@@ -1,0 +1,12 @@
+{
+	"name":			"equinox",
+	"version":		"0.0.1",
+	"description":	"Equinox Assistant",
+
+	"bin":			"binary/web",
+	"main":			"source/script/eqnx.js",
+
+	"dependencies":	{
+						"express":	"latest"
+					}
+}
