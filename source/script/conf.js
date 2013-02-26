@@ -3,7 +3,44 @@ eqnx.def('conf', function(conf, callback){
 	// private variables
 	var data = {},
 		handlers = {},
-		listeners = {}
+		listeners = {};
+
+	// string handler, optional regular
+	// expression can be passed to allow
+	// only values matching it
+	conf.string = function(regexp){
+		return function(value){
+			return !regexp || regexp.test(value)
+				? value.toString()
+				: undefined;
+		}
+	}
+
+	// number handler, optional number of
+	// digits after the decimal point can be
+	// passed
+	conf.number = function(digits){
+		return function(value){
+			return parseFloat(parseFloat(value).toFixed(digits));
+		}
+	}
+
+	// bool handler, optional boolean
+	// can be passed if each value coming
+	// should be inverted (true -> false).
+	// string 'true' and 'false' vlaues will
+	// be treated as booleans
+	conf.bool = function(opposite){
+		return function(value){
+			if (value === 'true')
+				return opposite ? false : true;
+
+			if (value === 'false')
+				return opposite ? true : false;
+
+			return opposite ? !value : !!value;
+		}
+	}
 
 	// get configuration value
 	conf.get = function(key, callback){
