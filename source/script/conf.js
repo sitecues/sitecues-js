@@ -21,7 +21,8 @@ eqnx.def('conf', function(conf, callback){
 	// passed
 	conf.number = function(digits){
 		return function(value){
-			return parseFloat(parseFloat(value).toFixed(digits));
+			value = parseFloat(value).toFixed(digits);
+			return isNaN(value) ? undefined : parseFloat(value);
 		}
 	}
 
