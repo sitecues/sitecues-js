@@ -4,7 +4,7 @@
 var root, source, target,
 	queue, concurrency, trick,
 	fs, path, glob, util, async,
-	mkdir, spawn;
+	spawn;
 
 // load all needed modules
 fs = require('fs');
@@ -12,7 +12,6 @@ path = require('path');
 glob = require('glob');
 util = require('util');
 async = require('async');
-mkdir = require('mkdirp');
 spawn = require('child_process').spawn;
 
 // setup concurrency level
