@@ -3,3 +3,6 @@ all:
 
 run:
 	@./binary/web $(port)
+
+build:
+	@./binary/compile
