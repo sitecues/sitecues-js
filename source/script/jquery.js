@@ -13,7 +13,7 @@ eqnx.def('jquery', function(module, callback){
 		load.script(
 			'//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
 			function(){
-				callback(jQuery.noConflict());
+				callback(jQuery.noConflict(true));
 			}
 		);
 	});
