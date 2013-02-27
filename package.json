@@ -7,6 +7,8 @@
 	"main":			"source/script/eqnx.js",
 
 	"dependencies":	{
-						"express":	"latest"
+						"express":	"latest",
+						"async":	"latest",
+						"glob":		"latest"
 					}
 }
