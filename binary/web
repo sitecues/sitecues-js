@@ -1,31 +1,31 @@
 #!/usr/bin/env node
 
 // initialize express application
-var app, root, path, port, express
-express = require('express')
-app = express()
+var app, root, path, port, express;
+express = require('express');
+app = express();
 
 // handle relative paths properly
-path = require('path')
-root = path.dirname(module.filename)
+path = require('path');
+root = path.dirname(module.filename);
 
 // use express logger to show info
 // about all incoming requests
-app.use(express.logger())
+app.use(express.logger());
 
 // setup paths to serve static files from
 // use relative path from binary to provide
 // robust way for finding files
-app.use(express.static(path.join(root, '../target/script')))
-app.use(express.static(path.join(root, '../target/style')))
-app.use(express.static(path.join(root, '../source/script')))
-app.use(express.static(path.join(root, '../source/style')))
-app.use(express.static(path.join(root, '../tests/pages')))
+app.use(express.static(path.join(root, '../target/script')));
+app.use(express.static(path.join(root, '../target/style')));
+app.use(express.static(path.join(root, '../source/script')));
+app.use(express.static(path.join(root, '../source/style')));
+app.use(express.static(path.join(root, '../tests/pages')));
 
 // detect what port number use for server
-port = process.env.PORT || process.argv[2] || 8000
+port = process.env.PORT || process.argv[2] || 8000;
 
 // start http server (express app) on specified port
 app.listen(port, function(){
-	console.log('started on http://localhost:' + port + '/')
-})
+	console.log('started on http://localhost:' + port + '/');
+});
