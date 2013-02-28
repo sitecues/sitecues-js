@@ -2,7 +2,7 @@ eqnx.def('panel', function(panel, callback){
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	eqnx.use('jquery', 'ui', function($){
+	eqnx.use('jquery', 'conf', 'ui', function($, conf){
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -12,7 +12,7 @@ eqnx.def('panel', function(panel, callback){
 		// panel element
 		panel.create = function(){
 			// private variables
-			var frame, button;
+			var frame, button, label;
 
 			// create element and add element id for proper styling
 			frame = $('<div>').attr('id', 'eqnx-panel');
@@ -39,9 +39,14 @@ eqnx.def('panel', function(panel, callback){
 			button('eqnx-tts', 'tts/toggle');
 
 			// add classes to zoom label
-			$('<span>').addClass('eqnx-panel-label eqnx-zoom').
-				html('100%').
+			label = $('<span>').addClass('eqnx-panel-label eqnx-zoom').
+				html(parseInt((conf.get('zoom') || 1) * 100) + '%').
 				appendTo(frame);
+
+			// update label when zoom level is changing
+			conf.get('zoom', function(value){
+				label.html(parseInt(value * 100) + '%');
+			});
 
 			// return panel
 			return frame;
