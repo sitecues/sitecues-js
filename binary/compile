@@ -1,0 +1,107 @@
+#!/usr/bin/env node
+
+// private variables
+var root, source, target,
+	queue, concurrency, trick,
+	fs, path, glob, util, async,
+	spawn;
+
+// load all needed modules
+fs = require('fs');
+path = require('path');
+glob = require('glob');
+util = require('util');
+async = require('async');
+spawn = require('child_process').spawn;
+
+// setup concurrency level
+// for child processes
+concurrency = 2;
+
+// setup root path for files lookup
+root = process.env.PWD;
+
+// define source and target folders
+source = path.join(root, 'source');
+target = path.join(root, 'target');
+
+// make trick with compiled TS file
+// to make it work with module system
+trick = function(file, callback){
+	// read compiled file
+	fs.readFile(file, 'utf-8', function(err, data){
+		// private variables
+		var name;
+
+		// error happened, break
+		if (err) return callback(err);
+
+		// get module name from filename, because
+		// this name will be used for loading this
+		// module
+		name = file.replace(target + '/script/', '').
+			replace(/\.js/, '');
+
+		// conver data to array and remove last 2 useless
+		// lines
+		data = data.trim().split(/\r?\n/).slice(0, -2);
+
+		// replace commonjs definition with eqnx system
+		// module definition and use part of filename as
+		// module name
+		data[0] = data[0].replace(
+			/^\(function\s*\(([^\)]+)\)\s*\{$/,
+			'eqnx.def(\'' + name + '\', function($1, callback){'
+		);
+
+		// push needed lines to the end of file
+		data.push('    callback()');
+		data.push('});');
+
+		// write file back on the place
+		fs.writeFile(file, data.join('\n'), 'utf-8', callback);
+	});
+}
+
+// prepare queue for file processing with
+// needed concurrency level
+queue = async.queue(function(from, callback){
+	// private variables
+	var child, out;
+
+	// generate short target out filename
+	out = from.replace(source + '/', '').
+		replace(/\.ts$/, '.js');
+
+	// print filename to track process
+	console.log('\033[34m' + out + '\033[0m');
+
+	// make full filename
+	out = path.join(target, out);
+
+	// spawn child process with TSC and 
+	// needed options
+	child = spawn('tsc', [
+		'--out', path.dirname(out),
+		'--module', 'commonjs',
+		'--comments',
+		from
+	]);
+
+	// pump messages from child to root process
+	util.pump(child.stdout, process.stdout);
+	util.pump(child.stderr, process.stderr);
+
+	// handle compile finish and make a trick with
+	// result file
+	child.on('exit', function(){
+		trick(out, callback);
+	});
+}, concurrency);
+
+// check source script path for ts files
+glob(source + '/script/**/*.ts', function(err, files){
+	// if any files found, pass them to
+	// queue for processing
+	files && files.forEach(queue.push);
+});
