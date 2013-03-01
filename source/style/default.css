@@ -103,3 +103,12 @@
 #eqnx-panel .eqnx-tts:after {
 	content: 'tts';
 }
+
+#eq360-cursor {
+    top: 0;
+    left: 0;
+    cursor: none !important;
+    position: fixed !important;
+    visibility: hidden;
+    pointer-events: none;
+}
