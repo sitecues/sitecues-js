@@ -66,18 +66,10 @@ eqnx.def('conf', function(conf, callback){
 		return conf;
 	}
 
-	// set configuration value or
-	// define key handler
+	// set configuration value
 	conf.set = function(key, value){
 		// private variables
 		var list;
-
-		// if value is function setup
-		// handler for key
-		if ('function' === typeof value){
-			handlers[key] = value;
-			return conf;
-		}
 
 		// call handler if needed
 		value = handlers[key]
@@ -96,6 +88,16 @@ eqnx.def('conf', function(conf, callback){
 		if (list = listeners[key])
 			for(var i=0, l=list.length; i<l; i++)
 				list[i](value);
+
+		// chain
+		return conf;
+	}
+
+	// define key handler
+	conf.def = function(key, handler){
+		// set handler for key
+		if ('function' === typeof handler)
+			handlers[key] = handler;
 
 		// chain
 		return conf;

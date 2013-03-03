@@ -15,7 +15,7 @@ eqnx.def('zoom', function(zoom, callback){
 
 		// use conf module for sharing
 		// current zoom level value
-		conf.set('zoom', function(value){
+		conf.def('zoom', function(value){
 			// value is too small
 			if (value < zoom.min) return zoom.min;
 
