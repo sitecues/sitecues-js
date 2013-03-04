@@ -21,7 +21,9 @@
 	else
 		eqnx = this.eqnx = {};
 
-	// extend object
+	// extend object`o` with objects coming in all other arguments
+	// @example	extend({}, a, b, c)
+	// @example	var a = extend({}, a, b, c)
 	extend = function(o){
 		var i, l, p;
 
@@ -64,7 +66,10 @@
 		}
 
 		// extend entity proto
-		return extend(node.prototype, proto), node;
+		extend(node.prototype, proto);
+
+		// return new entity
+		return node;
 	}
 
 	// events entity
@@ -122,7 +127,7 @@
 					var event, node, calls, tail, args, all, rest;
 					if (!(calls = this._events)) return this;
 
-					all = calls['all'];
+					all = calls['*'];
 					(events = events.split(/\s+/)).push(null);
 
 					// save references to the current heads & tails
