@@ -1,8 +1,15 @@
-﻿eqnx.def('cursor', function (cursor, callback) {
+﻿/**
+ * This is the module for the cursor enhancement.
+ * It hides the existing cursor so that there are not two cursors.
+ */
+eqnx.def('cursor', function (cursor, callback) {
 
-    cursor.isVisible = false;
+    /* Static properties */
+    cursor.isEnabled = false;
+    cursor.isVisible = false; // if custom cursor is visible
     cursor.zoomLevel = 0;
-    /* constants */
+
+    /* Constants */
     cursor.imageUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png';
     cursor.imagePointerUrl = "//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png";
     // TK: Using this value to improve the visibility of the cursor when zooming.  This might
@@ -18,16 +25,15 @@
     cursor.kCursorImageGap = 10;   // gap from the edge of the full size image to painted cursor pixels
     cursor.kCursorImageSize = 120; // size of the actual image when full size
 
-    // get dependencies
+    // Get dependencies
     eqnx.use('jquery', 'conf', 'ui', function ($, conf) {
         // private variables
         cursor.zoomLevel = conf.get('zoom');
         var cursorImage,
             imageGapAdjustment,
-            aspectRatio,
-            isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
+            aspectRatio;
 
-        // cursor element controls the appearance of the mouse cursor
+        // Cursor element takes over the appearance of the mouse cursor.
         cursor.create = function () {
             // create element and add element id for proper styling
             var cursorElement = $('<img>')
@@ -39,104 +45,94 @@
             return cursorElement;
         };
 
-        /*
-            Always checking when the mouse moves to compensate for
-            a Chrome problem where mousing out from the browser doc
-            window would leave an artifact of the mouse on the page.
-        */
-        cursor.update = function () {
-            isEnabled ? cursor.show() : cursor.hide();
-        };
-
-        // todo: show cursor in the exact place native cursor locates.
+        // Show cursor in the viewport.
         cursor.show = function () {
             if (!cursor.element) {
                 cursor.element = cursor.create();
             }
 
-            // cursor image loaded, calculate dimensions
+            // Cursor image loaded, calculate dimensions.
             cursor.height = (cursor.zoomLevel * cursor.kCursorZoomMultiplier) * cursor.kDefaultHeight ;
             cursor.width  = (this.height * aspectRatio).toString();
             cursor.left = ((cursor.left / cursor.zoomLevel) - imageGapAdjustment).toString() + "px";
-            cursor.top = ((cursor.top / cursor.zoomLevel) - imageGapAdjustment).toString() + "px";
+            cursor.top  = ((cursor.top / cursor.zoomLevel) - imageGapAdjustment).toString() + "px";
             imageGapAdjustment = Math.round(( this.height / cursor.kCursorImageSize ) * cursor.kCursorImageGap);
             aspectRatio = $(cursor.element).width() / $(cursor.element).height();
 
-            // update cursor styles
-            $(cursor.element).css({
+            // Update cursor styles.
+            cursor.element.css({
                 height: this.height + 'px',
                 width:  this.width + 'px',
-                visibility: 'visible',
                 left:   this.left,
                 top:    this.top
             });
 
-            if (!cursor.isVisible) {
-                handleRealCursor(false);
-            }
             cursor.isVisible = true;
             eqnx.emit('cursor/show', cursor.element);
 
         };
 
+        // Hide cursor in the viewport.
         cursor.hide = function () {
             if (cursor.isVisible) {
-                // setIsRealCursorVisible(true);
+                toogleRealCursor(true);
                 // ShimBuilder.removeShims(CursorView.kShimParentId);
-                cursor.element.css('visibility', 'hidden');
-                handleRealCursor(true);
+                cursor.element.hide();
                 cursor.isVisible = false;
                 eqnx.emit('cursor/hide', cursor.element);
             }
         };
 
+        // Enables the cursor module if needed.
         cursor.turnOnOrOff = function () {
-            var wasEnabled = isEnabled;
-            isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
+            cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
+            cursor.isEnabled ? cursor.show() : cursor.hide();
+        };
 
-            if (wasEnabled === isEnabled) {
-                cursor.update();
-            } else if (isEnabled) {
-                cursor.show();
+        // Hide or show the real mouse cursor dependently on the parameter given.
+        // If we are showing our own mouse cursor don't want the real cursor because that would be a double cursor.
+        function toogleRealCursor(setRealCursorVisible) {
+            if (setRealCursorVisible) {
+                $('#' + cursor.kCursorHideRuleId).remove();
+            } else {
+                if ($('#' + cursor.kCursorHideRuleId).length === 0) {
+                    $("head").append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important;}</style>');
+                }
+                
+            }
+        }
+
+        // Bind or unbind window events we care about.
+        function handleMouseEvents() {
+            if (cursor.isEnabled) {
+                cursor.show()
                 window.addEventListener("mousemove", mouseMoveHandler, false);
             } else {
                 cursor.hide();
+                window.removeEventListener("mousemove", mouseMoveHandler, false);
             }
         }
 
-        // hide or show the real mouse cursor dependently on the parameter given.
-        // if we are showing our own mouse cursor don't want the real cursor because that would be a double cursor.
-        function handleRealCursor(isRealCursorVisible) {
-            if (isRealCursorVisible) {
-                $('#' + cursor.kCursorHideRuleId).remove();
-            } else {
-                $("head").append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important;}</style>');
-            }
-        }
-
+        // Takes care of 'mousemove' event.
         function mouseMoveHandler(e) {
+            if (cursor.isVisible) {
+                toogleRealCursor(false);
+            }
+
             cursor.left = ((e.clientX / cursor.zoomLevel) - imageGapAdjustment).toString() + "px";
             cursor.top  = ((e.clientY / cursor.zoomLevel) - imageGapAdjustment).toString() + "px";
-
-            $('#' + cursor.kCursorId).css({ left: cursor.left, top: cursor.top});
-            cursor.update();
-            return true;
+            $('#' + cursor.kCursorId).css({ left: cursor.left, top: cursor.top}).show();
         }
 
-        // initialize the cursor on the page if needed
-        if (isEnabled) {
-            // attach events
-            cursor.show();
-            window.addEventListener("mousemove", mouseMoveHandler, false);
-        }
 
-        // handle zoom event fired by any module
+        /* Handle zoom event fired by any module */
         eqnx.on('zoom', function (zoomvalue) {
             cursor.zoomLevel = zoomvalue;
-            cursor.turnOnOrOff();
+            cursor.turnOnOrOff(cursor.isEnabled);
+            handleMouseEvents();
         });
 
-        // done
+        // Done
         callback();
 
     });
