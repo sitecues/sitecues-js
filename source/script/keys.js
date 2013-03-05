@@ -20,6 +20,9 @@ eqnx.def('keys', function(keys, callback){
 		// private variables
 		var i, l, key, test, parts, result;
 
+		// ignore events from input fields
+		if ($(event.target).is('input')) return;
+
 		// iterate over key map
 		for(key in keys.map) if (has.call(keys.map, key)){
 			// prepare default value
