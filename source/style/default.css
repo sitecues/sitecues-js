@@ -110,4 +110,5 @@
     position: fixed !important;
     display: none;
     pointer-events: none;
+    height: 10px;
 }

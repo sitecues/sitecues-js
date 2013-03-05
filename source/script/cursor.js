@@ -10,10 +10,10 @@
 eqnx.def('cursor', function (cursor, callback) {
 
     /* Static properties */
-    cursor.isEnabled = false;
+    cursor.isEnabled = false; // if cursor module is enabled
     cursor.isVisible = false; // if custom cursor is visible
-    cursor.zoomLevel = 0;
-    cursor.cursorType = 'default'; // also, may be either 'none' or 'auto.
+    cursor.zoomLevel = 1;
+    cursor.cursorType = 'default'; // also, may be either 'none' or 'auto'.
 
     /* Constants */
     cursor.imageDefaultUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png';
@@ -22,22 +22,20 @@ eqnx.def('cursor', function (cursor, callback) {
     // This might need to be a user specified value in the future.
     cursor.kCursorHideRuleId = 'eq360-cursor-hide-rule';
     cursor.kCursorId = 'eq360-cursor';
-    cursor.kDefaultHeight = 10;
     cursor.kZindex = 2147483647;
     cursor.kMinCursorZoom = 1.5;
-    cursor.kCursorZoomMultiplier = 1; // TODO: Find the best zoom multiplier through usability testing
-    // TK: These new constants are for getting the point of the cursor pointer
-    // to the exact location of where the underlying OS mouse pointer's point is
-    cursor.kCursorImageGap = 10;   // gap from the edge of the full size image to painted cursor pixels
-    cursor.kCursorImageSize = 120; // size of the actual image when full size
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'ui', function ($, conf) {
+    eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
         // private variables
         cursor.zoomLevel = conf.get('zoom');
         cursor.styleRuleParent = $('head');
+        cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
 
-        var imageGapAdjustment, aspectRatio;
+        $(document).mousemove(function (e) {
+            cursor.clientX = e.pageX;
+            cursor.clientY = e.pageY;
+        });
 
         /**
          * Cursor element takes over the appearance of the mouse cursor.
@@ -46,9 +44,9 @@ eqnx.def('cursor', function (cursor, callback) {
         cursor.create = function () {
             var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
             var cursorElement = $('<img>')
-                                .attr('id', cursor.kCursorId)
+                                .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
-                                .css({zIndex: cursor.kZindex.toString()})
+                                .css({zIndex: this.kZindex.toString()})
                                 .appendTo('body');
 
             return cursorElement;
@@ -58,22 +56,16 @@ eqnx.def('cursor', function (cursor, callback) {
          * Show cursor in the viewport.
          */
         cursor.show = function () {
-            if (!cursor.element) {
-                cursor.element = cursor.create();
+            if (!this.element) {
+                this.element = this.create();
             }
 
-            var newHeight = (cursor.zoomLevel * cursor.kCursorZoomMultiplier) * cursor.kDefaultHeight;
-            imageGapAdjustment = Math.round((newHeight / cursor.kCursorImageSize) * cursor.kCursorImageGap);
-            aspectRatio = cursor.element.width() / cursor.element.height();
-
-            cursor.element[0].style.height = newHeight + 'px';
-            cursor.element[0].style.width  = newHeight * aspectRatio + 'px';
-            cursor.element[0].style.left = (cursor.clientX / cursor.zoomLevel) - imageGapAdjustment + 'px';
-            cursor.element[0].style.top  = (cursor.clientY / cursor.zoomLevel) - imageGapAdjustment + 'px';
-
-            cursor.element.show();
-            cursor.isVisible = true;
-            eqnx.emit('cursor/show', cursor.element);
+            cursor.element[0].style.left = (cursor.clientX / cursor.zoomLevel) + 'px';
+            cursor.element[0].style.top = (cursor.clientY / cursor.zoomLevel) + 'px';
+            // Init custom cursor position.
+            util.setZoom(this.element, this.zoomLevel);
+            this.isVisible = true;
+            eqnx.emit('cursor/show', this.element);
 
         };
 
@@ -82,13 +74,13 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         cursor.hide = function () {
             // Do nothing if custom cursor is not shown.
-            if (!cursor.isVisible) {
+            if (!this.isVisible) {
                 return;
             }
             toogleRealCursor(true);
-            cursor.element.hide();
-            cursor.isVisible = false;
-            eqnx.emit('cursor/hide', cursor.element);
+            this.element.hide();
+            this.isVisible = false;
+            eqnx.emit('cursor/hide', this.element);
 
         };
 
@@ -96,8 +88,8 @@ eqnx.def('cursor', function (cursor, callback) {
          * Enables/disables the cursor module when needed.
          */
         cursor.turnOnOrOff = function () {
-            cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
-            cursor.isEnabled ? cursor.show() : cursor.hide();
+            this.isEnabled = this.zoomLevel > this.kMinCursorZoom;
+            this.isEnabled ? this.show() : this.hide();
         };
 
         /* Window event handlers */
@@ -112,9 +104,10 @@ eqnx.def('cursor', function (cursor, callback) {
                 window.addEventListener("mouseout", mouseOutHandler, false);
             } else {
                 window.removeEventListener("mousemove", mouseMoveHandler, false);
-                window.addEventListener("mouseout", mouseOutHandler, false);
+                window.removeEventListener("mouseout", mouseOutHandler, false);
             }
         }
+
         /**
          * Takes care of 'mousemove' window event.
          * @param e
@@ -127,16 +120,13 @@ eqnx.def('cursor', function (cursor, callback) {
 
             // Hide native cursor if custom cursor.
             toogleRealCursor(false);
-
             // Update image of the cursor element if the target requires.
             changeCursorDisplay($(e.target));
-
-            // Update custom cursor offsets.
-            cursor.left = (e.clientX / cursor.zoomLevel) - imageGapAdjustment;
-            cursor.top = (e.clientY / cursor.zoomLevel) - imageGapAdjustment;
-            cursor.element.css({ left: cursor.left + 'px', top: cursor.top + 'px' })
+            // Update custom cursor position.
+            var position = util.getMouseCoords(e, cursor.zoomLevel);
+            cursor.element.css({ left: position.left + 'px',
+                                 top:  position.top + 'px' })
                           .show();
-
         }
 
         /**
@@ -146,7 +136,7 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         function mouseOutHandler(e) {
             // Do nothing if custom cursor is not shown.
-            if (cursor.isVisible) {
+            if (!cursor.isVisible) {
                 return;
             }
             if (e.target == document.documentElement) {
@@ -187,18 +177,21 @@ eqnx.def('cursor', function (cursor, callback) {
         }
 
         /**
-         * Handle zoom event. Consider this as the start point of the module body.
+         * Consider this as the start point of the module body.
+         */
+
+        cursor.turnOnOrOff();
+        handleMouseEvents();
+
+        /**
+         * Handle zoom event.
          */
         eqnx.on('zoom', function (zoomvalue) {
             cursor.zoomLevel = zoomvalue;
-            cursor.turnOnOrOff(cursor.isEnabled);
+            cursor.turnOnOrOff();
             handleMouseEvents();
-
-            $(document).mousemove(function (e) {
-                cursor.clientX = e.pageX;
-                cursor.clientY = e.pageY;
-            });
         });
+
 
         // Done.
         callback();
