@@ -2,8 +2,10 @@
 
 	// private variables
 	var arr, has, noop,
-		extend, entity, events,
 		eqnx, modules;
+
+	// modules container
+	modules = {};
 
 	// array's prototype
 	arr = Array.prototype;
@@ -21,144 +23,80 @@
 	else
 		eqnx = this.eqnx = {};
 
-	// extend object`o` with objects coming in all other arguments
-	// @example	extend({}, a, b, c)
-	// @example	var a = extend({}, a, b, c)
-	extend = function(o){
-		var i, l, p;
-
-		if (o) for(i=1, l=arguments.length; i<l; i++)
-			for(p in arguments[i]) if (has.call(arguments[i], p))
-				o[p] = arguments[i][p];
-
-		return o;
+	// bind an event, specified by a string name, `events`, to a `callback`
+	// function. passing `"*"` will bind the callback to all events fired
+	eqnx.on = function(events, callback, context){
+		var ev, list, tail;
+		events = events.split(/\s+/);
+		var calls = this._events || (this._events = {});
+		while (ev = events.shift()){
+			// create an immutable callback list, allowing traversal during
+			// modification. the tail is an empty object that will always be used
+			// as the next node
+			list  = calls[ev] || (calls[ev] = {});
+			tail = list.tail || (list.tail = list.next = {});
+			tail.callback = callback;
+			tail.context = context;
+			list.tail = tail.next = {};
+		}
+		return this;
 	}
 
-	// define entity
-	entity = function(parent, proto){
-		// get entity instance
-		var node = function entity(){
-			var inst, init;
+	// remove one or many callbacks. if `context` is null, removes all callbacks
+	// with that function. if `callback` is null, removes all callbacks for the
+	// event. if `events` is null, removes all bound callbacks for all events
+	eqnx.off = function(events, callback, context){
+		var ev, calls, node;
+		if (!events){
+			delete this._events;
+		} else if (calls = this._events){
+			events = events.split(/\s+/);
+			while (ev = events.shift()){
+				node = calls[ev];
+				delete calls[ev];
+				if (!callback || !node) continue;
 
-			// get init from entity proto
-			init = entity.prototype.init;
-
-			// get entity instance
-			inst = this instanceof entity
-				? this
-				: (noop.prototype = entity.prototype, new noop);
-
-			// call init function
-			return 'function' === typeof init && init.apply(
-				inst, arguments
-			) || inst;
-		}
-
-		// if no parent passed first
-		if (undefined === proto && 'function' !== typeof parent)
-			proto = parent, parent = undefined;
-
-		// set entity prototype to parent
-		if ('function' === typeof parent){
-			noop.prototype = parent.prototype;
-			node.prototype = new noop;
-			node.prototype.constructor = node;
-		}
-
-		// extend entity proto
-		extend(node.prototype, proto);
-
-		// return new entity
-		return node;
-	}
-
-	// events entity
-	events = entity({
-
-		// bind an event, specified by a string name, `events`, to a `callback`
-		// function. passing `"*"` will bind the callback to all events fired
-		on:		function(events, callback, context){
-					var ev, list, tail;
-					events = events.split(/\s+/);
-					var calls = this._events || (this._events = {});
-					while (ev = events.shift()){
-						// create an immutable callback list, allowing traversal during
-						// modification. the tail is an empty object that will always be used
-						// as the next node
-						list  = calls[ev] || (calls[ev] = {});
-						tail = list.tail || (list.tail = list.next = {});
-						tail.callback = callback;
-						tail.context = context;
-						list.tail = tail.next = {};
-					}
-					return this;
-				},
-
-		// remove one or many callbacks. if `context` is null, removes all callbacks
-		// with that function. if `callback` is null, removes all callbacks for the
-		// event. if `events` is null, removes all bound callbacks for all events
-		off:	function(events, callback, context){
-					var ev, calls, node;
-					if (!events){
-						delete this._events;
-					} else if (calls = this._events){
-						events = events.split(/\s+/);
-						while (ev = events.shift()){
-							node = calls[ev];
-							delete calls[ev];
-							if (!callback || !node) continue;
-
-							// create a new list, omitting the indicated event/context pairs
-							while ((node = node.next) && node.next) {
-								if (node.callback === callback &&
-									(!context || node.context === context)) continue;
-								this.on(ev, node.callback, node.context);
-							}
-						}
-					}
-
-					return this;
-				},
-
-		// emit an event, firing all bound callbacks. callbacks are passed the
-		// same arguments as `trigger` is, apart from the event name.
-		// listening for `"*"` passes the true event name as the first argument
-		emit:	function(events){
-					var event, node, calls, tail, args, all, rest;
-					if (!(calls = this._events)) return this;
-
-					all = calls['*'];
-					(events = events.split(/\s+/)).push(null);
-
-					// save references to the current heads & tails
-					while (event = events.shift()){
-						if (all) events.push({next: all.next, tail: all.tail, event: event});
-						if (!(node = calls[event])) continue;
-						events.push({next: node.next, tail: node.tail});
-					}
-
-					// traverse each list, stopping when the saved tail is reached.
-					rest = arr.slice.call(arguments, 1);
-					while (node = events.pop()){
-						tail = node.tail;
-						args = node.event ? [node.event].concat(rest) : rest;
-						while ((node = node.next) !== tail){
-							node.callback.apply(node.context || this, args);
-						}
-					}
-
-					return this;
+				// create a new list, omitting the indicated event/context pairs
+				while ((node = node.next) && node.next) {
+					if (node.callback === callback &&
+						(!context || node.context === context)) continue;
+					this.on(ev, node.callback, node.context);
 				}
+			}
+		}
 
-	});
+		return this;
+	}
 
-	// modules container
-	modules = {};
+	// emit an event, firing all bound callbacks. callbacks are passed the
+	// same arguments as `trigger` is, apart from the event name.
+	// listening for `"*"` passes the true event name as the first argument
+	eqnx.emit = function(events){
+		var event, node, calls, tail, args, all, rest;
+		if (!(calls = this._events)) return this;
 
-	// we use vents methods as system bus
-	eqnx.on = events.prototype.on;
-	eqnx.off = events.prototype.off;
-	eqnx.emit = events.prototype.emit;
+		all = calls['*'];
+		(events = events.split(/\s+/)).push(null);
+
+		// save references to the current heads & tails
+		while (event = events.shift()){
+			if (all) events.push({next: all.next, tail: all.tail, event: event});
+			if (!(node = calls[event])) continue;
+			events.push({next: node.next, tail: node.tail});
+		}
+
+		// traverse each list, stopping when the saved tail is reached.
+		rest = arr.slice.call(arguments, 1);
+		while (node = events.pop()){
+			tail = node.tail;
+			args = node.event ? [node.event].concat(rest) : rest;
+			while ((node = node.next) !== tail){
+				node.callback.apply(node.context || this, args);
+			}
+		}
+
+		return this;
+	}
 
 	// define equinox module
 	eqnx.def = function(name, constructor){
