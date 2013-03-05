@@ -1,9 +1,15 @@
 // focus enhancement (make focus easier to see)
 eqnx.def('focus', function(focus, callback){
 
-	// minimum zoom at which focus enhancement appears
+	// minimum zoom at which focus
+	// enhancement appears
 	focus.minzoom = 1.2;
+
+	// color of focus enhancement
 	focus.color = 'aqua';
+
+	// selector for elements focus
+	// enhancement should be applied
 	focus.selector = 'input';
 
 	// depends on jquery and conf modules
