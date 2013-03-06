@@ -47,10 +47,8 @@ eqnx.def('zoom', function(zoom, callback){
 		conf.get('zoom', function(value){
 			if (zoom.native){
 				// if native zoom is supported, change it
-				$('body').stop().animate({ zoom: value }, 'fast', function(){
-					// notify all about zoom change
-					eqnx.emit('zoom', value);
-				});
+				$('body').css({ zoom: value });
+				eqnx.emit('zoom', value);
 			} else {
 				// native zoom isn't supported, use
 				// css3 transforms scale option
