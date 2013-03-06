@@ -1,4 +1,7 @@
-﻿eqnx.def('util', function (util, callback) {
+﻿/**
+ * This is module for common utilities that might need to be used across all of the different modules.
+ */
+eqnx.def('util', function (util, callback) {
 
     eqnx.use('jquery', function ($) {
 
