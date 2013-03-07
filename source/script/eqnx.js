@@ -19,8 +19,13 @@
 	// the top-level namespace. all public classes and modules will
 	// be attached to this. exported for both commonjs and the browser
 	if (typeof exports !== 'undefined')
+		// this looks like commonjs/node.js module
+		// export module and define it globally
+		// to make require work correctly
 		eqnx = exports, global.eqnx = eqnx;
 	else
+		// otherwise export eqnx to window
+		// to make it work in browser
 		eqnx = this.eqnx = {};
 
 	// bind an event, specified by a string name, `events`, to a `callback`
@@ -33,7 +38,7 @@
 			// create an immutable callback list, allowing traversal during
 			// modification. the tail is an empty object that will always be used
 			// as the next node
-			list  = calls[ev] || (calls[ev] = {});
+			list = calls[ev] || (calls[ev] = {});
 			tail = list.tail || (list.tail = list.next = {});
 			tail.callback = callback;
 			tail.context = context;
@@ -108,7 +113,7 @@
 		// call constructor for module
 		constructor(module, function(result){
 			// if return present
-			result && (module = result);
+			if (result) module = result;
 
 			// save module for future call
 			modules[name] = module;
