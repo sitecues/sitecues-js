@@ -38,8 +38,10 @@ eqnx.def('util', function (util, callback) {
                 top:  window.pageYOffset
             };
         }
+
+        // Done.
+        callback();
+
     });
 
-    // Done.
-    callback();
 });
