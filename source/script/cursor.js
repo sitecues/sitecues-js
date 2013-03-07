@@ -16,8 +16,10 @@ eqnx.def('cursor', function (cursor, callback) {
     cursor.cursorType = 'default'; // also, may be either 'none' or 'auto'.
 
     /* Constants */
-    cursor.imageDefaultUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png';
-    cursor.imagePointerUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png';
+    cursor.image_urls = {
+        default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png',
+        pointer: '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
+    };
     // TK: Using this value to improve the visibility of the cursor when zooming.
     // This might need to be a user specified value in the future.
     cursor.kCursorHideRuleId = 'eq360-cursor-hide-rule';
@@ -26,7 +28,7 @@ eqnx.def('cursor', function (cursor, callback) {
     cursor.kMinCursorZoom = 1.5;
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
+    eqnx.use('jquery', 'conf', 'util', 'ui', 'jquery.whatCursorStyle', function ($, conf, util) {
         // private variables
         cursor.styleRuleParent = $('head');
         cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
@@ -42,7 +44,7 @@ eqnx.def('cursor', function (cursor, callback) {
         }
 
         cursor.create = function () {
-            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
+            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
@@ -153,10 +155,10 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         // todo: add better support for cursor types.
         function changeCursorDisplay(target) {
-            var newCursorType = target[0].style.cursor.trim === '' ? target.css('cursor') : target[0].style.cursor;
+            var newCursorType = $(target).whatCursorStyle();
             if (cursor.cursorType !== newCursorType) { // if cursor type has changed
                 cursor.cursorType = newCursorType;
-                var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
+                var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
                 cursor.element.removeAttr('src').attr('src', properImageLocation);
             }
         }
