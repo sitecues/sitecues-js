@@ -107,6 +107,9 @@
 	eqnx.def = function(name, constructor){
 		var module = {};
 
+		// module is initializing
+		modules[name] = undefined;
+
 		// call constructor for module
 		constructor(module, function(result){
 			// if return present

@@ -28,19 +28,19 @@ eqnx.def('cursor', function (cursor, callback) {
     // Get dependencies
     eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
         // private variables
-        cursor.zoomLevel = conf.get('zoom');
         cursor.styleRuleParent = $('head');
         cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
-
-        $(document).mousemove(function (e) {
-            cursor.clientX = e.pageX;
-            cursor.clientY = e.pageY;
-        });
 
         /**
          * Cursor element takes over the appearance of the mouse cursor.
          */
         // todo: add better support for cursor types.
+        cursor.init = function (zoomvalue) {
+            this.zoomLevel = zoomvalue;
+            this.turnOnOrOff();
+            handleMouseEvents();
+        }
+
         cursor.create = function () {
             var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
             var cursorElement = $('<img>')
@@ -60,9 +60,12 @@ eqnx.def('cursor', function (cursor, callback) {
                 this.element = this.create();
             }
 
-            cursor.element[0].style.left = (cursor.clientX / cursor.zoomLevel) + 'px';
-            cursor.element[0].style.top = (cursor.clientY / cursor.zoomLevel) + 'px';
+            // Hide native cursor if custom cursor.
+            toogleRealCursor(false);
+
             // Init custom cursor position.
+            this.element[0].style.left = (this.clientX / this.zoomLevel) + 'px';
+            this.element[0].style.top = (this.clientY / this.zoomLevel) + 'px';
             util.setZoom(this.element, this.zoomLevel);
             this.isVisible = true;
             eqnx.emit('cursor/show', this.element);
@@ -118,8 +121,6 @@ eqnx.def('cursor', function (cursor, callback) {
                 return;
             }
 
-            // Hide native cursor if custom cursor.
-            toogleRealCursor(false);
             // Update image of the cursor element if the target requires.
             changeCursorDisplay($(e.target));
             // Update custom cursor position.
@@ -179,19 +180,18 @@ eqnx.def('cursor', function (cursor, callback) {
         /**
          * Consider this as the start point of the module body.
          */
-
-        cursor.turnOnOrOff();
-        handleMouseEvents();
+        $(document).mousemove(function (e) {
+            cursor.clientX = e.pageX;
+            cursor.clientY = e.pageY;
+        });
+        cursor.init(conf.get('zoom'));
 
         /**
          * Handle zoom event.
          */
         eqnx.on('zoom', function (zoomvalue) {
-            cursor.zoomLevel = zoomvalue;
-            cursor.turnOnOrOff();
-            handleMouseEvents();
+            cursor.init(zoomvalue);
         });
-
 
         // Done.
         callback();
