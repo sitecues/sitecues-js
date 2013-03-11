@@ -299,6 +299,7 @@ eqnx.def('util', function (util, callback) {
 
         // Done.
         callback();
+
     });
 
 });

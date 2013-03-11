@@ -16,8 +16,10 @@ eqnx.def('cursor', function (cursor, callback) {
     cursor.cursorType = 'default'; // also, may be either 'none' or 'auto'.
 
     /* Constants */
-    cursor.imageDefaultUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png';
-    cursor.imagePointerUrl = '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png';
+    cursor.image_urls = {
+        default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
+        pointer: '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
+    };
     // TK: Using this value to improve the visibility of the cursor when zooming.
     // This might need to be a user specified value in the future.
     cursor.kCursorHideRuleId = 'eq360-cursor-hide-rule';
@@ -26,7 +28,7 @@ eqnx.def('cursor', function (cursor, callback) {
     cursor.kMinCursorZoom = 1.5;
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
+    eqnx.use('jquery', 'conf', 'util', 'ui', 'jquery.whatCursorStyle', function ($, conf, util) {
         // private variables
         cursor.styleRuleParent = $('head');
         cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
@@ -42,7 +44,7 @@ eqnx.def('cursor', function (cursor, callback) {
         }
 
         cursor.create = function () {
-            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
+            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
@@ -153,10 +155,10 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         // todo: add better support for cursor types.
         function changeCursorDisplay(target) {
-            var newCursorType = target[0].style.cursor.trim === '' ? target.css('cursor') : target[0].style.cursor;
+            var newCursorType = whatCursorStyle($(target));
             if (cursor.cursorType !== newCursorType) { // if cursor type has changed
                 cursor.cursorType = newCursorType;
-                var properImageLocation = cursor.cursorType === 'pointer' ? cursor.imagePointerUrl : cursor.imageDefaultUrl;
+                var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
                 cursor.element.removeAttr('src').attr('src', properImageLocation);
             }
         }
@@ -174,6 +176,80 @@ eqnx.def('cursor', function (cursor, callback) {
                 if ($('#' + cursor.kCursorHideRuleId).length === 0) {
                     cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important;}</style>');
                 }
+            }
+        }
+
+        /**
+         * Returns the cursor type for a specific element.
+         *
+         * @param  {HTMLElement} element The element we need a cursor style for.
+         * @param  {Object}      options Options for the plugin.
+         * @return {String|null}         Returns a string with the element's cursor style or null if it is unknown.
+         */
+        function whatCursorStyle(element, options) {
+            var options = $.extend({
+                cursor_elements: null
+            }, options);
+
+            var element    = $(element);
+            var css_cursor = element.css('cursor');
+
+            if (css_cursor === 'auto' || css_cursor === 'default') {
+                var cursor_elements  = (options.cursor_elements !== null) ? options.cursor_elements : {
+                    a:        {
+                        cursor: 'pointer'
+                    },
+                    button:   {
+                        cursor: 'pointer'
+                    },
+                    input:    {
+                        selectors: {
+                            '[type="button"]':   'pointer',
+                            '[type="checkbox"]': 'pointer',
+                            '[type="email"]':    'text',
+                            '[type="image"]':    'pointer',
+                            '[type="radio"]':    'pointer',
+                            '[type="search"]':   'text',
+                            '[type="submit"]':   'pointer',
+                            '[type="text"]':     'text'
+                        }
+                    },
+                    label:    {
+                        cursor: 'pointer'
+                    },
+                    p:        {
+                        cursor: 'text'
+                    },
+                    select:   {
+                        cursor: 'pointer'
+                    },
+                    textarea: {
+                        cursor: 'text'
+                    }
+                };
+                var element_tag_name = element.prop('tagName').toLowerCase();
+
+                if (cursor_elements.hasOwnProperty(element_tag_name)) {
+                    var element_tag = cursor_elements[element_tag_name];
+                    var selectors   = element_tag.selectors;
+
+                    if (typeof(selectors) !== 'undefined') {
+                        for (var key in selectors) {
+                            if (element.is(key)) {
+                                return selectors[key];
+                            }
+                        }
+                    }
+                    else {
+                        return element_tag.cursor;
+                    }
+                }
+            }
+            else if (css_cursor !== 'auto' && css_cursor !== 'default' && css_cursor !== null && typeof(css_cursor) !== 'undefined') {
+                return css_cursor;
+            }
+            else {
+                return null;
             }
         }
 
