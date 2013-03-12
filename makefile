@@ -21,8 +21,8 @@ build:
 		source/script/zoom.js\
 		source/script/keys.js\
 		source/script/focus.js\
-		source/script/classifier.js\
 		source/script/caret.js\
 		source/script/caret/view.js\
 		source/script/caret/coords.js\
+		source/script/caret/classifier.js\
 		source/script/cursor.js
