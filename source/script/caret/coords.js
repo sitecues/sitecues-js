@@ -1,7 +1,7 @@
 eqnx.def('caret/coords', function(coords, callback){
 
 	// 
-	eqnx.use('jquery', 'conf', 'geo', function($, conf, geo){
+	eqnx.use('jquery', 'conf', 'util', function($, conf, util){
 
 		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos, zoomLevel) {
 			// Create an object with the same positioning but flexible width and height
@@ -22,7 +22,7 @@ eqnx.def('caret/coords', function(coords, callback){
 			console.log('Old border: ' + styleObj['border-top-width']);
 			if (isDebuggingOn){
 				extendStyle['visibility'] = 'visible';
-				var inputRect = geo.getAbsolutePosition(element);
+				var inputRect = util.getOffset(element);
 				extendStyle['left'] = inputRect.left;
 				extendStyle['top'] = inputRect.top;
 			}
@@ -49,7 +49,7 @@ eqnx.def('caret/coords', function(coords, callback){
 
 			// get current zoom level
 			var zoom = conf.get('zoom');
-			var scale = geo.getScale(element);
+			var scale = util.getTotalZoom(element);
 
 			// Now, trim to use just the last line -- from this we can get the x coordinate as well as the line height
 			if (element.localName !== 'input'){
