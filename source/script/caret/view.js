@@ -6,7 +6,7 @@ eqnx.def('caret/view', function(view, callback){
 	view.kCaretId = 'eq360-caret';
 
 	// depends on `jquery`, `conf`, `style`, `caret/coords` and `geo`
-	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util', function($, conf, styles, coords, util){
+	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util', 'ui', function($, conf, styles, coords, util){
 
 		// show caret view
 		view.show = function(target){
