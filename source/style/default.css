@@ -112,3 +112,14 @@
     pointer-events: none;
     height: 10px;
 }
+
+#eqnx-caret {
+	position: absolute;
+	border: 0px solid transparent;
+	z-index: 2147483647;
+	background-color: red;
+	opacity: 0.75;
+	width: 2px;
+	margin: 0;
+	padding: 0;
+}

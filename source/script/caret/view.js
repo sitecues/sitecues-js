@@ -20,13 +20,8 @@ eqnx.def('caret/view', function(view, callback){
 			var style = styles.getComputed(target);
 
 			// Create new caret
-			if (!view.renderedCaret){
-				var data = "<div id=\"eq360-caret\" style=\"position: absolute; " +
-					"border: 0px solid transparent;\"> \n <div style=\"z-index: 2147483647; " +
-					"background-color: red; opacity: 0.75; width: 2px; height: 100%; border: 0;" +
-					"margin: 0; padding: 0;\"> \n <\/div> \n<\/div>";
-				view.renderedCaret = $(data).appendTo('body');
-			}
+			if (!view.renderedCaret)
+				view.renderedCaret = $('<div>').attr('id', 'eqnx-caret').appendTo('body');
 
 			// Seems to help us not be off by as many pixels, at least in Chrome
 			// However, it's not working perfectly -- sometimes still off by 1px -- argh!
@@ -47,18 +42,18 @@ eqnx.def('caret/view', function(view, callback){
 			$(target).off('zoomout', function(){
 				view.show(target, zoomLevel);
 			});
-
+			console.log(caretRect);
 			view.renderedCaret.css({
 				'z-index': view.kZindex.toString(),
 				'top': caretRect.top + parseFloat(style['paddingTop']),
-				'left': caretRect.left - 1 + parseFloat(style['paddingLeft']),
+				'left': caretRect.left + parseFloat(style['paddingLeft']),
 				'width': caretRect.width,
 				'height': caretRect.height,
 
 				// Copy the same border/padding/margin as element with caret
 				// so that our caret has the same offset
-				'border-left-width': style['borderLeftWidth'],
-				'border-top-width': style['borderTopWidth']
+				'margin-left': style['borderLeftWidth'],
+				'margin-top': style['borderTopWidth']
 			});
 		}
 
