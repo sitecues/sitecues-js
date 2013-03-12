@@ -12,7 +12,7 @@ eqnx.def('caret', function(caret, callback){
 	caret.selector = 'input';
 
 	// depends on jquery, conf and classifier modules
-	eqnx.use('jquery', 'conf', 'classifier', 'caret/view', function($, conf, classifier, view){
+	eqnx.use('jquery', 'conf', 'caret/classifier', 'caret/view', function($, conf, classifier, view){
 
 		// update caret position
 		caret.update = function(event){

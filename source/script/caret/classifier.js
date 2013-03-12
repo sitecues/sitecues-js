@@ -1,6 +1,6 @@
 // module with useful methods to determine
 // what type of element something is
-eqnx.def('classifier', function(classifier, callback){
+eqnx.def('caret/classifier', function(classifier, callback){
 
 	classifier.editingInputTypes = {
 		'text': true,
