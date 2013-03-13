@@ -1,8 +1,11 @@
+port=8000
+https=off
+
 all:
 	@npm install
 
 run:
-	@./binary/web $(port)
+	@./binary/web $(port) $(https)
 
 build:
 	@mkdir -p target/script
