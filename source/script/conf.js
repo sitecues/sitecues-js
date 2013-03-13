@@ -89,6 +89,11 @@ eqnx.def('conf', function(conf, callback){
 			for(var i=0, l=list.length; i<l; i++)
 				list[i](value);
 
+		// notify each update listeners about changes
+		if (list = listeners['*'])
+			for(var i=0, l=list.length; i<l; i++)
+				list[i](key, value);
+
 		// chain
 		return conf;
 	}
@@ -126,6 +131,11 @@ eqnx.def('conf', function(conf, callback){
 
 		// chain
 		return conf;
+	}
+
+	// get all stored values
+	conf.data = function(){
+		return data;
 	}
 
 	// end
