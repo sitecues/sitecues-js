@@ -10,6 +10,7 @@ build:
 		source/script/eqnx.js\
 		source/script/conf.js\
 		source/script/conf/import.js\
+		source/script/conf/localstorage.js\
 		source/script/jquery.js\
 		source/script/ui.js\
 		source/script/geo.js\
