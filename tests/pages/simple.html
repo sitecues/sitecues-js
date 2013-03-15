@@ -2,25 +2,68 @@
 
 <html>
 
-	<head>
-		<title>eqnx simple page</title>
+<head>
+    <title>eqnx simple page</title>
 
-		<script src="/eqnx.js"></script>
-		<script>
+    <script src="/eqnx.js"></script>
+    <script>
 
-			// declarate which modules should be used
-			eqnx.use('conf/localstorage', 'badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor', 'highlight');
+        // declarate which modules should be used
+        eqnx.use('conf/localstorage', 'badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor', 'highlight-box');
 
-		</script>
+    </script>
 
-	</head>
+</head>
 
-	<body style="zoom: 3">
+<body>
 
-		equinox
-
-		<input type="text" />
-
-	</body>
+    <div align="left">
+        <input name="l"
+            type="text" size="28" maxlength="100" accesskey="l"
+            value="">
+        <select id="whatLang">
+            <option value="en">English</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+        </select>
+        <input id="whatToSay" type="text" size="100" value="this is a test" />
+        <input onclick="javascript: sayIt();" type="button" value="Say it" />
+    </div>
+    <table border="1px" cellpadding="10" cellspacing="0">
+        <tr>
+            <td colspan="2" bgcolor="gray">Artwork by Equinox</td>
+        </tr>
+        <tr>
+            <td rowspan="2" width="400px" align="left">
+                <h3>Wings by the Sea (Anna K.)</h3>
+                <p>Grabbing shovels <i>large</i> and small, residents and emergency workers across the
+                    Northeast struggled to dig out on Sunday after a gigantic midwinter storm left much
+                    of the region buried under drifting snow.</p>
+                <p>City streets resembled <a href="http://www.wachusett.com">ski</a> slopes or mountain
+                    passes, with cars and even some houses obscured by a thick blanket of white. More
+                    than three feet of snow fell in parts of Connecticut, and more than two feet accumulated
+                    on Long Island and in Massachusetts, where the storm caused coastal flooding that
+                    forced evacuations.</p>
+                <p>Armies of snowplows and workers with shovels were making slow progress, and many
+                    cars remained abandoned along impassable roadways. Anxiety was growing among those
+                    unable to escape their homes and neighborhoods.</p>
+            </td>
+            <td>Enter a search term:&nbsp;<input type="text" size="50" /><input type="button"
+                value="Search" /></td>
+        </tr>
+        <tr>
+            <td>
+                <img id="theImage" width="300px" height="300px" src="//cs305214.userapi.com/v305214679/3794/0-QXKvWNrtY.jpg" />
+            </td>
+        </tr>
+    </table>
+    <h5>Tiny text</h5>
+</body>
 
 </html>
