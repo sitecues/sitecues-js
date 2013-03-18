@@ -7,7 +7,7 @@ eqnx.def('keys', function(keys, callback){
 	keys.test = {
 		'plus':		function(event){ return event.keyCode === 187; },
 		'minus':	function(event){ return event.keyCode === 189; },
-		'space':    function(event){ return event.keyCode === 32; },
+		'space': function (event) { if (event.keyCode === 32) { event.preventDefault(); return true;} },
 	}
 
 	// define keys map used to bind actions to hotkeys
