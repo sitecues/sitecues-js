@@ -53,45 +53,42 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function (extraZoom) {
-                console.log('Inflate');
-
                 var clone = this.item.cloneNode(false),
                     cloneNode = $(clone),
                     // todo make up something better than keeping two similar vars
                     currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRect = this.origRect[this.origRect.length - 1],
-                    oldRectStyles = geo.getOffsetRect(this.item),
                     newRectStyles = getNewRectStyle(this.item, origRect, extraZoom);
-                var cssBeforeAnimateStyles = $.extend(oldRectStyles, {
+                var cssBeforeAnimateStyles = $.extend({}, origRect, {
                     position: 'absolute',
                     overflow: 'auto',
-                    //height: 'auto',
-                    //minHeight: newRectStyles.minHeight,
-                    //maxHeight: newRectStyles.maxHeight,
-                    //width: newRectStyles.width,
+                    height: 'auto',
+                    minHeight: newRectStyles.minHeight,
+                    maxHeight: newRectStyles.maxHeight,
+                    width: newRectStyles.width,
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     transformOrigin: '0 0',
-                    border: '0px solid white',
-                    backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
+                    border: '0px solid white'
                 }),
                 // todo: check why this is not properly applied, maybe the other library version?
-                cssAnimateStyles = $.extend(newRectStyles, {
+                cssAnimateStyles = $.extend({}, newRectStyles, {
                     transform: 'scale(' + extraZoom + ')',
                     margin: '0',
                     borderRadius: HighlightBox.kBoxBorderRadius,
                     borderColor: HighlightBox.kBoxBorderColor,
                     borderStyle: HighlightBox.kBoxBorderStyle,
                     borderWidth: HighlightBox.kBoxBorderWidth,
-                    padding: HighlightBox.kBoxPadding
+                    padding: HighlightBox.kBoxPadding,
+                    backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
                 });
 
                 var savedDisplay = currentStyle.display;
                 var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
                 var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
 
-                // todo: use appropriate easing type
-                this.itemNode.css(cssBeforeAnimateStyles);
-                this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed);
+                // todo: Use appropriate easing type
+                this.itemNode.css(cssBeforeAnimateStyles)
+                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed);
 
                 //console.log('Adding placeholder with these coords: ' + JSON.stringify(origRect));
 
@@ -113,13 +110,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 
                 // todo: Trigger the background blur effect if there is a highlight box only.
                 this.inflated = true;
+                return false;
             }
 
             /**
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
-                console.log('Deflate');
                 var _this = this;
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRect = this.origRect[this.origRect.length - 1];
@@ -324,14 +321,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
          * Handle keypress event.
          */
         eqnx.on('highlight/animate', function (e) {
-            console.log('x: ' + cursor.clientX + ' y: ' + cursor.clientY);
             var target = document.elementFromPoint(clientX, clientY);
             var box = HighlightBox.getInstance(target);
 
             if (box.getIsInflated()) {
                 box.deflate();
             } else {
-                box.inflate(conf.get('zoom') + 2);
+                box.inflate(1.5);
             }
 
             return false;
