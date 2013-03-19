@@ -170,7 +170,7 @@ eqnx.def('cursor', function (cursor, callback) {
             } else {
                 // if the rule is not already in DOM
                 if ($('#' + cursor.kCursorHideRuleId).length === 0) {
-                    cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { }</style>');
+                    cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important; }</style>');
                 }
             }
         }
@@ -256,7 +256,6 @@ eqnx.def('cursor', function (cursor, callback) {
             var position = util.getMouseCoords(e, cursor.zoomLevel);
             cursor.clientX = position.left;
             cursor.clientY = position.top;
-            console.log(position.top);
         });
         cursor.init(conf.get('zoom'));
 
