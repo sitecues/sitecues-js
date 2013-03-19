@@ -4,7 +4,7 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'geo', 'keys', 'ui', function ($, conf, cursor, geo, keys) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util', 'keys', function ($, conf, cursor, util, keys) {
 
         var box = null; // current highlight box, only work with it.
         var kMinCursorZoom = 1.5;
@@ -32,7 +32,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 box = this.item;
                 this.itemNode = $(this.item);
                 var computedStyles = getElementComputedStyles(this.item);
-                this.origRect.push(geo.getOffsetRect(this.item));
+                var offset = util.getOffset(this.item);
+                var size = { width: parseInt(computedStyles.width), height: parseInt(computedStyles.height) };
+                this.origRect.push($.extend({}, { left: parseInt(offset.left), top: parseInt(offset.top) }, size));
                 this.savedCss.push(computedStyles);
                 this.savedStyleAttr.push(this.itemNode.attr('style'));
             }
@@ -68,21 +70,21 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     cloneNode = $(clone),
                     // todo make up something better than keeping two similar vars
                     currentStyle = this.savedCss[this.savedCss.length - 1],
-                    origRect = this.origRect[this.origRect.length - 1],
-                    newRectStyles = getNewRectStyle(this.item, origRect, extraZoom);
-                var cssBeforeAnimateStyles = $.extend({}, origRect, {
+                    origRect = this.origRect[this.origRect.length - 1];
+
+                var transformTop = (origRect.height * extraZoom) / 2 - origRect.height,
+                    transformLeft = (origRect.width * extraZoom) / 2 - origRect.width;
+
+                var cssBeforeAnimateStyles = $.extend({}, {
                     position: 'absolute',
                     overflow: 'auto',
-                    height: 'auto',
-                    minHeight: newRectStyles.minHeight,
-                    maxHeight: newRectStyles.maxHeight,
-                    width: newRectStyles.width,
+                    width: origRect.width,
                     zIndex: HighlightBox.kBoxZindex.toString(),
-                    transformOrigin: '0 0',
+                    transformOrigin: transformLeft + " " + transformTop,
                     border: '0px solid white'
                 }),
                 // todo: check why this is not properly applied, maybe the other library version?
-                cssAnimateStyles = $.extend({}, newRectStyles, {
+                cssAnimateStyles = $.extend({}, {
                     transform: 'scale(' + extraZoom + ')',
                     margin: '0',
                     borderRadius: HighlightBox.kBoxBorderRadius,
@@ -107,15 +109,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 removeAttributes(cloneNode);
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 var dimensionCoefficient = 0.025 * extraZoom;
-                var width = currentStyle.width === 'auto' ? origRect.width : Math.min(parseFloat(currentStyle.width), origRect.width);
-                var height = currentStyle.height === 'auto' ? 0 : Math.max(parseFloat(currentStyle.height), origRect.height);
+
 
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
                          .css($.extend({},  currentStyle, {
                              display: resultDisplay,
                              visibility: 'hidden',
-                             width: width - dimensionCoefficient + 'px',
-                             height: height + 'px'
+                             width: origRect.width - dimensionCoefficient + 'px',
+                             height: origRect.height + 'px'
                          }));
                 this.itemNode.after(clone);
 
@@ -153,43 +154,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 }, HighlightBox.kHideBoxSpeed);
                 this.inflated = false;
                 box = null;
-            };
-
-            function getNewRectStyle(element, oldRect, additionalZoom) {
-                var _window = window;
-                var currentZoom = conf.get('zoom');
-                var dimensionCoefficient = 1 + (0.025 * additionalZoom);
-                var newWidth = oldRect.width * additionalZoom * dimensionCoefficient;
-                var newHeight = oldRect.height * additionalZoom * dimensionCoefficient;
-                var newLeft = oldRect.left - ((newWidth - oldRect.width) / 2);
-                var newTop = oldRect.top - ((newHeight - oldRect.height) / 2);
-                var viewLeft = (_window.scrollX + HighlightBox.kMinDistanceFromEdge) / currentZoom;
-                var viewTop = (_window.scrollY + HighlightBox.kMinDistanceFromEdge) / currentZoom;
-                var viewWidth = (window.innerWidth - (HighlightBox.kMinDistanceFromEdge * 2)) / currentZoom;
-                var viewHeight = (window.innerHeight - (HighlightBox.kMinDistanceFromEdge * 2)) / currentZoom;
-                var preAdjustedWidth = newWidth;
-                newWidth = Math.min(newWidth, viewWidth);
-                if (HighlightBox.kDimensionAdjustableElements[element.tagName.toLowerCase()] && (preAdjustedWidth != newWidth)) {
-                    newHeight = (newHeight * preAdjustedWidth) / newWidth;
-                }
-                var heightCoefficient = 1 + (0.025 * additionalZoom);
-                newHeight = Math.min(newHeight * heightCoefficient, viewHeight);
-                if (newLeft < viewLeft) {
-                    newLeft = viewLeft;
-                } else if ((newLeft + newWidth) > (viewLeft + viewWidth)) {
-                    newLeft = viewLeft + (viewWidth - newWidth);
-                }
-                if (newTop < viewTop) {
-                    newTop = viewTop;
-                } else if ((newTop + newHeight) > (viewTop + viewHeight)) {
-                    newTop = viewTop + (viewHeight - newHeight);
-                }
-                return {
-                    left: newLeft,
-                    top: newTop,
-                    width: newWidth / additionalZoom,
-                    height: newHeight / additionalZoom
-                };
             };
 
             /**
@@ -332,7 +296,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             var target = document.elementFromPoint(clientX, clientY);
             var box = HighlightBox.getInstance(target);
             if (!isEnabled) {
-                return; // Do nothing if module is disabled
+                //return; // Do nothing if module is disabled
             }
             if (box.getIsInflated()) {
                 box.deflate();
