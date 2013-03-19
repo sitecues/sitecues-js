@@ -57,7 +57,7 @@ eqnx.def('util', function (util, callback) {
             // Perform the calculations for all selected elements.
             var result = [];
             $(selector).each(function () {
-                var scrollPosition = this.getScrollPosition();
+                var scrollPosition = util.getScrollPosition();
                 var boundingBox = this.getBoundingClientRect();
                 var totalZoom = util.getTotalZoom(this);
                 var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
@@ -93,8 +93,8 @@ eqnx.def('util', function (util, callback) {
          */
         util.getScrollPosition = function () {
             return {
-                left: $(window).scrollLeft(),
-                top:  $(window).scrollTop()
+                left: window.pageXOffset,
+                top:  window.pageYOffset
             };
         }
 
@@ -176,8 +176,7 @@ eqnx.def('util', function (util, callback) {
 
                 // If we need to change the element's dimensions, so be it. However, explicitly
                 // set the dimensions only if needed.
-                var newWidth = undefined;
-                var newHeight = undefined;
+                var newWidth, newHeight;
 
                 // Check the width and horizontal positioning.
                 if (width > viewport.width) {
