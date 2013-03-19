@@ -12,6 +12,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var extraZoom = 1.5;
         var isEnabled = zoomLevel >= kMinCursorZoom; // if HLB module is enabled
 
+        // Add easing function for box open animation, to create bounce-back effect
+        $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301
+            easeOutBack: function (x, t, b, c, d, s) {
+                if (s == undefined) s = 1.70158;
+                return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+            }
+        });
+
         var HighlightBox = (function () {
 
             // Initialize.
@@ -91,7 +99,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // todo: Use appropriate easing type
                 this.itemNode.css(cssBeforeAnimateStyles)
-                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed);
+                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
 
                 //console.log('Adding placeholder with these coords: ' + JSON.stringify(origRect));
 
@@ -125,7 +133,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     origRect = this.origRect[this.origRect.length - 1];
                 var cssAnimateStyles = $.extend({}, currentStyle);
                 cssAnimateStyles.transform = 'scale(1)';
-                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed, 'swing', function () {
+                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed, 'easeOutBack', function () {
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
