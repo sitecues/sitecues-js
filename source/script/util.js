@@ -44,10 +44,9 @@ eqnx.def('util', function (util, callback) {
         util.getMouseCoords = function (e, zoom) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
-            var scrollPosition = this.getScrollPosition();
             return {
-                left: scrollPosition.left + e.clientX / zoom,
-                top:  scrollPosition.top  + e.clientY / zoom
+                left: e.clientX / zoom,
+                top:  e.clientY / zoom
             };
         }
 
@@ -58,7 +57,7 @@ eqnx.def('util', function (util, callback) {
             // Perform the calculations for all selected elements.
             var result = [];
             $(selector).each(function () {
-                var scrollPosition = util.getScrollPosition();
+                var scrollPosition = this.getScrollPosition();
                 var boundingBox = this.getBoundingClientRect();
                 var totalZoom = util.getTotalZoom(this);
                 var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
@@ -94,8 +93,8 @@ eqnx.def('util', function (util, callback) {
          */
         util.getScrollPosition = function () {
             return {
-                left: window.pageXOffset,
-                top:  window.pageYOffset
+                left: $(window).scrollLeft(),
+                top:  $(window).scrollTop()
             };
         }
 
@@ -117,7 +116,7 @@ eqnx.def('util', function (util, callback) {
         util.getViewportDimensions = function (inset) {
             inset = inset || 0;
             var insetX2 = inset * 2;
-            var scrollPos = util.getScrollPosition();
+            var scrollPos = this.getScrollPosition();
             var result = {
                 left: scrollPos.left + inset,
                 top: scrollPos.top + inset,
