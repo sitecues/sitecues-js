@@ -1,13 +1,16 @@
 ﻿/**
  * This is the box that appears when the user asks to read the highlighted text in a page.
- * todo: is there module state 'isEnabled'?
  */
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'util', 'cursor', 'geo', 'keys', 'ui', function ($, conf, util, cursor, geo, keys) {
+    eqnx.use('jquery', 'conf', 'cursor', 'geo', 'keys', 'ui', function ($, conf, cursor, geo, keys) {
 
-       var box = null; // current highlight box, only work with it.
+        var box = null; // current highlight box, only work with it.
+        var kMinCursorZoom = 1.5;
+        var zoomLevel = conf.get('zoom');
+        var extraZoom = 1.5;
+        var isEnabled = zoomLevel >= kMinCursorZoom; // if HLB module is enabled
 
         var HighlightBox = (function () {
 
@@ -107,7 +110,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                              height: height + 'px'
                          }));
                 this.itemNode.after(clone);
-                
+
                 // todo: Trigger the background blur effect if there is a highlight box only.
                 this.inflated = true;
                 return false;
@@ -266,7 +269,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Iterate through the parents looking for a background color
                         var thisNodeColor = $(this).css('backgroundColor');
                         // See if the background color is a default or transparent color
-                        if ($.inArray(thisNodeColor, transparentColorNamesSet) < 1) {
+                        if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
                             // Found a background color specified in this node, no need to check further up the tree
                             bgColor = thisNodeColor;
                             return false;
@@ -301,6 +304,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Keep only one instance of highlight box at a time.
                 // Return Highlight if need to support a few instances instead.
                 getInstance: function (target) {
+                    // don't return an object if HLB is disabled
+
                     if (!box) {
                         if (!target) return; // HighlightBox creation failed because target is not defined.
                         box = new HighlightBox(target);
@@ -323,14 +328,24 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         eqnx.on('highlight/animate', function (e) {
             var target = document.elementFromPoint(clientX, clientY);
             var box = HighlightBox.getInstance(target);
-
+            if (!isEnabled) {
+                return; // Do nothing if module is disabled
+            }
             if (box.getIsInflated()) {
                 box.deflate();
             } else {
-                box.inflate(1.5);
+                box.inflate(extraZoom);
             }
 
             return false;
+        });
+
+        /**
+         * Handle zoom event.
+         */
+        eqnx.on('zoom', function (zoomvalue) {
+            zoomLevel = zoomvalue;
+            isEnabled = zoomLevel >= kMinCursorZoom
         });
 
         // Done.

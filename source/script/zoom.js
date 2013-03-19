@@ -45,23 +45,19 @@ eqnx.def('zoom', function(zoom, callback){
 
 		// react on any zoom change
 		conf.get('zoom', function (value) {
-		    // TODO: AK use 'zoom' property later; for now always fallback to 'transform'
-		    // because dependent modules such as cursor or HLB will otherwise use both approaches
-		    // and for now we don't have correct Math for this - so this lead to confusion and bugs.
-            /*
+           
 			if (zoom.native){
 				// if native zoom is supported, change it
 				$('body').css({ zoom: value });
 				eqnx.emit('zoom', value);
-			}
-            */
-		    // native zoom isn't supported, use
-		    // css3 transforms scale option
-			$('body').css({
-			    'transform': 'scale(' + value + ')',
-			    'transform-origin': '0 0'
-			});
-
+			} else {
+		        // native zoom isn't supported, use
+		        // css3 transforms scale option
+			    $('body').css({
+			        'transform': 'scale(' + value + ')',
+			        'transform-origin': '0 0'
+			    });
+            }
 		    // notify all about zoom change
 			eqnx.emit('zoom', value);
 
