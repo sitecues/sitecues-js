@@ -123,13 +123,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var _this = this;
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRect = this.origRect[this.origRect.length - 1];
-                var cssAnimateStyles = {
-                    transform: 'scale(1)',
-                    width: parseFloat(currentStyle.width),
-                    height: parseFloat(currentStyle.height),
-                    top: origRect.top,
-                    left: origRect.left
-                };
+                var cssAnimateStyles = $.extend({}, currentStyle);
+                cssAnimateStyles.transform = 'scale(1)';
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed, 'swing', function () {
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.

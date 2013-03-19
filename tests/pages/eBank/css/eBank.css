@@ -6,8 +6,7 @@ h2 {
 .centerDivs  {
     width               : 50em;
     position            : relative;
-    left                : 50%;
-    margin-left         : -25em;
+    margin              : auto auto;
 }
 
 #footer {
