@@ -1,5 +1,5 @@
-// module with useful methods to determine
-// what type of element something is
+// module with useful methods to determine what type of element something is
+// NOTE: moved from TS codebase, need refactoring
 eqnx.def('caret/classifier', function(classifier, callback){
 
 	classifier.editingInputTypes = {

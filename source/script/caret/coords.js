@@ -1,12 +1,14 @@
+// module for calculating caret position in input
+// NOTE: moved from TS codebase, need refactoring
 eqnx.def('caret/coords', function(coords, callback){
 
-	// 
+	// depends on `jquery`, `conf` and `util` modules
 	eqnx.use('jquery', 'conf', 'util', function($, conf, util){
 
 		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos, zoomLevel) {
 			// Create an object with the same positioning but flexible width and height
 			// in order to measure the text up to the caret
-			var isDebuggingOn = false;// TODO EQ-255 compile this stuff out when false
+			var isDebuggingOn = false; // TODO EQ-255 compile this stuff out when false
 
 			var extendStyle = {
 				'width': 'auto',

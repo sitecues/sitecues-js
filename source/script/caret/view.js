@@ -1,4 +1,5 @@
 // view for the caret enhancement
+// NOTE: moved from TS codebase, need refactoring
 eqnx.def('caret/view', function(view, callback){
 
 	// constants

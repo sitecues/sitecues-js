@@ -1,3 +1,5 @@
+// module for showing equinox badge on the page
+// and notifying system about interactions (hover/click)
 eqnx.def('badge', function(badge, callback){
 
 	// use jquery, we can rid off this dependency

@@ -1,3 +1,4 @@
+// module for storing settings on the server
 eqnx.def('conf/server', function(server, callback){
 
 	// url of conf settings server
