@@ -132,7 +132,7 @@ eqnx.def('util', function (util, callback) {
         }
 
         /**
-         * Center another element over some other element, zooming the centered element if needed.
+         * Center another element over a provided center, zooming the centered element if needed.
          */
         util.centerOn = function (selector, center, zoom) {
             // Ensure a zoom exists.
