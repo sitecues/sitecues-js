@@ -12,40 +12,40 @@ eqnx.def('panel', function(panel, callback){
 		// panel element
 		panel.create = function(){
 			// private variables
-			var frame, button, label;
+			var frame, wrap, slider;
 
 			// create element and add element id for proper styling
 			frame = $('<div>').attr('id', 'eqnx-panel');
 
-			// button helper
-			button = function(classname, event){
-				// create link element
-				$('<a>').
-					// add all classes
-					addClass('eqnx-panel-button ' + classname).
+			// create small A label
+			$('<div>').addClass('small').text('A').appendTo(frame);
 
-					// handle click
-					click(function(){
-						eqnx.emit(event, frame);
-					}).
+			// create clider wrap element
+			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
 
-					// append to frame
-					appendTo(frame);
-			}
+			// create slider
+			slider = $('<input>').addClass('slider').attr({
+				type: 'range',
+				min: '1',
+				max: '5',
+				step: '0.1',
+				ariaLabel: 'See it better'
+			}).appendTo(wrap);
 
-			// create panel buttons
-			button('eqnx-zoomin', 'zoom/increase');
-			button('eqnx-zoomout', 'zoom/decrease');
-			button('eqnx-tts', 'tts/toggle');
+			// create big A label
+			$('<div>').addClass('big').text('A').appendTo(frame);
 
-			// add classes to zoom label
-			label = $('<span>').addClass('eqnx-panel-label eqnx-zoom').
-				html(parseInt((conf.get('zoom') || 1) * 100) + '%').
-				appendTo(frame);
+			// create TTS button
+			$('<div>').addClass('tts').appendTo(frame);
 
-			// update label when zoom level is changing
+			// handle slider value change
+			slider.change(function(){
+				conf.set('zoom', this.value);
+			});
+
+			// handle zoom change and update slider
 			conf.get('zoom', function(value){
-				label.html(parseInt(value * 100) + '%');
+				slider.val(value);
 			});
 
 			// return panel
