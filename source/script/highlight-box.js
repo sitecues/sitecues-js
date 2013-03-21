@@ -4,7 +4,8 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util', 'keys', function ($, conf, cursor, util, keys) {
+    // todo remove unused dependencies
+    eqnx.use('jquery', 'conf', 'cursor', 'util', 'keys', 'background-dimmer', function ($, conf, cursor, util, keys, backgroundDimmer) {
 
         var box = null; // current highlight box, only work with it.
         var kMinCursorZoom = 1.5;
@@ -98,7 +99,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
                 var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
 
-                // todo: Use appropriate easing type
                 this.itemNode.css(cssBeforeAnimateStyles)
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
 
@@ -117,7 +117,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                          }));
                 this.itemNode.after(clone);
 
-                // todo: Trigger the background blur effect if there is a highlight box only.
+                // Trigger the background blur effect if there is a highlight box only.
+                backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
                 this.inflated = true;
                 return false;
             }
@@ -143,6 +144,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];
                 setTimeout(function () {
                     $('.' + HighlightBox.kPlaceHolderClass).remove();
+                    backgroundDimmer.removeDimmer();
                     // Wait till animation is finished, then reset animate styles.
                     _this.itemNode.removeAttr('style');
                     if (typeof style !== 'undefined') {
