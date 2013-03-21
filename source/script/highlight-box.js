@@ -238,19 +238,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     width = (newWidth || width) / elementTotalZoom;
                     height = (newHeight || height) / elementTotalZoom;
 
-                    // Determine what the left and top CSS values must be to center the
-                    // (possibly zoomed) element over the determined center.
-                    var css = jElement.css(['marginLeft', 'marginTop']);
-
                     var cssLeft = (centerLeft
                                    - offsetParentPosition.left
                                    - (width * offsetParentZoom / 2)
-                                   - (parseFloat(css.marginLeft) * offsetParentZoom)
                                   ) / offsetParentZoom;
                     var cssTop = (centerTop
                                    - offsetParentPosition.top
                                    - (height * offsetParentZoom / 2)
-                                   - (parseFloat(css.marginTop) * offsetParentZoom)
                                   ) / offsetParentZoom;
 
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
