@@ -76,8 +76,18 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     origRect = this.origRect[this.origRect.length - 1];
 
                 var cssUpdate = getNewRectStyle(this.itemNode, util.getCenter(this.item), 2);
+                var offsetParent = this.itemNode.offsetParent();
 
-                var cssBeforeAnimateStyles = $.extend({}, {
+                var offset = {};
+                if (offsetParent[0].tagName.toLowerCase() === 'html') {
+                    offset.top = origRect.top;
+                    offset.left = origRect.left;
+                } else {
+                    offset.top = cssUpdate.top;
+                    offset.left = cssUpdate.left;
+                }
+
+                var cssBeforeAnimateStyles = $.extend({}, offset, {
                     position: 'absolute',
                     overflowY: 'auto',
                     overflowX: 'hidden',
@@ -85,7 +95,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     border: '0px solid white'
                 }),
-                // todo: check why this is not properly applied, maybe the other library version?
                 cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')',
                     margin: '0',
@@ -156,7 +165,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 box = null;
             };
 
-            
             /**
              * Get the style and position of the HLB.
              */
@@ -238,6 +246,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     width = (newWidth || width) / elementTotalZoom;
                     height = (newHeight || height) / elementTotalZoom;
 
+                    // Determine what the left and top CSS values must be to center the
+                    // (possibly zoomed) element over the determined center.
+                    var css = jElement.css(['marginLeft', 'marginTop']);
+
                     var cssLeft = (centerLeft
                                    - offsetParentPosition.left
                                    - (width * offsetParentZoom / 2)
@@ -247,6 +259,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                                    - (height * offsetParentZoom / 2)
                                   ) / offsetParentZoom;
 
+                    // If offset parent is html then no need to do this.
+                    if (offsetParent[0].tagName.toLowerCase() !== 'html') {
+                        cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
+                        cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
+                    }
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
                     cssUpdates = {
                         left: cssLeft,
@@ -425,7 +442,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             if (!box) return;
 
             if (!isEnabled) {
-                //return; // Do nothing if module is disabled
+                return; // Do nothing if module is disabled
             }
             if (box.getIsInflated()) {
                 box.deflate();
