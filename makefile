@@ -29,4 +29,5 @@ build:
 		source/script/caret/view.js\
 		source/script/caret/coords.js\
 		source/script/caret/classifier.js\
-		source/script/cursor.js
+		source/script/cursor.js\
+		source/script/player.js

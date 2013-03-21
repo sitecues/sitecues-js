@@ -1,3 +1,6 @@
+// module provides confinguration management system
+// for other modules to avoid direct communication
+// between modules.
 eqnx.def('conf', function(conf, callback){
 
 	// private variables
@@ -133,9 +136,16 @@ eqnx.def('conf', function(conf, callback){
 		return conf;
 	}
 
-	// get all stored values
-	conf.data = function(){
-		return data;
+	// get/update all stored values
+	conf.data = function(update){
+		// return data object if no updates
+		if (undefined === update)
+			return data;
+
+		// update data otherwise
+		for(var key in update)
+			if (update.hasOwnProperty(key))
+				conf.set(key, update[key]);
 	}
 
 	// end

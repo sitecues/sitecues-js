@@ -7,20 +7,23 @@ eqnx.def('keys', function(keys, callback){
 	keys.test = {
 		'plus':		function(event){ return event.keyCode === 187; },
 		'minus':	function(event){ return event.keyCode === 189; },
-		'space': function (event) { if (event.keyCode === 32) { event.preventDefault(); return true;} },
+		'space':	function(event){ return event.keyCode === 32; }
 	}
 
 	// define keys map used to bind actions to hotkeys
 	keys.map = {
 		'plus':			{ event: 'zoom/increase' },
 		'minus':		{ event: 'zoom/decrease' },
-        'space':        { event: 'highlight/animate' }
+		'space':		{ event: 'highlight/animate', preventDefault: true }
 	}
 
 	// handle key
 	keys.handle = function(key, event){
 		// if event defined, emit it
 		if (key.event) eqnx.emit(key.event, event);
+
+		// prevent default if needed
+		if (key.preventDefault) event.preventDefault();
 	}
 
 	// get dependencies

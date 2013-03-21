@@ -1,3 +1,5 @@
+// module for importing settings from page's _eqnx variable
+// needed for customer's indentification and customer's settings
 eqnx.def('conf/import', function(module, callback){
 
 	// private variables

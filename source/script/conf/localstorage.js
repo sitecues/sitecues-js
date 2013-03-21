@@ -1,4 +1,4 @@
-// domain-based settings stored at localstorage
+// module for storing settings in localstorage
 eqnx.def('conf/localstorage', function(ls, callback){
 
 	// break if local storage unsupported by browser
