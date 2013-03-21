@@ -9,6 +9,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
         var box = null; // current highlight box, only work with it.
         var kMinCursorZoom = 1.5;
+        var kPanelId = 'eqnx-panel';
+        var kBadgeId = 'eqnx-badge';
         var zoomLevel = conf.get('zoom');
         var extraZoom = 1.5;
         var isEnabled = zoomLevel >= kMinCursorZoom; // if HLB module is enabled
@@ -102,7 +104,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 this.itemNode.css(cssBeforeAnimateStyles)
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
 
-
                 // First, remove all the attributes from the tag.
                 removeAttributes(cloneNode);
                 // Then, insert placeholder so that content which comes after doesn't move back.
@@ -160,108 +161,110 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Get the style and position of the HLB.
              */
             function getNewRectStyle(selector, center, zoom) {
-                    // Ensure a zoom exists.
-                    zoom = zoom || 1;
-                    // Use the proper center.
-                    center = {
-                        left: (center.centerX || center.left),
-                        top: (center.centerY || center.top)
+                // The viewport inset from the window edges.
+                window._vpi = 50;
+                // Ensure a zoom exists.
+                zoom = zoom || 1;
+                // Use the proper center.
+                center = {
+                    left: (center.centerX || center.left),
+                    top: (center.centerY || center.top)
+                };
+                var cssUpdates = {};
+                $(selector).each(function () {
+                    var jElement = $(this);
+
+                    // Obtain the equinox state data for the element.
+                    var equinoxData = this.equinoxData || (this.equinoxData = {});
+                    var existingZoom = equinoxData.zoom || (equinoxData.zoom = 1);
+
+                    // As we are not moving the element within the DOM, we need to position the
+                    // element relative to it's offset parent. These calculations need to factor
+                    // in the total zoom of the parent.
+                    var offsetParent = jElement.offsetParent();
+                    var offsetParentPosition = util.getOffset(offsetParent);
+                    var offsetParentZoom = util.getTotalZoom(offsetParent);
+                    var elementTotalZoom = offsetParentZoom * zoom;
+
+                    // Determine where we would display the centered and (possibly) zoomed element,
+                    // and what it's dimensions would be.
+                    var centerLeft = center.left;
+                    var centerTop = center.top;
+
+                    // Determine the final dimensions, and their affect on the CSS dimensions.
+                    var width = jElement.outerWidth() * elementTotalZoom;
+                    var height = jElement.outerHeight() * elementTotalZoom;
+
+                    var left = centerLeft - (width / 2);
+                    var top = centerTop - (height / 2);
+
+                    // Now, determine if the element will fit in the viewport. If not, place the
+                    // element in the viewport, but as close the the original center as possible.
+                    var viewport = util.getViewportDimensions(window._vpi);
+
+                    // If we need to change the element's dimensions, so be it. However, explicitly
+                    // set the dimensions only if needed.
+                    var newWidth, newHeight;
+
+                    // Check the width and horizontal positioning.
+                    if (width > viewport.width) {
+                        // Easiest case: fit to width and horizontal center of viewport.
+                        centerLeft = viewport.centerX;
+                        newWidth = viewport.width;
+                    } else {
+                        // The element isn't too wide. However, if the element is out of the view area, move it back in.
+                        if (viewport.left > left) {
+                            centerLeft += viewport.left - left;
+                        } else if ((left + width) > viewport.right) {
+                            centerLeft -= (left + width) - viewport.right;
+                        }
+                    }
+
+                    // Check the width and horizontal positioning.
+                    if (height > viewport.height) {
+                        // Easiest case: fit to height and vertical center of viewport.
+                        centerTop = viewport.centerY;
+                        newHeight = viewport.height;
+                    } else {
+                        // The element isn't too tall. However, if the element is out of the view area, move it back in.
+                        if (viewport.top > top) {
+                            centerTop += viewport.top - top;
+                        } else if ((top + height) > viewport.bottom) {
+                            centerTop -= (top + height) - viewport.bottom;
+                        }
+                    }
+
+                    // Reduce the dimensions to a non-zoomed value.
+                    width = (newWidth || width) / elementTotalZoom;
+                    height = (newHeight || height) / elementTotalZoom;
+
+                    // Determine what the left and top CSS values must be to center the
+                    // (possibly zoomed) element over the determined center.
+                    var css = jElement.css(['marginLeft', 'marginTop']);
+
+                    var cssLeft = (centerLeft
+                                   - offsetParentPosition.left
+                                   - (width * offsetParentZoom / 2)
+                                   - (parseFloat(css.marginLeft) * offsetParentZoom)
+                                  ) / offsetParentZoom;
+                    var cssTop = (centerTop
+                                   - offsetParentPosition.top
+                                   - (height * offsetParentZoom / 2)
+                                   - (parseFloat(css.marginTop) * offsetParentZoom)
+                                  ) / offsetParentZoom;
+
+                    // Create the CSS needed to place the element where it needs to be, and to zoom it.
+                    cssUpdates = {
+                        left: cssLeft,
+                        top: cssTop
                     };
-                    var cssUpdates = {};
-                    $(selector).each(function () {
-                        var jElement = $(this);
 
-                        // Obtain the equinox state data for the element.
-                        var equinoxData = this.equinoxData || (this.equinoxData = {});
-                        var existingZoom = equinoxData.zoom || (equinoxData.zoom = 1);
+                    // Only update the dimensions if needed.
+                    cssUpdates.width = newWidth ? width : cssUpdates.width;
+                    cssUpdates.height = newHeight ? height : cssUpdates.height;
 
-                        // As we are not moving the element within the DOM, we need to position the
-                        // element relative to it's offset parent. These calculations need to factor
-                        // in the total zoom of the parent.
-                        var offsetParent = jElement.offsetParent();
-                        var offsetParentPosition = util.getOffset(offsetParent);
-                        var offsetParentZoom = util.getTotalZoom(offsetParent);
-                        var elementTotalZoom = offsetParentZoom * zoom;
-
-                        // Determine where we would display the centered and (possibly) zoomed element,
-                        // and what it's dimensions would be.
-                        var centerLeft = center.left;
-                        var centerTop = center.top;
-
-                        // Determine the final dimensions, and their affect on the CSS dimensions.
-                        var width = jElement.outerWidth() * elementTotalZoom;
-                        var height = jElement.outerHeight() * elementTotalZoom;
-
-                        var left = centerLeft - (width / 2);
-                        var top = centerTop - (height / 2);
-
-                        // Now, determine if the element will fit in the viewport. If not, place the
-                        // element in the viewport, but as close the the original center as possible.
-                        var viewport = util.getViewportDimensions(window._vpi);
-
-                        // If we need to change the element's dimensions, so be it. However, explicitly
-                        // set the dimensions only if needed.
-                        var newWidth, newHeight;
-
-                        // Check the width and horizontal positioning.
-                        if (width > viewport.width) {
-                            // Easiest case: fit to width and horizontal center of viewport.
-                            centerLeft = viewport.centerX;
-                            newWidth = viewport.width;
-                        } else {
-                            // The element isn't too wide. However, if the element is out of the view area, move it back in.
-                            if (viewport.left > left) {
-                                centerLeft += viewport.left - left;
-                            } else if ((left + width) > viewport.right) {
-                                centerLeft -= (left + width) - viewport.right;
-                            }
-                        }
-
-                        // Check the width and horizontal positioning.
-                        if (height > viewport.height) {
-                            // Easiest case: fit to height and vertical center of viewport.
-                            centerTop = viewport.centerY;
-                            newHeight = viewport.height;
-                        } else {
-                            // The element isn't too tall. However, if the element is out of the view area, move it back in.
-                            if (viewport.top > top) {
-                                centerTop += viewport.top - top;
-                            } else if ((top + height) > viewport.bottom) {
-                                centerTop -= (top + height) - viewport.bottom;
-                            }
-                        }
-
-                        // Reduce the dimensions to a non-zoomed value.
-                        width = (newWidth || width) / elementTotalZoom;
-                        height = (newHeight || height) / elementTotalZoom;
-
-                        // Determine what the left and top CSS values must be to center the
-                        // (possibly zoomed) element over the determined center.
-                        var css = jElement.css(['marginLeft', 'marginTop']);
-
-                        var cssLeft = (centerLeft
-                                       - offsetParentPosition.left
-                                       - (width * offsetParentZoom / 2)
-                                       - (parseFloat(css.marginLeft) * offsetParentZoom)
-                                      ) / offsetParentZoom;
-                        var cssTop = (centerTop
-                                       - offsetParentPosition.top
-                                       - (height * offsetParentZoom / 2)
-                                       - (parseFloat(css.marginTop) * offsetParentZoom)
-                                      ) / offsetParentZoom;
-
-                        // Create the CSS needed to place the element where it needs to be, and to zoom it.
-                        cssUpdates = {
-                            left: cssLeft,
-                            top: cssTop
-                        };
-
-                        // Only update the dimensions if needed.
-                        cssUpdates.width = newWidth ? width : cssUpdates.width;
-                        cssUpdates.height = newHeight ? height : cssUpdates.height;
-
-                    });
-                    return cssUpdates;
+                });
+                return cssUpdates;
             }
 
             /**
@@ -375,6 +378,28 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 });
             };
 
+            function isValidTarget(target) {
+                if (!target // HighlightBox creation failed because target is not defined.
+                   || target.tagName.toLowerCase() === 'body') {// Do not highlight body
+                    return false;
+                }
+
+                // Do not highlight panel & badge
+                if (target.id.toLowerCase() === kPanelId
+                    || target.id.toLowerCase() === kBadgeId) {
+                    return false;
+                }
+                // Do not highlight panel's incidents
+                var isValid = true;
+                $.each($(target).parents(), function (index, element) {
+                    if (element.id.toLowerCase() === kPanelId) {
+                        isValid = false;
+                        return false;
+                    }
+                })
+                return isValid;
+            }
+
             return {
                 // Keep only one instance of highlight box at a time.
                 // Return Highlight if need to support a few instances instead.
@@ -382,7 +407,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     // don't return an object if HLB is disabled
 
                     if (!box) {
-                        if (!target) return; // HighlightBox creation failed because target is not defined.
+                        if (!isValidTarget(target)) return;
                         box = new HighlightBox(target);
                     }
                     return box;
@@ -403,6 +428,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         eqnx.on('highlight/animate', function (e) {
             var target = document.elementFromPoint(clientX, clientY);
             var box = HighlightBox.getInstance(target);
+            if (!box) return;
+
             if (!isEnabled) {
                 //return; // Do nothing if module is disabled
             }
