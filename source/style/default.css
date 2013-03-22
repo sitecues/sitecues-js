@@ -14,8 +14,8 @@
 }
 
 #eqnx-badge:hover {
-	color: rgba(0, 0, 0, 1);
-	-webkit-transition: color 1s;
+    color: rgba(0, 0, 0, 1);
+    -webkit-transition: color 1s;
 }
 
 #eqnx-badge-image {
@@ -25,63 +25,62 @@
 
 /* panel */
 #eqnx-panel {
-	z-index: 2147483646;
-	position: fixed;
-	top: 55px;
-	right: 3%;
-	border: 1px solid #333;
-	white-space: nowrap;
-	width: 200px;
-	height: 47px;
-	background-color: #8FB2DC;
-	border-radius: 5px;
-	-moz-box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
-	-webkit-box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
-	box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
-
-	background-clip: content-box;
-	user-select: none;
+    z-index: 2147483646;
+    position: fixed;
+    top: 55px;
+    right: 3%;
+    border: 1px solid #333;
+    white-space: nowrap;
+    width: 200px;
+    height: 47px;
+    background-color: #8FB2DC;
+    border-radius: 5px;
+    -moz-box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
+    -webkit-box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
+    box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);
+    background-clip: content-box;
+    user-select: none;
 }
 
 #eqnx-panel .small {
-	position: absolute;
-	left: 3px;
-	top: 15px;
-	font-family: Verdana;
-	font-weight: bolder;
-	font-size: 14pt
+    position: absolute;
+    left: 3px;
+    top: 15px;
+    font-family: Verdana;
+    font-weight: bolder;
+    font-size: 14pt;
 }
 
 #eqnx-panel .slider-wrap {
-	position: absolute;
-	top: 20px;
-	left: 20px;
-	display: inline;
-	width: 100px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: inline;
+    width: 100px;
 }
 
 #eqnx-panel .slider {
-	width: 100px;
+    width: 100px;
 }
 
 #eqnx-panel .big {
-	position: absolute;
-	left: 125px;
-	top: 0px;
-	font-family: Verdana;
-	font-weight: bolder;
-	font-size: 28pt;
+    position: absolute;
+    left: 125px;
+    top: 0px;
+    font-family: Verdana;
+    font-weight: bolder;
+    font-size: 28pt;
 }
 
 #eqnx-panel .tts {
-	position: absolute;
-	top: 0;
-	right: 0;
-	width: 45px;
-	height: 45px;
-	background-image: url('//ai2.s3.amazonaws.com/assets/headphones_004.png');
-	background-size: 90px;
-	background-position: 0% 0%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 45px;
+    height: 45px;
+    background-image: url('//ai2.s3.amazonaws.com/assets/headphones_004.png');
+    background-size: 90px;
+    background-position: 0% 0%;
 }
 
 #eq360-cursor {
@@ -94,12 +93,21 @@
 }
 
 #eqnx-caret {
-	position: absolute;
-	border: 0px solid transparent;
-	z-index: 2147483647;
-	background-color: red;
-	opacity: 0.75;
-	width: 2px;
-	margin: 0;
-	padding: 0;
+    position: absolute;
+    border: 0px solid transparent;
+    z-index: 2147483647;
+    background-color: red;
+    opacity: 0.75;
+    width: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+#eq360-bg {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }

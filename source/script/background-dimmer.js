@@ -11,16 +11,10 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
         backgroundDimmer.kDimmingOpacity = 0.5;
         backgroundDimmer.kDimmingSpeed = 400;
         backgroundDimmer.dimBackgroundContent = function (zIndex) {
-            if ($('#eq360-bg').length < 1) {
+            if ($('#' + this.kDimmerId).length < 1) {
                 var dimmerDiv = document.createElement('div');
                 dimmerDiv.id = this.kDimmerId;
                 $(dimmerDiv).css({
-                    display: 'block',
-                    position: 'fixed',
-                    left: '0',
-                    top: '0',
-                    width: '100%',
-                    height: '100%',
                     zIndex: zIndex.toString(),
                     backgroundColor: this.kDimmingColor,
                     opacity: '0'
