@@ -4,16 +4,16 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    // todo remove unused dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util', 'keys', 'background-dimmer', function ($, conf, cursor, util, keys, backgroundDimmer) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', function ($, conf, cursor, util, backgroundDimmer) {
 
-        var box = null; // current highlight box, only work with it.
-        var kMinCursorZoom = 1.5;
+        var box = null; // Current highlight box instance, only work with it.
+        var kMinHighlightZoom = 1.5;
+        var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
         var zoomLevel = conf.get('zoom');
-        var extraZoom = 1.5;
-        var isEnabled = zoomLevel >= kMinCursorZoom; // if HLB module is enabled
+
+        var isEnabled = zoomLevel >= kMinHighlightZoom; // if HLB module is enabled
 
         // Add easing function for box open animation, to create bounce-back effect
         $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301
@@ -30,14 +30,18 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 this.inflated = false;
                 this.savedCss = [];
                 this.savedStyleAttr = [];
-                this.origRect = [];
+                this.origRectDimensions = [];
                 this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
                 box = this.item;
                 this.itemNode = $(this.item);
+
                 var computedStyles = getElementComputedStyles(this.item);
                 var offset = util.getOffset(this.item);
-                var size = { width: parseInt(computedStyles.width), height: parseInt(computedStyles.height) };
-                this.origRect.push($.extend({}, { left: parseInt(offset.left), top: parseInt(offset.top) }, size));
+                var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
+                var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
+                var size = { width: parseFloat(width), height: parseFloat(height) };
+
+                this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
                 this.savedCss.push(computedStyles);
                 this.savedStyleAttr.push(this.itemNode.attr('style'));
             }
@@ -56,7 +60,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             // Space placeholders prevent content after box from going underneath it.
             HighlightBox.kPlaceHolderClass = 'eq360-box-placeholder';
             // TODO: Expand this array to include all appropriate elements.
-            HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
+            // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
+
+            // The viewport inset from the window edges.
+            window._vpi = HighlightBox.kMinDistanceFromEdge;
 
             /**
              * Get highlight box isInflated state.
@@ -69,31 +76,43 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function (extraZoom) {
+                // Prepare clone element as a clone of the scaled highlight box element.
                 var clone = this.item.cloneNode(false),
                     cloneNode = $(clone),
-                    // todo make up something better than keeping two similar vars
+                    // Get the current element styles.
                     currentStyle = this.savedCss[this.savedCss.length - 1],
-                    origRect = this.origRect[this.origRect.length - 1];
+                    origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-                var cssUpdate = getNewRectStyle(this.itemNode, util.getCenter(this.item), 2);
+                var cssUpdate = getNewRectStyle(this.itemNode, util.getCenter(this.item), extraZoom);
+                var offsetParent = this.itemNode.offsetParent();
 
-                var cssBeforeAnimateStyles = $.extend({}, {
+                var offset = {};
+                // Elements relative to the root don't need extra margins, use original values instead.
+                if (offsetParent[0].tagName.toLowerCase() === 'html') {
+                    offset.top  = origRectSize.top;
+                    offset.left = origRectSize.left;
+                } else {
+                    offset.top  = cssUpdate.top;
+                    offset.left = cssUpdate.left;
+                }
+
+                var cssBeforeAnimateStyles = $.extend({}, offset, {
                     position: 'absolute',
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    width: origRect.width,
+                    width: origRectSize.width,
+                    height: 'auto',
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     border: '0px solid white'
                 }),
-                // todo: check why this is not properly applied, maybe the other library version?
                 cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')',
                     margin: '0',
                     borderRadius: HighlightBox.kBoxBorderRadius,
-                    borderColor: HighlightBox.kBoxBorderColor,
-                    borderStyle: HighlightBox.kBoxBorderStyle,
-                    borderWidth: HighlightBox.kBoxBorderWidth,
-                    padding: HighlightBox.kBoxPadding,
+                    borderColor:  HighlightBox.kBoxBorderColor,
+                    borderStyle:  HighlightBox.kBoxBorderStyle,
+                    borderWidth:  HighlightBox.kBoxBorderWidth,
+                    padding:      HighlightBox.kBoxPadding,
                     backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
                 });
 
@@ -101,20 +120,20 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
                 var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
 
-                this.itemNode.css(cssBeforeAnimateStyles)
-                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
+                // Animate HLB.
+                this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
 
-                // First, remove all the attributes from the tag.
+                // Remove all the attributes from the placeholder(clone) tag.
                 removeAttributes(cloneNode);
                 // Then, insert placeholder so that content which comes after doesn't move back.
-                var dimensionCoefficient = 0.025 * extraZoom;
-
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
                          .css($.extend({},  currentStyle, {
                              display: resultDisplay,
                              visibility: 'hidden',
-                             width: origRect.width - dimensionCoefficient + 'px',
-                             height: origRect.height + 'px'
+                             width: origRectSize.width + 'px',
+                             // Don't set height for inline-block elements(images are exceptions)
+                             // since it is calculated automatically with respect to line-height and other factors.
+                             height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
                          }));
                 this.itemNode.after(clone);
 
@@ -129,18 +148,29 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              */
             HighlightBox.prototype.deflate = function () {
                 var _this = this;
+                // Get the current element styles.
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
-                    origRect = this.origRect[this.origRect.length - 1];
-                var cssAnimateStyles = $.extend({}, currentStyle);
-                cssAnimateStyles.transform = 'scale(1)';
-                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed, 'easeOutBack', function () {
+                    origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1],
+                    offsetParent = this.itemNode.offsetParent();
+
+                var cssAnimateStyles = $.extend({}, currentStyle, { position: 'absolute', transform: 'scale(1)' });
+
+                // Elements relative to the root don't need extra margins, use original values instead.
+                if (offsetParent[0].tagName.toLowerCase() === 'html') {
+                    cssAnimateStyles.top = origRectSize.top;
+                    cssAnimateStyles.left = 0;
+                }
+
+                // Deflate the highlight box.
+                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
                         notifyZoomInOrOut(_this.itemNode, false);
+                        
                     }, 0);
                 });
-
+                
                 // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
                 var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];
                 setTimeout(function () {
@@ -156,13 +186,16 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 box = null;
             };
 
-            
             /**
-             * Get the style and position of the HLB.
+             * Get the size and position of the current HLB to inflate.
+             * @param selector What element is being positioned
+             * @param center   The center over which selector is positioned
+             * @param zoom     Zooming the selector element if needed
+             * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
+            // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
+            // getViewportDimensions() doesn't take into account 'zoom' value(util supports 'transform' value for its calculation).
             function getNewRectStyle(selector, center, zoom) {
-                // The viewport inset from the window edges.
-                window._vpi = 50;
                 // Ensure a zoom exists.
                 zoom = zoom || 1;
                 // Use the proper center.
@@ -173,10 +206,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
-
-                    // Obtain the equinox state data for the element.
-                    var equinoxData = this.equinoxData || (this.equinoxData = {});
-                    var existingZoom = equinoxData.zoom || (equinoxData.zoom = 1);
 
                     // As we are not moving the element within the DOM, we need to position the
                     // element relative to it's offset parent. These calculations need to factor
@@ -238,6 +267,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     width = (newWidth || width) / elementTotalZoom;
                     height = (newHeight || height) / elementTotalZoom;
 
+                    // Determine what the left and top CSS values must be to center the
+                    // (possibly zoomed) element over the determined center.
+                    var css = jElement.css(['marginLeft', 'marginTop']);
+
                     var cssLeft = (centerLeft
                                    - offsetParentPosition.left
                                    - (width * offsetParentZoom / 2)
@@ -247,6 +280,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                                    - (height * offsetParentZoom / 2)
                                   ) / offsetParentZoom;
 
+                    // If offset parent is html then no need to do this.
+                    if (offsetParent[0].tagName.toLowerCase() !== 'html') {
+                        cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
+                        cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
+                    }
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
                     cssUpdates = {
                         left: cssLeft,
@@ -254,8 +292,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     };
 
                     // Only update the dimensions if needed.
-                    cssUpdates.width = newWidth ? width : cssUpdates.width;
-                    cssUpdates.height = newHeight ? height : cssUpdates.height;
+                    if (newWidth) {
+                        cssUpdates.width = width;
+                    }
+
+                    if (newHeight) {
+                        cssUpdates.height = height;
+                    }
 
                 });
                 return cssUpdates;
@@ -263,6 +306,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             /**
              * Get the element's styles to be used further.
+             * @param element The DOM element which styles we want to get.
+             * @return elementComputedStyles An object of all element computed styles.
              */
             function getElementComputedStyles(element) {
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = [];
@@ -281,6 +326,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             /**
              * Notify all inputs if zoom in or out.
+             * todo: define if we need to leave this code after code transferring to a new event model.
              */
             function notifyZoomInOrOut (element, isZoomIn) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
@@ -288,7 +334,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             };
 
             /**
-             * We need to correct the display property for certain values.
+             * We need to correct the display property for certain values such as 'inline' or 'table'.
              */
             function getCorrectedDisplay(itemNode, savedDisplay) {
                 if (typeof savedDisplay === 'undefined') {
@@ -356,7 +402,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             };
 
             /**
-             * Get the element's styles to be used further.
+             * Remove all the attributes from the DOM element given.
              */
             function removeAttributes(element) {
                 element.each(function () {
@@ -372,21 +418,21 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 });
             };
 
+            /**
+             * Check if the target is suitable to be used for highlight reading box.
+             * @param target is the current element under mouse cursor.
+             * @return isValid true if element is okay
+             */
             function isValidTarget(target) {
                 if (!target // HighlightBox creation failed because target is not defined.
                    || target.tagName.toLowerCase() === 'body') {// Do not highlight body
                     return false;
                 }
 
-                // Do not highlight panel & badge
-                if (target.id.toLowerCase() === kPanelId
-                    || target.id.toLowerCase() === kBadgeId) {
-                    return false;
-                }
-                // Do not highlight panel's incidents
+                // Do not highlight panel & badge and their incidents
                 var isValid = true;
-                $.each($(target).parents(), function (index, element) {
-                    if (element.id.toLowerCase() === kPanelId) {
+                $.each($(target).parents().andSelf(), function (index, element) {
+                    if (element.id.toLowerCase() === kPanelId || element.id.toLowerCase() === kBadgeId) {
                         isValid = false;
                         return false;
                     }
@@ -398,9 +444,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Keep only one instance of highlight box at a time.
                 // Return Highlight if need to support a few instances instead.
                 getInstance: function (target) {
-                    // don't return an object if HLB is disabled
-
                     if (!box) {
+                        // Don't return an object if HLB is disabled
                         if (!isValidTarget(target)) return;
                         box = new HighlightBox(target);
                     }
@@ -425,10 +470,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             if (!box) return;
 
             if (!isEnabled) {
-                //return; // Do nothing if module is disabled
+               return; // Do nothing if module is disabled
             }
             if (box.getIsInflated()) {
-                box.deflate();
+                box.deflate(extraZoom);
             } else {
                 box.inflate(extraZoom);
             }
@@ -441,7 +486,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
          */
         eqnx.on('zoom', function (zoomvalue) {
             zoomLevel = zoomvalue;
-            isEnabled = zoomLevel >= kMinCursorZoom
+            isEnabled = zoomLevel >= kMinHighlightZoom
         });
 
         // Done.
