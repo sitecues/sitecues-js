@@ -9,6 +9,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var box = null; // Current highlight box instance, only work with it.
         var kMinHighlightZoom = 1.5;
         var extraZoom = 1.5;
+        var delay = 20;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
         var zoomLevel = conf.get('zoom');
@@ -140,6 +141,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Trigger the background blur effect if there is a highlight box only.
                 backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
                 this.inflated = true;
+                eqnx.emit('highlight/inflate', this.item);
                 return false;
             }
 
@@ -183,6 +185,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
                 }, HighlightBox.kHideBoxSpeed);
                 this.inflated = false;
+                eqnx.emit('highlight/deflate', this.item);
                 box = null;
             };
 
@@ -459,13 +462,26 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         $(document).bind('mousemove click', function (e) {
             clientX = e.clientX;
             clientY = e.clientY;
+            var lastTarget = target;
+            if (lastTarget === undefined) {
+                return; // nothing inflated
+            }
+            var newTarget = e.target;
+            // If mouse hovers over the other element, shut down last target.
+            if (lastTarget != newTarget) {
+                setTimeout(function () {
+                    var box = HighlightBox.getInstance();
+                    box.deflate(extraZoom);
+                }, delay);
+            }
         });
 
         /**
          * Handle keypress event.
          */
+        var target;
         eqnx.on('highlight/animate', function (e) {
-            var target = document.elementFromPoint(clientX, clientY);
+            target = document.elementFromPoint(clientX, clientY);
             var box = HighlightBox.getInstance(target);
             if (!box) return;
 
