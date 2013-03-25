@@ -90,6 +90,11 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			}
 		}
 
+        // hide mouse highlight once highlight box appears
+		eqnx.on('highlight/animate', function (e) {
+		    mh.hide();
+		});
+
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', function(zoom){
 			var was = mh.enabled;
