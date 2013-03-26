@@ -90,11 +90,23 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			}
 		}
 
-        // hide mouse highlight once highlight box appears
+		// todo: count is hack => improve toggling for mouse highlight; use event queue instead.
+		// AK: In the beginning, I used eqnx.on('highlight/inflate') instead
+		// but notification came *after* the HLB inflated and this is not what needed here.
+		var count = 0;
+		// hide mouse highlight once highlight box appears
 		eqnx.on('highlight/animate', function (e) {
-		    // remove mousemove listener from body
-		    $('body').off('mousemove', mh.update);
-		    mh.hide();
+			if (count % 2 === 0) { // deflate
+				// remove mousemove listener from body
+				$('body').off('mousemove', mh.update);
+				mh.hide();
+			} else {
+				if (mh.enabled) {
+					// handle mouse move on body
+					$('body').on('mousemove', mh.update);
+				}
+			}
+			count++;
 		});
 
 		// handle zoom changes to toggle enhancement on/off
