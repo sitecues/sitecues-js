@@ -471,7 +471,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             if (lastTarget != newTarget) {
                 setTimeout(function () {
                     var box = HighlightBox.getInstance();
-                    box.deflate(extraZoom);
+                    if (box) {
+                        box.deflate(extraZoom);
+                    }
                 }, delay);
             }
         });
