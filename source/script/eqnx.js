@@ -28,6 +28,8 @@
 		// to make it work in browser
 		eqnx = this.eqnx = {};
 
+		eqnx.modules = modules;
+
 	// bind an event, specified by a string name, `events`, to a `callback`
 	// function. passing `"*"` will bind the callback to all events fired
 	eqnx.on = function(events, callback, context){
@@ -154,8 +156,9 @@
 				result[index] = modules[name];
 
 				// call callback if finished
-				if (--count === 0 && 'function' === typeof callback)
+				if (--count === 0 && 'function' === typeof callback) {
 					callback.apply(t, result);
+				}
 			}
 		}
 
@@ -196,6 +199,7 @@
 
 	// trigger module loading
 	eqnx.load = function(){
+		
 		var i, l, script;
 
 		// detect env code is running. support of different
@@ -233,3 +237,7 @@
 	}
 
 }).call(this);
+
+// I'm not sure if this is the right place for this, but 
+// it should be done here and not in the page.
+eqnx.use('conf/import','conf','badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor' , 'speech/azure', 'speech');

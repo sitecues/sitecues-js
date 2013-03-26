@@ -5,17 +5,16 @@
 	<head>
 		<title>eqnx simple page</title>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript">
+		<script type="text/javascript">
 		  var _eqnx = _eqnx || [];
-  _eqnx.push(['_setSite', 'XXX']);
-  _eqnx.push(['ttsEnable', 'true']);
-  _eqnx.push(['ttsEngine', 'azure']);
+		  _eqnx.push(['_setSite', '1']);
+		  _eqnx.push(['ttsEnable', 'true']);
 
-  (function() {
-    var eqnxSc = document.createElement('script'); eqnxSc.type = 'text/javascript'; eqnxSc.async = true;
-    eqnxSc.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.equinox.aisquared.com:8000/eqnx.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(eqnxSc, s);
-  })();
+		  (function() {
+		    var eqnxSc = document.createElement('script'); eqnxSc.type = 'text/javascript'; eqnxSc.async = true;
+		    eqnxSc.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.equinox.aisquared.com:8000/eqnx.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(eqnxSc, s);
+		  })();
 
 			// declarate which modules should be used
 
@@ -25,15 +24,47 @@
 
 	<body style="zoom: 1">
 
+		<fieldset>
+			<legend>Speech Events</legend>
+			<button id="enableSpeech">speech/enable</button>
+			<button id="disableSpeech">speech/disable</button>
+			<button id="stopSpeech">speech/stop</button>
+		</fieldset>
+
 		<p id="p1">The Kennet and Avon Canal is a waterway in southern England with an overall length of 87 miles (140 km), made up of two lengths of navigable river linked by a canal. The name is commonly used to refer to the entire length of the navigation rather than solely to the central canal section. From Bristol to Bath the waterway follows the natural course of the River Avon before the canal links it to the River Kennet at Newbury, and from there to Reading on the River Thames. In all, the waterway incorporates more than 100 locks</p>
 
-		<button id="playTTS">Play</button>
+		<fieldset>
+			<legend>Highlight Box Events</legend>
+			<button id="createHlb">hlb/created</button>
+			<button id="readyHlb">hlb/ready</button>
+			<button id="closeHlb">hlb/close</button>
+		</fieldset>
 
 		<script>
-		$("#playTTS").click(function() {
-			console.log(eqnx);
-			eqnx.modules.speech.play($("#p1").text());
+		$("#enableSpeech").click(function() {
+			eqnx.emit("speech/enable");
 		});
+
+		$("#disableSpeech").click(function() {
+			eqnx.emit("speech/disable");
+		});
+
+		$("#stopSpeech").click(function() {
+			eqnx.emit("speech/stop");
+		});
+
+		$("#createHlb").click(function() {
+			eqnx.emit("hlb/created", $("#p1"));
+		});
+
+		$("#readyHlb").click(function() {
+			eqnx.emit("hlb/ready", $("#p1"));
+		});
+
+		$("#closeHlb").click(function() {
+			eqnx.emit("hlb/closed", $("#p1"));
+		});
+
 		</script>
 	</body>
 
