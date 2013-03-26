@@ -77,6 +77,22 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function (extraZoom) {
+                // Correctly compute the viewport
+                var port = util.getViewportDimensions();
+                var totalZoom = util.getTotalZoom(this.item, true);
+                for (prop in port) {
+                    port[prop] /= totalZoom;
+                }
+                var inset = HighlightBox.kMinDistanceFromEdge;
+                port.top += inset /totalZoom;
+                port.bottom -= inset / totalZoom;
+                port.height -= 2 * inset / totalZoom;
+                port.left += inset / totalZoom;
+                port.right -= inset / totalZoom;
+                port.width -= 2 * inset / totalZoom;
+
+                $('<div>').attr('id', 'vp').css($.extend({ backgroundColor: 'pink', zoom: 1, position: 'absolute', opacity: 0.5 }, port)).appendTo($('body'));
+
                 // Prepare clone element as a clone of the scaled highlight box element.
                 var clone = this.item.cloneNode(false),
                     cloneNode = $(clone),
@@ -84,20 +100,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-                var cssUpdate = getNewRectStyle(this.itemNode, util.getCenter(this.item), extraZoom);
+                var center = util.getCenter(this.item);
+                console.log(center.top);
+                var cssUpdate = getNewRectStyle(port, this.itemNode, center, extraZoom);
                 var offsetParent = this.itemNode.offsetParent();
+                var scroll = util.getScrollPosition();
+                // console.log(scroll.top);
 
-                var offset = {};
-                // Elements relative to the root don't need extra margins, use original values instead.
-                if (offsetParent[0].tagName.toLowerCase() === 'html') {
-                    offset.top  = origRectSize.top;
-                    offset.left = origRectSize.left;
-                } else {
-                    offset.top  = cssUpdate.top;
-                    offset.left = cssUpdate.left;
-                }
-
-                var cssBeforeAnimateStyles = $.extend({}, offset, {
+                var cssBeforeAnimateStyles = $.extend({}, {
                     position: 'absolute',
                     overflowY: 'auto',
                     overflowX: 'hidden',
@@ -140,6 +150,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Trigger the background blur effect if there is a highlight box only.
                 backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
+                
                 this.inflated = true;
                 eqnx.emit('highlight/inflate', this.item);
                 return false;
@@ -149,6 +160,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
+                $('#vp').remove();
+                
                 var _this = this;
                 // Get the current element styles.
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -184,6 +197,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         _this.itemNode.attr('style', style);
                     }
                 }, HighlightBox.kHideBoxSpeed);
+                
                 this.inflated = false;
                 eqnx.emit('highlight/deflate', this.item);
                 box = null;
@@ -198,14 +212,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              */
             // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
             // getViewportDimensions() doesn't take into account 'zoom' value(util supports 'transform' value for its calculation).
-            function getNewRectStyle(selector, center, zoom) {
+            function getNewRectStyle(viewport, selector, center, zoom) {
                 // Ensure a zoom exists.
                 zoom = zoom || 1;
                 // Use the proper center.
-                center = {
-                    left: (center.centerX || center.left),
-                    top: (center.centerY || center.top)
-                };
+                var centerLeft = center.left;
+                var centerTop = center.top;
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
@@ -216,12 +228,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     var offsetParent = jElement.offsetParent();
                     var offsetParentPosition = util.getOffset(offsetParent);
                     var offsetParentZoom = util.getTotalZoom(offsetParent);
-                    var elementTotalZoom = offsetParentZoom * zoom;
 
-                    // Determine where we would display the centered and (possibly) zoomed element,
-                    // and what it's dimensions would be.
-                    var centerLeft = center.left;
-                    var centerTop = center.top;
+                    var elementTotalZoom = offsetParentZoom * zoom;
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var width = jElement.outerWidth() * elementTotalZoom;
@@ -229,10 +237,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
-
-                    // Now, determine if the element will fit in the viewport. If not, place the
-                    // element in the viewport, but as close the the original center as possible.
-                    var viewport = util.getViewportDimensions(window._vpi);
 
                     // If we need to change the element's dimensions, so be it. However, explicitly
                     // set the dimensions only if needed.
@@ -252,7 +256,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         }
                     }
 
-                    // Check the width and horizontal positioning.
+                    // Check the height and vertical positioning.
                     if (height > viewport.height) {
                         // Easiest case: fit to height and vertical center of viewport.
                         centerTop = viewport.centerY;
@@ -284,10 +288,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                                   ) / offsetParentZoom;
 
                     // If offset parent is html then no need to do this.
-                    if (offsetParent[0].tagName.toLowerCase() !== 'html') {
-                        cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
-                        cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
-                    }
+                    //if (offsetParent[0].tagName.toLowerCase() !== 'html') {
+                    //    cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
+                    //    cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
+                    //}
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
                     cssUpdates = {
                         left: cssLeft,
@@ -480,7 +484,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             if (!box) return;
 
             if (!isEnabled) {
-               return; // Do nothing if module is disabled
+               //return; // Do nothing if module is disabled
             }
             if (box.getIsInflated()) {
                 box.deflate(extraZoom);
