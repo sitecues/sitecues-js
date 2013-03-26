@@ -8,12 +8,12 @@ eqnx.def('util', function (util, callback) {
         /**
          * Get the cumulative zoom for an element.
          */
-        util.getTotalZoom = function (selector) {
+        util.getTotalZoom = function (selector, andZoom) {
             var _recurse = function (element) {
                 if (!element) {
                     return 1;
                 }
-                var value = getZoom(element);
+                var value = getMagnification(element, andZoom);
                 return (value ? value : 1) * _recurse(element.parentElement);
             };
 
@@ -31,7 +31,7 @@ eqnx.def('util', function (util, callback) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             selector = (selector ? selector : document.body);
-            var zoomStyle = { transformOrigin: '0 0' };
+            var zoomStyle = { transformOrigin: '50% 50%' }; // default
             $(selector).each(function () {
                 zoomStyle.transform = 'scale(' + zoom + ',' + zoom + ')';
                 $(this).css(zoomStyle);
@@ -44,10 +44,9 @@ eqnx.def('util', function (util, callback) {
         util.getMouseCoords = function (e, zoom) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
-            var scrollPosition = this.getScrollPosition();
             return {
-                left: scrollPosition.left + e.clientX / zoom,
-                top:  scrollPosition.top  + e.clientY / zoom
+                left: e.clientX / zoom,
+                top:  e.clientY / zoom
             };
         }
 
@@ -60,12 +59,12 @@ eqnx.def('util', function (util, callback) {
             $(selector).each(function () {
                 var scrollPosition = util.getScrollPosition();
                 var boundingBox = this.getBoundingClientRect();
-                var totalZoom = util.getTotalZoom(this);
+                var totalZoom = util.getTotalZoom(this, true);
                 var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
 
                 result.push({
-                    left: boundingBox.left + scrollPosition.left,
-                    top: boundingBox.top + scrollPosition.top
+                    left: boundingBox.left + scrollPosition.left * totalZoom,
+                    top: boundingBox.top + scrollPosition.top * totalZoom
                 });
             });
             return processResult(result);
@@ -79,11 +78,10 @@ eqnx.def('util', function (util, callback) {
             $(selector).each(function () {
                 var jElement = $(this);
                 var offset = util.getOffset(this);
-                var totalZoom = util.getTotalZoom(this);
 
                 result.push({
-                    left: offset.left + (jElement.outerWidth() * totalZoom / 2),
-                    top: offset.top + (jElement.outerHeight() * totalZoom / 2)
+                    left: offset.left + ((jElement.outerWidth()) / 2),
+                    top: offset.top + ((jElement.outerHeight()) / 2)
                 });
             });
             return processResult(result);
@@ -117,7 +115,7 @@ eqnx.def('util', function (util, callback) {
         util.getViewportDimensions = function (inset) {
             inset = inset || 0;
             var insetX2 = inset * 2;
-            var scrollPos = util.getScrollPosition();
+            var scrollPos = this.getScrollPosition();
             var result = {
                 left: scrollPos.left + inset,
                 top: scrollPos.top + inset,
@@ -133,7 +131,7 @@ eqnx.def('util', function (util, callback) {
         }
 
         /**
-         * Center another element over some other element, zooming the centered element if needed.
+         * Center another element over a provided center, zooming the centered element if needed.
          */
         util.centerOn = function (selector, center, zoom) {
             // Ensure a zoom exists.
@@ -177,8 +175,7 @@ eqnx.def('util', function (util, callback) {
 
                 // If we need to change the element's dimensions, so be it. However, explicitly
                 // set the dimensions only if needed.
-                var newWidth = undefined;
-                var newHeight = undefined;
+                var newWidth, newHeight;
 
                 // Check the width and horizontal positioning.
                 if (width > viewport.width) {
@@ -264,7 +261,7 @@ eqnx.def('util', function (util, callback) {
         //
         ////////////////////////////////////////////////////////////////////////////////
 
-        // Helper method for processing the possibilty of N results in an array.
+        // Helper method for processing the possibility of N results in an array.
         // If the array is empty, return undefined. If the array has one element,
         // return the single result. Otherwise, return the array of results.
         function processResult(array) {
@@ -279,22 +276,24 @@ eqnx.def('util', function (util, callback) {
 
         // Get the zoom from the selected element's transform style.
         var _MATRIX_REGEXP = /matrix\s*\(\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*,\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*\)/i;
-        function getZoom(selector, defaultToOne) {
-            var defaultZoom = (defaultToOne ? '1' : undefined);
-            var zoom = undefined;
+        function getMagnification(selector, andZoom) {
             var jElement = $(selector);
             if (jElement.size()) {
-                var transformStr = jElement.css('transform');
-                if (transformStr) {
+                var transformStr = jElement.css('transform') || 1;
+                var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
+                var result = 1;
+                if (transformStr !== 'none' && transformStr.trim() !== '') {
                     var result = _MATRIX_REGEXP.exec(transformStr);
                     if (result && result.length > 1) {
                         var scaleX = parseFloat(result[1]);
+                        result = scaleX;
                         // There is an issue here... what should we do in the case of skewed scaling?
-                        return scaleX;
+                        // return scaleX;
                     }
                 }
+                result *= zoom;
             }
-            return defaultZoom;
+            return result || '1';
         }
 
         // Done.

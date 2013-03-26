@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 // initialize express application
-var app, root, path, port, express;
+var fs, app, root, path, port, https, express;
+
+// dependencies
+fs = require('fs');
+https = require('https');
 express = require('express');
 app = express();
 
@@ -29,3 +33,14 @@ port = process.env.PORT || process.argv[2] || 8000;
 app.listen(port, function(){
 	console.log('started on http://localhost:' + port + '/');
 });
+
+// if https ontion passed to script
+if (['yes', 'on', 'true'].indexOf(process.argv[3]) >=0){
+	// create https server and start it on 443 port
+	https.createServer({
+		key:	fs.readFileSync('binary/cert/localhost.key'),
+		cert:	fs.readFileSync('binary/cert/localhost.cert')
+	}, app).listen(443, function(){
+		console.log('started on https://localhost/');
+	});
+}

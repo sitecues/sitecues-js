@@ -44,22 +44,23 @@ eqnx.def('zoom', function(zoom, callback){
 		});
 
 		// react on any zoom change
-		conf.get('zoom', function(value){
+		conf.get('zoom', function (value) {
+           
 			if (zoom.native){
 				// if native zoom is supported, change it
 				$('body').css({ zoom: value });
 				eqnx.emit('zoom', value);
 			} else {
-				// native zoom isn't supported, use
-				// css3 transforms scale option
-				$('body').css({
-					'transform':		'scale(' + value + ')',
-					'transform-origin':	'0 0'
-				});
+		        // native zoom isn't supported, use
+		        // css3 transforms scale option
+			    $('body').css({
+			        'transform': 'scale(' + value + ')',
+			        'transform-origin': '0 0'
+			    });
+            }
+		    // notify all about zoom change
+			eqnx.emit('zoom', value);
 
-				// notify all about zoom change
-				eqnx.emit('zoom', value);
-			}
 		});
 
 		// done

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>eBank of North America</title>
+    <link href="//fonts.googleapis.com/css?family=Gentium+Basic:400,700,400italic,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:300italic,400italic,700italic,400,300,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="css/eBank.css"/>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <!--script type="text/javascript" src="/equinox.js?BingAppID=TH057pk4HCmqSBZOgOec3dzP5ph8pbmV44G67SyCNzEkyDLrgPqaD1h39zH3yDFUP"></script-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="/plugins/jquery.color-2.1.1.min.js"></script>
+    <script src="/plugins/jquery.transform2d.min.js"></script>
+    <script src="/eqnx.js"></script>
+	<script>
+		// declarate which modules should be used
+	    eqnx.use('badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor', 'highlight-box', 'mouse-highlight');
+	</script>
+</head>
+<script>
+    function load(link, newBody) {
+        console.log('load');
+        $("#center").load(newBody + ".html");
+        $(link).removeClass("highlightLink");
+    }
+    $(document).ready( function() {
+        $("a").mouseover(function() {
+            $(this).addClass("highlightLink");
+        });
+        $("a").mouseout( function() {
+            $(this).removeClass("highlightLink");
+        });
+        $("a").click( function() {
+            $("#main").load($(this).attr("param") + ".html");
+            $(this).removeClass("highlightLink");
+        });
+        $("#locationInfo").change( function() {
+            thisLocation = $("#locationInfo").val();
+            $("#searchButton").attr("href", "//maps.google.com/maps?q=" + thisLocation + "&hq=banks&hnear=" + thisLocation + "&t=m&z=13");
+        });
+    });
+</script>
+<body>
+<div id="header" class="centerDivs" >
+    <a href="index.html"><img src="images/eBank.png" style="width:20%" /></a>
+    <div style="position: absolute; right: 0; bottom: 0; text-align: right">
+        Connect with us:&nbsp;<img class="socialIcon" src="images/Twitter.png"/>&nbsp;<img class="socialIcon" src="images/Facebook.png"/>
+    </div>
+    <div style="position: absolute; right: 0; top: 0; text-align: right">Search the site:&nbsp;<input type="text" size="30"/><input type="button" value="Search"/></div>
+</div>
+<div id="center" class="centerDivs" style="padding: 10px">
+    <table style="cellpadding:2;">
+        <tr>
+            <td style="vertical-align: top; padding: 0.1em;" >
+                <div class="box" style="background-color:#CFE6F5; padding: 5px">
+                    <p><b>Online&nbsp;Banking</b><br/><small><a href="">Log&nbsp;In</a>&nbsp;|&nbsp;<a href="">Enroll</a>&nbsp;|&nbsp;<a href="">Learn&nbsp;More</a></small></p>
+                    <p><b>Business&nbsp;Services</b><br/><small><a href="">Log In</a>&nbsp;|&nbsp;<a href="">Enroll</a>&nbsp;|&nbsp;<a href="">Learn More</a></small></p>
+                    <p><b>Investments</b><br/><small><a href="">Options</a>&nbsp;|&nbsp;<a href="">Learn More</a></small></p>
+                </div><br/>
+                <div class="box" style="background-color:#FDF3B3; padding: 5px">
+                    <p>
+                        <b>Find a branch:</b><br/><input id="locationInfo" type="text" size="15"/><br/>
+                        <small>Enter a zip code</small></br>
+                        <a id="searchButton" href="#" target="_blank"class="eButton">Search</a>
+                    </p>
+                </div><br/>
+                <div class="box" style="padding: 5px;">
+                    <a param="aboutus">About Us</a><br/>
+                    <!--a param="community">Community</a><br/-->
+                    <a param="support">Support</a><br/>
+                    <a param="careers">Careers</a><br/>
+                </div>
+            </td>
+            <td style="vertical-align: top;">
+                <div id="main" style="padding: 10px">
+                    <span style=""><img width="635px" src="images/banner1.jpg"/></span>
+                    <table>
+                        <tr>
+                            <td>
+                                <h2>Welcome to eBank of North America</h2>
+                                <p id="happy">Does your bank make you happy?</p>
+                                <p>With eBank of North America's <a param="online_learnmore">online banking</a> options, you can find happiness again in managing your finances.  With our easy to use and intuitive interface, banking has never been so simple.</p>
+                                <p>Take a tour of our site and find the best products for:
+                                <ul id="customList">
+                                    <li>Personal banking</li>
+                                    <li>Commercial lending</li>
+                                    <li>Investing</li>
+                                    <li>Online checking</li>
+                                </ul>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <img src="images/happy-woman.png" style="border:1px solid #C0C0C0;" align="right"/>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+
+    </table>
+</div>
+<div class="centerDivs" id="footer" style="display:block">
+    <div style="margin-left: 0.5em; align: left; float: left;">
+        <a param="privacy" class="footerLink">Privacy Policy</a>  |  <a param="fdic" class="footerLink">FDIC Disclosure</a>
+    </div>
+    <div style="margin-right: 0.5em; align:right; float: right;">1-800-EBANK4U</div>
+</div>
+<div class="centerDivs" align="center"><br/><small>Securities and other investment and insurance products are: not a deposit; not FDIC insured; not insured by any federal government agency; <br/>
+    not guaranteed by eBank, N.A. or any of its affiliates; and, may be subject to investment risk, including possible loss of value.</small>
+</div>
+<div class="centerDivs" align="center" style="color:red;"><br/><small><b>eBank, N.A. is not a real bank.</b></small></div>
+</body>
+</html>

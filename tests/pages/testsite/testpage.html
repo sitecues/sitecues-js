@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"-->
+<html>
+<head>
+    <title>Equinox Test Page</title>
+</head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="/eqnx.js"></script>
+<script>
+	// declarate which modules should be used
+	eqnx.use('badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor');
+</script>
+<style>
+    #eq360-header {
+        background: black;
+        color: ghostwhite;
+        position: relative;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 30px;
+        display: none;
+        vertical-align: middle;
+    }
+    p {
+        margin: 10 10 10 10;
+        color: green;
+        font-size: 10pt;
+    }
+</style>
+
+<body>
+<div id="eq360-header" style="margin-top: 5px; margin-bottom: 5;">
+    <img id="closeButton" src="//ai2.s3.amazonaws.com/assets/close.png" style="height: 20px; width: 20px; margin: 5px;"/>
+</div>
+<div align=left>
+    <input name="l"
+           type="text" size="28" maxlength="100" accesskey="l"
+           value="">
+    <select id="whatLang">
+        <option value="en">English</option>
+        <option value="de">German</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="it">Italian</option>
+        <option value="pt">Portuguese</option>
+        <option value="ru">Russian</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+    </select>
+    <input id="whatToSay" type="text" size="100" value="this is a test"/>
+    <input onclick="javascript:sayIt();" type="button" value="Say it"/>
+</div>
+<table border=1px cellpadding=10 cellspacing=0>
+    <tr>
+        <td colspan=2 bgcolor=gray>Artwork by Equinox</td>
+    </tr>
+    <tr>
+        <td rowspan=2 width=400px align=left>
+            <h3>Wings by the Sea (Anna K.)</h3>
+            <p>Grabbing shovels <i>large</i> and small, residents and emergency workers across the Northeast struggled to dig out on Sunday after a gigantic midwinter storm left much of the region buried under drifting snow.</p>
+            <p>City streets resembled <a href="http://www.wachusett.com">ski</a> slopes or mountain passes, with cars and even some houses obscured by a thick blanket of white. More than three feet of snow fell in parts of Connecticut, and more than two feet accumulated on Long Island and in Massachusetts, where the storm caused coastal flooding that forced evacuations.</p>
+            <p>Armies of snowplows and workers with shovels were making slow progress, and many cars remained abandoned along impassable roadways. Anxiety was growing among those unable to escape their homes and neighborhoods.</p>
+        </td>
+        <td>Enter a search term:&nbsp;<input type="text" size="50"/><input type="button" value="Search"/></td>
+    </tr>
+    <tr>
+        <td><img id="theImage" width="300px" height="300px" src="//cs305214.userapi.com/v305214679/3794/0-QXKvWNrtY.jpg"/></td>
+    </tr>
+</table>
+<h5>Tiny text</h5>
+</body>
+<script>
+    $('#theImage').mouseover( function() {
+        $('#eq360-header')
+                .css("top", "-" + $('body').css('margin-top'))
+                .css("left", "-" + $('body').css('margin-left'))
+                .css("width", $(window ).width())
+                .slideDown('slow', function() {
+                    console.log('done slideDown');
+                });
+    });
+    $('#closeButton').click( function() {
+        $('#eq360-header').slideUp('slow', function() {
+            console.log('done slideUp');
+        });
+    });
+    function sayIt() {
+        var whatToSay = document.getElementById("whatToSay" ).value;
+        var whatLang = document.getElementById("whatLang" );
+        var speaker = new RoboVoice('TFpJo58qTd9kwMTi4kfFKXZmoBQuKx-is_5rOvE2VCJbo5E8U66pM8fKUujtOu6Bh');
+        //var speaker = new RoboVoice();
+        speaker.speak(whatToSay, whatLang.options[whatLang.selectedIndex].value);
+    }
+
+</script>
+</html>

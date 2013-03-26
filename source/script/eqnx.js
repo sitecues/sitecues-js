@@ -28,8 +28,6 @@
 		// to make it work in browser
 		eqnx = this.eqnx = {};
 
-		eqnx.modules = modules;
-
 	// bind an event, specified by a string name, `events`, to a `callback`
 	// function. passing `"*"` will bind the callback to all events fired
 	eqnx.on = function(events, callback, context){

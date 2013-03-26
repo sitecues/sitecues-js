@@ -28,7 +28,7 @@ eqnx.def('cursor', function (cursor, callback) {
     eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
         // private variables
         cursor.styleRuleParent = $('head');
-        cursor.isEnabled = cursor.zoomLevel > cursor.kMinCursorZoom;
+        cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
         /**
          * Cursor element takes over the appearance of the mouse cursor.
@@ -91,7 +91,7 @@ eqnx.def('cursor', function (cursor, callback) {
          * Enables/disables the cursor module when needed.
          */
         cursor.toogleState = function () {
-            this.isEnabled = this.zoomLevel > this.kMinCursorZoom;
+            this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
             this.isEnabled ? this.show() : this.hide();
         };
 
@@ -170,7 +170,7 @@ eqnx.def('cursor', function (cursor, callback) {
             } else {
                 // if the rule is not already in DOM
                 if ($('#' + cursor.kCursorHideRuleId).length === 0) {
-                    cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important;}</style>');
+                    cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important; }</style>');
                 }
             }
         }

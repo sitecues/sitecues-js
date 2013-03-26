@@ -1,8 +1,11 @@
+port=8000
+https=off
+
 all:
 	@npm install
 
 run:
-	@./binary/web $(port)
+	@./binary/web $(port) $(https)
 
 build:
 	@mkdir -p target/script
@@ -10,6 +13,7 @@ build:
 		source/script/eqnx.js\
 		source/script/conf.js\
 		source/script/conf/import.js\
+		source/script/conf/localstorage.js\
 		source/script/jquery.js\
 		source/script/ui.js\
 		source/script/geo.js\
@@ -25,4 +29,5 @@ build:
 		source/script/caret/view.js\
 		source/script/caret/coords.js\
 		source/script/caret/classifier.js\
-		source/script/cursor.js
+		source/script/cursor.js\
+		source/script/player.js
