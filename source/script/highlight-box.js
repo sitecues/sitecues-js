@@ -466,9 +466,17 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             if (lastTarget === undefined) {
                 return; // nothing inflated
             }
+            // Check if new target is a child node of the last target.
             var newTarget = e.target;
+            var isChildNode = false;
+            $.each($(newTarget).parents().andSelf(), function (index, element) {
+                if (element == lastTarget) {
+                    isChildNode = true;
+                    return;
+                }
+            })
             // If mouse hovers over the other element, shut down last target.
-            if (lastTarget != newTarget) {
+            if (!isChildNode && lastTarget != newTarget) {
                 setTimeout(function () {
                     var box = HighlightBox.getInstance();
                     if (box) {
