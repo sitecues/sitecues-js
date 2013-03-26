@@ -42,7 +42,7 @@ eqnx.def('conf/import', function(module, callback) {
         } else if (siteId) {
             console.log('Site: ' + siteId);
             _jQuery.ajax({
-                url: 'http://ws.ai2.at/api/config/' + siteId,
+                url: 'http://ws.ai2.at:8080/equinox/api/config/' + siteId,
                 dataType: 'json',
                 async: false,
                 success: function(data, status, xhr) {
