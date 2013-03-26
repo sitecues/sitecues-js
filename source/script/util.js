@@ -31,7 +31,7 @@ eqnx.def('util', function (util, callback) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             selector = (selector ? selector : document.body);
-            var zoomStyle = { transformOrigin: '0 0' };
+            var zoomStyle = { transformOrigin: '50% 50%' }; // default
             $(selector).each(function () {
                 zoomStyle.transform = 'scale(' + zoom + ',' + zoom + ')';
                 $(this).css(zoomStyle);
