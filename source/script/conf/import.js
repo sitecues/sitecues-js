@@ -37,7 +37,9 @@ eqnx.def('conf/import', function(module, callback) {
         }
 
         siteId = conf.get('_setSite');
-        if (siteId) {
+        if(conf.get('remoteConfig') === 'false') {
+            console.log("Remote configuration disabled");
+        } else if (siteId) {
             console.log('Site: ' + siteId);
             _jQuery.ajax({
                 url: 'http://ws.ai2.at/api/config/' + siteId,
