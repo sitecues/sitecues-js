@@ -92,6 +92,8 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
         // hide mouse highlight once highlight box appears
 		eqnx.on('highlight/animate', function (e) {
+		    // remove mousemove listener from body
+		    $('body').off('mousemove', mh.update);
 		    mh.hide();
 		});
 

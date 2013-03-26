@@ -459,31 +459,15 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         })();
 
         var clientX, clientY;
+        /**
+         * Handle nousemove event.
+         */
         $(document).bind('mousemove click', function (e) {
             clientX = e.clientX;
             clientY = e.clientY;
-            var lastTarget = target;
-            if (lastTarget === undefined) {
-                return; // nothing inflated
-            }
-            // Check if new target is a child node of the last target.
-            var newTarget = e.target;
-            var isChildNode = false;
-            $.each($(newTarget).parents().andSelf(), function (index, element) {
-                if (element == lastTarget) {
-                    isChildNode = true;
-                    return;
-                }
-            })
-            // If mouse hovers over the other element, shut down last target.
-            if (!isChildNode && lastTarget != newTarget) {
-                setTimeout(function () {
-                    var box = HighlightBox.getInstance();
-                    if (box) {
-                        box.deflate(extraZoom);
-                    }
-                }, delay);
-            }
+
+            onTargetChange(e.target);
+
         });
 
         /**
@@ -514,6 +498,30 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             zoomLevel = zoomvalue;
             isEnabled = zoomLevel >= kMinHighlightZoom
         });
+
+        // Take care on target change event.
+        function onTargetChange(newTarget) {
+            var box = HighlightBox.getInstance();
+            if (box) { // if something is inflated
+                var lastTarget = box.item;
+
+                if (lastTarget === newTarget) {
+                    return; // Target is not changed.
+                }
+                // Check if new target is a child node of the last target.
+                var isChildNode = false;
+                $.each($(newTarget).parents(), function (index, element) {
+                    if (element === lastTarget) {
+                        isChildNode = true;
+                        return; // Do nothing if the new target is a child node.
+                    }
+                })
+                // If mouse hovers over the other element, shut down last target(current HLB).
+                if (!isChildNode) {
+                    setTimeout(function () { box.deflate(extraZoom); }, delay);
+                }
+            }
+        }
 
         // Done.
         callback();
