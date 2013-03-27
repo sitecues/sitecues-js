@@ -60,11 +60,12 @@ eqnx.def('util', function (util, callback) {
                 var scrollPosition = util.getScrollPosition();
                 var boundingBox = this.getBoundingClientRect();
                 var totalZoom = util.getTotalZoom(this, true);
+
                 var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
 
                 result.push({
-                    left: boundingBox.left + scrollPosition.left * totalZoom,
-                    top: boundingBox.top + scrollPosition.top * totalZoom
+                    left: boundingBox.left + scrollPosition.left/ totalZoom,
+                    top:  boundingBox.top + scrollPosition.top / totalZoom
                 });
             });
             return processResult(result);
