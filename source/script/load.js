@@ -68,7 +68,7 @@ eqnx.def('load', function(load, callback){
 
     // Obtain all script tags, and search util we find our script.
     var scriptSrcUrl = null,
-        scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/equinox\.js'),
+        scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
         scriptTags = document.getElementsByTagName('script');
 
     for (var i = 0; i < scriptTags.length; i++) {
