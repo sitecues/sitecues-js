@@ -70,7 +70,7 @@ eqnx.def('cursor', function (cursor, callback) {
                 })
                 .show();
             }
-            util.setZoom(this.element, this.zoomLevel);
+            util.setZoom(this.element, this.zoomLevel, {x: 0, y: 0});
             eqnx.emit('cursor/show', this.element);
         };
 

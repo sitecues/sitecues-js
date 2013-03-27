@@ -27,11 +27,12 @@ eqnx.def('util', function (util, callback) {
         /**
          * Sets the zoom of an element, with the body being the default element.
          */
-        util.setZoom = function (selector, zoom) {
+        util.setZoom = function (selector, zoom, origin) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             selector = (selector ? selector : document.body);
-            var zoomStyle = { transformOrigin: '50% 50%' }; // default
+            transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%'; // default
+            var zoomStyle = { transformOrigin: transformCenter };
             $(selector).each(function () {
                 zoomStyle.transform = 'scale(' + zoom + ',' + zoom + ')';
                 $(this).css(zoomStyle);
