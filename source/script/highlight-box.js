@@ -51,7 +51,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.kShowBoxSpeed = 200;
             HighlightBox.kHideBoxSpeed = 100;
             HighlightBox.kBoxZindex = cursor.kZindex - 1; // Ensure that cursor is on top, we're above everything else.
-            HighlightBox.kMinDistanceFromEdge = 32;
+            HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
             HighlightBox.kBoxBorderWidth = '1px';
             HighlightBox.kBoxPadding = '2px'; // Give the text a little extra room
             HighlightBox.kBoxBorderRadius = '4px';
@@ -62,9 +62,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.kPlaceHolderClass = 'eq360-box-placeholder';
             // TODO: Expand this array to include all appropriate elements.
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
-
-            // The viewport inset from the window edges.
-            window._vpi = HighlightBox.kMinDistanceFromEdge;
 
             /**
              * Get highlight box isInflated state.
@@ -77,20 +74,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function (extraZoom) {
-                // Correctly compute the viewport
-                var port = util.getViewportDimensions();
-                var totalZoom = util.getTotalZoom(this.item, true);
-                for (prop in port) {
-                    port[prop] /= totalZoom;
-                }
-                var inset = HighlightBox.kMinDistanceFromEdge;
-                port.top += inset / totalZoom;
-                port.bottom -= inset / totalZoom;
-                port.height -= 2 * inset / totalZoom;
-                port.left += inset / totalZoom;
-                port.right -= inset / totalZoom;
-                port.width -= 2 * inset / totalZoom;
-
                 // Prepare clone element as a clone of the scaled highlight box element.
                 var clone = this.item.cloneNode(false),
                     cloneNode = $(clone),
@@ -98,16 +81,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-                var center = util.getCenter(this.item);
-
-                //$('<div>').attr('id', 'vp').css($.extend({ backgroundColor: 'pink', zoom: 1, position: 'absolute', opacity: 0.5 }, port)).appendTo($('body'));
-                //$('<div>').attr('id', 'centX').css({ position: 'absolute', top: center.top, height: '1px', width: '100%', backgroundColor: 'red' }).appendTo($('body'));
-                //$('<div>').attr('id', 'centY').css({ position: 'absolute', top: '0', left: center.left, height: '100%', width: '1px', backgroundColor: 'red' }).appendTo($('body'));
-
-                var cssUpdate = getNewRectStyle(port, this.itemNode, center, extraZoom, totalZoom);
-
-                var offsetParent = this.itemNode.offsetParent();
-                var scroll = util.getScrollPosition();
+                var center    = util.getCenter(this.item);
+                var totalZoom = util.getTotalZoom(this.item, true);
+                var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
                 var cssBeforeAnimateStyles = $.extend({}, {
                     transformOrigin: '50% 50%',
@@ -163,9 +139,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
-                //$('#vp').remove();
-                //$('#centX').remove();
-                //$('#centY').remove();
                 var _this = this;
                 // Get the current element styles.
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -217,12 +190,19 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
             // TODO: do not pass viewport. Instead, calculate it in-place.
             // getViewportDimensions() doesn't take into account 'zoom' value(util supports 'transform' value for its calculation).
-            function getNewRectStyle(viewport, selector, center, zoom, totalZoom) {
+            function getNewRectStyle(selector, center, extraZoom, totalZoom) {
                 // Ensure a zoom exists.
-                zoom = zoom || 1;
+                var extraZoom = extraZoom || 1;
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
+
+                // Correctly compute the viewport.
+                var viewport = util.getViewportDimensions(HighlightBox.kMinDistanceFromEdge);
+                for (prop in viewport) {
+                    viewport[prop] /= totalZoom;
+                }
+
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
@@ -234,7 +214,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     var offsetParentPosition = util.getOffset(offsetParent);
                     var offsetParentZoom = util.getTotalZoom(offsetParent);
 
-                    var elementTotalZoom = totalZoom * zoom;
+                    var elementTotalZoom = totalZoom * extraZoom;
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var width = jElement.outerWidth() * elementTotalZoom;
@@ -276,8 +256,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
 
                     // Reduce the dimensions to a non-zoomed value.
-                    width =  ((newWidth || width) - 3 * elementTotalZoom) / zoom;
-                    height = ((newHeight || height) - 3 * elementTotalZoom) / zoom;
+                    var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
+                    width = ((newWidth || width) - additionalBoxOffset * elementTotalZoom) / extraZoom;
+                    height = ((newHeight || height) - additionalBoxOffset * elementTotalZoom) / extraZoom;
 
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.

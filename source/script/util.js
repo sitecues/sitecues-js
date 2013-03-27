@@ -65,7 +65,7 @@ eqnx.def('util', function (util, callback) {
 
                 result.push({
                     left: boundingBox.left + scrollPosition.left/ totalZoom,
-                    top:  boundingBox.top + scrollPosition.top / totalZoom
+                    top:  boundingBox.top + scrollPosition.top  / totalZoom
                 });
             });
             return processResult(result);
@@ -82,7 +82,7 @@ eqnx.def('util', function (util, callback) {
 
                 result.push({
                     left: offset.left + ((jElement.outerWidth()) / 2),
-                    top: offset.top + ((jElement.outerHeight()) / 2)
+                    top:  offset.top + ((jElement.outerHeight()) / 2)
                 });
             });
             return processResult(result);
