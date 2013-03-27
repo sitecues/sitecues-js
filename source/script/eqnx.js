@@ -14,7 +14,7 @@
 	has = Object.prototype.hasOwnProperty;
 
 	// empty function
-	noop = function(){}
+	noop = function(){};
 
 	// the top-level namespace. all public classes and modules will
 	// be attached to this. exported for both commonjs and the browser
@@ -45,7 +45,7 @@
 			list.tail = tail.next = {};
 		}
 		return this;
-	}
+	};
 
 	// remove one or many callbacks. if `context` is null, removes all callbacks
 	// with that function. if `callback` is null, removes all callbacks for the
@@ -71,7 +71,7 @@
 		}
 
 		return this;
-	}
+	};
 
 	// emit an event, firing all bound callbacks. callbacks are passed the
 	// same arguments as `trigger` is, apart from the event name.
@@ -101,7 +101,7 @@
 		}
 
 		return this;
-	}
+	};
 
 	// define equinox module
 	eqnx.def = function(name, constructor){
@@ -125,7 +125,7 @@
 			eqnx.emit('load/' + name, module).
 				off('load/' + name);
 		});
-	}
+	};
 
 	// load equinox modules
 	eqnx.use = function(){
@@ -158,7 +158,7 @@
 					callback.apply(t, result);
 				}
 			}
-		}
+		};
 
 		// perform all actions in next tick
 		// this needed for correct loading
@@ -193,12 +193,159 @@
 			// load all needed modules
 			load.length && t.load.apply(t, load);
 		}, 0);
-	}
+	};
 
-	// trigger module loading
+    //////////////////////////////////////////////////
+    //
+    //  START: URL Processing Helper Methods
+    //
+    //////////////////////////////////////////////////
+
+    // Parse a URL query into key/value pairs.
+    eqnx.parseUrlQuery = function(queryStr) {
+        var query = {};
+        query.raw = queryStr;
+        query.parameters = {};
+
+        // Parse the query into key/value pairs.
+        var start = 0, end = 0;
+        if (queryStr[start] == '?') {
+            start++;
+        }
+
+        while (start < queryStr.length) {
+            end = queryStr.indexOf('=', start);
+            if (end < 0) {
+                end = queryStr.length;
+            }
+            var key = decodeURIComponent(queryStr.substring(start, end));
+            start = end + 1;
+
+            var value = null;
+            if (start <= queryStr.length) {
+                end = queryStr.indexOf('&', start);
+                if (end < 0) {
+                    end = queryStr.length;
+                }
+                value = decodeURIComponent(queryStr.substring(start, end));
+                start = end + 1;
+            }
+            query.parameters[key] = value;
+        }
+    };
+
+    // Parse a URL into its components.
+    eqnx.parseUrl = function(urlStr) {
+        // Ran across this in a Google search... loved the simplicity of the solution.
+        var url = {};
+        var parser = document.createElement('a');
+        parser.href = urlStr;
+
+        // No one ever wants the hash on a full URL...
+        if (parser.hash) {
+            url.raw = parser.href.substring(parser.href.length - parser.hash.length);
+        } else {
+            url.raw = parser.href;
+        }
+
+        url.protocol = parser.protocol.substring(0, parser.protocol.length - 1);
+        url.hostname = parser.hostname;
+        url.host     = parser.host;
+
+        if (parser.search) {
+            url.query = eqnx.parseUrlQuery(parser.search);
+        } else {
+            url.query = null;
+        }
+
+        // Extract the path and file portion of the pathname.
+        var pathname = parser.pathname;
+        var index = pathname.lastIndexOf('/') + 1;
+        url.path = pathname.substring(0, index);
+        url.file = pathname.substring(index);
+
+        return url;
+    };
+
+    // Obtain all script tags, and search util we find our script.
+    var scriptSrcUrl = null,
+        scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
+        scriptTags = document.getElementsByTagName('script');
+
+    for (var i = 0; i < scriptTags.length; i++) {
+        var match = scriptTags[i].src.match(scriptSrcRegExp);
+        if (match) {
+            scriptSrcUrl = eqnx.parseUrl(match[0]);
+            break;
+        }
+    }
+    // TODO: What if we don't find the base URL?
+
+    // The regular expression for an absolute URL. There is a capturing group for the protocol-relative
+    // portion of the URL.
+    var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
+
+    // Resolve a URL as relative to a base URL.
+    eqnx.resolveUrl = function(urlStr, baseUrl) {
+        var absRegExpResult =  ABSOLUTE_URL_REQEXP.exec(urlStr);
+        if (absRegExpResult) {
+            // We have an absolute URL, with protocol. That's a no-no, so, convert to a
+            // protocol-relative URL.
+            urlStr = absRegExpResult[1];
+        } else if (urlStr.indexOf('//') === 0) {
+            // Protocol-relative No need to modify the URL, as we will inherit the containing page's protocol.
+        } else if (urlStr.indexOf('/') === 0) {
+            // Host-relative URL.
+            urlStr = '//' + baseUrl.host + urlStr;
+        } else {
+            // A directory-relative URL.
+            urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
+        }
+
+        return urlStr;
+    };
+
+    // Resolve a URL as relative to the main script URL.
+    eqnx.resolveEqnxUrl = function(urlStr) {
+        return eqnx.resolveUrl(urlStr, scriptSrcUrl);
+    };
+
+
+    //////////////////////////////////////////////////
+    //
+    //  END: URL Processing Helper Methods
+    //
+    //////////////////////////////////////////////////
+
+    // async script loading
+    eqnx.loadScript = function(url, callback){
+        // Resolve the URL as relative to the library URL.
+        url = eqnx.resolveEqnxUrl(url);
+
+        // create script DOM element
+        var script = document.createElement('script');
+
+        // set proper script type
+        script.type = 'text/javascript';
+
+        // set url
+        script.src = url;
+
+        // enforce async loading
+        script.async = true;
+
+        // add callback to track when it will be loaded
+        script.onload = script.onreadystatechange = callback;
+
+        // add element to head to start loading
+        document.getElementsByTagName('head')[0].appendChild(script);
+    };
+
+
+    // trigger module loading
 	eqnx.load = function(){
 		
-		var i, l, script;
+		var i, l;
 
 		// detect env code is running. support of different
 		// envs needed for testing purposes
@@ -208,11 +355,7 @@
 			// iterate over passed module names
 			for(i=0, l=arguments.length; i<l; i++){
 				// and initiate loading of code for each
-				script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.src = '/' + arguments[i] + '.js';
-				script.async = true;
-				document.getElementsByTagName('head')[0].appendChild(script);
+                eqnx.loadScript(arguments[i] + '.js');
 			}
 		} else {
 			// this is node.js, use require
