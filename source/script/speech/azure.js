@@ -10,7 +10,7 @@ eqnx.def('speech/azure', function(azure, callback) {
         azure.factory = function(hlb) {
         	console.log(conf.get('azureAccessToken').accessToken);
         	var roboVoice = new RoboVoice(conf.get('azureAccessToken').accessToken);
-        	return new AzurePlayer(hlb, roboVoice, conf);
+        	return new AzurePlayer(hlb, roboVoice, conf, _jQuery);
         }
 
     });
@@ -20,12 +20,18 @@ eqnx.def('speech/azure', function(azure, callback) {
 
 });
 
-function AzurePlayer(_hlb, _roboVoice, conf) {
+function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 
-	var hlb=_hlb;
+	var hlb;
+	if(hlb instanceof jQuery) {
+		hlb =_hlb;
+	} else {
+		hlb = _jQuery(_hlb);
+	}
 	var roboVoice = _roboVoice;
 
 	this.play = function() {
+
 		console.log("Playing via azure: " + hlb.text());
 		roboVoice.speak(hlb.text(), "en");
 	}
