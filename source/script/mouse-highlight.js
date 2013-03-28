@@ -8,7 +8,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	mh.delay = 20;
 
 	// depends on jquery, conf and mouse-highlight/picker modules
-	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', function(jquery, conf, picker){
+	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', function($, conf, picker){
 
 		// private variables
 		var timer;

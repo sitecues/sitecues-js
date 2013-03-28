@@ -378,7 +378,3 @@
 	}
 
 }).call(this);
-
-// I'm not sure if this is the right place for this, but 
-// it should be done here and not in the page.
-eqnx.use('conf/import','conf','badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor' , 'speech/azure', 'speech');

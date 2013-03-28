@@ -15,6 +15,7 @@ build:
 		source/script/conf/import.js\
 		source/script/conf/remote.js\
 		source/script/conf/localstorage.js\
+		source/script/use.js\
 		source/script/jquery.js\
 		source/script/ui.js\
 		source/script/geo.js\
