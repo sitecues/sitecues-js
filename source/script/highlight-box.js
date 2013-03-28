@@ -4,7 +4,7 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', function ($, conf, cursor, util, backgroundDimmer) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', 'ui', function ($, conf, cursor, util, backgroundDimmer) {
 
         var box = null; // Current highlight box instance, only work with it.
         var kMinHighlightZoom = 1.5;
