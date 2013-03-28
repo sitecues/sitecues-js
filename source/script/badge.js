@@ -17,15 +17,20 @@ eqnx.def('badge', function(badge, callback){
             .click(function () {
                 eqnx.emit('badge/click', badge.element); // emit event about badge click
             })
+            .hide()
             .appendTo('html');
 
+        // create badge image inside of panel
         badge.element = $('<img>')
             .attr('id', 'eqnx-badge-image')
             .attr('src', '//ai2.s3.amazonaws.com/assets/newlogo.png')
             .appendTo(badge.panel);
 
-        // end
-        callback();
+        // handle image loading
+        badge.element.load(function(){
+            // show badge panel only after image was loaded
+            badge.panel.fadeIn(callback);
+        });
 
     });
 
