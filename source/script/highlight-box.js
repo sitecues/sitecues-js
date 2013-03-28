@@ -85,7 +85,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var totalZoom = util.getTotalZoom(this.item, true);
                 var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
-                var cssBeforeAnimateStyles = $.extend({}, {
+                var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
                     overflowY: 'auto',
