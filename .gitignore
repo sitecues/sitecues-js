@@ -1,3 +1,7 @@
 node_modules
 .DS_Store
 target
+# For now, ignore IntelliJ project files
+eqnx.iws
+eqnx.ipr
+eqnx.iml

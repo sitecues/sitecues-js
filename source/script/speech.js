@@ -147,7 +147,7 @@ eqnx.def('speech', function(speech, callback) {
          */
         speech.getHlbId = function(hlb) {
             if(!hlb) {
-                consolr.log("No hlb!");
+                console.log("No hlb!");
                 return;
             }
             if(hlb instanceof jQuery) {

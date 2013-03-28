@@ -40,9 +40,10 @@ eqnx.def('caret/view', function(view, callback){
 			caretRect.top = caretRect.top + origPos.top;
 
 			// realign caret on zoom out
-			$(target).off('zoomout', function(){
+			$(target).off('zoomout').on('zoomout', function(){
 				view.show(target, zoomLevel);
 			});
+
 			console.log(caretRect);
 			view.renderedCaret.css({
 				'z-index': view.kZindex.toString(),

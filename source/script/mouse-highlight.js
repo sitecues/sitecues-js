@@ -1,8 +1,7 @@
 eqnx.def('mouse-highlight', function(mh, callback){
 
+	// minimum zoom level to enable highlight
 	mh.minzoom = 1.2;
-	mh.speed = 100;
-	mh.color = '#fcecbc';
 
 	// how long mouse ptr needs to pause before we get a new highlight
 	mh.delay = 20;
@@ -22,12 +21,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			if (!element) return;
 
 			// save styles
-			mh.styles = [];
-			element.each(function(index){
-				mh.styles.push(this.getAttribute('style'));
-			}).animate({
-				backgroundColor: mh.color
-			}, mh.speed);
+			element.addClass('eqnx-highlight');
 		}
 
 		// hide mouse highlight
@@ -38,21 +32,14 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			// can't found any element to work with
 			if (!element) return;
 
-			// stop animation
-			element.stop(true, true);
-
 			// reset styles
-			element.each(function(index, element){
-				var style;
-
-				if (style = mh.styles[index])
-					element.setAttribute('style', style)
-				else
-					$(element).removeAttr('style');
-			});
+			element.removeClass('eqnx-highlight');
 		}
 
 		mh.update = function(event){
+			// break if highlight is disabled
+			if (!mh.enabled) return;
+
 			// clear timeout if it was set
 			if (timer) clearTimeout(timer);
 
@@ -90,23 +77,17 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			}
 		}
 
-		// todo: count is hack => improve toggling for mouse highlight; use event queue instead.
-		// AK: In the beginning, I used eqnx.on('highlight/inflate') instead
-		// but notification came *after* the HLB inflated and this is not what needed here.
-		var count = 0;
 		// hide mouse highlight once highlight box appears
-		eqnx.on('highlight/animate', function (e) {
-			if (count % 2 === 0) { // deflate
-				// remove mousemove listener from body
-				$('body').off('mousemove', mh.update);
-				mh.hide();
-			} else {
-				if (mh.enabled) {
-					// handle mouse move on body
-					$('body').on('mousemove', mh.update);
-				}
-			}
-			count++;
+		eqnx.on('hlb/ready hlb/create', function(element){
+			// remove mousemove listener from body
+			$('body').off('mousemove', mh.update);
+			mh.hide($(element));
+		});
+
+		// enable mouse highlight back once highlight box deflates
+		eqnx.on('hlb/closed', function(){
+			// handle mouse move on body
+			$('body').on('mousemove', mh.update);
 		});
 
 		// handle zoom changes to toggle enhancement on/off
