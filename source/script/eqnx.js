@@ -4,6 +4,9 @@
 	var arr, has, noop,
 		eqnx, modules;
 
+	// break if there is eqnx instance on the page
+	if ('eqnx' in window) return;
+
 	// modules container
 	modules = {};
 
@@ -17,16 +20,8 @@
 	noop = function(){};
 
 	// the top-level namespace. all public classes and modules will
-	// be attached to this. exported for both commonjs and the browser
-	if (typeof exports !== 'undefined')
-		// this looks like commonjs/node.js module
-		// export module and define it globally
-		// to make require work correctly
-		eqnx = exports, global.eqnx = eqnx;
-	else
-		// otherwise export eqnx to window
-		// to make it work in browser
-		eqnx = this.eqnx = {};
+	// be attached to this
+	eqnx = this.eqnx = {};
 
 	// bind an event, specified by a string name, `events`, to a `callback`
 	// function. passing `"*"` will bind the callback to all events fired
@@ -341,39 +336,12 @@
         document.getElementsByTagName('head')[0].appendChild(script);
     };
 
-
-    // trigger module loading
+	// trigger module loading
 	eqnx.load = function(){
-		
-		var i, l;
-
-		// detect env code is running. support of different
-		// envs needed for testing purposes
-		if ('object' === typeof window){
-			// this is browser, use async script loading
-
-			// iterate over passed module names
-			for(i=0, l=arguments.length; i<l; i++){
-				// and initiate loading of code for each
-                eqnx.loadScript(arguments[i] + '.js');
-			}
-		} else {
-			// this is node.js, use require
-			arr.slice.call(arguments, 0).
-				// append ./ prefix for each module
-				map(function(a){ return './' + a; }).
-
-				// require each module
-				forEach(function(module){
-					try {
-						// try to require module
-						require(module);
-					} catch(e){
-						// if failed - emit error
-						t.emit('error', e.toString());
-					}
-				});
-			
+		// iterate over passed module names
+		for(var i=0, l=arguments.length; i<l; i++){
+			// and initiate loading of code for each
+			eqnx.loadScript(arguments[i] + '.js');
 		}
 	}
 
