@@ -21,7 +21,6 @@ build:
 		source/script/util.js\
 		source/script/load.js\
 		source/script/style.js\
-
 		source/script/badge.js\
 		source/script/panel.js\
 		source/script/zoom.js\
