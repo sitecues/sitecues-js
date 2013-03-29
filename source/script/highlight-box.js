@@ -131,7 +131,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
                 
                 this.inflated = true;
-                eqnx.emit('highlight/inflate', this.item);
+                console.log("hlb ready");
+                eqnx.emit('hlb/ready', this.item);
                 return false;
             }
 
@@ -176,7 +177,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 }, HighlightBox.kHideBoxSpeed);
                 
                 this.inflated = false;
-                eqnx.emit('highlight/deflate', this.item);
+                eqnx.emit('hlb/closed', this.item);
                 box = null;
             };
 

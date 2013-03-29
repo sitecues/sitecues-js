@@ -35,20 +35,20 @@ eqnx.def('speech', function(speech, callback) {
                 console.log("TTS is disabled");
                 return;
             }
-            if(!hlb || !hlb.attr("id")) {
-                console.log("No hlb ID!");
+            var hlbId = speech.getHlbId(hlb);
+            if(!hlbId) {
+                console.log("No hightlightbox ID!");
                 return;
             }
-            
             //TODO While HLB is a singleton, let's clear out any other players
             speech.stopAll();
 
-            console.log("Initializing player for " + hlb.attr("id"));
+            console.log("Initializing player for " + hlbId);
             var player = speech.factory(hlb);
             if(!player) {
                 console.log("Factory failed to create a player");
             }
-            players[hlb.attr("id")] = player;
+            players[hlbId] = player;
             return player;
         }
 
@@ -74,11 +74,12 @@ eqnx.def('speech', function(speech, callback) {
                 console.log("TTS is disabled");
                 return;
             }
-            if(!hlb || !hlb.attr("id")) {
-                console.log("No hlb ID!");
+            var hlbId = speech.getHlbId(hlb);
+            if(!hlbId) {
+                console.log("No hightlightbox ID!");
                 return;
             }
-            var player = players[hlb.attr("id")];
+            var player = players[hlbId];
             if(!player) {
                 // A player wasn't initialized, so let's do that now
                 console.log("Lazy init of player");
@@ -93,12 +94,13 @@ eqnx.def('speech', function(speech, callback) {
          * or is not playing.
          */
         speech.stop = function(hlb) {
-            if(!hlb || !hlb.attr("id")) {
-                console.log("No hlb ID!");
+            var hlbId = speech.getHlbId(hlb);
+            if(!hlbId) {
+                console.log("No hightlightbox ID!");
                 return;
             }
-            console.log("Stopping " + hlb.attr("id"));
-            var player = players[hlb.attr("id")];
+            console.log("Stopping " + hlbId);
+            var player = players[hlbId];
             if(player) {
                 player.stop();
             } else {
@@ -139,6 +141,28 @@ eqnx.def('speech', function(speech, callback) {
                 callback();
             }
         }
+
+        /**
+         * Returns the ID of the object.  If no ID is found, it will set a random one.
+         */
+        speech.getHlbId = function(hlb) {
+            if(!hlb) {
+                consolr.log("No hlb!");
+                return;
+            }
+            if(hlb instanceof jQuery) {
+                if(!hlb.attr("id")) {
+                    hlb.attr("id", Math.random() + new Date().getTime());
+                }
+                return hlb.attr("id");
+            }
+            // Not a jQuery object
+            if(!hlb.id) {
+                hlb.id = Math.random() + new Date().getTime();
+            }
+            return hlb.id
+        }
+
 
         /*
          * Enables TTS, if possible.

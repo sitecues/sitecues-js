@@ -32,4 +32,5 @@ build:
 		source/script/caret/coords.js\
 		source/script/caret/classifier.js\
 		source/script/cursor.js\
-		source/script/player.js
+		source/script/speech.js\
+		source/script/speech/azure.js
