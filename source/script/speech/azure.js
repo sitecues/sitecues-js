@@ -23,7 +23,7 @@ eqnx.def('speech/azure', function(azure, callback) {
 function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 
 	var hlb;
-	if(hlb instanceof jQuery) {
+	if(hlb instanceof _jQuery) {
 		hlb =_hlb;
 	} else {
 		hlb = _jQuery(_hlb);
