@@ -9,7 +9,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var box = null; // Current highlight box instance, only work with it.
         var kMinHighlightZoom = 1.5;
         var extraZoom = 1.5;
-        var delay = 20;
+
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
         var zoomLevel = conf.get('zoom');
@@ -35,6 +35,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
                 box = this.item;
                 this.itemNode = $(this.item);
+
+                // notify about new hlb
+                eqnx.emit('hlb/create', this.item);
 
                 var computedStyles = getElementComputedStyles(this.item);
                 var offset = util.getOffset(this.item);
@@ -162,22 +165,21 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         notifyZoomInOrOut(_this.itemNode, false);
                         
                     }, 0);
-                });
-                
-                // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
-                var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];
-                setTimeout(function () {
-                    $('.' + HighlightBox.kPlaceHolderClass).remove();
+
+                    // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
+                    var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];                    $('.' + HighlightBox.kPlaceHolderClass).remove();
+
                     backgroundDimmer.removeDimmer();
                     // Wait till animation is finished, then reset animate styles.
                     _this.itemNode.removeAttr('style');
                     if (typeof style !== 'undefined') {
                         _this.itemNode.attr('style', style);
                     }
-                }, HighlightBox.kHideBoxSpeed);
-                
+
+                    eqnx.emit('hlb/closed', _this.item);
+                });
+
                 this.inflated = false;
-                eqnx.emit('hlb/closed', this.item);
                 box = null;
             };
 
@@ -507,9 +509,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         return; // Do nothing if the new target is a child node.
                     }
                 })
+
                 // If mouse hovers over the other element, shut down last target(current HLB).
                 if (!isChildNode) {
-                    setTimeout(function () { box.deflate(extraZoom); }, delay);
+                    box.deflate(extraZoom);
                 }
             }
         }
