@@ -326,7 +326,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              */
             function notifyZoomInOrOut (element, isZoomIn) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
-                element.find('input[type=text]').triggerHandler(zoomHandler);
+                element.triggerHandler(zoomHandler);
             };
 
             /**
