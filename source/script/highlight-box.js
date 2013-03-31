@@ -4,17 +4,82 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color', function ($, conf, cursor, util, backgroundDimmer) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+             function ($, conf, cursor, util, backgroundDimmer) {
 
-        var box = null; // Current highlight box instance, only work with it.
+        // Constants
         var kMinHighlightZoom = 1.5;
         var extraZoom = 1.5;
-
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
-        var zoomLevel = conf.get('zoom');
 
-        var isEnabled = zoomLevel >= kMinHighlightZoom; // if HLB module is enabled
+        // The states that the HLB can be in.
+        // TODO: Convert to state instances.
+        var STATES = highlightBox.STATES = {
+            // The HLB is off. The zoom level of the page is too low to allow for HLB creation.
+            OFF: {
+                id : 0,
+                name : 'off'
+            },
+
+            // The HLB is on, and ready to create HLBs.
+            ON: {
+                id : 1,
+                name : 'on'
+            },
+
+            // The HLB (instance) has been created and is initializing.
+            CREATE: {
+                id : 2,
+                name : 'create'
+            },
+
+            // The HLB (instance) is in the animation phase of inflating.
+            INFLATING: {
+                id : 3,
+                name : 'inflating'
+            },
+
+            // The HLB (instance) is inflated and ready for interaction.
+            READY: {
+                id : 4,
+                name : 'ready'
+            },
+
+            // The HLB (instance) is in the animation of deflating.
+            DEFLATING: {
+                id : 5,
+                name : 'deflating'
+            },
+
+            // The HLB (instance) is closed.
+            CLOSED: {
+                id : 6,
+                name : 'closed'
+            }
+        };
+
+        // The global HLB state. Toggles between on and off. This state is subordinate to the the instance state.
+        // Initially set to null so that the zoom check will trigger an event.
+        var state = null;
+
+        // Update the zoom level of the page, which effects whether or not the HLB is off or on.
+        var updateZoomLevel = function (zl) {
+            var newState = (zl >= kMinHighlightZoom ? STATES.ON : STATES.OFF);
+            if (newState !== state) {
+                state = newState;
+                eqnx.emit('hlb/' + state.name, highlightBox);
+            }
+        };
+
+        // Current highlight box instance, only work with it. There can only be one instance in the system
+        // that is not in the CLOSED state, and that instance will be referenced by 'instance'
+        var instance = null;
+
+        // Returns the state of the highlight box module. If there is no instance, use the global state.
+        var getState = highlightBox.getState = function() {
+            return (instance ? instance.getState() : state);
+        };
 
         // Add easing function for box open animation, to create bounce-back effect
         $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301
@@ -24,16 +89,20 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
         });
 
-        var HighlightBox = (function () {
+        // Performs global clean-up when an instance is closed.
+        var onHighlightBoxClosed = function() {
+            // All we need to do at the current time within the module is remove the instance.
+            instance = null;
+        };
 
+        var HighlightBox = (function () {
             // Initialize.
             function HighlightBox(target) {
-                this.inflated = false;
+                this.state = STATES.CREATE;
                 this.savedCss = [];
                 this.savedStyleAttr = [];
                 this.origRectDimensions = [];
                 this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
-                box = this.item;
                 this.itemNode = $(this.item);
 
                 // notify about new hlb
@@ -67,16 +136,22 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
 
             /**
-             * Get highlight box isInflated state.
+             * Get the state of the highlight box.
              */
-            HighlightBox.prototype.getIsInflated = function () {
-                return this.inflated;
-            }
+            HighlightBox.prototype.getState = function () {
+                return this.state;
+            };
 
             /**
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function (extraZoom) {
+                // Immediately enter the
+                this.state = STATES.INFLATING;
+                eqnx.emit('hlb/inflating', this.item);
+
+                var _this = this;
+
                 // Prepare clone element as a clone of the scaled highlight box element.
                 var clone = this.item.cloneNode(false),
                     cloneNode = $(clone),
@@ -113,37 +188,43 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
                 var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
 
-                // Animate HLB.
-                this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack');
+                // Animate HLB (keep in mind $.animate() is non-blocking).
+                this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+                    // Once the animation completes, set the new state and emit the ready event.
+                    _this.state = STATES.READY;
+                    console.log("hlb ready");
+                    eqnx.emit('hlb/ready', _this.item);
+                });
 
                 // Remove all the attributes from the placeholder(clone) tag.
                 removeAttributes(cloneNode);
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                         .css($.extend({},  currentStyle, {
-                             display: resultDisplay,
-                             visibility: 'hidden',
-                             width: origRectSize.width + 'px',
-                             // Don't set height for inline-block elements(images are exceptions)
-                             // since it is calculated automatically with respect to line-height and other factors.
-                             height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
-                         }));
+                    .css($.extend({},  currentStyle, {
+                        display: resultDisplay,
+                        visibility: 'hidden',
+                        width: origRectSize.width + 'px',
+                        // Don't set height for inline-block elements(images are exceptions)
+                        // since it is calculated automatically with respect to line-height and other factors.
+                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
+                    }));
                 this.itemNode.after(clone);
 
                 // Trigger the background blur effect if there is a highlight box only.
                 backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
-                
-                this.inflated = true;
-                console.log("hlb ready");
-                eqnx.emit('hlb/ready', this.item);
                 return false;
-            }
+            };
 
             /**
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
                 var _this = this;
+
+                // Update state.
+                this.state = STATES.DEFLATING;
+                eqnx.emit('hlb/deflating', _this.item);
+
                 // Get the current element styles.
                 var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1],
@@ -163,11 +244,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
                         notifyZoomInOrOut(_this.itemNode, false);
-                        
                     }, 0);
 
                     // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
-                    var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];                    $('.' + HighlightBox.kPlaceHolderClass).remove();
+                    var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];
+                    $('.' + HighlightBox.kPlaceHolderClass).remove();
 
                     backgroundDimmer.removeDimmer();
                     // Wait till animation is finished, then reset animate styles.
@@ -175,12 +256,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     if (typeof style !== 'undefined') {
                         _this.itemNode.attr('style', style);
                     }
-
+                    // This instance is now officially closed.
+                    _this.state = STATES.CLOSED;
+                    // Call the module method to clean up after close BEFORE calling listeners.
+                    onHighlightBoxClosed();
                     eqnx.emit('hlb/closed', _this.item);
                 });
-
-                this.inflated = false;
-                box = null;
             };
 
             /**
@@ -318,7 +399,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     elementComputedStyles[propertyName] = computedStyles[propertyName];
                 });
                 return elementComputedStyles;
-            };
+            }
 
             /**
              * Notify all inputs if zoom in or out.
@@ -327,7 +408,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             function notifyZoomInOrOut (element, isZoomIn) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
                 element.triggerHandler(zoomHandler);
-            };
+            }
 
             /**
              * We need to correct the display property for certain values such as 'inline' or 'table'.
@@ -350,14 +431,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     correctedDisplay = 'inline-block';
                 }
                 return correctedDisplay;
-            };
+            }
 
             /**
              * Capitalizes the first letter of the string given as an argument.
              */
             function capitaliseFirstLetter(str) {
                 return str.charAt(0).toUpperCase() + str.slice(1);
-            };
+            }
 
             /**
              * Get the background color of highlight box when it appears.
@@ -395,7 +476,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     // Return the existing background color that was specified in the item node
                     return oldBgColor;
                 }
-            };
+            }
 
             /**
              * Remove all the attributes from the DOM element given.
@@ -412,7 +493,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         element.removeAttr(item);
                     });
                 });
-            };
+            }
 
             /**
              * Check if the target is suitable to be used for highlight reading box.
@@ -432,28 +513,25 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         isValid = false;
                         return false;
                     }
-                })
+                });
                 return isValid;
             }
 
             return {
-                // Keep only one instance of highlight box at a time.
                 // Return Highlight if need to support a few instances instead.
-                getInstance: function (target) {
-                    if (!box) {
-                        // Don't return an object if HLB is disabled
-                        if (!isValidTarget(target)) return;
-                        box = new HighlightBox(target);
+                createInstance: function (target) {
+                    // Don't return an instance if the target is ineligible.
+                    if (isValidTarget(target)) {
+                        return new HighlightBox(target);
                     }
-                    return box;
+                    return null;
                 }
             }
-
         })();
 
         var clientX, clientY;
         /**
-         * Handle nousemove event.
+         * Handle mousemove event.
          */
         $(document).bind('mousemove click', function (e) {
             clientX = e.clientX;
@@ -468,17 +546,24 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
          */
         var target;
         eqnx.on('highlight/animate', function (e) {
-            target = document.elementFromPoint(clientX, clientY);
-            var box = HighlightBox.getInstance(target);
-            if (!box) return;
-
-            if (!isEnabled) {
-               //return; // Do nothing if module is disabled
-            }
-            if (box.getIsInflated()) {
-                box.deflate(extraZoom);
-            } else {
-                box.inflate(extraZoom);
+            var currentState = getState();
+            // Do nothing if module is off
+            if (currentState !== STATES.OFF) {
+                if (currentState === STATES.READY) {
+                    // An HLB instance exists and is inflated, so deflate it.
+                    instance.deflate(function() {
+                        // Once the instance is closed, remove the reference.
+                        instance = null;
+                    });
+                } else if (currentState === STATES.ON) {
+                    // There is no current HLB and we can create one, so do just that.
+                    // If the target element is ineligible, the create request may return null.
+                    var target = document.elementFromPoint(clientX, clientY);
+                    instance = HighlightBox.createInstance(target);
+                    if (instance) {
+                        instance.inflate();
+                    }
+                }
             }
 
             return false;
@@ -488,15 +573,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
          * Handle zoom event.
          */
         eqnx.on('zoom', function (zoomvalue) {
-            zoomLevel = zoomvalue;
-            isEnabled = zoomLevel >= kMinHighlightZoom
+            updateZoomLevel(zoomvalue);
         });
 
         // Take care on target change event.
         function onTargetChange(newTarget) {
-            var box = HighlightBox.getInstance();
-            if (box) { // if something is inflated
-                var lastTarget = box.item;
+            if (getState() === STATES.READY) { // if something is ready
+                var lastTarget = instance.item;
 
                 if (lastTarget === newTarget) {
                     return; // Target is not changed.
@@ -504,21 +587,23 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Check if new target is a child node of the last target.
                 var isChildNode = false;
                 $.each($(newTarget).parents(), function (index, element) {
+                    // Do nothing if the new target is a child node.
                     if (element === lastTarget) {
                         isChildNode = true;
-                        return; // Do nothing if the new target is a child node.
                     }
-                })
+                });
 
                 // If mouse hovers over the other element, shut down last target(current HLB).
                 if (!isChildNode) {
-                    box.deflate(extraZoom);
+                    instance.deflate();
                 }
             }
         }
 
+        // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
+        updateZoomLevel(conf.get('zoom'));
+
         // Done.
         callback();
-
     });
 });
