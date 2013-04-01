@@ -15,13 +15,14 @@ build:
 		source/script/conf/localstorage.js\
 		source/script/conf/import.js\
 		source/script/conf/remote.js\
-		source/script/use.js\
+		source/script/conf/server.js\
 		source/script/jquery.js\
+		source/script/jquery/color.js\
+		source/script/jquery/transform2d.js\
 		source/script/ui.js\
-		source/script/geo.js\
-		source/script/util.js\
 		source/script/load.js\
 		source/script/style.js\
+		source/script/util.js\
 		source/script/badge.js\
 		source/script/panel.js\
 		source/script/zoom.js\
@@ -32,5 +33,12 @@ build:
 		source/script/caret/coords.js\
 		source/script/caret/classifier.js\
 		source/script/cursor.js\
+		source/script/highlight-box.js\
+		source/script/background-dimmer.js\
+		source/script/mouse-highlight.js\
+		source/script/mouse-highlight/picker.js\
 		source/script/speech.js\
 		source/script/speech/azure.js
+
+	@mkdir -p target/style
+	@cp source/style/default.css target/style/default.css
