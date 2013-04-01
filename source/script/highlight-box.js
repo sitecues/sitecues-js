@@ -260,6 +260,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     _this.state = STATES.CLOSED;
                     // Call the module method to clean up after close BEFORE calling listeners.
                     onHighlightBoxClosed();
+                    console.log("hlb closed");
                     eqnx.emit('hlb/closed', _this.item);
                 });
             };
