@@ -247,7 +247,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }, 0);
 
                     // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
-                    var style = this.savedStyleAttr && this.savedStyleAttr[this.savedStyleAttr.length - 1];
+                    var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
                     $('.' + HighlightBox.kPlaceHolderClass).remove();
 
                     backgroundDimmer.removeDimmer();
@@ -260,6 +260,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     _this.state = STATES.CLOSED;
                     // Call the module method to clean up after close BEFORE calling listeners.
                     onHighlightBoxClosed();
+                    console.log("hlb closed");
                     eqnx.emit('hlb/closed', _this.item);
                 });
             };
