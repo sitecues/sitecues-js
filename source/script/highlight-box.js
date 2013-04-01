@@ -145,7 +145,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             /**
              * Show a highlight reading box when triggered.
              */
-            HighlightBox.prototype.inflate = function (extraZoom) {
+            HighlightBox.prototype.inflate = function () {
                 // Immediately enter the
                 this.state = STATES.INFLATING;
                 eqnx.emit('hlb/inflating', this.item);
