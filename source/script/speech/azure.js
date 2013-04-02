@@ -569,7 +569,7 @@ function RoboVoice(options) {
 
 	// Private members -------------------------------------
 
-	this._apiUrl = "http://api.microsofttranslator.com/V2/Ajax.svc/";
+	this._apiUrl = "//api.microsofttranslator.com/V2/Ajax.svc/";
 
 	this._doCallback = function(callback) {
 		if (callback) {
