@@ -55,5 +55,5 @@ build:
 	@cp source/style/default.css target/style/default.css
 	
 clean:
-    @rm -rf target
+	@rm -rf target
 
