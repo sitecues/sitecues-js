@@ -45,6 +45,11 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 		roboVoice.stop();
 	}
 
+	this.destroy = function() {
+		console.log("Destroying azure player");
+		this.stop();
+	}
+
 	this.fetchToken = function() {
 		console.log("Token re-fetching not implemented yet");
 	}
@@ -569,7 +574,7 @@ function RoboVoice(options) {
 
 	// Private members -------------------------------------
 
-	this._apiUrl = "http://api.microsofttranslator.com/V2/Ajax.svc/";
+	this._apiUrl = "//api.microsofttranslator.com/V2/Ajax.svc/";
 
 	this._doCallback = function(callback) {
 		if (callback) {
