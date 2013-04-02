@@ -389,7 +389,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              */
             function getElementComputedStyles(element) {
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = [];
-                var computedStyles = element.currentStyle || window.getComputedStyle(element, '');
+                var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
                     propertyParts = currentProperty.split('-');
