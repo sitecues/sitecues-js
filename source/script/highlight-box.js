@@ -121,7 +121,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             // Constants
             HighlightBox.kShowBoxSpeed = 200;
-            HighlightBox.kHideBoxSpeed = 100;
+            HighlightBox.kHideBoxSpeed = 150;
             HighlightBox.kBoxZindex = cursor.kZindex - 1; // Ensure that cursor is on top, we're above everything else.
             HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
             HighlightBox.kBoxBorderWidth = '1px';
@@ -132,6 +132,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.kDefaultBgColor = '#ffffff';
             // Space placeholders prevent content after box from going underneath it.
             HighlightBox.kPlaceHolderClass = 'eq360-box-placeholder';
+            HighlightBox.kPlaceHolderWrapperClass = 'eq360-box-placeholder-wrapper';
             // TODO: Expand this array to include all appropriate elements.
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
 
@@ -163,6 +164,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var totalZoom = util.getTotalZoom(this.item, true);
                 var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
+                // Correct display if necessary.
+                var savedDisplay = currentStyle.display;
+                var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
+                var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
+
+                // Handle table spacing effect on block elements.
+                var parentSpacing = this.handleTableElement();
+ 
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
@@ -171,7 +180,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     width: origRectSize.width,
                     height: 'auto',
                     zIndex: HighlightBox.kBoxZindex.toString(),
-                    border: '0px solid white'
+                    border: '0px solid white',
+                    listStylePosition: 'inside'
                 }),
                 cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')',
@@ -184,10 +194,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
                 });
 
-                var savedDisplay = currentStyle.display;
-                var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
-                var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
-
                 // Animate HLB (keep in mind $.animate() is non-blocking).
                 this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
                     // Once the animation completes, set the new state and emit the ready event.
@@ -198,15 +204,16 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Remove all the attributes from the placeholder(clone) tag.
                 removeAttributes(cloneNode);
+
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
                     .css($.extend({},  currentStyle, {
                         display: resultDisplay,
                         visibility: 'hidden',
-                        width: origRectSize.width + 'px',
+                        width: Math.round(origRectSize.width - parentSpacing) + 'px',
                         // Don't set height for inline-block elements(images are exceptions)
                         // since it is calculated automatically with respect to line-height and other factors.
-                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
+                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? '10px' : origRectSize.height + 'px'
                     }));
                 this.itemNode.after(clone);
 
@@ -240,6 +247,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Deflate the highlight box.
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
+                    // Remove placeholder wrapper element if the table child highlighted.
+                    if ($('.eq360-box-placeholder-wrapper').length > 0) {
+                       $('.eq360-box-placeholder-wrapper')
+                           .children()
+                           .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>"); 
+                    }
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
@@ -264,6 +277,42 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     eqnx.emit('hlb/closed', _this.item);
                 });
             };
+
+
+
+            /*
+             * Table elements require extra work for special cases.
+             */
+            HighlightBox.prototype.handleTableElement = function() {
+                // Handle table spacing effect on block elements.
+                var parentSpacing = 0;
+                var isTableChild = false;
+                this.itemNode.parents().andSelf().each(function () {
+                    if (this.tagName.toLowerCase() === 'table') {
+                         // 'border-spacing' is inherited by its children: <tbody>, <tr>, <td> etc.
+                         // Hence, inner content of <td> is also affected by this extra intent. Since 'border-spacing' value
+                         // is not copied to computed styles for descendants we need to take care of it manually.
+                        parentSpacing = $(this).css('border-spacing');
+                        if (parentSpacing.trim() !== '') {
+                            parentSpacing = parseFloat(parentSpacing.split(' ')[0]);
+                        }
+                        isTableChild = true;
+                        return false;
+                    }
+                })
+                
+                // If table has flexible width then it will be resized according to content's width.
+                // Let's prevent default behaviour by setting a wrapper with the fixed width.
+                if (isTableChild) {
+                    var closest = this.itemNode.closest('td');
+                     // 0.5 because Chrome turns integer value to float by itself; so width = 400px actually is 299.6989599...
+                     // this brnings visual change to underlying content
+                     // todo: think over better way to calculate it
+                    var wrapperWidth = Math.floor($(closest).outerWidth() - parentSpacing - 0.5);
+                    $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "' style='width:" + wrapperWidth +"px' ></div>");
+                }
+                return parentSpacing;
+            }
 
             /**
              * Get the size and position of the current HLB to inflate.
@@ -299,7 +348,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     var offsetParentPosition = util.getOffset(offsetParent);
                     var offsetParentZoom = util.getTotalZoom(offsetParent);
 
-                    var elementTotalZoom = totalZoom * extraZoom;
+                    var elementTotalZoom = extraZoom;
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var width = jElement.outerWidth() * elementTotalZoom;
@@ -342,8 +391,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                     // Reduce the dimensions to a non-zoomed value.
                     var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
-                    width = ((newWidth || width) - additionalBoxOffset * elementTotalZoom) / extraZoom;
-                    height = ((newHeight || height) - additionalBoxOffset * elementTotalZoom) / extraZoom;
+                    width = (newWidth || width) / extraZoom - additionalBoxOffset * totalZoom;
+                    height = (newHeight || height) / extraZoom - additionalBoxOffset * totalZoom;
 
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.

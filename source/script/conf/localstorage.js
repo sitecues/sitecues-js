@@ -4,6 +4,9 @@ eqnx.def('conf/localstorage', function(ls, callback){
 	// break if local storage unsupported by browser
 	if (!localStorage) return callback();
 
+	//Disabling localstorage until TTS can intelligently re-fetch tokens
+	return callback();
+
 	// depends on conf module
 	eqnx.use('conf', function(conf){
 
