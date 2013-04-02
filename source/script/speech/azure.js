@@ -1,7 +1,8 @@
-/*
- * This is the "main" speech library.  It manages all of the events 
- * and requests and should be the only speech component referenced 
- * by other parts of the application.
+/**
+ * This is the library that deals with the Azure (formerly Bing) 
+ * TTS service.  Note that there is a copy of Robovoice embedded
+ * in this file.  It is here because we don't need Robovoice for
+ * anything else and it is unlikely to be updated by the developer.
  */
 eqnx.def('speech/azure', function(azure, callback) {
 
@@ -31,7 +32,10 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 	var roboVoice = _roboVoice;
 
 	this.play = function() {
-
+		if(conf.get('azureAccessToken').expires < new Date().getTime()) {
+			console.log("Token has expired, re-fetching...");
+			this.fetchToken();
+		}
 		console.log("Playing via azure: " + hlb.text());
 		roboVoice.speak(hlb.text(), "en");
 	}
@@ -40,6 +44,11 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 		console.log("Stopping azure player");
 		roboVoice.stop();
 	}
+
+	this.fetchToken = function() {
+		console.log("Token re-fetching not implemented yet");
+	}
+
 }
 
 /*!
