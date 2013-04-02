@@ -32,7 +32,10 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 	var roboVoice = _roboVoice;
 
 	this.play = function() {
-
+		if(conf.get('azureAccessToken').expires < new Date().getTime()) {
+			console.log("Token has expired, re-fetching...");
+			this.fetchToken();
+		}
 		console.log("Playing via azure: " + hlb.text());
 		roboVoice.speak(hlb.text(), "en");
 	}
@@ -41,6 +44,11 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 		console.log("Stopping azure player");
 		roboVoice.stop();
 	}
+
+	this.fetchToken = function() {
+		console.log("Token re-fetching not implemented yet");
+	}
+
 }
 
 /*!
