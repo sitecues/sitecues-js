@@ -190,7 +190,10 @@ eqnx.def('cursor', function (cursor, callback) {
             var element    = $(element);
             var css_cursor = element.css('cursor');
 
-            if (css_cursor === 'auto' || css_cursor === 'default') {
+            if (
+                css_cursor === 'auto' ||
+                css_cursor === 'default'
+            ) {
                 var cursor_elements  = (options.cursor_elements !== null) ? options.cursor_elements : {
                     a:        {
                         cursor: 'pointer'
@@ -229,7 +232,7 @@ eqnx.def('cursor', function (cursor, callback) {
                     var element_tag = cursor_elements[element_tag_name];
                     var selectors   = element_tag.selectors;
 
-                    if (typeof(selectors) !== 'undefined') {
+                    if (typeof selectors !== 'undefined') {
                         for (var key in selectors) {
                             if (element.is(key)) {
                                 return selectors[key];
@@ -241,7 +244,12 @@ eqnx.def('cursor', function (cursor, callback) {
                     }
                 }
             }
-            else if (css_cursor !== 'auto' && css_cursor !== 'default' && css_cursor !== null && typeof(css_cursor) !== 'undefined') {
+            else if (
+                css_cursor !== 'auto' &&
+                css_cursor !== 'default' &&
+                css_cursor !== null &&
+                typeof css_cursor !== 'undefined'
+            ) {
                 return css_cursor;
             }
             else {

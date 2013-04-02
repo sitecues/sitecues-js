@@ -1,19 +1,28 @@
 eqnx.def('keys', function(keys, callback){
+	var extra_event_properties = {
+		'highlight_box': null
+	};
 
 	// shortcut to hasOwnProperty
-	has = Object.prototype.hasOwnProperty;
+	var has = Object.prototype.hasOwnProperty;
 
 	// define key testers
 	keys.test = {
-		'plus':		function(event){ return event.keyCode === 187; },
 		'minus':	function(event){ return event.keyCode === 189; },
+		'plus':		function(event){ return event.keyCode === 187; },
+		'r':		function ( event ) {
+			return ( event.keyCode === 82 );
+		},
 		'space':	function(event){ return event.keyCode === 32; }
 	}
 
 	// define keys map used to bind actions to hotkeys
 	keys.map = {
-		'plus':			{ event: 'zoom/increase' },
 		'minus':		{ event: 'zoom/decrease' },
+		'plus':			{ event: 'zoom/increase' },
+		'r':			{
+			event: 'inverse/toggle'
+		},
 		'space':		{ event: 'highlight/animate', preventDefault: true }
 	}
 
@@ -51,16 +60,20 @@ eqnx.def('keys', function(keys, callback){
 					test = keys.test[parts[i]];
 
 					// collect all checks
-					result &= test && test(event);
+					result = result & (test && test(event));
 				}
 
 				// if all checks passed, handle key
-				if (result) return keys.handle(keys.map[key], event);
+				if (result) return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
 			}
-		}
+		};
 
 		// bind key hook to window
 		$(window).on('keydown', keys.hook);
+
+		eqnx.on( 'hlb/ready', function ( data ) {
+			extra_event_properties.highlight_box = $( data );
+		} );
 
 		// done
 		callback();
