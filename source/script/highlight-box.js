@@ -121,7 +121,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             // Constants
             HighlightBox.kShowBoxSpeed = 200;
-            HighlightBox.kHideBoxSpeed = 100;
+            HighlightBox.kHideBoxSpeed = 150;
             HighlightBox.kBoxZindex = cursor.kZindex - 1; // Ensure that cursor is on top, we're above everything else.
             HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
             HighlightBox.kBoxBorderWidth = '1px';
@@ -255,7 +255,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 }
 
                 // Deflate the highlight box.
-                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
+                this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed, function () {
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
