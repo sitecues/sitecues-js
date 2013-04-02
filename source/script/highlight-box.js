@@ -184,10 +184,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
                 });
 
-                var savedDisplay = currentStyle.display;
-                var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
-                var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
-
                 // Animate HLB (keep in mind $.animate() is non-blocking).
                 this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
                     // Once the animation completes, set the new state and emit the ready event.
@@ -198,12 +194,31 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Remove all the attributes from the placeholder(clone) tag.
                 removeAttributes(cloneNode);
+                var savedDisplay = currentStyle.display;
+                var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
+                var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
+
+                // Again, make sure the element is processed correctly if it is a table.
+                var parentSpacing = 0;
+                this.itemNode.parents().andSelf().each(function () {
+                    if (this.tagName.toLowerCase() === 'table') {
+                         // 'border-spacing' is inherited by its children: <tbody>, <tr>, <td> etc.
+                         // Hence, inner content of <td> is also affected by this extra intent. Since 'border-spacing' value
+                         // is not copied to computed styles for descendants we need to take care of it manually.
+                        parentSpacing = $(this).css('border-spacing');
+                        if (parentSpacing.trim() !== '') {
+                            parentSpacing = parseFloat(parentSpacing.split(' ')[0]);
+                        }
+                        return false;
+                    }
+                })
+
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
                     .css($.extend({},  currentStyle, {
                         display: resultDisplay,
                         visibility: 'hidden',
-                        width: origRectSize.width + 'px',
+                        width: origRectSize.width - parentSpacing + 'px',
                         // Don't set height for inline-block elements(images are exceptions)
                         // since it is calculated automatically with respect to line-height and other factors.
                         height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
