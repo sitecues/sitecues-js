@@ -171,7 +171,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     width: origRectSize.width,
                     height: 'auto',
                     zIndex: HighlightBox.kBoxZindex.toString(),
-                    border: '0px solid white'
+                    border: '0px solid white',
+                    listStylePosition: 'inside'
                 }),
                 cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')',
@@ -314,7 +315,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     var offsetParentPosition = util.getOffset(offsetParent);
                     var offsetParentZoom = util.getTotalZoom(offsetParent);
 
-                    var elementTotalZoom = totalZoom * extraZoom;
+                    var elementTotalZoom = extraZoom;
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var width = jElement.outerWidth() * elementTotalZoom;
@@ -357,8 +358,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                     // Reduce the dimensions to a non-zoomed value.
                     var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
-                    width = ((newWidth || width) - additionalBoxOffset * elementTotalZoom) / extraZoom;
-                    height = ((newHeight || height) - additionalBoxOffset * elementTotalZoom) / extraZoom;
+                    width = (newWidth || width) / extraZoom - additionalBoxOffset * totalZoom;
+                    height = (newHeight || height) / extraZoom - additionalBoxOffset * totalZoom;
 
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.
