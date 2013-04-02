@@ -1,4 +1,12 @@
+# Parameters.
 dev=false
+https=off
+min=true
+uglifyjs_args=
+port=8000
+lint=false
+
+# Production files (combine all modules into one).
 files=\
 	source/script/eqnx.js \
 	source/script/conf.js\
@@ -29,44 +37,57 @@ files=\
 	source/script/mouse-highlight/picker.js \
 	source/script/speech.js \
 	source/script/speech/azure.js
-https=off
-min=true
-args=
-port=8000
 
+# Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/script/eqnx.js source/script/use.js
+files=source/script/eqnx.js source/script/use.js
 endif
 
-ifeq ($(min), false)
-	args=-b
-endif
-
+# TARGET: all
+# 	Run all targets.
 all:
 	@npm install
 
-build: lint process
+# TARGET: build
+# 	Build the compressed file and, optionally, run gjslint.
+ifeq ($(lint), true)
+_build_lint_dep:=lint
+else
+_build_lint_dep:=.no-lint-on-build
+endif
 
-build-no-lint: process
+ifeq ($(min), false)
+uglifyjs_args+=-b
+endif
 
-clean:
-	@echo "Cleaning started."
-	@rm -fr target
-	@echo "Cleaning completed."
-
-lint:
-	@echo "Linting started."
-	@gjslint --nojsdoc -r source/script
-	@echo "Linting completed."
-
-process:
-	@echo "Processing started."
+build: $(_build_lint_dep)
 	@mkdir -p target/script
-	@uglifyjs $(args) -o target/script/equinox.js --source-map target/script/equinox.js.map --source-map-url /equinox.js.map $(files)
+	@uglifyjs $(uglifyjs_args) -o target/script/equinox.js --source-map target/script/equinox.js.map --source-map-url /equinox.js.map $(files)
 	@mkdir -p target/style
 	@cp source/style/default.css target/style/default.css
-	@echo "Processing completed."
+
+# TARGET: lint
+# 	Run gjslint on the JavaScript source.
+lint:
+	@gjslint --nojsdoc -r source/script
+
+# HIDDEN TARGET: .no-lint-on-build
+# 	Alternate target when not linting during build.
+.no-lint-on-build:
+	@echo "Linting disabled on build!"
+
+# TARGET: clean
+# 	Clean the target directory.
+clean:
+	@rm -fr target
+
+# TARGET: run
+# 	Run the web server, giving access to the library and test pages.
+ifeq ($(https), on)
+port:=80
+endif
 
 run:
 	@echo "Running."
 	@./binary/web $(port) $(https)
+
