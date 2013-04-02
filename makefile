@@ -53,3 +53,7 @@ build:
 
 	@mkdir -p target/style
 	@cp source/style/default.css target/style/default.css
+	
+clean:
+    @rm -rf target
+
