@@ -1,6 +1,6 @@
-eqnx.def( 'inverse', function ( inverse, callback ) {
+eqnx.def( 'invert', function ( invert, callback ) {
     eqnx.use( 'highlight-box', 'jquery', function ( highlight_box, $ ) {
-        inverse.STATES = {
+        invert.STATES = {
             OFF: {
                 id:   0,
                 name: 'off'
@@ -18,7 +18,7 @@ eqnx.def( 'inverse', function ( inverse, callback ) {
         };
 
         var
-            STATES            = inverse.STATES,
+            STATES            = invert.STATES,
             css_invert_on     = {
                 '-webkit-filter': 'invert(100%)'
             },
@@ -43,7 +43,7 @@ eqnx.def( 'inverse', function ( inverse, callback ) {
 
                 dom_highlight_box = $( event.highlight_box );
 
-                console.log( ( highlight_box.getState() ).name );
+                // console.log( ( highlight_box.getState() ).name );
 
                 switch ( highlight_box_state ) {
                     case highlight_box_states.READY:
