@@ -45,6 +45,11 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 		roboVoice.stop();
 	}
 
+	this.destroy = function() {
+		console.log("Destroying azure player");
+		this.stop();
+	}
+
 	this.fetchToken = function() {
 		console.log("Token re-fetching not implemented yet");
 	}

@@ -6,10 +6,11 @@
 
 eqnx.def('speech', function(speech, callback) {
 
-    eqnx.use('jquery', 'conf', 'util', 'speech/azure', function(_jQuery, conf, util, _azure) {
+    eqnx.use('jquery', 'conf', 'util', 'speech/azure', 'speech/ivona', function(_jQuery, conf, util, _azure, _ivona) {
       
         var players = {};
         var azure = _azure;
+        var ivona = _ivona;
         var jQuery=_jQuery;
 
         // console.log(robovoice);
@@ -41,7 +42,7 @@ eqnx.def('speech', function(speech, callback) {
                 return;
             }
             //TODO While HLB is a singleton, let's clear out any other players
-            speech.stopAll();
+            speech.destroyAll();
 
             console.log("Initializing player for " + hlbId);
             var player = speech.factory(hlb);
@@ -55,7 +56,9 @@ eqnx.def('speech', function(speech, callback) {
         speech.factory = function(hlb) {
             // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
             if (ttsEngine === "azure") {
-                    return azure.factory(hlb);
+               return azure.factory(hlb);
+            } else if (ttsEngine === "ivona") {
+               return ivona.factory(hlb);
             } else {
                 // No matching plugins, disable TTS
                 console.log("No engine configured!");
@@ -119,6 +122,16 @@ eqnx.def('speech', function(speech, callback) {
         }
 
         /*
+         * Iterates through all of the players and destroys them.
+         */
+        speech.destroyAll = function() {
+            console.log("Stopping all players");
+            jQuery.each(players, function(key, value) {
+                setTimeout(value.destroy(),5);
+            });
+        }
+
+        /*
          * Enables TTS, invokes callback with no args
          */
         speech.enable = function(callback) {
@@ -152,13 +165,13 @@ eqnx.def('speech', function(speech, callback) {
             }
             if(hlb instanceof jQuery) {
                 if(!hlb.attr("id")) {
-                    hlb.attr("id", Math.random() + new Date().getTime());
+                    hlb.attr("id", Math.round((Math.random() + new Date().getTime()) * 1000));
                 }
                 return hlb.attr("id");
             }
             // Not a jQuery object
             if(!hlb.id) {
-                hlb.id = Math.random() + new Date().getTime();
+                hlb.id = Math.round((Math.random() + new Date().getTime() * 1000));
             }
             return hlb.id
         }
