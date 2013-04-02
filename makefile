@@ -36,7 +36,7 @@ files=\
 	source/script/mouse-highlight.js \
 	source/script/mouse-highlight/picker.js \
 	source/script/speech.js \
-	source/script/speech/azure.js
+	source/script/speech/azure.js \
 	source/script/invert.js
 
 # Developement files (load modules separately).
