@@ -23,4 +23,4 @@ Name | Options | Default | Description
 Name | Options | Default | Description
 --- | --- | --- | ---
 `https` | `on`,`off` | `off` | If `on`, HTTPS will be turned on. HTTPS listens on port `443`. Note: _Requires **root** permissions_.
-`port` | {number} | 8000 | TCP port number the server should listen on. Note: _Any TCP port number lower than `1024` requires **root** permissions_.
+`port` | {number} | `8000` | TCP port number the server should listen on. Note: _Any TCP port number lower than `1024` requires **root** permissions_.
