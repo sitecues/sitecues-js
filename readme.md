@@ -1,13 +1,65 @@
-# Equinox
+# SiteCues.
 
-## Build & Run
+It is required that **Node** and **NPM** be installed on your machine. Check [http://nodejs.org](http://nodejs.org/download/) to get the needed binaries for you system.
 
-For building you require **node.js** with **npm** to be installed on your machine. Check [nodejs.org](http://nodejs.org/download/) to get needed binaries for you system.
+Execute `make clean` to prepare for the build.
 
-To **build** project, execute following command in terminal/console: `make`. This will load all dependencies.
+Execute `make` to set up all the NPM dependencies.
 
-To create bundle with all modules execute `make build`. This will generate minified equinox.js file with all modules at `target/script`.
+Execute `make build` to launch the build process.
 
-To **run** project, execute following command in terminal/console: `make run`. This will run HTTP server to serve project files at [localhost:8000](http://localhost:8000/). The default port is 8000, but you can specify any port (port numbers below 1024 will require **sudo**). For example `make run port=7070` will start HTTP server on port *7070*, so you can reach it at [localhost:7070](http://localhost:7070/). If you try to start server on already used port, you'll get **listen EACCES** error.
+Execute `make run` to launch the server for interaction.
 
-To **run** https server execute `sudo make run https=on`. This will run both http server on default (or specified by `port` param) port and https server on 463 port [https://localhost](https://localhost/). 
+## `make build` flags.
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Options</th>
+        <th>Default</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>dev</code></td>
+        <td><code>true</code>&nbsp;|&nbsp;<code>false</code></td>
+
+        <td><code>false</code></td>
+        <td>If <code>true</code>, development mode will be turned on.</td>
+    </tr>
+    <tr>
+        <td><code>lint</code></td>
+        <td><code>true</code>&nbsp;|&nbsp;<code>false</code></td>
+
+        <td><code>false</code></td>
+        <td>If <code>true</code>, the linting process will launch when the build process is started.</td>
+    </tr>
+    <tr>
+        <td><code>min</code></td>
+        <td><code>true</code>&nbsp;|&nbsp;<code>false</code></td>
+        <td><code>true</code></td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+## `make run` flags.
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Options</th>
+        <th>Default</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>https</code></td>
+        <td><code>on</code>&nbsp;|&nbsp;<code>off</code></td>
+        <td><code>off</code></td>
+        <td>If <code>on</code>, HTTPS will be turned on. HTTPS listens on port <code>443</code>. Note: <em>Requires <u><strong>root</strong></u> permissions</em>.</td>
+    </tr>
+    <tr>
+        <td><code>port</code></td>
+        <td>{number}</td>
+        <td><code>8000</code></td>
+        <td>TCP port number the server should listen on. Note: <em>Any TCP port number lower than <code>1024</code> requires <u><strong>root</strong></u> permissions</em>.</td>
+    </tr>
+</table>
