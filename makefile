@@ -1,10 +1,5 @@
 # Parameters.
 dev=false
-https=off
-min=true
-uglifyjs_args=
-port=8000
-lint=false
 
 # Production files (combine all modules into one).
 files=\
@@ -39,55 +34,73 @@ files=\
 	source/script/speech/azure.js \
 	source/script/invert.js
 
+https=off
+lint=false
+min=true
+port=8000
+uglifyjs-args=
+
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-files=source/script/eqnx.js source/script/use.js
+	files=source/script/eqnx.js source/script/use.js
 endif
 
-# TARGET: all
-# 	Run all targets.
-all:
-	@npm install
-
-# TARGET: build
-# 	Build the compressed file and, optionally, run gjslint.
 ifeq ($(lint), true)
-_build_lint_dep:=lint
+	_build_lint_dep:=lint
 else
-_build_lint_dep:=.no-lint-on-build
+	_build_lint_dep:=.no-lint-on-build
 endif
 
 ifeq ($(min), false)
-uglifyjs_args+=-b
+	uglifyjs-args+=-b
 endif
 
+ifeq ($(https), on)
+	port:=80
+endif
+
+# HIDDEN TARGET: .no-lint-on-build
+# Alternate target when not linting during build.
+.no-lint-on-build:
+	@echo "Linting disabled on build!"
+
+# TARGET: all
+# Run all targets.
+all: deps
+
+# TARGET: build
+# Build the compressed file and, optionally, run gjslint.
 build: $(_build_lint_dep)
+	@echo "Building started."
 	@mkdir -p target/script
-	@uglifyjs $(uglifyjs_args) -o target/script/equinox.js --source-map target/script/equinox.js.map --source-map-url /equinox.js.map $(files)
+	@uglifyjs $(uglifyjs-args) -o target/script/equinox.js --source-map target/script/equinox.js.map --source-map-url /equinox.js.map $(files)
 	@mkdir -p target/style
 	@cp source/style/default.css target/style/default.css
+	@echo "Building completed."
+
+# TARGET: clean
+# Clean the target directory.
+clean:
+	@echo "Cleaning started."
+	@rm -fr node_modules target
+	@echo "Cleaning completed."
+
+# TARGET: deps
+# Set up the dependencies.
+deps:
+	@echo "Setting up dependencies started."
+	@npm install
+	@echo "Setting up dependencies completed."
 
 # TARGET: lint
 # 	Run gjslint on the JavaScript source.
 lint:
+	@echo "Linting started."
 	@gjslint --nojsdoc -r source/script
-
-# HIDDEN TARGET: .no-lint-on-build
-# 	Alternate target when not linting during build.
-.no-lint-on-build:
-	@echo "Linting disabled on build!"
-
-# TARGET: clean
-# 	Clean the target directory.
-clean:
-	@rm -fr target
+	@echo "Linting completed."
 
 # TARGET: run
-# 	Run the web server, giving access to the library and test pages.
-ifeq ($(https), on)
-port:=80
-endif
-
+# Run the web server, giving access to the library and test pages.
 run:
 	@echo "Running."
 	@./binary/web $(port) $(https)
