@@ -1,4 +1,4 @@
-# SiteCues.
+# SiteCues
 
 It is required that **Node** and **NPM** be installed on your machine. Check [http://nodejs.org](http://nodejs.org/download/) to get the needed binaries for you system.
 
@@ -10,7 +10,7 @@ Execute `make build` to launch the build process.
 
 Execute `make run` to launch the server for interaction.
 
-## `make build` flags.
+## `make build` flags:
 
 Name | Options | Default | Description
 --- | --- | --- | ---
@@ -18,7 +18,7 @@ Name | Options | Default | Description
 `lint` | `true`,`false` | `false` | If `true`, the linting process will launch when the build process is started.
 `min` | `true`,`false` | `true` |
 
-## `make run` flags.
+## `make run` flags:
 
 Name | Options | Default | Description
 --- | --- | --- | ---
