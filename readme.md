@@ -14,13 +14,13 @@ Execute `make run` to launch the server for interaction.
 
 Name | Options | Default | Description
 --- | --- | --- | ---
-`dev` | `true` \| `false` | `false` | If `true`, development mode will be turned on.
-`lint` | `true` \| `false` | `false` | If `true`, the linting process will launch when the build process is started.
-`min` | `true` \| `false` | `true` |
+`dev` | `true`,`false` | `false` | If `true`, development mode will be turned on.
+`lint` | `true`,`false` | `false` | If `true`, the linting process will launch when the build process is started.
+`min` | `true`,`false` | `true` |
 
 ## `make run` flags.
 
 Name | Options | Default | Description
 --- | --- | --- | ---
-`https` | `on` \| `off` | `off` | If `on`, HTTPS will be turned on. HTTPS listens on port `443`. Note: _Requires **root** permissions_.
+`https` | `on`,`off` | `off` | If `on`, HTTPS will be turned on. HTTPS listens on port `443`. Note: _Requires **root** permissions_.
 `port` | {number} | 8000 | TCP port number the server should listen on. Note: _Any TCP port number lower than `1024` requires **root** permissions_.
