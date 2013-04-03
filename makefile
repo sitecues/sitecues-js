@@ -88,9 +88,9 @@ clean:
 # TARGET: deps
 # Set up the dependencies.
 deps:
-	@echo "Setting up dependencies started."
+	@echo "Dependency setup started."
 	@npm install
-	@echo "Setting up dependencies completed."
+	@echo "Dependency setup completed."
 
 # TARGET: lint
 # 	Run gjslint on the JavaScript source.

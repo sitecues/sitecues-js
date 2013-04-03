@@ -1,13 +1,13 @@
 /**
- * This is the "main" speech library.  It manages all of the events 
- * and requests and should be the only speech component referenced 
+ * This is the "main" speech library.  It manages all of the events
+ * and requests and should be the only speech component referenced
  * by other parts of the application.
  */
 
 eqnx.def('speech', function(speech, callback) {
 
     eqnx.use('jquery', 'conf', 'util', 'speech/azure', 'speech/ivona', function(_jQuery, conf, util, _azure, _ivona) {
-      
+
         var players = {};
         var azure = _azure;
         var ivona = _ivona;
@@ -69,7 +69,7 @@ eqnx.def('speech', function(speech, callback) {
         /*
          * Play any piece of text.
          *
-         * Note: When we start splitting text, that should happen in here 
+         * Note: When we start splitting text, that should happen in here
          * as it may be implementation-specific.
          */
         speech.play = function(hlb) {
@@ -193,11 +193,11 @@ eqnx.def('speech', function(speech, callback) {
         eqnx.on('speech/stop', speech.stopAll);
 
         /*
-         * A highlight box has been requested.  This will create the player 
+         * A highlight box has been requested.  This will create the player
          * if necessary, but will not play anything.
          */
-        eqnx.on('hlb/created', speech.initPlayer);
-        
+        eqnx.on('hlb/create', speech.initPlayer);
+
         /*
          * A highlight box is ready to play.  If no player has been initialized,
          * this will do that first and then begin playing.
@@ -205,11 +205,11 @@ eqnx.def('speech', function(speech, callback) {
         eqnx.on('hlb/ready', speech.play);
 
         /*
-         * A highlight box was closed.  Stop/abort/dispose of the player 
+         * A highlight box was closed.  Stop/abort/dispose of the player
          * attached to it.
          */
         eqnx.on('hlb/closed', speech.stop);
-        
+
     });
 
     // end

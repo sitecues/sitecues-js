@@ -43,10 +43,12 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                 dom_highlight_box = $( event.highlight_box );
 
-                // console.log( ( highlight_box.getState() ).name );
-
                 switch ( highlight_box_state ) {
-                    case highlight_box_states.READY:
+                    case (
+                        highlight_box_states.READY ||
+                        highlight_box_states.INFLATING ||
+                        highlight_box_states.CREATE
+                    ):
                         switch ( current_state ) {
                             case STATES.OFF:
                                 $( dom_highlight_box ).css( css_invert_on );
@@ -70,7 +72,10 @@ eqnx.def( 'invert', function ( invert, callback ) {
                         }
 
                         break;
-                    case ( highlight_box_states.ON || highlight_box_states.CLOSED ):
+                    case (
+                        highlight_box_states.ON ||
+                        highlight_box_states.CLOSED
+                    ):
                         switch ( current_state ) {
                             case STATES.OFF:
                                 $( dom_html ).css( css_invert_on );
@@ -85,6 +90,12 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                                 break;
                         }
+
+                        break;
+                    case highlight_box_states.OFF:
+                        break;
+                    case highlight_box_states.DEFLATING:
+                        current_state = STATES.OFF;
 
                         break;
                     // default:
