@@ -20,10 +20,10 @@ app.use(express.logger());
 // setup paths to serve static files from
 // use relative path from binary to provide
 // robust way for finding files
-app.use(express.static(path.join(root, '../target/script')));
-app.use(express.static(path.join(root, '../target/style')));
 app.use(express.static(path.join(root, '../source/script')));
 app.use(express.static(path.join(root, '../source/style')));
+app.use(express.static(path.join(root, '../target/script')));
+app.use(express.static(path.join(root, '../target/style')));
 app.use(express.static(path.join(root, '../tests/pages')));
 
 // detect what port number use for server
@@ -31,7 +31,7 @@ port = process.env.PORT || process.argv[2] || 8000;
 
 // start http server (express app) on specified port
 app.listen(port, function(){
-	console.log('started on http://localhost:' + port + '/');
+	console.log('Listening at "http://localhost:' + port + '/".');
 });
 
 // if https ontion passed to script
@@ -41,6 +41,6 @@ if (['yes', 'on', 'true'].indexOf(process.argv[3]) >=0){
 		key:	fs.readFileSync('binary/cert/localhost.key'),
 		cert:	fs.readFileSync('binary/cert/localhost.cert')
 	}, app).listen(443, function(){
-		console.log('started on https://localhost/');
+		console.log('Listening at "https://localhost/".');
 	});
 }
