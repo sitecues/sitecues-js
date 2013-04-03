@@ -5,7 +5,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
                 id:   0,
                 name: 'off'
             },
-            ON: {
+            ON:  {
                 HIGHLIGHT_BOX: {
                     id:   1,
                     name: 'on.highlight_box'
@@ -36,7 +36,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
                 event.ctrlKey ||
                 event.metaKey
             ) ) {
-                console.log( 'Invert state before: ' + current_state.name + '.');
+                console.log( 'Invert state before: [' + current_state.name + '].');
 
                 var
                     highlight_box_state   = highlight_box.getState(),
@@ -99,7 +99,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
                     } );
                 }
 
-                console.log( 'Invert state after: ' + current_state.name + '.');
+                console.log( 'Invert state after: [' + current_state.name + '].');
             }
         } );
 
