@@ -66,7 +66,7 @@ endif
 
 # TARGET: all
 # Run all targets.
-all: clean deps build run
+all: clean deps build
 
 # TARGET: build
 # Build the compressed file and, optionally, run gjslint.

@@ -10,7 +10,7 @@ Execute `make build` to launch the build process.
 
 Execute `make run` to launch the server for interaction.
 
-It is also possible to execute just `make` & the full command `make clean deps build run` will be executed automatically. _It is still possible to pass in the flags. They will just work as expected._
+It is also possible to execute just `make` & the full command `make clean deps build` will be executed automatically, then just execute `make run` as usual. _It is still possible to pass in the flags. They will work as expected._
 
 ## `make build` flags:
 
