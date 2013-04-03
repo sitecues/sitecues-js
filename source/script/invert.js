@@ -36,6 +36,8 @@ eqnx.def( 'invert', function ( invert, callback ) {
                 event.ctrlKey ||
                 event.metaKey
             ) ) {
+                console.log( 'Invert state before: ' + current_state.name + '.');
+
                 var
                     highlight_box_state   = highlight_box.getState(),
                     highlight_box_states  = highlight_box.STATES
@@ -98,8 +100,15 @@ eqnx.def( 'invert', function ( invert, callback ) {
                         current_state = STATES.OFF;
 
                         break;
-                    // default:
                 }
+
+                if ( current_state === STATES.ON.HIGHLIGHT_BOX ) {
+                    eqnx.on( 'hlb/deflating', function () {
+                        current_state = STATES.OFF;
+                    } );
+                }
+
+                console.log( 'Invert state after: ' + current_state.name + '.');
             }
         } );
 
