@@ -169,9 +169,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
                 var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
 
-                // Handle table spacing effect on block elements.
-                var parentSpacing = this.handleTableElement();
- 
+                // Handle table special behaviour on inner contents.
+                handleTableElement(this.itemNode);
+
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
@@ -210,10 +210,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     .css($.extend({},  currentStyle, {
                         display: resultDisplay,
                         visibility: 'hidden',
-                        width: Math.round(origRectSize.width - parentSpacing) + 'px',
+                        width: origRectSize.width + 'px',
                         // Don't set height for inline-block elements(images are exceptions)
                         // since it is calculated automatically with respect to line-height and other factors.
-                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? '10px' : origRectSize.height + 'px'
+                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
                     }));
                 this.itemNode.after(clone);
 
@@ -278,40 +278,31 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 });
             };
 
-
-
-            /*
-             * Table elements require extra work for special cases.
-             */
-            HighlightBox.prototype.handleTableElement = function() {
+          /*
+           * Table elements require extra work for some cases - especially when table has flexible layout.
+           */
+           function handleTableElement(itemNode) {
                 // Handle table spacing effect on block elements.
-                var parentSpacing = 0;
-                var isTableChild = false;
-                this.itemNode.parents().andSelf().each(function () {
+                itemNode.parents().andSelf().each(function () {
                     if (this.tagName.toLowerCase() === 'table') {
-                         // 'border-spacing' is inherited by its children: <tbody>, <tr>, <td> etc.
-                         // Hence, inner content of <td> is also affected by this extra intent. Since 'border-spacing' value
-                         // is not copied to computed styles for descendants we need to take care of it manually.
-                        parentSpacing = $(this).css('border-spacing');
-                        if (parentSpacing.trim() !== '') {
-                            parentSpacing = parseFloat(parentSpacing.split(' ')[0]);
+                        // todo: try to set table-layout:fixed to table
+                        var closest = itemNode.closest('td');
+                        var closestStyle = getElementComputedStyles(closest[0]);
+
+                        var updateStyle = {};
+                        updateStyle.width = parseFloat(closestStyle.width) + 'px';
+
+                        var innerText = $(closest).html();
+                        if (innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
+                            updateStyle.whiteSpace = 'nowrap';
                         }
-                        isTableChild = true;
+                        
+                        $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
+                        $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateStyle);
+                        
                         return false;
                     }
                 })
-                
-                // If table has flexible width then it will be resized according to content's width.
-                // Let's prevent default behaviour by setting a wrapper with the fixed width.
-                if (isTableChild) {
-                    var closest = this.itemNode.closest('td');
-                     // 0.5 because Chrome turns integer value to float by itself; so width = 400px actually is 299.6989599...
-                     // this brnings visual change to underlying content
-                     // todo: think over better way to calculate it
-                    var wrapperWidth = Math.floor($(closest).outerWidth() - parentSpacing - 0.5);
-                    $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "' style='width:" + wrapperWidth +"px' ></div>");
-                }
-                return parentSpacing;
             }
 
             /**
