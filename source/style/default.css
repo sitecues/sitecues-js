@@ -112,7 +112,7 @@
     height: 100%;
 }
 
-#eqnx-black-bar {
+#eqnx-toolbar {
     background:     black;
     color:          ghostwhite;
     display:        none;
@@ -125,7 +125,7 @@
     vertical-align: middle;
     width:          100%;
 }
-#eqnx-black-bar-close-button {
+#eqnx-toolbar-close-button {
     height: 20px;
     margin: 5px;
     width:  20px;
