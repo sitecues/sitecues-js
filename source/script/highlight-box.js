@@ -131,8 +131,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.kBoxBorderColor = '#222222';
             HighlightBox.kDefaultBgColor = '#ffffff';
             // Space placeholders prevent content after box from going underneath it.
-            HighlightBox.kPlaceHolderClass = 'eq360-box-placeholder';
-            HighlightBox.kPlaceHolderWrapperClass = 'eq360-box-placeholder-wrapper';
+            HighlightBox.kPlaceHolderClass = 'eqnx-eq360-box-placeholder';
+            HighlightBox.kPlaceHolderWrapperClass = 'eqnx-eq360-box-placeholder-wrapper';
             // TODO: Expand this array to include all appropriate elements.
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
 
@@ -256,7 +256,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Remove placeholder wrapper element if the table child highlighted.
                        $('.' + HighlightBox.kPlaceHolderWrapperClass)
                            .children()
-                           .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>"); 
+                           .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
                     }
                     $('.' + HighlightBox.kPlaceHolderClass).remove();
                     backgroundDimmer.removeDimmer();
@@ -281,7 +281,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     console.log("hlb closed");
                     eqnx.emit('hlb/closed', _this.item);
                 });
-                
+
             };
 
            /*
@@ -309,16 +309,16 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         if (innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
                             updateInnerElStyle.whiteSpace = 'nowrap';
                         }
-                        
+
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
                         $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
-                        
+
                         return false; // Break the each loop
                     }
                 })
                 return false;
             }
-            
+
 
             /**
              * Get the size and position of the current HLB to inflate.

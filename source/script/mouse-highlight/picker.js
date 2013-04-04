@@ -9,7 +9,7 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 	picker.kSignificantMargin = 3;
 
 	// Elements to never highlight
-	picker.kBlackListQuery = '#eqnx-panel, #eqnx-badge, #eq360-bg';
+	picker.kBlackListQuery = '#eqnx-panel, #eqnx-badge, #eqnx-eq360-bg';
 
 	eqnx.use('jquery', 'style', function($, styles){
 

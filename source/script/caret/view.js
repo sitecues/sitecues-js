@@ -4,7 +4,7 @@ eqnx.def('caret/view', function(view, callback){
 
 	// constants
 	view.kZindex = 2147483647 - 1;
-	view.kCaretId = 'eq360-caret';
+	view.kCaretId = 'eqnx-eq360-caret';
 
 	// depends on `jquery`, `conf`, `style`, `caret/coords` and `geo`
 	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util', 'ui', function($, conf, styles, coords, util){

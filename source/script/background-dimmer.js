@@ -6,7 +6,7 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
     // Get dependencies
     eqnx.use('jquery', function ($) {
 
-        backgroundDimmer.kDimmerId = 'eq360-bg';
+        backgroundDimmer.kDimmerId = 'eqnx-eq360-bg';
         backgroundDimmer.kDimmingColor = '#000000';
         backgroundDimmer.kDimmingOpacity = 0.65;
         backgroundDimmer.kDimmingSpeed = 400;

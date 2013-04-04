@@ -32,7 +32,8 @@ files=\
 	source/script/mouse-highlight/picker.js \
 	source/script/speech.js \
 	source/script/speech/azure.js \
-	source/script/invert.js
+	source/script/invert.js \
+	source/script/black-bar.js
 
 https=off
 lint=false

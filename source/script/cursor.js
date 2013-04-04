@@ -19,8 +19,8 @@ eqnx.def('cursor', function (cursor, callback) {
         default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
         pointer: '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
     };
-    cursor.kCursorHideRuleId = 'eq360-cursor-hide-rule';
-    cursor.kCursorId = 'eq360-cursor';
+    cursor.kCursorHideRuleId = 'eqnx-eq360-cursor-hide-rule';
+    cursor.kCursorId = 'eqnx-eq360-cursor';
     cursor.kZindex = 2147483647;
     cursor.kMinCursorZoom = 1.5;
 
