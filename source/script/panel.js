@@ -66,7 +66,7 @@ eqnx.def('panel', function(panel, callback){
 			// hide panel when mouse leave panel
 			// use small delay just in case of ui mistake
 			panel.element.on('mouseleave', function(){
-				timer = setTimeout(panel.hide, 500);
+				timer = setTimeout(panel.hide, 1500);
 			});
 
 			// append to html

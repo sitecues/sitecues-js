@@ -1,7 +1,7 @@
 eqnx.def('mouse-highlight', function(mh, callback){
 
 	// minimum zoom level to enable highlight
-	mh.minzoom = 1.2;
+	mh.minzoom = 1.01;
 
 	// how long mouse ptr needs to pause before we get a new highlight
 	mh.delay = 20;
