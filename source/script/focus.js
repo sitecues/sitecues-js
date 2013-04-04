@@ -32,10 +32,12 @@ eqnx.def('focus', function(focus, callback){
 
 			// append focus css rule to it
 			focus.element.html(
-				'*:focus { ' +
-					'outline: ' + thickness + 'px solid ' + focus.color + ' !important;' +
-					'outline-radius: 2px;'+
-				'}'
+        '*:focus { ' +
+        // Rounded, soft outline outside of element
+        'box-shadow: 0px 0px 3pt 2pt ' + focus.color + ' !important; ' +
+        // TODO -- change z-index and use position: relative if statically positioned so outline on top
+        // 'z-index: 999999; position: relative;' +
+        '}'
 			);
 
 			// appent style element to head

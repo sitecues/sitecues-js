@@ -176,10 +176,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     height: 'auto',
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     border: '0px solid white',
-                    listStylePosition: 'inside'
-                }),
-                cssAnimateStyles = $.extend({}, cssUpdate, {
-                    transform: 'scale(' + extraZoom + ')',
+                    listStylePosition: 'inside',
                     margin: '0',
                     borderRadius: HighlightBox.kBoxBorderRadius,
                     borderColor:  HighlightBox.kBoxBorderColor,
@@ -187,6 +184,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     borderWidth:  HighlightBox.kBoxBorderWidth,
                     padding:      HighlightBox.kBoxPadding,
                     backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
+                }),
+                // Only animate the most important values so that animation is smoother
+                  cssAnimateStyles = $.extend({}, cssUpdate, {
+                    transform: 'scale(' + extraZoom + ')'
                 });
 
                // Remove all the attributes from the placeholder(clone) tag.

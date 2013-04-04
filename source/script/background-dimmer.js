@@ -18,9 +18,9 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
                     zIndex: zIndex.toString(),
                     backgroundColor: this.kDimmingColor,
                     opacity: '0'
-                }).animate({
+                }).css({
                     opacity: this.kDimmingOpacity.toString()
-                }, this.kDimmingSpeed).appendTo(document.body);
+                }).appendTo(document.body);
             }
         };
         backgroundDimmer.removeDimmer = function () {
