@@ -3,9 +3,9 @@ eqnx.def('zoom', function(zoom, callback){
 	// values used for zoom math
 	zoom.max = 5;
 	zoom.min = 1;
-	zoom.step = .5;
+	zoom.step = 0.1;
 	zoom.default = 1;
-	zoom.precision = .1;
+	zoom.precision = 0.1;
 
 	// detect if browser support zoom natively
 	zoom.native = 'zoom' in document.createElement('div').style;

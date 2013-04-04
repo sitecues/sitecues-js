@@ -3,10 +3,10 @@ eqnx.def('focus', function(focus, callback){
 
 	// minimum zoom at which focus
 	// enhancement appears
-	focus.minzoom = 1.2;
+	focus.minzoom = 1.4;
 
 	// color of focus enhancement
-	focus.color = 'aqua';
+	focus.color = 'rgba(82,168,236,.8)';
 
 	// selector for elements focus
 	// enhancement should be applied

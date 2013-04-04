@@ -5,7 +5,7 @@ eqnx.def('caret', function(caret, callback){
 
 	// minimum zoom at which caret
 	// enhancement appears
-	caret.minzoom = 1.2;
+	caret.minzoom = 1.8;
 
 	// selector for elements caret
 	// enhancement should be applied

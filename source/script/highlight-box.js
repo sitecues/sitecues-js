@@ -8,7 +8,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              function ($, conf, cursor, util, backgroundDimmer) {
 
         // Constants
-        var kMinHighlightZoom = 1.5;
+        var kMinHighlightZoom = 1.01;
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
@@ -120,12 +120,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
 
             // Constants
-            HighlightBox.kShowBoxSpeed = 200;
+            HighlightBox.kShowBoxSpeed = 300;
             HighlightBox.kHideBoxSpeed = 150;
             HighlightBox.kBoxZindex = cursor.kZindex - 1; // Ensure that cursor is on top, we're above everything else.
             HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
-            HighlightBox.kBoxBorderWidth = '1px';
-            HighlightBox.kBoxPadding = '2px'; // Give the text a little extra room
+            HighlightBox.kBoxBorderWidth = '3px';
+            HighlightBox.kBoxPadding = '4px'; // Give the text a little extra room
             HighlightBox.kBoxBorderRadius = '4px';
             HighlightBox.kBoxBorderStyle = 'solid';
             HighlightBox.kBoxBorderColor = '#222222';

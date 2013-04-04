@@ -8,7 +8,7 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
 
         backgroundDimmer.kDimmerId = 'eq360-bg';
         backgroundDimmer.kDimmingColor = '#000000';
-        backgroundDimmer.kDimmingOpacity = 0.5;
+        backgroundDimmer.kDimmingOpacity = 0.65;
         backgroundDimmer.kDimmingSpeed = 400;
         backgroundDimmer.dimBackgroundContent = function (zIndex) {
             if ($('#' + this.kDimmerId).length < 1) {
