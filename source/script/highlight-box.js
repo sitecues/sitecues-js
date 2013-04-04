@@ -612,6 +612,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             updateZoomLevel(zoomvalue);
         });
 
+        eqnx.on( 'key/esc', function ( event ) {
+            instance.deflate();
+        } );
+
         // Take care on target change event.
         function onTargetChange(newTarget) {
             if (getState() === STATES.READY) { // if something is ready

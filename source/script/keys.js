@@ -18,12 +18,12 @@ eqnx.def('keys', function(keys, callback){
 
 	// define keys map used to bind actions to hotkeys
 	keys.map = {
-		'minus':		{ event: 'zoom/decrease' },
-		'plus':			{ event: 'zoom/increase' },
-		'r':			{
+		'minus':	{ event: 'zoom/decrease' },
+		'plus':		{ event: 'zoom/increase' },
+		'r':		{
 			event: 'inverse/toggle'
 		},
-		'space':		{ event: 'highlight/animate', preventDefault: true }
+		'space':	{ event: 'highlight/animate', preventDefault: true }
 	}
 
 	// handle key
@@ -73,6 +73,19 @@ eqnx.def('keys', function(keys, callback){
 
 		eqnx.on( 'hlb/ready', function ( data ) {
 			extra_event_properties.highlight_box = $( data );
+
+			keys.test[ 'esc' ] = function ( event ) {
+				return ( event.keyCode === 27 );
+			};
+
+			keys.map[ 'esc' ] = {
+				event: 'key/esc'
+			};
+		} );
+
+		eqnx.on( 'hlb/closed', function () {
+			delete keys.test[ 'esc' ];
+			delete keys.map[ 'esc' ];
 		} );
 
 		// done
