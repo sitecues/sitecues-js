@@ -154,7 +154,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var _this = this;
 
                 // Prepare clone element as a clone of the scaled highlight box element.
-                var clone = this.item.cloneNode(false),
+                var clone = this.item.cloneNode(true),
                     cloneNode = $(clone),
                     // Get the current element styles.
                     currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -164,13 +164,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var totalZoom = util.getTotalZoom(this.item, true);
                 var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
-                // Correct display if necessary.
-                var savedDisplay = currentStyle.display;
-                var correctedDisplay = getCorrectedDisplay(this.itemNode, savedDisplay);
-                var resultDisplay = correctedDisplay === undefined ? savedDisplay : correctedDisplay;
-
                 // Handle table special behaviour on inner contents.
-                handleTableElement(this.itemNode);
+                handleTableElement(this.itemNode, currentStyle);
 
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
@@ -194,28 +189,36 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
                 });
 
-                // Animate HLB (keep in mind $.animate() is non-blocking).
-                this.itemNode.css(cssBeforeAnimateStyles).animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
-                    // Once the animation completes, set the new state and emit the ready event.
-                    _this.state = STATES.READY;
-                    console.log("hlb ready");
-                    eqnx.emit('hlb/ready', _this.item);
-                });
-
-                // Remove all the attributes from the placeholder(clone) tag.
-                removeAttributes(cloneNode);
+               // Remove all the attributes from the placeholder(clone) tag.
+               removeAttributes(cloneNode);
+               // Temporary shim for <td> which spans the number of columns in a cell.
+               // todo: apply better maths for calculating clone width for such cells.
+               var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
 
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                    .css($.extend({},  currentStyle, {
-                        display: resultDisplay,
+                    .css($.extend({}, currentStyle, {
+                        // Make sure clone display turned to 'block' if it is a tbale cell
+                        display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
-                        width: origRectSize.width + 'px',
-                        // Don't set height for inline-block elements(images are exceptions)
-                        // since it is calculated automatically with respect to line-height and other factors.
-                        height: resultDisplay === 'inline-block' && clone.tagName.toLowerCase() !== 'img' ? 'auto' : origRectSize.height + 'px'
+                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
+                        height: origRectSize.height + 'px'
                     }));
-                this.itemNode.after(clone);
+
+                // Insert placeholder before HLB target is absoultely positioned.
+                // Otherwise, we might loose white space intent to the left/right because
+                // in most cases sequences of whitespace will collapse into a single whitespace.
+                this.itemNode.after(cloneNode);
+
+                // Animate HLB (keep in mind $.animate() is non-blocking).
+                this.itemNode
+                    .css(cssBeforeAnimateStyles)
+                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+                        // Once the animation completes, set the new state and emit the ready event.
+                        _this.state = STATES.READY;
+                        console.log("hlb ready");
+                        eqnx.emit('hlb/ready', _this.item);
+                });
 
                 // Trigger the background blur effect if there is a highlight box only.
                 backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
@@ -247,23 +250,24 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Deflate the highlight box.
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
-                    // Remove placeholder wrapper element if the table child highlighted.
-                    if ($('.eq360-box-placeholder-wrapper').length > 0) {
-                       $('.eq360-box-placeholder-wrapper')
+                    // Cleanup all elements inserted by Eqnx on the page.
+                    if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
+                        // Remove placeholder wrapper element if the table child highlighted.
+                       $('.' + HighlightBox.kPlaceHolderWrapperClass)
                            .children()
                            .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>"); 
                     }
+                    $('.' + HighlightBox.kPlaceHolderClass).remove();
+                    backgroundDimmer.removeDimmer();
+
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
                         // We should do this with next tick to allow handlers catch right scale level.
                         notifyZoomInOrOut(_this.itemNode, false);
                     }, 0);
 
-                    // Do cleanup job when reading box is being closed: remove placeholder to prevent animated block from jumping.
                     var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
-                    $('.' + HighlightBox.kPlaceHolderClass).remove();
 
-                    backgroundDimmer.removeDimmer();
                     // Wait till animation is finished, then reset animate styles.
                     _this.itemNode.removeAttr('style');
                     if (typeof style !== 'undefined') {
@@ -276,34 +280,44 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     console.log("hlb closed");
                     eqnx.emit('hlb/closed', _this.item);
                 });
+                
             };
 
-          /*
-           * Table elements require extra work for some cases - especially when table has flexible layout.
-           */
-           function handleTableElement(itemNode) {
-                // Handle table spacing effect on block elements.
+           /*
+            * Table elements require extra work for some cases - especially when table has flexible layout.
+            */
+           function handleTableElement(itemNode, currentStyle) {
+               // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
+                var savedDisplay = currentStyle.display;
+                if (savedDisplay.indexOf('table') === 0) {
+                    itemNode.css({display: 'block'});
+                    return false;
+                }
+
+                // Handle flexible table width effect dependent of the inner elements.
                 itemNode.parents().andSelf().each(function () {
                     if (this.tagName.toLowerCase() === 'table') {
                         // todo: try to set table-layout:fixed to table
                         var closest = itemNode.closest('td');
                         var closestStyle = getElementComputedStyles(closest[0]);
 
-                        var updateStyle = {};
-                        updateStyle.width = parseFloat(closestStyle.width) + 'px';
+                        var updateInnerElStyle = {};
+                        updateInnerElStyle.width = parseFloat(closestStyle.width) + 'px';
 
                         var innerText = $(closest).html();
                         if (innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
-                            updateStyle.whiteSpace = 'nowrap';
+                            updateInnerElStyle.whiteSpace = 'nowrap';
                         }
                         
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
-                        $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateStyle);
+                        $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
                         
-                        return false;
+                        return false; // Break the each loop
                     }
                 })
+                return false;
             }
+            
 
             /**
              * Get the size and position of the current HLB to inflate.
@@ -452,29 +466,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
 
             /**
-             * We need to correct the display property for certain values such as 'inline' or 'table'.
-             */
-            function getCorrectedDisplay(itemNode, savedDisplay) {
-                if (typeof savedDisplay === 'undefined') {
-                    return undefined;
-                }
-                var correctedDisplay;
-                // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
-                if (savedDisplay.indexOf('table') === 0) {
-                    itemNode.css({
-                        display: 'block'
-                    });
-                    correctedDisplay = 'block';
-                }
-                // We can set the width of inline elements like <span>, <em> and <strong>,
-                // but we won't notice any effect until position them. Rather than that, we explicitly change display to 'inline-block'.
-                if (savedDisplay === 'inline') {
-                    correctedDisplay = 'inline-block';
-                }
-                return correctedDisplay;
-            }
-
-            /**
              * Capitalizes the first letter of the string given as an argument.
              */
             function capitaliseFirstLetter(str) {
@@ -542,17 +533,20 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @return isValid true if element is okay
              */
             function isValidTarget(target) {
+                var forbiddenTagsToZoom = ['body', 'html'];
                 if (!target // HighlightBox creation failed because target is not defined.
-                   || target.tagName.toLowerCase() === 'body') {// Do not highlight body
+                   || forbiddenTagsToZoom.indexOf(target.tagName.toLowerCase()) >= 0) {
                     return false;
                 }
 
                 // Do not highlight panel & badge and their incidents
                 var isValid = true;
+                var forbiddenIDsToZoom = [kPanelId.toLowerCase(), kBadgeId.toLowerCase()];
+
                 $.each($(target).parents().andSelf(), function (index, element) {
-                    if (element.id.toLowerCase() === kPanelId || element.id.toLowerCase() === kBadgeId) {
+                    if ($(element).attr('id') && forbiddenIDsToZoom.indexOf($(element).attr('id').toLowerCase()) >= 0) {
                         isValid = false;
-                        return false;
+                        return false; // Break the loop.
                     }
                 });
                 return isValid;
