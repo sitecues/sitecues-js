@@ -2,7 +2,7 @@ eqnx.def('panel', function(panel, callback){
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	eqnx.use('jquery', 'conf', 'ui', function($, conf){
+	eqnx.use('jquery', 'conf', 'speech', 'ui', function($, conf, speech){
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -12,7 +12,7 @@ eqnx.def('panel', function(panel, callback){
 		// panel element
 		panel.create = function(){
 			// private variables
-			var frame, wrap, slider;
+			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
 			frame = $('<div>').attr('id', 'eqnx-panel');
@@ -35,8 +35,17 @@ eqnx.def('panel', function(panel, callback){
 			// create big A label
 			$('<div>').addClass('big').text('A').appendTo(frame);
 
-			// create TTS button
-			$('<div>').addClass('tts').appendTo(frame);
+			// create TTS button and set it up
+			ttsButton = $('<div>').addClass('tts').appendTo(frame);
+			if(speech.isEnabled()) {
+				ttsButton.data('tts-enable', 'enabled');
+			} else {
+				ttsButton.addClass("tts-disabled");
+				ttsButton.data('tts-enable', 'disabled');
+			}
+			ttsButton.click(function() {
+				panel.ttsToggle();
+			});
 
 			// handle slider value change
 			slider.change(function(){
@@ -92,6 +101,22 @@ eqnx.def('panel', function(panel, callback){
 				// delete panel element
 				panel.element = undefined;
 			});
+		}
+
+		// Function that will toggle tts on or off
+		panel.ttsToggle = function() {
+			var ttsButton = $('#eqnx-panel .tts');
+			if(ttsButton.data('tts-enable') === 'disabled') {
+				// It's disabled, so enable it
+				eqnx.emit('speech/enable');
+				ttsButton.data('tts-enable','enabled');
+				ttsButton.removeClass("tts-disabled");
+			} else {
+				// It's enabled (or unknown), so disable it
+				eqnx.emit('speech/disable');
+				ttsButton.data('tts-enable','disabled')
+				ttsButton.addClass("tts-disabled");
+			}
 		}
 
 		// setup trigger to show panel

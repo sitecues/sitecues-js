@@ -142,6 +142,7 @@ eqnx.def('speech', function(speech, callback) {
                     callback();
                 }
             }
+            console.log("tts enabled");
         }
 
         /*
@@ -153,6 +154,7 @@ eqnx.def('speech', function(speech, callback) {
             if (callback) {
                 callback();
             }
+            console.log("tts disabled");
         }
 
         /**
@@ -176,6 +178,15 @@ eqnx.def('speech', function(speech, callback) {
             return hlb.id
         }
 
+        /**
+         * Returns if TTS is enabled or not.  Always returns true or false.
+         */
+        speech.isEnabled = function() {
+            if(ttsEnable) {
+                return true;
+            }
+            return false;
+        }
 
         /*
          * Enables TTS, if possible.
