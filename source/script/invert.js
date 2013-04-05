@@ -8,7 +8,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
             ON:  {
                 HIGHLIGHT_BOX: {
                     id:   1,
-                    name: 'on.highlight_box'
+                    name: 'on.highlight-box'
                 },
                 PAGE:          {
                     id:   2,
