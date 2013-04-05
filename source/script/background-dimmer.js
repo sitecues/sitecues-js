@@ -9,7 +9,7 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
         backgroundDimmer.kDimmerId = 'eqnx-eq360-bg';
         backgroundDimmer.kDimmingColor = '#000000';
         backgroundDimmer.kDimmingOpacity = 0.65;
-        backgroundDimmer.kDimmingSpeed = 400;
+        backgroundDimmer.kDimmingSpeed = 150;
         backgroundDimmer.dimBackgroundContent = function (zIndex) {
             if ($('#' + this.kDimmerId).length < 1) {
                 var dimmerDiv = document.createElement('div');
@@ -18,13 +18,14 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
                     zIndex: zIndex.toString(),
                     backgroundColor: this.kDimmingColor,
                     opacity: '0'
-                }).css({
-                    opacity: this.kDimmingOpacity.toString()
                 }).appendTo(document.body);
+                $(dimmerDiv).animate({opacity: this.kDimmingOpacity.toString()}, backgroundDimmer.kDimmingSpeed);
             }
         };
         backgroundDimmer.removeDimmer = function () {
-            $('#' + this.kDimmerId).remove();
+            $('#' + this.kDimmerId).animate({opacity: '0'}, backgroundDimmer.kDimmingSpeed, function () {
+                $('#' + backgroundDimmer.kDimmerId).remove();
+            });
         };
 
         // Done.
