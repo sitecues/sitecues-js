@@ -33,7 +33,6 @@ files=\
 	source/script/speech.js \
 	source/script/speech/azure.js \
 	source/script/invert.js \
-	# Disactivating toolbar for now.
 	# source/script/toolbar.js \
 
 https=off

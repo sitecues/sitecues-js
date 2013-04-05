@@ -1,3 +1,9 @@
+            _    __
+   _____   (_)  / /_  ___   _____  __  __  ___    _____
+  / ___/  / /  / __/ / _ \ / ___/ / / / / / _ \  / ___/
+ (__  )  / /  / /_  /  __// /__  / /_/ / /  __/ (__  )
+/____/  /_/   \__/  \___/ \___/  \__,_/  \___/ /____/
+
 # SiteCues
 
 It is required that **Node** and **NPM** be installed on your machine. Check [http://nodejs.org](http://nodejs.org/download/) to get the needed binaries for you system.
