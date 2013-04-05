@@ -1,5 +1,5 @@
 // specify modules to be loaded
-eqnx.use(
+if(typeof eqnx != 'undefined' && eqnx) { eqnx.use(
 	'conf',
 	'conf/localstorage',
 	'conf/import',
@@ -18,4 +18,4 @@ eqnx.use(
 	'speech',
 	'mouse-highlight',
 	'highlight-box'
-);
+); }

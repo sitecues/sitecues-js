@@ -1,5 +1,33 @@
 (function(){
 
+	// Whitelist to a set of domains, we're doing this in eqnx because we want 
+	// to bail out immediately if it's not permitted.
+	var host = document.location.hostname;
+
+	var hostnamePermitted = false;
+	var eqnxCookies=document.cookie.split(";");
+	for (var i=0;i<eqnxCookies.length;i++) {
+	  if(eqnxCookies[i].trim().substr(0,eqnxCookies[i].trim().indexOf("=")) === 'disableSitecuesWhitelist') {
+	  	// We don't care what the value is
+	  	hostnamePermitted = true;
+	  }
+	}
+	
+	if(!hostnamePermitted) {
+		var allowedHostnames = ['localhost', 'local'];
+		for(var i=0;i< allowedHostnames.length; i++) {
+			if(host === allowedHostnames[i]) {
+				hostnamePermitted = true;
+				break;
+			}
+		}
+	}
+
+	if(!hostnamePermitted) {
+		console.log("Sitecues is not permitted to run on this page.");
+		return;
+	}
+
 	// private variables
 	var arr, has, noop,
 		eqnx, modules;
