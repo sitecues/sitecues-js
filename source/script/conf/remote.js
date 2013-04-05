@@ -6,8 +6,8 @@ eqnx.def('conf/remote', function(remote, callback){
 
         conf.get('site-id', function(siteId){
 
-            if(!siteId) {
-                siteId=1;
+            if( !siteId ) {
+                siteId = 1;
             }
             if(conf.get('remoteConfig') === 'false'){
                 console.log("Remote configuration disabled");
