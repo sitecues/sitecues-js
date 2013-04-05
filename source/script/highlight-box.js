@@ -8,7 +8,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
     function ($, conf, cursor, util, backgroundDimmer) {
 
         // Constants
+
+        // This is the default setting, the value used at runtime will be in conf.
         var kMinHighlightZoom = 1.01;
+    
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
@@ -65,9 +68,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         // Initially set to null so that the zoom check will trigger an event.
         var state = null;
 
+        conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+
         // Update the zoom level of the page, which effects whether or not the HLB is off or on.
         var updateZoomLevel = function (zl) {
-            var newState = (zl >= kMinHighlightZoom ? STATES.ON : STATES.OFF);
+            var newState = (zl >= conf.get('highlightBoxMinZoom') ? STATES.ON : STATES.OFF);
             if (newState !== state) {
                 state = newState;
                 eqnx.emit('hlb/' + state.name, highlightBox);
@@ -720,6 +725,19 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         eqnx.on( 'key/esc', function ( event ) {
             instance.deflate();
         } );
+
+        // Lower the threshold when speech is enabled.
+        eqnx.on('speech/enable', function(){
+            conf.set('highlightBoxMinZoom', 1.00);
+            updateZoomLevel(conf.get('zoom'));
+        });
+
+        // Revert the threshold when speech is enabled.
+        eqnx.on('speech/disable', function(){
+            conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+            updateZoomLevel(conf.get('zoom'));
+        });
+
 
         // Take care on target change event.
         function onTargetChange(newTarget) {

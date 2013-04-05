@@ -14,8 +14,8 @@ eqnx.def('speech', function(speech, callback) {
         var jQuery=_jQuery;
 
         // console.log(robovoice);
-        // TTS is enabled by default
-        var ttsEnable = !(conf.get("ttsEnable") == 'false');
+        // TTS is disabled by default
+        var ttsEnable = conf.get("ttsEnable") === 'true';
 
         // This is the engine we're using, required, no default
         var ttsEngine = conf.get("ttsEngine");
@@ -125,9 +125,12 @@ eqnx.def('speech', function(speech, callback) {
          * Iterates through all of the players and destroys them.
          */
         speech.destroyAll = function() {
-            console.log("Stopping all players");
+            console.log("Destroying all players");
             jQuery.each(players, function(key, value) {
-                setTimeout(value.destroy(),5);
+                if(value) {
+                    setTimeout(value.destroy(),5);
+                }
+                players[key] = null;
             });
         }
 

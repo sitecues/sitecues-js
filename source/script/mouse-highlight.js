@@ -1,6 +1,7 @@
 eqnx.def('mouse-highlight', function(mh, callback){
 
 	// minimum zoom level to enable highlight
+	// This is the default setting, the value used at runtime will be in conf.
 	mh.minzoom = 1.01;
 
 	// how long mouse ptr needs to pause before we get a new highlight
@@ -11,6 +12,8 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
 		// private variables
 		var timer;
+
+		conf.set('mouseHighlightMinZoom', mh.minzoom);
 
 		// show mouse highlight
 		mh.show = function(element){
@@ -64,6 +67,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
 		// refresh status of enhancement on page
 		mh.refresh = function(){
+
 			if (mh.enabled){
 				// handle mouse move on body
 				$('body').on('mousemove', mh.update);
@@ -75,6 +79,12 @@ eqnx.def('mouse-highlight', function(mh, callback){
 				// hide highlight
 				mh.hide();
 			}
+		}
+
+		mh.updateZoom = function(zoom){
+			var was = mh.enabled;
+			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
+			if (was !== mh.enabled) mh.refresh();
 		}
 
 		// hide mouse highlight once highlight box appears
@@ -91,10 +101,18 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		});
 
 		// handle zoom changes to toggle enhancement on/off
-		conf.get('zoom', function(zoom){
-			var was = mh.enabled;
-			mh.enabled = zoom >= mh.minzoom;
-			if (was !== mh.enabled) mh.refresh();
+		conf.get('zoom', mh.updateZoom);
+
+		// Lower the threshold when speech is enabled.
+		eqnx.on('speech/enable', function(){
+			conf.set('mouseHighlightMinZoom', 1.00);
+			mh.updateZoom(conf.get('zoom'));
+		});
+
+		// Revert the threshold when speech is enabled.
+		eqnx.on('speech/disable', function(){
+			conf.set('mouseHighlightMinZoom', mh.minzoom);
+			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// done
