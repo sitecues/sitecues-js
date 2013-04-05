@@ -1,17 +1,19 @@
-﻿/**
+/**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
     eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
-             function ($, conf, cursor, util, backgroundDimmer) {
+    function ($, conf, cursor, util, backgroundDimmer) {
 
         // Constants
         var kMinHighlightZoom = 1.01;
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
+        var kRegExpRGBString = /\d+(\.\d+)?%?/g;
+        var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
         // The states that the HLB can be in.
         // TODO: Convert to state instances.
@@ -166,7 +168,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Handle table special behaviour on inner contents.
                 handleTableElement(this.itemNode, currentStyle);
-
+                
+                // If background color computed is not contrast to text color, invert background one.
+                var oldBgColor = currentStyle.backgroundColor;
+                var newBgColor = getNewBackgroundColor(this.itemNode, oldBgColor);
+                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+                var color = compStyle.getPropertyCSSValue("color");
+                var isContrastColors = getIsContrastColors(color, newBgColor);
+                
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
@@ -183,10 +192,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     borderStyle:  HighlightBox.kBoxBorderStyle,
                     borderWidth:  HighlightBox.kBoxBorderWidth,
                     padding:      HighlightBox.kBoxPadding,
-                    backgroundColor: getNewBackgroundColor(this.itemNode, currentStyle.backgroundColor)
+                    backgroundColor: isContrastColors ? newBgColor : getRevertColor(newBgColor)
                 }),
                 // Only animate the most important values so that animation is smoother
-                  cssAnimateStyles = $.extend({}, cssUpdate, {
+                cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')'
                 });
 
@@ -554,6 +563,99 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
                 });
                 return isValid;
+            }
+
+        // TODO: Take functions below to util module?
+            /*
+             * Converts both colors to the same [RGB] format and then find out if they are contrast.
+             * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare
+             * @param colorTwo String/CSSPrimitiveValue represents the other color to compare
+             * @return Boolean true if colors are contrast; false otherwise
+             */
+            function getIsContrastColors(colorOne, colorTwo){
+                var tones = [];
+                for (var index in arguments) {
+                    var colorValue = arguments[index];
+                    var RGBColor = getRGBColor(colorValue);
+                    // http://en.wikipedia.org/wiki/YIQ
+                    var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
+                    tones[colorValue] = (yiq >= 128) ? 'dark' : 'light';
+
+                }
+                // Now that we have both colors tones, define if they are contrast or not.
+                return (tones[colorOne] === tones[colorTwo]) ? false : true;
+            }
+
+            /*
+             * Converts color given RGB format.
+             * @param colorValue String/CSSPrimitiveValue
+             * @return Object of RGB format {r: numericValue, g: numericValue, b: numericValue}
+             */
+            function getRGBColor(colorValue) {
+                // Sring
+                if ( {}.toString.call( colorValue ) === '[object String]' ) {
+                    return Rgb(colorValue);
+                }
+                // CSSPrimitiveValue
+                var resultRGBColor = { r: 255, g: 255, b:255 };
+                try {
+                    var valueType = colorValue.primitiveType;
+                    if (valueType == CSSPrimitiveValue.CSS_RGBCOLOR) {
+                        var rgb = colorValue.getRGBColorValue();
+                        resultRGBColor.r = rgb.red.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
+                        resultRGBColor.g = rgb.green.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
+                        resultRGBColor.b = rgb.blue.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
+
+                    }
+                } catch (e) {
+                    // Just temporary logging, to make sure code always works as expected.
+                    console.log('Attempt to get RGB color failed.');
+                }
+                return resultRGBColor;
+            }
+
+            // todo: take out reg exp to a constant string
+            /*
+             * Returnes an object of RGB components converted from a string containing either RGB or HEX string.
+             */
+            function Rgb(rgb){
+                if(!(this instanceof Rgb)) return new Rgb(rgb);
+                var defaultColor = [255, 255, 255];
+                var c = rgb.match(kRegExpRGBString);
+                // RGB
+                if (c) {
+                    c = c.map(function(itm){
+                        // Take care of plain numbers as well as percentage values
+                        if(itm.indexOf('%')!= -1) itm= parseFloat(itm)*2.55;
+                        return parseInt(itm);
+                    });
+                } else if ((kRegExpHEXValidString).test(rgb)) {
+                    // Valid HEX
+                    c = [];
+                    c[0] = hexToR(rgb);
+                    c[1] = hexToG(rgb);
+                    c[2] = hexToB(rgb);
+                } else {
+                    c = defaultColor;
+                }
+                this.r= c[0];
+                this.g= c[1];
+                this.b= c[2];
+            }
+
+            function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
+            function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
+            function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
+            function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+            
+            /*
+             * Calculates opposite color to the one given as parameter.
+             * @param colorValue String/CSSPrimitiveValue
+             * @return String that represents RGB value. Format : 'rgb(numericValueR, numericValueG, numericValueB)'
+             */
+            function getRevertColor(colorValue) {
+                var RGBColor = getRGBColor(colorValue);
+                return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
             }
 
             return {
