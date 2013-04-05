@@ -117,7 +117,9 @@ eqnx.def('speech', function(speech, callback) {
         speech.stopAll = function() {
             console.log("Stopping all players");
             jQuery.each(players, function(key, value) {
-                setTimeout(value.stop(),5);
+                if(value) {
+                    setTimeout(value.stop(),5);
+                }
             });
         }
 
