@@ -83,6 +83,17 @@
     background-position: 0% 0%;
 }
 
+#eqnx-panel .tts.tts-disabled {
+    position: absolute; 
+    top: 0;
+    right: 0;
+    width: 45px;
+    height: 45px;
+    background-image: url('//ai2.s3.amazonaws.com/assets/headphones_004.png');
+    background-size: 90px;
+    background-position: -45px 0%;
+}
+
 #eqnx-eq360-cursor {
     top: 0;
     left: 0;
