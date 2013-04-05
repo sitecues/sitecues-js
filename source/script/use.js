@@ -4,6 +4,7 @@ eqnx.use(
 	'conf/localstorage',
 	'conf/import',
 	'conf/remote',
+	'conf/server',
 	'jquery',
 	'ui',
 	'badge',

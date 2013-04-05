@@ -206,6 +206,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         height: origRectSize.height + 'px'
                     }));
 
+                // clean clone before insertion to DOM
+                cloneNode.find('script').remove();
+
                 // Insert placeholder before HLB target is absoultely positioned.
                 // Otherwise, we might loose white space intent to the left/right because
                 // in most cases sequences of whitespace will collapse into a single whitespace.
