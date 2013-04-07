@@ -13,10 +13,19 @@
 	  }
 	}
 	
-	if(!hostnamePermitted) {
-		var allowedHostnames = ['localhost', 'local'];
-		for(var i=0;i< allowedHostnames.length; i++) {
-			if(host === allowedHostnames[i]) {
+	if( !hostnamePermitted ) {
+		var allowedHostnames = [
+      'localhost',
+      'local',
+      'sitecues.com',
+      'www.sitecues.com',
+      'up.sitecues.com',
+      'up.ai2.at',
+      'www.tdcanadatrust.com',
+      'www.tdwaterhouse.com'
+    ];
+		for ( var i = 0; i < allowedHostnames.length; i++ ) {
+			if ( host === allowedHostnames[i] ) {
 				hostnamePermitted = true;
 				break;
 			}
