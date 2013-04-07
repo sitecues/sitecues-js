@@ -1,12 +1,15 @@
 /* badge */
+#eqnx-badge #eqnx-badge-image {
+    height: 23px;
+}
+
 #eqnx-badge {
     z-index: 2147483645;
     margin: 0px;
     visibility: visible;
     position: fixed;
-    width: 100px;
-    height: 30px;
-    top: 15px;
+    width: 150px;
+    top: 5px;
     right: 1%;
     color: rgba(0, 0, 0, 0.6);
     cursor: default;
@@ -19,8 +22,15 @@
 }
 
 #eqnx-badge-image {
-    width: 100px;
-    height: 30px;
+    width: 134px;
+    border: 1px solid #555;
+    padding: 2px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);
+    box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);
+    -moz-box-shadow: 1px 1px 5px 0px rgba(10, 10, 10, .5);
 }
 
 /* panel */
