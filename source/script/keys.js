@@ -1,6 +1,8 @@
 eqnx.def('keys', function(keys, callback){
 	var extra_event_properties = {
-		'highlight_box': null
+		dom: {
+			highlight_box: null
+		}
 	};
 
 	// shortcut to hasOwnProperty
@@ -72,7 +74,7 @@ eqnx.def('keys', function(keys, callback){
 		$(window).on('keydown', keys.hook);
 
 		eqnx.on( 'hlb/ready', function ( data ) {
-			extra_event_properties.highlight_box = $( data );
+			extra_event_properties.dom.highlight_box = $( data );
 
 			keys.test[ 'esc' ] = function ( event ) {
 				return ( event.keyCode === 27 );

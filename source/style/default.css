@@ -129,12 +129,13 @@
     display:        none;
     height:         30px;
     left:           0;
+    margin:         0;
     margin-bottom:  5px;
-    margin-top:     5px;
-    position:       relative;
+    position:       fixed;
     top:            0;
     vertical-align: middle;
     width:          100%;
+    z-index:        2147483647;
 }
 #eqnx-toolbar-close-button {
     height: 20px;
