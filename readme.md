@@ -36,7 +36,7 @@
     | s | | i | | t | | e | | c | | u | | e | | s |
     +---+ +---+ +---+ +---+ +---+ +---+ +---+ +---+
 
-# SiteCues
+# sitecues
 
 It is required that **Node** and **NPM** be installed on your machine. Check [http://nodejs.org](http://nodejs.org/download/) to get the needed binaries for you system.
 
