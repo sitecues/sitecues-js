@@ -43,6 +43,8 @@ eqnx.def( 'invert', function ( invert, callback ) {
             }
         } );
 
+        // TODO: Make the code more DRY.
+
         eqnx.on( 'hlb/ready', function ( data ) {
             dom_highlight_box = $( data );
 
