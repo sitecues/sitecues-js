@@ -2,56 +2,58 @@
 
 	// Whitelist to a set of domains, we're doing this in eqnx because we want 
 	// to bail out immediately if it's not permitted.
-	var host = document.location.hostname;
+	var host = document.location.hostname,
+		hostnamePermitted = false,
+		eqnxCookies = document.cookie.split(';');
 
-	var hostnamePermitted = false;
-	var eqnxCookies = document.cookie.split( ";" );
-	for ( var i = 0; i < eqnxCookies.length; i++ ) {
-	  if( eqnxCookies[i].trim().substr( 0, eqnxCookies[i].trim().indexOf("=") ) === 'disableSitecuesWhitelist' ) {
-	  	// We don't care what the value is
-	  	hostnamePermitted = true;
-	  }
+	for (var i = 0; i < eqnxCookies.length; i++){
+		if( eqnxCookies[i].trim().substr(0, eqnxCookies[i].trim().indexOf('=')) === 'disableSitecuesWhitelist'){
+			// We don't care what the value is
+			hostnamePermitted = true;
+		}
 	}
-	
-	if( !hostnamePermitted ) {
+
+	if(!hostnamePermitted){
 		var allowedHostnames = [
-      'localhost',
-      'local',
-      'sitecues.com',
-      'www.sitecues.com',
-      'up.sitecues.com',
-      'up.ai2.at',
-      'www.tdcanadatrust.com',
-      'www.tdwaterhouse.com'
-    ];
-		for ( var i = 0; i < allowedHostnames.length; i++ ) {
-			if ( host === allowedHostnames[i] ) {
+			'localhost',
+			'local',
+			'sitecues.com',
+			'www.sitecues.com',
+			'up.sitecues.com',
+			'up.ai2.at',
+			'www.tdcanadatrust.com',
+			'www.tdwaterhouse.com'
+		];
+
+		for (var i = 0; i < allowedHostnames.length; i++){
+			if (host === allowedHostnames[i]){
 				hostnamePermitted = true;
 				break;
 			}
 		}
 	}
 
-  // TODO: Better way to turn whitelisting on and off
-  // Thom - 7 Apr : We've proved this is working, but we'll need a better way
-  // in order to let our QA and PM folks test different sites.  The cookie
-  // solution works, but it'll be annoying for them to have to do this
-  // every time they want to test a new site.
-  //
-  // Turning on all hosts by default for now.
+	// TODO: Better way to turn whitelisting on and off
+	// Thom - 7 Apr : We've proved this is working, but we'll need a better way
+	// in order to let our QA and PM folks test different sites.  The cookie
+	// solution works, but it'll be annoying for them to have to do this
+	// every time they want to test a new site.
+	//
+	// Turning on all hosts by default for now.
+	hostnamePermitted = true;
 
-  hostnamePermitted = true;
-
-  // ^^^
-
-	if ( !hostnamePermitted ) {
-		console.log( "Sitecues is not permitted to run on this page." );
+	// ^^^
+	if (!hostnamePermitted){
+		console.log("Sitecues is not permitted to run on this page.");
 		return;
 	}
 
 	// private variables
 	var arr, has, noop,
 		eqnx, modules;
+
+	// private functions
+	var resolveUrl, parseUrlQuery, parseUrl;
 
 	// break if there is eqnx instance on the page
 	if ('eqnx' in window) return;
@@ -239,151 +241,145 @@
 		}, 0);
 	};
 
-    //////////////////////////////////////////////////
-    //
-    //  START: URL Processing Helper Methods
-    //
-    //////////////////////////////////////////////////
+	//////////////////////////////////////////////////
+	//
+	//  START: URL Processing Helper Methods
+	//
+	//////////////////////////////////////////////////
 
-    // Parse a URL query into key/value pairs.
-    eqnx.parseUrlQuery = function(queryStr) {
-        var query = {};
-        query.raw = queryStr;
-        query.parameters = {};
+	// Parse a URL query into key/value pairs.
+	parseUrlQuery = function(queryStr){
+		var query = {};
+		query.raw = queryStr;
+		query.parameters = {};
 
-        // Parse the query into key/value pairs.
-        var start = 0, end = 0;
-        if (queryStr[start] == '?') {
-            start++;
-        }
+		// Parse the query into key/value pairs.
+		var start = 0, end = 0;
+		if (queryStr[start] == '?')
+			start++;
 
-        while (start < queryStr.length) {
-            end = queryStr.indexOf('=', start);
-            if (end < 0) {
-                end = queryStr.length;
-            }
-            var key = decodeURIComponent(queryStr.substring(start, end));
-            start = end + 1;
+		while (start < queryStr.length){
+			end = queryStr.indexOf('=', start);
+			if (end < 0) end = queryStr.length;
 
-            var value = null;
-            if (start <= queryStr.length) {
-                end = queryStr.indexOf('&', start);
-                if (end < 0) {
-                    end = queryStr.length;
-                }
-                value = decodeURIComponent(queryStr.substring(start, end));
-                start = end + 1;
-            }
-            query.parameters[key] = value;
-        }
-    };
+			var key = decodeURIComponent(queryStr.substring(start, end));
+			start = end + 1;
 
-    // Parse a URL into its components.
-    eqnx.parseUrl = function(urlStr) {
-        // Ran across this in a Google search... loved the simplicity of the solution.
-        var url = {};
-        var parser = document.createElement('a');
-        parser.href = urlStr;
+			var value = null;
+			if (start <= queryStr.length){
+				end = queryStr.indexOf('&', start);
+				if (end < 0) end = queryStr.length;
 
-        // No one ever wants the hash on a full URL...
-        if (parser.hash) {
-            url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-        } else {
-            url.raw = parser.href;
-        }
+				value = decodeURIComponent(queryStr.substring(start, end));
+				start = end + 1;
+			}
+			query.parameters[key] = value;
+		}
+	};
 
-        url.protocol = parser.protocol.substring(0, parser.protocol.length - 1);
-        url.hostname = parser.hostname;
-        url.host     = parser.host;
+	// Parse a URL into its components.
+	parseUrl = function(urlStr){
+		// Ran across this in a Google search... loved the simplicity of the solution.
+		var url = {};
+		var parser = document.createElement('a');
+		parser.href = urlStr;
 
-        if (parser.search) {
-            url.query = eqnx.parseUrlQuery(parser.search);
-        } else {
-            url.query = null;
-        }
+		// No one ever wants the hash on a full URL...
+		if (parser.hash)
+			url.raw = parser.href.substring(parser.href.length - parser.hash.length);
+		else
+			url.raw = parser.href;
 
-        // Extract the path and file portion of the pathname.
-        var pathname = parser.pathname;
-        var index = pathname.lastIndexOf('/') + 1;
-        url.path = pathname.substring(0, index);
-        url.file = pathname.substring(index);
+		url.protocol = parser.protocol.substring(0, parser.protocol.length - 1);
+		url.hostname = parser.hostname;
+		url.host     = parser.host;
 
-        return url;
-    };
+		if (parser.search)
+			url.query = parseUrlQuery(parser.search);
+		else
+			url.query = null;
 
-    // Obtain all script tags, and search util we find our script.
-    var scriptSrcUrl = null,
-        scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
-        scriptTags = document.getElementsByTagName('script');
+		// Extract the path and file portion of the pathname.
+		var pathname = parser.pathname;
+		var index = pathname.lastIndexOf('/') + 1;
+		url.path = pathname.substring(0, index);
+		url.file = pathname.substring(index);
 
-    for (var i = 0; i < scriptTags.length; i++) {
-        var match = scriptTags[i].src.match(scriptSrcRegExp);
-        if (match) {
-            scriptSrcUrl = eqnx.parseUrl(match[0]);
-            break;
-        }
-    }
-    // TODO: What if we don't find the base URL?
+		return url;
+	};
 
-    // The regular expression for an absolute URL. There is a capturing group for the protocol-relative
-    // portion of the URL.
-    var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
+	// Obtain all script tags, and search util we find our script.
+	var scriptSrcUrl = null,
+	scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
+	scriptTags = document.getElementsByTagName('script');
 
-    // Resolve a URL as relative to a base URL.
-    eqnx.resolveUrl = function(urlStr, baseUrl) {
-        var absRegExpResult =  ABSOLUTE_URL_REQEXP.exec(urlStr);
-        if (absRegExpResult) {
-            // We have an absolute URL, with protocol. That's a no-no, so, convert to a
-            // protocol-relative URL.
-            urlStr = absRegExpResult[1];
-        } else if (urlStr.indexOf('//') === 0) {
-            // Protocol-relative No need to modify the URL, as we will inherit the containing page's protocol.
-        } else if (urlStr.indexOf('/') === 0) {
-            // Host-relative URL.
-            urlStr = '//' + baseUrl.host + urlStr;
-        } else {
-            // A directory-relative URL.
-            urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
-        }
+	for (var i = 0; i < scriptTags.length; i++){
+		var match = scriptTags[i].src.match(scriptSrcRegExp);
+		if (match){
+			scriptSrcUrl = parseUrl(match[0]);
+			break;
+		}
+	}
 
-        return urlStr;
-    };
+	// TODO: What if we don't find the base URL?
+	// The regular expression for an absolute URL. There is a capturing group for the protocol-relative
+	// portion of the URL.
+	var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
 
-    // Resolve a URL as relative to the main script URL.
-    eqnx.resolveEqnxUrl = function(urlStr) {
-        return eqnx.resolveUrl(urlStr, scriptSrcUrl);
-    };
+	// Resolve a URL as relative to a base URL.
+	resolveUrl = function(urlStr, baseUrl) {
+		var absRegExpResult =  ABSOLUTE_URL_REQEXP.exec(urlStr);
+		if (absRegExpResult){
+			// We have an absolute URL, with protocol. That's a no-no, so, convert to a
+			// protocol-relative URL.
+			urlStr = absRegExpResult[1];
+		} else if (urlStr.indexOf('//') === 0) {
+			// Protocol-relative No need to modify the URL, as we will inherit the containing page's protocol.
+		} else if (urlStr.indexOf('/') === 0) {
+			// Host-relative URL.
+			urlStr = '//' + baseUrl.host + urlStr;
+		} else {
+			// A directory-relative URL.
+			urlStr = '//' + baseUrl.host + baseUrl.path + urlStr;
+		}
 
+		return urlStr;
+	};
 
-    //////////////////////////////////////////////////
-    //
-    //  END: URL Processing Helper Methods
-    //
-    //////////////////////////////////////////////////
+	// Resolve a URL as relative to the main script URL.
+	eqnx.resolveEqnxUrl = function(urlStr){
+		return resolveUrl(urlStr, scriptSrcUrl);
+	};
 
-    // async script loading
-    eqnx.loadScript = function(url, callback){
-        // Resolve the URL as relative to the library URL.
-        url = eqnx.resolveEqnxUrl(url);
+	//////////////////////////////////////////////////
+	//
+	//  END: URL Processing Helper Methods
+	//
+	//////////////////////////////////////////////////
 
-        // create script DOM element
-        var script = document.createElement('script');
+	// async script loading
+	eqnx.loadScript = function(url, callback){
+		// Resolve the URL as relative to the library URL.
+		url = eqnx.resolveEqnxUrl(url);
 
-        // set proper script type
-        script.type = 'text/javascript';
+		// create script DOM element
+		var script = document.createElement('script');
 
-        // set url
-        script.src = url;
+		// set proper script type
+		script.type = 'text/javascript';
 
-        // enforce async loading
-        script.async = true;
+		// set url
+		script.src = url;
 
-        // add callback to track when it will be loaded
-        script.onload = script.onreadystatechange = callback;
+		// enforce async loading
+		script.async = true;
 
-        // add element to head to start loading
-        document.getElementsByTagName('head')[0].appendChild(script);
-    };
+		// add callback to track when it will be loaded
+		script.onload = script.onreadystatechange = callback;
+
+		// add element to head to start loading
+		document.getElementsByTagName('head')[0].appendChild(script);
+	};
 
 	// trigger module loading
 	eqnx.load = function(){
