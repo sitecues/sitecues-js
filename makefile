@@ -1,4 +1,5 @@
 # Parameters.
+clean-deps=false
 dev=false
 
 # Production files (combine all modules into one).
@@ -42,9 +43,19 @@ min=true
 port=8000
 uglifyjs-args=
 
+ifeq ($(clean-deps), true)
+	_clean_deps:=deps-clean
+else
+	_clean_deps:=.no-clean-deps
+endif
+
 # Developement files (load modules separately).
 ifeq ($(dev), true)
 	files=source/script/eqnx.js source/script/use.js
+endif
+
+ifeq ($(https), on)
+	port:=80
 endif
 
 ifeq ($(lint), true)
@@ -57,14 +68,13 @@ ifeq ($(min), false)
 	uglifyjs-args+=-b
 endif
 
-ifeq ($(https), on)
-	port:=80
-endif
-
 # HIDDEN TARGET: .no-lint-on-build
 # Alternate target when not linting during build.
 .no-lint-on-build:
-	@echo "Linting disabled on build!"
+	@echo "Linting disabled on build."
+
+.no-clean-deps:
+	@echo "Cleaning dependencies disabled."
 
 # TARGET: all
 # Run all targets.
@@ -84,15 +94,20 @@ build: $(_build_lint_dep)
 # Clean the target directory.
 clean:
 	@echo "Cleaning started."
-	@rm -fr node_modules target
+	@rm -fr target
 	@echo "Cleaning completed."
 
 # TARGET: deps
 # Set up the dependencies.
-deps:
+deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@npm install
 	@echo "Dependency setup completed."
+
+deps-clean:
+	@echo "Cleaning dependencies started."
+	@rm -fr node_modules
+	@echo "Cleaning dependencies completed."
 
 # TARGET: lint
 # 	Run gjslint on the JavaScript source.
