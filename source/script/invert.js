@@ -32,7 +32,12 @@ eqnx.def( 'invert', function ( invert, callback ) {
             invert_state_page          = STATES.NORMAL
         ;
 
-        eqnx.on( 'hlb/deflating', function ( data ) {
+        // To be removed. For debugging purposes.
+        setInterval( function () {
+            logInvertState();
+        }, 3000 );
+
+        eqnx.on( 'hlb/deflating', function () {
             if ( invert_state_highlight_box === invert_state_page ) {
                 invert_state_highlight_box = STATES.MATCH;
             }
@@ -43,7 +48,11 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
             switch ( invert_state_highlight_box ) {
                 case STATES.INVERT:
-                    $( dom_highlight_box ).css( css_invert_full );
+                    if ( invert_state_page === STATES.INVERT ) {
+                        $( dom_highlight_box ).css( css_invert_empty );
+                    } else {
+                        $( dom_highlight_box ).css( css_invert_full );
+                    }
 
                     break;
                 case STATES.MATCH:
@@ -51,20 +60,19 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                     break;
                 case STATES.NORMAL:
-                    $( dom_highlight_box ).css( css_invert_none );
+                    if ( invert_state_page === STATES.NORMAL ) {
+                        $( dom_highlight_box ).css( css_invert_empty );
+                    } else {
+                        $( dom_highlight_box ).css( css_invert_full );
+                    }
 
                     break;
             }
         } );
 
         eqnx.on( 'inverse/toggle', function ( event ) {
-            if ( ! (
-                event.altKey ||
-                event.ctrlKey ||
-                event.metaKey
-            ) ) {
-                console.log( 'Invert state : before (highlight-box) => [ ' + invert_state_highlight_box.name + ' ].' );
-                console.log( 'Invert state : before (page)          => [ ' + invert_state_page.name + ' ].' );
+            if ( ! ( event.altKey || event.ctrlKey || event.metaKey ) ) {
+                logInvertState();
 
                 var
                     highlight_box_state  = highlight_box.getState(),
@@ -73,11 +81,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                 dom_highlight_box = $( event.dom.highlight_box );
 
-                if (
-                    ( highlight_box_state === highlight_box_states.READY ) ||
-                    ( highlight_box_state === highlight_box_states.INFLATING ) ||
-                    ( highlight_box_state === highlight_box_states.CREATE )
-                ) {
+                if ( highlight_box_state === highlight_box_states.READY || highlight_box_state === highlight_box_states.INFLATING || highlight_box_state === highlight_box_states.CREATE ) {
                     switch ( invert_state_highlight_box ) {
                         case STATES.INVERT:
                             $( dom_highlight_box ).css( css_invert_none );
@@ -109,10 +113,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                             break;
                     }
-                } else if (
-                    ( highlight_box_state === highlight_box_states.ON ) ||
-                    ( highlight_box_state === highlight_box_states.CLOSED )
-                ) {
+                } else if ( highlight_box_state === highlight_box_states.ON || highlight_box_state === highlight_box_states.CLOSED ) {
                     if ( invert_state_highlight_box === STATES.MATCH ) {
                         invert_state_highlight_box = invert_state_page;
                     }
@@ -133,10 +134,16 @@ eqnx.def( 'invert', function ( invert, callback ) {
                     }
                 }
 
-                console.log( 'Invert state : after (highlight-box) => [ ' + invert_state_highlight_box.name + ' ].' );
-                console.log( 'Invert state : after (page)          => [ ' + invert_state_page.name + ' ].' );
+                logInvertState();
             }
         } );
+
+        function logInvertState() {
+            console.log( '' );
+            console.log( 'Invert [highlight-box]: {' + invert_state_highlight_box.name + '}' );
+            console.log( 'Invert          [page]: {' + invert_state_page.name + '}' );
+            console.log( '' );
+        }
 
         callback();
     } );
