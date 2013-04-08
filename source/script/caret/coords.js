@@ -5,7 +5,7 @@ eqnx.def('caret/coords', function(coords, callback){
 	// depends on `jquery`, `conf` and `util` modules
 	eqnx.use('jquery', 'conf', 'util/positioning', function($, conf, positioning){
 
-		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos, zoomLevel) {
+		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos) {
 			// Create an object with the same positioning but flexible width and height
 			// in order to measure the text up to the caret
 			var isDebuggingOn = false; // TODO EQ-255 compile this stuff out when false
