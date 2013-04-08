@@ -206,6 +206,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                // Remove all the attributes from the placeholder(clone) tag.
                removeAttributes(cloneNode);
+               // Clean clone from inner <script> before insertion to DOM
+                cloneNode.find('script').remove();
                // Temporary shim for <td> which spans the number of columns in a cell.
                // todo: apply better maths for calculating clone width for such cells.
                var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
@@ -219,9 +221,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         width: (parseFloat(origRectSize.width) / colspan) + 'px',
                         height: origRectSize.height + 'px'
                     }));
-
-                // clean clone before insertion to DOM
-                cloneNode.find('script').remove();
 
                 // Insert placeholder before HLB target is absoultely positioned.
                 // Otherwise, we might loose white space intent to the left/right because
@@ -460,7 +459,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @return elementComputedStyles An object of all element computed styles.
              */
             function getElementComputedStyles(element) {
-                var currentProperty, propertyName, propertyParts = [], elementComputedStyles = [];
+                var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
