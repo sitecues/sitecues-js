@@ -355,7 +355,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Correctly compute the viewport.
                 var viewport = util.getViewportDimensions(HighlightBox.kMinDistanceFromEdge);
-                for (prop in viewport) {
+                for (var prop in viewport) {
                     viewport[prop] /= totalZoom;
                 }
 
