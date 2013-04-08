@@ -15,7 +15,8 @@ files=\
 	source/script/ui.js  \
 	source/script/load.js \
 	source/script/style.js \
-	source/script/util.js \
+	source/script/util/positioning.js \
+	source/script/util/common.js \
 	source/script/badge.js \
 	source/script/panel.js \
 	source/script/zoom.js \
