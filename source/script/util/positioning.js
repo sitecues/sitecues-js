@@ -1,5 +1,5 @@
-﻿/**
- * This is module for common utilities that might need to be used across all of the different modules.
+/**
+ * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
 eqnx.def('util/positioning', function (positioning, callback) {
 

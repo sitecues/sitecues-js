@@ -4,8 +4,8 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
-    function ($, conf, cursor, positioning, backgroundDimmer) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+    function ($, conf, cursor, positioning, common, backgroundDimmer) {
 
         // Constants
 
@@ -15,8 +15,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
-        var kRegExpRGBString = /\d+(\.\d+)?%?/g;
-        var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
         // The states that the HLB can be in.
         // TODO: Convert to state instances.
@@ -115,7 +113,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // notify about new hlb
                 eqnx.emit('hlb/create', this.item);
 
-                var computedStyles = getElementComputedStyles(this.item);
+                var computedStyles = common.getElementComputedStyles(this.item);
                 var offset = positioning.getOffset(this.item);
                 var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
                 var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
@@ -179,7 +177,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var newBgColor = getNewBackgroundColor(this.itemNode, oldBgColor);
                 var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
                 var color = compStyle.getPropertyCSSValue("color");
-                var isContrastColors = getIsContrastColors(color, newBgColor);
+                var isContrastColors = common.getIsContrastColors(color, newBgColor);
                 
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
@@ -197,7 +195,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     borderStyle:  HighlightBox.kBoxBorderStyle,
                     borderWidth:  HighlightBox.kBoxBorderWidth,
                     padding:      HighlightBox.kBoxPadding,
-                    backgroundColor: isContrastColors ? newBgColor : getRevertColor(newBgColor)
+                    backgroundColor: isContrastColors ? newBgColor : common.getRevertColor(newBgColor)
                 }),
                 // Only animate the most important values so that animation is smoother
                 cssAnimateStyles = $.extend({}, cssUpdate, {
@@ -205,7 +203,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 });
 
                // Remove all the attributes from the placeholder(clone) tag.
-               removeAttributes(cloneNode);
+               common.removeAttributes(cloneNode);
                // Clean clone from inner <script> before insertion to DOM
                 cloneNode.find('script').remove();
                // Temporary shim for <td> which spans the number of columns in a cell.
@@ -316,7 +314,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     if (this.tagName.toLowerCase() === 'table') {
                         // todo: try to set table-layout:fixed to table
                         var closest = itemNode.closest('td');
-                        var closestStyle = getElementComputedStyles(closest[0]);
+                        var closestStyle = common.getElementComputedStyles(closest[0]);
 
                         var updateInnerElStyle = {};
                         updateInnerElStyle.width = parseFloat(closestStyle.width) + 'px';
@@ -454,39 +452,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
 
             /**
-             * Get the element's styles to be used further.
-             * @param element The DOM element which styles we want to get.
-             * @return elementComputedStyles An object of all element computed styles.
-             */
-            function getElementComputedStyles(element) {
-                var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
-                var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
-                $.each(computedStyles, function (index) {
-                    currentProperty = computedStyles[index]; // in format 'margin-top'
-                    propertyParts = currentProperty.split('-');
-                    propertyName = propertyParts[0];
-                    for (var i = 1; i < propertyParts.length; i++) {
-                        propertyName += capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
-                    }
-                    elementComputedStyles[propertyName] = computedStyles[propertyName];
-                });
-                return elementComputedStyles;
-            }
-
-            /**
              * Notify all inputs if zoom in or out.
              * todo: define if we need to leave this code after code transferring to a new event model.
              */
             function notifyZoomInOrOut (element, isZoomIn) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
                 element.triggerHandler(zoomHandler);
-            }
-
-            /**
-             * Capitalizes the first letter of the string given as an argument.
-             */
-            function capitaliseFirstLetter(str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
             }
 
             /**
@@ -528,26 +499,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
 
             /**
-             * Remove all the attributes from the DOM element given.
-             */
-            function removeAttributes(element) {
-                element.each(function () {
-                    // Copy the attributes to remove:
-                    // if we don't do this it causes problems iterating over the array we're removing elements from.
-                    var attributes = $.map(this.attributes, function (item) {
-                        return item.name;
-                    });
-                    // Now use jQuery to remove the attributes.
-                    $.each(attributes, function (i, item) {
-                        // Check is the attribute is a valid DOM attribute.
-                        if (element.attr(item)) {
-                            element.removeAttr(item);
-                        }
-                    });
-                });
-            }
-
-            /**
              * Check if the target is suitable to be used for highlight reading box.
              * @param target is the current element under mouse cursor.
              * @return isValid true if element is okay
@@ -570,98 +521,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
                 });
                 return isValid;
-            }
-
-            /*
-             * Converts both colors to the same [RGB] format and then find out if they are contrast.
-             * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare
-             * @param colorTwo String/CSSPrimitiveValue represents the other color to compare
-             * @return Boolean true if colors are contrast; false otherwise
-             */
-            function getIsContrastColors(colorOne, colorTwo){
-                var tones = [];
-                for (var index in arguments) {
-                    var colorValue = arguments[index];
-                    var RGBColor = getRGBColor(colorValue);
-                    // http://en.wikipedia.org/wiki/YIQ
-                    var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
-                    tones[colorValue] = (yiq >= 128) ? 'dark' : 'light';
-
-                }
-                // Now that we have both colors tones, define if they are contrast or not.
-                return (tones[colorOne] === tones[colorTwo]) ? false : true;
-            }
-
-            /*
-             * Converts color given RGB format.
-             * @param colorValue String/CSSPrimitiveValue
-             * @return Object of RGB format {r: numericValue, g: numericValue, b: numericValue}
-             */
-            function getRGBColor(colorValue) {
-                // Sring
-                if ( {}.toString.call( colorValue ) === '[object String]' ) {
-                    return Rgb(colorValue);
-                }
-                // CSSPrimitiveValue
-                var resultRGBColor = { r: 255, g: 255, b:255 };
-                try {
-                    var valueType = colorValue.primitiveType;
-                    if (valueType == CSSPrimitiveValue.CSS_RGBCOLOR) {
-                        var rgb = colorValue.getRGBColorValue();
-                        resultRGBColor.r = rgb.red.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
-                        resultRGBColor.g = rgb.green.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
-                        resultRGBColor.b = rgb.blue.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
-
-                    }
-                } catch (e) {
-                    // Just temporary logging, to make sure code always works as expected.
-                    console.log('Attempt to get RGB color failed.');
-                }
-                return resultRGBColor;
-            }
-
-            // todo: take out reg exp to a constant string
-            /*
-             * Returnes an object of RGB components converted from a string containing either RGB or HEX string.
-             */
-            function Rgb(rgb){
-                if(!(this instanceof Rgb)) return new Rgb(rgb);
-                var defaultColor = [255, 255, 255];
-                var c = rgb.match(kRegExpRGBString);
-                // RGB
-                if (c) {
-                    c = c.map(function(itm){
-                        // Take care of plain numbers as well as percentage values
-                        if(itm.indexOf('%')!= -1) itm= parseFloat(itm)*2.55;
-                        return parseInt(itm);
-                    });
-                } else if ((kRegExpHEXValidString).test(rgb)) {
-                    // Valid HEX
-                    c = [];
-                    c[0] = hexToR(rgb);
-                    c[1] = hexToG(rgb);
-                    c[2] = hexToB(rgb);
-                } else {
-                    c = defaultColor;
-                }
-                this.r= c[0];
-                this.g= c[1];
-                this.b= c[2];
-            }
-
-            function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
-            function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
-            function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
-            function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
-            
-            /*
-             * Calculates opposite color to the one given as parameter.
-             * @param colorValue String/CSSPrimitiveValue
-             * @return String that represents RGB value. Format : 'rgb(numericValueR, numericValueG, numericValueB)'
-             */
-            function getRevertColor(colorValue) {
-                var RGBColor = getRGBColor(colorValue);
-                return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
             }
 
             return {
