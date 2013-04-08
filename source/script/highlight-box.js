@@ -539,7 +539,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     });
                     // Now use jQuery to remove the attributes.
                     $.each(attributes, function (i, item) {
-                        element.removeAttr(item);
+                        // Check is the attribute is a valid DOM attribute.
+                        if (element.attr(item)) {
+                            element.removeAttr(item);
+                        }
                     });
                 });
             }
