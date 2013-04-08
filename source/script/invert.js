@@ -113,6 +113,10 @@ eqnx.def( 'invert', function ( invert, callback ) {
                     ( highlight_box_state === highlight_box_states.ON ) ||
                     ( highlight_box_state === highlight_box_states.CLOSED )
                 ) {
+                    if ( invert_state_highlight_box === STATES.MATCH ) {
+                        invert_state_highlight_box = invert_state_page;
+                    }
+
                     switch ( invert_state_page ) {
                         case STATES.INVERT:
                             $( dom_html ).css( css_invert_none );
