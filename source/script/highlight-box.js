@@ -4,8 +4,8 @@
 eqnx.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
-    function ($, conf, cursor, util, backgroundDimmer) {
+    eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+    function ($, conf, cursor, positioning, backgroundDimmer) {
 
         // Constants
 
@@ -116,7 +116,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 eqnx.emit('hlb/create', this.item);
 
                 var computedStyles = getElementComputedStyles(this.item);
-                var offset = util.getOffset(this.item);
+                var offset = positioning.getOffset(this.item);
                 var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
                 var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
                 var size = { width: parseFloat(width), height: parseFloat(height) };
@@ -167,8 +167,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-                var center    = util.getCenter(this.item);
-                var totalZoom = util.getTotalZoom(this.item, true);
+                var center    = positioning.getCenter(this.item);
+                var totalZoom = positioning.getTotalZoom(this.item, true);
                 var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
                 // Handle table special behaviour on inner contents.
@@ -345,7 +345,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              */
             // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
             // TODO: do not pass viewport. Instead, calculate it in-place.
-            // getViewportDimensions() doesn't take into account 'zoom' value(util supports 'transform' value for its calculation).
+            // getViewportDimensions() doesn't take into account 'zoom' value(util/positioning supports 'transform' value for its calculation).
             function getNewRectStyle(selector, center, extraZoom, totalZoom) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
@@ -354,7 +354,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var centerTop = center.top;
 
                 // Correctly compute the viewport.
-                var viewport = util.getViewportDimensions(HighlightBox.kMinDistanceFromEdge);
+                var viewport = positioning.getViewportDimensions(HighlightBox.kMinDistanceFromEdge);
                 for (var prop in viewport) {
                     viewport[prop] /= totalZoom;
                 }
@@ -367,8 +367,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     // element relative to it's offset parent. These calculations need to factor
                     // in the total zoom of the parent.
                     var offsetParent = jElement.offsetParent();
-                    var offsetParentPosition = util.getOffset(offsetParent);
-                    var offsetParentZoom = util.getTotalZoom(offsetParent);
+                    var offsetParentPosition = positioning.getOffset(offsetParent);
+                    var offsetParentZoom = positioning.getTotalZoom(offsetParent);
 
                     var elementTotalZoom = extraZoom;
 
@@ -572,7 +572,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 return isValid;
             }
 
-        // TODO: Take functions below to util module?
             /*
              * Converts both colors to the same [RGB] format and then find out if they are contrast.
              * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare

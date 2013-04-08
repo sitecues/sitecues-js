@@ -6,7 +6,7 @@
 
 eqnx.def('speech', function(speech, callback) {
 
-    eqnx.use('jquery', 'conf', 'util', 'speech/azure', 'speech/ivona', function(_jQuery, conf, util, _azure, _ivona) {
+    eqnx.use('jquery', 'conf', 'util/positioning', 'speech/azure', 'speech/ivona', function(_jQuery, conf, positioning, _azure, _ivona) {
 
         var players = {};
         var azure = _azure;
