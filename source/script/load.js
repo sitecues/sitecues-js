@@ -1,12 +1,12 @@
 eqnx.def('load', function(load, callback){
 
-    // async script loading
+	// async script loading
 	load.script = eqnx.loadScript;
 
 	// async stylesheet loading
 	load.style = function(url, callback){
-        // Resolve the URL as relative to the library URL.
-        url = eqnx.resolveEqnxUrl(url);
+		// Resolve the URL as relative to the library URL.
+		url = eqnx.resolveEqnxUrl(url);
 
 		// private variables
 		var pull, style, counter = 0;
@@ -48,4 +48,5 @@ eqnx.def('load', function(load, callback){
 
 	// end
 	callback();
+
 });
