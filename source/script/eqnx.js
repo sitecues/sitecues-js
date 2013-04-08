@@ -5,9 +5,9 @@
 	var host = document.location.hostname;
 
 	var hostnamePermitted = false;
-	var eqnxCookies=document.cookie.split(";");
-	for (var i=0;i<eqnxCookies.length;i++) {
-	  if(eqnxCookies[i].trim().substr(0,eqnxCookies[i].trim().indexOf("=")) === 'disableSitecuesWhitelist') {
+	var eqnxCookies = document.cookie.split( ";" );
+	for ( var i = 0; i < eqnxCookies.length; i++ ) {
+	  if( eqnxCookies[i].trim().substr( 0, eqnxCookies[i].trim().indexOf("=") ) === 'disableSitecuesWhitelist' ) {
 	  	// We don't care what the value is
 	  	hostnamePermitted = true;
 	  }
@@ -32,8 +32,20 @@
 		}
 	}
 
-	if(!hostnamePermitted) {
-		console.log("Sitecues is not permitted to run on this page.");
+  // TODO: Better way to turn whitelisting on and off
+  // Thom - 7 Apr : We've proved this is working, but we'll need a better way
+  // in order to let our QA and PM folks test different sites.  The cookie
+  // solution works, but it'll be annoying for them to have to do this
+  // every time they want to test a new site.
+  //
+  // Turning on all hosts by default for now.
+
+  hostnamePermitted = true;
+
+  // ^^^
+
+	if ( !hostnamePermitted ) {
+		console.log( "Sitecues is not permitted to run on this page." );
 		return;
 	}
 
