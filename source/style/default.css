@@ -23,11 +23,12 @@
 
 #eqnx-badge-image {
     width: 134px;
-    border: 1px solid #555;
-    padding: 2px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+    border: 2px solid #A3A3A3;
+    padding: 4px;
+    background-color: white;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     -webkit-box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);
     box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);
     -moz-box-shadow: 1px 1px 5px 0px rgba(10, 10, 10, .5);
