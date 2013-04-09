@@ -6,12 +6,12 @@
  */
 eqnx.def('speech/azure', function(azure, callback) {
 
-    eqnx.use('jquery', 'conf', function (_jQuery, conf) {
+    eqnx.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
 
         azure.factory = function(hlb) {
-        	console.log(conf.get('azureAccessToken').accessToken);
-        	var roboVoice = new RoboVoice(conf.get('azureAccessToken').accessToken);
-        	return new AzurePlayer(hlb, roboVoice, conf, _jQuery);
+        	console.log(remote.azureAccessToken.accessToken);
+        	var roboVoice = new RoboVoice();
+        	return new AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
 
     });
@@ -21,7 +21,7 @@ eqnx.def('speech/azure', function(azure, callback) {
 
 });
 
-function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
+function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 
 	var hlb;
 	if(hlb instanceof _jQuery) {
@@ -30,11 +30,16 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 		hlb = _jQuery(_hlb);
 	}
 	var roboVoice = _roboVoice;
+	var remote = _remote;
 
 	this.play = function() {
-		if(conf.get('azureAccessToken').expires < new Date().getTime()) {
+		var offset = new Date().getTime() - remote.azureAccessToken.now;
+		var tokenTTL = remote.azureAccessToken.expires - new Date().getTime();
+		if(tokenTTL < 30000) {
 			console.log("Token has expired, re-fetching...");
 			this.fetchToken();
+		} else {
+			console.log("Token expires in " + tokenTTL + "ms");
 		}
 		console.log("Playing via azure: " + hlb.text());
 		roboVoice.speak(hlb.text(), "en");
@@ -51,7 +56,7 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery) {
 	}
 
 	this.fetchToken = function() {
-		console.log("Token re-fetching not implemented yet");
+		remote.fetch();
 	}
 
 }
