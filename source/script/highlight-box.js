@@ -185,7 +185,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     overflowY: 'auto',
                     overflowX: 'hidden',
                     width: origRectSize.width,
-                    height: 'auto',
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     border: '0px solid white',
                     listStylePosition: 'inside',
@@ -342,7 +341,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
             // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
-            // TODO: do not pass viewport. Instead, calculate it in-place.
             // getViewportDimensions() doesn't take into account 'zoom' value(util/positioning supports 'transform' value for its calculation).
             function getNewRectStyle(selector, center, extraZoom, totalZoom) {
                 // Ensure a zoom exists.
@@ -368,11 +366,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     var offsetParentPosition = positioning.getOffset(offsetParent);
                     var offsetParentZoom = positioning.getTotalZoom(offsetParent);
 
-                    var elementTotalZoom = extraZoom;
-
                     // Determine the final dimensions, and their affect on the CSS dimensions.
-                    var width = jElement.outerWidth() * elementTotalZoom;
-                    var height = jElement.outerHeight() * elementTotalZoom;
+                    var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
+                    var width = (jElement.outerWidth(true) + 2 * additionalBoxOffset) * extraZoom;
+                    var height = (jElement.outerHeight(true)+ 2 * additionalBoxOffset) * extraZoom;
 
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
@@ -410,10 +407,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
 
                     // Reduce the dimensions to a non-zoomed value.
-                    var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
-                    width = (newWidth || width) / extraZoom - additionalBoxOffset * totalZoom;
-                    height = (newHeight || height) / extraZoom - additionalBoxOffset * totalZoom;
 
+                    width = (newWidth || width) / extraZoom;
+                    height = (newHeight || height) / extraZoom;
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.
                     var css = jElement.css(['marginLeft', 'marginTop']);
@@ -428,6 +424,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                                   ) / offsetParentZoom;
 
                     // If offset parent is html then no need to do this.
+                    // todo: do we really use it?
                     if (offsetParent[0].tagName.toLowerCase() !== 'html') {
                         cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
                         cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
@@ -440,11 +437,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                     // Only update the dimensions if needed.
                     if (newWidth) {
-                        cssUpdates.width = width;
+                        cssUpdates.width = width - 2 * additionalBoxOffset * extraZoom;
                     }
 
                     if (newHeight) {
-                        cssUpdates.height = height;
+                        cssUpdates.height = height - 2* additionalBoxOffset * extraZoom;
                     }
 
                 });
