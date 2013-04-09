@@ -33,7 +33,6 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 	var remote = _remote;
 
 	this.play = function() {
-		var offset = new Date().getTime() - remote.azureAccessToken.now;
 		var tokenTTL = remote.azureAccessToken.expires - new Date().getTime();
 		if(tokenTTL < 30000) {
 			console.log("Token has expired, re-fetching...");
