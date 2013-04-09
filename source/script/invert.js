@@ -21,7 +21,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
                 '-webkit-filter': ''
             },
             css_invert_full            = {
-                '-webkit-filter': 'invert(100%)'
+                '-webkit-filter': 'invert(1)'
             },
             css_invert_none            = {
                 '-webkit-filter': 'none'
@@ -34,6 +34,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
         // To be removed. For debugging purposes.
         setInterval( function () {
+            console.log( '-webkit-filter: ' + $( dom_highlight_box ).css( '-webkit-filter' ) );
             logInvertState();
         }, 3000 );
 
@@ -86,7 +87,16 @@ eqnx.def( 'invert', function ( invert, callback ) {
                 if ( highlight_box_state === highlight_box_states.READY || highlight_box_state === highlight_box_states.INFLATING || highlight_box_state === highlight_box_states.CREATE ) {
                     switch ( invert_state_highlight_box ) {
                         case STATES.INVERT:
-                            $( dom_highlight_box ).css( css_invert_none );
+                            switch ( invert_state_page ) {
+                                case STATES.INVERT:
+                                    $( dom_highlight_box ).css( css_invert_full );
+
+                                    break;
+                                case STATES.NORMAL:
+                                    $( dom_highlight_box ).css( css_invert_none );
+
+                                    break;
+                            }
 
                             invert_state_highlight_box = STATES.NORMAL;
 
@@ -109,7 +119,16 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                             break;
                         case STATES.NORMAL:
-                            $( dom_highlight_box).css( css_invert_full );
+                            switch ( invert_state_page ) {
+                                case STATES.INVERT:
+                                    $( dom_highlight_box ).css( css_invert_none );
+
+                                    break;
+                                case STATES.NORMAL:
+                                    $( dom_highlight_box ).css( css_invert_full );
+
+                                    break;
+                            }
 
                             invert_state_highlight_box = STATES.INVERT;
 
