@@ -3,9 +3,9 @@
 eqnx.def('caret/coords', function(coords, callback){
 
 	// depends on `jquery`, `conf` and `util` modules
-	eqnx.use('jquery', 'conf', 'util', function($, conf, util){
+	eqnx.use('jquery', 'conf', 'util/positioning', function($, conf, positioning){
 
-		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos, zoomLevel) {
+		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos) {
 			// Create an object with the same positioning but flexible width and height
 			// in order to measure the text up to the caret
 			var isDebuggingOn = false; // TODO EQ-255 compile this stuff out when false
@@ -24,7 +24,7 @@ eqnx.def('caret/coords', function(coords, callback){
 			console.log('Old border: ' + styleObj['border-top-width']);
 			if (isDebuggingOn){
 				extendStyle['visibility'] = 'visible';
-				var inputRect = util.getOffset(element);
+				var inputRect = positioning.getOffset(element);
 				extendStyle['left'] = inputRect.left;
 				extendStyle['top'] = inputRect.top;
 			}
@@ -51,7 +51,7 @@ eqnx.def('caret/coords', function(coords, callback){
 
 			// get current zoom level
 			var zoom = conf.get('zoom');
-			var scale = util.getTotalZoom(element);
+			var scale = positioning.getTotalZoom(element);
 
 			// Now, trim to use just the last line -- from this we can get the x coordinate as well as the line height
 			if (element.localName !== 'input'){

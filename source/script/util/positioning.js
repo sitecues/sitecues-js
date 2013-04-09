@@ -1,14 +1,14 @@
-﻿/**
- * This is module for common utilities that might need to be used across all of the different modules.
+/**
+ * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-eqnx.def('util', function (util, callback) {
+eqnx.def('util/positioning', function (positioning, callback) {
 
     eqnx.use('jquery', function ($) {
 
         /**
          * Get the cumulative zoom for an element.
          */
-        util.getTotalZoom = function (selector, andZoom) {
+        positioning.getTotalZoom = function (selector, andZoom) {
             var _recurse = function (element) {
                 if (!element) {
                     return 1;
@@ -27,7 +27,7 @@ eqnx.def('util', function (util, callback) {
         /**
          * Sets the zoom of an element, with the body being the default element.
          */
-        util.setZoom = function (selector, zoom, origin) {
+        positioning.setZoom = function (selector, zoom, origin) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             selector = (selector ? selector : document.body);
@@ -42,7 +42,7 @@ eqnx.def('util', function (util, callback) {
         /**
          * Get the mouse event coordinates relative to the document origin.
          */
-        util.getMouseCoords = function (e, zoom) {
+        positioning.getMouseCoords = function (e, zoom) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             return {
@@ -54,13 +54,13 @@ eqnx.def('util', function (util, callback) {
         /**
          * Returns the offset of the provided element, with calculations based upon etBoundingClientRect().
          */
-        util.getOffset = function (selector) {
+        positioning.getOffset = function (selector) {
             // Perform the calculations for all selected elements.
             var result = [];
             $(selector).each(function () {
-                var scrollPosition = util.getScrollPosition();
+                var scrollPosition = positioning.getScrollPosition();
                 var boundingBox = this.getBoundingClientRect();
-                var totalZoom = util.getTotalZoom(this, true);
+                var totalZoom = positioning.getTotalZoom(this, true);
 
                 var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
 
@@ -75,11 +75,11 @@ eqnx.def('util', function (util, callback) {
         /**
          * Returns the center of the provided element.
          */
-        util.getCenter = function (selector) {
+        positioning.getCenter = function (selector) {
             var result = [];
             $(selector).each(function () {
                 var jElement = $(this);
-                var offset = util.getOffset(this);
+                var offset = positioning.getOffset(this);
 
                 result.push({
                     left: offset.left + ((jElement.outerWidth()) / 2),
@@ -92,7 +92,7 @@ eqnx.def('util', function (util, callback) {
         /**
          * Obtain the scroll position.
          */
-        util.getScrollPosition = function () {
+        positioning.getScrollPosition = function () {
             return {
                 left: window.pageXOffset,
                 top:  window.pageYOffset
@@ -103,7 +103,7 @@ eqnx.def('util', function (util, callback) {
          * Get the elements' bounding boxes.
          * DOM function object.getBoundingClientRect() returns a text rectangle object that encloses a group of text rectangles.
          */
-        util.getBoundingBox = function (selector) {
+        positioning.getBoundingBox = function (selector) {
             var result = [];
             $(selector).each(function () {
                 result.push(this.getBoundingClientRect());
@@ -114,7 +114,7 @@ eqnx.def('util', function (util, callback) {
         /**
          * Obtains the viewport dimensions, with an optional inset.
          */
-        util.getViewportDimensions = function (inset) {
+        positioning.getViewportDimensions = function (inset) {
             inset = inset || 0;
             var insetX2 = inset * 2;
             var scrollPos = this.getScrollPosition();
@@ -135,7 +135,7 @@ eqnx.def('util', function (util, callback) {
         /**
          * Center another element over a provided center, zooming the centered element if needed.
          */
-        util.centerOn = function (selector, center, zoom) {
+        positioning.centerOn = function (selector, center, zoom) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             // Use the proper center.
@@ -155,8 +155,8 @@ eqnx.def('util', function (util, callback) {
                 // element relative to it's offset parent. These calculations need to factor
                 // in the total zoom of the parent.
                 var offsetParent = jElement.offsetParent();
-                var offsetParentPosition = util.getOffset(offsetParent);
-                var offsetParentZoom = util.getTotalZoom(offsetParent);
+                var offsetParentPosition = positioning.getOffset(offsetParent);
+                var offsetParentZoom = positioning.getTotalZoom(offsetParent);
                 var elementTotalZoom = offsetParentZoom * zoom;
 
                 // Determine where we would display the centered and (possibly) zoomed element,
@@ -173,7 +173,7 @@ eqnx.def('util', function (util, callback) {
 
                 // Now, determine if the element will fit in the viewport. If not, place the
                 // element in the viewport, but as close the the original center as possible.
-                var viewport = util.getViewportDimensions(window._vpi);
+                var viewport = positioning.getViewportDimensions(window._vpi);
 
                 // If we need to change the element's dimensions, so be it. However, explicitly
                 // set the dimensions only if needed.
@@ -247,7 +247,7 @@ eqnx.def('util', function (util, callback) {
                 }
 
                 // Apply the zoom CSS to the CSS object.
-                util.setZoom(zoom, cssUpdates);
+                positioning.setZoom(zoom, cssUpdates);
 
                 // Update the element's CSS.
                 jElement.css(cssUpdates);
