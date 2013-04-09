@@ -185,6 +185,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     overflowY: 'auto',
                     overflowX: 'hidden',
                     width: origRectSize.width,
+                    height: 'auto',
+                    maxHeight: cssUpdate.maxHeight,
                     zIndex: HighlightBox.kBoxZindex.toString(),
                     border: '0px solid white',
                     listStylePosition: 'inside',
@@ -443,7 +445,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     if (newHeight) {
                         cssUpdates.height = height - 2* additionalBoxOffset * extraZoom;
                     }
-
+                    // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
+                    // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
+                    cssUpdates.maxHeight = viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset;
                 });
                 return cssUpdates;
             }
