@@ -6,6 +6,9 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
 	// how long mouse ptr needs to pause before we get a new highlight
 	mh.delay = 20;
+        
+        // if mouse highlight event handlers attached to window
+        mh.eventHandlersEnabled = false;
 
 	// depends on jquery, conf and mouse-highlight/picker modules
 	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'ui', function($, conf, picker){
@@ -48,7 +51,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
 			// set new timeout
 			timer = setTimeout(function(){
-				if (event.target !== mh.target){
+				if (mh.enabled && mh.eventHandlersEnabled && event.target !== mh.target){
 					// hide highlight for picked element
 					if (mh.picked) mh.hide(mh.picked);
 
@@ -61,7 +64,11 @@ eqnx.def('mouse-highlight', function(mh, callback){
 					// show highlight for picked element
 					if (mh.picked && mh.picked.length)
 						mh.show(mh.picked);
-				}
+				} else {
+					// hide highlight for picked element
+					if (mh.picked && mh.picked.length)
+						mh.hide(mh.picked);
+					}
 			}, mh.delay);
 		}
 
@@ -69,10 +76,12 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		mh.refresh = function(){
 
 			if (mh.enabled){
+				mh.eventHandlersEnabled = true;
 				// handle mouse move on body
 				$('body').on('mousemove', mh.update);
 
 			} else {
+				mh.eventHandlersEnabled = false;
 				// remove mousemove listener from body
 				$('body').off('mousemove', mh.update);
 
@@ -90,6 +99,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		// hide mouse highlight once highlight box appears
 		eqnx.on('hlb/ready hlb/create', function(element){
 			// remove mousemove listener from body
+				mh.eventHandlersEnabled = false;
 			$('body').off('mousemove', mh.update);
 			mh.hide($(element));
 		});
@@ -97,6 +107,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		// enable mouse highlight back once highlight box deflates
 		eqnx.on('hlb/closed', function(){
 			// handle mouse move on body
+				mh.eventHandlersEnabled = true;
 			$('body').on('mousemove', mh.update);
 		});
 
