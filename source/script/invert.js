@@ -33,10 +33,10 @@ eqnx.def( 'invert', function ( invert, callback ) {
         ;
 
         // To be removed. For debugging purposes.
-        setInterval( function () {
-            console.log( '-webkit-filter: ' + $( dom_highlight_box ).css( '-webkit-filter' ) );
-            logInvertState();
-        }, 3000 );
+        // setInterval( function () {
+        //     console.log( '-webkit-filter: ' + $( dom_highlight_box ).css( '-webkit-filter' ) );
+        //     logInvertState();
+        // }, 3000 );
 
         eqnx.on( 'hlb/deflating', function () {
             if ( invert_state_highlight_box === invert_state_page ) {
