@@ -226,12 +226,31 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // in most cases sequences of whitespace will collapse into a single whitespace.
                 this.itemNode.after(cloneNode);
 
+                // Quick state issue fix! If the HLB isn't ready slightly after the animation is supposed to end, then
+                // reset state.
+                var isInflated = false;
+                setTimeout(function() {
+                    if (!isInflated) {
+                        console.log("HLB in bad state! Closing!");
+                        // Bad state. This instance is now officially closed.
+                        _this.state = STATES.CLOSED;
+                        // Call the module method to clean up after close BEFORE calling listeners.
+                        onHighlightBoxClosed();
+                        // Ensure the bg dimmer is gone.
+                        backgroundDimmer.removeDimmer();
+                        // Trigger the background blur effect if there is a highlight box only.
+                        console.log("hlb closed");
+                        eqnx.emit('hlb/closed', _this.item);
+                    }
+                }, HighlightBox.kShowBoxSpeed + 100);
+
                 // Animate HLB (keep in mind $.animate() is non-blocking).
                 this.itemNode
                     .css(cssBeforeAnimateStyles)
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
                         // Once the animation completes, set the new state and emit the ready event.
                         _this.state = STATES.READY;
+                        isInflated = true;
                         console.log("hlb ready");
                         eqnx.emit('hlb/ready', _this.item);
                 });
