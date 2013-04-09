@@ -75,7 +75,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
         eqnx.on( 'inverse/toggle', function ( event ) {
             if ( ! ( event.altKey || event.ctrlKey || event.metaKey ) ) {
-                logInvertState();
+                // logInvertState();
 
                 var
                     highlight_box_state  = highlight_box.getState(),
@@ -155,16 +155,16 @@ eqnx.def( 'invert', function ( invert, callback ) {
                     }
                 }
 
-                logInvertState();
+                // logInvertState();
             }
         } );
 
-        function logInvertState() {
-            console.log( '' );
-            console.log( 'Invert [highlight-box]: {' + invert_state_highlight_box.name + '}' );
-            console.log( 'Invert          [page]: {' + invert_state_page.name + '}' );
-            console.log( '' );
-        }
+        // function logInvertState() {
+        //     console.log( '' );
+        //     console.log( 'Invert [highlight-box]: {' + invert_state_highlight_box.name + '}' );
+        //     console.log( 'Invert          [page]: {' + invert_state_page.name + '}' );
+        //     console.log( '' );
+        // }
 
         callback();
     } );
