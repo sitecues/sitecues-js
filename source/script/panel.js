@@ -9,6 +9,8 @@ eqnx.def('panel', function(panel, callback){
 		// move mouse cursor out of panel
 		var timer;
 
+		panel.hideDelay = 1000;
+
 		// panel element
 		panel.create = function(){
 			// private variables
@@ -72,16 +74,18 @@ eqnx.def('panel', function(panel, callback){
 			// create new panel
 			panel.element = panel.create();
 
-			// hide panel when mouse leave panel
-			// use small delay just in case of ui mistake
-			panel.element.on('mouseleave', function(){
-				timer = setTimeout(panel.hide, 1500);
-			});
-
 			// append to html
 			panel.element.hide().appendTo('html').fadeIn('fast', function(){
 				// notify system about shown panel
 				eqnx.emit('panel/show', panel.element);
+			});
+
+			panel.element.hover(function() {
+				//Hover in
+				panel.element.data('hover','true');
+			}, function() {
+				//Hover out
+				panel.element.data('hover','false');
 			});
 		}
 
@@ -90,6 +94,11 @@ eqnx.def('panel', function(panel, callback){
 			// nothing to hide
 			if (!panel.element) return;
 
+			if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
+				// We're hovering over the element, delay hiding it
+				setTimeout(panel.hide, panel.hideDelay);
+				return;
+			}
 			// hide panel
 			panel.element.fadeOut('fast', function(){
 				// notify about panel hiding
@@ -120,7 +129,16 @@ eqnx.def('panel', function(panel, callback){
 		}
 
 		// setup trigger to show panel
-		eqnx.on('badge/hover', panel.show);
+		eqnx.on('badge/hover', function() {
+			panel.show();
+			panel.element.data('badge-hover','true');
+		});
+
+		// setup trigger to show panel
+		eqnx.on('badge/leave', function() {
+			panel.element.data('badge-hover','false');
+			setTimeout(panel.hide, panel.hideDelay);
+		});
 
 		// panel is ready
 		callback();
