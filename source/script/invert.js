@@ -53,6 +53,9 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
         switch ( conf.get( 'invert.page.state' ) ) {
             case 'invert':
+                $( dom_html ).css( css_invert_empty );
+                $( dom_html ).css( css_invert_full );
+
                 setStatePageInvert();
 
                 break;
