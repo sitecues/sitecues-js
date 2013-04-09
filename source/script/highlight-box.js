@@ -231,7 +231,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var isInflated = false;
                 setTimeout(function() {
                     if (!isInflated) {
-                        console.log("HLB in bad state! Closing!");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
