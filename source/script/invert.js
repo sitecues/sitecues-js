@@ -1,5 +1,5 @@
 eqnx.def( 'invert', function ( invert, callback ) {
-    eqnx.use( 'highlight-box', 'jquery', function ( highlight_box, $ ) {
+    eqnx.use( 'conf', 'highlight-box', 'jquery', function ( conf, highlight_box, $ ) {
         invert.STATES = {
             INVERT: {
                 id:   0,
@@ -28,9 +28,43 @@ eqnx.def( 'invert', function ( invert, callback ) {
             },
             dom_highlight_box          = null,
             dom_html                   = $( 'html' ),
-            invert_state_highlight_box = STATES.MATCH,
-            invert_state_page          = STATES.NORMAL
+            invert_state_highlight_box = null,
+            invert_state_page          = null
         ;
+
+        switch ( conf.get( 'invert.highlight-box.state' ) ) {
+            case 'invert':
+                setStateHighlightBoxInvert();
+
+                break;
+            case 'match':
+                setStateHighlightBoxMatch();
+
+                break;
+            case 'normal':
+                setStateHighlightBoxNormal();
+
+                break;
+            case undefined:
+                setStateHighlightBoxMatch();
+
+                break;
+        }
+
+        switch ( conf.get( 'invert.page.state' ) ) {
+            case 'invert':
+                setStatePageInvert();
+
+                break;
+            case 'normal':
+                setStatePageNormal();
+
+                break;
+            case undefined:
+                setStatePageNormal();
+
+                break;
+        }
 
         // To be removed. For debugging purposes.
         // setInterval( function () {
@@ -40,7 +74,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
         eqnx.on( 'hlb/deflating', function () {
             if ( invert_state_highlight_box === invert_state_page ) {
-                invert_state_highlight_box = STATES.MATCH;
+                setStateHighlightBoxMatch();
             }
         } );
 
@@ -98,7 +132,7 @@ eqnx.def( 'invert', function ( invert, callback ) {
                                     break;
                             }
 
-                            invert_state_highlight_box = STATES.NORMAL;
+                            setStateHighlightBoxNormal();
 
                             break;
                         case STATES.MATCH:
@@ -106,13 +140,13 @@ eqnx.def( 'invert', function ( invert, callback ) {
                                 case STATES.INVERT:
                                     $( dom_highlight_box ).css( css_invert_none );
 
-                                    invert_state_highlight_box = STATES.NORMAL;
+                                    setStateHighlightBoxNormal();
 
                                     break;
                                 case STATES.NORMAL:
                                     $( dom_highlight_box ).css( css_invert_full );
 
-                                    invert_state_highlight_box = STATES.INVERT;
+                                    setStateHighlightBoxInvert();
 
                                     break;
                             }
@@ -130,26 +164,35 @@ eqnx.def( 'invert', function ( invert, callback ) {
                                     break;
                             }
 
-                            invert_state_highlight_box = STATES.INVERT;
+                            setStateHighlightBoxInvert();
 
                             break;
                     }
                 } else if ( highlight_box_state === highlight_box_states.ON || highlight_box_state === highlight_box_states.CLOSED ) {
                     if ( invert_state_highlight_box === STATES.MATCH ) {
-                        invert_state_highlight_box = invert_state_page;
+                        switch ( invert_state_page ) {
+                            case STATES.INVERT:
+                                setStateHighlightBoxInvert();
+
+                                break;
+                            case STATES.NORMAL:
+                                setStateHighlightBoxNormal();
+
+                                break;
+                        }
                     }
 
                     switch ( invert_state_page ) {
                         case STATES.INVERT:
                             $( dom_html ).css( css_invert_none );
 
-                            invert_state_page = STATES.NORMAL;
+                            setStatePageNormal();
 
                             break;
                         case STATES.NORMAL:
                             $( dom_html ).css( css_invert_full );
 
-                            invert_state_page = STATES.INVERT;
+                            setStatePageInvert();
 
                             break;
                     }
@@ -165,6 +208,41 @@ eqnx.def( 'invert', function ( invert, callback ) {
         //     console.log( 'Invert          [page]: {' + invert_state_page.name + '}' );
         //     console.log( '' );
         // }
+
+        function setStateHighlightBoxInvert() {
+            invert_state_highlight_box = STATES.INVERT;
+
+            conf.set( 'invert.highlight-box.state', 'invert' );
+            eqnx.emit( 'invert/highlight-box/invert' );
+        }
+
+        function setStateHighlightBoxMatch() {
+            invert_state_highlight_box = STATES.MATCH;
+
+            conf.set( 'invert.highlight-box.state', 'match' );
+            eqnx.emit( 'invert/highlight-box/match' );
+        }
+
+        function setStateHighlightBoxNormal() {
+            invert_state_highlight_box = STATES.NORMAL;
+
+            conf.set( 'invert.highlight-box.state', 'normal' );
+            eqnx.emit( 'invert/highlight-box/normal' );
+        }
+
+        function setStatePageInvert() {
+            invert_state_page = STATES.INVERT;
+
+            conf.set( 'invert.page.state', 'invert' );
+            eqnx.emit( 'invert/page/invert' );
+        }
+
+        function setStatePageNormal() {
+            invert_state_page = STATES.NORMAL;
+
+            conf.set( 'invert.page.state', 'normal' );
+            eqnx.emit( 'invert/page/normal' );
+        }
 
         callback();
     } );
