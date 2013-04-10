@@ -34,8 +34,8 @@ eqnx.def('cursor', function (cursor, callback) {
          * Cursor element takes over the appearance of the mouse cursor.
          */
         // todo: add better support for cursor types.
-        cursor.init = function (zoomvalue) {
-            this.zoomLevel = zoomvalue;
+        cursor.init = function (value) {
+            this.zoomLevel = value;
             this.toogleState();
             handleMouseEvents();
         }
@@ -60,7 +60,7 @@ eqnx.def('cursor', function (cursor, callback) {
             }
 
             // Hide native cursor if custom cursor.
-            toogleRealCursor(false);
+            toggleRealCursor(false);
 
             // Init custom cursor position.
             if (this.clientX && this.clientY) {
@@ -81,7 +81,7 @@ eqnx.def('cursor', function (cursor, callback) {
             if (!this.element) {
                 return;
             }
-            toogleRealCursor(true);
+            toggleRealCursor(true);
             this.element.hide();
             eqnx.emit('cursor/hide', this.element);
 
@@ -164,7 +164,7 @@ eqnx.def('cursor', function (cursor, callback) {
          * If we are showing our own mouse cursor we don't want the real cursor because that would be a double cursor.
          * @param setRealCursorVisible
          */
-        function toogleRealCursor(setRealCursorVisible) {
+        function toggleRealCursor(setRealCursorVisible) {
             if (setRealCursorVisible) {
                 $('#' + cursor.kCursorHideRuleId).remove();
             } else {
@@ -270,8 +270,8 @@ eqnx.def('cursor', function (cursor, callback) {
         /**
          * Handle zoom event.
          */
-        eqnx.on('zoom', function (zoomvalue) {
-            cursor.init(zoomvalue);
+        eqnx.on('zoom', function (value) {
+            cursor.init(value);
         });
 
         // Done.
