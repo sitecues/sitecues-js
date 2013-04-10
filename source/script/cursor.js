@@ -189,13 +189,11 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         function whatCursorStyle(element, options) {
             element = $(element);
+            options = $.extend({
+                cursor_elements: null
+            }, options);
 
-            var
-                css_cursor = element.css('cursor'),
-                options    = $.extend({
-                    cursor_elements: null
-                }, options)
-            ;
+            var css_cursor = element.css('cursor');
 
             if (
                 css_cursor === 'auto' ||
