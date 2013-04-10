@@ -34,14 +34,14 @@ eqnx.def('cursor', function (cursor, callback) {
          * Cursor element takes over the appearance of the mouse cursor.
          */
         // todo: add better support for cursor types.
-        cursor.init = function (zoomvalue) {
-            this.zoomLevel = zoomvalue;
-            this.toogleState();
+        cursor.init = function (value) {
+            this.zoomLevel = value;
+            this.toggleState();
             handleMouseEvents();
-        }
+        };
 
         cursor.create = function () {
-            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
+            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls.default;
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
@@ -60,7 +60,7 @@ eqnx.def('cursor', function (cursor, callback) {
             }
 
             // Hide native cursor if custom cursor.
-            toogleRealCursor(false);
+            toggleRealCursor(false);
 
             // Init custom cursor position.
             if (this.clientX && this.clientY) {
@@ -81,7 +81,7 @@ eqnx.def('cursor', function (cursor, callback) {
             if (!this.element) {
                 return;
             }
-            toogleRealCursor(true);
+            toggleRealCursor(true);
             this.element.hide();
             eqnx.emit('cursor/hide', this.element);
 
@@ -90,9 +90,14 @@ eqnx.def('cursor', function (cursor, callback) {
         /**
          * Enables/disables the cursor module when needed.
          */
-        cursor.toogleState = function () {
+        cursor.toggleState = function () {
             this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
-            this.isEnabled ? this.show() : this.hide();
+
+            if (this.isEnabled) {
+                this.show();
+            } else {
+                this.hide();
+            }
         };
 
         /* Window event handlers */
@@ -164,7 +169,7 @@ eqnx.def('cursor', function (cursor, callback) {
          * If we are showing our own mouse cursor we don't want the real cursor because that would be a double cursor.
          * @param setRealCursorVisible
          */
-        function toogleRealCursor(setRealCursorVisible) {
+        function toggleRealCursor(setRealCursorVisible) {
             if (setRealCursorVisible) {
                 $('#' + cursor.kCursorHideRuleId).remove();
             } else {
@@ -183,11 +188,11 @@ eqnx.def('cursor', function (cursor, callback) {
          * @return {String|null}         Returns a string with the element's cursor style or null if it is unknown.
          */
         function whatCursorStyle(element, options) {
-            var options = $.extend({
+            element = $(element);
+            options = $.extend({
                 cursor_elements: null
             }, options);
 
-            var element    = $(element);
             var css_cursor = element.css('cursor');
 
             if (
@@ -270,8 +275,8 @@ eqnx.def('cursor', function (cursor, callback) {
         /**
          * Handle zoom event.
          */
-        eqnx.on('zoom', function (zoomvalue) {
-            cursor.init(zoomvalue);
+        eqnx.on('zoom', function (value) {
+            cursor.init(value);
         });
 
         // Done.
