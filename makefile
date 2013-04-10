@@ -108,7 +108,7 @@ endif
 	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
 	@rm -f target/manifest.txt
 	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
-		echo $(CURDIR)/$$FILE:$$FILE >> ../../manifest.txt ; \
+		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
 	done)
 	@echo "Packaging completed."
 
