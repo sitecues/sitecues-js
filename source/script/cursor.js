@@ -36,7 +36,7 @@ eqnx.def('cursor', function (cursor, callback) {
         // todo: add better support for cursor types.
         cursor.init = function (value) {
             this.zoomLevel = value;
-            this.toogleState();
+            this.toggleState();
             handleMouseEvents();
         };
 
@@ -90,7 +90,7 @@ eqnx.def('cursor', function (cursor, callback) {
         /**
          * Enables/disables the cursor module when needed.
          */
-        cursor.toogleState = function () {
+        cursor.toggleState = function () {
             this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
 
             if (this.isEnabled) {
