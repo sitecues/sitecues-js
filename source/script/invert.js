@@ -53,9 +53,8 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
         switch ( conf.get( 'invert.page.state' ) ) {
             case 'invert':
-                $( dom_html ).css( css_invert_empty );
-                $( dom_html ).css( css_invert_full );
-
+                setStylePageEmpty();
+                setStylePageFull();
                 setStatePageInvert();
 
                 break;
@@ -89,21 +88,21 @@ eqnx.def( 'invert', function ( invert, callback ) {
             switch ( invert_state_highlight_box ) {
                 case STATES.INVERT:
                     if ( invert_state_page === STATES.INVERT ) {
-                        $( dom_highlight_box ).css( css_invert_empty );
+                        setStyleHighlightBoxEmpty();
                     } else {
-                        $( dom_highlight_box ).css( css_invert_full );
+                        setStyleHighlightBoxFull();
                     }
 
                     break;
                 case STATES.MATCH:
-                    $( dom_highlight_box ).css( css_invert_empty );
+                    setStyleHighlightBoxEmpty();
 
                     break;
                 case STATES.NORMAL:
                     if ( invert_state_page === STATES.NORMAL ) {
-                        $( dom_highlight_box ).css( css_invert_empty );
+                        setStyleHighlightBoxEmpty();
                     } else {
-                        $( dom_highlight_box ).css( css_invert_full );
+                        setStyleHighlightBoxFull();
                     }
 
                     break;
@@ -126,11 +125,11 @@ eqnx.def( 'invert', function ( invert, callback ) {
                         case STATES.INVERT:
                             switch ( invert_state_page ) {
                                 case STATES.INVERT:
-                                    $( dom_highlight_box ).css( css_invert_full );
+                                    setStyleHighlightBoxFull();
 
                                     break;
                                 case STATES.NORMAL:
-                                    $( dom_highlight_box ).css( css_invert_none );
+                                    setStyleHighlightBoxNone();
 
                                     break;
                             }
@@ -141,14 +140,12 @@ eqnx.def( 'invert', function ( invert, callback ) {
                         case STATES.MATCH:
                             switch ( invert_state_page ) {
                                 case STATES.INVERT:
-                                    $( dom_highlight_box ).css( css_invert_none );
-
+                                    setStyleHighlightBoxNone();
                                     setStateHighlightBoxNormal();
 
                                     break;
                                 case STATES.NORMAL:
-                                    $( dom_highlight_box ).css( css_invert_full );
-
+                                    setStyleHighlightBoxFull();
                                     setStateHighlightBoxInvert();
 
                                     break;
@@ -158,11 +155,11 @@ eqnx.def( 'invert', function ( invert, callback ) {
                         case STATES.NORMAL:
                             switch ( invert_state_page ) {
                                 case STATES.INVERT:
-                                    $( dom_highlight_box ).css( css_invert_none );
+                                    setStyleHighlightBoxNone();
 
                                     break;
                                 case STATES.NORMAL:
-                                    $( dom_highlight_box ).css( css_invert_full );
+                                    setStyleHighlightBoxFull();
 
                                     break;
                             }
@@ -187,13 +184,12 @@ eqnx.def( 'invert', function ( invert, callback ) {
 
                     switch ( invert_state_page ) {
                         case STATES.INVERT:
-                            $( dom_html ).css( css_invert_none );
-
+                            setStylePageNone();
                             setStatePageNormal();
 
                             break;
                         case STATES.NORMAL:
-                            $( dom_html ).css( css_invert_full );
+                            setStylePageFull();
 
                             setStatePageInvert();
 
@@ -211,40 +207,53 @@ eqnx.def( 'invert', function ( invert, callback ) {
         //     console.log( 'Invert          [page]: {' + invert_state_page.name + '}' );
         //     console.log( '' );
         // }
-
         function setStateHighlightBoxInvert() {
             invert_state_highlight_box = STATES.INVERT;
 
             conf.set( 'invert.highlight-box.state', 'invert' );
             eqnx.emit( 'invert/highlight-box/invert' );
         }
-
         function setStateHighlightBoxMatch() {
             invert_state_highlight_box = STATES.MATCH;
 
             conf.set( 'invert.highlight-box.state', 'match' );
             eqnx.emit( 'invert/highlight-box/match' );
         }
-
         function setStateHighlightBoxNormal() {
             invert_state_highlight_box = STATES.NORMAL;
 
             conf.set( 'invert.highlight-box.state', 'normal' );
             eqnx.emit( 'invert/highlight-box/normal' );
         }
-
         function setStatePageInvert() {
             invert_state_page = STATES.INVERT;
 
             conf.set( 'invert.page.state', 'invert' );
             eqnx.emit( 'invert/page/invert' );
         }
-
         function setStatePageNormal() {
             invert_state_page = STATES.NORMAL;
 
             conf.set( 'invert.page.state', 'normal' );
             eqnx.emit( 'invert/page/normal' );
+        }
+        function setStyleHighlightBoxEmpty() {
+            $( dom_highlight_box ).css( css_invert_empty );
+        }
+        function setStyleHighlightBoxFull() {
+            $( dom_highlight_box ).css( css_invert_full );
+        }
+        function setStyleHighlightBoxNone() {
+            $( dom_highlight_box ).css( css_invert_none );
+        }
+        function setStylePageEmpty() {
+            $( dom_html ).css( css_invert_empty );
+        }
+        function setStylePageFull() {
+            $( dom_html ).css( css_invert_full );
+        }
+        function setStylePageNone() {
+            $( dom_html ).css( css_invert_none );
         }
 
         callback();
