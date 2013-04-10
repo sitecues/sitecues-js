@@ -20,7 +20,7 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
                     opacity: '0'
                 }).appendTo(document.body);
                 //$(dimmerDiv).animate({opacity: this.kDimmingOpacity.toString()}, backgroundDimmer.kDimmingSpeed);
-								$( dimmerDiv ).css({opacity: this.kDimmingCapacity.toString()});
+				$( dimmerDiv ).css({opacity: this.kDimmingOpacity.toString()});
             }
         };
         backgroundDimmer.removeDimmer = function () {
