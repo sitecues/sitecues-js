@@ -38,10 +38,10 @@ eqnx.def('cursor', function (cursor, callback) {
             this.zoomLevel = value;
             this.toogleState();
             handleMouseEvents();
-        }
+        };
 
         cursor.create = function () {
-            var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
+            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls.default;
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
@@ -92,7 +92,12 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         cursor.toogleState = function () {
             this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
-            this.isEnabled ? this.show() : this.hide();
+
+            if (isEnabled) {
+                this.show();
+            } else {
+                this.hide();
+            }
         };
 
         /* Window event handlers */
@@ -183,12 +188,14 @@ eqnx.def('cursor', function (cursor, callback) {
          * @return {String|null}         Returns a string with the element's cursor style or null if it is unknown.
          */
         function whatCursorStyle(element, options) {
-            var options = $.extend({
-                cursor_elements: null
-            }, options);
+            element = $(element);
 
-            var element    = $(element);
-            var css_cursor = element.css('cursor');
+            var
+                css_cursor = element.css('cursor'),
+                options    = $.extend({
+                    cursor_elements: null
+                }, options)
+            ;
 
             if (
                 css_cursor === 'auto' ||
