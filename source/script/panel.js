@@ -1,8 +1,8 @@
-eqnx.def('panel', function(panel, callback){
+eqnx.def( 'panel', function( panel, callback ) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	eqnx.use('jquery', 'conf', 'speech', 'ui', function($, conf, speech){
+	eqnx.use( 'jquery', 'conf', 'speech', 'ui', function( $, conf, speech ) {
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -17,46 +17,46 @@ eqnx.def('panel', function(panel, callback){
 			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
-			frame = $('<div>').attr('id', 'eqnx-panel');
+			frame = $( '<div>' ).attr( 'id', 'eqnx-panel' );
 
 			// create small A label
-			$('<div>').addClass('small').text('A').appendTo(frame);
+			$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
 
 			// create clider wrap element
-			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+			wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(frame);
 
 			// create slider
-			slider = $('<input>').addClass('slider').attr({
-				type: 'range',
-				min: '1',
-				max: '5',
-				step: '0.1',
-				ariaLabel: 'See it better'
-			}).appendTo(wrap);
+			slider = $( '<input>' ).addClass( 'slider' ).attr({
+				type: 			'range',
+				min: 				'1',
+				max: 				'5',
+				step: 			'0.1',
+				ariaLabel: 	'See it better'
+			}).appendTo( wrap );
 
 			// create big A label
-			$('<div>').addClass('big').text('A').appendTo(frame);
+			$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );
 
 			// create TTS button and set it up
-			ttsButton = $('<div>').addClass('tts').appendTo(frame);
-			if(speech.isEnabled()) {
-				ttsButton.data('tts-enable', 'enabled');
+			ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( frame );
+			if ( speech.isEnabled() ) {
+				ttsButton.data( 'tts-enable', 'enabled' );
 			} else {
-				ttsButton.addClass("tts-disabled");
-				ttsButton.data('tts-enable', 'disabled');
+				ttsButton.addClass( "tts-disabled" );
+				ttsButton.data( 'tts-enable', 'disabled' );
 			}
-			ttsButton.click(function() {
+			ttsButton.click( function() {
 				panel.ttsToggle();
 			});
 
 			// handle slider value change
-			slider.change(function(){
-				conf.set('zoom', this.value);
+			slider.change( function() {
+				conf.set( 'zoom', this.value );
 			});
 
 			// handle zoom change and update slider
-			conf.get('zoom', function(value){
-				slider.val(value);
+			conf.get( 'zoom', function( value ) {
+				slider.val( value );
 			});
 
 			// return panel
@@ -74,12 +74,25 @@ eqnx.def('panel', function(panel, callback){
 			// create new panel
 			panel.element = panel.create();
 
+			// Animate instead of fade
+			panel.element.hide().appendTo('html').animate(
+				{
+					right: '+=0',
+					width: 'toggle',
+					height: 'toggle',
+					opacity: 1.0
+				},
+				750,
+				function() {
+					eqnx.emit('panel/show', panel.element);
+				});
+/*
 			// append to html
 			panel.element.hide().appendTo('html').fadeIn('fast', function(){
 				// notify system about shown panel
 				eqnx.emit('panel/show', panel.element);
 			});
-
+*/
 			panel.element.hover(function() {
 				//Hover in
 				panel.element.data('hover','true');
