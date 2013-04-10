@@ -93,7 +93,7 @@ eqnx.def('cursor', function (cursor, callback) {
         cursor.toogleState = function () {
             this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
 
-            if (isEnabled) {
+            if (this.isEnabled) {
                 this.show();
             } else {
                 this.hide();
