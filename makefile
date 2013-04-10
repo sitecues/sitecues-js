@@ -105,7 +105,7 @@ endif
 	@echo $(version) > $(package-basedir)/$(version)/VERSION.TXT
 	@cp target/script/equinox.js $(package-basedir)/$(version)
 	@cp target/style/default.css $(package-basedir)/$(version)
-	@tar -C $(package-basedir) -zcf target/equinox-js-$(version).tar.gz $(version)
+	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
 	@rm -f target/manifest.txt
 	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
 		echo $(CURDIR)/$$FILE:$$FILE >> ../../manifest.txt ; \
