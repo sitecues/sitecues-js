@@ -11,8 +11,7 @@ eqnx.def('ui', function(ui, callback){
 
 		// load default style, and only after it
 		// is loaded module is ready
-		load.style('/default.css', callback)
+		load.style('default.css', callback)
 
 	});
-
 });
