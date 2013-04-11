@@ -86,13 +86,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 				function() {
 					eqnx.emit('panel/show', panel.element);
 				});
-/*
-			// append to html
-			panel.element.hide().appendTo('html').fadeIn('fast', function(){
-				// notify system about shown panel
-				eqnx.emit('panel/show', panel.element);
-			});
-*/
+
 			panel.element.hover(function() {
 				//Hover in
 				panel.element.data('hover','true');
