@@ -25,7 +25,10 @@ eqnx.def('keys', function(keys, callback){
 		'r':		{
 			event: 'inverse/toggle'
 		},
-		'space':	{ event: 'highlight/animate' }
+		'space':	{
+			event: 'highlight/animate',
+			preventDefault: true
+		}
 	};
 
 	// handle key
