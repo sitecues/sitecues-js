@@ -52,8 +52,9 @@ eqnx.def('conf', function(conf, callback){
 		var list;
 
 		// handle sync getting of value
-		if (undefined === callback)
+		if (callback === undefined) {
 			return data[key];
+		}
 
 		// create new list if needed
 		if (undefined === (list = listeners[key]))
