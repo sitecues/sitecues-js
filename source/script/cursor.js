@@ -35,7 +35,7 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         // todo: add better support for cursor types.
         cursor.init = function (value) {
-            this.zoomLevel = value;
+            this.zoomLevel = value * value;
             this.toggleState();
         };
 
