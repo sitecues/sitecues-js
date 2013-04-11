@@ -6,7 +6,7 @@
 
 eqnx.def('speech', function(speech, callback) {
 
-    eqnx.use('jquery', 'conf', 'util', 'speech/azure', 'speech/ivona', function(_jQuery, conf, util, _azure, _ivona) {
+    eqnx.use('jquery', 'conf', 'speech/azure', 'speech/ivona', function(_jQuery, conf, _azure, _ivona) {
 
         var players = {};
         var azure = _azure;
@@ -14,8 +14,8 @@ eqnx.def('speech', function(speech, callback) {
         var jQuery=_jQuery;
 
         // console.log(robovoice);
-        // TTS is enabled by default
-        var ttsEnable = !(conf.get("ttsEnable") == 'false');
+        // TTS is disabled by default
+        var ttsEnable = conf.get("ttsEnable") === 'true';
 
         // This is the engine we're using, required, no default
         var ttsEngine = conf.get("ttsEngine");
@@ -117,7 +117,9 @@ eqnx.def('speech', function(speech, callback) {
         speech.stopAll = function() {
             console.log("Stopping all players");
             jQuery.each(players, function(key, value) {
-                setTimeout(value.stop(),5);
+                if(value) {
+                    setTimeout(value.stop(),5);
+                }
             });
         }
 
@@ -125,9 +127,12 @@ eqnx.def('speech', function(speech, callback) {
          * Iterates through all of the players and destroys them.
          */
         speech.destroyAll = function() {
-            console.log("Stopping all players");
+            console.log("Destroying all players");
             jQuery.each(players, function(key, value) {
-                setTimeout(value.destroy(),5);
+                if(value) {
+                    setTimeout(value.destroy(),5);
+                }
+                players[key] = null;
             });
         }
 
@@ -142,6 +147,7 @@ eqnx.def('speech', function(speech, callback) {
                     callback();
                 }
             }
+            console.log("tts enabled");
         }
 
         /*
@@ -153,6 +159,7 @@ eqnx.def('speech', function(speech, callback) {
             if (callback) {
                 callback();
             }
+            console.log("tts disabled");
         }
 
         /**
@@ -176,6 +183,15 @@ eqnx.def('speech', function(speech, callback) {
             return hlb.id
         }
 
+        /**
+         * Returns if TTS is enabled or not.  Always returns true or false.
+         */
+        speech.isEnabled = function() {
+            if(ttsEnable) {
+                return true;
+            }
+            return false;
+        }
 
         /*
          * Enables TTS, if possible.

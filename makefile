@@ -1,4 +1,6 @@
 # Parameters.
+version=$(USER)-`date -u +'%Y%m%d%H%M%S'`
+package-basedir:=target/package
 clean-deps=false
 dev=false
 
@@ -16,7 +18,8 @@ files=\
 	source/script/ui.js  \
 	source/script/load.js \
 	source/script/style.js \
-	source/script/util.js \
+	source/script/util/positioning.js \
+	source/script/util/common.js \
 	source/script/badge.js \
 	source/script/panel.js \
 	source/script/zoom.js \
@@ -33,6 +36,8 @@ files=\
 	source/script/mouse-highlight/picker.js \
 	source/script/speech.js \
 	source/script/speech/azure.js \
+	source/script/speech/ivona.js \
+	source/script/speech/jplayer.js \
 	source/script/invert.js \
 	# source/script/toolbar.js \
 
@@ -89,6 +94,24 @@ build: $(_build_lint_dep)
 	@cp source/style/default.css target/style/default.css
 	@echo "Building completed."
 
+# TARGET: package
+# Package up the files into a deployable bundle, and create a manifest for local file deployment 
+package: build
+ifeq ($(dev), true)
+	$(error Unable to package a development build)
+endif
+	@echo "Packaging started."
+	@mkdir -p $(package-basedir)/$(version)
+	@echo $(version) > $(package-basedir)/$(version)/VERSION.TXT
+	@cp target/script/equinox.js $(package-basedir)/$(version)
+	@cp target/style/default.css $(package-basedir)/$(version)
+	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
+	@rm -f target/manifest.txt
+	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
+		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
+	done)
+	@echo "Packaging completed."
+
 # TARGET: clean
 # Clean the target directory.
 clean:
@@ -120,3 +143,4 @@ lint:
 run:
 	@echo "Running."
 	@./binary/web $(port) $(https)
+	

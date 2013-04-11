@@ -6,8 +6,8 @@ eqnx.def('caret/view', function(view, callback){
 	view.kZindex = 2147483647 - 1;
 	view.kCaretId = 'eqnx-eq360-caret';
 
-	// depends on `jquery`, `conf`, `style`, `caret/coords` and `geo`
-	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util', 'ui', function($, conf, styles, coords, util){
+	// Add dependencies
+	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util/positioning', 'ui', function($, conf, styles, coords, positioning){
 
 		// show caret view
 		view.show = function(target){
@@ -35,7 +35,7 @@ eqnx.def('caret/view', function(view, callback){
 			style['paddingLeft'] = Math.round(parseFloat(style['paddingLeft'])) + 'px';
 			style['paddingTop'] = Math.round(parseFloat(style['paddingTop'])) + 'px';
 			var caretRect = coords.getUpdatedCaretRect(target, style, sel.end, zoomLevel);
-			var origPos = util.getOffset(target);
+			var origPos = positioning.getOffset(target);
 			caretRect.left = caretRect.left + origPos.left;
 			caretRect.top = caretRect.top + origPos.top;
 

@@ -10,7 +10,8 @@ eqnx.def('focus', function(focus, callback){
 
 	// selector for elements focus
 	// enhancement should be applied
-	focus.selector = 'input';
+	//focus.selector = 'input';
+	focus.selector = 'input,a,textarea,[tabindex],button,select';
 
 	// depends on jquery and conf modules
 	eqnx.use('jquery', 'conf', function($, conf){

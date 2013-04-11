@@ -25,7 +25,7 @@ eqnx.def('cursor', function (cursor, callback) {
     cursor.kMinCursorZoom = 1.5;
 
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
+    eqnx.use('jquery', 'conf', 'util/positioning', 'ui', function ($, conf, positioning) {
         // private variables
         cursor.styleRuleParent = $('head');
         cursor.isEnabled = (cursor.zoomLevel >= cursor.kMinCursorZoom);
@@ -76,7 +76,7 @@ eqnx.def('cursor', function (cursor, callback) {
         };
 
         cursor.update = function () {
-            util.setZoom( this.element, this.zoomLevel, {
+            positioning.setZoom( this.element, this.zoomLevel, {
                 x: 0,
                 y: 0
             } );
@@ -140,7 +140,7 @@ eqnx.def('cursor', function (cursor, callback) {
             // Update image of the cursor element if the target requires.
             changeCursorDisplay($(e.target));
             // Update custom cursor position.
-            var position = util.getMouseCoords(e, cursor.zoomLevel);
+            var position = positioning.getMouseCoords(e, cursor.zoomLevel);
             if (position.left && position.top) {
                 cursor.element.css({
                     left: position.left + 'px',
@@ -279,7 +279,7 @@ eqnx.def('cursor', function (cursor, callback) {
          * Consider this as the start point of the module body.
          */
         $(document).bind('mousemove click', function (e) {
-            var position = util.getMouseCoords(e, cursor.zoomLevel);
+            var position = positioning.getMouseCoords(e, cursor.zoomLevel);
 
             cursor.clientX = position.left;
             cursor.clientY = position.top;
