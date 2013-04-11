@@ -179,12 +179,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var color = compStyle.getPropertyCSSValue("color");
                 var isContrastColors = common.getIsContrastColors(color, newBgColor);
                 
+                var clientRect = this.item.getBoundingClientRect();
+
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    width: origRectSize.width,
+                    width: clientRect.width, // sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
                     height: 'auto',
                     maxHeight: cssUpdate.maxHeight,
                     zIndex: HighlightBox.kBoxZindex.toString(),
@@ -274,7 +276,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1],
                     offsetParent = this.itemNode.offsetParent();
 
-                var cssAnimateStyles = $.extend({}, currentStyle, { position: 'absolute', transform: 'scale(1)' });
+                var clientRect = this.item.getBoundingClientRect();
+
+                var cssAnimateStyles = $.extend({},currentStyle,{
+                        position: 'absolute', 
+                        transform: 'scale(1)', 
+                        width: clientRect.width
+                    });
 
                 // Elements relative to the root don't need extra margins, use original values instead.
                 if (offsetParent[0].tagName.toLowerCase() === 'html') {
