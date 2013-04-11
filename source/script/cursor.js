@@ -16,8 +16,8 @@ eqnx.def('cursor', function (cursor, callback) {
 
     /* Constants */
     cursor.image_urls = {
-        'default': '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
-        'pointer': '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
+        _default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
+        pointer:  '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
     };
     cursor.kCursorHideRuleId = 'eqnx-eq360-cursor-hide-rule';
     cursor.kCursorId = 'eqnx-eq360-cursor';
@@ -40,12 +40,12 @@ eqnx.def('cursor', function (cursor, callback) {
         };
 
         cursor.create = function () {
-            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls['default'];
+            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls._default;
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
                                 .css({zIndex: this.kZindex.toString()})
-                                .appendTo('body');
+                                .appendTo('html');
 
             return cursorElement;
         };
@@ -172,7 +172,7 @@ eqnx.def('cursor', function (cursor, callback) {
             var newCursorType = whatCursorStyle($(target));
             if (cursor.cursorType !== newCursorType) { // if cursor type has changed
                 cursor.cursorType = newCursorType;
-                var properImageLocation = cursor.cursorType === 'pointer' ? cursor.image_urls.pointer : cursor.image_urls.default;
+                var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls._default;
                 cursor.element.removeAttr('src').attr('src', properImageLocation);
             }
         }
