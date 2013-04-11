@@ -16,7 +16,7 @@ eqnx.def('keys', function(keys, callback){
 			return ( event.keyCode === 82 );
 		},
 		'space':	function(event){ return event.keyCode === 32; }
-	}
+	};
 
 	// define keys map used to bind actions to hotkeys
 	keys.map = {
@@ -25,17 +25,50 @@ eqnx.def('keys', function(keys, callback){
 		'r':		{
 			event: 'inverse/toggle'
 		},
-		'space':	{ event: 'highlight/animate', preventDefault: true }
-	}
+		'space':	{ event: 'highlight/animate' }
+	};
 
 	// handle key
-	keys.handle = function(key, event){
+	keys.handle = function ( key, event ) {
 		// if event defined, emit it
-		if (key.event) eqnx.emit(key.event, event);
+		if ( key.event ) {
+			eqnx.emit( key.event, event );
+		}
 
 		// prevent default if needed
 		if (key.preventDefault) event.preventDefault();
-	}
+	};
+
+	keys.isEditable = function ( element ) {
+		var tag = element.localName;
+
+		if ( ! tag ) {
+			return false;
+		}
+
+		tag = tag.toLowerCase();
+
+		if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
+			return true;
+		}
+
+		if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
+			return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+		}
+
+		// Check for rich text editor
+		var contentEditable = element.getAttribute('contenteditable');
+
+		if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
+			return true; // In editor
+		}
+
+		if ( document.designMode === 'on' ) {
+			return true; // Another kind of editor
+		}
+
+		return false;
+	};
 
 	// get dependencies
 	eqnx.use('jquery', function($){
@@ -45,8 +78,10 @@ eqnx.def('keys', function(keys, callback){
 			// private variables
 			var i, l, key, test, parts, result;
 
-			// ignore events from input fields
-			if ($(event.target).is('input, textarea')) return;
+			// ignore events from editable elements
+			if ( keys.isEditable( event.target ) ) {
+				return;
+			}
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
@@ -62,7 +97,7 @@ eqnx.def('keys', function(keys, callback){
 					test = keys.test[parts[i]];
 
 					// collect all checks
-					result = result & (test && test(event));
+					result = ( !! result ) & ( test && test( event ) );
 				}
 
 				// if all checks passed, handle key
