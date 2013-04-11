@@ -16,8 +16,8 @@ eqnx.def('cursor', function (cursor, callback) {
 
     /* Constants */
     cursor.image_urls = {
-        default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
-        pointer: '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
+        'default': '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
+        'pointer': '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
     };
     cursor.kCursorHideRuleId = 'eqnx-eq360-cursor-hide-rule';
     cursor.kCursorId = 'eqnx-eq360-cursor';
@@ -28,7 +28,7 @@ eqnx.def('cursor', function (cursor, callback) {
     eqnx.use('jquery', 'conf', 'util', 'ui', function ($, conf, util) {
         // private variables
         cursor.styleRuleParent = $('head');
-        cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
+        cursor.isEnabled = (cursor.zoomLevel >= cursor.kMinCursorZoom);
 
         /**
          * Cursor element takes over the appearance of the mouse cursor.
@@ -37,11 +37,10 @@ eqnx.def('cursor', function (cursor, callback) {
         cursor.init = function (value) {
             this.zoomLevel = value;
             this.toggleState();
-            handleMouseEvents();
         };
 
         cursor.create = function () {
-            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls.default;
+            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls['default'];
             var cursorElement = $('<img>')
                                 .attr('id', this.kCursorId)
                                 .attr('src', properImageLocation)
@@ -70,8 +69,19 @@ eqnx.def('cursor', function (cursor, callback) {
                 })
                 .show();
             }
-            util.setZoom(this.element, this.zoomLevel, {x: 0, y: 0});
+
+            this.update();
+
             eqnx.emit('cursor/show', this.element);
+        };
+
+        cursor.update = function () {
+            util.setZoom( this.element, this.zoomLevel, {
+                x: 0,
+                y: 0
+            } );
+
+            eqnx.emit('cursor/update', this.element);
         };
 
         /**
@@ -82,41 +92,44 @@ eqnx.def('cursor', function (cursor, callback) {
                 return;
             }
             toggleRealCursor(true);
-            this.element.hide();
-            eqnx.emit('cursor/hide', this.element);
 
+            this.element.hide();
+
+            eqnx.emit('cursor/hide', this.element);
         };
 
         /**
          * Enables/disables the cursor module when needed.
          */
         cursor.toggleState = function () {
+            var cursorWasEnabled = this.isEnabled;
+
             this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
 
-            if (this.isEnabled) {
+            if (cursorWasEnabled && this.isEnabled) {
+                this.update();
+            } else if (this.isEnabled) {
                 this.show();
+
+                handleCursorEnabled();
             } else {
                 this.hide();
+
+                handleCursorDisabled();
             }
         };
 
-        /* Window event handlers */
+        function handleCursorEnabled() {
+            window.addEventListener("mousemove", mouseMoveHandler, false);
+            // Track if user only clicks zoomin/zoomout buttons but do not move the mouse.
+            window.addEventListener("click", mouseMoveHandler, false);
+            window.addEventListener("mouseout", mouseOutHandler, false);
+        }
 
-        /**
-         * Bind or unbind window events we care about.
-         */
-        // todo: set 'blur' and 'focus' window events listeners/handlers if necessary.
-        function handleMouseEvents() {
-            if (cursor.isEnabled) {
-                window.addEventListener("mousemove", mouseMoveHandler, false);
-                // Track if user only clicks zoomin/zoomout buttons but do not move the mouse.
-                window.addEventListener("click", mouseMoveHandler, false);
-                window.addEventListener("mouseout", mouseOutHandler, false);
-            } else {
-                window.removeEventListener("mousemove", mouseMoveHandler, false);
-                window.removeEventListener("click", mouseMoveHandler, false);
-                window.removeEventListener("mouseout", mouseOutHandler, false);
-            }
+        function handleCursorDisabled() {
+            window.removeEventListener("mousemove", mouseMoveHandler, false);
+            window.removeEventListener("click", mouseMoveHandler, false);
+            window.removeEventListener("mouseout", mouseOutHandler, false);
         }
 
         /**
@@ -267,9 +280,11 @@ eqnx.def('cursor', function (cursor, callback) {
          */
         $(document).bind('mousemove click', function (e) {
             var position = util.getMouseCoords(e, cursor.zoomLevel);
+
             cursor.clientX = position.left;
             cursor.clientY = position.top;
         });
+
         cursor.init(conf.get('zoom'));
 
         /**
@@ -281,6 +296,5 @@ eqnx.def('cursor', function (cursor, callback) {
 
         // Done.
         callback();
-
     });
 });
