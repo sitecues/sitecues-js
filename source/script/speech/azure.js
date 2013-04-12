@@ -10,10 +10,9 @@ eqnx.def('speech/azure', function(azure, callback) {
 
         azure.factory = function(hlb) {
         	console.log(remote.azureAccessToken.accessToken);
-        	var roboVoice = new RoboVoice();
+        	var roboVoice = new RoboVoice(remote.azureAccessToken.accessToken);
         	return new AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
-
     });
 
     // end
