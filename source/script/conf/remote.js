@@ -32,13 +32,8 @@ eqnx.def('conf/remote', function(remote, callback){
                                 data.azureAccessToken.expires += offset;
                                 remote.azureAccessToken = data.azureAccessToken;
                             }
-                            for(var i = 0; i < data.settings.length; i++){
-                                if (conf.get(data.settings[i].key)){
-                                    console.log(data.settings[i].key + ' is overriden by local value ' + conf.get(data.settings[i].key));
-                                } else {
-                                    conf.set(data.settings[i].key, data.settings[i].value);
-                                    console.log(data.settings[i].key + ' is using remote value ' + conf.get(data.settings[i].key));
-                                }
+                            for (var i = 0; i < data.settings.length; i++) {
+                                conf.set(data.settings[i].key, data.settings[i].value);
                             }
 
                             callback();
@@ -48,9 +43,7 @@ eqnx.def('conf/remote', function(remote, callback){
                     console.log('cannot fetch settings, _setSite is not defined');
                     callback();
                 }
-
             });
-
         }
 
         remote.fetch();

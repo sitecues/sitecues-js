@@ -24,14 +24,9 @@ eqnx.def('speech/ivona', function(ivona, callback) {
 
 function IvonaPlayer(_hlb, conf, _jQuery) {
 
-	var myState='init';
-	var hlb;
-	if(hlb instanceof jQuery) {
-		hlb =_hlb;
-	} else {
-		hlb = _jQuery(_hlb);
-	}
-
+	var myState = 'init';
+	var hlb = _jQuery(_hlb);
+    var baseMediaUrl = "//ws.sitecues.com/equinox/api/ivona/5/speechfile?contentType=text/plain&";
 	this.init = function() {
 		_jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
 		console.log(_jQuery("#jPlayer-" + hlb.attr('id')));
@@ -39,8 +34,8 @@ function IvonaPlayer(_hlb, conf, _jQuery) {
 		    ready: function() {
 		    	console.log("jPlayer Ready");
 			    _jQuery(this).jPlayer( "setMedia", {
-					mp3: "/Def_Leppard.mp3?text=" + encodeURIComponent(hlb.text()),
-					oga: "/ACDC_-_Back_In_Black-sample.ogg?text=" + encodeURIComponent(hlb.text())
+					mp3: baseMediaUrl + "codecId=mp3&text=" + encodeURIComponent(hlb.text()),
+					oga: baseMediaUrl + "codecId=ogg&text=" + encodeURIComponent(hlb.text())
 			    });
 			    if(myState === 'waiting') {
 			    	_jQuery(this).jPlayer('play');
