@@ -16,6 +16,13 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
 
+		// Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
+		// http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
+		// Array of what we'd expect if we didn't have a background color
+		var transparentColorNamesSet = [
+			'transparent',
+			'rgba(0, 0, 0, 0)'
+		];
         // The states that the HLB can be in.
         // TODO: Convert to state instances.
         var STATES = highlightBox.STATES = {
@@ -168,25 +175,19 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var center    = positioning.getCenter(this.item);
                 var totalZoom = positioning.getTotalZoom(this.item, true);
                 var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
+				// Fetch the exact value for width(not rounded)
+				var clientRect = this.item.getBoundingClientRect();
 
                 // Handle table special behaviour on inner contents.
                 handleTableElement(this.itemNode, currentStyle);
-                
-                // If background color computed is not contrast to text color, invert background one.
-                var oldBgColor = currentStyle.backgroundColor;
-                var newBgColor = getNewBackgroundColor(this.itemNode, oldBgColor);
-                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-                var color = compStyle.getPropertyCSSValue("color");
-                var isContrastColors = common.getIsContrastColors(color, newBgColor);
-                
-                var clientRect = this.item.getBoundingClientRect();
 
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
                     transformOrigin: '50% 50%',
                     position: 'absolute',
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    width: clientRect.width, // sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
+					// Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
+                    width: clientRect.width, 
                     height: 'auto',
                     maxHeight: cssUpdate.maxHeight,
                     zIndex: HighlightBox.kBoxZindex.toString(),
@@ -197,11 +198,28 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     borderColor:  HighlightBox.kBoxBorderColor,
                     borderStyle:  HighlightBox.kBoxBorderStyle,
                     borderWidth:  HighlightBox.kBoxBorderWidth,
-                    padding:      HighlightBox.kBoxPadding,
-                    backgroundColor: isContrastColors ? newBgColor : common.getRevertColor(newBgColor)
-                }),
+                    padding:      HighlightBox.kBoxPadding
+                });
+
+                var oldBgColor = currentStyle.backgroundColor;
+				var oldBgImage = currentStyle.backgroundImage;
+				var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
+
+				// If background color computed is not contrast to text color, invert background one.
+				var newBgColor = newBg.bgColor;
+				var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+				var color = compStyle.getPropertyCSSValue("color");
+				var isContrastColors = common.getIsContrastColors(color, newBgColor);
+				cssBeforeAnimateStyles.backgroundColor = isContrastColors ? newBgColor : common.getRevertColor(newBgColor);
+
+				if (newBg.bgImage) {
+					cssBeforeAnimateStyles.backgroundRepeat = newBg.bgRepeat;
+					cssBeforeAnimateStyles.backgroundImage  = newBg.bgImage;
+					cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
+				}
+
                 // Only animate the most important values so that animation is smoother
-                cssAnimateStyles = $.extend({}, cssUpdate, {
+                var cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')'
                 });
 
@@ -368,8 +386,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
-            // TODO: Fix incorrect checks for viewport boundaries exceeding appearing due to the fact
-            // getViewportDimensions() doesn't take into account 'zoom' value(util/positioning supports 'transform' value for its calculation).
             function getNewRectStyle(selector, center, extraZoom, totalZoom) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
@@ -435,9 +451,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     }
 
                     // Reduce the dimensions to a non-zoomed value.
-
                     width = (newWidth || width) / extraZoom;
                     height = (newHeight || height) / extraZoom;
+
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.
                     var css = jElement.css(['marginLeft', 'marginTop']);
@@ -490,40 +506,81 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             /**
              * Get the background color of highlight box when it appears.
              */
-            function getNewBackgroundColor(itemNode, oldBgColor) {
-                // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
-                // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
-                // Array of what we'd expect if we didn't have a background color
-                var transparentColorNamesSet = [
-                    'transparent',
-                    'rgba(0, 0, 0, 0)'
-                ];
+			// TODO: take out getBgImage and getBgColor
+            function getNewBackground(itemNode, oldBgColor, oldBgImage) {
+				var bgColorObj = {},
+					bgImageObj = {};
+				var parents = itemNode.parents().toArray();
                 // Check to see if we have an existing background color
                 if (!oldBgColor || $.inArray(oldBgColor, transparentColorNamesSet) >= 0) {
                     // Didn't find an existing background color, so see if a parent has one
                     // TODO: This doesn't take into account background images!
                     // Get the parents of the current node, this lets us know if there
                     // is a parent with a background we should set for the highlight box
-                    var parents = itemNode.parents().toArray();
-                    // Set a variable for the default background in case we don't find one
-                    var bgColor = HighlightBox.kDefaultBgColor;
-                    $(parents).each(function () {
-                        // Iterate through the parents looking for a background color
-                        var thisNodeColor = $(this).css('backgroundColor');
-                        // See if the background color is a default or transparent color
-                        if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
-                            // Found a background color specified in this node, no need to check further up the tree
-                            bgColor = thisNodeColor;
-                            return false;
-                        }
-                    });
-                    // Return the default background color if we haven't returned a parent's background
-                    return bgColor;
-                } else {
+					bgColorObj = getNewBgColor(parents, oldBgColor);
+				} else {
                     // Return the existing background color that was specified in the item node
-                    return oldBgColor;
+                    bgColorObj = {'bgColor': oldBgColor};
                 }
+
+				if (!oldBgImage || oldBgImage.trim() === '' || oldBgImage === 'none') {
+					bgImageObj = getNewBgImage(parents, itemNode);
+				}
+				return $.extend({}, bgColorObj, bgImageObj);
             }
+
+			function getNewBgColor(parents) {
+				// Set a variable for the default background in case we don't find one
+				var bgColor = HighlightBox.kDefaultBgColor;
+				$(parents).each(function () {
+					// Iterate through the parents looking for a background color
+					var thisNodeColor = $(this).css('backgroundColor');
+					// See if the background color is a default or transparent color
+					if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
+						// Found a background color specified in this node, no need to check further up the tree
+						bgColor = thisNodeColor;
+						return false;
+					}
+				});
+				// Return the default background color if we haven't returned a parent's background
+				return {'bgColor': bgColor};
+
+			}
+
+			function getNewBgImage(parents, itemNode) {
+				var bgImage, bgPos, bgRepeat;
+				$(parents).each(function () {
+					var thisNodeImage = $(this).css('backgroundImage');
+					if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
+						// It's an easy case: we just retrieve the parent's bg image
+						bgImage  = thisNodeImage;
+						bgPos    = $(this).css('backgroundPosition');
+						bgRepeat = $(this).css('backgroundRepeat');
+						return false;
+					}
+				});
+				// If no bg color or image defined yet
+				// then look at the underlying elements(maybe some positioned and lie below the target)
+				// todo: is there a better way to define underlying elements(w/o recursion)?
+				// todo: if it is a list item, skip considering bullet images:
+				// && itemNode.tagName.toLowerCase() != 'li') {
+				if (!bgImage) {
+					var thisNodePos = positioning.getOffset(itemNode);
+					bgImage = function recursion(left, top) {
+						var el = document.elementFromPoint(left, top);
+						var thisNodeImage = $(el).css('backgroundImage');
+						// Conditions to interrupt the recurse:
+						if ((el && (el.tagName.toLowerCase() === 'body' || el.tagName.toLowerCase() === 'html'))
+							|| (left <= 0 && top <= 0)
+							|| (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none')) {
+							return thisNodeImage;
+						}
+						recursion(left <= 0 ? 0 : left - 5, top <= 0 ? 0 : top - 5);
+					} (thisNodePos.left * conf.get('zoom'), thisNodePos.top * conf.get('zoom'));
+				}
+				// Return the default background color if we haven't returned a parent's background
+				return {'bgImage': bgImage, 'bgPos': bgPos, 'bgRepeat': bgRepeat};  
+			}
 
             /**
              * Check if the target is suitable to be used for highlight reading box.
