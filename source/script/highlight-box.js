@@ -165,92 +165,29 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 var _this = this;
 
-                // Prepare clone element as a clone of the scaled highlight box element.
-                var clone = this.item.cloneNode(true),
-                    cloneNode = $(clone),
-                    // Get the current element styles.
-                    currentStyle = this.savedCss[this.savedCss.length - 1],
+                // Get the current element styles.
+                var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-                var center    = positioning.getCenter(this.item);
-                var totalZoom = positioning.getTotalZoom(this.item, true);
-                var cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
-				// Fetch the exact value for width(not rounded)
-				var clientRect = this.item.getBoundingClientRect();
+                var center    = positioning.getCenter(this.item),
+					totalZoom = positioning.getTotalZoom(this.item, true),
+					cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
                 // Handle table special behaviour on inner contents.
                 handleTableElement(this.itemNode, currentStyle);
 
-                var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
-                    transformOrigin: '50% 50%',
-                    position: 'absolute',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-					// Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
-                    width: clientRect.width, 
-                    height: 'auto',
-                    maxHeight: cssUpdate.maxHeight,
-                    zIndex: HighlightBox.kBoxZindex.toString(),
-                    border: '0px solid white',
-                    listStylePosition: 'inside',
-                    margin: '0',
-                    borderRadius: HighlightBox.kBoxBorderRadius,
-                    borderColor:  HighlightBox.kBoxBorderColor,
-                    borderStyle:  HighlightBox.kBoxBorderStyle,
-                    borderWidth:  HighlightBox.kBoxBorderWidth,
-                    padding:      HighlightBox.kBoxPadding
-                });
-
-                var oldBgColor = currentStyle.backgroundColor;
-				var oldBgImage = currentStyle.backgroundImage;
-				var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
-
-				// If background color computed is not contrast to text color, invert background one.
-				var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
-				var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-				var color = compStyle.getPropertyCSSValue("color");
-				var isContrastColors = common.getIsContrastColors(color, newBgColor);
-				
-				// If color and background color are not contrast then either set background image or invert background color.
-				if (newBg.bgImage) {
-					cssBeforeAnimateStyles.backgroundRepeat = newBg.bgRepeat;
-					cssBeforeAnimateStyles.backgroundImage  = newBg.bgImage;
-					cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
-				} else {
-					if (!isContrastColors) {
-						cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
-					}
-				}
-
-				cssBeforeAnimateStyles.backgroundColor = newBgColor;
+				// Get animation CSS styles.
+                var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
                 // Only animate the most important values so that animation is smoother
                 var cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')'
                 });
 
-               // Remove all the attributes from the placeholder(clone) tag.
-               common.removeAttributes(cloneNode);
-               // Clean clone from inner <script> before insertion to DOM
-                cloneNode.find('script').remove();
-               // Temporary shim for <td> which spans the number of columns in a cell.
-               // todo: apply better maths for calculating clone width for such cells.
-               var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
-
-                // Then, insert placeholder so that content which comes after doesn't move back.
-                cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                    .css($.extend({}, currentStyle, {
-                        // Make sure clone display turned to 'block' if it is a tbale cell
-                        display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
-                        visibility: 'hidden',
-                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
-                        height: origRectSize.height + 'px'
-                    }));
-
                 // Insert placeholder before HLB target is absoultely positioned.
                 // Otherwise, we might loose white space intent to the left/right because
-                // in most cases sequences of whitespace will collapse into a single whitespace.
-                this.itemNode.after(cloneNode);
-
+                // in most cases sequence of whitespace will collapse into a single whitespace.
+				this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
+               
                 // Quick state issue fix! If the HLB isn't ready slightly after the animation is supposed to end, then
                 // reset state.
                 var isInflated = false;
@@ -348,8 +285,96 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             };
 
+			/*
+			 * Calculate CSS styles to set before inflation animation.
+			 * @param currentStyle Object
+			 * @param cssUpdate Object
+			 * @return Object
+			 */
+			HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
+				// Fetch the exact value for width(not rounded)
+				var clientRect = this.item.getBoundingClientRect();
+				var cssBeforeAnimateStyles = $.extend({},
+					{top: cssUpdate.top, left: cssUpdate.left}, {
+						transformOrigin: '50% 50%',
+						position: 'absolute',
+						overflowY: 'auto',
+						overflowX: 'hidden',
+						// Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
+						width: clientRect.width, 
+						height: 'auto',
+						maxHeight: cssUpdate.maxHeight,
+						zIndex: HighlightBox.kBoxZindex.toString(),
+						border: '0px solid white',
+						listStylePosition: 'inside',
+						margin: '0',
+						borderRadius: HighlightBox.kBoxBorderRadius,
+						borderColor:  HighlightBox.kBoxBorderColor,
+						borderStyle:  HighlightBox.kBoxBorderStyle,
+						borderWidth:  HighlightBox.kBoxBorderWidth,
+						padding:      HighlightBox.kBoxPadding
+					});
+
+				var oldBgColor = currentStyle.backgroundColor;
+				var oldBgImage = currentStyle.backgroundImage;
+				var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
+
+				// If background color computed is not contrast to text color, invert background one.
+				var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
+				var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+				var color = compStyle.getPropertyCSSValue("color");
+				var isContrastColors = common.getIsContrastColors(color, newBgColor);
+
+				// If color and background color are not contrast then either set background image or invert background color.
+				if (newBg.bgImage) {
+					cssBeforeAnimateStyles.backgroundRepeat   = newBg.bgRepeat;
+					cssBeforeAnimateStyles.backgroundImage    = newBg.bgImage;
+					cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
+				} else {
+					if (!isContrastColors) {
+						cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+					}
+				}
+
+				cssBeforeAnimateStyles.backgroundColor = newBgColor;
+
+				return cssBeforeAnimateStyles;
+			}
+
+			/* Isolates placeholder logic.
+			 * Space placeholders prevent content after box from going underneath it. Creates, prepares ans inserts it in the correct place.
+			 * @param currentStyle Object
+			 * @param origRectSize Object
+			 */
+			HighlightBox.prototype.prepareAndInsertPlaceholder = function (currentStyle, origRectSize) {
+			   // Prepare clone element as a clone of the scaled highlight box element.
+                var clone = this.item.cloneNode(true),
+                    cloneNode = $(clone);
+				// Remove all the attributes from the placeholder(clone) tag.
+               common.removeAttributes(cloneNode);
+               // Clean clone from inner <script> before insertion to DOM
+                cloneNode.find('script').remove();
+               // Temporary shim for <td> which spans the number of columns in a cell.
+               // todo: apply better maths for calculating clone width for such cells.
+               var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
+
+                // Then, insert placeholder so that content which comes after doesn't move back.
+                cloneNode.addClass(HighlightBox.kPlaceHolderClass)
+                    .css($.extend({}, currentStyle, {
+                        // Make sure clone display turned to 'block' if it is a tbale cell
+                        display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
+                        visibility: 'hidden',
+                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
+                        height: origRectSize.height + 'px'
+                    }));
+
+                this.itemNode.after(cloneNode);
+			}
+
            /*
             * Table elements require extra work for some cases - especially when table has flexible layout.
+			* @param itemNode HTML node Object
+			* @param currentStyle Object
             */
            function handleTableElement(itemNode, currentStyle) {
                // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
@@ -382,7 +407,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 })
                 return false;
             }
-
 
             /**
              * Get the size and position of the current HLB to inflate.
@@ -510,6 +534,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
             /**
              * Get the background value of highlight box when it appears.
+			 * @param itemNode HTML node Object
+			 * @param oldBgColor String
+			 * @param oldBgImage String
+			 * @return Object
              */
             function getNewBackground(itemNode, oldBgColor, oldBgImage) {
 				var bgColorObj = {},
@@ -530,6 +558,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             /**
              * Get new background color of highlight box when it appears.
 			 * Returns the either parent's background color or default one(if we haven't fetched a suitible background color from parent).
+			 * @param parents Array
+			 * @return Object
              */
 			function getNewBgColor(parents) {
 				// Set a variable for the default background in case we don't find one.
@@ -552,6 +582,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             /**
              * Get new background image of highlight box when it appears.
 			 * Returns either parent's background image or the default one if we haven't returned a parent's background.
+			 * @param parents Array
+			 * @param itemNode HTML node Object
+			 * @return Object
              */
 			function getNewBgImage(parents, itemNode) {
 				// Some elements such as inputs don't require background.
@@ -644,6 +677,30 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
         })();
 
+        // Take care on target change event.
+        function onTargetChange(newTarget) {
+            if (getState() === STATES.READY) { // if something is ready
+                var lastTarget = instance.item;
+
+                if (lastTarget === newTarget) {
+                    return; // Target is not changed.
+                }
+                // Check if new target is a child node of the last target.
+                var isChildNode = false;
+                $.each($(newTarget).parents(), function (index, element) {
+                    // Do nothing if the new target is a child node.
+                    if (element === lastTarget) {
+                        isChildNode = true;
+                    }
+                });
+
+                // If mouse hovers over the other element, shut down last target(current HLB).
+                if (!isChildNode) {
+                    instance.deflate();
+                }
+            }
+        }
+
         var clientX, clientY;
         /**
          * Handle mousemove event.
@@ -706,31 +763,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             conf.set('highlightBoxMinZoom', kMinHighlightZoom);
             updateZoomLevel(conf.get('zoom'));
         });
-
-
-        // Take care on target change event.
-        function onTargetChange(newTarget) {
-            if (getState() === STATES.READY) { // if something is ready
-                var lastTarget = instance.item;
-
-                if (lastTarget === newTarget) {
-                    return; // Target is not changed.
-                }
-                // Check if new target is a child node of the last target.
-                var isChildNode = false;
-                $.each($(newTarget).parents(), function (index, element) {
-                    // Do nothing if the new target is a child node.
-                    if (element === lastTarget) {
-                        isChildNode = true;
-                    }
-                });
-
-                // If mouse hovers over the other element, shut down last target(current HLB).
-                if (!isChildNode) {
-                    instance.deflate();
-                }
-            }
-        }
 
         // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
         updateZoomLevel(conf.get('zoom'));
