@@ -198,7 +198,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Call the module method to clean up after close BEFORE calling listeners.
                         onHighlightBoxClosed();
                         // Ensure the bg dimmer is gone.
-                        backgroundDimmer.removeDimmer();
+						// AK: comment out all the dimmer calls by AL request
+                        //backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
                         console.log("hlb closed");
                         eqnx.emit('hlb/closed', _this.item);
@@ -217,7 +218,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 });
 
                 // Trigger the background blur effect if there is a highlight box only.
-                backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
+				// AK: comment out all the dimmer calls by AL request
+                //backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
                 return false;
             };
 
@@ -260,7 +262,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                            .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
                     }
                     $('.' + HighlightBox.kPlaceHolderClass).remove();
-                    backgroundDimmer.removeDimmer();
+					// AK: comment out all the dimmer calls by AL request
+                    //backgroundDimmer.removeDimmer();
 
                     setTimeout(function () {
                         // Animation callback: notify all inputs about zoom out.
