@@ -206,18 +206,23 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
 
 				// If background color computed is not contrast to text color, invert background one.
-				var newBgColor = newBg.bgColor;
+				var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
 				var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
 				var color = compStyle.getPropertyCSSValue("color");
 				var isContrastColors = common.getIsContrastColors(color, newBgColor);
-				cssBeforeAnimateStyles.backgroundColor = isContrastColors ? newBgColor : common.getRevertColor(newBgColor);
-
+				
+				// If color and background color are not contrast then either set background image or invert background color.
 				if (newBg.bgImage) {
 					cssBeforeAnimateStyles.backgroundRepeat = newBg.bgRepeat;
 					cssBeforeAnimateStyles.backgroundImage  = newBg.bgImage;
 					cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
+				} else {
+					if (!isContrastColors) {
+						cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+					}
 				}
 
+				cssBeforeAnimateStyles.backgroundColor = newBgColor;
                 // Only animate the most important values so that animation is smoother
                 var cssAnimateStyles = $.extend({}, cssUpdate, {
                     transform: 'scale(' + extraZoom + ')'
@@ -504,9 +509,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             }
 
             /**
-             * Get the background color of highlight box when it appears.
+             * Get the background value of highlight box when it appears.
              */
-			// TODO: take out getBgImage and getBgColor
             function getNewBackground(itemNode, oldBgColor, oldBgImage) {
 				var bgColorObj = {},
 					bgImageObj = {};
@@ -514,13 +518,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Check to see if we have an existing background color
                 if (!oldBgColor || $.inArray(oldBgColor, transparentColorNamesSet) >= 0) {
                     // Didn't find an existing background color, so see if a parent has one
-                    // TODO: This doesn't take into account background images!
-                    // Get the parents of the current node, this lets us know if there
-                    // is a parent with a background we should set for the highlight box
 					bgColorObj = getNewBgColor(parents, oldBgColor);
-				} else {
-                    // Return the existing background color that was specified in the item node
-                    bgColorObj = {'bgColor': oldBgColor};
                 }
 
 				if (!oldBgImage || oldBgImage.trim() === '' || oldBgImage === 'none') {
@@ -529,57 +527,84 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				return $.extend({}, bgColorObj, bgImageObj);
             }
 
+            /**
+             * Get new background color of highlight box when it appears.
+			 * Returns the either parent's background color or default one(if we haven't fetched a suitible background color from parent).
+             */
 			function getNewBgColor(parents) {
-				// Set a variable for the default background in case we don't find one
+				// Set a variable for the default background in case we don't find one.
 				var bgColor = HighlightBox.kDefaultBgColor;
 				$(parents).each(function () {
-					// Iterate through the parents looking for a background color
+					// Iterate through the parents looking for a background color.
 					var thisNodeColor = $(this).css('backgroundColor');
-					// See if the background color is a default or transparent color
+					// See if the background color is a default or transparent color( if yes, then $.inArray() returns '-1' value.
 					if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
-						// Found a background color specified in this node, no need to check further up the tree
+						// Found a background color specified in this node, no need to check further up the tree.
 						bgColor = thisNodeColor;
 						return false;
 					}
 				});
-				// Return the default background color if we haven't returned a parent's background
+				// Return the default background color if we haven't fetched a suitible background color from parent.
 				return {'bgColor': bgColor};
 
 			}
 
+            /**
+             * Get new background image of highlight box when it appears.
+			 * Returns either parent's background image or the default one if we haven't returned a parent's background.
+             */
 			function getNewBgImage(parents, itemNode) {
-				var bgImage, bgPos, bgRepeat;
-				$(parents).each(function () {
-					var thisNodeImage = $(this).css('backgroundImage');
-					if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
-						// It's an easy case: we just retrieve the parent's bg image
-						bgImage  = thisNodeImage;
-						bgPos    = $(this).css('backgroundPosition');
-						bgRepeat = $(this).css('backgroundRepeat');
-						return false;
-					}
-				});
-				// If no bg color or image defined yet
-				// then look at the underlying elements(maybe some positioned and lie below the target)
-				// todo: is there a better way to define underlying elements(w/o recursion)?
-				// todo: if it is a list item, skip considering bullet images:
-				// && itemNode.tagName.toLowerCase() != 'li') {
-				if (!bgImage) {
-					var thisNodePos = positioning.getOffset(itemNode);
-					bgImage = function recursion(left, top) {
-						var el = document.elementFromPoint(left, top);
-						var thisNodeImage = $(el).css('backgroundImage');
-						// Conditions to interrupt the recurse:
-						if ((el && (el.tagName.toLowerCase() === 'body' || el.tagName.toLowerCase() === 'html'))
-							|| (left <= 0 && top <= 0)
-							|| (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none')) {
-							return thisNodeImage;
+				// Some elements such as inputs don't require background.
+				// todo: if other elements are tested below then better to arrange an array.
+				if (itemNode[0].tagName.toLowerCase() !== 'input' && itemNode[0].tagName.toLowerCase() !== 'textarea') {
+					var bgImage, bgPos, bgRepeat;
+					$(parents).each(function () {
+						// Iterate through the parents looking for a background image.
+						var thisNodeImage = $(this).css('backgroundImage');
+						if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
+							// It's an easy case: we just retrieve the parent's background image.
+							bgImage  = thisNodeImage;
+							bgPos    = $(this).css('backgroundPosition');
+							bgRepeat = $(this).css('backgroundRepeat');
+							return false;
 						}
-						recursion(left <= 0 ? 0 : left - 5, top <= 0 ? 0 : top - 5);
-					} (thisNodePos.left * conf.get('zoom'), thisNodePos.top * conf.get('zoom'));
+					});
+					// If no bg image defined yet then look at the underlying elements(maybe some positioned and lie below the target).
+					// todo: do we need this at all?
+					// todo: is there a better way to define underlying elements(w/o recursion)?
+					/*
+					var thisNodeImage;
+					if (!bgImage) {
+						var thisNodePos = positioning.getOffset(itemNode);
+						var zoomLevel = conf.get('zoom');
+						var lastEl;
+						var bgImageEl = function recursion(left, top) {
+							var el = document.elementFromPoint(left, top);
+							// If the element has changed or position is not in the viewport.
+							if (el !== lastEl || (left <= 0 && top <= 0)) {
+								lastEl = el;
+								thisNodeImage = $(el).css('backgroundImage');
+								// Conditions to interrupt the recurse:
+								if ((el && (el.tagName.toLowerCase() === 'body' || el.tagName.toLowerCase() === 'html'))
+									|| (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none')
+									|| (left <= 0 && top <= 0)) {
+									return el;
+								}
+							}
+
+							return recursion(left <= 0 ? 0 : left - 1, top <= 0 ? 0 : top - 1);
+						} (thisNodePos.left * zoomLevel, thisNodePos.top * zoomLevel);
+
+						if (bgImageEl) {
+							bgImage  = $(bgImageEl).css('backgroundImage');
+							bgPos    = $(bgImageEl).css('backgroundPosition');
+							bgRepeat = $(bgImageEl).css('backgroundRepeat'); 
+						}
+					}
+					*/
+
+					return {'bgImage': bgImage, 'bgPos': bgPos, 'bgRepeat': bgRepeat};  
 				}
-				// Return the default background color if we haven't returned a parent's background
-				return {'bgImage': bgImage, 'bgPos': bgPos, 'bgRepeat': bgRepeat};  
 			}
 
             /**
