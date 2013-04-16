@@ -11,7 +11,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
         // This is the default setting, the value used at runtime will be in conf.
         var kMinHighlightZoom = 1.01;
-    
+
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
@@ -171,14 +171,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Handle table special behaviour on inner contents.
                 handleTableElement(this.itemNode, currentStyle);
-                
+
                 // If background color computed is not contrast to text color, invert background one.
                 var oldBgColor = currentStyle.backgroundColor;
                 var newBgColor = getNewBackgroundColor(this.itemNode, oldBgColor);
                 var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
                 var color = compStyle.getPropertyCSSValue("color");
                 var isContrastColors = common.getIsContrastColors(color, newBgColor);
-                
+
                 var clientRect = this.item.getBoundingClientRect();
 
                 var cssBeforeAnimateStyles = $.extend({}, {top: cssUpdate.top, left: cssUpdate.left}, {
@@ -279,8 +279,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var clientRect = this.item.getBoundingClientRect();
 
                 var cssAnimateStyles = $.extend({},currentStyle,{
-                        position: 'absolute', 
-                        transform: 'scale(1)', 
+                        position: 'absolute',
+                        transform: 'scale(1)',
                         width: clientRect.width
                     });
 
