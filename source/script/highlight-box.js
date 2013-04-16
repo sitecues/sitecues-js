@@ -297,6 +297,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 			HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
 				// Fetch the exact value for width(not rounded)
 				var clientRect = this.item.getBoundingClientRect();
+				var zoomLevel = conf.get('zoom');
 				var cssBeforeAnimateStyles = $.extend({},
 					{top: cssUpdate.top, left: cssUpdate.left}, {
 						transformOrigin: '50% 50%',
@@ -333,13 +334,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 					cssBeforeAnimateStyles.backgroundRepeat   = newBg.bgRepeat;
 					cssBeforeAnimateStyles.backgroundImage    = newBg.bgImage;
 					cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
-				} else {
-					if (!isContrastColors) {
-						cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
-					}
+					cssBeforeAnimateStyles.backgroundSize     = clientRect.width * zoomLevel + 'px ' + clientRect.height * zoomLevel+ 'px';
 				}
 
-				cssBeforeAnimateStyles.backgroundColor = newBgColor;
+				if (!isContrastColors) {
+					cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+				} else {
+					cssBeforeAnimateStyles.backgroundColor = newBgColor;
+				}
 
 				return cssBeforeAnimateStyles;
 			}
@@ -551,8 +553,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     // Didn't find an existing background color, so see if a parent has one
 					bgColorObj = getNewBgColor(parents, oldBgColor);
                 }
-
-				if (!oldBgImage || oldBgImage.trim() === '' || oldBgImage === 'none') {
+				// todo: fix list items bullet bg being considered as background image because they are.
+				if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || oldBgImage.trim() === '' || oldBgImage === 'none') {
 					bgImageObj = getNewBgImage(parents, itemNode);
 				}
 				return $.extend({}, bgColorObj, bgImageObj);
@@ -596,13 +598,16 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 					var bgImage, bgPos, bgRepeat;
 					$(parents).each(function () {
 						// Iterate through the parents looking for a background image.
-						var thisNodeImage = $(this).css('backgroundImage');
-						if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
-							// It's an easy case: we just retrieve the parent's background image.
-							bgImage  = thisNodeImage;
-							bgPos    = $(this).css('backgroundPosition');
-							bgRepeat = $(this).css('backgroundRepeat');
-							return false;
+						// todo: fix list items bullet background being considered as background image because they are.
+						if ($(this)[0].tagName.toLowerCase() !== 'li') {
+							var thisNodeImage = $(this).css('backgroundImage');
+							if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
+								// It's an easy case: we just retrieve the parent's background image.
+								bgImage  = thisNodeImage;
+								bgPos    = $(this).css('backgroundPosition');
+								bgRepeat = $(this).css('backgroundRepeat');
+								return false;
+							}
 						}
 					});
 					// If no bg image defined yet then look at the underlying elements(maybe some positioned and lie below the target).
