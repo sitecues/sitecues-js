@@ -1,0 +1,10 @@
+@font-face {
+	font-family: 'eqnx-cursor';
+	src: url('//localhost:8000/fonts/cursor.eot');
+	src: url('//localhost:8000/fonts/cursor.eot?#iefix') format('embedded-opentype'),
+		 url('//localhost:8000/fonts/cursor.woff') format('woff'),
+		 url('//localhost:8000/fonts/cursor.ttf') format('truetype'),
+		 url('//localhost:8000/fonts/cursor.svg#eqnx-cursor') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}

@@ -137,13 +137,14 @@
     background-position: -135px 0%;
 }
 
-#eqnx-eq360-cursor {
+#eqnx-cursor {
     top: 0;
     left: 0;
     position: fixed !important;
     display: none;
     pointer-events: none;
-    height: 10px;
+    height: 15px;
+    z-index: 2147483647;
 }
 
 #eqnx-caret {
@@ -180,6 +181,7 @@
     width:          100%;
     z-index:        2147483647;
 }
+
 #eqnx-toolbar-close-button {
     height: 20px;
     margin: 5px;
