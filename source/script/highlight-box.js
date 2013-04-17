@@ -677,12 +677,9 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Return Highlight if need to support a few instances instead.
                 createInstance: function (target) {
                     // Don't return an instance if the target is ineligible.
-                    if (isValidTarget(target)) {
-                        return new HighlightBox(target);
-                    }
-                    return null;
+                    return ( ( isValidTarget( target ) ) ? new HighlightBox( target ) : null );
                 }
-            }
+            };
         })();
 
         // Take care on target change event.
