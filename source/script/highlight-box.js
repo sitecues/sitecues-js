@@ -243,7 +243,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var cssAnimateStyles = $.extend({},currentStyle,{
                         position: 'absolute',
                         transform: 'scale(1)',
-                        width: clientRect.width
+                        width: clientRect.width / extraZoom,
+						height: clientRect.height / extraZoom
                     });
 
                 // Elements relative to the root don't need extra margins, use original values instead.
