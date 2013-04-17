@@ -153,7 +153,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 		// set cursor zoom
 		cursor.zoom = function(element, zoom){
-			data.size = 15 * zoom;
+			data.size = 15 * Math.sqrt(zoom);
 			cursor.repaint();
 			cursor.type(element, data.type);
 		}
