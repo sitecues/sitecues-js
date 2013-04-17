@@ -102,8 +102,8 @@
 
 	// define equinox module
 	eqnx.def = function(name, constructor){
-        // Do not define modules twice.
-        if (name in modules) return;
+		// do not define modules twice
+		if (modules[name]) return;
 
 		var module = {};
 
