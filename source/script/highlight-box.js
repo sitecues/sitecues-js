@@ -134,7 +134,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             // Constants
             HighlightBox.kShowBoxSpeed = 300;
             HighlightBox.kHideBoxSpeed = 150;
-            HighlightBox.kBoxZindex = cursor.kZindex - 1; // Ensure that cursor is on top, we're above everything else.
+            HighlightBox.kBoxZindex = 2147483646;
             HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
             HighlightBox.kBoxBorderWidth = '3px';
             HighlightBox.kBoxPadding = '4px'; // Give the text a little extra room
