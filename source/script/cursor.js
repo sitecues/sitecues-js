@@ -9,292 +9,161 @@
  */
 eqnx.def('cursor', function (cursor, callback) {
 
-    /* Static properties */
-    cursor.isEnabled = false; // if cursor module is enabled
-    cursor.zoomLevel = 1;
-    cursor.cursorType = 'default'; // also, may be either 'none' or 'auto'.
+	// static properties
+	cursor.isEnabled = false; // if cursor module is enabled
+	cursor.zoomLevel = 1;
+	cursor.type = 'default'; // also, may be either 'none' or 'auto'.
 
-    /* Constants */
-    cursor.image_urls = {
-        _default: '//ai2.s3.amazonaws.com/assets/cursors/pointer-001.png',
-        pointer:  '//ai2.s3.amazonaws.com/assets/cursors/pointer-hand.png'
-    };
-    cursor.kCursorHideRuleId = 'eqnx-eq360-cursor-hide-rule';
-    cursor.kCursorId = 'eqnx-eq360-cursor';
-    cursor.kZindex = 2147483647;
-    cursor.kMinCursorZoom = 1.5;
+	// constants
+	cursor.kCursorHideRuleId = 'eqnx-cursor-hide-rule';
+	cursor.kCursorId = 'eqnx-cursor';
+	cursor.kMinCursorZoom = 1.5;
 
-    // Get dependencies
-    eqnx.use('jquery', 'conf', 'util/positioning', 'ui', function ($, conf, positioning) {
-        // private variables
-        cursor.styleRuleParent = $('head');
-        cursor.isEnabled = (cursor.zoomLevel >= cursor.kMinCursorZoom);
+	// get dependencies
+	eqnx.use('jquery', 'conf', 'util/positioning', 'cursor/style', 'cursor/canvas', 'ui', function ($, conf, positioning, style, view){
 
-        /**
-         * Cursor element takes over the appearance of the mouse cursor.
-         */
-        // todo: add better support for cursor types.
-        cursor.init = function (value) {
-            this.zoomLevel = value * value;
-            this.toggleState();
-        };
+		// private variables
+		cursor.styleRuleParent = $('head');
+		cursor.isEnabled = false;
 
-        cursor.create = function () {
-            var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls._default;
-            var cursorElement = $('<img>')
-                                .attr('id', this.kCursorId)
-                                .attr('src', properImageLocation)
-                                .css({zIndex: this.kZindex.toString()})
-                                .appendTo('html');
+		// create cursor element and hode it
+		cursor.element = $('<img>').
+			attr('id', cursor.kCursorId).
+			appendTo('html').
+			hide();
 
-            return cursorElement;
-        };
+		// set cursor type
+		view.type(cursor.element, cursor.type);
 
-        /**
-         * Show cursor in the viewport.
-         */
-        cursor.show = function () {
-            if (!this.element) {
-                this.element = this.create();
-            }
+		// init cursor
+		cursor.init = function(value){
+			cursor.zoomLevel = value * value;
+			var cursorWasEnabled = cursor.isEnabled;
 
-            // Hide native cursor if custom cursor.
-            toggleRealCursor(false);
+			cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
-            // Init custom cursor position.
-            if (this.clientX && this.clientY) {
-                this.element.css({
-                    left: this.clientX + 'px',
-                    top:  this.clientY + 'px'
-                })
-                .show();
-            }
+			if (cursor.isEnabled){
+				if (cursorWasEnabled)
+					cursor.update();
+				else
+					cursor.show();
+			} else {
+				cursor.hide();
+			}
+		};
 
-            this.update();
+		// show cursor in the viewport
+		cursor.show = function(){
+			// Hide native cursor if custom cursor.
+			toggleRealCursor(false);
 
-            eqnx.emit('cursor/show', this.element);
-        };
+			// Init custom cursor position.
+			if (cursor.clientX && cursor.clientY){
+				cursor.element.css({
+					left: this.clientX + 'px',
+					top:  this.clientY + 'px'
+				}).show();
+			}
 
-        cursor.update = function () {
-            positioning.setZoom( this.element, this.zoomLevel, {
-                x: 0,
-                y: 0
-            } );
+			cursor.update();
 
-            eqnx.emit('cursor/update', this.element);
-        };
+			$(window).
+				on('mousemove', mouseMoveHandler).
+				on('click', mouseMoveHandler).
+				on('mouseout', mouseOutHandler);
 
-        /**
-         * Hide cursor in the viewport.
-         */
-        cursor.hide = function () {
-            if (!this.element) {
-                return;
-            }
-            toggleRealCursor(true);
+			eqnx.emit('cursor/show', cursor.element);
+		};
 
-            this.element.hide();
+		cursor.update = function(){
+			view.zoom(cursor.element, cursor.zoomLevel);
+			eqnx.emit('cursor/update', this.element);
+		};
 
-            eqnx.emit('cursor/hide', this.element);
-        };
+		// hide cursor in the viewport
+		cursor.hide = function(){
+			toggleRealCursor(true);
 
-        /**
-         * Enables/disables the cursor module when needed.
-         */
-        cursor.toggleState = function () {
-            var cursorWasEnabled = this.isEnabled;
+			this.element.hide();
 
-            this.isEnabled = this.zoomLevel >= this.kMinCursorZoom;
+			$(window).
+				off('mousemove', mouseMoveHandler).
+				off('click', mouseMoveHandler).
+				off('mouseout', mouseOutHandler);
 
-            if (cursorWasEnabled && this.isEnabled) {
-                this.update();
-            } else if (this.isEnabled) {
-                this.show();
+			eqnx.emit('cursor/hide', this.element);
+		};
 
-                handleCursorEnabled();
-            } else {
-                this.hide();
+		// takes care of 'mousemove' window event
+		function mouseMoveHandler(e){
+			// update image of the cursor element if the target requires
+			changeCursorDisplay($(e.target));
 
-                handleCursorDisabled();
-            }
-        };
+			// update custom cursor position
+			if (cursor.clientX && cursor.clientY){
+				cursor.element.css({
+					left: cursor.clientX + 'px',
+					top: cursor.clientY + 'px'
+				}).show();
+			}
+		}
 
-        function handleCursorEnabled() {
-            window.addEventListener("mousemove", mouseMoveHandler, false);
-            // Track if user only clicks zoomin/zoomout buttons but do not move the mouse.
-            window.addEventListener("click", mouseMoveHandler, false);
-            window.addEventListener("mouseout", mouseOutHandler, false);
-        }
+		/**
+		 * Takes care of 'mouseout' window event.
+		 * Tracks that cursor is not in browser window any longer, if so - hides custom cursor.
+		 * @param e
+		 */
+		function mouseOutHandler(e){
+			if (e.target === document.documentElement)
+				cursor.element.hide();
+		}
 
-        function handleCursorDisabled() {
-            window.removeEventListener("mousemove", mouseMoveHandler, false);
-            window.removeEventListener("click", mouseMoveHandler, false);
-            window.removeEventListener("mouseout", mouseOutHandler, false);
-        }
+		/* Auxiliary functions */
 
-        /**
-         * Takes care of 'mousemove' window event.
-         * @param e
-         */
-        function mouseMoveHandler(e) {
-            // Update image of the cursor element if the target requires.
-            changeCursorDisplay($(e.target));
-            // Update custom cursor position.
-            var position = positioning.getMouseCoords(e);
-            if (position.left && position.top) {
-                cursor.element.css({
-                    left: position.left + 'px',
-                    top: position.top + 'px'
-                })
-              .show();
-            }
-        }
+		/**
+		 * Updates image of the cursor element if the target needs.
+		 * @param target
+		 */
+		// todo: add better support for cursor types.
+		function changeCursorDisplay(target){
+			var newCursorType = style.detect(target);
 
-        /**
-         * Takes care of 'mouseout' window event.
-         * Tracks that cursor is not in browser window any longer, if so - hides custom cursor.
-         * @param e
-         */
-        function mouseOutHandler(e) {
-            if (e.target == document.documentElement) {
-                cursor.element.hide();
-            }
-        }
+			// if cursor type has changed
+			if (cursor.type !== newCursorType){
+				cursor.type = newCursorType;
+				view.type(cursor.element, cursor.type);
+			}
+		}
 
-        /* Auxiliary functions */
+		/**
+		 * Hides or show the real mouse cursor dependently on the parameter given.
+		 * If we are showing our own mouse cursor we don't want the real cursor because that would be a double cursor.
+		 * @param setRealCursorVisible
+		 */
+		function toggleRealCursor(setRealCursorVisible){
+			if (setRealCursorVisible){
+				$('#' + cursor.kCursorHideRuleId).remove();
+			} else {
+				// if the rule is not already in DOM
+				if ($('#' + cursor.kCursorHideRuleId).length === 0) {
+					cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important; }</style>');
+				}
+			}
+		}
 
-        /**
-         * Updates image of the cursor element if the target needs.
-         * @param target
-         */
-        // todo: add better support for cursor types.
-        function changeCursorDisplay(target) {
-            var newCursorType = whatCursorStyle($(target));
-            if (cursor.cursorType !== newCursorType) { // if cursor type has changed
-                cursor.cursorType = newCursorType;
-                var properImageLocation = (cursor.cursorType === 'pointer') ? cursor.image_urls.pointer : cursor.image_urls._default;
-                cursor.element.removeAttr('src').attr('src', properImageLocation);
-            }
-        }
+		// always track cursor position for proper first show
+		$(document).bind('mousemove click', function(e){
+			var position = positioning.getMouseCoords(e);
 
-        /**
-         * Hides or show the real mouse cursor dependently on the parameter given.
-         * If we are showing our own mouse cursor we don't want the real cursor because that would be a double cursor.
-         * @param setRealCursorVisible
-         */
-        function toggleRealCursor(setRealCursorVisible) {
-            if (setRealCursorVisible) {
-                $('#' + cursor.kCursorHideRuleId).remove();
-            } else {
-                // if the rule is not already in DOM
-                if ($('#' + cursor.kCursorHideRuleId).length === 0) {
-                    cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: none !important; }</style>');
-                }
-            }
-        }
+			cursor.clientX = position.left;
+			cursor.clientY = position.top;
+		});
 
-        /**
-         * Returns the cursor type for a specific element.
-         *
-         * @param  {HTMLElement} element The element we need a cursor style for.
-         * @param  {Object}      options Options for the plugin.
-         * @return {String|null}         Returns a string with the element's cursor style or null if it is unknown.
-         */
-        function whatCursorStyle(element, options) {
-            element = $(element);
-            options = $.extend({
-                cursor_elements: null
-            }, options);
+		// handle zoom event
+		eqnx.on('zoom', cursor.init);
+		cursor.init(conf.get('zoom'));
 
-            var css_cursor = element.css('cursor');
-
-            if (
-                css_cursor === 'auto' ||
-                css_cursor === 'default'
-            ) {
-                var cursor_elements  = (options.cursor_elements !== null) ? options.cursor_elements : {
-                    a:        {
-                        cursor: 'pointer'
-                    },
-                    button:   {
-                        cursor: 'pointer'
-                    },
-                    input:    {
-                        selectors: {
-                            '[type="button"]':   'pointer',
-                            '[type="checkbox"]': 'pointer',
-                            '[type="email"]':    'text',
-                            '[type="image"]':    'pointer',
-                            '[type="radio"]':    'pointer',
-                            '[type="search"]':   'text',
-                            '[type="submit"]':   'pointer',
-                            '[type="text"]':     'text'
-                        }
-                    },
-                    label:    {
-                        cursor: 'pointer'
-                    },
-                    p:        {
-                        cursor: 'text'
-                    },
-                    select:   {
-                        cursor: 'pointer'
-                    },
-                    textarea: {
-                        cursor: 'text'
-                    }
-                };
-                var element_tag_name = element.prop('tagName').toLowerCase();
-
-                if (cursor_elements.hasOwnProperty(element_tag_name)) {
-                    var element_tag = cursor_elements[element_tag_name];
-                    var selectors   = element_tag.selectors;
-
-                    if (typeof selectors !== 'undefined') {
-                        for (var key in selectors) {
-                            if (element.is(key)) {
-                                return selectors[key];
-                            }
-                        }
-                    }
-                    else {
-                        return element_tag.cursor;
-                    }
-                }
-            }
-            else if (
-                css_cursor !== 'auto' &&
-                css_cursor !== 'default' &&
-                css_cursor !== null &&
-                typeof css_cursor !== 'undefined'
-            ) {
-                return css_cursor;
-            }
-            else {
-                return null;
-            }
-        }
-
-        /**
-         * Consider this as the start point of the module body.
-         */
-        $(document).bind('mousemove click', function (e) {
-            var position = positioning.getMouseCoords(e);
-
-            cursor.clientX = position.left;
-            cursor.clientY = position.top;
-        });
-
-        cursor.init(conf.get('zoom'));
-
-        /**
-         * Handle zoom event.
-         */
-        eqnx.on('zoom', function (value) {
-            cursor.init(value);
-        });
-
-        // Done.
-        callback();
-    });
+		// Done.
+		callback();
+	});
 });
