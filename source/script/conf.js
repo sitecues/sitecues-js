@@ -11,7 +11,7 @@ eqnx.def('conf', function(conf, callback){
 	conf.locale; 
 
 	{ 
-		var langE=document.getElementsByTagName('html');
+		var locale, langE=document.getElementsByTagName('html');
 		if(langE && langE[0] && langE[0].lang) {
 			locale = langE[0].lang;
 		} else {
