@@ -565,11 +565,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 					// Rely on width since it is set(whereas height is not set(or, '', 'auto' specified))
 					if (widthType === 'Number' && heightType !== 'Number') {
 						delete cssUpdate.height;
-						cssBeforeAnimateStyles.maxHeight = (width * initialRatio) / extraZoom;
+						cssBeforeAnimateStyles.maxHeight = width / initialRatio;
 					} else if (widthType !== 'Number' && heightType === 'Number') {
 						// Rely on height since it is set(whereas width is not set(or, '', 'auto' specified))
 						delete cssUpdate.width;
-						cssBeforeAnimateStyles.maxWidth = (height / initialRatio) / extraZoom
+						cssBeforeAnimateStyles.maxWidth = height * initialRatio;
 					}
 				}
 
