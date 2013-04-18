@@ -15,6 +15,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
+		var toClass = {}.toString;
 
         // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
         // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -308,7 +309,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
                         width: clientRect.width,
                         height: 'auto',
-                        maxHeight: cssUpdate.maxHeight,
                         zIndex: HighlightBox.kBoxZindex.toString(),
                         border: '0px solid white',
                         listStylePosition: 'inside',
@@ -319,6 +319,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         borderWidth:  HighlightBox.kBoxBorderWidth,
                         padding:      HighlightBox.kBoxPadding
                     });
+
+				if (this.item.tagName.toLowerCase() === 'img') {
+					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
+				}
 
                 var oldBgColor = currentStyle.backgroundColor;
                 var oldBgImage = currentStyle.backgroundImage;
@@ -537,6 +541,40 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
                 element.triggerHandler(zoomHandler);
             }
+
+			// Keep ratio for images
+			function preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect) {
+				var initialRatio  = clientRect.width / clientRect.height;
+
+				var height = parseFloat(cssBeforeAnimateStyles.height);
+				var width  = parseFloat(cssBeforeAnimateStyles.width);
+				var newRatio = width / height;
+
+				delete cssBeforeAnimateStyles.width;
+				delete cssBeforeAnimateStyles.height;
+
+				if (newRatio) {
+					if (initialRatio !== newRatio) { // if ratio of inflated image is different
+						delete cssBeforeAnimateStyles.width;
+						delete cssBeforeAnimateStyles.height;
+						cssBeforeAnimateStyles.maxWidth = cssUpdate.maxHeight * initialRatio;
+					}
+				} else {
+					var widthType = width ? toClass.call(width).slice(8, -1) : '';
+					var heightType = height? toClass.call(height).slice(8, -1) : '';
+					// Rely on width since it is set(whereas height is not set(or, '', 'auto' specified))
+					if (widthType === 'Number' && heightType !== 'Number') {
+						delete cssUpdate.height;
+						cssBeforeAnimateStyles.maxHeight = (width * initialRatio) / extraZoom;
+					} else if (widthType !== 'Number' && heightType === 'Number') {
+						// Rely on height since it is set(whereas width is not set(or, '', 'auto' specified))
+						delete cssUpdate.width;
+						cssBeforeAnimateStyles.maxWidth = (height / initialRatio) / extraZoom
+					}
+				}
+
+				delete cssUpdate.maxHeight;
+			}
 
             /**
              * Get the background value of highlight box when it appears.
