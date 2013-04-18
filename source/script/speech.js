@@ -170,7 +170,7 @@ eqnx.def('speech', function(speech, callback) {
              * Uses a provisional player to say a piece of text, used for visual cues.
              */
             speech.say = function(text) {
-                var provHlb = $('<div></div>').hide().appendTo('body').text(text);
+                var provHlb = jQuery('<div></div>').hide().appendTo('body').text(text);
                 speech.play(provHlb);
             }
 
