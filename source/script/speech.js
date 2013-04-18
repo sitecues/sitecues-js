@@ -145,6 +145,7 @@ eqnx.def('speech', function(speech, callback) {
                 if (ttsEngine) {
                     // An engine is set so we can enable the component
                     ttsEnable = true;
+                    speech.say(conf.getLS('verbalCueSpeechOn'));
                     if (callback) {
                         callback();
                     }
@@ -156,12 +157,21 @@ eqnx.def('speech', function(speech, callback) {
              * Disables TTS and stops all players, invokes callback with no args.
              */
             speech.disable = function(callback) {
-                ttsEnable = false;
                 speech.stopAll();
+                speech.say(conf.getLS('verbalCueSpeechOff'));
+                ttsEnable = false;
                 if (callback) {
                     callback();
                 }
                 console.log("tts disabled");
+            }
+
+            /*
+             * Uses a provisional player to say a piece of text, used for visual cues.
+             */
+            speech.say = function(text) {
+                var provHlb = $('<div></div>').hide().appendTo('body').text(text);
+                speech.play(provHlb);
             }
 
             /**

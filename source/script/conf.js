@@ -8,6 +8,26 @@ eqnx.def('conf', function(conf, callback){
 		handlers = {},
 		listeners = {};
 
+	conf.locale; 
+
+	{ 
+		var langE=document.getElementsByTagName('html');
+		if(langE && langE[0] && langE[0].lang) {
+			locale = langE[0].lang;
+		} else {
+			langE=document.getElementsByTagName('body');
+			if(langE && langE[0] && langE[0].lang) {
+				locale = langE[0].lang;
+			}
+			// We're not going to set a default locale value, 
+			// as that can vary per site.
+		}
+		if(locale) {
+			conf.locale = locale.toLowerCase().replace('-','_');
+			console.log("Locale: " + conf.locale);
+		}
+	}
+
 	// string handler, optional regular
 	// expression can be passed to allow
 	// only values matching it
@@ -68,6 +88,36 @@ eqnx.def('conf', function(conf, callback){
 
 		// chain
 		return conf;
+	}
+
+	/**
+	 * Gets a locale-specific configuration value.
+	 * 
+	 * If a locale is available, we'll append that to the key first.  
+	 * If no value is found, we'll fall back to just using the key name.  
+	 * For example:
+	 * 
+	 * conf.getLS('pageGreeting') on a page with <html lang="fr-CA"> 
+	 * will call conf.get('pageGreeting_fr_ca') first, 
+	 * and then conf.get('pageGreeting').
+	 * 
+	 * The locale is specified as a lang attribute on the html or body 
+	 * element.  For consistency, it is converted to lowercase, and hypens
+	 * are converted to underscores.
+	 * 
+	 * @TODO We may want to have it fall back from a region to a language 
+	 * before we go to the default, so we try xxx_fr_ca, then xxx_fr.
+	 *
+	 */
+	conf.getLS = function(key) {
+		if(!conf.locale) {
+			return conf.get(key);
+		}
+		var value = conf.get(key + '_' + conf.locale);
+		if(value) {
+			return value;
+		}
+		return conf.get(key);
 	}
 
 	// set configuration value

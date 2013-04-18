@@ -40,7 +40,7 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 			console.log("Token expires in " + tokenTTL + "ms");
 		}
 		console.log("Playing via azure: " + hlb.text());
-		roboVoice.speak(hlb.text(), "en");
+		roboVoice.speak(hlb.text(), "auto");
 	}
 
 	this.stop = function() {
