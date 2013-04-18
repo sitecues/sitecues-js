@@ -22,7 +22,7 @@ eqnx.def('caret/view', function(view, callback){
 
 			// Create new caret
 			if (!view.renderedCaret)
-				view.renderedCaret = $('<div>').attr('id', 'eqnx-caret').appendTo('body');
+				view.renderedCaret = $('<div>').attr('id', 'eqnx-caret').appendTo('html');
 
 			// Seems to help us not be off by as many pixels, at least in Chrome
 			// However, it's not working perfectly -- sometimes still off by 1px -- argh!
@@ -36,13 +36,18 @@ eqnx.def('caret/view', function(view, callback){
 			style['paddingTop'] = Math.round(parseFloat(style['paddingTop'])) + 'px';
 			var caretRect = coords.getUpdatedCaretRect(target, style, sel.end, zoomLevel);
 			var origPos = positioning.getOffset(target);
-			caretRect.left = caretRect.left + origPos.left;
-			caretRect.top = caretRect.top + origPos.top;
+			caretRect.left = caretRect.left + origPos.left + 1;
+			caretRect.top = caretRect.top + origPos.top + 1;
 
 			// realign caret on zoom out
 			$(target).off('zoomout').on('zoomout', function(){
 				view.show(target, zoomLevel);
 			});
+
+			var zoom = conf.get('zoom');
+
+			for(var i in caretRect) if (caretRect.hasOwnProperty(i))
+				caretRect[i] = Math.ceil(caretRect[i] * zoom);
 
 			console.log(caretRect);
 			view.renderedCaret.css({
