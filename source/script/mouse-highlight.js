@@ -4,14 +4,8 @@ eqnx.def('mouse-highlight', function(mh, callback){
     // This is the default setting, the value used at runtime will be in conf.
     mh.minzoom = 1.01;
 
-    // how long mouse ptr needs to pause before we get a new highlight
-    mh.delay = 20;
-
     // depends on jquery, conf and mouse-highlight/picker modules
     eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'ui', function($, conf, picker){
-
-        // private variables
-        var timer;
 
         conf.set('mouseHighlightMinZoom', mh.minzoom);
 
@@ -43,11 +37,6 @@ eqnx.def('mouse-highlight', function(mh, callback){
             // break if highlight is disabled
             if (!mh.enabled) return;
 
-            // clear timeout if it was set
-            if (timer) clearTimeout(timer);
-
-            // set new timeout
-            timer = setTimeout(function(){
                 if (event.target !== mh.target){
                     // hide highlight for picked element
                     if (mh.picked) mh.hide(mh.picked);
@@ -62,7 +51,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
                     if (mh.picked && mh.picked.length)
                         mh.show(mh.picked);
                 }
-            }, mh.delay);
+
         }
 
         // refresh status of enhancement on page
