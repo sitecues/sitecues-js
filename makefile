@@ -39,6 +39,8 @@ files=\
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
 	source/js/invert.js \
+	source/js/cursor/canvas.js \
+	source/js/cursor/style.js \
 	# source/js/toolbar.js \
 
 https=off

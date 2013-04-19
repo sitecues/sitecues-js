@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'eqnx-cursor';
-	src: url('/images/cursors/cursor.eot');
-	src: url('/images/cursors/cursor.eot?#iefix') format('embedded-opentype'),
-		 url('/images/cursors/cursor.woff') format('woff'),
-		 url('/images/cursors/cursor.ttf') format('truetype'),
-		 url('/images/cursors/cursor.svg#eqnx-cursor') format('svg');
+	src: url('../images/cursors/cursor.eot');
+	src: url('../images/cursors/cursor.eot?#iefix') format('embedded-opentype'),
+		 url('../images/cursors/cursor.woff') format('woff'),
+		 url('../images/cursors/cursor.ttf') format('truetype'),
+		 url('../images/cursors/cursor.svg#eqnx-cursor') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }

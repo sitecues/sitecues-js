@@ -159,7 +159,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 		}
 
 		// load special cursor css
-		load.style('/css/cursor.css', function(){
+		load.style('../css/cursor.css', function(){
 			wait('eqnx-cursor', function(){
 				cursor.repaint();
 				callback();

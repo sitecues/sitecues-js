@@ -3,8 +3,8 @@ eqnx.def('cursor/image', function(cursor, callback){
 
 	// cursor type -> url representation
 	var types = {
-		'pointer':	eqnx.resolveEqnxUrl('/images/cursors/pointer-hand.png'),
-		'default':	eqnx.resolveEqnxUrl('/images/cursors/pointer-001.png')
+		'pointer':	eqnx.resolveEqnxUrl('../images/cursors/pointer-hand.png'),
+		'default':	eqnx.resolveEqnxUrl('../images/cursors/pointer-001.png')
 	}
 
 	// get dependencies

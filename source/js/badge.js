@@ -23,7 +23,7 @@ eqnx.def('badge', function(badge, callback){
         // create badge image inside of panel
         badge.element = $('<img>')
             .attr('id', 'eqnx-badge-image')
-            .attr('src', eqnx.resolveEqnxUrl('/images/eq360-badge.png'))
+            .attr('src', eqnx.resolveEqnxUrl('../images/eq360-badge.png'))
             .appendTo(badge.panel);
 
         // handle image loading
