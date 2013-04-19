@@ -14,7 +14,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	mh.doUseOverlayForBgColor = false;
 
     // background color
-	mh.kBackgroundColor = 'rgba(250, 235, 200, 0.4)';
+	mh.kBackgroundColor = 'rgba(250, 235, 200, 0.2)';
 
     // saved CSS for highlighted element
 	mh.savedCss = [];
