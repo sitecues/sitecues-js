@@ -51,28 +51,128 @@ eqnx.def('util/positioning', function (positioning, callback) {
             };
         }
 
-        /**
+	    /**
+	     * Return a corrected bounding box given the total zoom for the element and current scroll position
+	     */
+	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
+		    return {
+			    left: boundingBox.left + scrollPosition.left/ totalZoom,
+			    top:  boundingBox.top + scrollPosition.top  / totalZoom,
+			    width: boundingBox.width,
+			    height: boundingBox.height
+		    };
+	    }
+
+	    /**
+	     * Get the elements' bounding box.
+	     * DOM function object.getBoundingClientRect() returns a text rectangle object that encloses a group of text rectangles.
+	     */
+	    positioning.getBoundingBox = function (selector) {
+		    // Perform the calculations for all selected elements.
+		    var result = [];
+		    var scrollPosition = positioning.getScrollPosition();
+		    $(selector).each(function () {
+			    var totalZoom = positioning.getTotalZoom(this, true);
+			    var boundingBox = this.getBoundingClientRect();
+			    result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
+		    });
+		    return processResult(result);
+	    }
+
+	    /**
+	     * Get the rectangles for the target.
+	     * This is necessary when an inline element such as a link wraps at the end of a line -- there are multiple rects
+	     * DOM function object.getClientRects() returns rectangle objects for each rectangle associated with an object.
+	     * Recursive so that we don't miss any bounds (sometimes children escape the bounds of their parents).
+	     * For example, child images escape the bounds of inline parents and
+	     * relatively positioned children can be outside of the parent that way.
+	     * When adjacent rectangles are within |proximityBeforeRectsMerged| pixels,
+	     * they will be combined into a single rectangle.
+	     */
+	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged) {
+		    var allRects = [];
+		    var scrollPosition = positioning.getScrollPosition();
+		    positioning.getAllBoundingBoxesImpl(selector, scrollPosition, allRects);
+		    positioning.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+		    return allRects;
+	    }
+
+	    positioning.getAllBoundingBoxesImpl = function (selector, scrollPosition, result) {
+		    $(selector).each(function () {
+			    var boundingBoxes;
+			    if ("getClientRects" in this) {
+				    boundingBoxes = this.getClientRects();
+			    }
+			    if (!boundingBoxes || boundingBoxes.length === 0) {
+				    // Fallback
+				    boundingBoxes = [ positioning.getBoundingBox(selector) ];
+			    }
+			    var totalZoom = positioning.getTotalZoom(this, true);
+			    for (var count = 0; count < boundingBoxes.length; count ++) {
+				    var boundingBox = boundingBoxes[count];
+				    result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
+			    }
+			    var children = $(this).children();
+			    if (children.length)
+			        positioning.getAllBoundingBoxes(children, scrollPosition, result);
+		    });
+		    return result;
+	    }
+
+	    /**
          * Returns the offset of the provided element, with calculations based upon etBoundingClientRect().
          */
         positioning.getOffset = function (selector) {
-            // Perform the calculations for all selected elements.
-            var result = [];
-            $(selector).each(function () {
-                var scrollPosition = positioning.getScrollPosition();
-                var boundingBox = this.getBoundingClientRect();
-                var totalZoom = positioning.getTotalZoom(this, true);
-
-                var css = $(this).css(['borderLeftWidth', 'borderTopWidth']);
-
-                result.push({
-                    left: boundingBox.left + scrollPosition.left/ totalZoom,
-                    top:  boundingBox.top + scrollPosition.top  / totalZoom
-                });
-            });
-            return processResult(result);
+	        var rect = positioning.getBoundingBox(selector);
+	        return { left : rect.left, top : rect.top };
         }
 
-        /**
+	    /**
+	     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+	     */
+	    positioning.combineIntersectingRects = function(rects, extraSpace) {
+		    function intersects(r1, r2) {
+			    return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
+				    || r2.left + r2.width + extraSpace < r1.left - extraSpace
+				    || r2.top - extraSpace > r1.top + r1.height + extraSpace
+				    || r2.top + r2.height + extraSpace < r1.top - extraSpace
+				    );
+		    }
+
+		    function merge(r1, r2) {
+			    var left = Math.min(r1.left, r2.left);
+			    var top = Math.min(r1.top, r2.top);
+			    var right = Math.max(r1.left + r1.width, r2.left + r2.width);
+			    var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
+			    return {
+				    left: left,
+				    top: top,
+				    width: right - left,
+				    height: bottom - top
+			    };
+		    }
+
+		    // TODO O(n^2), not ideal.
+		    // Probably want to use well-known algorithm for merging adjacent rects
+		    // into a polygon, such as:
+		    // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
+		    // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
+		    // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
+		    for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
+			    var index2 = index1 + 1;
+			    while (index2 < rects.length) {
+				    if (intersects(rects[index1], rects[index2])) {
+					    rects[index1] = merge(rects[index1], rects[index2]);
+					    rects.splice(index2, 1);
+				    }
+				    else {
+					    index2++;
+				    }
+			    }
+		    }
+	    }
+
+	    /**
          * Returns the center of the provided element.
          */
         positioning.getCenter = function (selector) {
@@ -99,19 +199,7 @@ eqnx.def('util/positioning', function (positioning, callback) {
             };
         }
 
-        /**
-         * Get the elements' bounding boxes.
-         * DOM function object.getBoundingClientRect() returns a text rectangle object that encloses a group of text rectangles.
-         */
-        positioning.getBoundingBox = function (selector) {
-            var result = [];
-            $(selector).each(function () {
-                result.push(this.getBoundingClientRect());
-            });
-            return processResult(result);
-        }
-
-        /**
+	    /**
          * Obtains the viewport dimensions, with an optional inset.
          */
         positioning.getViewportDimensions = function (inset) {
@@ -284,7 +372,7 @@ eqnx.def('util/positioning', function (positioning, callback) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
                 var result = 1;
-                if (transformStr !== 'none' && transformStr.trim() !== '') {
+                if (transformStr !== 'none' && $.trim(transformStr) !== '') {
                     var result = _MATRIX_REGEXP.exec(transformStr);
                     if (result && result.length > 1) {
                         var scaleX = parseFloat(result[1]);

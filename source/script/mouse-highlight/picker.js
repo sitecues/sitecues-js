@@ -4,6 +4,7 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 	picker.kOkTags = ['li'];
 	picker.kGoodCssDisplay = ['block', 'inline-block', 'table-cell'];
 	picker.kOkCssDisplay = ['list-item'];
+	picker.kVisualMediaElements = 'img, canvas, video, embed, object, iframe, frame';
 
 	// How much empty space around an object is visually significant, separating it from others
 	picker.kSignificantMargin = 3;
@@ -19,7 +20,7 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 			var bestResult = $();
 			var bestScore = 0;
 			var current = start;
-			if(start === document.body) {
+			if(start === document.body || start === document.documentElement) {
 				// Shortcut -- no highlight for body itself
 				return bestResult;
 			}
@@ -27,6 +28,18 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 				// In Equinox widget ... do not highlight ourselves
 				return bestResult;
 			}
+
+			if ($(start).is(picker.kVisualMediaElements)) {
+				return $(start);  // Always just highlight visual media elements directly
+			}
+
+			if (!picker.isDirectParentOfVisibleTextContent(start)) {
+				// Don't return items that don't have visible content as direct children.
+				// By having this rule we eliminate the jumpiness that occurs when
+				// moving from block element to block element.
+				return bestResult;
+			}
+
 
 			while(current != document.documentElement){
 				var tag = current.localName;
@@ -82,6 +95,21 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 
 			return bestResult;
 		};
+
+		picker.isDirectParentOfVisibleTextContent = function(elt) {
+			var child = elt.firstChild;
+			while (child) {
+				if (picker.isNonEmptyTextNode(child)) {
+					return true;
+				}
+				child = child.nextSibling;
+			}
+			return false;
+		}
+
+		picker.isNonEmptyTextNode = function(node) {
+			return node && node.nodeType === 3 && $.trim(node.data) !== ""
+		}
 
 		callback();
 
