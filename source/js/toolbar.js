@@ -20,7 +20,7 @@ eqnx.def( 'toolbar', function ( toolbar, callback ) {
             dom_toolbar_element_selector              = null,
             dom_toolbar_string                        = ( '' +
                 '<div id="' + dom_toolbar_element_id + '">' +
-                    '<img id="' + dom_toolbar_close_button_element_id + '" src="//ai2.s3.amazonaws.com/assets/close.png" />' +
+                    '<img id="' + dom_toolbar_close_button_element_id + '" src="' + eqnx.resolveEqnxUrl("/images/close.png") + '" />' +
                 '</div>' +
             '' )
         ;

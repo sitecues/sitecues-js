@@ -20,10 +20,8 @@ app.use(express.logger());
 // setup paths to serve static files from
 // use relative path from binary to provide
 // robust way for finding files
-app.use(express.static(path.join(root, '../source/script')));
-app.use(express.static(path.join(root, '../source/style')));
-app.use(express.static(path.join(root, '../target/script')));
-app.use(express.static(path.join(root, '../target/style')));
+app.use(express.static(path.join(root, '../source')));
+app.use(express.static(path.join(root, '../target/compile')));
 app.use(express.static(path.join(root, '../tests/pages')));
 
 // detect what port number use for server
