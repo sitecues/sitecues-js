@@ -147,6 +147,12 @@
     z-index: 2147483647;
 }
 
+.eqnx-eq360-focus {
+    position: absolute !important;
+    pointer-events: none !important;
+    z-index: 2147483645 !important;  /* below the Equinox cursor and panel */
+}
+
 #eqnx-caret {
     position: absolute;
     border: 0px solid transparent;
@@ -188,11 +194,11 @@
     width:  20px;
 }
 
-.eqnx-highlight {
-    -webkit-transition: background-color .1s linear;
-    -moz-transition: background-color .1s linear;
-    -o-transition: background-color .1s linear;
-    -ms-transition: background-color .1s linear;
-    transition: background-color .1s linear;
-    background: #fcecbc !important;
+.eqnx-highlight-overlay {
+    position: absolute;
+    border: 2px solid black;
+    border-radius: 3px;
+    pointer-events: none;
+    background-color: transparent;
+    z-index: 2147483644; /* Below Equinox panel and mouse */
 }
