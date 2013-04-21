@@ -15,10 +15,9 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 	// cursor types
 	types = {
 		pointer:	'B',
-		default:	'A'
+		'default':	'A'
 	}
 
-	// 
 	paint = function(type){
 		var canvas = document.createElement('canvas'),
 			span = document.createElement('span'),
@@ -138,7 +137,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 			data.type = type;
 
 			// get image url for cursor type
-			var url = images[type] || images.default;
+			var url = images[type] || images['default'];
 
 			// get pure DOM element ref
 			element = element[0] || element;
