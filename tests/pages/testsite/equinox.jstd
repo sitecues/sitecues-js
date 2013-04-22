@@ -1,0 +1,5 @@
+load:
+
+test:
+- ../jsout/tests/*-tests.js
+

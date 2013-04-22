@@ -1,26 +1,69 @@
-<!doctype html>
-
 <html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <title>Young Frankenstein</title>
+    <style>
+        body {
+            width: 600px;
+        }
 
-	<head>
-		<title>eqnx simple page</title>
+        .inline {
+            display: inline-block;
+        }
 
-		<script src="/eqnx.js"></script>
-		<script>
+        #p1, #p2, #p3, #p4 {  padding: 0px; margin: 10px; }
+        #p4 { margin-bottom: 7px; }
+        h2 { margin:  10px; }
+         /* input, textarea {  padding:  0px; } */
 
-			// declarate which modules should be used
-			eqnx.use('badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor');
+        /* {padding: 0; border: 0; margin: 0; } */
 
-		</script>
+    </style>
+    <!--
+	<script src="/eqnx.js"></script>
+	<script>
+		// declarate which modules should be used
+	    eqnx.use('badge', 'panel', 'zoom', 'keys', 'focus', 'caret', 'cursor', 'mouse-highlight', 'highlight-box');
+	</script>
+    -->
+</head>
+<body>
+<h1>Young Frankenstein</h1>
+<p id="p1">
+    (p1) Dr. Frankenstein&#x27;s grandson, after years of living down the family reputation, inherits granddad&#x27;s castle
+    and repeats the experiments.
+</p>
+<p id="p2">
+    (p2) Dr. Frankenstein&#x27;s grandson, after years of living down the family reputation, inherits granddad&#x27;s castle
+    and repeats the experiments.
+</p>
+<p id="p3">
+    (p3) Dr. Frankenstein&#x27;s grandson, after years of living down the family reputation, inherits granddad&#x27;s castle
+    and repeats the experiments.
+</p>
+<p id="p4">
+    (p4) Dr. Frankenstein&#x27;s grandson, after years of living down the family reputation, inherits granddad&#x27;s castle
+    and repeats the experiments.
+</p>
 
-	</head>
+<h2>
+    Director:
+</h2>
+<a href="http://www.imdb.com/name/nm0000316/">Mel Brooks</a>
 
-	<body style="zoom: 3">
+<h2>
+    Writers:
+</h2>
+<a href="http://www.imdb.com/name/nm0000698/">Gene Wilder</a> <span>(screen story and screenplay)</span>,
+<a href="http://www.imdb.com/name/nm0000316/">Mel Brooks</a> <span>(screen story and screenplay)</span>
 
-		equinox
-
-		<input type="text" />
-
-	</body>
-
+<div>Checkbox: <input type="checkbox"/></div>
+<div id="testId">Test</div>
+<button disabled style="border: 0; margin: 0; padding:  0;">A disabled button!</button>
+<div id="testId">Test 10</div>
+<div id="testId">Test 20</div>
+<div id="testId">Test 30</div>
+xy<input type="text"/><br><br><br>
+Textarea: <textarea></textarea>
+</body>
 </html>
