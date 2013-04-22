@@ -1,5 +1,6 @@
 .DS_Store
 .jonathan-*
+.pip
 eqnx.iml
 eqnx.ipr
 eqnx.iws
