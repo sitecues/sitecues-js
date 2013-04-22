@@ -25,9 +25,6 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	// elements which need overlay for background color
 	mh.kVisualMediaElements = 'img,canvas,video,embed,object,iframe,frame';
 
-	// highlight blacklist
-	mh.blacklist = 'input';
-
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', function($, conf, picker, positioning){
 
@@ -165,9 +162,8 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			// break if highlight is disabled
 			if (!mh.enabled) return;
 
-			// don't show highlight if current active element
-			// is in blacklist
-			if ($(document.activeElement).is(mh.blacklist))
+			// don't show highlight if current active isn't body
+			if (!$(document.activeElement).is('body'))
 				return;
 
 			if (event.target !== mh.target){
