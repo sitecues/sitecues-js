@@ -25,6 +25,9 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	// elements which need overlay for background color
 	mh.kVisualMediaElements = 'img,canvas,video,embed,object,iframe,frame';
 
+	// highlight blacklist
+	mh.blacklist = 'input';
+
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', function($, conf, picker, positioning){
 
@@ -162,6 +165,11 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			// break if highlight is disabled
 			if (!mh.enabled) return;
 
+			// don't show highlight if current active element
+			// is in blacklist
+			if ($(document.activeElement).is(mh.blacklist))
+				return;
+
 			if (event.target !== mh.target){
 				// hide highlight for picked element
 
@@ -201,18 +209,24 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			if (was !== mh.enabled) mh.refresh();
 		}
 
-		// hide mouse highlight once highlight box appears
-		eqnx.on('hlb/create hlb/inflating hlb/ready', function(element){
+		// enable mouse highlight
+		mh.enable = function(){
+			// handle mouse move on body
+			$('body').on('mousemove', mh.update);
+		}
+
+		// disable mouse highlight
+		mh.disable = function(element){
 			// remove mousemove listener from body
 			$('body').off('mousemove', mh.update);
 			mh.hide($(element));
-		});
+		}
+
+		// hide mouse highlight once highlight box appears
+		eqnx.on('hlb/create hlb/inflating hlb/ready', mh.disable);
 
 		// enable mouse highlight back once highlight box deflates
-		eqnx.on('hlb/closed', function(){
-			// handle mouse move on body
-			$('body').on('mousemove', mh.update);
-		});
+		eqnx.on('hlb/closed', mh.enable);
 
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', mh.updateZoom);
