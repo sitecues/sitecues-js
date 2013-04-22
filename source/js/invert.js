@@ -102,7 +102,7 @@ eqnx.def('invert', function (invert, callback) {
         } );
 
         eqnx.on('inverse/toggle', function (event) {
-            if (! ( event.altKey || event.ctrlKey || event.metaKey)) {
+            if (! (event.altKey || event.ctrlKey || event.metaKey)) {
                 var highlight_box_state  = highlight_box.getState();
                 var highlight_box_states = highlight_box.STATES;
 
