@@ -107,7 +107,7 @@
 	// define equinox module
 	eqnx.def = function(name, constructor){
 		// do not define modules twice
-		if (modules[name]) {
+        if (name in modules){
             console.log("eqnx: module '" + name + "' already defined.");
             return;
         }
