@@ -8,7 +8,7 @@ eqnx.def('speech', function(speech, callback) {
 
     eqnx.use('conf', 'conf/remote', function(conf, conf_remote) {
 
-        eqnx.use('jquery', 'speech/azure', 'speech/ivona', function(_jQuery, _azure, _ivona) {
+        eqnx.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
 
             var players = {};
             var azure = _azure;
@@ -145,7 +145,13 @@ eqnx.def('speech', function(speech, callback) {
                 if (ttsEngine) {
                     // An engine is set so we can enable the component
                     ttsEnable = true;
-                    speech.say(conf.getLS('verbalCueSpeechOn'));
+                    if(common.getCookie("vCSp")) {
+                        speech.say(conf.getLS('verbalCueSpeechOn'));
+                    } else {
+                        speech.say(conf.getLS('verbalCueSpeechOnFirst'), function() {
+                            common.setCookie("vCSp","1",7);
+                        });
+                    }
                     if (callback) {
                         callback();
                     }
@@ -169,9 +175,12 @@ eqnx.def('speech', function(speech, callback) {
             /*
              * Uses a provisional player to say a piece of text, used for visual cues.
              */
-            speech.say = function(text) {
+            speech.say = function(text, callback) {
                 var provHlb = jQuery('<div></div>').hide().appendTo('body').text(text);
                 speech.play(provHlb);
+                if (callback) {
+                    callback();
+                }
             }
 
             /**
