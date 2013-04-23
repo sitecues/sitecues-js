@@ -239,6 +239,9 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			mh.updateZoom(conf.get('zoom'));
 		});
 
+		// hide mouse hightlight when user leave window
+		$(window).blur(mh.hide);
+
 		// done
 		callback();
 
