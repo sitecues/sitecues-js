@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
-    <style type="text/css">
-        .ui-slider-horizontal .ui-state-default {background: white url(http://s3.amazonaws.com/js.sitecues.com/images/slider_marker.png) no-repeat scroll 10% 10%;}
-    </style>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $("#slider").slider();
-        });
-    </script>
+<style>
+    input[type='range'] {
+        -webkit-appearance: none;
+        height: 50px;
+    }
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        background-color: blue;
+        width: 10px;
+        height: 49px;
+</style>
 </head>
 <body>
-<div id="slider"></div>
+<input type="range" min=1 max=5 step=0.1></input>
+<div class="ramp"></div>
 </body>
 </html>

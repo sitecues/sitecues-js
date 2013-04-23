@@ -34,6 +34,11 @@ eqnx.def( 'panel', function( panel, callback ) {
 				ariaLabel: 	'See it better'
 			}).appendTo( wrap );
 
+			$( '<img>' ).addClass( 'ramp' ).attr({
+				src:	'//s3.amazonaws.com/js.sitecues.com/images/hoversliderx_04.png'
+			}).appendTo( wrap );
+
+
 			// create big A label
 			$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );
 
