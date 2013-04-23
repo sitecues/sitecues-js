@@ -14,6 +14,7 @@ files=\
 	source/js/conf/server.js \
 	source/js/jquery.js \
 	source/js/jquery/color.js \
+	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/ui.js  \
 	source/js/load.js \
