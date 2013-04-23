@@ -35,7 +35,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 			}).appendTo( wrap );
 
 			$( '<img>' ).addClass( 'ramp' ).attr({
-				src:	'//s3.amazonaws.com/js.sitecues.com/images/hoversliderx_04.png'
+				src:	eqnx.resolveEqnxUrl('../images/panel/slider_ramp.png')
 			}).appendTo( wrap );
 
 
