@@ -67,7 +67,7 @@
     -webkit-appearance: none;
     background-color: blue;
     width: 12px;
-    height: 49px;
+    height: 35px;
     border-radius: 4px;
     -webkit-box-shadow: 0 0 4px #555;
     z-index: 1;
@@ -76,7 +76,7 @@
 #eqnx-panel .ramp {
     position: relative;
     left: 0px;
-    top: 0px;
+    top: -10px;
     width: 210px;
     opacity: 50%;
     z-index: -1;
