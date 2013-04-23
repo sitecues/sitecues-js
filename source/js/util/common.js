@@ -4,7 +4,7 @@
 eqnx.def('util/common', function (common, callback) {
 
    // Define dependency modules.
-    eqnx.use('jquery', function ($) {
+    eqnx.use('jquery', 'jquery/cookie', function ($) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
@@ -111,6 +111,32 @@ eqnx.def('util/common', function (common, callback) {
             common.getRevertColor = function(colorValue) {
                 var RGBColor = common.getRGBColor(colorValue);
                 return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
+            }
+
+            /*
+             * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
+             * 
+             * Note: This will always set a site-wide cookie ("path=/").
+             * 
+             * @param name  The name of the cookie (be brief!), required
+             * @param value The value of the cookie (be brief!), required
+             * @param days  The expiration of the cookie in days, optional
+             *               if not set this will be a session cookie.
+             */
+            common.setCookie = function(name, value, days) {
+                if(days) {
+                    $.cookie(name, value, { expires: days, path: '/' });
+                } else {
+                    $.cookie(name, value, { path: '/' });
+                }
+            }
+
+            /*
+             * Retrieves the value of cookie. Basically just wraps the jQuery 
+             * cookie plugin.
+             */
+            common.getCookie = function(name) {
+                return $.cookie(name);
             }
 
             /*

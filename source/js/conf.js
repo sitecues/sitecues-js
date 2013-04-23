@@ -194,9 +194,15 @@ eqnx.def('conf', function(conf, callback){
 			return data;
 
 		// update data otherwise
-		for(var key in update)
-			if (update.hasOwnProperty(key))
-				conf.set(key, update[key]);
+		for(var key in update) {
+			if(update.hasOwnProperty(key)) {
+				// If we already have a value for the key, 
+				// don't overwrite it, except zoom
+				if(!conf.get(key) || key === 'zoom') {
+					conf.set(key, update[key]);
+				}
+			}
+		}
 	}
 
 	// end

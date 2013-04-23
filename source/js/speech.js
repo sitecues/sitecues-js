@@ -8,7 +8,7 @@ eqnx.def('speech', function(speech, callback) {
 
     eqnx.use('conf', 'conf/remote', function(conf, conf_remote) {
 
-        eqnx.use('jquery', 'speech/azure', 'speech/ivona', function(_jQuery, _azure, _ivona) {
+        eqnx.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
 
             var players = {};
             var azure = _azure;
@@ -19,6 +19,13 @@ eqnx.def('speech', function(speech, callback) {
             // TTS is disabled by default
             var ttsEnable = conf.get("ttsEnable") === 'true';
 
+            /*
+             * This is a flag we can set that will effectively enable TTS, but
+             * not interfere with the user state maintained in the ttsEnable 
+             * variable.  The primary intent here is for use by cue()
+             */
+            var ttsBypass = false;
+
             // This is the engine we're using, required, no default
             var ttsEngine = conf.get("ttsEngine");
 
@@ -27,14 +34,11 @@ eqnx.def('speech', function(speech, callback) {
                 ttsEnable = false;
             }
 
-            console.log("ttsEnable: " + ttsEnable);
-            console.log("ttsEngine: " + ttsEngine);
-
             /*
              * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
              */
             speech.initPlayer = function(hlb) {
-                if (!ttsEnable) {
+                if (!ttsEnable && !ttsBypass) {
                     console.log("TTS is disabled");
                     return;
                 }
@@ -73,16 +77,18 @@ eqnx.def('speech', function(speech, callback) {
              *
              * Note: When we start splitting text, that should happen in here
              * as it may be implementation-specific.
+             *
+             * @return true if something was played, or false if there was an error or nothing to play.
              */
             speech.play = function(hlb) {
-                if (!ttsEnable) {
+                if (!ttsEnable && !ttsBypass) {
                     console.log("TTS is disabled");
-                    return;
+                    return false;
                 }
                 var hlbId = speech.getHlbId(hlb);
                 if(!hlbId) {
                     console.log("No hightlightbox ID!");
-                    return;
+                    return false;
                 }
                 var player = players[hlbId];
                 if(!player) {
@@ -91,6 +97,7 @@ eqnx.def('speech', function(speech, callback) {
                     player = speech.initPlayer(hlb);
                 }
                 player.play();
+                return true;
             }
 
             /*
@@ -145,7 +152,13 @@ eqnx.def('speech', function(speech, callback) {
                 if (ttsEngine) {
                     // An engine is set so we can enable the component
                     ttsEnable = true;
-                    speech.say(conf.getLS('verbalCueSpeechOn'));
+                    if(common.getCookie("vCSp")) {
+                        speech.say(conf.getLS('verbalCueSpeechOn'));
+                    } else {
+                        speech.say(conf.getLS('verbalCueSpeechOnFirst'), function() {
+                            common.setCookie("vCSp", 1, 7);
+                        });
+                    }
                     if (callback) {
                         callback();
                     }
@@ -169,9 +182,20 @@ eqnx.def('speech', function(speech, callback) {
             /*
              * Uses a provisional player to say a piece of text, used for visual cues.
              */
-            speech.say = function(text) {
+            speech.say = function(text, callback) {
                 var provHlb = jQuery('<div></div>').hide().appendTo('body').text(text);
-                speech.play(provHlb);
+                if(speech.play(provHlb) && callback) {
+                    callback();
+                }
+            }
+
+            /*
+             * A variant of say() that will work even if speech is disabled.
+             */
+            speech.cue = function(text, callback) {
+                ttsBypass = true;
+                speech.say(text, callback);
+                ttsBypass = false;
             }
 
             /**
