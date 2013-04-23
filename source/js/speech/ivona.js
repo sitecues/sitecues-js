@@ -63,6 +63,7 @@ function IvonaPlayer(_hlb, conf, _jQuery) {
 		} else {
 			myState = 'waiting';
 		}
+		return true;
 	}
 
 	this.stop = function() {
