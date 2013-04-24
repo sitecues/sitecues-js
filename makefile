@@ -58,7 +58,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/eqnx.js source/js/use.js
+	files=source/js/eqnx.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
