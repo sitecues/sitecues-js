@@ -104,13 +104,15 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 			// hide span
 			span = $('<span>').css({
 				position: 'absolute',
-				visibility: 'hidden',
-				fontFamily: name
+				visibility: 'hidden'
 			}).text('A').appendTo('body');
 
 			// remember span size
 			width = span.width();
 			height = span.height();
+
+			// set font-family
+			span.css('font-family', name);
 
 			// setup polling for changes
 			interval = setInterval(function(){
