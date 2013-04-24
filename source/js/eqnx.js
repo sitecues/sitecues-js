@@ -1,9 +1,10 @@
 (function(){
-    // break if there is eqnx instance on the page
-    if ('eqnx' in window) {
-        console.log("eqnx already defined.");
-        return;
-    }
+
+	// break if there is eqnx instance on the page
+	if ('eqnx' in window) {
+		console.log("eqnx already defined.");
+		return;
+	}
 
 	// private variables
 	var arr, has, noop,
@@ -11,7 +12,6 @@
 
 	// private functions
 	var resolveUrl, parseUrlQuery, parseUrl;
-
 
 	// modules container
 	modules = {};
@@ -107,10 +107,10 @@
 	// define equinox module
 	eqnx.def = function(name, constructor){
 		// do not define modules twice
-        if (name in modules){
-            console.log("eqnx: module '" + name + "' already defined.");
-            return;
-        }
+		if (modules[name]){
+			console.log("eqnx: module '" + name + "' already defined.");
+			return;
+		}
 
 		var module = {};
 
