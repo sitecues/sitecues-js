@@ -6,10 +6,12 @@
  */
 eqnx.def('speech/ivona', function(ivona, callback) {
 
-    var IvonaPlayer = function(_hlb, conf, _jQuery) {
+    var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
         var myState = 'init';
+		var secureFlag = (_secure ? 1 : 0);
         var hlb = _jQuery(_hlb);
-        var baseMediaUrl = "//ws.sitecues.com/equinox/api/ivona/5/speechfile?contentType=text/plain&";
+		// TODO: Remove the hard-coded site ID.
+        var baseMediaUrl = "//ws.sitecues.com/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
         this.init = function() {
             _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
             console.log(_jQuery("#jPlayer-" + hlb.attr('id')));
@@ -67,11 +69,10 @@ eqnx.def('speech/ivona', function(ivona, callback) {
 
         ivona.factory = function(hlb) {
         	console.log(hlb);
-        	var player = new IvonaPlayer(hlb, conf, _jQuery);
+        	var player = new IvonaPlayer(hlb, conf, _jQuery, eqnx.getScriptSrcUrl().secure);
         	player.init();
         	return player;
         }
-
     });
 
     // end
