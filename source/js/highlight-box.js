@@ -189,11 +189,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // in most cases sequence of whitespace will collapse into a single whitespace.
                 this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
 
-                // Quick state issue fix! If the HLB isn't ready slightly after the animation is supposed to end, then
-                // reset state.
-                var isInflated = false;
+                // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then
+                // close it out.
                 setTimeout(function() {
-                    if (!isInflated) {
+                    if (getState() === STATES.INFLATING) {
+						console.log("hlb in bad state. resetting.");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
@@ -213,7 +213,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
                         // Once the animation completes, set the new state and emit the ready event.
                         _this.state = STATES.READY;
-                        isInflated = true;
                         console.log("hlb ready");
                         eqnx.emit('hlb/ready', _this.item);
                 });
