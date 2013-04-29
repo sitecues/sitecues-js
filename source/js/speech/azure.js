@@ -734,6 +734,9 @@ function RoboVoice(options) {
 			},
 			function (audioUrl) { 
 				if (audioUrl) {
+					if (eqnx.getScriptSrcUrl().secure) {
+						audioUrl = audioUrl.replace(/^http:/, "https:");
+					}
 					self._doCallback(self.options.onAudioUrlLoaded, audioUrl, text, language);
 
 					if (!self.options.disableAudio) {

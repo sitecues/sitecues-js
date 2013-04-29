@@ -1,5 +1,4 @@
-(function(){
-
+	(function(){
 	// break if there is eqnx instance on the page
 	if ('eqnx' in window) {
 		console.log("eqnx already defined.");
@@ -251,7 +250,8 @@
 		else
 			url.raw = parser.href;
 
-		url.protocol = parser.protocol.substring(0, parser.protocol.length - 1);
+		url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
+		url.secure   = (url.protocol == "https");
 		url.hostname = parser.hostname;
 		url.host     = parser.host;
 
@@ -269,11 +269,15 @@
 		return url;
 	};
 
-	// Obtain all script tags, and search util we find our script.
 	var scriptSrcUrl = null,
 	scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
 	scriptTags = document.getElementsByTagName('script');
 
+	eqnx.getScriptSrcUrl =  function() {
+		return scriptSrcUrl;
+	};
+
+	// Obtain all script tags, and search util we find our script.
 	for (var i = 0; i < scriptTags.length; i++){
 		var match = scriptTags[i].src.match(scriptSrcRegExp);
 		if (match){
