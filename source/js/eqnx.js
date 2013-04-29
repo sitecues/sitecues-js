@@ -1,4 +1,4 @@
-(function(){
+	(function(){
 	// break if there is eqnx instance on the page
 	if ('eqnx' in window) {
 		console.log("eqnx already defined.");
@@ -106,7 +106,7 @@
 	// define equinox module
 	eqnx.def = function(name, constructor){
 		// do not define modules twice
-        if (name in modules){
+        if (modules[name]){
 			console.log("eqnx: module '" + name + "' already defined.");
 			return;
 		}
