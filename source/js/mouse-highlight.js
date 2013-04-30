@@ -248,8 +248,16 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			mh.hide($(element));
 		}
 
+		// Deselect the current highlighted element.
+		mh.unpick = function() {
+			mh.picked = null;
+		}
+
 		// hide mouse highlight once highlight box appears
 		eqnx.on('hlb/create hlb/inflating hlb/ready', mh.disable);
+
+		// hide mouse highlight once highlight box is dismissed
+		eqnx.on('hlb/deflating', mh.unpick);
 
 		// enable mouse highlight back once highlight box deflates
 		eqnx.on('hlb/closed', mh.enable);
