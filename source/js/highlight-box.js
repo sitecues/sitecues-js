@@ -2,7 +2,6 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 eqnx.def('highlight-box', function (highlightBox, callback) {
-
     // Get dependencies
     eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
     function ($, conf, cursor, positioning, common, backgroundDimmer) {
@@ -823,7 +822,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
         updateZoomLevel(conf.get('zoom'));
 
-        // Done.
-        callback();
     });
+
+    // Done.
+    callback();
 });
