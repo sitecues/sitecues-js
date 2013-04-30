@@ -1,116 +1,331 @@
+/*
+ * This module determines if an element should generate a mouse highlight, and
+ * be zoomable when the user hits the spacebar.  It starts off with a set of
+ * easy/fast rules and moves towards more a more complex scoring approach.  
+ * It is still very simple in it's approach but hopefully has been structured
+ * to allow for intelligent behaviors without major performance penalties.
+ */
 eqnx.def('mouse-highlight/picker', function(picker, callback){
 
-	picker.kGoodTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'fieldset', 'form', 'td'];
-	picker.kOkTags = ['li'];
-	picker.kGoodCssDisplay = ['block', 'inline-block', 'table-cell'];
-	picker.kOkCssDisplay = ['list-item'];
-	picker.kVisualMediaElements = 'img, canvas, video, embed, object, iframe, frame';
+	// Whitelist of css display properties we'll allow
+	picker.validDisplays = [
+		'block', 
+		'inline-block', 
+		'list-item',
+		'table-cell'
+	];
 
-	// How much empty space around an object is visually significant, separating it from others
-	picker.kSignificantMargin = 3;
+	// Element IDs to never highlight
+	picker.blacklistIds = [
+		'#eqnx-panel',
+		'#eqnx-badge',
+		'#eqnx-eq360-bg'
+	];
 
-	// Elements to never highlight
-	picker.kBlackListQuery = '#eqnx-panel, #eqnx-badge, #eqnx-eq360-bg';
+	// We completely ignore these elements
+	picker.blacklist = [
+		'!--...--',
+		'!doctype',
+		'area',
+		'base',
+		'basefont',
+		'bdo',
+		'br',
+		'head',
+		'body',
+		'center',
+		'col',
+		'colgroup',
+		'font',
+		'hr',
+		'html',
+		'frame',
+		'frameset',
+		'iframe',
+		'link',
+		'map',
+		'meta',
+		'noframes',
+		'noscript',
+		'optgroup',
+		'option',
+		'param',
+		'script',
+		'style',
+		'tbody',
+		'tfoot',
+		'thead',
+		'title'
+	];
 
-	eqnx.use('jquery', 'style', function($, styles){
+	// We just zoom these elements automatically
+	picker.graphicsTags = [
+		'applet',
+		'img',
+		'object'
+	];
 
-		picker.find = function find(start) {
-			// TODO don't return items with CSS transitions specified -- just to be defensive. We are mucking with that stuff.
-			// TODO we may not want to return any floating/out-of-flow items for now. At least, we will need to look at this.
-			var bestResult = $();
-			var bestScore = 0;
-			var current = start;
-			if(start === document.body || start === document.documentElement) {
-				// Shortcut -- no highlight for body itself
-				return bestResult;
+	// We treat these elements as inline text fragments
+	picker.fragmentTags = [
+		'a',
+		'abbr',
+		'acronym',
+		'b',
+		'big',
+		'cite',
+		'del',
+		'dfn',
+		'kbd',
+		'em',
+		'i',
+		'ins',
+		'q',
+		'small',
+		'span',
+		'strike',
+		'strong',
+		's',
+		'samp',
+		'var',
+		'sub',
+		'sup',
+		'u'
+	];
+
+	// We treat these elements as headers.  This means they should probably include some of the following content to be useful.
+	picker.headingTags = [
+		'h1',
+		'h2',
+		'h3',
+		'h4',
+		'h5',
+		'h6',
+		'caption',
+		'legend'
+	];
+
+	// We treat these elements as large or typically independent text blocks
+	picker.bigTextTags = [
+		'address',
+		'blockquote',
+		'code',
+		'p',
+		'pre',
+		'tt'
+	];
+
+	// We treat these elements as small text blocks that we may want to join together.  Note that these are conventionally used in lists.
+	picker.smallTextTags = [
+		'dt',
+		'th',
+		'td',
+		'dd',
+		'li'
+	];
+
+	// We treat these elements as arbitrary containers
+	// Note that all unknown elements are effectively part of this list too.
+	picker.containerTags = [
+		'div',
+		'fieldset',
+		'tr'
+	];
+
+	// We treat these elements as arbitrary containers
+	// Note that all unknown elements are effectively part of this list too.
+	picker.listTags = [
+		'table',
+		'dir',
+		'dl',
+		'form',
+		'ol',
+		'ul',
+		'menu'
+	];
+
+	// These are inputs.  They are pretty similar to small text blocks but less flexible.
+	picker.inputTags = [
+		'button',
+		'input',
+		'isindex',
+		'select',
+		'textarea',
+		'label'
+	];
+
+
+	eqnx.use('jquery', 'style', 'util/common', function($, styles, common){
+
+		/*
+		 * Find the best highlightable element, if any, given a target element.
+		 *
+		 * @param hover The element the mouse is hovering over
+		 */
+		picker.find = function find(hover) {
+			var e = hover instanceof $ ? hover : $(hover);
+			if(e.is('body')) {
+				// We're at the body, we're done.
+				return null;
 			}
-			if($(picker.kBlackListQuery).is(start) || $(picker.kBlackListQuery).has(start).length){
-				// In Equinox widget ... do not highlight ourselves
-				return bestResult;
+			var eScore, eTarget = e.data('eqnx-mouse-hl');
+			if(!eTarget) {
+				// Let's determine, and remember, what this element is.
+				eTarget = picker.isTarget(e);
+				if(eTarget == null) {
+					eTarget = 's';
+				} else if (eTarget) {
+					eTarget = 't'
+				} else {
+					eTarget = 'f';
+				}
+				e.data('eqnx-mouse-hl', eTarget);
 			}
-
-			if ($(start).is(picker.kVisualMediaElements)) {
-				return $(start);  // Always just highlight visual media elements directly
+			if(eTarget === 't') {
+				// It's definitely a target as determined previously
+				return e;
+			} else if (eTarget === 'f') {
+				// It's definitely not a target as determined previously
+			} else if (eTarget === 's') {
+				eScore = e.data('eqnx-mouse-hl-score');
+				if(eScore == null) {
+					eScore = picker.getScore(e);
+					e.data('eqnx-mouse-hl-score', eScore);
+				}
+				// The target may or may not be a target, depending on how it scores.
 			}
-
-			if (!picker.isDirectParentOfVisibleTextContent(start)) {
-				// Don't return items that don't have visible content as direct children.
-				// By having this rule we eliminate the jumpiness that occurs when
-				// moving from block element to block element.
-				return bestResult;
+			if(eScore && eScore > 0) {
+				// The hovered element is a viable choice and no better one has been identified.
+				return e;
 			}
-
-
-			while(current != document.documentElement){
-				var tag = current.localName;
-				var score = 0;
-				if($.inArray(tag, picker.kGoodTags)){
-					bestResult = $(current);
-					break;
-				}
-
-				if($.inArray(tag, picker.kOkTags)){
-					score += 10;
-				}
-
-				var style = styles.getComputed(current);
-				var displayStyle = style['display'];
-				if($.inArray(displayStyle, picker.kGoodCssDisplay)){
-					bestResult = $(current);
-					break;
-				}
-
-				if($.inArray(displayStyle, picker.kOkCssDisplay)) {
-					score += 10;
-				}
-
-				// Visually separated from other elements
-				if(style['backgroundColor'] || style['backgroundImage']) {
-					bestResult = $(current);
-					break;
-				}
-
-				if((parseInt(style['outline-top-width']) && parseInt(style['outline-left-width'])) || (parseInt(style['border-top-width']) && parseInt(style['border-left-width']))) {
-					bestResult = $(current); // has a border around it
-					break;
-				}
-
-				if(parseInt(style['margin-top']) + parseInt(style['padding-top']) >= picker.kSignificantMargin && parseInt(style['margin-left']) + parseInt(style['padding-left']) >= picker.kSignificantMargin) {
-					bestResult = $(current); // has a significant empty space around it
-					break;
-				}
-
-				if(style['left'] || style['top']) {
-					bestResult = $(current); // Positioned element
-					break;
-				}
-
-				if(score > bestScore) {
-					bestScore = score;
-					bestResult = $(current);
-				}
-
-				current = current.parentElement;
-			}
-
-			return bestResult;
+			// No candidates
+			return picker.find(e.parent());
 		};
 
-		picker.isDirectParentOfVisibleTextContent = function(elt) {
-			var child = elt.firstChild;
-			while (child) {
-				if (picker.isNonEmptyTextNode(child)) {
-					return true;
-				}
-				child = child.nextSibling;
+		/*
+		 * Heuristics
+		 *
+		 * These are the 'hard and fast' rules we can use to make quick 
+		 * calls about an element.  If heuristics fails to make a
+		 * determination, we'll proceed to the scoring section.
+		 */
+		picker.isTarget = function(e) { 
+			var node = e.get(0);
+			var nodeName = node.nodeName.toLowerCase();
+			if($.inArray(nodeName, picker.blacklist) >= 0) {
+				// Element we ignore
+				return false;
 			}
-			return false;
+			if($.inArray(nodeName, picker.graphicsTags) >= 0) {
+				if(e.parent().is('a')) {
+					// We'll skip linked images
+					// TODO Don't zoom embedded thumbnails directly
+
+					// TODO Testing simply on a parent of 'a' will catch most 
+					// instances but ignores intermediary elements and link-
+					// like onclick evenets.  We should eventually try to 
+					// improve identifying if we're in a "link".
+					return false;
+				}
+				return true;
+			}
+			if($.inArray(nodeName, picker.headingTags) >= 0) {
+				if(e.parent().is('a')) {
+					// We'll skip linked headers
+					// TODO Allow for highlighting groups of elements such as a header and the following paragraphs
+					return false;
+				}
+				return true;
+			}
+			if(node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
+				// IDs we ignore
+				return false;
+			}
+
+			var width = e.width();
+			if(width == 0) {
+				// Don't highlight things that have no width
+				return false;
+			}
+
+			var height = e.height();
+			if(height == 0) {
+				// Don't highlight things that have no height
+				return false;
+			}
+
+			var style = styles.getComputed(e);
+			if($.inArray(style['display'], picker.validDisplays) < 0) {
+				// Don't highlight things that aren't block elements
+				return false;
+			}
+			return null;
 		}
 
-		picker.isNonEmptyTextNode = function(node) {
-			return node && node.nodeType === 3 && $.trim(node.data) !== ""
+			/*
+			 * Scoring
+			 *
+			 * We've failed to make a decisions based on simple rules, so we
+			 * will analyze features of the element and it's environment and 
+			 * assign an additive score.  If this score reaches a certain 
+			 * threshold, the element will be highlightable.
+			 *
+			 */
+		picker.getScore = function(e) { 
+			var node = e.get(0);
+			var nodeName = node.nodeName.toLowerCase();
+			var score = 0, txtLen = 0;
+			var shouldContainText = true;
+			var shouldBeChild = false;
+			if($.inArray(nodeName, picker.smallTextTags) >= 0) {
+				shouldBeChild = true;
+				score += 1;
+			} else if($.inArray(nodeName, picker.bigTextTags) >= 0) {
+				score += 10;
+			} else if($.inArray(nodeName, picker.fragmentTags) >= 0) {
+				shouldBeChild = true;
+				score -= 5;
+			} else if($.inArray(nodeName, picker.containerTags) >= 0) {
+				score -= 10;
+			} else if($.inArray(nodeName, picker.listTags) >= 0) {
+				score -= 1;
+			} else if($.inArray(nodeName, picker.graphicsTags) >= 0) {
+				// We're only here if we determined that a parent was a better choice
+				score -= 10;
+				shouldContainText = false;
+			} else if($.inArray(nodeName, picker.inputTags) >= 0) {
+				score -= 1;
+			}
+			if(shouldContainText) {
+				txtLen = e.text().length;
+				if(txtLen < 1) {
+					score -= 10;
+				} else {
+					score += 10;
+				}
+			}
+			return score;
 		}
 
+		/*
+		 * A semi-functional debug method.
+		 */
+		picker.debugShowAll = function(e) {
+			if(!e) {
+				e = $("body");
+			}
+			e.children().each(function() {
+				if(picker.isTarget($(this) || picker.find($(this)) == $(this))) {
+					// Tell all children that they have a highlightable parent
+					$(this).find('*').data('eqnx-parent-hl','1');
+					$(this).css("border","1px solid red");
+				}
+				picker.showAll($(this));			
+			});
+		}
+
+		// eqnx.on('speech/enable', picker.debugShowAll);
+		// eqnx.on('highlight/enable', picker.debugShowAll);
+		
 		callback();
 
 	});
