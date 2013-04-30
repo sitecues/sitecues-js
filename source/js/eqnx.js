@@ -122,14 +122,12 @@
 			// if return present
 			if (result) {
 				module = result;
-				console.error('was result', name);
 			} else {
-				
 				// Modules can double-load when an eqnx.def use statement does not fire callback();
-				// This caused the issue with the double-loading of the badge.
+				// This caused the issue with the double-loading of the badge and highlight-box.
 				// See: https://fecru.ai2.at/cru/EQJS-39#c187
         //      https://equinox.atlassian.net/browse/EQ-355
-				console.warn( 'No callback() set when def.use("' + name );
+				// console.warn( 'No callback() set when def.use("' + name );
 			}
 
 			// save module for future call
@@ -209,7 +207,9 @@
 
 			// load all needed modules
 			load.length && t.load.apply(t, load);
+
 		}, 0);
+
 	};
 
 	//////////////////////////////////////////////////
