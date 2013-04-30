@@ -27,7 +27,8 @@ eqnx.def('keys', function(keys, callback){
 		},
 		'space':	{
 			event: 'highlight/animate',
-			preventDefault: true
+			preventDefault: true,
+			requiresMouseHighlight: true
 		}
 	};
 
@@ -74,7 +75,7 @@ eqnx.def('keys', function(keys, callback){
 	};
 
 	// get dependencies
-	eqnx.use('jquery', function($){
+	eqnx.use('jquery', 'mouse-highlight', function($, mh){
 
 		// key event hook
 		keys.hook = function(event){
@@ -88,6 +89,10 @@ eqnx.def('keys', function(keys, callback){
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
+
+				if(keys.map[key].requiresMouseHighlight && !mh.picked) {
+					return;
+				}
 				// prepare default value
 				result = true;
 

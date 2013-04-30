@@ -2,7 +2,6 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 eqnx.def('highlight-box', function (highlightBox, callback) {
-
     // Get dependencies
     eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
     function ($, conf, cursor, positioning, common, backgroundDimmer) {
@@ -545,34 +544,47 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 			function preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect) {
 				var initialRatio  = clientRect.width / clientRect.height;
 
+				// If dimensions are recalculated, use the new values.
+				if (cssUpdate.width || cssUpdate.height) {
+					delete cssBeforeAnimateStyles.width;
+					delete cssBeforeAnimateStyles.height;
+					delete cssUpdate.maxHeight;
+
+					if ((cssUpdate.height && cssUpdate.width) || cssUpdate.width) {
+						delete cssUpdate.height;
+						cssBeforeAnimateStyles.width =  cssUpdate.width;
+						cssBeforeAnimateStyles.height = cssUpdate.width / initialRatio;
+					} else if (cssUpdate.height) {
+						delete cssUpdate.width;
+						cssBeforeAnimateStyles.height = cssUpdate.height;
+						cssBeforeAnimateStyles.width = cssUpdate.height * initialRatio;
+					}
+					return;
+				}
+
+				// Otherwise, no specific dimensions set, so, use the original ones(if any available).
 				var height = parseFloat(cssBeforeAnimateStyles.height);
 				var width  = parseFloat(cssBeforeAnimateStyles.width);
-				var newRatio = width / height;
 
-				delete cssBeforeAnimateStyles.width;
-				delete cssBeforeAnimateStyles.height;
+				var widthType  = width ? toClass.call(width).slice(8, -1) : '';
+				var heightType = height? toClass.call(height).slice(8, -1) : '';
 
-				if (newRatio) {
-					if (initialRatio !== newRatio) { // if ratio of inflated image is different
-						delete cssBeforeAnimateStyles.width;
-						delete cssBeforeAnimateStyles.height;
-						cssBeforeAnimateStyles.maxWidth = cssUpdate.maxHeight * initialRatio;
-					}
-				} else {
-					var widthType = width ? toClass.call(width).slice(8, -1) : '';
-					var heightType = height? toClass.call(height).slice(8, -1) : '';
+				if (widthType === 'Number' || heightType === 'Number') {
+					delete cssBeforeAnimateStyles.width;
+					delete cssBeforeAnimateStyles.height;
+					delete cssUpdate.maxHeight;
 					// Rely on width since it is set(whereas height is not set(or, '', 'auto' specified))
-					if (widthType === 'Number' && heightType !== 'Number') {
+					if ((widthType === 'Number' && heightType === 'Number') || widthType === 'Number') {
 						delete cssUpdate.height;
-						cssBeforeAnimateStyles.maxHeight = width / initialRatio;
-					} else if (widthType !== 'Number' && heightType === 'Number') {
+						cssBeforeAnimateStyles.height = width / initialRatio;
+					} else if (heightType === 'Number') {
 						// Rely on height since it is set(whereas width is not set(or, '', 'auto' specified))
 						delete cssUpdate.width;
-						cssBeforeAnimateStyles.maxWidth = height * initialRatio;
+						cssBeforeAnimateStyles.width = height * initialRatio;
 					}
 				}
 
-				delete cssUpdate.maxHeight;
+				return;
 			}
 
             /**
@@ -810,7 +822,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
         updateZoomLevel(conf.get('zoom'));
 
-        // Done.
-        callback();
     });
+
+    // Done.
+    callback();
 });
