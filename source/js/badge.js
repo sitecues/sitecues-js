@@ -32,6 +32,11 @@ eqnx.def('badge', function(badge, callback){
             badge.panel.fadeIn(callback);
         });
 
+        // Unless callback() is queued, the module is not registered in global var modules{}
+        // See: https://fecru.ai2.at/cru/EQJS-39#c187
+        //      https://equinox.atlassian.net/browse/EQ-355
+        callback();
+
     });
 
 });
