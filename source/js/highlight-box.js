@@ -786,8 +786,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 } else if (currentState === STATES.ON) {
                     // There is no current HLB and we can create one, so do just that.
                     // If the target element is ineligible, the create request may return null.
-                    var target = document.elementFromPoint(clientX, clientY);
-                    instance = HighlightBox.createInstance(target);
+                    instance = HighlightBox.createInstance(e.mouseHighlightTarget);
                     if (instance) {
                         instance.inflate();
                     }

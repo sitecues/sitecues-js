@@ -90,8 +90,13 @@ eqnx.def('keys', function(keys, callback){
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
 
-				if(keys.map[key].requiresMouseHighlight && !mh.picked) {
-					return;
+				if(keys.map[key].requiresMouseHighlight) {
+					if(!mh.picked) {
+						return;
+					} else {
+						//We're going to attach the target dom element to the event
+						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
+					}
 				}
 				// prepare default value
 				result = true;
