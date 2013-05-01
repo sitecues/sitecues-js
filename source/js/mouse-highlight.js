@@ -209,6 +209,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		}
 
 		mh.updateZoom = function(zoom){
+			mh.picked = null;
 			var was = mh.enabled;
 			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
 			if (was !== mh.enabled) mh.refresh();
