@@ -11,7 +11,7 @@ eqnx.def('speech/ivona', function(ivona, callback) {
 		var secureFlag = (_secure ? 1 : 0);
         var hlb = _jQuery(_hlb);
 		// TODO: Remove the hard-coded site ID.
-        var baseMediaUrl = "//ws.sitecues.com/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
+        var baseMediaUrl = "//" + eqnx.getCoreConfig().hosts.ws + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
         this.init = function() {
             _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
             console.log(_jQuery("#jPlayer-" + hlb.attr('id')));

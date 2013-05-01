@@ -6,3 +6,5 @@ eqnx.ipr
 eqnx.iws
 node_modules
 target
+tmp
+source/js/.cfg
