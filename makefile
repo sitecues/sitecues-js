@@ -142,7 +142,15 @@ endif
 
 # TARGET: run
 # Run the web server, giving access to the library and test pages.
+# Additionally, copy in core config files, if they do not exist.
 run:
+	@mkdir -p source/js/.cfg
+	@(cd config ; for FILE in `find * -type f | sort` ; do \
+    		if [ ! -e ../source/js/.cfg/$$FILE ] ; then \
+    			echo Copying $$FILE to source/js/.cfg/$$FILE ; \
+    			cp $$FILE ../source/js/.cfg/$$FILE ; \
+    		fi \
+    	done)
 	@echo "Running."
 	@./binary/web $(port) $(https)
 

@@ -17,7 +17,7 @@ eqnx.def('conf/remote', function(remote, callback){
                 } else if (siteId) {
                     console.log('Site: ' + siteId);
                     $.ajax({
-                        url: '//ws.sitecues.com/equinox/api/config/' + siteId,
+                        url: '//' + eqnx.getCoreConfig().hosts.ws + '/equinox/api/config/' + siteId,
                         dataType: 'json',
                         async: false,
                         success: function(data, status, xhr){

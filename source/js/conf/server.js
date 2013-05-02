@@ -2,7 +2,7 @@
 eqnx.def('conf/server', function(server, callback){
 
 	// url of conf settings server
-	var url = '//up.sitecues.com/preferences/' + location.host.replace(/^www\./, '') + '/em';
+	var url = '//' + eqnx.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '') + '/em';
 
 	// depends on `conf` and `load` modules
 	eqnx.use('conf', 'load', function(conf, load){
