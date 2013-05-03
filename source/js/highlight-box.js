@@ -243,7 +243,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         position: 'absolute',
                         transform: 'scale(1)',
                         width: clientRect.width / extraZoom,
-						height: clientRect.height / extraZoom
+						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
+						height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
                     });
 
                 // Elements relative to the root don't need extra margins, use original values instead.
@@ -302,11 +303,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     {top: cssUpdate.top, left: cssUpdate.left}, {
                         transformOrigin: '50% 50%',
                         position: 'absolute',
-                        overflowY: 'auto',
+                        overflowY: currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
                         overflowX: 'hidden',
                         // Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
                         width: clientRect.width,
-                        height: 'auto',
+						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
+                        height: currentStyle.backgroundImage ? clientRect.height : 'auto',
                         zIndex: HighlightBox.kBoxZindex.toString(),
                         border: '0px solid white',
                         listStylePosition: 'inside',
@@ -314,9 +316,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         borderRadius: HighlightBox.kBoxBorderRadius,
                         borderColor:  HighlightBox.kBoxBorderColor,
                         borderStyle:  HighlightBox.kBoxBorderStyle,
-                        borderWidth:  HighlightBox.kBoxBorderWidth,
-                        padding:      HighlightBox.kBoxPadding
+                        borderWidth:  HighlightBox.kBoxBorderWidth
                     });
+				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
+				if (!currentStyle.backgroundImage) {
+					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
+				}
 
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
