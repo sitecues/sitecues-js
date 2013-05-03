@@ -309,7 +309,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
                         width: clientRect.width,
 						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
-                        height: currentStyle.backgroundImage ? clientRect.height : 'auto',
+                        height: currentStyle.backgroundImage ? currentStyle.height : 'auto',
                         zIndex: HighlightBox.kBoxZindex.toString(),
                         border: '0px solid white',
                         listStylePosition: 'inside',
