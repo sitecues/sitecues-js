@@ -377,7 +377,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
-                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
+                        width:  colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
                     }));
 
