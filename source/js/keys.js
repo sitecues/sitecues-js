@@ -91,10 +91,12 @@ eqnx.def('keys', function(keys, callback){
 			for(key in keys.map) if (has.call(keys.map, key)){
 
 				if(keys.map[key].requiresMouseHighlight) {
-					if(!mh.picked) {
+					if(!mh.enabled) {
+						// Mouse highlight is disabled, revert to default.
 						return;
 					} else {
-						//We're going to attach the target dom element to the event
+						//We're going to attach the target dom element to the
+						//event, whether it's available or not.
 						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
 					}
 				}
