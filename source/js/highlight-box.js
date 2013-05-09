@@ -397,9 +397,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
-                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
+                        width:  colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
                     }));
+
+			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
+			   if (cloneNode[0].tagName.toLowerCase() === 'li') {
+				  cloneNode[0].style.display = 'block';
+			   }
 
                 this.itemNode.after(cloneNode);
             }
