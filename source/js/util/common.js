@@ -102,7 +102,57 @@ eqnx.def('util/common', function (common, callback) {
                 }
                 return resultRGBColor;
             }
-          
+
+			/*
+			 * Using image object element it gets its average color by means of the canvas.
+			 * @param imgEl An object.
+			 * @return rgb A string which represents the average image color in RGB format.
+			 */
+			common.getAverageRGB = function(imgEl) {
+				var blockSize = 5, // only visit every 5 pixels
+				defaultRGB = {r:0, g:0, b:0}, // for non-supporting envs
+				canvas = document.createElement('canvas'),
+				context = canvas.getContext && canvas.getContext('2d'),
+				data, width, height,
+				i = -4,
+				length,
+				rgb = {r:0, g:0, b:0},
+				count = 0;
+
+				if (!context) {
+					return defaultRGB;
+				}
+
+				height = canvas.height = imgEl.naturalHeight || imgEl.offsetHeight || imgEl.height;
+				width = canvas.width = imgEl.naturalWidth || imgEl.offsetWidth || imgEl.width;
+
+				context.drawImage(imgEl, 0, 0);
+
+				try {
+					data = context.getImageData(0, 0, width, height);
+				} catch(e) {
+					/* security error, img on diff domain */
+                    // alert('x');
+					return defaultRGB;
+				}
+
+				length = data.data.length;
+
+				while ( (i += blockSize * 4) < length ) {
+					++count;
+					rgb.r += data.data[i];
+					rgb.g += data.data[i+1];
+					rgb.b += data.data[i+2];
+				}
+
+				// ~~ used to floor values
+				rgb.r = ~~(rgb.r/count);
+				rgb.g = ~~(rgb.g/count);
+				rgb.b = ~~(rgb.b/count);
+
+				return rgb;
+			}
+
             /*
              * Calculates opposite color to the one given as parameter.
              * @param colorValue String/CSSPrimitiveValue
@@ -111,32 +161,6 @@ eqnx.def('util/common', function (common, callback) {
             common.getRevertColor = function(colorValue) {
                 var RGBColor = common.getRGBColor(colorValue);
                 return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
-            }
-
-            /*
-             * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
-             * 
-             * Note: This will always set a site-wide cookie ("path=/").
-             * 
-             * @param name  The name of the cookie (be brief!), required
-             * @param value The value of the cookie (be brief!), required
-             * @param days  The expiration of the cookie in days, optional
-             *               if not set this will be a session cookie.
-             */
-            common.setCookie = function(name, value, days) {
-                if(days) {
-                    $.cookie(name, value, { expires: days, path: '/' });
-                } else {
-                    $.cookie(name, value, { path: '/' });
-                }
-            }
-
-            /*
-             * Retrieves the value of cookie. Basically just wraps the jQuery 
-             * cookie plugin.
-             */
-            common.getCookie = function(name) {
-                return $.cookie(name);
             }
 
             /*
@@ -171,6 +195,33 @@ eqnx.def('util/common', function (common, callback) {
             function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
             function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
             function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+			
+			
+            /*
+             * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
+             * 
+             * Note: This will always set a site-wide cookie ("path=/").
+             * 
+             * @param name  The name of the cookie (be brief!), required
+             * @param value The value of the cookie (be brief!), required
+             * @param days  The expiration of the cookie in days, optional
+             *               if not set this will be a session cookie.
+             */
+            common.setCookie = function(name, value, days) {
+                if(days) {
+                    $.cookie(name, value, { expires: days, path: '/' });
+                } else {
+                    $.cookie(name, value, { path: '/' });
+                }
+            }
+
+            /*
+             * Retrieves the value of cookie. Basically just wraps the jQuery 
+             * cookie plugin.
+             */
+            common.getCookie = function(name) {
+                return $.cookie(name);
+            }
 
         // Done.
         callback();

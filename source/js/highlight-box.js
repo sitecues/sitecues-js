@@ -2,7 +2,6 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 eqnx.def('highlight-box', function (highlightBox, callback) {
-
     // Get dependencies
     eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
     function ($, conf, cursor, positioning, common, backgroundDimmer) {
@@ -244,7 +243,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         position: 'absolute',
                         transform: 'scale(1)',
                         width: clientRect.width / extraZoom,
-						height: clientRect.height / extraZoom
+						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
+						height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
                     });
 
                 // Elements relative to the root don't need extra margins, use original values instead.
@@ -303,11 +303,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                     {top: cssUpdate.top, left: cssUpdate.left}, {
                         transformOrigin: '50% 50%',
                         position: 'absolute',
-                        overflowY: 'auto',
+                        overflowY: currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
                         overflowX: 'hidden',
                         // Sometimes width is rounded, so float part gets lost. preserve it so that inner content is not rearranged when width is a bit narrowed.
                         width: clientRect.width,
-                        height: 'auto',
+						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
+                        height: currentStyle.backgroundImage ? currentStyle.height : 'auto',
                         zIndex: HighlightBox.kBoxZindex.toString(),
                         border: '0px solid white',
                         listStylePosition: 'inside',
@@ -315,9 +316,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         borderRadius: HighlightBox.kBoxBorderRadius,
                         borderColor:  HighlightBox.kBoxBorderColor,
                         borderStyle:  HighlightBox.kBoxBorderStyle,
-                        borderWidth:  HighlightBox.kBoxBorderWidth,
-                        padding:      HighlightBox.kBoxPadding
+                        borderWidth:  HighlightBox.kBoxBorderWidth
                     });
+				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
+				if (!currentStyle.backgroundImage) {
+					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
+				}
 
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
@@ -326,26 +330,26 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var oldBgColor = currentStyle.backgroundColor;
                 var oldBgImage = currentStyle.backgroundImage;
                 var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
-
-                // If background color computed is not contrast to text color, invert background one.
                 var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
-                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-                var color = compStyle.getPropertyCSSValue("color");
-                var isContrastColors = common.getIsContrastColors(color, newBgColor);
 
                 // If color and background color are not contrast then either set background image or invert background color.
-                if (newBg.bgImage) {
-                    cssBeforeAnimateStyles.backgroundRepeat   = newBg.bgRepeat;
-                    cssBeforeAnimateStyles.backgroundImage    = newBg.bgImage;
-                    cssBeforeAnimateStyles.backgroundPosition = newBg.bgPos;
-                    cssBeforeAnimateStyles.backgroundSize     = clientRect.width * zoomLevel + 'px ' + clientRect.height * zoomLevel+ 'px';
+                if (oldBgImage) {
+                    cssBeforeAnimateStyles.backgroundRepeat   = currentStyle.backgroundRepeat;
+                    cssBeforeAnimateStyles.backgroundImage    = oldBgImage;
+                    cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
+                    cssBeforeAnimateStyles.backgroundSize     = clientRect.width + 'px ' + clientRect.height+ 'px';
                 }
-
-                if (!isContrastColors) {
-                    cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
-                } else {
-                    cssBeforeAnimateStyles.backgroundColor = newBgColor;
-                }
+		
+				// If background color is not contrast to text color, invert background one.
+                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+				var color = compStyle.getPropertyCSSValue("color");
+				var isContrastColors = common.getIsContrastColors(color, newBgColor);
+				// We don't know what's the text color in the image.
+				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img' || isValidBgImage(oldBgImage))) {
+					cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+				} else {
+					cssBeforeAnimateStyles.backgroundColor = newBgColor;
+				}
 
                 return cssBeforeAnimateStyles;
             }
@@ -373,9 +377,14 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
-                        width: (parseFloat(origRectSize.width) / colspan) + 'px',
+                        width:  colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
                     }));
+
+			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
+			   if (cloneNode[0].tagName.toLowerCase() === 'li') {
+				  cloneNode[0].style.display = 'block';
+			   }
 
                 this.itemNode.after(cloneNode);
             }
@@ -602,10 +611,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Check to see if we have an existing background color
                 if (!oldBgColor || $.inArray(oldBgColor, transparentColorNamesSet) >= 0) {
                     // Didn't find an existing background color, so see if a parent has one
-                    bgColorObj = getNewBgColor(parents, oldBgColor);
+                    bgColorObj = getNewBgColor(itemNode, parents);
                 }
                 // todo: fix list items bullet bg being considered as background image because they are.
-                if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || oldBgImage.trim() === '' || oldBgImage === 'none') {
+                if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || !isValidBgImage(oldBgImage)) {
                     bgImageObj = getNewBgImage(parents, itemNode);
                 }
                 return $.extend({}, bgColorObj, bgImageObj);
@@ -617,19 +626,39 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @param parents Array
              * @return Object
              */
-            function getNewBgColor(parents) {
+            function getNewBgColor(itemNode, parents) {
                 // Set a variable for the default background in case we don't find one.
                 var bgColor = HighlightBox.kDefaultBgColor;
-                $(parents).each(function () {
-                    // Iterate through the parents looking for a background color.
-                    var thisNodeColor = $(this).css('backgroundColor');
-                    // See if the background color is a default or transparent color( if yes, then $.inArray() returns '-1' value.
-                    if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
-                        // Found a background color specified in this node, no need to check further up the tree.
-                        bgColor = thisNodeColor;
-                        return false;
-                    }
-                });
+				// Special treatment for images since they might have text on transparent background.
+				// We should make sure text is readable anyways.
+				if (isValidBgImage($(itemNode).css('backgroundImage'))) {
+					// Create image object using bg image URL.
+					var imageObj = new Image();
+					imageObj.onload = function() {
+						var rgb = common.getAverageRGB(this);
+						bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
+					};
+					var bgImage = $(itemNode).css('backgroundImage');
+					// RegExp below will take out bg image URL from the string.
+					// Example: 'url(http://example.com/foo.png)' will evaluate to 'http://example.com/foo.png'.
+					imageObj.src = bgImage.match(/\(([^)]+)\)/)[1];
+				} else if (itemNode[0].tagName.toLowerCase() === 'img') {
+					var rgb = common.getAverageRGB($(itemNode)[0]);
+					bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
+				} else {
+					// Not an image, doesn't have bg image so just iterate over element's parents.
+					$(parents).each(function () {
+						// Iterate through the parents looking for a background color.
+						var thisNodeColor = $(this).css('backgroundColor');
+						// See if the background color is a default or transparent color( if yes, then $.inArray() returns '-1' value.
+						if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
+							// Found a background color specified in this node, no need to check further up the tree.
+							bgColor = thisNodeColor;
+							return false;
+						}
+					});
+				}
+
                 // Return the default background color if we haven't fetched a suitible background color from parent.
                 return {'bgColor': bgColor};
 
@@ -652,7 +681,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // todo: fix list items bullet background being considered as background image because they are.
                         if ($(this)[0].tagName.toLowerCase() !== 'li') {
                             var thisNodeImage = $(this).css('backgroundImage');
-                            if (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none') {
+                            if (isValidBgImage(thisNodeImage)) {
                                 // It's an easy case: we just retrieve the parent's background image.
                                 bgImage  = thisNodeImage;
                                 bgPos    = $(this).css('backgroundPosition');
@@ -661,43 +690,19 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                             }
                         }
                     });
-                    // If no bg image defined yet then look at the underlying elements(maybe some positioned and lie below the target).
-                    // todo: do we need this at all?
-                    // todo: is there a better way to define underlying elements(w/o recursion)?
-                    /*
-                    var thisNodeImage;
-                    if (!bgImage) {
-                        var thisNodePos = positioning.getOffset(itemNode);
-                        var zoomLevel = conf.get('zoom');
-                        var lastEl;
-                        var bgImageEl = function recursion(left, top) {
-                            var el = document.elementFromPoint(left, top);
-                            // If the element has changed or position is not in the viewport.
-                            if (el !== lastEl || (left <= 0 && top <= 0)) {
-                                lastEl = el;
-                                thisNodeImage = $(el).css('backgroundImage');
-                                // Conditions to interrupt the recurse:
-                                if ((el && (el.tagName.toLowerCase() === 'body' || el.tagName.toLowerCase() === 'html'))
-                                    || (thisNodeImage && thisNodeImage.trim() !== '' && thisNodeImage !== 'none')
-                                    || (left <= 0 && top <= 0)) {
-                                    return el;
-                                }
-                            }
-
-                            return recursion(left <= 0 ? 0 : left - 1, top <= 0 ? 0 : top - 1);
-                        } (thisNodePos.left * zoomLevel, thisNodePos.top * zoomLevel);
-
-                        if (bgImageEl) {
-                            bgImage  = $(bgImageEl).css('backgroundImage');
-                            bgPos    = $(bgImageEl).css('backgroundPosition');
-                            bgRepeat = $(bgImageEl).css('backgroundRepeat');
-                        }
-                    }
-                    */
 
                     return {'bgImage': bgImage, 'bgPos': bgPos, 'bgRepeat': bgRepeat};
                 }
             }
+
+			/*
+			 * Check if current image value is not empty.
+			 * @imageValue A string that represents current image value.
+			 * @return true if image value contains some not-empty value.
+			 */
+			function isValidBgImage(imageValue) {
+				return imageValue && imageValue.trim() !== '' && imageValue !== 'none';
+			}
 
             /**
              * Check if the target is suitable to be used for highlight reading box.
@@ -786,8 +791,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 } else if (currentState === STATES.ON) {
                     // There is no current HLB and we can create one, so do just that.
                     // If the target element is ineligible, the create request may return null.
-                    var target = document.elementFromPoint(clientX, clientY);
-                    instance = HighlightBox.createInstance(target);
+                    instance = HighlightBox.createInstance(e.mouseHighlightTarget);
                     if (instance) {
                         instance.inflate();
                     }
@@ -823,7 +827,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
         updateZoomLevel(conf.get('zoom'));
 
-        // Done.
-        callback();
     });
+
+    // Done.
+    callback();
 });
