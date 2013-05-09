@@ -207,13 +207,24 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 }, HighlightBox.kShowBoxSpeed + 100);
 
                 // Animate HLB (keep in mind $.animate() is non-blocking).
-                this.itemNode
+	            var ancestorCSS = [ ];
+	            $(this.itemNode).parents().each(function () {
+		            ancestorCSS.push({zIndex: this.style.zIndex, overflow: this.style.overflow });
+	            });
+	            this.savedAncestorCSS = ancestorCSS;
+	            this.itemNode.parentsUntil(document.body).css({
+		            zIndex: HighlightBox.kBoxZindex.toString(),
+		            overflow: 'visible'
+	            });
+	            this.itemNode
                     .css(cssBeforeAnimateStyles)
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
                         // Once the animation completes, set the new state and emit the ready event.
                         _this.state = STATES.READY;
                         console.log("hlb ready");
                         eqnx.emit('hlb/ready', _this.item);
+			            $(this).css({outline: '2000px solid rgba(0, 0, 0, .05)', outlineOffset: '-2px'}).
+			              animate( { outlineColor: 'rgba(0, 0, 0, .4)' }, 600);
                 });
 
                 // Trigger the background blur effect if there is a highlight box only.
@@ -233,7 +244,16 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 eqnx.emit('hlb/deflating', _this.item);
 
                 // Get the current element styles.
-                var currentStyle = this.savedCss[this.savedCss.length - 1],
+	            var ancestorCSS = this.savedAncestorCSS;
+	            $(this.itemNode).parentsUntil(document.body).each(function () {
+		            var css = ancestorCSS.shift();
+		            this.style.zIndex = css.zIndex;
+		            this.style.overflow = css.overflow;
+	            });
+
+	            this.itemNode.get(0).style.outline = '0px solid transparent';
+
+	            var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1],
                     offsetParent = this.itemNode.offsetParent();
 
@@ -408,7 +428,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         updateInnerElStyle.width = parseFloat(closestStyle.width) + 'px';
 
                         var innerText = $(closest).html();
-                        if (innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
+                        if (innerText && innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
                             updateInnerElStyle.whiteSpace = 'nowrap';
                         }
 
