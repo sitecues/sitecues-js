@@ -4,8 +4,14 @@
  * easy/fast rules and moves towards more a more complex scoring approach.  
  * It is still very simple in it's approach but hopefully has been structured
  * to allow for intelligent behaviors without major performance penalties.
+
+ data-sitecues-highlight
+ data-sitecues-highlight-role
+
  */
 eqnx.def('mouse-highlight/picker', function(picker, callback){
+
+	picker.debug = false;
 
 	// Whitelist of css display properties we'll allow
 	picker.validDisplays = [
@@ -22,139 +28,7 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 		'#eqnx-eq360-bg'
 	];
 
-	// We completely ignore these elements
-	picker.blacklist = [
-		'!--...--',
-		'!doctype',
-		'area',
-		'base',
-		'basefont',
-		'bdo',
-		'br',
-		'head',
-		'body',
-		'center',
-		'col',
-		'colgroup',
-		'font',
-		'hr',
-		'html',
-		'frame',
-		'frameset',
-		'iframe',
-		'link',
-		'map',
-		'meta',
-		'noframes',
-		'noscript',
-		'optgroup',
-		'option',
-		'param',
-		'script',
-		'style',
-		'tbody',
-		'tfoot',
-		'thead',
-		'title'
-	];
-
-	// We just zoom these elements automatically
-	picker.graphicsTags = [
-		'applet',
-		'img',
-		'object'
-	];
-
-	// We treat these elements as inline text fragments
-	picker.fragmentTags = [
-		'a',
-		'abbr',
-		'acronym',
-		'b',
-		'big',
-		'cite',
-		'del',
-		'dfn',
-		'kbd',
-		'em',
-		'i',
-		'ins',
-		'q',
-		'small',
-		'span',
-		'strike',
-		'strong',
-		's',
-		'samp',
-		'var',
-		'sub',
-		'sup',
-		'u'
-	];
-
-	// We treat these elements as headers.  This means they should probably include some of the following content to be useful.
-	picker.headingTags = [
-		'h1',
-		'h2',
-		'h3',
-		'h4',
-		'h5',
-		'h6',
-		'caption',
-		'legend'
-	];
-
-	// We treat these elements as large or typically independent text blocks
-	picker.bigTextTags = [
-		'address',
-		'blockquote',
-		'code',
-		'p',
-		'pre',
-		'tt'
-	];
-
-	// We treat these elements as small text blocks that we may want to join together.  Note that these are conventionally used in lists.
-	picker.smallTextTags = [
-		'dt',
-		'th',
-		'td',
-		'dd',
-		'li'
-	];
-
-	// We treat these elements as arbitrary containers
-	// Note that all unknown elements are effectively part of this list too.
-	picker.containerTags = [
-		'div',
-		'fieldset',
-		'tr'
-	];
-
-	// We treat these elements as arbitrary containers
-	// Note that all unknown elements are effectively part of this list too.
-	picker.listTags = [
-		'table',
-		'dir',
-		'dl',
-		'form',
-		'ol',
-		'ul',
-		'menu'
-	];
-
-	// These are inputs.  They are pretty similar to small text blocks but less flexible.
-	picker.inputTags = [
-		'button',
-		'input',
-		'isindex',
-		'select',
-		'textarea',
-		'label'
-	];
-
-
-	eqnx.use('jquery', 'style', 'util/common', function($, styles, common){
+	eqnx.use('jquery', 'style', 'util/common', 'mouse-highlight/roles', function($, styles, common, roles){
 
 		/*
 		 * Find the best highlightable element, if any, given a target element.
@@ -207,34 +81,24 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 		 * These are the 'hard and fast' rules we can use to make quick 
 		 * calls about an element.  If heuristics fails to make a
 		 * determination, we'll proceed to the scoring section.
+		 * 
 		 */
 		picker.isTarget = function(e) { 
-			var node = e.get(0);
-			var nodeName = node.nodeName.toLowerCase();
-			if($.inArray(nodeName, picker.blacklist) >= 0) {
-				// Element we ignore
+			var highlight = $(e).data('sitecues-highlight');
+			if(typeof eqnx != 'undefined' && highlight != '' && highlight != null) {
+				// We have some kind of value for this attribute
+				if(highlight) {
+					return true;
+				}
 				return false;
 			}
-			if($.inArray(nodeName, picker.graphicsTags) >= 0) {
-				if(e.parent().is('a')) {
-					// We'll skip linked images
-					// TODO Don't zoom embedded thumbnails directly
+			var role = roles.find(e);
 
-					// TODO Testing simply on a parent of 'a' will catch most 
-					// instances but ignores intermediary elements and link-
-					// like onclick evenets.  We should eventually try to 
-					// improve identifying if we're in a "link".
-					return false;
-				}
-				return true;
-			}
-			if($.inArray(nodeName, picker.headingTags) >= 0) {
-				if(e.parent().is('a')) {
-					// We'll skip linked headers
-					// TODO Allow for highlighting groups of elements such as a header and the following paragraphs
-					return false;
-				}
-				return true;
+			var node = e.get(0);
+			var nodeName = node.nodeName.toLowerCase();
+			if(!role.canHighlight) {
+				// Element we ignore
+				return false;
 			}
 			if(node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
 				// IDs we ignore
@@ -242,13 +106,13 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 			}
 
 			var width = e.width();
-			if(width == 0) {
+			if(width < 5) {
 				// Don't highlight things that have no width
 				return false;
 			}
 
 			var height = e.height();
-			if(height == 0) {
+			if(height < 5) {
 				// Don't highlight things that have no height
 				return false;
 			}
@@ -271,38 +135,69 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 			 *
 			 */
 		picker.getScore = function(e) { 
-			var node = e.get(0);
-			var nodeName = node.nodeName.toLowerCase();
-			var score = 0, txtLen = 0;
-			var shouldContainText = true;
-			var shouldBeChild = false;
-			if($.inArray(nodeName, picker.smallTextTags) >= 0) {
-				shouldBeChild = true;
-				score += 1;
-			} else if($.inArray(nodeName, picker.bigTextTags) >= 0) {
-				score += 10;
-			} else if($.inArray(nodeName, picker.fragmentTags) >= 0) {
-				shouldBeChild = true;
-				score -= 5;
-			} else if($.inArray(nodeName, picker.containerTags) >= 0) {
-				score -= 10;
-			} else if($.inArray(nodeName, picker.listTags) >= 0) {
-				score -= 1;
-			} else if($.inArray(nodeName, picker.graphicsTags) >= 0) {
-				// We're only here if we determined that a parent was a better choice
-				score -= 10;
-				shouldContainText = false;
-			} else if($.inArray(nodeName, picker.inputTags) >= 0) {
-				score -= 1;
+			var role = roles.find(e);
+			var score = 0, txtLen = -1, textNodes = false, highlightableChild = null;
+
+			if(e.contents()) {
+				e.contents().each(function() {
+					if(this.nodeType == 3 && this.nodeValue.trim().length > 0) {
+						textNodes = true;
+						console.log(this);
+					}
+				});
 			}
-			if(shouldContainText) {
-				txtLen = e.text().length;
-				if(txtLen < 1) {
-					score -= 10;
-				} else {
-					score += 10;
+
+			// Let's see if we should re-assign this to a text node.
+			if(!role.shouldContainText && textNodes) {
+				if(txtLen == -1) {
+					txtLen = e.text().trim().length;
 				}
+				role = roles.roles.longText;
 			}
+
+			if(role.shouldContainText) {
+				if(txtLen == -1) {
+					txtLen = e.text().trim().length;
+				}
+				if(txtLen < 1) {
+					// No text
+					score -= 10;
+				} else if(textNodes) {
+					// Direct text children
+					score += 10;
+				} else {
+					// Has text, but no direct children, this could be something
+					// like a <p><b>text</b></p> or <td><p>foo</p></td>. What
+					// we'll do here is that if we have at least one
+					// highlightable child, we'll skip this element.  There is
+					// definitely room for improvement in this logic.
+					if(highlightableChild == null) {
+						e.children().each(function() {
+							if(picker.isTarget($(this)) != false && picker.getScore($(this)) > 0) {
+								highlightableChild = true;
+							}
+						});
+					}
+					if(highlightableChild) {
+						score -= 10;
+					} else {
+						score += 1;
+					}
+				}
+			} else {
+				score -= 1;
+			}
+
+			if(picker.debug) {
+				// These are for seeing the results in-context in a web
+				// inspector.
+				e.attr('sitecues-highlight-score',score);
+				e.attr('sitecues-highlight-role',role.name);
+				e.attr('sitecues-highlight-text-nodes',textNodes);
+				e.attr('sitecues-highlight-text-length',txtLen);
+				e.attr('sitecues-highlight-child',highlightableChild);
+			}
+
 			return score;
 		}
 
@@ -322,9 +217,6 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 				picker.showAll($(this));			
 			});
 		}
-
-		// eqnx.on('speech/enable', picker.debugShowAll);
-		// eqnx.on('highlight/enable', picker.debugShowAll);
 		
 		callback();
 
