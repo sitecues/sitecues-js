@@ -14,7 +14,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var extraZoom = 1.5;
         var kPanelId = 'eqnx-panel';
         var kBadgeId = 'eqnx-badge';
-		var toClass = {}.toString;
+    		var toClass = {}.toString;
 
         // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
         // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -148,6 +148,22 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             // TODO: Expand this array to include all appropriate elements.
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
 
+
+            HighlightBox.isSticky = false;
+
+            /**
+             * Toggle Sticky state of highlight box
+             */
+            eqnx.toggleStickyHLB = function () {
+              if (HighlightBox.isSticky){
+                HighlightBox.isSticky = false;
+              } else {
+                HighlightBox.isSticky = true;
+              }
+              
+              return HighlightBox.isSticky;
+            };            
+
             /**
              * Get the state of the highlight box.
              */
@@ -159,6 +175,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * Show a highlight reading box when triggered.
              */
             HighlightBox.prototype.inflate = function () {
+
                 // Immediately enter the
                 this.state = STATES.INFLATING;
                 eqnx.emit('hlb/inflating', this.item);
@@ -186,57 +203,61 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Insert placeholder before HLB target is absoultely positioned.
                 // Otherwise, we might loose white space intent to the left/right because
                 // in most cases sequence of whitespace will collapse into a single whitespace.
-                this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
+                var clonedNode = this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
 
                 // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then
                 // close it out.
                 setTimeout(function() {
                     if (getState() === STATES.INFLATING) {
-						console.log("hlb in bad state. resetting.");
+					             	console.log("hlb in bad state. resetting.");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
                         onHighlightBoxClosed();
                         // Ensure the bg dimmer is gone.
                         // AK: comment out all the dimmer calls by AL request
-                        //backgroundDimmer.removeDimmer();
+                        backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
                         console.log("hlb closed");
                         eqnx.emit('hlb/closed', _this.item);
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
 
-                // Animate HLB (keep in mind $.animate() is non-blocking).
+              // Animate HLB (keep in mind $.animate() is non-blocking).
 	            var ancestorCSS = [ ];
 	            $(this.itemNode).parents().each(function () {
 		            ancestorCSS.push({zIndex: this.style.zIndex, overflow: this.style.overflow });
 	            });
+
 	            this.savedAncestorCSS = ancestorCSS;
 	            this.itemNode.parentsUntil(document.body).css({
 		            zIndex: HighlightBox.kBoxZindex.toString(),
 		            overflow: 'visible'
 	            });
-	            this.itemNode
-                    .css(cssBeforeAnimateStyles)
-                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
-                        // Once the animation completes, set the new state and emit the ready event.
-                        _this.state = STATES.READY;
-                        console.log("hlb ready");
-                        eqnx.emit('hlb/ready', _this.item);
-			            $(this).css({outline: '2000px solid rgba(0, 0, 0, .05)', outlineOffset: '-2px'}).
-			              animate( { outlineColor: 'rgba(0, 0, 0, .4)' }, 600);
-                });
 
+	            this.itemNode
+                .css(cssBeforeAnimateStyles)
+                .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+              
+                // Once the animation completes, set the new state and emit the ready event.
+                _this.state = STATES.READY;
+                console.log("hlb ready");
+                eqnx.emit('hlb/ready', _this.item);
+                  
                 // Trigger the background blur effect if there is a highlight box only.
-                // AK: comment out all the dimmer calls by AL request
-                //backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex - 1);
-                return false;
+                //  > AK: comment out all the dimmer calls by AL request
+                //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
+                backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex, this, extraZoom);
+              });
+
+              return false;
             };
 
             /**
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
+              if( HighlightBox.isSticky === false ){
                 var _this = this;
 
                 // Update state.
@@ -244,28 +265,28 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 eqnx.emit('hlb/deflating', _this.item);
 
                 // Get the current element styles.
-	            var ancestorCSS = this.savedAncestorCSS;
-	            $(this.itemNode).parentsUntil(document.body).each(function () {
-		            var css = ancestorCSS.shift();
-		            this.style.zIndex = css.zIndex;
-		            this.style.overflow = css.overflow;
-	            });
+  	            var ancestorCSS = this.savedAncestorCSS;
+  	            $(this.itemNode).parentsUntil(document.body).each(function () {
+  		            var css = ancestorCSS.shift();
+  		            this.style.zIndex = css.zIndex;
+  		            this.style.overflow = css.overflow;
+  	            });
 
-	            this.itemNode.get(0).style.outline = '0px solid transparent';
+	              this.itemNode.get(0).style.outline = '0px solid transparent';
 
-	            var currentStyle = this.savedCss[this.savedCss.length - 1],
+	              var currentStyle = this.savedCss[this.savedCss.length - 1],
                     origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1],
                     offsetParent = this.itemNode.offsetParent();
 
                 var clientRect = this.item.getBoundingClientRect();
 
                 var cssAnimateStyles = $.extend({},currentStyle,{
-                        position: 'absolute',
-                        transform: 'scale(1)',
-                        width: clientRect.width / extraZoom,
-						// Don't change height if there's a backgroudn image, otherwise it is destroyed.
-						height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
-                    });
+                    position: 'absolute',
+                    transform: 'scale(1)',
+                    width: clientRect.width / extraZoom,
+					          // Don't change height if there's a backgroudn image, otherwise it is destroyed.
+					          height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
+                });
 
                 // Elements relative to the root don't need extra margins, use original values instead.
                 if (offsetParent[0].tagName.toLowerCase() === 'html') {
@@ -275,38 +296,42 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Deflate the highlight box.
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
-                    // Cleanup all elements inserted by Eqnx on the page.
-                    if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
-                        // Remove placeholder wrapper element if the table child highlighted.
-                       $('.' + HighlightBox.kPlaceHolderWrapperClass)
-                           .children()
-                           .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
-                    }
-                    $('.' + HighlightBox.kPlaceHolderClass).remove();
-                    // AK: comment out all the dimmer calls by AL request
-                    //backgroundDimmer.removeDimmer();
+                  // Cleanup all elements inserted by Eqnx on the page.
+                  if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
+                    // Remove placeholder wrapper element if the table child highlighted.
+                    $('.' + HighlightBox.kPlaceHolderWrapperClass)
+                      .children()
+                      .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
+                  }
 
-                    setTimeout(function () {
-                        // Animation callback: notify all inputs about zoom out.
-                        // We should do this with next tick to allow handlers catch right scale level.
-                        notifyZoomInOrOut(_this.itemNode, false);
-                    }, 0);
+                  $('.' + HighlightBox.kPlaceHolderClass).remove();
+                  
+                  backgroundDimmer.removeDimmer();
 
-                    var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
+                  setTimeout(function () {
+                    // Animation callback: notify all inputs about zoom out.
+                    // We should do this with next tick to allow handlers catch right scale level.
+                    notifyZoomInOrOut(_this.itemNode, false);
+                  }, 0);
 
-                    // Wait till animation is finished, then reset animate styles.
-                    _this.itemNode.removeAttr('style');
-                    if (typeof style !== 'undefined') {
-                        _this.itemNode.attr('style', style);
-                    }
-                    // This instance is now officially closed.
-                    _this.state = STATES.CLOSED;
-                    // Call the module method to clean up after close BEFORE calling listeners.
-                    onHighlightBoxClosed();
-                    console.log("hlb closed");
-                    eqnx.emit('hlb/closed', _this.item);
-                });
+                  var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
 
+                  // Wait till animation is finished, then reset animate styles.
+                  _this.itemNode.removeAttr('style');
+
+                  if (typeof style !== 'undefined') {
+                    _this.itemNode.attr('style', style);
+                  }
+                  // This instance is now officially closed.
+                  _this.state = STATES.CLOSED;
+
+                  // Call the module method to clean up after close BEFORE calling listeners.
+                  onHighlightBoxClosed();
+                  
+                  console.log("hlb closed");
+                  eqnx.emit('hlb/closed', _this.item);
+              });
+              }
             };
 
             /*
@@ -380,34 +405,44 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
              * @param origRectSize Object
              */
             HighlightBox.prototype.prepareAndInsertPlaceholder = function (currentStyle, origRectSize) {
-               // Prepare clone element as a clone of the scaled highlight box element.
-                var clone = this.item.cloneNode(true),
-                    cloneNode = $(clone);
-                // Remove all the attributes from the placeholder(clone) tag.
-               common.removeAttributes(cloneNode);
-               // Clean clone from inner <script> before insertion to DOM
-                cloneNode.find('script').remove();
-               // Temporary shim for <td> which spans the number of columns in a cell.
-               // todo: apply better maths for calculating clone width for such cells.
-               var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
+               
+              // Prepare clone element as a clone of the scaled highlight box element.
+              var clone       = this.item.cloneNode(true)
+                , cloneNode   = $(clone)
+              ;
 
-                // Then, insert placeholder so that content which comes after doesn't move back.
-                cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                    .css($.extend({}, currentStyle, {
-                        // Make sure clone display turned to 'block' if it is a tbale cell
-                        display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
-                        visibility: 'hidden',
-                        width:  colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px',
-                        height: origRectSize.height + 'px'
-                    }));
+              // Remove all the attributes from the placeholder(clone) tag.
+              common.removeAttributes(cloneNode);
+              
+              // Clean clone from inner <script> before insertion to DOM
+              cloneNode.find('script').remove();
 
-			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
-			   if (cloneNode[0].tagName.toLowerCase() === 'li') {
-				  cloneNode[0].style.display = 'block';
-			   }
+              // Temporary shim for <td> which spans the number of columns in a cell.
+              // todo: apply better maths for calculating clone width for such cells.
+              var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
 
-                this.itemNode.after(cloneNode);
-            }
+              // Then, insert placeholder so that content which comes after doesn't move back.
+              cloneNode.addClass( HighlightBox.kPlaceHolderClass )
+                
+                .css($.extend( {}, currentStyle, {
+                    
+                    // Make sure clone display turned to 'block' if it is a tbale cell
+                    display       : ( currentStyle.display.indexOf('table') === 0 ) ? 'block' : currentStyle.display
+                  , visibility    : 'hidden'
+                  , width         : colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px'
+                  , height        : origRectSize.height + 'px'
+                })
+              );
+
+              // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
+              if (cloneNode[0].tagName.toLowerCase() === 'li') {
+                cloneNode[0].style.display = 'block';
+              }
+
+              this.itemNode.after(cloneNode);
+
+              return cloneNode;
+            };
 
            /*
             * Table elements require extra work for some cases - especially when table has flexible layout.
@@ -796,7 +831,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             clientY = e.clientY;
 
             onTargetChange(e.target);
-
         });
 
         /**
