@@ -599,6 +599,11 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				var widthType  = width ? toClass.call(width).slice(8, -1) : '';
 				var heightType = height? toClass.call(height).slice(8, -1) : '';
 
+				// If image dimensions are good and don't need recalculations, return.
+				if (widthType === 'Number' && heightType === 'Number') {
+					return;
+				}
+
 				if (widthType === 'Number' || heightType === 'Number') {
 					delete cssBeforeAnimateStyles.width;
 					delete cssBeforeAnimateStyles.height;
