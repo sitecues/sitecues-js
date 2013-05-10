@@ -11,11 +11,29 @@ eqnx.def('util/common', function (common, callback) {
             /**
              * Get the element's styles to be used further.
              * @param element The DOM element which styles we want to get.
+			 * @param CSS prop A property we want to get value for, ex.: margin-top or marginTop
              * @return elementComputedStyles An object of all element computed styles.
              */
-            common.getElementComputedStyles = function(element) {
+            common.getElementComputedStyles = function(element, prop) {
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
+
+				// If a specific property value is requested then skip the entire CSS object iteration.
+				if (prop) {
+					propertyParts = prop.split('-');
+					// camelCase name: 'marginTop'
+					if (propertyParts.length < 2) {
+						return computedStyles[prop];
+					}
+					// dash-like name: 'margin-top'
+					for (var i = 1; i < propertyParts.length; i++) {
+                        propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
+                    }
+					return computedStyles[propertyName];
+					
+				}
+
+				// By default, return entire CSS object.
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
                     propertyParts = currentProperty.split('-');
