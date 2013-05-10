@@ -318,7 +318,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
                 // Fetch the exact value for width(not rounded)
                 var clientRect = this.item.getBoundingClientRect();
-                var zoomLevel = conf.get('zoom');
+
                 var cssBeforeAnimateStyles = $.extend({},
                     {top: cssUpdate.top, left: cssUpdate.left}, {
                         transformOrigin: '50% 50%',
@@ -384,12 +384,10 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var clone = this.item.cloneNode(true),
                     cloneNode = $(clone);
                 // Remove all the attributes from the placeholder(clone) tag.
-               common.removeAttributes(cloneNode);
+                common.removeAttributes(cloneNode);
                // Clean clone from inner <script> before insertion to DOM
                 cloneNode.find('script').remove();
-               // Temporary shim for <td> which spans the number of columns in a cell.
-               // todo: apply better maths for calculating clone width for such cells.
-               var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
+                var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
 
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass)
@@ -397,9 +395,15 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
-                        width:  colspan > 1 ? 'auto' : parseFloat(origRectSize.width) + 'px',
+                        width: parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
                     }));
+
+				// If this is an ancestor to the table cell which doesn't have colspan.
+				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
+				if (tableCellAncestorParents && colspan === 1) {
+					//cloneNode[0].style.width = 'auto';
+				} 
 
 			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
 			   if (cloneNode[0].tagName.toLowerCase() === 'li') {
@@ -417,20 +421,30 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
            function handleTableElement(itemNode, currentStyle) {
                // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
                 var savedDisplay = currentStyle.display;
+				// If the target is <td>, <tr>, <table> or any other table cell element then exit.
                 if (savedDisplay.indexOf('table') === 0) {
                     itemNode.css({display: 'block'});
                     return false;
                 }
 
-                // Handle flexible table width effect dependent of the inner elements.
-                itemNode.parents().andSelf().each(function () {
+                // If the target is some inner element, like <div> or <p> inside of table cell then
+				// handle flexible table width effect dependent of the inner elements.
+				var tableCellAncestorParents = getTableCellAncestorParents(itemNode);
+                tableCellAncestorParents.each(function () {
                     if (this.tagName.toLowerCase() === 'table') {
                         // todo: try to set table-layout:fixed to table
                         var closest = itemNode.closest('td');
                         var closestStyle = common.getElementComputedStyles(closest[0]);
 
                         var updateInnerElStyle = {};
-                        updateInnerElStyle.width = parseFloat(closestStyle.width) + 'px';
+						updateInnerElStyle.width = parseFloat(closestStyle.width)
+													- parseFloat(closestStyle.paddingLeft)
+													- parseFloat(closestStyle.paddingRight)
+													- parseFloat(closestStyle.marginLeft) 
+													- parseFloat(closestStyle.marginRight)
+													- parseFloat(closestStyle.borderLeftWidth) 
+													- parseFloat(closestStyle.borderLeftWidth)
+													+ 'px';
 
                         var innerText = $(closest).html();
                         if (innerText && innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
@@ -446,6 +460,18 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 return false;
             }
 
+			/*
+			 * Gets table ancestor element's parents.
+			 * @param itemNode
+			 * @return false if this is not a child of table element; otherwise, return an array of parent objects.
+			 */
+			function getTableCellAncestorParents(itemNode) {
+				var parents = itemNode.parents().andSelf();
+				if (parents && parents.length > 0) {
+					return parents;
+				}
+				return false;
+			}
             /**
              * Get the size and position of the current HLB to inflate.
              * @param selector What element is being positioned
