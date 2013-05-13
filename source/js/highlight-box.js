@@ -378,11 +378,12 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
 
                 // If color and background color are not contrast then either set background image or invert background color.
-                if (oldBgImage) {
+                if (isValidBgImage(oldBgImage)) {
                     cssBeforeAnimateStyles.backgroundRepeat   = currentStyle.backgroundRepeat;
                     cssBeforeAnimateStyles.backgroundImage    = oldBgImage;
                     cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
                     cssBeforeAnimateStyles.backgroundSize     = clientRect.width + 'px ' + clientRect.height+ 'px';
+					cssBeforeAnimateStyles.backgroundColor    = common.getRevertColor(newBgColor);
                 }
 		
 				// If background color is not contrast to text color, invert background one.
@@ -390,7 +391,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				var color = compStyle.getPropertyCSSValue("color");
 				var isContrastColors = common.getIsContrastColors(color, newBgColor);
 				// We don't know what's the text color in the image.
-				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img' || isValidBgImage(oldBgImage))) {
+				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
 					cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
 				} else {
 					cssBeforeAnimateStyles.backgroundColor = newBgColor;
