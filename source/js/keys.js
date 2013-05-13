@@ -83,8 +83,8 @@ eqnx.def('keys', function(keys, callback){
 			var i, l, key, test, parts, result;
 
 			// ignore events from editable elements
-			if (mh.picked || keys.isEditable(event.target))
-				return;
+			//if (mh.picked || keys.isEditable(event.target))
+				//return;
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
