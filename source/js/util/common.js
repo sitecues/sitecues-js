@@ -4,7 +4,7 @@
 eqnx.def('util/common', function (common, callback) {
 
    // Define dependency modules.
-    eqnx.use('jquery', function ($) {
+    eqnx.use('jquery', 'jquery/cookie', function ($) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
@@ -13,9 +13,25 @@ eqnx.def('util/common', function (common, callback) {
              * @param element The DOM element which styles we want to get.
              * @return elementComputedStyles An object of all element computed styles.
              */
-            common.getElementComputedStyles = function(element) {
+            common.getElementComputedStyles = function(element, prop) {
+				// By default, return entire CSS object.
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
+
+				// If a specific property value is requested then skip the entire CSS object iteration.
+				if (prop) {
+					propertyParts = prop.split('-');
+					// camelCase name: 'marginTop'
+					if (propertyParts.length < 2) {
+						return computedStyles[prop];
+					}
+					// dash-like name: 'margin-top'
+					for (var i = 1; i < propertyParts.length; i++) {
+                        propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
+                    }
+					return computedStyles[propertyName];
+				}
+
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
                     propertyParts = currentProperty.split('-');
@@ -113,6 +129,56 @@ eqnx.def('util/common', function (common, callback) {
                 return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
             }
 
+			/*
+			 * Using image object element it gets its average color by means of the canvas.
+			 * @param imgEl An object.
+			 * @return rgb A string which represents the average image color in RGB format.
+			 */
+			common.getAverageRGB = function(imgEl) {
+				var blockSize = 5, // only visit every 5 pixels
+				defaultRGB = {r:0, g:0, b:0}, // for non-supporting envs
+				canvas = document.createElement('canvas'),
+				context = canvas.getContext && canvas.getContext('2d'),
+				data, width, height,
+				i = -4,
+				length,
+				rgb = {r:0, g:0, b:0},
+				count = 0;
+
+				if (!context) {
+					return defaultRGB;
+				}
+
+				height = canvas.height = imgEl.naturalHeight || imgEl.offsetHeight || imgEl.height;
+				width = canvas.width = imgEl.naturalWidth || imgEl.offsetWidth || imgEl.width;
+
+				context.drawImage(imgEl, 0, 0);
+
+				try {
+					data = context.getImageData(0, 0, width, height);
+				} catch(e) {
+					/* security error, img on diff domain */
+                    // alert('x');
+					return defaultRGB;
+				}
+
+				length = data.data.length;
+
+				while ( (i += blockSize * 4) < length ) {
+					++count;
+					rgb.r += data.data[i];
+					rgb.g += data.data[i+1];
+					rgb.b += data.data[i+2];
+				}
+
+				// ~~ used to floor values
+				rgb.r = ~~(rgb.r/count);
+				rgb.g = ~~(rgb.g/count);
+				rgb.b = ~~(rgb.b/count);
+
+				return rgb;
+			}
+
             /*
              * Returns an object of RGB components converted from a string containing either RGB or HEX string.
              */
@@ -145,6 +211,32 @@ eqnx.def('util/common', function (common, callback) {
             function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
             function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
             function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+			
+			            /*
+             * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
+             * 
+             * Note: This will always set a site-wide cookie ("path=/").
+             * 
+             * @param name  The name of the cookie (be brief!), required
+             * @param value The value of the cookie (be brief!), required
+             * @param days  The expiration of the cookie in days, optional
+             *               if not set this will be a session cookie.
+             */
+            common.setCookie = function(name, value, days) {
+                if(days) {
+                    $.cookie(name, value, { expires: days, path: '/' });
+                } else {
+                    $.cookie(name, value, { path: '/' });
+                }
+            }
+
+            /*
+             * Retrieves the value of cookie. Basically just wraps the jQuery 
+             * cookie plugin.
+             */
+            common.getCookie = function(name) {
+                return $.cookie(name);
+            }
 
         // Done.
         callback();

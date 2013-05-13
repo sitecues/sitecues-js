@@ -8,24 +8,20 @@ eqnx.def('conf', function(conf, callback){
 		handlers = {},
 		listeners = {};
 
-	conf.locale; 
-
-	{ 
-		var locale, langE=document.getElementsByTagName('html');
+	var locale, langE=document.getElementsByTagName('html');
+	if(langE && langE[0] && langE[0].lang) {
+		locale = langE[0].lang;
+	} else {
+		langE=document.getElementsByTagName('body');
 		if(langE && langE[0] && langE[0].lang) {
 			locale = langE[0].lang;
-		} else {
-			langE=document.getElementsByTagName('body');
-			if(langE && langE[0] && langE[0].lang) {
-				locale = langE[0].lang;
-			}
-			// We're not going to set a default locale value, 
-			// as that can vary per site.
 		}
-		if(locale) {
-			conf.locale = locale.toLowerCase().replace('-','_');
-			console.log("Locale: " + conf.locale);
-		}
+		// We're not going to set a default locale value, 
+		// as that can vary per site.
+	}
+	if(locale) {
+		conf.locale = locale.toLowerCase().replace('-','_');
+		console.log("Locale: " + conf.locale);
 	}
 
 	// string handler, optional regular
@@ -194,9 +190,15 @@ eqnx.def('conf', function(conf, callback){
 			return data;
 
 		// update data otherwise
-		for(var key in update)
-			if (update.hasOwnProperty(key))
-				conf.set(key, update[key]);
+		for(var key in update) {
+			if(update.hasOwnProperty(key)) {
+				// If we already have a value for the key, 
+				// don't overwrite it, except zoom
+				if(!conf.get(key) || key === 'zoom') {
+					conf.set(key, update[key]);
+				}
+			}
+		}
 	}
 
 	// end

@@ -11,8 +11,7 @@ eqnx.def( 'toolbar', function ( toolbar, callback ) {
             }
         };
 
-        var
-            STATES                                    = toolbar.STATES,
+        var STATES                                    = toolbar.STATES,
             current_state                             = STATES.OFF,
             dom_toolbar_close_button_element_id       = 'eqnx-toolbar-close-button',
             dom_toolbar_close_button_element_selector = null,

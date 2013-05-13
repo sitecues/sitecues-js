@@ -60,8 +60,8 @@ eqnx.def('cursor', function (cursor, callback) {
 			// Init custom cursor position.
 			if (cursor.clientX && cursor.clientY){
 				cursor.element.css({
-					left: this.clientX + 'px',
-					top:  this.clientY + 'px'
+					left: cursor.clientX + 'px',
+					top:  cursor.clientY + 'px'
 				}).show();
 			}
 
@@ -84,15 +84,19 @@ eqnx.def('cursor', function (cursor, callback) {
 		cursor.hide = function(){
 			toggleRealCursor(true);
 
-			this.element.hide();
+			cursor.element.hide();
 
 			$(window).
 				off('mousemove', mouseMoveHandler).
 				off('click', mouseMoveHandler).
 				off('mouseout', mouseOutHandler);
 
-			eqnx.emit('cursor/hide', this.element);
+			eqnx.emit('cursor/hide', cursor.element);
 		};
+
+		// show/hide mouse cursor when window focus changes
+		$(window).blur(cursor.hide);
+		$(window).focus(cursor.show);
 
 		// takes care of 'mousemove' window event
 		function mouseMoveHandler(e){
@@ -152,7 +156,7 @@ eqnx.def('cursor', function (cursor, callback) {
 		}
 
 		// always track cursor position for proper first show
-		$(document).bind('mousemove click', function(e){
+		$(document).bind('mousemove click focus', function(e){
 			var position = positioning.getMouseCoords(e);
 
 			cursor.clientX = position.left;

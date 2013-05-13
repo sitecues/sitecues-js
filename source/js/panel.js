@@ -10,6 +10,9 @@ eqnx.def( 'panel', function( panel, callback ) {
 		var timer;
 
 		panel.hideDelay = 1000;
+		// Forcing a change to merge from Thom into master
+		// to make sure that I'm actually getting the real code.
+		console.log('!!! TEMP !!! panel.hideDelay');
 
 		// panel element
 		panel.create = function(){
@@ -33,6 +36,11 @@ eqnx.def( 'panel', function( panel, callback ) {
 				step: 			'0.1',
 				ariaLabel: 	'See it better'
 			}).appendTo( wrap );
+
+			$( '<img>' ).addClass( 'ramp' ).attr({
+				src:	eqnx.resolveEqnxUrl('../images/panel/slider_ramp.png')
+			}).appendTo( wrap );
+
 
 			// create big A label
 			$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );

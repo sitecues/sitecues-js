@@ -27,7 +27,8 @@ eqnx.def('keys', function(keys, callback){
 		},
 		'space':	{
 			event: 'highlight/animate',
-			preventDefault: true
+			preventDefault: true,
+			requiresMouseHighlight: true
 		}
 	};
 
@@ -74,7 +75,7 @@ eqnx.def('keys', function(keys, callback){
 	};
 
 	// get dependencies
-	eqnx.use('jquery', function($){
+	eqnx.use('jquery', 'mouse-highlight', function($, mh){
 
 		// key event hook
 		keys.hook = function(event){
@@ -82,12 +83,22 @@ eqnx.def('keys', function(keys, callback){
 			var i, l, key, test, parts, result;
 
 			// ignore events from editable elements
-			if ( keys.isEditable( event.target ) ) {
-				return;
-			}
+			//if (mh.picked || keys.isEditable(event.target))
+				//return;
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
+				if(keys.map[key].requiresMouseHighlight) {
+					if(!mh.enabled) {
+						// Mouse highlight is disabled, revert to default.
+						return;
+					} else {
+						//We're going to attach the target dom element to the
+						//event, whether it's available or not.
+						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
+					}
+				}
+
 				// prepare default value
 				result = true;
 

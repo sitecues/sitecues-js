@@ -14,6 +14,7 @@ files=\
 	source/js/conf/server.js \
 	source/js/jquery.js \
 	source/js/jquery/color.js \
+	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/ui.js  \
 	source/js/load.js \
@@ -57,7 +58,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/eqnx.js source/js/use.js
+	files=source/js/eqnx.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
@@ -141,7 +142,15 @@ lint:
 
 # TARGET: run
 # Run the web server, giving access to the library and test pages.
+# Additionally, copy in core config files, if they do not exist.
 run:
+	@mkdir -p source/js/.cfg
+	@(cd config ; for FILE in `find * -type f | sort` ; do \
+    		if [ ! -e ../source/js/.cfg/$$FILE ] ; then \
+    			echo Copying $$FILE to source/js/.cfg/$$FILE ; \
+    			cp $$FILE ../source/js/.cfg/$$FILE ; \
+    		fi \
+    	done)
 	@echo "Running."
 	@./binary/web $(port) $(https)
 	

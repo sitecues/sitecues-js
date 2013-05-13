@@ -1,16 +1,22 @@
 (function(){
+	// break if there is eqnx instance on the page
+	if ('eqnx' in window) {
+		console.log("eqnx already defined.");
+		return;
+	}
+
 	// private variables
 	var arr, has, noop,
-		eqnx, modules;
+		eqnx, modules, coreConfig;
 
 	// private functions
 	var resolveUrl, parseUrlQuery, parseUrl;
 
-	// break if there is eqnx instance on the page
-	if ('eqnx' in window) return;
-
 	// modules container
 	modules = {};
+
+	// core config container
+	coreConfig = {};
 
 	// array's prototype
 	arr = Array.prototype;
@@ -24,6 +30,11 @@
 	// the top-level namespace. all public classes and modules will
 	// be attached to this
 	eqnx = this.eqnx = {};
+
+	// Return the core config.
+	eqnx.getCoreConfig = function() {
+		return coreConfig;
+	};
 
 	// bind an event, specified by a string name, `events`, to a `callback`
 	// function. passing `"*"` will bind the callback to all events fired
@@ -100,20 +111,58 @@
 		return this;
 	};
 
+	// Module states management:
+	var MODULE_STATE = {
+		NONE: 1,         // A 'def' or 'use' call has never been made for the module.
+		LOADING: 2,      // A 'use' call has been made for a module, and a load request has been started.
+		INITIALIZING: 3, // A 'def' call has been made for a module, and the module is initializing.
+		READY: 4         // The module is initialized and ready for use.
+	};
+
+	// Returns the state of the requested module.
+	var getModuleState = function(name) {
+		var module = modules[name];
+
+		if (!module) {
+			// There is no entry, so the there is no state.
+			return MODULE_STATE.NONE;
+		}
+
+		// The entry is a number, so just return that saved state.
+		if (typeof module === "number") {
+			return module;
+		}
+
+		// Otherwise, the entry is an object, so the module is ready.
+		return MODULE_STATE.READY;
+	};
+
 	// define equinox module
-	eqnx.def = function(name, constructor){
-		// do not define modules twice
-		if (modules[name]) return;
+	var _def = function(name, constructor){
+		// do not define modules twice.
+		if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
+			console.log("eqnx: module '" + name + "' already defined.");
+			return;
+		}
 
 		var module = {};
 
 		// module is initializing
-		modules[name] = undefined;
+		modules[name] = MODULE_STATE.INITIALIZING;
 
 		// call constructor for module
 		constructor(module, function(result){
+			
 			// if return present
-			if (result) module = result;
+			if (result) {
+				module = result;
+			} else {
+				// Modules can double-load when an eqnx.def use statement does not fire callback();
+				// This caused the issue with the double-loading of the badge and highlight-box.
+				// See: https://fecru.ai2.at/cru/EQJS-39#c187
+				//      https://equinox.atlassian.net/browse/EQ-355
+				// console.warn( 'No callback() set when def.use("' + name );
+			}
 
 			// save module for future call
 			modules[name] = module;
@@ -125,6 +174,35 @@
 			eqnx.emit('load/' + name, module).
 				off('load/' + name);
 		});
+	};
+
+	// exposed function for defining modules: queues until core is ready.
+	var READY_FOR_DEF_CALLS = false;
+	var DEF_QUEUE = [];
+	eqnx.def = function(name, constructor){
+		if (READY_FOR_DEF_CALLS) {
+			_def(name, constructor);
+		} else {
+			DEF_QUEUE.push({
+				name: name,
+				constructor: constructor
+			});
+		}
+	};
+
+	// processes the def queue once initialization has completed.
+	var _processDefQueue = function() {
+		var defObj;
+		while (DEF_QUEUE.length) {
+			defObj = DEF_QUEUE.shift();
+			_def(defObj.name, defObj.constructor);
+		}
+		READY_FOR_DEF_CALLS = true;
+	};
+
+	// Called to initialize the eqnx library.
+	var _initialize = function() {
+		_processDefQueue();
 	};
 
 	// load equinox modules
@@ -169,29 +247,31 @@
 
 			// iterate over module names
 			for(i=0, l=count; i<l; i++) (function(name, push){
-				// module is on the way
-				if (name in modules){
-					// module was loaded, push up
-					if (modules[name]) push();
+				var moduleState = getModuleState(name);
 
-					// module is loading, wait for it
-					else t.on('load/' + name, push);
+				if (moduleState === MODULE_STATE.NONE) {
+					// The module has never been used or defined.
 
-				// module wasn't loaded, load it
-				} else {
 					// mark module as loading
-					modules[name] = undefined;
+					modules[name] = MODULE_STATE.LOADING;
 
 					// add to load queue
 					load.push(name);
 
 					// wait for module load
 					t.on('load/' + name, push);
+				} else if (moduleState === MODULE_STATE.READY) {
+					// The module is ready for use, so no need to load it
+					push();
+				} else {
+					// A previous request to either use or define the module has occurred, but it is not yet ready
+					t.on('load/' + name, push);
 				}
 			}(args[i], register(i, args[i])));
 
 			// load all needed modules
 			load.length && t.load.apply(t, load);
+
 		}, 0);
 	};
 
@@ -244,7 +324,8 @@
 		else
 			url.raw = parser.href;
 
-		url.protocol = parser.protocol.substring(0, parser.protocol.length - 1);
+		url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
+		url.secure   = (url.protocol == "https");
 		url.hostname = parser.hostname;
 		url.host     = parser.host;
 
@@ -262,11 +343,15 @@
 		return url;
 	};
 
-	// Obtain all script tags, and search util we find our script.
 	var scriptSrcUrl = null,
 	scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
 	scriptTags = document.getElementsByTagName('script');
 
+	eqnx.getScriptSrcUrl =  function() {
+		return scriptSrcUrl;
+	};
+
+	// Obtain all script tags, and search util we find our script.
 	for (var i = 0; i < scriptTags.length; i++){
 		var match = scriptTags[i].src.match(scriptSrcRegExp);
 		if (match){
@@ -342,6 +427,93 @@
 			// and initiate loading of code for each
 			eqnx.loadScript(arguments[i] + '.js');
 		}
+	};
+
+	//////////////////////////////////////////////////
+	//
+	//  START: Core Configuration
+	//		This section loads the core configuration,
+	//		whose absence will prevent the library
+	// 		from loading.
+	//
+	//////////////////////////////////////////////////
+
+	var CORE_CONFIG_NAMES = [ "hosts" ], coreLoadCount;
+
+	// Validation method for core configuration. If valid, initialize eqnx.
+	var _validateCoreConfigs = function() {
+		var valid = true;
+		if (window.__eqnx_cfg) {
+			coreConfig = window.__eqnx_cfg;
+			window.__eqnx_cfg = undefined;
+
+			if (coreConfig.hosts) {
+				if (coreConfig.hosts.ws) {
+					console.log("eqnx ws host: " + coreConfig.hosts.ws);
+				} else {
+					console.log("eqnx ws host not specified.");
+					valid = false;
+				}
+
+				if (coreConfig.hosts.up) {
+					console.log("eqnx up host: " + coreConfig.hosts.up);
+				} else {
+					console.log("eqnx up host not specified.");
+					valid = false;
+				}
+			} else {
+				console.log("eqnx core hosts config not found.");
+				valid = false;
+			}
+		} else {
+			console.log("eqnx core config not found.");
+			valid = false;
+		}
+
+		// If the core configs are valid, initialize the library.
+		if (valid) {
+			_initialize();
+		} else {
+			console.log("invalid eqnx core config. aborting.");
+		}
+	};
+
+	// Called after all core configs that require loading are loaded, triggering validation.
+	var onCoreLoadComplete = function() {
+		coreLoadCount--;
+		if (coreLoadCount <= 0) {
+			_validateCoreConfigs();
+		}
+	};
+
+	// Determine which core configs require loading.
+	var coreLoadNames = [];
+	if (!window.__eqnx_cfg) {
+		// We need all of the core configs.
+		coreLoadNames = CORE_CONFIG_NAMES.splice(0, CORE_CONFIG_NAMES.length);
+	} else {
+		for (i=0; i<CORE_CONFIG_NAMES.length; i++) {
+			if (!window.__eqnx_cfg[CORE_CONFIG_NAMES[i]]) {
+				coreLoadNames.push(CORE_CONFIG_NAMES[i]);
+			}
+		}
 	}
+	// Set the counter of outstanding core configs.
+	coreLoadCount = coreLoadNames.length;
+
+	// If there are no outstanding core configs, trigger validation.
+	if (coreLoadCount <= 0) {
+		_validateCoreConfigs();
+	} else { // Trigger loading of missing core configs.
+		for (i=0; i<coreLoadNames.length; i++) {
+			eqnx.loadScript(".cfg/" + coreLoadNames[i] + ".js", onCoreLoadComplete);
+		}
+	}
+
+	//////////////////////////////////////////////////
+	//
+	//  END: Core Configuration
+	//
+	//////////////////////////////////////////////////
 
 }).call(this);

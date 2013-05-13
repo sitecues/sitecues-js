@@ -25,10 +25,19 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	// elements which need overlay for background color
 	mh.kVisualMediaElements = 'img,canvas,video,embed,object,iframe,frame';
 
+	// this is the local variable for whether the cue has been played, so we don't overwhelm the persistent cookie/conf mechanisms.
+	mh.cue = false;
+
+	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
+	mh.initZoom = 0;
+
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
-	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', function($, conf, picker, positioning){
+	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech){
 
 		conf.set('mouseHighlightMinZoom', mh.minzoom);
+
+		// Remember the initial zoom state
+		mh.initZoom = conf.get('zoom');
 
 		mh.isBackgroundStyled = function(collection){
 			var isBgStyled = false;
@@ -200,15 +209,37 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		}
 
 		mh.updateZoom = function(zoom){
+			mh.picked = null;
 			var was = mh.enabled;
 			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
 			if (was !== mh.enabled) mh.refresh();
+			// If highlighting is enabled, zoom is large enough, zoom is larger
+			// than we started, and we haven't already cued, then play an audio
+			// cue to explain highlighting
+			if(mh.enabled && zoom >= 2 && zoom > mh.initZoom && !mh.cue) {
+				mh.verbalCue();
+			}
 		}
 
 		// enable mouse highlight
 		mh.enable = function(){
 			// handle mouse move on body
 			$('body').on('mousemove', mh.update);
+		}
+
+		/*
+		 * Play a verbal cue explaining how mouse highlighting works.
+		 *
+		 * @TODO If we start using verbal cues elsewhere, we should consider 
+		 *       moving this to the speech module.
+		 */
+		mh.verbalCue = function() {
+			if(!mh.cue && !common.getCookie("vCHz")) {
+				speech.cue(conf.getLS('verbalCueHighZoom'), function() {
+					mh.cue = true;
+					common.setCookie("vCHz", 1, 7);
+				});
+	        }
 		}
 
 		// disable mouse highlight
@@ -218,8 +249,16 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			mh.hide($(element));
 		}
 
+		// Deselect the current highlighted element.
+		mh.unpick = function() {
+			mh.picked = null;
+		}
+
 		// hide mouse highlight once highlight box appears
 		eqnx.on('hlb/create hlb/inflating hlb/ready', mh.disable);
+
+		// hide mouse highlight once highlight box is dismissed
+		eqnx.on('hlb/deflating', mh.unpick);
 
 		// enable mouse highlight back once highlight box deflates
 		eqnx.on('hlb/closed', mh.enable);
@@ -238,6 +277,9 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			conf.set('mouseHighlightMinZoom', mh.minzoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
+
+		// hide mouse hightlight when user leave window
+		$(window).blur(mh.hide);
 
 		// done
 		callback();
