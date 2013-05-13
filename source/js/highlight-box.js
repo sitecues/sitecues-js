@@ -433,7 +433,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				} 
 
 			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
-			   if (cloneNode[0].tagName.toLowerCase() === 'li') {
+			   if (cloneNode[0].style.display === 'list-item') {
 				  cloneNode[0].style.display = 'block';
 			   }
 

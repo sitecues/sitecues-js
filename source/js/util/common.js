@@ -14,6 +14,10 @@ eqnx.def('util/common', function (common, callback) {
              * @return elementComputedStyles An object of all element computed styles.
              */
             common.getElementComputedStyles = function(element, prop) {
+				// By default, return entire CSS object.
+                var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
+                var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
+
 				// If a specific property value is requested then skip the entire CSS object iteration.
 				if (prop) {
 					propertyParts = prop.split('-');
@@ -26,12 +30,8 @@ eqnx.def('util/common', function (common, callback) {
                         propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
                     }
 					return computedStyles[propertyName];
-					
 				}
 
-				// By default, return entire CSS object.
-                var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
-                var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
                     propertyParts = currentProperty.split('-');
