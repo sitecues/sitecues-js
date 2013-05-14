@@ -1,9 +1,9 @@
 /* badge */
-#eqnx-badge #eqnx-badge-image {
+.eqnx-badge #eqnx-badge-image {
     height: 23px;
 }
 
-#eqnx-badge {
+.eqnx-badge {
     z-index: 2147483645;
     margin: 0px;
     visibility: visible;
@@ -16,7 +16,7 @@
     -webkit-transition: color 1s;
 }
 
-#eqnx-badge:hover {
+.eqnx-badge:hover {
     color: rgba(0, 0, 0, 1);
     -webkit-transition: color 1s;
 }

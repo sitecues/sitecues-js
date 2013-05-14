@@ -12,8 +12,6 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         var kMinHighlightZoom = 1.01;
 
         var extraZoom = 1.5;
-        var kPanelId = 'eqnx-panel';
-        var kBadgeId = 'eqnx-badge';
 		var toClass = {}.toString;
 
         // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
@@ -704,36 +702,15 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 				return imageValue && imageValue.trim() !== '' && imageValue !== 'none';
 			}
 
-            /**
-             * Check if the target is suitable to be used for highlight reading box.
-             * @param target is the current element under mouse cursor.
-             * @return isValid true if element is okay
-             */
-            function isValidTarget(target) {
-                var forbiddenTagsToZoom = ['body', 'html'];
-                if (!target // HighlightBox creation failed because target is not defined.
-                   || forbiddenTagsToZoom.indexOf(target.tagName.toLowerCase()) >= 0) {
-                    return false;
-                }
-
-                // Do not highlight panel & badge and their incidents
-                var isValid = true;
-                var forbiddenIDsToZoom = [kPanelId.toLowerCase(), kBadgeId.toLowerCase()];
-
-                $.each($(target).parents().andSelf(), function (index, element) {
-                    if ($(element).attr('id') && forbiddenIDsToZoom.indexOf($(element).attr('id').toLowerCase()) >= 0) {
-                        isValid = false;
-                        return false; // Break the loop.
-                    }
-                });
-                return isValid;
-            }
-
             return {
                 // Return Highlight if need to support a few instances instead.
                 createInstance: function (target) {
                     // Don't return an instance if the target is ineligible.
-                    return ( ( isValidTarget( target ) ) ? new HighlightBox( target ) : null );
+                    // There used to be an isValidTarget function call here,
+                    // but that logic already exists in mouse-highlight.  We
+                    // should keep that logic in one place and this component
+                    // should assume that any target sent to it is valid.
+                    return ( target ? new HighlightBox( target ) : null );
                 }
             };
         })();
