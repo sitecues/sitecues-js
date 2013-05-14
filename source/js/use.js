@@ -1,5 +1,5 @@
 // specify modules to be loaded
-if(typeof eqnx != 'undefined' && eqnx) { eqnx.use(
+window.eqnx && eqnx.use(
 	'conf',
 	'conf/localstorage',
 	'conf/import',
@@ -17,5 +17,6 @@ if(typeof eqnx != 'undefined' && eqnx) { eqnx.use(
 	'speech/azure',
 	'speech',
 	'mouse-highlight',
-	'highlight-box'
-); }
+	'highlight-box',
+	'invert'
+);
