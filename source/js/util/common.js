@@ -13,9 +13,25 @@ eqnx.def('util/common', function (common, callback) {
              * @param element The DOM element which styles we want to get.
              * @return elementComputedStyles An object of all element computed styles.
              */
-            common.getElementComputedStyles = function(element) {
+            common.getElementComputedStyles = function(element, prop) {
+				// By default, return entire CSS object.
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
+
+				// If a specific property value is requested then skip the entire CSS object iteration.
+				if (prop) {
+					propertyParts = prop.split('-');
+					// camelCase name: 'marginTop'
+					if (propertyParts.length < 2) {
+						return computedStyles[prop];
+					}
+					// dash-like name: 'margin-top'
+					for (var i = 1; i < propertyParts.length; i++) {
+                        propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
+                    }
+					return computedStyles[propertyName];
+				}
+
                 $.each(computedStyles, function (index) {
                     currentProperty = computedStyles[index]; // in format 'margin-top'
                     propertyParts = currentProperty.split('-');
@@ -102,6 +118,16 @@ eqnx.def('util/common', function (common, callback) {
                 }
                 return resultRGBColor;
             }
+          
+            /*
+             * Calculates opposite color to the one given as parameter.
+             * @param colorValue String/CSSPrimitiveValue
+             * @return String that represents RGB value. Format : 'rgb(numericValueR, numericValueG, numericValueB)'
+             */
+            common.getRevertColor = function(colorValue) {
+                var RGBColor = common.getRGBColor(colorValue);
+                return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
+            }
 
 			/*
 			 * Using image object element it gets its average color by means of the canvas.
@@ -154,16 +180,6 @@ eqnx.def('util/common', function (common, callback) {
 			}
 
             /*
-             * Calculates opposite color to the one given as parameter.
-             * @param colorValue String/CSSPrimitiveValue
-             * @return String that represents RGB value. Format : 'rgb(numericValueR, numericValueG, numericValueB)'
-             */
-            common.getRevertColor = function(colorValue) {
-                var RGBColor = common.getRGBColor(colorValue);
-                return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
-            }
-
-            /*
              * Returns an object of RGB components converted from a string containing either RGB or HEX string.
              */
             function Rgb(rgb){
@@ -196,8 +212,7 @@ eqnx.def('util/common', function (common, callback) {
             function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
             function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
 			
-			
-            /*
+			            /*
              * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
              * 
              * Note: This will always set a site-wide cookie ("path=/").

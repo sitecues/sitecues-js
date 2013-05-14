@@ -83,13 +83,12 @@ eqnx.def('keys', function(keys, callback){
 			var i, l, key, test, parts, result;
 
 			// ignore events from editable elements
-			if ( keys.isEditable( event.target ) ) {
+			if ( keys.isEditable(event.target) ) {
 				return;
 			}
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
-
 				if(keys.map[key].requiresMouseHighlight) {
 					if(!mh.enabled) {
 						// Mouse highlight is disabled, revert to default.
@@ -100,6 +99,7 @@ eqnx.def('keys', function(keys, callback){
 						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
 					}
 				}
+
 				// prepare default value
 				result = true;
 
