@@ -46,10 +46,10 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
           'L'+ 0    +' '+ viewport.height   +' '+
 
           // Wind clockwise relative path around element
-          'M'+ ($(hlbNode).offset().left - window.pageXOffset) +' '+ ($(hlbNode).offset().top - window.pageYOffset)  +' '+
-          'l'+ elem.width    +' '+ 0            +' '+
-          'l'+ 0             +' '+ elem.height  +' '+
-          'l'+ (-elem.width) +' '+ 0            +' '+
+          'M'+ ($(hlbNode).offset().left - window.pageXOffset + 2) +' '+ ($(hlbNode).offset().top - window.pageYOffset + 2)  +' '+
+          'l'+ (elem.width - 4)  +' '+ 0                   +' '+
+          'l'+ 0                 +' '+ (elem.height - 4)   +' '+
+          'l'+ (-elem.width + 4) +' '+ 0                   +' '+
  
         // Close the path
         ' Z" />' +
