@@ -4,7 +4,7 @@
 eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
 
   // Get dependencies
-  eqnx.use('jquery', function ($) {
+  eqnx.use('jquery', 'util/positioning', function ($, positioning) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'eqnx-eq360-bgxxxxxxxxxx1'
@@ -15,31 +15,17 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
 
 
     // Dims stuff. Word. ///////////////////////////////////////////////////////
-    backgroundDimmer.dimBackgroundContent = function (zIndex, placeHolderClonedNode, placeHolderScale) {
-
-      var $doc          = $(document)
-        , $win          = $(window)
-        , $placeHolder  = $(placeHolderClonedNode)
-      ;
+    backgroundDimmer.dimBackgroundContent = function (hlbNode, zoom) {
 
       ////  Set the coordinates for the SVG Dimmer overlay
 
-      // Define the coordinates of the whole document to be dimmed out
-      var page = {
-          left    : 0
-        , top     : 0
-        , width   : $doc.width()
-        , height  : $doc.height()
-      };
+		// Define the coordinates of the whole document to be dimmed out
+		var viewport = positioning.getViewportDimensions(0, zoom);
 
-      // Define the coordinates of the element being highlighted
-      // [ highlight-box.js/itemNode ]
-      var elem = {
-          left    : $placeHolder.offset().left
-        , top     : ($placeHolder.offset().top + $win.scrollTop() ) / placeHolderScale
-        , width   : $placeHolder.width() * placeHolderScale
-        , height  : $placeHolder.height() * placeHolderScale
-      };
+		// Define the coordinates of the element being highlighted
+		// [ highlight-box.js/itemNode ]
+		var elem = positioning.getBoundingBox(hlbNode);
+
 
       // Create dimmer SVG overlay
       var dimmerSVG ='<svg xmlns="http://www.w3.org/2000/svg">' +
@@ -54,13 +40,13 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
           'd="' +
 
           // Wind clockwise path around whole document
-          'M'+ 0            +' '+ 0             +' '+
-          'L'+ page.width   +' '+ 0             +' '+
-          'L'+ page.width   +' '+ page.height   +' '+
-          'L'+ 0            +' '+ page.height   +' '+
+          'M'+ 0                +' '+ 0      +' '+
+          'L'+ viewport.width   +' '+ 0      +' '+
+          'L'+ viewport.width   +' '+ viewport.height   +' '+
+          'L'+ 0    +' '+ viewport.height   +' '+
 
           // Wind clockwise relative path around element
-          'M'+ elem.left     +' '+ elem.top     +' '+
+          'M'+ ($(hlbNode).offset().left - window.pageXOffset) +' '+ ($(hlbNode).offset().top - window.pageYOffset)  +' '+
           'l'+ elem.width    +' '+ 0            +' '+
           'l'+ 0             +' '+ elem.height  +' '+
           'l'+ (-elem.width) +' '+ 0            +' '+
@@ -86,16 +72,16 @@ eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
           , display       : 'block'
           , zIndex        : 9999999999
           , opacity       : 0
-          , left          : 0
-          , top           : 0
-          , width         : page.width
-          , height        : page.height
+          , left          : viewport.left
+          , top           : viewport.top
+          , width         : viewport.width
+          , height        : viewport.height
           , overflow      : 'visible'
           , pointerEvents : 'none'
-        },
+        }
       });
 
-      //$('body').append( this.$dimmerContainer );
+     $('body').append( this.$dimmerContainer );
 
       // Animate the dimmer background container
       this.$dimmerContainer.animate({ opacity: 1 }, this.kDimmingSpeed);
