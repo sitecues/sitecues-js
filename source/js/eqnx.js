@@ -443,9 +443,9 @@
 	// Validation method for core configuration. If valid, initialize eqnx.
 	var _validateCoreConfigs = function() {
 		var valid = true;
-		if (window.__eqnx_cfg) {
-			coreConfig = window.__eqnx_cfg;
-			window.__eqnx_cfg = undefined;
+		if (window.eqnx.__eqnx_cfg) {
+			coreConfig = window.eqnx.__eqnx_cfg;
+			window.eqnx.__eqnx_cfg = undefined;
 
 			if (coreConfig.hosts) {
 				if (coreConfig.hosts.ws) {
@@ -488,12 +488,12 @@
 
 	// Determine which core configs require loading.
 	var coreLoadNames = [];
-	if (!window.__eqnx_cfg) {
+	if (!window.eqnx.__eqnx_cfg) {
 		// We need all of the core configs.
 		coreLoadNames = CORE_CONFIG_NAMES.splice(0, CORE_CONFIG_NAMES.length);
 	} else {
 		for (i=0; i<CORE_CONFIG_NAMES.length; i++) {
-			if (!window.__eqnx_cfg[CORE_CONFIG_NAMES[i]]) {
+			if (!window.eqnx.__eqnx_cfg[CORE_CONFIG_NAMES[i]]) {
 				coreLoadNames.push(CORE_CONFIG_NAMES[i]);
 			}
 		}
