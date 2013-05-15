@@ -1,8 +1,13 @@
 # Parameters.
-version=$(USER)-`date -u +'%Y%m%d%H%M%S'`
+version=$(USER)-$(shell date -u +'%Y%m%d%H%M%S')
 package-basedir:=target/package
 clean-deps=false
 dev=false
+vip=false
+package-name=equinox-js.tgz
+ifeq ($(vip), true)
+	package-name=equinox-js-$(version).tgz
+endif
 
 # Production files (combine all modules into one).
 files=\
@@ -107,7 +112,7 @@ endif
 	@cp -R target/compile/* $(package-basedir)/$(version)
 	@cp -R source/css $(package-basedir)/$(version)
 	@cp -R source/images $(package-basedir)/$(version)
-	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
+	@tar -C $(package-basedir) -zcf target/$(package-name) $(version)
 	@rm -f target/manifest.txt
 	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
 		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
