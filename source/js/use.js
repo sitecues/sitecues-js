@@ -1,5 +1,5 @@
 // specify modules to be loaded
-window.eqnx && eqnx.use(
+window.sitecues && sitecues.use(
 	'conf',
 	'conf/localstorage',
 	'conf/import',

@@ -1,9 +1,9 @@
-// module for importing settings from page's _eqnx variable
+// module for importing settings from page's _sitecues variable
 // needed for customer's indentification and customer's settings
-eqnx.def('conf/import', function(module, callback) {
+sitecues.def('conf/import', function(module, callback) {
 
     // depends on conf module
-    eqnx.use('conf', function(conf) {
+    sitecues.use('conf', function(conf) {
 
         // push setting up to conf
         var push = function(data) {

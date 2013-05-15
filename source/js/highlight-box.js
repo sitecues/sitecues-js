@@ -1,9 +1,9 @@
 /**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
-eqnx.def('highlight-box', function (highlightBox, callback) {
+sitecues.def('highlight-box', function (highlightBox, callback) {
     // Get dependencies
-    eqnx.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
     function ($, conf, cursor, positioning, common, backgroundDimmer) {
 
         // Constants
@@ -78,7 +78,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             var newState = (zl >= conf.get('highlightBoxMinZoom') ? STATES.ON : STATES.OFF);
             if (newState !== state) {
                 state = newState;
-                eqnx.emit('hlb/' + state.name, highlightBox);
+                sitecues.emit('hlb/' + state.name, highlightBox);
             }
         };
 
@@ -116,7 +116,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 this.itemNode = $(this.item);
 
                 // notify about new hlb
-                eqnx.emit('hlb/create', this.item);
+                sitecues.emit('hlb/create', this.item);
 
                 var computedStyles = common.getElementComputedStyles(this.item);
                 var offset = positioning.getOffset(this.item);
@@ -141,8 +141,8 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             HighlightBox.kBoxBorderColor = '#222222';
             HighlightBox.kDefaultBgColor = '#ffffff';
             // Space placeholders prevent content after box from going underneath it.
-            HighlightBox.kPlaceHolderClass = 'eqnx-eq360-box-placeholder';
-            HighlightBox.kPlaceHolderWrapperClass = 'eqnx-eq360-box-placeholder-wrapper';
+            HighlightBox.kPlaceHolderClass = 'sitecues-eq360-box-placeholder';
+            HighlightBox.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
             // TODO: Expand this array to include all appropriate elements.
             // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
 
@@ -152,7 +152,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
             /**
              * Toggle Sticky state of highlight box
              */
-            eqnx.toggleStickyHLB = function () {
+            sitecues.toggleStickyHLB = function () {
               if (HighlightBox.isSticky){
                 HighlightBox.isSticky = false;
               } else {
@@ -176,7 +176,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Immediately enter the
                 this.state = STATES.INFLATING;
-                eqnx.emit('hlb/inflating', this.item);
+                sitecues.emit('hlb/inflating', this.item);
 
                 var _this = this;
 
@@ -217,7 +217,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                         backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
                         console.log("hlb closed");
-                        eqnx.emit('hlb/closed', _this.item);
+                        sitecues.emit('hlb/closed', _this.item);
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
 
@@ -240,7 +240,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
                 console.log("hlb ready");
-                eqnx.emit('hlb/ready', _this.item);
+                sitecues.emit('hlb/ready', _this.item);
                   
                 // Trigger the background blur effect if there is a highlight box only.
                 //  > AK: comment out all the dimmer calls by AL request
@@ -260,7 +260,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Update state.
                 this.state = STATES.DEFLATING;
-                eqnx.emit('hlb/deflating', _this.item);
+                sitecues.emit('hlb/deflating', _this.item);
 
                 // Get the current element styles.
   	            var ancestorCSS = this.savedAncestorCSS;
@@ -294,7 +294,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
 
                 // Deflate the highlight box.
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
-                  // Cleanup all elements inserted by Eqnx on the page.
+                  // Cleanup all elements inserted by sitecues on the page.
                   if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
                     // Remove placeholder wrapper element if the table child highlighted.
                     $('.' + HighlightBox.kPlaceHolderWrapperClass)
@@ -327,7 +327,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                   onHighlightBoxClosed();
                   
                   console.log("hlb closed");
-                  eqnx.emit('hlb/closed', _this.item);
+                  sitecues.emit('hlb/closed', _this.item);
               });
               }
             };
@@ -831,7 +831,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
          * Handle keypress event.
          */
         var target;
-        eqnx.on('highlight/animate', function (e) {
+        sitecues.on('highlight/animate', function (e) {
             var currentState = getState();
             // Do nothing if module is off
             if (currentState !== STATES.OFF) {
@@ -857,22 +857,22 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
         /**
          * Handle zoom event.
          */
-        eqnx.on('zoom', function (zoomvalue) {
+        sitecues.on('zoom', function (zoomvalue) {
             updateZoomLevel(zoomvalue);
         });
 
-        eqnx.on( 'key/esc', function ( event ) {
+        sitecues.on( 'key/esc', function ( event ) {
             instance.deflate();
         } );
 
         // Lower the threshold when speech is enabled.
-        eqnx.on('speech/enable', function(){
+        sitecues.on('speech/enable', function(){
             conf.set('highlightBoxMinZoom', 1.00);
             updateZoomLevel(conf.get('zoom'));
         });
 
         // Revert the threshold when speech is enabled.
-        eqnx.on('speech/disable', function(){
+        sitecues.on('speech/disable', function(){
             conf.set('highlightBoxMinZoom', kMinHighlightZoom);
             updateZoomLevel(conf.get('zoom'));
         });

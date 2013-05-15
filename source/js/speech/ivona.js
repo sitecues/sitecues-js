@@ -4,14 +4,14 @@
  * how we will implement Ivona's API.  This version is therefore
  * a generic audio file player.
  */
-eqnx.def('speech/ivona', function(ivona, callback) {
+sitecues.def('speech/ivona', function(ivona, callback) {
 
     var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
         var myState = 'init';
 		var secureFlag = (_secure ? 1 : 0);
         var hlb = _jQuery(_hlb);
 		// TODO: Remove the hard-coded site ID.
-        var baseMediaUrl = "//" + eqnx.getCoreConfig().hosts.ws + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
+        var baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
         this.init = function() {
             _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
             console.log(_jQuery("#jPlayer-" + hlb.attr('id')));
@@ -65,11 +65,11 @@ eqnx.def('speech/ivona', function(ivona, callback) {
 
     };
 
-    eqnx.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
+    sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
 
         ivona.factory = function(hlb) {
         	console.log(hlb);
-        	var player = new IvonaPlayer(hlb, conf, _jQuery, eqnx.getScriptSrcUrl().secure);
+        	var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
         	player.init();
         	return player;
         }

@@ -7,7 +7,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-eqnx.def('cursor', function (cursor, callback) {
+sitecues.def('cursor', function (cursor, callback) {
 
 	// static properties
 	cursor.isEnabled = false; // if cursor module is enabled
@@ -15,12 +15,12 @@ eqnx.def('cursor', function (cursor, callback) {
 	cursor.type = 'default'; // also, may be either 'none' or 'auto'.
 
 	// constants
-	cursor.kCursorHideRuleId = 'eqnx-cursor-hide-rule';
-	cursor.kCursorId = 'eqnx-cursor';
+	cursor.kCursorHideRuleId = 'sitecues-cursor-hide-rule';
+	cursor.kCursorId = 'sitecues-cursor';
 	cursor.kMinCursorZoom = 1.5;
 
 	// get dependencies
-	eqnx.use('jquery', 'conf', 'util/positioning', 'cursor/style', 'cursor/canvas', 'ui', function ($, conf, positioning, style, view){
+	sitecues.use('jquery', 'conf', 'util/positioning', 'cursor/style', 'cursor/canvas', 'ui', function ($, conf, positioning, style, view){
 
 		// private variables
 		cursor.styleRuleParent = $('head');
@@ -72,12 +72,12 @@ eqnx.def('cursor', function (cursor, callback) {
 				on('click', mouseMoveHandler).
 				on('mouseout', mouseOutHandler);
 
-			eqnx.emit('cursor/show', cursor.element);
+			sitecues.emit('cursor/show', cursor.element);
 		};
 
 		cursor.update = function(){
 			view.zoom(cursor.element, cursor.zoomLevel);
-			eqnx.emit('cursor/update', this.element);
+			sitecues.emit('cursor/update', this.element);
 		};
 
 		// hide cursor in the viewport
@@ -91,7 +91,7 @@ eqnx.def('cursor', function (cursor, callback) {
 				off('click', mouseMoveHandler).
 				off('mouseout', mouseOutHandler);
 
-			eqnx.emit('cursor/hide', cursor.element);
+			sitecues.emit('cursor/hide', cursor.element);
 		};
 
 		// show/hide mouse cursor when window focus changes
@@ -164,7 +164,7 @@ eqnx.def('cursor', function (cursor, callback) {
 		});
 
 		// handle zoom event
-		eqnx.on('zoom', cursor.init);
+		sitecues.on('zoom', cursor.init);
 		cursor.init(conf.get('zoom'));
 
 		// Done.

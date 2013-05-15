@@ -1,5 +1,5 @@
-eqnx.def('jquery/cookie', function(plugin, callback){
-    eqnx.use('jquery', function($){
+sitecues.def('jquery/cookie', function(plugin, callback){
+    sitecues.use('jquery', function($){
 //
 // Begin Third Party Code
 //

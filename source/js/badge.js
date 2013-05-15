@@ -1,17 +1,17 @@
 // module for showing equinox badge on the page
 // and notifying system about interactions (hover/click)
-eqnx.def('badge', function(badge, callback){
+sitecues.def('badge', function(badge, callback){
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	eqnx.use('jquery', 'conf', 'ui', function($, conf){
+	sitecues.use('jquery', 'conf', 'ui', function($, conf){
 
 		badge.altBadges = $(conf.get('panelDisplaySelector'));
 
 		badge.badgeId = conf.get('badgeId');
 		if(!badge.badgeId) {
 			// Use the default value
-			badge.badgeId = 'eqnx-badge';
+			badge.badgeId = 'sitecues-badge';
 		}
 
 		if(badge.altBadges && badge.altBadges.length > 0) {
@@ -24,16 +24,16 @@ eqnx.def('badge', function(badge, callback){
 			// We have no alternate or pre-existing badges defined, so create a new one.
 			badge.panel = $('<div>')
 				.attr('id', badge.badgeId) // set element id for proper styling
-				.addClass('eqnx-badge')
+				.addClass('sitecues-badge')
 				.hide()
 				.appendTo('html');
 
 
 			// create badge image inside of panel
 			badge.element = $('<img>')
-				.attr('id', 'eqnx-badge-image')
-				.addClass('eqnx-badge-image')
-				.attr('src', eqnx.resolveEqnxUrl('../images/eq360-badge.png'))
+				.attr('id', 'sitecues-badge-image')
+				.addClass('sitecues-badge-image')
+				.attr('src', sitecues.resolvesitecuesUrl('../images/eq360-badge.png'))
 				.appendTo(badge.panel);
 
 			// handle image loading
@@ -45,12 +45,12 @@ eqnx.def('badge', function(badge, callback){
 
 		badge.panel 
 			.hover(function () {
-				eqnx.emit('badge/hover', badge.element); // emit event about hover
+				sitecues.emit('badge/hover', badge.element); // emit event about hover
 			}, function(){
-				eqnx.emit('badge/leave', badge.element); // emit event about leave
+				sitecues.emit('badge/leave', badge.element); // emit event about leave
 			})
 			.click(function () {
-				eqnx.emit('badge/click', badge.element); // emit event about badge click
+				sitecues.emit('badge/click', badge.element); // emit event about badge click
 			});
 
 		// Unless callback() is queued, the module is not registered in global var modules{}

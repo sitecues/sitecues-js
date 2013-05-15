@@ -1,9 +1,9 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-eqnx.def('util/positioning', function (positioning, callback) {
+sitecues.def('util/positioning', function (positioning, callback) {
 
-    eqnx.use('jquery', function ($) {
+    sitecues.use('jquery', function ($) {
 
         /**
          * Get the cumulative zoom for an element.

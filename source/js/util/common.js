@@ -1,10 +1,10 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-eqnx.def('util/common', function (common, callback) {
+sitecues.def('util/common', function (common, callback) {
 
    // Define dependency modules.
-    eqnx.use('jquery', 'jquery/cookie', function ($) {
+    sitecues.use('jquery', 'jquery/cookie', function ($) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 

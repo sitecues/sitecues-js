@@ -1,4 +1,4 @@
-eqnx.def('mouse-highlight/picker', function(picker, callback){
+sitecues.def('mouse-highlight/picker', function(picker, callback){
 
 	picker.kGoodTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'fieldset', 'form', 'td'];
 	picker.kOkTags = ['li'];
@@ -10,9 +10,9 @@ eqnx.def('mouse-highlight/picker', function(picker, callback){
 	picker.kSignificantMargin = 3;
 
 	// Elements to never highlight
-	picker.kBlackListQuery = '#eqnx-panel, #eqnx-badge, #eqnx-eq360-bg';
+	picker.kBlackListQuery = '#sitecues-panel, #sitecues-badge, #sitecues-eq360-bg';
 
-	eqnx.use('jquery', 'style', function($, styles){
+	sitecues.use('jquery', 'style', function($, styles){
 
 		picker.find = function find(start) {
 			// TODO don't return items with CSS transitions specified -- just to be defensive. We are mucking with that stuff.

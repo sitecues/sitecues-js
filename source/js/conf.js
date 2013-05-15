@@ -1,7 +1,7 @@
 // module provides confinguration management system
 // for other modules to avoid direct communication
 // between modules.
-eqnx.def('conf', function(conf, callback){
+sitecues.def('conf', function(conf, callback){
 
 	// private variables
 	var data = {},

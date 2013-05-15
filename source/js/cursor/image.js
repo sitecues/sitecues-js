@@ -1,14 +1,14 @@
 // image view for cursor
-eqnx.def('cursor/image', function(cursor, callback){
+sitecues.def('cursor/image', function(cursor, callback){
 
 	// cursor type -> url representation
 	var types = {
-		'pointer':	eqnx.resolveEqnxUrl('../images/cursors/pointer-hand.png'),
-		'default':	eqnx.resolveEqnxUrl('../images/cursors/pointer-001.png')
+		'pointer':	sitecues.resolvesitecuesUrl('../images/cursors/pointer-hand.png'),
+		'default':	sitecues.resolvesitecuesUrl('../images/cursors/pointer-001.png')
 	}
 
 	// get dependencies
-	eqnx.use('jquery', 'util/positioning', function($, pos){
+	sitecues.use('jquery', 'util/positioning', function($, pos){
 
 		// handle cursor type changes
 		cursor.type = function(element, type){

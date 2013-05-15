@@ -1,5 +1,5 @@
 // canvas view for cursor
-eqnx.def('cursor/canvas', function(cursor, callback){
+sitecues.def('cursor/canvas', function(cursor, callback){
 
 	// private variables
 	var data, types, paint;
@@ -28,7 +28,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 		span.innerHTML = text;
 		span.style.fontSize = data.size + 'px';
-		divHolder.style.fontFamily = 'eqnx-cursor';
+		divHolder.style.fontFamily = 'sitecues-cursor';
 		divHolder.appendChild(span);
 		body.appendChild(divHolder);
 
@@ -58,7 +58,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 			// set necessary cursor settings
 			ctx.textBaseline = 'top';
-			ctx.font = size + 'px eqnx-cursor';
+			ctx.font = size + 'px sitecues-cursor';
 			ctx.lineWidth = lineWidth;
 
 			// cursor color settings
@@ -88,7 +88,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 	}
 
 	// get dependencies
-	eqnx.use('jquery', 'load', 'conf', function($, load, conf){
+	sitecues.use('jquery', 'load', 'conf', function($, load, conf){
 
 		// private variables
 		var wait, images;
@@ -161,7 +161,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 		// load special cursor css
 		load.style('../css/cursor.css', function(){
-			wait('eqnx-cursor', function(){
+			wait('sitecues-cursor', function(){
 				cursor.repaint();
 				callback();
 			});

@@ -1,13 +1,13 @@
 ﻿/**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-eqnx.def('background-dimmer', function (backgroundDimmer, callback) {
+sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
 
   // Get dependencies
-  eqnx.use('jquery', 'util/positioning', function ($, positioning) {
+  sitecues.use('jquery', 'util/positioning', function ($, positioning) {
 
     $.extend( backgroundDimmer, {
-        kDimmerId       : 'eqnx-eq360-bgxxxxxxxxxx1'
+        kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
       , kDimmingColor   : '#000000'
       , kDimmingOpacity : 0.65
       , kDimmingSpeed   : 150

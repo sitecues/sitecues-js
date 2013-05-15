@@ -1,4 +1,4 @@
-eqnx.def('keys', function(keys, callback){
+sitecues.def('keys', function(keys, callback){
 	var extra_event_properties = {
 		dom: {
 			highlight_box: null
@@ -36,7 +36,7 @@ eqnx.def('keys', function(keys, callback){
 	keys.handle = function ( key, event ) {
 		// if event defined, emit it
 		if ( key.event ) {
-			eqnx.emit( key.event, event );
+			sitecues.emit( key.event, event );
 		}
 
 		// prevent default if needed
@@ -75,7 +75,7 @@ eqnx.def('keys', function(keys, callback){
 	};
 
 	// get dependencies
-	eqnx.use('jquery', 'mouse-highlight', function($, mh){
+	sitecues.use('jquery', 'mouse-highlight', function($, mh){
 
 		// key event hook
 		keys.hook = function(event){
@@ -123,7 +123,7 @@ eqnx.def('keys', function(keys, callback){
 		// bind key hook to window
 		$(window).on('keydown', keys.hook);
 
-		eqnx.on( 'hlb/ready', function ( data ) {
+		sitecues.on( 'hlb/ready', function ( data ) {
 			extra_event_properties.dom.highlight_box = $( data );
 
 			keys.test[ 'esc' ] = function ( event ) {
@@ -135,7 +135,7 @@ eqnx.def('keys', function(keys, callback){
 			};
 		} );
 
-		eqnx.on( 'hlb/closed', function () {
+		sitecues.on( 'hlb/closed', function () {
 			delete keys.test[ 'esc' ];
 			delete keys.map[ 'esc' ];
 		} );

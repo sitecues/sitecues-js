@@ -1,8 +1,8 @@
-eqnx.def( 'panel', function( panel, callback ) {
+sitecues.def( 'panel', function( panel, callback ) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	eqnx.use( 'jquery', 'conf', 'speech', 'ui', function( $, conf, speech ) {
+	sitecues.use( 'jquery', 'conf', 'speech', 'ui', function( $, conf, speech ) {
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -20,7 +20,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
-			frame = $( '<div>' ).attr( 'id', 'eqnx-panel' );
+			frame = $( '<div>' ).attr( 'id', 'sitecues-panel' );
 
 			// create small A label
 			$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
@@ -38,7 +38,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 			}).appendTo( wrap );
 
 			$( '<img>' ).addClass( 'ramp' ).attr({
-				src:	eqnx.resolveEqnxUrl('../images/panel/slider_ramp.png')
+				src:	sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
 			}).appendTo( wrap );
 
 
@@ -92,7 +92,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 				},
 				750,
 				function() {
-					eqnx.emit('panel/show', panel.element);
+					sitecues.emit('panel/show', panel.element);
 				});
 
 			panel.element.hover(function() {
@@ -117,7 +117,7 @@ eqnx.def( 'panel', function( panel, callback ) {
 			// hide panel
 			panel.element.fadeOut('fast', function(){
 				// notify about panel hiding
-				eqnx.emit('panel/hide', panel.element);
+				sitecues.emit('panel/hide', panel.element);
 
 				// remove element from dom
 				panel.element.remove();
@@ -129,28 +129,28 @@ eqnx.def( 'panel', function( panel, callback ) {
 
 		// Function that will toggle tts on or off
 		panel.ttsToggle = function() {
-			var ttsButton = $('#eqnx-panel .tts');
+			var ttsButton = $('#sitecues-panel .tts');
 			if(ttsButton.data('tts-enable') === 'disabled') {
 				// It's disabled, so enable it
-				eqnx.emit('speech/enable');
+				sitecues.emit('speech/enable');
 				ttsButton.data('tts-enable','enabled');
 				ttsButton.removeClass("tts-disabled");
 			} else {
 				// It's enabled (or unknown), so disable it
-				eqnx.emit('speech/disable');
+				sitecues.emit('speech/disable');
 				ttsButton.data('tts-enable','disabled')
 				ttsButton.addClass("tts-disabled");
 			}
 		}
 
 		// setup trigger to show panel
-		eqnx.on('badge/hover', function() {
+		sitecues.on('badge/hover', function() {
 			panel.show();
 			panel.element.data('badge-hover','true');
 		});
 
 		// setup trigger to show panel
-		eqnx.on('badge/leave', function() {
+		sitecues.on('badge/leave', function() {
 			panel.element.data('badge-hover','false');
 			setTimeout(panel.hide, panel.hideDelay);
 		});

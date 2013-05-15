@@ -1,12 +1,12 @@
-eqnx.def('load', function(load, callback){
+sitecues.def('load', function(load, callback){
 
 	// async script loading
-	load.script = eqnx.loadScript;
+	load.script = sitecues.loadScript;
 
 	// async stylesheet loading
 	load.style = function(url, callback){
 		// Resolve the URL as relative to the library URL.
-		url = eqnx.resolveEqnxUrl(url);
+		url = sitecues.resolvesitecuesUrl(url);
 
 		// private variables
 		var pull, style, counter = 0;

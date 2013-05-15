@@ -1,13 +1,13 @@
 (function(){
-	// break if there is eqnx instance on the page
-	if ('eqnx' in window) {
-		console.log("eqnx already defined.");
+	// break if there is sitecues instance on the page
+	if ('sitecues' in window) {
+		console.log("sitecues already defined.");
 		return;
 	}
 
 	// private variables
 	var arr, has, noop,
-		eqnx, modules, coreConfig;
+		sitecues, modules, coreConfig;
 
 	// private functions
 	var resolveUrl, parseUrlQuery, parseUrl;
@@ -29,16 +29,16 @@
 
 	// the top-level namespace. all public classes and modules will
 	// be attached to this
-	eqnx = this.eqnx = {};
+	sitecues = this.sitecues = {};
 
 	// Return the core config.
-	eqnx.getCoreConfig = function() {
+	sitecues.getCoreConfig = function() {
 		return coreConfig;
 	};
 
 	// bind an event, specified by a string name, `events`, to a `callback`
 	// function. passing `"*"` will bind the callback to all events fired
-	eqnx.on = function(events, callback, context){
+	sitecues.on = function(events, callback, context){
 		var ev, list, tail;
 		events = events.split(/\s+/);
 		var calls = this._events || (this._events = {});
@@ -58,7 +58,7 @@
 	// remove one or many callbacks. if `context` is null, removes all callbacks
 	// with that function. if `callback` is null, removes all callbacks for the
 	// event. if `events` is null, removes all bound callbacks for all events
-	eqnx.off = function(events, callback, context){
+	sitecues.off = function(events, callback, context){
 		var ev, calls, node;
 		if (!events){
 			delete this._events;
@@ -84,7 +84,7 @@
 	// emit an event, firing all bound callbacks. callbacks are passed the
 	// same arguments as `trigger` is, apart from the event name.
 	// listening for `"*"` passes the true event name as the first argument
-	eqnx.emit = function(events){
+	sitecues.emit = function(events){
 		var event, node, calls, tail, args, all, rest;
 		if (!(calls = this._events)) return this;
 
@@ -141,7 +141,7 @@
 	var _def = function(name, constructor){
 		// do not define modules twice.
 		if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-			console.log("eqnx: module '" + name + "' already defined.");
+			console.log("sitecues: module '" + name + "' already defined.");
 			return;
 		}
 
@@ -157,7 +157,7 @@
 			if (result) {
 				module = result;
 			} else {
-				// Modules can double-load when an eqnx.def use statement does not fire callback();
+				// Modules can double-load when an sitecues.def use statement does not fire callback();
 				// This caused the issue with the double-loading of the badge and highlight-box.
 				// See: https://fecru.ai2.at/cru/EQJS-39#c187
 				//      https://equinox.atlassian.net/browse/EQ-355
@@ -168,10 +168,10 @@
 			modules[name] = module;
 
 			// notify about new module
-			eqnx.emit('module', name, module);
+			sitecues.emit('module', name, module);
 
 			// notify about new module load once
-			eqnx.emit('load/' + name, module).
+			sitecues.emit('load/' + name, module).
 				off('load/' + name);
 		});
 	};
@@ -179,7 +179,7 @@
 	// exposed function for defining modules: queues until core is ready.
 	var READY_FOR_DEF_CALLS = false;
 	var DEF_QUEUE = [];
-	eqnx.def = function(name, constructor){
+	sitecues.def = function(name, constructor){
 		if (READY_FOR_DEF_CALLS) {
 			_def(name, constructor);
 		} else {
@@ -200,13 +200,13 @@
 		READY_FOR_DEF_CALLS = true;
 	};
 
-	// Called to initialize the eqnx library.
+	// Called to initialize the sitecues library.
 	var _initialize = function() {
 		_processDefQueue();
 	};
 
 	// load equinox modules
-	eqnx.use = function(){
+	sitecues.use = function(){
 		var i, l, t = this, count = 0,
 			args, load, result, callback, register;
 
@@ -344,10 +344,10 @@
 	};
 
 	var scriptSrcUrl = null,
-	scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|eqnx)\.js'),
+	scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js'),
 	scriptTags = document.getElementsByTagName('script');
 
-	eqnx.getScriptSrcUrl =  function() {
+	sitecues.getScriptSrcUrl =  function() {
 		return scriptSrcUrl;
 	};
 
@@ -386,7 +386,7 @@
 	};
 
 	// Resolve a URL as relative to the main script URL.
-	eqnx.resolveEqnxUrl = function(urlStr){
+	sitecues.resolvesitecuesUrl = function(urlStr){
 		return resolveUrl(urlStr, scriptSrcUrl);
 	};
 
@@ -397,9 +397,9 @@
 	//////////////////////////////////////////////////
 
 	// async script loading
-	eqnx.loadScript = function(url, callback){
+	sitecues.loadScript = function(url, callback){
 		// Resolve the URL as relative to the library URL.
-		url = eqnx.resolveEqnxUrl(url);
+		url = sitecues.resolvesitecuesUrl(url);
 
 		// create script DOM element
 		var script = document.createElement('script');
@@ -421,11 +421,11 @@
 	};
 
 	// trigger module loading
-	eqnx.load = function(){
+	sitecues.load = function(){
 		// iterate over passed module names
 		for(var i=0, l=arguments.length; i<l; i++){
 			// and initiate loading of code for each
-			eqnx.loadScript(arguments[i] + '.js');
+			sitecues.loadScript(arguments[i] + '.js');
 		}
 	};
 
@@ -440,33 +440,33 @@
 
 	var CORE_CONFIG_NAMES = [ "hosts" ], coreLoadCount;
 
-	// Validation method for core configuration. If valid, initialize eqnx.
+	// Validation method for core configuration. If valid, initialize sitecues.
 	var _validateCoreConfigs = function() {
 		var valid = true;
-		if (window.eqnx.__eqnx_cfg) {
-			coreConfig = window.eqnx.__eqnx_cfg;
-			window.eqnx.__eqnx_cfg = undefined;
+		if (window.sitecues.__sitecues_cfg) {
+			coreConfig = window.sitecues.__sitecues_cfg;
+			window.sitecues.__sitecues_cfg = undefined;
 
 			if (coreConfig.hosts) {
 				if (coreConfig.hosts.ws) {
-					console.log("eqnx ws host: " + coreConfig.hosts.ws);
+					console.log("sitecues ws host: " + coreConfig.hosts.ws);
 				} else {
-					console.log("eqnx ws host not specified.");
+					console.log("sitecues ws host not specified.");
 					valid = false;
 				}
 
 				if (coreConfig.hosts.up) {
-					console.log("eqnx up host: " + coreConfig.hosts.up);
+					console.log("sitecues up host: " + coreConfig.hosts.up);
 				} else {
-					console.log("eqnx up host not specified.");
+					console.log("sitecues up host not specified.");
 					valid = false;
 				}
 			} else {
-				console.log("eqnx core hosts config not found.");
+				console.log("sitecues core hosts config not found.");
 				valid = false;
 			}
 		} else {
-			console.log("eqnx core config not found.");
+			console.log("sitecues core config not found.");
 			valid = false;
 		}
 
@@ -474,7 +474,7 @@
 		if (valid) {
 			_initialize();
 		} else {
-			console.log("invalid eqnx core config. aborting.");
+			console.log("invalid sitecues core config. aborting.");
 		}
 	};
 
@@ -488,12 +488,12 @@
 
 	// Determine which core configs require loading.
 	var coreLoadNames = [];
-	if (!window.eqnx.__eqnx_cfg) {
+	if (!window.sitecues.__sitecues_cfg) {
 		// We need all of the core configs.
 		coreLoadNames = CORE_CONFIG_NAMES.splice(0, CORE_CONFIG_NAMES.length);
 	} else {
 		for (i=0; i<CORE_CONFIG_NAMES.length; i++) {
-			if (!window.eqnx.__eqnx_cfg[CORE_CONFIG_NAMES[i]]) {
+			if (!window.sitecues.__sitecues_cfg[CORE_CONFIG_NAMES[i]]) {
 				coreLoadNames.push(CORE_CONFIG_NAMES[i]);
 			}
 		}
@@ -506,7 +506,7 @@
 		_validateCoreConfigs();
 	} else { // Trigger loading of missing core configs.
 		for (i=0; i<coreLoadNames.length; i++) {
-			eqnx.loadScript(".cfg/" + coreLoadNames[i] + ".js", onCoreLoadComplete);
+			sitecues.loadScript(".cfg/" + coreLoadNames[i] + ".js", onCoreLoadComplete);
 		}
 	}
 

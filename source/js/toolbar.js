@@ -1,5 +1,5 @@
-eqnx.def( 'toolbar', function ( toolbar, callback ) {
-    eqnx.use( 'jquery', 'ui', function ( $, ui ) {
+sitecues.def( 'toolbar', function ( toolbar, callback ) {
+    sitecues.use( 'jquery', 'ui', function ( $, ui ) {
         toolbar.STATES = {
             OFF: {
                 id:   0,
@@ -13,13 +13,13 @@ eqnx.def( 'toolbar', function ( toolbar, callback ) {
 
         var STATES                                    = toolbar.STATES,
             current_state                             = STATES.OFF,
-            dom_toolbar_close_button_element_id       = 'eqnx-toolbar-close-button',
+            dom_toolbar_close_button_element_id       = 'sitecues-toolbar-close-button',
             dom_toolbar_close_button_element_selector = null,
-            dom_toolbar_element_id                    = 'eqnx-toolbar',
+            dom_toolbar_element_id                    = 'sitecues-toolbar',
             dom_toolbar_element_selector              = null,
             dom_toolbar_string                        = ( '' +
                 '<div id="' + dom_toolbar_element_id + '">' +
-                    '<img id="' + dom_toolbar_close_button_element_id + '" src="' + eqnx.resolveEqnxUrl("../images/close.png") + '" />' +
+                    '<img id="' + dom_toolbar_close_button_element_id + '" src="' + sitecues.resolvesitecuesUrl("../images/close.png") + '" />' +
                 '</div>' +
             '' )
         ;
@@ -30,11 +30,11 @@ eqnx.def( 'toolbar', function ( toolbar, callback ) {
         toolbar.slideIn  = function () {
             $( dom_toolbar_element_selector ).slideUp( 'slow' );
 
-            eqnx.emit( 'toolbar/slide-in', $( dom_toolbar_element_selector ) );
+            sitecues.emit( 'toolbar/slide-in', $( dom_toolbar_element_selector ) );
 
             current_state = STATES.OFF;
 
-            eqnx.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
         };
         toolbar.slideOut = function () {
             $( dom_toolbar_element_selector ).css( 'left', ( '-' + $( 'body' ).css( 'margin-left' ) ) );
@@ -42,25 +42,25 @@ eqnx.def( 'toolbar', function ( toolbar, callback ) {
             $( dom_toolbar_element_selector ).css( 'width', $( window ).width() );
             $( dom_toolbar_element_selector ).slideDown( 'slow' );
 
-            eqnx.emit( 'toolbar/slide-out', $( dom_toolbar_element_selector ) );
+            sitecues.emit( 'toolbar/slide-out', $( dom_toolbar_element_selector ) );
 
             current_state = STATES.ON;
 
-            eqnx.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
         };
 
         $( document ).ready( function () {
             $( 'body' ).prepend( dom_toolbar_string );
 
-            eqnx.on( 'badge/hover', toolbar.slideOut );
+            sitecues.on( 'badge/hover', toolbar.slideOut );
 
             $( dom_toolbar_close_button_element_selector ).on( 'click', toolbar.slideIn );
         } );
 
-        eqnx.on( 'toolbar/on', function () {
+        sitecues.on( 'toolbar/on', function () {
             console.log( 'Toolbar state: [on].' );
         } );
-        eqnx.on( 'toolbar/off', function () {
+        sitecues.on( 'toolbar/off', function () {
             console.log( 'Toolbar state: [off].' );
         } );
 

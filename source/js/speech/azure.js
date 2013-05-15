@@ -4,9 +4,9 @@
  * in this file.  It is here because we don't need Robovoice for
  * anything else and it is unlikely to be updated by the developer.
  */
-eqnx.def('speech/azure', function(azure, callback) {
+sitecues.def('speech/azure', function(azure, callback) {
 
-    eqnx.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
+    sitecues.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
 
         azure.factory = function(hlb) {
         	console.log(remote.azureAccessToken.accessToken);
@@ -734,7 +734,7 @@ function RoboVoice(options) {
 			},
 			function (audioUrl) { 
 				if (audioUrl) {
-					if (eqnx.getScriptSrcUrl().secure) {
+					if (sitecues.getScriptSrcUrl().secure) {
 						audioUrl = audioUrl.replace(/^http:/, "https:");
 					}
 					self._doCallback(self.options.onAudioUrlLoaded, audioUrl, text, language);
