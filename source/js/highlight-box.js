@@ -201,7 +201,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Insert placeholder before HLB target is absoultely positioned.
                 // Otherwise, we might loose white space intent to the left/right because
                 // in most cases sequence of whitespace will collapse into a single whitespace.
-                var clonedNode = this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
+                this.prepareAndInsertPlaceholder(currentStyle, origRectSize);
 
                 // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then
                 // close it out.
@@ -245,7 +245,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 // Trigger the background blur effect if there is a highlight box only.
                 //  > AK: comment out all the dimmer calls by AL request
                 //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
-                backgroundDimmer.dimBackgroundContent(HighlightBox.kBoxZindex, this, extraZoom);
+                backgroundDimmer.dimBackgroundContent(this, totalZoom);
               });
 
               return false;
@@ -514,10 +514,7 @@ eqnx.def('highlight-box', function (highlightBox, callback) {
                 var centerTop = center.top;
 
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(HighlightBox.kMinDistanceFromEdge);
-                for (var prop in viewport) {
-                    viewport[prop] /= totalZoom;
-                }
+                var viewport = positioning.getViewportDimensions(HighlightBox.kMinDistanceFromEdge, totalZoom);
 
                 var cssUpdates = {};
                 $(selector).each(function () {

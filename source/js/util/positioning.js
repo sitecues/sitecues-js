@@ -202,8 +202,9 @@ eqnx.def('util/positioning', function (positioning, callback) {
 	    /**
          * Obtains the viewport dimensions, with an optional inset.
          */
-        positioning.getViewportDimensions = function (inset) {
+        positioning.getViewportDimensions = function (inset, zoom) {
             inset = inset || 0;
+			zoom  = zoom  || 1;
             var insetX2 = inset * 2;
             var scrollPos = this.getScrollPosition();
             var result = {
@@ -216,6 +217,10 @@ eqnx.def('util/positioning', function (positioning, callback) {
             result.bottom = result.top + result.height;
             result.centerX = result.left + (result.width / 2);
             result.centerY = result.top + (result.height / 2);
+
+			for (var prop in result) {
+				result[prop] /= zoom;
+			}
 
             return result;
         }
