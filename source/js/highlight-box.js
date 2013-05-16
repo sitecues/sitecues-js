@@ -472,11 +472,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 													- parseFloat(closestStyle.borderLeftWidth)
 													+ 'px';
 
-                        var innerText = $(closest).html();
-                        if (innerText && innerText.indexOf('&nbsp;') > 0) { // Contains non-breakable space
-                            updateInnerElStyle.whiteSpace = 'nowrap';
-                        }
-
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
                         $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
 
