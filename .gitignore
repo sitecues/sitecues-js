@@ -4,6 +4,7 @@
 eqnx.iml
 eqnx.ipr
 eqnx.iws
+source/js/.cfg
 node_modules
 target
 tmp
