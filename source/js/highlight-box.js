@@ -356,9 +356,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         borderWidth:  HighlightBox.kBoxBorderWidth
                     });
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-				if (!currentStyle.backgroundImage) {
-					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
-				}
+				if (!currentStyle.backgroundImage || currentStyle.backgroundImage === 'none') {
+ 					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
+ 				}
 
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
