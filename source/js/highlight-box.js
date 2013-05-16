@@ -382,8 +382,13 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
                     cssBeforeAnimateStyles.backgroundSize     = clientRect.width + 'px ' + clientRect.height+ 'px';
 					cssBeforeAnimateStyles.backgroundColor    = common.getRevertColor(newBgColor);
+
+					// If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
+					if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
+						delete cssBeforeAnimateStyles.backgroundSize;
+					}
                 }
-		
+
 				// If background color is not contrast to text color, invert background one.
                 var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
 				var color = compStyle.getPropertyCSSValue("color");
@@ -725,7 +730,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 					$(parents).each(function () {
 						// Iterate through the parents looking for a background color.
 						var thisNodeColor = $(this).css('backgroundColor');
-						// See if the background color is a default or transparent color( if yes, then $.inArray() returns '-1' value.
+						// See if the background color is a default or transparent color(if no, then $.inArray() returns '-1' value).
 						if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
 							// Found a background color specified in this node, no need to check further up the tree.
 							bgColor = thisNodeColor;
