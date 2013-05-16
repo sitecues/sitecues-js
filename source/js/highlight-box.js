@@ -282,15 +282,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     position: 'absolute',
                     transform: 'scale(1)',
                     width: clientRect.width / extraZoom,
-					          // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-					          height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
+				    // Don't change height if there's a backgroudn image, otherwise it is destroyed.
+				    height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
                 });
-
-                // Elements relative to the root don't need extra margins, use original values instead.
-                if (offsetParent[0].tagName.toLowerCase() === 'html') {
-                    cssAnimateStyles.top = origRectSize.top;
-                    cssAnimateStyles.left = 0;
-                }
 
                 // Deflate the highlight box.
                 this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
