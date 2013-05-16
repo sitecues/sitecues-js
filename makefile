@@ -1,13 +1,9 @@
 # Parameters.
-version=$(USER)-$(shell date -u +'%Y%m%d%H%M%S')
+version=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
 package-basedir:=target/package
 clean-deps=false
 dev=false
-vip=false
-package-name=equinox-js.tgz
-ifeq ($(vip), true)
-	package-name=equinox-js-$(version).tgz
-endif
+package-name=equinox-js-$(version).tgz
 
 # Production files (combine all modules into one).
 files=\
