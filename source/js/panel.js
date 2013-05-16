@@ -90,6 +90,10 @@ sitecues.def( 'panel', function( panel, callback ) {
 			// Animate instead of fade
 			panel.element.hide();
 			if(panel.parent) {
+				panel.parent.click(function(e) {
+					e.preventDefault();
+					return false;
+				})
 				// panel.element.css("top",'50');
 				panel.element.css("left",'');
 				panel.element.css("right",'');
