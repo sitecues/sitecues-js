@@ -101,7 +101,7 @@
     position: absolute;
     left: 3px;
     top: 23px;
-    font-family: Verdana;
+    font-family: Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
     font-weight: bolder;
     font-size: 36pt;
 }
@@ -110,7 +110,7 @@
     position: absolute;
     left: 270px;
     top: -10px;
-    font-family: Verdana;
+    font-family: Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
     font-weight: bolder;
     font-size: 60pt;
 }
