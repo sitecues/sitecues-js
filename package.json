@@ -4,7 +4,7 @@
 	"description":	"Equinox Assistant",
 
 	"bin":			"binary/web",
-	"main":			"source/script/eqnx.js",
+	"main":			"source/js/core.js",
 
 	"dependencies":	{
 						"express":	"latest",
