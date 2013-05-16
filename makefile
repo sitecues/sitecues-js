@@ -7,7 +7,7 @@ package-name=equinox-js-$(version).tgz
 
 # Production files (combine all modules into one).
 files=\
-	source/js/eqnx.js \
+	source/js/core.js \
 	source/js/conf.js\
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
@@ -59,7 +59,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/eqnx.js source/js/use.js source/js/debug.js
+	files=source/js/core.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
