@@ -19,6 +19,7 @@ sitecues.def('conf', function(conf, callback){
 		// We're not going to set a default locale value, 
 		// as that can vary per site.
 	}
+
 	if(locale) {
 		conf.locale = locale.toLowerCase().replace('-','_');
 		console.log("Locale: " + conf.locale);

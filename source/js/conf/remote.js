@@ -4,7 +4,7 @@ sitecues.def('conf/remote', function(remote, callback){
     // depends on conf and jquery module
     sitecues.use('jquery', 'conf', function($, conf){
 
-        remote.fetch = function() {
+        remote.fetch = function(callback) {
 
             conf.get('site-id', function(siteId){
 
@@ -46,7 +46,7 @@ sitecues.def('conf/remote', function(remote, callback){
             });
         }
 
-        remote.fetch();
+        remote.fetch(callback);
     });
 
 });

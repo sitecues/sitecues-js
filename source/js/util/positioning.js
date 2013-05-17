@@ -227,8 +227,15 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
         /**
          * Center another element over a provided center, zooming the centered element if needed.
+         * 
+         * @param  string   selector  The selector of the element(s).
+         * @param  center   center    The center point, see getCenter()
+         * @param  int      zoom      The zoom level.
+         * @param  string   position  Set the position of the element, defaults to 'absolute'
+         * 
+         * @return void
          */
-        positioning.centerOn = function (selector, center, zoom) {
+        positioning.centerOn = function (selector, center, zoom, position) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             // Use the proper center.
@@ -306,22 +313,23 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
                 // Determine what the left and top CSS values must be to center the
                 // (possibly zoomed) element over the determined center.
-                var css = jElement.css(['marginLeft', 'marginTop']);
+                var cssMarginLeft = jElement.css('marginLeft') || 0;
+                var cssMarginTop = jElement.css('marginTop') || 0;
 
                 var cssLeft = (centerLeft
                                - offsetParentPosition.left
                                - (width * offsetParentZoom / 2)
-                               - (parseFloat(css.marginLeft) * offsetParentZoom)
+                               - (parseFloat(cssMarginLeft) * offsetParentZoom)
                               ) / offsetParentZoom;
                 var cssTop = (centerTop
                                - offsetParentPosition.top
                                - (height * offsetParentZoom / 2)
-                               - (parseFloat(css.marginTop) * offsetParentZoom)
+                               - (parseFloat(cssMarginTop) * offsetParentZoom)
                               ) / offsetParentZoom;
 
                 // Create the CSS needed to place the element where it needs to be, and to zoom it.
                 var cssUpdates = {
-                    position: 'absolute',
+                    position: position ? position: 'absolute',
                     left: cssLeft,
                     top: cssTop,
 

@@ -96,7 +96,7 @@ sitecues.def('cursor', function (cursor, callback) {
 
 		// show/hide mouse cursor when window focus changes
 		$(window).blur(cursor.hide);
-		$(window).focus(cursor.show);
+		$(window).focus(cursor.init);
 
 		// takes care of 'mousemove' window event
 		function mouseMoveHandler(e){

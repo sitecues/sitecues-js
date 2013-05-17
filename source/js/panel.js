@@ -2,7 +2,7 @@ sitecues.def( 'panel', function( panel, callback ) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	sitecues.use( 'jquery', 'conf', 'speech', 'ui', function( $, conf, speech ) {
+	sitecues.use( 'jquery', 'conf', 'speech', 'util/positioning', 'ui', function( $, conf, speech, positioning ) {
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -14,6 +14,11 @@ sitecues.def( 'panel', function( panel, callback ) {
 		// to make sure that I'm actually getting the real code.
 		console.log('!!! TEMP !!! panel.hideDelay');
 
+		// This is the parent element of the panel.  The default setup does
+		// not need one, this is only when we're using a custom target via
+		// badgeId or panelDisplaySelector properties.
+		panel.parent = null;
+
 		// panel element
 		panel.create = function(){
 			// private variables
@@ -21,7 +26,7 @@ sitecues.def( 'panel', function( panel, callback ) {
 
 			// create element and add element id for proper styling
 			frame = $( '<div>' ).attr( 'id', 'sitecues-panel' );
-
+		
 			// create small A label
 			$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
 
@@ -30,10 +35,10 @@ sitecues.def( 'panel', function( panel, callback ) {
 
 			// create slider
 			slider = $( '<input>' ).addClass( 'slider' ).attr({
-				type: 			'range',
-				min: 				'1',
-				max: 				'5',
-				step: 			'0.1',
+				type: 		'range',
+				min: 		'1',
+				max: 		'5',
+				step: 		'0.1',
 				ariaLabel: 	'See it better'
 			}).appendTo( wrap );
 
@@ -83,9 +88,33 @@ sitecues.def( 'panel', function( panel, callback ) {
 			panel.element = panel.create();
 
 			// Animate instead of fade
-			panel.element.hide().appendTo('html').animate(
+			panel.element.hide();
+			if(panel.parent) {
+				panel.parent.click(function(e) {
+					e.preventDefault();
+					return false;
+				})
+				// panel.element.css("top",'50');
+				panel.element.css("left",'');
+				panel.element.css("right",'');
+				var scroll = positioning.getScrollPosition();
+				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
+				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
+				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
+				if(panelTop < 0) {
+					panelTop = 0;
+				}
+				panel.element.css("top", panelTop);
+
+				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
+				if(panelLeft < 0) {
+					panelLeft = 0;
+				}
+				panel.element.css("left", panelLeft);
+			}
+			panel.element.appendTo('html').animate(
 				{
-					right: '+=0',
+					// right: '+=0',
 					width: 'toggle',
 					height: 'toggle',
 					opacity: 1.0

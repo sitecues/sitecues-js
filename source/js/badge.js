@@ -4,7 +4,7 @@ sitecues.def('badge', function(badge, callback){
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	sitecues.use('jquery', 'conf', 'ui', function($, conf){
+	sitecues.use('jquery', 'conf', 'panel', 'ui', function($, conf, panel){
 
 		badge.altBadges = $(conf.get('panelDisplaySelector'));
 
@@ -15,11 +15,9 @@ sitecues.def('badge', function(badge, callback){
 		}
 
 		if(badge.altBadges && badge.altBadges.length > 0) {
-			badge.panel = badge.altBadges;
-			badge.element = badge.panel;
+			panel.parent = badge.element = badge.panel = badge.altBadges;
 		} else if ($('#' + badge.badgeId).length > 0) {
-			badge.panel = $('#' + badge.badgeId);
-			badge.element = badge.panel;
+			panel.parent = badge.element = badge.panel = $('#' + badge.badgeId);
 		} else {
 			// We have no alternate or pre-existing badges defined, so create a new one.
 			badge.panel = $('<div>')

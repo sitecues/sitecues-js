@@ -2,7 +2,7 @@
 sitecues.def('conf/server', function(server, callback){
 
 	// url of conf settings server
-	var url = '//' + sitecues.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '') + '/em';
+	var url = '//' + sitecues.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '');
 
 	// depends on `conf` and `load` modules
 	sitecues.use('conf', 'load', function(conf, load){

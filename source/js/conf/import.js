@@ -22,16 +22,16 @@ sitecues.def('conf/import', function(module, callback) {
         }
 
         // settings on the page found
-        if ('_eqnx' in window) {
+        if ('_sitecues' in window) {
             // iterate over them and push to conf
-            for (var i = 0, l = _eqnx.length; i < l; i++)
-                push(_eqnx[i]);
+            for (var i = 0, l = _sitecues.length; i < l; i++)
+                push(_sitecues[i]);
         } else {
-            console.log('_eqnx not defined!');
+            console.log('_sitecues not defined!');
         }
 
         // replace global var
-        _eqnx = { push: push }
+        _sitecues = { push: push }
 
         // done
         callback();

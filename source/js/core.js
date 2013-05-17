@@ -1,35 +1,42 @@
+/*
+ * Sitecues:  core.js
+ * 
+ * The core module for loading Sitecues.
+ *
+ */
+
 (function(){
-	// break if there is sitecues instance on the page
-	if ('sitecues' in window) {
+
+	// Return if there is sitecues instance on the page
+	if (window.sitecues && window.sitecues.coreConfig) {
 		console.log("sitecues already defined.");
 		return;
 	}
 
-	// private variables
-	var arr, has, noop,
-		sitecues, modules, coreConfig;
+	// Private variables
 
-	// private functions
-	var resolveUrl, parseUrlQuery, parseUrl;
+	var arr 				= Array.prototype 								// Array's prototype
+		, has 				= Object.prototype.hasOwnProperty // Object's has own property
+		, noop 				= function(){} 										// Empty function
+		, modules 		= {} 															// Modules container
+		, coreConfig 	= {} 															// Core config container
 
-	// modules container
-	modules = {};
+		// Siteuces top-level namespace: all public classes and modules will be
+		// attached to this name space and aliased on "window.sitecues"
+		, sitecues    = {}
 
-	// core config container
-	coreConfig = {};
+		, modules
+		, coreConfig
+	
+	// Private Functions
 
-	// array's prototype
-	arr = Array.prototype;
+		, resolveUrl
+		, parseUrlQuery
+		, parseUrl
+	;
 
-	// object's has own property
-	has = Object.prototype.hasOwnProperty;
-
-	// empty function
-	noop = function(){};
-
-	// the top-level namespace. all public classes and modules will
-	// be attached to this
-	sitecues = this.sitecues = {};
+	// Alias sitecues to window
+	window.sitecues = sitecues;
 
 	// Return the core config.
 	sitecues.getCoreConfig = function() {
@@ -443,9 +450,15 @@
 	// Validation method for core configuration. If valid, initialize sitecues.
 	var _validateCoreConfigs = function() {
 		var valid = true;
-		if (window.sitecues.__sitecues_cfg) {
-			coreConfig = window.sitecues.__sitecues_cfg;
-			window.sitecues.__sitecues_cfg = undefined;
+	
+			//console.log( coreConfig, 1 );
+
+		if (window.sitecues.coreConfig) {
+			coreConfig = window.sitecues.coreConfig;
+			
+			console.log( coreConfig );
+
+			//window.sitecues.coreConfig = undefined;
 
 			if (coreConfig.hosts) {
 				if (coreConfig.hosts.ws) {
@@ -488,12 +501,12 @@
 
 	// Determine which core configs require loading.
 	var coreLoadNames = [];
-	if (!window.sitecues.__sitecues_cfg) {
+	if (!window.sitecues.coreConfig) {
 		// We need all of the core configs.
 		coreLoadNames = CORE_CONFIG_NAMES.splice(0, CORE_CONFIG_NAMES.length);
 	} else {
 		for (i=0; i<CORE_CONFIG_NAMES.length; i++) {
-			if (!window.sitecues.__sitecues_cfg[CORE_CONFIG_NAMES[i]]) {
+			if (!window.sitecues.coreConfig[CORE_CONFIG_NAMES[i]]) {
 				coreLoadNames.push(CORE_CONFIG_NAMES[i]);
 			}
 		}
