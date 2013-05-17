@@ -11,7 +11,7 @@ sitecues.def('speech/azure', function(azure, callback) {
         azure.factory = function(hlb) {
         	console.log(remote.azureAccessToken.accessToken);
         	var roboVoice = new window.sitecues.RoboVoice(remote.azureAccessToken.accessToken);
-        	return new AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
+        	return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
     });
 
@@ -20,7 +20,7 @@ sitecues.def('speech/azure', function(azure, callback) {
 
 });
 
-function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
+window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 
 	var hlb;
 	if(hlb instanceof _jQuery) {
@@ -62,7 +62,7 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 		remote.fetch();
 	}
 
-}
+};
 
 /*!
  * RoboVoice Speaker
