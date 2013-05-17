@@ -223,10 +223,7 @@ sitecues.def('speech', function(speech, callback) {
              * Returns if TTS is enabled or not.  Always returns true or false.
              */
             speech.isEnabled = function() {
-                if(ttsEnable) {
-                    return true;
-                }
-                return false;
+                return !!ttsEnable;
             }
 
             /*
@@ -262,9 +259,11 @@ sitecues.def('speech', function(speech, callback) {
              */
             sitecues.on('hlb/closed', speech.stop);
 
+			// end
+			callback();
+
         });
+
     });
 
-    // end
-    callback();
 });
