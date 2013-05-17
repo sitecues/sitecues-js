@@ -43,6 +43,7 @@ files=\
 	source/js/invert.js \
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
+	source/js/cursor/element.js \
 	# source/js/toolbar.js \
 
 https=off
