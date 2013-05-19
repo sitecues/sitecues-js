@@ -113,7 +113,7 @@ endif
 	@echo "Packaging started."
 	@mkdir -p $(package-dir)
 	@echo $(version) > $(package-dir)/VERSION.TXT
-	@cp -R target/compile/* $(package-dir)/$(version)
+	@cp -R target/compile/* $(package-dir)
 	@cp -R source/css $(package-dir)
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf target/$(package-file-name) $(package-name)
