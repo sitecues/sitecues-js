@@ -1,14 +1,21 @@
 # Parameters.
-version=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
-package-basedir:=target/package
+name:=sitecues
+
+local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
+version=$(local-version)
+
 clean-deps=false
 dev=false
-package-name=equinox-js-$(version).tgz
+
+package-basedir:=target/package
+package-name:=$(name)-js-$(version)
+package-file-name:=$(package-name).tgz
+package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
 files=\
 	source/js/core.js \
-	source/js/conf.js\
+	source/js/conf.js \
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
 	source/js/conf/remote.js \
@@ -104,14 +111,14 @@ ifeq ($(dev), true)
 	$(error Unable to package a development build)
 endif
 	@echo "Packaging started."
-	@mkdir -p $(package-basedir)/$(version)
-	@echo $(version) > $(package-basedir)/$(version)/VERSION.TXT
-	@cp -R target/compile/* $(package-basedir)/$(version)
-	@cp -R source/css $(package-basedir)/$(version)
-	@cp -R source/images $(package-basedir)/$(version)
-	@tar -C $(package-basedir) -zcf target/$(package-name) $(version)
+	@mkdir -p $(package-dir)
+	@echo $(version) > $(package-dir)/VERSION.TXT
+	@cp -R target/compile/* $(package-dir)/$(version)
+	@cp -R source/css $(package-dir)
+	@cp -R source/images $(package-dir)
+	@tar -C $(package-basedir) -zcf target/$(package-file-name) $(package-name)
 	@rm -f target/manifest.txt
-	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
+	@(cd $(package-dir) ; for FILE in `find * -type f | sort` ; do \
 		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
 	done)
 	@echo "Packaging completed."
