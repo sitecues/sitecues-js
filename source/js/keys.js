@@ -96,7 +96,7 @@ sitecues.def('keys', function(keys, callback){
 					} else {
 						//We're going to attach the target dom element to the
 						//event, whether it's available or not.
-						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
+						extra_event_properties.dom.mouse_highlight = mh.picked.get(0);
 					}
 				}
 
