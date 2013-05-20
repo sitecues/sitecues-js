@@ -1,4 +1,4 @@
-`/**
+/**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 sitecues.def('highlight-box', function (highlightBox, callback) {
