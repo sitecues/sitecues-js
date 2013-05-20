@@ -1,8 +1,8 @@
 // returns the cursor type for a specific element
-eqnx.def('cursor/style', function(module, callback){
+sitecues.def('cursor/style', function(module, callback){
 
 	// dependencies
-	eqnx.use('jquery', function($){
+	sitecues.use('jquery', function($){
 
 		module.detect = function(element, options){
 			element = $(element);

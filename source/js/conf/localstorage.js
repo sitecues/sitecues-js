@@ -1,5 +1,5 @@
 // module for storing settings in localstorage
-eqnx.def('conf/localstorage', function(ls, callback){
+sitecues.def('conf/localstorage', function(ls, callback){
 
 	// break if local storage unsupported by browser
 	if (!localStorage) return callback();
@@ -8,13 +8,13 @@ eqnx.def('conf/localstorage', function(ls, callback){
 	return callback();
 
 	// depends on conf module
-	eqnx.use('conf', function(conf){
+	sitecues.use('conf', function(conf){
 
 		// private variables
 		var data;
 
 		// get stored data in local storage
-		if (data = localStorage.getItem('eqnx')){
+		if (data = localStorage.getItem('sitecues')){
 			try {
 				// parse json data, errors can
 				// be thrown during parse
@@ -39,7 +39,7 @@ eqnx.def('conf/localstorage', function(ls, callback){
 			data = JSON.stringify(data);
 
 			// save to local storage
-			localStorage.setItem('eqnx', data);
+			localStorage.setItem('sitecues', data);
 		});
 
 		// done

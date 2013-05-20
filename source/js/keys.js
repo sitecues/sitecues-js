@@ -1,4 +1,4 @@
-eqnx.def('keys', function(keys, callback){
+sitecues.def('keys', function(keys, callback){
 	var extra_event_properties = {
 		dom: {
 			highlight_box: null
@@ -36,7 +36,7 @@ eqnx.def('keys', function(keys, callback){
 	keys.handle = function ( key, event ) {
 		// if event defined, emit it
 		if ( key.event ) {
-			eqnx.emit( key.event, event );
+			sitecues.emit( key.event, event );
 		}
 
 		// prevent default if needed
@@ -75,7 +75,7 @@ eqnx.def('keys', function(keys, callback){
 	};
 
 	// get dependencies
-	eqnx.use('jquery', 'mouse-highlight', function($, mh){
+	sitecues.use('jquery', 'mouse-highlight', function($, mh){
 
 		// key event hook
 		keys.hook = function(event){
@@ -83,21 +83,23 @@ eqnx.def('keys', function(keys, callback){
 			var i, l, key, test, parts, result;
 
 			// ignore events from editable elements
-			if ( keys.isEditable( event.target ) ) {
+			if ( keys.isEditable(event.target) ) {
 				return;
 			}
 
 			// iterate over key map
 			for(key in keys.map) if (has.call(keys.map, key)){
-
 				if(keys.map[key].requiresMouseHighlight) {
-					if(!mh.picked) {
+					if(!mh.enabled) {
+						// Mouse highlight is disabled, revert to default.
 						return;
 					} else {
-						//We're going to attach the target dom element to the event
+						//We're going to attach the target dom element to the
+						//event, whether it's available or not.
 						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
 					}
 				}
+
 				// prepare default value
 				result = true;
 
@@ -121,7 +123,7 @@ eqnx.def('keys', function(keys, callback){
 		// bind key hook to window
 		$(window).on('keydown', keys.hook);
 
-		eqnx.on( 'hlb/ready', function ( data ) {
+		sitecues.on( 'hlb/ready', function ( data ) {
 			extra_event_properties.dom.highlight_box = $( data );
 
 			keys.test[ 'esc' ] = function ( event ) {
@@ -133,7 +135,7 @@ eqnx.def('keys', function(keys, callback){
 			};
 		} );
 
-		eqnx.on( 'hlb/closed', function () {
+		sitecues.on( 'hlb/closed', function () {
 			delete keys.test[ 'esc' ];
 			delete keys.map[ 'esc' ];
 		} );

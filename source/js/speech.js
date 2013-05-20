@@ -4,11 +4,11 @@
  * by other parts of the application.
  */
 
-eqnx.def('speech', function(speech, callback) {
+sitecues.def('speech', function(speech, callback) {
 
-    eqnx.use('conf', 'conf/remote', function(conf, conf_remote) {
+    sitecues.use('conf', 'conf/remote', function(conf, conf_remote) {
 
-        eqnx.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
+        sitecues.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
 
             var players = {};
             var azure = _azure;
@@ -223,48 +223,47 @@ eqnx.def('speech', function(speech, callback) {
              * Returns if TTS is enabled or not.  Always returns true or false.
              */
             speech.isEnabled = function() {
-                if(ttsEnable) {
-                    return true;
-                }
-                return false;
+                return !!ttsEnable;
             }
 
             /*
              * Enables TTS, if possible.
              */
-            eqnx.on('speech/enable', speech.enable);
+            sitecues.on('speech/enable', speech.enable);
 
             /*
              * Disable TTS, terminating all players.
              */
-            eqnx.on('speech/disable', speech.disable);
+            sitecues.on('speech/disable', speech.disable);
 
             /*
              * Stop playback of all TTS.
              */
-            eqnx.on('speech/stop', speech.stopAll);
+            sitecues.on('speech/stop', speech.stopAll);
 
             /*
              * A highlight box has been requested.  This will create the player
              * if necessary, but will not play anything.
              */
-            eqnx.on('hlb/create', speech.initPlayer);
+            sitecues.on('hlb/create', speech.initPlayer);
 
             /*
              * A highlight box is ready to play.  If no player has been initialized,
              * this will do that first and then begin playing.
              */
-            eqnx.on('hlb/ready', speech.play);
+            sitecues.on('hlb/ready', speech.play);
 
             /*
              * A highlight box was closed.  Stop/abort/dispose of the player
              * attached to it.
              */
-            eqnx.on('hlb/closed', speech.stop);
+            sitecues.on('hlb/closed', speech.stop);
+
+			// end
+			callback();
 
         });
+
     });
 
-    // end
-    callback();
 });

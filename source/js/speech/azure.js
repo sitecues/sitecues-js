@@ -4,14 +4,14 @@
  * in this file.  It is here because we don't need Robovoice for
  * anything else and it is unlikely to be updated by the developer.
  */
-eqnx.def('speech/azure', function(azure, callback) {
+sitecues.def('speech/azure', function(azure, callback) {
 
-    eqnx.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
+    sitecues.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
 
         azure.factory = function(hlb) {
         	console.log(remote.azureAccessToken.accessToken);
-        	var roboVoice = new RoboVoice(remote.azureAccessToken.accessToken);
-        	return new AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
+        	var roboVoice = new window.sitecues.RoboVoice(remote.azureAccessToken.accessToken);
+        	return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
     });
 
@@ -20,7 +20,7 @@ eqnx.def('speech/azure', function(azure, callback) {
 
 });
 
-function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
+window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 
 	var hlb;
 	if(hlb instanceof _jQuery) {
@@ -62,7 +62,7 @@ function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 		remote.fetch();
 	}
 
-}
+};
 
 /*!
  * RoboVoice Speaker
@@ -473,7 +473,7 @@ function WMAudioPlayer() {
 
 // RoboVoice -------------------------------------
 
-function RoboVoice(options) {
+ window.sitecues.RoboVoice = function(options) {
 	var defaults = _.extend({}, this.defaults);
 
 	if (_.isString(options)) {
@@ -734,7 +734,7 @@ function RoboVoice(options) {
 			},
 			function (audioUrl) { 
 				if (audioUrl) {
-					if (eqnx.getScriptSrcUrl().secure) {
+					if (sitecues.getScriptSrcUrl().secure) {
 						audioUrl = audioUrl.replace(/^http:/, "https:");
 					}
 					self._doCallback(self.options.onAudioUrlLoaded, audioUrl, text, language);
@@ -783,9 +783,9 @@ function RoboVoice(options) {
 		return text;
 	}
 	
-}).call(RoboVoice.prototype);
+}).call(window.sitecues.RoboVoice.prototype);
 
 // ---------------------------------------------
-window.RoboVoice = RoboVoice;
+//window.RoboVoice = RoboVoice;
 
 })()

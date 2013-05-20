@@ -1,4 +1,4 @@
-eqnx.def('zoom', function(zoom, callback){
+sitecues.def('zoom', function(zoom, callback){
 
 	// values used for zoom math
 	zoom.max = 5;
@@ -11,7 +11,7 @@ eqnx.def('zoom', function(zoom, callback){
 	zoom.native = 'zoom' in document.createElement('div').style;
 
 	// get dependencies
-	eqnx.use('jquery', 'conf', function($, conf){
+	sitecues.use('jquery', 'conf', function($, conf){
 
 		// use conf module for sharing
 		// current zoom level value
@@ -34,12 +34,12 @@ eqnx.def('zoom', function(zoom, callback){
 			conf.set('zoom', $('body').css('zoom') || zoom.default);
 
 		// handle zoom/increase event fired by any module
-		eqnx.on('zoom/increase', function(){
+		sitecues.on('zoom/increase', function(){
 			conf.set('zoom', conf.get('zoom') + zoom.step);
 		});
 
 		// handle zoom/decrease event fired by any module
-		eqnx.on('zoom/decrease', function(){
+		sitecues.on('zoom/decrease', function(){
 			conf.set('zoom', conf.get('zoom') - zoom.step);
 		});
 
@@ -49,7 +49,7 @@ eqnx.def('zoom', function(zoom, callback){
 			if (zoom.native){
 				// if native zoom is supported, change it
 				$('body').css({ zoom: value });
-				eqnx.emit('zoom', value);
+				sitecues.emit('zoom', value);
 			} else {
 				// native zoom isn't supported, use
 				// css3 transforms scale option
@@ -60,7 +60,7 @@ eqnx.def('zoom', function(zoom, callback){
 			}
 
 			// notify all about zoom change
-			eqnx.emit('zoom', value);
+			sitecues.emit('zoom', value);
 
 		});
 

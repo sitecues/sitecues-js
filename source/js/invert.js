@@ -1,5 +1,5 @@
-eqnx.def('invert', function (invert, callback) {
-    eqnx.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
+sitecues.def('invert', function (invert, callback) {
+    sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
         invert.STATES = {
             INVERT: {
                 id:   0,
@@ -66,7 +66,7 @@ eqnx.def('invert', function (invert, callback) {
                 break;
         }
 
-        eqnx.on('hlb/deflating', function () {
+        sitecues.on('hlb/deflating', function () {
             if (invert_state_highlight_box === invert_state_page) {
                 setStateHighlightBoxMatch();
             }
@@ -74,7 +74,7 @@ eqnx.def('invert', function (invert, callback) {
 
         // TODO: Make the code more DRY.
 
-        eqnx.on('hlb/ready', function (data) {
+        sitecues.on('hlb/ready', function (data) {
             dom_highlight_box = $(data);
 
             switch (invert_state_highlight_box) {
@@ -101,7 +101,7 @@ eqnx.def('invert', function (invert, callback) {
             }
         } );
 
-        eqnx.on('inverse/toggle', function (event) {
+        sitecues.on('inverse/toggle', function (event) {
             if (! (event.altKey || event.ctrlKey || event.metaKey)) {
                 var highlight_box_state  = highlight_box.getState();
                 var highlight_box_states = highlight_box.STATES;
@@ -198,31 +198,31 @@ eqnx.def('invert', function (invert, callback) {
             invert_state_highlight_box = STATES.INVERT;
 
             conf.set('invert.highlight-box.state', 'invert');
-            eqnx.emit('invert/highlight-box/invert');
+            sitecues.emit('invert/highlight-box/invert');
         }
         function setStateHighlightBoxMatch() {
             invert_state_highlight_box = STATES.MATCH;
 
             conf.set('invert.highlight-box.state', 'match');
-            eqnx.emit('invert/highlight-box/match');
+            sitecues.emit('invert/highlight-box/match');
         }
         function setStateHighlightBoxNormal() {
             invert_state_highlight_box = STATES.NORMAL;
 
             conf.set('invert.highlight-box.state', 'normal');
-            eqnx.emit('invert/highlight-box/normal');
+            sitecues.emit('invert/highlight-box/normal');
         }
         function setStatePageInvert() {
             invert_state_page = STATES.INVERT;
 
             conf.set('invert.page.state', 'invert');
-            eqnx.emit('invert/page/invert');
+            sitecues.emit('invert/page/invert');
         }
         function setStatePageNormal() {
             invert_state_page = STATES.NORMAL;
 
             conf.set('invert.page.state', 'normal');
-            eqnx.emit('invert/page/normal');
+            sitecues.emit('invert/page/normal');
         }
         function setStyleHighlightBoxEmpty() {
             $(dom_highlight_box).css(css_invert_empty);
