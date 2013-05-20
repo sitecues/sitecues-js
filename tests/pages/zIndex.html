@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head><style type="text/css">
+div { font: 12px Arial; }
+span.bold { font-weight: bold; }
+h2 {text-align: center; margin-top: 20px; margin-bottom: 20px;}
+#wrapper {
+	position: absolute;
+	top: 0;
+	width: 600px;
+}
+
+#normdiv {
+   height: 70px;
+   border: 1px dashed #999966;
+   background-color: #ffffcc;
+   margin: 0px 50px 0px 50px;
+   text-align: center;
+}
+ 
+#reldiv1 {
+   opacity: 0.7;
+   height: 100px;
+   position: relative;
+   top: 30px;
+   border: 1px dashed #669966;
+   background-color: #ccffcc;
+   margin: 0px 50px 0px 50px;
+   text-align: center;
+}
+ 
+#reldiv2 {
+   opacity: 0.7;
+   height: 100px;
+   position: relative;
+   top: 15px;
+   left: 20px;
+   border: 1px dashed #669966;
+   background-color: #ccffcc;
+   margin: 0px 50px 0px 50px;
+   text-align: center;
+}
+ 
+#absdiv1 {
+   opacity: 0.7;
+   position: absolute;
+   width: 150px;
+   height: 300px;
+   top: 50px;
+   left: 10px;
+   border: 1px dashed #990000;
+   background-color: #ffdddd;
+   text-align: center;
+}
+ 
+#absdiv2 {
+   opacity: 0.7;
+   position: absolute;
+   width: 150px;
+   height: 300px;
+   top: 50px;
+   right: 10px;
+   border: 1px dashed #990000;
+   background-color: #ffdddd;
+   text-align: center;
+}
+
+ 
+#div11,#div13 {
+   height: 80px;
+   position: relative;
+   border: 1px dashed #669966;
+   background-color: #ccffcc;
+   padding-left: 5px;
+}
+ 
+#div12 {
+   opacity: 0.8;
+   z-index: 1;
+   position: absolute;
+   width: 150px;
+   height: 200px;
+   top: 20px;
+   left: 170px;
+   border: 1px dashed #990000;
+   background-color: #ffdddd;
+   text-align: center;
+}
+ 
+#div14 {
+   opacity: 0.8;
+   z-index: 2;
+   position: absolute;
+   width: 200px;
+   height: 70px;
+   top: 65px;
+   left: 50px;
+   border: 1px dashed #000099;
+   background-color: #ddddff;
+   text-align: left;
+   padding-left: 10px;
+}
+ 
+#div-2 { z-index: 2; }
+#div-3 { z-index: 1; }
+#div-4 { z-index: 10; }
+ 
+#div-1,#div-3 {
+   height: 80px;
+   position: relative;
+   border: 1px dashed #669966;
+   background-color: #ccffcc;
+   padding-left: 5px;
+}
+ 
+#div-2 {
+   opacity: 0.8;
+   position: absolute;
+   width: 150px;
+   height: 200px;
+   top: 20px;
+   left: 170px;
+   border: 1px dashed #990000;
+   background-color: #ffdddd;
+   text-align: center;
+}
+ 
+#div-4 {
+   opacity: 0.8;
+   position: absolute;
+   width: 200px;
+   height: 70px;
+   top: 65px;
+   left: 50px;
+   border: 1px dashed #000099;
+   background-color: #ddddff;
+   text-align: left;
+   padding-left: 10px;
+}
+</style></head>
+ 
+	<body>
+		<div id="wrapper">
+			<h2><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/Stacking_without_z-index?redirectlocale=en-US&redirectslug=CSS%2FUnderstanding_z-index%2FStacking_without_z-index">Default stacking rules(Stacking without z-index)</a></h2>
+
+			<div id="absdiv1">
+				<br /><span class="bold">DIV #1</span>
+				<br />position: absolute;
+			</div>
+
+			<div id="reldiv1">
+				<br /><span class="bold">DIV #2</span>
+				<br />position: relative;
+			</div>
+
+			<div id="reldiv2">
+				<br /><span class="bold">DIV #3</span>
+				<br />position: relative;
+			</div>
+
+			<div id="absdiv2">
+				<br /><span class="bold">DIV #4</span>
+				<br />position: absolute;
+			</div>
+
+			<div id="normdiv">
+				<br /><span class="bold">DIV #5</span>
+				<br />no positioning
+			</div>
+			<br />
+
+			<h2><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/Stacking_context_example_1?redirectlocale=en-US&redirectslug=CSS%2FUnderstanding_z-index%2FStacking_context_example_1">Stacking context example 1: 2-level HTML hierarchy, z-index on the last level<a></h2>
+			<div id="div11">
+				<br /><span class="bold">DIV #1</span>
+				<br />position: relative;
+				<div id="div12">
+					<br /><span class="bold">DIV #2</span>
+					<br />position: absolute;
+					<br />z-index: 1;
+				</div>
+			</div>
+
+			<br />
+
+			<div id="div13">
+				<br /><span class="bold">DIV #3</span>
+				<br />position: relative;
+				<div id="div14">
+					<br /><span class="bold">DIV #4</span>
+					<br />position: absolute;
+					<br />z-index: 2;
+				</div>
+			</div>
+			<br />
+			<br />
+			<br />
+
+			<h2><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/Stacking_context_example_2?redirectlocale=en-US&redirectslug=CSS%2FUnderstanding_z-index%2FStacking_context_example_2"> 2-level HTML hierarchy, z-index on all levels</b><a></h2>
+				<div id="div-1">
+					<br /><span class="bold">DIV #1</span>
+					<br />position: relative;
+					<div id="div-2">
+						<br /><span class="bold">DIV #2</span>
+						<br />position: absolute;
+						<br />z-index: 2;
+					</div>
+				</div>
+
+				<br />
+
+				<div id="div-3">
+					<br /><span class="bold">DIV #3</span>
+					<br />position: relative;
+					<br />z-index: 1;
+					<div id="div-4">
+						<br /><span class="bold">DIV #4</span>
+						<br />position: absolute;
+						<br />z-index: 10;
+					</div>
+				</div>
+
+		</div>
+	</body>
+</html>
