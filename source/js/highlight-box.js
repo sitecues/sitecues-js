@@ -91,6 +91,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             return (instance ? instance.getState() : state);
         };
 
+		// todo: take out common things like these below into general sitecues file which is loaded before any other file starts loading.
         // Add easing function for box open animation, to create bounce-back effect
         $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301
             easeOutBack: function (x, t, b, c, d, s) {
@@ -98,6 +99,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
             }
         });
+
+		if (typeof String.prototype.trim !== 'function') {
+		  String.prototype.trim = function() {
+			return this.replace(/^\s+|\s+$/g, ''); 
+		  }
+		}
 
         // Performs global clean-up when an instance is closed.
         var onHighlightBoxClosed = function() {
