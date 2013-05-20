@@ -1,4 +1,4 @@
-/**
+`/**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 sitecues.def('highlight-box', function (highlightBox, callback) {
@@ -102,7 +102,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
 		if (typeof String.prototype.trim !== 'function') {
 		  String.prototype.trim = function() {
-			return this.replace(/^\s+|\s+$/g, ''); 
+			return this.replace(/^\s+|\s+$/g, '');
 		  }
 		}
 
@@ -165,9 +165,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
               } else {
                 HighlightBox.isSticky = true;
               }
-              
+
               return HighlightBox.isSticky;
-            };            
+            };
 
             /**
              * Get the state of the highlight box.
@@ -243,12 +243,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 	            this.itemNode
                 .css(cssBeforeAnimateStyles)
                 .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
-              
+
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
                 console.log("hlb ready");
                 sitecues.emit('hlb/ready', _this.item);
-                  
+
                 // Trigger the background blur effect if there is a highlight box only.
                 //  > AK: comment out all the dimmer calls by AL request
                 //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
@@ -301,7 +301,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                   }
 
                   $('.' + HighlightBox.kPlaceHolderClass).remove();
-                  
+
                   backgroundDimmer.removeDimmer();
 
                   setTimeout(function () {
@@ -323,7 +323,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                   // Call the module method to clean up after close BEFORE calling listeners.
                   onHighlightBoxClosed();
-                  
+
                   console.log("hlb closed");
                   sitecues.emit('hlb/closed', _this.item);
               });
@@ -366,7 +366,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
  				}
 
 				if (isNotEmptyBgImage(currentStyle.backgroundImage)) {
-					cssBeforeAnimateStyles.overflowY = 'hidden'; 
+					cssBeforeAnimateStyles.overflowY = 'hidden';
 				} else {
 					cssBeforeAnimateStyles.overflowY = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
 				}
@@ -439,7 +439,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
 				if (tableCellAncestorParents && colspan === 1) {
 					//cloneNode[0].style.width = 'auto';
-				} 
+				}
 
 			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
 			   if (cloneNode[0].style.display === 'list-item') {
@@ -478,9 +478,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 						updateInnerElStyle.width = parseFloat(closestStyle.width)
 													- parseFloat(closestStyle.paddingLeft)
 													- parseFloat(closestStyle.paddingRight)
-													- parseFloat(closestStyle.marginLeft) 
+													- parseFloat(closestStyle.marginLeft)
 													- parseFloat(closestStyle.marginRight)
-													- parseFloat(closestStyle.borderLeftWidth) 
+													- parseFloat(closestStyle.borderLeftWidth)
 													- parseFloat(closestStyle.borderLeftWidth)
 													+ 'px';
 
@@ -850,7 +850,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 } else if (currentState === STATES.ON) {
                     // There is no current HLB and we can create one, so do just that.
                     // If the target element is ineligible, the create request may return null.
-                    instance = HighlightBox.createInstance(e.mouseHighlightTarget);
+                    instance = HighlightBox.createInstance(e.dom.mouse_highlight);
                     if (instance) {
                         instance.inflate();
                     }

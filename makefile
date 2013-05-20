@@ -105,7 +105,7 @@ build: $(_build_lint_dep)
 	@echo "Building completed."
 
 # TARGET: package
-# Package up the files into a deployable bundle, and create a manifest for local file deployment 
+# Package up the files into a deployable bundle, and create a manifest for local file deployment
 package: build
 ifeq ($(dev), true)
 	$(error Unable to package a development build)
@@ -149,29 +149,9 @@ lint:
 	@gjslint --nojsdoc -r source/js
 	@echo "Linting completed."
 
-# TARGET: package
-# Package up the files into a deployable bundle, and create a manifest for local file deployment
-package: build
-ifeq ($(dev), true)
-	$(error Unable to package a development build)
-endif
-	@echo "Packaging started."
-	@mkdir -p $(package-basedir)/$(version)
-	@echo $(version) > $(package-basedir)/$(version)/VERSION.TXT
-	@cp -R target/compile/* $(package-basedir)/$(version)
-	@cp -R source/css $(package-basedir)/$(version)
-	@cp -R source/images $(package-basedir)/$(version)
-	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
-	@rm -f target/manifest.txt
-	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
-		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
-	done)
-	@echo "Packaging completed."
-
 # TARGET: run
 # Run the web server, giving access to the library and test pages.
 # Additionally, copy in core config files, if they do not exist.
 run:
 	@echo "Running."
 	@./binary/web $(port) $(https)
-
