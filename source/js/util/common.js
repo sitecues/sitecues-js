@@ -8,6 +8,12 @@ sitecues.def('util/common', function (common, callback) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
+		// Make sure 'trim()' has cross-browser support.
+		if (typeof String.prototype.trim !== 'function') {
+		  String.prototype.trim = function() {
+			return this.replace(/^\s+|\s+$/g, '');
+		  }
+		}
             /**
              * Get the element's styles to be used further.
              * @param element The DOM element which styles we want to get.
@@ -69,6 +75,13 @@ sitecues.def('util/common', function (common, callback) {
              */
             common.capitaliseFirstLetter = function(str) {
                 return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+			
+			/**
+             * Checks if the value given is empty or not.
+             */
+            common.isEmpty = function(val) {
+                return !val || val.trim() === '';
             }
 
             /*

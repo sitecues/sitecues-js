@@ -100,12 +100,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             }
         });
 
-		if (typeof String.prototype.trim !== 'function') {
-		  String.prototype.trim = function() {
-			return this.replace(/^\s+|\s+$/g, '');
-		  }
-		}
-
         // Performs global clean-up when an instance is closed.
         var onHighlightBoxClosed = function() {
             // All we need to do at the current time within the module is remove the instance.
@@ -350,7 +344,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 						// Preserve it so that inner content is not rearranged when width is a bit narrowed.
                         width: parseFloat(clientRect.width) + 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px',
 						// Don't change height if there's a background image, otherwise it is destroyed.
-                        height: isNotEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
+                        height: !isEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
                         zIndex: HighlightBox.kBoxZindex.toString(),
                         border: '0px solid white',
                         listStylePosition: 'inside',
@@ -361,11 +355,11 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         borderWidth:  HighlightBox.kBoxBorderWidth
                     });
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-				if (!isNotEmptyBgImage(currentStyle.backgroundImage)) {
+				if (isEmptyBgImage(currentStyle.backgroundImage)) {
  					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
  				}
 
-				if (isNotEmptyBgImage(currentStyle.backgroundImage)) {
+				if (!isEmptyBgImage(currentStyle.backgroundImage)) {
 					cssBeforeAnimateStyles.overflowY = 'hidden';
 				} else {
 					cssBeforeAnimateStyles.overflowY = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
@@ -382,7 +376,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
 
                 // If color and background color are not contrast then either set background image or invert background color.
-                if (isNotEmptyBgImage(oldBgImage)) {
+                if (!isEmptyBgImage(oldBgImage)) {
                     cssBeforeAnimateStyles.backgroundRepeat   = currentStyle.backgroundRepeat;
                     cssBeforeAnimateStyles.backgroundImage    = oldBgImage;
                     cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
@@ -695,7 +689,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     bgColorObj = getNewBgColor(itemNode, parents);
                 }
                 // todo: fix list items bullet bg being considered as background image because they are.
-                if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || !isNotEmptyBgImage(oldBgImage)) {
+                if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || isEmptyBgImage(oldBgImage)) {
                     bgImageObj = getNewBgImage(parents, itemNode);
                 }
                 return $.extend({}, bgColorObj, bgImageObj);
@@ -712,7 +706,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var bgColor = HighlightBox.kDefaultBgColor;
 				// Special treatment for images since they might have text on transparent background.
 				// We should make sure text is readable anyways.
-				if (isNotEmptyBgImage($(itemNode).css('backgroundImage'))) {
+				if (!isEmptyBgImage($(itemNode).css('backgroundImage'))) {
 					// Create image object using bg image URL.
 					var imageObj = new Image();
 					imageObj.onload = function() {
@@ -762,7 +756,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // todo: fix list items bullet background being considered as background image because they are.
                         if ($(this)[0].tagName.toLowerCase() !== 'li') {
                             var thisNodeImage = $(this).css('backgroundImage');
-                            if (isNotEmptyBgImage(thisNodeImage)) {
+                            if (!isEmptyBgImage(thisNodeImage)) {
                                 // It's an easy case: we just retrieve the parent's background image.
                                 bgImage  = thisNodeImage;
                                 bgPos    = $(this).css('backgroundPosition');
@@ -781,8 +775,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 			 * @imageValue A string that represents current image value.
 			 * @return true if image value contains some not-empty value.
 			 */
-			function isNotEmptyBgImage(imageValue) {
-				return imageValue && imageValue.trim() !== '' && imageValue !== 'none';
+			function isEmptyBgImage(imageValue) {
+				return common.isEmpty(imageValue) || imageValue === 'none';
 			}
 
             return {
