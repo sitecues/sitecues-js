@@ -76,9 +76,9 @@ sitecues.def('keys', function(keys, callback){
 
 	// get dependencies
 	sitecues.use('jquery', 'mouse-highlight', function($, mh){
-
 		// key event hook
 		keys.hook = function(event){
+
 			// private variables
 			var i, l, key, test, parts, result;
 
@@ -96,7 +96,7 @@ sitecues.def('keys', function(keys, callback){
 					} else {
 						//We're going to attach the target dom element to the
 						//event, whether it's available or not.
-						extra_event_properties.dom.mouse_highlight = mh.picked.get(0);
+						extra_event_properties.dom.mouse_highlight = mh.picked ? mh.picked.get(0) : null;
 					}
 				}
 
