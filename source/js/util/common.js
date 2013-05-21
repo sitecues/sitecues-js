@@ -20,6 +20,9 @@ sitecues.def('util/common', function (common, callback) {
              * @return elementComputedStyles An object of all element computed styles.
              */
             common.getElementComputedStyles = function(element, prop) {
+                if(!element) {
+                    return;
+                }
 				// By default, return entire CSS object.
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
