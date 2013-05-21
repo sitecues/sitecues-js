@@ -49,7 +49,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 					eTarget = 's';
 				} else if (eTarget) {
 					eTarget = 't'
-				} else {
+				} else { 
 					eTarget = 'f';
 				}
 				e.data('sitecues-mouse-hl', eTarget);
@@ -184,6 +184,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 						score += 1;
 					}
 				}
+			} else if (role.name === 'graphic') {
+				score += 1;
 			} else {
 				score -= 1;
 			}

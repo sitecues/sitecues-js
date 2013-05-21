@@ -467,9 +467,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // todo: try to set table-layout:fixed to table
                         var closest = itemNode.closest('td');
                         var closestStyle = common.getElementComputedStyles(closest[0]);
-
                         var updateInnerElStyle = {};
-						updateInnerElStyle.width = parseFloat(closestStyle.width)
+                        if(closestStyle) {
+    						updateInnerElStyle.width = parseFloat(closestStyle.width)
 													- parseFloat(closestStyle.paddingLeft)
 													- parseFloat(closestStyle.paddingRight)
 													- parseFloat(closestStyle.marginLeft)
@@ -477,7 +477,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 													- parseFloat(closestStyle.borderLeftWidth)
 													- parseFloat(closestStyle.borderLeftWidth)
 													+ 'px';
-
+                        }
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
                         $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
 
