@@ -4,28 +4,32 @@
 */
 sitecues.def('style', function(style, callback){
 
+	sitecues.use('jquery', function(_jQuery){
+
 	style.getComputed = function getStyleObject(dom){
-		var style;
+		var myDom = dom instanceof _jQuery ? dom.get(0) : dom;
 		var returns = {}
 
-		if (window.getComputedStyle){
+		if (getComputedStyle){
 			var camelize = function(a, b){
 				return b.toUpperCase();
 			}
+		
+			var computedStyle = getComputedStyle(myDom, "");
 
-			style = window.getComputedStyle(dom, null);
-			for(var i = 0, l = style.length; i < l; i++){
-				var prop = style[i];
-				var camel = prop.replace(/\-([a-z])/g, camelize);
-				var val = style.getPropertyValue(prop);
-				returns[camel] = val;
+			if(computedStyle) {
+				for(var i = 0, l = computedStyle.length; i < l; i++){
+					var prop = computedStyle[i];
+					var camel = prop.replace(/\-([a-z])/g, camelize);
+					var val = computedStyle.getPropertyValue(prop);
+					returns[camel] = val;
+				}
 			}
-
 			return returns;
 		}
 
 		// Needed only for IE8
-		if(style = dom.currentStyle){
+		if(myDom.currentStyle){
 			for(var prop in style){
 				returns[prop] = style[prop];
 			}
@@ -39,4 +43,4 @@ sitecues.def('style', function(style, callback){
 	// done
 	callback();
 
-});
+});});
