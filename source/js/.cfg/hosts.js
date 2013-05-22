@@ -4,30 +4,21 @@
  * This is the default dev configuration which defines the host endpoints for
  * needed services in dev envs.
  *
- */ 
-
+ */
 (function(){
-
-  // Set hosts in the hosts object
-
-  var hosts = {
-
-    up : "up.sitecues.com",
-    
-    ws : "ws.sitecues.com"
-
-  };
-
   //// Do not change anything below this line ////////////////////////////////
-
-  if (! window.sitecues){
-
-    window.sitecues = { coreConfig: { hosts: hosts } };
-
-  } else {
-
-    window.sitecues.coreConfig = { hosts: hosts };
-
+  if (!window.sitecues){
+    window.sitecues = {};
   }
+  if (!window.sitecues.coreConfig){
+    window.sitecues.coreConfig = {};
+  }
+  //// Do not change anything above this line ////////////////////////////////
 
+  // Set hosts in the core config object
+  window.sitecues.coreConfig.hosts = {
+    up : "up.dev.sitecues.com",
+    ws : "ws.dev.sitecues.com"
+  };
 })();
+
