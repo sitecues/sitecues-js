@@ -14,7 +14,7 @@ package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
 files=\
-	source/js/core.js \
+	target/source/js/core.js \
 	source/js/conf.js \
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
@@ -67,7 +67,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/core.js source/js/use.js source/js/debug.js
+	files=target/source/js/core.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
@@ -100,6 +100,8 @@ all: clean deps build
 # Build the compressed file and, optionally, run gjslint.
 build: $(_build_lint_dep)
 	@echo "Building started."
+	@mkdir -p target/source/js
+	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
 	@mkdir -p target/compile/js
 	@uglifyjs $(uglifyjs-args) -o target/compile/js/equinox.js --source-map target/compile/js/equinox.js.map --source-map-url /equinox.js.map $(files)
 	@echo "Building completed."

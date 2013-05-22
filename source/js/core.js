@@ -33,6 +33,7 @@
         , resolveUrl
         , parseUrlQuery
         , parseUrl
+        , version = '0.0.0-UNVERSIONED'
     ;
 
     // Alias sitecues to window
