@@ -441,11 +441,28 @@
         sitecues.use.apply( sitecues, [
             "speech",
             function ( speech ) {
-                var info = "";
+                var info = {};
 
-                info += ( "TTS: " + ( speech.isEnabled() ) ? "ON" : "OFF" );
+                // info[ "plugin_version" ] = version;
+                info[ "current_url" ]    = window.location.href;
+                info[ "library_url" ]    = ( sitecues.getScriptSrcUrl() ).raw;
+                info[ "user_agent" ]     = navigator.userAgent;
+                info[ "tts_status" ]     = ( ( speech.isEnabled() ) ? "ON" : "OFF" );
+                info[ "zoom_level" ]     = null;
 
-                console.log( info );
+                info.toString = function () {
+                    var output = "";
+
+                    for ( var property in this ) {
+                        if ( ( {} ).hasOwnProperty.call( this, property ) && ( property !== "toString" ) ) {
+                            output += ( "" + ( property ) + ": " + info[ property ] + "\n" );
+                        }
+                    }
+
+                    return output;
+                };
+
+                console.log( info.toString() );
             }
         ] );
     };
