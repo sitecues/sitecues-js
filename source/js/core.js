@@ -483,7 +483,7 @@
                     info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
                     info[ "zoom_level" ]  = null;
 
-                    sitecues.last_version_info = info;
+                    window.sitecues.last_version_info = info;
 
                     // FIXME: Won't work in certain browsers. May need to use `json2.js`.
                     console.log( JSON.stringify( info ) );
