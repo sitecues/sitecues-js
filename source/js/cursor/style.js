@@ -62,6 +62,8 @@ sitecues.def('cursor/style', function(module, callback){
 					else {
 						return element_tag.cursor;
 					}
+				} else {
+					return css_cursor;
 				}
 			}
 			else if (
