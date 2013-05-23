@@ -130,7 +130,7 @@ sitecues.def('cursor/element', function (cursor, callback) {
 		 */
 		// todo: add better support for cursor types.
 		function changeCursorDisplay(target){
-			var newCursorType = style.detect(target);
+			var newCursorType = style.detectCursorType(target);
 
 			// if cursor type has changed
 			if (cursor.type !== newCursorType){

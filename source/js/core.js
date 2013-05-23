@@ -7,6 +7,191 @@
 
 (function(){
 
+//////////////////////////////////////////////////
+// BEGIN: logging stuff.
+//////////////////////////////////////////////////
+
+    var lelog;
+    (function (lelog) {
+        })(lelog || (lelog = {}));
+    var lelog;
+    (function (lelog) {
+        (function (buckets) {
+            var Console = (function () {
+                function Console(logger) {
+                    this._logger = logger;
+                }
+                Console.prototype.process = function (text, level) {
+                    console.log(this._logger.text(text, (level || null)));
+                };
+                return Console;
+            })();
+            buckets.Console = Console;
+        })(lelog.buckets || (lelog.buckets = {}));
+        var buckets = lelog.buckets;
+    })(lelog || (lelog = {}));
+    var lelog;
+    (function (lelog) {
+        })(lelog || (lelog = {}));
+    var lelog;
+    (function (lelog) {
+        (function (layouts) {
+            var Basic = (function () {
+                function Basic(logger) {
+                    this._logger = logger;
+                }
+                Basic.prototype.process = function (text, level) {
+                    var level = (level || this._logger.get_level());
+                    var log_time = new Date();
+                    var message = "";
+                    function pad(integer) {
+                        var integer = integer.toString();
+                        return ((integer.length === 1) ? ("0" + integer) : integer);
+                    }
+                    message += "Log::";
+                    message += level.value;
+                    message += "<";
+                    message += level.id;
+                    message += ">";
+                    message += " ";
+                    message += "[";
+                    message += this._logger.get_name();
+                    message += "]";
+                    message += " ";
+                    message += "(";
+                    message += (log_time.getFullYear()).toString();
+                    message += "-";
+                    message += (pad(log_time.getMonth() + 1)).toString();
+                    message += "-";
+                    message += (pad(log_time.getDate())).toString();
+                    message += " ";
+                    message += (pad(log_time.getHours())).toString();
+                    message += ":";
+                    message += (pad(log_time.getMinutes())).toString();
+                    message += ":";
+                    message += (pad(log_time.getSeconds())).toString();
+                    message += ")";
+                    message += ":";
+                    message += " ";
+                    message += text;
+                    return message;
+                };
+                return Basic;
+            })();
+            layouts.Basic = Basic;
+        })(lelog.layouts || (lelog.layouts = {}));
+        var layouts = lelog.layouts;
+    })(lelog || (lelog = {}));
+    var lelog;
+    (function (lelog) {
+        var Logger = (function () {
+            function Logger(name) {
+                this._bucket = new lelog.buckets.Console(this);
+                this._layout = new lelog.layouts.Basic(this);
+                this._level = lelog.levels["ALL"];
+                this._name = name;
+            }
+            Logger.prototype.echo = function (text, level) {
+                this._bucket.process(text, (level || null));
+            };
+            Logger.prototype.get_bucket = function () {
+                return this._bucket;
+            };
+            Logger.prototype.get_layout = function () {
+                return this._layout;
+            };
+            Logger.prototype.get_level = function () {
+                return this._level;
+            };
+            Logger.prototype.get_name = function () {
+                return this._name;
+            };
+            Logger.prototype.set_bucket = function (bucket) {
+                this._bucket = bucket;
+            };
+            Logger.prototype.set_layout = function (layout) {
+                this._layout = layout;
+            };
+            Logger.prototype.set_level = function (level) {
+                this._level = level;
+            };
+            Logger.prototype.set_name = function (name) {
+                this._name = name;
+            };
+            Logger.prototype.text = function (text, level) {
+                return this._layout.process(text, (level || null));
+            };
+            return Logger;
+        })();
+        lelog.Logger = Logger;
+    })(lelog || (lelog = {}));
+    var lelog;
+    (function (lelog) {
+        lelog.version = "__UNVERSIONED__";
+        lelog.timestamp_initialized = Math.round((new Date().getTime()) / 1000);
+        lelog.levels = {
+        };
+        lelog.levels["OFF"] = {
+            id: 0x5,
+            value: "off"
+        };
+        lelog.levels["ERROR"] = {
+            id: 0x4,
+            value: "error"
+        };
+        lelog.levels["WARN"] = {
+            id: 0x3,
+            value: "warn"
+        };
+        lelog.levels["INFO"] = {
+            id: 0x2,
+            value: "info"
+        };
+        lelog.levels["DEBUG"] = {
+            id: 0x1,
+            value: "debug"
+        };
+        lelog.levels["ALL"] = {
+            id: 0x0,
+            value: "all"
+        };
+        var _logger_default_name = "__default__";
+        var _logger_hash = {
+        };
+        _logger_hash[_logger_default_name] = _set_logger(_logger_default_name);
+        function _get_logger(name) {
+            if(({
+            }).hasOwnProperty.call(_logger_hash, name)) {
+                return _logger_hash[name];
+            } else {
+                return null;
+            }
+        }
+        function _get_logger_default() {
+            return _logger_hash[_logger_default_name];
+        }
+        function _set_logger(name) {
+            _logger_hash[name] = new lelog.Logger(name);
+            return _logger_hash[name];
+        }
+        function use_logger(name) {
+            if((({
+            }).toString.call(name) !== "[object String]") || (name.length === 0)) {
+                name = _logger_default_name;
+            }
+            var logger = ((name === _logger_default_name) ? _get_logger_default() : _get_logger(name));
+            if(logger === null) {
+                logger = _set_logger(name);
+            }
+            return logger;
+        }
+        lelog.use_logger = use_logger;
+    })(lelog || (lelog = {}));
+
+//////////////////////////////////////////////////
+// END: logging stuff.
+//////////////////////////////////////////////////
+
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
         console.log("sitecues already defined.");
@@ -38,6 +223,12 @@
 
     // Alias sitecues to window
     window.sitecues = sitecues;
+
+    sitecues.log_levels = lelog.levels;
+
+    sitecues.log = function log(name) {
+        // Code will go here.
+    };
 
     // Return the core config.
     sitecues.getCoreConfig = function() {
@@ -154,6 +345,48 @@
         }
 
         var module = {};
+
+        module["_log"] = lelog.use_logger(name);
+
+        module._log.set_layout(new (function () {
+            function sitecuesLayout(logger) {
+                this._logger = logger;
+            }
+
+            sitecuesLayout.prototype.process = function (text, level) {
+                var level    = (level || this._logger.get_level());
+                var log_time = new Date();
+                var message  = "";
+
+                function pad(integer) {
+                    var integer = integer.toString();
+
+                    return ((integer.length === 1) ? ("0" + integer) : integer);
+                }
+
+                message += (log_time.getFullYear()).toString();
+                message += "-";
+                message += (pad(log_time.getMonth() + 1)).toString();
+                message += "-";
+                message += (pad(log_time.getDate())).toString();
+                message += "_";
+                message += (pad(log_time.getHours())).toString();
+                message += ":";
+                message += (pad(log_time.getMinutes())).toString();
+                message += ":";
+                message += (pad(log_time.getSeconds())).toString();
+                message += ".";
+                message += (pad(log_time.getMilliseconds())).toString();
+
+                return message;
+            };
+
+            return sitecuesLayout;
+        }(module["_log"])));
+
+        module["log"] = module["_log"];
+
+        delete module["_log"];
 
         // module is initializing
         modules[name] = MODULE_STATE.INITIALIZING;

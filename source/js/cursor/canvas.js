@@ -14,8 +14,11 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 
 	// cursor types
 	types = {
-		pointer:	'B',
-		'default':	'A'
+		'auto'   :  'A',
+		'default':	'A',
+		'text'   :  'A',
+		'pointer':	'B'
+
 	}
 
 	paint = function(type) {
@@ -99,7 +102,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			var span, width, height, interval, times;
 
 			// make polling max running
-			times = 10;
+			times = 100;
 
 			// hide span
 			span = $('<span>').css({
@@ -121,7 +124,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 					span.remove();
 					callback();
 				}
-			}, 10);
+			}, 100);
 		}
 
 		// repaint cursor images
@@ -141,12 +144,35 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			return images[type] || images['default'];
 		}
 
+		// keep the compatibily for /element.js
+		// todo: remove or modify the code?
+		cursor.type = function(element, type){
+			// save type
+			data.type = type;
+			// get image url for cursor type
+			var url = images[type] || images['default'];
+			// get pure DOM element ref
+			element = element[0] || element;
+			// reset style height
+			element.style.height = 'auto';
+			// update element url
+			if (element.src !== url)
+				element.src = url;
+		}
+		
 		// set cursor zoom
-		cursor.zoom = function(zoom) {
+		// todo: remove or modify the code?
+		cursor.zoom = function(element, zoom){
+			data.size = 15 * Math.sqrt(zoom);
+			cursor.repaint();
+			cursor.type(element, data.type);
+		}
+
+		// set cursor zoom
+		cursor.zoomImage = function(zoom) {
 			data.size = 15 * Math.sqrt(zoom);
 			cursor.repaint();
 		}
-
 
 		// load special cursor css
 		load.style('../css/cursor.css', function(){

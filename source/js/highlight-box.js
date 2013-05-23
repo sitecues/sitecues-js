@@ -101,10 +101,30 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         });
 
         // Performs global clean-up when an instance is closed.
-        var onHighlightBoxClosed = function() {
+        function onHighlightBoxClosed() {
             // All we need to do at the current time within the module is remove the instance.
             instance = null;
+            common.enableWheelScroll();
         };
+
+        function onHighlightBoxOpened(hlb) {
+            $(hlb).bind('mousewheel DOMMouseScroll', function(e) {
+                // wheel up
+                if (e.originalEvent.wheelDelta/120 > 0) {
+                    if (hlb.scrollTop() <= 0) {
+                        common.disableWheelScroll();
+                    }
+                    common.enableWheelScroll();
+                    return;
+                }
+                // wheel down
+                if (hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight) {
+                    common.disableWheelScroll();
+                    return;
+                }
+                common.enableWheelScroll();
+            });
+        }
 
         var HighlightBox = (function () {
             // Initialize.
@@ -247,6 +267,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 //  > AK: comment out all the dimmer calls by AL request
                 //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
                 backgroundDimmer.dimBackgroundContent(this, totalZoom);
+				onHighlightBoxOpened($(this));
               });
 
               return false;
