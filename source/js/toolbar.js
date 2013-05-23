@@ -1,5 +1,6 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
-    sitecues.use( 'jquery', 'ui', function ( $, ui ) {
+    sitecues.use( 'jquery', 'conf', 'load', 'util/template', function ( $, conf, load, template) {
+        
         toolbar.STATES = {
             OFF: {
                 id:   0,
@@ -11,58 +12,104 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             }
         };
 
-        var STATES                                    = toolbar.STATES,
-            current_state                             = STATES.OFF,
-            dom_toolbar_close_button_element_id       = 'sitecues-toolbar-close-button',
-            dom_toolbar_close_button_element_selector = null,
-            dom_toolbar_element_id                    = 'sitecues-toolbar',
-            dom_toolbar_element_selector              = null,
-            dom_toolbar_string                        = ( '' +
-                '<div id="' + dom_toolbar_element_id + '">' +
-                    '<img id="' + dom_toolbar_close_button_element_id + '" src="' + sitecues.resolvesitecuesUrl("../images/close.png") + '" />' +
-                '</div>' +
-            '' )
-        ;
+        toolbar.currentState = toolbar.STATES.OFF;
 
-        dom_toolbar_element_selector              = ( '#' + dom_toolbar_element_id );
-        dom_toolbar_close_button_element_selector = ( '#' + dom_toolbar_close_button_element_id );
+        toolbar.render = function(callback) {
+            if(!toolbar.instance) {
+                toolbar.shim = $('<div class="sitecues-toolbar-shim" />').prependTo($('body'));
+                frame = $('<div class="sitecues-toolbar" />').prependTo($('body'));
+            
+                // create small A label
+                $( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
+
+                // create clider wrap element
+                wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(frame);
+
+                // create slider
+                slider = $( '<input>' ).addClass( 'slider' ).attr({
+                    type:       'range',
+                    min:        '1',
+                    max:        '5',
+                    step:       '0.1',
+                    ariaLabel:  'See it better'
+                }).appendTo( wrap );
+
+                $( '<img>' ).addClass( 'ramp' ).attr({
+                    src:    sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
+                }).appendTo( wrap );
+
+
+                // create big A label
+                $( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );
+
+                // create TTS button and set it up
+                ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( frame );
+                ttsButton.data( 'tts-enable', 'enabled' );
+                ttsButton.click( function() {
+                    panel.ttsToggle();
+                });
+
+                // handle slider value change
+                slider.change( function() {
+                    conf.set( 'zoom', this.value );
+                });
+
+                // handle zoom change and update slider
+                conf.get( 'zoom', function( value ) {
+                    slider.val( value );
+                });
+                toolbar.instance = frame;
+            }
+
+
+
+            if(callback) {
+                callback();
+            }
+        }
 
         toolbar.slideIn  = function () {
-            $( dom_toolbar_element_selector ).slideUp( 'slow' );
-
-            sitecues.emit( 'toolbar/slide-in', $( dom_toolbar_element_selector ) );
-
-            current_state = STATES.OFF;
-
-            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            toolbar.currentState = toolbar.STATES.OFF;
+            if(toolbar.instance) {
+                toolbar.instance.slideUp( 'slow' );
+                toolbar.shim.slideUp( 'slow', function() {
+                    sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+                });
+            }
+            conf.set('showToolbar', false);
         };
+
         toolbar.slideOut = function () {
-            $( dom_toolbar_element_selector ).css( 'left', ( '-' + $( 'body' ).css( 'margin-left' ) ) );
-            $( dom_toolbar_element_selector ).css( 'top', ( '-' + $( 'body' ).css( 'margin-top' ) ) );
-            $( dom_toolbar_element_selector ).css( 'width', $( window ).width() );
-            $( dom_toolbar_element_selector ).slideDown( 'slow' );
-
-            sitecues.emit( 'toolbar/slide-out', $( dom_toolbar_element_selector ) );
-
-            current_state = STATES.ON;
-
-            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            toolbar.currentState = toolbar.STATES.ON;
+            if(!toolbar.instance) {
+                toolbar.render();
+            }
+            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+            toolbar.shim.slideDown( 'slow' );
+            toolbar.instance.slideDown( 'slow' );
+            conf.set('showToolbar', true);
         };
+
+        toolbar.toggle = function() {
+            console.log('toggle');
+            if((toolbar.currentState) === toolbar.STATES.ON) {
+                toolbar.slideIn();
+            } else {
+                toolbar.slideOut();
+            }
+        }
 
         $( document ).ready( function () {
-            $( 'body' ).prepend( dom_toolbar_string );
-
-            sitecues.on( 'badge/hover', toolbar.slideOut );
-
-            $( dom_toolbar_close_button_element_selector ).on( 'click', toolbar.slideIn );
+            if(conf.get('showToolbar')) {
+                toolbar.slideIn();
+            }
         } );
 
-        sitecues.on( 'toolbar/on', function () {
-            console.log( 'Toolbar state: [on].' );
-        } );
-        sitecues.on( 'toolbar/off', function () {
-            console.log( 'Toolbar state: [off].' );
-        } );
+        sitecues.on( 'badge/hover', toolbar.slideOut );
+        sitecues.on( 'toolbar/toggle', toolbar.toggle );
+
+        // load special toolbar css
+        load.style('../css/toolbar.css');
 
         callback();
     } );

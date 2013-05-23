@@ -10,12 +10,11 @@ sitecues.def('keys', function(keys, callback){
 
 	// define key testers
 	keys.test = {
-		'minus':	function(event){ return event.keyCode === 189; },
-		'plus':		function(event){ return event.keyCode === 187; },
-		'r':		function ( event ) {
-			return ( event.keyCode === 82 );
-		},
-		'space':	function(event){ return event.keyCode === 32; }
+		'minus':	function(event) { return event.keyCode === 189; },
+		'plus':		function(event) { return event.keyCode === 187; },
+		'r':		function(event) { return event.keyCode === 82;  },
+		'space':	function(event) { return event.keyCode === 32;  },
+		'f8':	    function(event) { return event.keyCode === 119; },
 	};
 
 	// define keys map used to bind actions to hotkeys
@@ -25,6 +24,7 @@ sitecues.def('keys', function(keys, callback){
 		'r':		{
 			event: 'inverse/toggle'
 		},
+		'f8':		{ event: 'toolbar/toggle' },
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
@@ -78,7 +78,6 @@ sitecues.def('keys', function(keys, callback){
 	sitecues.use('jquery', 'mouse-highlight', function($, mh){
 		// key event hook
 		keys.hook = function(event){
-
 			// private variables
 			var i, l, key, test, parts, result;
 
