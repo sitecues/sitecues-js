@@ -1,4 +1,4 @@
-sitecues.def('zoom', function(zoom, callback){
+sitecues.def('zoom', function(zoom, callback) {
 
 	// values used for zoom math
 	zoom.max = 5;
@@ -11,7 +11,7 @@ sitecues.def('zoom', function(zoom, callback){
 	zoom.native = 'zoom' in document.createElement('div').style;
 
 	// get dependencies
-	sitecues.use('jquery', 'conf', function($, conf){
+	sitecues.use('jquery', 'conf', function($, conf) {
 
 		// use conf module for sharing
 		// current zoom level value
@@ -30,8 +30,9 @@ sitecues.def('zoom', function(zoom, callback){
 		});
 
 		// define default value for zoom if needed
-		if (!conf.get('zoom'))
+		if (!conf.get('zoom')) {
 			conf.set('zoom', $('body').css('zoom') || zoom.default);
+		}
 
 		// handle zoom/increase event fired by any module
 		sitecues.on('zoom/increase', function(){
