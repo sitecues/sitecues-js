@@ -42,6 +42,7 @@ files=\
 	source/js/highlight-box.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
+	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/speech.js \
 	source/js/speech/azure.js \
