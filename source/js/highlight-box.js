@@ -857,8 +857,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         /**
          * Handle zoom event.
          */
-        sitecues.on('zoom', function (zoomvalue) {
-            updateZoomLevel(zoomvalue);
+        sitecues.on('zoom', function (value) {
+            updateZoomLevel(value);
         });
 
         sitecues.on( 'key/esc', function ( event ) {

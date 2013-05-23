@@ -4,6 +4,6 @@ sitecues.def('cursor', function(cursor, callback){
 
 	// use old 'element' cursor which using
 	// absolutely positioned div on the page
-	sitecues.use('cursor/element', callback);
+	sitecues.use('cursor/custom', callback);
 
 });

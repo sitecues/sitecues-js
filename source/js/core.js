@@ -33,7 +33,7 @@
         , resolveUrl
         , parseUrlQuery
         , parseUrl
-        , version = '0.0.0-UNVERSIONED'
+        , extension_version = '0.0.0-UNVERSIONED'
     ;
 
     // Alias sitecues to window
@@ -437,16 +437,71 @@
         }
     };
 
+    sitecues.last_version_info = {};
+
     sitecues.version = function () {
         // TODO: Figure out a way to make this work correctly since `sitecues.use()` is asynchronous.
         sitecues.use.apply( sitecues, [
+            "jquery",
             "speech",
-            function ( speech ) {
-                var info = "";
+            function ( $, speech ) {
+                var ajax_urls = {};
 
-                info += ( "TTS: " + ( speech.isEnabled() ) ? "ON" : "OFF" );
+                ajax_urls[ "up" ] = ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" );
+                ajax_urls[ "ws" ] = ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" );
 
-                console.log( info );
+                // FIXME: Not bullet-proof.
+                $.when(
+                    $.ajax( {
+                        cache:    false,
+                        dataType: "json",
+                        type:     "GET",
+                        url:      ajax_urls.up
+                    } ),
+                    $.ajax( {
+                        cache:    false,
+                        dataType: "json",
+                        type:     "GET",
+                        url:      ajax_urls.ws
+                    } )
+                ).done( function ( a, b ) {
+                    var ajax_responses = {};
+
+                    ajax_responses[ "up" ] = a[ 0 ];
+                    ajax_responses[ "ws" ] = b[ 0 ];
+
+                    var info = {};
+
+                    info[ "versions" ]    = {
+                        "extension":                extension_version,
+                        "user_preferences":         ajax_responses.up.version,
+                        "web_services_preferences": ajax_responses.ws.version
+                    };
+                    info[ "current_url" ] = window.location.href;
+                    info[ "library_url" ] = ( sitecues.getScriptSrcUrl() ).raw;
+                    info[ "user_agent" ]  = navigator.userAgent;
+                    info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
+                    info[ "zoom_level" ]  = null;
+
+                    window.sitecues.last_version_info = info;
+
+                    // FIXME: Won't work in certain browsers. May need to use `json2.js`.
+                    console.log( JSON.stringify( info ) );
+
+                    // info.toString = function () {
+                    //     var output = "";
+
+                    //     for ( var property in this ) {
+                    //         if ( ( {} ).hasOwnProperty.call( this, property ) && ( property !== "toString" ) ) {
+                    //             output += ( "" + ( property ) + ": " + info[ property ] + "\n" );
+                    //         }
+                    //     }
+
+                    //     return output;
+                    // };
+
+                    // console.log( info.toString() );
+                } );
             }
         ] );
     };

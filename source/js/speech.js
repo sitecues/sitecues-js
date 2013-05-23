@@ -15,10 +15,13 @@ sitecues.def('speech', function(speech, callback) {
             var ivona = _ivona;
             var jQuery=_jQuery;
 
-            // console.log(robovoice);
-            // TTS is disabled by default
-            var ttsEnable = conf.get("ttsEnable") === 'true';
-
+            // Use the site and user settings, if available, but if neither is
+            // available, we'll fall back to being disabled
+            var ttsEnable = !(conf.get("ttsEnable") === undefined && conf.get("siteTTSEnable") === undefined) 
+            && (conf.get("ttsEnable") === undefined || conf.get("ttsEnable")) 
+            && (conf.get("siteTTSEnable") === undefined || conf.get("siteTTSEnable"));
+            console.log('siteTTSEnable for ' + window.location.host + ': ' + conf.get("siteTTSEnable"));
+            
             /*
              * This is a flag we can set that will effectively enable TTS, but
              * not interfere with the user state maintained in the ttsEnable 
@@ -152,6 +155,7 @@ sitecues.def('speech', function(speech, callback) {
                 if (ttsEngine) {
                     // An engine is set so we can enable the component
                     ttsEnable = true;
+                    conf.set('siteTTSEnable', true);
                     if(common.getCookie("vCSp")) {
                         speech.say(conf.getLS('verbalCueSpeechOn'));
                     } else {
@@ -171,6 +175,7 @@ sitecues.def('speech', function(speech, callback) {
              */
             speech.disable = function(callback) {
                 speech.stopAll();
+                conf.set('siteTTSEnable', false);
                 speech.say(conf.getLS('verbalCueSpeechOff'));
                 ttsEnable = false;
                 if (callback) {
