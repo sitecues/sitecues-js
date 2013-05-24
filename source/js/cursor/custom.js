@@ -20,7 +20,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 
 	// Constants
 	cursor.kCursorStyleRuleId = 'sitecues-cursor-style-rule';
-	// Set custom cursor image for disabled elements.
+	// Set custom cursor image for disabled elements
 	cursor.kCursorStyleDisabledRuleId  = 'sitecues-cursor-disabled-rule';
 	cursor.kCursorId = 'sitecues-cursor';
 	cursor.kMinCursorZoom = 1.1;
@@ -40,7 +40,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 			var cursorWasEnabled = cursor.isEnabled;
 			cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
-			if (cursor.isEnabled){
+			if (cursor.isEnabled) {
 				view.zoom(cursor.zoomLevel);
 				cursor.url = view.getImageOfType(cursor.type);
 				if (cursorWasEnabled)
@@ -56,6 +56,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		 *  Show custom cursor in the viewport.
 		 */
 		cursor.show = function() {
+			// Add rules for default cursor values.
 			cursor.styleRuleParent
 				.append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type +'}')
 				.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), default}');
@@ -67,9 +68,10 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		 *  Update cursor properties, such as dimensions or color.
 		 */
 		cursor.update = function() {
-			$('#' + cursor.kCursorStyleDisabledRuleId).remove();
 			// Target is not changed, so update the same element's cursor style.
 			$(cursor.prevTarget).css('cursor', 'url("' + cursor.url + '"), ' + cursor.type);
+			// Update cursor image for disabled elements.
+			$('#' + cursor.kCursorStyleDisabledRuleId).remove();
 			cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), default}');
 			sitecues.emit('cursor/update');
 		};
@@ -96,7 +98,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 			
 			// If target is changed then update CSS cursor property for it.
 			if (cursor.isEnabled && !$(target).is(cursor.prevTarget)) {
-				// Revert last target's cursor property to saved style.
+				// First, revert last target's cursor property to saved style.
 				$(cursor.prevTarget).css('cursor', cursor.prevType);
 				var newCursorType = style.detectCursorType(target) || 'default';
 
@@ -108,7 +110,6 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 				// Set cursor style on new target.
 				$(target).css('cursor', 'url("' + cursor.url + '"), ' + cursor.type);
 			}
-
 		}
 
 		function mouseMoveHandler(e) {
