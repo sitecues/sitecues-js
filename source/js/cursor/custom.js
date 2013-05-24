@@ -41,7 +41,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 			cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
 			if (cursor.isEnabled) {
-				view.zoom(cursor.zoomLevel);
+				view.zoomImage(cursor.zoomLevel);
 				cursor.url = view.getImageOfType(cursor.type);
 				if (cursorWasEnabled)
 					cursor.update();
