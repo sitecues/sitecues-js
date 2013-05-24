@@ -102,7 +102,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			var span, width, height, interval, times;
 
 			// make polling max running
-			times = 10;
+			times = 100;
 
 			// hide span
 			span = $('<span>').css({
@@ -124,7 +124,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 					span.remove();
 					callback();
 				}
-			}, 10);
+			}, 100);
 		}
 
 		// repaint cursor images
