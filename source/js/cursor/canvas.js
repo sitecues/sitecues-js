@@ -14,8 +14,11 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 
 	// cursor types
 	types = {
-		pointer:	'B',
-		'default':	'A'
+		'auto'   :  'A',
+		'default':	'A',
+		'text'   :  'A',
+		'pointer':	'B'
+
 	}
 
 	paint = function(type) {

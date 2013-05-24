@@ -1,81 +1,78 @@
-// returns the cursor type for a specific element
+// returns the cursor type for a specified element
 sitecues.def('cursor/style', function(module, callback){
 
 	// dependencies
 	sitecues.use('jquery', function($){
 
-		module.detect = function(element, options){
+		module.detectCursorType = function(element, options) {
 			element = $(element);
+			var defaultCursorType = 'default';
 
 			options = $.extend({
-				cursor_elements: null
+				cursorElements: null
 			}, options);
 
-			var css_cursor = element.css('cursor');
+			var cssCursorValue = element.css('cursor');
 
-			if (css_cursor === 'auto' || css_cursor === 'default' || css_cursor === 'none'){
-				var cursor_elements  = (options.cursor_elements !== null) ? options.cursor_elements : {
-					a:		{
-						cursor: 'pointer'
-					},
-					button:   {
-						cursor: 'pointer'
-					},
-					input:	{
-						selectors: {
-							'[type="button"]':   'pointer',
-							'[type="checkbox"]': 'pointer',
-							'[type="email"]':	'text',
-							'[type="image"]':	'pointer',
-							'[type="radio"]':	'pointer',
-							'[type="search"]':   'text',
-							'[type="submit"]':   'pointer',
-							'[type="text"]':	 'text'
+			// If the value is good for us, return it.
+			if (cssCursorValue && cssCursorValue !== 'auto' && cssCursorValue !== 'default' && cssCursorValue !== 'none') {
+				return cssCursorValue;
+			}
+			// Otherwise, try to detect a new one.
+			var cursorElements  = (options.cursorElements !== null) ? options.cursorElements : getCursorElements();
+			var elementTagName  = element.prop('tagName').toLowerCase();
+
+			if (cursorElements.hasOwnProperty(elementTagName)) {
+				var elementTag  = cursorElements[elementTagName];
+				var selectors   = elementTag.selectors;
+
+				if (typeof selectors !== 'undefined') {
+					for (var key in selectors) {
+						if (element.is(key)) {
+							return selectors[key];
 						}
-					},
-					label:	{
-						cursor: 'pointer'
-					},
-					p:		{
-						cursor: 'text'
-					},
-					select:   {
-						cursor: 'pointer'
-					},
-					textarea: {
-						cursor: 'text'
-					}
-				};
-				var element_tag_name = element.prop('tagName').toLowerCase();
-
-				if (cursor_elements.hasOwnProperty(element_tag_name)) {
-					var element_tag = cursor_elements[element_tag_name];
-					var selectors   = element_tag.selectors;
-
-					if (typeof selectors !== 'undefined') {
-						for (var key in selectors) {
-							if (element.is(key)) {
-								return selectors[key];
-							}
-						}
-					}
-					else {
-						return element_tag.cursor;
 					}
 				} else {
-					return css_cursor;
+					return elementTag.cursor || defaultCursorType;
 				}
+			} else {
+				return cssCursorValue || defaultCursorType;
 			}
-			else if (
-				css_cursor !== 'auto' &&
-				css_cursor !== 'default' &&
-				css_cursor !== null &&
-				typeof css_cursor !== 'undefined'
-			) {
-				return css_cursor;
-			}
-			else {
-				return null;
+			
+		}
+
+		function getCursorElements() {
+			return {
+				a:	{
+					cursor: 'pointer'
+				},
+				button:   {
+					cursor: 'pointer'
+				},
+				input:	{
+					selectors: {
+						'[type="button"]'  : 'pointer',
+						'[type="checkbox"]': 'pointer',
+						'[type="email"]'   : 'text',
+						'[type="image"]'   : 'pointer',
+						'[type="radio"]'   : 'pointer',
+						'[type="search"]'  : 'text',
+						'[type="submit"]'  : 'pointer',
+						'[type="text"]'    : 'text'
+					}
+				},
+				label:	{
+					cursor: 'pointer'
+				},
+				p:		{
+					cursor: 'text'
+				},
+				select:   {
+					cursor: 'pointer'
+				},
+				textarea: {
+					cursor: 'text'
+				}
 			}
 		}
 
