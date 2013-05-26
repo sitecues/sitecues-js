@@ -192,6 +192,8 @@
 // END: logging stuff.
 //////////////////////////////////////////////////
 
+    sitecues.log_levels = lelog.levels;
+
     sitecues.log = function log(name) {
         // Code will go here.
     };
