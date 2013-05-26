@@ -7,8 +7,6 @@ sitecues.def('zoom', function(zoom, callback) {
 	zoom.default = 1;
 	zoom.precision = 0.1;
 
-	zoom.log.echo("Yeahyo!");
-
 	// detect if browser support zoom natively
 	zoom.native = 'zoom' in document.createElement('div').style;
 
