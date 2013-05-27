@@ -15,14 +15,13 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 	cursor.type = 'default';
 	cursor.prevTarget = {};
 	cursor.prevType = 'default';
-	// Sefault data url string
+	// Default data url string
 	cursor.url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAaCAYAAAC3g3x9AAAB+klEQVRIS+2UPUvDQBzGe219ado6qHR0KP0QDoJSQRFHJ8HRtXR3cBI/QLfiKgo6OQp2dhG/QSmFKmqwviSm0TatzwOXkkvSQKE4efBwudzd7//KidiEh5gwL/Z3wMFgsCmEuB43glAPAbsBaB1qAlqQ0AHmPsR55AgDin6/bwM0zVu6rpdyudyphH1j/omCBoCO45zF4/Fd14VOp3OvadoO1j3oE/qCnFEuBoAIt4nDS+4FGDCTyeQK1vTuHXqT36FMBdjr9fYTicSJ/2S9Xr8qFApH+N9mFiBzVNgKELm7Re6WCQS8Dc/m+W2aZiubze5J754kmCkIDC9QKYb/ZKVSOSyXyzX8f4QItSOB/mL4Dzcajbt8Pn8ggS3MBsQ2UsbQQxTjAztzoZnGz263a1Wr1eNSqcRmf4BeIbaQCvQ0sbohRBG5u0in04veDdu2n1Op1JoMm8VhCw2bnXmroRDFgCUhNgzDOM9kMgvePcuydBjZll6yjZjLYegiwsNVXL6ENzkvEI3+gkbfkh4GgdiIQymZPw1zEkpICEOZgmblzJwzRIbKHEYCMzgwA7mFYp91PQYJpTEaYTFYRFZaDVle4GF6yQfBD+SaXtKYC6ShjlQAyAsMkWL47nCfK6753xXXLAJDZxTKk/Z3L7bH07E+/z0cK12hh38BlI3AG1Ei3IIAAAAASUVORK5CYII=";
 
 	// Constants
 	cursor.kCursorStyleRuleId = 'sitecues-cursor-style-rule';
 	// Set custom cursor image for disabled elements
 	cursor.kCursorStyleDisabledRuleId  = 'sitecues-cursor-disabled-rule';
-	cursor.kCursorId = 'sitecues-cursor';
 	cursor.kMinCursorZoom = 1.1;
 
 	// get dependencies
