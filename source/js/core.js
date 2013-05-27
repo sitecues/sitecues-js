@@ -192,12 +192,6 @@
 // END: logging stuff.
 //////////////////////////////////////////////////
 
-    sitecues.log_levels = lelog.levels;
-
-    sitecues.log = function log(name) {
-        // Code will go here.
-    };
-
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
         console.log("sitecues already defined.");
@@ -229,6 +223,12 @@
 
     // Alias sitecues to window
     window.sitecues = sitecues;
+
+    sitecues.log_levels = lelog.levels;
+
+    sitecues.log = function log(name) {
+        // Code will go here.
+    };
 
     // Return the core config.
     sitecues.getCoreConfig = function() {
