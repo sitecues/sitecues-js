@@ -7,6 +7,38 @@
 
 (function(){
 
+    // Return if there is sitecues instance on the page
+    if (window.sitecues && window.sitecues.coreConfig) {
+        console.log("sitecues already defined.");
+        return;
+    }
+
+    // Private variables
+
+    var arr                 = Array.prototype                               // Array's prototype
+        , has               = Object.prototype.hasOwnProperty // Object's has own property
+        , noop              = function(){}                                      // Empty function
+        , modules       = {}                                                            // Modules container
+        , coreConfig    = {}                                                            // Core config container
+
+        // Siteuces top-level namespace: all public classes and modules will be
+        // attached to this name space and aliased on "window.sitecues"
+        , sitecues    = {}
+
+        , modules
+        , coreConfig
+
+    // Private Functions
+
+        , resolveUrl
+        , parseUrlQuery
+        , parseUrl
+        , extension_version = '0.0.0-UNVERSIONED'
+    ;
+
+    // Alias sitecues to window
+    window.sitecues = sitecues;
+
 //////////////////////////////////////////////////
 // BEGIN: logging stuff.
 //////////////////////////////////////////////////
@@ -197,38 +229,6 @@
     sitecues.log = function log(name) {
         // Code will go here.
     };
-
-    // Return if there is sitecues instance on the page
-    if (window.sitecues && window.sitecues.coreConfig) {
-        console.log("sitecues already defined.");
-        return;
-    }
-
-    // Private variables
-
-    var arr                 = Array.prototype                               // Array's prototype
-        , has               = Object.prototype.hasOwnProperty // Object's has own property
-        , noop              = function(){}                                      // Empty function
-        , modules       = {}                                                            // Modules container
-        , coreConfig    = {}                                                            // Core config container
-
-        // Siteuces top-level namespace: all public classes and modules will be
-        // attached to this name space and aliased on "window.sitecues"
-        , sitecues    = {}
-
-        , modules
-        , coreConfig
-
-    // Private Functions
-
-        , resolveUrl
-        , parseUrlQuery
-        , parseUrl
-        , extension_version = '0.0.0-UNVERSIONED'
-    ;
-
-    // Alias sitecues to window
-    window.sitecues = sitecues;
 
     // Return the core config.
     sitecues.getCoreConfig = function() {
