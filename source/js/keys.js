@@ -1,4 +1,4 @@
-sitecues.def('keys', function(keys, callback){
+sitecues.def('keys', function(keys, callback) {
 	var extra_event_properties = {
 		dom: {
 			highlight_box: null
@@ -8,13 +8,11 @@ sitecues.def('keys', function(keys, callback){
 	// shortcut to hasOwnProperty
 	var has = Object.prototype.hasOwnProperty;
 
-	// define key testers
+    // define key testers
 	keys.test = {
 		'minus':	function(event){ return event.keyCode === 189; },
 		'plus':		function(event){ return event.keyCode === 187; },
-		'r':		function ( event ) {
-			return ( event.keyCode === 82 );
-		},
+		'r':		function(event){ return event.keyCode === 82; },
 		'space':	function(event){ return event.keyCode === 32; }
 	};
 
@@ -22,9 +20,7 @@ sitecues.def('keys', function(keys, callback){
 	keys.map = {
 		'minus':	{ event: 'zoom/decrease' },
 		'plus':		{ event: 'zoom/increase' },
-		'r':		{
-			event: 'inverse/toggle'
-		},
+		'r':		{ event: 'inverse/toggle'},
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
@@ -41,6 +37,14 @@ sitecues.def('keys', function(keys, callback){
 
 		// prevent default if needed
 		if (key.preventDefault) event.preventDefault();
+		// stop bubble up if needed
+		if (key.stopOuterScroll) {
+			var hlb = $(event.dom.highlight_box);
+			if ((key.down && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
+			||  (key.up && hlb.scrollTop() <= 0)) {
+				event.preventDefault();
+			}
+		}
 	};
 
 	keys.isEditable = function ( element ) {
@@ -77,7 +81,7 @@ sitecues.def('keys', function(keys, callback){
 	// get dependencies
 	sitecues.use('jquery', 'mouse-highlight', function($, mh){
 		// key event hook
-		keys.hook = function(event){
+		keys.hook = function(event) {
 
 			// private variables
 			var i, l, key, test, parts, result;
@@ -88,7 +92,7 @@ sitecues.def('keys', function(keys, callback){
 			}
 
 			// iterate over key map
-			for(key in keys.map) if (has.call(keys.map, key)){
+			for(key in keys.map) if (has.call(keys.map, key)) {
 				if(keys.map[key].requiresMouseHighlight) {
 					if(!mh.enabled) {
 						// Mouse highlight is disabled, revert to default.
@@ -123,21 +127,49 @@ sitecues.def('keys', function(keys, callback){
 		// bind key hook to window
 		$(window).on('keydown', keys.hook);
 
-		sitecues.on( 'hlb/ready', function ( data ) {
-			extra_event_properties.dom.highlight_box = $( data );
+		sitecues.on('hlb/ready', function (hlbElement) {
+			extra_event_properties.dom.highlight_box = $(hlbElement);
+			var hlbKeysTest = {
+				'esc':		function(event) { return event.keyCode === 27; },
+				// scroll
+				'up':	    function(event) { return event.keyCode === 38; },
+				'down':	    function(event) { return event.keyCode === 40; },
+				'pageup':	function(event) { return event.keyCode === 32; },
+				'pagedown':	function(event) { return event.keyCode === 34; },
+				'end':	    function(event) { return event.keyCode === 35; },
+				'home':	    function(event) { return event.keyCode === 36; }
+			}
+			$.extend(keys.test, hlbKeysTest);
 
-			keys.test[ 'esc' ] = function ( event ) {
-				return ( event.keyCode === 27 );
-			};
-
-			keys.map[ 'esc' ] = {
-				event: 'key/esc'
-			};
+			var hlbKeysMap = {
+				'esc':		{event: 'key/esc'},
+				// If HLB is on then scroll should only workd for HLB inner content, not bubbling up to window
+				'up':	    { stopOuterScroll: true, up: true },
+				'pageup':	{ stopOuterScroll: true, up: true },
+				'home':	    { stopOuterScroll: true, up: true },
+				'down':	    { stopOuterScroll: true, down: true },
+				'pagedown':	{ stopOuterScroll: true, down: true },
+				'end':	    { stopOuterScroll: true, down: true }
+			}
+			$.extend(keys.map, hlbKeysMap);
 		} );
 
 		sitecues.on( 'hlb/closed', function () {
 			delete keys.test[ 'esc' ];
+			delete keys.test[ 'up' ];
+			delete keys.test[ 'down' ];
+			delete keys.test[ 'pageup' ];
+			delete keys.test[ 'pagedown' ];
+			delete keys.test[ 'end' ];
+			delete keys.test[ 'home' ];
+			
 			delete keys.map[ 'esc' ];
+			delete keys.map[ 'up' ];
+			delete keys.map[ 'down' ];
+			delete keys.map[ 'pageup' ];
+			delete keys.map[ 'pagedown' ];
+			delete keys.map[ 'end' ];
+			delete keys.map[ 'home' ];
 		} );
 
 		// done
