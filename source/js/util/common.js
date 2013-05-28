@@ -228,7 +228,7 @@ sitecues.def('util/common', function (common, callback) {
             function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
             function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
 			
-			            /*
+			/*
              * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
              * 
              * Note: This will always set a site-wide cookie ("path=/").
@@ -254,32 +254,63 @@ sitecues.def('util/common', function (common, callback) {
                 return $.cookie(name);
             }
 
-            function preventDefault(e) {
+            // Event handlers.
+
+            /**
+             * Prevents default event behavior.
+             * @param e Event Object
+             */
+            common.preventDefault = function(e) {
                 e = e || window.event;
                 if (e.preventDefault)
                     e.preventDefault();
                 e.returnValue = false;
             }
 
+            /**
+             * Wheel scroll event handler.
+             * @param e Event Object
+             */
             function wheel(e) {
-                preventDefault(e);
+                common.preventDefault(e);
             }
 
+            /**
+             * Unbinds wheel scroll event from window and document.
+             */
             common.disableWheelScroll = function() {
                 if (window.addEventListener) {
                     window.addEventListener('DOMMouseScroll', wheel, false);
                 }
-
                 window.onmousewheel   =  wheel;
                 document.onmousewheel = wheel;
             }
 
+            /**
+             * Binds wheel scroll event to window and document.
+             */
             common.enableWheelScroll = function() {
                 if (window.removeEventListener) {
                     window.removeEventListener('DOMMouseScroll', wheel, false);
                 }
                 window.onmousewheel = null; 
                 document.onmousewheel = null;
+            }
+
+            /**
+             * Defines wheel scroll direction: if wheel is up.
+             * @param e Event Object
+             */
+            common.wheelUp = function(e) {
+                return e.originalEvent.wheelDelta/120 > 0;
+            }
+
+             /** 
+             * Defines wheel scroll direction: if wheel is down.
+             * @param e Event Object
+             */
+            common.wheelDown = function(e) {
+                return !this.wheelUp(e);
             }
 
         // Done.

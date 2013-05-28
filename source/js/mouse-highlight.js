@@ -175,6 +175,10 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			if (!$(document.activeElement).is('body'))
 				return;
 
+			// don't show highlight if window isn't active
+			if (!document.hasFocus())
+				return;
+
 			if (event.target !== mh.target){
 				// hide highlight for picked element
 
@@ -188,7 +192,10 @@ sitecues.def('mouse-highlight', function(mh, callback){
 
 				// show highlight for picked element
 				if (mh.picked && mh.picked.length){
-					mh.show(mh.picked);
+					mh.timer && clearTimeout(mh.timer);
+					mh.timer = setTimeout(function(){
+						mh.show(mh.picked);
+					}, 100);
 				}
 			}
 

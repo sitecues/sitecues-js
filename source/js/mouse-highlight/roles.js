@@ -219,12 +219,14 @@ sitecues.def('mouse-highlight/roles', function(role, callback) {
 		}
 	};
 
-	sitecues.use('jquery', 'style', 'util/common', function($, styles, common) {
+	sitecues.use('jquery', function($) {
 
-		role.find = function (e) {
-			var nodeName = e.get(0).nodeName.toLowerCase();
-			var siteCuesRole = e.data('sitecues-role');
-			var ariaRole = e.attr('aria-role');
+		role.find = function (elem) {
+			var nodeName = elem.get(0).nodeName.toLowerCase();
+			// These attributes may have been set on the markup as
+			// hints/overrides.
+			var siteCuesRole = elem.data('sitecues-role');
+			var ariaRole = elem.attr('aria-role');
 			var match;
 			if(siteCuesRole) {
 				// First we'll check sitecues attributes
