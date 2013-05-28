@@ -154,48 +154,6 @@
 
         var module = {};
 
-        module["_log"] = lelog.use_logger(name);
-
-        module._log.set_layout(new (function () {
-            function sitecuesLayout(logger) {
-                this._logger = logger;
-            }
-
-            sitecuesLayout.prototype.process = function (text, level) {
-                var level    = (level || this._logger.get_level());
-                var log_time = new Date();
-                var message  = "";
-
-                function pad(integer) {
-                    var integer = integer.toString();
-
-                    return ((integer.length === 1) ? ("0" + integer) : integer);
-                }
-
-                message += (log_time.getFullYear()).toString();
-                message += "-";
-                message += (pad(log_time.getMonth() + 1)).toString();
-                message += "-";
-                message += (pad(log_time.getDate())).toString();
-                message += "_";
-                message += (pad(log_time.getHours())).toString();
-                message += ":";
-                message += (pad(log_time.getMinutes())).toString();
-                message += ":";
-                message += (pad(log_time.getSeconds())).toString();
-                message += ".";
-                message += (pad(log_time.getMilliseconds())).toString();
-
-                return message;
-            };
-
-            return sitecuesLayout;
-        }(module["_log"])));
-
-        module["log"] = module["_log"];
-
-        delete module["_log"];
-
         // module is initializing
         modules[name] = MODULE_STATE.INITIALIZING;
 
