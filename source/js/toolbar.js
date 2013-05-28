@@ -1,5 +1,5 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
-    sitecues.use( 'jquery', 'conf', 'load', 'util/template', function ( $, conf, load, template) {
+    sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'util/hammer', 'toolbar/dropdown', function ( $, conf, load, template, hammer, dropdown) {
         
         toolbar.STATES = {
             OFF: {
@@ -17,8 +17,20 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         toolbar.render = function(callback) {
             if(!toolbar.instance) {
                 toolbar.shim = $('<div class="sitecues-toolbar-shim" />').prependTo($('body'));
-                frame = $('<div class="sitecues-toolbar" />').prependTo($('body'));
-            
+                toolbar.shim.css({
+                    height: (conf.get('toolbarHeight') || 40) + 'px'
+                });
+                frame = $('<div class="sitecues-toolbar hori" />').prependTo($('body'));
+                frame.css({
+                    height: (conf.get('toolbarHeight') || 40) + 'px'
+                });
+
+                dropdownLink = $('<a class="sitecues-dropdown" rel="sitecues-main">sitecues</a>').prependTo(frame);
+                menu = $('<div id="sitecues-main" class="sitecues-menu"><ul><li>Link 1</li><li>Link 2</li></div>').appendTo(frame);
+                dropdown.build();
+
+                toolbar.createResizer(frame);
+
                 // create small A label
                 $( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
 
@@ -97,13 +109,77 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             } else {
                 toolbar.slideOut();
             }
-        }
+        },
 
         $( document ).ready( function () {
             if(conf.get('showToolbar')) {
                 toolbar.slideIn();
             }
         } );
+
+        toolbar.resize = function(e) {
+            if(!e.gesture || e.gesture.touches.length != 1) {
+                // Ignore on multitouch
+                return;
+            }
+            var height = e.gesture.touches[0].pageY;
+            if(height < 20) {
+                height = 20;
+            } else if (height > 60) {
+                height = 60;
+            }
+            toolbar.instance.css({
+                height: height
+            });
+            toolbar.shim.css({
+                height: height
+            });
+        }
+
+        toolbar.saveHeight = function() {
+            conf.set('toolbarHeight', toolbar.instance.height());
+        }
+
+        /**
+         * Creates a resizer and wires up the proper events.
+         * 
+         * @param  element parent The parent element of the resizer.
+         * @return void
+         */
+        toolbar.createResizer = function(parent) {
+            resizer = $('<div class="sitecues-resizer"></div>').appendTo(parent);
+
+            var resizerDrag = Hammer(resizer.get(0));
+
+            // I'm not thrilled with the way this text-select-avoidance works,
+            // but it seems pretty good.  We don't really want to attach a
+            // hammer to the body because that causes an unnecessary
+            // performance hit and could interfere with an existing hammer if
+            // it's already there.
+            resizer.mouseenter(function() {
+                $('body').addClass('noselect');
+            }).mouseleave(function() {
+                if(!resizer.data('dragging')) {
+                    $('body').removeClass('noselect');
+                }
+            });
+
+            resizerDrag.on('dragstart', function(e) {
+                resizer.data('dragging', true);
+            });
+            resizerDrag.on('drag', function(e) {
+                resizer.data('dragging', true);
+                e.gesture.preventDefault();
+                e.stopPropagation();
+                toolbar.resize(e);
+            });
+            // Save the height when we're done dragging
+            resizerDrag.on('dragend', function(e) {
+                toolbar.saveHeight();
+                resizer.data('dragging', false);
+                $('body').removeClass('noselect');
+            });
+        }
 
         sitecues.on( 'badge/hover', toolbar.slideOut );
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
@@ -113,4 +189,5 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         callback();
     } );
+
 } );

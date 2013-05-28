@@ -4,13 +4,10 @@
 	top:0;
 	left:0;
 	width:100%;
-	height:40px;
-	border-bottom:2px solid #333;
 	display:none;
 	z-index: 2147483645;
 }
 .sitecues-toolbar-shim {
-	height:42px;
 	width:100%;
 	display:none;
 }
@@ -96,4 +93,44 @@
     background-image: url('../images/tts-icon-1.png');
     background-size: 270px;
     background-position: -135px 0%;
+}
+
+.sitecues-dropdown {
+    height:30px;
+    display:block;
+    float:left;
+    padding:5px;
+}
+.sitecues-menu {
+    display:none;
+    position:fixed;
+    border-radius:10px;
+    background-color:#eee;
+    padding:10px;
+}
+
+.sitecues-menu li {
+    border-bottom:1px solid #ccc;
+}
+
+.sitecues-toolbar.hori .sitecues-resizer {
+    background-color: #ccc;
+    height:3px;
+    position:absolute;
+    bottom:0;
+    width:100%;
+    cursor: ns-resize;
+}
+
+.sitecues-toolbar.vert .sitecues-resizer {
+    cursor: ew-resize;
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
