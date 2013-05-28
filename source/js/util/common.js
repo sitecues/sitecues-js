@@ -254,6 +254,34 @@ sitecues.def('util/common', function (common, callback) {
                 return $.cookie(name);
             }
 
+            function preventDefault(e) {
+                e = e || window.event;
+                if (e.preventDefault)
+                    e.preventDefault();
+                e.returnValue = false;
+            }
+
+            function wheel(e) {
+                preventDefault(e);
+            }
+
+            common.disableWheelScroll = function() {
+                if (window.addEventListener) {
+                    window.addEventListener('DOMMouseScroll', wheel, false);
+                }
+
+                window.onmousewheel   =  wheel;
+                document.onmousewheel = wheel;
+            }
+
+            common.enableWheelScroll = function() {
+                if (window.removeEventListener) {
+                    window.removeEventListener('DOMMouseScroll', wheel, false);
+                }
+                window.onmousewheel = null; 
+                document.onmousewheel = null;
+            }
+
         // Done.
         callback();
 
