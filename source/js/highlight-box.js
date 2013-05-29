@@ -100,32 +100,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             }
         });
 
-        // Performs global clean-up when an instance is closed.
-        function onHighlightBoxClosed() {
-            // All we need to do at the current time within the module is remove the instance.
-            instance = null;
-            common.enableWheelScroll();
-        };
-
-        function onHighlightBoxOpened(hlb) {
-            $(hlb).bind('mousewheel DOMMouseScroll', function(e) {
-                // wheel up
-                if (e.originalEvent.wheelDelta/120 > 0) {
-                    if (hlb.scrollTop() <= 0) {
-                        common.disableWheelScroll();
-                    }
-                    common.enableWheelScroll();
-                    return;
-                }
-                // wheel down
-                if (hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight) {
-                    common.disableWheelScroll();
-                    return;
-                }
-                common.enableWheelScroll();
-            });
-        }
-
         var HighlightBox = (function () {
             // Initialize.
             function HighlightBox(target) {
@@ -195,7 +169,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
              */
             HighlightBox.prototype.inflate = function () {
 
-                // Immediately enter the
+                // Immediately enter the HLB
                 this.state = STATES.INFLATING;
                 sitecues.emit('hlb/inflating', this.item);
 
@@ -242,7 +216,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
 
-              // Animate HLB (keep in mind $.animate() is non-blocking).
+                // Animate HLB (keep in mind $.animate() is non-blocking).
 	            var ancestorCSS = [ ];
 	            $(this.itemNode).parents().each(function () {
 		            ancestorCSS.push({zIndex: this.style.zIndex, overflow: this.style.overflow });
@@ -264,7 +238,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 sitecues.emit('hlb/ready', _this.item);
 
                 // Trigger the background blur effect if there is a highlight box only.
-                //  > AK: comment out all the dimmer calls by AL request
                 //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
                 backgroundDimmer.dimBackgroundContent(this, totalZoom);
 				onHighlightBoxOpened($(this));
@@ -277,7 +250,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
              * Hide the reading box.
              */
             HighlightBox.prototype.deflate = function () {
-              if( HighlightBox.isSticky === false ){
+              if (HighlightBox.isSticky === false) {
                 var _this = this;
 
                 // Update state.
@@ -463,8 +436,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 this.itemNode.after(cloneNode);
 
-          return cloneNode;
-        };
+                return cloneNode;
+            };
 
            /*
             * Table elements require extra work for some cases - especially when table has flexible layout.
@@ -520,6 +493,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 				}
 				return false;
 			}
+ 
             /**
              * Get the size and position of the current HLB to inflate.
              * @param selector What element is being positioned
@@ -835,6 +809,24 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     instance.deflate();
                 }
             }
+        }
+
+        // Performs global clean-up when an instance is closed.
+        function onHighlightBoxClosed() {
+            // All we need to do at the current time within the module is remove the instance.
+            instance = null;
+            common.enableWheelScroll();
+        };
+
+        function onHighlightBoxOpened(hlb) {
+            $(hlb).bind('mousewheel DOMMouseScroll', function(e) {
+                if ((common.wheelUp(e) && hlb.scrollTop() <= 0)
+                    || (common.wheelDown(e) && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)) {
+                        common.disableWheelScroll();
+                        return;
+                } 
+                common.enableWheelScroll();
+            });
         }
 
         var clientX, clientY;
