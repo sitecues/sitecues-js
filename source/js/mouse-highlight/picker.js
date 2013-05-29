@@ -28,7 +28,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 		'#sitecues-eq360-bg'
 	];
 
-	sitecues.use('jquery', 'style', 'util/common', 'mouse-highlight/roles', function($, styles, common, roles){
+	sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles){
 
 		/*
 		 * Find the best highlightable element, if any, given a target element.

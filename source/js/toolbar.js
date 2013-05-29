@@ -1,5 +1,5 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
-    sitecues.use( 'jquery', 'ui', function ( $, ui ) {
+    sitecues.use( 'jquery', 'ui', function ( $ ) {
         toolbar.STATES = {
             OFF: {
                 id:   0,

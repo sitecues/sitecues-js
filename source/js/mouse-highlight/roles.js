@@ -219,7 +219,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback) {
 		}
 	};
 
-	sitecues.use('jquery', 'style', 'util/common', function($, styles, common) {
+	sitecues.use('jquery', function($) {
 
 		role.find = function (elem) {
 			var nodeName = elem.get(0).nodeName.toLowerCase();
