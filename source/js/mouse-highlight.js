@@ -175,6 +175,10 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			if (!$(document.activeElement).is('body'))
 				return;
 
+			// don't show highlight if window isn't active
+			if (!document.hasFocus())
+				return;
+
 			if (event.target !== mh.target){
 				// hide highlight for picked element
 
