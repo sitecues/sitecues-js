@@ -130,27 +130,27 @@ sitecues.def('keys', function(keys, callback) {
 		sitecues.on('hlb/ready', function (hlbElement) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
 			var hlbKeysTest = {
-				'esc':		function(event) { return event.keyCode === 27; },
-				// scroll
-				'up':	    function(event) { return event.keyCode === 38; },
-				'down':	    function(event) { return event.keyCode === 40; },
-				'pageup':	function(event) { return event.keyCode === 33; },
-				'pagedown':	function(event) { return event.keyCode === 34; },
-				'end':	    function(event) { return event.keyCode === 35; },
-				'home':	    function(event) { return event.keyCode === 36; }
+                'esc':      function(event) { return event.keyCode === 27; },
+                // scroll
+                'up':	    function(event) { return event.keyCode === 38; },
+                'down':	    function(event) { return event.keyCode === 40; },
+                'pageup':	function(event) { return event.keyCode === 33; },
+                'pagedown':	function(event) { return event.keyCode === 34; },
+                'end':	    function(event) { return event.keyCode === 35; },
+                'home':	    function(event) { return event.keyCode === 36; }
 			}
 			$.extend(keys.test, hlbKeysTest);
 
 			var hlbKeysMap = {
-				'esc':		{event: 'key/esc'},
-				// If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
+                'esc':      {event: 'key/esc'},
+                // If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
                 // scroll
-				'up':	    { stopOuterScroll: true, up: true },
-				'pageup':	{ stopOuterScroll: true, up: true },
-				'home':	    { stopOuterScroll: true, up: true },
-				'down':	    { stopOuterScroll: true, down: true },
-				'pagedown':	{ stopOuterScroll: true, down: true },
-				'end':	    { stopOuterScroll: true, down: true }
+                'up':       { stopOuterScroll: true, up: true },
+                'pageup':   { stopOuterScroll: true, up: true },
+                'home':     { stopOuterScroll: true, up: true },
+                'down':	    { stopOuterScroll: true, down: true },
+                'pagedown': { stopOuterScroll: true, down: true },
+                'end':      { stopOuterScroll: true, down: true }
 			}
 			$.extend(keys.map, hlbKeysMap);
 		} );
