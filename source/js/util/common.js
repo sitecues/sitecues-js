@@ -260,7 +260,7 @@ sitecues.def('util/common', function (common, callback) {
              * Prevents default event behavior.
              * @param e Event Object
              */
-            function preventDefault(e) {
+            common.preventDefault = function(e) {
                 e = e || window.event;
                 if (e.preventDefault)
                     e.preventDefault();
@@ -272,7 +272,7 @@ sitecues.def('util/common', function (common, callback) {
              * @param e Event Object
              */
             function wheel(e) {
-                preventDefault(e);
+                common.preventDefault(e);
             }
 
             /**

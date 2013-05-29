@@ -27,59 +27,58 @@ sitecues.def('keys', function(keys, callback) {
 			requiresMouseHighlight: true
 		}
 	};
-
-	// handle key
-	keys.handle = function ( key, event ) {
-		// if event defined, emit it
-		if ( key.event ) {
-			sitecues.emit( key.event, event );
-		}
-
-		// prevent default if needed
-		if (key.preventDefault) event.preventDefault();
-		// stop bubble up if needed
-		if (key.stopOuterScroll) {
-			var hlb = event.dom.highlight_box && $(event.dom.highlight_box);
-			if ((key.down && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
-			||  (key.up && hlb.scrollTop() <= 0)) {
-				event.preventDefault();
-			}
-		}
-	};
-
-	keys.isEditable = function ( element ) {
-		var tag = element.localName;
-
-		if ( ! tag ) {
-			return false;
-		}
-
-		tag = tag.toLowerCase();
-
-		if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
-			return true;
-		}
-
-		if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
-			return true; // Be safe, looks like a keyboard-accessible interactive JS widget
-		}
-
-		// Check for rich text editor
-		var contentEditable = element.getAttribute('contenteditable');
-
-		if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
-			return true; // In editor
-		}
-
-		if ( document.designMode === 'on' ) {
-			return true; // Another kind of editor
-		}
-
-		return false;
-	};
-
 	// get dependencies
-	sitecues.use('jquery', 'mouse-highlight', function($, mh){
+	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
+        // handle key
+        keys.handle = function ( key, event ) {
+            // if event defined, emit it
+            if ( key.event ) {
+                sitecues.emit( key.event, event );
+            }
+
+            // prevent default if needed
+            if (key.preventDefault) common.preventDefault(event);
+            // stop bubble up if needed
+            if (key.stopOuterScroll) {
+                var hlb = event.dom.highlight_box && $(event.dom.highlight_box);
+                if ((key.down && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
+                ||  (key.up && hlb.scrollTop() <= 0)) {
+                    common.preventDefault(event);
+                }
+            }
+        };
+
+        keys.isEditable = function ( element ) {
+            var tag = element.localName;
+
+            if ( ! tag ) {
+                return false;
+            }
+
+            tag = tag.toLowerCase();
+
+            if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
+                return true;
+            }
+
+            if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
+                return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+            }
+
+            // Check for rich text editor
+            var contentEditable = element.getAttribute('contenteditable');
+
+            if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
+                return true; // In editor
+            }
+
+            if ( document.designMode === 'on' ) {
+                return true; // Another kind of editor
+            }
+
+            return false;
+        };
+
 		// key event hook
 		keys.hook = function(event) {
 
