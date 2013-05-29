@@ -206,7 +206,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
-                        onHighlightBoxClosed();
+                        onHighlightBoxClosed(_this.item);
                         // Ensure the bg dimmer is gone.
                         // AK: comment out all the dimmer calls by AL request
                         backgroundDimmer.removeDimmer();
@@ -310,7 +310,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                   _this.state = STATES.CLOSED;
 
                   // Call the module method to clean up after close BEFORE calling listeners.
-                  onHighlightBoxClosed();
+                  onHighlightBoxClosed(_this.item);
 
                   console.log("hlb closed");
                   sitecues.emit('hlb/closed', _this.item);
@@ -812,10 +812,11 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         }
 
         // Performs global clean-up when an instance is closed.
-        function onHighlightBoxClosed() {
+        function onHighlightBoxClosed(hlb) {
             // All we need to do at the current time within the module is remove the instance.
             instance = null;
             common.enableWheelScroll();
+            $(hlb).unbind('mousewheel DOMMouseScroll');
         };
 
         function onHighlightBoxOpened(hlb) {

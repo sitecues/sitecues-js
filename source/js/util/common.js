@@ -282,7 +282,6 @@ sitecues.def('util/common', function (common, callback) {
                 if (window.addEventListener) {
                     window.addEventListener('DOMMouseScroll', wheel, false);
                 }
-
                 window.onmousewheel   =  wheel;
                 document.onmousewheel = wheel;
             }
