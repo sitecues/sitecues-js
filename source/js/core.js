@@ -33,7 +33,7 @@
         , resolveUrl
         , parseUrlQuery
         , parseUrl
-        , extension_version = '0.0.0-UNVERSIONED'
+        , APP_VERSION = '0.0.0-UNVERSIONED'
     ;
 
     // Alias sitecues to window
@@ -437,9 +437,19 @@
         }
     };
 
-    sitecues.last_version_info = {};
+	// The default version formatter: simply log all data to the console.
+	var DEFAULT_VERSION_CALLBACK = function(info) {
+		var msg = '';
+		for (var p in info) {
+			if (info.hasOwnProperty(p)) {
+				msg += p + ': ' + info[p];
+			}
+		}
+		console.log(msg);
+	};
 
-    sitecues.version = function () {
+    sitecues.version = function (callback) {
+		callback = callback || DEFAULT_VERSION_CALLBACK;
         // TODO: Figure out a way to make this work correctly since `sitecues.use()` is asynchronous.
         sitecues.use.apply( sitecues, [
             "jquery",
@@ -473,34 +483,15 @@
                     var info = {};
 
                     info[ "versions" ]    = {
-                        "extension":                extension_version,
-                        "user_preferences":         ajax_responses.up.version,
-                        "web_services_preferences": ajax_responses.ws.version
+                        "sitecues_js": APP_VERSION,
+                        "sitecues_up": ajax_responses.up.version,
+                        "sitecues_ws": ajax_responses.ws.version
                     };
                     info[ "current_url" ] = window.location.href;
-                    info[ "library_url" ] = ( sitecues.getScriptSrcUrl() ).raw;
+                    info[ "sitecues_js_url" ] = ( sitecues.getScriptSrcUrl() ).raw;
                     info[ "user_agent" ]  = navigator.userAgent;
                     info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
                     info[ "zoom_level" ]  = null;
-
-                    window.sitecues.last_version_info = info;
-
-                    // FIXME: Won't work in certain browsers. May need to use `json2.js`.
-                    console.log( JSON.stringify( info ) );
-
-                    // info.toString = function () {
-                    //     var output = "";
-
-                    //     for ( var property in this ) {
-                    //         if ( ( {} ).hasOwnProperty.call( this, property ) && ( property !== "toString" ) ) {
-                    //             output += ( "" + ( property ) + ": " + info[ property ] + "\n" );
-                    //         }
-                    //     }
-
-                    //     return output;
-                    // };
-
-                    // console.log( info.toString() );
                 } );
             }
         ] );
