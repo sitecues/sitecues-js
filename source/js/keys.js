@@ -9,12 +9,23 @@ sitecues.def('keys', function(keys, callback) {
 	var has = Object.prototype.hasOwnProperty;
 
     // define key testers
-	keys.test = {
-		'minus':	function(event){ return event.keyCode === 189; },
-		'plus':		function(event){ return event.keyCode === 187; },
-		'r':		function(event){ return event.keyCode === 82; },
-		'space':	function(event){ return event.keyCode === 32; }
-	};
+    // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
+    keys.test = {
+        'minus':   function(event) {
+            return event.keyCode === 189
+                || event.keyCode === 109
+                || event.keyCode === 173
+                || event.keyCode === 45;
+        },
+        'plus':    function(event) {  // Also Equals (=) key
+            return event.keyCode === 187
+                || event.keyCode === 61
+                || event.keyCode === 107
+                || event.keyCode === 43;
+        },
+        'r':		function(event){ return event.keyCode === 82; },
+        'space':	function(event){ return event.keyCode === 32; }
+    };
 
 	// define keys map used to bind actions to hotkeys
 	keys.map = {
