@@ -8,7 +8,11 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback){
        * 
        * @return void
        */
-      dropdown.build = function() {
+      dropdown.build = function(parent) {
+
+        var dropdownLink = $('<div class="sitecues-dropdown" rel="sitecues-main"><a>sitecues</a></div>').prependTo(parent);
+        var menu = $('<div id="sitecues-main" class="sitecues-menu"><ul><li>Link 1</li><li>Link 2</li></div>').appendTo(parent);
+
         $('.sitecues-dropdown').on({
           click: function() {
             alert('foo');

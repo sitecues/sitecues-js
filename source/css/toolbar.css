@@ -21,8 +21,14 @@
     width: 198px;
     /*top: 26px;*/
 }
-.sitecues-toolbar input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
+
+.sitecues-slider {
+    position:absolute;
+    width:200px;
+    border:1px solid red;
+    }
+.sitecues-slider-thumb {
+    position:relative;
     background-color: none;
     background-image: url('../images/panel/slider_marker.png');
     width: 9px;
@@ -31,6 +37,9 @@
     border: none;
     /*-webkit-box-shadow: 0 0 4px #555;*/
     z-index: 1;
+    cursor: ew-resize;
+    top:0;
+    left:10%;
 }
 
 .sitecues-toolbar .slider-wrap {
@@ -96,10 +105,16 @@
 }
 
 .sitecues-dropdown {
-    height:30px;
+    height:80%;
     display:block;
     float:left;
-    padding:5px;
+    padding:10%;
+}
+.sitecues-dropdown a {
+    height:80%;
+    display:block;
+    float:left;
+    padding:10%;
 }
 .sitecues-menu {
     display:none;
