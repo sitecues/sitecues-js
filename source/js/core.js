@@ -436,19 +436,33 @@
         }
     };
 
-	// The default version formatter: simply log all data to the console.
-	var DEFAULT_VERSION_CALLBACK = function(info) {
-		var msg = '';
-		for (var p in info) {
-			if (info.hasOwnProperty(p)) {
-				msg += p + ': ' + info[p];
-			}
-		}
-		console.log(msg);
+	// The default status formatter: simply log all data to the console.
+	var DEFAULT_STATUS_CALLBACK = function(info) {
+		var printObj = function(o, prefix) {
+				var p, v, s = '';
+				prefix = prefix || '';
+				for (p in o) {
+					if (o.hasOwnProperty(p)) {
+						v = o[p];
+						s += prefix + p + ':';
+						if (typeof v == 'object') {
+							s += '\n' + printObj(v, prefix + '  ');
+						} else {
+							s += ' ' + v + '\n';
+						}
+					}
+				}
+				return s;
+			};
+
+		console.log(
+			'===== BEGIN: SITECUES STATUS =====================\n'
+			+ printObj(info)
+			+ '===== END: SITECUES STATUS =======================');
 	};
 
-    sitecues.version = function (callback) {
-		callback = callback || DEFAULT_VERSION_CALLBACK;
+    sitecues.status = function (callback) {
+		callback = callback || DEFAULT_STATUS_CALLBACK;
         // TODO: Figure out a way to make this work correctly since `sitecues.use()` is asynchronous.
         sitecues.use.apply( sitecues, [
             "jquery",
@@ -491,6 +505,9 @@
                     info[ "user_agent" ]  = navigator.userAgent;
                     info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
                     info[ "zoom_level" ]  = null;
+
+					// Perform the needed actions on the info.
+					callback(info);
                 } );
             }
         ] );
