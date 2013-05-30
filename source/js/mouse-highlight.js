@@ -192,7 +192,10 @@ sitecues.def('mouse-highlight', function(mh, callback){
 
 				// show highlight for picked element
 				if (mh.picked && mh.picked.length){
-					mh.show(mh.picked);
+					mh.timer && clearTimeout(mh.timer);
+					mh.timer = setTimeout(function(){
+						mh.show(mh.picked);
+					}, 100);
 				}
 			}
 
