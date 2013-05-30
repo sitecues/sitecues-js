@@ -27,7 +27,18 @@ sitecues.def('keys', function(keys, callback) {
         'space':	function(event){ return event.keyCode === 32; }
     };
 
-	// define keys map used to bind actions to hotkeys
+    keys.hlbKeysTest = {
+        'esc':      function(event) { return event.keyCode === 27; },
+        // scroll
+        'up':	    function(event) { return event.keyCode === 38; },
+        'down':	    function(event) { return event.keyCode === 40; },
+        'pageup':	function(event) { return event.keyCode === 33; },
+        'pagedown':	function(event) { return event.keyCode === 34; },
+        'end':	    function(event) { return event.keyCode === 35; },
+        'home':	    function(event) { return event.keyCode === 36; }
+    }
+
+ 	// define keys map used to bind actions to hotkeys
 	keys.map = {
 		'minus':	{ event: 'zoom/decrease' },
 		'plus':		{ event: 'zoom/increase' },
@@ -37,7 +48,20 @@ sitecues.def('keys', function(keys, callback) {
 			preventDefault: true,
 			requiresMouseHighlight: true
 		}
-	};
+	}
+
+    keys.hlbKeysMap = {
+        'esc':      {event: 'key/esc'},
+        // If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
+        // scroll
+        'up':       { stopOuterScroll: true, up: true },
+        'pageup':   { stopOuterScroll: true, up: true },
+        'home':     { stopOuterScroll: true, up: true },
+        'down':	    { stopOuterScroll: true, down: true },
+        'pagedown': { stopOuterScroll: true, down: true },
+        'end':      { stopOuterScroll: true, down: true }
+    }
+
 	// get dependencies
 	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
         // handle key
@@ -136,33 +160,11 @@ sitecues.def('keys', function(keys, callback) {
 
 		// bind key hook to window
 		$(window).on('keydown', keys.hook);
-
+        
 		sitecues.on('hlb/ready', function (hlbElement) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
-			var hlbKeysTest = {
-                'esc':      function(event) { return event.keyCode === 27; },
-                // scroll
-                'up':	    function(event) { return event.keyCode === 38; },
-                'down':	    function(event) { return event.keyCode === 40; },
-                'pageup':	function(event) { return event.keyCode === 33; },
-                'pagedown':	function(event) { return event.keyCode === 34; },
-                'end':	    function(event) { return event.keyCode === 35; },
-                'home':	    function(event) { return event.keyCode === 36; }
-			}
-			$.extend(keys.test, hlbKeysTest);
-
-			var hlbKeysMap = {
-                'esc':      {event: 'key/esc'},
-                // If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
-                // scroll
-                'up':       { stopOuterScroll: true, up: true },
-                'pageup':   { stopOuterScroll: true, up: true },
-                'home':     { stopOuterScroll: true, up: true },
-                'down':	    { stopOuterScroll: true, down: true },
-                'pagedown': { stopOuterScroll: true, down: true },
-                'end':      { stopOuterScroll: true, down: true }
-			}
-			$.extend(keys.map, hlbKeysMap);
+            $.extend(keys.test, keys.hlbKeysTest);
+            $.extend(keys.map, keys.hlbKeysMap);
 		} );
 
 		sitecues.on( 'hlb/closed', function () {

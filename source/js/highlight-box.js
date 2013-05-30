@@ -2,9 +2,11 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 sitecues.def('highlight-box', function (highlightBox, callback) {
+    // shortcut to hasOwnProperty
+    var has = Object.prototype.hasOwnProperty;
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
-    function ($, conf, cursor, positioning, common, backgroundDimmer) {
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'keys', 'ui', 'jquery/transform2d', 'jquery/color',
+    function ($, conf, cursor, positioning, common, backgroundDimmer, keys) {
 
         // Constants
 
@@ -816,18 +818,47 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             // All we need to do at the current time within the module is remove the instance.
             instance = null;
             common.enableWheelScroll();
-            $(hlb).unbind('mousewheel DOMMouseScroll');
+            // todo:unbind!
+            $(hlb).off('mousewheel DOMMouseScroll');
+            $(hlb).off('keydown');
         };
 
         function onHighlightBoxOpened(hlb) {
-            $(hlb).bind('mousewheel DOMMouseScroll', function(e) {
-                if ((common.wheelUp(e) && hlb.scrollTop() <= 0)
-                    || (common.wheelDown(e) && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)) {
-                        common.disableWheelScroll();
-                        return;
-                } 
-                common.enableWheelScroll();
+            // Add listeners below to correctly handle if HLB is focused.
+            $(hlb).on('mousewheel DOMMouseScroll', function(e) {
+                wheelHandler(e, hlb);
             });
+
+            $(hlb).on('keydown', function(e) {
+                keyDownHandler(e, hlb);
+            });
+        }
+
+        function wheelHandler(e, hlb) {
+             if ((common.wheelUp(e) && hlb.scrollTop() <= 0)
+                || (common.wheelDown(e) && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)) {
+                    common.disableWheelScroll();
+                    return;
+            } 
+            common.enableWheelScroll();
+        }
+
+        function keyDownHandler(e, hlb) {
+            var isUp;
+            // iterate over hlb key map
+            for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
+               // split key definition to parts
+               var name = key.split(/\s*\+\s*/)[0];
+               var test = keys.test[name];
+               if (test && test(e)) {
+                   isUp = keys.hlbKeysMap[key].up;
+                   break;
+               }
+            }
+            if ((!isUp && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
+            ||  (isUp && hlb.scrollTop() <= 0)) {
+                common.preventDefault(e);
+            }
         }
 
         var clientX, clientY;
