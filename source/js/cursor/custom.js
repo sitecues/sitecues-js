@@ -9,16 +9,19 @@
  */
 sitecues.def('cursor/custom', function (cursor, callback) {
 
-	// static properties
+	// Static properties
 	cursor.isEnabled = false; // if cursor module is enabled
 	cursor.zoomLevel = 1;
 	cursor.type = 'default';
-	// default data url string
-	cursor.url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAaCAYAAAC3g3x9AAAB+klEQVRIS+2UPUvDQBzGe219ado6qHR0KP0QDoJSQRFHJ8HRtXR3cBI/QLfiKgo6OQp2dhG/QSmFKmqwviSm0TatzwOXkkvSQKE4efBwudzd7//KidiEh5gwL/Z3wMFgsCmEuB43glAPAbsBaB1qAlqQ0AHmPsR55AgDin6/bwM0zVu6rpdyudyphH1j/omCBoCO45zF4/Fd14VOp3OvadoO1j3oE/qCnFEuBoAIt4nDS+4FGDCTyeQK1vTuHXqT36FMBdjr9fYTicSJ/2S9Xr8qFApH+N9mFiBzVNgKELm7Re6WCQS8Dc/m+W2aZiubze5J754kmCkIDC9QKYb/ZKVSOSyXyzX8f4QItSOB/mL4Dzcajbt8Pn8ggS3MBsQ2UsbQQxTjAztzoZnGz263a1Wr1eNSqcRmf4BeIbaQCvQ0sbohRBG5u0in04veDdu2n1Op1JoMm8VhCw2bnXmroRDFgCUhNgzDOM9kMgvePcuydBjZll6yjZjLYegiwsNVXL6ENzkvEI3+gkbfkh4GgdiIQymZPw1zEkpICEOZgmblzJwzRIbKHEYCMzgwA7mFYp91PQYJpTEaYTFYRFZaDVle4GF6yQfBD+SaXtKYC6ShjlQAyAsMkWL47nCfK6753xXXLAJDZxTKk/Z3L7bH07E+/z0cK12hh38BlI3AG1Ei3IIAAAAASUVORK5CYII=";
+	cursor.prevTarget = {};
+	cursor.prevType = 'default';
+	// Default data url string
+	cursor.url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAeCAYAAADD0FVVAAADQUlEQVRIS9WVz08TQRTHZ9sqbYOQkpoQ5Tc3Lj2QQOAfKBwIqdxI5MjFePBCUjyQEDVtUjxoJPXigYSDSEzkxkE4kKAJaCB6qImU1rakRahtpVr60/ddZzZbShcwXNzkZd7s7nz2ve+8eSuVSiW7JEnL7BIviaAx4o1dJhjQEkGTxWLRrdfr3Txg3MMlxgvlIaBYdJzJZB6YTCYPJxRozP8LWA2VwbFYzNPY2PiE/CzZL7LcRcEKdHt7m9lsNkZqZH0+32xXV9dTgiXIji4KVqC0UWxra0sGk765zc3NF729vY8JeMjBiPxcGpdBkb8Aww8Gg2/b2trucPBPLsmZ4AroSXAgEFhpb28H+EAVcVGrHE6FYsH6+jrr6+uT13LwXQ5O8YirgqtCAZufn2ejo6My2O/3r3Z2dgL8nUwTrAk9CQ6Hw++am5vHVeBj8isiPhN6EpxIJPwWi8VB9/d5xADjoCjXuaBVwLdU4IwarAn1er1sYGBAiYBOGqupqZHnqVTqK22ma3Bw8A1NcUBQx7IUmlC73c4WFhZYXV2dOjvFLxQKh6FQ6CGV3HO6qchwKhSw5eW/LVZdAYuLi2E6bQek6aHVao03NDSkjEZjlDJ4VBUKwMjICItGo4xOkhIRnSzW0tLCNjY24j09PS/pgY/sC1mITByKykiTySSrr69XQEtLS2x4eFieu91uNjExwXK5XNHj8axOTk6+VkHj5KObVUKxOJvNZkijOBX5DcydTidzuVwyWPSESCSy39TU5OTQbzSik2GT0Hvl0pI1JZ2OqLDft7a2QvDrOzs79zs6Om4iekCHhoZYd3e3svPT09MzU1NTr+jdINkPMtFz5WYj5fP5FYPBMEa+hQz5XwM4nU4/M5vNtYoe5Ozt7aWoJX4mWWZVkQqo8qpE3lUOMtOIIpTna2tr4/39/bd1Ot0VpDw3N/eJtPwANlmARxnh6SPSMqiewzDiIzoOriUd7+3u7hYcDsdHuodiRXGjaUe5obmgz1ZAARImvgawkQxyQBYATfyDaRqRMgwn6TcZNqksUvVc7Rs4CLJAEpEJogJI/BSx42V/A0RY7RJSCJh4DwCAIMWpvxYtqMb3tB/9P9A/S+mqLvqod+YAAAAASUVORK5CYII=";
 
-	// constants
-	cursor.kCursorHideRuleId = 'sitecues-cursor-hide-rule';
-	cursor.kCursorId = 'sitecues-cursor';
+	// Constants
+	cursor.kCursorStyleRuleId = 'sitecues-cursor-style-rule';
+	// Set custom cursor image for disabled elements
+	cursor.kCursorStyleDisabledRuleId  = 'sitecues-cursor-disabled-rule';
 	cursor.kMinCursorZoom = 1.1;
 
 	// get dependencies
@@ -31,15 +34,14 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		/*
 		 * Initialize cursor according to zoom level given.
 		 */
-		cursor.init = function(value){
+		cursor.init = function(value) {
 			cursor.zoomLevel = value * value;
 			var cursorWasEnabled = cursor.isEnabled;
-
 			cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
-			if (cursor.isEnabled){
-				view.zoom(this.zoomLevel);
-				cursor.url = view.getImageOfType(this.type);
+			if (cursor.isEnabled) {
+				view.zoomImage(cursor.zoomLevel);
+				cursor.url = view.getImageOfType(cursor.type);
 				if (cursorWasEnabled)
 					cursor.update();
 				else
@@ -50,30 +52,37 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		};
 
 		/*
-		 *  Show custom cursor in the viewport, hiding the default one if necessary.
+		 *  Show custom cursor in the viewport.
 		 */
-		cursor.show = function(){
-			// Hide native cursor if custom cursor.
-			toggleRealCursor(false);
-			cursor.update();
+		cursor.show = function() {
+			// Add rules for default cursor values.
+			cursor.styleRuleParent
+				.append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type +'}')
+				.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), default}');
+			$(window).on('mousemove click', mouseMoveHandler);
 			sitecues.emit('cursor/show');
 		};
 
 		/*
 		 *  Update cursor properties, such as dimensions or color.
 		 */
-		cursor.update = function(){
-			view.zoom(cursor.zoomLevel);
-			cursor.url = view.getImageOfType(this.type);
-			updateCustomCursor();
+		cursor.update = function() {
+			// Target is not changed, so update the same element's cursor style.
+			$(cursor.prevTarget).css('cursor', 'url("' + cursor.url + '"), ' + cursor.type);
+			// Update cursor image for disabled elements.
+			$('#' + cursor.kCursorStyleDisabledRuleId).remove();
+			cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), default}');
 			sitecues.emit('cursor/update');
 		};
 
 		/*
-		 *  hide cursor in the viewport
+		 *  Hide cursor in the viewport.
 		 */
-		cursor.hide = function(){
-			toggleRealCursor(true);
+		cursor.hide = function() {
+			// Reset the CSS cursor style.
+			$('#' + cursor.kCursorStyleDisabledRuleId).remove();
+			$(cursor.prevTarget).css('cursor', cursor.prevType);
+			$(window).off('mousemove click', mouseMoveHandler);
 			sitecues.emit('cursor/hide');
 		};
 
@@ -83,41 +92,32 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		 * Updates image of the cursor element if the target needs.
 		 * @param target
 		 */
-		function changeCursorType(target) {
-			var newCursorType = style.detect(target);
+		function changeCursorDisplay(target) {
+			$('#' + cursor.kCursorStyleRuleId).remove();
+			
+			// If target is changed then update CSS cursor property for it.
+			if (cursor.isEnabled && !$(target).is(cursor.prevTarget)) {
+				// First, revert last target's cursor property to saved style.
+				$(cursor.prevTarget).css('cursor', cursor.prevType);
+				var newCursorType = style.detectCursorType(target) || 'default';
 
-			// if cursor type has changed
-			if (cursor.type !== newCursorType){
+				// Save the new target and its original cursor style to be able to revert to it.
+				cursor.prevTarget = target;
+				cursor.prevType = newCursorType;
 				cursor.type = newCursorType;
+				cursor.url = view.getImageOfType(newCursorType);
+				// Set cursor style on new target.
+				$(target).css('cursor', 'url("' + cursor.url + '"), ' + cursor.type);
 			}
 		}
 
-		/**
-		 * Hides or show the real mouse cursor dependently on the parameter given.
-		 * If we are showing our own mouse cursor we don't want the real cursor because that would be a double cursor.
-		 * @param setRealCursorVisible
-		 */
-		function toggleRealCursor(setRealCursorVisible){
-			if (setRealCursorVisible){
-				$('#' + cursor.kCursorHideRuleId).remove();
-			} else {
-				// if the rule is not already in DOM
-				if ($('#' + cursor.kCursorHideRuleId).length === 0) {
-					// todo: set a few cursor types in the rule, so no need to remove/add new rules until zoom level changes.
-					cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type + '}</style>');
-				}
-			}
-		}
-
-		// todo: set a few cursor types in the rule, so no need to remove/add new rules until zoom level changes.
-		function updateCustomCursor() {
-			$('#' + cursor.kCursorHideRuleId).remove();
-			cursor.styleRuleParent.append('<style id="' + cursor.kCursorHideRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type + '}</style>');
+		function mouseMoveHandler(e) {
+			changeCursorDisplay($(e.target));
 		}
 
 		// Handle zoom event.
 		sitecues.on('zoom', cursor.init);
-		cursor.init(conf.get('zoom') || 1);
+		cursor.init(conf.get('zoom') || cursor.zoomLevel);
 
 		// Done.
 		callback();

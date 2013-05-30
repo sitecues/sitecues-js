@@ -27,8 +27,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 		'#sitecues-badge',
 		'#sitecues-eq360-bg'
 	];
+    
+    picker.kTargetStates = {
+        'sometimes': 's',
+        'true'     : 't',
+        'false'    : 'f'
+    }
 
-	sitecues.use('jquery', 'style', 'util/common', 'mouse-highlight/roles', function($, styles, common, roles){
+	sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles){
 
 		/*
 		 * Find the best highlightable element, if any, given a target element.
@@ -45,21 +51,21 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 			if(!eTarget) {
 				// Let's determine, and remember, what this element is.
 				eTarget = picker.isTarget(e);
-				if(eTarget == null) {
-					eTarget = 's';
+				if (eTarget == null) {
+					eTarget = this.kTargetStates['sometimes'];
 				} else if (eTarget) {
-					eTarget = 't'
+					eTarget = this.kTargetStates['true'];
 				} else { 
-					eTarget = 'f';
+					eTarget = this.kTargetStates['false'];
 				}
 				e.data('sitecues-mouse-hl', eTarget);
 			}
-			if(eTarget === 't') {
+			if(eTarget === this.kTargetStates['true']) {
 				// It's definitely a target as determined previously
 				return e;
-			} else if (eTarget === 'f') {
+			} else if (eTarget === this.kTargetStates['false']) {
 				// It's definitely not a target as determined previously
-			} else if (eTarget === 's') {
+			} else if (eTarget === this.kTargetStates['sometimes']) {
 				eScore = e.data('sitecues-mouse-hl-score');
 				if(eScore == null) {
 					eScore = picker.getScore(e);
@@ -140,7 +146,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback){
 
 			if(e.contents()) {
 				e.contents().each(function() {
-					if(this.nodeType == 3 && this.nodeValue.trim().length > 0) {
+					if(this.nodeType == 3 && this.nodeValue.trim().length > 0 || this.innerText && this.innerText.trim().length > 0) {
 						textNodes = true;
 						console.log(this);
 					}
