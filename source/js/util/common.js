@@ -266,6 +266,11 @@ sitecues.def('util/common', function (common, callback) {
                     e.preventDefault();
                 e.returnValue = false;
             }
+            
+            common.stopDefaultEventBehavior = function(e) {
+                common.preventDefault(e);
+                e.stopPropagation();
+            }
 
             /**
              * Wheel scroll event handler.
@@ -317,7 +322,7 @@ sitecues.def('util/common', function (common, callback) {
             }
 
            common.hasVertScroll = function(el) {
-                return el.clientHeight < el.scrollHeight
+                return el.clientHeight < el.scrollHeight;
             }
 
         // Done.

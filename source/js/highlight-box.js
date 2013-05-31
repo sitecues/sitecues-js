@@ -819,6 +819,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             instance = null;
             // Unbind!
             $(hlb).off('mousewheel DOMMouseScroll');
+            $(hlb).off('keydown');
             common.enableWheelScroll();
         };
 
@@ -861,24 +862,41 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 }
             }
 
-            if (!doStopScroll) { // some unrelevant key pressed
+            if (!doStopScroll) { // some unrelevant key pressed, skip
                 return;
             }
 
             // Don't scroll element if it doesn't have scroll bar
             if ($(e.target).is(hlb) && !common.hasVertScroll(e.target)) {
-                common.preventDefault(e);
-                // e.stopPropagation();
+                common.stopDefaultEventBehavior(e);
+                return false;
             }
 
             // Define scroll step for smooth scroll effect on pageup/pagedown.
             if (name === 'pagedown' || name === 'pageup') {
-                common.preventDefault(e);
+                common.stopDefaultEventBehavior(e);
+                
                 var step = e.target.offsetHeight / 4;
                 step = isUp? -step : step;
                 e.target.scrollTop += step;
                 return false;
            }
+
+            // todo: add all text input elements in this check
+            if (e.target.tagName.toLowerCase() == 'input' || e.target.tagName.toLowerCase() == 'textarea') {
+                // these keys don't scroll inputs' content so no need to take care of it.
+                if (name === 'end' || name === 'home' || name === 'up' || name === 'down') {
+                    return true;
+                } 
+            }
+
+           // Prevent all scrolling events because the height exceeded.
+            if ((!isUp && $(e.target).scrollTop() + e.target.clientHeight >=  e.target.scrollHeight)
+            ||  (isUp &&  $(e.target).scrollTop() <= 0)) {
+                common.stopDefaultEventBehavior(e);
+                return false;
+            }
+
         }
 
         var clientX, clientY;

@@ -73,14 +73,6 @@ sitecues.def('keys', function(keys, callback) {
 
             // prevent default if needed
             if (key.preventDefault) common.preventDefault(event);
-
-           if (key.stopOuterScroll) {
-                var hlb = event.dom.highlight_box && $(event.dom.highlight_box);
-                if ((key.down &&  $(hlb).scrollTop() + hlb[0].clientHeight >=  hlb[0].scrollHeight)
-                ||  (key.up &&  $(hlb).scrollTop() <= 0)) {
-                    common.preventDefault(event);
-                }
-            }
         };
 
         keys.isEditable = function ( element ) {
