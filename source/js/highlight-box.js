@@ -204,7 +204,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // close it out.
                 setTimeout(function() {
                     if (getState() === STATES.INFLATING) {
-					             	console.log("hlb in bad state. resetting.");
+					    console.log("hlb in bad state. resetting.");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
@@ -241,8 +241,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 // Trigger the background blur effect if there is a highlight box only.
                 //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
+                onHighlightBoxReady($(this));
                 backgroundDimmer.dimBackgroundContent(this, totalZoom);
-				onHighlightBoxOpened($(this));
               });
 
               return false;
@@ -813,52 +813,25 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             }
         }
 
+        var bodyStyle = {overflow: 'auto'};
         // Performs global clean-up when an instance is closed.
         function onHighlightBoxClosed(hlb) {
-            // All we need to do at the current time within the module is remove the instance.
+            // At the current time within the module we need to remove the instance.
             instance = null;
-            common.enableWheelScroll();
-            // todo:unbind!
-            $(hlb).off('mousewheel DOMMouseScroll');
-            $(hlb).off('keydown');
+            // Revert body style(s).
+            $('body').css('overflow', bodyStyle.overflow);
         };
 
-        function onHighlightBoxOpened(hlb) {
-            // Add listeners below to correctly handle if HLB is focused.
-            $(hlb).on('mousewheel DOMMouseScroll', function(e) {
-                wheelHandler(e, hlb);
-            });
-
-            $(hlb).on('keydown', function(e) {
-                keyDownHandler(e, hlb);
-            });
-        }
-
-        function wheelHandler(e, hlb) {
-             if ((common.wheelUp(e) && hlb.scrollTop() <= 0)
-                || (common.wheelDown(e) && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)) {
-                    common.disableWheelScroll();
-                    return;
-            } 
-            common.enableWheelScroll();
-        }
-
-        function keyDownHandler(e, hlb) {
-            var isUp;
-            // iterate over hlb key map
-            for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
-               // split key definition to parts
-               var name = key.split(/\s*\+\s*/)[0];
-               var test = keys.test[name];
-               if (test && test(e)) {
-                   isUp = keys.hlbKeysMap[key].up;
-                   break;
-               }
-            }
-            if ((!isUp && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
-            ||  (isUp && hlb.scrollTop() <= 0)) {
-                common.preventDefault(e);
-            }
+        function onHighlightBoxReady(hlb) {
+            // First prevent body form scroll on up/down keys, wheel and possibly other custom hot keys user may set.
+            var $body = $('body');
+            bodyStyle.overflow = $body.css('overflow');
+            $body.css('overflow', 'hidden');
+            // Then handle special keys such as 'pageup', 'pagedown' since they scroll element and window at the same time.
+            // Note: You need to give the div a tabindex so it can receive focus. Otherwise, it will not catch keydown/keyup/keypress event.
+            // Alternatively, we can catch the event on document/widnow level.
+            // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
+            $(hlb).focus();
         }
 
         var clientX, clientY;

@@ -54,12 +54,12 @@ sitecues.def('keys', function(keys, callback) {
         'esc':      {event: 'key/esc'},
         // If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
         // scroll
-        'up':       { stopOuterScroll: true, up: true },
-        'pageup':   { stopOuterScroll: true, up: true },
-        'home':     { stopOuterScroll: true, up: true },
-        'down':	    { stopOuterScroll: true, down: true },
-        'pagedown': { stopOuterScroll: true, down: true },
-        'end':      { stopOuterScroll: true, down: true }
+        'up':       {up: true },
+        'pageup':   {up: true },
+        'home':     {up: true },
+        'down':     {down: true },
+        'pagedown': {down: true },
+        'end':      {down: true }
     }
 
 	// get dependencies
@@ -73,14 +73,6 @@ sitecues.def('keys', function(keys, callback) {
 
             // prevent default if needed
             if (key.preventDefault) common.preventDefault(event);
-            // stop bubble up if needed
-            if (key.stopOuterScroll) {
-                var hlb = event.dom.highlight_box && $(event.dom.highlight_box);
-                if ((key.down && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
-                ||  (key.up && hlb.scrollTop() <= 0)) {
-                    common.preventDefault(event);
-                }
-            }
         };
 
         keys.isEditable = function ( element ) {
@@ -165,9 +157,32 @@ sitecues.def('keys', function(keys, callback) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
             $.extend(keys.test, keys.hlbKeysTest);
             $.extend(keys.map, keys.hlbKeysMap);
+            $(hlbElement).on('keydown', keyDownHandler);
+
+            function keyDownHandler(e) {
+                // Iterate over hlb key map
+                for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
+                    // Split key definition to parts
+                    var name = key.split(/\s*\+\s*/)[0];
+                    var test = keys.test[name];
+                    if (test && test(e)) {
+                        var isUp = keys.hlbKeysMap[key].up;
+                    break;
+                    }
+                }
+                // Prevent default behavior and define new scroll logic.
+                if (name === 'pagedown' || name === 'pageup') {
+                    common.preventDefault(e);
+                    // Define scroll step for smooth scroll effect.
+                    var step = e.target.offsetHeight / 4;
+                    step = isUp? -step : step;
+                    e.target.scrollTop += step;
+                    return false;
+                } 
+            }
 		} );
 
-		sitecues.on( 'hlb/closed', function () {
+		sitecues.on( 'hlb/closed', function (hlbElement) {
 			delete keys.test[ 'esc' ];
 			delete keys.test[ 'up' ];
 			delete keys.test[ 'down' ];
@@ -183,6 +198,8 @@ sitecues.def('keys', function(keys, callback) {
 			delete keys.map[ 'pagedown' ];
 			delete keys.map[ 'end' ];
 			delete keys.map[ 'home' ];
+            
+            $(hlbElement).off('keydown');
 		} );
 
 		// done
