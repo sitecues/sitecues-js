@@ -813,25 +813,72 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             }
         }
 
-        var bodyStyle = {overflow: 'auto'};
         // Performs global clean-up when an instance is closed.
         function onHighlightBoxClosed(hlb) {
             // At the current time within the module we need to remove the instance.
             instance = null;
-            // Revert body style(s).
-            $('body').css('overflow', bodyStyle.overflow);
+            // Unbind!
+            $(hlb).off('mousewheel DOMMouseScroll');
+            common.enableWheelScroll();
         };
 
+        // Handle scroll key events when their target is HLB element or its children.
         function onHighlightBoxReady(hlb) {
-            // First prevent body form scroll on up/down keys, wheel and possibly other custom hot keys user may set.
-            var $body = $('body');
-            bodyStyle.overflow = $body.css('overflow');
-            $body.css('overflow', 'hidden');
             // Then handle special keys such as 'pageup', 'pagedown' since they scroll element and window at the same time.
             // Note: You need to give the div a tabindex so it can receive focus. Otherwise, it will not catch keydown/keyup/keypress event.
             // Alternatively, we can catch the event on document/widnow level.
             // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
             $(hlb).focus();
+            // Add listener below to correctly handle scroll event(s) if HLB is opened.
+            $(hlb).on('mousewheel DOMMouseScroll', function(e) {
+                wheelHandler(e, hlb);
+            });
+            $(hlb).on('keydown', function(e) {
+                keyDownHandler(e, hlb);
+            });
+        }
+
+        function wheelHandler(e, hlb) {
+           if ($(e.target).is(hlb) && !common.hasVertScroll(e.target)
+               || (common.wheelUp(e) && $(e.target).scrollTop() <= 0)
+               || (common.wheelDown(e) && $(e.target).scrollTop() + e.target.clientHeight + 1 >= e.target.scrollHeight)) {
+                   common.disableWheelScroll();
+                   return;
+           }
+           common.enableWheelScroll();
+        }
+        
+        function keyDownHandler(e, hlb) {
+            // Iterate over hlb key map
+            for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
+                // Split key definition to parts
+                var name = key.split(/\s*\+\s*/)[0];
+                var test = keys.test[name];
+                if (test && test(e)) {
+                    var isUp = keys.hlbKeysMap[key].up;
+                    var doStopScroll = keys.hlbKeysMap[key].stopOuterScroll;
+                    break;
+                }
+            }
+
+            if (!doStopScroll) { // some unrelevant key pressed
+                return;
+            }
+
+            // Don't scroll element if it doesn't have scroll bar
+            if ($(e.target).is(hlb) && !common.hasVertScroll(e.target)) {
+                common.preventDefault(e);
+                // e.stopPropagation();
+            }
+
+            // Define scroll step for smooth scroll effect on pageup/pagedown.
+            if (name === 'pagedown' || name === 'pageup') {
+                common.preventDefault(e);
+                var step = e.target.offsetHeight / 4;
+                step = isUp? -step : step;
+                e.target.scrollTop += step;
+                return false;
+           }
         }
 
         var clientX, clientY;

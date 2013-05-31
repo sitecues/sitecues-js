@@ -273,6 +273,7 @@ sitecues.def('util/common', function (common, callback) {
              */
             function wheel(e) {
                 common.preventDefault(e);
+                e.stopPropagation();
             }
 
             /**
@@ -302,7 +303,9 @@ sitecues.def('util/common', function (common, callback) {
              * @param e Event Object
              */
             common.wheelUp = function(e) {
-                return e.originalEvent.wheelDelta/120 > 0;
+                var evt = e || window.event;
+                var delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
+                return delta > 0;
             }
 
              /** 
@@ -311,6 +314,10 @@ sitecues.def('util/common', function (common, callback) {
              */
             common.wheelDown = function(e) {
                 return !this.wheelUp(e);
+            }
+
+           common.hasVertScroll = function(el) {
+                return el.clientHeight < el.scrollHeight
             }
 
         // Done.
