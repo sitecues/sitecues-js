@@ -818,8 +818,15 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             // At the current time within the module we need to remove the instance.
             instance = null;
             // Unbind!
-            $(hlb).off('mousewheel DOMMouseScroll');
-            $(hlb).off('keydown');
+            $(hlb).off('mousewheel DOMMouseScroll', function(e) {
+                wheelHandler(e, hlb);
+            });
+            $(hlb).off('keydown', function(e) {
+                keyDownHandler(e, hlb);
+            });
+            $(window).off('keydown', function(e) {
+                keyDownHandler(e, hlb);
+            });
             common.enableWheelScroll();
         };
 
@@ -835,6 +842,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 wheelHandler(e, hlb);
             });
             $(hlb).on('keydown', function(e) {
+                keyDownHandler(e, hlb);
+            });
+            $(window).on('keydown', function(e) {
                 keyDownHandler(e, hlb);
             });
         }
