@@ -348,7 +348,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         borderRadius: HighlightBox.kBoxBorderRadius,
                         borderColor:  HighlightBox.kBoxBorderColor,
                         borderStyle:  HighlightBox.kBoxBorderStyle,
-                        borderWidth:  HighlightBox.kBoxBorderWidth
+                        borderWidth:  HighlightBox.kBoxBorderWidth,
+                        outline:      '0'
                     });
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
 				if (isEmptyBgImage(currentStyle.backgroundImage)) {
