@@ -2,11 +2,10 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
 sitecues.def('highlight-box', function (highlightBox, callback) {
-    // shortcut to hasOwnProperty
-    var has = Object.prototype.hasOwnProperty;
+
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'background-dimmer', 'keys', 'ui', 'jquery/transform2d', 'jquery/color',
-    function ($, conf, cursor, positioning, common, backgroundDimmer, keys) {
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+    function ($, conf, cursor, positioning, common, eventHandlers, backgroundDimmer) {
 
         // Constants
 
@@ -817,12 +816,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         // Performs global clean-up when an instance is closed.
         function onHighlightBoxClosed(hlb) {
             // Unbind!
-            $(hlb).off('mousewheel DOMMouseScroll', wheelHandler);
-            $(window).off('keydown', keyDownHandler);
+            $(hlb).off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
+            $(window).off('keydown', eventHandlers.keyDownHandler);
             // At the current time within the module we need to remove the instance.
             $(hlb).blur();
             instance = null;
-            common.enableWheelScroll();
+            eventHandlers.enableWheelScroll();
         };
 
         // Handle scroll key events when their target is HLB element or its children.
@@ -833,115 +832,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
             $(hlb).focus();
             // Add listener below to correctly handle scroll event(s) if HLB is opened.
-            $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, wheelHandler);
-            $(window).on('keydown', {'hlb': hlb}, keyDownHandler);
-        }
-
-        function wheelHandler(e) {
-           var target = e.data.hlb[0];
-           // Find out if target is a child of HLB(inner content element)
-           var isChild;
-           $(target).children().each(function() {
-                if ($(this).is(e.target)) {
-                    isChild = true;
-                    return;
-                }
-           })
-
-            // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
-           if (!isChild && !common.hasVertScroll(target)
-               || (common.wheelUp(e) && $(target).scrollTop() <= 0)
-               || (common.wheelDown(e) && $(target).scrollTop() + target.clientHeight + 1 >= target.scrollHeight)) {
-                   common.disableWheelScroll();
-                   return false;
-           }
-
-           common.enableWheelScroll();
-        }
-        
-        function keyDownHandler(e) {
-            var target = e.data.hlb[0];
-            // Iterate over hlb key map
-            for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
-                // Split key definition to parts
-                var name = key.split(/\s*\+\s*/)[0];
-                var test = keys.test[name];
-                if (test && test(e)) {
-                    var isUp = keys.hlbKeysMap[key].up;
-                    var doStopScroll = keys.hlbKeysMap[key].stopOuterScroll;
-                    break;
-                }
-            }
-
-            if (!doStopScroll) { // some unrelevant key pressed, skip
-                return;
-            }
- 
-            // Find out if target is a child of HLB(inner content element)
-            var isChild;
-            $(target).children().each(function() {
-                if ($(this).is(e.target)) {
-                    isChild = true;
-                    return;
-                }
-            })
-
-            // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
-            if (!isChild && !common.hasVertScroll(target)) {
-                common.stopDefaultEventBehavior(e);
-                return false;
-            }
-
-            // Pageup/pagedown default behavior always affect window/document scroll(simultaniously with element's local scroll).
-            // So prevent default and define new scroll logic.
-            if (name === 'pagedown' || name === 'pageup') {
-                target = isChild ? e.target : target;
-                smoothlyScroll(e, target, Math.round(target.offsetHeight / 4), isUp);
-                return false;
-           }
-
-            // Handle name === 'end, 'home', 'up', 'down' etc
-
-            // todo: add all text input elements in this check
-            // If it is a child then we just return, the event will bubble up to the HLB
-            if (isChild || target.tagName.toLowerCase() == 'input' || target.tagName.toLowerCase() == 'textarea') {
-               return true;
-            }
-
-            switch (name) {
-                case 'down':
-                case 'up':
-                    smoothlyScroll(e, target, 1, isUp);
-                    break;
-                case 'end':
-                case 'home':
-                    isUp? $(target).scrollTop() : $(target).scrollTop($(target).width());
-                    break;
-                default:
-                    break;
-            }
-
-            // Prevent all scrolling events because the height exceeded.
-            if ((!isUp && $(target).scrollTop() + target.clientHeight + 6 >=  target.scrollHeight)
-            ||  (isUp &&  $(target).scrollTop() <= 0)) {
-                common.stopDefaultEventBehavior(e);
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * @param e EventObject
-         * @param el HTMLObject
-         * @param step Number the number of pixels set as scroll interval
-         * @param isUp Boolean True if scroll direction is up
-         */
-        function smoothlyScroll(e, el, step, isUp) {
-            common.stopDefaultEventBehavior(e);
-            var step = step || 1;
-            step = isUp? -step : step;
-            el.scrollTop += step;
-            return false;
+            $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
+            $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);
         }
 
         var clientX, clientY;

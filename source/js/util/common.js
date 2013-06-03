@@ -273,36 +273,6 @@ sitecues.def('util/common', function (common, callback) {
             }
 
             /**
-             * Wheel scroll event handler.
-             * @param e Event Object
-             */
-            function wheel(e) {
-                common.preventDefault(e);
-            }
-
-            /**
-             * Unbinds wheel scroll event from window and document.
-             */
-            common.disableWheelScroll = function() {
-                if (window.addEventListener) {
-                    window.addEventListener('DOMMouseScroll', wheel, false);
-                }
-                window.onmousewheel   =  wheel;
-                document.onmousewheel = wheel;
-            }
-
-            /**
-             * Binds wheel scroll event to window and document.
-             */
-            common.enableWheelScroll = function() {
-                if (window.removeEventListener) {
-                    window.removeEventListener('DOMMouseScroll', wheel, false);
-                }
-                window.onmousewheel = null; 
-                document.onmousewheel = null;
-            }
-
-            /**
              * Defines wheel scroll direction: if wheel is up.
              * @param e Event Object
              */
@@ -322,6 +292,20 @@ sitecues.def('util/common', function (common, callback) {
 
            common.hasVertScroll = function(el) {
                 return el.clientHeight < el.scrollHeight;
+            }
+            
+            /**
+             * @param e EventObject
+             * @param el HTMLObject
+             * @param step Number the number of pixels set as scroll interval
+             * @param isUp Boolean True if scroll direction is up
+             */
+            common.smoothlyScroll = function(e, el, step, isUp) {
+                common.stopDefaultEventBehavior(e);
+                var step = step || 1;
+                step = isUp? -step : step;
+                el.scrollTop += step;
+                return false;
             }
 
         // Done.
