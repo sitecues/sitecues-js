@@ -81,7 +81,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
                     break;
                 case 'end':
                 case 'home':
-                    isUp? $(target).scrollTop() : $(target).scrollTop($(target).width());
+                    isUp? $(target).scrollTop(0) : $(target).scrollTop($(target).width());
                     break;
                 default:
                     break;
