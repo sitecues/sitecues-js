@@ -278,7 +278,6 @@ sitecues.def('util/common', function (common, callback) {
              */
             function wheel(e) {
                 common.preventDefault(e);
-                e.stopPropagation();
             }
 
             /**
