@@ -1,4 +1,4 @@
-﻿/**
+/**
  * This is the module for the cursor enhancement.
  * It works as follows:
  * - enables/disables cursor module if zoom level is above/below certain value appropriately;
@@ -35,7 +35,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 		 * Initialize cursor according to zoom level given.
 		 */
 		cursor.init = function(value) {
-			cursor.zoomLevel = value * value;
+			cursor.zoomLevel = Math.pow(value, 2);
 			var cursorWasEnabled = cursor.isEnabled;
 			cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
