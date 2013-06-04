@@ -261,9 +261,10 @@ sitecues.def('util/common', function (common, callback) {
              * @param e Event Object
              */
             common.preventDefault = function(e) {
-                e = e || window.event;
+                e = e || window.event; // cross-browser event
                 if (e.preventDefault)
                     e.preventDefault();
+                e.cancelBubble = true; // IE variant
                 e.returnValue = false;
             }
             
