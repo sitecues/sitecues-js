@@ -9,12 +9,6 @@ sitecues.def('toolbar/slider', function(slider, callback){
 			 * @return void
 			 */
 			slider.build = function(parent) {
-				var dropdownLink = $('<div class="sitecues-dropdown" rel="sitecues-main"><a>sitecues</a></div>').prependTo(parent);
-				var menu = $('<div id="sitecues-main" class="sitecues-menu"><ul><li>Link 1</li><li>Link 2</li></div>').appendTo(parent);
-
-				// create small A label
-				$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(parent);
-
 				// create clider slider.wrap element
 				slider.wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(parent);
 
@@ -22,20 +16,15 @@ sitecues.def('toolbar/slider', function(slider, callback){
 				slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
 				var thumb = $( '<div class="sitecues-slider-thumb"></div>').appendTo( slider.slider );
 
-
-
 				$( '<img>' ).addClass( 'ramp' ).attr({
 						src:    sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
 				}).appendTo( slider.wrap );
 
+				conf.set( 'zoom', this.value );
 
-				// create big A label
-				$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( parent );
-										conf.set( 'zoom', this.value );
-
-														// handle zoom change and update slider
+				// handle zoom change and update slider
 				conf.get( 'zoom', function( value ) {
-						slider.slider.val( value );
+					slider.slider.val( value );
 				});
 
 				var thumbHammer = Hammer(thumb.get(0));
@@ -58,8 +47,6 @@ sitecues.def('toolbar/slider', function(slider, callback){
 				});
 
 			}
-
-
 
 			callback();
 

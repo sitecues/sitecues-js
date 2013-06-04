@@ -37,6 +37,8 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
                     panel.ttsToggle();
                 });
 
+                toolbar.wireEvents();
+
             }
 
             if(callback) {
@@ -75,18 +77,58 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             }
         },
 
+        /**
+         * Looks for toolbar elements with a "rel" attribute of value
+         * "sitecues-event". It then looks for a "data-sitecues-event" attribute
+         * that will say which event(s) to fire.
+         *
+         * Note: We could possibly skip the "rel" step.
+         * 
+         * @return void
+         */
+        toolbar.wireEvents = function() {
+            toolbar.instance.find('[rel="sitecues-event"]').each(function() {
+                console.log($(this));
+                $(this).click(function() {
+                    var event = $(this).data('sitecues-event');
+                    if(event) {
+                        sitecues.emit(event);
+                    } else {
+                        console.log("No event configured");
+                    }
+                })
+            })
+        }
+
         $( document ).ready( function () {
             if(conf.get('showToolbar')) {
                 toolbar.slideIn();
             }
         } );
 
+        /**
+         * Closes the toolbar and sets the preference so it stays closed.
+         * 
+         * @return void
+         */
+        toolbar.disable = function() {
+            conf.set("toolbarEnabled", false);
+            toolbar.toggle();
+        }
+
         sitecues.on( 'badge/hover', toolbar.slideOut );
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
+        sitecues.on( 'toolbar/disable', toolbar.disable );
 
         // load special toolbar css
         load.style('../css/toolbar.css');
-        setTimeout(toolbar.slideOut, 500);
+        load.style('../css/bootstrap.css');
+
+        // FIXME We'll wait a half-second to show the toolbar, because
+        // otherwise we don't know if everything is loaded or not.  I'd rather
+        // have this listen to some event or possible check on a setTimeout
+        // loop.
+        setTimeout(toolbar.slideOut, 500)
 
         callback();
     } );

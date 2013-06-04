@@ -1,5 +1,6 @@
 .sitecues-toolbar {
-	background-color:#fff;
+	background-color:#000;
+    font-family: Calibri, Candara, Segoe, “Segoe UI”, Optima, Arial, sans-serif;;
 	position:fixed;
 	top:0;
 	left:0;
@@ -12,19 +13,10 @@
 	display:none;
 }
 
-
-.sitecues-toolbar input[type='range'] {
-    position:absolute;
-    -webkit-appearance: none;
-    left: 5px;
-    height: 0px;
-    width: 198px;
-    /*top: 26px;*/
-}
-
 .sitecues-slider {
     position:absolute;
-    width:200px;
+    width:100%;
+    height:100%;
     border:1px solid red;
     }
 .sitecues-slider-thumb {
@@ -43,11 +35,15 @@
 }
 
 .sitecues-toolbar .slider-wrap {
+    background-image: url('../images/toolbar/toolbar-slider.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center 0%;
     position: absolute;
-    top: 20px;
     right: 150px;
     display: inline;
-    width: 100px;
+    width: 200px;
+    height:100%;
 }
 
 .sitecues-toolbar .ramp {
@@ -58,10 +54,6 @@
     max-width: 105px;
     opacity: 50;
     z-index: -1;
-}
-
-.sitecues-toolbar .slider {
-    width: 180px;
 }
 
 .sitecues-toolbar .small {
@@ -87,9 +79,10 @@
     top: 1px;
     right: 0;
     width: 68px;
-    height: 38px;
-    background-image: url('../images/tts-icon-1.png');
-    background-size: 135px;
+    height: 100%;
+    background-image: url('../images/toolbar/toolbar-speech.png');
+    background-size: contain;
+    background-repeat: no-repeat;
     background-position: 0% 0%;
 }
 
@@ -100,7 +93,8 @@
     width: 136px;
     height: 76px;
     background-image: url('../images/tts-icon-1.png');
-    background-size: 270px;
+    background-size: 50px;
+    background-repeat: no-repeat;
     background-position: -135px 0%;
 }
 
@@ -129,16 +123,50 @@
 }
 
 .sitecues-toolbar.hori .sitecues-resizer {
-    background-color: #ccc;
+    background-color: #000;
     height:3px;
     position:absolute;
-    bottom:0;
+    bottom:-3px;
     width:100%;
     cursor: ns-resize;
+    border-bottom: 3px outset;
+}
+
+.sitecues-toolbar.hori .sitecues-resizer:hover {
+    /*background-color:#ccc;*/
 }
 
 .sitecues-toolbar.vert .sitecues-resizer {
     cursor: ew-resize;
+}
+
+.dropdown-toggle span {
+    display:none;
+}
+
+.sitecues-toolbar.hori .dropdown-wrap {
+    height:100%;
+}
+
+.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a:hover {
+    height:100%;
+    background-color:#0046ad;
+    background-image:none;
+    color:#fff;
+}
+
+.sitecues-toolbar.hori .dropdown-menu {
+    margin:10px;
+}
+
+.sitecues-toolbar.hori .dropdown-toggle {
+    background-image: url('../images/toolbar/toolbar-logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    height:90%;
+    display:block;
+    margin:5px 10px;
 }
 
 .noselect {

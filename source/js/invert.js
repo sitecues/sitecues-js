@@ -101,7 +101,33 @@ sitecues.def('invert', function (invert, callback) {
             }
         } );
 
+        /**
+         * Inverts the page colors.  Currently only works in webkit.
+         * 
+         * @param  keypress event A keypress event, optional.
+         * @return void
+         */
         sitecues.on('inverse/toggle', function (event) {
+            if(!event) {
+                // We have no key event.
+                if (invert_state_page === STATES.INVERT) {
+                    setStylePageNone();
+                    invert_state_page = STATES.NORMAL;
+                    console.log("invert off");
+                } else {
+                    setStylePageFull();
+                    invert_state_page = STATES.INVERT;
+                    console.log("invert on");
+                }
+                // There should not be a highlight box open so we'll just set
+                // it to match
+                invert_state_highlight_box = STATES.MATCH;
+                setStyleHighlightBoxNone();
+                return;
+            }
+
+            //TODO We should probably clean up what's below here, or put it on
+            //the menu in the North End.
             if (! (event.altKey || event.ctrlKey || event.metaKey)) {
                 var highlight_box_state  = highlight_box.getState();
                 var highlight_box_states = highlight_box.STATES;
