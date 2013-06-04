@@ -261,40 +261,20 @@ sitecues.def('util/common', function (common, callback) {
              * @param e Event Object
              */
             common.preventDefault = function(e) {
-                e = e || window.event;
+                e = e || window.event; // cross-browser event
                 if (e.preventDefault)
                     e.preventDefault();
+                e.cancelBubble = true; // IE variant
                 e.returnValue = false;
             }
-
+            
             /**
-             * Wheel scroll event handler.
+             * Prevents default and stops propogation.
              * @param e Event Object
              */
-            function wheel(e) {
+            common.stopDefaultEventBehavior = function(e) {
                 common.preventDefault(e);
-            }
-
-            /**
-             * Unbinds wheel scroll event from window and document.
-             */
-            common.disableWheelScroll = function() {
-                if (window.addEventListener) {
-                    window.addEventListener('DOMMouseScroll', wheel, false);
-                }
-                window.onmousewheel   =  wheel;
-                document.onmousewheel = wheel;
-            }
-
-            /**
-             * Binds wheel scroll event to window and document.
-             */
-            common.enableWheelScroll = function() {
-                if (window.removeEventListener) {
-                    window.removeEventListener('DOMMouseScroll', wheel, false);
-                }
-                window.onmousewheel = null; 
-                document.onmousewheel = null;
+                e.stopPropagation();
             }
 
             /**
@@ -302,7 +282,9 @@ sitecues.def('util/common', function (common, callback) {
              * @param e Event Object
              */
             common.wheelUp = function(e) {
-                return e.originalEvent.wheelDelta/120 > 0;
+                var evt = e || window.event;
+                var delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
+                return delta > 0;
             }
 
              /** 
@@ -311,6 +293,28 @@ sitecues.def('util/common', function (common, callback) {
              */
             common.wheelDown = function(e) {
                 return !this.wheelUp(e);
+            }
+
+            /**
+             * Defines if the element given contains vertical scroll.
+             * @param el HTMLObject
+             */
+           common.hasVertScroll = function(el) {
+                return el.clientHeight < el.scrollHeight;
+            }
+            
+            /**
+             * @param e EventObject
+             * @param el HTMLObject
+             * @param step Number the number of pixels set as scroll interval
+             * @param isUp Boolean True if scroll direction is up
+             */
+            common.smoothlyScroll = function(e, el, step, isUp) {
+                common.stopDefaultEventBehavior(e);
+                var step = step || 1;
+                step = isUp? -step : step;
+                el.scrollTop += step;
+                return false;
             }
 
         // Done.

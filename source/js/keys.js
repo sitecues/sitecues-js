@@ -41,9 +41,9 @@ sitecues.def('keys', function(keys, callback) {
 
  	// define keys map used to bind actions to hotkeys
 	keys.map = {
-		'minus':	{ event: 'zoom/decrease'  },
-		'plus':		{ event: 'zoom/increase'  },
-		'r':		{ event: 'inverse/toggle' },
+		'minus':	{ preventDefault: true, event: 'zoom/decrease' },
+		'plus':		{ preventDefault: true, event: 'zoom/increase' },
+		'r':		{ preventDefault: true, event: 'inverse/toggle'},
 		'f8':		{ event: 'toolbar/toggle' },
 		'space':	{
 			event: 'highlight/animate',
@@ -59,12 +59,10 @@ sitecues.def('keys', function(keys, callback) {
         'up':       { stopOuterScroll: true, up: true },
         'pageup':   { stopOuterScroll: true, up: true },
         'home':     { stopOuterScroll: true, up: true },
-        'down':	    { stopOuterScroll: true, down: true },
+        'down':     { stopOuterScroll: true, down: true },
         'pagedown': { stopOuterScroll: true, down: true },
         'end':      { stopOuterScroll: true, down: true }
     }
-
-	// get dependencies
 	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
         // handle key
         keys.handle = function ( key, event ) {
@@ -74,14 +72,10 @@ sitecues.def('keys', function(keys, callback) {
             }
 
             // prevent default if needed
-            if (key.preventDefault) common.preventDefault(event);
-            // stop bubble up if needed
-            if (key.stopOuterScroll) {
-                var hlb = event.dom.highlight_box && $(event.dom.highlight_box);
-                if ((key.down && hlb.scrollTop() + hlb[0].clientHeight >= hlb[0].scrollHeight)
-                ||  (key.up && hlb.scrollTop() <= 0)) {
-                    common.preventDefault(event);
-                }
+            if (key.preventDefault) {
+                common.preventDefault(event);
+                //Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
+                event.stopImmediatePropagation();
             }
         };
 
@@ -95,7 +89,7 @@ sitecues.def('keys', function(keys, callback) {
             tag = tag.toLowerCase();
 
             if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
-                return true;
+               return true;
             }
 
             if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
@@ -161,7 +155,8 @@ sitecues.def('keys', function(keys, callback) {
 		};
 
 		// bind key hook to window
-		$(window).on('keydown', keys.hook);
+        // 3rd param changes event order: false == bubbling; true = capturing.
+		window.addEventListener('keydown', keys.hook, true);
         
 		sitecues.on('hlb/ready', function (hlbElement) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
@@ -169,7 +164,7 @@ sitecues.def('keys', function(keys, callback) {
             $.extend(keys.map, keys.hlbKeysMap);
 		} );
 
-		sitecues.on( 'hlb/closed', function () {
+		sitecues.on( 'hlb/closed', function (hlbElement) {
 			delete keys.test[ 'esc' ];
 			delete keys.test[ 'up' ];
 			delete keys.test[ 'down' ];
@@ -185,6 +180,8 @@ sitecues.def('keys', function(keys, callback) {
 			delete keys.map[ 'pagedown' ];
 			delete keys.map[ 'end' ];
 			delete keys.map[ 'home' ];
+            
+            $(hlbElement).off('keydown');
 		} );
 
 		// done
