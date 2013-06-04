@@ -25,7 +25,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		var canvas = document.createElement('canvas'),
 			span = document.createElement('span'),
 			divHolder = document.createElement('div'),
-			body = document.getElementsByTagName('body')[0],
+			body = document.body,
 			spanWidth, spanHeight,
 			text = types[type] || types['default'];
 
@@ -159,7 +159,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			if (element.src !== url)
 				element.src = url;
 		}
-		
+
 		// set cursor zoom
 		// todo: remove or modify the code?
 		cursor.zoom = function(element, zoom){
