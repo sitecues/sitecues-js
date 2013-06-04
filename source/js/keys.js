@@ -40,9 +40,9 @@ sitecues.def('keys', function(keys, callback) {
 
  	// define keys map used to bind actions to hotkeys
 	keys.map = {
-		'minus':	{ event: 'zoom/decrease' },
-		'plus':		{ event: 'zoom/increase' },
-		'r':		{ event: 'inverse/toggle'},
+		'minus':	{ preventDefault: true, event: 'zoom/decrease' },
+		'plus':		{ preventDefault: true, event: 'zoom/increase' },
+		'r':		{ preventDefault: true, event: 'inverse/toggle'},
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
@@ -61,8 +61,6 @@ sitecues.def('keys', function(keys, callback) {
         'pagedown': { stopOuterScroll: true, down: true },
         'end':      { stopOuterScroll: true, down: true }
     }
-
-	// get dependencies
 	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
         // handle key
         keys.handle = function ( key, event ) {
@@ -72,7 +70,11 @@ sitecues.def('keys', function(keys, callback) {
             }
 
             // prevent default if needed
-            if (key.preventDefault) common.preventDefault(event);
+            if (key.preventDefault) {
+                common.preventDefault(event);
+                //Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
+                event.stopImmediatePropagation();
+            }
         };
 
         keys.isEditable = function ( element ) {
@@ -85,7 +87,7 @@ sitecues.def('keys', function(keys, callback) {
             tag = tag.toLowerCase();
 
             if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
-                return true;
+               return true;
             }
 
             if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
@@ -151,7 +153,8 @@ sitecues.def('keys', function(keys, callback) {
 		};
 
 		// bind key hook to window
-		$(window).on('keydown', keys.hook);
+        // 3rd param changes event order: false == bubbling; true = capturing.
+		window.addEventListener('keydown', keys.hook, true);
         
 		sitecues.on('hlb/ready', function (hlbElement) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
