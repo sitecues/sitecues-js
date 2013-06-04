@@ -267,6 +267,10 @@ sitecues.def('util/common', function (common, callback) {
                 e.returnValue = false;
             }
             
+            /**
+             * Prevents default and stops propogation.
+             * @param e Event Object
+             */
             common.stopDefaultEventBehavior = function(e) {
                 common.preventDefault(e);
                 e.stopPropagation();
@@ -290,6 +294,10 @@ sitecues.def('util/common', function (common, callback) {
                 return !this.wheelUp(e);
             }
 
+            /**
+             * Defines if the element given contains vertical scroll.
+             * @param el HTMLObject
+             */
            common.hasVertScroll = function(el) {
                 return el.clientHeight < el.scrollHeight;
             }

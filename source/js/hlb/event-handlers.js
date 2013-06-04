@@ -1,19 +1,28 @@
+/**
+ * In order to keep each module as clear as possible we take out some unrelevant code to the separate files.
+ * The module represents HLB event handlers.
+ * For example, we want to onle allow scroll for HLB and its entities when HLB is open.
+ * Stop event bubble up to window/document object.
+ *  
+ * Note: keydown event is also handled in keys.js
+ */
+
 sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
+
     // shortcut to hasOwnProperty
     var has = Object.prototype.hasOwnProperty;
+
 	sitecues.use('jquery', 'util/common', 'keys',  function($, common, keys) {
         
+        /**
+         * Onmousewheel event handler.
+         * @param e EventObject
+         */
         eventHandlers.wheelHandler = function(e) {
-           var target = e.data.hlb[0];
-           // Find out if target is a child of HLB(inner content element)
-           var isChild;
-           $(target).children().each(function() {
-                if ($(this).is(e.target)) {
-                    isChild = true;
-                    return;
-                }
-           })
-           target = isChild ? e.target : target;
+           var hlb = e.data.hlb[0];
+           // Find out if target is a child of HLB(inner content element).
+           var isChild = targetIsChildOfHlb(hlb, e.target);
+           var target = isChild ? e.target : hlb;
             // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
            if (!isChild && !common.hasVertScroll(target)
                || (common.wheelUp(e) && $(target).scrollTop() <= 0)
@@ -25,11 +34,15 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
            eventHandlers.enableWheelScroll();
         }
         
+       /**
+         * Onkeydown event handler.
+         * @param e EventObject
+         */
         eventHandlers.keyDownHandler = function(e) {
-            var target = e.data.hlb[0];
-            // Iterate over hlb key map
+            var hlb = e.data.hlb[0];
+            // Iterate over hlb key map.
             for(var key in keys.hlbKeysMap) if (has.call(keys.hlbKeysMap, key)) {
-                // Split key definition to parts
+                // Split key definition to parts.
                 var name = key.split(/\s*\+\s*/)[0];
                 var test = keys.test[name];
                 if (test && test(e)) {
@@ -39,21 +52,15 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
                 }
             }
 
-            if (!doStopScroll) { // some unrelevant key pressed, skip
+            if (!doStopScroll) { // Some unrelevant key pressed, skip.
                 return;
             }
  
-            // Find out if target is a child of HLB(inner content element)
-            var isChild;
-            $(target).children().each(function() {
-                if ($(this).is(e.target)) {
-                    isChild = true;
-                    return;
-                }
-            })
+            // Find out if target is a child of HLB(inner content element).
+            var isChild = targetIsChildOfHlb(hlb, e.target);
 
             // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
-            if (!isChild && !common.hasVertScroll(target)) {
+            if (!isChild && !common.hasVertScroll(hlb)) {
                 common.stopDefaultEventBehavior(e);
                 return false;
             }
@@ -61,7 +68,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
             // Pageup/pagedown default behavior always affect window/document scroll(simultaniously with element's local scroll).
             // So prevent default and define new scroll logic.
             if (name === 'pagedown' || name === 'pageup') {
-                target = isChild ? e.target : target;
+                var target = isChild ? e.target : hlb;
                 common.smoothlyScroll(e, target, Math.round(target.offsetHeight / 4), isUp);
                 return false;
            }
@@ -69,62 +76,80 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
             // Handle name === 'end, 'home', 'up', 'down' etc
 
             // todo: add all text input elements in this check
-            // If it is a child then we just return, the event will bubble up to the HLB
-            if (isChild || target.tagName.toLowerCase() == 'input' || target.tagName.toLowerCase() == 'textarea') {
+            // If it is a child then we just return, the event will bubble up to the HLB and treated there.
+            if (isChild || hlb.tagName.toLowerCase() == 'input' || hlb.tagName.toLowerCase() == 'textarea') {
                return true;
             }
 
             switch (name) {
                 case 'down':
                 case 'up':
-                    common.smoothlyScroll(e, target, 1, isUp);
+                    common.smoothlyScroll(e, hlb, 1, isUp);
                     break;
                 case 'end':
                 case 'home':
-                    isUp? $(target).scrollTop(0) : $(target).scrollTop($(target)[0].offsetHeight);
+                    isUp? $(hlb).scrollTop(0) : $(hlb).scrollTop($(hlb)[0].offsetHeight);
                     break;
                 default:
                     break;
             }
 
             // Prevent all scrolling events because the height exceeded.
-            if ((!isUp && $(target).scrollTop() + target.clientHeight + 6 >=  target.scrollHeight)
-            ||  (isUp &&  $(target).scrollTop() <= 0)) {
+            if ((!isUp && $(hlb).scrollTop() + hlb.clientHeight + 6 >=  hlb.scrollHeight)
+            ||  (isUp &&  $(hlb).scrollTop() <= 0)) {
                 common.stopDefaultEventBehavior(e);
                 return false;
             }
+            
+            // Otherwise, everything's OK, allow default.
             return true;
         }
 
-            /**
-             * Wheel scroll event handler.
-             * @param e Event Object
-             */
-            function wheel(e) {
-                common.preventDefault(e);
-            }
-
-            /**
-             * Unbinds wheel scroll event from window and document.
-             */
-            eventHandlers.disableWheelScroll = function() {
-                if (window.addEventListener) {
-                    window.addEventListener('DOMMouseScroll', wheel, false);
+        /**
+         * Check is current target is an descentor of hlb element.
+         * @param hlb Html Object
+         * @param eTarget Object
+         */
+        function targetIsChildOfHlb(hlb, eTarget) {
+           var isChild;
+           $(hlb).children().each(function() {
+                if ($(this).is(eTarget)) {
+                    isChild = true;
+                    return;
                 }
-                window.onmousewheel   =  wheel;
-                document.onmousewheel = wheel;
-            }
+           })
+           return isChild;
+        }
 
-            /**
-             * Binds wheel scroll event to window and document.
-             */
-            eventHandlers.enableWheelScroll = function() {
-                if (window.removeEventListener) {
-                    window.removeEventListener('DOMMouseScroll', wheel, false);
-                }
-                window.onmousewheel = null; 
-                document.onmousewheel = null;
+        /**
+         * Wheel scroll event handler.
+         * @param e Event Object
+         */
+        function wheel(e) {
+            common.preventDefault(e);
+        }
+
+        /**
+         * Unbinds wheel scroll event from window and document.
+         */
+        eventHandlers.disableWheelScroll = function() {
+            if (window.addEventListener) {
+                window.addEventListener('DOMMouseScroll', wheel, false);
             }
+            window.onmousewheel   =  wheel;
+            document.onmousewheel = wheel;
+        }
+
+        /**
+         * Binds wheel scroll event to window and document.
+         */
+        eventHandlers.enableWheelScroll = function() {
+            if (window.removeEventListener) {
+                window.removeEventListener('DOMMouseScroll', wheel, false);
+            }
+            window.onmousewheel = null; 
+            document.onmousewheel = null;
+        }
         
     // Done.
     callback();
