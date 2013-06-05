@@ -1,13 +1,13 @@
 // view for the caret enhancement
 // NOTE: moved from TS codebase, need refactoring
-eqnx.def('caret/view', function(view, callback){
+sitecues.def('caret/view', function(view, callback){
 
 	// constants
 	view.kZindex = 2147483647 - 1;
-	view.kCaretId = 'eqnx-eq360-caret';
+	view.kCaretId = 'sitecues-eq360-caret';
 
 	// Add dependencies
-	eqnx.use('jquery', 'conf', 'style', 'caret/coords', 'util/positioning', 'ui', function($, conf, styles, coords, positioning){
+	sitecues.use('jquery', 'conf', 'style', 'caret/coords', 'util/positioning', 'ui', function($, conf, styles, coords, positioning){
 
 		// show caret view
 		view.show = function(target){
@@ -22,7 +22,7 @@ eqnx.def('caret/view', function(view, callback){
 
 			// Create new caret
 			if (!view.renderedCaret)
-				view.renderedCaret = $('<div>').attr('id', 'eqnx-caret').appendTo('html');
+				view.renderedCaret = $('<div>').attr('id', 'sitecues-caret').appendTo('html');
 
 			// Seems to help us not be off by as many pixels, at least in Chrome
 			// However, it's not working perfectly -- sometimes still off by 1px -- argh!

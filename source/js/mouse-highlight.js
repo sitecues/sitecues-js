@@ -1,11 +1,11 @@
-eqnx.def('mouse-highlight', function(mh, callback){
+sitecues.def('mouse-highlight', function(mh, callback){
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
 	mh.minzoom = 1.01;
 
 	// class of highlight
-	mh.kHighlightOverlayClass = 'eqnx-highlight-overlay';
+	mh.kHighlightOverlayClass = 'sitecues-highlight-overlay';
 
 	// was highlight color avoided (in case of single media element just use outline)
 	mh.doPreventHighlightColor = false;
@@ -32,7 +32,7 @@ eqnx.def('mouse-highlight', function(mh, callback){
 	mh.initZoom = 0;
 
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
-	eqnx.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech){
+	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech){
 
 		conf.set('mouseHighlightMinZoom', mh.minzoom);
 
@@ -175,6 +175,10 @@ eqnx.def('mouse-highlight', function(mh, callback){
 			if (!$(document.activeElement).is('body'))
 				return;
 
+			// don't show highlight if window isn't active
+			if (!document.hasFocus())
+				return;
+
 			if (event.target !== mh.target){
 				// hide highlight for picked element
 
@@ -188,7 +192,10 @@ eqnx.def('mouse-highlight', function(mh, callback){
 
 				// show highlight for picked element
 				if (mh.picked && mh.picked.length){
-					mh.show(mh.picked);
+					mh.timer && clearTimeout(mh.timer);
+					mh.timer = setTimeout(function(){
+						mh.show(mh.picked);
+					}, 100);
 				}
 			}
 
@@ -255,25 +262,25 @@ eqnx.def('mouse-highlight', function(mh, callback){
 		}
 
 		// hide mouse highlight once highlight box appears
-		eqnx.on('hlb/create hlb/inflating hlb/ready', mh.disable);
+		sitecues.on('hlb/create hlb/inflating hlb/ready', mh.disable);
 
 		// hide mouse highlight once highlight box is dismissed
-		eqnx.on('hlb/deflating', mh.unpick);
+		sitecues.on('hlb/deflating', mh.unpick);
 
 		// enable mouse highlight back once highlight box deflates
-		eqnx.on('hlb/closed', mh.enable);
+		sitecues.on('hlb/closed', mh.enable);
 
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', mh.updateZoom);
 
 		// lower the threshold when speech is enabled
-		eqnx.on('speech/enable', function(){
+		sitecues.on('speech/enable', function(){
 			conf.set('mouseHighlightMinZoom', 1.00);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// revert the threshold when speech is enabled
-		eqnx.on('speech/disable', function(){
+		sitecues.on('speech/disable', function(){
 			conf.set('mouseHighlightMinZoom', mh.minzoom);
 			mh.updateZoom(conf.get('zoom'));
 		});

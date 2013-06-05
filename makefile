@@ -1,13 +1,21 @@
 # Parameters.
-version=$(USER)-`date -u +'%Y%m%d%H%M%S'`
-package-basedir:=target/package
+name:=sitecues
+
+local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
+version=$(local-version)
+
 clean-deps=false
 dev=false
 
+package-basedir:=target/package
+package-name:=$(name)-js-$(version)
+package-file-name:=$(package-name).tgz
+package-dir:=$(package-basedir)/$(package-name)
+
 # Production files (combine all modules into one).
 files=\
-	source/js/eqnx.js \
-	source/js/conf.js\
+	target/source/js/core.js \
+	source/js/conf.js \
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
 	source/js/conf/remote.js \
@@ -32,8 +40,10 @@ files=\
 	source/js/caret/classifier.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
+    source/js/hlb/event-handlers.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
+	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/speech.js \
 	source/js/speech/azure.js \
@@ -42,6 +52,8 @@ files=\
 	source/js/invert.js \
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
+	source/js/cursor/element.js \
+	source/js/cursor/custom.js \
 	# source/js/toolbar.js \
 
 https=off
@@ -58,7 +70,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/eqnx.js source/js/use.js source/js/debug.js
+	files=target/source/js/core.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
@@ -91,25 +103,27 @@ all: clean deps build
 # Build the compressed file and, optionally, run gjslint.
 build: $(_build_lint_dep)
 	@echo "Building started."
+	@mkdir -p target/source/js
+	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
 	@mkdir -p target/compile/js
 	@uglifyjs $(uglifyjs-args) -o target/compile/js/equinox.js --source-map target/compile/js/equinox.js.map --source-map-url /equinox.js.map $(files)
 	@echo "Building completed."
 
 # TARGET: package
-# Package up the files into a deployable bundle, and create a manifest for local file deployment 
+# Package up the files into a deployable bundle, and create a manifest for local file deployment
 package: build
 ifeq ($(dev), true)
 	$(error Unable to package a development build)
 endif
 	@echo "Packaging started."
-	@mkdir -p $(package-basedir)/$(version)
-	@echo $(version) > $(package-basedir)/$(version)/VERSION.TXT
-	@cp -R target/compile/* $(package-basedir)/$(version)
-	@cp -R source/css $(package-basedir)/$(version)
-	@cp -R source/images $(package-basedir)/$(version)
-	@tar -C $(package-basedir) -zcf target/equinox-js.tgz $(version)
+	@mkdir -p $(package-dir)
+	@echo $(version) > $(package-dir)/VERSION.TXT
+	@cp -R target/compile/* $(package-dir)
+	@cp -R source/css $(package-dir)
+	@cp -R source/images $(package-dir)
+	@tar -C $(package-basedir) -zcf target/$(package-file-name) $(package-name)
 	@rm -f target/manifest.txt
-	@(cd $(package-basedir)/$(version) ; for FILE in `find * -type f | sort` ; do \
+	@(cd $(package-dir) ; for FILE in `find * -type f | sort` ; do \
 		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
 	done)
 	@echo "Packaging completed."
@@ -144,13 +158,5 @@ lint:
 # Run the web server, giving access to the library and test pages.
 # Additionally, copy in core config files, if they do not exist.
 run:
-	@mkdir -p source/js/.cfg
-	@(cd config ; for FILE in `find * -type f | sort` ; do \
-    		if [ ! -e ../source/js/.cfg/$$FILE ] ; then \
-    			echo Copying $$FILE to source/js/.cfg/$$FILE ; \
-    			cp $$FILE ../source/js/.cfg/$$FILE ; \
-    		fi \
-    	done)
 	@echo "Running."
 	@./binary/web $(port) $(https)
-	

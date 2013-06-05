@@ -3,17 +3,17 @@
 <html>
 
 	<head>
-		<title>eqnx simple page</title>
+		<title>sitecues simple page</title>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script type="text/javascript">
-		  var _eqnx = _eqnx || [];
-		  _eqnx.push(['_setSite', '1']);
-		  _eqnx.push(['ttsEnable', 'true']);
+		  var _sitecues = _sitecues || [];
+		  _sitecues.push(['_setSite', '1']);
+		  _sitecues.push(['ttsEnable', 'true']);
 
 		  (function() {
-		    var eqnxSc = document.createElement('script'); eqnxSc.type = 'text/javascript'; eqnxSc.async = true;
-		    eqnxSc.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.equinox.aisquared.com:8000/eqnx.js';
-		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(eqnxSc, s);
+		    var sitecuesSc = document.createElement('script'); sitecuesSc.type = 'text/javascript'; sitecuesSc.async = true;
+		    sitecuesSc.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.equinox.aisquared.com:8000/sitecues.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(sitecuesSc, s);
 		  })();
 
 			// declarate which modules should be used
@@ -42,27 +42,27 @@
 
 		<script>
 		$("#enableSpeech").click(function() {
-			eqnx.emit("speech/enable");
+			sitecues.emit("speech/enable");
 		});
 
 		$("#disableSpeech").click(function() {
-			eqnx.emit("speech/disable");
+			sitecues.emit("speech/disable");
 		});
 
 		$("#stopSpeech").click(function() {
-			eqnx.emit("speech/stop");
+			sitecues.emit("speech/stop");
 		});
 
 		$("#createHlb").click(function() {
-			eqnx.emit("hlb/created", $("#p1"));
+			sitecues.emit("hlb/created", $("#p1"));
 		});
 
 		$("#readyHlb").click(function() {
-			eqnx.emit("hlb/ready", $("#p1"));
+			sitecues.emit("hlb/ready", $("#p1"));
 		});
 
 		$("#closeHlb").click(function() {
-			eqnx.emit("hlb/closed", $("#p1"));
+			sitecues.emit("hlb/closed", $("#p1"));
 		});
 
 		</script>

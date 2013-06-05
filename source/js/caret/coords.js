@@ -1,9 +1,9 @@
 // module for calculating caret position in input
 // NOTE: moved from TS codebase, need refactoring
-eqnx.def('caret/coords', function(coords, callback){
+sitecues.def('caret/coords', function(coords, callback){
 
 	// depends on `jquery`, `conf` and `util` modules
-	eqnx.use('jquery', 'conf', 'util/positioning', function($, conf, positioning){
+	sitecues.use('jquery', 'conf', 'util/positioning', function($, conf, positioning){
 
 		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos) {
 			// Create an object with the same positioning but flexible width and height

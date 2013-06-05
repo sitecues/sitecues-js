@@ -1,7 +1,7 @@
 // caret enhancement. makes the insertion caret
 // (blinking vertical line inside of a text input)
 // easier to see
-eqnx.def('caret', function(caret, callback){
+sitecues.def('caret', function(caret, callback){
 
 	// minimum zoom at which caret
 	// enhancement appears
@@ -12,7 +12,7 @@ eqnx.def('caret', function(caret, callback){
 	caret.selector = 'input';
 
 	// depends on jquery, conf and classifier modules
-	eqnx.use('jquery', 'conf', 'caret/classifier', 'caret/view', function($, conf, classifier, view){
+	sitecues.use('jquery', 'conf', 'caret/classifier', 'caret/view', function($, conf, classifier, view){
 
 		// update caret position
 		caret.update = function(event){

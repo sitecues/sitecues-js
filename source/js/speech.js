@@ -4,21 +4,24 @@
  * by other parts of the application.
  */
 
-eqnx.def('speech', function(speech, callback) {
+sitecues.def('speech', function(speech, callback) {
 
-    eqnx.use('conf', 'conf/remote', function(conf, conf_remote) {
+    sitecues.use('conf', 'conf/remote', function(conf, conf_remote) {
 
-        eqnx.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
+        sitecues.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
 
             var players = {};
             var azure = _azure;
             var ivona = _ivona;
             var jQuery=_jQuery;
 
-            // console.log(robovoice);
-            // TTS is disabled by default
-            var ttsEnable = conf.get("ttsEnable") === 'true';
-
+            // Use the site and user settings, if available, but if neither is
+            // available, we'll fall back to being disabled
+            var ttsEnable = !(conf.get("ttsEnable") === undefined && conf.get("siteTTSEnable") === undefined) 
+            && (conf.get("ttsEnable") === undefined || conf.get("ttsEnable")) 
+            && (conf.get("siteTTSEnable") === undefined || conf.get("siteTTSEnable"));
+            console.log('siteTTSEnable for ' + window.location.host + ': ' + conf.get("siteTTSEnable"));
+            
             /*
              * This is a flag we can set that will effectively enable TTS, but
              * not interfere with the user state maintained in the ttsEnable 
@@ -152,6 +155,7 @@ eqnx.def('speech', function(speech, callback) {
                 if (ttsEngine) {
                     // An engine is set so we can enable the component
                     ttsEnable = true;
+                    conf.set('siteTTSEnable', true);
                     if(common.getCookie("vCSp")) {
                         speech.say(conf.getLS('verbalCueSpeechOn'));
                     } else {
@@ -171,6 +175,7 @@ eqnx.def('speech', function(speech, callback) {
              */
             speech.disable = function(callback) {
                 speech.stopAll();
+                conf.set('siteTTSEnable', false);
                 speech.say(conf.getLS('verbalCueSpeechOff'));
                 ttsEnable = false;
                 if (callback) {
@@ -223,48 +228,47 @@ eqnx.def('speech', function(speech, callback) {
              * Returns if TTS is enabled or not.  Always returns true or false.
              */
             speech.isEnabled = function() {
-                if(ttsEnable) {
-                    return true;
-                }
-                return false;
+                return !!ttsEnable;
             }
 
             /*
              * Enables TTS, if possible.
              */
-            eqnx.on('speech/enable', speech.enable);
+            sitecues.on('speech/enable', speech.enable);
 
             /*
              * Disable TTS, terminating all players.
              */
-            eqnx.on('speech/disable', speech.disable);
+            sitecues.on('speech/disable', speech.disable);
 
             /*
              * Stop playback of all TTS.
              */
-            eqnx.on('speech/stop', speech.stopAll);
+            sitecues.on('speech/stop', speech.stopAll);
 
             /*
              * A highlight box has been requested.  This will create the player
              * if necessary, but will not play anything.
              */
-            eqnx.on('hlb/create', speech.initPlayer);
+            sitecues.on('hlb/create', speech.initPlayer);
 
             /*
              * A highlight box is ready to play.  If no player has been initialized,
              * this will do that first and then begin playing.
              */
-            eqnx.on('hlb/ready', speech.play);
+            sitecues.on('hlb/ready', speech.play);
 
             /*
              * A highlight box was closed.  Stop/abort/dispose of the player
              * attached to it.
              */
-            eqnx.on('hlb/closed', speech.stop);
+            sitecues.on('hlb/closed', speech.stop);
+
+			// end
+			callback();
 
         });
+
     });
 
-    // end
-    callback();
 });

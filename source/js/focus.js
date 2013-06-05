@@ -1,5 +1,5 @@
 // focus enhancement (make focus easier to see)
-eqnx.def('focus', function(focus, callback){
+sitecues.def('focus', function(focus, callback){
 
 	// minimum zoom at which focus
 	// enhancement appears
@@ -14,7 +14,7 @@ eqnx.def('focus', function(focus, callback){
 	focus.selector = 'input,a,textarea,[tabindex],button,select';
 
 	// depends on jquery and conf modules
-	eqnx.use('jquery', 'conf', function($, conf){
+	sitecues.use('jquery', 'conf', function($, conf){
 
 		// show focus enhancement
 		focus.show = function(){

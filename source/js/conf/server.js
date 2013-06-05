@@ -1,11 +1,11 @@
 // module for storing settings on the server
-eqnx.def('conf/server', function(server, callback){
+sitecues.def('conf/server', function(server, callback){
 
 	// url of conf settings server
-	var url = '//' + eqnx.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '') + '/em';
+	var url = '//' + sitecues.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '');
 
 	// depends on `conf` and `load` modules
-	eqnx.use('conf', 'load', function(conf, load){
+	sitecues.use('conf', 'load', function(conf, load){
 
 		// load data from server
 		load.script(url, function(){

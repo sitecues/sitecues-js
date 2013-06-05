@@ -1,9 +1,9 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-eqnx.def('geo', function(geo, callback){
+sitecues.def('geo', function(geo, callback){
 
-	eqnx.use('jquery', 'conf', function($, conf){
+	sitecues.use('jquery', 'conf', function($, conf){
 
 		// Coordinates relative to <body>
 		geo.getAbsolutePosition = function(obj){

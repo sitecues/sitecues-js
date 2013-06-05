@@ -1,9 +1,9 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-eqnx.def('util/positioning', function (positioning, callback) {
+sitecues.def('util/positioning', function (positioning, callback) {
 
-    eqnx.use('jquery', function ($) {
+    sitecues.use('jquery', function ($) {
 
         /**
          * Get the cumulative zoom for an element.
@@ -202,8 +202,9 @@ eqnx.def('util/positioning', function (positioning, callback) {
 	    /**
          * Obtains the viewport dimensions, with an optional inset.
          */
-        positioning.getViewportDimensions = function (inset) {
+        positioning.getViewportDimensions = function (inset, zoom) {
             inset = inset || 0;
+			zoom  = zoom  || 1;
             var insetX2 = inset * 2;
             var scrollPos = this.getScrollPosition();
             var result = {
@@ -217,13 +218,24 @@ eqnx.def('util/positioning', function (positioning, callback) {
             result.centerX = result.left + (result.width / 2);
             result.centerY = result.top + (result.height / 2);
 
+			for (var prop in result) {
+				result[prop] /= zoom;
+			}
+
             return result;
         }
 
         /**
          * Center another element over a provided center, zooming the centered element if needed.
+         * 
+         * @param  string   selector  The selector of the element(s).
+         * @param  center   center    The center point, see getCenter()
+         * @param  int      zoom      The zoom level.
+         * @param  string   position  Set the position of the element, defaults to 'absolute'
+         * 
+         * @return void
          */
-        positioning.centerOn = function (selector, center, zoom) {
+        positioning.centerOn = function (selector, center, zoom, position) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             // Use the proper center.
@@ -301,22 +313,23 @@ eqnx.def('util/positioning', function (positioning, callback) {
 
                 // Determine what the left and top CSS values must be to center the
                 // (possibly zoomed) element over the determined center.
-                var css = jElement.css(['marginLeft', 'marginTop']);
+                var cssMarginLeft = jElement.css('marginLeft') || 0;
+                var cssMarginTop = jElement.css('marginTop') || 0;
 
                 var cssLeft = (centerLeft
                                - offsetParentPosition.left
                                - (width * offsetParentZoom / 2)
-                               - (parseFloat(css.marginLeft) * offsetParentZoom)
+                               - (parseFloat(cssMarginLeft) * offsetParentZoom)
                               ) / offsetParentZoom;
                 var cssTop = (centerTop
                                - offsetParentPosition.top
                                - (height * offsetParentZoom / 2)
-                               - (parseFloat(css.marginTop) * offsetParentZoom)
+                               - (parseFloat(cssMarginTop) * offsetParentZoom)
                               ) / offsetParentZoom;
 
                 // Create the CSS needed to place the element where it needs to be, and to zoom it.
                 var cssUpdates = {
-                    position: 'absolute',
+                    position: position ? position: 'absolute',
                     left: cssLeft,
                     top: cssTop,
 

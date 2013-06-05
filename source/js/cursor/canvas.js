@@ -1,5 +1,5 @@
 // canvas view for cursor
-eqnx.def('cursor/canvas', function(cursor, callback){
+sitecues.def('cursor/canvas', function(cursor, callback){
 
 	// private variables
 	var data, types, paint;
@@ -14,21 +14,24 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 	// cursor types
 	types = {
-		pointer:	'B',
-		'default':	'A'
+		'auto'   :  'A',
+		'default':	'A',
+		'text'   :  'A',
+		'pointer':	'B'
+
 	}
 
-	paint = function(type){
+	paint = function(type) {
 		var canvas = document.createElement('canvas'),
 			span = document.createElement('span'),
 			divHolder = document.createElement('div'),
-			body = document.getElementsByTagName('body')[0],
+			body = document.body,
 			spanWidth, spanHeight,
 			text = types[type] || types['default'];
 
 		span.innerHTML = text;
 		span.style.fontSize = data.size + 'px';
-		divHolder.style.fontFamily = 'eqnx-cursor';
+		divHolder.style.fontFamily = 'sitecues-cursor';
 		divHolder.appendChild(span);
 		body.appendChild(divHolder);
 
@@ -58,7 +61,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 
 			// set necessary cursor settings
 			ctx.textBaseline = 'top';
-			ctx.font = size + 'px eqnx-cursor';
+			ctx.font = size + 'px sitecues-cursor';
 			ctx.lineWidth = lineWidth;
 
 			// cursor color settings
@@ -88,7 +91,7 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 	}
 
 	// get dependencies
-	eqnx.use('jquery', 'load', 'conf', function($, load, conf){
+	sitecues.use('jquery', 'load', 'conf', function($, load, conf){
 
 		// private variables
 		var wait, images;
@@ -124,8 +127,8 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 			}, 100);
 		}
 
-		// reaint cursor images
-		cursor.repaint = function(){
+		// repaint cursor images
+		cursor.repaint = function() {
 			images = {};
 
 			for(var type in types)
@@ -134,34 +137,46 @@ eqnx.def('cursor/canvas', function(cursor, callback){
 		}
 
 		// set cursor type
+		cursor.getImageOfType = function(type){
+			// save type
+			data.type = type;
+			// get image url for cursor type
+			return images[type] || images['default'];
+		}
+
+		// keep the compatibily for /element.js
+		// todo: remove or modify the code?
 		cursor.type = function(element, type){
 			// save type
 			data.type = type;
-
 			// get image url for cursor type
 			var url = images[type] || images['default'];
-
 			// get pure DOM element ref
 			element = element[0] || element;
-
 			// reset style height
 			element.style.height = 'auto';
-
 			// update element url
 			if (element.src !== url)
 				element.src = url;
 		}
 
 		// set cursor zoom
+		// todo: remove or modify the code?
 		cursor.zoom = function(element, zoom){
 			data.size = 15 * Math.sqrt(zoom);
 			cursor.repaint();
 			cursor.type(element, data.type);
 		}
 
+		// set cursor zoom
+		cursor.zoomImage = function(zoom) {
+			data.size = 15 * Math.sqrt(zoom);
+			cursor.repaint();
+		}
+
 		// load special cursor css
 		load.style('../css/cursor.css', function(){
-			wait('eqnx-cursor', function(){
+			wait('sitecues-cursor', function(){
 				cursor.repaint();
 				callback();
 			});

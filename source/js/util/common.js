@@ -1,19 +1,28 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-eqnx.def('util/common', function (common, callback) {
+sitecues.def('util/common', function (common, callback) {
 
    // Define dependency modules.
-    eqnx.use('jquery', 'jquery/cookie', function ($) {
+    sitecues.use('jquery', 'jquery/cookie', function ($) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
 
+		// Make sure 'trim()' has cross-browser support.
+		if (typeof String.prototype.trim !== 'function') {
+		  String.prototype.trim = function() {
+			return this.replace(/^\s+|\s+$/g, '');
+		  }
+		}
             /**
              * Get the element's styles to be used further.
              * @param element The DOM element which styles we want to get.
              * @return elementComputedStyles An object of all element computed styles.
              */
             common.getElementComputedStyles = function(element, prop) {
+                if(!element) {
+                    return;
+                }
 				// By default, return entire CSS object.
                 var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
                 var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
@@ -69,6 +78,13 @@ eqnx.def('util/common', function (common, callback) {
              */
             common.capitaliseFirstLetter = function(str) {
                 return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+			
+			/**
+             * Checks if the value given is empty or not.
+             */
+            common.isEmpty = function(val) {
+                return !val || val.trim() === '';
             }
 
             /*
@@ -212,7 +228,7 @@ eqnx.def('util/common', function (common, callback) {
             function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
             function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
 			
-			            /*
+			/*
              * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
              * 
              * Note: This will always set a site-wide cookie ("path=/").
@@ -236,6 +252,69 @@ eqnx.def('util/common', function (common, callback) {
              */
             common.getCookie = function(name) {
                 return $.cookie(name);
+            }
+
+            // Event handlers.
+
+            /**
+             * Prevents default event behavior.
+             * @param e Event Object
+             */
+            common.preventDefault = function(e) {
+                e = e || window.event; // cross-browser event
+                if (e.preventDefault)
+                    e.preventDefault();
+                e.cancelBubble = true; // IE variant
+                e.returnValue = false;
+            }
+            
+            /**
+             * Prevents default and stops propogation.
+             * @param e Event Object
+             */
+            common.stopDefaultEventBehavior = function(e) {
+                common.preventDefault(e);
+                e.stopPropagation();
+            }
+
+            /**
+             * Defines wheel scroll direction: if wheel is up.
+             * @param e Event Object
+             */
+            common.wheelUp = function(e) {
+                var evt = e || window.event;
+                var delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
+                return delta > 0;
+            }
+
+             /** 
+             * Defines wheel scroll direction: if wheel is down.
+             * @param e Event Object
+             */
+            common.wheelDown = function(e) {
+                return !this.wheelUp(e);
+            }
+
+            /**
+             * Defines if the element given contains vertical scroll.
+             * @param el HTMLObject
+             */
+           common.hasVertScroll = function(el) {
+                return el.clientHeight < el.scrollHeight;
+            }
+            
+            /**
+             * @param e EventObject
+             * @param el HTMLObject
+             * @param step Number the number of pixels set as scroll interval
+             * @param isUp Boolean True if scroll direction is up
+             */
+            common.smoothlyScroll = function(e, el, step, isUp) {
+                common.stopDefaultEventBehavior(e);
+                var step = step || 1;
+                step = isUp? -step : step;
+                el.scrollTop += step;
+                return false;
             }
 
         // Done.

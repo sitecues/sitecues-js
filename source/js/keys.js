@@ -1,4 +1,4 @@
-eqnx.def('keys', function(keys, callback){
+sitecues.def('keys', function(keys, callback) {
 	var extra_event_properties = {
 		dom: {
 			highlight_box: null
@@ -8,86 +8,119 @@ eqnx.def('keys', function(keys, callback){
 	// shortcut to hasOwnProperty
 	var has = Object.prototype.hasOwnProperty;
 
-	// define key testers
-	keys.test = {
-		'minus':	function(event){ return event.keyCode === 189; },
-		'plus':		function(event){ return event.keyCode === 187; },
-		'r':		function ( event ) {
-			return ( event.keyCode === 82 );
-		},
-		'space':	function(event){ return event.keyCode === 32; }
-	};
+    // define key testers
+    // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
+    keys.test = {
+        'minus':   function(event) {
+            return event.keyCode === 189
+                || event.keyCode === 109
+                || event.keyCode === 173
+                || event.keyCode === 45;
+        },
+        'plus':    function(event) {  // Also Equals (=) key
+            return event.keyCode === 187
+                || event.keyCode === 61
+                || event.keyCode === 107
+                || event.keyCode === 43;
+        },
+        'r':		function(event){ return event.keyCode === 82; },
+        'space':	function(event){ return event.keyCode === 32; }
+    };
 
-	// define keys map used to bind actions to hotkeys
+    keys.hlbKeysTest = {
+        'esc':      function(event) { return event.keyCode === 27; },
+        // scroll
+        'up':	    function(event) { return event.keyCode === 38; },
+        'down':	    function(event) { return event.keyCode === 40; },
+        'pageup':	function(event) { return event.keyCode === 33; },
+        'pagedown':	function(event) { return event.keyCode === 34; },
+        'end':	    function(event) { return event.keyCode === 35; },
+        'home':	    function(event) { return event.keyCode === 36; }
+    }
+
+ 	// define keys map used to bind actions to hotkeys
 	keys.map = {
-		'minus':	{ event: 'zoom/decrease' },
-		'plus':		{ event: 'zoom/increase' },
-		'r':		{
-			event: 'inverse/toggle'
-		},
+		'minus':	{ preventDefault: true, event: 'zoom/decrease' },
+		'plus':		{ preventDefault: true, event: 'zoom/increase' },
+		'r':		{ preventDefault: true, event: 'inverse/toggle'},
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
 			requiresMouseHighlight: true
 		}
-	};
+	}
 
-	// handle key
-	keys.handle = function ( key, event ) {
-		// if event defined, emit it
-		if ( key.event ) {
-			eqnx.emit( key.event, event );
-		}
+    keys.hlbKeysMap = {
+        'esc':      {event: 'key/esc'},
+        // If HLB is opened then scroll should only work for HLB inner content, not bubbling up to window.
+        // scroll
+        'up':       { stopOuterScroll: true, up: true },
+        'pageup':   { stopOuterScroll: true, up: true },
+        'home':     { stopOuterScroll: true, up: true },
+        'down':     { stopOuterScroll: true, down: true },
+        'pagedown': { stopOuterScroll: true, down: true },
+        'end':      { stopOuterScroll: true, down: true }
+    }
+	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
+        // handle key
+        keys.handle = function ( key, event ) {
+            // if event defined, emit it
+            if ( key.event ) {
+                sitecues.emit( key.event, event );
+            }
 
-		// prevent default if needed
-		if (key.preventDefault) event.preventDefault();
-	};
+            // prevent default if needed
+            if (key.preventDefault) {
+                common.preventDefault(event);
+                //Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
+                event.stopImmediatePropagation();
+            }
+        };
 
-	keys.isEditable = function ( element ) {
-		var tag = element.localName;
+        keys.isEditable = function ( element ) {
+            var tag = element.localName;
 
-		if ( ! tag ) {
-			return false;
-		}
+            if ( ! tag ) {
+                return false;
+            }
 
-		tag = tag.toLowerCase();
+            tag = tag.toLowerCase();
 
-		if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
-			return true;
-		}
+            if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
+               return true;
+            }
 
-		if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
-			return true; // Be safe, looks like a keyboard-accessible interactive JS widget
-		}
+            if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
+                return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+            }
 
-		// Check for rich text editor
-		var contentEditable = element.getAttribute('contenteditable');
+            // Check for rich text editor
+            var contentEditable = element.getAttribute('contenteditable');
 
-		if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
-			return true; // In editor
-		}
+            if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
+                return true; // In editor
+            }
 
-		if ( document.designMode === 'on' ) {
-			return true; // Another kind of editor
-		}
+            if ( document.designMode === 'on' ) {
+                return true; // Another kind of editor
+            }
 
-		return false;
-	};
-
-	// get dependencies
-	eqnx.use('jquery', 'mouse-highlight', function($, mh){
+            return false;
+        };
 
 		// key event hook
-		keys.hook = function(event){
+		keys.hook = function(event) {
+
 			// private variables
 			var i, l, key, test, parts, result;
 
 			// ignore events from editable elements
-			//if (mh.picked || keys.isEditable(event.target))
-				//return;
+			if ( keys.isEditable(event.target) ) {
+				return;
+			}
 
 			// iterate over key map
-			for(key in keys.map) if (has.call(keys.map, key)){
+			for(key in keys.map) if (has.call(keys.map, key)) {
 				if(keys.map[key].requiresMouseHighlight) {
 					if(!mh.enabled) {
 						// Mouse highlight is disabled, revert to default.
@@ -95,7 +128,7 @@ eqnx.def('keys', function(keys, callback){
 					} else {
 						//We're going to attach the target dom element to the
 						//event, whether it's available or not.
-						extra_event_properties.mouseHighlightTarget = mh.picked.get(0);
+						extra_event_properties.dom.mouse_highlight = mh.picked ? mh.picked.get(0) : null;
 					}
 				}
 
@@ -120,23 +153,33 @@ eqnx.def('keys', function(keys, callback){
 		};
 
 		// bind key hook to window
-		$(window).on('keydown', keys.hook);
-
-		eqnx.on( 'hlb/ready', function ( data ) {
-			extra_event_properties.dom.highlight_box = $( data );
-
-			keys.test[ 'esc' ] = function ( event ) {
-				return ( event.keyCode === 27 );
-			};
-
-			keys.map[ 'esc' ] = {
-				event: 'key/esc'
-			};
+        // 3rd param changes event order: false == bubbling; true = capturing.
+		window.addEventListener('keydown', keys.hook, true);
+        
+		sitecues.on('hlb/ready', function (hlbElement) {
+			extra_event_properties.dom.highlight_box = $(hlbElement);
+            $.extend(keys.test, keys.hlbKeysTest);
+            $.extend(keys.map, keys.hlbKeysMap);
 		} );
 
-		eqnx.on( 'hlb/closed', function () {
+		sitecues.on( 'hlb/closed', function (hlbElement) {
 			delete keys.test[ 'esc' ];
+			delete keys.test[ 'up' ];
+			delete keys.test[ 'down' ];
+			delete keys.test[ 'pageup' ];
+			delete keys.test[ 'pagedown' ];
+			delete keys.test[ 'end' ];
+			delete keys.test[ 'home' ];
+			
 			delete keys.map[ 'esc' ];
+			delete keys.map[ 'up' ];
+			delete keys.map[ 'down' ];
+			delete keys.map[ 'pageup' ];
+			delete keys.map[ 'pagedown' ];
+			delete keys.map[ 'end' ];
+			delete keys.map[ 'home' ];
+            
+            $(hlbElement).off('keydown');
 		} );
 
 		// done

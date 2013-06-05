@@ -1,10 +1,10 @@
 .DS_Store
 .jonathan-*
 .pip
-eqnx.iml
-eqnx.ipr
-eqnx.iws
+*.iml
+*.ipr
+*.iws
 node_modules
 target
 tmp
-source/js/.cfg
+howards-jokes.js
