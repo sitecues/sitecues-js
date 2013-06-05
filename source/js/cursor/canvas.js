@@ -83,7 +83,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			ctx.shadowOffsetY = 0;
 			ctx.shadowBlur = 0;
 
-			// restroke without the shaodw
+			// restroke without the shadow
 			ctx.strokeText(text, lineWidth/2, lineWidth);
 
 			return canvas.toDataURL();
