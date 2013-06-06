@@ -13,7 +13,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
       , kDimmingSpeed   : 150
     });
 
-
+    var wrapper;
     // Dims stuff. Word. ///////////////////////////////////////////////////////
     backgroundDimmer.dimBackgroundContent = function (hlbNode, zoom) {
 
@@ -26,6 +26,19 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
 		// [ highlight-box.js/itemNode ]
 		var elem = positioning.getBoundingBox(hlbNode);
 
+        // Wind clockwise path around whole document.
+        wrapper =  
+        'M'+ 0                +' '+ 0                 +' '+
+        'L'+ viewport.width   +' '+ 0                 +' '+
+        'L'+ viewport.width   +' '+ viewport.height   +' '+
+        'L'+ 0                +' '+ viewport.height;
+ 
+        // Wind clockwise relative path around element.
+        var inner = 
+        'M'+ ($(hlbNode).offset().left - window.pageXOffset + 2) +' '+ ($(hlbNode).offset().top - window.pageYOffset + 2)  +' '+
+        'l'+ (elem.width - 4)  +' '+ 0                   +' '+
+        'l'+ 0                 +' '+ (elem.height - 4)   +' '+
+        'l'+ (-elem.width + 4) +' '+ 0;
 
       // Create dimmer SVG overlay
       var dimmerSVG ='<svg xmlns="http://www.w3.org/2000/svg">' +
@@ -37,19 +50,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
           'fill      = "' + this.kDimmingColor    + '" '+
           'opacity   = "' + this.kDimmingOpacity  + '"' +
           'fill-rule = "evenodd " '+
-          'd="' +
-
-          // Wind clockwise path around whole document
-          'M'+ 0                +' '+ 0      +' '+
-          'L'+ viewport.width   +' '+ 0      +' '+
-          'L'+ viewport.width   +' '+ viewport.height   +' '+
-          'L'+ 0    +' '+ viewport.height   +' '+
-
-          // Wind clockwise relative path around element
-          'M'+ ($(hlbNode).offset().left - window.pageXOffset + 2) +' '+ ($(hlbNode).offset().top - window.pageYOffset + 2)  +' '+
-          'l'+ (elem.width - 4)  +' '+ 0                   +' '+
-          'l'+ 0                 +' '+ (elem.height - 4)   +' '+
-          'l'+ (-elem.width + 4) +' '+ 0                   +' '+
+          'd="' + wrapper + ' ' + inner + ' ' +
  
         // Close the path
         ' Z" />' +
@@ -82,7 +83,6 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
       });
 
      $('body').append( this.$dimmerContainer );
-
       // Animate the dimmer background container
       this.$dimmerContainer.animate({ opacity: 1 }, this.kDimmingSpeed);
     };
@@ -91,7 +91,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
 
     // Un-dims stuff. Ballin' //////////////////////////////////////////////////
     backgroundDimmer.removeDimmer = function () {
-
+      // Update SVG path to remove inner path responsible for hole.
+      this.$dimmerContainer.find('svg path').attr('d', wrapper);
       // Animate out the dimmerContainer
       this.$dimmerContainer.animate({ opacity: 0 }, this.kDimmingSpeed, function () {
         
