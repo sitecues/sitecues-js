@@ -31,11 +31,8 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
                 resizer.build(toolbar.instance, toolbar.shim);
 
                 // create TTS button and set it up
-                ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( toolbar.instance );
-                ttsButton.data( 'tts-enable', 'enabled' );
-                ttsButton.click( function() {
-                    panel.ttsToggle();
-                });
+                toolbar.ttsButton = $( '<div rel="sitecues-event" data-sitecues-event="speech/toggle">' ).addClass( 'tts' ).appendTo( toolbar.instance );
+                toolbar.ttsButton.data( 'tts-enable', 'enabled' );
 
                 toolbar.wireEvents();
 
@@ -75,6 +72,16 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             } else {
                 toolbar.slideOut();
             }
+        },
+
+        toolbar.enableSpeech = function() {
+            toolbar.ttsButton.removeClass('tts-disabled');
+            toolbar.ttsButton.data( 'tts-enable', 'enabled' );
+        },
+
+        toolbar.disableSpeech = function() {
+            toolbar.ttsButton.addClass('tts-disabled');
+            toolbar.ttsButton.data( 'tts-enable', 'disabled' );
         },
 
         /**
@@ -119,6 +126,9 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         sitecues.on( 'badge/hover', toolbar.slideOut );
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
         sitecues.on( 'toolbar/disable', toolbar.disable );
+
+        sitecues.on( 'speech/disable', toolbar.disableSpeech );
+        sitecues.on( 'speech/enable', toolbar.enableSpeech );
 
         // load special toolbar css
         load.style('../css/toolbar.css');

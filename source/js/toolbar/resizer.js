@@ -64,6 +64,7 @@ sitecues.def('toolbar/resizer', function(resizer, callback){
           resizer.shim.css({
               height: height
           });
+          sitecues.emit("toolbar/resized", resizer.toolbar);
       }
 
 

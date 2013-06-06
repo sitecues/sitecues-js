@@ -14,11 +14,7 @@ sitecues.def('toolbar/slider', function(slider, callback){
 
 				// create slider
 				slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
-				var thumb = $( '<div class="sitecues-slider-thumb"></div>').appendTo( slider.slider );
-
-				$( '<img>' ).addClass( 'ramp' ).attr({
-						src:    sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
-				}).appendTo( slider.wrap );
+				slider.thumb = $( '<div class="sitecues-slider-thumb"></div>').appendTo( slider.slider );
 
 				conf.set( 'zoom', this.value );
 
@@ -27,26 +23,45 @@ sitecues.def('toolbar/slider', function(slider, callback){
 					slider.slider.val( value );
 				});
 
-				var thumbHammer = Hammer(thumb.get(0));
+				var thumbHammer = Hammer(slider.thumb.get(0));
 				thumbHammer.on('dragleft dragright', function(e) {
-					var sliderWidth = slider.slider.width()
 					e.gesture.preventDefault();
 					e.stopPropagation();
-					var newLeft = e.gesture.touches[0].pageX - slider.slider.offset().left;
-					if(newLeft < 0) {
-						newLeft = 0;
-					} else if (newLeft > sliderWidth) {
-						//TODO We could optimize by caching this value, but
-						//I'm not sure right now what we would have to do to
-						//make sure it stayed accurate (resize, zoom, etc).
-						newLeft = sliderWidth;
-					}
-					zoom = 1.0 + ((newLeft / sliderWidth) * 4.0);
-					thumb.css('left', newLeft + "px");
-					conf.set('zoom', zoom);
+					slider.moveThumb(e.gesture.touches[0].pageX);
+				});
+
+				slider.slider.click(function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					slider.moveThumb(e.clientX);
 				});
 
 			}
+
+			slider.repaint = function(toolbar) {
+				var wrapHeight = slider.wrap.height();
+				slider.wrap.css('width', (wrapHeight * 4) + 'px');
+			},
+
+			slider.moveThumb = function(x) {
+				var sliderWidth = slider.slider.width()
+				var newLeft = x - slider.slider.offset().left;
+				if(newLeft < 0) {
+					newLeft = 0;
+				} else if (newLeft > sliderWidth) {
+					//TODO We could optimize by caching this value, but
+					//I'm not sure right now what we would have to do to
+					//make sure it stayed accurate (resize, zoom, etc).
+					newLeft = sliderWidth;
+				}
+				zoom = 1.0 + ((newLeft / sliderWidth) * 4.0);
+				slider.thumb.css('left', newLeft + "px");
+				conf.set('zoom', zoom);
+			},
+
+			sitecues.on("toolbar/resized", function(toolbar) {
+				slider.repaint(toolbar);
+			});
 
 			callback();
 

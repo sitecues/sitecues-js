@@ -15,23 +15,25 @@
 
 .sitecues-slider {
     position:absolute;
-    width:100%;
     height:100%;
-    border:1px solid red;
+    width:63%;
+    margin:0 15%;
+    cursor:pointer;
     }
 .sitecues-slider-thumb {
     position:relative;
     background-color: none;
-    background-image: url('../images/panel/slider_marker.png');
-    width: 9px;
-    height: 22px;
-    border-radius: 4px;
+    background-image: url('../images/toolbar/toolbar-slider-thumb.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    height:85%%;
+    width:10%;
+    /*border-radius: 4px;*/
     border: none;
     /*-webkit-box-shadow: 0 0 4px #555;*/
     z-index: 1;
     cursor: ew-resize;
-    top:0;
-    left:10%;
+    top:15%;
 }
 
 .sitecues-toolbar .slider-wrap {
@@ -43,7 +45,8 @@
     right: 150px;
     display: inline;
     width: 200px;
-    height:100%;
+    height:92%;
+    top:8%;
 }
 
 .sitecues-toolbar .ramp {
@@ -78,24 +81,16 @@
     position: absolute;
     top: 1px;
     right: 0;
-    width: 68px;
-    height: 100%;
+    width: 139px;
+    height: 99%;
     background-image: url('../images/toolbar/toolbar-speech.png');
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: 0% 0%;
+    background-position: center 0%;
 }
 
 .sitecues-toolbar .tts.tts-disabled {
-    position: absolute; 
-    top: 2px;
-    right: 0;
-    width: 136px;
-    height: 76px;
-    background-image: url('../images/tts-icon-1.png');
-    background-size: 50px;
-    background-repeat: no-repeat;
-    background-position: -135px 0%;
+    background-image: url('../images/toolbar/toolbar-speech-off.png');
 }
 
 .sitecues-dropdown {
