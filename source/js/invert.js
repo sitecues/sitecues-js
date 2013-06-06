@@ -26,7 +26,7 @@ sitecues.def('invert', function (invert, callback) {
             '-webkit-filter': 'none'
         };
         var dom_highlight_box          = null;
-        var dom_root                   = $('body');
+        var dom_root                   = $(conf.get("invertRootSelector") || 'body');
         var invert_state_highlight_box = null;
         var invert_state_page          = null;
 
