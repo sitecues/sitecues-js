@@ -26,7 +26,7 @@ sitecues.def('invert', function (invert, callback) {
             '-webkit-filter': 'none'
         };
         var dom_highlight_box          = null;
-        var dom_html                   = $('html');
+        var dom_root                   = $('body');
         var invert_state_highlight_box = null;
         var invert_state_page          = null;
 
@@ -260,13 +260,13 @@ sitecues.def('invert', function (invert, callback) {
             $(dom_highlight_box).css(css_invert_none);
         }
         function setStylePageEmpty() {
-            $(dom_html).css(css_invert_empty);
+            $(dom_root).css(css_invert_empty);
         }
         function setStylePageFull() {
-            $(dom_html).css(css_invert_full);
+            $(dom_root).css(css_invert_full);
         }
         function setStylePageNone() {
-            $(dom_html).css(css_invert_none);
+            $(dom_root).css(css_invert_none);
         }
 
         callback();
