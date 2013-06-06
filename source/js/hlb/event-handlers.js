@@ -69,7 +69,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
             // So prevent default and define new scroll logic.
             if (name === 'pagedown' || name === 'pageup') {
                 var target = isChild ? e.target : hlb;
-                common.smoothlyScroll(e, target, Math.round(target.offsetHeight / 4), isUp);
+                common.smoothlyScroll(e, target, Math.round(target.offsetHeight / 2), isUp);
                 return false;
            }
 
@@ -84,7 +84,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
             switch (name) {
                 case 'down':
                 case 'up':
-                    common.smoothlyScroll(e, hlb, 1, isUp);
+                    common.smoothlyScroll(e, hlb, 10, isUp);
                     break;
                 case 'end':
                 case 'home':

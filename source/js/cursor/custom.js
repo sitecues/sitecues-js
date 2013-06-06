@@ -16,9 +16,10 @@ sitecues.def('cursor/custom', function (cursor, callback) {
     cursor.prevTarget = {};
     cursor.prevType = 'default';
     // Default data url string
-    cursor.url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAeCAYAAADD0FVVAAADQUlEQVRIS9WVz08TQRTHZ9sqbYOQkpoQ5Tc3Lj2QQOAfKBwIqdxI5MjFePBCUjyQEDVtUjxoJPXigYSDSEzkxkE4kKAJaCB6qImU1rakRahtpVr60/ddZzZbShcwXNzkZd7s7nz2ve+8eSuVSiW7JEnL7BIviaAx4o1dJhjQEkGTxWLRrdfr3Txg3MMlxgvlIaBYdJzJZB6YTCYPJxRozP8LWA2VwbFYzNPY2PiE/CzZL7LcRcEKdHt7m9lsNkZqZH0+32xXV9dTgiXIji4KVqC0UWxra0sGk765zc3NF729vY8JeMjBiPxcGpdBkb8Aww8Gg2/b2trucPBPLsmZ4AroSXAgEFhpb28H+EAVcVGrHE6FYsH6+jrr6+uT13LwXQ5O8YirgqtCAZufn2ejo6My2O/3r3Z2dgL8nUwTrAk9CQ6Hw++am5vHVeBj8isiPhN6EpxIJPwWi8VB9/d5xADjoCjXuaBVwLdU4IwarAn1er1sYGBAiYBOGqupqZHnqVTqK22ma3Bw8A1NcUBQx7IUmlC73c4WFhZYXV2dOjvFLxQKh6FQ6CGV3HO6qchwKhSw5eW/LVZdAYuLi2E6bQek6aHVao03NDSkjEZjlDJ4VBUKwMjICItGo4xOkhIRnSzW0tLCNjY24j09PS/pgY/sC1mITByKykiTySSrr69XQEtLS2x4eFieu91uNjExwXK5XNHj8axOTk6+VkHj5KObVUKxOJvNZkijOBX5DcydTidzuVwyWPSESCSy39TU5OTQbzSik2GT0Hvl0pI1JZ2OqLDft7a2QvDrOzs79zs6Om4iekCHhoZYd3e3svPT09MzU1NTr+jdINkPMtFz5WYj5fP5FYPBMEa+hQz5XwM4nU4/M5vNtYoe5Ozt7aWoJX4mWWZVkQqo8qpE3lUOMtOIIpTna2tr4/39/bd1Ot0VpDw3N/eJtPwANlmARxnh6SPSMqiewzDiIzoOriUd7+3u7hYcDsdHuodiRXGjaUe5obmgz1ZAARImvgawkQxyQBYATfyDaRqRMgwn6TcZNqksUvVc7Rs4CLJAEpEJogJI/BSx42V/A0RY7RJSCJh4DwCAIMWpvxYtqMb3tB/9P9A/S+mqLvqod+YAAAAASUVORK5CYII=";
+    cursor.url = cursor.kDefaultCursorImage;
 
     // Constants
+    cursor.kDefaultCursorImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAeCAYAAADD0FVVAAADQUlEQVRIS9WVz08TQRTHZ9sqbYOQkpoQ5Tc3Lj2QQOAfKBwIqdxI5MjFePBCUjyQEDVtUjxoJPXigYSDSEzkxkE4kKAJaCB6qImU1rakRahtpVr60/ddZzZbShcwXNzkZd7s7nz2ve+8eSuVSiW7JEnL7BIviaAx4o1dJhjQEkGTxWLRrdfr3Txg3MMlxgvlIaBYdJzJZB6YTCYPJxRozP8LWA2VwbFYzNPY2PiE/CzZL7LcRcEKdHt7m9lsNkZqZH0+32xXV9dTgiXIji4KVqC0UWxra0sGk765zc3NF729vY8JeMjBiPxcGpdBkb8Aww8Gg2/b2trucPBPLsmZ4AroSXAgEFhpb28H+EAVcVGrHE6FYsH6+jrr6+uT13LwXQ5O8YirgqtCAZufn2ejo6My2O/3r3Z2dgL8nUwTrAk9CQ6Hw++am5vHVeBj8isiPhN6EpxIJPwWi8VB9/d5xADjoCjXuaBVwLdU4IwarAn1er1sYGBAiYBOGqupqZHnqVTqK22ma3Bw8A1NcUBQx7IUmlC73c4WFhZYXV2dOjvFLxQKh6FQ6CGV3HO6qchwKhSw5eW/LVZdAYuLi2E6bQek6aHVao03NDSkjEZjlDJ4VBUKwMjICItGo4xOkhIRnSzW0tLCNjY24j09PS/pgY/sC1mITByKykiTySSrr69XQEtLS2x4eFieu91uNjExwXK5XNHj8axOTk6+VkHj5KObVUKxOJvNZkijOBX5DcydTidzuVwyWPSESCSy39TU5OTQbzSik2GT0Hvl0pI1JZ2OqLDft7a2QvDrOzs79zs6Om4iekCHhoZYd3e3svPT09MzU1NTr+jdINkPMtFz5WYj5fP5FYPBMEa+hQz5XwM4nU4/M5vNtYoe5Ozt7aWoJX4mWWZVkQqo8qpE3lUOMtOIIpTna2tr4/39/bd1Ot0VpDw3N/eJtPwANlmARxnh6SPSMqiewzDiIzoOriUd7+3u7hYcDsdHuodiRXGjaUe5obmgz1ZAARImvgawkQxyQBYATfyDaRqRMgwn6TcZNqksUvVc7Rs4CLJAEpEJogJI/BSx42V/A0RY7RJSCJh4DwCAIMWpvxYtqMb3tB/9P9A/S+mqLvqod+YAAAAASUVORK5CYII=";
     cursor.kCursorStyleRuleId = 'sitecues-cursor-style-rule';
     // Set custom cursor image for disabled elements
     cursor.kCursorStyleDisabledRuleId  = 'sitecues-cursor-disabled-rule';
@@ -41,7 +42,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
 
             if (cursor.isEnabled) {
                 view.zoomImage(cursor.zoomLevel);
-                cursor.url = view.getImageOfType(cursor.type);
+                cursor.url = view.getImageOfType(cursor.type) || cursor.kDefaultCursorImage;
                 if (cursorWasEnabled)
                     cursor.update();
                 else
@@ -105,7 +106,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
                 cursor.prevTarget = target;
                 cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
-                cursor.url = view.getImageOfType(newCursorType);
+                cursor.url = view.getImageOfType(newCursorType) || cursor.kDefaultCursorImage;
                 // Set cursor style on new target.
                 $(target).css('cursor', 'url("' + cursor.url + '"), ' + cursor.type);
             }
