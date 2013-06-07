@@ -14,11 +14,11 @@
 
     // Private variables
 
-    var arr                 = Array.prototype                               // Array's prototype
+    var arr                 = Array.prototype                 // Array's prototype
         , has               = Object.prototype.hasOwnProperty // Object's has own property
-        , noop              = function(){}                                      // Empty function
-        , modules       = {}                                                            // Modules container
-        , coreConfig    = {}                                                            // Core config container
+        , noop              = function(){}                    // Empty function
+        , modules           = {}                              // Modules container
+        , coreConfig        = {}                              // Core config container
 
         // Siteuces top-level namespace: all public classes and modules will be
         // attached to this name space and aliased on "window.sitecues"

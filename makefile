@@ -14,6 +14,7 @@ package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
 files=\
+	source/js/logging/log4javascript_production.js \
 	target/source/js/core.js \
 	source/js/conf.js \
 	source/js/conf/localstorage.js \
@@ -40,7 +41,7 @@ files=\
 	source/js/caret/classifier.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
-    source/js/hlb/event-handlers.js \
+  source/js/hlb/event-handlers.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
@@ -70,7 +71,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=target/source/js/core.js source/js/use.js source/js/debug.js
+	files=source/js/logging/log4javascript_uncompressed.js target/source/js/core.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
@@ -149,9 +150,10 @@ deps-clean:
 
 # TARGET: lint
 # 	Run gjslint on the JavaScript source.
+#@gjslint --nojsdoc -r source/js
 lint:
 	@echo "Linting started."
-	@gjslint --nojsdoc -r source/js
+	lenient-lint source/js
 	@echo "Linting completed."
 
 # TARGET: run
