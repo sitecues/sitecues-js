@@ -2,21 +2,20 @@
 sitecues.def('cursor/canvas', function(cursor, callback){
 
 	// private variables
-	var data, types, paint;
+	var data, types, paint, minSize = 30, step = 15;
 
 	// cursor image data
 	data = {
 		color:	'#000',
 		stroke:	'#fff',
 		shadow:	'#000',
-		size:	15
+		size:	minSize
 	}
 
 	// cursor types
 	types = {
 		'auto'   :  'A',
 		'default':	'A',
-		'text'   :  'A',
 		'pointer':	'B'
 
 	}
@@ -41,14 +40,15 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		body.removeChild(divHolder);
 
 		if (canvas && canvas.getContext){
-			var ctx = canvas.getContext('2d'),
+
+            var ctx = canvas.getContext('2d'),
 				lineWidth = 3,
 				shadowBlur = 10,
 				size = data.size,
 				canvasWidth, canvasHeight;
 
 			if (data.size < 60){
-				lineWidth = 2;
+				lineWidth = 1;
 				shadowBlur = 5;
 			}
 
@@ -163,20 +163,21 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		// set cursor zoom
 		// todo: remove or modify the code?
 		cursor.zoom = function(element, zoom){
-			data.size = 15 * Math.sqrt(zoom);
+			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
 			cursor.repaint();
 			cursor.type(element, data.type);
 		}
 
 		// set cursor zoom
 		cursor.zoomImage = function(zoom) {
-			data.size = 15 * Math.sqrt(zoom);
+			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
 			cursor.repaint();
 		}
 
 		// load special cursor css
 		load.style('../css/cursor.css', function(){
 			wait('sitecues-cursor', function(){
+                 console.log('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
 			});
