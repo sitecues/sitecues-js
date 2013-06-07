@@ -58,7 +58,7 @@ files=\
 	# source/js/toolbar.js \
 
 https=off
-lint=false
+lint=true
 min=true
 port=8000
 uglifyjs-args=
@@ -153,7 +153,7 @@ deps-clean:
 #@gjslint --nojsdoc -r source/js
 lint:
 	@echo "Linting started."
-	lenient-lint source/js
+	@lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
 # TARGET: run
