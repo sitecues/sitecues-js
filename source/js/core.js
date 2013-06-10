@@ -8,7 +8,7 @@
 (function(){
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
-        console.log("sitecues already defined.");
+        log.warn("sitecues already defined.");
         return;
     }
 
@@ -148,7 +148,7 @@
     var _def = function(name, constructor){
         // do not define modules twice.
         if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-            console.log("sitecues: module '" + name + "' already defined.");
+            log.warn("sitecues: module '" + name + "' already defined.");
             return;
         }
 
@@ -168,7 +168,7 @@
                 // This caused the issue with the double-loading of the badge and highlight-box.
                 // See: https://fecru.ai2.at/cru/EQJS-39#c187
                 //      https://equinox.atlassian.net/browse/EQ-355
-                // console.warn( 'No callback() set when def.use("' + name );
+                // log.warn( 'No callback() set when def.use("' + name );
             }
 
             // save module for future call
@@ -436,7 +436,7 @@
         }
     };
 
-	// The default status formatter: simply log all data to the console.
+	// The default status formatter: simply log all data to the log.
 	var DEFAULT_STATUS_CALLBACK = function(info) {
 		var printObj = function(o, prefix) {
 				var p, v, s = '';
@@ -455,7 +455,7 @@
 				return s;
 			};
 
-		console.log(
+		log.info(
 			'===== BEGIN: SITECUES STATUS =====================\n'
 			+ printObj(info)
 			+ '===== END: SITECUES STATUS =======================');
@@ -528,35 +528,35 @@
     var _validateCoreConfigs = function() {
         var valid = true;
 
-            //console.log( coreConfig, 1 );
+            //log.info( coreConfig, 1 );
 
         if (window.sitecues.coreConfig) {
             coreConfig = window.sitecues.coreConfig;
 
-            console.log( coreConfig );
+            log.info( coreConfig );
 
             //window.sitecues.coreConfig = undefined;
 
             if (coreConfig.hosts) {
                 if (coreConfig.hosts.ws) {
-                    console.log("sitecues ws host: " + coreConfig.hosts.ws);
+                    log.info("sitecues ws host: " + coreConfig.hosts.ws);
                 } else {
-                    console.log("sitecues ws host not specified.");
+                    log.warn("sitecues ws host not specified.");
                     valid = false;
                 }
 
                 if (coreConfig.hosts.up) {
-                    console.log("sitecues up host: " + coreConfig.hosts.up);
+                    log.info("sitecues up host: " + coreConfig.hosts.up);
                 } else {
-                    console.log("sitecues up host not specified.");
+                    log.warn("sitecues up host not specified.");
                     valid = false;
                 }
             } else {
-                console.log("sitecues core hosts config not found.");
+                log.warn("sitecues core hosts config not found.");
                 valid = false;
             }
         } else {
-            console.log("sitecues core config not found.");
+            log.warn("sitecues core config not found.");
             valid = false;
         }
 
@@ -564,7 +564,7 @@
         if (valid) {
             _initialize();
         } else {
-            console.log("invalid sitecues core config. aborting.");
+            log.warn("invalid sitecues core config. aborting.");
         }
     };
 
