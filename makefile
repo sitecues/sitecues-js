@@ -25,6 +25,7 @@ files=\
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
+    source/js/jquery/style.js \
 	source/js/ui.js  \
 	source/js/load.js \
 	source/js/style.js \
