@@ -5,6 +5,8 @@
  *
  */
 
+ log = log4javascript.getDefaultLogger();
+
 (function(){
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
