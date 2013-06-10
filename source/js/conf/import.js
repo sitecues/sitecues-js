@@ -27,7 +27,7 @@ sitecues.def('conf/import', function(module, callback) {
             for (var i = 0, l = _sitecues.length; i < l; i++)
                 push(_sitecues[i]);
         } else {
-            console.log('_sitecues not defined!');
+            log.warn('_sitecues not defined!');
         }
 
         // replace global var

@@ -8,8 +8,8 @@ sitecues.def('sitecues/debug', function(module, callback){
 		// calculate time diff
 		var time = (+new Date() - (time || start))/1000;
 
-		// dump to console profile
-		console.log(time + 's\t' + type);
+		// dump to log profile
+		log.info(time + 's\t' + type);
 	});
 
 });

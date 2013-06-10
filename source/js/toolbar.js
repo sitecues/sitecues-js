@@ -58,10 +58,10 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         } );
 
         sitecues.on( 'toolbar/on', function () {
-            console.log( 'Toolbar state: [on].' );
+            log.info( 'Toolbar state: [on].' );
         } );
         sitecues.on( 'toolbar/off', function () {
-            console.log( 'Toolbar state: [off].' );
+            log.info( 'Toolbar state: [off].' );
         } );
 
         callback();
