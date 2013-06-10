@@ -1,0 +1,20 @@
+
+<!-- START: SITECUES INIT SCRIPT INSERTED BY TEST FRAMEWORK -->
+<script type="text/javascript">
+	(function() {
+		try {
+			var e  = document.createElement("script");
+			e.type = "text/javascript";
+			e.src  = "{{scjsurl}}";
+			document.getElementsByTagName("head")[0].appendChild(e);
+
+			this._sitecues = this._sitecues || [];
+
+			this._sitecues.push(["site-id","{{scwsid}}"])
+
+		} catch(t) {
+			console.log("sitecues: unable to inline JavaScript code (" + t.message + ")");
+		}
+	})();
+</script>
+<!-- END: SITECUES INIT SCRIPT INSERTED BY TEST FRAMEWORK -->

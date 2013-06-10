@@ -1,14 +1,17 @@
 {
-	"name":			"equinox",
+	"name":			"sitecues",
 	"version":		"0.0.1",
-	"description":	"Equinox Assistant",
+	"description":	"sitecues Assistant",
 
-	"bin":			"binary/web",
+	"bin":			"binary/web.js",
 	"main":			"source/js/core.js",
 
 	"dependencies":	{
-						"express":	"latest",
-						"async":	"latest",
-						"glob":		"latest"
-					}
+		"async":			"latest",
+		"express":			"latest",
+		"glob":				"latest",
+		"mime":				"latest",
+		"hogan.js":			"latest",
+		"hogan-express":	"latest"
+	}
 }

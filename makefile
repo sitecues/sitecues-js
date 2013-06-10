@@ -25,6 +25,7 @@ files=\
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
+    source/js/jquery/style.js \
 	source/js/ui.js  \
 	source/js/load.js \
 	source/js/style.js \
@@ -58,6 +59,7 @@ files=\
 	# source/js/toolbar.js \
 
 https=off
+prod=off
 lint=true
 min=true
 port=8000
@@ -140,6 +142,7 @@ clean:
 # Set up the dependencies.
 deps: $(_clean_deps)
 	@echo "Dependency setup started."
+	@mkdir -p node_modules
 	@npm install
 	@echo "Dependency setup completed."
 
@@ -161,4 +164,4 @@ lint:
 # Additionally, copy in core config files, if they do not exist.
 run:
 	@echo "Running."
-	@./binary/web $(port) $(https)
+	@./binary/web.js $(port) $(https) $(prod)
