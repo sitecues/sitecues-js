@@ -13,8 +13,6 @@
         "selenium-webdriver": "2.33.x",
         "sinon"             : "1.7.x"
     },
-    "description" : "sitecues assistant.",
     "main"        : "source/js/core.js",
     "name"        : "sitecues",
-    "version"     : "0.0.1"
 }
