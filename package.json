@@ -1,17 +1,19 @@
 {
-	"name":			"sitecues",
-	"version":		"0.0.1",
-	"description":	"sitecues Assistant",
-
-	"bin":			"binary/web.js",
-	"main":			"source/js/core.js",
-
-	"dependencies":	{
-		"async":			"latest",
-		"express":			"latest",
-		"glob":				"latest",
-		"mime":				"latest",
-		"hogan.js":			"latest",
-		"hogan-express":	"latest"
-	}
+    "bin"         : "binary/web.js",
+    "dependencies": {
+        "async"             : "latest",
+        "chai"              : "latest",
+        "express"           : "latest",
+        "glob"              : "latest",
+        "hogan-express"     : "latest",
+        "hogan.js"          : "latest",
+        "mime"              : "latest",
+        "mocha"             : "latest",
+        "node.extend"       : "latest",
+        "selenium-webdriver": "latest"
+    },
+    "description" : "sitecues assistant.",
+    "main"        : "source/js/core.js",
+    "name"        : "sitecues",
+    "version"     : "0.0.1"
 }
