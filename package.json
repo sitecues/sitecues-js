@@ -2,15 +2,16 @@
     "bin"         : "binary/web.js",
     "dependencies": {
         "async"             : "latest",
-        "chai"              : "latest",
+        "chai"              : "1.6.x",
         "express"           : "latest",
         "glob"              : "latest",
         "hogan-express"     : "latest",
         "hogan.js"          : "latest",
         "mime"              : "latest",
-        "mocha"             : "latest",
-        "node.extend"       : "latest",
-        "selenium-webdriver": "latest"
+        "mocha"             : "1.10.x",
+        "node.extend"       : "1.0.x",
+        "selenium-webdriver": "2.33.x",
+        "sinon"             : "1.7.x"
     },
     "description" : "sitecues assistant.",
     "main"        : "source/js/core.js",
