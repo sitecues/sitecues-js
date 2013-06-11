@@ -21,7 +21,7 @@ sitecues.def('caret/coords', function(coords, callback){
 				'-webkit-text-security': 'none'
 			};
 
-			console.log('Old border: ' + styleObj['border-top-width']);
+			log.info('Old border: ' + styleObj['border-top-width']);
 			if (isDebuggingOn){
 				extendStyle['visibility'] = 'visible';
 				var inputRect = positioning.getOffset(element);

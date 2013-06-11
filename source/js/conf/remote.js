@@ -12,16 +12,18 @@ sitecues.def('conf/remote', function(remote, callback){
                     siteId = 1;
                 }
                 if(conf.get('remoteConfig') === 'false'){
-                    console.log("Remote configuration disabled");
+                    
+                    log.info("Remote configuration disabled.");
+
                     callback();
                 } else if (siteId) {
-                    console.log('Site: ' + siteId);
+                    log.info('Site: ' + siteId);
                     $.ajax({
                         url: '//' + sitecues.getCoreConfig().hosts.ws + '/equinox/api/config/' + siteId,
                         dataType: 'json',
                         async: false,
                         success: function(data, status, xhr){
-                            console.log("success");
+                            log.info("success");
                             // When TTS becomes more modular, we could remove this
                             // specificity and just retain the data object and allow
                             // the modules to find special variables.
@@ -40,7 +42,7 @@ sitecues.def('conf/remote', function(remote, callback){
                         }
                     });
                 } else {
-                    console.log('cannot fetch settings, _setSite is not defined');
+                    log.warn('cannot fetch settings, _setSite is not defined');
                     callback();
                 }
             });

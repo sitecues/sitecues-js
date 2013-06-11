@@ -22,7 +22,7 @@ sitecues.def('conf', function(conf, callback){
 
 	if(locale) {
 		conf.locale = locale.toLowerCase().replace('-','_');
-		console.log("Locale: " + conf.locale);
+		log.info("Locale: " + conf.locale);
 	}
 
 	// string handler, optional regular

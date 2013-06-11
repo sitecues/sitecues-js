@@ -142,6 +142,13 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         // loop.
         setTimeout(toolbar.slideOut, 500)
 
+        sitecues.on( 'toolbar/enable', function () {
+            log.info( 'Toolbar state: [on].' );
+        } );
+        sitecues.on( 'toolbar/disable', function () {
+            log.info( 'Toolbar state: [off].' );
+        } );
+
         callback();
     } );
 
