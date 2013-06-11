@@ -5,7 +5,32 @@
  *
  */
 
- log = log4javascript.getDefaultLogger();
+
+    // Temporary logging code: most of this will end up in a conf file.
+
+    var logLine = "LogLine:1"
+
+    // Create the logger
+    var log = log4javascript.getLogger(logLine);
+
+    // Create a PopUpAppender with default options
+    var popUpAppender = new log4javascript.PopUpAppender();
+
+    // Change the desired configuration options
+    // popUpAppender.setFocusPopUp(true);
+    popUpAppender.setNewestMessageAtTop(true);
+
+    // Add the appender to the logger
+    log.addAppender(popUpAppender);
+
+    //var log = log4javascript.getLogger("mylogger");
+    var popUpAppender2 = new log4javascript.PopUpAppender();
+    var layout = new log4javascript.PatternLayout("%d{yyyyMMdd_HHmmss.SS} [%-5p] %c %f %m{3}");
+    popUpAppender2.setLayout(layout);
+
+    log.addAppender(popUpAppender2);
+
+
 
 (function(){
     // Return if there is sitecues instance on the page

@@ -1,7 +1,7 @@
 var log4javascript = {
 
-  getDefaultLogger: function(){
-
+  getLogger: function(){
+    
     var log = function(){};
     log.prototype.trace = function(){};
     log.prototype.debug = function(){};
@@ -9,8 +9,24 @@ var log4javascript = {
     log.prototype.warn = function(){};
     log.prototype.error = function(){};
     log.prototype.fatal = function(){};
+    log.prototype.addAppender = function(){};
+    log.prototype.getLogger = function(){};
 
-    return new log()
-  }
+    return new log();
+  },
 
+  PopUpAppender: function(){
+    return {
+      PopUpAppender: function(){},
+      setFocusPopUp: function(){},
+      setNewestMessageAtTop: function(){},
+      addAppender: function(){},
+      setLayout: function(){}
+    };
+  },
+  
+  setFocusPopUp: function(){},
+  setNewestMessageAtTop: function(){},
+  PatternLayout: function(){},
+  getDefaultLogger: function(){}
 };
