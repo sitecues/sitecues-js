@@ -1,6 +1,6 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
-    sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', function ( $, conf, load, template, dropdown, slider, resizer) {
+    sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
         
         toolbar.STATES = {
             OFF: {
@@ -21,12 +21,14 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
                 toolbar.shim.css({
                     height: (conf.get('toolbarHeight') || 40) + 'px'
                 });
+
                 toolbar.instance = $('<div class="sitecues-toolbar hori" />').prependTo($('html'));
                 toolbar.instance.css({
                     height: (conf.get('toolbarHeight') || 40) + 'px'
                 });
 
                 dropdown.build(toolbar.instance);
+                messenger.build(toolbar.instance);
                 slider.build(toolbar.instance);
                 resizer.build(toolbar.instance, toolbar.shim);
 
