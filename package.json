@@ -14,5 +14,5 @@
         "sinon"             : "1.7.x"
     },
     "main"        : "source/js/core.js",
-    "name"        : "sitecues",
+    "name"        : "sitecues"
 }
