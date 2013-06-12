@@ -37,10 +37,13 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
         };
         toolbar.slideOut = function () {
-            $( dom_toolbar_element_selector ).css( 'left', ( '-' + $( 'body' ).css( 'margin-left' ) ) );
-            $( dom_toolbar_element_selector ).css( 'top', ( '-' + $( 'body' ).css( 'margin-top' ) ) );
-            $( dom_toolbar_element_selector ).css( 'width', $( window ).width() );
-            $( dom_toolbar_element_selector ).slideDown( 'slow' );
+            $( dom_toolbar_element_selector )
+                .style({
+                    'left' : '-' + $('body').css('margin-left'),
+                    'top'  : '-' + $('body').css('margin-top'),
+                    'width': $(window).width()
+                }, '', 'important')
+                .slideDown('slow');
 
             sitecues.emit( 'toolbar/slide-out', $( dom_toolbar_element_selector ) );
 
