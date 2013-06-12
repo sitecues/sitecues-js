@@ -105,17 +105,19 @@ sitecues.def('cursor/canvas', function(cursor, callback) {
 			times = 100;
 
 			// hide span
-			span = $('<span>').css({
-				position: 'absolute',
-				visibility: 'hidden'
-			}).text('A').appendTo('body');
+			span = $('<span>')
+                .style({
+                    position: 'absolute',
+                    visibility: 'hidden'
+			    }, '', 'important')
+                .text('A').appendTo('body');
 
 			// remember span size
 			width = span.width();
 			height = span.height();
 
 			// set font-family
-			span.css('font-family', name);
+			span.style('font-family', name, 'important');
 
 			// setup polling for changes
 			interval = setInterval(function() {

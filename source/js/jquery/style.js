@@ -1,5 +1,5 @@
 // http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
-
+// todo: rename, add js doc
 sitecues.def('jquery/style', function(style, callback) {
     var toClass = {}.toString;
     sitecues.use('jquery', function(jQuery) {
