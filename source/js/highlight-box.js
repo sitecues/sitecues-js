@@ -224,10 +224,13 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 	            });
 
 	            this.savedAncestorCSS = ancestorCSS;
-	            this.itemNode.parentsUntil(document.body).css({
-		            zIndex: HighlightBox.kBoxZindex.toString(),
-		            overflow: 'visible'
-	            });
+	            var parents = this.itemNode.parentsUntil(document.body);
+                $.each(parents, function() {
+                    $(this)
+                        .style('z-index', HighlightBox.kBoxZindex.toString(), 'important')
+                        .style('overflow', 'visible', 'important');
+                });
+
 
                 $.each(cssBeforeAnimateStyles, function(property, value) {
                     _this.itemNode.style(property, value);
@@ -455,7 +458,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var savedDisplay = currentStyle.display;
 				// If the target is <td>, <tr>, <table> or any other table cell element then exit.
                 if (savedDisplay.indexOf('table') === 0) {
-                    itemNode.css({display: 'block'});
+                    itemNode.style('display', 'block', 'important');
                     return false;
                 }
 
@@ -479,7 +482,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 													+ 'px';
                         }
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
-                        $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
+                        itemNode.style('display', 'block', 'important');
+                        $('.'+HighlightBox.kPlaceHolderWrapperClass).style('width', updateInnerElStyle.width, 'important');
 
                         return false; // Break the each loop
                     }
