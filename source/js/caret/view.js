@@ -1,19 +1,19 @@
 // view for the caret enhancement
 // NOTE: moved from TS codebase, need refactoring
-sitecues.def('caret/view', function(view, callback){
+sitecues.def('caret/view', function(view, callback) {
 
 	// constants
 	view.kZindex = 2147483647 - 1;
 	view.kCaretId = 'sitecues-eq360-caret';
 
 	// Add dependencies
-	sitecues.use('jquery', 'conf', 'style', 'caret/coords', 'util/positioning', 'ui', function($, conf, styles, coords, positioning){
+	sitecues.use('jquery', 'conf', 'style', 'caret/coords', 'util/positioning', 'ui', function($, conf, styles, coords, positioning) {
 
 		// show caret view
-		view.show = function(target){
+		view.show = function(target) {
 			var sel = view.selection(target);
 			var zoomLevel = conf.get('zoom');
-			if (sel.start !== sel.end){
+			if (sel.start !== sel.end) {
 				// We currently only support the collapsed selection (a caret, not selected text)
 				return;
 			}
@@ -40,7 +40,7 @@ sitecues.def('caret/view', function(view, callback){
 			caretRect.top = caretRect.top + origPos.top + 1;
 
 			// realign caret on zoom out
-			$(target).off('zoomout').on('zoomout', function(){
+			$(target).off('zoomout').on('zoomout', function() {
 				view.show(target, zoomLevel);
 			});
 
@@ -65,19 +65,19 @@ sitecues.def('caret/view', function(view, callback){
 		}
 
 		// hide caret view
-		view.hide = function(){
-			if (view.renderedCaret){
+		view.hide = function() {
+			if (view.renderedCaret) {
 				view.renderedCaret.remove();
 				view.renderedCaret = null;
 			}
 		}
 
 		// get selection for input element
-		view.selection = function(el){
+		view.selection = function(el) {
 			var start = 0, end = 0, normalizedValue, range,
 				textInputRange, len, endRange;
 
-			if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number"){
+			if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
 				start = el.selectionStart;
 				end = el.selectionEnd;
 			} else {
@@ -86,7 +86,7 @@ sitecues.def('caret/view', function(view, callback){
 				// TODO EQ-229: what about contenteditable, designMode, etc.?
 				// Let's just degrade gracefully for those in IE8 (don't show caret)
 				range = document.selection.createRange();
-				if (range && range.parentElement() == el){
+				if (range && range.parentElement() == el) {
 					len = el.value.length;
 					normalizedValue = el.value.replace(/\r\n/g, "\n");
 					// Create a working TextRange that lives only in the input
@@ -97,12 +97,12 @@ sitecues.def('caret/view', function(view, callback){
 					// in those cases
 					endRange = el.createTextRange();
 					endRange.collapse(false);
-					if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1){
+					if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
 						start = end = len;
 					} else {
 						start = -textInputRange.moveStart("character", -len);
 						start += normalizedValue.slice(0, start).split("\n").length - 1;
-						if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1){
+						if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
 							end = len;
 						} else {
 							end = -textInputRange.moveEnd("character", -len);
