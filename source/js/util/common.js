@@ -19,7 +19,7 @@ sitecues.def('util/common', function (common, callback) {
              * @param element The DOM element which styles we want to get.
              * @return elementComputedStyles An object of all element computed styles.
              */
-            common.getElementComputedStyles = function(element, prop) {
+            common.getElementComputedStyles = function(element, prop, doTransform) {
                 if(!element) {
                     return;
                 }
@@ -48,7 +48,14 @@ sitecues.def('util/common', function (common, callback) {
                     for (var i = 1; i < propertyParts.length; i++) {
                         propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
                     }
-                    elementComputedStyles[propertyName] = computedStyles[propertyName];
+                    if (doTransform) {
+                        // in format 'marginTop'
+                        elementComputedStyles[propertyName] = computedStyles[propertyName];
+                    } else {
+                        // in format 'margin-top'
+                        elementComputedStyles[currentProperty] = computedStyles[propertyName];
+                    } 
+                    
                 });
                 return elementComputedStyles;
             }

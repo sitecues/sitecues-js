@@ -4,7 +4,7 @@
 sitecues.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui',
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'jquery/style', 'ui',
     function ($, conf, cursor, positioning, common, eventHandlers, backgroundDimmer) {
 
         // Constants
@@ -229,8 +229,11 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 		            overflow: 'visible'
 	            });
 
-	            this.itemNode
-                .css(cssBeforeAnimateStyles)
+                $.each(cssBeforeAnimateStyles, function(property, value) {
+                    _this.itemNode.style(property, value);
+                });
+
+                this.itemNode
                 .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
 
                 // Once the animation completes, set the new state and emit the ready event.
@@ -329,39 +332,38 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // Fetch the exact value for width(not rounded)
                 var clientRect = this.item.getBoundingClientRect();
 
-                var cssBeforeAnimateStyles = $.extend({},
-                    {top: cssUpdate.top, left: cssUpdate.left}, {
-                        transformOrigin: '50% 50%',
-                        position: 'absolute',
-						overflowY: currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
-                        overflowX: 'hidden',
+                var cssBeforeAnimateStyles = {
+                        'top': cssUpdate.top,
+                        'left': cssUpdate.left,
+                        '-webkit-transform-origin': '50% 50%',
+                        'position': 'absolute',
+                        'overflow-y': currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
+                        'overflow-x': 'hidden',
                         // Sometimes width is rounded, so float part gets lost.
-						// Preserve it so that inner content is not rearranged when width is a bit narrowed.
-                        width: parseFloat(clientRect.width) + 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px',
-						// Don't change height if there's a background image, otherwise it is destroyed.
-                        height: !isEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
-                        zIndex: HighlightBox.kBoxZindex.toString(),
-                        border: '0px solid white',
-                        listStylePosition: 'inside',
-                        margin: '0',
-                        borderRadius: HighlightBox.kBoxBorderRadius,
-                        borderColor:  HighlightBox.kBoxBorderColor,
-                        borderStyle:  HighlightBox.kBoxBorderStyle,
-                        borderWidth:  HighlightBox.kBoxBorderWidth,
-                        outline:      '0'
-                    });
+                        // Preserve it so that inner content is not rearranged when width is a bit narrowed.
+                        'width': parseFloat(clientRect.width) + 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px',
+                        // Don't change height if there's a background image, otherwise it is destroyed.
+                        'height': !isEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
+                        'z-index': HighlightBox.kBoxZindex.toString(),
+                        'border': '0px solid white',
+                        'list-style-position': 'inside',
+                        'margin': '0',
+                        'border-radius': HighlightBox.kBoxBorderRadius,
+                        'border-color':  HighlightBox.kBoxBorderColor,
+                        'border-style':  HighlightBox.kBoxBorderStyle,
+                        'border-width':  HighlightBox.kBoxBorderWidth,
+                        'outline':      '0'
+                    };
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
 				if (isEmptyBgImage(currentStyle.backgroundImage)) {
  					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
  				}
 
 				if (!isEmptyBgImage(currentStyle.backgroundImage)) {
-					cssBeforeAnimateStyles.overflowY = 'hidden';
+                    cssBeforeAnimateStyles['overflow-y'] = 'hidden';
 				} else {
-					cssBeforeAnimateStyles.overflowY = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
+                    cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
 				}
-
-
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
 				}
@@ -373,15 +375,15 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 // If color and background color are not contrast then either set background image or invert background color.
                 if (!isEmptyBgImage(oldBgImage)) {
-                    cssBeforeAnimateStyles.backgroundRepeat   = currentStyle.backgroundRepeat;
-                    cssBeforeAnimateStyles.backgroundImage    = oldBgImage;
-                    cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
-                    cssBeforeAnimateStyles.backgroundSize     = clientRect.width + 'px ' + clientRect.height+ 'px';
-					cssBeforeAnimateStyles.backgroundColor    = common.getRevertColor(newBgColor);
+                    cssBeforeAnimateStyles['background-repeat']   = currentStyle.backgroundRepeat;
+                    cssBeforeAnimateStyles['background-image']    = oldBgImage;
+                    cssBeforeAnimateStyles['background-position'] = currentStyle.backgroundPosition;
+                    cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
+                    cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
 
 					// If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
 					if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
-						delete cssBeforeAnimateStyles.backgroundSize;
+                        delete cssBeforeAnimateStyles['background-size'];
 					}
                 }
 
@@ -391,9 +393,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 				var isContrastColors = common.getIsContrastColors(color, newBgColor);
 				// We don't know what's the text color in the image.
 				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
-					cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+					cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
 				} else {
-					cssBeforeAnimateStyles.backgroundColor = newBgColor;
+					cssBeforeAnimateStyles['background-color'] = newBgColor;
 				}
 
                 return cssBeforeAnimateStyles;
@@ -416,15 +418,17 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
 
                 // Then, insert placeholder so that content which comes after doesn't move back.
-                cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                    .css($.extend({}, currentStyle, {
+                cloneNode.addClass(HighlightBox.kPlaceHolderClass);
+                var styles = $.extend({}, currentStyle, {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
                         width: parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
-                    }));
-
+                    });
+                $.each(styles, function(property, value) {
+                    cloneNode.style(property, value);
+                });
 				// If this is an ancestor to the table cell which doesn't have colspan.
 				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
 				if (tableCellAncestorParents && colspan === 1) {
