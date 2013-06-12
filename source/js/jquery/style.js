@@ -1,3 +1,5 @@
+// http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
+
 sitecues.def('jquery/style', function(style, callback) {
     sitecues.use('jquery', function(jQuery) {
 
@@ -41,10 +43,10 @@ sitecues.def('jquery/style', function(style, callback) {
             // CSSStyleDeclaration
             var style = this.get(0).style;
             // Getter/Setter
-            if (typeof styleName != 'undefined') {
-                if (typeof value != 'undefined') {
+            if (style && styleName !== undefined) {
+                if (value !== undefined) {
                     // Set style property
-                    var priority = typeof priority != 'undefined' ? priority : '';
+                    var priority = priority !== undefined ? priority : '';
                     style.setProperty(styleName, value, priority);
                     return this;
                 } else {
