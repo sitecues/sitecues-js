@@ -95,8 +95,7 @@ sitecues.def( 'panel', function( panel, callback ) {
 					return false;
 				})
 				// panel.element.css("top",'50');
-				panel.element.css("left",'');
-				panel.element.css("right",'');
+				panel.element.css({"left": '', "right": ''});
 				var scroll = positioning.getScrollPosition();
 				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
 				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
@@ -104,13 +103,13 @@ sitecues.def( 'panel', function( panel, callback ) {
 				if(panelTop < 0) {
 					panelTop = 0;
 				}
-				panel.element.css("top", panelTop);
+				panel.element.style("top", panelTop, 'important');
 
 				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
 				if(panelLeft < 0) {
 					panelLeft = 0;
 				}
-				panel.element.css("left", panelLeft);
+				panel.element.style("left", panelLeft, 'important');
 			}
 			panel.element.appendTo('html').animate(
 				{
