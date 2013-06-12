@@ -1,5 +1,5 @@
 // canvas view for cursor
-sitecues.def('cursor/canvas', function(cursor, callback){
+sitecues.def('cursor/canvas', function(cursor, callback) {
 
 	// private variables
 	var data, types, paint, minSize = 30, step = 15;
@@ -39,7 +39,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		spanHeight = span.offsetHeight;
 		body.removeChild(divHolder);
 
-		if (canvas && canvas.getContext){
+		if (canvas && canvas.getContext) {
 
             var ctx = canvas.getContext('2d'),
 				lineWidth = 3,
@@ -47,7 +47,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 				size = data.size,
 				canvasWidth, canvasHeight;
 
-			if (data.size < 60){
+			if (data.size < 60) {
 				lineWidth = 1;
 				shadowBlur = 5;
 			}
@@ -91,13 +91,13 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 	}
 
 	// get dependencies
-	sitecues.use('jquery', 'load', 'conf', function($, load, conf){
+	sitecues.use('jquery', 'load', 'jquery/style', function($, load) {
 
 		// private variables
 		var wait, images;
 
 		// wait for font loading
-		wait = function(name, callback){
+		wait = function(name, callback) {
 			// private variables
 			var span, width, height, interval, times;
 
@@ -118,8 +118,8 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 			span.css('font-family', name);
 
 			// setup polling for changes
-			interval = setInterval(function(){
-				if (!times-- || span.width() !== width || span.height() !== height){
+			interval = setInterval(function() {
+				if (!times-- || span.width() !== width || span.height() !== height) {
 					clearInterval(interval);
 					span.remove();
 					callback();
@@ -137,7 +137,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		}
 
 		// set cursor type
-		cursor.getImageOfType = function(type){
+		cursor.getImageOfType = function(type) {
 			// save type
 			data.type = type;
 			// get image url for cursor type
@@ -146,7 +146,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 
 		// keep the compatibily for /element.js
 		// todo: remove or modify the code?
-		cursor.type = function(element, type){
+		cursor.type = function(element, type) {
 			// save type
 			data.type = type;
 			// get image url for cursor type
@@ -162,7 +162,7 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 
 		// set cursor zoom
 		// todo: remove or modify the code?
-		cursor.zoom = function(element, zoom){
+		cursor.zoom = function(element, zoom) {
 			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
 			cursor.repaint();
 			cursor.type(element, data.type);
@@ -175,8 +175,8 @@ sitecues.def('cursor/canvas', function(cursor, callback){
 		}
 
 		// load special cursor css
-		load.style('../css/cursor.css', function(){
-			wait('sitecues-cursor', function(){
+		load.style('../css/cursor.css', function() {
+			wait('sitecues-cursor', function() {
         log.warn('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
