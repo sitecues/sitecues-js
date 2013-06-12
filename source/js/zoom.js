@@ -11,7 +11,9 @@ sitecues.def('zoom', function(zoom, callback) {
 	zoom['native'] = 'zoom' in document.createElement('div').style;
 
 	// get dependencies
-	sitecues.use('jquery', 'conf', function($, conf) {
+	sitecues.use('jquery', 'conf', 'jquery/style', function($, conf) {
+        
+        var $body = $('body');
 
 		// use conf module for sharing
 		// current zoom level value
@@ -31,7 +33,7 @@ sitecues.def('zoom', function(zoom, callback) {
 
 		// define default value for zoom if needed
 		if (!conf.get('zoom')) {
-			conf.set('zoom', $('body').css('zoom') || zoom['default']);
+			conf.set('zoom', $body.css('zoom') || zoom['default']);
 		}
 
 		// handle zoom/increase event fired by any module
@@ -49,15 +51,15 @@ sitecues.def('zoom', function(zoom, callback) {
 
 			if (zoom['native']) {
 				// if native zoom is supported, change it
-				$('body').css({ zoom: value });
+				$body.style({zoom: value}, '', 'important');
 				sitecues.emit('zoom', value);
 			} else {
 				// native zoom isn't supported, use
 				// css3 transforms scale option
-				$('body').css({
+				$body.style({
 					'transform': 'scale(' + value + ')',
 					'transform-origin': '0 0'
-				});
+				}, '', 'important');
 			}
 
 			// notify all about zoom change
