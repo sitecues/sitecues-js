@@ -1,5 +1,5 @@
 // http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
-// todo: rename, add js doc
+// todo: rename
 sitecues.def('jquery/style', function(style, callback) {
     var toClass = {}.toString;
     sitecues.use('jquery', function(jQuery) {
@@ -33,7 +33,15 @@ sitecues.def('jquery/style', function(style, callback) {
             return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         }
 
-        // The style function
+        /*
+         * The style function.
+         * @param cssStyle: either a string representing a property name;
+         *        or may be an Object containing CSS in key=>value structure.
+         *        Example: {'width': '10px', 'margin-left': '15px'}
+         * @param value: A string, value for a property given as 1st parameter.
+         * @param priority: A string, pass 'important' if you want to set style like '10px !important'
+         * @return this: HTML Object, a node a call performed on.
+         */ 
         jQuery.fn.style = function(cssStyle, value, priority) {
             // DOM node
             var node = this.get(0);
@@ -56,6 +64,13 @@ sitecues.def('jquery/style', function(style, callback) {
             return this;
         }
         
+        /**
+         * Sets property-value style with given priority.
+         * @param style: CSSStyleDeclaration Object
+         * @param property: A string contains name of the property we want to set value for.
+         * @param value: A string contains value of the property we want to set value for.
+         * @param priority: A string contains the piority of the property value we want to set.
+         */
         function setCssStyle(style, property, value, priority) {
             // Setter
             if (style && property !== undefined) {
