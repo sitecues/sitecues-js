@@ -7,7 +7,7 @@ sitecues.def('ui', function(ui, callback){
 	// important resources will be loaded for example
 
 	// require load module for async style loading
-	sitecues.use('load', 'jquery/color', 'jquery/transform2d', function(load){
+	sitecues.use('load', 'jquery/color', 'jquery/transform2d', 'jquery/style', function(load){
 
 		// load default style, and only after it
 		// is loaded module is ready

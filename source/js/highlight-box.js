@@ -4,7 +4,7 @@
 sitecues.def('highlight-box', function (highlightBox, callback) {
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'jquery/style', 'ui',
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui',
     function ($, conf, cursor, positioning, common, eventHandlers, backgroundDimmer) {
 
         // Constants

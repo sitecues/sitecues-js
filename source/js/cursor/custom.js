@@ -26,7 +26,7 @@ sitecues.def('cursor/custom', function (cursor, callback) {
     cursor.kMinCursorZoom = 1.1;
 
     // get dependencies
-    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/canvas', 'jquery/style', 'ui', function ($, conf, style, view) {
+    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/canvas', 'ui', function ($, conf, style, view) {
 
         // private variables
         cursor.styleRuleParent = $('head');

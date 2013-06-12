@@ -91,7 +91,7 @@ sitecues.def('cursor/canvas', function(cursor, callback) {
 	}
 
 	// get dependencies
-	sitecues.use('jquery', 'load', 'jquery/style', function($, load) {
+	sitecues.use('jquery', 'load', 'ui', function($, load) {
 
 		// private variables
 		var wait, images;

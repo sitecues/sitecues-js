@@ -11,7 +11,7 @@ sitecues.def('zoom', function(zoom, callback) {
 	zoom['native'] = 'zoom' in document.createElement('div').style;
 
 	// get dependencies
-	sitecues.use('jquery', 'conf', 'jquery/style', function($, conf) {
+	sitecues.use('jquery', 'conf', 'ui', function($, conf) {
         
         var $body = $('body');
 
