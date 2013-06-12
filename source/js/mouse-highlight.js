@@ -52,11 +52,11 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 			var isBgStyled = false;
 			$(collection).each(function () {
 				// Is there any background on any element in collection or elements' ancestors or descendants
-				if ($(this).css('backgroundImage') !== 'none') {
+				if ($(this).css('background-image') !== 'none') {
 					isBgStyled = true;
 					return false;
 				}
-				var bgColor = $(this).css('backgroundColor');
+				var bgColor = $(this).css('background-color');
                 // If no match then $.inArray() returns '-1' value
 				if ($.inArray(bgColor, transparentColorNamesSet) < 0) {
 					isBgStyled = true;
@@ -132,37 +132,37 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 				var rect = rects[count];
 				$('<div>')
 					.attr('class', mh.kHighlightOverlayClass)
-					.css({
-						top: rect.top - 3,
-						left: rect.left - 3,
-						width: rect.width + 4,
-						height: rect.height + 4,
-						display: 'block'
-					})
+					.style({
+						'top': rect.top - 3 + 'px',
+						'left': rect.left - 3 + 'px',
+						'width': rect.width + 4 + 'px',
+						'height': rect.height + 4 + 'px',
+						'display': 'block'
+					}, '', 'important')
 					.appendTo(document.body);
 			}
 
 			// add highlight color if necessary
 			if (!mh.doPreventHighlightColor) {
 				if (mh.doUseOverlayForBgColor) {
-					$('.' + mh.kHighlightOverlayClass).css('backgroundColor', mh.kBackgroundColor);
+					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, 'important');
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
 					var element = collection.get(0);
 					mh.savedCss = {
 						backgroundColor: element.style.backgroundColor,
-						outlineWidth: element.style.outlineWidth,
-						outlineStyle: element.style.outlineStyle,
-						outlineColor: element.style.outlineColor,
-						outlineOffset: element.style.outlineOffset
+						outlineWidth:    element.style.outlineWidth,
+						outlineStyle:    element.style.outlineStyle,
+						outlineColor:    element.style.outlineColor,
+						outlineOffset:   element.style.outlineOffset
 					};
-					$(element).css({
-						backgroundColor: mh.kBackgroundColor,
-						outlineWidth: '4px',
-						outlineStyle: 'solid',
-						outlineColor: 'rgba(250, 235, 200, .2)',
-						outlineOffset: '-3px'
-					});
+					$(element).style({
+						'background-color': mh.kBackgroundColor,
+						'outline-width': '4px',
+						'outline-style': 'solid',
+						'outline-color': 'rgba(250, 235, 200, .2)',
+						'outline-offset': '-3px'
+					}, '', 'important');
 				}
 			}
 		}

@@ -199,11 +199,12 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 			if (picker.debug) {
 				// These are for seeing the results in-context in a web
 				// inspector.
-				e.attr('sitecues-highlight-score',score);
-				e.attr('sitecues-highlight-role',role.name);
-				e.attr('sitecues-highlight-text-nodes',textNodes);
-				e.attr('sitecues-highlight-text-length',txtLen);
-				e.attr('sitecues-highlight-child',highlightableChild);
+				e
+                .attr('sitecues-highlight-score',score)
+                .attr('sitecues-highlight-role',role.name)
+                .attr('sitecues-highlight-text-nodes',textNodes)
+                .attr('sitecues-highlight-text-length',txtLen)
+                .attr('sitecues-highlight-child',highlightableChild);
 			}
 
 			return score;
@@ -220,7 +221,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 				if (picker.isTarget($(this) || picker.find($(this)) == $(this))) {
 					// Tell all children that they have a highlightable parent
 					$(this).find('*').data('sitecues-parent-hl','1');
-					$(this).css("border", "1px solid red");
+					$(this).style("border", "1px solid red", 'important');
 				}
 				picker.showAll($(this));
 			});
