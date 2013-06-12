@@ -226,18 +226,14 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 	            this.savedAncestorCSS = ancestorCSS;
 	            var parents = this.itemNode.parentsUntil(document.body);
                 $.each(parents, function() {
-                    $(this)
-                        .style('z-index', HighlightBox.kBoxZindex.toString(), 'important')
-                        .style('overflow', 'visible', 'important');
-                });
-
-
-                $.each(cssBeforeAnimateStyles, function(property, value) {
-                    _this.itemNode.style(property, value);
+                    $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
+                                  'overflow': 'visible'
+                                  }, '', 'important');
                 });
 
                 this.itemNode
-                .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+                    .style(cssBeforeAnimateStyles, '', 'important')
+                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
 
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
@@ -429,9 +425,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         width: parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
                     });
-                $.each(styles, function(property, value) {
-                    cloneNode.style(property, value);
-                });
+                cloneNode.style(styles, '', 'important');
 				// If this is an ancestor to the table cell which doesn't have colspan.
 				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
 				if (tableCellAncestorParents && colspan === 1) {

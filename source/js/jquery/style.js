@@ -1,6 +1,7 @@
 // http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
 
 sitecues.def('jquery/style', function(style, callback) {
+    var toClass = {}.toString;
     sitecues.use('jquery', function(jQuery) {
 
         // For those who need them (< IE 9), add support for CSS functions
@@ -33,7 +34,7 @@ sitecues.def('jquery/style', function(style, callback) {
         }
 
         // The style function
-        jQuery.fn.style = function(styleName, value, priority) {
+        jQuery.fn.style = function(cssStyle, value, priority) {
             // DOM node
             var node = this.get(0);
             // Ensure we have a DOM node 
@@ -42,20 +43,28 @@ sitecues.def('jquery/style', function(style, callback) {
             }
             // CSSStyleDeclaration
             var style = this.get(0).style;
-            // Getter/Setter
-            if (style && styleName !== undefined) {
+            var type  = toClass.call(cssStyle).slice(8, -1) || "";
+            if (type === 'Object') {
+                $.each(cssStyle, function(property, value) {
+                    setCssStyle(style, property, value, priority);
+                });
+            } 
+            if (type === 'String') {
+                setCssStyle(style, cssStyle, value, priority);
+            }
+
+            return this;
+        }
+        
+        function setCssStyle(style, property, value, priority) {
+            // Setter
+            if (style && property !== undefined) {
                 if (value !== undefined) {
                     // Set style property
                     var priority = priority !== undefined ? priority : '';
-                    style.setProperty(styleName, value, priority);
-                    return this;
-                } else {
-                    // Get style property
-                    return style.getPropertyValue(styleName);
+                    style.setProperty(property, value, priority);
+                    return;
                 }
-            } else {
-                // Get CSSStyleDeclaration
-                return style;
             }
         }
 
