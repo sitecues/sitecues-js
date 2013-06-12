@@ -50,18 +50,18 @@ sitecues.def('caret/view', function(view, callback) {
 				caretRect[i] = Math.ceil(caretRect[i] * zoom);
 
 			log.info(caretRect);
-			view.renderedCaret.css({
+			view.renderedCaret.style({
 				'z-index': view.kZindex.toString(),
-				'top': caretRect.top + parseFloat(style['paddingTop']),
-				'left': caretRect.left + parseFloat(style['paddingLeft']),
-				'width': caretRect.width,
-				'height': caretRect.height,
+				'top': caretRect.top + parseFloat(style['paddingTop']) + 'px',
+				'left': caretRect.left + parseFloat(style['paddingLeft']) + 'px',
+				'width': caretRect.width + 'px',
+				'height': caretRect.height + 'px',
 
 				// Copy the same border/padding/margin as element with caret
 				// so that our caret has the same offset
-				'margin-left': style['borderLeftWidth'],
-				'margin-top': style['borderTopWidth']
-			});
+				'margin-left': style['borderLeftWidth'] + 'px',
+				'margin-top': style['borderTopWidth'] + 'px'
+			}, '', 'important');
 		}
 
 		// hide caret view
