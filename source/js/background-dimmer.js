@@ -93,6 +93,11 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
             // Remove the dimmerContainer after the animation has finished
             backgroundDimmer.$dimmerContainer.remove();
         };
+
+        sitecues.on('hlb/deflating', function() {
+            // Update SVG path to remove inner path responsible for hole.
+            backgroundDimmer.$dimmerContainer.find('svg path').attr('d', wrapper);
+        });
     
     // Done
     callback();
