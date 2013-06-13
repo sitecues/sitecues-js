@@ -236,7 +236,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 });
 
                 this.itemNode
-                    .style(cssBeforeAnimateStyles, '', 'important')
+                    .style(cssBeforeAnimateStyles)
                     .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
 
                 // Once the animation completes, set the new state and emit the ready event.
@@ -373,16 +373,16 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
 				}
 
-                var oldBgColor = currentStyle.backgroundColor;
-                var oldBgImage = currentStyle.backgroundImage;
+                var oldBgColor = currentStyle['background-color'];
+                var oldBgImage = currentStyle['background-image'];
                 var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
                 var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
 
                 // If color and background color are not contrast then either set background image or invert background color.
                 if (!isEmptyBgImage(oldBgImage)) {
-                    cssBeforeAnimateStyles['background-repeat']   = currentStyle.backgroundRepeat;
+                    cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
                     cssBeforeAnimateStyles['background-image']    = oldBgImage;
-                    cssBeforeAnimateStyles['background-position'] = currentStyle.backgroundPosition;
+                    cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
                     cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
                     cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
 
@@ -721,7 +721,10 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 					var bgImage = $(itemNode).css('backgroundImage');
 					// RegExp below will take out bg image URL from the string.
 					// Example: 'url(http://example.com/foo.png)' will evaluate to 'http://example.com/foo.png'.
-					imageObj.src = bgImage.match(/\(([^)]+)\)/)[1];
+                    var url = bgImage.match(/\(([^)]+)\)/)[1];
+                    if (common.validateUrl(url)) {
+                        imageObj.src = url;
+                    }
 				} else if (itemNode[0].tagName.toLowerCase() === 'img') {
 					var rgb = common.getAverageRGB($(itemNode)[0]);
 					bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
