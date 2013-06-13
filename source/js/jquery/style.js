@@ -1,4 +1,7 @@
+// http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
+// todo: rename
 sitecues.def('jquery/style', function(style, callback) {
+    var toClass = {}.toString;
     sitecues.use('jquery', function(jQuery) {
 
         // For those who need them (< IE 9), add support for CSS functions
@@ -30,8 +33,16 @@ sitecues.def('jquery/style', function(style, callback) {
             return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         }
 
-        // The style function
-        jQuery.fn.style = function(styleName, value, priority) {
+        /*
+         * The style function.
+         * @param cssStyle: either a string representing a property name;
+         *        or may be an Object containing CSS in key=>value structure.
+         *        Example: {'width': '10px', 'margin-left': '15px'}
+         * @param value: A string, value for a property given as 1st parameter.
+         * @param priority: A string, pass 'important' if you want to set style like '10px !important'
+         * @return this: HTML Object, a node a call performed on.
+         */ 
+        jQuery.fn.style = function(cssStyle, value, priority) {
             // DOM node
             var node = this.get(0);
             // Ensure we have a DOM node 
@@ -40,20 +51,35 @@ sitecues.def('jquery/style', function(style, callback) {
             }
             // CSSStyleDeclaration
             var style = this.get(0).style;
-            // Getter/Setter
-            if (typeof styleName != 'undefined') {
-                if (typeof value != 'undefined') {
+            var type  = toClass.call(cssStyle).slice(8, -1) || "";
+            if (type === 'Object') {
+                jQuery.each(cssStyle, function(property, value) {
+                    setCssStyle(style, property, value, priority);
+                });
+            } 
+            if (type === 'String') {
+                setCssStyle(style, cssStyle, value, priority);
+            }
+
+            return this;
+        }
+        
+        /**
+         * Sets property-value style with given priority.
+         * @param style: CSSStyleDeclaration Object
+         * @param property: A string contains name of the property we want to set value for.
+         * @param value: A string contains value of the property we want to set value for.
+         * @param priority: A string contains the piority of the property value we want to set.
+         */
+        function setCssStyle(style, property, value, priority) {
+            // Setter
+            if (style && property !== undefined) {
+                if (value !== undefined) {
                     // Set style property
-                    var priority = typeof priority != 'undefined' ? priority : '';
-                    style.setProperty(styleName, value, priority);
-                    return this;
-                } else {
-                    // Get style property
-                    return style.getPropertyValue(styleName);
+                    var priority = priority !== undefined ? priority : '';
+                    style.setProperty(property, value, priority);
+                    return;
                 }
-            } else {
-                // Get CSSStyleDeclaration
-                return style;
             }
         }
 

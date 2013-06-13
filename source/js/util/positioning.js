@@ -31,11 +31,11 @@ sitecues.def('util/positioning', function (positioning, callback) {
             // Ensure a zoom exists.
             zoom = zoom || 1;
             selector = (selector ? selector : document.body);
-            transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%'; // default
-            var zoomStyle = { transformOrigin: transformCenter };
+            var transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%'; // default
+            var zoomStyle = {'transform-origin': transformCenter};
             $(selector).each(function () {
                 zoomStyle.transform = 'scale(' + zoom + ',' + zoom + ')';
-                $(this).css(zoomStyle);
+                $(this).style(zoomStyle, '', 'important');
             });
         }
 

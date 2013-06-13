@@ -1,9 +1,9 @@
 // module for calculating caret position in input
 // NOTE: moved from TS codebase, need refactoring
-sitecues.def('caret/coords', function(coords, callback){
+sitecues.def('caret/coords', function(coords, callback) {
 
 	// depends on `jquery`, `conf` and `util` modules
-	sitecues.use('jquery', 'conf', 'util/positioning', function($, conf, positioning){
+	sitecues.use('jquery', 'conf', 'util/positioning', function($, conf, positioning) {
 
 		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos) {
 			// Create an object with the same positioning but flexible width and height
@@ -22,7 +22,7 @@ sitecues.def('caret/coords', function(coords, callback){
 			};
 
 			log.info('Old border: ' + styleObj['border-top-width']);
-			if (isDebuggingOn){
+			if (isDebuggingOn) {
 				extendStyle['visibility'] = 'visible';
 				var inputRect = positioning.getOffset(element);
 				extendStyle['left'] = inputRect.left;
@@ -33,7 +33,7 @@ sitecues.def('caret/coords', function(coords, callback){
 			var text = item.val().slice(0, caretPos);// Cut text to caret position for measuring
 
 			// Password rules
-			if (item.attr('type') === 'password'){
+			if (item.attr('type') === 'password') {
 				text = text.replace(/\s|\S/g, '\u2022'); // password bullet char
 			}
 
@@ -54,7 +54,7 @@ sitecues.def('caret/coords', function(coords, callback){
 			var scale = positioning.getTotalZoom(element);
 
 			// Now, trim to use just the last line -- from this we can get the x coordinate as well as the line height
-			if (element.localName !== 'input'){
+			if (element.localName !== 'input') {
 				CaretCoordinates.trimToLastLine(span, text, item.width());
 			}
 
@@ -66,7 +66,7 @@ sitecues.def('caret/coords', function(coords, callback){
 				height: lineHeight * scale
 			};
 
-			setTimeout(function (){
+			setTimeout(function () {
 				span.remove();
 			}, 500);
 
@@ -76,7 +76,7 @@ sitecues.def('caret/coords', function(coords, callback){
 		coords.trimToLastLine = function trimToLastLine(span, text, width) {
 			// Trim to string from last hard break to end
 			var lastHardLineBreak = text.lastIndexOf('\n');
-			if (lastHardLineBreak >= 0){
+			if (lastHardLineBreak >= 0) {
 				text = text.slice(lastHardLineBreak + 1, -1);
 			}
 
@@ -93,8 +93,8 @@ sitecues.def('caret/coords', function(coords, callback){
 				var word = words[wordIndex] + (wordIndex < numWords - 1 ? ' \ufeff' : '');
 				currLine += word;
 				span.text(currLine);
-				if ($(span).width() > width){
-					if (wasEmpty){
+				if ($(span).width() > width) {
+					if (wasEmpty) {
 					} else {
 						// Couldn't fit -- first word on new line
 						span.text(currLine = word);
