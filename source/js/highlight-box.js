@@ -357,7 +357,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         'border-color':  HighlightBox.kBoxBorderColor,
                         'border-style':  HighlightBox.kBoxBorderStyle,
                         'border-width':  HighlightBox.kBoxBorderWidth,
-                        'outline':      '0'
+                        'outline':      '0px solid transparent'
                     };
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
 				if (isEmptyBgImage(currentStyle['background-image'])) {
@@ -837,11 +837,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
         // Handle scroll key events when their target is HLB element or its children.
         function onHighlightBoxReady(hlb) {
-            // Then handle special keys such as 'pageup', 'pagedown' since they scroll element and window at the same time.
-            // Note: You need to give the div a tabindex so it can receive focus. Otherwise, it will not catch keydown/keyup/keypress event.
-            // Alternatively, we can catch the event on document/widnow level.
-            // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
-            $(hlb).focus();
             // Add listener below to correctly handle scroll event(s) if HLB is opened.
             $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
             $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);
