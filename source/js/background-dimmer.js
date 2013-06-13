@@ -65,10 +65,9 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
         id: this.kDimmerId,
         
         // Add the SVG path to the HTML of the dimmerContain
-        html: dimmerSVG,
-
+        html: dimmerSVG})
         // Set the CSS for the dimemrContainer
-        css: {
+        .style({
             position      : 'absolute'
           , display       : 'block'
           , zIndex        : 9999999999
@@ -79,8 +78,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
           , height        : viewport.height
           , overflow      : 'visible'
           , pointerEvents : 'none'
-        }
-      });
+        }, '', 'important');
 
      $('body').append( this.$dimmerContainer );
       // Animate the dimmer background container
