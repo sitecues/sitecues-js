@@ -284,7 +284,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     transform: 'scale(1)',
                     width: clientRect.width / extraZoom,
 				    // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-				    height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
+				    height: currentStyle['background-image'] ? currentStyle.height / extraZoom : clientRect.height / extraZoom
                 });
 
                 // Deflate the highlight box.
@@ -342,13 +342,13 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         'left': cssUpdate.left + 'px',
                         '-webkit-transform-origin': '50% 50%',
                         'position': 'absolute',
-                        'overflow-y': currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
+                        'overflow-y': currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto',
                         'overflow-x': 'hidden',
                         // Sometimes width is rounded, so float part gets lost.
                         // Preserve it so that inner content is not rearranged when width is a bit narrowed.
-                        'width': parseFloat(clientRect.width) + 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px',
+                        'width': parseFloat(clientRect.width) + 'px',
                         // Don't change height if there's a background image, otherwise it is destroyed.
-                        'height': !isEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
+                        'height': !isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
                         'z-index': HighlightBox.kBoxZindex.toString(),
                         'border': '0px solid white',
                         'list-style-position': 'inside',
@@ -360,14 +360,14 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         'outline':      '0'
                     };
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-				if (isEmptyBgImage(currentStyle.backgroundImage)) {
+				if (isEmptyBgImage(currentStyle['background-image'])) {
  					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
  				}
 
-				if (!isEmptyBgImage(currentStyle.backgroundImage)) {
+				if (!isEmptyBgImage(currentStyle['background-image'])) {
                     cssBeforeAnimateStyles['overflow-y'] = 'hidden';
 				} else {
-                    cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
+                    cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
 				}
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
@@ -383,7 +383,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
                     cssBeforeAnimateStyles['background-image']    = oldBgImage;
                     cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
-                    cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
+                    //cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
                     cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
 
 					// If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
