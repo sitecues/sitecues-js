@@ -138,14 +138,14 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 						'width': rect.width + 4 + 'px',
 						'height': rect.height + 4 + 'px',
 						'display': 'block'
-					}, '', 'important')
+					}, '', '')
 					.appendTo(document.body);
 			}
 
 			// add highlight color if necessary
 			if (!mh.doPreventHighlightColor) {
 				if (mh.doUseOverlayForBgColor) {
-					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, 'important');
+					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, '');
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
 					var element = collection.get(0);
@@ -163,7 +163,7 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 						'outline-style'   : 'solid',
 						'outline-color'   : 'rgba(250, 235, 200, .2)',
 						'outline-offset'  : '-3px'
-					}, '', 'important');
+					}, '', '');
 				}
 			}
 		}
@@ -171,7 +171,7 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 		// hide mouse highlight
 		mh.hide = function(collection) {
 			if (collection && !mh.doPreventHighlightColor && !mh.doUseOverlayForBgColor && mh.savedCss) {
-				$(collection).style(mh.savedCss, '', 'important');
+				$(collection).style(mh.savedCss, '', '');
 				mh.savedCss = null;
 			}
 			$('.' + mh.kHighlightOverlayClass).remove();
