@@ -5,12 +5,12 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 	sitecues.use( 'jquery', 'conf', function ($, conf) {
 
 		// The queue of messages, including the one that is currently displayed.
-        var messageQueue = {};
+        var messageQueue = [];
         // The interval between checks on the queue.  This should be low when a
         // message is active, and high when the queue is empty.
         var pollingInterval = 100;
         // The ID of the currently displayed messge.
-        var currentMessageId = 0;
+        messenger.currentMessageId = 0;
 
 		/**
 		 * We're not going to do this automatically as we need to make sure the
@@ -25,7 +25,7 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 			messenger.wrap = $( '<div>' ).addClass( 'messenger-wrap' ).appendTo(toolbar);
 
 			// create messenger
-			messenger.messenger = $( '<div class="sitecues-messenger">OMG</div>').appendTo( messenger.wrap );
+			messenger.messenger = $( '<div class="sitecues-messenger"><div class="message">Welcome to sitecues.</div></div>').appendTo( messenger.wrap );
 		},
 
 		/**
@@ -39,7 +39,7 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 		 */
 		messenger.queue = function(message) {
 			if(message.display && message.content && message.ttl) {
-				message.messageId = new Date().getTime() + Math.random();
+				message.messageId = new Date().getTime() + '-' + Math.round(100000 * Math.random());
 				messageQueue.push(message);
 				messenger.poll();
 			}
@@ -51,7 +51,7 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 		 */
 		messenger.start = function() {
 			if(messenger.timer === undefined) {
-				messenger.timer = setTimeout(messager.poll, pollingInterval);
+				messenger.timer = setTimeout(messenger.poll, pollingInterval);
 			}
 		},
 
@@ -66,24 +66,57 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 				return;
 			}
 			var message = messageQueue[0];
-			if (message.messageId === currentMessageId) {
+			if (message.messageId === messenger.currentMessageId) {
 				if (message.display && (message.displayTime + message.ttl) > new Date().getTime()) {
 					// Message should stay active
-					setTimeout(messager.poll, pollingInterval);
+					setTimeout(messenger.poll, pollingInterval);
 					return;
 				}
 				// We need to get rid of the current message
-				$(message).fadeOut(function() {
+				var oldElement = $('#sitecues-message-' + message.messageId);
+				if(oldElement.length > 0) {
+					// The old element exists, get rid of it
+					oldElement.fadeOut('fast', function() {
+						$(this).remove();
+						messageQueue.pop();
+						setTimeout(messenger.poll, 0);
+					});
+				} else {
+					// The old element doesn't exist Note: This is duplicated
+					// from above because we're doing it above on the fadeout's
+					// success.
 					messageQueue.pop();
-					setTimeout(messager.poll, 0);
-				},'fast');
+					setTimeout(messenger.poll, 0);
+				}
 				return;
 			} else {
 				// We need to show this message				
 				messenger.display(message);
-				setTimeout(messager.poll, pollingInterval);
+				setTimeout(messenger.poll, pollingInterval);
 			}
 		}
+
+		messenger.display = function(message) {
+			var existing = $('.sitecues-messenger .message');
+			if(existing.length > 0) {
+				// Clear the old one and re-enter this function
+				existing.fadeOut('fast', function() {
+					existing.remove();
+					messenger.display(message);
+				})
+				return;
+			}
+			messenger.currentMessageId = message.messageId;
+			message.displayTime = new Date().getTime();
+			var container = $('<div class="message" />')
+				.attr('id', 'sitecues-message-' + message.messageId)
+				.html(message.content);
+			$('.sitecues-messenger').empty().append(container);
+		}
+
+        sitecues.on( 'toolbar/message', function (message) {
+            messenger.queue(message);
+        } );
 
 		callback();
 
