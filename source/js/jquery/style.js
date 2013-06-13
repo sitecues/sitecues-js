@@ -53,7 +53,7 @@ sitecues.def('jquery/style', function(style, callback) {
             var style = this.get(0).style;
             var type  = toClass.call(cssStyle).slice(8, -1) || "";
             if (type === 'Object') {
-                $.each(cssStyle, function(property, value) {
+                jQuery.each(cssStyle, function(property, value) {
                     setCssStyle(style, property, value, priority);
                 });
             } 
