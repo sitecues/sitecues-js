@@ -1,5 +1,7 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
-    sitecues.use( 'jquery', 'ui', function ( $ ) {
+
+    sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
+        
         toolbar.STATES = {
             OFF: {
                 id:   0,
@@ -11,62 +13,143 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             }
         };
 
-        var STATES                                    = toolbar.STATES,
-            current_state                             = STATES.OFF,
-            dom_toolbar_close_button_element_id       = 'sitecues-toolbar-close-button',
-            dom_toolbar_close_button_element_selector = null,
-            dom_toolbar_element_id                    = 'sitecues-toolbar',
-            dom_toolbar_element_selector              = null,
-            dom_toolbar_string                        = ( '' +
-                '<div id="' + dom_toolbar_element_id + '">' +
-                    '<img id="' + dom_toolbar_close_button_element_id + '" src="' + sitecues.resolvesitecuesUrl("../images/close.png") + '" />' +
-                '</div>' +
-            '' )
-        ;
+        toolbar.currentState = toolbar.STATES.OFF;
 
-        dom_toolbar_element_selector              = ( '#' + dom_toolbar_element_id );
-        dom_toolbar_close_button_element_selector = ( '#' + dom_toolbar_close_button_element_id );
+        toolbar.render = function(callback) {
+            if(!toolbar.instance) {
+                toolbar.shim = $('<div class="sitecues-toolbar-shim" />').prependTo($('html'));
+                toolbar.shim.css({
+                    height: (conf.get('toolbarHeight') || 40) + 'px'
+                });
+
+                toolbar.instance = $('<div class="sitecues-toolbar hori" />').prependTo($('html'));
+                toolbar.instance.css({
+                    height: (conf.get('toolbarHeight') || 40) + 'px'
+                });
+
+                dropdown.build(toolbar.instance);
+                messenger.build(toolbar.instance);
+                slider.build(toolbar.instance);
+                resizer.build(toolbar.instance, toolbar.shim);
+
+                // create TTS button and set it up
+                toolbar.ttsButton = $( '<div rel="sitecues-event" data-sitecues-event="speech/toggle">' ).addClass( 'tts' ).appendTo( toolbar.instance );
+                toolbar.ttsButton.data( 'tts-enable', 'enabled' );
+
+                toolbar.wireEvents();
+
+            }
+
+            if(callback) {
+                callback();
+            }
+        }
 
         toolbar.slideIn  = function () {
-            $( dom_toolbar_element_selector ).slideUp( 'slow' );
-
-            sitecues.emit( 'toolbar/slide-in', $( dom_toolbar_element_selector ) );
-
-            current_state = STATES.OFF;
-
-            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            toolbar.currentState = toolbar.STATES.OFF;
+            if(toolbar.instance) {
+                toolbar.instance.slideUp( 'slow' );
+                toolbar.shim.slideUp( 'slow', function() {
+                    sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+                });
+            }
+            conf.set('showToolbar', false);
         };
+
         toolbar.slideOut = function () {
-            $( dom_toolbar_element_selector )
-                .style({
-                    'left' : '-' + $('body').css('margin-left'),
-                    'top'  : '-' + $('body').css('margin-top'),
-                    'width': $(window).width()
-                }, '', 'important')
-                .slideDown('slow');
-
-            sitecues.emit( 'toolbar/slide-out', $( dom_toolbar_element_selector ) );
-
-            current_state = STATES.ON;
-
-            sitecues.emit( ( 'toolbar/' + current_state.name ), $( dom_toolbar_element_selector ) );
+            toolbar.currentState = toolbar.STATES.ON;
+            if(!toolbar.instance) {
+                toolbar.render();
+            }
+            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+            toolbar.shim.slideDown( 'slow' );
+            toolbar.instance.slideDown( 'slow' );
+            conf.set('showToolbar', true);
         };
+
+        toolbar.toggle = function() {
+            console.log('toggle');
+            if((toolbar.currentState) === toolbar.STATES.ON) {
+                toolbar.slideIn();
+            } else {
+                toolbar.slideOut();
+            }
+        },
+
+        toolbar.enableSpeech = function() {
+            toolbar.ttsButton.removeClass('tts-disabled');
+            toolbar.ttsButton.data( 'tts-enable', 'enabled' );
+        },
+
+        toolbar.disableSpeech = function() {
+            toolbar.ttsButton.addClass('tts-disabled');
+            toolbar.ttsButton.data( 'tts-enable', 'disabled' );
+        },
+
+        /**
+         * Looks for toolbar elements with a "rel" attribute of value
+         * "sitecues-event". It then looks for a "data-sitecues-event" attribute
+         * that will say which event(s) to fire.
+         *
+         * Note: We could possibly skip the "rel" step.
+         * 
+         * @return void
+         */
+        toolbar.wireEvents = function() {
+            toolbar.instance.find('[rel="sitecues-event"]').each(function() {
+                console.log($(this));
+                $(this).click(function() {
+                    var event = $(this).data('sitecues-event');
+                    if(event) {
+                        sitecues.emit(event);
+                    } else {
+                        console.log("No event configured");
+                    }
+                })
+            })
+        }
 
         $( document ).ready( function () {
-            $( 'body' ).prepend( dom_toolbar_string );
-
-            sitecues.on( 'badge/hover', toolbar.slideOut );
-
-            $( dom_toolbar_close_button_element_selector ).on( 'click', toolbar.slideIn );
+            if(conf.get('showToolbar')) {
+                toolbar.slideIn();
+            }
         } );
 
-        sitecues.on( 'toolbar/on', function () {
+        /**
+         * Closes the toolbar and sets the preference so it stays closed.
+         * 
+         * @return void
+         */
+        toolbar.disable = function() {
+            conf.set("toolbarEnabled", false);
+            toolbar.toggle();
+        }
+
+        sitecues.on( 'badge/hover', toolbar.slideOut );
+        sitecues.on( 'toolbar/toggle', toolbar.toggle );
+        sitecues.on( 'toolbar/disable', toolbar.disable );
+
+        sitecues.on( 'speech/disable', toolbar.disableSpeech );
+        sitecues.on( 'speech/enable', toolbar.enableSpeech );
+
+        // load special toolbar css
+        load.style('../css/toolbar.css');
+        load.style('../css/bootstrap.css');
+
+        // FIXME We'll wait a half-second to show the toolbar, because
+        // otherwise we don't know if everything is loaded or not.  I'd rather
+        // have this listen to some event or possible check on a setTimeout
+        // loop.
+        setTimeout(toolbar.slideOut, 500)
+
+        sitecues.on( 'toolbar/enable', function () {
             log.info( 'Toolbar state: [on].' );
         } );
-        sitecues.on( 'toolbar/off', function () {
+        sitecues.on( 'toolbar/disable', function () {
             log.info( 'Toolbar state: [off].' );
         } );
 
         callback();
     } );
+
 } );

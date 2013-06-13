@@ -231,10 +231,26 @@ sitecues.def('speech', function(speech, callback) {
                 return !!ttsEnable;
             }
 
+            /**
+             * Toggles speech on or off based on its current state.
+             */
+            speech.toggle = function() {
+                if(speech.isEnabled()) {
+                    sitecues.emit('speech/disable');
+                } else {
+                    sitecues.emit('speech/enable');
+                }
+            }
+
             /*
              * Enables TTS, if possible.
              */
             sitecues.on('speech/enable', speech.enable);
+
+            /*
+             * Enables TTS, if possible.
+             */
+            sitecues.on('speech/toggle', speech.toggle);
 
             /*
              * Disable TTS, terminating all players.

@@ -8,7 +8,7 @@ sitecues.def('keys', function(keys, callback) {
 	// shortcut to hasOwnProperty
 	var has = Object.prototype.hasOwnProperty;
 
-    // define key testers
+	// define keys map used to bind actions to hotkeys
     // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
     keys.test = {
         'minus':   function(event) {
@@ -24,6 +24,7 @@ sitecues.def('keys', function(keys, callback) {
                 || event.keyCode === 43;
         },
         'r':		function(event){ return event.keyCode === 82; },
+		'f8':	    function(event) { return event.keyCode === 119; },
         'space':	function(event){ return event.keyCode === 32; }
     };
 
@@ -43,6 +44,7 @@ sitecues.def('keys', function(keys, callback) {
 		'minus':	{ preventDefault: true, event: 'zoom/decrease' },
 		'plus':		{ preventDefault: true, event: 'zoom/increase' },
 		'r':		{ preventDefault: true, event: 'inverse/toggle'},
+		'f8':		{ event: 'toolbar/toggle' },
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
@@ -109,7 +111,7 @@ sitecues.def('keys', function(keys, callback) {
         };
 
 		// key event hook
-		keys.hook = function(event) {
+		keys.hook = function(event){
 
 			// private variables
 			var i, l, key, test, parts, result;

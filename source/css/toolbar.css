@@ -1,0 +1,191 @@
+.sitecues-toolbar {
+	background-color:#000;
+    font-family: Calibri, Candara, Segoe, “Segoe UI”, Optima, Arial, sans-serif;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	display:none;
+	z-index: 2147483645;
+}
+.sitecues-toolbar-shim {
+	width:100%;
+	display:none;
+}
+
+.sitecues-slider {
+    position:absolute;
+    height:100%;
+    width:63%;
+    margin:0 15%;
+    cursor:pointer;
+    }
+.sitecues-slider-thumb {
+    position:relative;
+    background-color: none;
+    background-image: url('../images/toolbar/toolbar-slider-thumb.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    height:85%%;
+    width:10%;
+    /*border-radius: 4px;*/
+    border: none;
+    /*-webkit-box-shadow: 0 0 4px #555;*/
+    z-index: 1;
+    cursor: ew-resize;
+    top:15%;
+}
+
+.sitecues-toolbar .slider-wrap {
+    background-image: url('../images/toolbar/toolbar-slider.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center 0%;
+    position: absolute;
+    right: 150px;
+    display: inline;
+    width: 200px;
+    height:92%;
+    top:8%;
+}
+
+.sitecues-toolbar .ramp {
+    position: absolute;
+    left: 0px;
+    top: -13px;
+    min-width: 105px;
+    max-width: 105px;
+    opacity: 50;
+    z-index: -1;
+}
+
+.sitecues-toolbar .small {
+    position: absolute;
+    right: 250px;
+    top: 12px;
+    font-family: Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
+    font-weight: bolder;
+    font-size: 13px;
+}
+
+.sitecues-toolbar .big {
+    position: absolute;
+    right: 90px;
+    top: 3px;
+    font-family: Verdana, "Bitstream Vera Sans", "DejaVu Sans", Tahoma, Geneva, Arial, Sans-serif;
+    font-weight: bolder;
+    font-size: 30px;
+}
+
+.sitecues-toolbar .tts {
+    position: absolute;
+    top: 1px;
+    right: 0;
+    width: 139px;
+    height: 99%;
+    background-image: url('../images/toolbar/toolbar-speech.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center 0%;
+}
+
+.sitecues-toolbar .tts.tts-disabled {
+    background-image: url('../images/toolbar/toolbar-speech-off.png');
+}
+
+.sitecues-dropdown {
+    height:80%;
+    display:block;
+    float:left;
+    padding:10%;
+}
+.sitecues-dropdown a {
+    height:80%;
+    display:block;
+    float:left;
+    padding:10%;
+}
+.sitecues-menu {
+    display:none;
+    position:fixed;
+    border-radius:10px;
+    background-color:#eee;
+    padding:10px;
+}
+
+.sitecues-menu li {
+    border-bottom:1px solid #ccc;
+}
+
+.sitecues-toolbar.hori .sitecues-resizer {
+    background-color: #000;
+    height:3px;
+    position:absolute;
+    bottom:-3px;
+    width:100%;
+    cursor: ns-resize;
+    border-bottom: 3px outset;
+}
+
+.sitecues-toolbar.hori .sitecues-resizer:hover {
+    /*background-color:#ccc;*/
+}
+
+.sitecues-toolbar.vert .sitecues-resizer {
+    cursor: ew-resize;
+}
+
+.dropdown-toggle span {
+    display:none;
+}
+
+.sitecues-toolbar.hori .dropdown-wrap {
+    height:100%;
+    width:20%;
+}
+
+.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a:hover {
+    height:100%;
+    background-color:#0046ad;
+    background-image:none;
+    color:#fff;
+}
+
+.sitecues-toolbar.hori .dropdown-menu {
+    margin:10px;
+}
+
+.sitecues-toolbar.hori .dropdown-toggle {
+    background-image: url('../images/toolbar/toolbar-logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    height:90%;
+    display:block;
+    margin:5px 10px;
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.sitecues-toolbar .messenger-wrap {
+    position:absolute;
+    height:100%;
+    top:0;
+    left:21%;
+    width:50%;
+}
+
+.sitecues-messenger {
+    color:#fff;
+    font-weight:bold;
+    text-align:center;
+    line-height: 2;
+    font-size:20px; 
+}
