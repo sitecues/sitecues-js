@@ -220,7 +220,11 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // Animate HLB (keep in mind $.animate() is non-blocking).
 	            var ancestorCSS = [ ];
 	            $(this.itemNode).parents().each(function () {
-		            ancestorCSS.push({zIndex: this.style.zIndex, overflow: this.style.overflow });
+                    ancestorCSS.push({
+                        zIndex   : this.style.zIndex,
+                        overflowX: this.style.overflowX,
+                        overflowY: this.style.overflowY,
+                        overflow : this.style.overflow});
 	            });
 
 	            this.savedAncestorCSS = ancestorCSS;
@@ -262,13 +266,15 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 // Get the current element styles.
   	            var ancestorCSS = this.savedAncestorCSS;
-  	            $(this.itemNode).parentsUntil(document.body).each(function () {
-  		            var css = ancestorCSS.shift();
-  		            this.style.zIndex = css.zIndex;
-  		            this.style.overflow = css.overflow;
-  	            });
-
-	            this.itemNode.get(0).style.outline = '0px solid transparent';
+                var parents = this.itemNode.parentsUntil(document.body);
+                $.each(parents, function() {
+                    var css = ancestorCSS.shift();
+                    $(this).style({'z-index'   : css.zIndex,
+                                 'overflow-x': css.overflowX,
+                                 'overflow-y': css.overflowY,
+                                 'overflow'  : css.overflow});
+                });
+                this.itemNode.style('outline', '0px solid transparent', 'important');
 
 	            var currentStyle = this.savedCss[this.savedCss.length - 1];
                 var clientRect = this.item.getBoundingClientRect();
@@ -332,8 +338,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var clientRect = this.item.getBoundingClientRect();
 
                 var cssBeforeAnimateStyles = {
-                        'top': cssUpdate.top,
-                        'left': cssUpdate.left,
+                        'top': cssUpdate.top + 'px',
+                        'left': cssUpdate.left + 'px',
                         '-webkit-transform-origin': '50% 50%',
                         'position': 'absolute',
                         'overflow-y': currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
@@ -434,12 +440,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
 			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
 			   if (cloneNode[0].style.display === 'list-item') {
-				  cloneNode[0].style.display = 'block';
+				  cloneNode.style('display', 'block', '!important');
 			   }
 
-                this.itemNode.after(cloneNode);
+               this.itemNode.after(cloneNode);
 
-                return cloneNode;
+               return cloneNode;
             };
 
            /*
@@ -466,13 +472,13 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         var closestStyle = common.getElementComputedStyles(closest[0]);
                         var updateInnerElStyle = {};
                         if(closestStyle) {
-    						updateInnerElStyle.width = parseFloat(closestStyle.width)
-													- parseFloat(closestStyle.paddingLeft)
-													- parseFloat(closestStyle.paddingRight)
-													- parseFloat(closestStyle.marginLeft)
-													- parseFloat(closestStyle.marginRight)
-													- parseFloat(closestStyle.borderLeftWidth)
-													- parseFloat(closestStyle.borderLeftWidth)
+    						updateInnerElStyle.width = parseFloat(closestStyle['width'])
+													- parseFloat(closestStyle['padding-left'])
+													- parseFloat(closestStyle['padding-right'])
+													- parseFloat(closestStyle['margin-left'])
+													- parseFloat(closestStyle['margin-right'])
+													- parseFloat(closestStyle['border-left-width'])
+													- parseFloat(closestStyle['border-left-width'])
 													+ 'px';
                         }
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");

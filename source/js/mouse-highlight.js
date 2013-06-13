@@ -150,18 +150,18 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 					// we only do this for single elements -- multiple items always get the overlay
 					var element = collection.get(0);
 					mh.savedCss = {
-						backgroundColor: element.style.backgroundColor,
-						outlineWidth:    element.style.outlineWidth,
-						outlineStyle:    element.style.outlineStyle,
-						outlineColor:    element.style.outlineColor,
-						outlineOffset:   element.style.outlineOffset
+						'background-color': element.style.backgroundColor,
+						'outline-width'   : element.style.outlineWidth,
+						'outline-style'   : element.style.outlineStyle,
+						'outline-color'   : element.style.outlineColor,
+						'outline-offset'  : element.style.outlineOffset
 					};
 					$(element).style({
 						'background-color': mh.kBackgroundColor,
-						'outline-width': '4px',
-						'outline-style': 'solid',
-						'outline-color': 'rgba(250, 235, 200, .2)',
-						'outline-offset': '-3px'
+						'outline-width'   : '4px',
+						'outline-style'   : 'solid',
+						'outline-color'   : 'rgba(250, 235, 200, .2)',
+						'outline-offset'  : '-3px'
 					}, '', 'important');
 				}
 			}

@@ -20,81 +20,81 @@ sitecues.def('cursor/canvas', function(cursor, callback) {
 
 	}
 
-	paint = function(type) {
-		var canvas = document.createElement('canvas'),
-			span = document.createElement('span'),
-			divHolder = document.createElement('div'),
-			body = document.body,
-			spanWidth, spanHeight,
-			text = types[type] || types['default'];
-
-		span.innerHTML = text;
-		span.style.fontSize = data.size + 'px';
-		divHolder.style.fontFamily = 'sitecues-cursor';
-		divHolder.appendChild(span);
-		body.appendChild(divHolder);
-
-		// span width and height
-		spanWidth = span.offsetWidth;
-		spanHeight = span.offsetHeight;
-		body.removeChild(divHolder);
-
-		if (canvas && canvas.getContext) {
-
-            var ctx = canvas.getContext('2d'),
-				lineWidth = 3,
-				shadowBlur = 10,
-				size = data.size,
-				canvasWidth, canvasHeight;
-
-			if (data.size < 60) {
-				lineWidth = 1;
-				shadowBlur = 5;
-			}
-
-			canvasWidth  = spanWidth + 2 * lineWidth + shadowBlur;
-			canvasHeight = spanHeight + 2 * lineWidth + shadowBlur;
-
-			// set main canvas element width and height
-			canvas.width = canvasWidth;
-			canvas.height = canvasHeight;
-
-			// set necessary cursor settings
-			ctx.textBaseline = 'top';
-			ctx.font = size + 'px sitecues-cursor';
-			ctx.lineWidth = lineWidth;
-
-			// cursor color settings
-			ctx.fillStyle = data.color;
-			ctx.strokeStyle = data.stroke;
-
-			// shadow settings
-			ctx.shadowColor = data.shadow;
-			ctx.shadowOffsetX = lineWidth;
-			ctx.shadowOffsetY = lineWidth;
-			ctx.shadowBlur = shadowBlur;
-
-			// create letter
-			ctx.fillText(text, lineWidth/2, lineWidth);
-
-			// clear the shadow
-			ctx.shadowColor = 0;
-			ctx.shadowOffsetX = 0;
-			ctx.shadowOffsetY = 0;
-			ctx.shadowBlur = 0;
-
-			// restroke without the shadow
-			ctx.strokeText(text, lineWidth/2, lineWidth);
-
-			return canvas.toDataURL();
-		}
-	}
-
 	// get dependencies
 	sitecues.use('jquery', 'load', 'ui', function($, load) {
 
 		// private variables
 		var wait, images;
+
+
+        paint = function(type) {
+            var canvas = document.createElement('canvas'),
+                span = document.createElement('span'),
+                divHolder = document.createElement('div'),
+                body = document.body,
+                spanWidth, spanHeight,
+                text = types[type] || types['default'];
+
+            span.innerHTML = text;
+            $(span).style('font-size', data.size + 'px', 'important');
+            $(divHolder).style('font-family', 'sitecues-cursor', 'important')[0].appendChild(span);
+            body.appendChild(divHolder);
+
+            // span width and height
+            spanWidth = span.offsetWidth;
+            spanHeight = span.offsetHeight;
+            body.removeChild(divHolder);
+
+            if (canvas && canvas.getContext) {
+
+                var ctx = canvas.getContext('2d'),
+                    lineWidth = 3,
+                    shadowBlur = 10,
+                    size = data.size,
+                    canvasWidth, canvasHeight;
+
+                if (data.size < 60) {
+                    lineWidth = 1;
+                    shadowBlur = 5;
+                }
+
+                canvasWidth  = spanWidth + 2 * lineWidth + shadowBlur;
+                canvasHeight = spanHeight + 2 * lineWidth + shadowBlur;
+
+                // set main canvas element width and height
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+
+                // set necessary cursor settings
+                ctx.textBaseline = 'top';
+                ctx.font = size + 'px sitecues-cursor';
+                ctx.lineWidth = lineWidth;
+
+                // cursor color settings
+                ctx.fillStyle = data.color;
+                ctx.strokeStyle = data.stroke;
+
+                // shadow settings
+                ctx.shadowColor = data.shadow;
+                ctx.shadowOffsetX = lineWidth;
+                ctx.shadowOffsetY = lineWidth;
+                ctx.shadowBlur = shadowBlur;
+
+                // create letter
+                ctx.fillText(text, lineWidth/2, lineWidth);
+
+                // clear the shadow
+                ctx.shadowColor = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                ctx.shadowBlur = 0;
+
+                // restroke without the shadow
+                ctx.strokeText(text, lineWidth/2, lineWidth);
+
+                return canvas.toDataURL();
+            }
+        }
 
 		// wait for font loading
 		wait = function(name, callback) {
@@ -156,7 +156,7 @@ sitecues.def('cursor/canvas', function(cursor, callback) {
 			// get pure DOM element ref
 			element = element[0] || element;
 			// reset style height
-			element.style.height = 'auto';
+			$(element).style('height', 'auto', 'important');
 			// update element url
 			if (element.src !== url)
 				element.src = url;
