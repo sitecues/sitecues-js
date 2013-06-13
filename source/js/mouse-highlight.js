@@ -149,12 +149,13 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
 					var element = collection.get(0);
+                    var style = common.getElementComputedStyles(element, '', true);
 					mh.savedCss = {
-						'background-color': element.style.backgroundColor,
-						'outline-width'   : element.style.outlineWidth,
-						'outline-style'   : element.style.outlineStyle,
-						'outline-color'   : element.style.outlineColor,
-						'outline-offset'  : element.style.outlineOffset
+						'background-color': style.backgroundColor,
+						'outline-width'   : style.outlineWidth,
+						'outline-style'   : style.outlineStyle,
+						'outline-color'   : style.outlineColor,
+						'outline-offset'  : style.outlineOffset
 					};
 					$(element).style({
 						'background-color': mh.kBackgroundColor,
@@ -170,7 +171,7 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 		// hide mouse highlight
 		mh.hide = function(collection) {
 			if (collection && !mh.doPreventHighlightColor && !mh.doUseOverlayForBgColor && mh.savedCss) {
-				$(collection).css(mh.savedCss);
+				$(collection).style(mh.savedCss, '', 'important');
 				mh.savedCss = null;
 			}
 			$('.' + mh.kHighlightOverlayClass).remove();
@@ -296,7 +297,9 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 		});
 
 		// hide mouse hightlight when user leave window
-		$(window).blur(mh.hide);
+		$(window).blur(function() {
+            mh.hide(mh.picked);
+        });
 
 		// done
 		callback();
