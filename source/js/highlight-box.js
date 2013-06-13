@@ -236,8 +236,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 });
 
                 this.itemNode
-                    .style(cssBeforeAnimateStyles)
-                    .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+                    .style(cssBeforeAnimateStyles);
+                this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
 
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
@@ -844,7 +844,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             if (hlb[0].tagName.toLowerCase() == 'input' || hlb[0].tagName.toLowerCase() == 'textarea') {
                $(hlb).focus(); 
             }
-            $(hlb).focus(); 
             // Add listener below to correctly handle scroll event(s) if HLB is opened.
             $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
             $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);
