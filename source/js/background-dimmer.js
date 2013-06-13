@@ -65,42 +65,39 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
         id: this.kDimmerId,
         
         // Add the SVG path to the HTML of the dimmerContain
-        html: dimmerSVG,
-
+        html: dimmerSVG})
         // Set the CSS for the dimemrContainer
-        css: {
-            position      : 'absolute'
-          , display       : 'block'
-          , zIndex        : 9999999999
-          , opacity       : 0
-          , left          : viewport.left
-          , top           : viewport.top
-          , width         : viewport.width
-          , height        : viewport.height
-          , overflow      : 'visible'
-          , pointerEvents : 'none'
-        }
-      });
+        .style({
+          'position'      : 'absolute',
+          'display'       : 'block',
+          'z-index'       : 9999999999,
+          'opacity'       : 0,
+          'left'          : viewport.left +'px',
+          'top'           : viewport.top +'px',
+          'width'         : viewport.width +'px',
+          'height'        : viewport.height +'px',
+          'overflow'      : 'visible',
+          'pointer-events': 'none',
+          'transition'    : 'opacity 150ms ease-out'
+        }, '', 'important');
 
      $('body').append( this.$dimmerContainer );
       // Animate the dimmer background container
-      this.$dimmerContainer.animate({ opacity: 1 }, this.kDimmingSpeed);
+      this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
     };
 
+        // Un-dims stuff. Ballin' //////////////////////////////////////////////////
+        backgroundDimmer.removeDimmer = function () {
+            // Animate out the dimmerContainer
+            this.$dimmerContainer.style({opacity: 0}, '', 'important');
+            // Remove the dimmerContainer after the animation has finished
+            backgroundDimmer.$dimmerContainer.remove();
+        };
 
-
-    // Un-dims stuff. Ballin' //////////////////////////////////////////////////
-    backgroundDimmer.removeDimmer = function () {
-      // Update SVG path to remove inner path responsible for hole.
-      this.$dimmerContainer.find('svg path').attr('d', wrapper);
-      // Animate out the dimmerContainer
-      this.$dimmerContainer.animate({ opacity: 0 }, this.kDimmingSpeed, function () {
-        
-        // Remove the dimmerContainer after the animation has finished
-        backgroundDimmer.$dimmerContainer.remove();
-      });
-    };
-
+        sitecues.on('hlb/deflating', function() {
+            // Update SVG path to remove inner path responsible for hole.
+            backgroundDimmer.$dimmerContainer.find('svg path').attr('d', wrapper);
+        });
     
     // Done
     callback();
