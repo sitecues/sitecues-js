@@ -14,10 +14,10 @@ sitecues.def('speech/ivona', function(ivona, callback) {
         var baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
         this.init = function() {
             _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
-            log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
+            sitecuesLog.info(_jQuery("#jPlayer-" + hlb.attr('id')));
             _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer({
                 ready: function() {
-                    log.info("jPlayer Ready");
+                    sitecuesLog.info("jPlayer Ready");
                     _jQuery(this).jPlayer( "setMedia", {
                         mp3: baseMediaUrl + "codecId=mp3&text=" + encodeURIComponent(hlb.text()),
                         oga: baseMediaUrl + "codecId=ogg&text=" + encodeURIComponent(hlb.text())
@@ -30,19 +30,19 @@ sitecues.def('speech/ivona', function(ivona, callback) {
                 },
                 preload: 'auto',
                 play: function() {
-                    log.info("Playing");
+                    sitecuesLog.info("Playing");
                 },
                 error: function(event) {
-                    log.warn("Error: via Ivona");
-                    log.info(event)
+                    sitecuesLog.warn("Error: via Ivona");
+                    sitecuesLog.info(event)
                 },
                 supplied: "oga, mp3"
             });
-            log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
+            sitecuesLog.info(_jQuery("#jPlayer-" + hlb.attr('id')));
         };
 
         this.play = function() {
-            log.info("Playing via ivona: " + hlb.text());
+            sitecuesLog.info("Playing via ivona: " + hlb.text());
             if(myState === 'ready') {
                 _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("play");
             } else {
@@ -52,12 +52,12 @@ sitecues.def('speech/ivona', function(ivona, callback) {
         };
 
         this.stop = function() {
-            log.info("Stopping ivona player");
+            sitecuesLog.info("Stopping ivona player");
             _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("stop");
         };
 
         this.destroy = function() {
-            log.info("Destroying ivona player");
+            sitecuesLog.info("Destroying ivona player");
             this.stop();
             _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("destroy");
             _jQuery("#jPlayer-" + hlb.attr('id')).remove();
@@ -68,7 +68,7 @@ sitecues.def('speech/ivona', function(ivona, callback) {
     sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
 
         ivona.factory = function(hlb) {
-        	log.info(hlb);
+        	sitecuesLog.info(hlb);
         	var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
         	player.init();
         	return player;

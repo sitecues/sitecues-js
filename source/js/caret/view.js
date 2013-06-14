@@ -17,7 +17,7 @@ sitecues.def('caret/view', function(view, callback) {
 				// We currently only support the collapsed selection (a caret, not selected text)
 				return;
 			}
-			log.info('Caret index: ' + sel.end);
+			sitecuesLog.info('Caret index: ' + sel.end);
 			var style = styles.getComputed(target);
 
 			// Create new caret
@@ -49,7 +49,7 @@ sitecues.def('caret/view', function(view, callback) {
 			for(var i in caretRect) if (caretRect.hasOwnProperty(i))
 				caretRect[i] = Math.ceil(caretRect[i] * zoom);
 
-			log.info(caretRect);
+			sitecuesLog.info(caretRect);
 			view.renderedCaret.style({
 				'z-index': view.kZindex.toString(),
 				'top': caretRect.top + parseFloat(style['paddingTop']) + 'px',

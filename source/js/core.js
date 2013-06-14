@@ -5,34 +5,8 @@
  *
  */
 
-
-    // Temporary logging code: most of this will end up in a conf file.
-
-    var logLine = "LogLine:1"
-
-    // Create the logger
-    var log = log4javascript.getLogger(logLine);
-
-    // Create a PopUpAppender with default options
-    var popUpAppender = new log4javascript.PopUpAppender();
-
-    // Change the desired configuration options
-    // popUpAppender.setFocusPopUp(true);
-    popUpAppender.setNewestMessageAtTop(true);
-
-    // Add the appender to the logger
-    log.addAppender(popUpAppender);
-
-    //var log = log4javascript.getLogger("mylogger");
-    //var popUpAppender2 = new log4javascript.PopUpAppender();
-    var layout = new log4javascript.PatternLayout("%d{yyyyMMdd_HHmmss.SS} [%-5p] %c %f %m{3}");
-    popUpAppender.setLayout(layout);
-
-    //log.addAppender(popUpAppender2);
-
-
-
 (function(){
+
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
         log.warn("sitecues already defined.");
@@ -175,7 +149,7 @@
     var _def = function(name, constructor){
         // do not define modules twice.
         if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-            log.warn("sitecues: module '" + name + "' already defined.");
+            sitecuesLog.warn("sitecues: module '" + name + "' already defined.");
             return;
         }
 
@@ -195,7 +169,7 @@
                 // This caused the issue with the double-loading of the badge and highlight-box.
                 // See: https://fecru.ai2.at/cru/EQJS-39#c187
                 //      https://equinox.atlassian.net/browse/EQ-355
-                // log.warn( 'No callback() set when def.use("' + name );
+                // sitecuesLog.warn( 'No callback() set when def.use("' + name );
             }
 
             // save module for future call
@@ -482,7 +456,7 @@
 				return s;
 			};
 
-		log.info(
+		sitecuesLog.info(
 			'===== BEGIN: SITECUES STATUS =====================\n'
 			+ printObj(info)
 			+ '===== END: SITECUES STATUS =======================');
@@ -560,30 +534,30 @@
         if (window.sitecues.coreConfig) {
             coreConfig = window.sitecues.coreConfig;
 
-            log.info( coreConfig );
+            sitecuesLog.info( coreConfig );
 
             //window.sitecues.coreConfig = undefined;
 
             if (coreConfig.hosts) {
                 if (coreConfig.hosts.ws) {
-                    log.info("sitecues ws host: " + coreConfig.hosts.ws);
+                    sitecuesLog.info("sitecues ws host: " + coreConfig.hosts.ws);
                 } else {
-                    log.warn("sitecues ws host not specified.");
+                    sitecuesLog.warn("sitecues ws host not specified.");
                     valid = false;
                 }
 
                 if (coreConfig.hosts.up) {
-                    log.info("sitecues up host: " + coreConfig.hosts.up);
+                    sitecuesLog.info("sitecues up host: " + coreConfig.hosts.up);
                 } else {
-                    log.warn("sitecues up host not specified.");
+                    sitecuesLog.warn("sitecues up host not specified.");
                     valid = false;
                 }
             } else {
-                log.warn("sitecues core hosts config not found.");
+                sitecuesLog.warn("sitecues core hosts config not found.");
                 valid = false;
             }
         } else {
-            log.warn("sitecues core config not found.");
+            sitecuesLog.warn("sitecues core config not found.");
             valid = false;
         }
 
@@ -591,7 +565,7 @@
         if (valid) {
             _initialize();
         } else {
-            log.warn("invalid sitecues core config. aborting.");
+            sitecuesLog.warn("invalid sitecues core config. aborting.");
         }
     };
 

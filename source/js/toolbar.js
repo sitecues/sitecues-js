@@ -68,7 +68,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         };
 
         toolbar.toggle = function() {
-            console.log('toggle');
+            sitecuesLog.info('toggle');
             if((toolbar.currentState) === toolbar.STATES.ON) {
                 toolbar.slideIn();
             } else {
@@ -97,13 +97,13 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
          */
         toolbar.wireEvents = function() {
             toolbar.instance.find('[rel="sitecues-event"]').each(function() {
-                console.log($(this));
+                sitecuesLog.info($(this));
                 $(this).click(function() {
                     var event = $(this).data('sitecues-event');
                     if(event) {
                         sitecues.emit(event);
                     } else {
-                        console.log("No event configured");
+                        sitecuesLog.warn("No event configured");
                     }
                 })
             })
@@ -143,10 +143,10 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         setTimeout(toolbar.slideOut, 500)
 
         sitecues.on( 'toolbar/enable', function () {
-            log.info( 'Toolbar state: [on].' );
+            sitecuesLog.info( 'Toolbar state: [on].' );
         } );
         sitecues.on( 'toolbar/disable', function () {
-            log.info( 'Toolbar state: [off].' );
+            sitecuesLog.info( 'Toolbar state: [off].' );
         } );
 
         callback();

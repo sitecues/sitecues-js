@@ -9,7 +9,7 @@ sitecues.def('sitecues/debug', function(module, callback){
 		var time = (+new Date() - (time || start))/1000;
 
 		// dump to log profile
-		log.info(time + 's\t' + type);
+		sitecuesLog.info(time + 's\t' + type);
 	});
 
 });

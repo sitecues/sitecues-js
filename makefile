@@ -14,7 +14,8 @@ package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
 files=\
-	source/js/logging/log4javascript_production.js \
+	source/js/logging/log4javascript_uncompressed.js \
+	source/js/logging/init_logger.js \
 	target/source/js/core.js \
 	source/js/conf.js \
 	source/js/conf/localstorage.js \
@@ -73,7 +74,7 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=source/js/logging/log4javascript_uncompressed.js target/source/js/core.js source/js/use.js source/js/debug.js
+	files=source/js/logging/log4javascript_uncompressed.js source/js/logging/init_logger.js target/source/js/core.js source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)

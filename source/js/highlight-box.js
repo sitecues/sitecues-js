@@ -13,7 +13,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         var kMinHighlightZoom = 1.01;
 
         var extraZoom = 1.5;
-		var toClass = {}.toString;
+		
+        var toClass = {}.toString;
 
         // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
         // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value

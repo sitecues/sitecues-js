@@ -1,6 +1,6 @@
 sitecues.def('toolbar/bootstrap-dropdown', function(bootstrapDropdown, callback){
   sitecues.use( 'jquery', function ($) {
-    console.log($);
+    sitecuesLog.info($);
 // Begin third party code
 
 
@@ -175,7 +175,7 @@ sitecues.def('toolbar/bootstrap-dropdown', function(bootstrapDropdown, callback)
 }(window.jQuery);
 
 // End third party code
- console.log('callback?');
+ sitecuesLog.info('callback?');
 });
   callback();
 });

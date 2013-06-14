@@ -427,7 +427,7 @@ var log4javascript = (function() {
 					if (exception) {
 						alertMessage += newLine + newLine + "Original error: " + getExceptionStringRep(exception);
 					}
-					alert(alertMessage);
+					// alert(alertMessage);
 				}
 			}
 		}

@@ -179,7 +179,7 @@ sitecues.def('cursor/canvas', function(cursor, callback) {
 		// load special cursor css
 		load.style('../css/cursor.css', function() {
 			wait('sitecues-cursor', function() {
-                log.warn('sitecues-cursor font loaded');
+        sitecuesLog.warn('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
 			});

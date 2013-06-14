@@ -9,7 +9,7 @@ sitecues.def('speech/azure', function(azure, callback) {
     sitecues.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
 
         azure.factory = function(hlb) {
-        	log.info(remote.azureAccessToken.accessToken);
+        	sitecuesLog.info(remote.azureAccessToken.accessToken);
         	var roboVoice = new window.sitecues.RoboVoice(remote.azureAccessToken.accessToken);
         	return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
@@ -34,27 +34,27 @@ window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQue
 	this.play = function() {
 		var tokenTTL = remote.azureAccessToken.expires - new Date().getTime();
 		if(tokenTTL < 30000) {
-			log.info("Token has expired, re-fetching...");
+			sitecuesLog.info("Token has expired, re-fetching...");
 			this.fetchToken();
 		} else {
-			log.info("Token expires in " + tokenTTL + "ms");
+			sitecuesLog.info("Token expires in " + tokenTTL + "ms");
 		}
 		var text = hlb.text();
 		if(!text || text.length < 1) {
 			return false;
 		}
-		log.info("Playing via azure: " + text);
+		sitecuesLog.info("Playing via azure: " + text);
 		roboVoice.speak(text, "auto");
 		return true;
 	}
 
 	this.stop = function() {
-		log.info("Stopping azure player");
+		sitecuesLog.info("Stopping azure player");
 		roboVoice.stop();
 	}
 
 	this.destroy = function() {
-		log.info("Destroying azure player");
+		sitecuesLog.info("Destroying azure player");
 		this.stop();
 	}
 
