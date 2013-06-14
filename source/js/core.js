@@ -24,11 +24,11 @@
     log.addAppender(popUpAppender);
 
     //var log = log4javascript.getLogger("mylogger");
-    var popUpAppender2 = new log4javascript.PopUpAppender();
+    //var popUpAppender2 = new log4javascript.PopUpAppender();
     var layout = new log4javascript.PatternLayout("%d{yyyyMMdd_HHmmss.SS} [%-5p] %c %f %m{3}");
-    popUpAppender2.setLayout(layout);
+    popUpAppender.setLayout(layout);
 
-    log.addAppender(popUpAppender2);
+    //log.addAppender(popUpAppender2);
 
 
 
