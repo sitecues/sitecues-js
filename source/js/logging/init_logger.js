@@ -31,4 +31,4 @@
     sitecuesLog.addAppender(popUpAppender);
     sitecuesLog.addAppender(ajaxAppender);
 
-    sitecuesLog.error("testthis");
+    //sitecuesLog.error("testthis");
