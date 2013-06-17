@@ -213,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // AK: comment out all the dimmer calls by AL request
                         backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
-                        log.into("hlb closed");
+                        log.info("hlb closed");
                         sitecues.emit('hlb/closed', _this.item);
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
