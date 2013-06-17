@@ -9,6 +9,6 @@
 
 (function(){
 
-  window.sitecues.log.addAppender( window.sitecues.popUpAppender );
+  sitecues.log._sitecues_appenders.popUpAppender.show();
 
 })();
