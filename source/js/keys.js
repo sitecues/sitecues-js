@@ -111,7 +111,7 @@ sitecues.def('keys', function(keys, callback) {
         };
 
 		// key event hook
-		keys.hook = function(event){
+		keys.hook = function(event) {
 
 			// private variables
 			var i, l, key, test, parts, result;
@@ -149,8 +149,13 @@ sitecues.def('keys', function(keys, callback) {
 					result = ( !! result ) & ( test && test( event ) );
 				}
 
-				// if all checks passed, handle key
-				if (result) return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
+                // if all checks passed, handle key
+                if (result) {
+                    return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
+                } else {
+                    // otherwise, let the key proceed further
+                    return true;
+                }
 			}
 		};
 
