@@ -1,7 +1,7 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
     sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
-        
+
         toolbar.STATES = {
             OFF: {
                 id:   0,
@@ -44,6 +44,20 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
                 callback();
             }
         }
+
+        toolbar.show = function () {
+            toolbar.currentState = toolbar.STATES.ON;
+
+            if (! toolbar.instance) {
+                toolbar.render();
+            }
+
+            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+
+            toolbar.instance.show(0);
+            toolbar.shim.show(0);
+            conf.set("showToolbar", true);
+        };
 
         toolbar.slideIn  = function () {
             toolbar.currentState = toolbar.STATES.OFF;
@@ -92,7 +106,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
          * that will say which event(s) to fire.
          *
          * Note: We could possibly skip the "rel" step.
-         * 
+         *
          * @return void
          */
         toolbar.wireEvents = function() {
@@ -117,7 +131,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         /**
          * Closes the toolbar and sets the preference so it stays closed.
-         * 
+         *
          * @return void
          */
         toolbar.disable = function() {
@@ -140,7 +154,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         // otherwise we don't know if everything is loaded or not.  I'd rather
         // have this listen to some event or possible check on a setTimeout
         // loop.
-        setTimeout(toolbar.slideOut, 500)
+        setTimeout(toolbar.show, 500)
 
         sitecues.on( 'toolbar/enable', function () {
             sitecuesLog.info( 'Toolbar state: [on].' );
