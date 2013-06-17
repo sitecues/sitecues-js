@@ -30,6 +30,7 @@
 
   sitecues.log._sitecues_appenders = {};
 
+  sitecues.log._sitecues_layouts = {};
 
 
 
@@ -46,16 +47,22 @@
   var popUpAppender  = sitecues.log._sitecues_appenders.popUpAppender,
       ajaxAppender   = sitecues.log._sitecues_appenders.popUpAppender;
 
+
   // Create the layout filter for the appenders
-  var layout = new log4javascript.PatternLayout(
-      "%d{yyyyMMdd_HHmmss.SS} " +
-      "[ " + logSettings.version + " ]" +
-      "[%-5p] %c %f %m{3}"
+  sitecues.log._sitecues_layouts.default_layout = new log4javascript.PatternLayout(
+      "%d{yyyyMMdd_HHmmss.SS}, " +
+      "" + logSettings.version + ", " +
+      "%p, %f, %m{3}"
   );
+
+  var default_layout = sitecues.log._sitecues_layouts.default_layout;
   
+  // Add Custom Fields to Layout
+  default_layout.setCustomField('module', 'logger');
+
   // Set the layout to the appenders
-  popUpAppender.setLayout(layout);
-  ajaxAppender.setLayout(layout);
+  popUpAppender.setLayout(default_layout);
+  ajaxAppender.setLayout(default_layout);
   
   // Set the error level for the appenders
   ajaxAppender.setThreshold(  log4javascript.Level.ERROR );
