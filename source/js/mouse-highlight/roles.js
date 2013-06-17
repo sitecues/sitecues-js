@@ -264,7 +264,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback) {
 				return match;
 			} 
 
-			sitecuesLog.info("No match for " + nodeName);
+			sitecues.log.info("No match for " + nodeName);
 			return role.roles.container;
 		}
 

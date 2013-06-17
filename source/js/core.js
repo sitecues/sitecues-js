@@ -7,14 +7,21 @@
 
 (function(){
 
+    var module_name = "core";
+
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
         log.warn("sitecues already defined.");
         return;
     }
 
-    // Private variables
+    // Create a sitecues namespace if it does not already exist
+    // Logging will attach itself to this namespace on window.sitecues.log
+    if (!window.sitecues) {
+        window.sitecues = {};
+    }
 
+    // Private variables
     var arr                 = Array.prototype                 // Array's prototype
         , has               = Object.prototype.hasOwnProperty // Object's has own property
         , noop              = function(){}                    // Empty function
@@ -23,7 +30,7 @@
 
         // Siteuces top-level namespace: all public classes and modules will be
         // attached to this name space and aliased on "window.sitecues"
-        , sitecues    = {}
+        , sitecues    = window.sitecues
 
         , modules
         , coreConfig
@@ -36,8 +43,6 @@
         , APP_VERSION = '0.0.0-UNVERSIONED'
     ;
 
-    // Alias sitecues to window
-    window.sitecues = sitecues;
 
     // Return the core config.
     sitecues.getCoreConfig = function() {
@@ -149,7 +154,7 @@
     var _def = function(name, constructor){
         // do not define modules twice.
         if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-            sitecuesLog.warn("sitecues: module '" + name + "' already defined.");
+            sitecues.log.warn("sitecues: module '" + name + "' already defined.");
             return;
         }
 
@@ -169,7 +174,7 @@
                 // This caused the issue with the double-loading of the badge and highlight-box.
                 // See: https://fecru.ai2.at/cru/EQJS-39#c187
                 //      https://equinox.atlassian.net/browse/EQ-355
-                // sitecuesLog.warn( 'No callback() set when def.use("' + name );
+                // sitecues.log.warn( 'No callback() set when def.use("' + name );
             }
 
             // save module for future call
@@ -455,8 +460,8 @@
 				}
 				return s;
 			};
-
-		sitecuesLog.info(
+            
+        sitecues.log.info(
 			'===== BEGIN: SITECUES STATUS =====================\n'
 			+ printObj(info)
 			+ '===== END: SITECUES STATUS =======================');
@@ -534,30 +539,30 @@
         if (window.sitecues.coreConfig) {
             coreConfig = window.sitecues.coreConfig;
 
-            sitecuesLog.info( coreConfig );
+            sitecues.log.info( coreConfig );
 
             //window.sitecues.coreConfig = undefined;
 
             if (coreConfig.hosts) {
                 if (coreConfig.hosts.ws) {
-                    sitecuesLog.info("sitecues ws host: " + coreConfig.hosts.ws);
+                    sitecues.log.info("sitecues ws host: " + coreConfig.hosts.ws);
                 } else {
-                    sitecuesLog.warn("sitecues ws host not specified.");
+                    sitecues.log.warn("sitecues ws host not specified.");
                     valid = false;
                 }
 
                 if (coreConfig.hosts.up) {
-                    sitecuesLog.info("sitecues up host: " + coreConfig.hosts.up);
+                    sitecues.log.info("sitecues up host: " + coreConfig.hosts.up);
                 } else {
-                    sitecuesLog.warn("sitecues up host not specified.");
+                    sitecues.log.warn("sitecues up host not specified.");
                     valid = false;
                 }
             } else {
-                sitecuesLog.warn("sitecues core hosts config not found.");
+                sitecues.log.warn("sitecues core hosts config not found.");
                 valid = false;
             }
         } else {
-            sitecuesLog.warn("sitecues core config not found.");
+            sitecues.log.warn("sitecues core config not found.");
             valid = false;
         }
 
@@ -565,7 +570,7 @@
         if (valid) {
             _initialize();
         } else {
-            sitecuesLog.warn("invalid sitecues core config. aborting.");
+            sitecues.log.warn("invalid sitecues core config. aborting.");
         }
     };
 

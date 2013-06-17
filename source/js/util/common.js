@@ -138,7 +138,7 @@ sitecues.def('util/common', function (common, callback) {
                     }
                 } catch (e) {
                     // Just temporary logging, to make sure code always works as expected.
-                    sitecuesLog.warn('Attempt to get RGB color failed.');
+                    sitecues.log.warn('Attempt to get RGB color failed.');
                 }
                 return resultRGBColor;
             }
