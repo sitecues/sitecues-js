@@ -55,7 +55,6 @@ files=\
 	source/js/invert.js \
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
-	source/js/cursor/element.js \
 	source/js/cursor/custom.js \
 	source/js/toolbar.js
 
@@ -76,7 +75,7 @@ endif
 ifeq ($(dev), true)
 	files=\
 		source/js/logging/log4javascript_uncompressed.js \
-		 source/js/logging/init_logger.js \
+		source/js/logging/init_logger.js \
 		target/source/js/core.js \
 		source/js/use.js source/js/debug.js
 endif
