@@ -7,6 +7,8 @@
 
 (function(){
 
+
+  //// LOGGING SETTINGS ////////////////////////////////////////////////////////
   
   // Settings object for the logger
   var logSettings = {
@@ -26,9 +28,23 @@
   // Make sitecues.log namespace global by attaching it to the window
   window.sitecues.log = log4javascript.getLogger('siteCuesMainLogger');
 
+  sitecues.log._sitecues_appenders = {};
+
+
+
+
+  //// SETUP APPENDERS /////////////////////////////////////////////////////////
+
   // Create a popUpAppender with default options
-  window.sitecues.popUpAppender = new log4javascript.PopUpAppender();
-  window.sitecues.ajaxAppender = new log4javascript.AjaxAppender( logSettings.ajax_endpoint );
+  sitecues.log._sitecues_appenders.popUpAppender = 
+    new log4javascript.PopUpAppender();
+
+  sitecues.log._sitecues_appenders.ajaxAppender = 
+    new log4javascript.AjaxAppender( logSettings.ajax_endpoint );
+
+  // Alias private vars to make following code easier to read
+  var popUpAppender  = sitecues.log._sitecues_appenders.popUpAppender,
+      ajaxAppender   = sitecues.log._sitecues_appenders.popUpAppender;
 
   // Create the layout filter for the appenders
   var layout = new log4javascript.PatternLayout(
@@ -38,19 +54,73 @@
   );
   
   // Set the layout to the appenders
-  sitecues.popUpAppender.setLayout(layout);
-  sitecues.ajaxAppender.setLayout(layout);
+  popUpAppender.setLayout(layout);
+  ajaxAppender.setLayout(layout);
   
   // Set the error level for the appenders
-  sitecues.popUpAppender.setThreshold(log4javascript.Level.ALL);
-  window.sitecues.ajaxAppender.setThreshold(log4javascript.Level.ERROR);
-
-  // Make messages appear at top of popUpAppender
-  sitecues.popUpAppender.setNewestMessageAtTop(true);
+  ajaxAppender.setThreshold(  log4javascript.Level.ERROR );
+  popUpAppender.setThreshold( log4javascript.Level.INFO );
 
   // Add the appender(s) to the main logger
-  sitecues.log.addAppender(sitecues.ajaxAppender);
+  sitecues.log.addAppender( ajaxAppender );
+  sitecues.log.addAppender( popUpAppender );
+  
+  // Hide the popup appender (this will be shown only in dev mode unless toggled)
+  popUpAppender.hide();
 
-  //sitecues.log.error("testthis");
+  // Make messages appear at top of popUpAppender
+  popUpAppender.setNewestMessageAtTop(true);
+
+
+  
+  //// TOGGLE FEATURES /////////////////////////////////////////////////////////
+ 
+  // Toggle Items
+  sitecues.log.toggleItems = {
+    
+    // Toggle the use of the popUpAppender
+    popup: { state: false,
+      on: function(){
+        popUpAppender.show();
+        return "On";
+      },
+      off: function(){
+        popUpAppender.hide();
+        return "Off";
+      }},
+
+    /*
+    // Toggle route-logs-to-console (use with caution)
+    console: { state: false, 
+      on: function(){
+
+      },
+      off: function(){
+
+      }}
+    */
+  };
+
+  // Toggle Interface
+  sitecues.log.toggle = function( type ){
+    if ( typeof sitecues.log.toggleItems[type] === "object" ) {
+
+      var toggleItem = sitecues.log.toggleItems[type],
+          state      = toggleItem.state;
+
+      if (typeof state === "boolean") {
+        if (state === true ){
+          toggleItem.state = false;
+          return "Toggle '"+type+"': "+toggleItem.off();
+        } else {
+          toggleItem.state = true;
+          return "Toggle '"+type+"': "+toggleItem.on();
+        }
+      }
+
+    } else {
+      return "No such Toggle-Item found.";
+    }
+  };
 
 })();

@@ -462,7 +462,7 @@
 			};
             
         sitecues.log.info(
-			'===== BEGIN: SITECUES STATUS =====================\n'
+			'\n===== BEGIN: SITECUES STATUS =====================\n'
 			+ printObj(info)
 			+ '===== END: SITECUES STATUS =======================');
 	};
@@ -517,6 +517,8 @@
                 } );
             }
         ] );
+        
+        return "Status info now found in logger. Use sitecues.log.toggle('popup'); then: sitecues.status();";
     };
 
     //////////////////////////////////////////////////
