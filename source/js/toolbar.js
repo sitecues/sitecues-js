@@ -124,9 +124,11 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         }
 
         $( document ).ready( function () {
-            if(conf.get('showToolbar')) {
+            if (conf.get('showToolbar')) {
                 toolbar.slideIn();
             }
+
+            toolbar.show();
         } );
 
         /**
@@ -149,12 +151,6 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         // load special toolbar css
         load.style('../css/toolbar.css');
         load.style('../css/bootstrap.css');
-
-        // FIXME We'll wait a half-second to show the toolbar, because
-        // otherwise we don't know if everything is loaded or not.  I'd rather
-        // have this listen to some event or possible check on a setTimeout
-        // loop.
-        setTimeout(toolbar.show, 500)
 
         sitecues.on( 'toolbar/enable', function () {
             sitecues.log.info( 'Toolbar state: [on].' );
