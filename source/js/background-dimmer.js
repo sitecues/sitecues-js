@@ -86,18 +86,18 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback) {
       this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
     };
 
-        // Un-dims stuff. Ballin' //////////////////////////////////////////////////
-        backgroundDimmer.removeDimmer = function () {
-            // Animate out the dimmerContainer
-            this.$dimmerContainer.style({opacity: 0}, '', 'important');
-            // Remove the dimmerContainer after the animation has finished
-            backgroundDimmer.$dimmerContainer.remove();
-        };
+    // Un-dims stuff. Ballin' //////////////////////////////////////////////////
+    backgroundDimmer.removeDimmer = function () {
+        // Animate out the dimmerContainer
+        this.$dimmerContainer.style({opacity: 0}, '', 'important');
+        // Remove the dimmerContainer after the animation has finished
+        backgroundDimmer.$dimmerContainer.remove();
+    };
 
-        sitecues.on('hlb/deflating', function() {
-            // Update SVG path to remove inner path responsible for hole.
-            backgroundDimmer.$dimmerContainer.find('svg path').attr('d', wrapper);
-        });
+    sitecues.on('hlb/deflating', function() {
+        // Update SVG path to remove inner path responsible for hole.
+        backgroundDimmer.$dimmerContainer.find('svg path').attr('d', wrapper);
+    });
     
     // Done
     callback();

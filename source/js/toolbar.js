@@ -82,7 +82,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         };
 
         toolbar.toggle = function() {
-            sitecuesLog.info('toggle');
+            sitecues.log.info('toggle');
             if((toolbar.currentState) === toolbar.STATES.ON) {
                 toolbar.slideIn();
             } else {
@@ -111,13 +111,13 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
          */
         toolbar.wireEvents = function() {
             toolbar.instance.find('[rel="sitecues-event"]').each(function() {
-                sitecuesLog.info($(this));
+                sitecues.log.info($(this));
                 $(this).click(function() {
                     var event = $(this).data('sitecues-event');
                     if(event) {
                         sitecues.emit(event);
                     } else {
-                        sitecuesLog.warn("No event configured");
+                        sitecues.log.warn("No event configured");
                     }
                 })
             })
@@ -157,10 +157,10 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         setTimeout(toolbar.show, 500)
 
         sitecues.on( 'toolbar/enable', function () {
-            sitecuesLog.info( 'Toolbar state: [on].' );
+            sitecues.log.info( 'Toolbar state: [on].' );
         } );
         sitecues.on( 'toolbar/disable', function () {
-            sitecuesLog.info( 'Toolbar state: [off].' );
+            sitecues.log.info( 'Toolbar state: [off].' );
         } );
 
         callback();

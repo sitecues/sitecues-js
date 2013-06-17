@@ -13,6 +13,7 @@ package-file-name:=$(package-name).tgz
 package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
+# Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
 	source/js/logging/log4javascript_uncompressed.js \
 	source/js/logging/init_logger.js \
@@ -76,6 +77,7 @@ ifeq ($(dev), true)
 	files=\
 		source/js/logging/log4javascript_uncompressed.js \
 		source/js/logging/init_logger.js \
+		source/js/logging/init_logger_dev.js \
 		target/source/js/core.js \
 		source/js/use.js source/js/debug.js
 endif
