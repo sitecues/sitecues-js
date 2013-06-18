@@ -45,17 +45,18 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             }
         }
 
-        toolbar.show = function () {
-            toolbar.currentState = toolbar.STATES.ON;
+        // TODO: Make code DRY-compliant.
 
+        toolbar.show = function () {
             if (! toolbar.instance) {
                 toolbar.render();
             }
 
-            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
-
             toolbar.instance.show(0);
             toolbar.shim.show(0);
+
+            toolbar.currentState = toolbar.STATES.ON;
+            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
             conf.set("showToolbar", true);
         };
 
@@ -123,27 +124,18 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             })
         }
 
-        $( document ).ready( function () {
-            if (conf.get('showToolbar')) {
-                toolbar.slideIn();
-            }
-
-            toolbar.show();
-        } );
-
         /**
          * Closes the toolbar and sets the preference so it stays closed.
          *
          * @return void
          */
-        toolbar.disable = function() {
+        toolbar.disable = function () {
             conf.set("toolbarEnabled", false);
             toolbar.toggle();
-        }
+        };
 
         sitecues.on( 'badge/hover', toolbar.slideOut );
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
-        sitecues.on( 'toolbar/disable', toolbar.disable );
 
         sitecues.on( 'speech/disable', toolbar.disableSpeech );
         sitecues.on( 'speech/enable', toolbar.enableSpeech );
@@ -156,8 +148,15 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             sitecues.log.info( 'Toolbar state: [on].' );
         } );
         sitecues.on( 'toolbar/disable', function () {
+            toolbar.disable();
             sitecues.log.info( 'Toolbar state: [off].' );
         } );
+
+        $(document).ready(function () {
+            if (conf.get("showToolbar")) {
+                toolbar.show();
+            }
+        });
 
         callback();
     } );

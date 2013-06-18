@@ -17,20 +17,17 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 		 * toolbar is on the page to set up the listeners properly. Otherwise
 		 * we'd have to set the .on() methods to document scope which would be a
 		 * performance hit.
-		 * 
+		 *
 		 * @return void
 		 */
 		messenger.build = function(toolbar) {
 			// create clider messenger.wrap element
 			messenger.wrap = $( '<div>' ).addClass( 'messenger-wrap' ).appendTo(toolbar);
-
-			// create messenger
-			messenger.messenger = $( '<div class="sitecues-messenger"><div class="message">Welcome to sitecues.</div></div>').appendTo( messenger.wrap );
 		},
 
 		/**
 		 * Queues a message for display.
-		 * 
+		 *
 		 * @param  message An object with the following properties:
 		 *         .content  HTML     The content of the message, as HTML.
 		 *         .ttl      long     The lifespan of the message, in ms
@@ -90,7 +87,7 @@ sitecues.def('toolbar/messenger', function(messenger, callback){
 				}
 				return;
 			} else {
-				// We need to show this message				
+				// We need to show this message
 				messenger.display(message);
 				setTimeout(messenger.poll, pollingInterval);
 			}
