@@ -48,20 +48,20 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
         // TODO: Make code DRY-compliant.
 
         toolbar.show = function () {
-            if (! toolbar.instance) {
-                toolbar.render();
-            }
+            toolbar.render();
 
             toolbar.instance.show(0);
             toolbar.shim.show(0);
 
             toolbar.currentState = toolbar.STATES.ON;
+
             sitecues.emit("toolbar/state/" + toolbar.currentState.name);
             conf.set("showToolbar", true);
         };
 
         toolbar.slideIn  = function () {
             toolbar.currentState = toolbar.STATES.OFF;
+
             if(toolbar.instance) {
                 toolbar.instance.slideUp( 'slow' );
                 toolbar.shim.slideUp( 'slow', function() {
@@ -73,9 +73,8 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         toolbar.slideOut = function () {
             toolbar.currentState = toolbar.STATES.ON;
-            if(!toolbar.instance) {
-                toolbar.render();
-            }
+
+            toolbar.render();
             sitecues.emit("toolbar/state/" + toolbar.currentState.name);
             toolbar.shim.slideDown( 'slow' );
             toolbar.instance.slideDown( 'slow' );
@@ -84,6 +83,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         toolbar.toggle = function() {
             sitecues.log.info('toggle');
+
             if((toolbar.currentState) === toolbar.STATES.ON) {
                 toolbar.slideIn();
             } else {
