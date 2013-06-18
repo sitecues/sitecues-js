@@ -4,7 +4,7 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback){
        * We're not going to do this automatically as we need to make sure the toolbar is on the page to set up the
        * listeners properly. Otherwise we'd have to set the .on() methods to document scope which would be a
        * performance hit.
-       * 
+       *
        * @return void
        */
       dropdown.build = function(parent) {
@@ -20,7 +20,6 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback){
         return;
       }
 
+      callback();
     });
-
-  callback();
 });

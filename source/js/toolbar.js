@@ -1,7 +1,6 @@
 sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
     sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
-
         toolbar.STATES = {
             OFF: {
                 id:   0,
@@ -49,7 +48,6 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         toolbar.show = function () {
             toolbar.render();
-
             toolbar.instance.show(0);
             toolbar.shim.show(0);
 
@@ -89,17 +87,17 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             } else {
                 toolbar.slideOut();
             }
-        },
+        };
 
         toolbar.enableSpeech = function() {
             toolbar.ttsButton.removeClass('tts-disabled');
             toolbar.ttsButton.data( 'tts-enable', 'enabled' );
-        },
+        };
 
         toolbar.disableSpeech = function() {
             toolbar.ttsButton.addClass('tts-disabled');
             toolbar.ttsButton.data( 'tts-enable', 'disabled' );
-        },
+        };
 
         /**
          * Looks for toolbar elements with a "rel" attribute of value
@@ -112,8 +110,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
          */
         toolbar.wireEvents = function() {
             toolbar.instance.find('[rel="sitecues-event"]').each(function() {
-                sitecues.log.info($(this));
-                $(this).click(function() {
+                $(this).on("click", function() {
                     var event = $(this).data('sitecues-event');
                     if(event) {
                         sitecues.emit(event);
@@ -122,7 +119,7 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
                     }
                 })
             })
-        }
+        };
 
         /**
          * Closes the toolbar and sets the preference so it stays closed.
@@ -151,13 +148,14 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             sitecues.log.info( 'Toolbar state: [off].' );
         } );
 
+        // FIXME: Effin' fix me AS effin' AP!!!
+
         $(document).ready(function () {
-            if (conf.get("showToolbar")) {
-                toolbar.show();
+            if (conf.get("showToolbar") === true) {
+                setTimeout(toolbar.show, 2500);
             }
         });
 
         callback();
     } );
-
 } );
