@@ -148,7 +148,10 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
             sitecues.log.info( 'Toolbar state: [off].' );
         } );
 
-        // FIXME: Effin' fix me AS effin' AP!!!
+        /**
+         * FIXME: Effin' fix me as effin' soon as effin' possible!!!
+         * We should not have to run `toolbar.show` in `setTimeout()`. Yeah, it's a WTF question to me too.
+         */
 
         $(document).ready(function () {
             if (conf.get("showToolbar") === true) {
