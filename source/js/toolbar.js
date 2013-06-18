@@ -136,7 +136,6 @@ sitecues.def( 'toolbar', function ( toolbar, callback ) {
 
         sitecues.on( 'badge/hover', toolbar.slideOut );
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
-
         sitecues.on( 'speech/disable', toolbar.disableSpeech );
         sitecues.on( 'speech/enable', toolbar.enableSpeech );
 
