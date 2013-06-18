@@ -518,7 +518,10 @@
             }
         ] );
         
-        return "Status info now found in logger. Use sitecues.log.toggle('popup'); then: sitecues.status();";
+        // Popup the logger and report status
+        //sitecues.log.toggleItems.popup.on()
+        //var popUpAppender = sitecues.log._sitecues_appenders.popUpAppender;
+        //popUpAppender.show().focus();
     };
 
     //////////////////////////////////////////////////

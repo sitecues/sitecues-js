@@ -47,7 +47,6 @@
   var popUpAppender  = sitecues.log._sitecues_appenders.popUpAppender,
       ajaxAppender   = sitecues.log._sitecues_appenders.popUpAppender;
 
-
   // Create the layout filter for the appenders
   sitecues.log._sitecues_layouts.default_layout = new log4javascript.PatternLayout(
       "%d{yyyyMMdd_HHmmss.SS}, " +
@@ -65,19 +64,20 @@
   ajaxAppender.setLayout(default_layout);
   
   // Set the error level for the appenders
-  ajaxAppender.setThreshold(  log4javascript.Level.ERROR );
-  popUpAppender.setThreshold( log4javascript.Level.INFO );
+  ajaxAppender.setThreshold(log4javascript.Level.ERROR);
+  popUpAppender.setThreshold(log4javascript.Level.INFO);
 
   // Add the appender(s) to the main logger
-  sitecues.log.addAppender( ajaxAppender );
-  sitecues.log.addAppender( popUpAppender );
-  
-  // Hide the popup appender (this will be shown only in dev mode unless toggled)
-  popUpAppender.hide();
+  sitecues.log.addAppender(ajaxAppender);
+  sitecues.log.addAppender(popUpAppender)
 
   // Make messages appear at top of popUpAppender
   popUpAppender.setNewestMessageAtTop(true);
 
+  // Hide the popup appender (this will be shown only in dev mode unless toggled)
+  //popUpAppender.hide();
+  //popUpAppender.close();
+  popUpAppender.setInitiallyMinimized(true);
 
   
   //// TOGGLE FEATURES /////////////////////////////////////////////////////////
@@ -88,11 +88,13 @@
     // Toggle the use of the popUpAppender
     popup: { state: false,
       on: function(){
-        popUpAppender.show();
+        //popUpAppender.show();
+        sitecues.log.toggleItems.popup = true;
         return "On";
       },
       off: function(){
-        popUpAppender.hide();
+        //popUpAppender.hide();
+        sitecues.log.toggleItems.popup = false;
         return "Off";
       }},
 
@@ -117,10 +119,8 @@
 
       if (typeof state === "boolean") {
         if (state === true ){
-          toggleItem.state = false;
           return "Toggle '"+type+"': "+toggleItem.off();
         } else {
-          toggleItem.state = true;
           return "Toggle '"+type+"': "+toggleItem.on();
         }
       }
