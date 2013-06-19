@@ -5,7 +5,7 @@ sitecues.def('toolbar/resizer', function(resizer, callback){
        * We're not going to do this automatically as we need to make sure the toolbar is on the page to set up the
        * listeners properly. Otherwise we'd have to set the .on() methods to document scope which would be a
        * performance hit.
-       * 
+       *
        * @return void
        */
       resizer.build = function(toolbar, shim) {
@@ -53,10 +53,10 @@ sitecues.def('toolbar/resizer', function(resizer, callback){
               return;
           }
           var height = e.gesture.touches[0].pageY;
-          if(height < 20) {
-              height = 20;
-          } else if (height > 60) {
-              height = 60;
+          if(height < 40) {
+              height = 40;
+          } else if (height > 70) {
+              height = 70;
           }
           resizer.toolbar.css({
               height: height
