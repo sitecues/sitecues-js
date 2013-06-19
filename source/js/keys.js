@@ -23,9 +23,9 @@ sitecues.def('keys', function(keys, callback) {
                 || event.keyCode === 107
                 || event.keyCode === 43;
         },
-        'r':		function(event){ return event.keyCode === 82; },
+        'r':		function(event) { return event.keyCode === 82; },
 		'f8':	    function(event) { return event.keyCode === 119; },
-        'space':	function(event){ return event.keyCode === 32; }
+        'space':	function(event) { return event.keyCode === 32; }
     };
 
     keys.hlbKeysTest = {
@@ -66,6 +66,12 @@ sitecues.def('keys', function(keys, callback) {
 	sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
         // handle key
         keys.handle = function ( key, event ) {
+
+            // this is shim for browser short cuts; none of our current features requires 'ctrl' or 'alt' so far
+            if (event.ctrlKey || event.altKey) {
+                return true;
+            }
+            
             // if event defined, emit it
             if ( key.event ) {
                 sitecues.emit( key.event, event );
@@ -149,19 +155,16 @@ sitecues.def('keys', function(keys, callback) {
 					result = ( !! result ) & ( test && test( event ) );
 				}
 
-                // if all checks passed, handle key
                 if (result) {
                     return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
-                } else {
-                    // otherwise, let the key proceed further
-                    return true;
                 }
 			}
+            return true;
 		};
 
 		// bind key hook to window
         // 3rd param changes event order: false == bubbling; true = capturing.
-		window.addEventListener('keydown', keys.hook, true);
+	     window.addEventListener('keydown', keys.hook, true);
         
 		sitecues.on('hlb/ready', function (hlbElement) {
 			extra_event_properties.dom.highlight_box = $(hlbElement);
