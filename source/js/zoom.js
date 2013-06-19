@@ -10,10 +10,7 @@ sitecues.def('zoom', function(zoom, callback) {
 	// detect if browser support zoom natively
 	zoom['native'] = 'zoom' in document.createElement('div').style;
 
-	// get dependencies
-	sitecues.use('jquery', 'conf', 'ui', function($, conf) {
-        
-        var $body = $('body');
+	sitecues.use('conf',function($, conf) {
 
 		// use conf module for sharing
 		// current zoom level value
@@ -30,6 +27,13 @@ sitecues.def('zoom', function(zoom, callback) {
 			// value have float value
 			return parseFloat((value).toFixed(1));
 		});
+	});
+
+	// get dependencies
+	sitecues.use('jquery', 'conf', 'ui', function($, conf) {
+        
+        var $body = $('body');
+
 
 		// define default value for zoom if needed
 		if (!conf.get('zoom')) {
