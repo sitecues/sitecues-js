@@ -1,5 +1,5 @@
 // returns the cursor type for a specified element
-sitecues.def('cursor/style', function(module, callback){
+sitecues.def('cursor/style', function(module, callback, console){
 
 	// dependencies
 	sitecues.use('jquery', function($){

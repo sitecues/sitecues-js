@@ -7,127 +7,165 @@
 
 (function(){
 
+  // Convenience alias log4javascript instance stored on windows.sitcues
+  var log4js = window.sitecues.log4js;
 
-  //// LOGGING SETTINGS ////////////////////////////////////////////////////////
+  // The main Logger 
+  var Logger = {
+
   
-  // Settings object for the logger
-  var logSettings = {
-    
+
+    //// Logger Settings ////
+
     // The log-line-version of the logger
-    version: "1",
-    
+    version: "Heart.1",
+
     // Set the path for the logging server
-    ajax_endpoint: "./some/path/"
-  };
+    ajaxEndpoint: "./logging/ajax/endpoint",
 
-  if ( typeof window.sitecues !== "object" ) {
-    window.sitecues = {};
-  }
-  
-  // Create the logger (makes new logger if name does not yet exist)
-  // Make sitecues.log namespace global by attaching it to the window
-  window.sitecues.log = log4javascript.getLogger('siteCuesMainLogger');
-
-  sitecues.log._sitecues_appenders = {};
-
-  sitecues.log._sitecues_layouts = {};
+    // Default Layout Pattern
+    layoutPattern: "%d{yyyyMMdd_HHmmss.SS}, %f, %c, %p, %m{3}",
 
 
-
-  //// SETUP APPENDERS /////////////////////////////////////////////////////////
-
-  // Create a popUpAppender with default options
-  sitecues.log._sitecues_appenders.popUpAppender = 
-    new log4javascript.PopUpAppender();
-
-  sitecues.log._sitecues_appenders.ajaxAppender = 
-    new log4javascript.AjaxAppender( logSettings.ajax_endpoint );
-
-  // Alias private vars to make following code easier to read
-  var popUpAppender  = sitecues.log._sitecues_appenders.popUpAppender,
-      ajaxAppender   = sitecues.log._sitecues_appenders.popUpAppender;
-
-  // Create the layout filter for the appenders
-  sitecues.log._sitecues_layouts.default_layout = new log4javascript.PatternLayout(
-      "%d{yyyyMMdd_HHmmss.SS}, " +
-      "" + logSettings.version + ", " +
-      "%p, %f, %m{3}"
-  );
-
-  var default_layout = sitecues.log._sitecues_layouts.default_layout;
-  
-  // Add Custom Fields to Layout
-  default_layout.setCustomField('module', 'logger');
-
-  // Set the layout to the appenders
-  popUpAppender.setLayout(default_layout);
-  ajaxAppender.setLayout(default_layout);
-  
-  // Set the error level for the appenders
-  ajaxAppender.setThreshold(log4javascript.Level.ERROR);
-  popUpAppender.setThreshold(log4javascript.Level.INFO);
-
-  // Add the appender(s) to the main logger
-  sitecues.log.addAppender(ajaxAppender);
-  sitecues.log.addAppender(popUpAppender)
-
-  // Make messages appear at top of popUpAppender
-  popUpAppender.setNewestMessageAtTop(true);
-
-  // Hide the popup appender (this will be shown only in dev mode unless toggled)
-  //popUpAppender.hide();
-  //popUpAppender.close();
-  popUpAppender.setInitiallyMinimized(true);
-
-  
-  //// TOGGLE FEATURES /////////////////////////////////////////////////////////
- 
-  // Toggle Items
-  sitecues.log.toggleItems = {
     
-    // Toggle the use of the popUpAppender
-    popup: { state: false,
-      on: function(){
-        popUpAppender.show();
-        sitecues.log.toggleItems.popup.state = true;
-        return "On";
-      },
-      off: function(){
-        popUpAppender.hide();
-        sitecues.log.toggleItems.popup.state = false;
-        return "Off";
-      }},
+    //// Logger Internals  ////
 
-    /*
-    // Toggle route-logs-to-console (use with caution)
-    console: { state: false, 
-      on: function(){
+    // Appender store
+    appenders: {},
 
-      },
-      off: function(){
 
-      }}
-    */
-  };
 
-  // Toggle Interface
-  sitecues.log.toggle = function( type ){
-    if ( typeof sitecues.log.toggleItems[type] === "object" ) {
+    //// Add Appender to store ////
 
-      var toggleItem = sitecues.log.toggleItems[type],
-          state      = toggleItem.state;
+    addAppender: function(name, objref, level){
 
-      if (typeof state === "boolean") {
-        if (state === true ){
-          return "Toggle '"+type+"': "+toggleItem.off();
-        } else {
-          return "Toggle '"+type+"': "+toggleItem.on();
-        }
+      // Set the default layout on this new appender
+      objref.setLayout(this.layout);
+
+      // Set the Threshold for the errors
+      objref.setThreshold(level);
+
+      // Store the appender
+      this.appenders[name] = objref;
+    },
+
+
+
+    //// Logger Initialization Function ////
+
+    init: function(){
+     
+      // Set the default appender layout
+      this.layout = new log4js.PatternLayout(this.layoutPattern);
+
+      // Add the Log-Line-Version custom field to the default Layout
+      this.layout.setCustomField('log-line-version', this.version);
+
+      // Create popup appender
+      this.addAppender('popup',
+        new log4js.PopUpAppender(),
+        log4js.Level.INFO
+      );
+
+      // Create AJAX appender
+
+      // this.addAppender('ajax',
+      //   new log4js.AjaxAppender(this.ajaxEndpoint),
+      //   log4js.Level.INFO
+      // );
+
+      // Make messages appear at top of popUpAppender
+      this.appenders.popup.setNewestMessageAtTop(true);
+
+      // Hide popup appender (only in dev mode unless toggled)
+      this.appenders.popup.setInitiallyMinimized(true);
+
+      return this;
+    },
+
+
+    //// Create New or Return Existing Logger ////
+    log: function(name){
+
+      // Create the loggerinstance
+      var newLogger = log4js.getLogger(name);
+
+      // Step through the appenders created
+      for (var appenderName in this.appenders) {
+
+        // Attached the appenders to the new logger
+        newLogger.addAppender(this.appenders[appenderName]);
       }
 
-    } else {
-      return "No such Toggle-Item found.";
+      // Map console-like interface
+      return {
+        instance: newLogger,
+        log   : function(a){ newLogger.info(a);  },
+        debug : function(a){ newLogger.debug(a); },
+        error : function(a){ newLogger.error(a); },
+        info  : function(a){ newLogger.info(a);  },
+        warn  : function(a){ newLogger.warn(a);  },
+        trace : function(a){ newLogger.trace(a); },
+        fatal : function(a){ newLogger.fatal(a); }
+      }
+    },
+
+    //// Toggle State Handlers ////
+
+    toggleItems: {
+    
+      // Toggle the use of the popUpAppender
+      popup: { state: false,
+        on: function(){
+          this.appenders.popup.show();
+          this.toggleItems.popup.state = true;
+          return "On";
+        },
+        off: function(){
+          this.appenders.popup.hide();
+          this.toggleItems.popup.state = false;
+          return "Off";
+        }}
+
+    
+      // Toggle route-logs-to-console (use with caution)
+      
+      // console: { state: false, 
+      //   on: function(){
+
+      //   },
+      //   off: function(){
+
+      //   }}
+    },
+
+
+
+    //// Toggle Interface ////
+
+    toggle: function( type ){
+      if ( typeof this.toggleItems[type] === "object" ) {
+
+        var toggleItem = this.toggleItems[type],
+            state = toggleItem.state;
+
+        if (typeof state === "boolean") {
+          if (state === true ){
+            return "Toggle '"+type+"': "+toggleItem.off();
+          } else {
+            return "Toggle '"+type+"': "+toggleItem.on();
+          }
+        }
+
+      } else {
+        return "No such Toggle-Item found.";
+      }
     }
+  
+  // Logger: end-of-def
   };
+
+  // Initialize the global Logger
+  window.sitecues.logger = Logger.init();
 
 })();

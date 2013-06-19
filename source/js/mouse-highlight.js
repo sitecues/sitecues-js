@@ -1,4 +1,4 @@
-sitecues.def('mouse-highlight', function(mh, callback) {
+sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.

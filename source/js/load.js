@@ -1,4 +1,4 @@
-sitecues.def('load', function(load, callback){
+sitecues.def('load', function(load, callback, console){
 
 	// async script loading
 	load.script = sitecues.loadScript;

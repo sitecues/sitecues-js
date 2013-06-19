@@ -1,7 +1,7 @@
 /**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
-sitecues.def('highlight-box', function (highlightBox, callback) {
+sitecues.def('highlight-box', function (highlightBox, callback, console) {
 
     // Get dependencies
     sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui',
@@ -204,7 +204,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // close it out.
                 setTimeout(function() {
                     if (getState() === STATES.INFLATING) {
-					    log.warn("hlb in bad state. resetting.");
+					    console.warn("hlb in bad state. resetting.");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
@@ -213,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // AK: comment out all the dimmer calls by AL request
                         backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
-                        log.info("hlb closed");
+                        console.info("hlb closed");
                         sitecues.emit('hlb/closed', _this.item);
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
@@ -242,7 +242,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
-                log.info("hlb ready");
+                console.info("hlb ready");
                 sitecues.emit('hlb/ready', _this.item);
 
                 // Trigger the background blur effect if there is a highlight box only.
@@ -322,7 +322,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                   // Call the module method to clean up after close BEFORE calling listeners.
                   onHighlightBoxClosed(_this.item);
 
-                  sitecues.log.info("hlb closed");
+                  sitecues.console.info("hlb closed");
                   sitecues.emit('hlb/closed', _this.item);
               });
               }

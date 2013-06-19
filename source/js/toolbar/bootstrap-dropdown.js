@@ -1,6 +1,13 @@
-sitecues.def('toolbar/bootstrap-dropdown', function(bootstrapDropdown, callback){
+sitecues.def('toolbar/bootstrap-dropdown', function(bootstrapDropdown, callback, console){
+
+  // Create the logger for this module
+  var log = window.sitecues.logger.log('bootstrap-dropdown');
+
   sitecues.use( 'jquery', function ($) {
-    sitecues.log.info($);
+    
+    //console.info($); // Al commeted this out. Seeing the jQuery object in my
+    //log all the time got a bit annoying. Sorry!
+
 // Begin third party code
 
 
@@ -175,7 +182,7 @@ sitecues.def('toolbar/bootstrap-dropdown', function(bootstrapDropdown, callback)
 }(window.jQuery);
 
 // End third party code
- sitecues.log.info('callback?');
+ log.info('callback?');
 });
   callback();
 });

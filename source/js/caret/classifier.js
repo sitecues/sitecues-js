@@ -1,6 +1,6 @@
 // module with useful methods to determine what type of element something is
 // NOTE: moved from TS codebase, need refactoring
-sitecues.def('caret/classifier', function(classifier, callback){
+sitecues.def('caret/classifier', function(classifier, callback, console){
 
 	classifier.editingInputTypes = {
 		'text': true,

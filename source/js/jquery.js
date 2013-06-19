@@ -1,4 +1,4 @@
-sitecues.def('jquery', function(module, callback){
+sitecues.def('jquery', function(module, callback, console){
 
 	// initiate loading from google cdn. after loading
 	// switch if to no-confict mode in case of host

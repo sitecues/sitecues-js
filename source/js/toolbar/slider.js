@@ -1,4 +1,4 @@
-sitecues.def('toolbar/slider', function(slider, callback){
+sitecues.def('toolbar/slider', function(slider, callback, console){
 	sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
 		/**

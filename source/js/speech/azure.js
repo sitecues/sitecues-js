@@ -4,12 +4,12 @@
  * in this file.  It is here because we don't need Robovoice for
  * anything else and it is unlikely to be updated by the developer.
  */
-sitecues.def('speech/azure', function(azure, callback) {
+sitecues.def('speech/azure', function(azure, callback, console) {
 
     sitecues.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
 
         azure.factory = function(hlb) {
-        	sitecues.log.info(remote.azureAccessToken.accessToken);
+        	console.info(remote.azureAccessToken.accessToken);
         	var roboVoice = new window.sitecues.RoboVoice(remote.azureAccessToken.accessToken);
         	return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
         }
@@ -34,27 +34,27 @@ window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQue
 	this.play = function() {
 		var tokenTTL = remote.azureAccessToken.expires - new Date().getTime();
 		if(tokenTTL < 30000) {
-			sitecues.log.info("Token has expired, re-fetching...");
+			console.info("Token has expired, re-fetching...");
 			this.fetchToken();
 		} else {
-			sitecues.log.info("Token expires in " + tokenTTL + "ms");
+			console.info("Token expires in " + tokenTTL + "ms");
 		}
 		var text = hlb.text();
 		if(!text || text.length < 1) {
 			return false;
 		}
-		sitecues.log.info("Playing via azure: " + text);
+		console.info("Playing via azure: " + text);
 		roboVoice.speak(text, "auto");
 		return true;
 	}
 
 	this.stop = function() {
-		sitecues.log.info("Stopping azure player");
+		console.info("Stopping azure player");
 		roboVoice.stop();
 	}
 
 	this.destroy = function() {
-		sitecues.log.info("Destroying azure player");
+		console.info("Destroying azure player");
 		this.stop();
 	}
 

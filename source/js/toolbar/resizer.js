@@ -1,4 +1,4 @@
-sitecues.def('toolbar/resizer', function(resizer, callback){
+sitecues.def('toolbar/resizer', function(resizer, callback, console){
     sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
       /**

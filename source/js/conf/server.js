@@ -1,5 +1,5 @@
 // module for storing settings on the server
-sitecues.def('conf/server', function(server, callback){
+sitecues.def('conf/server', function(server, callback, console){
 
 	// url of conf settings server
 	var url = '//' + sitecues.getCoreConfig().hosts.up + '/preferences/' + location.host.replace(/^www\./, '');
