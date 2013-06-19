@@ -15,7 +15,7 @@
     
     // The log-line-version of the logger
     version: "1",
-
+    
     // Set the path for the logging server
     ajax_endpoint: "./some/path/"
   };
@@ -88,13 +88,13 @@
     // Toggle the use of the popUpAppender
     popup: { state: false,
       on: function(){
-        //popUpAppender.show();
-        sitecues.log.toggleItems.popup = true;
+        popUpAppender.show();
+        sitecues.log.toggleItems.popup.state = true;
         return "On";
       },
       off: function(){
-        //popUpAppender.hide();
-        sitecues.log.toggleItems.popup = false;
+        popUpAppender.hide();
+        sitecues.log.toggleItems.popup.state = false;
         return "Off";
       }},
 
