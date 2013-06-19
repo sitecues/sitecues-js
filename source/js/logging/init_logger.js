@@ -88,13 +88,13 @@
     // Toggle the use of the popUpAppender
     popup: { state: false,
       on: function(){
-        //popUpAppender.show();
-        sitecues.log.toggleItems.popup = true;
+        popUpAppender.show();
+        sitecues.log.toggleItems.popup.state = true;
         return "On";
       },
       off: function(){
-        //popUpAppender.hide();
-        sitecues.log.toggleItems.popup = false;
+        popUpAppender.hide();
+        sitecues.log.toggleItems.popup.state = false;
         return "Off";
       }},
 
