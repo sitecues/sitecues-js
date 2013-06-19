@@ -519,9 +519,9 @@
         ] );
         
         // Popup the logger and report status
-        //sitecues.log.toggleItems.popup.on()
-        //var popUpAppender = sitecues.log._sitecues_appenders.popUpAppender;
-        //popUpAppender.show().focus();
+        var popUpAppender = sitecues.log._sitecues_appenders.popUpAppender;
+        popUpAppender.show();
+        popUpAppender.focus();
     };
 
     //////////////////////////////////////////////////

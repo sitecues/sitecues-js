@@ -15,7 +15,7 @@
     
     // The log-line-version of the logger
     version: "1",
-
+    
     // Set the path for the logging server
     ajax_endpoint: "./some/path/"
   };
