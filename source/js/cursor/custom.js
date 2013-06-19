@@ -7,7 +7,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-sitecues.def('cursor/custom', function (cursor, callback) {
+sitecues.def('cursor/custom', function (cursor, callback, console) {
 
     // Static properties
     cursor.isEnabled = false; // if cursor module is enabled

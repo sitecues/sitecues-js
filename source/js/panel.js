@@ -1,4 +1,4 @@
-sitecues.def( 'panel', function( panel, callback ) {
+sitecues.def( 'panel', function(panel, callback, console) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
@@ -12,7 +12,7 @@ sitecues.def( 'panel', function( panel, callback ) {
 		panel.hideDelay = 1000;
 		// Forcing a change to merge from Thom into master
 		// to make sure that I'm actually getting the real code.
-		sitecues.log.info('!!! TEMP !!! panel.hideDelay');
+		console.info('!!! TEMP !!! panel.hideDelay');
 
 		// This is the parent element of the panel.  The default setup does
 		// not need one, this is only when we're using a custom target via

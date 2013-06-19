@@ -1,6 +1,7 @@
 // module for showing equinox badge on the page
 // and notifying system about interactions (hover/click)
-sitecues.def('badge', function(badge, callback){
+sitecues.def('badge', function(badge, callback, console){
+
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions

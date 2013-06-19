@@ -33,6 +33,11 @@
 /* -------------------------------------------------------------------------- */
 // Array-related stuff
 
+if ( typeof window.sitecues !== "object" ) {
+  window.sitecues = {};
+}
+  
+
 // Next three methods are solely for IE5, which is missing them
 if (!Array.prototype.push) {
 	Array.prototype.push = function() {
@@ -77,7 +82,7 @@ if (!Array.prototype.splice) {
 
 /* -------------------------------------------------------------------------- */
 
-var log4javascript = (function() {
+window.sitecues.log4js = (function() {
 
 	function isUndefined(obj) {
 		return typeof obj == "undefined";

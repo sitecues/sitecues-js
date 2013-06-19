@@ -1,4 +1,4 @@
-sitecues.def('toolbar/dropdown', function(dropdown, callback){
+sitecues.def('toolbar/dropdown', function(dropdown, callback, console){
     sitecues.use( 'jquery', 'toolbar/bootstrap-dropdown', function ($, bootstrapDropdown) {
       /**
        * We're not going to do this automatically as we need to make sure the toolbar is on the page to set up the

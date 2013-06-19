@@ -6,8 +6,9 @@
  */
 
 (function(){
-
-    var module_name = "core";
+    
+    // Create the logger for this module
+    var log = window.sitecues.logger.log('core');
 
     // Return if there is sitecues instance on the page
     if (window.sitecues && window.sitecues.coreConfig) {
@@ -154,7 +155,7 @@
     var _def = function(name, constructor){
         // do not define modules twice.
         if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-            sitecues.log.warn("sitecues: module '" + name + "' already defined.");
+            log.warn("sitecues: module '" + name + "' already defined.");
             return;
         }
 
@@ -174,7 +175,7 @@
                 // This caused the issue with the double-loading of the badge and highlight-box.
                 // See: https://fecru.ai2.at/cru/EQJS-39#c187
                 //      https://equinox.atlassian.net/browse/EQ-355
-                // sitecues.log.warn( 'No callback() set when def.use("' + name );
+                // log.warn( 'No callback() set when def.use("' + name );
             }
 
             // save module for future call
@@ -186,7 +187,9 @@
             // notify about new module load once
             sitecues.emit('load/' + name, module).
                 off('load/' + name);
-        });
+        
+        // Pass a new logger into the constructor scope of the module
+        }, window.sitecues.logger.log(name));
     };
 
     // exposed function for defining modules: queues until core is ready.
@@ -461,8 +464,7 @@
 				return s;
 			};
             
-        sitecues.log.info(
-			'\n===== BEGIN: SITECUES STATUS =====================\n'
+      log.info('\n===== BEGIN: SITECUES STATUS =====================\n'
 			+ printObj(info)
 			+ '===== END: SITECUES STATUS =======================');
 	};
@@ -519,9 +521,9 @@
         ] );
         
         // Popup the logger and report status
-        var popUpAppender = sitecues.log._sitecues_appenders.popUpAppender;
-        popUpAppender.show();
-        popUpAppender.focus();
+        var popup = sitecues.logger.appenders.popup;
+        popup.show();
+        popup.focus();
     };
 
     //////////////////////////////////////////////////
@@ -544,30 +546,30 @@
         if (window.sitecues.coreConfig) {
             coreConfig = window.sitecues.coreConfig;
 
-            sitecues.log.info( coreConfig );
+            log.info( coreConfig );
 
             //window.sitecues.coreConfig = undefined;
 
             if (coreConfig.hosts) {
                 if (coreConfig.hosts.ws) {
-                    sitecues.log.info("sitecues ws host: " + coreConfig.hosts.ws);
+                    log.info("sitecues ws host: " + coreConfig.hosts.ws);
                 } else {
-                    sitecues.log.warn("sitecues ws host not specified.");
+                    log.warn("sitecues ws host not specified.");
                     valid = false;
                 }
 
                 if (coreConfig.hosts.up) {
-                    sitecues.log.info("sitecues up host: " + coreConfig.hosts.up);
+                    log.info("sitecues up host: " + coreConfig.hosts.up);
                 } else {
-                    sitecues.log.warn("sitecues up host not specified.");
+                    log.warn("sitecues up host not specified.");
                     valid = false;
                 }
             } else {
-                sitecues.log.warn("sitecues core hosts config not found.");
+                log.warn("sitecues core hosts config not found.");
                 valid = false;
             }
         } else {
-            sitecues.log.warn("sitecues core config not found.");
+            log.warn("sitecues core config not found.");
             valid = false;
         }
 
@@ -575,7 +577,7 @@
         if (valid) {
             _initialize();
         } else {
-            sitecues.log.warn("invalid sitecues core config. aborting.");
+            log.warn("invalid sitecues core config. aborting.");
         }
     };
 

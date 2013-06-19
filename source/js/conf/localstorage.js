@@ -1,5 +1,5 @@
 // module for storing settings in localstorage
-sitecues.def('conf/localstorage', function(ls, callback){
+sitecues.def('conf/localstorage', function(ls, callback, console){
 
 	// break if local storage unsupported by browser
 	if (!localStorage) return callback();
