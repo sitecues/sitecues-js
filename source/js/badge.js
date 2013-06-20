@@ -7,6 +7,8 @@ sitecues.def('badge', function(badge, callback, log) {
 	// if we will start using vanilla js functions
 	sitecues.use('jquery', 'conf', 'panel', 'ui', function($, conf, panel){
 
+		// This property is used when a site wants to use an existing element
+		// as a badge, rather than the standard sitecues one.
 		badge.altBadges = $(conf.get('panelDisplaySelector'));
 
 		badge.badgeId = conf.get('badgeId');
