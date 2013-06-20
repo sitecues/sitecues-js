@@ -322,7 +322,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, console) {
                   // Call the module method to clean up after close BEFORE calling listeners.
                   onHighlightBoxClosed(_this.item);
 
-                  sitecues.console.info("hlb closed");
+                  console.info("hlb closed");
                   sitecues.emit('hlb/closed', _this.item);
               });
               }
