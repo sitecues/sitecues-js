@@ -1,6 +1,6 @@
 // module for calculating caret position in input
 // NOTE: moved from TS codebase, need refactoring
-sitecues.def('caret/coords', function(coords, callback, console) {
+sitecues.def('caret/coords', function (coords, callback, log) {
 
 	// depends on `jquery`, `conf` and `util` modules
 	sitecues.use('jquery', 'conf', 'util/positioning', function($, conf, positioning) {
@@ -21,7 +21,7 @@ sitecues.def('caret/coords', function(coords, callback, console) {
 				'-webkit-text-security': 'none'
 			};
 
-			console.info('Old border: ' + styleObj['border-top-width']);
+			log.info('Old border: ' + styleObj['border-top-width']);
 			if (isDebuggingOn) {
 				extendStyle['visibility'] = 'visible';
 				var inputRect = positioning.getOffset(element);

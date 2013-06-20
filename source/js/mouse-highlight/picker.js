@@ -9,7 +9,7 @@
  data-sitecues-highlight-role
 
  */
-sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
+sitecues.def('mouse-highlight/picker', function (picker, callback, log) {
 
 	picker.debug = false;
 
@@ -151,7 +151,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				e.contents().each(function() {
 					if (this.nodeType == 3 && this.nodeValue.trim().length > 0 || this.innerText && this.innerText.trim().length > 0) {
 						textNodes = true;
-						console.info(this);
+						log.info(this);
 					}
 				});
 			}

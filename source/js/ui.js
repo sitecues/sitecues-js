@@ -1,4 +1,4 @@
-sitecues.def('ui', function(ui, callback, console){
+sitecues.def('ui', function (ui, callback, log) {
 
 	// this module should be used by all modules
 	// which are injecting elements on the page

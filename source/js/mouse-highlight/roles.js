@@ -12,7 +12,7 @@
  * em tag with display:block setting is no longer a fragment, it is now a
  * shortText or a longText or something else, depending on what it contains. 
  */
-sitecues.def('mouse-highlight/roles', function(role, callback, console) {
+sitecues.def('mouse-highlight/roles', function (role, callback, log) {
 
 	role.roles = {
 		 // We completely ignore these elements
@@ -266,7 +266,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
                     return match;
                 } 
 
-                console.info("No match for " + nodeName);
+                log.info("No match for " + nodeName);
                 return role.roles.container;
             }
         }

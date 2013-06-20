@@ -4,7 +4,7 @@
  * by other parts of the application.
  */
 
-sitecues.def('speech', function(speech, callback, console) {
+sitecues.def('speech', function (speech, callback, log) {
 
     sitecues.use('conf', 'conf/remote', function(conf, conf_remote) {
 
@@ -20,7 +20,7 @@ sitecues.def('speech', function(speech, callback, console) {
             var ttsEnable = !(conf.get("ttsEnable") === undefined && conf.get("siteTTSEnable") === undefined) 
             && (conf.get("ttsEnable") === undefined || conf.get("ttsEnable")) 
             && (conf.get("siteTTSEnable") === undefined || conf.get("siteTTSEnable"));
-            console.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get("siteTTSEnable"));
+            log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get("siteTTSEnable"));
             
             /*
              * This is a flag we can set that will effectively enable TTS, but
@@ -42,21 +42,21 @@ sitecues.def('speech', function(speech, callback, console) {
              */
             speech.initPlayer = function(hlb) {
                 if (!ttsEnable && !ttsBypass) {
-                    console.info("TTS is disabled");
+                    log.info("TTS is disabled");
                     return;
                 }
                 var hlbId = speech.getHlbId(hlb);
                 if(!hlbId) {
-                    console.warn("No hightlightbox ID!");
+                    log.warn("No hightlightbox ID!");
                     return;
                 }
                 //TODO While HLB is a singleton, let's clear out any other players
                 speech.destroyAll();
 
-                console.info("Initializing player for " + hlbId);
+                log.info("Initializing player for " + hlbId);
                 var player = speech.factory(hlb);
                 if(!player) {
-                    console.warn("Factory failed to create a player");
+                    log.warn("Factory failed to create a player");
                 }
                 players[hlbId] = player;
                 return player;
@@ -70,7 +70,7 @@ sitecues.def('speech', function(speech, callback, console) {
                    return ivona.factory(hlb);
                 } else {
                     // No matching plugins, disable TTS
-                    console.warn("No engine configured!");
+                    log.warn("No engine configured!");
                     ttsEnable = false;
                 }
             }
@@ -85,18 +85,18 @@ sitecues.def('speech', function(speech, callback, console) {
              */
             speech.play = function(hlb) {
                 if (!ttsEnable && !ttsBypass) {
-                    console.info("TTS is disabled");
+                    log.info("TTS is disabled");
                     return false;
                 }
                 var hlbId = speech.getHlbId(hlb);
                 if(!hlbId) {
-                    console.warn("No hightlightbox ID!");
+                    log.warn("No hightlightbox ID!");
                     return false;
                 }
                 var player = players[hlbId];
                 if(!player) {
                     // A player wasn't initialized, so let's do that now
-                    console.info("Lazy init of player");
+                    log.info("Lazy init of player");
                     player = speech.initPlayer(hlb);
                 }
                 player.play();
@@ -111,15 +111,15 @@ sitecues.def('speech', function(speech, callback, console) {
             speech.stop = function(hlb) {
                 var hlbId = speech.getHlbId(hlb);
                 if(!hlbId) {
-                    console.warn("No hightlightbox ID!");
+                    log.warn("No hightlightbox ID!");
                     return;
                 }
-                console.info("Stopping " + hlbId);
+                log.info("Stopping " + hlbId);
                 var player = players[hlbId];
                 if(player) {
                     player.stop();
                 } else {
-                    console.info(players);
+                    log.info(players);
                 }
             }
 
@@ -127,7 +127,7 @@ sitecues.def('speech', function(speech, callback, console) {
              * Iterates through all of the players and stops them.
              */
             speech.stopAll = function() {
-                console.info("Stopping all players");
+                log.info("Stopping all players");
                 jQuery.each(players, function(key, value) {
                     if(value) {
                         setTimeout(value.stop(),5);
@@ -139,7 +139,7 @@ sitecues.def('speech', function(speech, callback, console) {
              * Iterates through all of the players and destroys them.
              */
             speech.destroyAll = function() {
-                console.info("Destroying all players");
+                log.info("Destroying all players");
                 jQuery.each(players, function(key, value) {
                     if(value) {
                         setTimeout(value.destroy(),5);
@@ -167,7 +167,7 @@ sitecues.def('speech', function(speech, callback, console) {
                         callback();
                     }
                 }
-                console.info("tts enabled");
+                log.info("tts enabled");
             }
 
             /*
@@ -181,7 +181,7 @@ sitecues.def('speech', function(speech, callback, console) {
                 if (callback) {
                     callback();
                 }
-                console.info("tts disabled");
+                log.info("tts disabled");
             }
 
             /*
@@ -208,7 +208,7 @@ sitecues.def('speech', function(speech, callback, console) {
              */
             speech.getHlbId = function(hlb) {
                 if(!hlb) {
-                    console.info("No hlb!");
+                    log.info("No hlb!");
                     return;
                 }
                 if(hlb instanceof jQuery) {
