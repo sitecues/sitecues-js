@@ -1,4 +1,4 @@
-sitecues.def('invert', function (invert, callback, console) {
+sitecues.def('invert', function (invert, callback, log) {
     sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
         invert.STATES = {
             INVERT: {
@@ -113,11 +113,11 @@ sitecues.def('invert', function (invert, callback, console) {
                 if (invert_state_page === STATES.INVERT) {
                     setStylePageNone();
                     invert_state_page = STATES.NORMAL;
-                    console.info("invert off");
+                    log.info("invert off");
                 } else {
                     setStylePageFull();
                     invert_state_page = STATES.INVERT;
-                    console.info("invert on");
+                    log.info("invert on");
                 }
                 // There should not be a highlight box open so we'll just set
                 // it to match

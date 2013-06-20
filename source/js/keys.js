@@ -1,4 +1,4 @@
-sitecues.def('keys', function(keys, callback, console) {
+sitecues.def('keys', function (keys, callback, log) {
 	var extra_event_properties = {
 		dom: {
 			highlight_box: null

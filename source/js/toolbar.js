@@ -1,4 +1,4 @@
-sitecues.def( 'toolbar', function (toolbar, callback, console) {
+sitecues.def( 'toolbar', function (toolbar, callback, log) {
 
     sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
         toolbar.STATES = {
@@ -80,7 +80,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
         };
 
         toolbar.toggle = function() {
-            console.info('toggle');
+            log.info('toggle');
 
             if((toolbar.currentState) === toolbar.STATES.ON) {
                 toolbar.slideIn();
@@ -115,7 +115,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
                     if(event) {
                         sitecues.emit(event);
                     } else {
-                        console.warn("No event configured");
+                        log.warn("No event configured");
                     }
                 })
             })
@@ -141,11 +141,11 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
         load.style('../css/bootstrap.css');
 
         sitecues.on( 'toolbar/enable', function () {
-            console.info( 'Toolbar state: [on].' );
+            log.info( 'Toolbar state: [on].' );
         } );
         sitecues.on( 'toolbar/disable', function () {
             toolbar.disable();
-            console.info( 'Toolbar state: [off].' );
+            log.info( 'Toolbar state: [off].' );
         } );
 
         /**

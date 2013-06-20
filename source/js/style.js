@@ -2,7 +2,7 @@
 * Get the entire computed style for a given object. The computed style is the actual applied style
 * the browser uses on the object, taking into account precedence of various style rules, including !important.
 */
-sitecues.def('style', function(style, callback, console){
+sitecues.def('style', function (style, callback, log){
 
 	sitecues.use('jquery', function(_jQuery){
 

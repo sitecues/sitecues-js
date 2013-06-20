@@ -1,5 +1,5 @@
 // canvas view for cursor
-sitecues.def('cursor/canvas', function(cursor, callback, console) {
+sitecues.def('cursor/canvas', function (cursor, callback, log) {
 
 	// private variables
 	var data, types, paint, minSize = 30, step = 15;
@@ -179,7 +179,7 @@ sitecues.def('cursor/canvas', function(cursor, callback, console) {
 		// load special cursor css
 		load.style('../css/cursor.css', function() {
 			wait('sitecues-cursor', function() {
-        console.warn('sitecues-cursor font loaded');
+        log.warn('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
 			});

@@ -1,4 +1,4 @@
-sitecues.def('zoom', function(zoom, callback, console) {
+sitecues.def('zoom', function (zoom, callback, log) {
 
 	// values used for zoom math
 	zoom.max = 5;

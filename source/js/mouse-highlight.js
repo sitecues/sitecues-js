@@ -1,4 +1,4 @@
-sitecues.def('mouse-highlight', function(mh, callback, console) {
+sitecues.def('mouse-highlight', function (mh, callback, log) {
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
@@ -67,7 +67,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			return isBgStyled;
 		}
 
-		mh.hasFloatingSibling = function(collection) {
+		mh.hasFloatingSibling= function(collection) {
 			var allSiblings = $(collection).add($(collection).siblings());
 			var isNearFloat = false;
 			$(allSiblings).each(function() {
@@ -183,35 +183,17 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			if (!mh.enabled) return;
 
 			// don't show highlight if current active isn't body
-			if (!$(document.activeElement).is('body')) {
-                return;
-            }
+			if (!$(document.activeElement).is('body'))
+				return;
 
 			// don't show highlight if window isn't active
-			if (!document.hasFocus()) {
-                return;
-            }
-		    
-            // hide previous mh target if now mouseiver sitecues toolbar
-            var isInBody = false;
-            $.each($(event.target).parents(), function(i, parent) {
-                if ($(parent).is(document.body)) {
-                    isInBody = true;
-                }
-            })
- 
-            if (!isInBody) {
-                if (mh.picked) {
-                    mh.hide(mh.picked);
-                }
-            }
- 
+			if (!document.hasFocus())
+				return;
+
 			if (event.target !== mh.target) {
 				// hide highlight for picked element
 
-				if (mh.picked) {
-                    mh.hide(mh.picked);
-                }
+				if (mh.picked) mh.hide(mh.picked);
 
 				// save target element
 				mh.target = event.target;
@@ -234,10 +216,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		mh.refresh = function() {
 			if (mh.enabled) {
 				// handle mouse move on body
-				$(document).on('mousemove', mh.update);
+				$('body').on('mousemove', mh.update);
 			} else {
 				// remove mousemove listener from body
-				$(document).off('mousemove', mh.update);
+				$('body').off('mousemove', mh.update);
 
 				// hide highlight
 				mh.hide();
@@ -252,7 +234,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			// If highlighting is enabled, zoom is large enough, zoom is larger
 			// than we started, and we haven't already cued, then play an audio
 			// cue to explain highlighting
-			if (mh.enabled && zoom >= 2 && zoom > mh.initZoom && !mh.cue) {
+			if(mh.enabled && zoom >= 2 && zoom > mh.initZoom && !mh.cue) {
 				mh.verbalCue();
 			}
 		}

@@ -7,7 +7,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-sitecues.def('cursor/custom', function (cursor, callback, console) {
+sitecues.def('cursor/custom', function (cursor, callback, log) {
 
     // Static properties
     cursor.isEnabled = false; // if cursor module is enabled
@@ -112,28 +112,12 @@ sitecues.def('cursor/custom', function (cursor, callback, console) {
             }
         }
 
-        /**
-         * Reverts the target's cursor property value to initial(replaced by our cutsom one).
-         * @param target
-         */
-        function restoreCursorDisplay(target) {
-            $('#' + cursor.kCursorStyleRuleId).remove();
-
-            if (cursor.isEnabled) {
-                $(target).style('cursor', cursor.prevType, 'important');
-            }
-        }
-
         function mouseMoveHandler(e) {
             changeCursorDisplay($(e.target));
         }
 
         // Handle zoom event.
         sitecues.on('zoom', cursor.init);
-        // Rollback cursor style change before we store element styles on HLB inflating.
-        sitecues.on('hlb/create', function(hlb) {
-            restoreCursorDisplay(hlb);
-        });
         cursor.init(conf.get('zoom') || cursor.zoomLevel);
 
         // Done.
