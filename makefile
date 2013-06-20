@@ -171,3 +171,12 @@ lint:
 run:
 	@echo "Running."
 	@./binary/web.js $(port) $(https) $(prod)
+
+# TARGET: test-all
+# Run all tests
+test-all: test-smoke
+
+# TARGET: test-smoke
+# Run the smoke tests
+test-smoke:
+	@(cd tests/smoke ; export SWDDA_CONFIG_FILE="$$(cd $$(dirname swdda.json) && pwd)/swdda.json" ; ../../node_modules/.bin/macchiato)

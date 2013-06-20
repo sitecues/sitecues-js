@@ -1,0 +1,50 @@
+{
+  "testSite": {
+    "siteId"	  : 5,
+    "hostname"	: "localhost",
+    "secure"	  : false,
+    "httpPort"	: 8000,
+    "httpsPort"	: 8443
+  },
+
+  "sitecuesUrl": {
+    "hostname"  : "localhost",
+    "path"			: "/js/equinox.js",
+    "httpPort"	: 8000,
+    "httpsPort"	: 8443
+  },
+
+  "providerCommon": {
+    "browserCommon": {
+      "javascriptEnabled"			            : true,
+      "locationContextEnabled"            : true,
+      "nativeEvents"						          : true,
+      "unexpectedAlertBehaviour"          : "ignore",
+      "webStorageEnabled"					        : true,
+      "applicationCacheEnabled"		        : true,
+      "browserConnectionEnabled"	        : true,
+      "databaseEnabled"					          : true,
+      "webdriver.remote.quietExceptions"  : false
+    }
+  },
+
+  "providers": {
+    "PhantomJS": {
+      "maxConcurrent": 2,
+
+      "server": {
+        "host": "localhost",
+        "port":	8484
+      },
+
+      "browsers": [
+        {
+          "label"       : "PhantomJS",
+          "platform"		: "ANY",
+          "browserName"	: "phantomjs",
+          "version"		  : ""
+        }
+      ]
+    }
+  }
+}

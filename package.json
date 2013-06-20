@@ -1,17 +1,17 @@
 {
     "bin"         : "binary/web.js",
     "dependencies": {
-        "async"             : "latest",
-        "chai"              : "1.6.x",
-        "express"           : "latest",
-        "glob"              : "latest",
-        "hogan-express"     : "latest",
-        "hogan.js"          : "latest",
-        "mime"              : "latest",
-        "mocha"             : "1.10.x",
-        "node.extend"       : "1.0.x",
-        "selenium-webdriver": "2.33.x",
-        "sinon"             : "1.7.x"
+        "async"         : "latest",
+        "chai"          : "1.6.x",
+        "express"       : "latest",
+        "glob"          : "latest",
+        "hogan-express" : "latest",
+        "hogan.js"      : "latest",
+        "mime"          : "latest",
+        "node.extend"   : "1.0.x",
+        "sinon"         : "1.7.x",
+        "macchiato"     : "https://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.1.tgz",
+        "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.1.tgz"
     },
     "main"        : "source/js/core.js",
     "name"        : "sitecues"
