@@ -100,12 +100,17 @@
       // Map console-like interface
       return {
         instance: newLogger,
-        log   : function(a){ newLogger.info(a);  },
+        
+        // console.log now routes to log4javascript.logger.info
+        log   : function(a){
+          newLogger.info(a);
+        },
+        
+        trace : function(a){ newLogger.trace(a); },
         debug : function(a){ newLogger.debug(a); },
-        error : function(a){ newLogger.error(a); },
         info  : function(a){ newLogger.info(a);  },
         warn  : function(a){ newLogger.warn(a);  },
-        trace : function(a){ newLogger.trace(a); },
+        error : function(a){ newLogger.error(a); },
         fatal : function(a){ newLogger.fatal(a); }
       }
     },

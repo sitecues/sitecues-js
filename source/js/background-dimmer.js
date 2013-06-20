@@ -3,6 +3,8 @@
  */
 sitecues.def('background-dimmer', function (backgroundDimmer, callback, console) {
 
+  console.log( 'test' );
+
   // Get dependencies
   sitecues.use('jquery', 'util/positioning', function ($, positioning) {
 
