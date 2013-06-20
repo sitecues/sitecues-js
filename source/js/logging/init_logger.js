@@ -145,6 +145,6 @@
   };
 
   // Initialize the global Logger
-  window.sitecues.logger = Logger.init();
+  window.sitecues.logger = Logger.init( log4js );
 
 })();
