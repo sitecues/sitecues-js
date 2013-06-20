@@ -144,6 +144,12 @@
     width:20%;
 }
 
+.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {
+    font-family: Calibri, Candara, Segoe, “Segoe UI”, Optima, Arial, sans-serif;
+    text-decoration:none;
+    cursor:pointer;
+    line-height: 1;
+}
 .sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a:hover {
     height:100%;
     background-color:#0046ad;
