@@ -10,7 +10,7 @@
         "mime"          : "latest",
         "node.extend"   : "1.0.x",
         "sinon"         : "1.7.x",
-        "macchiato"     : "https://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.1.tgz",
+        "macchiato"     : "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.1.tgz",
         "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.1.tgz"
     },
     "main"        : "source/js/core.js",
