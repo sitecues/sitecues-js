@@ -222,51 +222,54 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
 	sitecues.use('jquery', function($) {
 
 		role.find = function (elem) {
-			var nodeName = elem.get(0).nodeName.toLowerCase();
-			// These attributes may have been set on the markup as
-			// hints/overrides.
-			var siteCuesRole = elem.data('sitecues-role');
-			var ariaRole = elem.attr('aria-role');
-			var match;
-			if(siteCuesRole) {
-				// First we'll check sitecues attributes
-				for( var myRole in role.roles) {
-					if($.inArray(siteCuesRole, role.sitecues) >= 0) {
-						return myRole;
-					}
-				}
-				if(match) {
-					return match;
-				} 
-			}
 
-			if(ariaRole) {
-				// Then we'll check aria attributes
-				for( var myRole in role.roles) {
-					if($.inArray(ariaRole, role.aria) >= 0) {
-						return myRole;
-					}
-				}
-				if(match) {
-					return match;
-				} 
-			}
+            if (elem.get(0)) {
+                var nodeName = elem.get(0).nodeName.toLowerCase();
+                // These attributes may have been set on the markup as
+                // hints/overrides.
+                var siteCuesRole = elem.data('sitecues-role');
+                var ariaRole = elem.attr('aria-role');
+                var match;
+                if(siteCuesRole) {
+                    // First we'll check sitecues attributes
+                    for( var myRole in role.roles) {
+                        if($.inArray(siteCuesRole, role.sitecues) >= 0) {
+                            return myRole;
+                        }
+                    }
+                    if(match) {
+                        return match;
+                    } 
+                }
 
-			// Now we'll fall back to tag names
-			var match;
-			$.each(role.roles, function(key, value) {
-				if($.inArray(nodeName, value.tags) >= 0) {
-					match = value;
-				}
-			});
+                if (ariaRole) {
+                    // Then we'll check aria attributes
+                    for( var myRole in role.roles) {
+                        if($.inArray(ariaRole, role.aria) >= 0) {
+                            return myRole;
+                        }
+                    }
+                    if(match) {
+                        return match;
+                    } 
+                }
 
-			if(match) {
-				return match;
-			} 
+                // Now we'll fall back to tag names
+                var match;
+                $.each(role.roles, function(key, value) {
+                    if($.inArray(nodeName, value.tags) >= 0) {
+                        match = value;
+                    }
+                });
 
-			console.info("No match for " + nodeName);
-			return role.roles.container;
-		}
+                if(match) {
+                    return match;
+                } 
+
+                console.info("No match for " + nodeName);
+                return role.roles.container;
+            }
+        }
 
 		callback();
 	});
