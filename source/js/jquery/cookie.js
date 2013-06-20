@@ -1,4 +1,4 @@
-sitecues.def('jquery/cookie', function(plugin, callback){
+sitecues.def('jquery/cookie', function(plugin, callback, console){
     sitecues.use('jquery', function($){
 //
 // Begin Third Party Code

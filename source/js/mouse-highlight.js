@@ -1,4 +1,4 @@
-sitecues.def('mouse-highlight', function(mh, callback){
+sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
@@ -31,24 +31,34 @@ sitecues.def('mouse-highlight', function(mh, callback){
 	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
 	mh.initZoom = 0;
 
+    // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
+    // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
+    // Array of what we'd expect if we didn't have a background color
+    var transparentColorNamesSet = [
+        'transparent',
+        'rgba(0, 0, 0, 0)',
+        'rgb(255, 255, 255)'
+    ];
+
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
-	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech){
+	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
 
 		conf.set('mouseHighlightMinZoom', mh.minzoom);
 
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
 
-		mh.isBackgroundStyled = function(collection){
+		mh.isBackgroundStyled = function(collection) {
 			var isBgStyled = false;
 			$(collection).each(function () {
 				// Is there any background on any element in collection or elements' ancestors or descendants
-				if ($(this).css('backgroundImage') !== 'none'){
+				if ($(this).css('background-image') !== 'none') {
 					isBgStyled = true;
 					return false;
 				}
-				var bgColor = $(this).css('backgroundColor');
-				if (bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'rgb(255, 255, 255)') {
+				var bgColor = $(this).css('background-color');
+                // If no match then $.inArray() returns '-1' value
+				if ($.inArray(bgColor, transparentColorNamesSet) < 0) {
 					isBgStyled = true;
 					return false;
 				}
@@ -57,12 +67,12 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			return isBgStyled;
 		}
 
-		mh.hasFloatingSibling= function(collection){
+		mh.hasFloatingSibling= function(collection) {
 			var allSiblings = $(collection).add($(collection).siblings());
 			var isNearFloat = false;
-			$(allSiblings).each(function(){
+			$(allSiblings).each(function() {
 				// Is there any background on any element in collection or elements' ancestors or descendants
-				if ($(this).css('float') !== 'none'){
+				if ($(this).css('float') !== 'none') {
 					isNearFloat = true;
 					return false;
 				}
@@ -72,7 +82,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 		}
 
 		// show mouse highlight
-		mh.show = function(collection){
+		mh.show = function(collection) {
 			// get element to work with
 			collection = collection || mh.picked;
 
@@ -100,7 +110,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			mh.doPreventHighlightColor = false;
 			mh.doUseOverlayForBgColor = false;
 			if (collection.length === 1 && ($(collection).is(mh.kVisualMediaElements) ||
-				mh.isBackgroundStyled(collection))){
+				mh.isBackgroundStyled(collection))) {
 				// approach #1 -- overlay for outline only
 				mh.doPreventHighlightColor = true;
 			} else {
@@ -108,7 +118,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 					$(collection).is(mh.kVisualMediaElements) ||
 					$(collection).find(mh.kVisualMediaElements).length ||
 					mh.isBackgroundStyled($(collection).add($(collection).parentsUntil(document.body)).add($(collection).find('> *, > * > *'))) ||
-					mh.hasFloatingSibling(collection)){
+					mh.hasFloatingSibling(collection)) {
 					// approach #2 -- overlay for background color and rounded border
 					mh.doUseOverlayForBgColor = true;
 				} else {
@@ -118,56 +128,57 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			}
 
 			// Position each focus rect absolutely over the item which is focused
-			for (var count = 0; count < rects.length; count ++){
+			for (var count = 0; count < rects.length; count ++) {
 				var rect = rects[count];
 				$('<div>')
 					.attr('class', mh.kHighlightOverlayClass)
-					.css({
-						top: rect.top - 3,
-						left: rect.left - 3,
-						width: rect.width + 4,
-						height: rect.height + 4,
-						display: 'block'
-					})
+					.style({
+						'top': rect.top - 3 + 'px',
+						'left': rect.left - 3 + 'px',
+						'width': rect.width + 4 + 'px',
+						'height': rect.height + 4 + 'px',
+						'display': 'block'
+					}, '', '')
 					.appendTo(document.body);
 			}
 
 			// add highlight color if necessary
-			if (!mh.doPreventHighlightColor){
-				if (mh.doUseOverlayForBgColor){
-					$('.' + mh.kHighlightOverlayClass).css('backgroundColor', mh.kBackgroundColor);
+			if (!mh.doPreventHighlightColor) {
+				if (mh.doUseOverlayForBgColor) {
+					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, '');
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
 					var element = collection.get(0);
+                    var style = common.getElementComputedStyles(element, '', true);
 					mh.savedCss = {
-						backgroundColor: element.style.backgroundColor,
-						outlineWidth: element.style.outlineWidth,
-						outlineStyle: element.style.outlineStyle,
-						outlineColor: element.style.outlineColor,
-						outlineOffset: element.style.outlineOffset
+						'background-color': style.backgroundColor,
+						'outline-width'   : style.outlineWidth,
+						'outline-style'   : style.outlineStyle,
+						'outline-color'   : style.outlineColor,
+						'outline-offset'  : style.outlineOffset
 					};
-					$(element).css({
-						backgroundColor: mh.kBackgroundColor,
-						outlineWidth: '4px',
-						outlineStyle: 'solid',
-						outlineColor: 'rgba(250, 235, 200, .2)',
-						outlineOffset: '-3px'
-					});
+					$(element).style({
+						'background-color': mh.kBackgroundColor,
+						'outline-width'   : '4px',
+						'outline-style'   : 'solid',
+						'outline-color'   : 'rgba(250, 235, 200, .2)',
+						'outline-offset'  : '-3px'
+					}, '', '');
 				}
 			}
 		}
 
 		// hide mouse highlight
-		mh.hide = function(collection){
-			if (collection && !mh.doPreventHighlightColor && !mh.doUseOverlayForBgColor && mh.savedCss){
-				$(collection).css(mh.savedCss);
+		mh.hide = function(collection) {
+			if (collection && !mh.doPreventHighlightColor && !mh.doUseOverlayForBgColor && mh.savedCss) {
+				$(collection).style(mh.savedCss, '', '');
 				mh.savedCss = null;
 			}
 			$('.' + mh.kHighlightOverlayClass).remove();
 			collection = null;
 		}
 
-		mh.update = function(event){
+		mh.update = function(event) {
 			// break if highlight is disabled
 			if (!mh.enabled) return;
 
@@ -179,7 +190,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			if (!document.hasFocus())
 				return;
 
-			if (event.target !== mh.target){
+			if (event.target !== mh.target) {
 				// hide highlight for picked element
 
 				if (mh.picked) mh.hide(mh.picked);
@@ -191,9 +202,9 @@ sitecues.def('mouse-highlight', function(mh, callback){
 				mh.picked = picker.find(event.target);
 
 				// show highlight for picked element
-				if (mh.picked && mh.picked.length){
+				if (mh.picked && mh.picked.length) {
 					mh.timer && clearTimeout(mh.timer);
-					mh.timer = setTimeout(function(){
+					mh.timer = setTimeout(function() {
 						mh.show(mh.picked);
 					}, 100);
 				}
@@ -202,8 +213,8 @@ sitecues.def('mouse-highlight', function(mh, callback){
 		}
 
 		// refresh status of enhancement on page
-		mh.refresh = function(){
-			if (mh.enabled){
+		mh.refresh = function() {
+			if (mh.enabled) {
 				// handle mouse move on body
 				$('body').on('mousemove', mh.update);
 			} else {
@@ -215,7 +226,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 			}
 		}
 
-		mh.updateZoom = function(zoom){
+		mh.updateZoom = function(zoom) {
 			mh.picked = null;
 			var was = mh.enabled;
 			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
@@ -229,7 +240,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 		}
 
 		// enable mouse highlight
-		mh.enable = function(){
+		mh.enable = function() {
 			// handle mouse move on body
 			$('body').on('mousemove', mh.update);
 		}
@@ -250,7 +261,7 @@ sitecues.def('mouse-highlight', function(mh, callback){
 		}
 
 		// disable mouse highlight
-		mh.disable = function(element){
+		mh.disable = function(element) {
 			// remove mousemove listener from body
 			$('body').off('mousemove', mh.update);
 			mh.hide($(element));
@@ -274,19 +285,21 @@ sitecues.def('mouse-highlight', function(mh, callback){
 		conf.get('zoom', mh.updateZoom);
 
 		// lower the threshold when speech is enabled
-		sitecues.on('speech/enable', function(){
+		sitecues.on('speech/enable', function() {
 			conf.set('mouseHighlightMinZoom', 1.00);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// revert the threshold when speech is enabled
-		sitecues.on('speech/disable', function(){
+		sitecues.on('speech/disable', function() {
 			conf.set('mouseHighlightMinZoom', mh.minzoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// hide mouse hightlight when user leave window
-		$(window).blur(mh.hide);
+		$(window).blur(function() {
+            mh.hide(mh.picked);
+        });
 
 		// done
 		callback();

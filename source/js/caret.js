@@ -1,7 +1,7 @@
 // caret enhancement. makes the insertion caret
 // (blinking vertical line inside of a text input)
 // easier to see
-sitecues.def('caret', function(caret, callback){
+sitecues.def('caret', function(caret, callback, console){
 
 	// minimum zoom at which caret
 	// enhancement appears

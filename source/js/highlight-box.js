@@ -1,10 +1,10 @@
 /**
  * This is the box that appears when the user asks to read the highlighted text in a page.
  */
-sitecues.def('highlight-box', function (highlightBox, callback) {
+sitecues.def('highlight-box', function (highlightBox, callback, console) {
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui', 'jquery/transform2d', 'jquery/color',
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui',
     function ($, conf, cursor, positioning, common, eventHandlers, backgroundDimmer) {
 
         // Constants
@@ -13,7 +13,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         var kMinHighlightZoom = 1.01;
 
         var extraZoom = 1.5;
-		var toClass = {}.toString;
+		
+        var toClass = {}.toString;
 
         // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
         // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -203,7 +204,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // close it out.
                 setTimeout(function() {
                     if (getState() === STATES.INFLATING) {
-					    console.log("hlb in bad state. resetting.");
+					    console.warn("hlb in bad state. resetting.");
                         // Bad state. This instance is now officially closed.
                         _this.state = STATES.CLOSED;
                         // Call the module method to clean up after close BEFORE calling listeners.
@@ -212,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         // AK: comment out all the dimmer calls by AL request
                         backgroundDimmer.removeDimmer();
                         // Trigger the background blur effect if there is a highlight box only.
-                        console.log("hlb closed");
+                        console.info("hlb closed");
                         sitecues.emit('hlb/closed', _this.item);
                     }
                 }, HighlightBox.kShowBoxSpeed + 100);
@@ -220,22 +221,28 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // Animate HLB (keep in mind $.animate() is non-blocking).
 	            var ancestorCSS = [ ];
 	            $(this.itemNode).parents().each(function () {
-		            ancestorCSS.push({zIndex: this.style.zIndex, overflow: this.style.overflow });
+                    ancestorCSS.push({
+                        zIndex   : this.style.zIndex,
+                        overflowX: this.style.overflowX,
+                        overflowY: this.style.overflowY,
+                        overflow : this.style.overflow});
 	            });
 
 	            this.savedAncestorCSS = ancestorCSS;
-	            this.itemNode.parentsUntil(document.body).css({
-		            zIndex: HighlightBox.kBoxZindex.toString(),
-		            overflow: 'visible'
-	            });
+	            var parents = this.itemNode.parentsUntil(document.body);
+                $.each(parents, function() {
+                    $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
+                                  'overflow': 'visible'
+                                  }, '', 'important');
+                });
 
-	            this.itemNode
-                .css(cssBeforeAnimateStyles)
-                .animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
+                this.itemNode
+                    .style(cssBeforeAnimateStyles);
+                this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
 
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
-                console.log("hlb ready");
+                console.info("hlb ready");
                 sitecues.emit('hlb/ready', _this.item);
 
                 // Trigger the background blur effect if there is a highlight box only.
@@ -260,13 +267,15 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
                 // Get the current element styles.
   	            var ancestorCSS = this.savedAncestorCSS;
-  	            $(this.itemNode).parentsUntil(document.body).each(function () {
-  		            var css = ancestorCSS.shift();
-  		            this.style.zIndex = css.zIndex;
-  		            this.style.overflow = css.overflow;
-  	            });
-
-	            this.itemNode.get(0).style.outline = '0px solid transparent';
+                var parents = this.itemNode.parentsUntil(document.body);
+                $.each(parents, function() {
+                    var css = ancestorCSS.shift();
+                    $(this).style({'z-index'   : css.zIndex,
+                                 'overflow-x': css.overflowX,
+                                 'overflow-y': css.overflowY,
+                                 'overflow'  : css.overflow});
+                });
+                this.itemNode.style('outline', '0px solid transparent', 'important');
 
 	            var currentStyle = this.savedCss[this.savedCss.length - 1];
                 var clientRect = this.item.getBoundingClientRect();
@@ -276,7 +285,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                     transform: 'scale(1)',
                     width: clientRect.width / extraZoom,
 				    // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-				    height: currentStyle.backgroundImage ? currentStyle.height / extraZoom : clientRect.height / extraZoom
+				    height: currentStyle['background-image'] ? currentStyle.height / extraZoom : clientRect.height / extraZoom
                 });
 
                 // Deflate the highlight box.
@@ -313,7 +322,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                   // Call the module method to clean up after close BEFORE calling listeners.
                   onHighlightBoxClosed(_this.item);
 
-                  console.log("hlb closed");
+                  sitecues.console.info("hlb closed");
                   sitecues.emit('hlb/closed', _this.item);
               });
               }
@@ -329,59 +338,58 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 // Fetch the exact value for width(not rounded)
                 var clientRect = this.item.getBoundingClientRect();
 
-                var cssBeforeAnimateStyles = $.extend({},
-                    {top: cssUpdate.top, left: cssUpdate.left}, {
-                        transformOrigin: '50% 50%',
-                        position: 'absolute',
-						overflowY: currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto',
-                        overflowX: 'hidden',
+                var cssBeforeAnimateStyles = {
+                        'top': cssUpdate.top + 'px',
+                        'left': cssUpdate.left + 'px',
+                        '-webkit-transform-origin': '50% 50%',
+                        'position': 'absolute',
+                        'overflow-y': currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto',
+                        'overflow-x': 'hidden',
                         // Sometimes width is rounded, so float part gets lost.
-						// Preserve it so that inner content is not rearranged when width is a bit narrowed.
-                        width: parseFloat(clientRect.width) + 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px',
-						// Don't change height if there's a background image, otherwise it is destroyed.
-                        height: !isEmptyBgImage(currentStyle.backgroundImage) ? currentStyle.height : 'auto',
-                        zIndex: HighlightBox.kBoxZindex.toString(),
-                        border: '0px solid white',
-                        listStylePosition: 'inside',
-                        margin: '0',
-                        borderRadius: HighlightBox.kBoxBorderRadius,
-                        borderColor:  HighlightBox.kBoxBorderColor,
-                        borderStyle:  HighlightBox.kBoxBorderStyle,
-                        borderWidth:  HighlightBox.kBoxBorderWidth,
-                        outline:      '0'
-                    });
+                        // Preserve it so that inner content is not rearranged when width is a bit narrowed.
+                        'width': parseFloat(clientRect.width) + 'px',
+                        // Don't change height if there's a background image, otherwise it is destroyed.
+                        'height': !isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
+                        'z-index': HighlightBox.kBoxZindex.toString(),
+                        'border': '0px solid white',
+                        'list-style-position': 'inside',
+                        'margin': '0',
+                        'border-radius': HighlightBox.kBoxBorderRadius,
+                        'border-color':  HighlightBox.kBoxBorderColor,
+                        'border-style':  HighlightBox.kBoxBorderStyle,
+                        'border-width':  HighlightBox.kBoxBorderWidth,
+                        'outline':      '0px solid transparent'
+                    };
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-				if (isEmptyBgImage(currentStyle.backgroundImage)) {
+				if (isEmptyBgImage(currentStyle['background-image'])) {
  					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
  				}
 
-				if (!isEmptyBgImage(currentStyle.backgroundImage)) {
-					cssBeforeAnimateStyles.overflowY = 'hidden';
+				if (!isEmptyBgImage(currentStyle['background-image'])) {
+                    cssBeforeAnimateStyles['overflow-y'] = 'hidden';
 				} else {
-					cssBeforeAnimateStyles.overflowY = currentStyle.overflow || currentStyle.overflowY ? currentStyle.overflow || currentStyle.overflowY : 'auto';
+                    cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
 				}
-
-
 				if (this.item.tagName.toLowerCase() === 'img') {
 					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
 				}
 
-                var oldBgColor = currentStyle.backgroundColor;
-                var oldBgImage = currentStyle.backgroundImage;
+                var oldBgColor = currentStyle['background-color'];
+                var oldBgImage = currentStyle['background-image'];
                 var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
                 var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
 
                 // If color and background color are not contrast then either set background image or invert background color.
                 if (!isEmptyBgImage(oldBgImage)) {
-                    cssBeforeAnimateStyles.backgroundRepeat   = currentStyle.backgroundRepeat;
-                    cssBeforeAnimateStyles.backgroundImage    = oldBgImage;
-                    cssBeforeAnimateStyles.backgroundPosition = currentStyle.backgroundPosition;
-                    cssBeforeAnimateStyles.backgroundSize     = clientRect.width + 'px ' + clientRect.height+ 'px';
-					cssBeforeAnimateStyles.backgroundColor    = common.getRevertColor(newBgColor);
+                    cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
+                    cssBeforeAnimateStyles['background-image']    = oldBgImage;
+                    cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
+                    //cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
+                    cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
 
 					// If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
 					if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
-						delete cssBeforeAnimateStyles.backgroundSize;
+                        delete cssBeforeAnimateStyles['background-size'];
 					}
                 }
 
@@ -391,9 +399,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 				var isContrastColors = common.getIsContrastColors(color, newBgColor);
 				// We don't know what's the text color in the image.
 				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
-					cssBeforeAnimateStyles.backgroundColor = common.getRevertColor(newBgColor);
+					cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
 				} else {
-					cssBeforeAnimateStyles.backgroundColor = newBgColor;
+					cssBeforeAnimateStyles['background-color'] = newBgColor;
 				}
 
                 return cssBeforeAnimateStyles;
@@ -416,15 +424,15 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var colspan = parseInt(this.itemNode.attr('colspan')) || 1;
 
                 // Then, insert placeholder so that content which comes after doesn't move back.
-                cloneNode.addClass(HighlightBox.kPlaceHolderClass)
-                    .css($.extend({}, currentStyle, {
+                cloneNode.addClass(HighlightBox.kPlaceHolderClass);
+                var styles = $.extend({}, currentStyle, {
                         // Make sure clone display turned to 'block' if it is a tbale cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
                         width: parseFloat(origRectSize.width) + 'px',
                         height: origRectSize.height + 'px'
-                    }));
-
+                    });
+                cloneNode.style(styles, '', 'important');
 				// If this is an ancestor to the table cell which doesn't have colspan.
 				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
 				if (tableCellAncestorParents && colspan === 1) {
@@ -433,12 +441,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
 			   // If we insert a placeholder with display 'list-item' then ordered list items numbers will be increased.
 			   if (cloneNode[0].style.display === 'list-item') {
-				  cloneNode[0].style.display = 'block';
+				  cloneNode.style('display', 'block', '!important');
 			   }
 
-                this.itemNode.after(cloneNode);
+               this.itemNode.after(cloneNode);
 
-                return cloneNode;
+               return cloneNode;
             };
 
            /*
@@ -451,7 +459,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                 var savedDisplay = currentStyle.display;
 				// If the target is <td>, <tr>, <table> or any other table cell element then exit.
                 if (savedDisplay.indexOf('table') === 0) {
-                    itemNode.css({display: 'block'});
+                    itemNode.style('display', 'block', 'important');
                     return false;
                 }
 
@@ -465,17 +473,18 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
                         var closestStyle = common.getElementComputedStyles(closest[0]);
                         var updateInnerElStyle = {};
                         if(closestStyle) {
-    						updateInnerElStyle.width = parseFloat(closestStyle.width)
-													- parseFloat(closestStyle.paddingLeft)
-													- parseFloat(closestStyle.paddingRight)
-													- parseFloat(closestStyle.marginLeft)
-													- parseFloat(closestStyle.marginRight)
-													- parseFloat(closestStyle.borderLeftWidth)
-													- parseFloat(closestStyle.borderLeftWidth)
+    						updateInnerElStyle.width = parseFloat(closestStyle['width'])
+													- parseFloat(closestStyle['padding-left'])
+													- parseFloat(closestStyle['padding-right'])
+													- parseFloat(closestStyle['margin-left'])
+													- parseFloat(closestStyle['margin-right'])
+													- parseFloat(closestStyle['border-left-width'])
+													- parseFloat(closestStyle['border-left-width'])
 													+ 'px';
                         }
                         $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
-                        $('.'+HighlightBox.kPlaceHolderWrapperClass).css(updateInnerElStyle);
+                        itemNode.style('display', 'block', 'important');
+                        $('.'+HighlightBox.kPlaceHolderWrapperClass).style('width', updateInnerElStyle.width, 'important');
 
                         return false; // Break the each loop
                     }
@@ -713,7 +722,10 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 					var bgImage = $(itemNode).css('backgroundImage');
 					// RegExp below will take out bg image URL from the string.
 					// Example: 'url(http://example.com/foo.png)' will evaluate to 'http://example.com/foo.png'.
-					imageObj.src = bgImage.match(/\(([^)]+)\)/)[1];
+                    var url = bgImage.match(/\(([^)]+)\)/)[1];
+                    if (common.validateUrl(url)) {
+                        imageObj.src = url;
+                    }
 				} else if (itemNode[0].tagName.toLowerCase() === 'img') {
 					var rgb = common.getAverageRGB($(itemNode)[0]);
 					bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
@@ -830,7 +842,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
             // Note: You need to give the div a tabindex so it can receive focus. Otherwise, it will not catch keydown/keyup/keypress event.
             // Alternatively, we can catch the event on document/widnow level.
             // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
-            $(hlb).focus();
+            if (hlb[0].tagName.toLowerCase() == 'input' || hlb[0].tagName.toLowerCase() == 'textarea') {
+               $(hlb).focus(); 
+            }
             // Add listener below to correctly handle scroll event(s) if HLB is opened.
             $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
             $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);

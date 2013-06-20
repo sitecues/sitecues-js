@@ -1,7 +1,7 @@
 // module provides confinguration management system
 // for other modules to avoid direct communication
 // between modules.
-sitecues.def('conf', function(conf, callback){
+sitecues.def('conf', function(conf, callback, console){
 
 	// private variables
 	var data = {},
@@ -22,7 +22,7 @@ sitecues.def('conf', function(conf, callback){
 
 	if(locale) {
 		conf.locale = locale.toLowerCase().replace('-','_');
-		console.log("Locale: " + conf.locale);
+		console.info("Locale: " + conf.locale);
 	}
 
 	// string handler, optional regular

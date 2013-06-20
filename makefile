@@ -13,7 +13,10 @@ package-file-name:=$(package-name).tgz
 package-dir:=$(package-basedir)/$(package-name)
 
 # Production files (combine all modules into one).
+# Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
+	source/js/logging/log4javascript_uncompressed.js \
+	source/js/logging/init_logger.js \
 	target/source/js/core.js \
 	source/js/conf.js \
 	source/js/conf/localstorage.js \
@@ -24,6 +27,7 @@ files=\
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
+	source/js/jquery/style.js \
 	source/js/ui.js  \
 	source/js/load.js \
 	source/js/style.js \
@@ -40,7 +44,7 @@ files=\
 	source/js/caret/classifier.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
-    source/js/hlb/event-handlers.js \
+	source/js/hlb/event-handlers.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
@@ -52,12 +56,12 @@ files=\
 	source/js/invert.js \
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
-	source/js/cursor/element.js \
 	source/js/cursor/custom.js \
-	# source/js/toolbar.js \
+	source/js/toolbar.js
 
 https=off
-lint=false
+prod=off
+lint=true
 min=true
 port=8000
 uglifyjs-args=
@@ -70,7 +74,12 @@ endif
 
 # Developement files (load modules separately).
 ifeq ($(dev), true)
-	files=target/source/js/core.js source/js/use.js source/js/debug.js
+	files=\
+		source/js/logging/log4javascript_uncompressed.js \
+		source/js/logging/init_logger.js \
+		source/js/logging/init_logger_dev.js \
+		target/source/js/core.js \
+		source/js/use.js source/js/debug.js
 endif
 
 ifeq ($(https), on)
@@ -139,6 +148,7 @@ clean:
 # Set up the dependencies.
 deps: $(_clean_deps)
 	@echo "Dependency setup started."
+	@mkdir -p node_modules
 	@npm install
 	@echo "Dependency setup completed."
 
@@ -149,9 +159,10 @@ deps-clean:
 
 # TARGET: lint
 # 	Run gjslint on the JavaScript source.
+#@gjslint --nojsdoc -r source/js
 lint:
 	@echo "Linting started."
-	@gjslint --nojsdoc -r source/js
+	@lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
 # TARGET: run
@@ -159,4 +170,4 @@ lint:
 # Additionally, copy in core config files, if they do not exist.
 run:
 	@echo "Running."
-	@./binary/web $(port) $(https)
+	@./binary/web.js $(port) $(https) $(prod)

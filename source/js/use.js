@@ -18,5 +18,6 @@ window.sitecues && sitecues.use(
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
-	'invert'
+	'invert',
+	'toolbar'
 );

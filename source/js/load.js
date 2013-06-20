@@ -1,4 +1,4 @@
-sitecues.def('load', function(load, callback){
+sitecues.def('load', function(load, callback, console){
 
 	// async script loading
 	load.script = sitecues.loadScript;
@@ -26,8 +26,11 @@ sitecues.def('load', function(load, callback){
 		pull = function(){
 			// iterate over loaded document stylesheets and
 			// check is our stylecheet loaded or not
-			for(var s=document.styleSheets, i=s.length; --i >= 0;)
-				if (s[i].href === style.href) return callback();
+			for(var s=document.styleSheets, i=s.length; --i >= 0;) {
+				if (s[i].href === style.href) {
+					return callback ? callback() : null;
+				}
+			}
 
 			// initiate pulling for this check -- pull for
 			// changes max 100 times with 100ms delay, if

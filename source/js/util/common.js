@@ -7,6 +7,7 @@ sitecues.def('util/common', function (common, callback) {
     sitecues.use('jquery', 'jquery/cookie', function ($) {
         var kRegExpRGBString = /\d+(\.\d+)?%?/g;
         var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
+        var kUrlValidString = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 
 		// Make sure 'trim()' has cross-browser support.
 		if (typeof String.prototype.trim !== 'function') {
@@ -19,7 +20,7 @@ sitecues.def('util/common', function (common, callback) {
              * @param element The DOM element which styles we want to get.
              * @return elementComputedStyles An object of all element computed styles.
              */
-            common.getElementComputedStyles = function(element, prop) {
+            common.getElementComputedStyles = function(element, prop, doTransform) {
                 if(!element) {
                     return;
                 }
@@ -48,7 +49,14 @@ sitecues.def('util/common', function (common, callback) {
                     for (var i = 1; i < propertyParts.length; i++) {
                         propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
                     }
-                    elementComputedStyles[propertyName] = computedStyles[propertyName];
+                    if (doTransform) {
+                        // in format 'marginTop'
+                        elementComputedStyles[propertyName] = computedStyles[propertyName];
+                    } else {
+                        // in format 'margin-top'
+                        elementComputedStyles[currentProperty] = computedStyles[propertyName];
+                    } 
+                    
                 });
                 return elementComputedStyles;
             }
@@ -130,7 +138,7 @@ sitecues.def('util/common', function (common, callback) {
                     }
                 } catch (e) {
                     // Just temporary logging, to make sure code always works as expected.
-                    console.log('Attempt to get RGB color failed.');
+                    sitecues.log.warn('Attempt to get RGB color failed.');
                 }
                 return resultRGBColor;
             }
@@ -315,6 +323,13 @@ sitecues.def('util/common', function (common, callback) {
                 step = isUp? -step : step;
                 el.scrollTop += step;
                 return false;
+            }
+
+            /* Validates whether the given value is a valid URL
+             * @urlString A string
+             */
+            common.validateUrl = function(urlString) {
+                return kUrlValidString.test(urlString);
             }
 
         // Done.

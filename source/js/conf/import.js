@@ -1,6 +1,6 @@
 // module for importing settings from page's _sitecues variable
 // needed for customer's indentification and customer's settings
-sitecues.def('conf/import', function(module, callback) {
+sitecues.def('conf/import', function(module, callback, console) {
 
     // depends on conf module
     sitecues.use('conf', function(conf) {
@@ -27,7 +27,7 @@ sitecues.def('conf/import', function(module, callback) {
             for (var i = 0, l = _sitecues.length; i < l; i++)
                 push(_sitecues[i]);
         } else {
-            console.log('_sitecues not defined!');
+            console.warn('_sitecues not defined!');
         }
 
         // replace global var

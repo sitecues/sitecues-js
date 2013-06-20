@@ -1,5 +1,5 @@
 // focus enhancement (make focus easier to see)
-sitecues.def('focus', function(focus, callback){
+sitecues.def('focus', function(focus, callback, console){
 
 	// minimum zoom at which focus
 	// enhancement appears

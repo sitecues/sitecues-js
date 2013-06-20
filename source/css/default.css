@@ -1,4 +1,4 @@
-/* badge */
+/* Badge */
 .sitecues-badge #sitecues-badge-image {
     height: 23px;
 }
@@ -127,7 +127,7 @@
 }
 
 #sitecues-panel .tts.tts-disabled {
-    position: absolute; 
+    position: absolute;
     top: 2px;
     right: 0;
     width: 136px;
@@ -186,6 +186,16 @@
     vertical-align: middle;
     width:          100%;
     z-index:        2147483647;
+}
+
+.sitecues-toolbar,
+.sitecues-toolbar *
+{
+    -moz-user-select:    none !important;
+    -ms-user-select:     none !important;
+    -o-user-select:      none !important;
+    -webkit-user-select: none !important;
+    user-select:         none !important;
 }
 
 #sitecues-toolbar-close-button {
