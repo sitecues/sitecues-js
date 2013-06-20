@@ -60,7 +60,11 @@ sitecues.def('badge', function(badge, callback, console){
 
 		// hide panel
 		badge.show = function() {
-			badge.panel.fadeIn('slow');
+			if (!conf.get("defaultUI") || conf.get("defaultUI") === 'badge') {
+				badge.panel.fadeIn('slow');
+			} else {
+				log.warn("Something called badge.show() but UI is set to " + conf.get("defaultUI"));
+			}
 		};
 
 		// Hide the badge when the toolbar displays

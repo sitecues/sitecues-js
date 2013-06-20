@@ -44,9 +44,10 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
             }
         }
 
-        // TODO: Make code DRY-compliant.
-
         toolbar.show = function () {
+            if(!conf.get('toolbarEnabled')) {
+                return;
+            }
             toolbar.render();
             toolbar.instance.show(0);
             toolbar.shim.show(0);
@@ -54,10 +55,9 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
             toolbar.currentState = toolbar.STATES.ON;
 
             sitecues.emit("toolbar/state/" + toolbar.currentState.name);
-            conf.set("showToolbar", true);
         };
 
-        toolbar.slideIn  = function () {
+        toolbar.slideIn = function () {
             toolbar.currentState = toolbar.STATES.OFF;
 
             if(toolbar.instance) {
@@ -66,7 +66,6 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
                     sitecues.emit("toolbar/state/" + toolbar.currentState.name);
                 });
             }
-            conf.set('showToolbar', false);
         };
 
         toolbar.slideOut = function () {
@@ -76,7 +75,6 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
             sitecues.emit("toolbar/state/" + toolbar.currentState.name);
             toolbar.shim.slideDown( 'slow' );
             toolbar.instance.slideDown( 'slow' );
-            conf.set('showToolbar', true);
         };
 
         toolbar.toggle = function() {
@@ -131,7 +129,16 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
             toolbar.toggle();
         };
 
-        sitecues.on( 'badge/hover', toolbar.slideOut );
+        /**
+         * Enable (but do not show), the toolbar. Call show() or toggle() to
+         * show it.
+         * 
+         * @return void
+         */
+        toolbar.enable = function () {
+            conf.set("toolbarEnabled", true);
+        };
+
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
         sitecues.on( 'speech/disable', toolbar.disableSpeech );
         sitecues.on( 'speech/enable', toolbar.enableSpeech );
@@ -142,23 +149,28 @@ sitecues.def( 'toolbar', function (toolbar, callback, console) {
 
         sitecues.on( 'toolbar/enable', function () {
             console.info( 'Toolbar state: [on].' );
+            conf.set("toolbarEnabled", true);
         } );
+
         sitecues.on( 'toolbar/disable', function () {
             toolbar.disable();
             console.info( 'Toolbar state: [off].' );
         } );
 
-        /**
-         * FIXME: Effin' fix me as effin' soon as effin' possible!!!
-         * We should not have to run `toolbar.show` in `setTimeout()`. Yeah, it's a WTF question to me too.
-         */
-
+        // FIXME We should not have to run `toolbar.show` in `setTimeout()`
+        // EQ-622 might be the solution here
         $(document).ready(function () {
-            if (conf.get("showToolbar") === true) {
+            if (conf.get("defaultUI") === 'toolbar') {
+                toolbar.enable();
+            } else {
+                log.info("Disabling toolbar, defaultUI is set to " + conf.get("defaultUI"));
+                toolbar.disable();
+            }
+            if(conf.get('toolbarEnabled')) {
                 setTimeout(toolbar.show, 2500);
             }
         });
-
         callback();
-    } );
-} );
+    });
+
+});
