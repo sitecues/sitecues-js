@@ -40,9 +40,7 @@ sitecues.def('badge', function (badge, callback, log) {
       // FIXME: `jQuery(...).on("load", ...)` is to be considered unreliable.
       $(badge.element).on("load", function(){
         // show badge panel only after image was loaded
-        if ((conf.get('siteUI') === 'badge') || (conf.get('defaultUI') === 'badge')) {
-          badge.show();
-        }
+        badge.show();
       });
     }
 
@@ -84,7 +82,7 @@ sitecues.def('badge', function (badge, callback, log) {
     badge.isAvailable = function () {
       if (conf.get('siteUI')) {
         // THis site has a UI setting
-        if(conf.get('siteUI') === 'badge') {
+        if (conf.get('siteUI') === 'badge') {
           // badge is enabled for this site
           return true;
         } else {
@@ -93,7 +91,7 @@ sitecues.def('badge', function (badge, callback, log) {
         }
       } else {
         // This site does not have a UI setting
-        if((! conf.get('defaultUI')) || (conf.get('defaultUI') === 'badge')) {
+        if ((! conf.get('defaultUI')) || (conf.get('defaultUI') === 'badge')) {
           // Default is not set or is set to badge
           return true;
         } else {
