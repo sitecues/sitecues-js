@@ -45,7 +45,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         }
 
         toolbar.show = function () {
-            if(!conf.get('toolbarEnabled')) {
+            if(!toolbar.isAvailable()) {
                 return;
             }
             toolbar.render();
@@ -54,35 +54,45 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
 
             toolbar.currentState = toolbar.STATES.ON;
 
-            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+            sitecues.emit('toolbar/state/' + toolbar.currentState.name);
         };
 
+        /** Hides the toolbar by sliding it in */
         toolbar.slideIn = function () {
+            log.info('Toolbar sliding in (hiding)');
             toolbar.currentState = toolbar.STATES.OFF;
 
             if(toolbar.instance) {
                 toolbar.instance.slideUp( 'slow' );
                 toolbar.shim.slideUp( 'slow', function() {
-                    sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+                    sitecues.emit('toolbar/state/' + toolbar.currentState.name);
+                    log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
                 });
             }
         };
 
+        /** Shows the toolbar by sliding it out */
         toolbar.slideOut = function () {
+            log.info('Toolbar sliding out (showing)');
+            if(!toolbar.isAvailable()) {
+                return;
+            }
+
             toolbar.currentState = toolbar.STATES.ON;
 
             toolbar.render();
-            sitecues.emit("toolbar/state/" + toolbar.currentState.name);
+            sitecues.emit('toolbar/state/' + toolbar.currentState.name);
             toolbar.shim.slideDown( 'slow' );
             toolbar.instance.slideDown( 'slow' );
         };
 
         toolbar.toggle = function() {
-            log.info('toggle');
-
-            if((toolbar.currentState) === toolbar.STATES.ON) {
+            log.info('Toggling toolbar from state ' + toolbar.currentState.name);
+            if(toolbar.currentState === toolbar.STATES.ON) {
+                toolbar.disable();
                 toolbar.slideIn();
             } else {
+                toolbar.enable();
                 toolbar.slideOut();
             }
         };
@@ -98,7 +108,36 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         };
 
         /**
-         * Looks for toolbar elements with a "rel" attribute of value
+         * Determines if the toolbar should be shown based on site and default
+         * settings.
+         * 
+         * @return boolean true if the toolbar is the UI that should be used.
+         */
+        toolbar.isAvailable = function() {
+            if (conf.get('siteUI')) {
+                // THis site has a UI setting
+                if(conf.get('siteUI') === 'toolbar') {
+                    // badge is enabled for this site
+                    return true;
+                } else {
+                    log.info('This site does not use toolbar for UI');
+                    return false;
+                }
+            } else {
+                // This site does not have a UI setting
+                if(conf.get('defaultUI') === 'toolbar') {
+                    // Default is set to toolbar
+                    return true;
+                } else {
+                    log.info('Default setting is not toolbar');
+                    return false;
+                }
+            }
+        }
+
+
+        /**
+         * Looks for toolbar elements with a 'rel" attribute of value
          * "sitecues-event". It then looks for a "data-sitecues-event" attribute
          * that will say which event(s) to fire.
          *
@@ -108,12 +147,12 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
          */
         toolbar.wireEvents = function() {
             toolbar.instance.find('[rel="sitecues-event"]').each(function() {
-                $(this).on("click", function() {
+                $(this).on('click', function() {
                     var event = $(this).data('sitecues-event');
                     if(event) {
                         sitecues.emit(event);
                     } else {
-                        log.warn("No event configured");
+                        log.warn('No event configured');
                     }
                 })
             })
@@ -125,8 +164,13 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
          * @return void
          */
         toolbar.disable = function () {
-            conf.set("toolbarEnabled", false);
-            toolbar.toggle();
+            log.info('Disabling toolbar');
+            conf.set('toolbarEnabled', false);
+            if(conf.get('siteUI') === 'toolbar') {
+                // Clear this preference so we go back to the default
+                conf.set('siteUI', '');
+            }
+            toolbar.slideIn();
         };
 
         /**
@@ -136,7 +180,10 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
          * @return void
          */
         toolbar.enable = function () {
-            conf.set("toolbarEnabled", true);
+            log.info('Enabling toolbar');
+            conf.set('toolbarEnabled', true);
+            conf.set('siteUI', 'toolbar');
+            log.info('siteUI set to ' + conf.get('siteUI'));
         };
 
         sitecues.on( 'toolbar/toggle', toolbar.toggle );
@@ -148,7 +195,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         load.style('../css/bootstrap.css');
 
         sitecues.on( 'toolbar/enable', function () {
-            conf.set("toolbarEnabled", true);
+            conf.set('toolbarEnabled', true);
             log.info( 'Toolbar state: [on].' );
         } );
 
@@ -160,10 +207,10 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         // FIXME We should not have to run `toolbar.show` in `setTimeout()`
         // EQ-622 might be the solution here
         $(document).ready(function () {
-            if (conf.get("defaultUI") === 'toolbar') {
+            if (conf.get('siteUI') === 'toolbar' || conf.get('defaultUI') === 'toolbar') {
                 toolbar.enable();
             } else {
-                log.info("Disabling toolbar, defaultUI is set to " + conf.get("defaultUI"));
+                log.info('Disabling toolbar, defaultUI is set to ' + conf.get('defaultUI'));
                 toolbar.disable();
             }
             if(conf.get('toolbarEnabled')) {

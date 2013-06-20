@@ -38,7 +38,7 @@ sitecues.def('badge', function(badge, callback, log) {
 			// handle image loading
 			badge.element.load(function(){
 				// show badge panel only after image was loaded
-				badge.panel.fadeIn(callback);
+				badge.show();
 			});
 		}
 
@@ -58,21 +58,57 @@ sitecues.def('badge', function(badge, callback, log) {
 			badge.panel.fadeOut('fast');
 		};
 
-		// hide panel
+		/**
+		 * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
+		 * 
+		 * @return void
+		 */
 		badge.show = function() {
-			if (!conf.get("defaultUI") || conf.get("defaultUI") === 'badge') {
+			log.info('showing badge');
+			if(badge.isAvailable()) {
+				// badge.panel.show();
 				badge.panel.fadeIn('slow');
 			} else {
-				log.warn("Something called badge.show() but UI is set to " + conf.get("defaultUI"));
+				log.warn('badge.show() was called but the badge is not available');
 			}
 		};
 
+		/**
+		 * Determines if the badge should be shown based on site and default settings.
+		 * 
+		 * @return boolean true if the badge is the UI that should be used.
+		 */
+		badge.isAvailable = function() {
+			if (conf.get('siteUI')) {
+				// THis site has a UI setting
+				if(conf.get('siteUI') === 'badge') {
+					// badge is enabled for this site
+					return true;
+				} else {
+					log.info('This site does not use badge for UI');
+					return false;
+				}
+			} else {
+				// This site does not have a UI setting
+				if(!conf.get('defaultUI') || conf.get('defaultUI') === 'badge') {
+					// Default is not set or is set to badge
+					return true;
+				} else {
+					log.info('Default setting is not badge');
+					return false;
+				}
+			}
+
+		}
+
 		// Hide the badge when the toolbar displays
-		sitecues.on("toolbar/state/on", function() {
+		sitecues.on('toolbar/state/on', function() {
 			badge.hide();
 		});
 
-		sitecues.on("toolbar/state/off", function() {
+		sitecues.on('toolbar/state/off', function() {
+			log.info('Toolbar was turned off, showing the badge');
+			conf.set('siteUI','badge')
 			badge.show();
 		});
 
