@@ -1,5 +1,23 @@
 sitecues.def( 'toolbar', function (toolbar, callback, log) {
-  sitecues.use( 'jquery', 'conf', 'load', 'util/template', 'toolbar/dropdown', 'toolbar/slider', 'toolbar/resizer', 'toolbar/messenger', function ( $, conf, load, template, dropdown, slider, resizer, messenger) {
+  sitecues.use(
+    'jquery',
+    'conf',
+    'load',
+    'util/template',
+    'toolbar/dropdown',
+    'toolbar/slider',
+    'toolbar/resizer',
+    'toolbar/messenger',
+    function (
+      $,
+      conf,
+      load,
+      template,
+      dropdown,
+      slider,
+      resizer,
+      messenger
+    ) {
     toolbar.STATES = {
       OFF: {
         id:   0,
@@ -16,11 +34,13 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     toolbar.render = function (callback) {
       if (! toolbar.instance) {
         toolbar.shim = $('<div class="sitecues-toolbar-shim" />').prependTo($('html'));
+
         toolbar.shim.css({
           height: (conf.get('toolbarHeight') || 40) + 'px'
         });
 
         toolbar.instance = $('<div class="sitecues-toolbar hori" />').prependTo($('html'));
+
         toolbar.instance.css({
           height: (conf.get('toolbarHeight') || 40) + 'px'
         });
@@ -31,8 +51,8 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         resizer.build(toolbar.instance, toolbar.shim);
 
         // create TTS button and set it up
-        toolbar.ttsButton = $( '<div rel="sitecues-event" data-sitecues-event="speech/toggle">' ).addClass( 'tts' ).appendTo( toolbar.instance );
-        toolbar.ttsButton.data( 'tts-enable', 'enabled' );
+        toolbar.ttsButton = $('<div rel="sitecues-event" data-sitecues-event="speech/toggle">').addClass('tts').appendTo( toolbar.instance );
+        toolbar.ttsButton.data('tts-enable', 'enabled');
 
         toolbar.wireEvents();
 
@@ -62,8 +82,8 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
       toolbar.currentState = toolbar.STATES.OFF;
 
       if(toolbar.instance) {
-        toolbar.instance.slideUp( 'slow' );
-        toolbar.shim.slideUp( 'slow', function() {
+        toolbar.instance.slideUp('slow');
+        toolbar.shim.slideUp('slow', function () {
           sitecues.emit('toolbar/state/' + toolbar.currentState.name);
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
         });
@@ -81,8 +101,8 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
 
       toolbar.render();
       sitecues.emit('toolbar/state/' + toolbar.currentState.name);
-      toolbar.shim.slideDown( 'slow' );
-      toolbar.instance.slideDown( 'slow' );
+      toolbar.shim.slideDown('slow');
+      toolbar.instance.slideDown('slow');
     };
 
     toolbar.toggle = function () {
@@ -98,12 +118,12 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
 
     toolbar.enableSpeech = function () {
       toolbar.ttsButton.removeClass('tts-disabled');
-      toolbar.ttsButton.data( 'tts-enable', 'enabled' );
+      toolbar.ttsButton.data('tts-enable', 'enabled');
     };
 
     toolbar.disableSpeech = function () {
       toolbar.ttsButton.addClass('tts-disabled');
-      toolbar.ttsButton.data( 'tts-enable', 'disabled' );
+      toolbar.ttsButton.data('tts-enable', 'disabled');
     };
 
     /**
@@ -184,23 +204,23 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
       log.info('siteUI set to ' + conf.get('siteUI'));
     };
 
-    sitecues.on( 'toolbar/toggle', toolbar.toggle );
-    sitecues.on( 'speech/disable', toolbar.disableSpeech );
-    sitecues.on( 'speech/enable', toolbar.enableSpeech );
+    sitecues.on('toolbar/toggle', toolbar.toggle);
+    sitecues.on('speech/disable', toolbar.disableSpeech);
+    sitecues.on('speech/enable', toolbar.enableSpeech);
 
     // load special toolbar css
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
 
-    sitecues.on( 'toolbar/enable', function () {
+    sitecues.on('toolbar/enable', function () {
       conf.set('toolbarEnabled', true);
-      log.info( 'Toolbar state: [on].' );
-    } );
+      log.info('Toolbar state: [on].');
+    });
 
     sitecues.on( 'toolbar/disable', function () {
       toolbar.disable();
-      log.info( 'Toolbar state: [off].' );
-    } );
+      log.info('Toolbar state: [off].');
+    });
 
     // FIXME We should not have to run `toolbar.show` in `setTimeout()`
     // EQ-622 might be the solution here

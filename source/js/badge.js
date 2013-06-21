@@ -3,7 +3,7 @@ sitecues.def('badge', function (badge, callback, log) {
   // if we will start using vanilla js functions
   sitecues.use('jquery', 'conf', 'panel', 'ui', function ($, conf, panel) {
 
-  // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
+    // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
     badge.altBadges = $(conf.get('panelDisplaySelector'));
     badge.badgeId   = conf.get('badgeId');
 
@@ -38,7 +38,7 @@ sitecues.def('badge', function (badge, callback, log) {
       $(badge.element).appendTo(badge.panel);
       // handle image loading
       // FIXME: `jQuery(...).on("load", ...)` is to be considered unreliable.
-      $(badge.element).on("load", function(){
+      $(badge.element).on("load", function () {
         // show badge panel only after image was loaded
         badge.show();
       });
