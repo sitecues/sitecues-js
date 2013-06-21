@@ -36,6 +36,7 @@ if (!prodMode) {
 	app.use(express.static(path.join(root, '../source')));
 }
 app.use(express.static(path.join(root, '../target/compile')));
+app.use(express.static(path.join(root, '../target/etc')));
 
 // Process the inline JS file template.
 var INLINE_JS_FILE = path.resolve(path.join(root, '../tests/views/inline.html'));

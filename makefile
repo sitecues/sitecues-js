@@ -58,6 +58,8 @@ files=\
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
 	source/js/util/template.js \
+	source/js/util/hammer.js \
+	source/js/toolbar/bootstrap-dropdown.js \
 	source/js/toolbar/dropdown.js \
 	source/js/toolbar/slider.js \
 	source/js/toolbar/messenger.js \
@@ -121,6 +123,9 @@ build: $(_build_lint_dep)
 	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
 	@mkdir -p target/compile/js
 	@uglifyjs $(uglifyjs-args) -o target/compile/js/equinox.js --source-map target/compile/js/equinox.js.map --source-map-url /equinox.js.map $(files)
+	@mkdir -p target/etc/js
+	@cp -r source/js/.cfg target/etc/js
+	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
 	@echo "Building completed."
 
 # TARGET: package
