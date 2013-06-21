@@ -57,7 +57,12 @@ files=\
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
-	source/js/toolbar.js
+	source/js/util/template.js \
+	source/js/toolbar/dropdown.js \
+	source/js/toolbar/slider.js \
+	source/js/toolbar/messenger.js \
+	source/js/toolbar/resizer.js \
+	source/js/toolbar.js \
 
 https=off
 prod=off
