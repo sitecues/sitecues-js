@@ -1,4 +1,4 @@
-sitecues.def('toolbar/resizer', function(resizer, callback, log){
+sitecues.def('toolbar/resizer', function (resizer, callback, log) {
     sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
       /**
@@ -24,7 +24,7 @@ sitecues.def('toolbar/resizer', function(resizer, callback, log){
         resizer.element.mouseenter(function() {
             $('body').addClass('noselect');
         }).mouseleave(function() {
-            if(!resizer.element.data('dragging')) {
+            if(! resizer.element.data('dragging')) {
                 $('body').removeClass('noselect');
             }
         });
