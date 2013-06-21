@@ -146,31 +146,7 @@ sitecues.def('cursor/canvas', function (cursor, callback, log) {
 			return images[type] || images['default'];
 		}
 
-		// keep the compatibily for /element.js
-		// todo: remove or modify the code?
-		cursor.type = function(element, type) {
-			// save type
-			data.type = type;
-			// get image url for cursor type
-			var url = images[type] || images['default'];
-			// get pure DOM element ref
-			element = element[0] || element;
-			// reset style height
-			$(element).style('height', 'auto', 'important');
-			// update element url
-			if (element.src !== url)
-				element.src = url;
-		}
-
-		// set cursor zoom
-		// todo: remove or modify the code?
-		cursor.zoom = function(element, zoom) {
-			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
-			cursor.repaint();
-			cursor.type(element, data.type);
-		}
-
-		// set cursor zoom
+        // set cursor zoom
 		cursor.zoomImage = function(zoom) {
 			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
 			cursor.repaint();
