@@ -122,6 +122,7 @@ sitecues.def('cursor/canvas', function (cursor, callback, log) {
 			// setup polling for changes
 			interval = setInterval(function() {
 				if (!times-- || span.width() !== width || span.height() !== height) {
+                    log.warn('setInterval in pooling loop is executed....');
 					clearInterval(interval);
 					span.remove();
 					callback();
@@ -155,7 +156,7 @@ sitecues.def('cursor/canvas', function (cursor, callback, log) {
 		// load special cursor css
 		load.style('../css/cursor.css', function() {
 			wait('sitecues-cursor', function() {
-        log.warn('sitecues-cursor font loaded');
+                log.warn('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
 			});
