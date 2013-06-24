@@ -43,7 +43,7 @@ sitecues.def('invert', function (invert, callback, log) {
 
       switch (elem_invert_state.highlight_box) {
 
-        case states.invert:
+        case states.invert:        
           if (elem_invert_state.page === states.invert) {
             setStyle("highlight_box", "empty");
           } else {
@@ -73,7 +73,7 @@ sitecues.def('invert', function (invert, callback, log) {
      */
     sitecues.on('inverse/toggle', function (event) {
       
-      if (!event) {    
+      if (!event) {
         // We have no key event.
         if (elem_invert_state.page === states.invert) {
           setStyle("page", "none");
@@ -108,6 +108,7 @@ sitecues.def('invert', function (invert, callback, log) {
              highlight_box_state === highlight_box_states.CREATE ) {
 
           switch (elem_invert_state.highlight_box) {
+            
             case states.invert:
               switch (elem_invert_state.page) {
                 case states.invert:
@@ -153,16 +154,20 @@ sitecues.def('invert', function (invert, callback, log) {
                     highlight_box_state === highlight_box_states.CLOSED ) {
 
           if (elem_invert_state.highlight_box === states.match) {
-          
-            switch (elem_invert_state.page) {
+            
+            // Is this actually getting used for anything?
+
+            /*switch (elem_invert_state.page) {
               case states.invert:
                 setState("highlight_box","invert");
                 break;
 
               case states.normal:
                 setState("highlight_box","normal");
+
                 break;
-            }
+            }*/
+            ////setState("highlight_box", elem_invert_state.page);
           }
 
           switch (elem_invert_state.page) {
@@ -176,6 +181,7 @@ sitecues.def('invert', function (invert, callback, log) {
               setState("page", "invert");
               break;
           }
+
         }
       }
     });
