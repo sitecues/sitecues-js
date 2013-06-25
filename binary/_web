@@ -1,0 +1,212 @@
+#!/usr/bin/env node
+// A simple service wrapper around the test site.
+var fs = require('fs-extra')
+  , path = require('path')
+  , cp = require('child_process')
+  , isRunning = require('is-running')
+  , Tail = require('tail').Tail
+  ;
+
+var NAME = 'Test Site'
+  , LABEL = 'testsite'
+  , STARTUP_TIMEOUT = 5000
+  , DIRS = null
+  , FILES = null
+  ;
+
+var args = process.argv.slice(2);
+var action = args.shift();
+
+switch(action)
+{
+  case 'start':
+    start(args, done);
+    break;
+  case 'stop':
+    stop(args, done);
+    break;
+  case 'running':
+    running(args, done);
+    break;
+  case 'wait':
+    wait(args, done);
+    break;
+  default:
+    console.error('Unknown action: ' + action);
+    exit(127);
+}
+
+// Simple noop method.
+function noop() {}
+
+// Called when a command line
+function done(success) {
+  exit(success ? 0 : 1);
+}
+
+function exit(status) {
+  process.exit(status)
+}
+
+function ensureDirs() {
+  if (!DIRS) {
+    var binDir = __dirname;
+    var rootDir = path.join(binDir, '..');
+
+    var pidDir = path.join(rootDir, 'var', 'pid', LABEL);
+    fs.mkdirsSync(pidDir);
+
+    var logDir = path.join(rootDir, 'var', 'log', LABEL);
+    fs.mkdirsSync(logDir);
+
+    DIRS = {
+      root: rootDir,
+      bin: binDir,
+      pid: pidDir,
+      log: logDir
+    }
+  }
+  return DIRS;
+}
+
+function getFiles() {
+  if (!FILES) {
+    var dirs = ensureDirs();
+    FILES = {
+      out: path.join(dirs.log, 'out.log'),
+      pid: path.join(dirs.pid, 'pid.txt'),
+      ready: path.join(dirs.pid, 'ready.txt')
+    }
+  }
+  return FILES;
+}
+
+function isReady() {
+  var result, pid = getRunningPid();
+  if (pid) {
+    var files = getFiles();
+    var pidLMT = fs.statSync(files.pid).mtime.getTime();
+    var readyLMT = (fs.existsSync(files.ready) ? fs.statSync(files.ready).mtime.getTime() : 0);
+    result = (readyLMT >= pidLMT);
+  } else {
+    result = false;
+  }
+  return result;
+}
+
+function writePidFile(pid) {
+  var files = getFiles();
+  fs.writeFileSync(files.pid, '' + pid);
+}
+
+function writeReadyFile() {
+  var files = getFiles();
+  fs.writeFileSync(files.ready, 'ready');
+}
+
+function start(args, cb) {
+  cb = cb || noop;
+  var pid = getRunningPid();
+  if (pid) {
+    console.error(NAME + ' is already running.');
+    cb(true);
+  } else {
+    console.error('Starting ' + NAME + '...');
+    var timeout;
+    var files = getFiles();
+    fs.createFileSync(files.out);
+    var tail = new Tail(files.out);
+    tail.on('line', function(line) {
+      if (line.indexOf('Listening at') == 0) {
+        timeout && clearTimeout(timeout);
+        writeReadyFile();
+        console.error(NAME + ' is ready.');
+        cb(true);
+      }
+    });
+
+    // Start the actual process.
+    var out = fs.openSync(files.out, 'a');
+    var child = cp.spawn(path.resolve(path.join(__dirname, 'web.js')), args, { detached: true, stdio: [ 'ignore', out, out ] });
+    pid = child.pid;
+    writePidFile(pid);
+
+    // Fail after a certain time of non-responsiveness.
+    timeout = setTimeout(function() {
+      if (!isReady()) {
+        console.error(NAME + ' failed to become responsive before the timeout.');
+        cb(false);
+      }
+    }, STARTUP_TIMEOUT)
+  }
+}
+
+function getRunningPid(verbose) {
+  var files = getFiles();
+  var pid = null;
+  if (!fs.existsSync(files.pid)) {
+    verbose && console.error("No pid file found.");
+  } else {
+    pid = parseInt(fs.readFileSync(files.pid, {encoding: 'utf8'}));
+    if (!isRunning(pid)) {
+      verbose && console.error("Process " + pid + " is not running.");
+      pid = null;
+    }
+  }
+  return pid;
+}
+
+function stop(args, cb) {
+  cb = cb || noop;
+  var files = getFiles();
+  var pid = getRunningPid(true);
+  if (pid) {
+    console.error("Shutting down process " + pid + ".");
+    process.kill(pid, 'SIGTERM');
+  }
+
+  fs.deleteSync(files.pid);
+  fs.deleteSync(files.ready);
+
+  cb(true);
+}
+
+function running(args, cb) {
+  var pid = getRunningPid();
+  if (pid) {
+    console.error(NAME + ' is running.');
+  } else {
+    console.error(NAME + ' is not running.');
+  }
+  cb(pid);
+}
+
+// Wait for PhantomJS to become available. Start it if needed.
+function wait(args, cb) {
+  if (!getRunningPid(true)) {
+    console.error(NAME + ' is not running.');
+    start(args, cb)
+  } else {
+    if (isReady()) {
+      console.error(NAME + ' is ready.');
+      cb(true);
+    } else {
+      var timeout;
+      console.error('Waiting for ' + NAME + ' to become ready...');
+      setInterval(function() {
+        if (isReady()) {
+          timeout && clearTimeout(timeout);
+          console.error(NAME + ' is ready.');
+          cb(true);
+        }
+      }, 100);
+
+      timeout = setTimeout(function() {
+        if (!isReady()) {
+          console.error(NAME + ' failed to become responsive before the timeout.');
+          cb(false);
+        }
+      }, STARTUP_TIMEOUT)
+    }
+  }
+}
