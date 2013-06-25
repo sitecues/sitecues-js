@@ -44,7 +44,7 @@ sitecues.def('keys', function (keys, callback, log) {
 		'minus':	{ preventDefault: true, event: 'zoom/decrease' },
 		'plus':		{ preventDefault: true, event: 'zoom/increase' },
 		'r':		{ preventDefault: true, event: 'inverse/toggle'},
-		'f8':		{ event: 'toolbar/toggle' },
+		'f8':		{ event: 'ui/toggle' },
 		'space':	{
 			event: 'highlight/animate',
 			preventDefault: true,
