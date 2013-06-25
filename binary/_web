@@ -31,6 +31,16 @@ var options = nopt({
 
 var startupTimeout = options.timeout || 10000;
 
+// We may run this as root to bind to ports 80/443,
+// so determine who the owner of this script is, and
+// chown all created dirs and files to that owner.
+var uid, gid;
+(function(){
+  var rootStat = fs.statSync(__filename);
+  uid = rootStat.uid;
+  gid = rootStat.gid;
+})();
+
 switch(action)
 {
   case 'start':
@@ -62,16 +72,32 @@ function exit(status) {
   process.exit(status)
 }
 
+function mkdirs(dir) {
+  // Find the first existing dir.
+  dir = path.resolve(dir);
+  var firstExisting = '' + dir;
+  while (!fs.existsSync(firstExisting)) {
+    firstExisting = path.dirname(firstExisting);
+  }
+
+  fs.mkdirsSync(dir);
+
+  while (dir != firstExisting) {
+    fs.chownSync(dir, uid, gid);
+    dir = path.dirname(dir);
+  }
+}
+
 function ensureDirs() {
   if (!DIRS) {
     var binDir = __dirname;
     var rootDir = path.join(binDir, '..');
 
     var pidDir = path.join(rootDir, 'var', 'pid', LABEL);
-    fs.mkdirsSync(pidDir);
+    mkdirs(pidDir);
 
     var logDir = path.join(rootDir, 'var', 'log', LABEL);
-    fs.mkdirsSync(logDir);
+    mkdirs(logDir);
 
     DIRS = {
       root: rootDir,
@@ -111,12 +137,13 @@ function isReady() {
 function writePidFile(pid) {
   var files = getFiles();
   fs.writeFileSync(files.pid, '' + pid);
+  fs.chownSync(files.pid, uid, gid);
 }
 
 function writeReadyFile() {
   var files = getFiles();
   fs.writeFileSync(files.ready, 'ready');
-}
+  fs.chownSync(files.ready, uid, gid);}
 
 function start(args, cb) {
   cb = cb || noop;
@@ -129,6 +156,7 @@ function start(args, cb) {
     var timeout;
     var files = getFiles();
     fs.createFileSync(files.out);
+    fs.chownSync(files.out, uid, gid);
     var tail = new Tail(files.out);
     tail.on('line', function(line) {
       if (line.indexOf('Listening at') == 0) {
