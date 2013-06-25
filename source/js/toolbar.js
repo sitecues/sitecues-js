@@ -69,15 +69,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     toolbar.show = function () {
       if (toolbar.isAvailable()) {
         toolbar.render();
-        // Yo son, DON'T judge me for this!!!
-        //
-        // BIG FAT COMMENT! <- see my BIG FAT COMMENT (talkin' to you sir Brian)???
-        //
-        // Okay...I wasn't drunk when I wrote this code.
-        // I actually can't "legally" drink BTW...yeah, I know, it's sucks.
-        // Boo!!!
-        // Anyway, this hackety hack is, for some reason, required for `toolbar.show()` to work properly.
-        // FIXME: Fix this later...we're focused on functionality for now.
+        // FIXME required for `toolbar.show()` to work properly
         toolbar.instance.hide(0);
         toolbar.shim.hide(0);
         toolbar.instance.show(0);
