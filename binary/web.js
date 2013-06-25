@@ -18,6 +18,32 @@ hogan = require('hogan.js');
 express = require('express');
 app = express();
 
+// We may run this as root to bind to ports 80/443,
+// so determine who the owner of this script is, and
+// chown all created dirs and files to that owner.
+var uid, gid;
+(function(){
+  var rootStat = fs.statSync(__filename);
+  uid = rootStat.uid;
+  gid = rootStat.gid;
+})();
+
+function mkdirs(dir) {
+  // Find the first existing dir.
+  dir = path.resolve(dir);
+  var firstExisting = '' + dir;
+  while (!fs.existsSync(firstExisting)) {
+    firstExisting = path.dirname(firstExisting);
+  }
+
+  fs.mkdirsSync(dir);
+
+  while (dir != firstExisting) {
+    fs.chownSync(dir, uid, gid);
+    dir = path.dirname(dir);
+  }
+}
+
 // process cmd line args
 var useHttps = strToBool(process.argv[3]),
 	prodMode = strToBool(process.argv[4]),
@@ -25,7 +51,7 @@ var useHttps = strToBool(process.argv[3]),
 
 if (process.argv.length > 5) {
   portFile = path.resolve(process.argv[5]);
-  fs.mkdirsSync(path.dirname(portFile));
+  mkdirs(path.dirname(portFile));
 }
 
 app.on('listen', function(e){
@@ -136,6 +162,7 @@ app.listen(port, function() {
 
 if (portFile) {
   fs.writeFileSync(portFile, '-Dswdda.testSite.httpPort=' + port + ' -Dswdda.sitecuesUrl.httpPort=' + port, {flag:'w'});
+  fs.chownSync(portFile, uid, gid);
 }
 
 // if https option passed to script

@@ -67,10 +67,15 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
           sitecues.emit("toolbar/resized", resizer.toolbar);
       }
 
-
-      resizer.saveHeight = function() {
+      resizer.saveHeight = function () {
           conf.set('toolbarHeight', resizer.toolbar.height());
-      }
+      };
+
+      // resizer = {
+      //   build: function ( toolbar, shim ) {},
+      //   resize: function ( event ) {},
+      //   saveHeight: function () {}
+      // };
 
       callback();
 

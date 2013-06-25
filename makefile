@@ -69,17 +69,17 @@ files=\
 
 https=off
 prod=off
-ports-file:=$(shell pwd)/var/data/testsite/ports.txt
+ports-env-file:=$(shell pwd)/var/data/testsite/ports.txt
 lint=true
 min=true
 port=8000
 uglifyjs-args=
-testingbot-api-key:=1b304798f3713751275ed2fff1a397d0
-testingbot-api-secret:=e93cb09b9d16bbc3bd1a38dc7ce93737
+testingbot-api-key:=b62a13f4d5cdb0f6c8b9e790ebd1aa8e
+testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 
-testsite-timeout:=10000
-phantomjs-timeout:=10000
-testingbot-tunnel-timeout:=120000
+testsite-timeout:=30000
+phantomjs-timeout:=30000
+testingbot-tunnel-timeout:=240000
 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
@@ -191,7 +191,7 @@ run:
 # TARGET: start-testsite
 # Run the web server as a service, giving access to the library and test pages.
 start-testsite:
-	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-file)
+	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-env-file)
 
 # TARGET: stop-testsite
 # Run the web server as a service, giving access to the library and test pages.
@@ -210,20 +210,36 @@ test-all: test-smoke test-unit
 # Run the smoke tests.
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/smoke && ../../node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+	@(make --no-print-directory start-phantomjs)
+	@(cd tests/smoke && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/unit && ../../node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret) && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+	@(make --no-print-directory start-testingbot-tunnel)
+	@(cd tests/unit && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
+
+# TARGET: start-phantomjs
+# Start the PhantomJS service.
+start-phantomjs:
+	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json
 
 # TARGET: stop-phantomjs
 # Stop the PhantomJS service.
 stop-phantomjs:
 	@node_modules/.bin/_phantomjs stop
 
+# TARGET: start-testingbot-tunnel
+# Start the TestingBot Tunnel service.
+start-testingbot-tunnel:
+	@node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret)
+
 # TARGET: stop-testingbot-tunnel
 # Stop the TestingBot Tunnel service.
 stop-testingbot-tunnel:
 	@node_modules/.bin/_testingbot-tunnel stop
+
+# TARGET: stop-all-services
+# Stop all known services.
+stop-all-services: stop-testsite stop-phantomjs stop-testingbot-tunnel
