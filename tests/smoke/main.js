@@ -26,7 +26,7 @@ describe("sitecues", function () {
             expect(el).to.exist;
             done();
           });
-        }, 500);
+        }, 2000); // Allow some time for the library to load
       });
 
     });

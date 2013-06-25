@@ -5,17 +5,31 @@ var fs = require('fs-extra')
   , cp = require('child_process')
   , isRunning = require('is-running')
   , Tail = require('tail').Tail
+  , nopt = require("nopt")
   ;
 
 var NAME = 'Test Site'
   , LABEL = 'testsite'
-  , STARTUP_TIMEOUT = 5000
   , DIRS = null
   , FILES = null
   ;
 
-var args = process.argv.slice(2);
+// Process the action, service args, and executable args.
+var sargs = [], args = process.argv.slice(2);
 var action = args.shift();
+
+while (args.length && args[0] != '--' ) {
+  sargs.push(args.shift());
+}
+// If we ended with any parameters left, the first one must be '--'
+args.length && args.shift();
+
+var options = nopt({
+  "timeout" : Number
+}, {
+}, sargs, 0);
+
+var startupTimeout = options.timeout || 10000;
 
 switch(action)
 {
@@ -137,7 +151,7 @@ function start(args, cb) {
         console.error(NAME + ' failed to become responsive before the timeout.');
         cb(false);
       }
-    }, STARTUP_TIMEOUT)
+    }, startupTimeout)
   }
 }
 
@@ -206,7 +220,7 @@ function wait(args, cb) {
           console.error(NAME + ' failed to become responsive before the timeout.');
           cb(false);
         }
-      }, STARTUP_TIMEOUT)
+      }, startupTimeout)
     }
   }
 }

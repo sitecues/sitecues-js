@@ -26,7 +26,7 @@ describe("sitecues", function () {
             expect(el).to.exist;
             done();
           });
-        }, 2000); // Takes a little longer to load the sitecues library on TestingBot
+        }, 2000); // Allow some time for the library to load
       });
 
     });

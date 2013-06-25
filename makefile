@@ -77,6 +77,10 @@ uglifyjs-args=
 testingbot-api-key:=1b304798f3713751275ed2fff1a397d0
 testingbot-api-secret:=e93cb09b9d16bbc3bd1a38dc7ce93737
 
+testsite-timeout:=10000
+phantomjs-timeout:=10000
+testingbot-tunnel-timeout:=120000
+
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
 else
@@ -187,7 +191,7 @@ run:
 # TARGET: start-testsite
 # Run the web server as a service, giving access to the library and test pages.
 start-testsite:
-	@./binary/_web start $(port) $(https) $(prod) $(ports-file)
+	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-file)
 
 # TARGET: stop-testsite
 # Run the web server as a service, giving access to the library and test pages.
@@ -206,13 +210,13 @@ test-all: test-smoke test-unit
 # Run the smoke tests.
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/smoke && ../../node_modules/.bin/_phantomjs start --config=phantomjs.json && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+	@(cd tests/smoke && ../../node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/unit && ../../node_modules/.bin/_testingbot-tunnel start $(testingbot-api-key) $(testingbot-api-secret) && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+	@(cd tests/unit && ../../node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret) && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
 
 # TARGET: stop-phantomjs
 # Stop the PhantomJS service.
