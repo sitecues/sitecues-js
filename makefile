@@ -57,6 +57,7 @@ files=\
 	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
+	source/js/cursor/images.js \
 	source/js/util/template.js \
 	source/js/util/hammer.js \
 	source/js/toolbar/bootstrap-dropdown.js \
@@ -68,10 +69,17 @@ files=\
 
 https=off
 prod=off
+ports-file:=$(shell pwd)/var/data/testsite/ports.txt
 lint=true
 min=true
 port=8000
 uglifyjs-args=
+testingbot-api-key:=1b304798f3713751275ed2fff1a397d0
+testingbot-api-secret:=e93cb09b9d16bbc3bd1a38dc7ce93737
+
+testsite-timeout:=10000
+phantomjs-timeout:=10000
+testingbot-tunnel-timeout:=120000
 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
@@ -168,7 +176,7 @@ deps-clean:
 	@echo "Cleaning dependencies completed."
 
 # TARGET: lint
-# 	Run gjslint on the JavaScript source.
+# Run gjslint on the JavaScript source.
 #@gjslint --nojsdoc -r source/js
 lint:
 	@echo "Linting started."
@@ -177,16 +185,45 @@ lint:
 
 # TARGET: run
 # Run the web server, giving access to the library and test pages.
-# Additionally, copy in core config files, if they do not exist.
 run:
-	@echo "Running."
 	@./binary/web.js $(port) $(https) $(prod)
 
+# TARGET: start-testsite
+# Run the web server as a service, giving access to the library and test pages.
+start-testsite:
+	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-file)
+
+# TARGET: stop-testsite
+# Run the web server as a service, giving access to the library and test pages.
+stop-testsite:
+	@./binary/_web stop
+
 # TARGET: test-all
-# Run all tests
+# Run all tests.
 test-all: test-smoke
 
+# TARGET: test-all
+# Run all tests.
+test-all: test-smoke test-unit
+
 # TARGET: test-smoke
-# Run the smoke tests
+# Run the smoke tests.
 test-smoke:
-	@(cd tests/smoke ; export SWDDA_CONFIG_FILE="$$(cd $$(dirname swdda.json) && pwd)/swdda.json" ; ../../node_modules/.bin/macchiato)
+	@(make --no-print-directory start-testsite prod=on)
+	@(cd tests/smoke && ../../node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+
+# TARGET: test-unit
+# Run the unit tests.
+test-unit:
+	@(make --no-print-directory start-testsite prod=on)
+	@(cd tests/unit && ../../node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret) && ../../node_modules/.bin/macchiato `cat $(ports-file)`)
+
+# TARGET: stop-phantomjs
+# Stop the PhantomJS service.
+stop-phantomjs:
+	@node_modules/.bin/_phantomjs stop
+
+# TARGET: stop-testingbot-tunnel
+# Stop the TestingBot Tunnel service.
+stop-testingbot-tunnel:
+	@node_modules/.bin/_testingbot-tunnel stop

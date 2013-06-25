@@ -9,18 +9,28 @@ function strToBool(str) {
 // initialize express application
 var fs, app, root, path, mime, port, https, hogan, express;
 
-// process cmd line args
-var useHttps = strToBool(process.argv[3]),
-	prodMode = strToBool(process.argv[4]);
-
 // dependencies
-fs = require('fs');
+fs = require('fs-extra');
 path = require('path');
 mime = require('mime');
 https = require('https');
 hogan = require('hogan.js');
 express = require('express');
 app = express();
+
+// process cmd line args
+var useHttps = strToBool(process.argv[3]),
+	prodMode = strToBool(process.argv[4]),
+  portFile = null;
+
+if (process.argv.length > 5) {
+  portFile = path.resolve(process.argv[5]);
+  fs.mkdirsSync(path.dirname(portFile));
+}
+
+app.on('listen', function(e){
+  console.log('LISTEN: ' + JSON.stringify(e));
+});
 
 // handle relative paths properly
 root = path.dirname(module.filename);
@@ -102,7 +112,6 @@ app.get(SITE_CONTEXT_PATH + '/*', function (req, res, next) {
 
 				// Insert the markup.
 				content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
-					console.log('match found: ' + headStart);
 					return headStart + inlineJsData.markup;
 				});
 
@@ -121,17 +130,26 @@ app.get(SITE_CONTEXT_PATH + '/*', function (req, res, next) {
 // start http server (express app) on specified port
 // detect what port number use for server
 port = process.env.PORT || process.argv[2] || 8000;
-app.listen(port, function(){
-	console.log('Listening at "http://localhost:' + port + '/".');
+app.listen(port, function() {
+	console.log('Listening at "http://localhost:' + port + '/"');
 });
+
+if (portFile) {
+  fs.writeFileSync(portFile, '-Dswdda.testSite.httpPort=' + port + ' -Dswdda.sitecuesUrl.httpPort=' + port, {flag:'w'});
+}
 
 // if https option passed to script
 if (useHttps){
+  if (portFile) {
+    fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
+  }
+
 	// create https server and start it on 443 port
 	https.createServer({
 		key:	fs.readFileSync('binary/cert/localhost.key'),
 		cert:	fs.readFileSync('binary/cert/localhost.cert')
 	}, app).listen(443, function(){
-		console.log('Listening at "https://localhost/".');
+		console.log('Listening at "https://localhost:443/"');
+
 	});
 }
