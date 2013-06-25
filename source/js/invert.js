@@ -1,274 +1,202 @@
 sitecues.def('invert', function (invert, callback, log) {
-    sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
-        invert.STATES = {
-            INVERT: {
-                id:   0,
-                name: 'invert'
-            },
-            MATCH:  {
-                id:   1,
-                name: 'match'
-            },
-            NORMAL: {
-                id:   2,
-                name: 'normal'
-            }
-        };
+  sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
+  
+    invert.states = {
+        invert  : 0
+      , match   : 1
+      , normal  : 2
+    };
 
-        var STATES                     = invert.STATES;
-        var css_invert_empty           = {
-            '-webkit-filter': ''
-        };
-        var css_invert_full            = {
-            '-webkit-filter': 'invert(1)'
-        };
-        var css_invert_none            = {
-            '-webkit-filter': 'none'
-        };
-        var dom_highlight_box          = null;
-        var dom_root                   = $(conf.get("invertRootSelector") || 'body');
-        var invert_state_highlight_box = null;
-        var invert_state_page          = null;
+    invert.enum = {
+        0 : 'invert'
+      , 1 : 'match'
+      , 2 : 'normal'
+    };
 
-        switch (conf.get('invert.highlight-box.state')) {
-            case 'invert':
-                setStateHighlightBoxInvert();
+    var elem_invert_state = {
+        highlight_box  : null
+      , page           : null
+    };
 
-                break;
-            case 'match':
-                setStateHighlightBoxMatch();
+    var states = invert.states;
 
-                break;
-            case 'normal':
-                setStateHighlightBoxNormal();
+    var dom_elem = {
+        page          : $(conf.get("invertRootSelector") || 'body')
+      , highlight_box : null
+    }
 
-                break;
-            case undefined:
-                setStateHighlightBoxMatch();
+    var cssInvert = {
+        empty   : {'-webkit-filter': ''}
+      , full    : {'-webkit-filter': 'invert(1)'}
+      , none    : {'-webkit-filter': 'none'}
+    };
 
-                break;
+    var hlbState = conf.get('invert.highlight-box.state') || "match";
+    setState("highlight_box", hlbState);
+
+    var pageState = conf.get('invert.page.state') || "normal";
+    setState("page", pageState);
+
+    sitecues.on('hlb/deflating', function () {
+      if (elem_invert_state.highlight_box === elem_invert_state.page) {
+        setState("highlight_box", "match");
+      }
+    });
+
+
+    sitecues.on('hlb/ready', function (data) {
+      dom_elem.highlight_box = $(data);
+
+      switch (elem_invert_state.highlight_box) {
+
+        case states.invert:        
+          if (elem_invert_state.page === states.invert) {
+            setStyle("highlight_box", "empty");
+          } else {
+            setStyle("highlight_box", "full");
+          }
+          break;
+
+        case states.match:
+          setStyle("highlight_box", "empty");
+          break;
+
+        case states.normal:
+          if (elem_invert_state.page === states.normal) {
+            setStyle("highlight_box", "empty");
+          } else {
+            setStyle("highlight_box", "full");
+          }
+          break;
+      }
+    });
+
+    /**
+     * Inverts the page colors.  Currently only works in webkit.
+     * 
+     * @param  keypress event A keypress event, optional.
+     * @return void
+     */
+    sitecues.on('inverse/toggle', function (event) {
+      
+      if (!event) {
+        // We have no key event.
+        if (elem_invert_state.page === states.invert) {
+          setStyle("page", "none");
+          elem_invert_state.page = states.normal;
+          log.info("invert off - without key event");
+
+        } else {
+          setStyle("page", "full");
+          elem_invert_state.page = states.invert;
+          log.info("invert on - without key event");
+
         }
 
-        switch (conf.get('invert.page.state')) {
-            case 'invert':
-                setStylePageEmpty();
-                setStylePageFull();
-                setStatePageInvert();
+        // There should not be a highlight box open so we'll just set
+        // it to match
+        elem_invert_state.highlight_box = states.match;
+        setStyle("highlight_box", "none");
+        return;
+      }
 
-                break;
-            case 'normal':
-                setStatePageNormal();
+      //TODO We should probably clean up what's below here, or put it on
+      //the menu in the North End.
+      if (! (event.altKey || event.ctrlKey || event.metaKey)) {
 
-                break;
-            case undefined:
-                setStatePageNormal();
+        var highlight_box_state  = highlight_box.getState();
+        var highlight_box_states = highlight_box.STATES;
 
-                break;
+        dom_elem.highlight_box = $(event.dom.highlight_box);
+
+        if ( highlight_box_state === highlight_box_states.READY     ||
+             highlight_box_state === highlight_box_states.INFLATING ||
+             highlight_box_state === highlight_box_states.CREATE ) {
+
+          switch (elem_invert_state.highlight_box) {
+            
+            case states.invert:
+              switch (elem_invert_state.page) {
+                case states.invert:
+                  setStyle("highlight_box", "full");
+                  break;
+
+                case states.normal:
+                  setStyle('highlight_box', 'none')
+                  break;
+              }
+              setState("highlight_box","normal");
+              break;
+
+            case states.match:
+              switch (elem_invert_state.page) {
+                case states.invert:
+                  setStyle('highlight_box', 'none')
+                  setState("highlight_box","normal");
+                  break;
+
+                case states.normal:
+                  setStyle('highlight_box', 'full')
+                  setState("highlight_box","invert");
+                  break;
+              }
+              break;
+            
+            case states.normal:
+              switch (elem_invert_state.page) {
+                case states.invert:
+                  setStyle('highlight_box', 'none')
+                  break;
+                
+                case states.normal:
+                  setStyle('highlight_box', 'full')
+                  break;
+              }
+              setState("highlight_box","invert");
+              break;
+          }
+        
+        } else if ( highlight_box_state === highlight_box_states.ON ||
+                    highlight_box_state === highlight_box_states.CLOSED ) {
+
+          if (elem_invert_state.highlight_box === states.match) {
+
+            // NOTE: This following line of code was the replacement for a
+            // switch statement, but I am not convinced that the cases in the
+            // statement were ever executing. Perhaps there is some state that
+            // I am not aware of yet.
+            setState("highlight_box", invert.enum[elem_invert_state.page]);
+          }
+
+          switch (elem_invert_state.page) {
+            case states.invert:
+              setStyle('page', 'none')
+              setState("page","normal");
+              break;
+
+            case states.normal:
+              setStyle('page', 'full');
+              setState("page", "invert");
+              break;
+          }
+
         }
+      }
+    });
 
-        sitecues.on('hlb/deflating', function () {
-            if (invert_state_highlight_box === invert_state_page) {
-                setStateHighlightBoxMatch();
-            }
-        });
+    function setState(elem, state){
+      elem_invert_state[ elem ] = states[state];
+      var elemS = elem.replace("_",'-'); // Not happy this line is nessecary. A product of the module system. -al
+      conf.set("invert."+elemS+".state", state);
+      sitecues.emit("invert/"+elemS+"/"+state);
+    };
 
-        // TODO: Make the code more DRY.
+    function setStyle(elem, invert){
+      $(dom_elem[ elem ]).css(cssInvert[ invert ]);
+    };
 
-        sitecues.on('hlb/ready', function (data) {
-            dom_highlight_box = $(data);
+    callback();
 
-            switch (invert_state_highlight_box) {
-                case STATES.INVERT:
-                    if (invert_state_page === STATES.INVERT) {
-                        setStyleHighlightBoxEmpty();
-                    } else {
-                        setStyleHighlightBoxFull();
-                    }
+  });
 
-                    break;
-                case STATES.MATCH:
-                    setStyleHighlightBoxEmpty();
-
-                    break;
-                case STATES.NORMAL:
-                    if (invert_state_page === STATES.NORMAL) {
-                        setStyleHighlightBoxEmpty();
-                    } else {
-                        setStyleHighlightBoxFull();
-                    }
-
-                    break;
-            }
-        } );
-
-        /**
-         * Inverts the page colors.  Currently only works in webkit.
-         * 
-         * @param  keypress event A keypress event, optional.
-         * @return void
-         */
-        sitecues.on('inverse/toggle', function (event) {
-            if(!event) {
-                // We have no key event.
-                if (invert_state_page === STATES.INVERT) {
-                    setStylePageNone();
-                    invert_state_page = STATES.NORMAL;
-                    log.info("invert off");
-                } else {
-                    setStylePageFull();
-                    invert_state_page = STATES.INVERT;
-                    log.info("invert on");
-                }
-                // There should not be a highlight box open so we'll just set
-                // it to match
-                invert_state_highlight_box = STATES.MATCH;
-                setStyleHighlightBoxNone();
-                return;
-            }
-
-            //TODO We should probably clean up what's below here, or put it on
-            //the menu in the North End.
-            if (! (event.altKey || event.ctrlKey || event.metaKey)) {
-                var highlight_box_state  = highlight_box.getState();
-                var highlight_box_states = highlight_box.STATES;
-
-                dom_highlight_box = $(event.dom.highlight_box);
-
-                if (
-                    highlight_box_state === highlight_box_states.READY ||
-                    highlight_box_state === highlight_box_states.INFLATING ||
-                    highlight_box_state === highlight_box_states.CREATE
-                ) {
-                    switch (invert_state_highlight_box) {
-                        case STATES.INVERT:
-                            switch (invert_state_page) {
-                                case STATES.INVERT:
-                                    setStyleHighlightBoxFull();
-
-                                    break;
-                                case STATES.NORMAL:
-                                    setStyleHighlightBoxNone();
-
-                                    break;
-                            }
-
-                            setStateHighlightBoxNormal();
-
-                            break;
-                        case STATES.MATCH:
-                            switch (invert_state_page) {
-                                case STATES.INVERT:
-                                    setStyleHighlightBoxNone();
-                                    setStateHighlightBoxNormal();
-
-                                    break;
-                                case STATES.NORMAL:
-                                    setStyleHighlightBoxFull();
-                                    setStateHighlightBoxInvert();
-
-                                    break;
-                            }
-
-                            break;
-                        case STATES.NORMAL:
-                            switch (invert_state_page) {
-                                case STATES.INVERT:
-                                    setStyleHighlightBoxNone();
-
-                                    break;
-                                case STATES.NORMAL:
-                                    setStyleHighlightBoxFull();
-
-                                    break;
-                            }
-
-                            setStateHighlightBoxInvert();
-
-                            break;
-                    }
-                } else if (
-                    highlight_box_state === highlight_box_states.ON ||
-                    highlight_box_state === highlight_box_states.CLOSED
-                ) {
-                    if (invert_state_highlight_box === STATES.MATCH) {
-                        switch (invert_state_page) {
-                            case STATES.INVERT:
-                                setStateHighlightBoxInvert();
-
-                                break;
-                            case STATES.NORMAL:
-                                setStateHighlightBoxNormal();
-
-                                break;
-                        }
-                    }
-
-                    switch (invert_state_page) {
-                        case STATES.INVERT:
-                            setStylePageNone();
-                            setStatePageNormal();
-
-                            break;
-                        case STATES.NORMAL:
-                            setStylePageFull();
-
-                            setStatePageInvert();
-
-                            break;
-                    }
-                }
-            }
-        } );
-
-        function setStateHighlightBoxInvert() {
-            invert_state_highlight_box = STATES.INVERT;
-
-            conf.set('invert.highlight-box.state', 'invert');
-            sitecues.emit('invert/highlight-box/invert');
-        }
-        function setStateHighlightBoxMatch() {
-            invert_state_highlight_box = STATES.MATCH;
-
-            conf.set('invert.highlight-box.state', 'match');
-            sitecues.emit('invert/highlight-box/match');
-        }
-        function setStateHighlightBoxNormal() {
-            invert_state_highlight_box = STATES.NORMAL;
-
-            conf.set('invert.highlight-box.state', 'normal');
-            sitecues.emit('invert/highlight-box/normal');
-        }
-        function setStatePageInvert() {
-            invert_state_page = STATES.INVERT;
-
-            conf.set('invert.page.state', 'invert');
-            sitecues.emit('invert/page/invert');
-        }
-        function setStatePageNormal() {
-            invert_state_page = STATES.NORMAL;
-
-            conf.set('invert.page.state', 'normal');
-            sitecues.emit('invert/page/normal');
-        }
-        function setStyleHighlightBoxEmpty() {
-            $(dom_highlight_box).css(css_invert_empty);
-        }
-        function setStyleHighlightBoxFull() {
-            $(dom_highlight_box).css(css_invert_full);
-        }
-        function setStyleHighlightBoxNone() {
-            $(dom_highlight_box).css(css_invert_none);
-        }
-        function setStylePageEmpty() {
-            $(dom_root).css(css_invert_empty);
-        }
-        function setStylePageFull() {
-            $(dom_root).css(css_invert_full);
-        }
-        function setStylePageNone() {
-            $(dom_root).css(css_invert_none);
-        }
-
-        callback();
-    } );
-} );
+});
