@@ -26,7 +26,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
     cursor.kMinCursorZoom = 1.1;
 
     // get dependencies
-    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/canvas', 'ui', function ($, conf, style, view) {
+    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/images', 'ui', function ($, conf, style, view) {
 
         // private variables
         cursor.styleRuleParent = $('head');
@@ -41,8 +41,8 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             cursor.isEnabled = cursor.zoomLevel >= cursor.kMinCursorZoom;
 
             if (cursor.isEnabled) {
-                view.zoomImage(cursor.zoomLevel);
-                cursor.url = view.getImageOfType(cursor.type) || cursor.kDefaultCursorImage;
+                //view.zoomImage(cursor.zoomLevel);
+                cursor.url = view.getImage(cursor.type, value) || cursor.kDefaultCursorImage;
                 if (cursorWasEnabled)
                     cursor.update();
                 else
@@ -59,7 +59,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             // Add rules for default cursor values.
             cursor.styleRuleParent
                 .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type +' !important}')
-                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), default !important}');
+                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage('default', conf.get('zoom')) + '"), default !important}');
             $(window).on('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/show');
         };
@@ -72,7 +72,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
             // Update cursor image for disabled elements.
             $('#' + cursor.kCursorStyleDisabledRuleId).remove();
-            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImageOfType('default') + '"), !important}');
+            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' +  view.getImage('default', conf.get('zoom')) + '"), !important}');
             sitecues.emit('cursor/update');
         };
 
@@ -106,7 +106,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
                 cursor.prevTarget = target;
                 cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
-                cursor.url = view.getImageOfType(newCursorType) || cursor.kDefaultCursorImage;
+                cursor.url = view.getImage('default', conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
                 // Set cursor style on new target.
                 $(target).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
             }
