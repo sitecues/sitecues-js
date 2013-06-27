@@ -119,12 +119,12 @@
 
 .sitecues-toolbar.hori .sitecues-resizer {
   background-color: #000;
-  height:5px;
+  height:0.5px;
   position:absolute;
   bottom:0px;
   width:100%;
   cursor: ns-resize;
-  border-bottom: 10px outset;
+  border-bottom: 1px outset;
 }
 
 .sitecues-toolbar.hori .sitecues-resizer:hover {
