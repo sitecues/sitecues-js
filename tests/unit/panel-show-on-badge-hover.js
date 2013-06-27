@@ -20,17 +20,17 @@ describe("sitecues", function () {
         });
       });
 
-      it("should see the panel on the page when the badge is hovered", function (done) {
-        s.browser.waitForVisibleById('sitecues-badge', 10000, function(err, el) {
-          s.browser.elementById('sitecues-badge', function(err, el) {
-            s.browser.moveTo(el, 0, 0, function(){
-              s.browser.waitForVisibleById('sitecues-panel', 10000, function(err, el) {
-                done();
-              });
-            });
-          });
-        });
-      });
+      // it("should see the panel on the page when the badge is hovered", function (done) {
+      //   s.browser.waitForVisibleById('sitecues-badge', 10000, function(err, el) {
+      //     s.browser.elementById('sitecues-badge', function(err, el) {
+      //       s.browser.moveTo(el, 0, 0, function(){
+      //         s.browser.waitForVisibleById('sitecues-panel', 10000, function(err, el) {
+      //           done();
+      //         });
+      //       });
+      //     });
+      //   });
+      // });
       
     });
   });
