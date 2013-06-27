@@ -68,19 +68,24 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     }
 
     toolbar.show = function () {
-      if (toolbar.isAvailable()) {
-        // var height = toolbar.instance.height();
+      if(conf.get('toolbarEnabled')) {
+        toolbar.render();
+
+        // FIXME: Required for `toolbar.show()` to work properly.
+        if(toolbar.instance) {
+          toolbar.instance.hide(0);
+          toolbar.instance.show(0);
+        }
+        if(toolbar.shim) {
+          toolbar.shim.hide(0);
+          toolbar.shim.show(0);
+        }
 
         toolbar.currentState = toolbar.STATES.ON;
 
-        toolbar.render();
-        // FIXME required for `toolbar.show()` to work properly
-        toolbar.instance.hide(0);
-        toolbar.shim.hide(0);
-        toolbar.instance.show(0);
-        toolbar.shim.show(0);
-
         sitecues.emit('toolbar/state/' + toolbar.currentState.name);
+      } else {
+        log.warn("toolbar.show() was called but toolbar is disabled")
       }
     };
 
@@ -88,7 +93,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     toolbar.slideOut = function () {
       log.info('Toolbar sliding out (showing)');
 
-      if (toolbar.isAvailable()) {
+      if (conf.get('toolbarEnabled')) {
         toolbar.currentState = toolbar.STATES.ON;
 
         toolbar.render();
@@ -106,11 +111,17 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
             toolbar.shim.css('height', ((height + now) + 'px'))
           }
         }, 'slow');
+      } else {
+        log.warn("toolbar.slideOut() was called but toolbar is disabled")
       }
     };
 
-    /** Hides the toolbar by sliding it in */
-    toolbar.slideIn = function () {
+    /**
+     * Hides the toolbar by sliding it in.
+     *
+     * @param success Function executed if successful.
+     */
+    toolbar.slideIn = function (success) {
       log.info('Toolbar sliding in (hiding)');
       toolbar.currentState = toolbar.STATES.OFF;
 
@@ -123,7 +134,10 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         toolbar.shim.slideUp('slow', function () {
           sitecues.emit('toolbar/state/' + toolbar.currentState.name);
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
+          success();
         });
+      } else {
+        success();
       }
     };
 
@@ -146,34 +160,6 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     toolbar.disableSpeech = function () {
       toolbar.ttsButton.addClass('tts-disabled');
       toolbar.ttsButton.data('tts-enable', 'disabled');
-    };
-
-    /**
-     * Determines if the toolbar should be shown based on site and default
-     * settings.
-     *
-     * @return boolean true if the toolbar is the UI that should be used.
-     */
-    toolbar.isAvailable = function () {
-      if (conf.get('siteUI')) {
-        // THis site has a UI setting
-        if (conf.get('siteUI') === 'toolbar') {
-          // badge is enabled for this site
-          return true;
-        } else {
-          log.info('This site does not use toolbar for UI');
-          return false;
-        }
-      } else {
-        // This site does not have a UI setting
-        if (conf.get('defaultUI') === 'toolbar') {
-          // Default is set to toolbar
-          return true;
-        } else {
-          log.info('Default setting is not toolbar');
-          return false;
-        }
-      }
     };
 
     /**
@@ -202,65 +188,36 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     /**
      * Closes the toolbar and sets the preference so it stays closed.
      *
+     * @param success Function executed if successful.
      * @return void
      */
-    toolbar.disable = function () {
+    toolbar.disable = function (success) {
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
-
-      if (conf.get('siteUI') === 'toolbar') {
-        // Clear this preference so we go back to the default
-        conf.set('siteUI', '');
-      }
-
-      toolbar.slideIn();
+      toolbar.slideIn(success);
     };
 
     /**
-     * Enable (but do not show), the toolbar. Call show() or toggle() to
+     * Enable the toolbar. Call show() or toggle() to
      * show it.
      *
+     * @param show Show the toolbar after it's enabled?  defaults to false
      * @return void
      */
-    toolbar.enable = function () {
+    toolbar.enable = function (show) {
       log.info('Enabling toolbar');
       conf.set('toolbarEnabled', true);
-      conf.set('siteUI', 'toolbar');
-      log.info('siteUI set to ' + conf.get('siteUI'));
+      if(show) {
+        toolbar.slideOut();
+      }
     };
-
-    sitecues.on('toolbar/toggle', toolbar.toggle);
-    sitecues.on('speech/disable', toolbar.disableSpeech);
-    sitecues.on('speech/enable', toolbar.enableSpeech);
 
     // load special toolbar css
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
 
-    sitecues.on('toolbar/enable', function () {
-      conf.set('toolbarEnabled', true);
-      log.info('Toolbar state: [on].');
-    });
-
-    sitecues.on( 'toolbar/disable', function () {
-      toolbar.disable();
-      log.info('Toolbar state: [off].');
-    });
-
-    // FIXME: We shouldn't have to run `toolbar.show()` in `setTimeout()`.
-    // #EQ-622 might be the solution.
-    $(document).ready(function () {
-      if ((conf.get('siteUI') === 'toolbar') || (conf.get('defaultUI') === 'toolbar')) {
-        toolbar.enable();
-      } else {
-        log.info('Disabling toolbar, defaultUI is set to ' + conf.get('defaultUI'));
-        toolbar.disable();
-      }
-
-      if (conf.get('toolbarEnabled')) {
-        toolbar.show();
-      }
-    });
+    sitecues.on('speech/disable', toolbar.disableSpeech);
+    sitecues.on('speech/enable', toolbar.enableSpeech);
 
     callback();
   });
