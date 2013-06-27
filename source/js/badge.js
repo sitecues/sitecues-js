@@ -54,68 +54,71 @@ sitecues.def('badge', function (badge, callback, log) {
       sitecues.emit('badge/click', badge.element); // emit event about badge click
     });
 
-    // hide panel
-    badge.hide = function () {
-      $(badge.panel).fadeOut('fast');
+    /**
+     * Hides the badge.
+     *
+     * @param success Function executed if successful.
+     * @return void
+     */
+    badge.hide = function (success) {
+      $(badge.panel).fadeOut('fast', function() {
+      	if(success) {
+      		success();
+      	}
+      });
     };
 
     /**
      * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
      *
+     * @param success Function executed if successful.
      * @return void
      */
-    badge.show = function () {
-      log.info('showing badge');
-      if(badge.isAvailable()) {
-        // badge.panel.show();
-        $(badge.panel).fadeIn('slow');
-      } else {
-        log.warn('badge.show() was called but the badge is not available');
-      }
+    badge.show = function (success) {
+    	if(conf.get('badgeEnabled')) {
+    		log.info('Showing badge');
+	        $(badge.panel).fadeIn('slow', function() {
+				if(success) {
+					success();
+				}
+	        });
+    	} else {
+    		log.warn("badge.show() was called but badge is disabled");
+    	}
     };
 
     /**
-     * Determines if the badge should be shown based on site and default settings.
+     * Closes the badge and sets the preference so it stays closed.
      *
-     * @return boolean true if the badge is the UI that should be used.
+     * @param success Function executed if successful.
+     * @return void
      */
-    badge.isAvailable = function () {
-      if (conf.get('siteUI')) {
-        // THis site has a UI setting
-        if (conf.get('siteUI') === 'badge') {
-          // badge is enabled for this site
-          return true;
-        } else {
-          log.info('This site does not use badge for UI');
-          return false;
-        }
-      } else {
-        // This site does not have a UI setting
-        if ((! conf.get('defaultUI')) || (conf.get('defaultUI') === 'badge')) {
-          // Default is not set or is set to badge
-          return true;
-        } else {
-          log.info('Default setting is not badge');
-          return false;
-        }
+    badge.disable = function (success) {
+      log.info('Disabling badge');
+      conf.set('badgeEnabled', false);
+      badge.hide(success);
+    };
+
+    /**
+     * Closes the badge and sets the preference so it stays closed.
+     *
+     * @param success Function executed if successful.
+     * @return void
+     */
+    badge.enable = function (show, success) {
+      log.info('Enabling badge');
+      conf.set('badgeEnabled', true);
+      if(show) {
+      	badge.show(success);
+      } else if (success) {
+      	success();
       }
-
-    }
-
-    // Hide the badge when the toolbar displays
-    sitecues.on('toolbar/state/on', function () {
-      badge.hide();
-    });
-
-    sitecues.on('toolbar/state/off', function () {
-      log.info('Toolbar was turned off, showing the badge');
-      conf.set('siteUI','badge')
-      badge.show();
-    });
+    };
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
     //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
+
 });

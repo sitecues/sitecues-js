@@ -38,8 +38,8 @@
       },
 
       "browserCommon": {
-        "api_key"                           : "1b304798f3713751275ed2fff1a397d0",
-        "api_secret"                        : "e93cb09b9d16bbc3bd1a38dc7ce93737",
+        "api_key"                           : "b62a13f4d5cdb0f6c8b9e790ebd1aa8e",
+        "api_secret"                        : "5fcb13beac07d9d8eff12944dadb5f86",
         "javascriptEnabled"			            : true,
         "locationContextEnabled"            : true,
         "nativeEvents"						          : true,

@@ -8,7 +8,7 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
        *
        * @return void
        */
-      resizer.build = function(toolbar, shim) {
+      resizer.build = function (toolbar, shim) {
 
         resizer.toolbar = toolbar;
         resizer.shim = shim;
@@ -47,7 +47,7 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
       }
 
 
-      resizer.resize = function(e) {
+      resizer.resize = function (e) {
           if(!e.gesture || e.gesture.touches.length != 1) {
               // Ignore on multitouch
               return;
@@ -67,10 +67,15 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
           sitecues.emit("toolbar/resized", resizer.toolbar);
       }
 
-
-      resizer.saveHeight = function() {
+      resizer.saveHeight = function () {
           conf.set('toolbarHeight', resizer.toolbar.height());
-      }
+      };
+
+      // resizer = {
+      //   build: function ( toolbar, shim ) {},
+      //   resize: function ( event ) {},
+      //   saveHeight: function () {}
+      // };
 
       callback();
 

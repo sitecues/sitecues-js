@@ -74,8 +74,8 @@ lint=true
 min=true
 port=8000
 uglifyjs-args=
-testingbot-api-key:=1b304798f3713751275ed2fff1a397d0
-testingbot-api-secret:=e93cb09b9d16bbc3bd1a38dc7ce93737
+testingbot-api-key:=b62a13f4d5cdb0f6c8b9e790ebd1aa8e
+testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 
 testsite-timeout:=30000
 phantomjs-timeout:=30000
