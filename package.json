@@ -1,4 +1,6 @@
 {
+    "efs-comment" : "My node decided that it now needs a version.  This is unlikely to be the real version, but feel free to update it to the current one.",
+    "version"     : "0.0.1",
     "bin"         : "binary/web.js",
     "dependencies": {
         "async"         : "0.2.9",
