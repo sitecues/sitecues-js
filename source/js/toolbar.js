@@ -102,6 +102,8 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
           success();
         });
+      } else {
+        success();
       }
     };
 
