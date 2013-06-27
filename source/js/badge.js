@@ -36,12 +36,6 @@ sitecues.def('badge', function (badge, callback, log) {
       $(badge.element).addClass('sitecues-badge-image');
       $(badge.element).attr('src', sitecues.resolvesitecuesUrl('../images/eq360-badge.png'));
       $(badge.element).appendTo(badge.panel);
-      // handle image loading
-      // FIXME: `jQuery(...).on("load", ...)` is to be considered unreliable.
-      $(badge.element).on("load", function () {
-        // show badge panel only after image was loaded
-        badge.show();
-      });
     }
 
     $(badge.panel).hover(function () {
@@ -84,6 +78,7 @@ sitecues.def('badge', function (badge, callback, log) {
 	        });
     	} else {
     		log.warn("badge.show() was called but badge is disabled");
+    		throw e;
     	}
     };
 
