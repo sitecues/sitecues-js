@@ -7,8 +7,7 @@ window.sitecues && sitecues.use(
 	'conf/server',
 	'jquery',
 	'ui',
-	'badge',
-	'panel',
+	'ui-manager',
 	'zoom',
 	'keys',
 	'focus',
@@ -18,6 +17,5 @@ window.sitecues && sitecues.use(
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
-	'invert',
-	'toolbar'
+	'invert'
 );
