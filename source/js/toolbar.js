@@ -46,7 +46,8 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         toolbar.instance = $('<div class="sitecues-toolbar hori" />').prependTo($('html'));
 
         toolbar.instance.css({
-          height: ((conf.get('toolbarHeight') || 40) + 'px')
+          height: ((conf.get('toolbarHeight') || 40) + 'px'),
+          top: ("-" + ((conf.get('toolbarHeight') || 40) + 'px'))
         });
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
@@ -67,41 +68,24 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     }
 
     toolbar.show = function () {
-      if(!conf.get('toolbarEnabled')) {
+      if(conf.get('toolbarEnabled')) {
+        toolbar.render();
+
+        // FIXME: Required for `toolbar.show()` to work properly.
+        if(toolbar.instance) {
+          toolbar.instance.hide(0);
+          toolbar.instance.show(0);
+        }
+        if(toolbar.shim) {
+          toolbar.shim.hide(0);
+          toolbar.shim.show(0);
+        }
+
+        toolbar.currentState = toolbar.STATES.ON;
+
+        sitecues.emit('toolbar/state/' + toolbar.currentState.name);
+      } else {
         log.warn("toolbar.show() was called but toolbar is disabled")
-        return;
-      }
-      // FIXME required for `toolbar.show()` to work properly
-      if(toolbar.instance) {
-        toolbar.instance.hide(0);
-        toolbar.instance.show(0);
-      }
-      if(toolbar.shim) {
-        toolbar.shim.hide(0);
-        toolbar.shim.show(0);
-      }
-
-      toolbar.currentState = toolbar.STATES.ON;
-
-      sitecues.emit('toolbar/state/' + toolbar.currentState.name);
-    };
-
-    /** 
-     * Hides the toolbar by sliding it in.
-     * 
-     * @param success Function executed if successful.
-     */
-    toolbar.slideIn = function (success) {
-      log.info('Toolbar sliding in (hiding)');
-      toolbar.currentState = toolbar.STATES.OFF;
-
-      if (toolbar.instance) {
-        toolbar.instance.slideUp('slow');
-        toolbar.shim.slideUp('slow', function () {
-          sitecues.emit('toolbar/state/' + toolbar.currentState.name);
-          log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
-          success();
-        });
       }
     };
 
@@ -109,17 +93,52 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     toolbar.slideOut = function () {
       log.info('Toolbar sliding out (showing)');
 
-      if(!conf.get('toolbarEnabled')) {
+      if (conf.get('toolbarEnabled')) {
+        toolbar.currentState = toolbar.STATES.ON;
+
+        toolbar.render();
+
+        var height = toolbar.instance.height();
+
+        toolbar.instance.show();
+        sitecues.emit('toolbar/state/' + toolbar.currentState.name);
+        toolbar.shim.css('height', 0);
+        toolbar.shim.show();
+        toolbar.instance.animate({
+          top: 0
+        }, {
+          step: function (now) {
+            toolbar.shim.css('height', ((height + now) + 'px'))
+          }
+        }, 'slow');
+      } else {
         log.warn("toolbar.slideOut() was called but toolbar is disabled")
-        return;
       }
+    };
 
-      toolbar.currentState = toolbar.STATES.ON;
+    /**
+     * Hides the toolbar by sliding it in.
+     *
+     * @param success Function executed if successful.
+     */
+    toolbar.slideIn = function (success) {
+      log.info('Toolbar sliding in (hiding)');
+      toolbar.currentState = toolbar.STATES.OFF;
 
-      toolbar.render();
-      sitecues.emit('toolbar/state/' + toolbar.currentState.name);
-      toolbar.shim.slideDown('slow');
-      toolbar.instance.slideDown('slow');
+      if (toolbar.instance) {
+        var height = toolbar.instance.height();
+
+        toolbar.instance.animate({
+          top: -height
+        }, 'slow');
+        toolbar.shim.slideUp('slow', function () {
+          sitecues.emit('toolbar/state/' + toolbar.currentState.name);
+          log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
+          success();
+        });
+      } else {
+        success();
+      }
     };
 
     toolbar.toggle = function () {
@@ -181,7 +200,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
     /**
      * Enable the toolbar. Call show() or toggle() to
      * show it.
-     * 
+     *
      * @param show Show the toolbar after it's enabled?  defaults to false
      * @return void
      */
@@ -202,5 +221,4 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
 
     callback();
   });
-
 });

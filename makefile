@@ -66,6 +66,7 @@ files=\
 	source/js/toolbar/messenger.js \
 	source/js/toolbar/resizer.js \
 	source/js/toolbar.js \
+	source/js/ui-manager.js \
 
 https=off
 prod=off

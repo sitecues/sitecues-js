@@ -48,24 +48,25 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
 
 
       resizer.resize = function (e) {
-          if(!e.gesture || e.gesture.touches.length != 1) {
-              // Ignore on multitouch
-              return;
+          if (! (! e.gesture) || (e.gesture.touches.length != 1)) {
+            var height = e.gesture.touches[0].pageY;
+
+            if (height < 40) {
+                height = 40;
+            } else if (height > 70) {
+                height = 70;
+            }
+
+            resizer.toolbar.css({
+                height: height
+            });
+            resizer.shim.css({
+                height: height
+            });
+
+            sitecues.emit("toolbar/resized", resizer.toolbar);
           }
-          var height = e.gesture.touches[0].pageY;
-          if(height < 40) {
-              height = 40;
-          } else if (height > 70) {
-              height = 70;
-          }
-          resizer.toolbar.css({
-              height: height
-          });
-          resizer.shim.css({
-              height: height
-          });
-          sitecues.emit("toolbar/resized", resizer.toolbar);
-      }
+      };
 
       resizer.saveHeight = function () {
           conf.set('toolbarHeight', resizer.toolbar.height());
