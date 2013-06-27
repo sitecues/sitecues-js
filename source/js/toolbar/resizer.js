@@ -21,25 +21,25 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
         // hammer to the body because that causes an unnecessary
         // performance hit and could interfere with an existing hammer if
         // it's already there.
-        resizer.element.mouseenter(function() {
+        resizer.element.mouseenter(function () {
             $('body').addClass('noselect');
-        }).mouseleave(function() {
+        }).mouseleave(function () {
             if(! resizer.element.data('dragging')) {
                 $('body').removeClass('noselect');
             }
         });
 
-        resizerDrag.on('dragstart', function(e) {
+        resizerDrag.on('dragstart', function (e) {
             resizer.element.data('dragging', true);
         });
-        resizerDrag.on('drag', function(e) {
+        resizerDrag.on('drag', function (e) {
             resizer.element.data('dragging', true);
             e.gesture.preventDefault();
             e.stopPropagation();
             resizer.resize(e);
         });
         // Save the height when we're done dragging
-        resizerDrag.on('dragend', function(e) {
+        resizerDrag.on('dragend', function (e) {
             resizer.saveHeight();
             resizer.element.data('dragging', false);
             $('body').removeClass('noselect');
