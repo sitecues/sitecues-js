@@ -1,24 +1,24 @@
 {
   "providerCommon": {
     "browserCommon": {
-      "applicationCacheEnabled"         : true,
-      "browserConnectionEnabled"        : true,
-      "databaseEnabled"                 : true,
-      "javascriptEnabled"               : true,
-      "locationContextEnabled"          : true,
-      "nativeEvents"                    : true,
-      "unexpectedAlertBehaviour"        : "ignore",
+      "applicationCacheEnabled": true,
+      "browserConnectionEnabled": true,
+      "databaseEnabled": true,
+      "javascriptEnabled": true,
+      "locationContextEnabled": true,
+      "nativeEvents": true,
+      "unexpectedAlertBehaviour": "ignore",
       "webdriver.remote.quietExceptions": false,
-      "webStorageEnabled"               : true
+      "webStorageEnabled": true
     }
   },
   "providers": {
     "PhantomJS": {
       "browsers": [{
         "browserName": "phantomjs",
-        "label"      : "PhantomJS",
-        "platform"   : "ANY",
-        "version"    : ""
+        "label": "PhantomJS",
+        "platform": "ANY",
+        "version": ""
       }],
       "maxConcurrent": 2,
       "server": {
@@ -28,16 +28,16 @@
     }
   },
   "sitecuesUrl": {
-    "hostname" : "localhost",
-    "httpPort" : 8000,
+    "hostname": "localhost",
+    "httpPort": 8000,
     "httpsPort": 8443,
-    "path"     : "/js/equinox.js"
+    "path": "/js/equinox.js"
   },
   "testSite": {
-    "hostname" : "localhost",
-    "httpPort" : 8000,
+    "hostname": "localhost",
+    "httpPort": 8000,
     "httpsPort": 8443,
-    "secure"   : false,
-    "siteId"   : 5
+    "secure": false,
+    "siteId": 5
   }
 }
