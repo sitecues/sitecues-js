@@ -17,6 +17,8 @@ describe("sitecues", function () {
   describe("navigator", function () {
     before(function (done) {
       globals.url = swdda.testUrl("/site/simple.html");
+
+      done();
     });
 
     swdda.describeForEachBrowser("toolbar", function (session) {
@@ -27,10 +29,11 @@ describe("sitecues", function () {
           session.browser.title(function (error, title) {
             expect(error).to.not.be.an.instanceof(Error);
             expect(title).is.equal("Young Frankenstein");
+
+            done();
           });
         });
 
-        done();
       });
 
       it("should see toolbar on the page on F8", function (done) {
@@ -42,11 +45,11 @@ describe("sitecues", function () {
             500,
             function (error) {
               expect(error).to.not.be.an.instanceof(Error);
+
+              done();
             }
           );
         });
-
-        done();
       });
     });
   });
