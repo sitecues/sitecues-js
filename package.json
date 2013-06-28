@@ -19,6 +19,11 @@
     "wd": "0.0.x"
   },
   "efs-comment": "My node decided that it now needs a version.  This is unlikely to be the real version, but feel free to update it to the current one.",
+  "engines": {
+    "node": "0.10.x",
+    "npm": ">=1.2.0 <=1.3.9"
+  },
+  "engineStrict": true,
   "main": "source/js/core.js",
   "name": "sitecues",
   "version": "0.0.1"
