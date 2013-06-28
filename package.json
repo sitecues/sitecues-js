@@ -1,24 +1,25 @@
 {
-    "efs-comment" : "My node decided that it now needs a version.  This is unlikely to be the real version, but feel free to update it to the current one.",
-    "version"     : "0.0.1",
-    "bin"         : "binary/web.js",
-    "dependencies": {
-        "async"         : "0.2.9",
-        "chai"          : "1.7.1",
-        "express"       : "3.2.6",
-        "glob"          : "3.2.1",
-        "hogan-express" : "0.3.3",
-        "hogan.js"      : "2.0.0",
-        "mime"          : "1.2.9",
-        "node.extend"   : "1.0.7",
-        "sinon"         : "1.7.3",
-        "fs-extra"      : "0.6.1",
-        "is-running"    : "1.0.3",
-        "tail"          : "0.3.1",
-        "nopt"          : "2.1.1",
-        "macchiato"     : "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
-        "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.2.tgz"
-    },
-    "main"        : "source/js/core.js",
-    "name"        : "sitecues"
+  "bin": "binary/web.js",
+  "dependencies": {
+    "async": "0.2.x",
+    "chai": "1.7.x",
+    "express": "3.2.x",
+    "fs-extra": "0.6.x",
+    "glob": "3.2.x",
+    "hogan-express": "0.3.x",
+    "hogan.js": "2.0.x",
+    "is-running": "1.0.x",
+    "macchiato": "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
+    "mime": "1.2.x",
+    "node.extend": "1.0.x",
+    "nopt": "2.1.x",
+    "sinon": "1.7.x",
+    "swdda": "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.2.tgz",
+    "tail": "0.3.x",
+    "wd": "0.0.x"
+  },
+  "efs-comment": "My node decided that it now needs a version.  This is unlikely to be the real version, but feel free to update it to the current one.",
+  "main": "source/js/core.js",
+  "name": "sitecues",
+  "version": "0.0.1"
 }

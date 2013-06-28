@@ -1,34 +1,29 @@
 var
-  swdda	  = require("swdda"),
-  chai	  = require("chai"),
-  expect  = chai.expect
-  ;
+  chai   = require("chai"),
+  expect = chai.expect,
+  swdda  = require("swdda")
+;
 
 describe("sitecues", function () {
-
   describe("navigator", function () {
-
-    swdda.describeForEachBrowser('simple', function(s) {
-
+    swdda.describeForEachBrowser("simple", function (session) {
       it("should navigate to the simple test page", function (done) {
-        s.browser.get(swdda.testUrl('/site/simple.html'), function() {
-          s.browser.title(function(err, title) {
+        session.browser.get(swdda.testUrl("/site/simple.html"), function() {
+          session.browser.title(function(error, title) {
             expect(title).to.be.a("string");
             expect(title).is.equal("Young Frankenstein");
             done();
           })
         });
       });
-
       it("should see the badge on the page", function (done) {
         setTimeout(function () {
-          s.browser.elementById('sitecues-badge', function(err, el) {
-            expect(el).to.exist;
+          session.browser.elementById("sitecues-badge", function(error, element) {
+            expect(element).to.exist;
             done();
           });
-        }, 2000); // Allow some time for the library to load
+        }, 2500);
       });
-
     });
   });
 });
