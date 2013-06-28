@@ -1,4 +1,4 @@
-sitecues.def( 'toolbar', function (toolbar, callback, log) {
+sitecues.def('toolbar', function (toolbar, callback, log) {
   sitecues.use(
     'jquery',
     'conf',
@@ -52,7 +52,7 @@ sitecues.def( 'toolbar', function (toolbar, callback, log) {
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
         slider.build(toolbar.instance);
-        resizer.build(toolbar.instance, toolbar.shim);
+        // resizer.build(toolbar.instance, toolbar.shim);
 
         // create TTS button and set it up
         toolbar.ttsButton = $('<div rel="sitecues-event" data-sitecues-event="speech/toggle">').addClass('tts').appendTo( toolbar.instance );
