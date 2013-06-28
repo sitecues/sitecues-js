@@ -7,6 +7,7 @@
   width:100%;
   display:none;
   z-index: 2147483645;
+  box-shadow:0px 2px 4px rgba(0,0,0,.25);
 }
 .sitecues-toolbar-shim {
   width:100%;
@@ -166,7 +167,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: 0 0;
-  height:90%;
+  height:88%;
   display:block;
   margin:5px 10px;
 }
