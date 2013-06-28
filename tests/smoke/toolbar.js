@@ -13,44 +13,44 @@ var
   globals = {}
 ;
 
-describe("sitecues", function () {
-  describe("navigator", function () {
-    before(function (done) {
-      globals.url = swdda.testUrl("/site/simple.html");
+// describe("sitecues", function () {
+//   describe("navigator", function () {
+//     before(function (done) {
+//       globals.url = swdda.testUrl("/site/simple.html");
 
-      done();
-    });
+//       done();
+//     });
 
-    swdda.describeForEachBrowser("toolbar", function (session) {
-      it("should navigate to <sitecues_test_pages>/simple.html", function (done) {
-        session.browser.get(globals.url, function (error) {
-          expect(error).to.not.be.an.instanceof(Error);
+//     swdda.describeForEachBrowser("toolbar", function (session) {
+//       it("should navigate to <sitecues_test_pages>/simple.html", function (done) {
+//         session.browser.get(globals.url, function (error) {
+//           expect(error).to.not.be.an.instanceof(Error);
 
-          session.browser.title(function (error, title) {
-            expect(error).to.not.be.an.instanceof(Error);
-            expect(title).is.equal("Young Frankenstein");
+//           session.browser.title(function (error, title) {
+//             expect(error).to.not.be.an.instanceof(Error);
+//             expect(title).is.equal("Young Frankenstein");
 
-            done();
-          });
-        });
+//             done();
+//           });
+//         });
 
-      });
+//       });
 
-      it("should see toolbar on the page on F8", function (done) {
-        session.browser.keys(wd.SPECIAL_KEYS["F8"], function (error) {
-          expect(error).to.not.be.an.instanceof(Error);
+//       it("should see toolbar on the page on F8", function (done) {
+//         session.browser.keys(wd.SPECIAL_KEYS["F8"], function (error) {
+//           expect(error).to.not.be.an.instanceof(Error);
 
-          session.browser.waitForElementByClassName(
-            "sitecues-toolbar",
-            500,
-            function (error) {
-              expect(error).to.not.be.an.instanceof(Error);
+//           session.browser.waitForElementByClassName(
+//             "sitecues-toolbar",
+//             500,
+//             function (error) {
+//               expect(error).to.not.be.an.instanceof(Error);
 
-              done();
-            }
-          );
-        });
-      });
-    });
-  });
-});
+//               done();
+//             }
+//           );
+//         });
+//       });
+//     });
+//   });
+// });
