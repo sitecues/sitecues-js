@@ -83,13 +83,13 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
      $('body').append( this.$dimmerContainer );
       // Animate the dimmer background container
-      this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
+      this.$dimmerContainer.style({ opacity: 1 }, '1000', 'important');
     };
 
     // Un-dims stuff. Ballin' //////////////////////////////////////////////////
     backgroundDimmer.removeDimmer = function () {
         // Animate out the dimmerContainer
-        this.$dimmerContainer.style({opacity: 0}, '', 'important');
+        this.$dimmerContainer.style({opacity: 0}, '1000', 'important');
         // Remove the dimmerContainer after the animation has finished
         backgroundDimmer.$dimmerContainer.remove();
     };
