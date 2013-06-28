@@ -119,6 +119,9 @@ sitecues.def('conf', function (conf, callback, log) {
 
 	// set configuration value
 	conf.set = function(key, value){
+		console.log(key,value);
+
+
 		// private variables
 		var list;
 
