@@ -1,8 +1,5 @@
 sitecues.def('toolbar/bootstrap-dropdown', function (bootstrapDropdown, callback, log) {
 
-  // Create the logger for this module
-  var log = window.sitecues.logger.log('bootstrap-dropdown');
-
   sitecues.use( 'jquery', function ($) {
     
     //log.info($); // Al commeted this out. Seeing the jQuery object in my

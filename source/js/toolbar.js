@@ -19,7 +19,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       messenger
     ) {
 
-    // FIXME: Remove me! For testing purposes only.
+    // FIXME: Remove me! For testing purposes only. - Eric
+    // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful.
     window.sitecues.configs = conf;
 
     toolbar.STATES = {
