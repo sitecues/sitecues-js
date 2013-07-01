@@ -50,7 +50,10 @@ var useHttps = strToBool(process.argv[3]),
   portFile = null;
 
 if (process.argv.length > 5) {
-  portFile = path.resolve(process.argv[5]);
+  var portFileComps = process.argv[5].split('/');
+  portFileComps.unshift(process.cwd());
+  portFile = path.resolve(path.join.apply(path, portFileComps));
+  console.log("PORTSFILE: " + portFile);
   mkdirs(path.dirname(portFile));
 }
 

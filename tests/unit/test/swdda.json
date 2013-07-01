@@ -30,6 +30,8 @@
 
   "providers": {
     "TestingBot": {
+      "module": "../../../swdda/testingbot.js",
+
       "maxConcurrent": 4,
 
       "server": {
@@ -60,11 +62,6 @@
         {
           "label"       : "WIN8/Chrome",
           "platform"    : "WIN8",
-          "browserName" : "googlechrome"
-        },
-        {
-          "label"       : "MacOSXLion/Chrome",
-          "platform"    : "MAC",
           "browserName" : "googlechrome"
         }
       ]

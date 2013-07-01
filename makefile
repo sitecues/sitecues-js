@@ -1,8 +1,19 @@
 # Parameters.
 name:=sitecues
+username:=$(shell [ -n "$${SUDO_USER}" ] && echo "$${SUDO_USER}" || { [ -n "$${USER}" ] && echo "$${USER}" || { [ -n "$${LOGNAME}" ] && echo "$${LOGNAME}" || echo "UNKNOWN" ; } ; } | tr '[:lower:]' '[:upper:]')
 
-local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
+local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
 version=$(local-version)
+
+# Determine if we need to force a deps refresh
+deps-sig:=$(shell md5sum ./package.json | awk '{print($$1);}')
+deps-sig-file:=./node_modules/.sig
+existing-deps-sig:=$(shell if [ -s $(deps-sig-file) ] ; then cat $(deps-sig-file) ; else echo 0 ; fi)
+ifneq ($(deps-sig), $(existing-deps-sig))
+	_force_deps_refresh=deps-clean deps
+else
+	_force_deps_refresh=
+endif
 
 clean-deps=false
 dev=false
@@ -70,7 +81,7 @@ files=\
 
 https=off
 prod=off
-ports-env-file:=$(shell pwd)/var/data/testsite/ports.txt
+ports-env-file:=./var/data/testsite/ports.txt
 lint=true
 min=true
 port=8000
@@ -81,6 +92,11 @@ testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 testsite-timeout:=30000
 phantomjs-timeout:=30000
 testingbot-tunnel-timeout:=240000
+
+default-test-run-id:=$(username)-$(shell ./binary/uuid)
+test-run-id=$(default-test-run-id)
+
+common-macchiato-options=-Dbrowser.name.prefix=$(test-run-id)
 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
@@ -126,7 +142,7 @@ all: clean deps build
 
 # TARGET: build
 # Build the compressed file and, optionally, run gjslint.
-build: $(_build_lint_dep)
+build: $(_force_deps_refresh) $(_build_lint_dep)
 	@echo "Building started."
 	@mkdir -p target/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
@@ -169,6 +185,7 @@ deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
 	@npm install
+	@echo $(deps-sig) > $(deps-sig-file)
 	@echo "Dependency setup completed."
 
 deps-clean:
@@ -192,7 +209,7 @@ run:
 # TARGET: start-testsite
 # Run the web server as a service, giving access to the library and test pages.
 start-testsite:
-	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-env-file)
+	@./binary/_web start --timeout $(testsite-timeout) --root . -- $(port) $(https) $(prod) $(ports-env-file)
 
 # TARGET: stop-testsite
 # Run the web server as a service, giving access to the library and test pages.
@@ -212,19 +229,19 @@ test-all: test-smoke test-unit
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-phantomjs)
-	@(cd tests/smoke && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
+	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-testingbot-tunnel)
-	@(cd tests/unit && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
+	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: start-phantomjs
 # Start the PhantomJS service.
 start-phantomjs:
-	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json
+	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) --root . -- --config=phantomjs.json
 
 # TARGET: stop-phantomjs
 # Stop the PhantomJS service.
@@ -234,7 +251,7 @@ stop-phantomjs:
 # TARGET: start-testingbot-tunnel
 # Start the TestingBot Tunnel service.
 start-testingbot-tunnel:
-	@node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret)
+	@node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) --root . -- $(testingbot-api-key) $(testingbot-api-secret)
 
 # TARGET: stop-testingbot-tunnel
 # Stop the TestingBot Tunnel service.
