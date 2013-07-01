@@ -6,7 +6,7 @@ local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
 version=$(local-version)
 
 # Determine if we need to force a deps refresh
-deps-sig:=$(shell md5sum ./package.json | awk '{print($$1);}')
+deps-sig:=$(shell $$(which 'md5sum'&> /dev/null && echo 'md5sum' || echo 'md5 -q') ./package.json | awk '{print($$1);}')
 deps-sig-file:=./node_modules/.sig
 existing-deps-sig:=$(shell if [ -s $(deps-sig-file) ] ; then cat $(deps-sig-file) ; else echo 0 ; fi)
 ifneq ($(deps-sig), $(existing-deps-sig))
