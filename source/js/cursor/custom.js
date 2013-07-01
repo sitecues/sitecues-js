@@ -59,7 +59,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             // Add rules for default cursor values.
             cursor.styleRuleParent
                 .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type +' !important}')
-                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage('default', conf.get('zoom')) + '"), default !important}');
+                //.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage('default', conf.get('zoom')) + '"), default !important}');
             $(window).on('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/show');
         };
@@ -72,7 +72,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
             // Update cursor image for disabled elements.
             $('#' + cursor.kCursorStyleDisabledRuleId).remove();
-            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' +  view.getImage('default', conf.get('zoom')) + '"), !important}');
+            //cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' +  view.getImage('default', conf.get('zoom')) + '"), !important}');
             sitecues.emit('cursor/update');
         };
 
@@ -106,7 +106,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
                 cursor.prevTarget = target;
                 cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
-                cursor.url = view.getImage('default', conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
+                //cursor.url = view.getImage('default', conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
                 // Set cursor style on new target.
                 $(target).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
             }

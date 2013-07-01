@@ -5,6 +5,8 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 			var sliderWidth = slider.slider.width();
 			var left = slider.slider.offset().left;
 
+			//console.log( 'slider.js: ' + zoom );
+
 			//console.log( sliderWidth, newLeft );
 			//zoom = ((4/sliderWidth) * pos);
 
@@ -62,7 +64,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 		},
 
 		slider.moveThumb = function(x) {
-			console.log('moveThumb: '+x);	
+			//console.log('moveThumb: '+x);	
 			var sliderWidth = slider.slider.width();
 			var newLeft = x - slider.slider.offset().left;
 			if(newLeft < 0) {
