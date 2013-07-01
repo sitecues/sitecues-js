@@ -1,7 +1,8 @@
 # Parameters.
 name:=sitecues
+username:=$(shell if [ -n "$${SUDO_USER}" ] ; then _U="$${SUDO_USER}" ; else _U="$${USER}" ; fi ; echo "$${_U}" | tr '[:lower:]' '[:upper:]')
 
-local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
+local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
 version=$(local-version)
 
 # Determine if we need to force a deps refresh
@@ -91,6 +92,11 @@ testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 testsite-timeout:=30000
 phantomjs-timeout:=30000
 testingbot-tunnel-timeout:=240000
+
+default-test-run-id:=$(username)-$(shell ./binary/uuid)
+test-run-id=$(default-test-run-id)
+
+common-macchiato-options=$(shell cat $(ports-env-file)) -Dbrowser.name.prefix=$(test-run-id)
 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
@@ -223,14 +229,14 @@ test-all: test-smoke test-unit
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-phantomjs)
-	@(cd tests/smoke && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
+	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato $(common-macchiato-options))
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-testingbot-tunnel)
-	@(cd tests/unit && ../../node_modules/.bin/macchiato `cat $(ports-env-file)`)
+	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato $(common-macchiato-options))
 
 # TARGET: start-phantomjs
 # Start the PhantomJS service.

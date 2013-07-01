@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+// Simple UUID generation script.
+try {
+  console.log(require('uuid').v1());
+} catch (e) {
+  console.log('00000000-0000-0000-0000-000000000000');
+}

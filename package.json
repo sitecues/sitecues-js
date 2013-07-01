@@ -14,10 +14,11 @@
     "fs-extra"      : "0.6.1",
     "tail"          : "0.3.1",
     "nopt"          : "2.1.1",
+    "uuid"          : "1.4.1",
+    "wd"			      : "0.0.x",
     "macchiato"     : "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
-    "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.4.tgz",
-    "bg-runner"     : "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz",
-    "wd"			: "0.0.x"
+    "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.5.tgz",
+    "bg-runner"     : "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz"
   },
   "engines": {
     "node": "0.10.x",
