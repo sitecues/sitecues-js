@@ -4,6 +4,16 @@ name:=sitecues
 local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} | tr '[:lower:]' '[:upper:]')
 version=$(local-version)
 
+# Determine if we need to force a deps refresh
+deps-version-file:=./node_modules/.version
+deps-version:=1
+existing-deps-version:=$(shell if [ -s $(deps-version-file) ] ; then cat $(deps-version-file) ; else echo 0 ; fi)
+ifneq ($(deps-version), $(existing-deps-version))
+	_force_deps_refresh=deps-clean deps
+else
+	_force_deps_refresh=
+endif
+
 clean-deps=false
 dev=false
 
@@ -126,7 +136,7 @@ all: clean deps build
 
 # TARGET: build
 # Build the compressed file and, optionally, run gjslint.
-build: $(_build_lint_dep)
+build: $(_force_deps_refresh) $(_build_lint_dep)
 	@echo "Building started."
 	@mkdir -p target/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
@@ -169,6 +179,7 @@ deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
 	@npm install
+	@echo $(deps-version) > $(deps-version-file)
 	@echo "Dependency setup completed."
 
 deps-clean:
@@ -192,7 +203,7 @@ run:
 # TARGET: start-testsite
 # Run the web server as a service, giving access to the library and test pages.
 start-testsite:
-	@./binary/_web start --timeout $(testsite-timeout) -- $(port) $(https) $(prod) $(ports-env-file)
+	@./binary/_web start --timeout $(testsite-timeout) --root . -- $(port) $(https) $(prod) $(ports-env-file)
 
 # TARGET: stop-testsite
 # Run the web server as a service, giving access to the library and test pages.
@@ -224,7 +235,7 @@ test-unit:
 # TARGET: start-phantomjs
 # Start the PhantomJS service.
 start-phantomjs:
-	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) -- --config=phantomjs.json
+	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) --root . -- --config=phantomjs.json
 
 # TARGET: stop-phantomjs
 # Stop the PhantomJS service.
@@ -234,7 +245,7 @@ stop-phantomjs:
 # TARGET: start-testingbot-tunnel
 # Start the TestingBot Tunnel service.
 start-testingbot-tunnel:
-	@node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) -- $(testingbot-api-key) $(testingbot-api-secret)
+	@node_modules/.bin/_testingbot-tunnel start --timeout $(testingbot-tunnel-timeout) --root . -- $(testingbot-api-key) $(testingbot-api-secret)
 
 # TARGET: stop-testingbot-tunnel
 # Stop the TestingBot Tunnel service.

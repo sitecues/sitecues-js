@@ -1,24 +1,23 @@
 {
-    "efs-comment" : "My node decided that it now needs a version.  This is unlikely to be the real version, but feel free to update it to the current one.",
-    "version"     : "0.0.1",
-    "bin"         : "binary/web.js",
-    "dependencies": {
-        "async"         : "0.2.9",
-        "chai"          : "1.7.1",
-        "express"       : "3.2.6",
-        "glob"          : "3.2.1",
-        "hogan-express" : "0.3.3",
-        "hogan.js"      : "2.0.0",
-        "mime"          : "1.2.9",
-        "node.extend"   : "1.0.7",
-        "sinon"         : "1.7.3",
-        "fs-extra"      : "0.6.1",
-        "is-running"    : "1.0.3",
-        "tail"          : "0.3.1",
-        "nopt"          : "2.1.1",
-        "macchiato"     : "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
-        "swdda"         : "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.2.tgz"
-    },
-    "main"        : "source/js/core.js",
-    "name"        : "sitecues"
+  "version"     : "0.0.1",
+  "bin"         : "binary/web.js",
+  "dependencies": {
+    "async"         : "0.2.9",
+    "chai"          : "1.7.1",
+    "express"       : "3.2.6",
+    "glob"          : "3.2.1",
+    "hogan-express" : "0.3.3",
+    "hogan.js"      : "2.0.0",
+    "mime"          : "1.2.9",
+    "node.extend"   : "1.0.7",
+    "sinon"         : "1.7.3",
+    "fs-extra"      : "0.6.1",
+    "tail"          : "0.3.1",
+    "nopt"          : "2.1.1",
+    "macchiato"     : "httpS://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
+    "swdda"         : "httpS://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.4.tgz",
+    "bg-runner"     : "https://s3.amazonaws.com/npm.sitecues.com/bg-runner-0.0.2.tgz"
+  },
+  "main"        : "source/js/core.js",
+  "name"        : "sitecues"
 }
