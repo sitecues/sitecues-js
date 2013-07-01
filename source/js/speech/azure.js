@@ -18,7 +18,7 @@ sitecues.def('speech/azure', function (azure, callback, log) {
     // end
     callback();
 
-});
+
 
 window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
 
@@ -788,4 +788,6 @@ function WMAudioPlayer() {
 // ---------------------------------------------
 //window.RoboVoice = RoboVoice;
 
-})()
+})();
+
+});

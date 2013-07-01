@@ -17,12 +17,10 @@ describe("sitecues", function () {
         });
       });
       it("should see the badge on the page", function (done) {
-        setTimeout(function () {
-          session.browser.elementById("sitecues-badge", function(error, element) {
-            expect(element).to.exist;
-            done();
-          });
-        }, 2500);
+        session.browser.waitForElementById("sitecues-badge", 3000, function(error) {
+          expect(error).to.be.null;
+          done();
+        });
       });
     });
   });
