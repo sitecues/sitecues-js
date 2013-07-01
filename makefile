@@ -229,14 +229,14 @@ test-all: test-smoke test-unit
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-phantomjs)
-	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat $(ports-env-file)` $(common-macchiato-options))
+	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-testingbot-tunnel)
-	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat $(ports-env-file)` $(common-macchiato-options))
+	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: start-phantomjs
 # Start the PhantomJS service.
