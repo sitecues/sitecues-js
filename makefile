@@ -1,6 +1,6 @@
 # Parameters.
 name:=sitecues
-username:=$(shell if [ -n "$${SUDO_USER}" ] ; then _U="$${SUDO_USER}" ; else _U="$${USER}" ; fi ; echo "$${_U}" | tr '[:lower:]' '[:upper:]')
+username:=$(shell [ -n "$${SUDO_USER}" ] && echo "$${SUDO_USER}" || { [ -n "$${USER}" ] && echo "$${USER}" || { [ -n "$${LOGNAME}" ] && echo "$${LOGNAME}" || echo "UNKNOWN" ; } ; } | tr '[:lower:]' '[:upper:]')
 
 local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
 version=$(local-version)
