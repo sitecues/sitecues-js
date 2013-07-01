@@ -2,21 +2,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 	sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
 		sitecues.on('toolbar/slider/update-position', function(zoom) {
-			var sliderWidth = slider.slider.width();
-			var left = slider.slider.offset().left;
-
-			//console.log( 'slider.js: ' + zoom );
-
-			//console.log( sliderWidth, newLeft );
-			//zoom = ((4/sliderWidth) * pos);
-
-			//console.log( sliderWidth * zoom );
-
-			// var xPos = left + (zoom*sliderWidth);
-			//var xPos = (zoom*sliderWidth);
-
-			//console.log( xPos );
-			//slider.moveThumb(xPos);
+			slider.moveOnZoom(zoom);
 		});
 
 		/**
@@ -26,6 +12,15 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 		 * 
 		 * @return void
 		 */
+		
+		slider.moveOnZoom = function( zoom ){
+			var sliderWidth = slider.slider.width()
+				,	left = slider.slider.offset().left
+				, xPos = (sliderWidth / 4 * (zoom-1)) + left
+				;
+			slider.moveThumb(xPos);
+		};
+
 		slider.build = function(parent) {
 			// create clider slider.wrap element
 			slider.wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(parent);
@@ -38,8 +33,12 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 			// handle zoom change and update slider
 			conf.get( 'zoom', function( value ) {
-				slider.slider.val( value );
+				slider.slider.val(value);
+				
+				//slider.moveThumb(xPos);
+				slider.moveOnZoom(value);
 			});
+
 
 			var thumbHammer = Hammer(slider.thumb.get(0));
 			thumbHammer.on('dragleft dragright', function(e) {
