@@ -2,6 +2,7 @@
 // A simple service wrapper around the test site.
 var BgRunner = require('bg-runner')
   , path = require('path')
+  , fs = require('fs')
   , os = require('os')
   , Tail = require('tail').Tail
   ;
@@ -18,15 +19,24 @@ testsite = new BgRunner({
 testsite.on('beforeStart', function(e) {
   // Start the command with node, and pass in the script as a parameter (Win compliance).
   e.args.unshift(path.resolve(path.join(__dirname, 'web.js')));
+  var isWin = (os.type().toLowerCase().indexOf('win') >= 0);
 
-  // Ugh, need to tail the log file to see if we get a "Listening at" in order
-  // to determine the test site is indeed responsive.
-  var tail = new Tail(e.config.outFile, os.EOL);
-  tail.on('line', function(line) {
-    if (line.indexOf('Listening at') >= 0) {
+  if (isWin) {
+    // Tailing on Windows is horrible as usual... just wait 2 seconds,
+    // and, if we are still running, touch the ready file.
+    setTimeout(function() {
       e.writeReadyFile();
-    }
-  });
+    }, 2000);
+  } else {
+    // ... tail the log file to see if we get a "Listening at" in order
+    // to determine the test site is indeed responsive.
+    var tail = new Tail(e.config.outFile, os.EOL);
+    tail.on('line', function(line) {
+      if (line.indexOf('Listening at') >= 0) {
+        e.writeReadyFile();
+      }
+    });
+  }
 });
 
 testsite.run(process.argv.slice(2));
