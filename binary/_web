@@ -2,24 +2,28 @@
 // A simple service wrapper around the test site.
 var BgRunner = require('bg-runner')
   , path = require('path')
+  , os = require('os')
   , Tail = require('tail').Tail
   ;
 
 testsite = new BgRunner({
   name:         "Test Site",
   label:        "testsite",
-  command:      path.resolve(path.join(__dirname, 'web.js')),
+  command:      "node",
   hasReadyFile: "yes",
   wait:         true,
   timeout:      5000
 });
 
-// Ugh, need to tail the log file to see if we get a "Listening at" in order
-// to determine the test site is indeed responsive.
 testsite.on('beforeStart', function(e) {
-  var tail = new Tail(e.config.outFile);
+  // Start the command with node, and pass in the script as a parameter (Win compliance).
+  e.args.unshift(path.resolve(path.join(__dirname, 'web.js')));
+
+  // Ugh, need to tail the log file to see if we get a "Listening at" in order
+  // to determine the test site is indeed responsive.
+  var tail = new Tail(e.config.outFile, os.EOL);
   tail.on('line', function(line) {
-    if (line.indexOf('Listening at') == 0) {
+    if (line.indexOf('Listening at') >= 0) {
       e.writeReadyFile();
     }
   });
