@@ -7,6 +7,7 @@
   width:100%;
   display:none;
   z-index: 2147483645;
+  box-shadow:0px 2px 4px rgba(0,0,0,.25);
 }
 .sitecues-toolbar-shim {
   width:100%;
@@ -23,17 +24,17 @@
 .sitecues-slider-thumb {
   position:relative;
   background-color: none;
-  background-image: url('../images/toolbar/toolbar-slider-thumb.png');
+  background-image: url("../images/toolbar/toolbar-slider-thumb.png");
   background-repeat: no-repeat;
   background-size: contain;
-  height:85%%;
+  height:100%;
   width:10%;
   /*border-radius: 4px;*/
   border: none;
   /*-webkit-box-shadow: 0 0 4px #555;*/
   z-index: 1;
   cursor: ew-resize;
-  top:15%;
+  top:25%;
 }
 
 .sitecues-toolbar .slider-wrap {
@@ -44,9 +45,9 @@
   position: absolute;
   right: 150px;
   display: inline;
-  width: 200px;
+  width: 160px;
   height:92%;
-  top:8%;
+  top:9%;
 }
 
 .sitecues-toolbar .ramp {
@@ -82,7 +83,7 @@
   top: 1px;
   right: 0;
   width: 139px;
-  height: 99%;
+  height: 95%;
   background-image: url('../images/toolbar/toolbar-speech.png');
   background-size: contain;
   background-repeat: no-repeat;
@@ -166,7 +167,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: 0 0;
-  height:90%;
+  height:88%;
   display:block;
   margin:5px 10px;
 }

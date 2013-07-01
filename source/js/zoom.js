@@ -13,7 +13,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
 	// get dependencies
 	sitecues.use('jquery', 'conf', 'ui', function($, conf) {
         
-        var $body = $('body');
+    var $body = $('body');
 
 		// use conf module for sharing
 		// current zoom level value

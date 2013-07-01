@@ -65,7 +65,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         id: this.kDimmerId,
         
         // Add the SVG path to the HTML of the dimmerContain
-        html: dimmerSVG})
+        html: dimmerSVG })
+      
         // Set the CSS for the dimemrContainer
         .style({
           'position'      : 'absolute',

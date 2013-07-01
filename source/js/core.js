@@ -512,9 +512,14 @@
           info[ "sitecues_js_url" ] = ( sitecues.getScriptSrcUrl() ).raw;
           info[ "user_agent" ]  = navigator.userAgent;
           info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
-          info[ "zoom_level" ]  = null;
+          info[ "tts_engine" ]  = sitecues.configs.get("ttsEngine");
+          info[ "zoom_level" ]  = sitecues.configs.get("zoom");
+          info[ "badge_enabled" ]  = sitecues.configs.get("badgeEnabled");
+          info[ "toolbar_enabled" ]  = sitecues.configs.get("toolbarEnabled");
+          info[ "site_ui" ]  = sitecues.configs.get("siteUI");          
+          //info[ "" ]  = sitecues.configs.get("");
 
-          // Perform the needed actions on the info.
+         // Perform the needed actions on the info.
           callback(info);
         } );
       }
