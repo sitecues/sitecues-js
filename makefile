@@ -5,10 +5,10 @@ local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(shell echo ${USER} |
 version=$(local-version)
 
 # Determine if we need to force a deps refresh
-deps-version-file:=./node_modules/.version
-deps-version:=1
-existing-deps-version:=$(shell if [ -s $(deps-version-file) ] ; then cat $(deps-version-file) ; else echo 0 ; fi)
-ifneq ($(deps-version), $(existing-deps-version))
+deps-sig:=$(shell md5sum ./package.json | awk '{print($$1);}')
+deps-sig-file:=./node_modules/.sig
+existing-deps-sig:=$(shell if [ -s $(deps-sig-file) ] ; then md5sum $(deps-sig-file) | awk '{print($$1);}' ; else echo 0 ; fi)
+ifneq ($(deps-sig), $(existing-deps-sig))
 	_force_deps_refresh=deps-clean deps
 else
 	_force_deps_refresh=
@@ -179,7 +179,7 @@ deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
 	@npm install
-	@echo $(deps-version) > $(deps-version-file)
+	@echo $(deps-sig) > $(deps-sig-file)
 	@echo "Dependency setup completed."
 
 deps-clean:
