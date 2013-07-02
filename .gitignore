@@ -1,13 +1,11 @@
-.DS_Store
-.jonathan-*
-.pip
 *.iml
 *.ipr
 *.iws
+.DS_Store
+.jonathan-*
+.pip
+howards-jokes.js
 node_modules
 target
 tmp
 var
-howards-jokes.js
-wowards-jokes.js :)
-
