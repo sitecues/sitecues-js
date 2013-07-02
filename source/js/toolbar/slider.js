@@ -12,14 +12,6 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 		 * 
 		 * @return void
 		 */
-		
-		slider.moveOnZoom = function( zoom ){
-			var sliderWidth = slider.slider.width()
-				,	left = slider.slider.offset().left
-				, xPos = (sliderWidth / 4 * (zoom-1)) + left
-				;
-			slider.moveThumb(xPos);
-		};
 
 		slider.build = function(parent) {
 			// create clider slider.wrap element
@@ -61,6 +53,19 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 			var wrapHeight = slider.wrap.height();
 			slider.wrap.css('width', (wrapHeight * 4) + 'px');
 		},
+
+		// This function updates the slider position when a zoom level is passed to it
+		slider.moveOnZoom = function( zoom ){
+			var sliderWidth = slider.slider.width()
+				,	left = slider.slider.offset().left
+				
+				// NOTE: 'magic-numbers'...
+				// 4 = the range of zoom, ie: the difference between min and max
+				// 1 = the minimum zoom level
+				, xPos = (sliderWidth / 4 * (zoom-1)) + left
+				;
+			slider.moveThumb(xPos);
+		};
 
 		slider.moveThumb = function(x) {
 			//console.log('moveThumb: '+x);	
