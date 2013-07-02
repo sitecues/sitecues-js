@@ -20,7 +20,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     ) {
 
     // FIXME: Remove me! For testing purposes only. - Eric
-    // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful.
+    // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
     window.sitecues.configs = conf;
 
     toolbar.STATES = {

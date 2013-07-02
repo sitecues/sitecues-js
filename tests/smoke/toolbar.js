@@ -1,17 +1,17 @@
-"use strict";
+// "use strict";
 
-// Imports.
-var
-  chai  = require("chai"),
-  swdda = require("swdda"),
-  wd    = require("wd")
-;
+// // Imports.
+// var
+//   chai  = require("chai"),
+//   swdda = require("swdda"),
+//   wd    = require("wd")
+// ;
 
-// Setup.
-var
-  expect  = chai.expect,
-  globals = {}
-;
+// // Setup.
+// var
+//   expect  = chai.expect,
+//   globals = {}
+// ;
 
 // describe("sitecues", function () {
 //   describe("navigator", function () {

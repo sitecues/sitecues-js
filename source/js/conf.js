@@ -63,6 +63,18 @@ sitecues.def('conf', function (conf, callback, log) {
 		}
 	}
 
+	conf.typeCheck = function(data, key){
+		var value = data[key];
+			
+		// NOTE: This logic should be in the Zoom modile. Not conf. To be updated.
+		if (key == "zoom") {
+			value = parseFloat(value);
+		}
+
+		return value;
+	};
+
+
 	// get configuration value
 	conf.get = function(key, callback){
 		// private variables
@@ -70,7 +82,7 @@ sitecues.def('conf', function (conf, callback, log) {
 
 		// handle sync getting of value
 		if (callback === undefined) {
-			return data[key];
+			return conf.typeCheck(data, key);
 		}
 
 		// create new list if needed
@@ -80,8 +92,10 @@ sitecues.def('conf', function (conf, callback, log) {
 		// push callback to listeners list
 		list.push(callback);
 
-		// call back if there is value for key
-		key in data && callback(data[key]);
+		if (key in data) {
+			// call back if there is value for key
+			callback(conf.typeCheck(data, key));
+		}
 
 		// chain
 		return conf;
@@ -187,8 +201,9 @@ sitecues.def('conf', function (conf, callback, log) {
 	// get/update all stored values
 	conf.data = function(update){
 		// return data object if no updates
-		if (undefined === update)
+		if (undefined === update){
 			return data;
+		}
 
 		// update data otherwise
 		for(var key in update) {

@@ -18,17 +18,26 @@ sitecues.def('zoom', function (zoom, callback, log) {
 		// use conf module for sharing
 		// current zoom level value
 		conf.def('zoom', function(value) {
+
+			var value = parseFloat(value);
+
+			//console.log( 'zoom.js: '+value );
+
 			// value is too small
-			if (value < zoom.min) return zoom.min;
+			if (value < zoom.min){
+				return zoom.min;
+			}
 
 			// value is too big
-			if (value > zoom.max) return zoom.max;
+			if (value > zoom.max){
+				return zoom.max;
+			}
 
 			// use precision to get right value
 			value = (value / zoom.precision) * zoom.precision;
 
 			// value have float value
-			return parseFloat((value).toFixed(1));
+			return value.toFixed(1);
 		});
 
 		// define default value for zoom if needed
@@ -38,28 +47,38 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
 		// handle zoom/increase event fired by any module
 		sitecues.on('zoom/increase', function() {
-			conf.set('zoom', conf.get('zoom') + zoom.step);
+			//console.log('doing zoom');
+			var zoomVal = conf.get('zoom') + zoom.step;
+			conf.set('zoom', zoomVal);
+			sitecues.emit('toolbar/slider/update-position', zoomVal);
 		});
 
 		// handle zoom/decrease event fired by any module
 		sitecues.on('zoom/decrease', function() {
-			conf.set('zoom', conf.get('zoom') - zoom.step);
+			var zoomVal = conf.get('zoom') - zoom.step;
+			conf.set('zoom', zoomVal);
+			sitecues.emit('toolbar/slider/update-position', zoomVal);
 		});
 
 		// react on any zoom change
 		conf.get('zoom', function (value) {
 
 			if (zoom['native']) {
+
 				// if native zoom is supported, change it
 				$body.style({zoom: value}, '', 'important');
 				sitecues.emit('zoom', value);
+
 			} else {
+
 				// native zoom isn't supported, use
 				// css3 transforms scale option
+				
 				$body.style({
 					'transform': 'scale(' + value + ')',
 					'transform-origin': '0 0'
 				}, '', 'important');
+
 			}
 
 			// notify all about zoom change
