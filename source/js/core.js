@@ -23,7 +23,7 @@
   }
 
   // Private variables
-  var arr                 = Array.prototype                 // Array's prototype
+  var arr               = Array.prototype                 // Array's prototype
     , has               = Object.prototype.hasOwnProperty // Object's has own property
     , noop              = function(){}                    // Empty function
     , modules           = {}                              // Modules container
