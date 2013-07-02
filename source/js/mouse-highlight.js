@@ -271,7 +271,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		 */
 		mh.verbalCue = function() {
 			if(!mh.cue && !common.getCookie("vCHz")) {
-				speech.cue(conf.getLS('verbalCueHighZoom'), function() {
+				speech.cueByKey('verbalCueHighZoom', function() {
 					mh.cue = true;
 					common.setCookie("vCHz", 1, 7);
 				});
