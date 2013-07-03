@@ -65,9 +65,9 @@ files=\
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
 	source/js/invert.js \
-	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
+	source/js/cursor/element.js \
 	source/js/cursor/images.js \
 	source/js/util/template.js \
 	source/js/util/hammer.js \
