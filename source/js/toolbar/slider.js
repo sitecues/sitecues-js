@@ -1,6 +1,10 @@
 sitecues.def('toolbar/slider', function(slider, callback, log){
 
-    slider.imagePath = '../../images/toolbar/toolbar-slider-thumb.png';
+  var domain = sitecues.getScriptSrcUrl();
+
+  slider.imagePath = domain.protocol + "://" + domain.host + "/" +
+  	'images/toolbar/toolbar-slider-thumb.png';
+
 	sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
 		sitecues.on('toolbar/slider/update-position', function(zoom) {
@@ -21,11 +25,17 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 			// create slider
 			slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
-			slider.thumb = $( '<img class="sitecues-slider-thumb"/>')
-                            .attr('src', slider.imagePath)
-                            .appendTo( slider.slider );
+			
+			console.log( slider.imagePath);
+			console.log( sitecues.getScriptSrcUrl() );
 
-			conf.set( 'zoom', this.value );
+
+			// Create thumb
+			slider.thumb = $( '<img class="sitecues-slider-thumb"/>')
+        .attr('src', slider.imagePath)
+        .appendTo(slider.slider);
+
+			conf.set('zoom', this.value);
 
 			// handle zoom change and update slider
 			conf.get( 'zoom', function( value ) {
