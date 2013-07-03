@@ -21,20 +21,20 @@
   margin:0 15%;
   cursor:pointer;
   }
+
+  
 .sitecues-slider-thumb {
   position:relative;
   background-color: none;
-  background-image: url("../images/toolbar/toolbar-slider-thumb.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  height:100%;
+  border: 0px;
+  height:40%;
   width:10%;
   /*border-radius: 4px;*/
   border: none;
   /*-webkit-box-shadow: 0 0 4px #555;*/
   z-index: 1;
-  cursor: ew-resize;
-  top:25%;
+  top:20%;
+  cursor: pointer;
 }
 
 .sitecues-toolbar .slider-wrap {
