@@ -260,7 +260,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		// enable mouse highlight
 		mh.enable = function() {
 			// handle mouse move on body
-			$('body').on('mousemove', mh.update);
+			$(document).on('mousemove', mh.update);
 		}
 
 		/*
@@ -281,7 +281,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		// disable mouse highlight
 		mh.disable = function(element) {
 			// remove mousemove listener from body
-			$('body').off('mousemove', mh.update);
+			$(document).off('mousemove', mh.update);
 			mh.hide($(element));
 		}
 
