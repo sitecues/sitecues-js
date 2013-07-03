@@ -113,12 +113,28 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             }
         }
 
+        /**
+         * Reverts the target's cursor property value to initial(replaced by our cutsom one).
+         * @param target
+         */
+        function restoreCursorDisplay(target) {
+            $('#' + cursor.kCursorStyleRuleId).remove();
+
+            if (cursor.isEnabled) {
+                $(target).style('cursor', cursor.prevType, 'important');
+            }
+        }
+
         function mouseMoveHandler(e) {
             changeCursorDisplay($(e.target));
         }
 
         // Handle zoom event.
         sitecues.on('zoom', cursor.init);
+        // Rollback cursor style change before we store element styles on HLB inflating.
+        sitecues.on('hlb/create', function(hlb) {
+            restoreCursorDisplay(hlb);
+        });
         cursor.init(conf.get('zoom') || cursor.zoomLevel);
 
         // Done.
