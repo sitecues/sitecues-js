@@ -218,6 +218,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
+      
+     // Override the existing badge events
+      sitecues.off('speech/disabled', toolbar.disableSpeech);
+      sitecues.off('speech/enabled', toolbar.enableSpeech);
+      
       toolbar.slideIn(success);
     };
 
@@ -233,6 +238,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
       log.info('Enabling toolbar');
       conf.set('toolbarEnabled', true);
+
+      // Override the existing badge events
+      sitecues.on('speech/disabled', toolbar.disableSpeech);
+      sitecues.on('speech/enabled', toolbar.enableSpeech);
+
       if(show) {
         toolbar.slideOut();
       }
@@ -241,23 +251,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     // load special toolbar css
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
-
-
-    // FIXME: Again, this current workaround below would not be needed.
-    // The event listener should not be overwriting existing events ever.
-    // Why do module events have not have a stack and a state?
-
-    // Check to see whether the toolbar is enabled
-    var toolbarEnabled = conf.get('toolbarEnabled');
-    console.log( toolbarEnabled );
-
-    // If it is enabled...
-    if (toolbarEnabled) {
-
-      // Override the existing badge events events
-      sitecues.on('speech/disabled', toolbar.disableSpeech);
-      sitecues.on('speech/enabled', toolbar.enableSpeech);
-    }
 
     callback();
   });
