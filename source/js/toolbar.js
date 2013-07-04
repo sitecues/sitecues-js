@@ -255,8 +255,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     if (toolbarEnabled) {
 
       // Override the existing badge events events
-      sitecues.on('speech/disable', toolbar.disableSpeech);
-      sitecues.on('speech/enable', toolbar.enableSpeech);
+      sitecues.on('speech/disabled', toolbar.disableSpeech);
+      sitecues.on('speech/enabled', toolbar.enableSpeech);
     }
 
     callback();

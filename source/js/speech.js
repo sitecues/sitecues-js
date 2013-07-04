@@ -168,6 +168,7 @@ sitecues.def('speech', function (speech, callback, log) {
               }
           }
           log.info("tts enabled");
+          sitecues.emit('speech/enabled');
       };
 
       /*
@@ -182,6 +183,7 @@ sitecues.def('speech', function (speech, callback, log) {
               callback();
           }
           log.info("tts disabled");
+          sitecues.emit('speech/disabled');
       };
 
       /*
