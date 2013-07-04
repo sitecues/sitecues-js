@@ -49,10 +49,6 @@ files=\
 	source/js/zoom.js \
 	source/js/keys.js \
 	source/js/focus.js \
-	source/js/caret.js \
-	source/js/caret/view.js \
-	source/js/caret/coords.js \
-	source/js/caret/classifier.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
