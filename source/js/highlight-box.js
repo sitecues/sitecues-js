@@ -4,8 +4,8 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'background-dimmer', 'ui',
-    function ($, conf, cursor, positioning, common, eventHandlers, backgroundDimmer) {
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui',
+    function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer) {
 
         // Constants
 
@@ -13,16 +13,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var kMinHighlightZoom = 1.01;
 
         var extraZoom = 1.5;
-		
-        var toClass = {}.toString;
 
-        // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
-        // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
-        // Array of what we'd expect if we didn't have a background color
-        var transparentColorNamesSet = [
-            'transparent',
-            'rgba(0, 0, 0, 0)'
-        ];
         // The states that the HLB can be in.
         // TODO: Convert to state instances.
         var STATES = highlightBox.STATES = {
@@ -126,24 +117,20 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 this.savedStyleAttr.push(this.itemNode.attr('style'));
             }
 
-            // Constants
+            // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
             HighlightBox.kShowBoxSpeed = 300;
             HighlightBox.kHideBoxSpeed = 150;
             HighlightBox.kBoxZindex = 2147483646;
-            HighlightBox.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
             HighlightBox.kBoxBorderWidth = '3px';
             HighlightBox.kBoxPadding = '4px';             // Give the text a little extra room
             HighlightBox.kBoxBorderRadius = '4px';
             HighlightBox.kBoxBorderStyle = 'solid';
             HighlightBox.kBoxBorderColor = '#222222';
             HighlightBox.kDefaultBgColor = '#ffffff';
+            HighlightBox.kBoxNoOutline   = '0px solid transparent';
             // Space placeholders prevent content after box from going underneath it.
             HighlightBox.kPlaceHolderClass = 'sitecues-eq360-box-placeholder';
             HighlightBox.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
-            // TODO: Expand this array to include all appropriate elements.
-            // HighlightBox.kDimensionAdjustableElements = { p: true, span: true, td: true };
-
-
             HighlightBox.isSticky = false;
 
             /**
@@ -183,10 +170,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
                 var center    = positioning.getCenter(this.item),
                     totalZoom = positioning.getTotalZoom(this.item, true),
-                    cssUpdate = getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
+                    cssUpdate = designer.getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
 
                 // Handle table special behaviour on inner contents.
-                handleTableElement(this.itemNode, currentStyle);
+                designer.handleTableElement(this.itemNode, currentStyle);
 
                 // Get animation CSS styles.
                 var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
@@ -246,7 +233,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 sitecues.emit('hlb/ready', _this.item);
 
                 // Trigger the background blur effect if there is a highlight box only.
-                //  > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
+                // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
                 onHighlightBoxReady($(this));
                 backgroundDimmer.dimBackgroundContent(this, totalZoom);
               });
@@ -275,7 +262,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                                  'overflow-y': css.overflowY,
                                  'overflow'  : css.overflow});
                 });
-                this.itemNode.style('outline', '0px solid transparent', 'important');
+                this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
 	            var currentStyle = this.savedCss[this.savedCss.length - 1];
                 var clientRect = this.item.getBoundingClientRect();
@@ -349,60 +336,32 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                         // Preserve it so that inner content is not rearranged when width is a bit narrowed.
                         'width': parseFloat(clientRect.width) + 'px',
                         // Don't change height if there's a background image, otherwise it is destroyed.
-                        'height': !isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
+                        'height' : !common.isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
                         'z-index': HighlightBox.kBoxZindex.toString(),
-                        'border': '0px solid white',
+                        'border' : HighlightBox.kBoxNoOutline,
                         'list-style-position': 'inside',
                         'margin': '0',
                         'border-radius': HighlightBox.kBoxBorderRadius,
                         'border-color':  HighlightBox.kBoxBorderColor,
                         'border-style':  HighlightBox.kBoxBorderStyle,
                         'border-width':  HighlightBox.kBoxBorderWidth,
-                        'outline':      '0px solid transparent'
+                        'outline'     :  HighlightBox.kBoxNoOutline
                     };
 				// Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-				if (isEmptyBgImage(currentStyle['background-image'])) {
+				if (common.isEmptyBgImage(currentStyle['background-image'])) {
  					cssBeforeAnimateStyles.padding = HighlightBox.kBoxPadding;
  				}
 
-				if (!isEmptyBgImage(currentStyle['background-image'])) {
+				if (!common.isEmptyBgImage(currentStyle['background-image'])) {
                     cssBeforeAnimateStyles['overflow-y'] = 'hidden';
 				} else {
                     cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
 				}
 				if (this.item.tagName.toLowerCase() === 'img') {
-					preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
+					designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
 				}
 
-                var oldBgColor = currentStyle['background-color'];
-                var oldBgImage = currentStyle['background-image'];
-                var newBg = getNewBackground(this.itemNode, oldBgColor, oldBgImage);
-                var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
-
-                // If color and background color are not contrast then either set background image or invert background color.
-                if (!isEmptyBgImage(oldBgImage)) {
-                    cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
-                    cssBeforeAnimateStyles['background-image']    = oldBgImage;
-                    cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
-                    //cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
-                    cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
-
-					// If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
-					if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
-                        delete cssBeforeAnimateStyles['background-size'];
-					}
-                }
-
-				// If background color is not contrast to text color, invert background one.
-                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-				var color = compStyle.getPropertyCSSValue("color");
-				var isContrastColors = common.getIsContrastColors(color, newBgColor);
-				// We don't know what's the text color in the image.
-				if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
-					cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
-				} else {
-					cssBeforeAnimateStyles['background-color'] = newBgColor;
-				}
+                this.setBgStyle(currentStyle, cssBeforeAnimateStyles);
 
                 return cssBeforeAnimateStyles;
             }
@@ -426,7 +385,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 // Then, insert placeholder so that content which comes after doesn't move back.
                 cloneNode.addClass(HighlightBox.kPlaceHolderClass);
                 var styles = $.extend({}, currentStyle, {
-                        // Make sure clone display turned to 'block' if it is a tbale cell
+                        // Make sure clone display turned to 'block' if it is a table cell
                         display: (currentStyle.display.indexOf('table') === 0) ? 'block' : currentStyle.display,
                         visibility: 'hidden',
                         width: parseFloat(origRectSize.width) + 'px',
@@ -434,7 +393,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     });
                 cloneNode.style(styles, '', 'important');
 				// If this is an ancestor to the table cell which doesn't have colspan.
-				var tableCellAncestorParents = getTableCellAncestorParents(this.itemNode);
+				var tableCellAncestorParents = designer.getTableCellAncestorParents(this.itemNode);
 				if (tableCellAncestorParents && colspan === 1) {
 					//cloneNode[0].style.width = 'auto';
 				}
@@ -449,175 +408,43 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                return cloneNode;
             };
 
-           /*
-            * Table elements require extra work for some cases - especially when table has flexible layout.
-            * @param itemNode HTML node Object
-            * @param currentStyle Object
-            */
-           function handleTableElement(itemNode, currentStyle) {
-               // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
-                var savedDisplay = currentStyle.display;
-				// If the target is <td>, <tr>, <table> or any other table cell element then exit.
-                if (savedDisplay.indexOf('table') === 0) {
-                    itemNode.style('display', 'block', 'important');
-                    return false;
-                }
-
-                // If the target is some inner element, like <div> or <p> inside of table cell then
-				// handle flexible table width effect dependent of the inner elements.
-				var tableCellAncestorParents = getTableCellAncestorParents(itemNode);
-                tableCellAncestorParents.each(function () {
-                    if (this.tagName.toLowerCase() === 'table') {
-                        // todo: try to set table-layout:fixed to table
-                        var closest = itemNode.closest('td');
-                        var closestStyle = common.getElementComputedStyles(closest[0]);
-                        var updateInnerElStyle = {};
-                        if(closestStyle) {
-    						updateInnerElStyle.width = parseFloat(closestStyle['width'])
-													- parseFloat(closestStyle['padding-left'])
-													- parseFloat(closestStyle['padding-right'])
-													- parseFloat(closestStyle['margin-left'])
-													- parseFloat(closestStyle['margin-right'])
-													- parseFloat(closestStyle['border-left-width'])
-													- parseFloat(closestStyle['border-left-width'])
-													+ 'px';
-                        }
-                        $(closest).children().wrapAll("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "'></div>");
-                        itemNode.style('display', 'block', 'important');
-                        $('.'+HighlightBox.kPlaceHolderWrapperClass).style('width', updateInnerElStyle.width, 'important');
-
-                        return false; // Break the each loop
-                    }
-                })
-                return false;
-            }
-
-			/*
-			 * Gets table ancestor element's parents.
-			 * @param itemNode
-			 * @return false if this is not a child of table element; otherwise, return an array of parent objects.
-			 */
-			function getTableCellAncestorParents(itemNode) {
-				var parents = itemNode.parents().andSelf();
-				if (parents && parents.length > 0) {
-					return parents;
-				}
-				return false;
-			}
- 
-            /**
-             * Get the size and position of the current HLB to inflate.
-             * @param selector What element is being positioned
-             * @param center   The center over which selector is positioned
-             * @param zoom     Zooming the selector element if needed
-             * @return cssUpdates An object containing left, top, width and height of the positioned element.
+            /*
+             * Defines which background suits to HLB & sets it: both background image and color.
+             * @param currentStyle Object
+             * @param cssBeforeAnimateStyles Object
              */
-            function getNewRectStyle(selector, center, extraZoom, totalZoom) {
-                // Ensure a zoom exists.
-                var extraZoom = extraZoom || 1;
-                // Use the proper center.
-                var centerLeft = center.left;
-                var centerTop = center.top;
-
-                // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(HighlightBox.kMinDistanceFromEdge, totalZoom);
-
-                var cssUpdates = {};
-                $(selector).each(function () {
-                    var jElement = $(this);
-
-                    // As we are not moving the element within the DOM, we need to position the
-                    // element relative to it's offset parent. These calculations need to factor
-                    // in the total zoom of the parent.
-                    var offsetParent = jElement.offsetParent();
-                    var offsetParentPosition = positioning.getOffset(offsetParent);
-                    var offsetParentZoom = positioning.getTotalZoom(offsetParent);
-
-                    // Determine the final dimensions, and their affect on the CSS dimensions.
-                    var additionalBoxOffset = (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
-                    var width = (jElement.outerWidth(true) + 2 * additionalBoxOffset) * extraZoom;
-                    var height = (jElement.outerHeight(true)+ 2 * additionalBoxOffset) * extraZoom;
-
-                    var left = centerLeft - (width / 2);
-                    var top = centerTop - (height / 2);
-
-                    // If we need to change the element's dimensions, so be it. However, explicitly
-                    // set the dimensions only if needed.
-                    var newWidth, newHeight;
-
-                    // Check the width and horizontal positioning.
-                    if (width > viewport.width) {
-                        // Easiest case: fit to width and horizontal center of viewport.
-                        centerLeft = viewport.centerX;
-                        newWidth = viewport.width;
-                    } else {
-                        // The element isn't too wide. However, if the element is out of the view area, move it back in.
-                        if (viewport.left > left) {
-                            centerLeft += viewport.left - left;
-                        } else if ((left + width) > viewport.right) {
-                            centerLeft -= (left + width) - viewport.right;
-                        }
+            HighlightBox.prototype.setBgStyle = function(currentStyle, cssBeforeAnimateStyles) {
+                var oldBgColor = currentStyle['background-color'];
+                var oldBgImage = currentStyle['background-image'];
+                var newBg = designer.getNewBackground(this.itemNode, oldBgColor, oldBgImage);
+                var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
+                
+                // If color and background color are not contrast then either set background image or invert background color.
+                if (!common.isEmptyBgImage(oldBgImage)) {
+                    cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
+                    cssBeforeAnimateStyles['background-image']    = oldBgImage;
+                    cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
+                    //cssBeforeAnimateStyles['background-size']     = clientRect.width + 'px ' + clientRect.height+ 'px';
+                    cssBeforeAnimateStyles['background-color']    = common.getRevertColor(newBgColor);
+                    
+                    // If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
+                    if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
+                        delete cssBeforeAnimateStyles['background-size'];
                     }
-
-                    // Check the height and vertical positioning.
-                    if (height > viewport.height) {
-                        // Easiest case: fit to height and vertical center of viewport.
-                        centerTop = viewport.centerY;
-                        newHeight = viewport.height;
-                    } else {
-                        // The element isn't too tall. However, if the element is out of the view area, move it back in.
-                        if (viewport.top > top) {
-                            centerTop += viewport.top - top;
-                        } else if ((top + height) > viewport.bottom) {
-                            centerTop -= (top + height) - viewport.bottom;
-                        }
-                    }
-
-                    // Reduce the dimensions to a non-zoomed value.
-                    width = (newWidth || width) / extraZoom;
-                    height = (newHeight || height) / extraZoom;
-
-                    // Determine what the left and top CSS values must be to center the
-                    // (possibly zoomed) element over the determined center.
-                    var css = jElement.css(['marginLeft', 'marginTop']);
-
-                    var cssLeft = (centerLeft
-                                   - offsetParentPosition.left
-                                   - (width * offsetParentZoom / 2)
-                                  ) / offsetParentZoom;
-                    var cssTop = (centerTop
-                                   - offsetParentPosition.top
-                                   - (height * offsetParentZoom / 2)
-                                  ) / offsetParentZoom;
-
-                    // If offset parent is html then no need to do this.
-                    // todo: do we really use it?
-                    if (offsetParent[0].tagName.toLowerCase() !== 'html') {
-                        cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
-                        cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
-                    }
-                    // Create the CSS needed to place the element where it needs to be, and to zoom it.
-                    cssUpdates = {
-                        left: cssLeft,
-                        top: cssTop
-                    };
-
-                    // Only update the dimensions if needed.
-                    if (newWidth) {
-                        cssUpdates.width = width - 2 * additionalBoxOffset * extraZoom;
-                    }
-
-                    if (newHeight) {
-                        cssUpdates.height = height - 2* additionalBoxOffset * extraZoom;
-                    }
-                    // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
-                    // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
-					// AK: leave it in case we get regression bugs. todo: should be removed in future.
-                    //cssUpdates.maxHeight = viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset;
-                });
-                return cssUpdates;
+                }
+                
+                // If background color is not contrast to text color, invert background one.
+                var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+                var color = compStyle.getPropertyCSSValue("color");
+                var isContrastColors = common.getIsContrastColors(color, newBgColor);
+                // We don't know what's the text color in the image.
+                if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
+                    cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
+                } else {
+                    cssBeforeAnimateStyles['background-color'] = newBgColor;
+                }
             }
-
+ 
             /**
              * Notify all inputs if zoom in or out.
              * todo: define if we need to leave this code after code transferring to a new event model.
@@ -626,167 +453,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
                 element.triggerHandler(zoomHandler);
             }
-
-			// Keep ratio for images
-			function preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect) {
-				var initialRatio  = clientRect.width / clientRect.height;
-
-				// If dimensions are recalculated, use the new values.
-				if (cssUpdate.width || cssUpdate.height) {
-					delete cssBeforeAnimateStyles.width;
-					delete cssBeforeAnimateStyles.height;
-
-					if ((cssUpdate.height && cssUpdate.width) || cssUpdate.width) {
-						delete cssUpdate.height;
-						cssBeforeAnimateStyles.width =  cssUpdate.width;
-						cssBeforeAnimateStyles.height = cssUpdate.width / initialRatio;
-					} else if (cssUpdate.height) {
-						delete cssUpdate.width;
-						cssBeforeAnimateStyles.height = cssUpdate.height;
-						cssBeforeAnimateStyles.width = cssUpdate.height * initialRatio;
-					}
-					return;
-				}
-
-				// Otherwise, no specific dimensions set, so, use the original ones(if any available).
-				var height = parseFloat(cssBeforeAnimateStyles.height);
-				var width  = parseFloat(cssBeforeAnimateStyles.width);
-
-				var widthType  = width ? toClass.call(width).slice(8, -1) : '';
-				var heightType = height? toClass.call(height).slice(8, -1) : '';
-
-				// If image dimensions are good and don't need recalculations, return.
-				if (widthType === 'Number' && heightType === 'Number') {
-					return;
-				}
-
-				if (widthType === 'Number' || heightType === 'Number') {
-					delete cssBeforeAnimateStyles.width;
-					delete cssBeforeAnimateStyles.height;
-
-					// Rely on width since it is set(whereas height is not set(or, '', 'auto' specified))
-					if ((widthType === 'Number' && heightType === 'Number') || widthType === 'Number') {
-						delete cssUpdate.height;
-						cssBeforeAnimateStyles.height = width / initialRatio;
-					} else if (heightType === 'Number') {
-						// Rely on height since it is set(whereas width is not set(or, '', 'auto' specified))
-						delete cssUpdate.width;
-						cssBeforeAnimateStyles.width = height * initialRatio;
-					}
-				}
-
-				return;
-			}
-
-            /**
-             * Get the background value of highlight box when it appears.
-             * @param itemNode HTML node Object
-             * @param oldBgColor String
-             * @param oldBgImage String
-             * @return Object
-             */
-            function getNewBackground(itemNode, oldBgColor, oldBgImage) {
-                var bgColorObj = {},
-                    bgImageObj = {};
-                var parents = itemNode.parents().toArray();
-                // Check to see if we have an existing background color
-                if (!oldBgColor || $.inArray(oldBgColor, transparentColorNamesSet) >= 0) {
-                    // Didn't find an existing background color, so see if a parent has one
-                    bgColorObj = getNewBgColor(itemNode, parents);
-                }
-                // todo: fix list items bullet bg being considered as background image because they are.
-                if (!oldBgImage || $(itemNode)[0].tagName.toLowerCase() === 'li' || isEmptyBgImage(oldBgImage)) {
-                    bgImageObj = getNewBgImage(parents, itemNode);
-                }
-                return $.extend({}, bgColorObj, bgImageObj);
-            }
-
-            /**
-             * Get new background color of highlight box when it appears.
-             * Returns the either parent's background color or default one(if we haven't fetched a suitible background color from parent).
-             * @param parents Array
-             * @return Object
-             */
-            function getNewBgColor(itemNode, parents) {
-                // Set a variable for the default background in case we don't find one.
-                var bgColor = HighlightBox.kDefaultBgColor;
-				// Special treatment for images since they might have text on transparent background.
-				// We should make sure text is readable anyways.
-				if (!isEmptyBgImage($(itemNode).css('backgroundImage'))) {
-					// Create image object using bg image URL.
-					var imageObj = new Image();
-					imageObj.onload = function() {
-						var rgb = common.getAverageRGB(this);
-						bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
-					};
-					var bgImage = $(itemNode).css('backgroundImage');
-					// RegExp below will take out bg image URL from the string.
-					// Example: 'url(http://example.com/foo.png)' will evaluate to 'http://example.com/foo.png'.
-                    var url = bgImage.match(/\(([^)]+)\)/)[1];
-                    if (common.validateUrl(url)) {
-                        imageObj.src = url;
-                    }
-				} else if (itemNode[0].tagName.toLowerCase() === 'img') {
-					var rgb = common.getAverageRGB($(itemNode)[0]);
-					bgColor = 'rgb(' + rgb.r + ',' + rgb.b + ',' + rgb.g + ')';
-				} else {
-					// Not an image, doesn't have bg image so just iterate over element's parents.
-					$(parents).each(function () {
-						// Iterate through the parents looking for a background color.
-						var thisNodeColor = $(this).css('backgroundColor');
-						// See if the background color is a default or transparent color(if no, then $.inArray() returns '-1' value).
-						if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
-							// Found a background color specified in this node, no need to check further up the tree.
-							bgColor = thisNodeColor;
-							return false;
-						}
-					});
-				}
-
-                // Return the default background color if we haven't fetched a suitible background color from parent.
-                return {'bgColor': bgColor};
-
-            }
-
-            /**
-             * Get new background image of highlight box when it appears.
-             * Returns either parent's background image or the default one if we haven't returned a parent's background.
-             * @param parents Array
-             * @param itemNode HTML node Object
-             * @return Object
-             */
-            function getNewBgImage(parents, itemNode) {
-                // Some elements such as inputs don't require background.
-                // todo: if other elements are tested below then better to arrange an array.
-                if (itemNode[0].tagName.toLowerCase() !== 'input' && itemNode[0].tagName.toLowerCase() !== 'textarea') {
-                    var bgImage, bgPos, bgRepeat;
-                    $(parents).each(function () {
-                        // Iterate through the parents looking for a background image.
-                        // todo: fix list items bullet background being considered as background image because they are.
-                        if ($(this)[0].tagName.toLowerCase() !== 'li') {
-                            var thisNodeImage = $(this).css('backgroundImage');
-                            if (!isEmptyBgImage(thisNodeImage)) {
-                                // It's an easy case: we just retrieve the parent's background image.
-                                bgImage  = thisNodeImage;
-                                bgPos    = $(this).css('backgroundPosition');
-                                bgRepeat = $(this).css('backgroundRepeat');
-                                return false;
-                            }
-                        }
-                    });
-
-                    return {'bgImage': bgImage, 'bgPos': bgPos, 'bgRepeat': bgRepeat};
-                }
-            }
-
-			/*
-			 * Check if current image value is not empty.
-			 * @imageValue A string that represents current image value.
-			 * @return true if image value contains some not-empty value.
-			 */
-			function isEmptyBgImage(imageValue) {
-				return common.isEmpty(imageValue) || imageValue === 'none';
-			}
 
             return {
                 // Return Highlight if need to support a few instances instead.
@@ -895,18 +561,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             updateZoomLevel(value);
         });
 
-        sitecues.on( 'key/esc', function ( event ) {
+        sitecues.on('key/esc', function () {
             instance.deflate();
         } );
 
         // Lower the threshold when speech is enabled.
-        sitecues.on('speech/enable', function(){
-            conf.set('highlightBoxMinZoom', 1.00);
+        sitecues.on('speech/enable', function() {
+            conf.set('highlightBoxMinZoom', kMinHighlightZoom);
             updateZoomLevel(conf.get('zoom'));
         });
 
         // Revert the threshold when speech is enabled.
-        sitecues.on('speech/disable', function(){
+        sitecues.on('speech/disable', function() {
             conf.set('highlightBoxMinZoom', kMinHighlightZoom);
             updateZoomLevel(conf.get('zoom'));
         });

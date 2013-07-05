@@ -2,7 +2,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
-	mh.minzoom = 1.01;
+	mh.minZoom = 1.01;
 
 	// class of highlight
 	mh.kHighlightOverlayClass = 'sitecues-highlight-overlay';
@@ -43,7 +43,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
 
-		conf.set('mouseHighlightMinZoom', mh.minzoom);
+		conf.set('mouseHighlightMinZoom', mh.minZoom);
 
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
@@ -304,13 +304,13 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 		// lower the threshold when speech is enabled
 		sitecues.on('speech/enable', function() {
-			conf.set('mouseHighlightMinZoom', 1.00);
+			conf.set('mouseHighlightMinZoom', mh.minZoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// revert the threshold when speech is enabled
 		sitecues.on('speech/disable', function() {
-			conf.set('mouseHighlightMinZoom', mh.minzoom);
+			conf.set('mouseHighlightMinZoom', mh.minZoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
