@@ -4,75 +4,68 @@
  * choices.
  */
 sitecues.def( 'ui-manager', function (uiManager, callback, log) {
-  sitecues.use(
-    'jquery',
-    'conf',
-    'toolbar',
-    'badge',
-    function (
-        $,
-      conf,
-      toolbar,
-      badge
-    ) {
+  sitecues.use( 'jquery', 'conf', 'toolbar', 'badge', function ($, conf, toolbar, badge) {
+
+    // The toggling state.  If true an active toggle is underway and calls to
+    // toggle() will be ignored.
+    uiManager.toggling = false;
 
     uiManager.STATES = {
-      AUTO:  {
-        id:   0,
-        name: 'auto'
-      },
+      //AUTO:  {
+      //  id:   0,
+      //  name: 'auto'
+      //},
+
+      // Display the badge.
       BADGE:  {
         id:   1,
         name: 'badge'
       },
+
+      // Display the toolbar.
       TOOLBAR: {
         id:   2,
         name: 'toolbar'
       }
     };
 
-    // The toggling state.  If true an active toggle is underway and calls to 
-    // toggle() will be ignored.
-    uiManager.toggling = false;
-
-    uiManager.currentState = uiManager.STATES.AUTO;
-
-    /**
-     * Determines which UI should be used based on defaults and settings.
-     *
-     * @return uiManager.STATES The UI which should currently be used.
-     */
-    uiManager.getDefault = function () {
-        // This is the global default setting for the UI.
-        var defaultUI = conf.get('defaultUI');
-        // This is the site-specific setting for the UI.
-        var siteUI = conf.get('siteUI');
-
-        if (siteUI) {
-            // This site has a UI setting
-            return uiManager.toState(siteUI);
-        } else if (defaultUI) {
-            // This site does not have a UI setting, but there is a global
-            // default.
-            return uiManager.toState(siteUI);
-        }
-        // Nothing is set.
-        return uiManager.STATES.AUTO;
-    };
-
     /**
      * Converts a string to an enum.
      */
     uiManager.toState = function (stateName) {
-        switch (stateName) {
-            case "badge":
-                return uiManager.STATES.BADGE;
-            case "toolbar":
-                return uiManager.STATES.TOOLBAR;
-            default:
-                return uiManager.STATES.AUTO;
-        }
+      switch (stateName) {
+        case "badge":
+          return uiManager.STATES.BADGE;
+        default: //case "toolbar":
+          return uiManager.STATES.TOOLBAR;
+        //default:
+        //  return uiManager.STATES.AUTO;
+      }
     };
+
+    // Determine the initial state.
+    var determineInitialState = function() {
+      // This is the user-specified setting for the UI.
+      var userUI = conf.get('userUI');
+      log.info("User UI: " + userUI);
+
+      // This is the site-provided setting for the UI.
+      var siteUI = conf.get('ui') || conf.get('defaultUI'); // 'defaultUI' is included for backwards compatibility
+      log.info("Site UI: " + siteUI);
+
+      if (userUI) {
+        // This site does not have a UI setting, but the user has a preference.
+        return uiManager.toState(userUI);
+      } else if (siteUI) {
+        // The site is providing the UI to use.
+        return uiManager.toState(siteUI);
+      }
+      // Default is toolbar.
+      return uiManager.STATES.TOOLBAR;
+    };
+    var currentState = determineInitialState();
+
+    log.info("Initial UI: " + currentState.name);
 
     /**
      * Switches UI. Right now there are only two, so it just alternates, but if
@@ -87,7 +80,7 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         uiManager.innerToggle(function() {
             uiManager.toggling = false;
         });
-        // Safety mechanism to revert if something above failes to execute
+        // Safety mechanism to revert if something above fails to execute
         // the callback.
         setTimeout(function() {
            uiManager.toggling = false; 
@@ -98,76 +91,71 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
      * there are more than two this should iterate through them.
      */
     uiManager.innerToggle = function (callback) {
-
         uiManager.toggling = true;
-        var state = uiManager.currentState;
-        log.info("Toggling UI from " + state.name);
-        switch (state) {
+        log.info("Toggling UI from " + currentState.name);
+        switch (currentState) {
             case uiManager.STATES.BADGE:
-                uiManager.currentState = uiManager.STATES.TOOLBAR;
-                conf.set('siteUI', uiManager.STATES.TOOLBAR.name);
+                currentState = uiManager.STATES.TOOLBAR;
+                conf.set('userUI', currentState.name);
                 badge.disable(function() {
                     toolbar.enable(true);
                     callback();
                 });
                 break;
-            case uiManager.STATES.TOOLBAR:
-                uiManager.currentState = uiManager.STATES.BADGE;
-                conf.set('siteUI', uiManager.STATES.BADGE.name);
+          default: // case uiManager.STATES.TOOLBAR:
+                currentState = uiManager.STATES.BADGE;
+                conf.set('userUI', currentState.name);
                 toolbar.disable(function() {
                     badge.enable(true);
                     callback();
                 });
                 break;
-            default:
+            //default:
                 // AKA uiManager.STATES.AUTO This probably shouldn't happen if
                 // the init part happened properly, but we'll handle it anyways.
-                uiManager.currentState = uiManager.STATES.BADGE;
-                conf.set('siteUI', uiManager.STATES.BADGE.name);
-                toolbar.disable(function() {
-                    badge.enable(true);
-                    callback();
-                });
+            //    currentState = uiManager.STATES.BADGE;
+            //    conf.set('siteUI', uiManager.STATES.BADGE.name);
+            //    toolbar.disable(function() {
+            //        badge.enable(true);
+            //        callback();
+            //    });
         }
-        log.info("UI set to " + uiManager.currentState.name);
-    }
+        log.info("UI set to " + currentState.name);
+        // In case the user is using the extension, inform the preferences server that the user has chosen a UI.
+        $.post('//' + sitecues.getCoreConfig().hosts.up + '/preferences', { ui: "user" });
+    };
 
     // FIXME: We shouldn't have to run `toolbar.show()` in `setTimeout()`.
     // #EQ-622 might be the solution.
     $(document).ready(function () {
         log.info("Initializing UI");
-        var state = uiManager.getDefault();
-        switch (state) {
+        switch (currentState) {
             case uiManager.STATES.BADGE:
                 log.info("Initial UI State: " + uiManager.STATES.BADGE.name);
                 // Note that we update the current state first, to deal with
                 // button mashing, since the disabling/enabling are most likely
                 // going to involve async behavior.
-                uiManager.currentState = uiManager.STATES.BADGE;
                 toolbar.disable(function() {
                     badge.enable(true);
                 });
                 break;
-            case uiManager.STATES.TOOLBAR:
+            default: // case uiManager.STATES.TOOLBAR:
                 log.info("Initial UI State: " + uiManager.STATES.TOOLBAR.name);
-                uiManager.currentState = uiManager.STATES.TOOLBAR;
                 badge.disable(function() {
                     toolbar.enable(true);
                 });
                 break;
-            default:
+            //default:
                 // AKA uiManager.STATES.AUTO
-                log.info("Initial UI State: " + uiManager.STATES.BADGE.name + " (Auto)");
-                uiManager.currentState = uiManager.STATES.BADGE;
-                toolbar.disable(function() {
-                    badge.enable(true);
-                });
+            //    log.info("Initial UI State: " + uiManager.STATES.BADGE.name + " (Auto)");
+            //    toolbar.disable(function() {
+            //        badge.enable(true);
+            //    });
         }
     });
 
     sitecues.on('ui/toggle', uiManager.toggle);
 
     callback();
-
   });
 });

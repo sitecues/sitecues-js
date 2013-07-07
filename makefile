@@ -29,18 +29,18 @@ files=\
 	source/js/logging/log4javascript_uncompressed.js \
 	source/js/logging/init_logger.js \
 	target/source/js/core.js \
+	source/js/load.js \
+	source/js/jquery.js \
 	source/js/conf.js \
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
 	source/js/conf/remote.js \
 	source/js/conf/server.js \
-	source/js/jquery.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/ui.js  \
-	source/js/load.js \
 	source/js/style.js \
 	source/js/util/positioning.js \
 	source/js/util/common.js \

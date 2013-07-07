@@ -25,10 +25,6 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 			// create slider
 			slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
-			
-			console.log( slider.imagePath);
-			console.log( sitecues.getScriptSrcUrl() );
-
 
 			// Create thumb
 			slider.thumb = $( '<img class="sitecues-slider-thumb"/>')
