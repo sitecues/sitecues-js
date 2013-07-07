@@ -1,4 +1,6 @@
 sitecues.def('toolbar', function (toolbar, callback, log) {
+  log.trace('toolbar.def()');
+
   sitecues.use(
     'jquery',
     'conf',
@@ -18,6 +20,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       resizer,
       messenger
     ) {
+      log.trace('toolbar.use()');
 
     // FIXME: Remove me! For testing purposes only. - Eric
     // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
@@ -37,6 +40,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.currentState = toolbar.STATES.OFF;
 
     toolbar.render = function (callback) {
+      log.trace('toolbar.render()');
+
       if (! toolbar.instance) {
         toolbar.shim = $('<div class="sitecues-toolbar-shim" />').prependTo($('html'));
 
@@ -56,9 +61,12 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         // resizer.build(toolbar.instance, toolbar.shim);
 
         // create TTS button and set it up
-        toolbar.ttsButton = $('<div rel="sitecues-event" data-sitecues-event="speech/toggle">').addClass('tts').appendTo( toolbar.instance );
+        toolbar.ttsButton = $('<div rel="sitecues-event" data-sitecues-event="speech/toggle">')
+          .addClass('tts')
+          .appendTo( toolbar.instance )
+          .data('tts-enable', 'enabled')
+        ;
 
-        toolbar.ttsButton.data('tts-enable', 'enabled');
         toolbar.wireEvents();
 
       }
@@ -69,6 +77,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     }
 
     toolbar.show = function () {
+      log.trace('toolbar.show()');
+
       if(conf.get('toolbarEnabled')) {
         toolbar.render();
 
@@ -86,12 +96,14 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
         sitecues.emit('toolbar/state/' + toolbar.currentState.name);
       } else {
-        log.warn("toolbar.show() was called but toolbar is disabled")
+        log.warn("toolbar.show() was called but toolbar is disabled");
       }
     };
 
     /** Shows the toolbar by sliding it out */
     toolbar.slideOut = function () {
+      log.trace('toolbar.slideOut()');
+
       log.info('Toolbar sliding out (showing)');
 
       if (conf.get('toolbarEnabled')) {
@@ -123,6 +135,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
      * @param success Function executed if successful.
      */
     toolbar.slideIn = function (success) {
+      log.trace('toolbar.slideIn()');
+
       log.info('Toolbar sliding in (hiding)');
       toolbar.currentState = toolbar.STATES.OFF;
 
@@ -143,6 +157,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     };
 
     toolbar.toggle = function () {
+      log.trace('toolbar.toggle()');
+
       log.info('Toggling toolbar from state ' + toolbar.currentState.name);
       if (toolbar.currentState === toolbar.STATES.ON) {
         toolbar.disable();
@@ -154,11 +170,14 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     };
 
     toolbar.enableSpeech = function () {
+      log.trace('toolbar.enableSpeech()');
       toolbar.ttsButton.removeClass('tts-disabled');
       toolbar.ttsButton.data('tts-enable', 'enabled');
     };
 
     toolbar.disableSpeech = function () {
+      log.trace('toolbar.disableSpeech()');
+
       toolbar.ttsButton.addClass('tts-disabled');
       toolbar.ttsButton.data('tts-enable', 'disabled');
     };
@@ -173,6 +192,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
      * @return void
      */
     toolbar.wireEvents = function () {
+      log.trace('toolbar.wireEvents()');
+
       toolbar.instance.find('[rel="sitecues-event"]').each(function() {
         $(this).on('click', function() {
           var event = $(this).data('sitecues-event');
@@ -193,8 +214,15 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
      * @return void
      */
     toolbar.disable = function (success) {
+      log.trace('toolbar.disable()');
+
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
+      
+     // Override the existing badge events
+      sitecues.off('speech/disabled', toolbar.disableSpeech);
+      sitecues.off('speech/enabled', toolbar.enableSpeech);
+      
       toolbar.slideIn(success);
     };
 
@@ -206,8 +234,15 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
      * @return void
      */
     toolbar.enable = function (show) {
+      log.trace('toolbar.enable()');
+
       log.info('Enabling toolbar');
       conf.set('toolbarEnabled', true);
+
+      // Override the existing badge events
+      sitecues.on('speech/disabled', toolbar.disableSpeech);
+      sitecues.on('speech/enabled', toolbar.enableSpeech);
+
       if(show) {
         toolbar.slideOut();
       }
@@ -216,9 +251,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     // load special toolbar css
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
-
-    sitecues.on('speech/disable', toolbar.disableSpeech);
-    sitecues.on('speech/enable', toolbar.enableSpeech);
 
     callback();
   });

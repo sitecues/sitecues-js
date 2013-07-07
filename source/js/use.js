@@ -11,7 +11,6 @@ window.sitecues && sitecues.use(
 	'zoom',
 	'keys',
 	'focus',
-	'caret',
 	'cursor',
 	'speech/azure',
 	'speech',

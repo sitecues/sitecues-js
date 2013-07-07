@@ -49,13 +49,10 @@ files=\
 	source/js/zoom.js \
 	source/js/keys.js \
 	source/js/focus.js \
-	source/js/caret.js \
-	source/js/caret/view.js \
-	source/js/caret/coords.js \
-	source/js/caret/classifier.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
+    source/js/hlb/designer.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
@@ -65,9 +62,9 @@ files=\
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
 	source/js/invert.js \
-	source/js/cursor/canvas.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
+	source/js/cursor/element.js \
 	source/js/cursor/images.js \
 	source/js/util/template.js \
 	source/js/util/hammer.js \

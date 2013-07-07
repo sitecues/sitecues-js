@@ -2,7 +2,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
-	mh.minzoom = 1.01;
+	mh.minZoom = 1.01;
 
 	// class of highlight
 	mh.kHighlightOverlayClass = 'sitecues-highlight-overlay';
@@ -43,7 +43,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
 
-		conf.set('mouseHighlightMinZoom', mh.minzoom);
+		conf.set('mouseHighlightMinZoom', mh.minZoom);
 
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
@@ -260,7 +260,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		// enable mouse highlight
 		mh.enable = function() {
 			// handle mouse move on body
-			$('body').on('mousemove', mh.update);
+			$(document).on('mousemove', mh.update);
 		}
 
 		/*
@@ -271,7 +271,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		 */
 		mh.verbalCue = function() {
 			if(!mh.cue && !common.getCookie("vCHz")) {
-				speech.cue(conf.getLS('verbalCueHighZoom'), function() {
+				speech.cueByKey('verbalCueHighZoom', function() {
 					mh.cue = true;
 					common.setCookie("vCHz", 1, 7);
 				});
@@ -281,7 +281,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		// disable mouse highlight
 		mh.disable = function(element) {
 			// remove mousemove listener from body
-			$('body').off('mousemove', mh.update);
+			$(document).off('mousemove', mh.update);
 			mh.hide($(element));
 		}
 
@@ -304,13 +304,13 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 		// lower the threshold when speech is enabled
 		sitecues.on('speech/enable', function() {
-			conf.set('mouseHighlightMinZoom', 1.00);
+			conf.set('mouseHighlightMinZoom', mh.minZoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
 		// revert the threshold when speech is enabled
 		sitecues.on('speech/disable', function() {
-			conf.set('mouseHighlightMinZoom', mh.minzoom);
+			conf.set('mouseHighlightMinZoom', mh.minZoom);
 			mh.updateZoom(conf.get('zoom'));
 		});
 
