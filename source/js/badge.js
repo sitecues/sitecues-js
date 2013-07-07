@@ -34,7 +34,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
       $(badge.element).attr('id', 'sitecues-badge-image');
       $(badge.element).addClass('sitecues-badge-image');
-      $(badge.element).attr('src', sitecues.resolvesitecuesUrl('../images/eq360-badge.png'));
+      $(badge.element).attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'));
       $(badge.element).appendTo(badge.panel);
     }
 

@@ -43,7 +43,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			}).appendTo( wrap );
 
 			$( '<img>' ).addClass( 'ramp' ).attr({
-				src:	sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
+				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
 			}).appendTo( wrap );
 
 

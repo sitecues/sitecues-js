@@ -402,7 +402,7 @@
   };
 
   // Resolve a URL as relative to the main script URL.
-  sitecues.resolvesitecuesUrl = function(urlStr){
+  sitecues.resolveSitecuesUrl = function(urlStr){
     return resolveUrl(urlStr, scriptSrcUrl);
   };
 
@@ -415,7 +415,7 @@
   // async script loading
   sitecues.loadScript = function(url, callback){
     // Resolve the URL as relative to the library URL.
-    url = sitecues.resolvesitecuesUrl(url);
+    url = sitecues.resolveSitecuesUrl(url);
 
     // create script DOM element
     var script = document.createElement('script');
