@@ -3,7 +3,7 @@
 --check-leaks
 -d
 -G
--R spec
+-R xunit
 --recursive
 -t 120000
 -u bdd
