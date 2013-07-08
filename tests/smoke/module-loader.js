@@ -48,7 +48,7 @@ describe("sitecues", function () {
               expect(value).to.equal("[object Object]");
               done();
             });
-          }, 2500);
+          }, 3500);
         });
       });
       it("should have loaded badge [sitecues] module", function (done) {

@@ -1,28 +1,30 @@
-(function (window) {
-  // Object runtime context for PhantomJS's testing of necessary objects.
-  window.phantomjs_context = {};
+// I was experiencing a weird and random scope issue.
+// During evaluation, `window` would sometimes be undefined.
+window = this;
 
-  // Modules to load and add to the context.
-  var
-    module_names = [
-      "badge",
-      "jquery",
-      "keys",
-      "toolbar"
-    ]
-  ;
+// Object runtime context for PhantomJS's testing of necessary objects.
+window.phantomjs_context = {};
 
-  // A bit of logic for respecting DRY.
-  sitecues.use.apply(sitecues, module_names.concat([
-    function () {
-      for (
-        var
-          a = 0,
-          b = module_names.length
-        ; a < b; a++
-      ) {
-        window.phantomjs_context[module_names[a]] = arguments[a];
-      }
+// Modules to load and add to the context.
+var
+  module_names = [
+    "badge",
+    "jquery",
+    "keys",
+    "toolbar"
+  ]
+;
+
+// A bit of logic for respecting DRY.
+sitecues.use.apply(sitecues, module_names.concat([
+  function () {
+    for (
+      var
+        a = 0,
+        b = module_names.length
+      ; a < b; a++
+    ) {
+      window.phantomjs_context[module_names[a]] = arguments[a];
     }
-  ]));
-})(this);
+  }
+]));
