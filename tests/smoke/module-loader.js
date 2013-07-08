@@ -43,7 +43,7 @@ describe("sitecues", function () {
 
         session.browser.execute(script, function (error, result) {
           setTimeout(function () {
-            session.browser.eval("Object.prototype.toString.call(phantomjs_context)", function (error, value) {
+            session.browser.eval("phantomjs_context.toString()", function (error, value) {
               expect(value).to.be.a("string");
               expect(value).to.equal("[object Object]");
               done();
