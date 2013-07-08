@@ -6,7 +6,7 @@
 
 sitecues.def('speech', function (speech, callback, log) {
 
-  sitecues.use('conf', 'conf/remote', function(conf, conf_remote) {
+  sitecues.use('conf', function(conf) {
 
     sitecues.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
 

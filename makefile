@@ -31,11 +31,12 @@ files=\
 	target/source/js/core.js \
 	source/js/load.js \
 	source/js/jquery.js \
-	source/js/conf.js \
+	source/js/conf/main.js \
 	source/js/conf/localstorage.js \
 	source/js/conf/import.js \
 	source/js/conf/remote.js \
 	source/js/conf/server.js \
+	source/js/conf.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \

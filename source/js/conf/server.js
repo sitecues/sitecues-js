@@ -1,9 +1,6 @@
 // module for storing settings on the server
 sitecues.def('conf/server', function (server, callback, log) {
 
-  // Used for JSONP callbacks.
-  var extConf = sitecues.conf = sitecues.conf || {};
-
   // URLs for loading/saving data
   var domain = location.hostname.replace(/^www\./, '');
 	var saveUrl = '//' + sitecues.getCoreConfig().hosts.up + '/save/' + domain + '?callback=?';
@@ -16,11 +13,11 @@ sitecues.def('conf/server', function (server, callback, log) {
   // we don't want to save. Our config management needs work...
   var SAVING_DATA = false;
 
-	sitecues.use('conf', 'load', 'jquery', function(conf, load, jquery){
+	sitecues.use('conf/main', 'jquery', function(conf_main, jquery){
 
     // JSONP callback called when a save call returns.
     var saveTimeoutId;
-    extConf.saveCallback = function() {
+    var saveCallback = function() {
       saveTimeoutId && clearTimeout(saveTimeoutId);
       SAVING_DATA = false;
     };
@@ -42,7 +39,7 @@ sitecues.def('conf/server', function (server, callback, log) {
 
         // Set a save set timeout.
         saveTimeoutId = setTimeout(function() {
-          extConf.saveCallback()
+          saveCallback()
         }, 500);
 
         jquery.ajax({
@@ -53,11 +50,11 @@ sitecues.def('conf/server', function (server, callback, log) {
           contentType: "application/json",
           dataType: 'jsonp',
           success: function(data) {
-            extConf.saveCallback();
+            saveCallback();
           },
           error: function(e) {
             log.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
-            extConf.saveCallback();
+            saveCallback();
           }
         })
       }
@@ -66,15 +63,15 @@ sitecues.def('conf/server', function (server, callback, log) {
     // JSONP callback called when a load call returns.
     var loadTimeoutID;
     var initialized = false;
-    extConf.loadCallback = function(data) {
+    var loadCallback = function(data) {
       loadTimeoutID && clearTimeout(loadTimeoutID);
       // Set the obtained config data (if any).
-      data && conf.data(data);
+      data && conf_main.data(data);
 
       if (!initialized) {
         initialized = true;
         // Update the preferences server on every 'set'.
-        conf.get('*', function(key, value) {
+        conf_main.get('*', function(key, value) {
           saveData(key, value);
         });
         // This module has completed it's loading.
@@ -90,11 +87,11 @@ sitecues.def('conf/server', function (server, callback, log) {
       contentType: "application/json",
       dataType: 'jsonp',
       success: function(data) {
-        extConf.loadCallback(data);
+        loadCallback(data);
       },
       error: function(e) {
         log.info("Unable to load server config: " + e.message);
-        extConf.loadCallback();
+        loadCallback();
       }
     });
 	});

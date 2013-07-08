@@ -8,7 +8,7 @@ sitecues.def('conf/localstorage', function (ls, callback, log){
 	return callback();
 
 	// depends on conf module
-	sitecues.use('conf', function(conf){
+	sitecues.use('conf/main', function(conf_main){
 
 		// private variables
 		var data;
@@ -26,14 +26,14 @@ sitecues.def('conf/localstorage', function (ls, callback, log){
 				// pass stored data to conf
 				for(var i in data)
 					if (data.hasOwnProperty(i))
-						conf.set(i, data[i]);
+						conf_main.set(i, data[i]);
 			}
 		}
 
 		// handle any conf value change
-		conf.get('*', function(key, value){
+		conf_main.get('*', function(key, value){
 			// get all conf data
-			var data = conf.data();
+			var data = conf_main.data();
 
 			// pack it to json
 			data = JSON.stringify(data);
