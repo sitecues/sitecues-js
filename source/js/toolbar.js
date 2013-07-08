@@ -7,8 +7,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     var kTts = 'tts';
     var kTtsDisabled = 'tts-disabled';
     var kTtsButtonRel= 'sitecues-event';
-//
-//    sitecues.use('conf', function(conf) {
     
     sitecues.use(
         'jquery',
@@ -262,5 +260,4 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
         callback();
         });
-//    });
 });
