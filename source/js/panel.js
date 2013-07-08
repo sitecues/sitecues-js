@@ -19,6 +19,10 @@ sitecues.def( 'panel', function (panel, callback, log) {
 		// badgeId or panelDisplaySelector properties.
 		panel.parent = null;
 
+		// Use to check whether a panel element already exists. If it does, then there
+		// is no need to call create() again, but instead just show();
+		panel.created = false;
+
 		// panel element
 		panel.create = function(){
 			// private variables
@@ -72,6 +76,31 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				slider.val( value );
 			});
 
+			if(panel.parent) {
+				panel.parent.click(function(e) {
+					e.preventDefault();
+					return false;
+				})
+				// panel.element.css("top",'50');
+				frame.css({"left": '', "right": ''});
+				var scroll = positioning.getScrollPosition();
+				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
+				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
+				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
+				if(panelTop < 0) {
+					panelTop = 0;
+				}
+				frame.style("top", panelTop, 'important');
+
+				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
+				if(panelLeft < 0) {
+					panelLeft = 0;
+				}
+				frame.style("left", panelLeft, 'important');
+			}
+
+			frame.appendTo('html')
+
 			// return panel
 			return frame;
 		}
@@ -84,35 +113,14 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			// already shown
 			if (panel.element) return;
 
-			// create new panel
-			panel.element = panel.create();
+			// Create new panel if one does not already exist
+			if (panel.created===false){
+				panel.element = panel.create();
+			}
 
 			// Animate instead of fade
 			panel.element.hide();
-			if(panel.parent) {
-				panel.parent.click(function(e) {
-					e.preventDefault();
-					return false;
-				})
-				// panel.element.css("top",'50');
-				panel.element.css({"left": '', "right": ''});
-				var scroll = positioning.getScrollPosition();
-				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
-				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
-				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
-				if(panelTop < 0) {
-					panelTop = 0;
-				}
-				panel.element.style("top", panelTop, 'important');
-
-				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
-				if(panelLeft < 0) {
-					panelLeft = 0;
-				}
-				panel.element.style("left", panelLeft, 'important');
-			}
-			panel.element.appendTo('html').animate(
-				{
+			panel.element.animate({
 					// right: '+=0',
 					width: 'toggle',
 					height: 'toggle',
@@ -121,7 +129,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				750,
 				function() {
 					sitecues.emit('panel/show', panel.element);
-				});
+			});
 
 			panel.element.hover(function() {
 				//Hover in
@@ -148,7 +156,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				sitecues.emit('panel/hide', panel.element);
 
 				// remove element from dom
-				panel.element.remove();
+				//panel.element.remove();
 
 				// delete panel element
 				panel.element = undefined;
