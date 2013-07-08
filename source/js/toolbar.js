@@ -67,6 +67,14 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           .data('tts-enable', 'enabled')
         ;
 
+        // Toolbar instance is created, let's define if it is enabled or disabled? Okey-dokey!
+        var toolbarEnabled = conf.get('toolbarEnabled');
+        if (toolbarEnabled) {
+            toolbar.enableSpeech();
+        } else {
+            toolbar.disableSpeech();
+        }
+
         toolbar.wireEvents();
 
       }
