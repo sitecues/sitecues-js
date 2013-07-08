@@ -10,7 +10,9 @@
 // // Setup.
 // var
 //   expect  = chai.expect,
-//   globals = {}
+//  globals = {
+//    "url": null
+//  }
 // ;
 
 // describe("sitecues", function () {
@@ -33,23 +35,26 @@
 //             done();
 //           });
 //         });
-
 //       });
 
-//       it("should see toolbar on the page on F8", function (done) {
+//       it("should press F8", function (done) {
 //         session.browser.keys(wd.SPECIAL_KEYS["F8"], function (error) {
 //           expect(error).to.not.be.an.instanceof(Error);
 
-//           session.browser.waitForElementByClassName(
-//             "sitecues-toolbar",
-//             500,
-//             function (error) {
-//               expect(error).to.not.be.an.instanceof(Error);
-
-//               done();
-//             }
-//           );
+//           done();
 //         });
+//       });
+
+//       it("should see toolbar on the page", function (done) {
+//         session.browser.waitForElementByClassName(
+//           "sitecues-toolbar",
+//           25000,
+//           function (error) {
+//             expect(error).to.not.be.an.instanceof(Error);
+
+//             done();
+//           }
+//         );
 //       });
 //     });
 //   });
