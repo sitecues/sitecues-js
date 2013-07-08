@@ -86,7 +86,20 @@ describe("sitecues", function () {
       });
       it("should have loaded toolbar [sitecues] module", function (done) {
         session.browser.eval("phantomjs_context.toolbar", function (error, value) {
-          // expect(value);
+          expect(value).to.have.ownProperty("STATES");
+          expect(value.STATES).to.have.ownProperty("OFF");
+          expect(value.STATES).to.have.ownProperty("ON");
+          expect(value).to.have.ownProperty("currentState");
+          expect(value).to.have.ownProperty("render");
+          expect(value).to.have.ownProperty("show");
+          expect(value).to.have.ownProperty("slideOut");
+          expect(value).to.have.ownProperty("slideIn");
+          expect(value).to.have.ownProperty("toggle");
+          expect(value).to.have.ownProperty("enableSpeech");
+          expect(value).to.have.ownProperty("disableSpeech");
+          expect(value).to.have.ownProperty("wireEvents");
+          expect(value).to.have.ownProperty("disable");
+          expect(value).to.have.ownProperty("enable");
           done();
         });
       });
