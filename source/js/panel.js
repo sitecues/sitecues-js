@@ -56,7 +56,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 			// create TTS button and set it up
 			ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( frame );
-			if ( speech.isEnabled() ) {
+			if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
 				ttsButton.data( 'tts-enable', 'enabled' );
 			} else {
 				ttsButton.addClass( "tts-disabled" );
@@ -152,11 +152,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			}
 			// hide panel
 			panel.element.fadeOut('fast', function(){
+
 				// notify about panel hiding
 				sitecues.emit('panel/hide', panel.element);
-
-				// remove element from dom
-				//panel.element.remove();
 
 				// delete panel element
 				panel.element = undefined;
@@ -166,7 +164,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 		// Function that will toggle tts on or off
 		panel.ttsToggle = function() {
 			var ttsButton = $('#sitecues-panel .tts');
-			if(ttsButton.data('tts-enable') === 'disabled') {
+			if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
 				// It's disabled, so enable it
 				sitecues.emit('speech/enable');
 				ttsButton.data('tts-enable','enabled');

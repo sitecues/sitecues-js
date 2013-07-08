@@ -7,8 +7,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     var kTts = 'tts';
     var kTtsDisabled = 'tts-disabled';
     var kTtsButtonRel= 'sitecues-event';
-//
-//    sitecues.use('conf', function(conf) {
     
     sitecues.use(
         'jquery',
@@ -70,8 +68,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
                 ;
 
                 // Toolbar instance is created, let's define if it is enabled or disabled? Okey-dokey!
-                var speechEnabled = conf.get('siteTTSEnable');
-                if (speechEnabled) {
+                var speechEnabled = conf.get('siteTTSEnable')
+                  , ttsServiceAvailable = conf.get('tts-service-available')
+                  ;
+
+                if (speechEnabled && ttsServiceAvailable) {
                     toolbar.enableSpeech();
                 } else {
                     toolbar.disableSpeech();
@@ -168,7 +169,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             log.trace('toolbar.toggle()');
 
             log.info('Toggling toolbar from state ' + toolbar.currentState.name);
-            if (toolbar.currentState === toolbar.STATES.ON) {
+            if (toolbar.currentState === toolbar.STATES.ON && conf.get('tts-service-available') === true) {
                 toolbar.disable();
                 toolbar.slideIn();
             } else {
@@ -178,9 +179,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         };
 
         toolbar.enableSpeech = function () {
+          if (conf.get('tts-service-available') === true) {
             log.trace('toolbar.enableSpeech()');
             toolbar.ttsButton.removeClass(kTtsDisabled);
             toolbar.ttsButton.data('tts-enable', 'enabled');
+          }
         };
 
         toolbar.disableSpeech = function () {

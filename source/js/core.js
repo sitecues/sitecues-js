@@ -457,6 +457,7 @@
           }
         }
         return s;
+
       };
 
     log.info('\n===== BEGIN: SITECUES STATUS =====================\n'
@@ -466,64 +467,93 @@
 
   sitecues.status = function (callback) {
     callback = callback || DEFAULT_STATUS_CALLBACK;
-    // TODO: Figure out a way to make this work correctly since `sitecues.use()` is asynchronous.
-    sitecues.use.apply( sitecues, [
-      "jquery",
-      "speech",
-      function ( $, speech ) {
-        var ajax_urls = {};
 
-        ajax_urls[ "up" ] = ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" );
-        ajax_urls[ "ws" ] = ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" );
+    sitecues.use("jquery", "speech", function ( $, speech ) {
 
-        // FIXME: Not bullet-proof.
-        $.when(
-          $.ajax( {
-            cache:    false,
-            dataType: "json",
-            type:     "GET",
-            url:      ajax_urls.up
-          } ),
-          $.ajax( {
-            cache:    false,
-            dataType: "json",
-            type:     "GET",
-            url:      ajax_urls.ws
-          } )
-        ).done( function ( a, b ) {
-          var ajax_responses = {};
-
-          ajax_responses[ "up" ] = a[ 0 ];
-          ajax_responses[ "ws" ] = b[ 0 ];
-
-          var info = {};
-
-          info[ "versions" ]    = {
-            "sitecues_js": APP_VERSION,
-            "sitecues_up": ajax_responses.up.version,
-            "sitecues_ws": ajax_responses.ws.version
-          };
-          info[ "current_url" ] = window.location.href;
-          info[ "sitecues_js_url" ] = ( sitecues.getScriptSrcUrl() ).raw;
-          info[ "user_agent" ]  = navigator.userAgent;
-          info[ "tts_status" ]  = ( ( speech.isEnabled() ) ? "on" : "off" );
-          info[ "tts_engine" ]  = sitecues.configs.get("ttsEngine");
-          info[ "zoom_level" ]  = sitecues.configs.get("zoom");
-          info[ "badge_enabled" ]  = sitecues.configs.get("badgeEnabled");
-          info[ "toolbar_enabled" ]  = sitecues.configs.get("toolbarEnabled");
-          info[ "site_ui" ]  = sitecues.configs.get("siteUI");          
-          //info[ "" ]  = sitecues.configs.get("");
-
-         // Perform the needed actions on the info.
-          callback(info);
-        } );
+      if (! window.times) {
+        window.times = 1;
+      } else {
+        window.times ++;
       }
-    ] );
+
+      // Set the ajax URLs
+      var ajax_urls = {
+        up: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" ),
+        ws: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" )
+      };
+      
+      // Define the info object to be formatted by the log
+      var info = {
+        version: {
+          "sitecues_js": APP_VERSION,
+          "sitecues_up": null,
+          "sitecues_ws": null
+        },
+        "current_url": window.location.href,
+        "sitecues_js_url": ( sitecues.getScriptSrcUrl() ).raw,
+        "user_agent":  navigator.userAgent,
+        "tts_status": ( ( speech.isEnabled() ) ? "on" : "off" ),
+        "tts_engine": sitecues.configs.get("ttsEngine"),
+        "tts_services_available": sitecues.configs.get("tts-service-available"),
+        "zoom_level": sitecues.configs.get("zoom"),
+        "badge_enabled": sitecues.configs.get("badgeEnabled"),
+        "toolbar_enabled": sitecues.configs.get("toolbarEnabled"),
+        "site_ui": sitecues.configs.get("siteUI")
+      };
+
+      // Defer the ajax calls so we can respond when both are complete
+      var ajaxCheck = function(){
+        if ( typeof info.version.sitecues_up === 'string' && 
+             typeof info.version.sitecues_ws === 'string' ) {
+          callback(info);
+        }
+      };
+
+      $.ajax({
+        cache:    false,
+        dataType: "json",
+        type:     "GET",
+        url:      ajax_urls.up,
+        success: function(response){
+          
+          // Set the version based on the AJAX response object
+          info.version.sitecues_up = response.version;
+          ajaxCheck();
+        },
+        error: function(){
+          
+          // Set an error message if the AJAX object did not return
+          info.version.sitecues_up = 'Error Fetching Version from Service URL';
+          ajaxCheck();
+        }
+      });
+        
+      $.ajax({
+        cache:    false,
+        dataType: "json",
+        type:     "GET",
+        url:      ajax_urls.ws,
+        success: function(response){
+          
+          // Set the version based on the AJAX response object
+          info.version.sitecues_ws = response.version;
+          ajaxCheck();
+        },
+        error: function(){
+
+          // Set an error message if the AJAX object did not return
+          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
+          ajaxCheck();
+        }
+      });
+
+    }); // end of use
 
     // Popup the logger and report status
     var popup = sitecues.logger.appenders.popup;
     popup.show();
     popup.focus();
+    return 'Getting sitecues status.'
   };
 
   //////////////////////////////////////////////////
@@ -577,7 +607,7 @@
     if (valid) {
       _initialize();
     } else {
-      log.warn("invalid sitecues core config. aborting.");
+      log.error("invalid sitecues core config. aborting.");
     }
   };
 
