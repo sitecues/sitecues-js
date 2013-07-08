@@ -87,9 +87,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 		};
 
 		slider.moveThumb = function(x) {
-			//console.log('moveThumb: '+x);	
 			var sliderWidth = slider.slider.width();
-			console.log( slider.slider.width() );
 			var newLeft = x - slider.slider.offset().left;
 			if(newLeft < 0) {
 				newLeft = 0;
