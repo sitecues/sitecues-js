@@ -10,6 +10,8 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 			slider.moveOnZoom(zoom);
 		});
 
+
+		
 		/**
 		 * We're not going to do this automatically as we need to make sure the toolbar is on the page to set up the
 		 * listeners properly. Otherwise we'd have to set the .on() methods to document scope which would be a
@@ -20,25 +22,34 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 		slider.build = function(parent) {
 			// create clider slider.wrap element
-			slider.wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(parent);
+			slider.wrap = $('<div>').addClass('slider-wrap').appendTo(parent);
 
 			// create slider
-			slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
+			slider.slider = $('<div class="sitecues-slider"></div>').appendTo(slider.wrap);
 
 			// Create thumb
-			slider.thumb = $( '<img class="sitecues-slider-thumb"/>')
-        .attr('src', slider.imagePath)
-        .appendTo(slider.slider);
+			slider.thumb = $('<img class="sitecues-slider-thumb"/>')
+				.appendTo(slider.slider);
+      
+			
+      // Create thumbImage Object
+      var thumbImage = new Image();
+      
+      // Beging loading the thumb image...
+      thumbImage.src = slider.imagePath;
 
-			conf.set('zoom', this.value);
-
-			// handle zoom change and update slider
-			conf.get( 'zoom', function( value ) {
-				slider.slider.val(value);
-				
-				//slider.moveThumb(xPos);
-				slider.moveOnZoom(value);
-			});
+      // This callback function fires after the thumb image has loaded. The thumb image being
+      // appended to the slider changes the pixel-width of the slider content. When we get the
+      // zoom level from conf and update the UI, the calculation of where to place the thumb on
+      // the slider should be based on the sliders correct width. This can only be done after
+      // all the contents of the slider have been loaded.
+      thumbImage.addEventListener('load', function(){
+      	slider.thumb.attr('src', this.src);
+      	conf.get('zoom', function( value ) {
+					slider.slider.val(value);
+					slider.moveOnZoom(value);
+				});
+      });
 
 
 			var thumbHammer = Hammer(slider.thumb.get(0));
@@ -53,10 +64,9 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 				e.preventDefault();
 				e.stopPropagation();
 				var pos = slider.moveThumb(e.clientX);
-				slider.updateZoom( pos );
+				slider.updateZoom(pos);
 			});
-
-		}
+		};
 
 		slider.repaint = function(toolbar) {
 			var wrapHeight = slider.wrap.height();
@@ -79,6 +89,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 		slider.moveThumb = function(x) {
 			//console.log('moveThumb: '+x);	
 			var sliderWidth = slider.slider.width();
+			console.log( slider.slider.width() );
 			var newLeft = x - slider.slider.offset().left;
 			if(newLeft < 0) {
 				newLeft = 0;
