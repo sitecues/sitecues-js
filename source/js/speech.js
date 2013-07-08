@@ -6,6 +6,8 @@
 
 sitecues.def('speech', function (speech, callback, log) {
 
+  var kSpeechOnCookie = "vCSp"; 
+
   sitecues.use('conf', function(conf) {
 
     sitecues.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
@@ -156,11 +158,11 @@ sitecues.def('speech', function (speech, callback, log) {
               // An engine is set so we can enable the component
               ttsEnable = true;
               conf.set('siteTTSEnable', true);
-              if(common.getCookie("vCSp")) {
+              if(common.getCookie(kSpeechOnCookie)) {
                   speech.sayByKey('verbalCueSpeechOn');
               } else {
                   speech.sayByKey('verbalCueSpeechOnFirst', function() {
-                      common.setCookie("vCSp", 1, 7);
+                      common.setCookie(kSpeechOnCookie, 1, 7);
                   });
               }
               if (callback) {
