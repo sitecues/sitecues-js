@@ -2,8 +2,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
   var domain = sitecues.getScriptSrcUrl();
 
-  slider.imagePath = domain.protocol + "://" + domain.host + "/" +
-  	'images/toolbar/toolbar-slider-thumb.png';
+  slider.imagePath = sitecues.resolveSitecuesUrl('../images/toolbar/toolbar-slider-thumb.png');
 
 	sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
 
@@ -25,10 +24,6 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 			// create slider
 			slider.slider = $( '<div class="sitecues-slider"></div>').appendTo( slider.wrap );
-			
-			console.log( slider.imagePath);
-			console.log( sitecues.getScriptSrcUrl() );
-
 
 			// Create thumb
 			slider.thumb = $( '<img class="sitecues-slider-thumb"/>')

@@ -12,7 +12,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 		panel.hideDelay = 1000;
 		// Forcing a change to merge from Thom into master
 		// to make sure that I'm actually getting the real code.
-		log.info('!!! TEMP !!! panel.hideDelay');
+		//log.info('!!! TEMP !!! panel.hideDelay');
 
 		// This is the parent element of the panel.  The default setup does
 		// not need one, this is only when we're using a custom target via
@@ -43,7 +43,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			}).appendTo( wrap );
 
 			$( '<img>' ).addClass( 'ramp' ).attr({
-				src:	sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
+				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
 			}).appendTo( wrap );
 
 
