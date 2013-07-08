@@ -33,17 +33,12 @@
     // attached to this name space and aliased on "window.sitecues"
     , sitecues    = window.sitecues
 
-    , modules
-    , coreConfig
-
   // Private Functions
-
     , resolveUrl
     , parseUrlQuery
     , parseUrl
     , APP_VERSION = '0.0.0-UNVERSIONED'
   ;
-
 
   // Return the core config.
   sitecues.getCoreConfig = function() {
@@ -137,7 +132,7 @@
   var getModuleState = function(name) {
     var module = modules[name];
 
-    if (! module) {
+    if (!module) {
       // There is no entry, so the there is no state.
       return MODULE_STATE.NONE;
     }

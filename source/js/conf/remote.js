@@ -5,16 +5,16 @@ sitecues.def('conf/remote', function (remote, callback, log){
     var log = window.sitecues.logger.log('remote');
 
     // depends on conf and jquery module
-    sitecues.use('jquery', 'conf', function($, conf){
+    sitecues.use('jquery', 'conf/main', function($, conf_main){
 
         remote.fetch = function(callback) {
 
-            conf.get('site-id', function(siteId){
+            conf_main.get('site-id', function(siteId){
 
                 if( !siteId ) {
                     siteId = 1;
                 }
-                if(conf.get('remoteConfig') === 'false'){
+                if(conf_main.get('remoteConfig') === 'false'){
                     
                     log.info("Remote configuration disabled.");
 
@@ -38,7 +38,7 @@ sitecues.def('conf/remote', function (remote, callback, log){
                                 remote.azureAccessToken = data.azureAccessToken;
                             }
                             for (var i = 0; i < data.settings.length; i++) {
-                                conf.set(data.settings[i].key, data.settings[i].value);
+                                conf_main.set(data.settings[i].key, data.settings[i].value);
                             }
 
                             callback();
