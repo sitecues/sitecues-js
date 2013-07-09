@@ -64,15 +64,15 @@ sitecues.def('keys', function (keys, callback, log) {
         'end':      { stopOuterScroll: true, down: true }
     }
     sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
-        // handle key
+        // Handle key
         keys.handle = function ( key, event ) {
 
-            // this is shim for browser short cuts; none of our current features requires 'ctrl' or 'alt' so far
+            // This is shim for browser short cuts; none of our current features requires 'ctrl' or 'alt' so far
             if (event.ctrlKey || event.altKey) {
                 return true;
             }
 
-            // if event defined, emit it
+            // If event defined, emit it
             if ( key.event ) {
                 sitecues.emit( key.event, event );
             }
@@ -80,7 +80,7 @@ sitecues.def('keys', function (keys, callback, log) {
             // prevent default if needed
             if (key.preventDefault) {
                 common.preventDefault(event);
-                //Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
+                // Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
                 event.stopImmediatePropagation();
             }
         };
@@ -88,28 +88,28 @@ sitecues.def('keys', function (keys, callback, log) {
         keys.isEditable = function ( element ) {
             var tag = element.localName;
 
-            if ( ! tag ) {
+            if (!tag) {
                 return false;
             }
 
             tag = tag.toLowerCase();
 
-            if ( tag === 'input' || tag === 'textarea' || tag === 'select' ) {
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') {
                return true;
             }
 
-            if ( element.getAttribute( 'tabIndex' ) || element.getAttribute( 'onkeydown' ) || element.getAttribute( 'onkeypress' ) ) {
+            if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
                 return true; // Be safe, looks like a keyboard-accessible interactive JS widget
             }
 
             // Check for rich text editor
             var contentEditable = element.getAttribute('contenteditable');
 
-            if ( contentEditable && contentEditable.toLowerCase() !== 'false' ) {
+            if (contentEditable && contentEditable.toLowerCase() !== 'false') {
                 return true; // In editor
             }
 
-            if ( document.designMode === 'on' ) {
+            if (document.designMode === 'on') {
                 return true; // Another kind of editor
             }
 
@@ -147,7 +147,7 @@ sitecues.def('keys', function (keys, callback, log) {
                 parts = key.split(/\s*\+\s*/);
 
                 // check each part of key definition
-                for(i=0, l=parts.length; i<l; i++){
+                for (i=0, l=parts.length; i<l; i++) {
                     // get test for key
                     test = keys.test[parts[i]];
 

@@ -24,21 +24,21 @@ sitecues.def( 'panel', function (panel, callback, log) {
 		panel.created = false;
 
 		// panel element
-		panel.create = function(){
+		panel.create = function() {
 			// private variables
 			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
-			frame = $( '<div>' ).attr( 'id', 'sitecues-panel' );
+			frame = $('<div>').attr('id', 'sitecues-panel');
 		
 			// create small A label
-			$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
+			$('<div>').addClass('small').text('A').appendTo(frame);
 
 			// create clider wrap element
-			wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(frame);
+			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
 
 			// create slider
-			slider = $( '<input>' ).addClass( 'slider' ).attr({
+			slider = $('<input>').addClass('slider').attr({
 				type: 		'range',
 				min: 		'1',
 				max: 		'5',
@@ -46,16 +46,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				ariaLabel: 	'See it better'
 			}).appendTo( wrap );
 
-			$( '<img>' ).addClass( 'ramp' ).attr({
+			$('<img>').addClass('ramp').attr({
 				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
-			}).appendTo( wrap );
+			}).appendTo(wrap);
 
 
 			// create big A label
-			$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );
+			$('<div>').addClass('big').text('A').appendTo(frame);
 
 			// create TTS button and set it up
-			ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( frame );
+			ttsButton = $('<div>').addClass('tts').appendTo(frame);
 			if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
 				ttsButton.data( 'tts-enable', 'enabled' );
 			} else {
@@ -76,7 +76,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				slider.val( value );
 			});
 
-			if(panel.parent) {
+			if (panel.parent) {
 				panel.parent.click(function(e) {
 					e.preventDefault();
 					return false;

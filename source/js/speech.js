@@ -91,12 +91,12 @@ sitecues.def('speech', function (speech, callback, log) {
               return false;
           }
           var hlbId = speech.getHlbId(hlb);
-          if(!hlbId) {
+          if (!hlbId) {
               log.warn("No hightlightbox ID!");
               return false;
           }
           var player = players[hlbId];
-          if(!player) {
+          if (!player) {
               // A player wasn't initialized, so let's do that now
               log.info("Lazy init of player");
               player = speech.initPlayer(hlb);
@@ -112,13 +112,13 @@ sitecues.def('speech', function (speech, callback, log) {
        */
       speech.stop = function(hlb) {
           var hlbId = speech.getHlbId(hlb);
-          if(!hlbId) {
+          if (!hlbId) {
               log.warn("No hightlightbox ID!");
               return;
           }
           log.info("Stopping " + hlbId);
           var player = players[hlbId];
-          if(player) {
+          if (player) {
               player.stop();
           } else {
               log.info(players);
@@ -193,7 +193,7 @@ sitecues.def('speech', function (speech, callback, log) {
        */
       speech.say = function(text, callback) {
           var provHlb = jQuery('<div></div>').hide().appendTo('body').text(text);
-          if(speech.play(provHlb) && callback) {
+          if (speech.play(provHlb) && callback) {
               callback();
           }
       };
@@ -207,7 +207,7 @@ sitecues.def('speech', function (speech, callback, log) {
         // object that indicates what the key is. The speech processor will use that key to determine
         // the audio file, rather than using the text.
         var provHlb = jQuery('<div></div>').hide().appendTo('body').data('speechKey', key);
-        if(speech.play(provHlb) && callback) {
+        if (speech.play(provHlb) && callback) {
           callback();
         }
       };
@@ -234,18 +234,18 @@ sitecues.def('speech', function (speech, callback, log) {
        * Returns the ID of the object.  If no ID is found, it will set a random one.
        */
       speech.getHlbId = function(hlb) {
-          if(!hlb) {
+          if (!hlb) {
               log.info("No hlb!");
               return;
           }
-          if(hlb instanceof jQuery) {
+          if (hlb instanceof jQuery) {
               if(!hlb.attr("id")) {
                   hlb.attr("id", Math.round((Math.random() + new Date().getTime()) * 1000));
               }
               return hlb.attr("id");
           }
           // Not a jQuery object
-          if(!hlb.id) {
+          if (!hlb.id) {
               hlb.id = Math.round((Math.random() + new Date().getTime() * 1000));
           }
           return hlb.id
@@ -262,7 +262,7 @@ sitecues.def('speech', function (speech, callback, log) {
        * Toggles speech on or off based on its current state.
        */
       speech.toggle = function() {
-          if(speech.isEnabled()) {
+          if (speech.isEnabled()) {
               sitecues.emit('speech/disable');
           } else {
               sitecues.emit('speech/enable');

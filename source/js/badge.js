@@ -22,20 +22,20 @@ sitecues.def('badge', function (badge, callback, log) {
       panel.parent  = badge.element;
     } else {
       // We have no alternate or pre-existing badges defined, so create a new one.
-      badge.panel = $('<div>')
+      badge.panel = $('<div>');
 
-      $(badge.panel).attr('id', badge.badgeId); // set element id for proper styling
-      $(badge.panel).addClass('sitecues-badge');
-      $(badge.panel).hide();
-      $(badge.panel).appendTo('html');
+      $(badge.panel).attr('id', badge.badgeId) // set element id for proper styling
+                    .addClass('sitecues-badge')
+                    .hide()
+                    .appendTo('html');
 
       // create badge image inside of panel
       badge.element = $('<img>');
 
-      $(badge.element).attr('id', 'sitecues-badge-image');
-      $(badge.element).addClass('sitecues-badge-image');
-      $(badge.element).attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'));
-      $(badge.element).appendTo(badge.panel);
+      $(badge.element).attr('id', 'sitecues-badge-image')
+                      .addClass('sitecues-badge-image')
+                      .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
+                      .appendTo(badge.panel);
     }
 
     $(badge.panel).hover(function () {
@@ -56,7 +56,7 @@ sitecues.def('badge', function (badge, callback, log) {
      */
     badge.hide = function (success) {
       $(badge.panel).fadeOut('fast', function() {
-      	if(success) {
+      	if (success) {
       		success();
       	}
       });
@@ -72,7 +72,7 @@ sitecues.def('badge', function (badge, callback, log) {
     	if(conf.get('badgeEnabled')) {
     		log.info('Showing badge');
 	        $(badge.panel).fadeIn('slow', function() {
-				if(success) {
+				if (success) {
 					success();
 				}
 	        });
