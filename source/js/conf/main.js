@@ -66,9 +66,9 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 	conf_main.typeCheck = function(data, key){
 		var value = data[key];
 			
-		// NOTE: This logic should be in the Zoom modile. Not conf. To be updated.
+		// NOTE: This logic should be in the zoom module. Not conf. To be updated.
 		if (key == "zoom") {
-			value = parseFloat(value);
+			value = parseFloat(value || 1);
 		}
 
 		return value;

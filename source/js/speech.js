@@ -177,7 +177,7 @@ sitecues.def('speech', function (speech, callback, log) {
               // An engine is set so we can enable the component
               ttsEnable = true;
               conf.set('siteTTSEnable', true);
-              if(shouldPlayFirstSpeechOnCue()) {
+              if(!shouldPlayFirstSpeechOnCue()) {
                   speech.sayByKey('verbalCueSpeechOn');
               } else {
                   speech.sayByKey('verbalCueSpeechOnFirst', function() {
