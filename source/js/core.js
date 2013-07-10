@@ -468,13 +468,7 @@
   sitecues.status = function (callback) {
     callback = callback || DEFAULT_STATUS_CALLBACK;
 
-    sitecues.use("jquery", "speech", function ( $, speech ) {
-
-      if (! window.times) {
-        window.times = 1;
-      } else {
-        window.times ++;
-      }
+    sitecues.use("jquery", "speech", 'conf', function ( $, speech, conf ) {
 
       // Set the ajax URLs
       var ajax_urls = {
@@ -493,13 +487,12 @@
         "sitecues_js_url": ( sitecues.getScriptSrcUrl() ).raw,
         "user_agent":  navigator.userAgent,
         "tts_status": ( ( speech.isEnabled() ) ? "on" : "off" ),
-        "tts_engine": sitecues.configs.get("ttsEngine"),
-        "tts_services_available": sitecues.configs.get("tts-service-available"),
-        "zoom_level": sitecues.configs.get("zoom"),
-        "badge_enabled": sitecues.configs.get("badgeEnabled"),
-        "toolbar_enabled": sitecues.configs.get("toolbarEnabled"),
-        "site_ui": sitecues.configs.get("siteUI")
       };
+
+      var data = conf.data();
+      for (var setting in data) {
+        info[setting] = data[setting];
+      }
 
       // Defer the ajax calls so we can respond when both are complete
       var ajaxCheck = function(){
