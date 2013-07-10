@@ -1,4 +1,4 @@
-sitecues.def('load', function(load, callback, console){
+sitecues.def('load', function (load, callback, log) {
 
 	// async script loading
 	load.script = sitecues.loadScript;
@@ -6,7 +6,7 @@ sitecues.def('load', function(load, callback, console){
 	// async stylesheet loading
 	load.style = function(url, callback){
 		// Resolve the URL as relative to the library URL.
-		url = sitecues.resolvesitecuesUrl(url);
+		url = sitecues.resolveSitecuesUrl(url);
 
 		// private variables
 		var pull, style, counter = 0;

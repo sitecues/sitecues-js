@@ -7,7 +7,7 @@
 
 (function(){
 
-  // Convenience alias log4javascript instance stored on windows.sitcues
+  // Alias log4javascript object to log4js for convenience
   var log4js = window.sitecues.log4js;
 
   // The main Logger 
@@ -53,8 +53,8 @@
 
     //// Logger Initialization Function ////
 
-    init: function(){
-     
+    init: function( log4js ){
+    
       // Set the default appender layout
       this.layout = new log4js.PatternLayout(this.layoutPattern);
 
@@ -97,17 +97,7 @@
         newLogger.addAppender(this.appenders[appenderName]);
       }
 
-      // Map console-like interface
-      return {
-        instance: newLogger,
-        log   : function(a){ newLogger.info(a);  },
-        debug : function(a){ newLogger.debug(a); },
-        error : function(a){ newLogger.error(a); },
-        info  : function(a){ newLogger.info(a);  },
-        warn  : function(a){ newLogger.warn(a);  },
-        trace : function(a){ newLogger.trace(a); },
-        fatal : function(a){ newLogger.fatal(a); }
-      }
+      return newLogger;
     },
 
     //// Toggle State Handlers ////
@@ -126,17 +116,6 @@
           this.toggleItems.popup.state = false;
           return "Off";
         }}
-
-    
-      // Toggle route-logs-to-console (use with caution)
-      
-      // console: { state: false, 
-      //   on: function(){
-
-      //   },
-      //   off: function(){
-
-      //   }}
     },
 
 
@@ -166,6 +145,6 @@
   };
 
   // Initialize the global Logger
-  window.sitecues.logger = Logger.init();
+  window.sitecues.logger = Logger.init( log4js );
 
 })();

@@ -1,0 +1,70 @@
+{
+  "testSite": {
+    "siteId"	  : 5,
+    "hostname"	: "localhost",
+    "secure"	  : false,
+    "httpPort"	: 8000,
+    "httpsPort"	: 8443
+  },
+
+  "sitecuesUrl": {
+    "hostname"  : "localhost",
+    "path"			: "/js/equinox.js",
+    "httpPort"	: 8000,
+    "httpsPort"	: 8443
+  },
+
+  "providerCommon": {
+    "browserCommon": {
+      "javascriptEnabled"			            : true,
+      "locationContextEnabled"            : true,
+      "nativeEvents"						          : true,
+      "unexpectedAlertBehaviour"          : "ignore",
+      "webStorageEnabled"					        : true,
+      "applicationCacheEnabled"		        : true,
+      "browserConnectionEnabled"	        : true,
+      "databaseEnabled"					          : true,
+      "webdriver.remote.quietExceptions"  : false
+    }
+  },
+
+  "providers": {
+    "TestingBot": {
+      "module": "../../../swdda/testingbot.js",
+
+      "maxConcurrent": 4,
+
+      "server": {
+        "host": "localhost",
+        "port":	4445
+      },
+
+      "browserCommon": {
+        "api_key"                           : "b62a13f4d5cdb0f6c8b9e790ebd1aa8e",
+        "api_secret"                        : "5fcb13beac07d9d8eff12944dadb5f86",
+        "javascriptEnabled"			            : true,
+        "locationContextEnabled"            : true,
+        "nativeEvents"						          : true,
+        "unexpectedAlertBehaviour"          : "ignore",
+        "webStorageEnabled"					        : true,
+        "applicationCacheEnabled"		        : true,
+        "browserConnectionEnabled"	        : true,
+        "databaseEnabled"					          : true,
+        "webdriver.remote.quietExceptions"  : false
+      },
+
+      "browsers": [
+        {
+          "label"       : "WIN7/Chrome",
+          "platform"    : "WINDOWS",
+          "browserName" : "googlechrome"
+        },
+        {
+          "label"       : "WIN8/Chrome",
+          "platform"    : "WIN8",
+          "browserName" : "googlechrome"
+        }
+      ]
+    }
+  }
+}

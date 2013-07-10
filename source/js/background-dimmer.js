@@ -1,7 +1,7 @@
 ﻿/**
  * BackgroundDimmer can dim all content in the page behind a given z-index.
  */
-sitecues.def('background-dimmer', function (backgroundDimmer, callback, console) {
+sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
   // Get dependencies
   sitecues.use('jquery', 'util/positioning', function ($, positioning) {
@@ -65,7 +65,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, console)
         id: this.kDimmerId,
         
         // Add the SVG path to the HTML of the dimmerContain
-        html: dimmerSVG})
+        html: dimmerSVG })
+      
         // Set the CSS for the dimemrContainer
         .style({
           'position'      : 'absolute',

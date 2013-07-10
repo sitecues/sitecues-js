@@ -1,0 +1,15 @@
+{
+  "cookies": "phantomjs-cookies.txt",
+  "debug": true,
+  "diskCache": true,
+  "loadImages": true,
+  "localStoragePath": "phantomjs-local-storage",
+  "localStorageQuota": 128,
+  "localToRemoteUrlAccess": true,
+  "maxDiskCacheSize": 256,
+  "remoteDebuggerPort": 9753,
+  "webdriver": "localhost:8484",
+  "webdriverLogfile": "phantomjs-webdriver.log",
+  "webdriverLoglevel": "ERROR",
+  "webSecurity": true
+}

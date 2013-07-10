@@ -153,6 +153,15 @@ sitecues.def('util/common', function (common, callback) {
                 return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
             }
 
+            /*
+			 * Check if current image value is not empty.
+			 * @imageValue A string that represents current image value.
+			 * @return true if image value contains some not-empty value.
+			 */
+            common.isEmptyBgImage = function(imageValue) {
+                return common.isEmpty(imageValue) || imageValue === 'none';
+            }
+
 			/*
 			 * Using image object element it gets its average color by means of the canvas.
 			 * @param imgEl An object.

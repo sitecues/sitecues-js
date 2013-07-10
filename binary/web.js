@@ -9,18 +9,57 @@ function strToBool(str) {
 // initialize express application
 var fs, app, root, path, mime, port, https, hogan, express;
 
-// process cmd line args
-var useHttps = strToBool(process.argv[3]),
-	prodMode = strToBool(process.argv[4]);
-
 // dependencies
-fs = require('fs');
+fs = require('fs-extra');
 path = require('path');
 mime = require('mime');
 https = require('https');
 hogan = require('hogan.js');
 express = require('express');
 app = express();
+
+// We may run this as root to bind to ports 80/443,
+// so determine who the owner of this script is, and
+// chown all created dirs and files to that owner.
+var uid, gid;
+(function(){
+  var rootStat = fs.statSync(__filename);
+  uid = rootStat.uid;
+  gid = rootStat.gid;
+})();
+
+function mkdirs(dir) {
+  // Find the first existing dir.
+  dir = path.resolve(dir);
+  var firstExisting = '' + dir;
+  while (!fs.existsSync(firstExisting)) {
+    firstExisting = path.dirname(firstExisting);
+  }
+
+  fs.mkdirsSync(dir);
+
+  while (dir != firstExisting) {
+    fs.chownSync(dir, uid, gid);
+    dir = path.dirname(dir);
+  }
+}
+
+// process cmd line args
+var useHttps = strToBool(process.argv[3]),
+	prodMode = strToBool(process.argv[4]),
+  portFile = null;
+
+if (process.argv.length > 5) {
+  var portFileComps = process.argv[5].split('/');
+  portFileComps.unshift(process.cwd());
+  portFile = path.resolve(path.join.apply(path, portFileComps));
+  console.log("PORTSFILE: " + portFile);
+  mkdirs(path.dirname(portFile));
+}
+
+app.on('listen', function(e){
+  console.log('LISTEN: ' + JSON.stringify(e));
+});
 
 // handle relative paths properly
 root = path.dirname(module.filename);
@@ -36,6 +75,7 @@ if (!prodMode) {
 	app.use(express.static(path.join(root, '../source')));
 }
 app.use(express.static(path.join(root, '../target/compile')));
+app.use(express.static(path.join(root, '../target/etc')));
 
 // Process the inline JS file template.
 var INLINE_JS_FILE = path.resolve(path.join(root, '../tests/views/inline.html'));
@@ -101,7 +141,6 @@ app.get(SITE_CONTEXT_PATH + '/*', function (req, res, next) {
 
 				// Insert the markup.
 				content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
-					console.log('match found: ' + headStart);
 					return headStart + inlineJsData.markup;
 				});
 
@@ -120,17 +159,27 @@ app.get(SITE_CONTEXT_PATH + '/*', function (req, res, next) {
 // start http server (express app) on specified port
 // detect what port number use for server
 port = process.env.PORT || process.argv[2] || 8000;
-app.listen(port, function(){
-	console.log('Listening at "http://localhost:' + port + '/".');
+app.listen(port, function() {
+	console.log('Listening at "http://localhost:' + port + '/"');
 });
+
+if (portFile) {
+  fs.writeFileSync(portFile, '-Dswdda.testSite.httpPort=' + port + ' -Dswdda.sitecuesUrl.httpPort=' + port, {flag:'w'});
+  fs.chownSync(portFile, uid, gid);
+}
 
 // if https option passed to script
 if (useHttps){
+  if (portFile) {
+    fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
+  }
+
 	// create https server and start it on 443 port
 	https.createServer({
 		key:	fs.readFileSync('binary/cert/localhost.key'),
 		cert:	fs.readFileSync('binary/cert/localhost.cert')
 	}, app).listen(443, function(){
-		console.log('Listening at "https://localhost/".');
+		console.log('Listening at "https://localhost:443/"');
+
 	});
 }

@@ -1,4 +1,4 @@
-sitecues.def('sitecues/debug', function(module, callback, console){
+sitecues.def('sitecues/debug', function (module, callback, log) {
 
 	// remember start time
 	var start = +new Date();
@@ -9,7 +9,7 @@ sitecues.def('sitecues/debug', function(module, callback, console){
 		var time = (+new Date() - (time || start))/1000;
 
 		// dump to log profile
-		console.info(time + 's\t' + type);
+		log.info(time + 's\t' + type);
 	});
 
 });

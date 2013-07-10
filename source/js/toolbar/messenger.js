@@ -1,7 +1,7 @@
 /**va
  * The messenger is the text-display component of the toolbar.
  */
-sitecues.def('toolbar/messenger', function(messenger, callback, console){
+sitecues.def('toolbar/messenger', function(messenger, callback, log){
 	sitecues.use( 'jquery', 'conf', function ($, conf) {
 
 		// The queue of messages, including the one that is currently displayed.

@@ -7,7 +7,7 @@
  * Note: keydown event is also handled in keys.js
  */
 
-sitecues.def('hlb/event-handlers', function(eventHandlers, callback, console) {
+sitecues.def('hlb/event-handlers', function(eventHandlers, callback, log) {
 
     // shortcut to hasOwnProperty
     var has = Object.prototype.hasOwnProperty;

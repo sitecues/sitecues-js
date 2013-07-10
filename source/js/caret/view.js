@@ -1,6 +1,6 @@
 // view for the caret enhancement
 // NOTE: moved from TS codebase, need refactoring
-sitecues.def('caret/view', function(view, callback, console) {
+sitecues.def('caret/view', function(view, callback, log) {
 
 	// Create the logger for this module
    var log = window.sitecues.logger.log('caret/view');

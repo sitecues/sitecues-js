@@ -1,7 +1,7 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-sitecues.def('geo', function(geo, callback, console){
+sitecues.def('geo', function(geo, callback, log) {
 
 	sitecues.use('jquery', 'conf', function($, conf){
 

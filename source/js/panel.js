@@ -1,4 +1,4 @@
-sitecues.def( 'panel', function(panel, callback, console) {
+sitecues.def( 'panel', function (panel, callback, log) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
@@ -12,29 +12,33 @@ sitecues.def( 'panel', function(panel, callback, console) {
 		panel.hideDelay = 1000;
 		// Forcing a change to merge from Thom into master
 		// to make sure that I'm actually getting the real code.
-		console.info('!!! TEMP !!! panel.hideDelay');
+		//log.info('!!! TEMP !!! panel.hideDelay');
 
 		// This is the parent element of the panel.  The default setup does
 		// not need one, this is only when we're using a custom target via
 		// badgeId or panelDisplaySelector properties.
 		panel.parent = null;
 
+		// Use to check whether a panel element already exists. If it does, then there
+		// is no need to call create() again, but instead just show();
+		panel.created = false;
+
 		// panel element
-		panel.create = function(){
+		panel.create = function() {
 			// private variables
 			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
-			frame = $( '<div>' ).attr( 'id', 'sitecues-panel' );
+			frame = $('<div>').attr('id', 'sitecues-panel');
 		
 			// create small A label
-			$( '<div>' ).addClass( 'small' ).text( 'A' ).appendTo(frame);
+			$('<div>').addClass('small').text('A').appendTo(frame);
 
 			// create clider wrap element
-			wrap = $( '<div>' ).addClass( 'slider-wrap' ).appendTo(frame);
+			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
 
 			// create slider
-			slider = $( '<input>' ).addClass( 'slider' ).attr({
+			slider = $('<input>').addClass('slider').attr({
 				type: 		'range',
 				min: 		'1',
 				max: 		'5',
@@ -42,17 +46,17 @@ sitecues.def( 'panel', function(panel, callback, console) {
 				ariaLabel: 	'See it better'
 			}).appendTo( wrap );
 
-			$( '<img>' ).addClass( 'ramp' ).attr({
-				src:	sitecues.resolvesitecuesUrl('../images/panel/slider_ramp.png')
-			}).appendTo( wrap );
+			$('<img>').addClass('ramp').attr({
+				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
+			}).appendTo(wrap);
 
 
 			// create big A label
-			$( '<div>' ).addClass( 'big' ).text( 'A' ).appendTo( frame );
+			$('<div>').addClass('big').text('A').appendTo(frame);
 
 			// create TTS button and set it up
-			ttsButton = $( '<div>' ).addClass( 'tts' ).appendTo( frame );
-			if ( speech.isEnabled() ) {
+			ttsButton = $('<div>').addClass('tts').appendTo(frame);
+			if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
 				ttsButton.data( 'tts-enable', 'enabled' );
 			} else {
 				ttsButton.addClass( "tts-disabled" );
@@ -72,6 +76,31 @@ sitecues.def( 'panel', function(panel, callback, console) {
 				slider.val( value );
 			});
 
+			if (panel.parent) {
+				panel.parent.click(function(e) {
+					e.preventDefault();
+					return false;
+				})
+				// panel.element.css("top",'50');
+				frame.css({"left": '', "right": ''});
+				var scroll = positioning.getScrollPosition();
+				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
+				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
+				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
+				if(panelTop < 0) {
+					panelTop = 0;
+				}
+				frame.style("top", panelTop, 'important');
+
+				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
+				if(panelLeft < 0) {
+					panelLeft = 0;
+				}
+				frame.style("left", panelLeft, 'important');
+			}
+
+			frame.appendTo('html')
+
 			// return panel
 			return frame;
 		}
@@ -84,35 +113,14 @@ sitecues.def( 'panel', function(panel, callback, console) {
 			// already shown
 			if (panel.element) return;
 
-			// create new panel
-			panel.element = panel.create();
+			// Create new panel if one does not already exist
+			if (panel.created===false){
+				panel.element = panel.create();
+			}
 
 			// Animate instead of fade
 			panel.element.hide();
-			if(panel.parent) {
-				panel.parent.click(function(e) {
-					e.preventDefault();
-					return false;
-				})
-				// panel.element.css("top",'50');
-				panel.element.css({"left": '', "right": ''});
-				var scroll = positioning.getScrollPosition();
-				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
-				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
-				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
-				if(panelTop < 0) {
-					panelTop = 0;
-				}
-				panel.element.style("top", panelTop, 'important');
-
-				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
-				if(panelLeft < 0) {
-					panelLeft = 0;
-				}
-				panel.element.style("left", panelLeft, 'important');
-			}
-			panel.element.appendTo('html').animate(
-				{
+			panel.element.animate({
 					// right: '+=0',
 					width: 'toggle',
 					height: 'toggle',
@@ -121,7 +129,7 @@ sitecues.def( 'panel', function(panel, callback, console) {
 				750,
 				function() {
 					sitecues.emit('panel/show', panel.element);
-				});
+			});
 
 			panel.element.hover(function() {
 				//Hover in
@@ -144,11 +152,9 @@ sitecues.def( 'panel', function(panel, callback, console) {
 			}
 			// hide panel
 			panel.element.fadeOut('fast', function(){
+
 				// notify about panel hiding
 				sitecues.emit('panel/hide', panel.element);
-
-				// remove element from dom
-				panel.element.remove();
 
 				// delete panel element
 				panel.element = undefined;
@@ -158,7 +164,7 @@ sitecues.def( 'panel', function(panel, callback, console) {
 		// Function that will toggle tts on or off
 		panel.ttsToggle = function() {
 			var ttsButton = $('#sitecues-panel .tts');
-			if(ttsButton.data('tts-enable') === 'disabled') {
+			if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
 				// It's disabled, so enable it
 				sitecues.emit('speech/enable');
 				ttsButton.data('tts-enable','enabled');

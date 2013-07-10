@@ -4,77 +4,92 @@
  * how we will implement Ivona's API.  This version is therefore
  * a generic audio file player.
  */
-sitecues.def('speech/ivona', function(ivona, callback, console) {
+sitecues.def('speech/ivona', function (ivona, callback, log) {
 
-    var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
-        var myState = 'init';
-		var secureFlag = (_secure ? 1 : 0);
-        var hlb = _jQuery(_hlb);
-		// TODO: Remove the hard-coded site ID.
-        var baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag + "&";
-        this.init = function() {
-            _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
-            console.info(_jQuery("#jPlayer-" + hlb.attr('id')));
-            _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer({
-                ready: function() {
-                    console.info("jPlayer Ready");
-                    _jQuery(this).jPlayer( "setMedia", {
-                        mp3: baseMediaUrl + "codecId=mp3&text=" + encodeURIComponent(hlb.text()),
-                        oga: baseMediaUrl + "codecId=ogg&text=" + encodeURIComponent(hlb.text())
-                    });
-                    if(myState === 'waiting') {
-                        _jQuery(this).jPlayer('play');
-                    } else {
-                        myState = 'ready';
-                    }
-                },
-                preload: 'auto',
-                play: function() {
-                    console.info("Playing");
-                },
-                error: function(event) {
-                    console.warn("Error: via Ivona");
-                    console.info(event)
-                },
-                supplied: "oga, mp3"
-            });
-            console.info(_jQuery("#jPlayer-" + hlb.attr('id')));
-        };
+  var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
+    var myState = 'init';
+    var secureFlag = (_secure ? 1 : 0);
+    var hlb = _jQuery(_hlb);
 
-        this.play = function() {
-            console.info("Playing via ivona: " + hlb.text());
-            if(myState === 'ready') {
-                _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("play");
-            } else {
-                myState = 'waiting';
-            }
-            return true;
-        };
+    var speechKey = hlb.data('speechKey');
+    var baseMediaUrl, mp3Url, oggUrl;
 
-        this.stop = function() {
-            console.info("Stopping ivona player");
-            _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("stop");
-        };
+    if (speechKey) {
+      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/cues/ivona/" + speechKey + ".";
+      mp3Url = baseMediaUrl + "mp3";
+      oggUrl = baseMediaUrl + "ogg";
+    } else {
+      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws
+        // TODO: Remove the hard-coded site ID.
+        + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag
+        + "&text=" + encodeURIComponent(hlb.text()) + "&codecId=";
+      mp3Url = baseMediaUrl + "mp3";
+      oggUrl = baseMediaUrl + "ogg";
+    }
 
-        this.destroy = function() {
-            console.info("Destroying ivona player");
-            this.stop();
-            _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("destroy");
-            _jQuery("#jPlayer-" + hlb.attr('id')).remove();
-        };
-
+    this.init = function() {
+      _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
+      log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
+      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer({
+        ready: function() {
+          log.info("jPlayer Ready");
+          _jQuery(this).jPlayer( "setMedia", {
+            mp3: mp3Url,
+            oga: oggUrl
+          });
+          if(myState === 'waiting') {
+            _jQuery(this).jPlayer('play');
+          } else {
+            myState = 'ready';
+          }
+        },
+        preload: 'auto',
+        play: function() {
+          log.info("Playing");
+        },
+        error: function(event) {
+          log.warn("Error: via Ivona");
+          log.info(event)
+        },
+        supplied: "oga, mp3"
+      });
+      log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
     };
 
-    sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
+    this.play = function() {
+      log.info("Playing via ivona: " + hlb.text());
+      if(myState === 'ready') {
+        _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("play");
+      } else {
+        myState = 'waiting';
+      }
+      return true;
+    };
 
-        ivona.factory = function(hlb) {
-        	console.info(hlb);
-        	var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
-        	player.init();
-        	return player;
-        }
-    });
+    this.stop = function() {
+      log.info("Stopping ivona player");
+      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("stop");
+    };
 
-    // end
-    callback();
+    this.destroy = function() {
+      log.info("Destroying ivona player");
+      this.stop();
+      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("destroy");
+      _jQuery("#jPlayer-" + hlb.attr('id')).remove();
+    };
+
+  };
+
+  sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
+
+    ivona.factory = function(hlb) {
+      log.info(hlb);
+      var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
+      player.init();
+      return player;
+    }
+  });
+
+  // end
+  callback();
 });

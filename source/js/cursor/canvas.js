@@ -1,5 +1,5 @@
 // canvas view for cursor
-sitecues.def('cursor/canvas', function(cursor, callback, console) {
+sitecues.def('cursor/canvas', function (cursor, callback, log) {
 
 	// private variables
 	var data, types, paint, minSize = 30, step = 15;
@@ -122,6 +122,7 @@ sitecues.def('cursor/canvas', function(cursor, callback, console) {
 			// setup polling for changes
 			interval = setInterval(function() {
 				if (!times-- || span.width() !== width || span.height() !== height) {
+                    log.warn('setInterval in pooling loop is executed....');
 					clearInterval(interval);
 					span.remove();
 					callback();
@@ -146,31 +147,7 @@ sitecues.def('cursor/canvas', function(cursor, callback, console) {
 			return images[type] || images['default'];
 		}
 
-		// keep the compatibily for /element.js
-		// todo: remove or modify the code?
-		cursor.type = function(element, type) {
-			// save type
-			data.type = type;
-			// get image url for cursor type
-			var url = images[type] || images['default'];
-			// get pure DOM element ref
-			element = element[0] || element;
-			// reset style height
-			$(element).style('height', 'auto', 'important');
-			// update element url
-			if (element.src !== url)
-				element.src = url;
-		}
-
-		// set cursor zoom
-		// todo: remove or modify the code?
-		cursor.zoom = function(element, zoom) {
-			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
-			cursor.repaint();
-			cursor.type(element, data.type);
-		}
-
-		// set cursor zoom
+        // set cursor zoom
 		cursor.zoomImage = function(zoom) {
 			data.size = step * Math.sqrt(zoom) < minSize ? minSize : step * Math.sqrt(zoom);
 			cursor.repaint();
@@ -179,7 +156,7 @@ sitecues.def('cursor/canvas', function(cursor, callback, console) {
 		// load special cursor css
 		load.style('../css/cursor.css', function() {
 			wait('sitecues-cursor', function() {
-        console.warn('sitecues-cursor font loaded');
+                log.warn('sitecues-cursor font loaded');
 				cursor.repaint();
 				callback();
 			});

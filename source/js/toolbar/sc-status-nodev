@@ -1,0 +1,15 @@
+===== BEGIN: SITECUES STATUS =====================
+versions:
+  sitecues_js: 0.0.20130708153725-LOCAL-AL
+  sitecues_up: 0.8.23-DEV
+  sitecues_ws: 0.8.22-DEV
+current_url: https://up.dev.sitecues.com/preferences?dev
+sitecues_js_url: https://localhost/js/equinox.js
+user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36
+tts_status: off
+tts_engine: azure
+zoom_level: 2.1
+badge_enabled: false
+toolbar_enabled: true
+site_ui: undefined
+===== END: SITECUES STATUS =======================

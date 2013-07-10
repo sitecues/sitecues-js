@@ -42,15 +42,15 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * @param hover The element the mouse is hovering over
 		 */
 		picker.find = function find(hover) {
-			var e = hover instanceof $ ? hover : $(hover);
-			if (e.is('body')) {
+			var el = hover instanceof $ ? hover : $(hover);
+			if (el.is(document.body) || el.is(document)) {
 				// We're at the body, we're done.
 				return null;
 			}
-			var eScore, eTarget = e.data('sitecues-mouse-hl');
+			var eScore, eTarget = el.data('sitecues-mouse-hl');
 			if (!eTarget) {
 				// Let's determine, and remember, what this element is.
-				eTarget = picker.isTarget(e);
+				eTarget = picker.isTarget(el);
 				if (eTarget == null) {
 					eTarget = this.kTargetStates['sometimes'];
 				} else if (eTarget) {
@@ -58,27 +58,30 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				} else { 
 					eTarget = this.kTargetStates['false'];
 				}
-				e.data('sitecues-mouse-hl', eTarget);
+				el.data('sitecues-mouse-hl', eTarget);
 			}
 			if (eTarget === this.kTargetStates['true']) {
 				// It's definitely a target as determined previously
-				return e;
+				return el;
 			} else if (eTarget === this.kTargetStates['false']) {
 				// It's definitely not a target as determined previously
 			} else if (eTarget === this.kTargetStates['sometimes']) {
-				eScore = e.data('sitecues-mouse-hl-score');
+				eScore = el.data('sitecues-mouse-hl-score');
 				if (eScore == null) {
-					eScore = picker.getScore(e);
-					e.data('sitecues-mouse-hl-score', eScore);
+					eScore = picker.getScore(el);
+					el.data('sitecues-mouse-hl-score', eScore);
 				}
 				// The target may or may not be a target, depending on how it scores.
 			}
 			if (eScore && eScore > 0) {
 				// The hovered element is a viable choice and no better one has been identified.
-				return e;
+				return el;
 			}
 			// No candidates
-			return picker.find(e.parent());
+            if (el.parent().length) {
+                return picker.find(el.parent());
+            }
+            return false;
 		};
 
 		/*
@@ -102,7 +105,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 			var node = e.get(0);
 
-			if (!role.canHighlight) {
+			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
 			}
@@ -148,7 +151,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				e.contents().each(function() {
 					if (this.nodeType == 3 && this.nodeValue.trim().length > 0 || this.innerText && this.innerText.trim().length > 0) {
 						textNodes = true;
-						console.info(this);
+						//console.info(this); // Removed this to make logs easier to read. - Al
 					}
 				});
 			}
