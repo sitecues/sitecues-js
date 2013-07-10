@@ -229,13 +229,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
                 // Once the animation completes, set the new state and emit the ready event.
                 _this.state = STATES.READY;
-                log.info("hlb ready");
-                sitecues.emit('hlb/ready', _this.item);
 
                 // Trigger the background blur effect if there is a highlight box only.
                 // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
                 onHighlightBoxReady($(this));
                 backgroundDimmer.dimBackgroundContent(this, totalZoom);
+                log.info("hlb ready");
+                sitecues.emit('hlb/ready', _this.item);
               });
 
               return false;
