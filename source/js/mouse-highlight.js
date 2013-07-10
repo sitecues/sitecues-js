@@ -1,6 +1,13 @@
 sitecues.def('mouse-highlight', function(mh, callback, console) {
 
-	// minimum zoom level to enable highlight
+  // Tracks if the user has heard the "first high zoom" cue.
+  var FIRST_HIGH_ZOOM_PARAM = "firstSpeechOn";
+  // The high zoom threshold.
+  var HIGH_ZOOM_THRESHOLD = 2;
+  // Time in millis after which the "first high zoom" cue should replay.
+  var FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000; // 7 days
+
+  // minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
 	mh.minZoom = 1.01;
 
@@ -25,13 +32,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 	// elements which need overlay for background color
 	mh.kVisualMediaElements = 'img,canvas,video,embed,object,iframe,frame';
 
-	// this is the local variable for whether the cue has been played, so we don't overwhelm the persistent cookie/conf mechanisms.
-	mh.cue = false;
-
 	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
 	mh.initZoom = 0;
 
-    // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
+  // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
     // Array of what we'd expect if we didn't have a background color
     var transparentColorNamesSet = [
@@ -252,7 +256,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			// If highlighting is enabled, zoom is large enough, zoom is larger
 			// than we started, and we haven't already cued, then play an audio
 			// cue to explain highlighting
-			if (mh.enabled && zoom >= 2 && zoom > mh.initZoom && !mh.cue) {
+			if (mh.enabled && zoom >= HIGH_ZOOM_THRESHOLD && zoom > mh.initZoom) {
 				mh.verbalCue();
 			}
 		}
@@ -263,19 +267,34 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			$(document).on('mousemove', mh.update);
 		}
 
-		/*
-		 * Play a verbal cue explaining how mouse highlighting works.
-		 *
-		 * @TODO If we start using verbal cues elsewhere, we should consider 
-		 *       moving this to the speech module.
-		 */
+    /**
+     * Returns true if the "first high zoom" cue should be played.
+     * @return {boolean}
+     */
+    var shouldPlayFirstHighZoomCue = function() {
+      var fhz = conf.get(FIRST_HIGH_ZOOM_PARAM);
+      return (!fhz || ((fhz + FIRST_HIGH_ZOOM_RESET_MS) < (new Date()).getTime()));
+    };
+
+    /**
+     * Signals that the "first high zoom" cue has played.
+     */
+    var playedFirstHighZoomCue = function() {
+      conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
+    };
+
+    /*
+     * Play a verbal cue explaining how mouse highlighting works.
+     *
+     * @TODO If we start using verbal cues elsewhere, we should consider
+     *       moving this to the speech module.
+     */
 		mh.verbalCue = function() {
-			if(!mh.cue && !common.getCookie("vCHz")) {
+			if(!conf.get(FIRST_HIGH_ZOOM_PARAM)) {
 				speech.cueByKey('verbalCueHighZoom', function() {
-					mh.cue = true;
-					common.setCookie("vCHz", 1, 7);
+					conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
 				});
-	        }
+      }
 		}
 
 		// disable mouse highlight

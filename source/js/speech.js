@@ -6,7 +6,10 @@
 
 sitecues.def('speech', function (speech, callback, log) {
 
-  var kSpeechOnCookie = "vCSp"; 
+  // Tracks if the user has heard the longer, more descriptive "speech on" cue.
+  var FIRST_SPEECH_ON_PARAM = "firstSpeechOn";
+  // Time in millis after which the more descriptive "speech on" cue should replay.
+  var FIRST_SPEECH_ON_RESET_MS = 7 *86400000; // 7 days
 
   sitecues.use('conf', function(conf) {
 
@@ -150,6 +153,22 @@ sitecues.def('speech', function (speech, callback, log) {
           });
       };
 
+      /**
+       * Returns true if the "first speech on" cue should be played.
+       * @return {boolean}
+       */
+      var shouldPlayFirstSpeechOnCue = function() {
+        var fso = conf.get(FIRST_SPEECH_ON_PARAM);
+        return (!fso || ((fso + FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
+      };
+
+      /**
+       * Signals that the "first speech on" cue has played.
+       */
+      var playedFirstSpeechOnCue = function() {
+        conf.set(FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
+      };
+
       /*
        * Enables TTS, invokes callback with no args
        */
@@ -158,11 +177,11 @@ sitecues.def('speech', function (speech, callback, log) {
               // An engine is set so we can enable the component
               ttsEnable = true;
               conf.set('siteTTSEnable', true);
-              if(common.getCookie(kSpeechOnCookie)) {
+              if(shouldPlayFirstSpeechOnCue()) {
                   speech.sayByKey('verbalCueSpeechOn');
               } else {
                   speech.sayByKey('verbalCueSpeechOnFirst', function() {
-                      common.setCookie(kSpeechOnCookie, 1, 7);
+                    playedFirstSpeechOnCue();
                   });
               }
               if (callback) {
