@@ -122,7 +122,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             HighlightBox.kHideBoxSpeed = 150;
             HighlightBox.kBoxZindex = 2147483646;
             HighlightBox.kBoxBorderWidth = '3px';
-            HighlightBox.kBoxPadding = '4px';             // Give the text a little extra room
+            HighlightBox.kBoxPadding     = '4px';             // Give the text a little extra room
             HighlightBox.kBoxBorderRadius = '4px';
             HighlightBox.kBoxBorderStyle = 'solid';
             HighlightBox.kBoxBorderColor = '#222222';

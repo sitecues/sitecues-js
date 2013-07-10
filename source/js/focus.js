@@ -73,19 +73,20 @@ sitecues.def('focus', function(focus, callback, log) {
 
 		// refresh focus enhancement bindings on the page
 		focus.refresh = function(){
+            var $body = $('body');
 			if (focus.enabled){
 				// if focus enhancement is enabled,
 				// bind `blur` and `focus` events to
 				// proper handlers. use selector for
 				// filtering of matched elements
-				$('body').
+				$body.
 					on('blur', focus.selector, focus.blur).
 					on('focus', focus.selector, focus.focus);
 
 			} else {
 				// unbind event handlers if focus
 				// enhancement is disabled
-				$('body').
+				$body.
 					off('blur', focus.selector, focus.blur).
 					off('focus', focus.selector, focus.focus);
 
