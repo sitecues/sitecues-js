@@ -202,7 +202,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	    /**
          * Obtains the viewport dimensions, with an optional inset.
          */
-        positioning.getViewportDimensions = function (inset, zoom, doNotScale) {
+        positioning.getViewportDimensions = function (inset, zoom) {
             inset = inset || 0;
 			zoom  = zoom  || 1;
             var insetX2 = inset * 2;
@@ -218,12 +218,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
             result.centerX = result.left + (result.width / 2);
             result.centerY = result.top + (result.height / 2);
 
-            // We don't need resizing based on zoom for background dimmer.
-            if (!doNotScale) {
-                // In any other case, re-scale dimensions to get pure(not zoomed) values.
-                for (var prop in result) {
-                    result[prop] /= zoom;
-                }
+            // In any other case, re-scale dimensions to get pure(not zoomed) values.
+            for (var prop in result) {
+                result[prop] /= zoom;
             }
             
 
