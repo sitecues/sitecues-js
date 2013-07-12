@@ -216,10 +216,6 @@ stop-testsite:
 
 # TARGET: test-all
 # Run all tests.
-test-all: test-smoke
-
-# TARGET: test-all
-# Run all tests.
 test-all: test-smoke test-unit
 
 # TARGET: test-smoke
