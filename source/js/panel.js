@@ -62,18 +62,20 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				ttsButton.addClass( "tts-disabled" );
 				ttsButton.data( 'tts-enable', 'disabled' );
 			}
-			ttsButton.click( function() {
+			ttsButton.click(function() {
+        sitecues.emit('panel/interaction');
 				panel.ttsToggle();
 			});
 
 			// handle slider value change
 			slider.change( function() {
-				conf.set( 'zoom', this.value );
+        sitecues.emit('panel/interaction');
+				conf.set('zoom', this.value);
 			});
 
 			// handle zoom change and update slider
-			conf.get( 'zoom', function( value ) {
-				slider.val( value );
+			conf.get('zoom', function(value) {
+				slider.val(value);
 			});
 
 			if (panel.parent) {
@@ -99,11 +101,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				frame.style("left", panelLeft, 'important');
 			}
 
-			frame.appendTo('html')
+			frame.appendTo('html');
 
 			// return panel
 			return frame;
-		}
+		};
 
 		// show panel
 		panel.show = function(){
@@ -175,13 +177,13 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				ttsButton.data('tts-enable','disabled')
 				ttsButton.addClass("tts-disabled");
 			}
-		}
+		};
 
-		// setup trigger to show panel
-		sitecues.on('badge/hover', function() {
-			panel.show();
-			panel.element.data('badge-hover','true');
-		});
+    // setup trigger to show panel
+    sitecues.on('badge/hover', function() {
+      panel.show();
+      panel.element.data('badge-hover','true');
+    });
 
 		// setup trigger to show panel
 		sitecues.on('badge/leave', function() {
@@ -191,7 +193,5 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 		// panel is ready
 		callback();
-
 	});
-
 });
