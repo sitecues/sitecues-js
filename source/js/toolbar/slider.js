@@ -75,15 +75,15 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
 		// This function updates the slider position when a zoom level is passed to it
 		slider.moveOnZoom = function( zoom ){
-			var sliderWidth = slider.slider.width()
+            if (slider.slider) {
+               var maxZoomLevel = 5,
+                   minZoomLevel = 1;
+               var sliderWidth = slider.slider.width()
 				,	left = slider.slider.offset().left
-				
-				// NOTE: 'magic-numbers'...
-				// 4 = the range of zoom, ie: the difference between min and max
-				// 1 = the minimum zoom level
-				, xPos = (sliderWidth / 4 * (zoom-1)) + left
+				, xPos = (sliderWidth / (maxZoomLevel - minZoomLevel) * (zoom - minZoomLevel)) + left
 				;
-			slider.moveThumb(xPos);
+			   slider.moveThumb(xPos);
+            }
 		};
 
 		slider.moveThumb = function(x) {

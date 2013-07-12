@@ -110,6 +110,10 @@ sitecues.def('badge', function (badge, callback, log) {
       }
     };
 
+      sitecues.on("badge/enable", function() {
+          badge.enable(true);
+      });
+
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
     //      https://equinox.atlassian.net/browse/EQ-355

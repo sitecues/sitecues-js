@@ -135,7 +135,11 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         var viewport = positioning.getViewportDimensions(0, zoom, true);
         var svgPath = getSVGPath(viewport, hlb);
 
-        backgroundDimmer.$dimmerContainer.style({width: viewport.width + 'px', height: viewport.height +'px'}, '', 'important');
+        backgroundDimmer.$dimmerContainer.style({width: viewport.width + 'px',
+            height: viewport.height +'px',
+            top: viewport.top + 'px',
+            left: viewport.left + 'px'
+        }, '', 'important');
         backgroundDimmer.updateBackgroundPath(svgPath.wrapper + '' + svgPath.inner);
     }
     

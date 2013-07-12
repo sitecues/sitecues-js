@@ -4,8 +4,8 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui',
-    function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer) {
+    sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech',
+    function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech) {
 
         // Constants
 
@@ -67,12 +67,20 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         conf.set('highlightBoxMinZoom', kMinHighlightZoom);
 
         // Update the zoom level of the page, which effects whether or not the HLB is off or on.
+        var globalZoom;
+
         var updateZoomLevel = function (zl) {
-            var newState = (zl >= conf.get('highlightBoxMinZoom') ? STATES.ON : STATES.OFF);
-            if (newState !== state) {
-                state = newState;
-                sitecues.emit('hlb/' + state.name, highlightBox);
-            }
+            globalZoom = zl;
+            updateState();
+        };
+
+        var updateState = function() {
+          // The HLB is always enabled when TTS is on.
+          var newState = (speech.isEnabled() || (globalZoom >= conf.get('highlightBoxMinZoom')) ? STATES.ON : STATES.OFF);
+          if (newState !== state) {
+            state = newState;
+            sitecues.emit('hlb/' + state.name, highlightBox);
+          }
         };
 
         // Current highlight box instance, only work with it. There can only be one instance in the system
@@ -579,7 +587,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
         updateZoomLevel(conf.get('zoom'));
-
     });
 
     // Done.

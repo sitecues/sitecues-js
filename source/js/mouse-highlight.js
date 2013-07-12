@@ -242,18 +242,20 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			} else {
 				// remove mousemove listener from body
 				$(document).off('mousemove', mh.update);
-
-				// hide highlight
-				mh.hide();
 			}
 		}
 
 		mh.updateZoom = function(zoom) {
-      zoom = parseFloat(zoom);
-			mh.picked = null;
+            zoom = parseFloat(zoom);
 			var was = mh.enabled;
-			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
-			if (was !== mh.enabled) mh.refresh();
+      // The mouse highlight is always enabled when TTS is on.
+			mh.enabled = speech.isEnabled() || (zoom >= conf.get('mouseHighlightMinZoom'));
+			mh.hide(mh.picked);
+			if (was !== mh.enabled) {
+				mh.refresh();
+			}
+			mh.picked = null;
+			mh.target = null;
 			// If highlighting is enabled, zoom is large enough, zoom is larger
 			// than we started, and we haven't already cued, then play an audio
 			// cue to explain highlighting
