@@ -105,6 +105,10 @@ sitecues.def('speech', function (speech, callback, log) {
               player = speech.initPlayer(hlb);
           }
           player.play();
+          // Stop speech on any key down.
+          $(window).on('keydown', function() {
+             speech.stop(hlb);
+          });
           return true;
       };
 
@@ -126,6 +130,10 @@ sitecues.def('speech', function (speech, callback, log) {
           } else {
               log.info(players);
           }
+          //Remove hanlder of stoping speech on any key down.
+          $(window).off('keydown', function() {
+             speech.stop(hlb);
+          });
       };
 
       /*
