@@ -106,7 +106,7 @@ sitecues.def('speech', function (speech, callback, log) {
           }
           player.play();
           // Stop speech on any key down.
-          $(window).on('keydown', function() {
+          _jQuery(window).on('keydown', function() {
              speech.stop(hlb);
           });
           return true;
@@ -131,7 +131,7 @@ sitecues.def('speech', function (speech, callback, log) {
               log.info(players);
           }
           //Remove hanlder of stoping speech on any key down.
-          $(window).off('keydown', function() {
+          _jQuery(window).off('keydown', function() {
              speech.stop(hlb);
           });
       };
