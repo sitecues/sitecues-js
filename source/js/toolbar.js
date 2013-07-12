@@ -259,6 +259,15 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             }
         };
 
+
+          sitecues.on("toolbar/disable", function() {
+              // Reset zoom level.
+              conf.set('zoom', 0);
+              toolbar.disable(function() {
+                  sitecues.emit('badge/enable');
+              });
+          });
+
         // load special toolbar css
         load.style('../css/toolbar.css');
         load.style('../css/bootstrap.css');
