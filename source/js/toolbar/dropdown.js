@@ -22,8 +22,7 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback, log){
         $('<li><a href="#">'+ kTextHelp +'</a></li>').appendTo(dropdownMenu);
         $('<li><a href="#">'+ kTextFeedback +'</a></li>').appendTo(dropdownMenu);
         $('<li><a rel="sitecues-event" data-sitecues-event="inverse/toggle">'+ kTextChangeColors +'</a></li>').appendTo(dropdownMenu);
-        // EQ-699: Disable 'Turn Off' temporarily
-        // $('<li><a rel="sitecues-event" data-sitecues-event="toolbar/disable">'+ kTextTurnOff +'</a></li>').appendTo(dropdownMenu);
+        $('<li><a rel="sitecues-event" data-sitecues-event="toolbar/disable">'+ kTextTurnOff +'</a></li>').appendTo(dropdownMenu);
         dropdown.updateFontSize(toolbar);
         return;
       }
