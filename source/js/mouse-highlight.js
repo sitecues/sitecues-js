@@ -248,7 +248,8 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		mh.updateZoom = function(zoom) {
             zoom = parseFloat(zoom);
 			var was = mh.enabled;
-			mh.enabled = zoom >= conf.get('mouseHighlightMinZoom');
+      // The mouse highlight is always enabled when TTS is on.
+			mh.enabled = speech.isEnabled() || (zoom >= conf.get('mouseHighlightMinZoom'));
 			mh.hide(mh.picked);
 			if (was !== mh.enabled) {
 				mh.refresh();
