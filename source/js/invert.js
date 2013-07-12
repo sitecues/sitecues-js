@@ -1,5 +1,5 @@
 sitecues.def('invert', function (invert, callback, log) {
-  sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
+  sitecues.use('conf', 'highlight-box', 'util/common', 'jquery', function (conf, highlight_box, common, $) {
 
     invert.states = {
         invert  : 0
@@ -192,7 +192,14 @@ sitecues.def('invert', function (invert, callback, log) {
     };
 
     function setStyle(elem, invert){
-      $(dom_elem[ elem ]).css(cssInvert[ invert ]);
+      var $hlb = $(dom_elem[ elem ]);
+      // Maintain HLB outline color during reverse contrast.
+      // Ideas is: revert original color before it is reverted again by invert feature.
+      // => double inverts give the original color.
+      if (invert && invert == 'full') {
+          $hlb.css('borderColor', common.getRevertColor($hlb.css('borderColor')));
+      }
+      $hlb.css(cssInvert[ invert ]);
     };
 
     callback();
