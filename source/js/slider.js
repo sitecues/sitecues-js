@@ -1,5 +1,5 @@
 sitecues.def("slider", function (slider, callback, log) {
-sitecues.use("jquery", "conf", function ($, conf) {
+sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
   slider.build =function (props) {
     return new SliderClass(props);
@@ -44,7 +44,6 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
     // Initialize the slider vars and call draw
     init: function (props) {
-      this.disableghosting();
       this.build();
       this.setdimensions();
       this.bindevents();
@@ -70,19 +69,9 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
     },
 
-    // Switch draggable ghost off
-    disableghosting: function(){
 
-      this.$container.css({
-        '-webkit-user-select' : 'none',
-        '-khtml-user-select'  : 'none',
-        '-moz-user-select'    : 'none',
-        '-o-user-select'      : 'none',
-        'user-select'         : 'none'
-      });
 
-    },
-
+    // Set the bounds of the Slider's container element
     setcontainerbounds: function(){
         
       // Read the bounds of the container
@@ -94,14 +83,20 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
     },
 
+    // Set the bounds of the SVG DOM element (auto-resizes svg elements)
     setsvgbounds: function(){
+      
+      // Set the width and height attributes of the root SVG element
       this.svg.viewBox.attr('width', this.width);
       this.svg.viewBox.attr('height', this.height);
+
     },
+
+
 
     // Build and reference the SVG elements
     build: function () {
-      
+
       this.setcontainerbounds();
 
       // Build the SVG paths and return the HTML string result
@@ -125,14 +120,17 @@ sitecues.use("jquery", "conf", function ($, conf) {
         letterBig     : $svgElem.find('.letterBig'),
       };  
 
+      // Switch draggable ghost off
+      this.$container.css({
+        '-webkit-user-select' : 'none',
+        '-khtml-user-select'  : 'none',
+        '-moz-user-select'    : 'none',
+        '-o-user-select'      : 'none',
+        'user-select'         : 'none'
+      });
+
     },
-    
-    getcontainerdimensions: function () {
-      // this.$container.css({
-      //   border:'1px solid red'
-      // });
-      // return this.$container.get(0).getBoundingClientRect();
-    },
+
 
 
     // Bind event listeners to DOM elements
@@ -183,6 +181,11 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
       // Reize events require a recalculation of dimensions
       $(window)         .on('resize',    context, this.setdimensions);
+
+      // TODO: Add this back in when Toolbar resize feature is finished
+      // sitecues.on("toolbar/resized", function (toolbar) {
+      //   slider.repaint(toolbar);
+      // });
 
     },
 
@@ -292,7 +295,11 @@ sitecues.use("jquery", "conf", function ($, conf) {
       slider.setcontainerbounds.call(slider);
       slider.setsvgbounds.call(slider);
 
-      conf.get('zoom', slider.updatezoomlevel);
+      // Update the Thumb element's position based on the zoom level now dimensions have changed
+      conf.get('zoom', function (zoomLevel) {
+        slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
+        slider.translateThumbSVG.call(slider);
+      });
 
       // Get the aspect horizontal aspect ratio  of the 
       // NOTE: Magic number 768 is default original width of SVG document
@@ -306,13 +313,17 @@ sitecues.use("jquery", "conf", function ($, conf) {
       slider.offsetLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left
       
       // Get the Left & Right edges of the Slider Track's bounding box ('back')
-      var trackBackLeft = slider.svg.trackBack.get(0).getBoundingClientRect().left - slider.offsetLeft
-      ,  trackBackRight = trackBackLeft + slider.svg.trackBack.get(0).getBoundingClientRect().width
-      ;
+      slider.trackBackLeft = slider.svg.trackBack.get(0).getBoundingClientRect().left - slider.offsetLeft;
+      var trackBackRight = slider.trackBackLeft + slider.svg.trackBack.get(0).getBoundingClientRect().width;
 
       // Set the bounds of the Thumb relative to the Thumb's width
-      slider.thumbBoundLeft = trackBackLeft + thumbHalfWidth;
+      slider.thumbBoundLeft = this.trackBackLeft + thumbHalfWidth;
       slider.thumbBoundRight = trackBackRight - thumbHalfWidth;
+
+      // Set the width of the TrackBack
+      slider.thumbBoundsWidth = slider.thumbBoundRight - slider.thumbBoundLeft;
+
+      slider.trackBackWidth = trackBackRight -  slider.trackBackLeft;
 
     },
 
@@ -339,10 +350,10 @@ sitecues.use("jquery", "conf", function ($, conf) {
         }
 
         // Translate the Thumb SVG element (slide the thumb)
-        slider.svg.thumb.attr('transform', 'translate('+ (slider.thumbPos * slider.aspect) +')');
-      
+        slider.translateThumbSVG.call(slider);
+
         // Update the Zoom Level
-        //slider.updatezoomlevel();
+        slider.updatezoomlevel.call(slider);
     
       }
 
@@ -350,8 +361,33 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
 
 
-    updatezoomlevel: function (zoom) {
+    // Set the Slider's internal thumb position variable based on the zoom level
+    setThumbPositionFromZoomLevel: function (zoomLevel){
+      this.thumbPos = (this.thumbBoundsWidth / (zoom.max-zoom.min) * (zoomLevel-zoom.min)) + this.thumbBoundLeft;
     },
+
+    // Move the SVG thumb element based on the dimensions of the Slider
+    translateThumbSVG: function () {
+      this.svg.thumb.attr('transform', 'translate('+ (this.thumbPos * this.aspect) +')');
+    },
+
+    updatezoomlevel: function () {
+
+      var zoomRange = zoom.max-zoom.min
+      
+      // FIXME: -(1/this.aspect) .... Not entirely happy with this calculation. It is not exact.
+      // Possibly something to do with margins/borders etc?
+      ,   zoomLevel = ((zoomRange/this.thumbBoundsWidth) * (this.thumbPos)) - (1/this.aspect);
+      ;
+
+      conf.set('zoom', zoomLevel);
+      
+      console.log( zoomLevel);
+
+      // this.setdimensions();
+    },
+
+
 
 
 
@@ -361,6 +397,7 @@ sitecues.use("jquery", "conf", function ($, conf) {
 
   }; // endof SliderClass.prototype
   
+  // core callback
   callback();
 
 });

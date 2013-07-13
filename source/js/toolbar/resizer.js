@@ -1,5 +1,5 @@
 sitecues.def('toolbar/resizer', function (resizer, callback, log) {
-  sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
+  sitecues.use( 'jquery', 'conf', function ($, conf, hammer) {
     /**
      * We're not going to do this automatically as we need to make sure the toolbar is on the page to set up the
      * listeners properly. Otherwise we'd have to set the .on() methods to document scope which would be a
@@ -13,7 +13,7 @@ sitecues.def('toolbar/resizer', function (resizer, callback, log) {
       resizer.shim = shim;
 
       resizer.element = $('<div class="sitecues-resizer"></div>').appendTo(resizer.toolbar);
-      var resizerDrag = Hammer(resizer.element.get(0));
+      //var resizerDrag = Hammer(resizer.element.get(0));
 
       // I'm not thrilled with the way this text-select-avoidance works,
       // but it seems pretty good.  We don't really want to attach a

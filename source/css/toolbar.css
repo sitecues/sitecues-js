@@ -38,15 +38,16 @@
 }
 
 .sitecues-toolbar .slider-wrap {
-  background-image: url('../images/toolbar/toolbar-slider.png');
+  /*background-image: url('../images/toolbar/toolbar-slider.png');*/
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;
   position: absolute;
   right: 150px;
   display: inline;
-  width: 160px;
-  height:92%;
+  /*width: 160px;*/
+  width: 260px;
+  height:80%;
   top:9%;
 }
 

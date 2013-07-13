@@ -50,10 +50,11 @@ files=\
 	source/js/zoom.js \
 	source/js/keys.js \
 	source/js/focus.js \
+	source/js/slider.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
-    source/js/hlb/designer.js \
+  source/js/hlb/designer.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
@@ -68,7 +69,6 @@ files=\
 	source/js/cursor/element.js \
 	source/js/cursor/images.js \
 	source/js/util/template.js \
-	source/js/util/hammer.js \
 	source/js/toolbar/bootstrap-dropdown.js \
 	source/js/toolbar/dropdown.js \
 	source/js/toolbar/slider.js \
