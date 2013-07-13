@@ -14,15 +14,17 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         'load',
         'util/template',
         'toolbar/dropdown',
-        'toolbar/slider',
+        // 'toolbar/slider',
+        'slider',
         'toolbar/resizer',
         'toolbar/messenger',
-    function ($, conf, load, template, dropdown, slider, resizer, messenger) {
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger) {
         log.trace('toolbar.use()');
 
         // FIXME: Remove me! For testing purposes only. - Eric
         // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
         window.sitecues.configs = conf;
+        // ########################################################################################
 
         toolbar.STATES = {
             OFF: {
@@ -34,6 +36,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
                 name: 'on'
             }
         };
+
 
         toolbar.currentState = toolbar.STATES.OFF;
 
@@ -57,7 +60,17 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
                 });
                 dropdown.build(toolbar.instance);
                 messenger.build(toolbar.instance);
-                slider.build(toolbar.instance);
+                
+                // Create a Slider Instance for the Toolbar
+                this.slider = {};
+                this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(toolbar.instance);
+                this.slider.wrap.appendTo(toolbar.instance);
+                
+
+                this.slider.widget = SliderClass.build({
+                  container: this.slider.wrap
+                });
+                
                 // resizer.build(toolbar.instance, toolbar.shim);
 
                 // create TTS button and set it up
@@ -93,7 +106,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             if (conf.get('toolbarEnabled')) {
                 toolbar.render();
 
-                // FIXME: Required for `toolbar.show()` to work properly.
+                // FIXME: Required for `toolbar.show()` to work properly. - Jonathan
+                // NOTE: The thing that needs fixing is that the toolbar needs to be 
+                // hidden before it can be shown.
                 if(toolbar.instance) {
                     toolbar.instance.hide(0);
                     toolbar.instance.show(0);
@@ -114,7 +129,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         /** Shows the toolbar by sliding it out */
         toolbar.slideOut = function () {
             log.trace('toolbar.slideOut()');
-
             log.info('Toolbar sliding out (showing)');
 
             if (conf.get('toolbarEnabled')) {
@@ -124,14 +138,23 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
                 var height = toolbar.instance.height();
 
-                toolbar.instance.show();
+                toolbar.instance.show(function(){
+                  
+                  // Set slider dimensions now that the Toolbar element is display:block
+                  toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+
+                });
+                
                 sitecues.emit('toolbar/state/' + toolbar.currentState.name);
                 toolbar.shim.css('height', 0);
                 toolbar.shim.show();
-                toolbar.instance.animate({ top: 0 }, {
-                    step: function (now) {
-                        toolbar.shim.css('height', ((height + now) + 'px'))
-                    }
+                toolbar.instance.animate({top: 0 },
+                { 
+                  step: function (now) {
+                    toolbar.shim.css('height', ((height + now) + 'px'))
+                  },
+                  complete: function(){
+                  }
                 }, 'slow');
             } else {
                 log.warn("toolbar.slideOut() was called but toolbar is disabled")
@@ -154,7 +177,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
                 toolbar.instance.animate({
                     top: -height
-                }, 'slow');
+                }, 'slow', function(){
+                });
                 toolbar.shim.slideUp('slow', function () {
                     sitecues.emit('toolbar/state/' + toolbar.currentState.name);
                     log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
