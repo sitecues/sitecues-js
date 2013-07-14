@@ -100,6 +100,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
       }
 
+      // Ignore all elements in the toolbar when highlighting, etc...
+      toolbar.instance.find('*').add(toolbar.instance).data('sitecues-role', 'ignore');
+
       if (callback) {
         callback();
       }
