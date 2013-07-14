@@ -45,8 +45,7 @@
   position: absolute;
   right: 150px;
   display: inline;
-  /*width: 160px;*/
-  width: 260px;
+  width: 160px;
   height:80%;
   top:9%;
 }

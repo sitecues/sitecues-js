@@ -14,7 +14,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         'load',
         'util/template',
         'toolbar/dropdown',
-        // 'toolbar/slider',
         'slider',
         'toolbar/resizer',
         'toolbar/messenger',
@@ -65,8 +64,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
                 this.slider = {};
                 this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(toolbar.instance);
                 this.slider.wrap.appendTo(toolbar.instance);
-                
-
                 this.slider.widget = SliderClass.build({
                   container: this.slider.wrap
                 });
@@ -142,9 +139,16 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
                   
                   // Set slider dimensions now that the Toolbar element is display:block
                   toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+                  //sitecues.emit('toolbar/slider/update-position', conf.get('zoom'));
+                  // conf.get('zoom', function (zoomLevel) {
+                  //   console.log(zoomLevel)
+                  //   console.log(
+                  //     sitecues.emit('slider/update-position')
+                  //   );
+                  // });
 
                 });
-                
+
                 sitecues.emit('toolbar/state/' + toolbar.currentState.name);
                 toolbar.shim.css('height', 0);
                 toolbar.shim.show();

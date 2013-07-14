@@ -1,55 +1,89 @@
 sitecues.def("slider", function (slider, callback, log) {
 sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
-  slider.build =function (props) {
-    return new SliderClass(props);
+
+
+  // #### SLIDER INTERFACE #########################################################################
+
+  // Stack of sliders: used to update * sliders linked to zoom
+  slider.stack = [];
+
+  // Interface to instantiate the Slider
+  slider.build = function (props) {
+    return new SliderClass(props, slider);
   };
 
-  // sitecues.on('toolbar/slider/update-position', function(zoom) {
-  //   slider.moveOnZoom(zoom);
-  // });
-
-  SliderClass = function ( props ) {
+  // Updates the Thumb position of all the sliders in the stack
+  slider['update-position'] = function(zoomLevel) {
     
+    // Alias the slider stack
+    var sliderStack = slid.stack;
+
+    // Step through the stack
+    for (var i=0, l=sliderStack.length; i< l; i++ ) {
+      
+      // Pass the zoomLevel value to each slider and update the Thumb's position
+      sliderStack[i].setThumbPositionFromZoomLevel(zoomLevel);
+    
+    }
+
+  };
+
+
+
+  // #### SLIDER CLASS #############################################################################
+
+  SliderClass = function (props, slider) {
+
     // Store a reference to the Slider's container element
     this.$container = $(props.container);
     
     // Initialize this new Slider instance
     this.init();
 
+    // Add this instance to a stack of sliders
+    slider.stack.push(this);
+
   };
+
+
 
   SliderClass.prototype = {
 
-    // Default Settings
-    
+    // Settings
+
     // Number of milliseconds to wait before updating zoom when mouse is held down over a letter
     letterZoomDelay: 200,
+    // NOTE: Magic number 768 is default original width of SVG document
+    originalWidth: 768,
+    // Half the width of the SVG thumb element at it's original size
+    originalThumbWidth: 24,
     
-    // The default width & height dimensions are overwritten with the DOM containers's dimensions
-    width     : 768,
-    height    : 128,
-    
+    // TODO: Make the color settings object configurable on instantiation using deep object merge
+
+    // Color settings object
     color: {
-      letterSmlBack : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
-      trackBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
-      letterBigBack : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
-      letterSml     : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
-      track         : { normal: "#0045AD", hover: "#0067CF", active: "#0089EF" },
-      thumb         : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
-      letterBig     : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
+      letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
+      trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
+      letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)", active: "rgba(50,50,50,0)" },
+      letterSml         : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
+      track             : { normal: "#0045AD", hover: "#0067CF", active: "#0089EF" },
+      thumb             : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
+      letterBig         : { normal: "#FFFFFF", hover: "#FFFF00", active: "#FF0000" },
     },
+
+    // The default width & height dimensions are overwritten with the DOM containers's dimensions
+    width: 768,
+    height: 128,
 
 
 
     // Initialize the slider vars and call draw
     init: function (props) {
-      this.build();
+      this.create();
       this.setdimensions();
       this.bindevents();
     },
-
-
 
     buildsvg: function (slider, color) {
 
@@ -68,8 +102,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       '</svg>';
 
     },
-
-
 
     // Set the bounds of the Slider's container element
     setcontainerbounds: function(){
@@ -95,7 +127,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
 
     // Build and reference the SVG elements
-    build: function () {
+    create: function () {
 
       this.setcontainerbounds();
 
@@ -202,6 +234,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     },
 
+    // TODO: These following two functions are very similar, we can pack tis down later
+
     // When the mouse is is pressed over the Letter or LetterBack
     mousedownlettersml: function (e) {
       
@@ -215,13 +249,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.letterIntervalSml = setInterval(function(){
         
         // Call the letterupdate function to adjust zoom, passing it the correct context
-        slider.letterupdatesml.call(slider);
+        sitecues.emit('zoom/decrease');
 
       // Finalize the interval call with the delay setting
       }, slider.letterZoomDelay);
 
       // Fire initial zoom update on original mouse down event
-      slider.letterupdatesml();
+      sitecues.emit('zoom/decrease');
 
     },
 
@@ -238,15 +272,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.letterIntervalBig = setInterval(function(){
         
         // Call the letterupdate function to adjust zoom, passing it the correct context
-        slider.letterupdatebig.call(slider);
+        sitecues.emit('zoom/increase');
 
       // Finalize the interval call with the delay setting
       }, slider.letterZoomDelay);
 
       // Fire initial zoom update on original mouse down event
-      slider.letterupdatebig();
-
-      slider.setdimensions(slider);
+      sitecues.emit('zoom/increase');
 
     },
 
@@ -269,16 +301,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
 
 
-    letterupdatesml: function () {
-      console.log('LetterSml');
-    },
-
-    letterupdatebig: function () {
-      console.log('LetterBig');
-    },
-
-
-
     // Calculate the dimensions of dynamic Slider components
     setdimensions: function (e) {
       
@@ -295,19 +317,11 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.setcontainerbounds.call(slider);
       slider.setsvgbounds.call(slider);
 
-      // Update the Thumb element's position based on the zoom level now dimensions have changed
-      conf.get('zoom', function (zoomLevel) {
-        slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
-        slider.translateThumbSVG.call(slider);
-      });
-
-      // Get the aspect horizontal aspect ratio  of the 
-      // NOTE: Magic number 768 is default original width of SVG document
-      slider.aspect = 768/slider.width; 
+      // Get the aspect horizontal aspect ratio of the Slider
+      slider.aspect = slider.originalWidth/slider.width; 
 
       // Get the half width of the thumb relative to the Slider's scale
-      // NOTE: Magic number 24 is haldfthe original width of the SVG thumb element
-      var thumbHalfWidth = 24/slider.aspect;
+      var thumbHalfWidth = (slider.originalThumbWidth/2)/slider.aspect;
 
       // Get the left position of the Slider in the Document
       slider.offsetLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left
@@ -324,6 +338,12 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.thumbBoundsWidth = slider.thumbBoundRight - slider.thumbBoundLeft;
 
       slider.trackBackWidth = trackBackRight -  slider.trackBackLeft;
+
+      // Update the Thumb element's position based on the zoom level now dimensions have changed
+      conf.get('zoom', function (zoomLevel) {
+        slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
+        slider.translateThumbSVG.call(slider);
+      });
 
     },
 
@@ -349,17 +369,40 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
           slider.thumbPos = slider.thumbBoundRight;
         }
 
-        // Translate the Thumb SVG element (slide the thumb)
-        slider.translateThumbSVG.call(slider);
-
         // Update the Zoom Level
         slider.updatezoomlevel.call(slider);
-    
+  
+        // NOTE: Switched off because this makes the thumb appear jerky when dragged.
+        // This is because the conf gets updated, which then emits events to subscribers, which in
+        // turn updates the thumb position to the zoom.step value. So you drag in decrete increments
+        // less-than zoom.step, ie: you drag the Thumb less than one pixel, but then the
+        // emit(toolbar/slider/update-positionslider) then moves the Thumb to the zoom.step of 0.1
+        // which happens to be bigger than a pixel. Uncomment the next line of code to see.
+        
+        // Translate the Thumb SVG element (slide the thumb)
+        //slider.translateThumbSVG.call(slider);
+
       }
 
     },
 
 
+
+    // Updates the sitecues zoom-level based on the Thumb position
+    updatezoomlevel: function () {
+
+      // Calculate the zoom range (I think we should put this in zoom.js) - Al
+      var zoomRange = zoom.max-zoom.min
+      
+      // FIXME: -(1/this.aspect) .... Not entirely happy with this calculation. It is not exact.
+      // Possibly something to do with margins/borders etc?
+      ,   zoomLevel = ((zoomRange/this.thumbBoundsWidth) * (this.thumbPos)) - (1/this.aspect);
+      ;
+
+      conf.set('zoom', zoomLevel);
+      //console.log( zoomLevel);
+
+    },
 
     // Set the Slider's internal thumb position variable based on the zoom level
     setThumbPositionFromZoomLevel: function (zoomLevel){
@@ -371,34 +414,17 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.svg.thumb.attr('transform', 'translate('+ (this.thumbPos * this.aspect) +')');
     },
 
-    updatezoomlevel: function () {
-
-      var zoomRange = zoom.max-zoom.min
-      
-      // FIXME: -(1/this.aspect) .... Not entirely happy with this calculation. It is not exact.
-      // Possibly something to do with margins/borders etc?
-      ,   zoomLevel = ((zoomRange/this.thumbBoundsWidth) * (this.thumbPos)) - (1/this.aspect);
-      ;
-
-      conf.set('zoom', zoomLevel);
-      
-      console.log( zoomLevel);
-
-      // this.setdimensions();
-    },
-
-
-
 
 
     destroy: function () {
     }
 
-
-  }; // endof SliderClass.prototype
+  }; // END: SliderClass.prototype
   
-  // core callback
+
+
+  // Core callback
   callback();
 
-});
-});
+})  // END: use
+}); // END: def
