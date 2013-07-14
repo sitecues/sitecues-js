@@ -41,6 +41,7 @@ files=\
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
+	source/js/jquery/resize.js \
 	source/js/ui.js  \
 	source/js/style.js \
 	source/js/util/positioning.js \
