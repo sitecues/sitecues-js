@@ -5,19 +5,22 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
   // #### SLIDER INTERFACE #########################################################################
 
+  // There's some really weird scoping going on in this library. Maybe at the core/def level. - Al
+  var _slider = slider;
+
   // Stack of sliders: used to update * sliders linked to zoom
-  slider.stack = [];
+  _slider.stack = [];
 
   // Interface to instantiate the Slider
-  slider.build = function (props) {
-    return new SliderClass(props, slider);
+  _slider.build = function (props) {
+    return new SliderClass(props, _slider);
   };
 
   // Updates the Thumb position of all the sliders in the stack
-  slider['update-position'] = function(zoomLevel) {
+  _slider['update-position'] = function(zoomLevel) {
     
     // Alias the slider stack
-    var sliderStack = slid.stack;
+    var sliderStack = _slider.stack;
 
     // Step through the stack
     for (var i=0, l=sliderStack.length; i< l; i++ ) {
@@ -33,16 +36,29 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
   // #### SLIDER CLASS #############################################################################
 
-  SliderClass = function (props, slider) {
+  SliderClass = function (props, _slider) {
 
     // Store a reference to the Slider's container element
     this.$container = $(props.container);
+
+    // Over-ride the default color object if a new one is passed
+    if (props.color) {
+      this.color = props.color;
+    }
+
+    if (props.width) {
+      this.width = props.width;
+    }
+
+    if (props.height) {
+      this.height = props.height;
+    }    
     
     // Initialize this new Slider instance
     this.init();
 
     // Add this instance to a stack of sliders
-    slider.stack.push(this);
+    _slider.stack.push(this);
 
   };
 
@@ -53,7 +69,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // Settings
 
     // Number of milliseconds to wait before updating zoom when mouse is held down over a letter
-    letterZoomDelay: 200,
+    letterZoomDelay: 100,
     // NOTE: Magic number 768 is default original width of SVG document
     originalWidth: 768,
     // Half the width of the SVG thumb element at it's original size
@@ -406,7 +422,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // Set the Slider's internal thumb position variable based on the zoom level
     setThumbPositionFromZoomLevel: function (zoomLevel){
-      this.thumbPos = (this.thumbBoundsWidth / (zoom.max-zoom.min) * (zoomLevel-zoom.min)) + this.thumbBoundLeft;
+      this.thumbPos = (this.trackBackWidth / (zoom.max-zoom.min) * (zoomLevel-zoom.min)) + this.thumbBoundLeft;
     },
 
     // Move the SVG thumb element based on the dimensions of the Slider

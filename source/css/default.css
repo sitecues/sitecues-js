@@ -76,26 +76,12 @@
 }
 
 #sitecues-panel .slider-wrap {
-    position: absolute;
-    top: 20px;
-    left: 50px;
-    display: inline;
-    width: 100px;
+    
+    display:block;
+    width: 330px;
+    height: 77px;
 }
 
-#sitecues-panel .ramp {
-    position: absolute;
-    left: 0px;
-    top: -13px;
-    min-width: 210px;
-    max-width: 210px;
-    opacity: 50;
-    z-index: -1;
-}
-
-#sitecues-panel .slider {
-    width: 180px;
-}
 
 #sitecues-panel .small {
     position: absolute;

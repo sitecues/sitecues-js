@@ -2,7 +2,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 	// use jquery, we can rid off this dependency
 	// if we will start using vanilla js functions
-	sitecues.use( 'jquery', 'conf', 'speech', 'util/positioning', 'ui', function( $, conf, speech, positioning ) {
+	sitecues.use( 'jquery', 'conf', 'speech', 'util/positioning', 'ui', 'slider', function( $, conf, speech, positioning, ui, SliderClass ) {
 
 		// timer needed for handling
 		// ui mistake - when user occasionally
@@ -29,30 +29,26 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			var frame, wrap, slider, ttsButton;
 
 			// create element and add element id for proper styling
-			frame = $('<div>').attr('id', 'sitecues-panel');
+			frame = $('<div>').attr('id', 'sitecues-panel').css({display:'none'});
 		
-			// create small A label
-			$('<div>').addClass('small').text('A').appendTo(frame);
+      // Create a Slider Instance for the Panel
+      this.slider = {};
+      this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+      this.slider.widget = SliderClass.build({
+        container: this.slider.wrap,
+        color: {
+		      letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
+		      trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
+		      letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
+		      letterSml         : { normal: "#000000", hover: "#FF0000"},
+		      track             : { normal: "#0045AD", hover: "#FF0000"},
+		      thumb             : { normal: "#000000", hover: "#FF0000"},
+		      letterBig         : { normal: "#000000", hover: "#FF0000"},
+    		}
+      });
+     
+      
 
-			// create clider wrap element
-			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
-
-			// create slider
-			slider = $('<input>').addClass('slider').attr({
-				type: 		'range',
-				min: 		'1',
-				max: 		'5',
-				step: 		'0.1',
-				ariaLabel: 	'See it better'
-			}).appendTo( wrap );
-
-			$('<img>').addClass('ramp').attr({
-				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
-			}).appendTo(wrap);
-
-
-			// create big A label
-			$('<div>').addClass('big').text('A').appendTo(frame);
 
 			// create TTS button and set it up
 			ttsButton = $('<div>').addClass('tts').appendTo(frame);
@@ -65,17 +61,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			ttsButton.click(function() {
         sitecues.emit('panel/interaction');
 				panel.ttsToggle();
-			});
-
-			// handle slider value change
-			slider.change( function() {
-        sitecues.emit('panel/interaction');
-				conf.set('zoom', this.value);
-			});
-
-			// handle zoom change and update slider
-			conf.get('zoom', function(value) {
-				slider.val(value);
 			});
 
 			if (panel.parent) {
@@ -103,22 +88,21 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 			frame.appendTo('html');
 
+			// Set panel to 'created'
+			this.created = true;
+
+			this.element = frame;
+			
 			// return panel
 			return frame;
 		};
 
+
 		// show panel
 		panel.show = function(){
+			
 			// clear timer if present
 			timer && clearTimeout(timer);
-
-			// already shown
-			if (panel.element) return;
-
-			// Create new panel if one does not already exist
-			if (panel.created===false){
-				panel.element = panel.create();
-			}
 
 			// Animate instead of fade
 			panel.element.hide();
@@ -131,7 +115,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				750,
 				function() {
 					sitecues.emit('panel/show', panel.element);
+					
+					// Set/recheck the dimensions of the slider
+					panel.slider.widget.setdimensions(panel.slider.widget);
 			});
+
+			// Set/recheck the dimensions of the slider
+			panel.slider.widget.setdimensions(panel.slider.widget);
+	
+
+
 
 			panel.element.hover(function() {
 				//Hover in
@@ -144,8 +137,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 		// hide panel
 		panel.hide = function(){
+			
 			// nothing to hide
-			if (!panel.element) return;
+			if (!panel.element) {
+				return;
+			}
 
 			if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
 				// We're hovering over the element, delay hiding it
@@ -159,8 +155,10 @@ sitecues.def( 'panel', function (panel, callback, log) {
 				sitecues.emit('panel/hide', panel.element);
 
 				// delete panel element
-				panel.element = undefined;
+				//panel.element = undefined;
+
 			});
+
 		}
 
 		// Function that will toggle tts on or off
@@ -190,6 +188,8 @@ sitecues.def( 'panel', function (panel, callback, log) {
 			panel.element.data('badge-hover','false');
 			setTimeout(panel.hide, panel.hideDelay);
 		});
+
+		panel.create();
 
 		// panel is ready
 		callback();
