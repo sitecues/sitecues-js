@@ -113,7 +113,7 @@ sitecues.def('util/common', function (common, callback, log) {
 
       }
       // Now that we have both colors tones, define if they are contrast or not.
-      return !!(tones[colorOne] === tones[colorTwo]);
+      return !(tones[colorOne] === tones[colorTwo]);
     };
 
     /*
