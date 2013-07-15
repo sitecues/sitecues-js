@@ -38,7 +38,7 @@
 }
 
 .sitecues-toolbar .slider-wrap {
-  background-image: url('../images/toolbar/toolbar-slider.png');
+  /*background-image: url('../images/toolbar/toolbar-slider.png');*/
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;
@@ -46,7 +46,7 @@
   right: 80px;
   display: inline;
   width: 160px;
-  height:92%;
+  height:80%;
   top:9%;
 }
 
