@@ -34,6 +34,8 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
 	mh.initZoom = 0;
+    
+   var defaultToolbarHeight = 40;
 
   // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -131,13 +133,20 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 				}
 			}
 
+            // Take into calculations toolbar's height as it shifts elements position.
+            // TODO: once toolbar is completed, remove this
+            // repeated code(line below is used accross the files) to a correspondent util module.
+            var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled')
+                ? conf.get('toolbarHeight') || defaultToolbarHeight / (conf.get('zoom') || 1)
+                : 0;
+
 			// Position each focus rect absolutely over the item which is focused
 			for (var count = 0; count < rects.length; count ++) {
 				var rect = rects[count];
 				$('<div>')
 					.attr('class', mh.kHighlightOverlayClass)
 					.style({
-						'top': rect.top - 3 + 'px',
+						'top': rect.top - 3 - toolBarHeight + 'px',
 						'left': rect.left - 3 + 'px',
 						'width': rect.width + 4 + 'px',
 						'height': rect.height + 4 + 'px',
