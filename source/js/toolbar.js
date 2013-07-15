@@ -280,10 +280,10 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       }
     };
 
-
       sitecues.on("toolbar/disable", function() {
         // Reset zoom level.
         conf.set('zoom', 0);
+        sitecues.emit('inverse/disable');
         toolbar.disable(function() {
           sitecues.emit('badge/enable');
         });
