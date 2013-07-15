@@ -48,13 +48,14 @@ sitecues.def( 'panel', function (panel, callback, log) {
       this.slider.widget = SliderClass.build({
         container: this.slider.wrap,
         color: {
-          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          letterSml         : { normal: "#000000", hover: "#FF0000"},
-          track             : { normal: "#0045AD", hover: "#FF0000"},
-          thumb             : { normal: "#000000", hover: "#FF0000"},
-          letterBig         : { normal: "#000000", hover: "#FF0000"},
+          letterSmlBack     : { normal: "rgba(255,0,0,.1)", hover: "rgba(100,100,100,0.0)"},
+          trackBack         : { normal: "rgba(0,255,0,.1)", hover: "rgba(100,100,100,0.0)"},
+          letterBigBack     : { normal: "rgba(0,0,255,.1)", hover: "rgba(100,100,100,0.0)"},
+          letterSml         : { normal: "#000000", hover: "#000000"},
+          track             : { normal: "#000000", hover: "#000000"},
+          // thumb             : { normal: "#1D3D8E", hover: "#1D3D8E"},
+          thumb             : { normal: "rgba(0,0,0,.5)", hover: "rgba(0,0,0,.5)"},
+          letterBig         : { normal: "#000000", hover: "#000000"},
         }
       });
     
