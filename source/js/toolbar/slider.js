@@ -4,7 +4,7 @@ sitecues.def('toolbar/slider', function(slider, callback, log){
 
   slider.imagePath = sitecues.resolveSitecuesUrl('../images/toolbar/toolbar-slider-thumb.png');
 
-	sitecues.use( 'jquery', 'conf', 'util/hammer', function ($, conf, hammer) {
+	sitecues.use( 'jquery', 'conf', function ($, conf) {
 
 		sitecues.on('toolbar/slider/update-position', function(zoom) {
 			slider.moveOnZoom(zoom);

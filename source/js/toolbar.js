@@ -14,12 +14,12 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'load',
     'util/template',
     'toolbar/dropdown',
-    'toolbar/slider',
+    'slider',
     'toolbar/resizer',
     'toolbar/messenger',
     'util/common',
     //'zoom',
-  function ($, conf, load, template, dropdown, slider, resizer, messenger, common) {
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common) {
     log.trace('toolbar.use()');
 
     // FIXME: Remove me! For testing purposes only. - Eric
@@ -60,6 +60,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
 
+        
+        // resizer.build(toolbar.instance, toolbar.shim);
+
         // Set up the right-align container that will not be affected by the (dis)appearance
         // of the vertical scrollbar
         toolbar.rightPane = $('<div>')
@@ -75,8 +78,13 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         });
         var rightAlignPane = toolbar.rightPane;
 
-        slider.build(rightAlignPane);
-        // resizer.build(toolbar.instance, toolbar.shim);
+        // slider.build(rightAlignPane);
+        // Create a Slider Instance for the Toolbar
+        this.slider = {};
+         this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
+        this.slider.widget = SliderClass.build({
+          container: this.slider.wrap
+        });
 
         // create TTS button and set it up
         toolbar.ttsButton = $('<div rel="' + kTtsButtonRel + '" data-sitecues-event="speech/toggle">')
@@ -135,7 +143,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     /** Shows the toolbar by sliding it out */
     toolbar.slideOut = function () {
       log.trace('toolbar.slideOut()');
-
       log.info('Toolbar sliding out (showing)');
 
       if (conf.get('toolbarEnabled')) {
@@ -145,15 +152,28 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
         var height = toolbar.instance.height();
 
-        toolbar.instance.show();
+        toolbar.instance.show(function(){
+          
+          // Set slider dimensions now that the Toolbar element is display:block
+          toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+        });
+        
+        // Set slider dimensions now that the Toolbar element is display:block
+        toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+
         sitecues.emit('toolbar/state/' + toolbar.currentState.name);
         toolbar.shim.css('height', 0);
         toolbar.shim.show();
-        toolbar.instance.animate({ top: 0 }, {
-          step: function (now) {
-            toolbar.shim.css('height', ((height + now) + 'px'))
-          }
-        }, 'slow');
+        toolbar.instance.animate({top: 0 },
+                { 
+                  step: function (now) {
+                    toolbar.shim.css('height', ((height + now) + 'px'))
+                  },
+                  complete: function(){
+                    // Set slider dimensions now that the Toolbar element is display:block
+        toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+                  }
+                }, 'slow');
       } else {
         log.warn("toolbar.slideOut() was called but toolbar is disabled")
       }
