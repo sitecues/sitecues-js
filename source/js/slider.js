@@ -98,13 +98,13 @@ sitecues.use("jquery", "conf", "zoom", "cursor", function ($, conf, zoom, cursor
       return '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
 
         'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" preserveAspectRatio="none">' +
-        '<path class="letterSmlBack"  fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
-        '<path class="trackBack"      fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
-        '<path class="letterBigBack"  fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
-        '<path class="letterSml"      fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,143.076 L16.803,143.076 L42.351,72.953 L63.434,72.953 L89.611,143.076 L70.706,143.076 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
-        '<path class="track"          fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
-        '<path class="thumb"          fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" stroke-width="8" stroke-linejoin="round" />' +
-        '<path class="letterBig"      fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,140.875 L551.484,140.875 L594.99,24.213 L629.008,24.213 L672.199,140.875 L640.91,140.875 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
+        '<path class="letterSmlBack"  cursor="pointer" fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
+        '<path class="trackBack"      cursor="pointer" fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
+        '<path class="letterBigBack"  cursor="pointer" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
+        '<path class="letterSml"      cursor="pointer" fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,143.076 L16.803,143.076 L42.351,72.953 L63.434,72.953 L89.611,143.076 L70.706,143.076 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
+        '<path class="track"          cursor="pointer" fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
+        '<path class="thumb"          cursor="pointer" fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" stroke-width="8" stroke-linejoin="round" />' +
+        '<path class="letterBig"      cursor="pointer" fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,140.875 L551.484,140.875 L594.99,24.213 L629.008,24.213 L672.199,140.875 L640.91,140.875 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
       '</svg>';
 
     },
