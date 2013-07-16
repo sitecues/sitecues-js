@@ -47,17 +47,16 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
 		// handle zoom/increase event fired by any module
 		sitecues.on('zoom/increase', function() {
-			//console.log('doing zoom');
 			var zoomVal = conf.get('zoom') + zoom.step;
 			conf.set('zoom', zoomVal);
-			sitecues.emit('toolbar/slider/update-position', zoomVal);
+			//sitecues.emit('slider/update-position', zoomVal);
 		});
 
 		// handle zoom/decrease event fired by any module
 		sitecues.on('zoom/decrease', function() {
 			var zoomVal = conf.get('zoom') - zoom.step;
 			conf.set('zoom', zoomVal);
-			sitecues.emit('toolbar/slider/update-position', zoomVal);
+			//sitecues.emit('slider/update-position', zoomVal);
 		});
 
 		// react on any zoom change
