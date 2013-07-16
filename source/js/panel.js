@@ -31,6 +31,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
     // panel element
     panel.create = function() {
+
       // private variables
       var frame, wrap, slider, ttsButton;
 

@@ -19,29 +19,29 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
   // Updates the Thumb position of all the sliders in the stack
   _slider.updatePosition = function(zoomLevel) {
 
-    // Alias the slider stack
-    var sliderStack = _slider.stack;
+    // // Alias the slider stack
+    // var sliderStack = _slider.stack;
 
-    // Step through the stack
-    for (var i=0, l=sliderStack.length; i< l; i++ ) {
+    // // Step through the stack
+    // // for (var i=0, l=sliderStack.length; i< l; i++ ) {
 
-      if (!sliderStack[i].mouseDownTrack){
+    //   if (!sliderStack[i].mouseDownTrack){
 
-        var i_slider = sliderStack[i];
+    //     var i_slider = sliderStack[i];
 
-        i_slider.zoomLevel = zoomLevel;
+    //     i_slider.zoomLevel = zoomLevel;
         
-        // Pass the zoomLevel value to each slider and update the Thumb's position
-        // i_slider.setdimensions.call(i_slider);
-        i_slider.setThumbPositionFromZoomLevel.call(i_slider, i_slider.zoomLevel);
-        i_slider.translateThumbSVG.call(i_slider);
+    //     // Pass the zoomLevel value to each slider and update the Thumb's position
+    //     // i_slider.setdimensions.call(i_slider);
+    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, i_slider.zoomLevel);
+    //     // i_slider.translateThumbSVG.call(i_slider);
 
-        // i_slider.setThumbPositionFromZoomLevel.call(i_slider, zoomLevel);
-        // i_slider.translateThumbSVG.call(i_slider);
+    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, zoomLevel);
+    //     // i_slider.translateThumbSVG.call(i_slider);
 
-      }
+    //   }
     
-    }
+    // }
 
   };
 
@@ -242,25 +242,27 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       //   slider.repaint(toolbar);
       // });
 
-      // Update the Thumb element's position based on the zoom level now dimensions have changed
-      conf.get('zoom', function (zoomLevel) {
-        
-        slider.zoomLevel = zoomLevel;
+      // Pass slider to anonfunc to set correct context of slider when called from conf
+      (function(_slider){
 
-        // Only respond to conf zoom updates when mouse not down
-        if (!slider.mouseDownTrack) {
-          
-          slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
-          
-          // Update the Thumb position
-          slider.translateThumbSVG.call(slider);
+        // Update the Thumb element's position based on the zoom level now dimensions have changed
+        conf.get('zoom', function (zoomLevel) {
 
-        }
+          _slider.zoomLevel = zoomLevel;
 
-        // console.log(slider.interface);
-        // slider.interface.updatePosition();
+          // Only respond to conf zoom updates when mouse not down
+          if (!_slider.mouseDownTrack) {
+            
+            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
+            
+            // Update the Thumb position
+            _slider.translateThumbSVG.call(_slider);
 
-      });
+          }
+
+        });
+
+      })(slider);
 
     },
 

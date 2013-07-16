@@ -106,15 +106,14 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
         toolbar.wireEvents();
 
+        // Ignore all elements in the toolbar when highlighting, etc...
+        toolbar.instance.find('*').add(toolbar.instance).data('sitecues-role', 'ignore');
       }
-
-      // Ignore all elements in the toolbar when highlighting, etc...
-      toolbar.instance.find('*').add(toolbar.instance).data('sitecues-role', 'ignore');
 
       if (callback) {
         callback();
       }
-    }
+    };
 
     toolbar.show = function () {
       log.trace('toolbar.show()');
