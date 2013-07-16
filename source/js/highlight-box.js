@@ -79,7 +79,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       var newState = (speech.isEnabled() || (globalZoom >= conf.get('highlightBoxMinZoom')) ? STATES.ON : STATES.OFF);
       if (newState !== state) {
       state = newState;
-      sitecues.emit('hlb/' + state.name, highlightBox);
+      sitecues.emit('hlb/' + state.name, highlightBox, {});
       }
     };
 
@@ -108,7 +108,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
     var HighlightBox = (function () {
       // Initialize.
-      function HighlightBox(target) {
+      function HighlightBox(target, options) {
+        this.options = $.extend(true, {}, options);
         this.state = STATES.CREATE;
         this.savedCss = [];
         this.savedStyleAttr = [];
@@ -117,7 +118,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode = $(this.item);
 
         // notify about new hlb
-        sitecues.emit('hlb/create', this.item);
+        sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
         var computedStyles = common.getElementComputedStyles(this.item);
         var offset = positioning.getOffset(this.item);
@@ -150,12 +151,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * Toggle Sticky state of highlight box
        */
       sitecues.toggleStickyHLB = function () {
-        if (HighlightBox.isSticky){
-        HighlightBox.isSticky = false;
-        } else {
-        HighlightBox.isSticky = true;
-        }
-
+        HighlightBox.isSticky = !HighlightBox.isSticky;
         return HighlightBox.isSticky;
       };
 
@@ -173,7 +169,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Immediately enter the HLB
         this.state = STATES.INFLATING;
-        sitecues.emit('hlb/inflating', this.item);
+        sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
 
         var _this = this;
 
@@ -214,7 +210,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             backgroundDimmer.removeDimmer();
             // Trigger the background blur effect if there is a highlight box only.
             log.info("hlb closed");
-            sitecues.emit('hlb/closed', _this.item);
+            sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
           }
         }, HighlightBox.kShowBoxSpeed + 100);
 
@@ -246,7 +242,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           onHighlightBoxReady($(this));
           backgroundDimmer.dimBackgroundContent(this, totalZoom);
           log.info("hlb ready");
-          sitecues.emit('hlb/ready', _this.item);
+          sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
         });
 
         return false;
@@ -261,7 +257,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Update state.
         this.state = STATES.DEFLATING;
-        sitecues.emit('hlb/deflating', _this.item);
+        sitecues.emit('hlb/deflating', _this.item, $.extend(true, {}, _this.options));
 
         // Get the current element styles.
           var ancestorCSS = this.savedAncestorCSS;
@@ -321,7 +317,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           onHighlightBoxClosed(_this.item);
 
           log.info("hlb closed");
-          sitecues.emit('hlb/closed', _this.item);
+          sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
         });
         }
       };
@@ -467,13 +463,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
       return {
         // Return Highlight if need to support a few instances instead.
-        createInstance: function (target) {
+        createInstance: function (target, options) {
           // Don't return an instance if the target is ineligible.
           // There used to be an isValidTarget function call here,
           // but that logic already exists in mouse-highlight.  We
           // should keep that logic in one place and this component
           // should assume that any target sent to it is valid.
-          return ( target ? new HighlightBox( target ) : null );
+          return ( target ? new HighlightBox(target, options) : null );
         }
       };
     })();
@@ -481,23 +477,25 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     // Take care on target change event.
     function onTargetChange(newTarget) {
       if (getState() === STATES.READY) { // if something is ready
-        var lastTarget = instance.item;
+        if (!instance.options.suppress_mouse_out) {
+          var lastTarget = instance.item;
 
-        if (lastTarget === newTarget) {
-          return; // Target is not changed.
-        }
-        // Check if new target is a child node of the last target.
-        var isChildNode = false;
-        $.each($(newTarget).parents(), function (index, element) {
-          // Do nothing if the new target is a child node.
-          if (element === lastTarget) {
-            isChildNode = true;
+          if (lastTarget === newTarget) {
+            return; // Target is not changed.
           }
-        });
+          // Check if new target is a child node of the last target.
+          var isChildNode = false;
+          $.each($(newTarget).parents(), function (index, element) {
+            // Do nothing if the new target is a child node.
+            if (element === lastTarget) {
+              isChildNode = true;
+            }
+          });
 
-        // If mouse hovers over the other element, shut down last target(current HLB).
-        if (!isChildNode) {
-          instance.deflate();
+          // If mouse hovers over the other element, shut down last target(current HLB).
+          if (!isChildNode) {
+            instance.deflate();
+          }
         }
       }
     }
@@ -543,13 +541,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
      */
     sitecues.on('highlight/animate', function (e) {
       var currentState = getState();
+      var hlbOptions = e.hlb_options || {};
       if (currentState === STATES.READY) {
         // An HLB instance exists and is inflated, so deflate it.
         instance.deflate();
-      } else if ((currentState === STATES.ON) || ((currentState === STATES.OFF) && e.force_hlb)) {
+      } else if ((currentState === STATES.ON) || ((currentState === STATES.OFF) && hlbOptions.force)) {
         // There is no current HLB and we can create one, so do just that.
         // If the target element is ineligible, the create request may return null.
-        instance = HighlightBox.createInstance(e.dom.hlb_target || e.dom.mouse_highlight);
+        instance = HighlightBox.createInstance(e.dom.hlb_target || e.dom.mouse_highlight, hlbOptions);
         if (instance) {
           instance.inflate();
         }

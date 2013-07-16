@@ -83,10 +83,9 @@ sitecues.def('help', function(help, callback, log) {
         };
 
         // Opens a target in the HLB.
-        var openHlb = function(target, force, suppressTTS) {
+        var openHlb = function(target, options) {
           var event = {
-            force_hlb : force,
-            suppress_tts: suppressTTS,
+            hlb_options: options || {},
             dom: {
               hlb_target: target
             }
@@ -106,7 +105,11 @@ sitecues.def('help', function(help, callback, log) {
           setInitialCss(helpFrame);
           helpFrame.prependTo('body');
           sitecues.emit('help/opening', help);
-          openHlb(hlbHelpTarget, true);
+          openHlb(hlbHelpTarget, {
+            force: true,
+            suppress_tts: true,
+            suppress_mouse_out: true
+          });
         };
 
         // Finalize the closing of the help display.
