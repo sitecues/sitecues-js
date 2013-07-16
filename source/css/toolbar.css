@@ -20,7 +20,7 @@
   width:63%;
   margin:0 15%;
   cursor:pointer;
-  }
+}
 
   
 .sitecues-slider-thumb {
@@ -37,8 +37,15 @@
   cursor: pointer;
 }
 
+
+.sitecues-toolbar .slider-wrap *{
+  cursor:pointer!important;
+  /*pointer-events:none!important;*/
+  -webkit-user-select:none!important;
+}
+
 .sitecues-toolbar .slider-wrap {
-  /*background-image: url('../images/toolbar/toolbar-slider.png');*/
+  cursor:pointer;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;

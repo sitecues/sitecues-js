@@ -1,5 +1,5 @@
 sitecues.def("slider", function (slider, callback, log) {
-sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
+sitecues.use("jquery", "conf", "zoom", "cursor", function ($, conf, zoom, cursor) {
 
 
 
@@ -18,6 +18,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
   _slider.destoryInstances = function () {
   };
+
+
 
   // #### SLIDER CLASS #############################################################################
 
@@ -234,6 +236,21 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     },
 
 
+    // Switch off user-select
+    disablebodyselect: function () {
+
+      $('html').css({
+        '-webkit-user-select' : 'none',     /* Chrome all / Safari all */
+        '-moz-user-select'    : 'none',     /* Firefox all */
+        '-ms-user-select'     : 'none',     /* IE 10+ */
+        /* No support for these yet, use at own risk */
+        // '-o-user-select': 'none',
+        // 'user-select': 'none'
+      });
+      
+    },
+
+
 
     // When the mouse is is pressed over the Track, Thumb and TrackBack
     mousedowntrack: function (e) {
@@ -241,30 +258,24 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Get the context when called from event mousemove event listener
       var slider = e.data.slider;
 
+      slider.disablebodyselect();
+
       // Store the state of the mousedown
       slider.mouseDownTrack = true;
 
       slider.dragthumb(e);
 
-      // Switch off user-select on the whole body while dragging
-      $('body').css({
-        '-webkit-user-select': 'none',  /* Chrome all / Safari all */
-        '-moz-user-select': 'none',     /* Firefox all */
-        '-ms-user-select': 'none',      /* IE 10+ */
-        /* No support for these yet, use at own risk */
-        // '-o-user-select': 'none',
-        // 'user-select': 'none'
-      });
-
     },
 
-    // TODO: These following two functions are very similar, we can pack tis down later
+    // TODO: These following two functions are very similar, we can pack this down later............
 
     // When the mouse is is pressed over the Letter or LetterBack
     mousedownlettersml: function (e) {
       
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
+
+      slider.disablebodyselect();
 
       // Store the state of the mousedown
       slider.mouseDownLetterSml = true;
@@ -288,6 +299,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
+
+      slider.disablebodyselect();
 
       // Store the state of the mousedown
       slider.mouseDownLetterBig = true;
@@ -317,19 +330,20 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.mouseDownLetterSml = false;
       slider.mouseDownLetterBig = false;
 
-      // Clear mousedown timers on zoom letters
-      clearInterval(slider.letterIntervalSml);
-      clearInterval(slider.letterIntervalBig);
-
       // Switch off user-select on when the mouse is released
-      $('body').css({
-        '-webkit-user-select': 'auto',  /* Chrome all / Safari all */
-        '-moz-user-select': 'auto',     /* Firefox all */
-        '-ms-user-select': 'auto',      /* IE 10+ */
+      $('html').css({
+        '-webkit-user-select' : 'text',  /* Chrome all / Safari all */
+        '-moz-user-select'    : 'text',     /* Firefox all */
+        '-ms-user-select'     : 'text',      /* IE 10+ */
         /* No support for these yet, use at own risk */
         // '-o-user-select': 'auto',
         // 'user-select': 'auto'
       });
+
+
+      // Clear mousedown timers on zoom letters
+      clearInterval(slider.letterIntervalSml);
+      clearInterval(slider.letterIntervalBig);
 
     },
 
@@ -409,8 +423,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.trackClientWidth = this.trackBounds.width;
       slider.containerLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left;
       slider.trackOffsetLeft = slider.trackBounds.left - slider.containerLeft;
-
-      // console.log(slider.index);
 
       slider.setThumbPositionFromZoomLevel.call(slider, slider.zoomLevel);
       slider.translateThumbSVG.call(slider);
