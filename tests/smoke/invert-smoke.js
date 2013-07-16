@@ -66,8 +66,7 @@ describe("sitecues", function () {
         session.browser.elementByTagName('body', function(err, el) {
           session.browser.getComputedCss(el, '-webkit-filter', function(err, value) {
             expect(err).to.not.be.an.instanceof(Error);
-            // expect(value).to.equal('none');
-            expect(value).to.equal('see-if-CI-fails');
+            expect(value).to.equal('none');
             done();
           });
         });
