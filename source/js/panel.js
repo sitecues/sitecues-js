@@ -29,6 +29,18 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // The panel placer element (currently only used with the default badge).
     panel.placer = undefined;
 
+    // Sticky param for panel
+    panel.isSticky = false;
+    
+    // Helper function to make panel sticky
+    sitecues.toggleStickyPanel = function () {
+      if (panel.isSticky===false) {
+        return panel.isSticky = true;
+      } else {
+        return panel.isSticky = false;
+      }
+    };
+
     // panel element
     panel.create = function() {
 
@@ -182,13 +194,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
         return;
       }
 
-      // hide panel
-      panel.element.fadeOut('fast', function(){
 
-        // notify about panel hiding
-        sitecues.emit('panel/hide', panel.element);
+      if (panel.isSticky===false) {
+        // hide panel
+        panel.element.fadeOut('fast', function(){
 
-      });
+          // notify about panel hiding
+          sitecues.emit('panel/hide', panel.element);
+
+        });
+      }
 
     };
 

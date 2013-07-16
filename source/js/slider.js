@@ -1,5 +1,5 @@
 sitecues.def("slider", function (slider, callback, log) {
-sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
+sitecues.use("jquery", "conf", "zoom", "cursor", function ($, conf, zoom, cursor) {
 
 
 
@@ -16,34 +16,10 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     return new SliderClass(props, _slider);
   };
 
-  // Updates the Thumb position of all the sliders in the stack
-  _slider.updatePosition = function(zoomLevel) {
-
-    // // Alias the slider stack
-    // var sliderStack = _slider.stack;
-
-    // // Step through the stack
-    // // for (var i=0, l=sliderStack.length; i< l; i++ ) {
-
-    //   if (!sliderStack[i].mouseDownTrack){
-
-    //     var i_slider = sliderStack[i];
-
-    //     i_slider.zoomLevel = zoomLevel;
-        
-    //     // Pass the zoomLevel value to each slider and update the Thumb's position
-    //     // i_slider.setdimensions.call(i_slider);
-    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, i_slider.zoomLevel);
-    //     // i_slider.translateThumbSVG.call(i_slider);
-
-    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, zoomLevel);
-    //     // i_slider.translateThumbSVG.call(i_slider);
-
-    //   }
-    
-    // }
-
+  _slider.destoryInstances = function () {
   };
+
+
 
   // #### SLIDER CLASS #############################################################################
 
@@ -65,11 +41,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.height = props.height;
     }
 
+    // Reference the SliderClass interface
     this.interface = interface;
 
     // Add this instance to a stack of sliders
     interface.stack.push(this);
 
+    // Set an index on the instance: useful for debugging events that are fired to multiple sliders
     this.index = interface.stack.length;
 
     // Initialize this new Slider instance
@@ -120,17 +98,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       return '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
 
         'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" preserveAspectRatio="none">' +
-
-        '<path class="letterSmlBack"  fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
-        '<path class="trackBack"      fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
-        '<path class="letterBigBack"  fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
-
-        '<path class="letterSml"      fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,143.076 L16.803,143.076 L42.351,72.953 L63.434,72.953 L89.611,143.076 L70.706,143.076 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
-
-        '<path class="track"          fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
-        '<path class="thumb"          fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" stroke-width="8" stroke-linejoin="round" />' +
-
-        '<path class="letterBig"      fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,140.875 L551.484,140.875 L594.99,24.213 L629.008,24.213 L672.199,140.875 L640.91,140.875 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
+        '<path class="letterSmlBack"  cursor="pointer" fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
+        '<path class="trackBack"      cursor="pointer" fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
+        '<path class="letterBigBack"  cursor="pointer" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
+        '<path class="letterSml"      cursor="pointer" fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,143.076 L16.803,143.076 L42.351,72.953 L63.434,72.953 L89.611,143.076 L70.706,143.076 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
+        '<path class="track"          cursor="pointer" fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
+        '<path class="thumb"          cursor="pointer" fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" stroke-width="8" stroke-linejoin="round" />' +
+        '<path class="letterBig"      cursor="pointer" fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,140.875 L551.484,140.875 L594.99,24.213 L629.008,24.213 L672.199,140.875 L640.91,140.875 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
       '</svg>';
 
     },
@@ -182,7 +156,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         track         : $svgElem.find('.track'),
         thumb         : $svgElem.find('.thumb'),
         letterBig     : $svgElem.find('.letterBig'),
-      };  
+      };
 
     },
 
@@ -212,9 +186,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       for (var component in color) {
         setHover(component);
       }
-      // TODO: remove these if they end up not being used...
-      // svg.viewBox   .on('mouseenter', context...
-      // svg.viewBox   .on('mouseleave', context...
 
       // Set the context (this) to be used in the event listener callbacks
       var context = { slider: this };
@@ -237,12 +208,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Reize events require a recalculation of dimensions
       $(window)         .on('resize',    context, this.setdimensions);
 
-      // TODO: Add this back in when Toolbar resize feature is finished
-      // sitecues.on("toolbar/resized", function (toolbar) {
-      //   slider.repaint(toolbar);
-      // });
-
-      // Pass slider to anonfunc to set correct context of slider when called from conf
+      // Pass slider instance to anonfunc to set correct context of slider when called from conf
       (function(_slider){
 
         // Update the Thumb element's position based on the zoom level now dimensions have changed
@@ -253,9 +219,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
           // Only respond to conf zoom updates when mouse not down
           if (!_slider.mouseDownTrack) {
             
-            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
-            
             // Update the Thumb position
+            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
             _slider.translateThumbSVG.call(_slider);
 
           }
@@ -267,6 +232,21 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     },
 
 
+    // Switch off user-select
+    disablebodyselect: function () {
+
+      $('html').css({
+        '-webkit-user-select' : 'none',     /* Chrome all / Safari all */
+        '-moz-user-select'    : 'none',     /* Firefox all */
+        '-ms-user-select'     : 'none',     /* IE 10+ */
+        /* No support for these yet, use at own risk */
+        // '-o-user-select': 'none',
+        // 'user-select': 'none'
+      });
+      
+    },
+
+
 
     // When the mouse is is pressed over the Track, Thumb and TrackBack
     mousedowntrack: function (e) {
@@ -274,18 +254,24 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Get the context when called from event mousemove event listener
       var slider = e.data.slider;
 
+      slider.disablebodyselect();
+
       // Store the state of the mousedown
       slider.mouseDownTrack = true;
 
+      slider.dragthumb(e);
+
     },
 
-    // TODO: These following two functions are very similar, we can pack tis down later
+    // TODO: These following two functions are very similar, we can pack this down later............
 
     // When the mouse is is pressed over the Letter or LetterBack
     mousedownlettersml: function (e) {
       
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
+
+      slider.disablebodyselect();
 
       // Store the state of the mousedown
       slider.mouseDownLetterSml = true;
@@ -310,6 +296,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
 
+      slider.disablebodyselect();
+
       // Store the state of the mousedown
       slider.mouseDownLetterBig = true;
 
@@ -329,7 +317,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // When the mouse is unpressed anywhere
     mouseup: function (e) {
-      
+
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
 
@@ -337,6 +325,17 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.mouseDownTrack     = false;
       slider.mouseDownLetterSml = false;
       slider.mouseDownLetterBig = false;
+
+      // Switch off user-select on when the mouse is released
+      $('html').css({
+        '-webkit-user-select' : 'text',  /* Chrome all / Safari all */
+        '-moz-user-select'    : 'text',     /* Firefox all */
+        '-ms-user-select'     : 'text',      /* IE 10+ */
+        /* No support for these yet, use at own risk */
+        // '-o-user-select': 'auto',
+        // 'user-select': 'auto'
+      });
+
 
       // Clear mousedown timers on zoom letters
       clearInterval(slider.letterIntervalSml);
@@ -420,8 +419,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.trackClientWidth = this.trackBounds.width;
       slider.containerLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left;
       slider.trackOffsetLeft = slider.trackBounds.left - slider.containerLeft;
-
-      // console.log(slider.index);
 
       slider.setThumbPositionFromZoomLevel.call(slider, slider.zoomLevel);
       slider.translateThumbSVG.call(slider);
