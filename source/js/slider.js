@@ -221,9 +221,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
           // Only respond to conf zoom updates when mouse not down
           if (!_slider.mouseDownTrack) {
             
-            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
-            
             // Update the Thumb position
+            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
             _slider.translateThumbSVG.call(_slider);
 
           }
@@ -244,6 +243,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
       // Store the state of the mousedown
       slider.mouseDownTrack = true;
+
+      slider.dragthumb(e);
 
       // Switch off user-select on the whole body while dragging
       $('body').css({
@@ -310,10 +311,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
-
-      if (slider.mousedowntrack) {
-        slider.dragthumb(e);
-      }
 
       // Update the state of the mousedown on 
       slider.mouseDownTrack     = false;
