@@ -17,26 +17,37 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
   };
 
   // Updates the Thumb position of all the sliders in the stack
-  _slider['update-position'] = function(zoomLevel) {
-    
+  _slider.updatePosition = function(zoomLevel) {
+
     // Alias the slider stack
     var sliderStack = _slider.stack;
 
     // Step through the stack
     for (var i=0, l=sliderStack.length; i< l; i++ ) {
-      
-      // Pass the zoomLevel value to each slider and update the Thumb's position
-      sliderStack[i].setThumbPositionFromZoomLevel(zoomLevel);
+
+      if (!sliderStack[i].mouseDownTrack){
+
+        var i_slider = sliderStack[i];
+
+        i_slider.zoomLevel = zoomLevel;
+        
+        // Pass the zoomLevel value to each slider and update the Thumb's position
+        // i_slider.setdimensions.call(i_slider);
+        i_slider.setThumbPositionFromZoomLevel.call(i_slider, i_slider.zoomLevel);
+        i_slider.translateThumbSVG.call(i_slider);
+
+        // i_slider.setThumbPositionFromZoomLevel.call(i_slider, zoomLevel);
+        // i_slider.translateThumbSVG.call(i_slider);
+
+      }
     
     }
 
   };
 
-
-
   // #### SLIDER CLASS #############################################################################
 
-  SliderClass = function (props, _slider) {
+  SliderClass = function (props, interface) {
 
     // Store a reference to the Slider's container element
     this.$container = $(props.container);
@@ -52,14 +63,17 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     if (props.height) {
       this.height = props.height;
-    }    
-    
-    // Initialize this new Slider instance
-    this.init();
+    }
+
+    this.interface = interface;
 
     // Add this instance to a stack of sliders
-    _slider.stack.push(this);
+    interface.stack.push(this);
 
+    this.index = interface.stack.length;
+
+    // Initialize this new Slider instance
+    this.init();
   };
 
 
@@ -69,7 +83,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // Settings
 
     // Number of milliseconds to wait before updating zoom when mouse is held down over a letter
-    letterZoomDelay: 100,
+    letterZoomDelay: 50,
     // NOTE: Magic number 768 is default original width of SVG document
     originalWidth: 690,
     // Half the width of the SVG thumb element at it's original size
@@ -84,7 +98,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)"},
       letterSml         : { normal: "#FFFFFF", hover: "#FFFFFF"},
       track             : { normal: "#0045AD", hover: "#0045AD"},
-      thumb             : { normal: "rgba(255,255,255,.5)", hover: "rgba(255,255,255,.5)"},
+      thumb             : { normal: "#FFFFFF", hover: "#FFFFFF"},
       letterBig         : { normal: "#FFFFFF", hover: "#FFFFFF"},
     },
 
@@ -106,19 +120,15 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       return '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
 
         'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" preserveAspectRatio="none">' +
-        // 'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" >' +
 
-        // '<path class="letterSmlBack"  fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
-        '<path class="letterSmlBack"  fill="rgba(255,255,255,.2)"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
+        '<path class="letterSmlBack"  fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
         '<path class="trackBack"      fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
         '<path class="letterBigBack"  fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
 
         '<path class="letterSml"      fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,143.076 L16.803,143.076 L42.351,72.953 L63.434,72.953 L89.611,143.076 L70.706,143.076 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
-        //'<path class="track"          fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="8" />' + //stroke-linecap="round" stroke-linejoin="round"
-        //'<path class="thumb"          fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" />' + //stroke-width="8" stroke-linejoin="round"
-        
-        '<path class="track"          fill="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="8" />' + //stroke-linecap="round" stroke-linejoin="round"
-        '<path class="thumb"          fill="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" />' + //stroke-width="8" stroke-linejoin="round"
+
+        '<path class="track"          fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
+        '<path class="thumb"          fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,135.249 z" stroke-width="8" stroke-linejoin="round" />' +
 
         '<path class="letterBig"      fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,140.875 L551.484,140.875 L594.99,24.213 L629.008,24.213 L672.199,140.875 L640.91,140.875 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
       '</svg>';
@@ -232,6 +242,26 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       //   slider.repaint(toolbar);
       // });
 
+      // Update the Thumb element's position based on the zoom level now dimensions have changed
+      conf.get('zoom', function (zoomLevel) {
+        
+        slider.zoomLevel = zoomLevel;
+
+        // Only respond to conf zoom updates when mouse not down
+        if (!slider.mouseDownTrack) {
+          
+          slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
+          
+          // Update the Thumb position
+          slider.translateThumbSVG.call(slider);
+
+        }
+
+        // console.log(slider.interface);
+        // slider.interface.updatePosition();
+
+      });
+
     },
 
 
@@ -324,31 +354,42 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       if (slider.mouseDownTrack) {
         
         // Get the postition of the mouse relative to the Slider
-        slider.thumbPos = e.clientX - slider.offsetLeft + $(document).scrollLeft();
+        //slider.thumbPos = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
+        var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
 
         // Contain the Thumb position in the Track bounds
-        if (slider.thumbPos < slider.thumbBoundLeft) {
-          slider.thumbPos = slider.thumbBoundLeft;
+        if (thumbX < 0) {
+          thumbX = 0;
         }
-        if (slider.thumbPos > slider.thumbBoundRight) {
-          slider.thumbPos = slider.thumbBoundRight;
+        if (thumbX > slider.trackBounds.width) {
+          thumbX = slider.trackBounds.width;
         }
-
-        // Update the Zoom Level
-        slider.updatezoomlevel.call(slider);
-  
-        // NOTE: Switched off because this makes the thumb appear jerky when dragged.
-        // This is because the conf gets updated, which then emits events to subscribers, which in
-        // turn updates the thumb position to the zoom.step value. So you drag in decrete increments
-        // less-than zoom.step, ie: you drag the Thumb less than one pixel, but then the
-        // emit(toolbar/slider/update-positionslider) then moves the Thumb to the zoom.step of 0.1
-        // which happens to be bigger than a pixel. Uncomment the next line of code to see.
+                
+        // Calculate the zoom based on the mouseX position
+        var zoomLevel = slider.calcZoomLevel.call(slider, thumbX);
         
-        // Translate the Thumb SVG element (slide the thumb)
-        //slider.translateThumbSVG.call(slider);
+        // Calculate the position of the Thumb relative to the zoom level and SVG elemss
+        slider.thumbPos = slider.calcThumbPos.call(slider, zoomLevel);
 
+        // Translate the Thumb SVG element (slide the thumb)
+        slider.translateThumbSVG.call(slider);
+
+        // Set the new zoom level in conf
+        conf.set('zoom', zoomLevel);
       }
 
+    },
+
+
+
+    calcZoomLevel: function (thumbX) {
+      return ((zoom.max-zoom.min) / this.trackBounds.width * thumbX) + zoom.min;
+    },
+
+    calcThumbPos: function (zoomLevel) {
+      var zoomRange = zoom.max-zoom.min;
+      var newThumbPos = this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
+      return newThumbPos;
     },
 
 
@@ -365,6 +406,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         slider = this;
       };
 
+
       // Reset element boundingds incase dom sizes change
       slider.setcontainerbounds.call(slider);
       slider.setsvgbounds.call(slider);
@@ -372,72 +414,33 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Get the aspect horizontal aspect ratio of the Slider
       slider.aspect = slider.originalWidth/slider.width; 
 
-      // Get the half width of the thumb relative to the Slider's scale
-      // this.thumbHalfWidth = (slider.originalThumbWidth/slider.aspect)/2;
-      // slider.thumbHalfWidth = slider.svg.thumb.get(0).getBoundingClientRect()/2;///slider.aspect;
-      slider.thumbWidth = slider.svg.thumb.get(0).getBoundingClientRect().width;///slider.aspect;
-
-      //console.log( slider.thumbWidth );
-
-
-      var track = slider.svg.track.get(0).getBoundingClientRect();
-
-      // Get the Left & Right edges of the Slider Track
-      slider.trackClientLeft = track.left; // - slider.offsetLeft;
-      slider.trackClientWidth = track.width;
+      slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect();
+      slider.trackClientWidth = this.trackBounds.width;
       slider.containerLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left;
-      slider.trackOffsetLeft = track.left - slider.containerLeft;
+      slider.trackOffsetLeft = slider.trackBounds.left - slider.containerLeft;
 
-      console.log(slider.trackClientWidth);
+      // console.log(slider.index);
 
-      // Update the Thumb element's position based on the zoom level now dimensions have changed
-      conf.get('zoom', function (zoomLevel) {
-        slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
-        slider.translateThumbSVG.call(slider);
-      });
+      slider.setThumbPositionFromZoomLevel.call(slider, slider.zoomLevel);
+      slider.translateThumbSVG.call(slider);
 
     },
 
 
-
-    // Updates the sitecues zoom-level based on the Thumb position
-    updatezoomlevel: function () {
-
-      // Calculate the zoom range (I think we should put this in zoom.js) - Al
-      var zoomRange = zoom.max-zoom.min
-      
-      // FIXME: -(1/this.aspect) .... Not entirely happy with this calculation. It is not exact.
-      // Possibly something to do with margins/borders etc?
-      ,   zoomLevel = ((zoomRange/this.thumbBoundsWidth) * (this.thumbPos)) - (1/this.aspect);
-      ;
-
-      conf.set('zoom', zoomLevel);
-      //console.log( zoomLevel);
-
-    },
 
     // Set the Slider's internal thumb position variable based on the zoom level
     setThumbPositionFromZoomLevel: function (zoomLevel){
 
       // Calculate the zoom range (I think we should put this in zoom.js) - Al
-      var zoomRange = zoom.max-zoom.min;
+      var zoomRange  = zoom.max-zoom.min;
 
-      //this.thumbPos = (this.thumbBoundsWidth / zoomRange * (zoomLevel-zoom.min)) + this.thumbBoundLeft;
-      
-      // this.thumbPos = ((this.trackClientWidth / zoomRange) * (zoomLevel*this.aspect)) + this.trackOffsetLeft - ((this.thumbWidth*this.aspect)); //- this.thumbHalfWidth;
+      // Calculate the new position of the THumb
+      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
 
-      this.aspect = this.originalWidth/this.width; 
-
-      // this.thumbPos = this.trackOffsetLeft + (((this.trackClientWidth*this.aspect)/(zoomRange)) * zoomLevel);
-      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min)
-
-      console.log(zoomLevel, this.thumbPos);
-      //this.thumbPos = 0;
     },
 
     // Move the SVG thumb element based on the dimensions of the Slider
     translateThumbSVG: function () {
-      // this.svg.thumb.attr('transform', 'translate('+ (this.thumbPos * this.aspect) +')');
       this.svg.thumb.attr('transform', 'translate('+ (this.thumbPos) +')');
     },
 
