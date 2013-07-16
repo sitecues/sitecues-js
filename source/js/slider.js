@@ -16,33 +16,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     return new SliderClass(props, _slider);
   };
 
-  // Updates the Thumb position of all the sliders in the stack
-  _slider.updatePosition = function(zoomLevel) {
-
-    // // Alias the slider stack
-    // var sliderStack = _slider.stack;
-
-    // // Step through the stack
-    // // for (var i=0, l=sliderStack.length; i< l; i++ ) {
-
-    //   if (!sliderStack[i].mouseDownTrack){
-
-    //     var i_slider = sliderStack[i];
-
-    //     i_slider.zoomLevel = zoomLevel;
-        
-    //     // Pass the zoomLevel value to each slider and update the Thumb's position
-    //     // i_slider.setdimensions.call(i_slider);
-    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, i_slider.zoomLevel);
-    //     // i_slider.translateThumbSVG.call(i_slider);
-
-    //     // i_slider.setThumbPositionFromZoomLevel.call(i_slider, zoomLevel);
-    //     // i_slider.translateThumbSVG.call(i_slider);
-
-    //   }
-    
-    // }
-
+  _slider.destoryInstances = function () {
   };
 
   // #### SLIDER CLASS #############################################################################
@@ -65,11 +39,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.height = props.height;
     }
 
+    // Reference the SliderClass interface
     this.interface = interface;
 
     // Add this instance to a stack of sliders
     interface.stack.push(this);
 
+    // Set an index on the instance: useful for debugging events that are fired to multiple sliders
     this.index = interface.stack.length;
 
     // Initialize this new Slider instance
@@ -182,7 +158,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         track         : $svgElem.find('.track'),
         thumb         : $svgElem.find('.thumb'),
         letterBig     : $svgElem.find('.letterBig'),
-      };  
+      };
 
     },
 
@@ -212,9 +188,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       for (var component in color) {
         setHover(component);
       }
-      // TODO: remove these if they end up not being used...
-      // svg.viewBox   .on('mouseenter', context...
-      // svg.viewBox   .on('mouseleave', context...
 
       // Set the context (this) to be used in the event listener callbacks
       var context = { slider: this };
@@ -237,12 +210,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Reize events require a recalculation of dimensions
       $(window)         .on('resize',    context, this.setdimensions);
 
-      // TODO: Add this back in when Toolbar resize feature is finished
-      // sitecues.on("toolbar/resized", function (toolbar) {
-      //   slider.repaint(toolbar);
-      // });
-
-      // Pass slider to anonfunc to set correct context of slider when called from conf
+      // Pass slider instance to anonfunc to set correct context of slider when called from conf
       (function(_slider){
 
         // Update the Thumb element's position based on the zoom level now dimensions have changed
@@ -276,6 +244,16 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
       // Store the state of the mousedown
       slider.mouseDownTrack = true;
+
+      // Switch off user-select on the whole body while dragging
+      $('body').css({
+        '-webkit-user-select': 'none',  /* Chrome all / Safari all */
+        '-moz-user-select': 'none',     /* Firefox all */
+        '-ms-user-select': 'none',      /* IE 10+ */
+        /* No support for these yet, use at own risk */
+        // '-o-user-select': 'none',
+        // 'user-select': 'none'
+      });
 
     },
 
@@ -329,9 +307,13 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // When the mouse is unpressed anywhere
     mouseup: function (e) {
-      
+
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
+
+      if (slider.mousedowntrack) {
+        slider.dragthumb(e);
+      }
 
       // Update the state of the mousedown on 
       slider.mouseDownTrack     = false;
@@ -341,6 +323,16 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Clear mousedown timers on zoom letters
       clearInterval(slider.letterIntervalSml);
       clearInterval(slider.letterIntervalBig);
+
+      // Switch off user-select on when the mouse is released
+      $('body').css({
+        '-webkit-user-select': 'auto',  /* Chrome all / Safari all */
+        '-moz-user-select': 'auto',     /* Firefox all */
+        '-ms-user-select': 'auto',      /* IE 10+ */
+        /* No support for these yet, use at own risk */
+        // '-o-user-select': 'auto',
+        // 'user-select': 'auto'
+      });
 
     },
 
