@@ -85,11 +85,25 @@
     z-index: 1;
 }
 
+
+
 #sitecues-panel .slider-wrap {
-    
     display:block;
-    width: 330px;
-    height: 77px;
+    width:340px;
+    height:80px;
+    -webkit-user-select : none;
+    -khtml-user-select  : none;
+    -moz-user-select    : none;
+    -o-user-select      : none;
+    user-select         : none;
+}
+
+#sitecues-panel .slider-wrap *{
+    -webkit-user-select': none;
+    -khtml-user-select  : none;
+    -moz-user-select    : none;
+    -o-user-select      : none;
+    user-select'        : none;
 }
 
 

@@ -29,8 +29,21 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // The panel placer element (currently only used with the default badge).
     panel.placer = undefined;
 
+    // Sticky param for panel
+    panel.isSticky = false;
+    
+    // Helper function to make panel sticky
+    sitecues.toggleStickyPanel = function () {
+      if (panel.isSticky===false) {
+        return panel.isSticky = true;
+      } else {
+        return panel.isSticky = false;
+      }
+    };
+
     // panel element
     panel.create = function() {
+
       // private variables
       var frame, wrap, slider, ttsButton;
 
@@ -48,13 +61,13 @@ sitecues.def( 'panel', function (panel, callback, log) {
       this.slider.widget = SliderClass.build({
         container: this.slider.wrap,
         color: {
-          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.0)"},
-          letterSml         : { normal: "#000000", hover: "#FF0000"},
-          track             : { normal: "#0045AD", hover: "#FF0000"},
-          thumb             : { normal: "#000000", hover: "#FF0000"},
-          letterBig         : { normal: "#000000", hover: "#FF0000"},
+          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          letterSml         : { normal: "#000000", hover: "#000000"},
+          track             : { normal: "#000000", hover: "#000000"},
+          thumb             : { normal: "#1D3D8E", hover: "#1D3D8E"},
+          letterBig         : { normal: "#000000", hover: "#000000"},
         }
       });
     
@@ -150,11 +163,18 @@ sitecues.def( 'panel', function (panel, callback, log) {
           sitecues.emit('panel/show', panel.element);
           
           // Set/recheck the dimensions of the slider
-          panel.slider.widget.setdimensions(panel.slider.widget);
+          var sliderWidget = panel.slider.widget;
+          sliderWidget.setdimensions(sliderWidget);
+          sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+          sliderWidget.translateThumbSVG.call(sliderWidget);
       });
 
       // Set/recheck the dimensions of the slider
-      panel.slider.widget.setdimensions(panel.slider.widget);
+      var sliderWidget = panel.slider.widget;
+      sliderWidget.setdimensions(sliderWidget);
+      sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+      sliderWidget.translateThumbSVG.call(sliderWidget);
+
 
       panel.element.hover(function() {
         //Hover in
@@ -168,26 +188,22 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // hide panel
     panel.hide = function(){
 
-      // nothing to hide
-      if (!panel.element) {
-        return;
-      }
-
       if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
         // We're hovering over the element, delay hiding it
         setTimeout(panel.hide, panel.hideDelay);
         return;
       }
 
-      // hide panel
-      panel.element.fadeOut('fast', function(){
 
-        // notify about panel hiding
-        sitecues.emit('panel/hide', panel.element);
+      if (panel.isSticky===false) {
+        // hide panel
+        panel.element.fadeOut('fast', function(){
 
-        // delete panel element
-        //panel.element = undefined;
-      });
+          // notify about panel hiding
+          sitecues.emit('panel/hide', panel.element);
+
+        });
+      }
 
     };
 

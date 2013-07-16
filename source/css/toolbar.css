@@ -20,7 +20,7 @@
   width:63%;
   margin:0 15%;
   cursor:pointer;
-  }
+}
 
   
 .sitecues-slider-thumb {
@@ -37,8 +37,21 @@
   cursor: pointer;
 }
 
+
+
+.sitecues-toolbar .slider-wrap *{
+  cursor:pointer!important;
+  -webkit-user-select : none!important;
+  -moz-user-select    : none!important;
+  -ms-user-select     : none!important;
+}
+
 .sitecues-toolbar .slider-wrap {
-  /*background-image: url('../images/toolbar/toolbar-slider.png');*/
+  cursor:pointer!important;
+  -webkit-user-select : none!important;
+  -moz-user-select    : none!important;
+  -ms-user-select     : none!important;
+  
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;
@@ -46,8 +59,8 @@
   right: 80px;
   display: inline;
   width: 160px;
-  height:80%;
-  top:9%;
+  height:90%;
+  top:4%;
 }
 
 .sitecues-toolbar .ramp {
