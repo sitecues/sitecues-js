@@ -187,24 +187,18 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
     // hide panel
     panel.hide = function(){
-
       if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
         // We're hovering over the element, delay hiding it
         setTimeout(panel.hide, panel.hideDelay);
         return;
       }
-
-
       if (panel.isSticky===false) {
         // hide panel
         panel.element.fadeOut('fast', function(){
-
           // notify about panel hiding
           sitecues.emit('panel/hide', panel.element);
-
         });
       }
-
     };
 
     // delete the panel
@@ -234,7 +228,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
         ttsButton.addClass("tts-disabled");
       }
     };
-
 
     // setup trigger to show panel
     sitecues.on('badge/hover', function() {
