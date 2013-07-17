@@ -384,13 +384,11 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
 
     calcZoomLevel: function (thumbX) {
-      return ((zoom.max-zoom.min) / this.trackBounds.width * thumbX) + zoom.min;
+      return (zoom.range / this.trackBounds.width * thumbX) + zoom.min;
     },
 
     calcThumbPos: function (zoomLevel) {
-      var zoomRange = zoom.max-zoom.min;
-      var newThumbPos = this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
-      return newThumbPos;
+      return this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoom.range  *  (zoomLevel-zoom.min);
     },
 
 
@@ -413,7 +411,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       slider.setsvgbounds.call(slider);
 
       // Get the aspect horizontal aspect ratio of the Slider
-      slider.aspect = slider.originalWidth/slider.width; 
+      slider.aspect = slider.originalWidth/slider.width;
 
       slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect();
       slider.trackClientWidth = slider.trackBounds.width;
@@ -430,11 +428,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // Set the Slider's internal thumb position variable based on the zoom level
     setThumbPositionFromZoomLevel: function (zoomLevel){
 
-      // Calculate the zoom range (I think we should put this in zoom.js) - Al
-      var zoomRange  = zoom.max-zoom.min;
-
       // Calculate the new position of the THumb
-      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
+      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoom.range  *  (zoomLevel-zoom.min);
 
     },
 
