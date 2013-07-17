@@ -9,8 +9,7 @@ sitecues.def('jquery/resize', function (module, callback, log) {
     var delta = 100;
 
     var checkResizeEnd = function() {
-      console.log('resize-end');
-      if (((new Date()).getTime() - lastResizeEventEpoch) < delta) {
+      if (((+ new Date()) - lastResizeEventEpoch) < delta) {
         setTimeout(checkResizeEnd, delta);
       } else {
         timeoutSet = false;
@@ -22,7 +21,7 @@ sitecues.def('jquery/resize', function (module, callback, log) {
 
 
     var onEachResize = function() {
-      lastResizeEventEpoch = (new Date()).getTime();
+      lastResizeEventEpoch = (+ new Date());
       if (timeoutSet === false) {
         timeoutSet = true;
         setTimeout(checkResizeEnd, delta);

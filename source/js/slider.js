@@ -450,9 +450,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
   
 
 
-})  // END: use
-
   // Core callback
   callback();
 
+});  // END: use
 }); // END: def

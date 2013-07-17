@@ -26,8 +26,8 @@
   var arr               = Array.prototype                 // Array's prototype
     , has               = Object.prototype.hasOwnProperty // Object's has own property
     , noop              = function(){}                    // Empty function
-    , modules           = {}                              // Modules container
     , coreConfig        = {}                              // Core config container
+    , modules           = {}                              // Modules container
 
     // Siteuces top-level namespace: all public classes and modules will be
     // attached to this name space and aliased on "window.sitecues"
@@ -37,8 +37,17 @@
     , resolveUrl
     , parseUrlQuery
     , parseUrl
+    
+    , lastModuleDefined
+    
     , APP_VERSION = '0.0.0-UNVERSIONED'
   ;
+
+
+  // More convenient way to get epoch time in milliseconds when working with the code
+  function time(){
+    return + new Date();
+  };
 
   // Return the core config.
   sitecues.getCoreConfig = function() {
@@ -146,8 +155,28 @@
     return MODULE_STATE.READY;
   };
 
+  // function mcCheckenzYo () {
+  //   var truthCount = 0
+  //   ,   length     = LOAD_LIST.length
+  //   ;
+
+  //   for (var i=0; i< length; i++) {
+      
+  //     var i_module = modules[LOAD_LIST[i]];
+
+  //     if (i_module) {
+  //       truthCount += i_module.deffed === true ? 1 : 0 ;
+  //     }
+  //   }
+    
+  //   if (truthCount === length) {
+  //     sitecues.emit('core/allModulesLoaded');
+  //   }
+  // };
+
   // define equinox module
   var _def = function(name, constructor){
+    
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
       log.warn("sitecues: module '" + name + "' already defined.");
@@ -180,24 +209,30 @@
       sitecues.emit('module', name, module);
 
       // notify about new module load once
-      sitecues.emit('load/' + name, module).
-        off('load/' + name);
+      sitecues.emit('load/' + name, module).off('load/' + name);
+
+      // modules[name].deffed = true;
+      // mcCheckenzYo();
 
     // Pass a new logger into the constructor scope of the module
     }, window.sitecues.logger.log(name));
   };
 
   // exposed function for defining modules: queues until core is ready.
-  var READY_FOR_DEF_CALLS = false;
-  var DEF_QUEUE = [];
+  var READY_FOR_DEF_CALLS = false
+  ,   DEF_QUEUE           = []
+  // ,   LOAD_LIST           = []
+  ;
   sitecues.def = function(name, constructor){
     if (READY_FOR_DEF_CALLS) {
+      // console.log("DEF : READY_FOR_DEF_CALLS");
       _def(name, constructor);
     } else {
       DEF_QUEUE.push({
         name: name,
         constructor: constructor
       });
+      // LOAD_LIST.push(name);
     }
   };
 
@@ -208,6 +243,7 @@
       defObj = DEF_QUEUE.shift();
       _def(defObj.name, defObj.constructor);
     }
+
     READY_FOR_DEF_CALLS = true;
   };
 
@@ -354,11 +390,14 @@
     return url;
   };
 
-  var scriptSrcUrl = null,
-  scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js'),
-  scriptTags = document.getElementsByTagName('script');
 
-  sitecues.getScriptSrcUrl =  function() {
+
+  var scriptSrcUrl    = null
+  ,   scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js')
+  ,   scriptTags      = document.getElementsByTagName('script')
+  ;
+
+  sitecues.getScriptSrcUrl = function() {
     return scriptSrcUrl;
   };
 
