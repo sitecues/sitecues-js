@@ -205,29 +205,31 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       svg.letterBig     .on('mousedown', context, this.mousedownletterbig);
       svg.letterBigBack .on('mousedown', context, this.mousedownletterbig);
 
-      // Reize events require a recalculation of dimensions
-      $(window)         .on('resize',    context, this.setdimensions);
 
       // Pass slider instance to anonfunc to set correct context of slider when called from conf
-      (function(_slider){
+      (function(slider_){
 
         // Update the Thumb element's position based on the zoom level now dimensions have changed
         conf.get('zoom', function (zoomLevel) {
 
-          _slider.zoomLevel = zoomLevel;
+          slider_.zoomLevel = zoomLevel;
 
           // Only respond to conf zoom updates when mouse not down
-          if (!_slider.mouseDownTrack) {
+          if (!slider_.mouseDownTrack) {
             
             // Update the Thumb position
-            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
-            _slider.translateThumbSVG.call(_slider);
+            slider_.setThumbPositionFromZoomLevel.call(slider_, zoomLevel);
+            slider_.translateThumbSVG.call(slider_);
 
           }
 
         });
 
+        // Reize events require a recalculation of dimensions
+        sitecues.on('resize/end', function(){ slider_.setdimensions.call(slider_); });
+
       })(slider);
+
 
     },
 
@@ -353,9 +355,11 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       
       // If the slider has put the mouse-down inside the Slider Track Back bounds...
       if (slider.mouseDownTrack) {
+
+        
+        //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
         
         // Get the postition of the mouse relative to the Slider
-        //slider.thumbPos = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
         var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
 
         // Contain the Thumb position in the Track bounds
@@ -395,7 +399,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // Calculate the dimensions of dynamic Slider components
     setdimensions: function (e) {
-      
+
       // Set the context, allowing setdimensions to be called from any scope
       if (e && e.data && e.data.slider) {
         slider = e.data.slider;
@@ -404,7 +408,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       } else {
         slider = this;
       };
-
 
       // Reset element boundingds incase dom sizes change
       slider.setcontainerbounds.call(slider);

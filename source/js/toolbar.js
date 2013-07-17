@@ -18,8 +18,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'toolbar/resizer',
     'toolbar/messenger',
     'util/common',
+    'jquery/resize',
     //'zoom',
-    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common) {
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize) {
     log.trace('toolbar.use()');
 
     // FIXME: Remove me! For testing purposes only. - Eric
@@ -41,6 +42,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     toolbar.render = function (callback) {
       log.trace('toolbar.render()');
+
+      //console.log('rendering toolbar');
 
       var $html = $('html');
       if (! toolbar.instance) {
