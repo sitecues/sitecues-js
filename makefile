@@ -47,11 +47,11 @@ files=\
 	source/js/util/positioning.js \
 	source/js/util/common.js \
 	source/js/badge.js \
-	source/js/panel.js \
 	source/js/zoom.js \
+	source/js/slider.js \
+	source/js/panel.js \
 	source/js/keys.js \
 	source/js/focus.js \
-	source/js/slider.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \

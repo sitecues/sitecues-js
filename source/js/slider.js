@@ -1,7 +1,7 @@
 sitecues.def("slider", function (slider, callback, log) {
-sitecues.use("jquery", "conf", "zoom", "cursor", function ($, conf, zoom, cursor) {
+sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
-
+  console.log(conf);
 
   // #### SLIDER INTERFACE #########################################################################
 
@@ -452,8 +452,9 @@ sitecues.use("jquery", "conf", "zoom", "cursor", function ($, conf, zoom, cursor
   
 
 
-  // Core callback
-   callback();
-
 })  // END: use
+
+  // Core callback
+  callback();
+
 }); // END: def
