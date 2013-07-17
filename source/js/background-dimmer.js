@@ -66,7 +66,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         .style({
           'position'      : 'absolute',
           'display'       : 'block',
-          'z-index'       : 9999999999,
+          'z-index'       : 2147483646,
           'opacity'       : 0,
           'left'          : viewport.left +'px',
           'top'           : viewport.top - toolBarHeight +'px',

@@ -10,7 +10,7 @@ sitecues.def('help', function(help, callback, log) {
   var HELP_CONTENTS_ENDPOINT = '//' + sitecues.coreConfig.hosts.up + '/helpContents';
 
   // Initial inset of the help HLB once it is added to the page.
-  var HELP_FRAME_INIT_INSET = 5;
+  var HELP_FRAME_INIT_INSET = 50;
 
   // Help states.
   var STATES = help.STATES = {
@@ -62,25 +62,55 @@ sitecues.def('help', function(help, callback, log) {
       type: 'GET',
       url:  HELP_CONTENTS_ENDPOINT,
       success: function(data) {
+        var helpConfig = jq.extend(true, {}, data);
+
         // Load the help styles.
-        load.style('../css/help.css');
+        if (helpConfig.cssFiles) {
+          for (var i = 0; i < helpConfig.cssFiles.length; i++) {
+            load.style(helpConfig.cssFiles[i]);
+          }
+        }
 
         // Create the help container
-        var helpFrame = jq('<div>').attr('id', 'sitecues_help_display').addClass('sitecues_help_display').html(data.content);
+        var helpFrame = jq(helpConfig.content).css({
+          position: 'absolute'
+        }).hide().prependTo('body');
 
         // Used to track if HLB close events relate to help.
         var hlbHelpTarget = helpFrame.get(0);
 
         // Set the initial CSS of the help element before it is added to the DOM.
         var setInitialCss = function(jqObj) {
-          var vp = pos.getViewportDimensions(HELP_FRAME_INIT_INSET, conf.get('zoom'));
+          var zoom = conf.get('zoom');
+          var viewport = pos.getViewportDimensions(0, zoom);
+          var insetViewport = pos.getViewportDimensions(HELP_FRAME_INIT_INSET, zoom);
+          var width = helpConfig.width || insetViewport.width;
+          var left = (viewport.width - width) / 2;
           jqObj.css({
-            width: vp.width,
-            height: vp.height,
-            left: vp.left,
-            top: -10000
+            width: width,
+            height: helpConfig.height || insetViewport.height,
+            left: left,
+            top: HELP_FRAME_INIT_INSET * zoom * 1.75
           });
         };
+
+        // We need to swap out to transform rather than zoom so that iframe scrolling works.
+        sitecues.on('help/open', function() {
+          var totalZoom = pos.getTotalZoom(helpFrame);
+          helpFrame.find('iframe').style('zoom', '' + (1.0 / totalZoom), 'important').css({
+            transform: 'scale(' + totalZoom + ')',
+            transformOrigin: '0 0'
+          });
+        });
+
+        // Swap back to zoom so that the deflate works.
+        sitecues.on('help/closing', function() {
+          var totalZoom = pos.getTotalZoom(helpFrame);
+          helpFrame.find('iframe').css({
+            zoom: totalZoom,
+            transform: ''
+          });
+        });
 
         // Opens a target in the HLB.
         var openHlb = function(target, options) {
@@ -103,12 +133,13 @@ sitecues.def('help', function(help, callback, log) {
         var openHelpHlb = function() {
           state = STATES.OPENING;
           setInitialCss(helpFrame);
-          helpFrame.prependTo('body');
+          helpFrame.show();
           sitecues.emit('help/opening', help);
           openHlb(hlbHelpTarget, {
             force: true,
             suppress_tts: true,
-            suppress_mouse_out: true
+            suppress_mouse_out: true,
+            close_button: true
           });
         };
 
@@ -129,7 +160,7 @@ sitecues.def('help', function(help, callback, log) {
         // Finalize the closing of the help display.
         var finalizeClose = function() {
           state = STATES.CLOSED;
-          helpFrame.remove();
+          helpFrame.hide();
           sitecues.emit('help/closed');
           // If there was a previous HLB, reinstate it.
           if (previousHlbTarget) {

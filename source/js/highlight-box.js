@@ -12,7 +12,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     // This is the default setting, the value used at runtime will be in conf.
     var kMinHighlightZoom = 1.01;
 
-    var extraZoom = 1.5;
+    var kExtraZoom = 1.5;
 
     // The states that the HLB can be in.
     // TODO: Convert to state instances.
@@ -106,6 +106,27 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       }
     });
 
+    // The (optional) close button.
+    var closeButton = $('<div>').attr('id', 'sitecues-hlb-close-button').hide().prependTo('html').click(function(e) {
+      e.stopPropagation();
+      sitecues.emit('highlight/animate', {});
+    });
+
+    sitecues.on('hlb/deflating', function() {
+      closeButton.hide();
+    });
+
+    var closeButtonInset = 10;
+    var displayCloseButton = function(hlbTarget, totalZoom) {
+      var hlbNode = $(hlbTarget);
+      var hlbBorderWidth = parseFloat(hlbNode.css('borderWidth')) || 0;
+      var bb = positioning.getBoundingBox(hlbTarget);
+      closeButton.show().css({
+        left: ((bb.left  + hlbBorderWidth) * totalZoom) + closeButtonInset,
+        top:  ((bb.top   + hlbBorderWidth) * totalZoom) + closeButtonInset
+      });
+    };
+
     var HighlightBox = (function () {
       // Initialize.
       function HighlightBox(target, options) {
@@ -134,7 +155,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
       HighlightBox.kShowBoxSpeed = 300;
       HighlightBox.kHideBoxSpeed = 150;
-      HighlightBox.kBoxZindex = 2147483646;
+      HighlightBox.kBoxZindex = 2147483644;
       HighlightBox.kBoxBorderWidth = '3px';
       HighlightBox.kBoxPadding   = '4px';  // Give the text a little extra room
       HighlightBox.kBoxBorderRadius = '4px';
@@ -179,7 +200,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var center  = positioning.getCenter(this.item),
           totalZoom = positioning.getTotalZoom(this.item, true),
-          cssUpdate = designer.getNewRectStyle(this.itemNode, center, extraZoom, totalZoom);
+          cssUpdate = designer.getNewRectStyle(this.itemNode, center, kExtraZoom, totalZoom);
 
         // Handle table special behaviour on inner contents.
         designer.handleTableElement(this.itemNode, currentStyle);
@@ -188,7 +209,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = $.extend({}, cssUpdate, {
-          transform: 'scale(' + extraZoom + ')'
+          transform: 'scale(' + kExtraZoom + ')'
         });
 
         // Insert placeholder before HLB target is absoultely positioned.
@@ -241,6 +262,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
           onHighlightBoxReady($(this));
           backgroundDimmer.dimBackgroundContent(this, totalZoom);
+          if (_this.options.close_button) {
+            displayCloseButton(_this.item, totalZoom);
+          }
+
           log.info("hlb ready");
           sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
         });
@@ -277,9 +302,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
           transform: 'scale(1)',
-          width: clientRect.width / extraZoom,
+          width: clientRect.width / kExtraZoom,
           // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-          height: currentStyle['background-image'] ? currentStyle.height / extraZoom : clientRect.height / extraZoom
+          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
         });
 
         // Deflate the highlight box.
@@ -371,7 +396,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.setBgStyle(currentStyle, cssBeforeAnimateStyles);
 
         return cssBeforeAnimateStyles;
-      }
+      };
 
       /* Isolates placeholder logic.
        * Space placeholders prevent content after box from going underneath it. Creates, prepares ans inserts it in the correct place.
@@ -565,7 +590,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
     sitecues.on('key/esc', function () {
       instance.deflate();
-    } );
+    });
 
     // Lower the threshold when speech is enabled.
     sitecues.on('speech/enable', function() {
