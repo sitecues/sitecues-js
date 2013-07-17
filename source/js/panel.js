@@ -257,6 +257,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
       setTimeout(panel.hide, panel.hideDelay);
     });
 
+    sitecues.on('speech/enabled',  showTTSbuttonEnabled);
+    sitecues.on('speech/disabled', showTTSbuttonDisabled);
+
     panel.create();
 
     // panel is ready
