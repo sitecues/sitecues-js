@@ -21,7 +21,7 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback, log){
         var dropdownMenu = $('<ul class="dropdown-menu" role="menu"></ul>').appendTo(dropdown.wrap);
         $('<li><a href="#">'+ kTextHelp +'</a></li>').appendTo(dropdownMenu);
         $('<li><a target="_blank" href="https://www.surveymonkey.com/s/MRQLLBF">'+ kTextFeedback +'</a></li>').appendTo(dropdownMenu);
-        $('<li><a rel="sitecues-event" data-sitecues-event="inverse/toggle">'+ kTextChangeColors +'</a></li>').appendTo(dropdownMenu);
+        //$('<li><a rel="sitecues-event" data-sitecues-event="inverse/toggle">'+ kTextChangeColors +'</a></li>').appendTo(dropdownMenu);
         $('<li><a rel="sitecues-event" data-sitecues-event="toolbar/disable">'+ kTextTurnOff +'</a></li>').appendTo(dropdownMenu);
         dropdown.updateFontSize(toolbar);
         return;
