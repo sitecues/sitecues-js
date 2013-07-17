@@ -107,7 +107,7 @@ sitecues.def('badge', function (badge, callback, log) {
     };
 
     /**
-     * Closes the badge and sets the preference so it stays closed.
+     * Opens the badge and sets the preference so it stays opened.
      *
      * @param success Function executed if successful.
      * @return void

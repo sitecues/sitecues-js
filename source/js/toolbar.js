@@ -270,10 +270,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
 
-      // Override the existing badge events
-      sitecues.off('speech/disabled', toolbar.disableSpeech);
-      sitecues.off('speech/enabled', toolbar.enableSpeech);
-
       toolbar.slideIn(success);
     };
 
@@ -290,23 +286,33 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       log.info('Enabling toolbar');
       conf.set('toolbarEnabled', true);
 
-      // Override the existing badge events
-      sitecues.on('speech/disabled', toolbar.disableSpeech);
-      sitecues.on('speech/enabled', toolbar.enableSpeech);
-
       if (show) {
         toolbar.slideOut();
       }
     };
 
-      sitecues.on("toolbar/disable", function() {
+      sitecues.on('toolbar/disable', function() {
+        // Turn off TTS if it is on.
+        var speechEnabled = conf.get('siteTTSEnable')
+          , ttsServiceAvailable = conf.get('tts-service-available')
+          ;
+        if (speechEnabled && ttsServiceAvailable) {
+           sitecues.emit('speech/disable');
+        }
+        // Make sure reverse contrast is OFF.
+        sitecues.emit('inverse/disable');
         // Reset zoom level.
         conf.set('zoom', 0);
-        sitecues.emit('inverse/disable');
         toolbar.disable(function() {
+          // The floating-badge reappears.
           sitecues.emit('badge/enable');
         });
       });
+
+
+    // Override the existing badge events
+    sitecues.on('speech/disabled', toolbar.disableSpeech);
+    sitecues.on('speech/enabled',  toolbar.enableSpeech);
 
     // load special toolbar css
     load.style('../css/toolbar.css');
