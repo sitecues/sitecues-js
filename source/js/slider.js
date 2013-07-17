@@ -1,7 +1,7 @@
 sitecues.def("slider", function (slider, callback, log) {
 sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
-  console.log(conf);
+
 
   // #### SLIDER INTERFACE #########################################################################
 
@@ -16,7 +16,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     return new SliderClass(props, _slider);
   };
 
-  _slider.destoryInstances = function () {
+  _slider.destroyInstances = function () {
   };
 
 
