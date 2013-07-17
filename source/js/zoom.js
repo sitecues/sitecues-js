@@ -1,12 +1,16 @@
 sitecues.def('zoom', function (zoom, callback, log) {
 
-	// values used for zoom math
+	// Values used for zoom math
 	zoom.max = 5;
 	zoom.min = 1;
-	zoom.range = zoom.max - zoom.min;
 	zoom.step = 0.1;
 	zoom['default'] = 1;
 	zoom.precision = 0.1;
+
+	// Calculate the zoom range. This calc is used throughout library. Easier to do here only.
+	zoom.range = zoom.max - zoom.min;
+
+	
 
 	// detect if browser support zoom natively
 	zoom['native'] = 'zoom' in document.createElement('div').style;
