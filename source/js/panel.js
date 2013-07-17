@@ -41,7 +41,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
       }
     };
 
-    // panel element
+    // PANEL OBJECT'S METHODS
+
+    // Create panel element.
     panel.create = function() {
 
       // private variables
@@ -145,12 +147,12 @@ sitecues.def( 'panel', function (panel, callback, log) {
       return frame;
     };
 
-    // show panel
+    // Show panel.
     panel.show = function(){
-      // clear timer if present
+      // Clear timer if present
       timer && clearTimeout(timer);
 
-      // Animate instead of fade
+      // Animate instead of fade.
       panel.element.hide();
       panel.element.animate({
           // right: '+=0',
@@ -177,37 +179,31 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
 
       panel.element.hover(function() {
-        //Hover in
+        // Hover in.
         panel.element.data('hover','true');
       }, function() {
-        //Hover out
+        // Hover out.
         panel.element.data('hover','false');
       });
     }
 
-    // hide panel
+    // Hide panel.
     panel.hide = function(){
-
       if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
-        // We're hovering over the element, delay hiding it
+        // We're hovering over the element, delay hiding it.
         setTimeout(panel.hide, panel.hideDelay);
         return;
       }
-
-
       if (panel.isSticky===false) {
-        // hide panel
+        // Hide panel.
         panel.element.fadeOut('fast', function(){
-
-          // notify about panel hiding
+          // Notify about panel hiding.
           sitecues.emit('panel/hide', panel.element);
-
         });
       }
-
     };
 
-    // delete the panel
+    // Delete the panel.
     panel.delete = function(){
       if (panel.placer) {
         panel.placer.remove();
@@ -219,35 +215,50 @@ sitecues.def( 'panel', function (panel, callback, log) {
       panel.element = undefined
     };
 
-    // Function that will toggle tts on or off
+    // Function that will toggle tts on or off.
     panel.ttsToggle = function() {
       var ttsButton = $('#sitecues-panel .tts');
       if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
         // It's disabled, so enable it
         sitecues.emit('speech/enable');
-        ttsButton.data('tts-enable','enabled');
-        ttsButton.removeClass("tts-disabled");
+        showTTSbuttonEnabled(ttsButton);
       } else {
         // It's enabled (or unknown), so disable it
         sitecues.emit('speech/disable');
-        ttsButton.data('tts-enable','disabled')
-        ttsButton.addClass("tts-disabled");
+        showTTSbuttonDisabled(ttsButton);
       }
     };
 
+    // Show TTS is enabled.
+    function showTTSbuttonEnabled(ttsButton) {
+        var ttsButton = ttsButton || $('#sitecues-panel .tts');
+        ttsButton.data('tts-enable','enabled');
+        ttsButton.removeClass("tts-disabled");
+    }
 
-    // setup trigger to show panel
+    // Show TTS is disabled.
+    function showTTSbuttonDisabled(ttsButton) {
+        var ttsButton = ttsButton || $('#sitecues-panel .tts');
+        ttsButton.data('tts-enable','disabled');
+        ttsButton.addClass("tts-disabled");
+    }
+
+    // EVENT HANLERS
+
+    // Setup trigger to show panel.
     sitecues.on('badge/hover', function() {
       panel.show();
       panel.element.data('badge-hover','true');
     });
 
-    // setup trigger to show panel
+    // Setup trigger to show panel.
     sitecues.on('badge/leave', function() {
       panel.element.data('badge-hover','false');
       setTimeout(panel.hide, panel.hideDelay);
     });
 
+    sitecues.on('speech/enabled',  showTTSbuttonEnabled);
+    sitecues.on('speech/disabled', showTTSbuttonDisabled);
 
     panel.create();
 
