@@ -112,9 +112,6 @@ sitecues.def('util/positioning', function (positioning, callback) {
 				    var boundingBox = boundingBoxes[count];
 				    result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
 			    }
-			    var children = $(this).children();
-			    if (children.length)
-			        positioning.getAllBoundingBoxes(children, scrollPosition, result);
 		    });
 		    return result;
 	    }
