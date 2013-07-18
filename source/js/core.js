@@ -195,7 +195,8 @@
       if (result) {
         module = result;
       } else {
-        // Modules can double-load when an sitecues.def use statement does not fire callback();
+        // Modules can double-load when an sitecues.def use statement
+        // does not fire callback();
       }
 
       // save module for future call
@@ -214,7 +215,7 @@
         definedLastModule = true;
       }
 
-      // Only spend the clicks required to test, once the last module has been defined anyway
+      // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
         checkDefinedModulesAreAllLoaded();
       }
@@ -318,7 +319,8 @@
           // The module is ready for use, so no need to load it
           push();
         } else {
-          // A previous request to either use or define the module has occurred, but it is not yet ready
+          // A previous request to either use or define the module has occurred,
+          // but it is not yet ready
           t.on('load/' + name, push);
         }
       }(args[i], register(i, args[i])));
@@ -418,8 +420,8 @@
   }
 
   // TODO: What if we don't find the base URL?
-  // The regular expression for an absolute URL. There is a capturing group for the protocol-relative
-  // portion of the URL.
+  // The regular expression for an absolute URL. There is a capturing group for
+  // the protocol-relative portion of the URL.
   var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
 
   // Resolve a URL as relative to a base URL.
@@ -430,7 +432,8 @@
       // protocol-relative URL.
       urlStr = absRegExpResult[1];
     } else if (urlStr.indexOf('//') === 0) {
-      // Protocol-relative No need to modify the URL, as we will inherit the containing page's protocol.
+      // Protocol-relative No need to modify the URL,
+      // as we will inherit the containing page's protocol.
     } else if (urlStr.indexOf('/') === 0) {
       // Host-relative URL.
       urlStr = '//' + baseUrl.host + urlStr;
