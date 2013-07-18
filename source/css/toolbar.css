@@ -174,6 +174,11 @@
 
 .sitecues-toolbar.hori .dropdown-menu {
   margin:10px;
+  font-size: 20px;
+}
+
+.sitecues-toolbar.hori .dropdown-menu li {
+  padding: 2px;
 }
 
 .sitecues-toolbar.hori .dropdown-toggle {
