@@ -64,9 +64,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
 
-        
-        // console.log('_____________________________________');
-        // console.log('building right pane');
+        console.log('_____________________________________');
+        console.log('building right pane');
 
         // Set up the right-align container that will not be affected by the (dis)appearance
         // of the vertical scrollbar
@@ -75,17 +74,18 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           .css({height: toolbar.instance.css('height')})
           .appendTo(toolbar.instance);
 
-        var rightPaneVisibleWidth = toolbar.rightPane.outerWidth();
+        var rightPaneVisibleWidth = toolbar.rightPane.get(0).getBoundingClientRect().width;
+        
+        console.log(rightPaneVisibleWidth);
 
         common.addRightAlignIgnoreScrollbar({
-          obj: toolbar.rightPane,
-          getWidth: function() { return rightPaneVisibleWidth;},
-          getRightOffset: function() { return 5; },
-          setCss: function(jCssObj) { toolbar.rightPane.css(jCssObj); }
+          obj             : toolbar.rightPane,
+          getWidth        : function() { return rightPaneVisibleWidth; },
+          getRightOffset  : function() { return 5; },
+          setCss          : function(jCssObj) { toolbar.rightPane.css(jCssObj); }
         });
         var rightAlignPane = toolbar.rightPane;
 
-        // slider.build(rightAlignPane);
         // Create a Slider Instance for the Toolbar
         this.slider = {};
         this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
@@ -97,7 +97,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         toolbar.ttsButton = $('<div rel="' + kTtsButtonRel + '" data-sitecues-event="speech/toggle">')
         .addClass(kTts)
         .appendTo(rightAlignPane)
-        // .appendTo(toolbar.instance)
         .data('tts-enable', 'enabled')
         ;
 

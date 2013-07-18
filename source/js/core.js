@@ -143,7 +143,7 @@
 
     if (!module) {
       // There is no entry, so the there is no state.
-      return MODULE_STATE.NONE;
+      return MODULE_STATE.NO
     }
 
     // The entry is a number, so just return that saved state.
