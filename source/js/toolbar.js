@@ -72,7 +72,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           .addClass('sitecues-toolbar-right-pane')
           .css({height: toolbar.instance.css('height')})
           .appendTo(toolbar.instance);
+
         var rightPaneVisibleWidth = toolbar.rightPane.outerWidth();
+
         common.addRightAlignIgnoreScrollbar({
           obj: toolbar.rightPane,
           getWidth: function() { return rightPaneVisibleWidth;},
@@ -84,7 +86,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         // slider.build(rightAlignPane);
         // Create a Slider Instance for the Toolbar
         this.slider = {};
-         this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
+        this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
+        // this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(toolbar.instance);
         this.slider.widget = SliderClass.build({
           container: this.slider.wrap
         });
@@ -93,6 +96,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         toolbar.ttsButton = $('<div rel="' + kTtsButtonRel + '" data-sitecues-event="speech/toggle">')
         .addClass(kTts)
         .appendTo(rightAlignPane)
+        // .appendTo(toolbar.instance)
         .data('tts-enable', 'enabled')
         ;
 
