@@ -205,29 +205,31 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       svg.letterBig     .on('mousedown', context, this.mousedownletterbig);
       svg.letterBigBack .on('mousedown', context, this.mousedownletterbig);
 
-      // Reize events require a recalculation of dimensions
-      $(window)         .on('resize',    context, this.setdimensions);
 
       // Pass slider instance to anonfunc to set correct context of slider when called from conf
-      (function(_slider){
+      (function(slider_){
 
         // Update the Thumb element's position based on the zoom level now dimensions have changed
         conf.get('zoom', function (zoomLevel) {
 
-          _slider.zoomLevel = zoomLevel;
+          slider_.zoomLevel = zoomLevel;
 
           // Only respond to conf zoom updates when mouse not down
-          if (!_slider.mouseDownTrack) {
+          if (!slider_.mouseDownTrack) {
             
             // Update the Thumb position
-            _slider.setThumbPositionFromZoomLevel.call(_slider, zoomLevel);
-            _slider.translateThumbSVG.call(_slider);
+            slider_.setThumbPositionFromZoomLevel.call(slider_, zoomLevel);
+            slider_.translateThumbSVG.call(slider_);
 
           }
 
         });
 
+        // Reize events require a recalculation of dimensions
+        sitecues.on('resize/end', function(){ slider_.setdimensions.call(slider_); });
+
       })(slider);
+
 
     },
 
@@ -353,9 +355,11 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       
       // If the slider has put the mouse-down inside the Slider Track Back bounds...
       if (slider.mouseDownTrack) {
+
+        
+        //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
         
         // Get the postition of the mouse relative to the Slider
-        //slider.thumbPos = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
         var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
 
         // Contain the Thumb position in the Track bounds
@@ -384,20 +388,18 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
 
     calcZoomLevel: function (thumbX) {
-      return ((zoom.max-zoom.min) / this.trackBounds.width * thumbX) + zoom.min;
+      return (zoom.range / this.trackBounds.width * thumbX) + zoom.min;
     },
 
     calcThumbPos: function (zoomLevel) {
-      var zoomRange = zoom.max-zoom.min;
-      var newThumbPos = this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
-      return newThumbPos;
+      return this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoom.range  *  (zoomLevel-zoom.min);
     },
 
 
 
     // Calculate the dimensions of dynamic Slider components
     setdimensions: function (e) {
-      
+
       // Set the context, allowing setdimensions to be called from any scope
       if (e && e.data && e.data.slider) {
         slider = e.data.slider;
@@ -407,13 +409,12 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         slider = this;
       };
 
-
       // Reset element boundingds incase dom sizes change
       slider.setcontainerbounds.call(slider);
       slider.setsvgbounds.call(slider);
 
       // Get the aspect horizontal aspect ratio of the Slider
-      slider.aspect = slider.originalWidth/slider.width; 
+      slider.aspect = slider.originalWidth/slider.width;
 
       slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect();
       slider.trackClientWidth = slider.trackBounds.width;
@@ -430,11 +431,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // Set the Slider's internal thumb position variable based on the zoom level
     setThumbPositionFromZoomLevel: function (zoomLevel){
 
-      // Calculate the zoom range (I think we should put this in zoom.js) - Al
-      var zoomRange  = zoom.max-zoom.min;
-
       // Calculate the new position of the THumb
-      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoomRange  *  (zoomLevel-zoom.min);
+      this.thumbPos = this.trackOffsetLeft*this.aspect  +  this.trackClientWidth*this.aspect/zoom.range  *  (zoomLevel-zoom.min);
 
     },
 
@@ -452,9 +450,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
   
 
 
-})  // END: use
-
   // Core callback
   callback();
 
+});  // END: use
 }); // END: def

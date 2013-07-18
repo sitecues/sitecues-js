@@ -71,11 +71,11 @@ files=\
 	source/js/cursor/element.js \
 	source/js/cursor/images.js \
 	source/js/util/template.js \
+	source/js/toolbar.js \
 	source/js/toolbar/bootstrap-dropdown.js \
 	source/js/toolbar/dropdown.js \
 	source/js/toolbar/messenger.js \
 	source/js/toolbar/resizer.js \
-	source/js/toolbar.js \
 	source/js/ui-manager.js \
 
 https=off

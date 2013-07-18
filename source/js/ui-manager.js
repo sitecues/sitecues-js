@@ -139,24 +139,27 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
       log.info("UI set to " + currentState.name);
     };
 
-    // FIXME: We shouldn't have to run `toolbar.show()` in `setTimeout()`.
-    // #EQ-622 might be the solution.
     $(document).ready(function () {
       log.info("Initializing UI");
+      // console.log('doc ready');
+
       switch (currentState) {
         case STATES.BADGE:
           log.info("Initial UI State: " + STATES.BADGE.name);
           // Note that we update the current state first, to deal with
           // button mashing, since the disabling/enabling are most likely
           // going to involve async behavior.
-          toolbar.disable(function() {
+          toolbar.disable(function(s) {
               badge.enable(true);
           });
           break;
         default: // case STATES.TOOLBAR:
           log.info("Initial UI State: " + STATES.TOOLBAR.name);
           badge.disable(function() {
+          // sitecues.on('core/allModulesLoaded', function(){
             toolbar.enable(true);
+          // });
+
           });
           break;
       }

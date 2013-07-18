@@ -363,6 +363,7 @@ sitecues.def('util/common', function (common, callback, log) {
 
     // Applies the CSS object for the right alignment styles.
     var applyDynamicPlacementCSS = function(accessors) {
+
       var css = {
         left: ($(document.documentElement).outerWidth()
           - accessors.getWidth()
@@ -371,6 +372,7 @@ sitecues.def('util/common', function (common, callback, log) {
               : bodyVertScrollbarWidth + accessors.getRightOffset()
           )) + 'px'
       };
+
       // Apply the dynamic placement CSS.
       accessors.setCss(css);
     };
