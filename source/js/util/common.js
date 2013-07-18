@@ -367,13 +367,13 @@ sitecues.def('util/common', function (common, callback, log) {
       //console.log( $(document).get(0).getClientBoundingRect() );
 
       // Why is this fired so many times?
-      console.log('________ applyDynamicPlacementCSS ________');
-      console.log(accessors.obj);
-      console.log('               doc elem outer width: ' +$(document.documentElement).outerWidth() );
-      console.log('                accessors get width: ' +accessors.getWidth() );
-      console.log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
-      console.log('         accessors get right offset: ' +accessors.getRightOffset() );
-      console.log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
+      // console.log('________ applyDynamicPlacementCSS ________');
+      // console.log(accessors.obj);
+      // console.log('               doc elem outer width: ' +$(document.documentElement).outerWidth() );
+      // console.log('                accessors get width: ' +accessors.getWidth() );
+      // console.log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
+      // console.log('         accessors get right offset: ' +accessors.getRightOffset() );
+      // console.log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
 
       var css = {
         left: ($(document.documentElement).outerWidth()
@@ -416,7 +416,7 @@ sitecues.def('util/common', function (common, callback, log) {
 
     // Only update the right alignments when the window width changes.
     $(window).on('resizeEnd', function() {
-      console.log('RESIZE END________________________________________________');
+      // console.log('RESIZE END________________________________________________');
       for (var i = 0; i < rightAlignObjs.length; i++) {
         applyDynamicPlacementCSS(rightAlignObjs[i]);
       }

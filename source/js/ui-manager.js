@@ -158,7 +158,6 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
           badge.disable(function() {
           
           sitecues.on('core/allModulesLoaded', function(){
-            console.log(1);
             toolbar.enable(true);
           });
 

@@ -127,7 +127,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.show = function () {
       log.trace('toolbar.show()');
 
-      console.log('toolbar show');
+      // console.log('toolbar show');
 
       if (conf.get('toolbarEnabled')) {
         toolbar.render();
