@@ -4,9 +4,10 @@ sitecues.def('jquery/resize', function (module, callback, log) {
 
     // Add an event that fire only at the end of window resizing, not for each
     // resize event that results from dragging.
-    var lastResizeEventEpoch = new Date(1, 1, 2000, 12, 0, 0).getTime();
-    var timeoutSet = false;
-    var delta = 100;
+    var lastResizeEventEpoch = new Date(1, 1, 2000, 12, 0, 0).getTime()
+    , timeoutSet = false
+    , delta = 100
+    ;
 
     var checkResizeEnd = function() {
       if (((+ new Date()) - lastResizeEventEpoch) < delta) {

@@ -73,7 +73,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           .addClass('sitecues-toolbar-right-pane')
           .css({height: toolbar.instance.css('height')})
           .appendTo(toolbar.instance);
+
         var rightPaneVisibleWidth = toolbar.rightPane.outerWidth();
+
         common.addRightAlignIgnoreScrollbar({
           obj: toolbar.rightPane,
           getWidth: function() { return rightPaneVisibleWidth;},
@@ -94,6 +96,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         toolbar.ttsButton = $('<div rel="' + kTtsButtonRel + '" data-sitecues-event="speech/toggle">')
         .addClass(kTts)
         .appendTo(rightAlignPane)
+        // .appendTo(toolbar.instance)
         .data('tts-enable', 'enabled')
         ;
 
