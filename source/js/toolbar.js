@@ -65,8 +65,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         messenger.build(toolbar.instance);
 
         
-        console.log('_____________________________________');
-        console.log('building right pane');
+        // console.log('_____________________________________');
+        // console.log('building right pane');
 
         // Set up the right-align container that will not be affected by the (dis)appearance
         // of the vertical scrollbar
