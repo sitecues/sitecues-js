@@ -71,9 +71,9 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // Color settings object
     color: {
-      letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)"},
-      trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)"},
-      letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(100,100,100,0.5)"},
+      letterSmlBack     : { normal: "#000000", hover: "#000000"},
+      trackBack         : { normal: "#000000", hover: "#000000"},
+      letterBigBack     : { normal: "#000000", hover: "#000000"},
       letterSml         : { normal: "#FFFFFF", hover: "#FFFFFF"},
       track             : { normal: "#0045AD", hover: "#0045AD"},
       thumb             : { normal: "#FFFFFF", hover: "#FFFFFF"},
@@ -91,6 +91,14 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.create();
       this.setdimensions();
       this.bindevents();
+
+      // Set to the zoomLevel in conf, or set to zoom.default
+      this.zoomLevel = conf.get('zoom') || zoom.default;
+      
+      // Update the Thumb position
+      this.setThumbPositionFromZoomLevel(this.zoomLevel);
+      this.translateThumbSVG();
+
     },
 
     buildsvg: function (slider, color) {
@@ -205,20 +213,20 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       svg.letterBig     .on('mousedown', context, this.mousedownletterbig);
       svg.letterBigBack .on('mousedown', context, this.mousedownletterbig);
 
-
       // Pass slider instance to anonfunc to set correct context of slider when called from conf
       (function(slider_){
 
         // Update the Thumb element's position based on the zoom level now dimensions have changed
         conf.get('zoom', function (zoomLevel) {
 
-          slider_.zoomLevel = zoomLevel;
+          // Set to the zoomLevel in conf, or set to zoom.default
+          slider_.zoomLevel = zoomLevel || zoom.default;
 
           // Only respond to conf zoom updates when mouse not down
           if (!slider_.mouseDownTrack) {
             
             // Update the Thumb position
-            slider_.setThumbPositionFromZoomLevel.call(slider_, zoomLevel);
+            slider_.setThumbPositionFromZoomLevel.call(slider_, slider_.zoomLevel);
             slider_.translateThumbSVG.call(slider_);
 
           }
