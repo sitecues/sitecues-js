@@ -127,13 +127,13 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
         // Set up the scrollbar-ignoring right placement.
         placer.prependTo('html');
-        var placerVisibleWidth = placer.outerWidth();
-        common.addRightAlignIgnoreScrollbar({
-          obj: panel,
-          getWidth: function() { return placerVisibleWidth;},
-          getRightOffset: function() { return 5; },
-          setCss: function(jCssObj) { placer.css(jCssObj); }
-        });
+        // var placerVisibleWidth = placer.outerWidth();
+        // common.addRightAlignIgnoreScrollbar({
+        //   obj: panel,
+        //   getWidth: function() { return placerVisibleWidth;},
+        //   getRightOffset: function() { return 5; },
+        //   setCss: function(jCssObj) { placer.css(jCssObj); }
+        // });
 
         panel.placer = placer;
       }
