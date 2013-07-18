@@ -42,6 +42,7 @@ files=\
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
+	source/js/util/closeButton.js \
 	source/js/ui.js  \
 	source/js/style.js \
 	source/js/util/positioning.js \

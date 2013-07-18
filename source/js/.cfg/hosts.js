@@ -17,8 +17,7 @@
 
   // Set hosts in the core config object
   window.sitecues.coreConfig.hosts = {
-    up : "up.dev.sitecues.com",
+    up : "up.local.sitecues.com",
     ws : "ws.dev.sitecues.com"
   };
 })();
-

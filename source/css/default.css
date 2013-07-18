@@ -214,7 +214,7 @@
     width:  20px;
 }
 
-#sitecues-hlb-close-button {
+#sitecues-close-button {
     position: absolute;
     height: 36px;
     width:  36px;
@@ -233,4 +233,16 @@
     pointer-events: none;
     background-color: transparent;
     z-index: 2147483645; /* Below Equinox panel, mouse, HLB, and HLB close button */
+}
+
+.sitecues-help-frame {
+    border:  2px solid #000;
+    border-radius: 3px;
+    background-color: #FFF;
+    margin:  0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: absolute;
+    z-index: 2147483646; /* Below the close button */
 }

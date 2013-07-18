@@ -4,8 +4,8 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech',
-  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech) {
+  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/closeButton',
+  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton) {
 
     // Constants
 
@@ -106,25 +106,23 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       }
     });
 
-    // The (optional) close button.
-    var closeButton = $('<div>').attr('id', 'sitecues-hlb-close-button').hide().prependTo('html').click(function(e) {
-      e.stopPropagation();
+    // Create the close button shared across HLBs.
+    var hlbCloseButton = closeButton.create(function() {
       sitecues.emit('highlight/animate', {});
     });
 
     sitecues.on('hlb/deflating', function() {
-      closeButton.hide();
+      hlbCloseButton.disable();
     });
 
-    var closeButtonInset = 10;
     var displayCloseButton = function(hlbTarget, totalZoom) {
       var hlbNode = $(hlbTarget);
       var hlbBorderWidth = parseFloat(hlbNode.css('borderWidth')) || 0;
       var bb = positioning.getBoundingBox(hlbTarget);
-      closeButton.show().css({
-        left: ((bb.left  + hlbBorderWidth) * totalZoom) + closeButtonInset,
-        top:  ((bb.top   + hlbBorderWidth) * totalZoom) + closeButtonInset
-      });
+      var left = ((bb.left  + hlbBorderWidth) * totalZoom) + closeButtonInset;
+      var top = ((bb.top   + hlbBorderWidth) * totalZoom) + closeButtonInset;
+
+      closeButton.enable(left, top);
     };
 
     var HighlightBox = (function () {

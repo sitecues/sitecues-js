@@ -364,6 +364,14 @@ sitecues.def('util/common', function (common, callback, log) {
     // Applies the CSS object for the right alignment styles.
     var applyDynamicPlacementCSS = function(accessors) {
 
+      // Why is this fired so many times?
+      // console.log('________________________________________________________________________________');
+      // console.log('               doc elem outer width: ' +$(document.documentElement).outerWidth() );
+      // console.log('                accessors get width: ' +accessors.getWidth() );
+      // console.log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
+      // console.log('         accessors get right offset: ' +accessors.getRightOffset() );
+      // console.log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
+
       var css = {
         left: ($(document.documentElement).outerWidth()
           - accessors.getWidth()

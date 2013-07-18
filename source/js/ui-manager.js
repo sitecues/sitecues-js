@@ -156,9 +156,11 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         default: // case STATES.TOOLBAR:
           log.info("Initial UI State: " + STATES.TOOLBAR.name);
           badge.disable(function() {
-          // sitecues.on('core/allModulesLoaded', function(){
+          
+          sitecues.on('core/allModulesLoaded', function(){
             toolbar.enable(true);
-          // });
+          });
+
 
           });
           break;

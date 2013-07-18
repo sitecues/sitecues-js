@@ -155,24 +155,24 @@
     return MODULE_STATE.READY;
   };
 
-  // function mcCheckenzYo () {
-  //   var truthCount = 0
-  //   ,   length     = LOAD_LIST.length
-  //   ;
+  function checkDefinedModulesAreAllLoaded () {
+    var defCount = 0
+    ,   length     = LOAD_LIST.length
+    ;
 
-  //   for (var i=0; i< length; i++) {
-      
-  //     var i_module = modules[LOAD_LIST[i]];
+    for (var i=0; i< length; i++) {
 
-  //     if (i_module) {
-  //       truthCount += i_module.deffed === true ? 1 : 0 ;
-  //     }
-  //   }
-    
-  //   if (truthCount === length) {
-  //     sitecues.emit('core/allModulesLoaded');
-  //   }
-  // };
+      var i_module = modules[LOAD_LIST[i]];
+
+      if (i_module) {
+        defCount += i_module.defined === true ? 1 : 0 ;
+      }
+    }
+
+    if (defCount === length) {
+      sitecues.emit('core/allModulesLoaded');
+    }
+  };
 
   // define equinox module
   var _def = function(name, constructor){
@@ -195,11 +195,8 @@
       if (result) {
         module = result;
       } else {
-        // Modules can double-load when an sitecues.def use statement does not fire callback();
-        // This caused the issue with the double-loading of the badge and highlight-box.
-        // See: https://fecru.ai2.at/cru/EQJS-39#c187
-        //      https://equinox.atlassian.net/browse/EQ-355
-        // log.warn( 'No callback() set when def.use("' + name );
+        // Modules can double-load when an sitecues.def use statement
+        // does not fire callback();
       }
 
       // save module for future call
@@ -211,8 +208,17 @@
       // notify about new module load once
       sitecues.emit('load/' + name, module).off('load/' + name);
 
-      // modules[name].deffed = true;
-      // mcCheckenzYo();
+      // Module checking.....
+      modules[name].defined = true;
+      
+      if (name===lastDefinedModuleName) {
+        definedLastModule = true;
+      }
+
+      // Only spend the cpu-clicks required to test,after last module has been defined
+      if (definedLastModule) {
+        checkDefinedModulesAreAllLoaded();
+      }
 
     // Pass a new logger into the constructor scope of the module
     }, window.sitecues.logger.log(name));
@@ -221,18 +227,20 @@
   // exposed function for defining modules: queues until core is ready.
   var READY_FOR_DEF_CALLS = false
   ,   DEF_QUEUE           = []
-  // ,   LOAD_LIST           = []
+  ,   LOAD_LIST           = []
+  ,   definedLastModule   = false
+  ,   lastDefinedModuleName
   ;
   sitecues.def = function(name, constructor){
     if (READY_FOR_DEF_CALLS) {
-      // console.log("DEF : READY_FOR_DEF_CALLS");
       _def(name, constructor);
     } else {
       DEF_QUEUE.push({
         name: name,
         constructor: constructor
       });
-      // LOAD_LIST.push(name);
+      LOAD_LIST.push(name);
+      lastDefinedModuleName = name;
     }
   };
 
@@ -311,7 +319,8 @@
           // The module is ready for use, so no need to load it
           push();
         } else {
-          // A previous request to either use or define the module has occurred, but it is not yet ready
+          // A previous request to either use or define the module has occurred,
+          // but it is not yet ready
           t.on('load/' + name, push);
         }
       }(args[i], register(i, args[i])));
@@ -411,8 +420,8 @@
   }
 
   // TODO: What if we don't find the base URL?
-  // The regular expression for an absolute URL. There is a capturing group for the protocol-relative
-  // portion of the URL.
+  // The regular expression for an absolute URL. There is a capturing group for
+  // the protocol-relative portion of the URL.
   var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
 
   // Resolve a URL as relative to a base URL.
@@ -423,7 +432,8 @@
       // protocol-relative URL.
       urlStr = absRegExpResult[1];
     } else if (urlStr.indexOf('//') === 0) {
-      // Protocol-relative No need to modify the URL, as we will inherit the containing page's protocol.
+      // Protocol-relative No need to modify the URL,
+      // as we will inherit the containing page's protocol.
     } else if (urlStr.indexOf('/') === 0) {
       // Host-relative URL.
       urlStr = '//' + baseUrl.host + urlStr;
