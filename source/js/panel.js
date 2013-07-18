@@ -9,7 +9,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // move mouse cursor out of panel
     var timer;
 
-    panel.hideDelay = 1000;
+    panel.hideDelay = 1500;
     // Forcing a change to merge from Thom into master
     // to make sure that I'm actually getting the real code.
     //log.info('!!! TEMP !!! panel.hideDelay');
