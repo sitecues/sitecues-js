@@ -18,9 +18,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'toolbar/resizer',
     'toolbar/messenger',
     'util/common',
-    //'zoom',
-    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common) {
+    'jquery/resize',
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize) {
     log.trace('toolbar.use()');
+
+
 
     // FIXME: Remove me! For testing purposes only. - Eric
     // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
@@ -41,6 +43,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     toolbar.render = function (callback) {
       log.trace('toolbar.render()');
+
+      //console.log('rendering toolbar');
 
       var $html = $('html');
       if (! toolbar.instance) {
@@ -81,7 +85,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         // slider.build(rightAlignPane);
         // Create a Slider Instance for the Toolbar
         this.slider = {};
-         this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
+        this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
         this.slider.widget = SliderClass.build({
           container: this.slider.wrap
         });
@@ -117,6 +121,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     toolbar.show = function () {
       log.trace('toolbar.show()');
+
+      console.log('toolbar show');
 
       if (conf.get('toolbarEnabled')) {
         toolbar.render();
@@ -192,9 +198,11 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       if (toolbar.instance) {
         var height = toolbar.instance.height();
 
+
         toolbar.instance.animate({
           top: -height
         }, 'slow');
+
         toolbar.shim.slideUp('slow', function () {
           sitecues.emit('toolbar/state/' + toolbar.currentState.name);
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
@@ -291,24 +299,23 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       }
     };
 
-      sitecues.on('toolbar/disable', function() {
-        // Turn off TTS if it is on.
-        var speechEnabled = conf.get('siteTTSEnable')
-          , ttsServiceAvailable = conf.get('tts-service-available')
-          ;
-        if (speechEnabled && ttsServiceAvailable) {
-           sitecues.emit('speech/disable');
-        }
-        // Make sure reverse contrast is OFF.
-        sitecues.emit('inverse/disable');
-        // Reset zoom level.
-        conf.set('zoom', 0);
-        toolbar.disable(function() {
-          // The floating-badge reappears.
-          sitecues.emit('badge/enable');
-        });
+    sitecues.on('toolbar/disable', function() {
+      // Turn off TTS if it is on.
+      var speechEnabled = conf.get('siteTTSEnable')
+        , ttsServiceAvailable = conf.get('tts-service-available')
+        ;
+      if (speechEnabled && ttsServiceAvailable) {
+         sitecues.emit('speech/disable');
+      }
+      // Make sure reverse contrast is OFF.
+      sitecues.emit('inverse/disable');
+      // Reset zoom level.
+      conf.set('zoom', 0);
+      toolbar.disable(function() {
+        // The floating-badge reappears.
+        sitecues.emit('badge/enable');
       });
-
+    });
 
     // Override the existing badge events
     sitecues.on('speech/disabled', toolbar.disableSpeech);
