@@ -1,9 +1,9 @@
 sitecues.def('toolbar/dropdown', function(dropdown, callback, log){
     
     var kTextHelp = 'Help';
-    var kTextFeedback = 'Provide feedback';
-    var kTextChangeColors = 'Change page colors';
-    var kTextTurnOff = 'Turn off';
+    var kTextFeedback = 'Provide Feedback';
+    var kTextChangeColors = 'Change Page Colors';
+    var kTextTurnOff = 'Turn Off';
     
     sitecues.use( 'jquery', 'toolbar/bootstrap-dropdown', function ($, bootstrapDropdown) {
       /**
