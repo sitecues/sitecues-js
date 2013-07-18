@@ -246,3 +246,26 @@
     position: absolute;
     z-index: 2147483646; /* Below the close button */
 }
+
+
+/* Simulate Windows Scrollbars in Webkit */
+/*
+body::-webkit-scrollbar {
+    -webkit-appearance: none!important;
+}
+
+body::-webkit-scrollbar:vertical {
+    width: 15px!important;
+}
+
+body:-webkit-scrollbar:horizontal {
+    height: 11px!important;
+}
+
+body::-webkit-scrollbar-thumb {
+    border-radius: 8px!important;
+    border: 2px solid white!important;
+    background-color: rgba(0, 0, 0, 1)!important;
+}*/
+
+

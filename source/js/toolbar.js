@@ -64,31 +64,32 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
 
-        
         // console.log('_____________________________________');
         // console.log('building right pane');
 
-        // Set up the right-align container that will not be affected by the (dis)appearance
-        // of the vertical scrollbar
-        toolbar.rightPane = $('<div>')
-          .addClass('sitecues-toolbar-right-pane')
-          .css({height: toolbar.instance.css('height')})
-          .appendTo(toolbar.instance);
+        // // Set up the right-align container that will not be affected by the (dis)appearance
+        // // of the vertical scrollbar
+        // toolbar.rightPane = $('<div>')
+        //   .addClass('sitecues-toolbar-right-pane')
+        //   .css({height: toolbar.instance.css('height')})
+        //   .appendTo(toolbar.instance);
 
-        var rightPaneVisibleWidth = toolbar.rightPane.outerWidth();
+        // var rightPaneVisibleWidth = toolbar.rightPane.get(0).getBoundingClientRect().width;
+        
+        // console.log(rightPaneVisibleWidth);
 
-        common.addRightAlignIgnoreScrollbar({
-          obj: toolbar.rightPane,
-          getWidth: function() { return rightPaneVisibleWidth;},
-          getRightOffset: function() { return 5; },
-          setCss: function(jCssObj) { toolbar.rightPane.css(jCssObj); }
-        });
-        var rightAlignPane = toolbar.rightPane;
+        // common.addRightAlignIgnoreScrollbar({
+        //   obj             : toolbar.rightPane,
+        //   getWidth        : function() { return rightPaneVisibleWidth; },
+        //   getRightOffset  : function() { return 5; },
+        //   setCss          : function(jCssObj) { toolbar.rightPane.css(jCssObj); }
+        // });
+        // var rightAlignPane = toolbar.rightPane;
 
-        // slider.build(rightAlignPane);
         // Create a Slider Instance for the Toolbar
         this.slider = {};
-        this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
+        this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(toolbar.instance);
+        //this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
         this.slider.widget = SliderClass.build({
           container: this.slider.wrap
         });
@@ -96,8 +97,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         // create TTS button and set it up
         toolbar.ttsButton = $('<div rel="' + kTtsButtonRel + '" data-sitecues-event="speech/toggle">')
         .addClass(kTts)
-        .appendTo(rightAlignPane)
-        // .appendTo(toolbar.instance)
+        // .appendTo(rightAlignPane)
+        .appendTo(toolbar.instance)
         .data('tts-enable', 'enabled')
         ;
 
@@ -126,7 +127,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.show = function () {
       log.trace('toolbar.show()');
 
-      console.log('toolbar show');
+      // console.log('toolbar show');
 
       if (conf.get('toolbarEnabled')) {
         toolbar.render();

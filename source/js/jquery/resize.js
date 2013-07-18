@@ -17,6 +17,7 @@ sitecues.def('jquery/resize', function (module, callback, log) {
         jq(window).trigger('resizeEnd');
       }
       
+
       sitecues.emit('resize/end');
     };
 
