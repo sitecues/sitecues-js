@@ -41,6 +41,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.height = props.height;
     }
 
+    console.log([this.height, props.height],[this.width, props.width]);
+
     // Reference the SliderClass interface
     this.interface = interface;
 
@@ -81,13 +83,14 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     },
 
     // The default width & height dimensions are overwritten with the DOM containers's dimensions
-    width: 690,
-    height: 161,
+    // width: 690,
+    // height: 161,
 
 
 
     // Initialize the slider vars and call draw
     init: function (props) {
+      
       this.create();
       this.setdimensions();
       this.bindevents();
@@ -95,7 +98,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Set to the zoomLevel in conf, or set to zoom.default
       this.zoomLevel = conf.get('zoom') || zoom.default;
       
-      // Update the Thumb position
+      // Update the Thumb position based on the conf.zoom or zoom.default value
       this.setThumbPositionFromZoomLevel(this.zoomLevel);
       this.translateThumbSVG();
 
@@ -119,13 +122,21 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // Set the bounds of the Slider's container element
     setcontainerbounds: function(){
+
+      // FIXME: This was commented out because the CSS is loading AFTER the JavaScript. Thus...
+      // dimensions should not be dynamically set based on DOM values. UI.js does not check that
+      // CSS files have been loaded, so scripts execute before DOM dimesions have been set.
         
       // Read the bounds of the container
       var bounds = this.$container.get(0).getBoundingClientRect();
 
       // Set the width and height of the Slider's container
-      this.width = bounds.width;
-      this.height = bounds.height;
+      // But don't overwrite values that have been passed if the container has no dimensions
+      // this.width = bounds.width || this.width;
+      // this.height = bounds.height || this.height;
+
+      // console.log('setcontainerbounds');
+      // console.log( this.width, this.height );
 
     },
 
@@ -135,7 +146,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // Set the width and height attributes of the root SVG element
       this.svg.viewBox.attr('width', this.width);
       this.svg.viewBox.attr('height', this.height);
-
+      
     },
 
 

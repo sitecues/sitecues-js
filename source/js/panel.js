@@ -58,20 +58,20 @@ sitecues.def( 'panel', function (panel, callback, log) {
       });
     
       // Create a Slider Instance for the Panel
-      this.slider = {};
-      this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
-      this.slider.widget = SliderClass.build({
-        container: this.slider.wrap,
-        color: {
-          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          letterSml         : { normal: "#000000", hover: "#000000"},
-          track             : { normal: "#000000", hover: "#000000"},
-          thumb             : { normal: "#1D3D8E", hover: "#1D3D8E"},
-          letterBig         : { normal: "#000000", hover: "#000000"},
-        }
-      });
+      // this.slider = {};
+      // this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+      // this.slider.widget = SliderClass.build({
+      //   container: this.slider.wrap,
+      //   color: {
+      //     letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+      //     trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+      //     letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+      //     letterSml         : { normal: "#000000", hover: "#000000"},
+      //     track             : { normal: "#000000", hover: "#000000"},
+      //     thumb             : { normal: "#1D3D8E", hover: "#1D3D8E"},
+      //     letterBig         : { normal: "#000000", hover: "#000000"},
+      //   }
+      // });
     
       // create TTS button and set it up
       ttsButton = $('<div>').addClass('tts').appendTo(frame);
@@ -165,10 +165,10 @@ sitecues.def( 'panel', function (panel, callback, log) {
           sitecues.emit('panel/show', panel.element);
           
           // Set/recheck the dimensions of the slider
-          var sliderWidget = panel.slider.widget;
-          sliderWidget.setdimensions(sliderWidget);
-          sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
-          sliderWidget.translateThumbSVG.call(sliderWidget);
+          // var sliderWidget = panel.slider.widget;
+          // sliderWidget.setdimensions(sliderWidget);
+          // sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+          // sliderWidget.translateThumbSVG.call(sliderWidget);
       });
 
       // Set/recheck the dimensions of the slider

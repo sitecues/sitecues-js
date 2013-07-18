@@ -52,15 +52,11 @@
   -webkit-user-select : none!important;
   -moz-user-select    : none!important;
   -ms-user-select     : none!important;
-  
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center 0%;
   position: absolute;
   right: 80px;
-  display: inline;
   width: 160px;
-  height:90%;
+  height: 38px;
+  /*border:1px solid red;*/
   top:4%;
 }
 
@@ -220,7 +216,7 @@
     top:0;
     position:absolute;
     /*width:230px;*/
-    width:1px;*/
+    width:1px;
     height:100%;
     margin:0;
     padding:0;
