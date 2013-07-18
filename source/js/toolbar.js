@@ -65,7 +65,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         messenger.build(toolbar.instance);
 
         
-        // resizer.build(toolbar.instance, toolbar.shim);
+        console.log('_____________________________________');
+        console.log('building right pane');
 
         // Set up the right-align container that will not be affected by the (dis)appearance
         // of the vertical scrollbar
@@ -173,15 +174,15 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         toolbar.shim.css('height', 0);
         toolbar.shim.show();
         toolbar.instance.animate({top: 0 },
-                { 
-                  step: function (now) {
-                    toolbar.shim.css('height', ((height + now) + 'px'))
-                  },
-                  complete: function(){
-                    // Set slider dimensions now that the Toolbar element is display:block
-        toolbar.slider.widget.setdimensions(toolbar.slider.widget);
-                  }
-                }, 'slow');
+          { 
+            step: function (now) {
+              toolbar.shim.css('height', ((height + now) + 'px'))
+            },
+            complete: function(){
+            // Set slider dimensions now that the Toolbar element is display:block
+              toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+            }
+          }, 'slow');
       } else {
         log.warn("toolbar.slideOut() was called but toolbar is disabled")
       }
