@@ -11,6 +11,8 @@ sitecues.def('speech', function (speech, callback, log) {
   // Time in millis after which the more descriptive "speech on" cue should replay.
   var FIRST_SPEECH_ON_RESET_MS = 7 * 86400000; // 7 days
   var SITE_TTS_ENABLE_PARAM = 'siteTTSEnable';
+  // Used to define if "Speech off" cue needs to be said.
+  var SPEECH_OFF_PARAM = 'speechOff';
 
   var VERBAL_CUE_SPEECH_ON = 'verbalCueSpeechOn';
   var VERBAL_CUE_SPEECH_ON_FIRST = 'verbalCueSpeechOnFirst';
@@ -187,6 +189,7 @@ sitecues.def('speech', function (speech, callback, log) {
           // An engine is set so we can enable the component
           ttsEnable = true;
           conf.set(SITE_TTS_ENABLE_PARAM, true);
+          conf.set(SPEECH_OFF_PARAM, true);
 
           if(!shouldPlayFirstSpeechOnCue()) {
             speech.sayByKey(VERBAL_CUE_SPEECH_ON);
@@ -209,7 +212,9 @@ sitecues.def('speech', function (speech, callback, log) {
       speech.disable = function(callback) {
         speech.stopAll();
         conf.set(SITE_TTS_ENABLE_PARAM, false);
-        speech.sayByKey(VERBAL_CUE_SPEECH_OFF);
+        if (shouldPlaySpeechOffCue()) {
+          speech.sayByKey(VERBAL_CUE_SPEECH_OFF);
+        }
         ttsEnable = false;
         if (callback) {
           callback();
@@ -306,6 +311,14 @@ sitecues.def('speech', function (speech, callback, log) {
       var shouldPlayFirstSpeechOnCue = function() {
         var fso = conf.get(FIRST_SPEECH_ON_PARAM);
         return (!fso || ((fso + FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
+      };
+
+      /**
+       * Returns true if the "speech off" cue should be played.
+       * @return {boolean}
+       */
+      var shouldPlaySpeechOffCue = function() {
+        return conf.get(SPEECH_OFF_PARAM);
       };
 
       /**
