@@ -61,6 +61,8 @@ sitecues.def( 'panel', function (panel, callback, log) {
       this.slider = {};
       this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
       this.slider.widget = SliderClass.build({
+        width: 340,
+        height:80,
         container: this.slider.wrap,
         color: {
           letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
@@ -73,7 +75,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
       });
     
-      // create TTS button and set it up
+     // create TTS button and set it up
       ttsButton = $('<div>').addClass('tts').appendTo(frame);
       if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
         ttsButton.data( 'tts-enable', 'enabled' );
@@ -81,7 +83,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
         ttsButton.addClass( "tts-disabled" );
         ttsButton.data( 'tts-enable', 'disabled' );
       }
-      
       ttsButton.click(function() {
         sitecues.emit('panel/interaction');
         panel.ttsToggle();
@@ -91,9 +92,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
         panel.parent.click(function(e) {
           e.preventDefault();
           return false;
-        });
-        // This version of the panel will be fixed.
-        frame.css({"left": '', "right": '', position: 'fixed'});
+        })
+        // panel.element.css("top",'50');
+        frame.css({"left": '', "right": ''});
         var scroll = positioning.getScrollPosition();
         //We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
         // positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
@@ -108,44 +109,19 @@ sitecues.def( 'panel', function (panel, callback, log) {
           panelLeft = 0;
         }
         frame.style("left", panelLeft, 'important');
-        frame.prependTo('html');
-      } else {
-        // In this 'else' case, we are using the default badge. This doesn't seem right... we should always
-        // have a parent, and in this case the default badge should be the parent. However, 2 days before a
-        // major release is not the time for drastic changes to working features...
-
-        // Right align the panel, but do this is a way in which the (dis)appearance of the
-        // body vertical scrollbar will not affect placement. To do this, put the panel in
-        // a 'placer' element to allow for the proper animation direction.
-        var placer = $('<div>').attr('id', 'sitecues-panel-placer');
-
-        // Add the panel to placer.
-        frame.appendTo(placer);
-
-        // This version of the panel will be positioned absolute to the placer.
-        frame.css({position: 'absolute'});
-
-        // Set up the scrollbar-ignoring right placement.
-        placer.prependTo('html');
-        // var placerVisibleWidth = placer.outerWidth();
-        // common.addRightAlignIgnoreScrollbar({
-        //   obj: panel,
-        //   getWidth: function() { return placerVisibleWidth;},
-        //   getRightOffset: function() { return 5; },
-        //   setCss: function(jCssObj) { placer.css(jCssObj); }
-        // });
-
-        panel.placer = placer;
       }
 
-      panel.element = frame;
+      frame.appendTo('html');
 
       // Set panel to 'created'
       this.created = true;
-      this.element = frame;
 
+      this.element = frame;
+      
+      // return panel
       return frame;
     };
+
 
     // Show panel.
     panel.show = function(){
@@ -201,18 +177,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
           sitecues.emit('panel/hide', panel.element);
         });
       }
-    };
-
-    // Delete the panel.
-    panel.delete = function(){
-      if (panel.placer) {
-        panel.placer.remove();
-        common.removeRightAlignIgnoreScrollbar(panel);
-        panel.placer = undefined;
-      } else {
-        panel.element.remove();
-      }
-      panel.element = undefined
     };
 
     // Function that will toggle tts on or off.
