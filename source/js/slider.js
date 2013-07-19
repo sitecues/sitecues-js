@@ -41,8 +41,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.height = props.height;
     }
 
-    console.log([this.height, props.height],[this.width, props.width]);
-
     // Reference the SliderClass interface
     this.interface = interface;
 
@@ -134,9 +132,6 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       // But don't overwrite values that have been passed if the container has no dimensions
       // this.width = bounds.width || this.width;
       // this.height = bounds.height || this.height;
-
-      // console.log('setcontainerbounds');
-      // console.log( this.width, this.height );
 
     },
 

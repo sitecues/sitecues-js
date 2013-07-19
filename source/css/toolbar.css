@@ -53,22 +53,12 @@
   -moz-user-select    : none!important;
   -ms-user-select     : none!important;
   position: absolute;
-  right: 80px;
+  right: 95px;
   width: 160px;
   height: 38px;
-  /*border:1px solid red;*/
   top:4%;
 }
 
-.sitecues-toolbar .ramp {
-  position: absolute;
-  left: 0px;
-  top: -13px;
-  min-width: 105px;
-  max-width: 105px;
-  opacity: 50;
-  z-index: -1;
-}
 
 .sitecues-toolbar .small {
   position: absolute;
@@ -91,7 +81,7 @@
 .sitecues-toolbar .tts {
   position: absolute;
   top: 1px;
-  right: 0;
+  right: 15px;
   width: 70px;
   height: 95%;
   background-image: url('../images/toolbar/toolbar-speech.png');
@@ -210,17 +200,4 @@
   text-align:center;
   line-height: 2;
   font-size:20px;
-}
-
-.sitecues-toolbar-right-pane {
-    top:0;
-    position:absolute;
-    /*width:230px;*/
-    width:1px;
-    height:100%;
-    margin:0;
-    padding:0;
-    border:0;
-    overflow:visible;
-    /*border:1px solid red;*/
 }
