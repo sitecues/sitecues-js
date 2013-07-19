@@ -34,25 +34,12 @@
 }
 
 /* panel */
-/*#sitecues-panel-placer {
-    z-index: 2147483646;
-    position: fixed;
-    top: 5px;
-    width: 1px;
-    height: 1px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    overflow: visible;
-}
-*/
-/* panel */
 #sitecues-panel {
     opacity: 0.25;
     z-index: 2147483646;
     position: fixed;
     top: 0px;
-    right: 5px;
+    right: 15px;
     border: 1px solid #aaa;
     white-space: nowrap;
     margin: 5px;

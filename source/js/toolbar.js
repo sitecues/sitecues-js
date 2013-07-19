@@ -19,7 +19,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'toolbar/messenger',
     'util/common',
     'jquery/resize',
-    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize) {
+    'zoom',
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom) {
     log.trace('toolbar.use()');
 
 
@@ -63,28 +64,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         });
         dropdown.build(toolbar.instance);
         messenger.build(toolbar.instance);
-
-        // console.log('_____________________________________');
-        // console.log('building right pane');
-
-        // // Set up the right-align container that will not be affected by the (dis)appearance
-        // // of the vertical scrollbar
-        // toolbar.rightPane = $('<div>')
-        //   .addClass('sitecues-toolbar-right-pane')
-        //   .css({height: toolbar.instance.css('height')})
-        //   .appendTo(toolbar.instance);
-
-        // var rightPaneVisibleWidth = toolbar.rightPane.get(0).getBoundingClientRect().width;
-        
-        // console.log(rightPaneVisibleWidth);
-
-        // common.addRightAlignIgnoreScrollbar({
-        //   obj             : toolbar.rightPane,
-        //   getWidth        : function() { return rightPaneVisibleWidth; },
-        //   getRightOffset  : function() { return 5; },
-        //   setCss          : function(jCssObj) { toolbar.rightPane.css(jCssObj); }
-        // });
-        // var rightAlignPane = toolbar.rightPane;
 
         // Create a Slider Instance for the Toolbar
         this.slider = {};
@@ -177,6 +156,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             complete: function(){
             // Set slider dimensions now that the Toolbar element is displayed
             toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+            zoom.toolbarWidth = $('.sitecues-toolbar').get(0).getBoundingClientRect().width;
             }
           }, 'slow');
       } else {
@@ -324,6 +304,49 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     // load special toolbar css
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
+
+
+
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar appears
+    sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
+      
+      // Get the right position of the TTS icon and slider
+      var   ttsRight      = $('.sitecues-toolbar .tts').css('right')
+      ,  sliderRight      = $('.sitecues-toolbar .slider-wrap').css('right')
+      
+      // Calculate the updated positions
+      , newRightValTTS    = (parseFloat(ttsRight)    - scrollbarWidth) +'px'
+      , newRightValSlider = (parseFloat(sliderRight) - scrollbarWidth) +'px'
+      ;
+
+      // Set the updated CSS positions
+      $('.sitecues-toolbar .tts').css({right: newRightValTTS});
+      $('.sitecues-toolbar .slider-wrap').css({right: newRightValSlider});
+
+    });
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar disappears
+    sitecues.on('zoom/documentScrollbarHide', function(scrollbarWidth){
+      
+      // Get the right positions of the TTS and slider icon
+      var   ttsRight      = $('.sitecues-toolbar .tts').css('right')
+      ,  sliderRight      = $('.sitecues-toolbar .slider-wrap').css('right')
+      
+      // Calculate the updated positions
+      , newRightValTTS    = (parseFloat(ttsRight)     + scrollbarWidth) +'px'
+      , newRightValSlider = (parseFloat(sliderRight)  + scrollbarWidth) +'px'
+
+      ;
+      
+      // Set the updated CSS positions
+      $('.sitecues-toolbar .tts').css({right: newRightValTTS});
+      $('.sitecues-toolbar .slider-wrap').css({right: newRightValSlider});
+    
+    });
+
+
+
 
     callback();
     });

@@ -2,7 +2,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', function( $, conf, speech, SliderClass, positioning, ui, common) {
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', function( $, conf, speech, SliderClass, positioning, ui, common, zoom) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -74,6 +74,20 @@ sitecues.def( 'panel', function (panel, callback, log) {
           letterBig         : { normal: "#000000", hover: "#000000"},
         }
       });
+
+      // Body Width Calc Guide
+      $('<div>', {
+        id: 'sitecues-BWCG',
+        css:{
+          position:'absolute',
+          width:'100%',
+          height:'1px',
+          'pointerEvents':'none',
+          top:'0px',
+          left:'0px',
+          display:'hidden'
+        },
+      }).appendTo('html');
     
      // create TTS button and set it up
       ttsButton = $('<div>').addClass('tts').appendTo(frame);
@@ -222,9 +236,45 @@ sitecues.def( 'panel', function (panel, callback, log) {
     });
 
     sitecues.on('speech/enabled',  showTTSbuttonEnabled);
-    sitecues.on('speech/disabled', showTTSbuttonDisabled);
+    sitecues.on('speech/disabled', showTTSbuttonDisabled)
+
 
     panel.create();
+
+
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar appears
+    sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
+
+      // Get the right position of the panel
+      var   panelRight = $('#sitecues-panel').css('right')
+
+      // Calculate the updated position
+      , newRightValPanel    = (parseFloat(panelRight) - scrollbarWidth) +'px'
+      ;
+
+
+      // Set the updated CSS position
+      $('#sitecues-panel').css({right: newRightValPanel});
+
+    });
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar disappears
+    sitecues.on('zoom/documentScrollbarHide', function(scrollbarWidth){
+   
+      // Get the right position of the panel
+      var   panelRight = $('#sitecues-panel').css('right')
+
+      // Calculate the updated position
+      , newRightValPanel    = (parseFloat(panelRight) + scrollbarWidth) +'px'
+      ;
+
+      // Set the updated CSS position
+      $('#sitecues-panel').css({right: newRightValPanel});
+    
+    });
+
+
 
     // panel is ready
     callback();
