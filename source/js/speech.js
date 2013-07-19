@@ -7,13 +7,18 @@
 sitecues.def('speech', function (speech, callback, log) {
 
   // Tracks if the user has heard the longer, more descriptive "speech on" cue.
-  var FIRST_SPEECH_ON_PARAM = "firstSpeechOn";
+  var FIRST_SPEECH_ON_PARAM = 'firstSpeechOn';
   // Time in millis after which the more descriptive "speech on" cue should replay.
-  var FIRST_SPEECH_ON_RESET_MS = 7 *86400000; // 7 days
+  var FIRST_SPEECH_ON_RESET_MS = 7 * 86400000; // 7 days
+  var SITE_TTS_ENABLE_PARAM = 'siteTTSEnable';
+
+  var VERBAL_CUE_SPEECH_ON = 'verbalCueSpeechOn';
+  var VERBAL_CUE_SPEECH_ON_FIRST = 'verbalCueSpeechOnFirst';
+  var VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff';
 
   sitecues.use('conf', function(conf) {
 
-    sitecues.use('jquery', 'util/common', 'speech/azure', 'speech/ivona', function(_jQuery, common, _azure, _ivona) {
+    sitecues.use('jquery', 'speech/azure', 'speech/ivona', function(_jQuery, _azure, _ivona) {
 
       var players = {};
       var azure = _azure;
@@ -174,22 +179,6 @@ sitecues.def('speech', function (speech, callback, log) {
         });
       };
 
-      /**
-       * Returns true if the "first speech on" cue should be played.
-       * @return {boolean}
-       */
-      var shouldPlayFirstSpeechOnCue = function() {
-      var fso = conf.get(FIRST_SPEECH_ON_PARAM);
-      return (!fso || ((fso + FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
-      };
-
-      /**
-       * Signals that the "first speech on" cue has played.
-       */
-      var playedFirstSpeechOnCue = function() {
-      conf.set(FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
-      };
-
       /*
        * Enables TTS, invokes callback with no args
        */
@@ -197,11 +186,12 @@ sitecues.def('speech', function (speech, callback, log) {
         if (ttsEngine) {
           // An engine is set so we can enable the component
           ttsEnable = true;
-          conf.set('siteTTSEnable', true);
+          conf.set(SITE_TTS_ENABLE_PARAM, true);
+
           if(!shouldPlayFirstSpeechOnCue()) {
-            speech.sayByKey('verbalCueSpeechOn');
+            speech.sayByKey(VERBAL_CUE_SPEECH_ON);
           } else {
-            speech.sayByKey('verbalCueSpeechOnFirst', function() {
+            speech.sayByKey(VERBAL_CUE_SPEECH_ON_FIRST, function() {
             playedFirstSpeechOnCue();
             });
           }
@@ -218,8 +208,8 @@ sitecues.def('speech', function (speech, callback, log) {
        */
       speech.disable = function(callback) {
         speech.stopAll();
-        conf.set('siteTTSEnable', false);
-        speech.sayByKey('verbalCueSpeechOff');
+        conf.set(SITE_TTS_ENABLE_PARAM, false);
+        speech.sayByKey(VERBAL_CUE_SPEECH_OFF);
         ttsEnable = false;
         if (callback) {
           callback();
@@ -242,14 +232,14 @@ sitecues.def('speech', function (speech, callback, log) {
        * Uses a provisional player to say a piece of text by key, used for visual cues.
        */
       speech.sayByKey = function(key, callback) {
-      // MONKEY PATCH!!! Our TTS is very HLB-centric at the moment, so how this works is as follows:
-      // Create a div for the audio file, but instead of containing text, add a property to the DOM
-      // object that indicates what the key is. The speech processor will use that key to determine
-      // the audio file, rather than using the text.
-      var provHlb = jQuery('<div></div>').hide().appendTo('body').data('speechKey', key);
-      if (speech.play(provHlb) && callback) {
-        callback();
-      }
+        // MONKEY PATCH!!! Our TTS is very HLB-centric at the moment, so how this works is as follows:
+        // Create a div for the audio file, but instead of containing text, add a property to the DOM
+        // object that indicates what the key is. The speech processor will use that key to determine
+        // the audio file, rather than using the text.
+        var provHlb = jQuery('<div></div>').hide().appendTo('body').data('speechKey', key);
+        if (speech.play(provHlb) && callback) {
+          callback();
+        }
       };
 
       /*
@@ -265,9 +255,9 @@ sitecues.def('speech', function (speech, callback, log) {
        * A variant of cue() that plays audio by key rather than supplied text.
        */
       speech.cueByKey = function(key, callback) {
-      ttsBypass = true;
-      speech.sayByKey(key, callback);
-      ttsBypass = false;
+        ttsBypass = true;
+        speech.sayByKey(key, callback);
+        ttsBypass = false;
       };
 
       /**
@@ -307,6 +297,22 @@ sitecues.def('speech', function (speech, callback, log) {
         } else {
           sitecues.emit('speech/enable');
         }
+      };
+
+      /**
+       * Returns true if the "first speech on" cue should be played.
+       * @return {boolean}
+       */
+      var shouldPlayFirstSpeechOnCue = function() {
+        var fso = conf.get(FIRST_SPEECH_ON_PARAM);
+        return (!fso || ((fso + FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
+      };
+
+      /**
+       * Signals that the "first speech on" cue has played.
+       */
+      var playedFirstSpeechOnCue = function() {
+        conf.set(FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
       };
 
       /*
