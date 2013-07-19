@@ -300,6 +300,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     };
 
     sitecues.on('toolbar/disable', function() {
+      // Close any iframe dialogs.
+      sitecues.emit('iframe-modal/hide');
+
       // Turn off TTS if it is on.
       var speechEnabled = conf.get('siteTTSEnable')
         , ttsServiceAvailable = conf.get('tts-service-available')

@@ -20,10 +20,10 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback, log){
         var dropdownLink = $('<a class="dropdown-toggle" data-toggle="dropdown" href="#"><span>sitecues</span></a>').appendTo(dropdown.wrap);
         var dropdownMenu = $('<ul class="dropdown-menu" role="menu"></ul>').appendTo(dropdown.wrap);
         $('<li><a id="sitecues_help_show">'+ kTextHelp +'</a></li>').appendTo(dropdownMenu).on('click', function() {
-          sitecues.emit('help/show', {name:'help'});
+          sitecues.emit('iframe-modal/show', {name:'help'});
         });
         $('<li><a id="sitecues_feedback_show">'+ kTextFeedback +'</a></li>').appendTo(dropdownMenu).on('click', function() {
-          sitecues.emit('help/show', {name:'feedback'});
+          sitecues.emit('iframe-modal/show', {name:'feedback'});
         });
         //$('<li><a rel="sitecues-event" data-sitecues-event="inverse/toggle">'+ kTextChangeColors +'</a></li>').appendTo(dropdownMenu);
         $('<li><a rel="sitecues-event" data-sitecues-event="toolbar/disable">'+ kTextTurnOff +'</a></li>').appendTo(dropdownMenu);

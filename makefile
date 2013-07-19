@@ -42,7 +42,7 @@ files=\
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
-	source/js/util/closeButton.js \
+	source/js/util/close-button.js \
 	source/js/ui.js  \
 	source/js/style.js \
 	source/js/util/positioning.js \
@@ -61,7 +61,7 @@ files=\
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
-	source/js/help.js \
+	source/js/iframe-modal.js \
     source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \

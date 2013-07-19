@@ -237,7 +237,7 @@
     z-index: 2147483645; /* Below Equinox panel, mouse, HLB, and HLB close button */
 }
 
-.sitecues-help-frame {
+.sitecues-iframe-modal {
     border:  2px solid #000;
     border-radius: 3px;
     background-color: #FFF;
@@ -246,9 +246,20 @@
     overflow-x: hidden;
     overflow-y: scroll;
     position: absolute;
-    z-index: 2147483646; /* Below the close button */
+    z-index: 2147483644; /* Below the close button */
 }
 
+.sitecues-iframe-dimmer {
+    border: 0;
+    background-color: #000;
+    opacity: 0.65;
+    margin:  0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: absolute;
+    z-index: 2147483643; /* behind the toolbar */
+}
 
 /* Simulate Windows Scrollbars in Webkit */
 /*
