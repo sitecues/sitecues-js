@@ -157,6 +157,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             zoom.toolbarWidth = $('.sitecues-toolbar').get(0).getBoundingClientRect().width;
             }
           }, 'slow');
+          conf.set('toolBarVisible', true);
       } else {
         log.warn("toolbar.slideOut() was called but toolbar is disabled")
       }

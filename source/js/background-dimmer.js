@@ -27,7 +27,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         // Take into calculations toolbar's height as it shifts elements position.
         // TODO: once toolbar is completed, remove this
         // repeated code(line below is used accross the files) to a correspondent util module.
-        var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled')
+        var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled') && conf.get('toolBarVisible')
             ? conf.get('toolbarHeight') || defaultToolbarHeight / (conf.get('zoom') || 1)
             : 0;
 
