@@ -267,6 +267,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // When the mouse is is pressed over the Track, Thumb and TrackBack
     mousedowntrack: function (e) {
 
+      sitecues.emit('panel/interaction');
+
       // Get the context when called from event mousemove event listener
       var slider = e.data.slider;
 
@@ -284,6 +286,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     // When the mouse is is pressed over the Letter or LetterBack
     mousedownlettersml: function (e) {
       
+      sitecues.emit('panel/interaction');
+
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
 
@@ -308,6 +312,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // When the mouse is is pressed over the LetterBig or LetterBigBack
     mousedownletterbig: function (e) {
+
+      sitecues.emit('panel/interaction');
       
       // Get the context when called from event mousedown event listener
       var slider = e.data.slider;
