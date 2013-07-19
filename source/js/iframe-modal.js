@@ -1,6 +1,8 @@
 // The 'help' module manages the display that shows the help. The help display is populated using external
 // content obtained via the user preferences server.
 sitecues.def('iframe-modal', function(iframeModal, callback, log) {
+sitecues.use('jquery', function ($) {
+      
   // The URL of the help contents.
   var IFRAME_CONTENT_ENDPOINT = '//' + sitecues.coreConfig.hosts.up + '/iframeModals';
 
@@ -217,4 +219,5 @@ sitecues.def('iframe-modal', function(iframeModal, callback, log) {
       }
     });
   });
+});
 });

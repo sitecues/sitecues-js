@@ -17,57 +17,59 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
 	zoom.documentHasScrollbar = false;
 
+	sitecues.use('jquery', function ($) {
 
-	// Handle the appearing/dissapearing vertical scrollbar in document (changes document width)
-	zoom.checkForScrollbar = function () {
+		// Handle the appearing/dissapearing vertical scrollbar in document (changes document width)
+		zoom.checkForScrollbar = function () {
 
-    var scrollbarWidth = window.innerHeight-document.documentElement.clientHeight;
+	    var scrollbarWidth = window.innerHeight-document.documentElement.clientHeight;
 
-    if (scrollbarWidth>0) {
-    	zoom.storedScrollbarWidth = scrollbarWidth;
-    }
+	    if (scrollbarWidth>0) {
+	    	zoom.storedScrollbarWidth = scrollbarWidth;
+	    }
 
-    // TODO: Replace this try-catch with some better logic
-		try{ 
-		
-			var currentToolbarWidth = $('#sitecues-BWCG').get(0).getBoundingClientRect().width;
-
-			// console.log([ 'currentToolbarWidth: ' + currentToolbarWidth, 'winDocHeightDiff: ' 		+ winDocHeightDiff, 'window.innerWidth: ' 	+ window.innerWidth ]);
-		}catch(e){
-
-		}
-
-  	// Check whether a scrollbar has appeared in the document now zoom has changed
-    if (currentToolbarWidth && currentToolbarWidth < window.innerWidth && scrollbarWidth > 0) {
-
-    	// If scrollbar was not present during last resize...
-    	if (zoom.documentHasScrollbar === false) {
-
-    		// Set the zoom scrollbar boolean ready for next resize check
-    		zoom.documentHasScrollbar = true;
-
-    		// Emit the scrollbar show event to subscribers as the doc now has scrollbar
-    		sitecues.emit('zoom/documentScrollbarShow', scrollbarWidth);
-
-    	}
-    
-    } else if ((currentToolbarWidth && currentToolbarWidth >= window.innerWidth) || scrollbarWidth === 0) {
+	    // TODO: Replace this try-catch with some better logic
+			try{ 
 			
-			// If scrollbar was present during last resize...
-    	if (zoom.documentHasScrollbar === true) {
-    		
-				// Emit the scrollbar hide event to subscribers as the doc scrollbar is gone
-    		sitecues.emit('zoom/documentScrollbarHide', zoom.storedScrollbarWidth);
+				var currentToolbarWidth = $('#sitecues-BWCG').get(0).getBoundingClientRect().width;
 
-    		// Set the zoom scrollbar boolean ready for next resize check
-    		zoom.documentHasScrollbar = false;
+				// console.log([ 'currentToolbarWidth: ' + currentToolbarWidth, 'winDocHeightDiff: ' 		+ winDocHeightDiff, 'window.innerWidth: ' 	+ window.innerWidth ]);
+			}catch(e){
 
-    	}
-    	
-    }
+			}
 
-  };
+	  	// Check whether a scrollbar has appeared in the document now zoom has changed
+	    if (currentToolbarWidth && currentToolbarWidth < window.innerWidth && scrollbarWidth > 0) {
 
+	    	// If scrollbar was not present during last resize...
+	    	if (zoom.documentHasScrollbar === false) {
+
+	    		// Set the zoom scrollbar boolean ready for next resize check
+	    		zoom.documentHasScrollbar = true;
+
+	    		// Emit the scrollbar show event to subscribers as the doc now has scrollbar
+	    		sitecues.emit('zoom/documentScrollbarShow', scrollbarWidth);
+
+	    	}
+	    
+	    } else if ((currentToolbarWidth && currentToolbarWidth >= window.innerWidth) || scrollbarWidth === 0) {
+				
+				// If scrollbar was present during last resize...
+	    	if (zoom.documentHasScrollbar === true) {
+	    		
+					// Emit the scrollbar hide event to subscribers as the doc scrollbar is gone
+	    		sitecues.emit('zoom/documentScrollbarHide', zoom.storedScrollbarWidth);
+
+	    		// Set the zoom scrollbar boolean ready for next resize check
+	    		zoom.documentHasScrollbar = false;
+
+	    	}
+	    	
+	    }
+
+	  };
+	  
+	});
 
 	// get dependencies
 	sitecues.use('jquery', 'conf', 'ui', function($, conf) {
