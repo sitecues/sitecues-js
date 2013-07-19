@@ -96,8 +96,16 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         // The maths below based on experience and doesn't use any kind of specific logic.
         // We are liely to change it better one when we have final images.
         // There's no need for specific approach while we constantly change images and code.
-        function getCursorHotspotOffset() {
-             var zoom = conf.get('zoom');
+        /**
+         * Gets custom cursor's hotspot offset.
+         * @param zl Number or string, represents zoom level.
+         * @return result A string in format 'x y' which is later used a part of cursor property value.
+         */
+        function getCursorHotspotOffset(zl) {
+             var zoom = {};
+             zoom.min = 1;
+             zoom.current = zl || conf.get('zoom') || cursor.zoomLevel;
+             zoom.diff = zoom.current - zoom.min;
              var type = cursor.type || defaultType;
              var offset = eval('images.offsets.' + cursor.type || defaultType);
              var result = '';
@@ -105,10 +113,13 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
                 switch (type) {
                  case 'auto':
                  case 'default':
-                   result = offset.x + ' ' + Math.round(offset.y + offset.step * (zoom - 0.9));
+                   result = offset.x + ' ' + Math.round(offset.y + offset.step * zoom.diff);
                    break
                  case 'pointer':
-                   result = Math.round(offset.x + offset.step * (zoom - 0.9)) + ' ' + Math.round(offset.y + offset.step/ 2 * (zoom - 0.9));
+                   result = Math.round(offset.x + offset.step * zoom.diff)
+                            + ' ' + Math.round(offset.y + (offset.step / 2) * zoom.diff);
+                   break;
+                 default:
                    break;
                }
              }
