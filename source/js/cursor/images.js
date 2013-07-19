@@ -7,9 +7,9 @@ sitecues.def('cursor/images', function (images, callback) {
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     images.offsets = {
-     'auto'   : {x: 0, y: 5, step: 2.5},
-     'default': {x: 0, y: 5, step: 2.5},
-     'pointer': {x: 10, y: 5, step: 3}
+     'auto'   : {x: 0, y: 5,  step: 2.5},
+     'default': {x: 0, y: 5,  step: 2.5},
+     'pointer': {x: 10, y: 5, step: 3.5}
     }
 
     // Cursor images according to zoom level values, in dataUrl format. Name pattern is: <cursor_type>_<zoom_level>. Example: default_1_0.
