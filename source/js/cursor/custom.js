@@ -45,8 +45,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
             if (cursor.isEnabled) {
                 cursor.url = view.getImage(cursor.type, value) || cursor.kDefaultCursorImage;
-                var offset = eval('images.offsets.' + cursor.type);
-                cursor.offset = offset ? offset.x + ' ' + offset.y : '';
+                cursor.offset = getCursorHotspotOffset();
                 if (cursorWasEnabled)
                     cursor.update();
                 else
@@ -73,7 +72,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          */
         cursor.update = function() {
             // Target is not changed, so update the same element's cursor style.
-            $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ',' + cursor.type, 'important');
+            $(cursor.prevTarget).css('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ',' + cursor.type);
             // Update cursor image for disabled elements.
             $('#' + cursor.kCursorStyleDisabledRuleId).remove();
             cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*: disabled { cursor: url("' +  view.getImage(cursor.type, conf.get('zoom')) + '") ' + cursor.offset + ', !important}');
@@ -86,12 +85,35 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         cursor.hide = function() {
             // Reset the CSS cursor style.
             $('#' + cursor.kCursorStyleDisabledRuleId).remove();
-            $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
+            $(cursor.prevTarget).css('cursor', cursor.prevType);
             $(window).off('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/hide');
         };
 
         /* Auxiliary functions */
+
+        // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
+        // The maths below based on experience and doesn't use any kind of specific logic.
+        // We are liely to change it better one when we have final images.
+        // There's no need for specific approach while we constantly change images and code.
+        function getCursorHotspotOffset() {
+             var zoom = conf.get('zoom');
+             var type = cursor.type || defaultType;
+             var offset = eval('images.offsets.' + cursor.type || defaultType);
+             var result = '';
+             if (offset) {
+                switch (type) {
+                 case 'auto':
+                 case 'default':
+                   result = offset.x + ' ' + Math.round(offset.y + offset.step * (zoom - 0.9));
+                   break
+                 case 'pointer':
+                   result = Math.round(offset.x + offset.step * (zoom - 0.9)) + ' ' + Math.round(offset.y + offset.step/ 2 * (zoom - 0.9));
+                   break;
+               }
+             }
+             return result;
+        }
 
         /**
          * Updates image of the cursor element if the target needs.
@@ -103,7 +125,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             // If target is changed then update CSS cursor property for it.
             if (cursor.isEnabled && !$(target).is(cursor.prevTarget)) {
                 // First, revert last target's cursor property to saved style.
-                $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
+                $(cursor.prevTarget).css('cursor', cursor.prevType);
                 var newCursorType = style.detectCursorType(target) || defaultType;
 
                 // Save the new target and its original cursor style to be able to revert to it.
@@ -111,11 +133,10 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
                 cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
                 cursor.url = view.getImage(cursor.type, conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
-                
-                var offset = eval('images.offsets.' + cursor.type);
-                cursor.offset = offset ? offset.x + ' ' + offset.y : '';
+                cursor.offset = getCursorHotspotOffset();
+
                 // Set cursor style on new target.
-                $(target).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type, 'important');
+                $(target)[0].style.cursor = 'url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type;
             }
         }
 
@@ -127,7 +148,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             $('#' + cursor.kCursorStyleRuleId).remove();
 
             if (cursor.isEnabled) {
-                $(target).style('cursor', cursor.prevType, 'important');
+                $(target).css('cursor', cursor.prevType);
             }
         }
 
