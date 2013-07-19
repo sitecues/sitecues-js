@@ -27,7 +27,8 @@ sitecues.def('badge', function (badge, callback, log) {
       badge.panel.attr('id', badge.badgeId) // set element id for proper styling
                  .addClass('sitecues-badge')
                  .hide()
-                 .prependTo('html');
+                 // .prependTo('html');
+                  .appendTo('html');
 
       // Determine the badge visible width
       var badgeVisibleWidth = badge.panel.outerWidth();

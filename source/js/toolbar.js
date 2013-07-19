@@ -91,7 +91,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(toolbar.instance);
         //this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(rightAlignPane);
         this.slider.widget = SliderClass.build({
-          container: this.slider.wrap
+          container: this.slider.wrap,
+          width:160,
+          height:38
         });
 
         // create TTS button and set it up
@@ -162,14 +164,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
         var height = toolbar.instance.height();
 
-        toolbar.instance.show(function(){
-          
-          // Set slider dimensions now that the Toolbar element is display:block
-          toolbar.slider.widget.setdimensions(toolbar.slider.widget);
-        });
-        
-        // Set slider dimensions now that the Toolbar element is display:block
-        toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+        toolbar.instance.show();
 
         sitecues.emit('toolbar/state/' + toolbar.currentState.name);
         toolbar.shim.css('height', 0);
@@ -180,8 +175,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
               toolbar.shim.css('height', ((height + now) + 'px'))
             },
             complete: function(){
-            // Set slider dimensions now that the Toolbar element is display:block
-              toolbar.slider.widget.setdimensions(toolbar.slider.widget);
+            // Set slider dimensions now that the Toolbar element is displayed
+            toolbar.slider.widget.setdimensions(toolbar.slider.widget);
             }
           }, 'slow');
       } else {
