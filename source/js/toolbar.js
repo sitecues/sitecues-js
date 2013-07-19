@@ -23,8 +23,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom) {
     log.trace('toolbar.use()');
 
-
-
     // FIXME: Remove me! For testing purposes only. - Eric
     // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
     window.sitecues.configs = conf;
@@ -288,6 +286,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
         , ttsServiceAvailable = conf.get('tts-service-available')
         ;
       if (speechEnabled && ttsServiceAvailable) {
+         conf.set('speechOff', false);
          sitecues.emit('speech/disable');
       }
       // Make sure reverse contrast is OFF.
