@@ -11,6 +11,13 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
     var defaultType = 'default';
 
+    // cursor types
+    var types = {
+      'auto'   : '',
+      'default': '',
+      'pointer': ''
+    }
+
     // Static properties
     cursor.isEnabled = false; // if cursor module is enabled
     cursor.zoomLevel = 1;
@@ -106,8 +113,11 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
              zoom.min = 1;
              zoom.current = zl || conf.get('zoom') || cursor.zoomLevel;
              zoom.diff = zoom.current - zoom.min;
-             var type = cursor.type || defaultType;
-             var offset = eval('images.offsets.' + cursor.type || defaultType);
+             var type = cursor.type;
+             if (!types.hasOwnProperty(cursor.type)) {
+               type = defaultType;
+             }
+             var offset = eval('images.offsets.' + type || defaultType);
              var result = '';
              if (offset) {
                 switch (type) {
