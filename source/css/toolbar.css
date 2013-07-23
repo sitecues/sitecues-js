@@ -166,6 +166,9 @@
 
 .sitecues-toolbar.hori .dropdown-menu li {
   padding: 2px;
+  list-style-type: none;
+  list-style-image: none;
+  background: none;
 }
 
 .sitecues-toolbar.hori .dropdown-toggle {
