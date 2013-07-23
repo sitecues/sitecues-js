@@ -79,6 +79,7 @@
 }
 
 .sitecues-toolbar .tts {
+  cursor: pointer;
   position: absolute;
   top: 1px;
   right: 15px;

@@ -115,6 +115,7 @@
 }
 
 #sitecues-panel .tts {
+    cursor: pointer;
     position: absolute;
     top: 2px;
     right: 0;
