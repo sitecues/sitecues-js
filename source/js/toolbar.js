@@ -208,16 +208,19 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.enableSpeech = function () {
       if (conf.get('tts-service-available') === true) {
       log.trace('toolbar.enableSpeech()');
-      toolbar.ttsButton.removeClass(kTtsDisabled);
-      toolbar.ttsButton.data('tts-enable', 'enabled');
+      if (toolbar && toolbar.ttsButton) {
+        toolbar.ttsButton.removeClass(kTtsDisabled);
+        toolbar.ttsButton.data('tts-enable', 'enabled');
+      }
       }
     };
 
     toolbar.disableSpeech = function () {
       log.trace('toolbar.disableSpeech()');
-
-      toolbar.ttsButton.addClass(kTtsDisabled);
-      toolbar.ttsButton.data('tts-enable', 'disabled');
+      if (toolbar && toolbar.ttsButton) {
+        toolbar.ttsButton.addClass(kTtsDisabled);
+        toolbar.ttsButton.data('tts-enable', 'disabled');
+      }
     };
 
     /**
@@ -232,9 +235,13 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.wireEvents = function () {
       log.trace('toolbar.wireEvents()');
 
+      console.log("WIRING!");
+
       toolbar.instance.find('[rel="' + kTtsButtonRel + '"]').each(function() {
         $(this).on('click', function() {
           var event = $(this).data(kTtsButtonRel);
+
+          console.log("CLICK AFTER WIRE");
 
           if (event) {
             sitecues.emit(event);
