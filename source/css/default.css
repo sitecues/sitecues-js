@@ -10,7 +10,6 @@
     position: fixed;
     width: 150px;
     top: 5px;
-    right: 1%;
     color: rgba(0, 0, 0, 0.6);
     cursor: default;
     -webkit-transition: color 1s;
@@ -40,7 +39,7 @@
     z-index: 2147483646;
     position: fixed;
     top: 0px;
-    right: 5px;
+    right: 15px;
     border: 1px solid #aaa;
     white-space: nowrap;
     margin: 5px;
@@ -75,27 +74,27 @@
     z-index: 1;
 }
 
+
+
 #sitecues-panel .slider-wrap {
-    position: absolute;
-    top: 20px;
-    left: 50px;
-    display: inline;
-    width: 100px;
+    display:block;
+    width:340px;
+    height:80px;
+    -webkit-user-select : none;
+    -khtml-user-select  : none;
+    -moz-user-select    : none;
+    -o-user-select      : none;
+    user-select         : none;
 }
 
-#sitecues-panel .ramp {
-    position: absolute;
-    left: 0px;
-    top: -13px;
-    min-width: 210px;
-    max-width: 210px;
-    opacity: 50;
-    z-index: -1;
+#sitecues-panel .slider-wrap *{
+    -webkit-user-select': none;
+    -khtml-user-select  : none;
+    -moz-user-select    : none;
+    -o-user-select      : none;
+    user-select'        : none;
 }
 
-#sitecues-panel .slider {
-    width: 180px;
-}
 
 #sitecues-panel .small {
     position: absolute;
@@ -204,11 +203,69 @@
     width:  20px;
 }
 
+#sitecues-close-button {
+    position: absolute;
+    height: 36px;
+    width:  36px;
+    border: 0;
+    border-radius: 15px;
+    background-image: url('../images/hlb_close_button.png');
+    background-size: 36px 36px;
+    z-index: 2147483647; /* above all */
+    cursor: pointer;
+}
+
 .sitecues-highlight-overlay {
     position: absolute;
     border: 2px solid black;
     border-radius: 3px;
     pointer-events: none;
     background-color: transparent;
-    z-index: 2147483644; /* Below Equinox panel and mouse */
+    z-index: 2147483645; /* Below Equinox panel, mouse, HLB, and HLB close button */
 }
+
+.sitecues-iframe-modal {
+    border:  2px solid #000;
+    border-radius: 3px;
+    background-color: #FFF;
+    margin:  0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: absolute;
+    z-index: 2147483644; /* Below the close button */
+}
+
+.sitecues-iframe-dimmer {
+    border: 0;
+    background-color: #000;
+    opacity: 0.65;
+    margin:  0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: absolute;
+    z-index: 2147483643; /* behind the toolbar */
+}
+
+/* Simulate Windows Scrollbars in Webkit */
+/*
+body::-webkit-scrollbar {
+    -webkit-appearance: none!important;
+}
+
+body::-webkit-scrollbar:vertical {
+    width: 15px!important;
+}
+
+body:-webkit-scrollbar:horizontal {
+    height: 11px!important;
+}
+
+body::-webkit-scrollbar-thumb {
+    border-radius: 8px!important;
+    border: 2px solid white!important;
+    background-color: rgba(0, 0, 0, 1)!important;
+}*/
+
+

@@ -112,9 +112,6 @@ sitecues.def('util/positioning', function (positioning, callback) {
 				    var boundingBox = boundingBoxes[count];
 				    result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
 			    }
-			    var children = $(this).children();
-			    if (children.length)
-			        positioning.getAllBoundingBoxes(children, scrollPosition, result);
 		    });
 		    return result;
 	    }
@@ -218,9 +215,11 @@ sitecues.def('util/positioning', function (positioning, callback) {
             result.centerX = result.left + (result.width / 2);
             result.centerY = result.top + (result.height / 2);
 
-			for (var prop in result) {
-				result[prop] /= zoom;
-			}
+            // In any other case, re-scale dimensions to get pure(not zoomed) values.
+            for (var prop in result) {
+                result[prop] /= zoom;
+            }
+            
 
             return result;
         }

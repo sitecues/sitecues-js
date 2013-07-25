@@ -11,6 +11,13 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
     var defaultType = 'default';
 
+    // cursor types
+    var types = {
+      'auto'   : '',
+      'default': '',
+      'pointer': ''
+    }
+
     // Static properties
     cursor.isEnabled = false; // if cursor module is enabled
     cursor.zoomLevel = 1;
@@ -19,16 +26,17 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
     cursor.prevType = defaultType;
     // Default data url string
     cursor.url = cursor.kDefaultCursorImage;
+    cursor.offset = ''; // top left corner
 
     // Constants
-    cursor.kDefaultCursorImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAbCAYAAAB836/YAAACL0lEQVRIS9WVT4gSYRjG53MkZ1sMFrEQRQIvsU14SQLR8CCCdPPivQ4egsKbROglIg9FUHTZs3varQ5ePCqB2BaI4h+CpA6WfzPRWXVTt+eFOQwSzCh7aD94GOebd36+7zzvvMO4M17sjHnc+QDq/lH2KfZIay82mUweM8auCoLwQL6bQHNZa0PZdDrNGgyG2+Px+K3RaLwvQyc4Hm8CZZIkfWi32zftdjvfarXe2Wy2JwCNoF+bQNlwOMyXy+Ub6XR6O5FInBQKhX2fz7cH2M9NoGwwGBQqlYro8XguxmIxLh6P/8lms4fBYPAVgD9WoKomsV6vd1Sr1a57vd4tik4mk1w0Gl3mcrl9v9//Alst6Dc0g5ZqRNbtdj/V6/VdJTAQCHCiKC6KxeKey+V6CsgAIqMWqsB+v/+xWq2KPM9vlUolLhKJcHD8eDabLfF8jxwOxz1AupqBZAp68BaAC7i9RF+yTqfzxe12vwbkO/RVNojaSD1DmPJer9fvogcfAZbK5/O80+mUTCbTQwDa0DfZnLEmIIIuQ5egK41G4+V8Pr9mtVqFTCbzJhQKHcjZEVjSZAqCtiEDtJNKpe6Ew+HngOpHo9Fns9l8F/t9WeSy6qtI44uHaEAQeKfZbD7T6XSnFoslIZdIbw25fKLmMF1XzsMLODdCguJGyogyI+jaQMqSYARWLpo8U4iOqkuZIf0m6Op8pCypXVSf32rJqv+uJeB8fFO0VKI55v8v+S/S1uIc5k3vOgAAAABJRU5ErkJggg==";
-    cursor.kCursorStyleRuleId = 'sitecues-cursor-style-rule';
+    cursor.kDefaultCursorImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAhCAYAAAA2/OAtAAADKElEQVRIS9WWPWxSURTH73t8SCmQpqGDCSYdHGiHjg4kHQ0mRZhMHGocsNShxkGbNCE6yGRIazVpN7aSiJCYGAYbcWLAxehgo6LRammNH0BIaSlV3vN/mvsIHw/6iungTf553PN4v3fuOeee+wR2DEM4Bib7j6CyLN9FCE5Bl3goJEEQ5H8Ji1Cr1cKiKN4EJAFdhSrQHsBSr2CCLlSr1RmDwSDq9fpnAM1A36HdXsEEXSwUCoH5+fm+UCgkAZwGcBra7BVM0AfFYvGK3W7vm5ubY8Fg8LfFYnkB4FSv4AMoPJ0aGhoyUQzdbjeLx+N/rFZrBtMAB+8cJRRtUAUci8VqAL9GEi/DloPKANe0JE8V2gi22Ww5wDywbWgFd4S2gDc5+KsWcFdor+BDob2ANUFVwOdho1BsqyVPM1QBr6ysyIODgzlUhQ+2L1CpFXwkqAJeWlqShoeHt3Q6HYHXW8FHhip1ura2Jjmdzi3ucRNYE5R22ezsLEObbKr98fFxhka0DvBZ3NiCKtQ2NUGJBM/YyMgI9doypnvQPl6yVyqV5IGBgSeY34FoO9dUoalUioXDYba6ulr3zO/3s+XlZdloNL6EMcl3WAHXn9A36FdHKHk0OjrKMpmM7HK5ms6wdDpNtiKWSz33DVQkj6Eq1z41nrqnk5OTJpQLQ7lU8FAW3WtsYmJCaPSWYptMJmX03MeA3OKZJ6ASbLke03K5PI34iGgeVMwP8aePmF/LZrMOZFjfmJ1EIiF5vd5dJOgC7K9o2Wp1ugjPruMm9c8Y9AP6BJ2RJOleIBDQRSKRRi6rVCqSyWR6DuMNcgBQOtfqQ4BHC5idhkKQAaLg0xklQk/z+fwYTgWj8kQ0GmUej4f19/dvoPgv8tjSCuv1RlACWSAdf5DeSqJln0Rs3+H8MjkcDubz+ZjZbKZkvMe9+3z5H3ClBt4EpQyTV8o4OPcxyG7B9RHm53Alb9bJe+gz9BaivU+rOih6BdD1swcg8tYO3Ybo+DZDVI9UlwTbhqptiWrwsO0n95YORBt0gq+IdtQOh6l+cBz6gUalphKerl8vh0K7raTTvb9mDMYxORabHQAAAABJRU5ErkJggg==';
+    cursor.kCursorStyleRuleId  = 'sitecues-cursor-style-rule';
     // Set custom cursor image for disabled elements
     cursor.kCursorStyleDisabledRuleId  = 'sitecues-cursor-disabled-rule';
     cursor.kMinCursorZoom = 1.1;
 
     // get dependencies
-    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/element', 'ui', function ($, conf, style, view) {
+    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/element', 'cursor/images', 'ui', function ($, conf, style, view, images) {
 
         // private variables
         cursor.styleRuleParent = $('head');
@@ -44,6 +52,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
             if (cursor.isEnabled) {
                 cursor.url = view.getImage(cursor.type, value) || cursor.kDefaultCursorImage;
+                cursor.offset = getCursorHotspotOffset();
                 if (cursorWasEnabled)
                     cursor.update();
                 else
@@ -59,8 +68,8 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         cursor.show = function() {
             // Add rules for default cursor values.
             cursor.styleRuleParent
-                .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '"), ' + cursor.type +' !important}')
-                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage(cursor.type, conf.get('zoom')) + '"), default !important}');
+                .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type +' !important}')
+                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage(cursor.type, conf.get('zoom')) + '") ' + cursor.offset + ', default !important}');
             $(window).on('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/show');
         };
@@ -70,10 +79,10 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          */
         cursor.update = function() {
             // Target is not changed, so update the same element's cursor style.
-            $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
+            $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ',' + cursor.type, 'important');
             // Update cursor image for disabled elements.
             $('#' + cursor.kCursorStyleDisabledRuleId).remove();
-            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*: disabled { cursor: url("' +  view.getImage(cursor.type, conf.get('zoom')) + '"), !important}');
+            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*: disabled { cursor: url("' +  view.getImage(cursor.type, conf.get('zoom')) + '") ' + cursor.offset + ', !important}');
             sitecues.emit('cursor/update');
         };
 
@@ -89,6 +98,43 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         };
 
         /* Auxiliary functions */
+
+        // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
+        // The maths below based on experience and doesn't use any kind of specific logic.
+        // We are liely to change it better one when we have final images.
+        // There's no need for specific approach while we constantly change images and code.
+        /**
+         * Gets custom cursor's hotspot offset.
+         * @param zl Number or string, represents zoom level.
+         * @return result A string in format 'x y' which is later used a part of cursor property value.
+         */
+        function getCursorHotspotOffset(zl) {
+             var zoom = {};
+             zoom.min = 1;
+             zoom.current = zl || conf.get('zoom') || cursor.zoomLevel;
+             zoom.diff = zoom.current - zoom.min;
+             var type = cursor.type;
+             if (!types.hasOwnProperty(cursor.type)) {
+               type = defaultType;
+             }
+             var offset = eval('images.offsets.' + type || defaultType);
+             var result = '';
+             if (offset) {
+                switch (type) {
+                 case 'auto':
+                 case 'default':
+                   result = offset.x + ' ' + Math.round(offset.y + offset.step * zoom.diff);
+                   break
+                 case 'pointer':
+                   result = Math.round(offset.x + offset.step * zoom.diff)
+                            + ' ' + Math.round(offset.y + (offset.step / 2) * zoom.diff);
+                   break;
+                 default:
+                   break;
+               }
+             }
+             return result;
+        }
 
         /**
          * Updates image of the cursor element if the target needs.
@@ -108,8 +154,10 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
                 cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
                 cursor.url = view.getImage(cursor.type, conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
+                cursor.offset = getCursorHotspotOffset();
+
                 // Set cursor style on new target.
-                $(target).style('cursor', 'url("' + cursor.url + '"), ' + cursor.type, 'important');
+                $(target).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type, 'important');
             }
         }
 

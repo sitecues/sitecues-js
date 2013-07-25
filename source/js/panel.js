@@ -1,197 +1,283 @@
 sitecues.def( 'panel', function (panel, callback, log) {
 
-	// use jquery, we can rid off this dependency
-	// if we will start using vanilla js functions
-	sitecues.use( 'jquery', 'conf', 'speech', 'util/positioning', 'ui', function( $, conf, speech, positioning ) {
+  // use jquery, we can rid off this dependency
+  // if we will start using vanilla js functions
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', function( $, conf, speech, SliderClass, positioning, ui, common, zoom) {
 
-		// timer needed for handling
-		// ui mistake - when user occasionally
-		// move mouse cursor out of panel
-		var timer;
+    // timer needed for handling
+    // ui mistake - when user occasionally
+    // move mouse cursor out of panel
+    var timer;
 
-		panel.hideDelay = 1000;
-		// Forcing a change to merge from Thom into master
-		// to make sure that I'm actually getting the real code.
-		//log.info('!!! TEMP !!! panel.hideDelay');
+    panel.hideDelay = 1500;
+    // Forcing a change to merge from Thom into master
+    // to make sure that I'm actually getting the real code.
+    //log.info('!!! TEMP !!! panel.hideDelay');
 
-		// This is the parent element of the panel.  The default setup does
-		// not need one, this is only when we're using a custom target via
-		// badgeId or panelDisplaySelector properties.
-		panel.parent = null;
+    // This is the parent element of the panel.  The default setup does
+    // not need one, this is only when we're using a custom target via
+    // badgeId or panelDisplaySelector properties.
+    panel.parent = null;
 
-		// Use to check whether a panel element already exists. If it does, then there
-		// is no need to call create() again, but instead just show();
-		panel.created = false;
+    // Use to check whether a panel element already exists. If it does, then there
+    // is no need to call create() again, but instead just show();
+    panel.created = false;
 
-		// panel element
-		panel.create = function() {
-			// private variables
-			var frame, wrap, slider, ttsButton;
+    // The panel element
+    panel.element = undefined;
 
-			// create element and add element id for proper styling
-			frame = $('<div>').attr('id', 'sitecues-panel');
-		
-			// create small A label
-			$('<div>').addClass('small').text('A').appendTo(frame);
+    // The panel placer element (currently only used with the default badge).
+    panel.placer = undefined;
 
-			// create clider wrap element
-			wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+    // Sticky param for panel
+    panel.isSticky = false;
+    
+    // Helper function to make panel sticky
+    sitecues.toggleStickyPanel = function () {
+      if (panel.isSticky===false) {
+        return panel.isSticky = true;
+      } else {
+        return panel.isSticky = false;
+      }
+    };
 
-			// create slider
-			slider = $('<input>').addClass('slider').attr({
-				type: 		'range',
-				min: 		'1',
-				max: 		'5',
-				step: 		'0.1',
-				ariaLabel: 	'See it better'
-			}).appendTo( wrap );
+    // PANEL OBJECT'S METHODS
 
-			$('<img>').addClass('ramp').attr({
-				src:	sitecues.resolveSitecuesUrl('../images/panel/slider_ramp.png')
-			}).appendTo(wrap);
+    // Create panel element.
+    panel.create = function() {
+
+      // private variables
+      var frame, wrap, slider, ttsButton;
+
+      // create element and add element id for proper styling
+      frame = $('<div>', {
+        'id': 'sitecues-panel',
+        css:{
+          'display':'none'
+        }
+      });
+    
+      // Create a Slider Instance for the Panel
+      this.slider = {};
+      this.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+      this.slider.widget = SliderClass.build({
+        width: 340,
+        height:80,
+        container: this.slider.wrap,
+        color: {
+          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
+          letterSml         : { normal: "#000000", hover: "#000000"},
+          track             : { normal: "#000000", hover: "#000000"},
+          thumb             : { normal: "#3265c1", hover: "#3265c1"},
+          letterBig         : { normal: "#000000", hover: "#000000"},
+        }
+      });
+
+      // Body Width Calc Guide
+      $('<div>', {
+        id: 'sitecues-BWCG',
+        css:{
+          position:'absolute',
+          width:'100%',
+          height:'1px',
+          'pointerEvents':'none',
+          top:'0px',
+          left:'0px',
+          display:'hidden'
+        },
+      }).appendTo('html');
+    
+     // create TTS button and set it up
+      ttsButton = $('<div>').addClass('tts').appendTo(frame);
+      if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
+        ttsButton.data( 'tts-enable', 'enabled' );
+      } else {
+        ttsButton.addClass( "tts-disabled" );
+        ttsButton.data( 'tts-enable', 'disabled' );
+      }
+      ttsButton.click(function() {
+        sitecues.emit('panel/interaction');
+        panel.ttsToggle();
+      });
+
+      if (panel.parent) {
+        panel.parent.click(function(e) {
+          e.preventDefault();
+          return false;
+        })
+        // panel.element.css("top",'50');
+        frame.css({"left": '', "right": ''});
+        var scroll = positioning.getScrollPosition();
+        //We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
+        // positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
+        var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
+        if(panelTop < 0) {
+          panelTop = 0;
+        }
+        frame.style("top", panelTop, 'important');
+
+        var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
+        if(panelLeft < 0) {
+          panelLeft = 0;
+        }
+        frame.style("left", panelLeft, 'important');
+      }
+
+      frame.appendTo('html');
+
+      // Set panel to 'created'
+      this.created = true;
+
+      this.element = frame;
+      
+      // return panel
+      return frame;
+    };
 
 
-			// create big A label
-			$('<div>').addClass('big').text('A').appendTo(frame);
+    // Show panel.
+    panel.show = function(){
+      // Clear timer if present
+      timer && clearTimeout(timer);
 
-			// create TTS button and set it up
-			ttsButton = $('<div>').addClass('tts').appendTo(frame);
-			if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
-				ttsButton.data( 'tts-enable', 'enabled' );
-			} else {
-				ttsButton.addClass( "tts-disabled" );
-				ttsButton.data( 'tts-enable', 'disabled' );
-			}
-			ttsButton.click( function() {
-				panel.ttsToggle();
-			});
+      // Animate instead of fade.
+      panel.element.hide();
+      panel.element.animate({
+          // right: '+=0',
+          width: 'toggle',
+          height: 'toggle',
+          opacity: 1.0
+        },
+        750,
+        function() {
+          sitecues.emit('panel/show', panel.element);
+          
+          // Set/recheck the dimensions of the slider
+          var sliderWidget = panel.slider.widget;
+          sliderWidget.setdimensions(sliderWidget);
+          sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+          sliderWidget.translateThumbSVG.call(sliderWidget);
+      });
 
-			// handle slider value change
-			slider.change( function() {
-				conf.set( 'zoom', this.value );
-			});
+      // Set/recheck the dimensions of the slider
+      var sliderWidget = panel.slider.widget;
+      sliderWidget.setdimensions(sliderWidget);
+      sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+      sliderWidget.translateThumbSVG.call(sliderWidget);
 
-			// handle zoom change and update slider
-			conf.get( 'zoom', function( value ) {
-				slider.val( value );
-			});
 
-			if (panel.parent) {
-				panel.parent.click(function(e) {
-					e.preventDefault();
-					return false;
-				})
-				// panel.element.css("top",'50');
-				frame.css({"left": '', "right": ''});
-				var scroll = positioning.getScrollPosition();
-				//We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
-				// positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
-				var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
-				if(panelTop < 0) {
-					panelTop = 0;
-				}
-				frame.style("top", panelTop, 'important');
+      panel.element.hover(function() {
+        // Hover in.
+        panel.element.data('hover','true');
+      }, function() {
+        // Hover out.
+        panel.element.data('hover','false');
+      });
+    }
 
-				var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
-				if(panelLeft < 0) {
-					panelLeft = 0;
-				}
-				frame.style("left", panelLeft, 'important');
-			}
+    // Hide panel.
+    panel.hide = function(){
+      if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
+        // We're hovering over the element, delay hiding it.
+        setTimeout(panel.hide, panel.hideDelay);
+        return;
+      }
+      if (panel.isSticky===false) {
+        // Hide panel.
+        panel.element.fadeOut('fast', function(){
+          // Notify about panel hiding.
+          sitecues.emit('panel/hide', panel.element);
+        });
+      }
+    };
 
-			frame.appendTo('html')
+    // Function that will toggle tts on or off.
+    panel.ttsToggle = function() {
+      var ttsButton = $('#sitecues-panel .tts');
+      if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
+        // It's disabled, so enable it
+        sitecues.emit('speech/enable');
+        showTTSbuttonEnabled(ttsButton);
+      } else {
+        // It's enabled (or unknown), so disable it
+        sitecues.emit('speech/disable');
+        showTTSbuttonDisabled(ttsButton);
+      }
+    };
 
-			// return panel
-			return frame;
-		}
+    // Show TTS is enabled.
+    function showTTSbuttonEnabled(ttsButton) {
+        var ttsButton = ttsButton || $('#sitecues-panel .tts');
+        ttsButton.data('tts-enable','enabled');
+        ttsButton.removeClass("tts-disabled");
+    }
 
-		// show panel
-		panel.show = function(){
-			// clear timer if present
-			timer && clearTimeout(timer);
+    // Show TTS is disabled.
+    function showTTSbuttonDisabled(ttsButton) {
+        var ttsButton = ttsButton || $('#sitecues-panel .tts');
+        ttsButton.data('tts-enable','disabled');
+        ttsButton.addClass("tts-disabled");
+    }
 
-			// already shown
-			if (panel.element) return;
+    // EVENT HANLERS
 
-			// Create new panel if one does not already exist
-			if (panel.created===false){
-				panel.element = panel.create();
-			}
+    // Setup trigger to show panel.
+    sitecues.on('badge/hover', function() {
+      panel.show();
+      panel.element.data('badge-hover','true');
+    });
 
-			// Animate instead of fade
-			panel.element.hide();
-			panel.element.animate({
-					// right: '+=0',
-					width: 'toggle',
-					height: 'toggle',
-					opacity: 1.0
-				},
-				750,
-				function() {
-					sitecues.emit('panel/show', panel.element);
-			});
+    // Setup trigger to show panel.
+    sitecues.on('badge/leave', function() {
+      panel.element.data('badge-hover','false');
+      setTimeout(panel.hide, panel.hideDelay);
+    });
 
-			panel.element.hover(function() {
-				//Hover in
-				panel.element.data('hover','true');
-			}, function() {
-				//Hover out
-				panel.element.data('hover','false');
-			});
-		}
+    sitecues.on('speech/enabled',  showTTSbuttonEnabled);
+    sitecues.on('speech/disabled', showTTSbuttonDisabled)
 
-		// hide panel
-		panel.hide = function(){
-			// nothing to hide
-			if (!panel.element) return;
 
-			if(panel.element.data('hover') === 'true' || panel.element.data('badge-hover') === 'true') {
-				// We're hovering over the element, delay hiding it
-				setTimeout(panel.hide, panel.hideDelay);
-				return;
-			}
-			// hide panel
-			panel.element.fadeOut('fast', function(){
+    panel.create();
 
-				// notify about panel hiding
-				sitecues.emit('panel/hide', panel.element);
 
-				// delete panel element
-				panel.element = undefined;
-			});
-		}
 
-		// Function that will toggle tts on or off
-		panel.ttsToggle = function() {
-			var ttsButton = $('#sitecues-panel .tts');
-			if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
-				// It's disabled, so enable it
-				sitecues.emit('speech/enable');
-				ttsButton.data('tts-enable','enabled');
-				ttsButton.removeClass("tts-disabled");
-			} else {
-				// It's enabled (or unknown), so disable it
-				sitecues.emit('speech/disable');
-				ttsButton.data('tts-enable','disabled')
-				ttsButton.addClass("tts-disabled");
-			}
-		}
+    // Adjust the position of the toolbar items when the document vertical scrollbar appears
+    sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
 
-		// setup trigger to show panel
-		sitecues.on('badge/hover', function() {
-			panel.show();
-			panel.element.data('badge-hover','true');
-		});
+      // Get the right position of the panel
+      var   panelRight = $('#sitecues-panel').css('right')
 
-		// setup trigger to show panel
-		sitecues.on('badge/leave', function() {
-			panel.element.data('badge-hover','false');
-			setTimeout(panel.hide, panel.hideDelay);
-		});
+      // Calculate the updated position
+      , newRightValPanel    = (parseFloat(panelRight) - scrollbarWidth) +'px'
+      ;
 
-		// panel is ready
-		callback();
 
-	});
+      // Set the updated CSS position
+      $('#sitecues-panel').css({right: newRightValPanel});
+
+    });
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar disappears
+    sitecues.on('zoom/documentScrollbarHide', function(scrollbarWidth){
+   
+      // Get the right position of the panel
+      var   panelRight = $('#sitecues-panel').css('right')
+
+      // Calculate the updated position
+      , newRightValPanel    = (parseFloat(panelRight) + scrollbarWidth) +'px'
+      ;
+
+      // Set the updated CSS position
+      $('#sitecues-panel').css({right: newRightValPanel});
+    
+    });
+
+
+
+    // panel is ready
+    callback();
+  });
 
 });

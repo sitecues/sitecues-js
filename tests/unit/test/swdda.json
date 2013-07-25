@@ -29,19 +29,20 @@
   },
 
   "providers": {
-    "TestingBot": {
-      "module": "../../../swdda/testingbot.js",
+    "SauceLabs": {
+      "module": "../../../swdda/saucelabs.js",
 
       "maxConcurrent": 4,
 
       "server": {
         "host": "localhost",
-        "port":	4445
+        "port": 4445,
+        "username": "6hMinutes",
+        "accessKey": "38dafeb5-00ab-4320-80f3-7fb2be18a024"
+
       },
 
       "browserCommon": {
-        "api_key"                           : "b62a13f4d5cdb0f6c8b9e790ebd1aa8e",
-        "api_secret"                        : "5fcb13beac07d9d8eff12944dadb5f86",
         "javascriptEnabled"			            : true,
         "locationContextEnabled"            : true,
         "nativeEvents"						          : true,
@@ -56,13 +57,15 @@
       "browsers": [
         {
           "label"       : "WIN7/Chrome",
-          "platform"    : "WINDOWS",
-          "browserName" : "googlechrome"
+          "browserName" : "chrome",
+          "platform"    : "Windows 8",
+          "version"     : ""
         },
         {
           "label"       : "WIN8/Chrome",
-          "platform"    : "WIN8",
-          "browserName" : "googlechrome"
+          "browserName" : "chrome",
+          "platform"    : "Windows 7",
+          "version"     : ""
         }
       ]
     }

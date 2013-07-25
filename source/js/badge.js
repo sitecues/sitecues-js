@@ -1,7 +1,7 @@
 sitecues.def('badge', function (badge, callback, log) {
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'ui', function ($, conf, panel) {
+  sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'zoom', function ($, conf, panel, ui, common) {
 
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
     badge.altBadges = $(conf.get('panelDisplaySelector'));
@@ -24,18 +24,31 @@ sitecues.def('badge', function (badge, callback, log) {
       // We have no alternate or pre-existing badges defined, so create a new one.
       badge.panel = $('<div>');
 
-      $(badge.panel).attr('id', badge.badgeId) // set element id for proper styling
-                    .addClass('sitecues-badge')
-                    .hide()
-                    .appendTo('html');
+      badge.panel.attr('id', badge.badgeId) // set element id for proper styling
+                 .addClass('sitecues-badge')
+                 .hide()
+                 // .prependTo('html');
+                  .appendTo('html');
+
+      // Determine the badge visible width
+      var badgeVisibleWidth = badge.panel.outerWidth();
+
+      // Right align the badge, but do this is a way in which the (dis)appearance of the
+      // body vertical scrollbar will not affect placement.
+      common.addRightAlignIgnoreScrollbar({
+        obj: badge,
+        getWidth: function() { return badgeVisibleWidth;},
+        getRightOffset: function() { return 5; },
+        setCss: function(jCssObj) { badge.panel.css(jCssObj); }
+      });
 
       // create badge image inside of panel
       badge.element = $('<img>');
 
-      $(badge.element).attr('id', 'sitecues-badge-image')
-                      .addClass('sitecues-badge-image')
-                      .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
-                      .appendTo(badge.panel);
+      badge.element.attr('id', 'sitecues-badge-image')
+       .addClass('sitecues-badge-image')
+       .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
+       .appendTo(badge.panel);
     }
 
     $(badge.panel).hover(function () {
@@ -95,7 +108,7 @@ sitecues.def('badge', function (badge, callback, log) {
     };
 
     /**
-     * Closes the badge and sets the preference so it stays closed.
+     * Opens the badge and sets the preference so it stays opened.
      *
      * @param success Function executed if successful.
      * @return void
@@ -109,6 +122,10 @@ sitecues.def('badge', function (badge, callback, log) {
       	success();
       }
     };
+
+      sitecues.on("badge/enable", function() {
+          badge.enable(true);
+      });
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

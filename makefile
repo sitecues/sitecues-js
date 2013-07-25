@@ -41,24 +41,28 @@ files=\
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
+	source/js/jquery/resize.js \
+	source/js/util/close-button.js \
 	source/js/ui.js  \
 	source/js/style.js \
 	source/js/util/positioning.js \
 	source/js/util/common.js \
 	source/js/badge.js \
-	source/js/panel.js \
 	source/js/zoom.js \
+	source/js/slider.js \
+	source/js/panel.js \
 	source/js/keys.js \
 	source/js/focus.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
-    source/js/hlb/designer.js \
+	source/js/hlb/designer.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
-	source/js/speech.js \
+	source/js/iframe-modal.js \
+    source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
@@ -68,13 +72,11 @@ files=\
 	source/js/cursor/element.js \
 	source/js/cursor/images.js \
 	source/js/util/template.js \
-	source/js/util/hammer.js \
+	source/js/toolbar.js \
 	source/js/toolbar/bootstrap-dropdown.js \
 	source/js/toolbar/dropdown.js \
-	source/js/toolbar/slider.js \
 	source/js/toolbar/messenger.js \
 	source/js/toolbar/resizer.js \
-	source/js/toolbar.js \
 	source/js/ui-manager.js \
 
 https=off
@@ -87,9 +89,13 @@ uglifyjs-args=
 testingbot-api-key:=b62a13f4d5cdb0f6c8b9e790ebd1aa8e
 testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 
+saucelabs-username:=6hMinutes
+saucelabs-access-key:=38dafeb5-00ab-4320-80f3-7fb2be18a024
+
 testsite-timeout:=30000
 phantomjs-timeout:=30000
 testingbot-tunnel-timeout:=240000
+saucelabs-connect-timeout:=240000
 
 default-test-run-id:=$(username)-$(shell ./binary/uuid)
 test-run-id=$(default-test-run-id)
@@ -216,10 +222,6 @@ stop-testsite:
 
 # TARGET: test-all
 # Run all tests.
-test-all: test-smoke
-
-# TARGET: test-all
-# Run all tests.
 test-all: test-smoke test-unit
 
 # TARGET: test-smoke
@@ -233,7 +235,7 @@ test-smoke:
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
-	@(make --no-print-directory start-testingbot-tunnel)
+	@(make --no-print-directory start-saucelabs-connect)
 	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: start-phantomjs
@@ -256,6 +258,16 @@ start-testingbot-tunnel:
 stop-testingbot-tunnel:
 	@node_modules/.bin/_testingbot-tunnel stop
 
+# TARGET: start-saucelabs-connect
+# Start the SauceLabs Connect service.
+start-saucelabs-connect:
+	@binary/_saucelabs-connect start --timeout $(saucelabs-connect-timeout) --root . -- $(saucelabs-username) $(saucelabs-access-key)
+
+# TARGET: stop-saucelabs-connect
+# Stop the SauceLabs Connect service.
+stop-saucelabs-connect:
+	@binary/_saucelabs-connect stop
+
 # TARGET: stop-all-services
 # Stop all known services.
-stop-all-services: stop-testsite stop-phantomjs stop-testingbot-tunnel
+stop-all-services: stop-testsite stop-phantomjs stop-testingbot-tunnel stop-saucelabs-connect

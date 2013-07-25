@@ -1,5 +1,6 @@
 sitecues.def('invert', function (invert, callback, log) {
-  sitecues.use('conf', 'highlight-box', 'jquery', function (conf, highlight_box, $) {
+
+  sitecues.use('conf', 'highlight-box', 'util/common', 'jquery', function (conf, highlight_box, common, $) {
 
     invert.states = {
         invert  : 0
@@ -37,12 +38,50 @@ sitecues.def('invert', function (invert, callback, log) {
     var pageState = conf.get('invert.page.state') || "normal";
     setState("page", pageState);
 
+
+    invert.disable = function() {
+        setState("highlight_box", "normal");
+        setState("page", "normal");
+        
+        setStyle('highlight_box', 'none');
+        setStyle('page', 'none');
+    }
+
+    function setState(elem, state){
+      elem_invert_state[ elem ] = states[state];
+      var elemS = elem.replace("_",'-'); // Not happy this line is nessecary. A product of the module system. -al
+      conf.set("invert."+elemS+".state", state);
+      sitecues.emit("invert/"+elemS+"/"+state);
+    };
+
+    var staticBorderColor;
+
+    function setStyle(elem, invert) {
+      var $hlb = $(dom_elem[ elem ]);
+      // Maintain HLB outline color during reverse contrast.
+      if (invert) {
+          staticBorderColor = staticBorderColor? staticBorderColor :  $hlb.css('borderColor');
+          var newBorderColor;
+          switch (invert) {
+              // Revert original color before it is reverted again by invert feature. => double inverts give the original color.
+              case 'full':
+                  newBorderColor = common.getRevertColor(staticBorderColor);
+                  break;
+              // Neutralize [possible] impact of invert color(case 'full'): set the original color.
+              case 'none':
+                  newBorderColor = staticBorderColor;
+                  break;
+          }
+          $hlb.css('borderColor', newBorderColor);
+      }
+      $hlb.css(cssInvert[ invert ]);
+    };
+
     sitecues.on('hlb/deflating', function () {
       if (elem_invert_state.highlight_box === elem_invert_state.page) {
         setState("highlight_box", "match");
       }
     });
-
 
     sitecues.on('hlb/ready', function (data) {
       dom_elem.highlight_box = $(data);
@@ -184,16 +223,9 @@ sitecues.def('invert', function (invert, callback, log) {
       }
     });
 
-    function setState(elem, state){
-      elem_invert_state[ elem ] = states[state];
-      var elemS = elem.replace("_",'-'); // Not happy this line is nessecary. A product of the module system. -al
-      conf.set("invert."+elemS+".state", state);
-      sitecues.emit("invert/"+elemS+"/"+state);
-    };
-
-    function setStyle(elem, invert){
-      $(dom_elem[ elem ]).css(cssInvert[ invert ]);
-    };
+    sitecues.on('inverse/disable', function() {
+        invert.disable();
+    })
 
     callback();
 

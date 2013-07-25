@@ -5,7 +5,8 @@
   top:0;
   left:0;
   width:100%;
-  display:none;
+  /*display:none;*/
+  display:block!important;
   z-index: 2147483645;
   box-shadow:0px 2px 4px rgba(0,0,0,.25);
 }
@@ -20,14 +21,14 @@
   width:63%;
   margin:0 15%;
   cursor:pointer;
-  }
+}
 
   
 .sitecues-slider-thumb {
   position:relative;
   background-color: none;
   border: 0px;
-  height:40%;
+  height:50%;
   width:10%;
   /*border-radius: 4px;*/
   border: none;
@@ -37,28 +38,27 @@
   cursor: pointer;
 }
 
-.sitecues-toolbar .slider-wrap {
-  background-image: url('../images/toolbar/toolbar-slider.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center 0%;
-  position: absolute;
-  right: 150px;
-  display: inline;
-  width: 160px;
-  height:92%;
-  top:9%;
+
+
+.sitecues-toolbar .slider-wrap *{
+  cursor:pointer!important;
+  -webkit-user-select : none!important;
+  -moz-user-select    : none!important;
+  -ms-user-select     : none!important;
 }
 
-.sitecues-toolbar .ramp {
+.sitecues-toolbar .slider-wrap {
+  cursor:pointer!important;
+  -webkit-user-select : none!important;
+  -moz-user-select    : none!important;
+  -ms-user-select     : none!important;
   position: absolute;
-  left: 0px;
-  top: -13px;
-  min-width: 105px;
-  max-width: 105px;
-  opacity: 50;
-  z-index: -1;
+  right: 95px;
+  width: 160px;
+  height: 38px;
+  top:4%;
 }
+
 
 .sitecues-toolbar .small {
   position: absolute;
@@ -81,8 +81,8 @@
 .sitecues-toolbar .tts {
   position: absolute;
   top: 1px;
-  right: 0;
-  width: 139px;
+  right: 15px;
+  width: 70px;
   height: 95%;
   background-image: url('../images/toolbar/toolbar-speech.png');
   background-size: contain;
@@ -160,6 +160,11 @@
 
 .sitecues-toolbar.hori .dropdown-menu {
   margin:10px;
+  font-size: 20px;
+}
+
+.sitecues-toolbar.hori .dropdown-menu li {
+  padding: 2px;
 }
 
 .sitecues-toolbar.hori .dropdown-toggle {
