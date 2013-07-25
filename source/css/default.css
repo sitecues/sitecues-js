@@ -1,8 +1,4 @@
 /* Badge */
-.sitecues-badge #sitecues-badge-image {
-    height: 23px;
-}
-
 .sitecues-badge {
     z-index: 2147483645;
     margin: 0px;
@@ -13,6 +9,18 @@
     color: rgba(0, 0, 0, 0.6);
     cursor: default;
     -webkit-transition: color 1s;
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box;    /* Firefox, other Gecko */
+    box-sizing: content-box;         /* Opera/IE 8+ */
+}
+.sitecues-badge #sitecues-badge-image {
+    height: 23px;
+}
+
+#sitecues-badge, #sitecues-badge-image {
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box;    /* Firefox, other Gecko */
+    box-sizing: content-box;         /* Opera/IE 8+ */
 }
 
 .sitecues-badge:hover {
