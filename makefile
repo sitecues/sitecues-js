@@ -89,9 +89,13 @@ uglifyjs-args=
 testingbot-api-key:=b62a13f4d5cdb0f6c8b9e790ebd1aa8e
 testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 
+saucelabs-username:=6hMinutes
+saucelabs-access-key:=38dafeb5-00ab-4320-80f3-7fb2be18a024
+
 testsite-timeout:=30000
 phantomjs-timeout:=30000
 testingbot-tunnel-timeout:=240000
+saucelabs-connect-timeout:=240000
 
 default-test-run-id:=$(username)-$(shell ./binary/uuid)
 test-run-id=$(default-test-run-id)
@@ -231,7 +235,7 @@ test-smoke:
 # Run the unit tests.
 test-unit:
 	@(make --no-print-directory start-testsite prod=on)
-	@(make --no-print-directory start-testingbot-tunnel)
+	@(make --no-print-directory start-saucelabs-connect)
 	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: start-phantomjs
@@ -254,6 +258,16 @@ start-testingbot-tunnel:
 stop-testingbot-tunnel:
 	@node_modules/.bin/_testingbot-tunnel stop
 
+# TARGET: start-saucelabs-connect
+# Start the SauceLabs Connect service.
+start-saucelabs-connect:
+	@binary/_saucelabs-connect start --timeout $(saucelabs-connect-timeout) --root . -- $(saucelabs-username) $(saucelabs-access-key)
+
+# TARGET: stop-saucelabs-connect
+# Stop the SauceLabs Connect service.
+stop-saucelabs-connect:
+	@binary/_saucelabs-connect stop
+
 # TARGET: stop-all-services
 # Stop all known services.
-stop-all-services: stop-testsite stop-phantomjs stop-testingbot-tunnel
+stop-all-services: stop-testsite stop-phantomjs stop-testingbot-tunnel stop-saucelabs-connect
