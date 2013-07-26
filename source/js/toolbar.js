@@ -235,13 +235,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.wireEvents = function () {
       log.trace('toolbar.wireEvents()');
 
-      console.log("WIRING!");
-
       toolbar.instance.find('[rel="' + kTtsButtonRel + '"]').each(function() {
         $(this).on('click', function() {
           var event = $(this).data(kTtsButtonRel);
-
-          console.log("CLICK AFTER WIRE");
 
           if (event) {
             sitecues.emit(event);
