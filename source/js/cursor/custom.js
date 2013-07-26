@@ -23,7 +23,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
     cursor.zoomLevel = 1;
     cursor.type = defaultType;
     cursor.prevTarget = {};
-    cursor.prevType = defaultType;
+
     // Default data url string
     cursor.url = cursor.kDefaultCursorImage;
     cursor.offset = ''; // top left corner
@@ -68,7 +68,6 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         cursor.show = function() {
             addStyleRules();
             $(window).on('mousemove click', mouseMoveHandler);
-            $(window).on('mouseenter', mouseEnterHandler);
             sitecues.emit('cursor/show');
         };
 
@@ -89,9 +88,8 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         cursor.hide = function() {
             // Reset the CSS cursor style.
             removeStyleRules();
-            $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
+            $(cursor.prevTarget).style('cursor', '', 'important');
             $(window).off('mousemove click', mouseMoveHandler);
-            $(window).off('mouseenter', mouseEnterHandler);
             sitecues.emit('cursor/hide');
         };
 
@@ -161,12 +159,11 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             if (cursor.isEnabled && !$(target).is(cursor.prevTarget)) {
                 $('#' + cursor.kCursorStyleRuleId).remove();
                 // First, revert last target's cursor property to saved style.
-                $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
+                $(cursor.prevTarget).style('cursor', '', 'important');
                 var newCursorType = style.detectCursorType(target) || defaultType;
 
                 // Save the new target and its original cursor style to be able to revert to it.
                 cursor.prevTarget = target;
-                cursor.prevType = newCursorType;
                 cursor.type = newCursorType;
                 cursor.url = view.getImage(cursor.type, conf.get('zoom')) || cursor.kDefaultCursorImage; // (newCursorType)
                 cursor.offset = getCursorHotspotOffset();
@@ -184,17 +181,12 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             $('#' + cursor.kCursorStyleRuleId).remove();
 
             if (cursor.isEnabled) {
-                $(target).style('cursor', cursor.prevType, 'important');
+                $(target).style('cursor', '', 'important');
             }
         }
 
         function mouseMoveHandler(e) {
             changeCursorDisplay($(e.target));
-        }
-
-        function mouseEnterHandler() {
-          removeStyleRules();
-          addStyleRules();
         }
 
         // Handle zoom event.
