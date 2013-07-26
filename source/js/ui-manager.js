@@ -183,6 +183,10 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
           toggle();
         }
       });
+
+      sitecues.on('toolbar/hide', function() {
+        currentState = STATES.BADGE;
+      });
     }
 
     callback();

@@ -91,6 +91,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
     
      // create TTS button and set it up
       ttsButton = $('<div>').addClass('tts').appendTo(frame);
+      
       if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
         ttsButton.data( 'tts-enable', 'enabled' );
       } else {
