@@ -49,7 +49,7 @@ sitecues.def('keys', function (keys, callback, log) {
   var origMap = keys.map = {
     'minus':  { preventDefault: true, event: 'zoom/decrease' },
     'plus':   { preventDefault: true, event: 'zoom/increase' },
-    'r':    { preventDefault: true, event: 'inverse/toggle'},
+    'r':      { preventDefault: true, event: 'inverse/toggle'},
     'f8':     { event: 'ui/toggle' },
     'space':  {
       event: 'highlight/animate',
