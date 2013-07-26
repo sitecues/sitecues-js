@@ -68,6 +68,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
         cursor.show = function() {
             addStyleRules();
             $(window).on('mousemove click', mouseMoveHandler);
+            $(window).on('mouseenter', mouseEnterHandler);
             sitecues.emit('cursor/show');
         };
 
@@ -90,6 +91,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
             removeStyleRules();
             $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
             $(window).off('mousemove click', mouseMoveHandler);
+            $(window).off('mouseenter', mouseEnterHandler);
             sitecues.emit('cursor/hide');
         };
 
@@ -155,10 +157,9 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          * @param target
          */
         function changeCursorDisplay(target) {
-            $('#' + cursor.kCursorStyleRuleId).remove();
-
             // If target is changed then update CSS cursor property for it.
             if (cursor.isEnabled && !$(target).is(cursor.prevTarget)) {
+                $('#' + cursor.kCursorStyleRuleId).remove();
                 // First, revert last target's cursor property to saved style.
                 $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
                 var newCursorType = style.detectCursorType(target) || defaultType;
@@ -189,6 +190,11 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
         function mouseMoveHandler(e) {
             changeCursorDisplay($(e.target));
+        }
+
+        function mouseEnterHandler() {
+          removeStyleRules();
+          addStyleRules();
         }
 
         // Handle zoom event.
