@@ -259,6 +259,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
+      sitecues.emit('toolbar/hide');
 
       toolbar.slideIn(success);
     };

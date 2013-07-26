@@ -179,10 +179,13 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
 
       // If the user interacts with the panel, transfer to the toolbar on panel close.
       sitecues.on('panel/hide', function() {
-
         if (panelInteractionDetected) {
           toggle();
         }
+      });
+
+      sitecues.on('toolbar/hide', function() {
+        currentState = STATES.BADGE;
       });
     }
 
