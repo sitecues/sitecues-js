@@ -66,10 +66,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          *  Show custom cursor in the viewport.
          */
         cursor.show = function() {
-            // Add rules for default cursor values.
-            cursor.styleRuleParent
-                .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type +' !important}')
-                .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*:disabled { cursor: url("' + view.getImage(cursor.type, conf.get('zoom')) + '") ' + cursor.offset + ', default !important}');
+            addStyleRules();
             $(window).on('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/show');
         };
@@ -79,10 +76,9 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          */
         cursor.update = function() {
             // Target is not changed, so update the same element's cursor style.
-            $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ',' + cursor.type, 'important');
-            // Update cursor image for disabled elements.
-            $('#' + cursor.kCursorStyleDisabledRuleId).remove();
-            cursor.styleRuleParent.append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*: disabled { cursor: url("' +  view.getImage(cursor.type, conf.get('zoom')) + '") ' + cursor.offset + ', !important}');
+            $(cursor.prevTarget).style('cursor', 'url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type, 'important');
+            removeStyleRules();
+            addStyleRules();
             sitecues.emit('cursor/update');
         };
 
@@ -91,13 +87,31 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
          */
         cursor.hide = function() {
             // Reset the CSS cursor style.
-            $('#' + cursor.kCursorStyleDisabledRuleId).remove();
+            removeStyleRules();
             $(cursor.prevTarget).style('cursor', cursor.prevType, 'important');
             $(window).off('mousemove click', mouseMoveHandler);
             sitecues.emit('cursor/hide');
         };
 
+
         /* Auxiliary functions */
+
+        /**
+         * Remove rules for default cursor values.
+         */
+        function removeStyleRules() {
+          $('#' + cursor.kCursorStyleRuleId).remove();
+          $('#' + cursor.kCursorStyleDisabledRuleId).remove();
+        }
+
+        /**
+         * Add rules for default cursor values.
+         */
+        function addStyleRules() {
+          cursor.styleRuleParent
+            .append('<style id="' + cursor.kCursorStyleRuleId + '">* { cursor: url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type +' !important}')
+            .append('<style id="' + cursor.kCursorStyleDisabledRuleId + '">*: disabled { cursor: url("' + cursor.url + '") ' + cursor.offset + ', ' + cursor.type +' !important}');
+        }
 
         // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
         // The maths below based on experience and doesn't use any kind of specific logic.
