@@ -50,6 +50,9 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
 
 		conf.set('mouseHighlightMinZoom', mh.minZoom);
+    // EQ-734: temporarily fix for MH since toolbar is now stored in user pref and thus has incorrect initial state.
+    // TODO: remove when 'toolBarVisible' is no longer overriden, as disacussed in comment to EQ-734.
+    conf.set('toolBarVisible', false);
 
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
