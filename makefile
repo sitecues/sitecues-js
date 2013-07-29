@@ -62,7 +62,7 @@ files=\
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
-    source/js/speech.js \
+  source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
