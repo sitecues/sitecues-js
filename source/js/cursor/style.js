@@ -4,40 +4,44 @@ sitecues.def('cursor/style', function (module, callback, log){
 	// dependencies
 	sitecues.use('jquery', function($){
 
+    var neutralCursorTypes = ['', 'auto', 'default', 'none'];
+
 		module.detectCursorType = function(element, options) {
-			element = $(element);
+			var $element = $(element);
 			var defaultCursorType = 'default';
 
 			options = $.extend({
 				cursorElements: null
 			}, options);
 
-			var cssCursorValue = element.css('cursor');
+			var cssCursorValue = $element.css('cursor');
 
-			// If the value is good for us, return it.
-			if (cssCursorValue && cssCursorValue !== 'auto' && cssCursorValue !== 'default' && cssCursorValue !== 'none') {
+			// If the value is good for us(not found in array), return it.
+			if ($.inArray(cssCursorValue, neutralCursorTypes) < 0) {
 				return cssCursorValue;
 			}
+
 			// Otherwise, try to detect a new one.
 			var cursorElements  = (options.cursorElements !== null) ? options.cursorElements : getCursorElements();
-			var elementTagName  = element.prop('tagName').toLowerCase();
+			var elementTagName  = $element.prop('tagName').toLowerCase();
 
-			if (cursorElements.hasOwnProperty(elementTagName)) {
-				var elementTag  = cursorElements[elementTagName];
-				var selectors   = elementTag.selectors;
+      // We didn't prepare value for this element.
+			if (!cursorElements.hasOwnProperty(elementTagName)) {
+        return cssCursorValue || defaultCursorType;
+      }
 
-				if (typeof selectors !== 'undefined') {
-					for (var key in selectors) {
-						if (element.is(key)) {
-							return selectors[key];
-						}
-					}
-				} else {
-					return elementTag.cursor || defaultCursorType;
-				}
-			} else {
-				return cssCursorValue || defaultCursorType;
-			}
+      var elementTag  = cursorElements[elementTagName];
+      var selectors   = elementTag.selectors;
+
+      if (typeof selectors !== 'undefined') {
+        for (var key in selectors) {
+          if ($element.is(key)) {
+            return selectors[key];
+          }
+        }
+      } else {
+        return elementTag.cursor || defaultCursorType;
+      }
 			
 		}
 
