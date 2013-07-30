@@ -13,8 +13,6 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       , kDimmingSpeed   : 150
     });
 
-    var defaultToolbarHeight = 40;
-
     var wrapper;
     // Dims stuff. Word. ///////////////////////////////////////////////////////
     backgroundDimmer.dimBackgroundContent = function (hlbNode, zoom) {
@@ -23,13 +21,6 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
         // Define the coordinates of the whole document to be dimmed out
         var viewport = positioning.getViewportDimensions(0, zoom);
-
-        // Take into calculations toolbar's height as it shifts elements position.
-        // TODO: once toolbar is completed, remove this
-        // repeated code(line below is used accross the files) to a correspondent util module.
-        var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled') && conf.get('toolBarVisible')
-            ? conf.get('toolbarHeight') || defaultToolbarHeight / (conf.get('zoom') || 1)
-            : 0;
 
         var svgPath = getSVGPath(viewport, hlbNode);
         var inner   = svgPath.inner;
@@ -64,12 +55,12 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
         // Set the CSS for the dimemrContainer
         .style({
-          'position'      : 'absolute',
+          'position'      : 'fixed',
           'display'       : 'block',
           'z-index'       : 2147483646,
           'opacity'       : 0,
-          'left'          : viewport.left +'px',
-          'top'           : viewport.top - toolBarHeight +'px',
+          'left'          : '0px',
+          'top'           : '0px',
           'width'         : viewport.width +'px',
           'height'        : viewport.height +'px',
           'overflow'      : 'visible',

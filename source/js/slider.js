@@ -406,11 +406,12 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     },
 
 
-
+    // Calculate the sitecues-zoom-level-value, from the current position of the Slider's Thumb
     calcZoomLevel: function (thumbX) {
       return (zoom.range / this.trackBounds.width * thumbX) + zoom.min;
     },
 
+    // Calculate Thumb Position for the Thumb SVG element, from the rge sitecues-zoom-level-value
     calcThumbPos: function (zoomLevel) {
       return this.trackOffsetLeft*slider.aspect  +  this.trackClientWidth*this.aspect/zoom.range  *  (zoomLevel-zoom.min);
     },
@@ -429,19 +430,29 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         slider = this;
       };
 
-      // Reset element boundingds incase dom sizes change
+      // Reset element bounding box, incase the dom size changes
       slider.setcontainerbounds.call(slider);
       slider.setsvgbounds.call(slider);
 
       // Get the aspect horizontal aspect ratio of the Slider
       slider.aspect = slider.originalWidth/slider.width;
 
+      // Get the bounding box of the Slider-Track
       slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect();
+      
+      // Get the pixel-width of the Slider-Track
       slider.trackClientWidth = slider.trackBounds.width;
+      
+      // Get the left-offset of the Slider's container, relative to the document
       slider.containerLeft = slider.svg.viewBox.get(0).getBoundingClientRect().left;
+      
+      // Get the horizontal distance between the left position of the Slider Container and the Track
       slider.trackOffsetLeft = slider.trackBounds.left - slider.containerLeft;
 
+      // Set the internal Thumb Position incase the dimensions changed
       slider.setThumbPositionFromZoomLevel.call(slider, slider.zoomLevel);
+      
+      // Translate the SVG Thumb element based on the new internal Thumb Position
       slider.translateThumbSVG.call(slider);
 
     },

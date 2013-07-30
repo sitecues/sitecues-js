@@ -141,7 +141,6 @@ sitecues.def('invert', function (invert, callback, log) {
 
       //TODO We should probably clean up what's below here, or put it on
       //the menu in the North End.
-      if (! (event.altKey || event.ctrlKey || event.metaKey)) {
 
         var highlight_box_state  = highlight_box.getState();
         var highlight_box_states = highlight_box.STATES;
@@ -220,7 +219,6 @@ sitecues.def('invert', function (invert, callback, log) {
           }
 
         }
-      }
     });
 
     sitecues.on('inverse/disable', function() {

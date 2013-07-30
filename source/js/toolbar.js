@@ -22,6 +22,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'zoom',
     function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom) {
     log.trace('toolbar.use()');
+    
 
     // FIXME: Remove me! For testing purposes only. - Eric
     // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
@@ -42,8 +43,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     toolbar.render = function (callback) {
       log.trace('toolbar.render()');
-
-      //console.log('rendering toolbar');
 
       var $html = $('html');
       if (! toolbar.instance) {
@@ -105,8 +104,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     toolbar.show = function () {
       log.trace('toolbar.show()');
-
-      // console.log('toolbar show');
 
       if (conf.get('toolbarEnabled')) {
         toolbar.render();
@@ -187,6 +184,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
           success();
         });
+        conf.set('toolBarVisible', false);
       } else {
         success();
       }
@@ -235,13 +233,9 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     toolbar.wireEvents = function () {
       log.trace('toolbar.wireEvents()');
 
-      console.log("WIRING!");
-
       toolbar.instance.find('[rel="' + kTtsButtonRel + '"]').each(function() {
         $(this).on('click', function() {
           var event = $(this).data(kTtsButtonRel);
-
-          console.log("CLICK AFTER WIRE");
 
           if (event) {
             sitecues.emit(event);
@@ -263,6 +257,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
       log.info('Disabling toolbar');
       conf.set('toolbarEnabled', false);
+      sitecues.emit('toolbar/hide');
 
       toolbar.slideIn(success);
     };
@@ -316,8 +311,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     load.style('../css/bootstrap.css');
 
 
-
-
     // Adjust the position of the toolbar items when the document vertical scrollbar appears
     sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
       
@@ -354,9 +347,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       $('.sitecues-toolbar .slider-wrap').css({right: newRightValSlider});
     
     });
-
-
-
 
     callback();
     });

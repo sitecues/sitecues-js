@@ -23,31 +23,33 @@ sitecues.def('keys', function (keys, callback, log) {
         || event.keyCode === 107
         || event.keyCode === 43;
     },
-    'r':    function(event) { return event.keyCode === 82; },
-    'f8':     function(event) { return event.keyCode === 119; },
-    'space':  function(event) { return event.keyCode === 32; }
+    'r':    function(event) {
+	    return (event.keyCode === 82 && event.shiftKey && !event.ctrlKey && event.altKey && !event.metaKey);
+    },
+    'f8':     function(event) { return event.keyCode === 119 && !hasModifier(event); },
+    'space':  function(event) { return event.keyCode === 32  && !hasModifier(event); }
   };
 
   keys.hlbKeysTest = {
-    'esc':    function(event) { return event.keyCode === 27; },
+    'esc':    function(event) { return event.keyCode === 27 && !hasModifier(event); },
     // scroll
-    'up':     function(event) { return event.keyCode === 38; },
-    'down':   function(event) { return event.keyCode === 40; },
-    'pageup':   function(event) { return event.keyCode === 33; },
-    'pagedown': function(event) { return event.keyCode === 34; },
-    'end':    function(event) { return event.keyCode === 35; },
-    'home':   function(event) { return event.keyCode === 36; }
+    'up':     function(event) { return event.keyCode === 38 && !hasModifier(event); },
+    'down':   function(event) { return event.keyCode === 40 && !hasModifier(event); },
+    'pageup':   function(event) { return event.keyCode === 33 && !hasModifier(event); },
+    'pagedown': function(event) { return event.keyCode === 34 && !hasModifier(event); },
+    'end':    function(event) { return event.keyCode === 35 && !hasModifier(event); },
+    'home':   function(event) { return event.keyCode === 36 && !hasModifier(event); }
   }
 
   var iframeDialogTest = {
-    'esc':    function(event) { return event.keyCode === 27; }
+    'esc':    function(event) { return event.keyCode === 27 && !hasModifier(event); }
   }
 
   // define keys map used to bind actions to hotkeys
   var origMap = keys.map = {
     'minus':  { preventDefault: true, event: 'zoom/decrease' },
     'plus':   { preventDefault: true, event: 'zoom/increase' },
-    'r':    { preventDefault: true, event: 'inverse/toggle'},
+    'r':      { preventDefault: true, event: 'inverse/toggle'},
     'f8':     { event: 'ui/toggle' },
     'space':  {
       event: 'highlight/animate',
@@ -72,18 +74,17 @@ sitecues.def('keys', function (keys, callback, log) {
     'esc':    {event: 'iframe-modal/hide'}
   }
 
+  function hasModifier(event) {
+	  return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
+  }
+
   sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common){
     // Handle key
     keys.handle = function ( key, event ) {
 
-      // This is shim for browser short cuts; none of our current features requires 'ctrl' or 'alt' so far
-      if (event.ctrlKey || event.altKey) {
-        return true;
-      }
-
       // If event defined, emit it
       if ( key.event ) {
-        sitecues.emit( key.event, event );
+	      sitecues.emit( key.event, event );
       }
 
       // prevent default if needed
