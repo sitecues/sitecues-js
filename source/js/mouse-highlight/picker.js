@@ -149,7 +149,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 			if (e.contents()) {
 				e.contents().each(function() {
-					if (this.nodeType == 3 && this.nodeValue.trim().length > 0 || this.innerText && this.innerText.trim().length > 0) {
+					if (this.nodeType == 3 && this.nodeValue.trim().length > 0) {
 						textNodes = true;
 						//console.info(this); // Removed this to make logs easier to read. - Al
 					}

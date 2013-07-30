@@ -235,6 +235,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
           for(roleName in role.roles) {
             roleData = role.roles[roleName];
             if($.inArray(siteCuesRole, roleData.sitecues) >= 0) {
+              // console.info("Sitecues role match for " + nodeName);
               return roleData;
             }
           }
@@ -245,6 +246,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
           for(roleName in role.roles) {
             roleData = role.roles[roleName];
             if($.inArray(ariaRole, roleData.aria) >= 0) {
+              // console.info("Aria role match for " + nodeName);
               return roleData;
             }
           }
@@ -254,6 +256,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
         var match;
         $.each(role.roles, function(key, value) {
           if($.inArray(nodeName, value.tags) >= 0) {
+            // console.info("Tag name match for " + nodeName + " to " + value.name);
             match = value;
           }
         });
@@ -262,7 +265,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
           return match;
         } 
 
-        console.info("No match for " + nodeName);
+        // console.info("No match for " + nodeName);
         return role.roles.container;
       }
     }
