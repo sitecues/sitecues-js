@@ -89,8 +89,8 @@ uglifyjs-args=
 testingbot-api-key:=b62a13f4d5cdb0f6c8b9e790ebd1aa8e
 testingbot-api-secret:=5fcb13beac07d9d8eff12944dadb5f86
 
-saucelabs-username:=6hMinutes
-saucelabs-access-key:=38dafeb5-00ab-4320-80f3-7fb2be18a024
+saucelabs-username:=sitecues
+saucelabs-access-key:=43c5470e-8c38-41d8-ba4f-99a558263dad
 
 testsite-timeout:=30000
 phantomjs-timeout:=30000
