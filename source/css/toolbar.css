@@ -81,14 +81,15 @@
 .sitecues-toolbar .tts {
   cursor: pointer;
   position: absolute;
-  top: 1px;
-  right: 15px;
-  width: 70px;
+  top: 5%;
+  width: 5%;
+  right: 0.1%;
   height: 95%;
   background-image: url('../images/toolbar/toolbar-speech.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;
+  background-size: contain;
 }
 
 .sitecues-toolbar .tts.tts-disabled {
