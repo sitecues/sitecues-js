@@ -106,7 +106,7 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
       return '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
 
-        'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" preserveAspectRatio="none">' +
+        'width="100%" height="100%" viewBox="0, 0, 690, 161" preserveAspectRatio="meet">' +
         '<path cursor="pointer" class="letterSmlBack" fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
         '<path cursor="pointer" class="trackBack"     fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
         '<path cursor="pointer" class="letterBigBack" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
@@ -139,8 +139,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
     setsvgbounds: function(){
       
       // Set the width and height attributes of the root SVG element
-      this.svg.viewBox.attr('width', this.width);
-      this.svg.viewBox.attr('height', this.height);
+//      this.svg.viewBox.attr('width', this.width);
+//      this.svg.viewBox.attr('height', this.height);
       
     },
 
