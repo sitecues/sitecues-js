@@ -2,6 +2,7 @@ sitecues.def('cursor/element', function (element, callback, log) {
 
     // cursor types
     var types = {
+        'auto':      'A',
         'default':   'A',
         'pointer':   'B'
     }
