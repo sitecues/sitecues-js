@@ -25,11 +25,11 @@
 
   
 .sitecues-slider-thumb {
-  position: relative;
+  position:relative;
   background-color: none;
   border: 0px;
-  height: 50%;
-  width: 10%;
+  height:50%;
+  width:10%;
   /*border-radius: 4px;*/
   border: none;
   /*-webkit-box-shadow: 0 0 4px #555;*/
@@ -37,6 +37,8 @@
   top:20%;
   cursor: pointer;
 }
+
+
 
 .sitecues-toolbar .slider-wrap *{
   cursor:pointer!important;
@@ -50,12 +52,11 @@
   -webkit-user-select : none!important;
   -moz-user-select    : none!important;
   -ms-user-select     : none!important;
-  margin: 5px 0;
   position: absolute;
-  right: 5%;
-  width: 8.5%;
-  height: 88%;
-  top: 0%;
+  right: 95px;
+  width: 160px;
+  height: 38px;
+  top:4%;
 }
 
 
@@ -80,16 +81,14 @@
 .sitecues-toolbar .tts {
   cursor: pointer;
   position: absolute;
-  top: 0%;
-  width: 5%;
-  right: 0.1%;
-  height: 88%;
-  margin: 5px 0;
+  top: 1px;
+  right: 15px;
+  width: 70px;
+  height: 95%;
   background-image: url('../images/toolbar/toolbar-speech.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center 0%;
-  background-size: contain;
 }
 
 .sitecues-toolbar .tts.tts-disabled {
