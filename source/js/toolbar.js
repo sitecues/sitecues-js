@@ -1,13 +1,13 @@
-sitecues.def('toolbar', function (toolbar, callback, log) {
+  sitecues.def('toolbar', function (toolbar, callback, log) {
 
   log.trace('toolbar.def()');
-  
+
   var kToolbarShim = 'sitecues-toolbar-shim';
   var kToolbar = 'sitecues-toolbar';
   var kTts = 'tts';
   var kTtsDisabled = 'tts-disabled';
   var kTtsButtonRel= 'sitecues-event';
-  
+
   sitecues.use(
     'jquery',
     'conf',
@@ -22,7 +22,7 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     'zoom',
     function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom) {
     log.trace('toolbar.use()');
-    
+
 
     // FIXME: Remove me! For testing purposes only. - Eric
     // NOTE: sitecues.status() uses this windows.sitecues.configs object now. Be graceful. - Al
@@ -154,7 +154,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
             zoom.toolbarWidth = $('.sitecues-toolbar').get(0).getBoundingClientRect().width;
             }
           }, 'slow');
-          conf.set('toolBarVisible', true);
+      // Adjust the position of the toolbar items when the document vertical scrollbar appears or disappears.
+      $(window).on('resize', zoom.checkForScrollbar);
       } else {
         log.warn("toolbar.slideOut() was called but toolbar is disabled")
       }
@@ -174,7 +175,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       if (toolbar.instance) {
         var height = toolbar.instance.height();
 
-
         toolbar.instance.animate({
           top: -height
         }, 'slow');
@@ -184,7 +184,8 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
           log.info('Toolbar is hidden and in state ' + toolbar.currentState.name);
           success();
         });
-        conf.set('toolBarVisible', false);
+
+        $(window).off('resize', zoom.checkForScrollbar);
       } else {
         success();
       }
@@ -306,10 +307,6 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     sitecues.on('speech/disabled', toolbar.disableSpeech);
     sitecues.on('speech/enabled',  toolbar.enableSpeech);
 
-    // load special toolbar css
-    load.style('../css/toolbar.css');
-    load.style('../css/bootstrap.css');
-
     // Adjust the position of the toolbar items when the document vertical scrollbar appears
     sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
       adjustToolbarContent(true, scrollbarWidth);
@@ -320,13 +317,16 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
       adjustToolbarContent(false, scrollbarWidth);
     });
 
+    // load special toolbar css
+    load.style('../css/toolbar.css');
+    load.style('../css/bootstrap.css');
 
     function adjustToolbarContent(isSrollBarShown, scrollbarWidth) {
       scrollbarWidth  *= isSrollBarShown ? -1 : 1;
-   
+
       var   ttsRight      = $('.sitecues-toolbar .tts').css('right')
       ,  sliderRight      = $('.sitecues-toolbar .slider-wrap').css('right')
-      
+
       // Calculate the updated positions
       , newRightValTTS    = (parseFloat(ttsRight)    + scrollbarWidth) +'px'
       , newRightValSlider = (parseFloat(sliderRight) + scrollbarWidth) +'px'
@@ -339,4 +339,4 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
 
     callback();
     });
-});
+  });
