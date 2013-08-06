@@ -7,6 +7,9 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
   // Time in millis after which the "first high zoom" cue should replay.
   var FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000; // 7 days
 
+  var OUTLINE_WIDTH = 4;
+  var OUTLINE_OFFSET = 3;
+
   // minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
 	mh.minZoom = 1.01;
@@ -149,11 +152,12 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 				$('<div>')
 					.attr('class', mh.kHighlightOverlayClass)
 					.style({
-						'top': rect.top - 3 - toolBarHeight + 'px',
-						'left': rect.left - 3 + 'px',
-						'width': rect.width + 4 + 'px',
-						'height': rect.height + 4 + 'px',
-						'display': 'block'
+						'top': rect.top - OUTLINE_OFFSET - toolBarHeight + 'px',
+						'left': rect.left - OUTLINE_OFFSET + 'px',
+						'width': rect.width + OUTLINE_WIDTH + 'px',
+						'height': rect.height + OUTLINE_WIDTH + 'px',
+						'display': 'block',
+                                                'box-sizing': 'border-box'
 					}, '', '')
 					.appendTo(document.body);
 			}
@@ -175,10 +179,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 					};
 					$(element).style({
 						'background-color': mh.kBackgroundColor,
-						'outline-width'   : '4px',
+						'outline-width'   : OUTLINE_WIDTH + 'px',
 						'outline-style'   : 'solid',
 						'outline-color'   : 'rgba(250, 235, 200, .2)',
-						'outline-offset'  : '-3px'
+						'outline-offset'  : - OUTLINE_OFFSET + 'px'
 					}, '', '');
 				}
 			}
