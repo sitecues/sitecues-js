@@ -101,8 +101,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			// can't found any element to work with
 			if (!collection) return;
 
-			var rects = positioning.getAllBoundingBoxes(collection, mh.kPixelsBeforeRectsCombined);
-
 			// Multi-pronged approach.
 			// Determine which of the following approaches to use:
 			// 1. No background color, just outline
@@ -139,28 +137,21 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 				}
 			}
 
-            // Take into calculations toolbar's height as it shifts elements position.
-            // TODO: once toolbar is completed, remove this
-            // repeated code(line below is used accross the files) to a correspondent util module.
-            var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled') && conf.get('toolBarVisible')
-                ? conf.get('toolbarHeight') || defaultToolbarHeight / (conf.get('zoom') || 1)
-                : 0;
-
-			// Position each focus rect absolutely over the item which is focused
-			for (var count = 0; count < rects.length; count ++) {
-				var rect = rects[count];
-				$('<div>')
-					.attr('class', mh.kHighlightOverlayClass)
-					.style({
-						'top': rect.top - OUTLINE_OFFSET - toolBarHeight + 'px',
-						'left': rect.left - OUTLINE_OFFSET + 'px',
-						'width': rect.width + OUTLINE_WIDTH + 'px',
-						'height': rect.height + OUTLINE_WIDTH + 'px',
-						'display': 'block',
-                                                'box-sizing': 'border-box'
-					}, '', '')
-					.appendTo(document.body);
-			}
+		    // Position each focus rect absolutely over the item which is focused
+		    // we only do this for single elements -- multiple items always get the overlay
+		    var element = collection.get(0);
+		    var rect = element.getBoundingClientRect();
+		    $('<div>')
+			    .attr('class', mh.kHighlightOverlayClass)
+			    .style({
+				    'top': rect.top - OUTLINE_OFFSET + 'px',
+				    'left': rect.left - OUTLINE_OFFSET + 'px',
+				    'width': rect.width + OUTLINE_WIDTH + 'px',
+				    'height': rect.height + OUTLINE_WIDTH + 'px',
+				    'display': 'block',
+				    'box-sizing': 'border-box'
+			    }, '', '')
+			    .appendTo(document.body);
 
 			// add highlight color if necessary
 			if (!mh.doPreventHighlightColor) {
@@ -168,8 +159,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, '');
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
-					var element = collection.get(0);
-                    var style = common.getElementComputedStyles(element, '', true);
+					var style = common.getElementComputedStyles(element, '', true);
 					mh.savedCss = {
 						'background-color': style.backgroundColor,
 						'outline-width'   : style.outlineWidth,

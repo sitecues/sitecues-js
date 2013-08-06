@@ -225,7 +225,7 @@
 }
 
 .sitecues-highlight-overlay {
-    position: absolute;
+    position: fixed;
     border: 2px solid black;
     border-radius: 3px;
     pointer-events: none;
