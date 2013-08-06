@@ -360,6 +360,7 @@ sitecues.def('util/common', function (common, callback, log) {
       log.info("bodyHasVertScrollbar = " + result);
       return result;
     };
+    common.bodyHasVertScrollbar = bodyHasVertScrollbar;
 
     // Applies the CSS object for the right alignment styles.
     var applyDynamicPlacementCSS = function(accessors) {

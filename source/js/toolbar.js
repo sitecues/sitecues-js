@@ -310,6 +310,33 @@ sitecues.def('toolbar', function (toolbar, callback, log) {
     load.style('../css/toolbar.css');
     load.style('../css/bootstrap.css');
 
+    // Adjust the position of the toolbar items when the document vertical scrollbar appears
+    sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
+      adjustToolbarContent(true, scrollbarWidth);
+    });
+
+    // Adjust the position of the toolbar items when the document vertical scrollbar disappears
+    sitecues.on('zoom/documentScrollbarHide', function(scrollbarWidth){
+      adjustToolbarContent(false, scrollbarWidth);
+    });
+
+
+    function adjustToolbarContent(isSrollBarShown, scrollbarWidth) {
+      scrollbarWidth  *= isSrollBarShown ? -1 : 1;
+   
+      var   ttsRight      = $('.sitecues-toolbar .tts').css('right')
+      ,  sliderRight      = $('.sitecues-toolbar .slider-wrap').css('right')
+      
+      // Calculate the updated positions
+      , newRightValTTS    = (parseFloat(ttsRight)    + scrollbarWidth) +'px'
+      , newRightValSlider = (parseFloat(sliderRight) + scrollbarWidth) +'px'
+      ;
+
+      // Set the updated CSS positions
+      $('.sitecues-toolbar .tts').css({'right': newRightValTTS});
+      $('.sitecues-toolbar .slider-wrap').css({'right': newRightValSlider}); 
+    }
+
     callback();
     });
 });
