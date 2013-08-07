@@ -24,7 +24,7 @@ sitecues.def('toolbar/dropdown', function(dropdown, callback, log){
 	   'id':    'sitecues-logo',
 	   'class': 'dropdown-toggle',
 	   'data-toggle': 'dropdown',
-	   'src': '//' + sitecues.getScriptSrcUrl().hostname + '/images/toolbar/toolbar-logo.png',
+	   'src': sitecues.resolveSitecuesUrl('../images/toolbar/toolbar-logo.png'),
 	   'alt': 'sitecues' })
 	.appendTo(dropdown.wrap);
 
