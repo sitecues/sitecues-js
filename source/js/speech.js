@@ -163,7 +163,7 @@ sitecues.def('speech', function (speech, callback, log) {
         log.info("Stopping all players");
         jQuery.each(players, function(key, value) {
           if(value) {
-            setTimeout(value.stop(),5);
+            setTimeout(value.stop,5);
           }
         });
       };
@@ -175,7 +175,7 @@ sitecues.def('speech', function (speech, callback, log) {
         log.info("Destroying all players");
         jQuery.each(players, function(key, value) {
           if(value) {
-            setTimeout(value.destroy(),5);
+            setTimeout(value.destroy,5);
           }
           players[key] = null;
         });
