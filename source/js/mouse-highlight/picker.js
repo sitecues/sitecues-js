@@ -15,7 +15,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 	// Whitelist of css display properties we'll allow
 	picker.validDisplays = [
-		'block', 
+		'block',
+		'inline',
 		'inline-block', 
 		'list-item',
 		'table-cell'
