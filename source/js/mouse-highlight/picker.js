@@ -44,10 +44,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 */
 		picker.find = function find(hover) {
 			var el = hover instanceof $ ? hover : $(hover);
-			if (el.is(document.body) || el.is(document)) {
-				// We're at the body, we're done.
-				return null;
-			}
 			var eScore, eTarget = el.data('sitecues-mouse-hl');
 			if (!eTarget) {
 				// Let's determine, and remember, what this element is.

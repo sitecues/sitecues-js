@@ -196,21 +196,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			if (!document.hasFocus()) {
                 return;
             }
-		    
-            // hide previous mh target if now mouseiver sitecues toolbar
-            var isInBody = false;
-            $.each($(event.target).parents(), function(i, parent) {
-                if ($(parent).is(document.body)) {
-                    isInBody = true;
-                }
-            })
- 
-            if (!isInBody) {
-                if (mh.picked) {
-                    mh.hide(mh.picked);
-                }
-            }
- 
 			if (event.target !== mh.target) {
 				// hide highlight for picked element
 
