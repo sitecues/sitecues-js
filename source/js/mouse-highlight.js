@@ -37,8 +37,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
 	mh.initZoom = 0;
-    
-   var defaultToolbarHeight = 40;
 
   // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
