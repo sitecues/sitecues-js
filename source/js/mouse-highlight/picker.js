@@ -22,13 +22,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		'table-cell'
 	];
 
-	// Element IDs to never highlight
-	picker.blacklistIds = [
-		'#sitecues-panel',
-		'#sitecues-badge',
-		'#sitecues-eq360-bg'
-	];
-    
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale below)
+//	// Element IDs to never highlight
+//	picker.blacklistIds = [
+//		'#sitecues-panel',
+//		'#sitecues-badge',
+//		'#sitecues-eq360-bg'
+//	];
+//    
     picker.kTargetStates = {
         'sometimes': 's',
         'true'     : 't',
@@ -89,7 +90,23 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * determination, we'll proceed to the scoring section.
 		 * 
 		 */
-		picker.isTarget = function(e) { 
+		picker.isTarget = function(e) {
+
+                        // hide previous mh target if now mouseiver sitecues toolbar
+                        var isInBody = false;
+                        $.each($(e.target).parents(), function(i, parent) {
+                            if ($(parent).is(document.body)) {
+                                isInBody = true;
+                            }
+                        })
+
+                        // Ignore elements not in the body: BGD, panel, badge, toolbar
+                        if (!isInBody) {
+                          console.info('element is not in the body');
+                          console.info(e.target);
+                          return false;
+                        }
+
 			var highlight = $(e).data('sitecues-highlight');
 			if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
 				// We have some kind of value for this attribute
@@ -100,16 +117,19 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 			}
 			var role = roles.find(e);
 
-			var node = e.get(0);
+
 
 			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
 			}
-			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
-				// IDs we ignore
-				return false;
-			}
+
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale above)
+//                      var node = e.get(0);
+//			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
+//				// IDs we ignore
+//				return false;
+//			}
 
 			var width = e.width();
 			if (width < 5) {
