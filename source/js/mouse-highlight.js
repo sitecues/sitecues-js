@@ -224,10 +224,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		mh.refresh = function() {
 			if (mh.enabled) {
 				// handle mouse move on body
-				$(document).on('mousemove', mh.update);
+				$(document).on('mousemove scroll', mh.update);
 			} else {
 				// remove mousemove listener from body
-				$(document).off('mousemove', mh.update);
+				$(document).off('mousemove scroll', mh.update);
 			}
 		}
 
