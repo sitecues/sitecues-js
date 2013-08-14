@@ -125,7 +125,7 @@
 #sitecues-panel .tts {
     cursor: pointer;
     position: absolute;
-    top: 2px;
+    top: 0;
     right: 0;
     width: 136px;
     height: 76px;
@@ -136,7 +136,7 @@
 
 #sitecues-panel .tts.tts-disabled {
     position: absolute;
-    top: 2px;
+    top: 0;
     right: 0;
     width: 136px;
     height: 76px;
