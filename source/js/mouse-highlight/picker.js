@@ -93,17 +93,22 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		picker.isTarget = function(e) {
 
                         // hide previous mh target if now mouseiver sitecues toolbar
-                        var isInBody = false;
-                        $.each($(e.target).parents(), function(i, parent) {
-                            if ($(parent).is(document.body)) {
+                        var isInBody = false, isInBadge = false;
+                        var $bagde = $('#sitecues-badge');
+                        $.each($(e).parents().andSelf(), function(i, parent) {
+                            var $parent = $(parent);
+                            if ($parent.is(document.body)) {
                                 isInBody = true;
+                                return;
+                            }
+                            if ($parent.is($bagde)) {
+                                isInBadge = true;
+                                return;
                             }
                         })
 
-                        // Ignore elements not in the body: BGD, panel, badge, toolbar
-                        if (!isInBody) {
-                          console.info('element is not in the body');
-                          console.info(e.target);
+                        // Ignore elements not in the body: BGD, panel, toolbar
+                        if (!isInBody || isInBadge) {
                           return false;
                         }
 
@@ -116,9 +121,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				return false;
 			}
 			var role = roles.find(e);
-
-
-
 			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
