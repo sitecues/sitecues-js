@@ -90,12 +90,12 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * determination, we'll proceed to the scoring section.
 		 * 
 		 */
-		picker.isTarget = function(e) {
-
+		picker.isTarget = function(el) {
+                        var $el = $(el); 
                         // hide previous mh target if now mouseiver sitecues toolbar
                         var isInBody = false, isInBadge = false;
                         var $bagde = $('#sitecues-badge');
-                        $.each($(e).parents().andSelf(), function(i, parent) {
+                        $.each($el.parents().andSelf(), function(i, parent) {
                             var $parent = $(parent);
                             if ($parent.is(document.body)) {
                                 isInBody = true;
@@ -112,7 +112,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
                           return false;
                         }
 
-			var highlight = $(e).data('sitecues-highlight');
+			var highlight = $el.data('sitecues-highlight');
 			if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
 				// We have some kind of value for this attribute
 				if (highlight) {
@@ -120,32 +120,32 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				}
 				return false;
 			}
-			var role = roles.find(e);
+			var role = roles.find(el);
 			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
 			}
 
 // AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale above)
-//                      var node = e.get(0);
+//                      var node = el.get(0);
 //			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
 //				// IDs we ignore
 //				return false;
 //			}
 
-			var width = e.width();
+			var width = el.width();
 			if (width < 5) {
 				// Don't highlight things that have no width
 				return false;
 			}
 
-			var height = e.height();
+			var height = el.height();
 			if (height < 5) {
 				// Don't highlight things that have no height
 				return false;
 			}
 
-			var style = styles.getComputed(e);
+			var style = styles.getComputed(el);
 			if ($.inArray(style['display'], picker.validDisplays) < 0) {
 				// Don't highlight things that aren't block elements
 				return false;
