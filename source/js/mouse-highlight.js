@@ -183,6 +183,20 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			collection = null;
 		}
 
+                /*
+                 * Track scrolling while mouse highlighting.
+                 */
+                mh.updatePosition = function () {
+                  if (mh.picked) {
+                    var rect = mh.picked.get(0).getBoundingClientRect();
+
+                    $('.' + mh.kHighlightOverlayClass)
+                            .style({'top':  rect.top - OUTLINE_OFFSET + 'px',
+                                  'left': rect.left - OUTLINE_OFFSET + 'px',
+                                   }, '', '');
+                   }
+                }
+                
 		mh.update = function(event) {
 			// break if highlight is disabled
 			if (!mh.enabled) return;
@@ -222,13 +236,15 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 		// refresh status of enhancement on page
 		mh.refresh = function() {
-			if (mh.enabled) {
-				// handle mouse move on body
-				$(document).on('mousemove scroll', mh.update);
-			} else {
-				// remove mousemove listener from body
-				$(document).off('mousemove scroll', mh.update);
-			}
+                  if (mh.enabled) {
+                    // handle mouse move on body
+                    $(document).on('mousemove', mh.update)
+                               .on('scroll',    mh.updatePosition);
+                  } else {
+                    // remove mousemove listener from body
+                    $(document).off('mousemove', mh.update)
+                               .off('scroll',    mh.updatePosition);
+                  }
 		}
 
 		mh.updateZoom = function(zoom) {
