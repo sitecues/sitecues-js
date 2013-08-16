@@ -35,7 +35,7 @@
 
       "module": "../../../swdda/phantomjs.js",
 
-      "maxConcurrent": 20,
+      "maxConcurrent": 2,
 
       "server": {
         "host": "localhost",
