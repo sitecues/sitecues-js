@@ -2,7 +2,7 @@ var
   chai   = require("chai"),
   fs    = require("fs"),
   expect = chai.expect,
-  swdda  = require("swdda")
+  swdda  = require("../lib/sitecues_swdda")
 ;
 
 describe("sitecues", function () {
@@ -13,7 +13,6 @@ describe("sitecues", function () {
           expect(err).to.not.be.an.instanceof(Error);
           session.browser.get(swdda.testUrl("/site/simple.html"), function() {
             session.browser.eval('window.location.href', function(err, value) {
-              console.log(value);
               setTimeout(done, 500);
             });
           });

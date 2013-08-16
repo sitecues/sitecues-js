@@ -1,5 +1,5 @@
 // var
-//   swdda   = require("swdda"),
+//   swdda   = require("../lib/sitecues_swdda"),
 //   chai    = require("chai"),
 //   expect  = chai.expect
 //   ;

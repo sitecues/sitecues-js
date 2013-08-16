@@ -7,9 +7,9 @@ var NAME_PREFIX_VAR = 'browser.name.prefix';
 var namePrefix = process.env[NAME_PREFIX_VAR];
 
 // Add a unique prefix to the browser sessions.
-saucelabs.processBrowserConfig = function(browserConfig) {
+saucelabs.before = function(session, cb) {
   if (namePrefix) {
-    browserConfig.name = namePrefix + ': ' + browserConfig.name;
+    session.browserData.name = namePrefix + ': ' + session.browserData.name;
   }
-  return browserConfig;
+  cb();
 };

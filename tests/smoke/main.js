@@ -1,7 +1,7 @@
 var
   chai   = require("chai"),
   expect = chai.expect,
-  swdda  = require("swdda")
+  swdda  = require("../lib/sitecues_swdda")
 ;
 
 describe("sitecues", function () {

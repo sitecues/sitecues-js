@@ -100,7 +100,8 @@ saucelabs-connect-timeout:=240000
 default-test-run-id:=$(username)-$(shell ./binary/uuid)
 test-run-id=$(default-test-run-id)
 
-common-macchiato-options=-Dbrowser.name.prefix=$(test-run-id)
+common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
+smoke-macchiato-options:=-Dphantomjs.run.cwd=$(shell pwd)
 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
@@ -228,8 +229,7 @@ test-all: test-smoke test-unit
 # Run the smoke tests.
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
-	@(make --no-print-directory start-phantomjs)
-	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
+	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options))
 
 # TARGET: test-unit
 # Run the unit tests.
@@ -237,16 +237,6 @@ test-unit:
 	@(make --no-print-directory start-testsite prod=on)
 	@(make --no-print-directory start-saucelabs-connect)
 	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
-
-# TARGET: start-phantomjs
-# Start the PhantomJS service.
-start-phantomjs:
-	@node_modules/.bin/_phantomjs start --timeout $(phantomjs-timeout) --root . -- --config=phantomjs.json
-
-# TARGET: stop-phantomjs
-# Stop the PhantomJS service.
-stop-phantomjs:
-	@node_modules/.bin/_phantomjs stop
 
 # TARGET: start-testingbot-tunnel
 # Start the TestingBot Tunnel service.
