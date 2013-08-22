@@ -13,12 +13,11 @@ sitecues.def('zoom', function (zoom, callback, log) {
       zoom.range = zoom.max - zoom.min;
 
       // detect if browser support zoom natively
-      zoom['native'] = 'zoom' in document.createElement('div').style;
 
       zoom.documentHasScrollbar = false;
 
       // get dependencies
-      sitecues.use('jquery', 'conf', 'util/common', 'ui', function($, conf, common) {
+      sitecues.use('jquery', 'conf', 'util/common', 'browser', 'ui', function($, conf, common, browser) {
 
           var $body = $('body');
           // Handle the appearing/dissapearing vertical scrollbar in document (changes document width)
@@ -104,7 +103,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
         // react on any zoom change
         conf.get('zoom', function (value) {
 
-          if (zoom['native']) {
+          if (browser.zoom) {
 
               // if native zoom is supported, change it
               $body.style({'zoom': value}, '', 'important');
