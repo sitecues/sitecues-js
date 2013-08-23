@@ -1,6 +1,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'etc'
+
+# Build username.
+$USERNAME = Etc.getlogin
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -14,10 +19,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://s3.amazonaws.com/vagrant.sitecues.com/boxes/sitecues-js-vagrant.box"
+  config.vm.box_url = "http://s3.amazonaws.com/vagrant.sitecues.com/boxes/sitecues-js.box"
 
   config.vm.provider :virtualbox do |vb|
     vb.name = "sitecues-js-vagrant"
+  end
+
+  # Set the build username.
+  config.vm.provision :shell do |s|
+    s.path = "tools/vagrant/set_build_user.sh"
+    s.args = $USERNAME
   end
 
   # Create a forwarded port mapping which allows access to a specific port

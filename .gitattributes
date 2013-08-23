@@ -1,0 +1,5 @@
+makefile			text eol=lf
+Vagrantfile			text eol=lf
+binary/*			text eol=lf
+tools/build/*.sh	text eol=lf
+tools/vagrant/*.sh	text eol=lf
