@@ -107,7 +107,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
           if (zoom['native']) {
 
               // if native zoom is supported, change it
-              $body.style({'zoom': value}, '', 'important');
+              $body.css({'zoom': value});
               sitecues.emit('zoom', value);
 
           } else {
