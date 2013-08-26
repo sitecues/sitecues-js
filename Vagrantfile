@@ -6,6 +6,9 @@ require 'etc'
 # Build username.
 $USERNAME = Etc.getlogin
 
+# Perform any vagrant workspace initializations.
+
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
