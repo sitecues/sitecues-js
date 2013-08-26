@@ -1,8 +1,4 @@
 /* Badge */
-.sitecues-badge #sitecues-badge-image {
-    height: 23px;
-}
-
 .sitecues-badge {
     z-index: 2147483645;
     margin: 0px;
@@ -13,6 +9,18 @@
     color: rgba(0, 0, 0, 0.6);
     cursor: default;
     -webkit-transition: color 1s;
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box;    /* Firefox, other Gecko */
+    box-sizing: content-box;         /* Opera/IE 8+ */
+}
+.sitecues-badge #sitecues-badge-image {
+    height: 23px;
+}
+
+#sitecues-badge, #sitecues-badge-image {
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box;    /* Firefox, other Gecko */
+    box-sizing: content-box;         /* Opera/IE 8+ */
 }
 
 .sitecues-badge:hover {
@@ -115,8 +123,9 @@
 }
 
 #sitecues-panel .tts {
+    cursor: pointer;
     position: absolute;
-    top: 2px;
+    top: 0;
     right: 0;
     width: 136px;
     height: 76px;
@@ -127,7 +136,7 @@
 
 #sitecues-panel .tts.tts-disabled {
     position: absolute;
-    top: 2px;
+    top: 0;
     right: 0;
     width: 136px;
     height: 76px;
@@ -216,7 +225,7 @@
 }
 
 .sitecues-highlight-overlay {
-    position: absolute;
+    position: fixed;
     border: 2px solid black;
     border-radius: 3px;
     pointer-events: none;

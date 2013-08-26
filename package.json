@@ -15,10 +15,11 @@
     "nopt": "2.1.1",
     "sinon": "1.7.x",
     "step": "0.0.x",
-    "swdda": "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.6.tgz",
+    "swdda": "http://s3.amazonaws.com/npm.sitecues.com/swdda-0.1.7.tgz",
     "tail": "0.3.1",
     "uuid": "1.4.1",
-    "wd": "0.0.x"
+    "wd": "0.0.x",
+    "empty-port": "0.0.1"
   },
   "engines": {
     "node": "0.10",

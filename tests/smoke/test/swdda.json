@@ -1,5 +1,21 @@
 {
+  "sitecuesUrl": {
+    "hostname": "localhost",
+    "httpPort": 8000,
+    "httpsPort": 8443,
+    "path": "/js/equinox.js"
+  },
+
+  "testSite": {
+    "hostname": "localhost",
+    "httpPort": 8000,
+    "httpsPort": 8443,
+    "secure": false,
+    "siteId": 5
+  },
+
   "providerCommon": {
+
     "browserCommon": {
       "applicationCacheEnabled": true,
       "browserConnectionEnabled": true,
@@ -12,32 +28,39 @@
       "webStorageEnabled": true
     }
   },
+
   "providers": {
+
     "PhantomJS": {
+
+      "module": "../../../swdda/phantomjs.js",
+
+      "maxConcurrent": 2,
+
+      "server": {
+        "host": "localhost",
+        "port": 8484
+      },
+
+      "config": {
+        "diskCache": false,
+        "loadImages": true,
+        "localStoragePath": "phantomjs-local-storage",
+        "localStorageQuota": 128,
+        "localToRemoteUrlAccess": true,
+        "maxDiskCacheSize": 256,
+        "webdriver": "localhost:8484",
+        "webdriverLogfile": "phantomjs-webdriver.log",
+        "webdriverLoglevel": "ERROR",
+        "webSecurity": true
+      },
+
       "browsers": [{
         "browserName": "phantomjs",
         "label": "PhantomJS",
         "platform": "ANY",
         "version": ""
-      }],
-      "maxConcurrent": 2,
-      "server": {
-        "host": "localhost",
-        "port": 8484
-      }
+      }]
     }
-  },
-  "sitecuesUrl": {
-    "hostname": "localhost",
-    "httpPort": 8000,
-    "httpsPort": 8443,
-    "path": "/js/equinox.js"
-  },
-  "testSite": {
-    "hostname": "localhost",
-    "httpPort": 8000,
-    "httpsPort": 8443,
-    "secure": false,
-    "siteId": 5
   }
 }

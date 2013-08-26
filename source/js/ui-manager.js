@@ -117,22 +117,33 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
      */
     var innerToggle = function (callback) {
       log.info("Toggling UI from " + currentState.name);
+      // EQ-770: check if badge is boomarklet one. ONLY for MVP demo purposes.
+      // todo: remove when demo paased.
+      var $badge = $('#' + badge.badgeId);
+      var isBadgeInDom = $badge && $badge.length > 0;
+      var bookmarletBadgeId = '#sitecues-badge-image-moved';
+      badge.isBadgeRaplacedByToolbar = isBadgeInDom
+              && $badge.attr('data-toolbar-will-replace') === 'true' // extension-based script
+              && !$badge.find(bookmarletBadgeId).length > 0;         // draggable bookmarklet
       panelInteractionDetected = false;
       switch (currentState) {
         case STATES.BADGE:
           currentState = STATES.TOOLBAR;
           conf.set('userUISelection', currentState.name);
-          badge.disable(function() {
-              toolbar.enable(true);
-              callback();
-          });
+          // Only hide badge if extension-provided script is running.
+          badge.isBadgeRaplacedByToolbar && badge.disable();
+          // Make sure toolbar appears after badge is hidden.
+          setTimeout(function() {
+            toolbar.enable(true);
+            callback();
+          }, 1);
           break;
         default: // case STATES.TOOLBAR:
           currentState = STATES.BADGE;
           conf.set('userUISelection', currentState.name);
           toolbar.disable(function() {
-              badge.enable(true);
-              callback();
+            badge.isBadgeRaplacedByToolbar && badge.enable(true);
+            callback();
           });
           break;
       }
@@ -149,20 +160,20 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
           // Note that we update the current state first, to deal with
           // button mashing, since the disabling/enabling are most likely
           // going to involve async behavior.
-          toolbar.disable(function(s) {
-              badge.enable(true);
+          toolbar.disable(function() {
+              badge.isBadgeRaplacedByToolbar && badge.enable(true);
           });
           break;
         default: // case STATES.TOOLBAR:
-          log.info("Initial UI State: " + STATES.TOOLBAR.name);
-          badge.disable(function() {
-          
-          sitecues.on('core/allModulesLoaded', function(){
-            toolbar.enable(true);
-          });
-
-
-          });
+          log.info("Initial UI State: " + STATES.TOOLBAR.name); 
+          // Only hide badge if extension-provided script is running.
+          badge.isBadgeRaplacedByToolbar && badge.disable();
+          // Make sure toolbar appears after badge is hidden.
+          setTimeout(function() {
+            sitecues.on('core/allModulesLoaded', function() {
+              toolbar.enable(true);
+            })
+          }, 1);
           break;
       }
     });
@@ -182,6 +193,10 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         if (panelInteractionDetected) {
           toggle();
         }
+      });
+
+      sitecues.on('toolbar/hide', function() {
+        currentState = STATES.BADGE;
       });
     }
 

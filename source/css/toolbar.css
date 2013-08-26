@@ -79,8 +79,9 @@
 }
 
 .sitecues-toolbar .tts {
+  cursor: pointer;
   position: absolute;
-  top: 1px;
+  top: 5%;
   right: 15px;
   width: 70px;
   height: 95%;
@@ -165,16 +166,15 @@
 
 .sitecues-toolbar.hori .dropdown-menu li {
   padding: 2px;
+  list-style-type: none;
+  list-style-image: none;
+  background: none;
 }
 
 .sitecues-toolbar.hori .dropdown-toggle {
-  background-image: url('../images/toolbar/toolbar-logo.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  height:88%;
-  display:block;
-  margin:5px 10px;
+  height: 100%;
+  display: block;
+  cursor: pointer;
 }
 
 .noselect {

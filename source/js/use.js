@@ -4,6 +4,7 @@ window.sitecues && sitecues.use(
 	'jquery',
 	'ui',
 	'ui-manager',
+	'iframe-modal',
 	'zoom',
 	'keys',
 	'focus',

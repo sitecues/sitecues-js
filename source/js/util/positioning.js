@@ -204,11 +204,20 @@ sitecues.def('util/positioning', function (positioning, callback) {
 			zoom  = zoom  || 1;
             var insetX2 = inset * 2;
             var scrollPos = this.getScrollPosition();
+            /*
+             * Note that we're using window.innerHeight instead of
+             * document.documentElement.clientHeight because these two numbers
+             * are very different in Firefox, which will report the height of
+             * the body when it is shorter than the window. With Chrome, the
+             * numbers are similar as it seems to use the visual height of the
+             * body. We don't need to do this for width, but we will for
+             * consistency.
+             */
             var result = {
                 left: scrollPos.left + inset,
                 top: scrollPos.top + inset,
-                width: document.documentElement.clientWidth - insetX2,
-                height: document.documentElement.clientHeight - insetX2
+                width: window.innerWidth - insetX2,
+                height: window.innerHeight - insetX2
             };
             result.right = result.left + result.width;
             result.bottom = result.top + result.height;
@@ -231,7 +240,6 @@ sitecues.def('util/positioning', function (positioning, callback) {
          * @param  center   center    The center point, see getCenter()
          * @param  int      zoom      The zoom level.
          * @param  string   position  Set the position of the element, defaults to 'absolute'
-         * 
          * @return void
          */
         positioning.centerOn = function (selector, center, zoom, position) {

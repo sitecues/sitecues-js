@@ -7,6 +7,9 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
   // Time in millis after which the "first high zoom" cue should replay.
   var FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000; // 7 days
 
+  var OUTLINE_WIDTH = 4;
+  var OUTLINE_OFFSET = 3;
+
   // minimum zoom level to enable highlight
 	// This is the default setting, the value used at runtime will be in conf.
 	mh.minZoom = 1.01;
@@ -34,8 +37,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
 	mh.initZoom = 0;
-    
-   var defaultToolbarHeight = 40;
 
   // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -95,8 +96,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			// can't found any element to work with
 			if (!collection) return;
 
-			var rects = positioning.getAllBoundingBoxes(collection, mh.kPixelsBeforeRectsCombined);
-
 			// Multi-pronged approach.
 			// Determine which of the following approaches to use:
 			// 1. No background color, just outline
@@ -133,27 +132,21 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 				}
 			}
 
-            // Take into calculations toolbar's height as it shifts elements position.
-            // TODO: once toolbar is completed, remove this
-            // repeated code(line below is used accross the files) to a correspondent util module.
-            var toolBarHeight = $('body').css('position') !== 'static' && conf.get('toolbarEnabled') && conf.get('toolBarVisible')
-                ? conf.get('toolbarHeight') || defaultToolbarHeight / (conf.get('zoom') || 1)
-                : 0;
-
-			// Position each focus rect absolutely over the item which is focused
-			for (var count = 0; count < rects.length; count ++) {
-				var rect = rects[count];
-				$('<div>')
-					.attr('class', mh.kHighlightOverlayClass)
-					.style({
-						'top': rect.top - 3 - toolBarHeight + 'px',
-						'left': rect.left - 3 + 'px',
-						'width': rect.width + 4 + 'px',
-						'height': rect.height + 4 + 'px',
-						'display': 'block'
-					}, '', '')
-					.appendTo(document.body);
-			}
+		    // Position each focus rect absolutely over the item which is focused
+		    // we only do this for single elements -- multiple items always get the overlay
+		    var element = collection.get(0);
+		    var rect = element.getBoundingClientRect();
+		    $('<div>')
+			    .attr('class', mh.kHighlightOverlayClass)
+			    .style({
+				    'top': rect.top - OUTLINE_OFFSET + 'px',
+				    'left': rect.left - OUTLINE_OFFSET + 'px',
+				    'width': rect.width + OUTLINE_WIDTH + 'px',
+				    'height': rect.height + OUTLINE_WIDTH + 'px',
+				    'display': 'block',
+				    'box-sizing': 'border-box'
+			    }, '', '')
+			    .appendTo(document.body);
 
 			// add highlight color if necessary
 			if (!mh.doPreventHighlightColor) {
@@ -161,8 +154,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 					$('.' + mh.kHighlightOverlayClass).style('background-color', mh.kBackgroundColor, '');
 				} else {
 					// we only do this for single elements -- multiple items always get the overlay
-					var element = collection.get(0);
-                    var style = common.getElementComputedStyles(element, '', true);
+					var style = common.getElementComputedStyles(element, '', true);
 					mh.savedCss = {
 						'background-color': style.backgroundColor,
 						'outline-width'   : style.outlineWidth,
@@ -172,10 +164,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 					};
 					$(element).style({
 						'background-color': mh.kBackgroundColor,
-						'outline-width'   : '4px',
+						'outline-width'   : OUTLINE_WIDTH + 'px',
 						'outline-style'   : 'solid',
 						'outline-color'   : 'rgba(250, 235, 200, .2)',
-						'outline-offset'  : '-3px'
+						'outline-offset'  : - OUTLINE_OFFSET + 'px'
 					}, '', '');
 				}
 			}
@@ -191,6 +183,20 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			collection = null;
 		}
 
+                /*
+                 * Track scrolling while mouse highlighting.
+                 */
+                mh.updatePosition = function () {
+                  if (mh.picked) {
+                    var rect = mh.picked.get(0).getBoundingClientRect();
+
+                    $('.' + mh.kHighlightOverlayClass)
+                            .style({'top':  rect.top - OUTLINE_OFFSET + 'px',
+                                  'left': rect.left - OUTLINE_OFFSET + 'px',
+                                   }, '', '');
+                   }
+                }
+                
 		mh.update = function(event) {
 			// break if highlight is disabled
 			if (!mh.enabled) return;
@@ -204,21 +210,6 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 			if (!document.hasFocus()) {
                 return;
             }
-		    
-            // hide previous mh target if now mouseiver sitecues toolbar
-            var isInBody = false;
-            $.each($(event.target).parents(), function(i, parent) {
-                if ($(parent).is(document.body)) {
-                    isInBody = true;
-                }
-            })
- 
-            if (!isInBody) {
-                if (mh.picked) {
-                    mh.hide(mh.picked);
-                }
-            }
- 
 			if (event.target !== mh.target) {
 				// hide highlight for picked element
 
@@ -245,13 +236,15 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 
 		// refresh status of enhancement on page
 		mh.refresh = function() {
-			if (mh.enabled) {
-				// handle mouse move on body
-				$(document).on('mousemove', mh.update);
-			} else {
-				// remove mousemove listener from body
-				$(document).off('mousemove', mh.update);
-			}
+                  if (mh.enabled) {
+                    // handle mouse move on body
+                    $(document).on('mousemove', mh.update)
+                               .on('scroll',    mh.updatePosition);
+                  } else {
+                    // remove mousemove listener from body
+                    $(document).off('mousemove', mh.update)
+                               .off('scroll',    mh.updatePosition);
+                  }
 		}
 
 		mh.updateZoom = function(zoom) {

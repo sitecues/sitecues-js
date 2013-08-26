@@ -1,35 +1,32 @@
 sitecues.def('badge', function (badge, callback, log) {
+
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
   sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'zoom', function ($, conf, panel, ui, common) {
 
+    var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
     badge.altBadges = $(conf.get('panelDisplaySelector'));
     badge.badgeId   = conf.get('badgeId');
 
-    if (! badge.badgeId) {
+    if (!badge.badgeId) {
       // Use the default value
       badge.badgeId = 'sitecues-badge';
     }
 
-    if (badge.altBadges && (badge.altBadges.length > 0)) {
-      badge.panel   = badge.altBadges;
-      badge.element = badge.panel;
-      panel.parent  = badge.element;
-    } else if ($('#' + badge.badgeId).length > 0) {
-      badge.panel   = $('#' + badge.badgeId);
-      badge.element = badge.panel;
-      panel.parent  = badge.element;
-    } else {
-      // We have no alternate or pre-existing badges defined, so create a new one.
-      badge.panel = $('<div>');
-
-      badge.panel.attr('id', badge.badgeId) // set element id for proper styling
-                 .addClass('sitecues-badge')
-                 .hide()
-                 // .prependTo('html');
-                  .appendTo('html');
-
+  /**
+   * Creates a markup for new badge and inserts it right into the DOM.
+   * @param function success
+   * @returns void
+   */
+    badge.create = function(success) {
+      badge.panel = $('<div>')
+              .attr('id', badge.badgeId) // set element id for proper styling
+              .attr(REPLACE_BADGE_ATTR, true)
+              .addClass('sitecues-badge')
+              .hide()
+              // .prependTo('html');
+              .appendTo('html');
       // Determine the badge visible width
       var badgeVisibleWidth = badge.panel.outerWidth();
 
@@ -43,23 +40,16 @@ sitecues.def('badge', function (badge, callback, log) {
       });
 
       // create badge image inside of panel
-      badge.element = $('<img>');
-
-      badge.element.attr('id', 'sitecues-badge-image')
+      badge.element = $('<img>')
+       .attr('id', 'sitecues-badge-image')
        .addClass('sitecues-badge-image')
        .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
        .appendTo(badge.panel);
+      
+      if (success) {
+        success();
+      }
     }
-
-    $(badge.panel).hover(function () {
-      sitecues.emit('badge/hover', badge.element); // emit event about hover
-    }, function () {
-      sitecues.emit('badge/leave', badge.element); // emit event about leave
-    });
-
-    $(badge.panel).on("click", function () {
-      sitecues.emit('badge/click', badge.element); // emit event about badge click
-    });
 
     /**
      * Hides the badge.
@@ -81,18 +71,18 @@ sitecues.def('badge', function (badge, callback, log) {
      * @param success Function executed if successful.
      * @return void
      */
-    badge.show = function (success) {
-    	if(conf.get('badgeEnabled')) {
-    		log.info('Showing badge');
-	        $(badge.panel).fadeIn('slow', function() {
-				if (success) {
-					success();
-				}
-	        });
-    	} else {
-    		log.warn("badge.show() was called but badge is disabled");
-    		throw e;
-    	}
+    badge.show = function(success) {
+      if (conf.get('badgeEnabled')) {
+        log.info('Showing badge');
+        $(badge.panel).fadeIn('slow', function() {
+          if (success) {
+            success();
+          }
+        });
+      } else {
+        log.warn("badge.show() was called but badge is disabled");
+        throw e;
+      }
     };
 
     /**
@@ -122,7 +112,38 @@ sitecues.def('badge', function (badge, callback, log) {
       	success();
       }
     };
+ 
+    // BODY
+    var $badge = $('#' + badge.badgeId);
+    if (badge.altBadges && (badge.altBadges.length > 0)) {
+      badge.panel   = badge.altBadges;
+      badge.element = badge.panel;
+      panel.parent  = badge.element;
+    } else if ($badge.length > 0) {
+      badge.panel   = $badge;
+      badge.element = badge.panel;
+      panel.parent  = badge.element;
+    } else {
+      // We have no alternate or pre-existing badges defined, so create a new one.
+      badge.create();
+    }
 
+    $badge = $('#' + badge.badgeId);
+    var isBadgeInDom = $badge && $badge.length > 0;
+ 
+    // EQ-770: check if badge is created by site provided script or by extension-based one.
+    // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
+    badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
+
+    $(badge.panel).hover(function () {
+      sitecues.emit('badge/hover', badge.element); // emit event about hover
+    }, function () {
+      sitecues.emit('badge/leave', badge.element); // emit event about leave
+    });
+
+    $(badge.panel).on('click', function () {
+      sitecues.emit('badge/click', badge.element); // emit event about badge click
+    });
       sitecues.on("badge/enable", function() {
           badge.enable(true);
       });

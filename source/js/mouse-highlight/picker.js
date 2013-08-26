@@ -15,19 +15,21 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 	// Whitelist of css display properties we'll allow
 	picker.validDisplays = [
-		'block', 
+		'block',
+		'inline',
 		'inline-block', 
 		'list-item',
 		'table-cell'
 	];
 
-	// Element IDs to never highlight
-	picker.blacklistIds = [
-		'#sitecues-panel',
-		'#sitecues-badge',
-		'#sitecues-eq360-bg'
-	];
-    
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale below)
+//	// Element IDs to never highlight
+//	picker.blacklistIds = [
+//		'#sitecues-panel',
+//		'#sitecues-badge',
+//		'#sitecues-eq360-bg'
+//	];
+//    
     picker.kTargetStates = {
         'sometimes': 's',
         'true'     : 't',
@@ -43,10 +45,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 */
 		picker.find = function find(hover) {
 			var el = hover instanceof $ ? hover : $(hover);
-			if (el.is(document.body) || el.is(document)) {
-				// We're at the body, we're done.
-				return null;
-			}
 			var eScore, eTarget = el.data('sitecues-mouse-hl');
 			if (!eTarget) {
 				// Let's determine, and remember, what this element is.
@@ -92,8 +90,29 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * determination, we'll proceed to the scoring section.
 		 * 
 		 */
-		picker.isTarget = function(e) { 
-			var highlight = $(e).data('sitecues-highlight');
+		picker.isTarget = function(el) {
+                        var $el = $(el); 
+                        // hide previous mh target if now mouseiver sitecues toolbar
+                        var isInBody = false, isInBadge = false;
+                        var $bagde = $('#sitecues-badge');
+                        $.each($el.parents().andSelf(), function(i, parent) {
+                            var $parent = $(parent);
+                            if ($parent.is(document.body)) {
+                                isInBody = true;
+                                return;
+                            }
+                            if ($parent.is($bagde)) {
+                                isInBadge = true;
+                                return;
+                            }
+                        })
+
+                        // Ignore elements not in the body: BGD, panel, toolbar
+                        if (!isInBody || isInBadge) {
+                          return false;
+                        }
+
+			var highlight = $el.data('sitecues-highlight');
 			if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
 				// We have some kind of value for this attribute
 				if (highlight) {
@@ -101,32 +120,32 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				}
 				return false;
 			}
-			var role = roles.find(e);
-
-			var node = e.get(0);
-
+			var role = roles.find(el);
 			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
 			}
-			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
-				// IDs we ignore
-				return false;
-			}
 
-			var width = e.width();
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale above)
+//                      var node = el.get(0);
+//			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
+//				// IDs we ignore
+//				return false;
+//			}
+
+			var width = el.width();
 			if (width < 5) {
 				// Don't highlight things that have no width
 				return false;
 			}
 
-			var height = e.height();
+			var height = el.height();
 			if (height < 5) {
 				// Don't highlight things that have no height
 				return false;
 			}
 
-			var style = styles.getComputed(e);
+			var style = styles.getComputed(el);
 			if ($.inArray(style['display'], picker.validDisplays) < 0) {
 				// Don't highlight things that aren't block elements
 				return false;
@@ -149,7 +168,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 			if (e.contents()) {
 				e.contents().each(function() {
-					if (this.nodeType == 3 && this.nodeValue.trim().length > 0 || this.innerText && this.innerText.trim().length > 0) {
+					if (this.nodeType == 3 && this.nodeValue.trim().length > 0) {
 						textNodes = true;
 						//console.info(this); // Removed this to make logs easier to read. - Al
 					}

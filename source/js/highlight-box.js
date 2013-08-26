@@ -465,7 +465,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         
         // If background color is not contrast to text color, invert background one.
         var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-        var color = compStyle.getPropertyCSSValue("color");
+        var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
         var isContrastColors = common.getIsContrastColors(color, newBgColor);
         // We don't know what's the text color in the image.
         if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {

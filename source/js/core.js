@@ -392,6 +392,13 @@
 
     // Extract the path and file portion of the pathname.
     var pathname = parser.pathname;
+    
+    // IE < 10 versions pathname does not contains first slash whereas in other browsers it does.
+    // So let's unify pathnames. Since we need '/' anyway, just add it to pathname when needed.
+    if (pathname.indexOf('/') > 0) {
+      pathname = '/' + pathname;
+    }
+
     var index = pathname.lastIndexOf('/') + 1;
     url.path = pathname.substring(0, index);
     url.file = pathname.substring(index);
