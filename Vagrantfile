@@ -28,6 +28,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.name = "sitecues-js-vagrant"
   end
 
+  # Perform
+
   # Set the build username.
   config.vm.provision :shell do |s|
     s.path = "tools/vagrant/set_build_user.sh"
