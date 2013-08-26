@@ -15,9 +15,6 @@ then
 	WORKSPACE_VERSION=0
 fi
 
-echo "Initializing workspace..."
-echo
-
 if [[ ${WORKSPACE_VERSION} -lt 1 ]]
 then
 	# Make sure the .gitattributes file is processed
@@ -48,10 +45,11 @@ then
 		(cd "${WORKSPACE_DIR}" && git rm --cached -r . && git reset --hard)
 		if [[ ${?} -eq 0 ]]
 		then
-			echo "Unable to perform update. Aborting." 1>&2
-		else
+			echo "Git workspace update completed."
 			WORKSPACE_VERSION=1
 			echo "${WORKSPACE_VERSION}" > "${WORKSPACE_VERSION_FILE}"
+		else
+			echo "Unable to perform update. Aborting." 1>&2
 		fi
 	fi
 fi

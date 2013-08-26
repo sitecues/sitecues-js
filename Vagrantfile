@@ -7,7 +7,7 @@ require 'etc'
 $USERNAME = Etc.getlogin
 
 # Perform any vagrant workspace initializations.
-
+exit false unless system 'tools/vagrant/initialize_workspace.sh'
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
