@@ -2,6 +2,9 @@
 var phantomJsClient = {};
 exports = module.exports = phantomJsClient;
 
+// PhantomJS start-up timeout.
+var START_UP_TIMEOUT = 2000;
+
 // Import required modules.
 var emptyPort = require('empty-port')
   , path = require('path')
@@ -13,7 +16,7 @@ var emptyPort = require('empty-port')
 // See if we have been provided a root dir.
 var CWD_VAR = 'phantomjs.run.cwd';
 var rootDir = path.resolve(process.env[CWD_VAR] || process.cwd());
-var baseDir =  path.join(rootDir, '.phantomjs');
+var baseDir =  path.join(rootDir, 'var', 'run', 'phantomjs', 'smoke');
 fs.mkdirsSync(baseDir);
 
 // ID, used to create a separate run directory for each PhantomJS instance.
@@ -69,7 +72,7 @@ var startPhantomJs = function(session, cb) {
 
     // Wait for the PhantomJS instance to become available.
     // TODO: Replace with something more intelligent
-    setTimeout(function() { cb(); }, 300);
+    setTimeout(function() { cb(); }, START_UP_TIMEOUT);
   });
 };
 
