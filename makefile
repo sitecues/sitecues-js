@@ -226,7 +226,7 @@ start-testsite:
 # TARGET: stop-testsite
 # Run the web server as a service, giving access to the library and test pages.
 stop-testsite:
-	@-./binary/_web stop
+	@./binary/_web stop --root $(service-root)
 
 # TARGET: test-all
 # Run all tests.
@@ -253,7 +253,7 @@ start-saucelabs-connect:
 # TARGET: stop-saucelabs-connect
 # Stop the SauceLabs Connect service.
 stop-saucelabs-connect:
-	@-binary/_saucelabs-connect stop
+	@binary/_saucelabs-connect stop --root $(service-root)
 
 # TARGET: stop-all-services
 # Stop all known services.
