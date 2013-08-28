@@ -2,12 +2,11 @@
 # vi: set ft=ruby :
 
 require 'etc'
+require 'yaml'
 
 # Build username.
 $USERNAME = Etc.getlogin
 
-# Perform any vagrant workspace initializations.
-exit false unless system 'tools/vagrant/initialize_workspace.sh'
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
@@ -16,6 +15,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
+
+  # Initialize the workspace
+  initialize_workspace
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "sitecues-js"
@@ -135,4 +137,55 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # chef-validator, unless you changed the configuration.
   #
   #   chef.validation_client_name = "ORGNAME-validator"
+end
+
+# Perform any vagrant workspace initializations.
+def initialize_workspace()
+  workspace_data_dir = File.join('.vagrant', 'workspace')
+  FileUtils.mkdir_p workspace_data_dir
+  workspace_data_file = File.join(workspace_data_dir, 'data.yml')
+  data = {}
+  if File.exists? workspace_data_file
+    data = YAML::load_file workspace_data_file
+  end
+
+  if !data[:git_attributes_applied]
+    git_attributes_applied = false
+    puts 'Appling .gitattributes to the workspace.'
+    puts 'Stashing current updates...'
+    if system 'git stash'
+      puts "Changes stashed."
+
+      puts 'Clearing file cache...'
+      if system 'git rm --cached -r .'
+        puts "File cache cleared."
+
+        puts 'Resetting workspace...'
+        if system 'git reset --hard'
+          puts 'Workspace reset.'
+          git_attributes_applied = true
+        else
+          puts 'Unable to reset workspace'
+        end
+      else
+        puts 'Unable to clear file cache.'
+      end
+
+      puts 'Popping stash...'
+      if system 'git stash pop'
+        puts 'Stash popped.'
+      else
+        puts 'Unable to pop stash.'
+      end
+
+    else
+      puts 'Unable to stash changes.'
+    end
+
+    data[:git_attributes_applied] = git_attributes_applied
+  end
+
+  File.open(workspace_data_file, 'w' ) do |out|
+    YAML.dump(data, out)
+  end
 end
