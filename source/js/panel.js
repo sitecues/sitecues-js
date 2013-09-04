@@ -2,7 +2,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', function( $, conf, speech, SliderClass, positioning, ui, common, zoom) {
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -50,12 +50,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
       var frame, wrap, slider, ttsButton;
 
       // create element and add element id for proper styling
-      frame = $('<div>', {
-        'id': 'sitecues-panel',
-        css:{
-          'display':'none'
-        }
-      });
+      frame = htmlBuild.$div()
+        .attr('id','sitecues-panel')
+        .css('display','none');
     
       // Create a Slider Instance for the Panel
       this.slider = {};
