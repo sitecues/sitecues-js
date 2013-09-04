@@ -1,14 +1,14 @@
 var
-  chai   = require("chai"),
-  fs    = require("fs"),
-  expect = chai.expect,
-  swdda  = require("../lib/sitecues_swdda")
-;
+        chai = require("chai"),
+        fs = require("fs"),
+        expect = chai.expect,
+        swdda = require("../lib/sitecues_swdda")
+        ;
 
-describe("sitecues", function () {
-  describe("navigator", function () {
-    swdda.describeForEachBrowser("simple", function (session) {
-      it("should navigate to the simple test page", function (done) {
+describe("sitecues", function() {
+  describe("navigator", function() {
+    swdda.describeForEachBrowser("simple", function(session) {
+      it("should navigate to the simple test page", function(done) {
         session.browser.deleteAllCookies(function(err) {
           expect(err).to.not.be.an.instanceof(Error);
           session.browser.get(swdda.testUrl("/site/simple.html"), function() {
@@ -19,20 +19,28 @@ describe("sitecues", function () {
         });
       });
 
-      it("Send F8 key to body", function (done) {
+      it("Send F8 key to body", function(done) {
         session.browser.elementByTagName('body', function(err, body) {
           session.browser.type(body, '\uE038');
           setTimeout(done, 1000);
         });
-      });    
+      });
 
-      it("should see the toolbar on the page", function (done) {
+      it("should see the toolbar on the page", function(done) {
         session.browser.elementByClassName("sitecues-toolbar", function(error) {
           expect(error).to.be.null;
           done();
         });
       });
 
+      it("should change tts button icon and tts state", function(done) {
+        session.browser.elementByClassName('tts', function(error, ttsButton) {
+          expect(error).to.be.null;
+          session.browser.clickElement(ttsButton);
+          setTimeout(done, 500);
+        });
+      });
+
     });
-	});
+  });
 });
