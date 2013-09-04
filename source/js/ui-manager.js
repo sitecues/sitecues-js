@@ -170,9 +170,17 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
           badge.isBadgeRaplacedByToolbar && badge.disable();
           // Make sure toolbar appears after badge is hidden.
           setTimeout(function() {
-            sitecues.on('core/allModulesLoaded', function() {
-              toolbar.enable(true);
-            })
+            log.info('window.sitecues.allModulesLoaded: ' + window.sitecues.allModulesLoaded);
+            if(window.sitecues.allModulesLoaded) {
+              // It's already loaded up
+              toolbar.enable(true);              
+            } else {
+              log.info('Deferring toolbar load until all modules are loaded');
+              sitecues.on('core/allModulesLoaded', function() {
+                log.info('Enabling toolbar, all modules are loaded');
+                toolbar.enable(true);
+              })
+            }
           }, 1);
           break;
       }
