@@ -19,7 +19,9 @@
     "tail": "0.3.1",
     "uuid": "1.4.1",
     "wd": "0.0.x",
-    "empty-port": "0.0.1"
+    "empty-port": "0.0.1",
+    "jquery" : "*",
+    "jsdom" : "*"
   },
   "engines": {
     "node": "0.10",
