@@ -69,13 +69,11 @@ describe("sitecues", function() {
 
       // Here we begin to test 'Help'
       it("Should open toolbar dropdown and show Help page", function(done) {
-        takeScreen(session, 'toolbar');
         session.browser.elementById(CSS_SELECTOR_LOGO, function(error, logo) {
           expect(error).to.be.null;
           // Open dropdown.
           session.browser.clickElement(logo);
           session.browser.waitForElementByClassName(CSS_SELECTOR_DROPDOWN, DEFAULT_WAIT_TIME, function(error) {
-            takeScreen(session, 'dropdown');
             expect(error).to.be.null;
             session.browser.elementById(CSS_SELECTOR_HELP, function(error, help) {
               expect(error).to.be.null;
@@ -83,7 +81,6 @@ describe("sitecues", function() {
               session.browser.clickElement(help);
               // Help HLB appeared.
               session.browser.waitForElementByCssSelector(FRAME_HELP, DEFAULT_WAIT_TIME, function(error) {
-                takeScreen(session, 'help');
                 expect(error).to.be.null;
                 session.browser.elementByCssSelector(FRAME_HELP, function(error, help) {
                   // Check Help HLB is visible.
@@ -91,7 +88,6 @@ describe("sitecues", function() {
 //                    expect(error).to.be.null;
 //                  });
                   help.getComputedCss('display' , function(error, value) {
-                    takeScreen(session, 'display');
                     expect(value).to.equal('block');
                   });         
                 });
