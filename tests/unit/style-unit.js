@@ -11,9 +11,9 @@ getComputedStyle = null;
 var style = require("../../source/js/style");
 
 describe('sitecues', function() {
-      describe('initial', function() {
-       it('should load & execute the method of simple example', function(done) {
-          var res = style.real(document.getElementById('sitecues'));
+      describe('style', function() {
+       it('getComputed should evaluate to empty with empty DOM object', function(done) {
+          var res = style.getComputed(document.getElementById('sitecues'));
           expect(res).to.be.ok;
           expect(res).to.be.an('object');
           expect(res).to.eql({});
