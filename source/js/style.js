@@ -40,7 +40,7 @@ sitecues.def('style', function (style, callback, log) {
     }
 
     if (sitecues.tdd) {
-      exports.real = style.getComputed;
+      exports.getComputed = style.getComputed;
     }
 
     // done
