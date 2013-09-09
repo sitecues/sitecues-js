@@ -44,7 +44,9 @@ sitecues.def('cursor/element', function (element, callback, log) {
         }
 
         element.getImage = function(type, zoom) {
-            if (!types.hasOwnProperty(type)) {
+            // 'auto' type takes 'default' image.
+            // TODO: we need to finally removethe right hardcode part of check "|| type === 'auto'"
+            if (!types.hasOwnProperty(type) || type === 'auto') {
                 type = defaultType;                
             }
             // todo: remove this line, this is shim for prototype purpose
