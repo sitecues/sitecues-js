@@ -39,6 +39,10 @@ sitecues.def('style', function (style, callback, log) {
       return {}
     }
 
+    if (sitecues.tdd) {
+      exports.getComputed = style.getComputed;
+    }
+
     // done
     callback();
 

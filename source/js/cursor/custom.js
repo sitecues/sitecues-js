@@ -134,7 +134,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
              zoom.current = zl || conf.get('zoom') || kDefaultZoomLevel;
              zoom.diff = zoom.current - zoom.min;
              var type = cursor.type;
-             if (!cursor.kTypes.hasOwnProperty(cursor.type)) {
+             if ($.inArray(cursor.type, cursor.kTypes) < 0) {
                type = kDefaultType;
              }
              var offset = eval('images.offsets.' + type || kDefaultType);
