@@ -1,3 +1,10 @@
+/**
+ * This file contains custom Windows-like cursor images for each zoom level.
+ * It aims to isolate images storage from the code. We might want to change the
+ * format or the way they are represented, so encapsulation sounds like a good idea.
+ * @param {object} imagesMac
+ * @param {function} callback
+ */
 sitecues.def('cursor/images-win', function (imagesWin, callback) {
     // Cursor images according to zoom level values, in dataUrl format. Name pattern is: <cursor_type>_<zoom_level>. Example: default_1_0.
     imagesWin.urls = {
