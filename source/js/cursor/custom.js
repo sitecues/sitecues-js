@@ -21,7 +21,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
     cursor.kMinCursorZoom = 1.1;
     
     // Get dependencies.
-    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/element', 'cursor/images', 'ui', function ($, conf, style, view, images) {
+    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/element', 'cursor/images-manager', 'ui', function ($, conf, style, view, imagesManager) {
 
         // Private variables.
 
@@ -33,7 +33,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
 
         cursor.styleRuleParent = $('head');
         cursor.type = kDefaultType;
-        cursor.kTypes = Object.keys(images.offsets);
+        cursor.kTypes = Object.keys(imagesManager.offsets);
 
         /*
          * Initialize cursor according to zoom level given.
@@ -137,7 +137,7 @@ sitecues.def('cursor/custom', function (cursor, callback, log) {
              if ($.inArray(cursor.type, cursor.kTypes) < 0) {
                type = kDefaultType;
              }
-             var offset = eval('images.offsets.' + type || kDefaultType);
+             var offset = eval('imagesManager.offsets.' + type || kDefaultType);
              var result = '';
              if (offset) {
                 switch (type) {
