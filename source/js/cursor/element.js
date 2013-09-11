@@ -8,7 +8,7 @@ sitecues.def('cursor/element', function (element, callback, log) {
     }
     var defaultType = 'default';
 
-    sitecues.use('cursor/images', function (images) {
+    sitecues.use('cursor/images-manager', function (images) {
         /*
          * Initialize cursor according to zoom level given.
          */
@@ -16,7 +16,7 @@ sitecues.def('cursor/element', function (element, callback, log) {
             this.data = {};
 
             for(var type in types) {
-                if (!types.hasOwnProperty(type)) {
+                if (!types.hasOwnProperty(type) || type === 'auto') {
                     type = defaultType;                
                 }
                 // if we want dynamic drawning
