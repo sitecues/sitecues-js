@@ -21,7 +21,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
     cursor.kMinCursorZoom = 1.1;
     
     // Get dependencies.
-    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/custom', 'cursor/images-manager', 'ui', function ($, conf, style, view, imagesManager) {
+    sitecues.use('jquery', 'conf', 'cursor/style', 'cursor/custom', 'cursor/images/manager', 'ui', function ($, conf, style, view, imagesManager) {
 
         // Private variables.
 

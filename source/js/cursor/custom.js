@@ -8,7 +8,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
     }
     var defaultType = 'default';
 
-    sitecues.use('cursor/images-manager', function (images) {
+    sitecues.use('cursor/images/manager', function (images) {
         /*
          * Initialize cursor according to zoom level given.
          */
