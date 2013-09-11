@@ -1,7 +1,5 @@
 /**
  * This file contain unit test(s) for style.js file.
- * TODO: since lines 5-35 most probably will be repeated in each test file we create
- * I'd take this code out to a sharing file and then require it when necessary.
  */
 
 require('./test/bootstrap');
