@@ -78,7 +78,6 @@ files=\
 	source/js/invert.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
-	source/js/cursor/element.js \
 	source/js/cursor/images-manager.js \
 	source/js/cursor/images-win.js \
 	source/js/cursor/images-mac.js \
