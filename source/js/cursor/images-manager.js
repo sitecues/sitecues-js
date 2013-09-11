@@ -1,11 +1,7 @@
 /*
- * This file contains cursor images for every single zoom level we need now.
- * It aims to isolate images storage from the code. We might want to change the
- * format or the way they are represented, so encapsulation sounds like a good idea.
+ * This file manages retrival of images depending on the current user's platform.
  */
-// todo: add deps to make file
 sitecues.def('cursor/images-manager', function (images, callback) {
-
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     images.offsets = {
      'auto'   : {x: 0, y: 5,  step: 2.5},
@@ -34,7 +30,7 @@ sitecues.def('cursor/images-manager', function (images, callback) {
       imageModuleName += 'mac';
     }
     
-    // Get dependencies.
+    // Get dependencies: either images for Windows, or for MacOs.
     sitecues.use('cursor/' + imageModuleName, function (osImages) {
        images.urls = osImages.urls;
 
