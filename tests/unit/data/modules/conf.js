@@ -1,0 +1,1 @@
+conf = {'get': function() {return 'test';}};
