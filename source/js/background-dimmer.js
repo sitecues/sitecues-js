@@ -27,8 +27,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         wrapper     = svgPath.wrapper;
 
         // Create dimmer SVG overlay
-        // Make sure to set height and width of SVG https://bugzilla.mozilla.org/show_bug.cgi?id=382325
-        var dimmerSVG ='<svg style="height:' + viewport.height + 'px;width:' + viewport.width +'px" xmlns="http://www.w3.org/2000/svg">' +
+        var dimmerSVG ='<svg xmlns="http://www.w3.org/2000/svg">' +
 
             // Use an SVG path to create the dimmer area
             '<path '+
