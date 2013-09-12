@@ -196,6 +196,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
         cursor.init(conf.get('zoom') || kDefaultZoomLevel);
 
+        if (sitecues.tdd) {
+          // todo: maybe export the whole module instead if every single function?
+          exports.init = cursor.init;
+        }
+
         // Done.
         callback();
     });
