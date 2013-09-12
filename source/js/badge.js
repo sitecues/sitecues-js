@@ -118,14 +118,15 @@ sitecues.def('badge', function (badge, callback, log) {
     if (badge.altBadges && (badge.altBadges.length > 0)) {
       badge.panel   = badge.altBadges;
       badge.element = badge.panel;
+      panel.parent  = badge.element;
     } else if ($badge.length > 0) {
       badge.panel   = $badge;
       badge.element = badge.panel;
+      panel.parent  = badge.element;
     } else {
       // We have no alternate or pre-existing badges defined, so create a new one.
       badge.create();
     }
-    panel.parent  = badge.element;
 
     $badge = $('#' + badge.badgeId);
     var isBadgeInDom = $badge && $badge.length > 0;
