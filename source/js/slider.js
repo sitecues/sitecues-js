@@ -93,10 +93,10 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
       this.setdimensions();
       this.bindevents();
 
-      // Set to the zoomLevel in conf, or set to zoom.default
-      this.zoomLevel = conf.get('zoom') || zoom.default;
+      // Set to the zoomLevel in conf, or set to zoom.defaultLevel
+      this.zoomLevel = conf.get('zoom') || zoom.defaultLevel;
       
-      // Update the Thumb position based on the conf.zoom or zoom.default value
+      // Update the Thumb position based on the conf.zoom or zoom.defaultLevel value
       this.setThumbPositionFromZoomLevel(this.zoomLevel);
       this.translateThumbSVG();
 
@@ -225,8 +225,8 @@ sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
         // Update the Thumb element's position based on the zoom level now dimensions have changed
         conf.get('zoom', function (zoomLevel) {
 
-          // Set to the zoomLevel in conf, or set to zoom.default
-          slider_.zoomLevel = zoomLevel || zoom.default;
+          // Set to the zoomLevel in conf, or set to zoom.defaultLevel
+          slider_.zoomLevel = zoomLevel || zoom.defaultLevel;
 
           // Only respond to conf zoom updates when mouse not down
           if (!slider_.mouseDownTrack) {

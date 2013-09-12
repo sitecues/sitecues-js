@@ -4,7 +4,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
       zoom.max = 5;
       zoom.min = 1;
       zoom.step = 0.1;
-      zoom['default'] = 1;
+      zoom.defaultLevel = 1;
       zoom.precision = 0.1;
 
       zoom.toolbarWidth = 0;
@@ -86,7 +86,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
         // define default value for zoom if needed
         if (!conf.get('zoom')) {
-                conf.set('zoom', $body.css('zoom') || zoom['default']);
+                conf.set('zoom', $body.css('zoom') || zoom.defaultLevel);
         }
 
         // handle zoom/increase event fired by any module
