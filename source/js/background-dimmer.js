@@ -4,7 +4,7 @@
 sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'util/positioning', 'browser', function ($, conf, positioning, browser) {
+  sitecues.use('jquery', 'conf', 'util/positioning', function ($, conf, positioning) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
@@ -56,29 +56,18 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
         // Set the CSS for the dimemrContainer
         .style({
+          'position'      : 'fixed',
           'display'       : 'block',
           'z-index'       : 2147483646,
           'opacity'       : 0,
+          'left'          : '0px',
+          'top'           : '0px',
           'width'         : viewport.width +'px',
           'height'        : viewport.height +'px',
           'overflow'      : 'visible',
           'pointer-events': 'none',
           'transition'    : 'opacity 150ms ease-out'
         }, '', 'important');
-
-        if(browser.isFirefox()) {
-          this.$dimmerContainer.style({
-            'position'      : 'absolute',
-            'left'          : window.pageXOffset/conf.get('zoom') + 'px',
-            'top'           : window.pageYOffset/conf.get('zoom') + 'px'
-          }, '', 'important');
-        } else {
-          this.$dimmerContainer.style({
-            'position'      : 'fixed',
-            'left'          : '0px',
-            'top'           : '0px',
-          }, '', 'important');
-        }
 
         $('body').append( this.$dimmerContainer );
         // Animate the dimmer background container
@@ -116,38 +105,25 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     }
 
     function getWrapperDimensions(viewport) {
-      var topLeft = {x: 0, y: 0},
-        topRight = {x: viewport.width, y: 0},
-        bottomLeft = {x: 0, y: viewport.height}, 
-        bottomRight = {x: viewport.width, y: viewport.height};
+        // Wind clockwise path around whole document.
+        var wrapper =  
+        'M'+ 0                +' '+ 0                 +' '+
+        'L'+ viewport.width   +' '+ 0                 +' '+
+        'L'+ viewport.width   +' '+ viewport.height   +' '+
+        'L'+ 0                +' '+ viewport.height;
 
-      // Wind clockwise path around whole document.
-      var wrapper = 
-        'M'+ topLeft.x +' '+ topLeft.y + ' ' +
-        'L'+ topRight.x +' '+ topRight.y + ' ' +
-        'L'+ bottomRight.x +' '+ bottomRight.y + ' ' +
-        'L'+ bottomLeft.x +' '+ bottomLeft.y;
-
-      return wrapper;
+        return wrapper;
     }
     
     function getInnerDimensions(elem, $hlbNode) {
         // Wind clockwise path around whole document.
-        if(browser.isFirefox()) {
-          var inner =  
-            'M'+ ($hlbNode.offset().left - window.pageXOffset + 2)/conf.get('zoom') +' '+ ($hlbNode.offset().top - window.pageYOffset + 2)/conf.get('zoom')  +' '+
-            'l'+ (elem.width - 4)/conf.get('zoom')  +' '+ 0                   +' '+
-            'l'+ 0                 +' '+ (elem.height - 4)/conf.get('zoom')   +' '+
-            'l'+ (-(elem.width - 4))/conf.get('zoom') +' '+ 0;
-          return inner;
-        } else {
-          var inner =  
-            'M'+ ($hlbNode.offset().left - window.pageXOffset + 2) +' '+  ($hlbNode.offset().top - window.pageYOffset + 2)  +' '+
-            'l'+ (elem.width - 4)  +' '+ 0                   +' '+
-            'l'+ 0                 +' '+ (elem.height - 4)   +' '+
-            'l'+ (-elem.width + 4) +' '+ 0;
-          return inner;
-        }
+        var inner =  
+        'M'+ ($hlbNode.offset().left - window.pageXOffset + 2) +' '+ ($hlbNode.offset().top - window.pageYOffset + 2)  +' '+
+        'l'+ (elem.width - 4)  +' '+ 0                   +' '+
+        'l'+ 0                 +' '+ (elem.height - 4)   +' '+
+        'l'+ (-elem.width + 4) +' '+ 0;
+
+        return inner;
     }
 
     /**
