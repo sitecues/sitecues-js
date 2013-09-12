@@ -1,4 +1,4 @@
-sitecues.def('mouse-highlight', function(mh, callback, console) {
+sitecues.def('mouse-highlight', function(mh, callback, log) {
 
   // Tracks if the user has heard the "first high zoom" cue.
   var FIRST_HIGH_ZOOM_PARAM = "firstHighZoom";
@@ -48,7 +48,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
     ];
 
 	// depends on jquery, conf, mouse-highlight/picker and positioning modules
-	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
+	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'browser', function($, conf, picker, positioning, common, speech, browser) {
 
 		conf.set('mouseHighlightMinZoom', mh.minZoom);
 
@@ -136,17 +136,29 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		    // we only do this for single elements -- multiple items always get the overlay
 		    var element = collection.get(0);
 		    var rect = element.getBoundingClientRect();
-		    $('<div>')
+
+		    var highlightOverlay = $('<div>')
 			    .attr('class', mh.kHighlightOverlayClass)
 			    .style({
-				    'top': rect.top - OUTLINE_OFFSET + 'px',
-				    'left': rect.left - OUTLINE_OFFSET + 'px',
-				    'width': rect.width + OUTLINE_WIDTH + 'px',
-				    'height': rect.height + OUTLINE_WIDTH + 'px',
 				    'display': 'block',
 				    'box-sizing': 'border-box'
-			    }, '', '')
-			    .appendTo(document.body);
+			    });
+			 if(browser.isFirefox()) {
+			    highlightOverlay.style({
+		    		top:(window.pageYOffset + rect.top)/conf.get('zoom')  + 'px',
+		    		left:(window.pageXOffset + rect.left)/conf.get('zoom')  + 'px',
+		    		height:rect.height/conf.get('zoom') + 'px',
+		    		width:rect.width/conf.get('zoom') + 'px',
+			    });
+			 } else {
+			 	highlightOverlay.style({
+					'top': rect.top - OUTLINE_OFFSET + 'px',
+					'left': rect.left - OUTLINE_OFFSET + 'px',
+					'width': rect.width + OUTLINE_WIDTH + 'px',
+					'height': rect.height + OUTLINE_WIDTH + 'px'
+			    });
+			 }
+			 highlightOverlay.appendTo(document.body);
 
 			// add highlight color if necessary
 			if (!mh.doPreventHighlightColor) {
@@ -167,7 +179,7 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 						'outline-width'   : OUTLINE_WIDTH + 'px',
 						'outline-style'   : 'solid',
 						'outline-color'   : 'rgba(250, 235, 200, .2)',
-						'outline-offset'  : - OUTLINE_OFFSET + 'px'
+						// 'outline-offset'  : - OUTLINE_OFFSET + 'px'
 					}, '', '');
 				}
 			}
@@ -190,10 +202,10 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
                   if (mh.picked) {
                     var rect = mh.picked.get(0).getBoundingClientRect();
 
-                    $('.' + mh.kHighlightOverlayClass)
-                            .style({'top':  rect.top - OUTLINE_OFFSET + 'px',
-                                  'left': rect.left - OUTLINE_OFFSET + 'px',
-                                   }, '', '');
+                    // $('.' + mh.kHighlightOverlayClass)
+                    //         .style({'top':  rect.top - OUTLINE_OFFSET + 'px',
+                    //               'left': rect.left - OUTLINE_OFFSET + 'px',
+                    //                }, '', '');
                    }
                 }
                 
