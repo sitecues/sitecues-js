@@ -137,7 +137,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
              if ($.inArray(cursor.type, cursor.kTypes) < 0) {
                type = kDefaultType;
              }
-             var offset = eval('imagesManager.offsets.' + type || kDefaultType);
+             var offset = imagesManager.offsets[type || kDefaultType];
              var result = '';
              if (offset) {
                 switch (type) {
@@ -164,6 +164,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
             if (!cursor.isEnabled) {
               return;
             }
+
             // Target has changed, update its image according to current zoom level and cursor type.
             if (!$(target).is(cursor.prevTarget)) {
               // First, revert last target's cursor property to saved style.
@@ -198,7 +199,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
         if (sitecues.tdd) {
           // todo: maybe export the whole module instead if every single function?
-          exports.init = cursor.init;
+          exports.cursor = cursor;
+          exports.cursor.getCursorHotspotOffset = getCursorHotspotOffset;
+          exports.cursor.restoreCursorDisplay = restoreCursorDisplay;
+          exports.cursor.changeCursorDisplay = changeCursorDisplay;
         }
 
         // Done.

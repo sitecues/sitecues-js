@@ -318,10 +318,14 @@ sitecues.def('mouse-highlight', function(mh, callback, console) {
 		sitecues.on('hlb/create hlb/inflating hlb/ready', mh.disable);
 
 		// hide mouse highlight once highlight box is dismissed
-		sitecues.on('hlb/deflating', mh.unpick);
+		//sitecues.on('hlb/deflating', mh.unpick); <---- Anthony Nardi EQ-640
 
 		// enable mouse highlight back once highlight box deflates
-		sitecues.on('hlb/closed', mh.enable);
+		sitecues.on('hlb/closed', function () {
+			mh.enable();
+			mh.show(mh.picked);
+
+		});
 
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', mh.updateZoom);

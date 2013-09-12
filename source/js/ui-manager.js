@@ -3,7 +3,8 @@
  * if any, so we don't have to split and duplicate that logic across the
  * choices.
  */
-sitecues.def( 'ui-manager', function (uiManager, callback, log) {
+sitecues.def('ui-manager', function (uiManager, callback, log) {
+
   sitecues.use( 'jquery', 'conf', 'toolbar', 'badge', function ($, conf, toolbar, badge) {
 
     // The toggling state.  If true an active toggle is underway and calls to
@@ -98,7 +99,6 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
     var toggle = function () {
       if(toggling) {
         log.info('Toggle call ignored');
-        return;
       }
       toggling = true;
       innerToggle(function() {
@@ -207,7 +207,12 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         currentState = STATES.BADGE;
       });
     }
-
+        if (sitecues.tdd) {
+          // todo: maybe export the whole module instead if every single function?
+          exports.uiManager = uiManager;
+          exports.uiManager.toggle = toggle;
+          exports.uiManager.innerToggle = innerToggle;
+        }
     callback();
   });
 });

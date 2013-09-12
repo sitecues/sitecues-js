@@ -5,6 +5,25 @@
  * a generic audio file player.
  */
 sitecues.def('speech/ivona', function (ivona, callback, log) {
+  //Fix for EQ-498 - Translate hex representation of html entities to words
+  var removeHTMLEntities = (function() {
+    //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
+    var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%A2', '%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
+    //@param URIComponent accepts a string of URI encoded text and removes any
+    //html entity encoded characters from it
+    return function (URIComponent) {
+      for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
+        URIComponent = URIComponent.replace(htmlEntityMap[i], '');
+      }
+      return URIComponent;
+    }
+  
+  }());
+
+  if (sitecues.tdd) {
+    exports.ivona = ivona;
+    exports.removeHTMLEntities = removeHTMLEntities;
+  }
 
   var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
     var myState = 'init';
@@ -22,7 +41,7 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
       baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws
         // TODO: Remove the hard-coded site ID.
         + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag
-        + "&text=" + encodeURIComponent(hlb.text()) + "&codecId=";
+        + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";
     }
