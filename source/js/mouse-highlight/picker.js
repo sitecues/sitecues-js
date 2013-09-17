@@ -91,26 +91,31 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * 
 		 */
 		picker.isTarget = function(el) {
-                        var $el = $(el); 
-                        // hide previous mh target if now mouseiver sitecues toolbar
-                        var isInBody = false, isInBadge = false;
-                        var $bagde = $('#sitecues-badge');
-                        $.each($el.parents().andSelf(), function(i, parent) {
-                            var $parent = $(parent);
-                            if ($parent.is(document.body)) {
-                                isInBody = true;
-                                return;
-                            }
-                            if ($parent.is($bagde)) {
-                                isInBadge = true;
-                                return;
-                            }
-                        })
+            var $el = $(el), 
+            // hide previous mh target if now mouseiver sitecues toolbar
+                isInBody = false, 
+                isInBadge = false,
+                $bagde = $('#sitecues-badge'),
+                $parent;
+            //.andSelf() deprecated since 1.8
+            $.each($el.parents().andSelf(), function(i, parent) {
+                
+                $parent = $(parent);
+                
+                if ($parent.is(document.body)) {
+                    isInBody = true;
+                    return;
+                }
+                if ($parent.is($bagde)) {
+                    isInBadge = true;
+                    return;
+                }
+            })
 
-                        // Ignore elements not in the body: BGD, panel, toolbar
-                        if (!isInBody || isInBadge) {
-                          return false;
-                        }
+            // Ignore elements not in the body: BGD, panel, toolbar
+            if (!isInBody || isInBadge) {
+              return false;
+            }
 
 			var highlight = $el.data('sitecues-highlight');
 			if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
@@ -214,10 +219,16 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				}
 			} else if (role.name === 'graphic') {
 				score += 1;
-			} else {
+			} else if (role.name === 'list') {
+			//if the hovered element is an ['table','dir','dl','form','ol','ul','menu']
+                score += 1;
+		    } else {
 				score -= 1;
 			}
-
+			//if the hovered element is an ['dt','th','td','dd','li']
+			if (role.name === 'shortText' && e.text().trim().length < 200) {
+				score = 0;
+			}
 			if (picker.debug) {
 				// These are for seeing the results in-context in a web
 				// inspector.
