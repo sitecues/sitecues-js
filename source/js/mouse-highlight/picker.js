@@ -219,14 +219,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				}
 			} else if (role.name === 'graphic') {
 				score += 1;
-			} else if (role.name === 'list') {
+			} else if (role.name === 'list' && (e.prop('tagName').toLowerCase() === 'ol' || e.prop('tagName').toLowerCase() === 'ul')) {
 			//if the hovered element is an ['table','dir','dl','form','ol','ul','menu']
                 score += 1;
 		    } else {
 				score -= 1;
 			}
 			//if the hovered element is an ['dt','th','td','dd','li']
-			if (role.name === 'shortText' && e.text().trim().length < 200) {
+			if (role.name === 'shortText' && e.prop('tagName').toLowerCase() === 'li') {
 				score = 0;
 			}
 			if (picker.debug) {
