@@ -8,24 +8,27 @@ require('./test/bootstrap');
 var module = require("../../source/js/cursor");
 
 describe('cursor', function() {
-   describe('#init()', function() {
 
+   describe('#init()', function() {
        it('should not initialize cursor if zoom level <= minimum zoom level.', function(done) {
           var zl = 1;
-          var res = module.cursor.init(zl);
-          expect(res).to.be.undefined;
-          // todo: assert cursor.hide() called
+          sinon.spy(module.cursor, "hide");
+
+          module.cursor.init(zl);
+          expect(module.cursor.hide.calledOnce).to.be.true;
+          module.cursor.hide.restore();
           done();
         });
 
        it('should initialize cursor if zoom level > then minimum zoom level.', function(done) {
           var zl = 1.2;
-          var res = module.cursor.init(zl);
-          expect(res).to.be.undefined;
-          // todo: assert cursor.show() called
+          sinon.spy(module.cursor, "show");
+          
+          module.cursor.init(zl);
+          expect(module.cursor.show.calledOnce).to.be.true;
+          module.cursor.show.restore();
           done();
         });
-
     });
     
     describe('#getCursorHotspot()', function() {
