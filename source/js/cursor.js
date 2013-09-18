@@ -198,7 +198,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
         if (sitecues.tdd) {
           // todo: maybe export the whole module instead if every single function?
-          exports.init = cursor.init;
+          exports.cursor = cursor;
+          exports.cursor.getCursorHotspotOffset = getCursorHotspotOffset;
         }
 
         // Done.
