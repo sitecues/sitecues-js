@@ -109,6 +109,7 @@ default-test-run-id:=$(username)-$(shell ./binary/uuid)
 test-run-id=$(default-test-run-id)
 
 common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
+testunit-mocha-options:=-c
 smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
 
 ifeq ($(clean-deps), true)
@@ -242,7 +243,9 @@ test-smoke:
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
-	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
+	echo "TEST RUN ID: $(test-run-id)"
+	cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
+
 
 # TARGET: start-saucelabs-connect
 # Start the SauceLabs Connect service.

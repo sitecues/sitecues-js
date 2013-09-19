@@ -15,7 +15,7 @@ describe('cursor', function() {
           sinon.spy(module.cursor, "hide");
 
           module.cursor.init(zl);
-          expect(module.cursor.hide.calledOnce).to.be.true;
+          expect(module.cursor.hide.calledOnce).to.be.false;
           module.cursor.hide.restore();
           done();
         });
