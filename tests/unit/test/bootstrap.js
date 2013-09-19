@@ -5,7 +5,7 @@
  * It is a quick-n-dirty solution and we might want to improve it in the future.
  */
 
-require("../../lib/mock");
+// Require fixtures library.
 sinon   = require("sinon");
 
 // Require assertive library.
