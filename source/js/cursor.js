@@ -137,7 +137,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
              if ($.inArray(cursor.type, cursor.kTypes) < 0) {
                type = kDefaultType;
              }
-             var offset = eval('imagesManager.offsets.' + type || kDefaultType);
+             var offset = imagesManager.offsets[type || kDefaultType];
              var result = '';
              if (offset) {
                 switch (type) {
