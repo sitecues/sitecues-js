@@ -20,11 +20,6 @@ jsdom  = require("jsdom");
 document = jsdom.jsdom();
 window   = document.parentWindow;
 
-// Create & insert a new element we will later use for tests.
-node = document.createElement("p");
-node.setAttribute("id", "sitecues");
-document.getElementsByTagName('body')[0].appendChild(node);
-
 // Override/mock sitecues object.
 var def = function(name, callback) {
   var module = {};
