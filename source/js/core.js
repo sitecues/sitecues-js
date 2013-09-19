@@ -22,6 +22,8 @@
     window.sitecues = {};
   }
 
+  window.sitecues.allModulesLoaded = false;
+
   // Private variables
   var arr               = Array.prototype                 // Array's prototype
     , has               = Object.prototype.hasOwnProperty // Object's has own property
@@ -170,6 +172,7 @@
     }
 
     if (defCount === length) {
+      window.sitecues.allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
     }
   };

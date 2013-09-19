@@ -1,19 +1,13 @@
-/*
- * This file contains cursor images for every single zoom level we need now.
+/**
+ * This file contains custom Mac-like cursor images for each zoom level.
  * It aims to isolate images storage from the code. We might want to change the
  * format or the way they are represented, so encapsulation sounds like a good idea.
+ * @param {object} imagesMac
+ * @param {function} callback
  */
-sitecues.def('cursor/images', function (images, callback) {
-
-    // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
-    images.offsets = {
-     'auto'   : {x: 0, y: 5,  step: 2.5},
-     'default': {x: 0, y: 5,  step: 2.5},
-     'pointer': {x: 10, y: 5, step: 3.5}
-    }
-
+sitecues.def('cursor/images/mac', function (imagesMac, callback) {
     // Cursor images according to zoom level values, in dataUrl format. Name pattern is: <cursor_type>_<zoom_level>. Example: default_1_0.
-    images.urls = {
+    imagesMac.urls = {
         'default_1_0' : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAhCAYAAAA2/OAtAAADKElEQVRIS9WWPWxSURTH73t8SCmQpqGDCSYdHGiHjg4kHQ0mRZhMHGocsNShxkGbNCE6yGRIazVpN7aSiJCYGAYbcWLAxehgo6LRammNH0BIaSlV3vN/mvsIHw/6iungTf553PN4v3fuOeee+wR2DEM4Bib7j6CyLN9FCE5Bl3goJEEQ5H8Ji1Cr1cKiKN4EJAFdhSrQHsBSr2CCLlSr1RmDwSDq9fpnAM1A36HdXsEEXSwUCoH5+fm+UCgkAZwGcBra7BVM0AfFYvGK3W7vm5ubY8Fg8LfFYnkB4FSv4AMoPJ0aGhoyUQzdbjeLx+N/rFZrBtMAB+8cJRRtUAUci8VqAL9GEi/DloPKANe0JE8V2gi22Ww5wDywbWgFd4S2gDc5+KsWcFdor+BDob2ANUFVwOdho1BsqyVPM1QBr6ysyIODgzlUhQ+2L1CpFXwkqAJeWlqShoeHt3Q6HYHXW8FHhip1ura2Jjmdzi3ucRNYE5R22ezsLEObbKr98fFxhka0DvBZ3NiCKtQ2NUGJBM/YyMgI9doypnvQPl6yVyqV5IGBgSeY34FoO9dUoalUioXDYba6ulr3zO/3s+XlZdloNL6EMcl3WAHXn9A36FdHKHk0OjrKMpmM7HK5ms6wdDpNtiKWSz33DVQkj6Eq1z41nrqnk5OTJpQLQ7lU8FAW3WtsYmJCaPSWYptMJmX03MeA3OKZJ6ASbLke03K5PI34iGgeVMwP8aePmF/LZrMOZFjfmJ1EIiF5vd5dJOgC7K9o2Wp1ugjPruMm9c8Y9AP6BJ2RJOleIBDQRSKRRi6rVCqSyWR6DuMNcgBQOtfqQ4BHC5idhkKQAaLg0xklQk/z+fwYTgWj8kQ0GmUej4f19/dvoPgv8tjSCuv1RlACWSAdf5DeSqJln0Rs3+H8MjkcDubz+ZjZbKZkvMe9+3z5H3ClBt4EpQyTV8o4OPcxyG7B9RHm53Alb9bJe+gz9BaivU+rOih6BdD1swcg8tYO3Ybo+DZDVI9UlwTbhqptiWrwsO0n95YORBt0gq+IdtQOh6l+cBz6gUalphKerl8vh0K7raTTvb9mDMYxORabHQAAAABJRU5ErkJggg==',
         'default_1_1' : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAjCAYAAACQA/olAAADI0lEQVRIS7WWS2gTURSG7+RBUpumNLQIxaVQELct0iwUQbKoZGOFUNBNUbNwFYSGgIItCF10Ia6ycSFWEhPELoPPEkWxKFaCqFEp1aI1D2vSJtHMw/+UiczkOcmYwkc7j373zH8v91yOdemH65KXdU8sSZKL47jY/66cg/g+pD/AKVkuYiBJ70AkfgDJURAFXlAEJchFPXJOFMVHpVLJaTabDSaT6R5k58EmKOiRk/hxJpMZW1hY6JmbmxMhj0N6DmzokZN4OZvNjg4ODvb4/X42OzsrofonkJ7RI6eMl9Pp9NjQ0JCVMiU5KpdQuS55jbgiDwQCfF9f37NOK68rJrnL5WKRSKRjeUNxHflZOfMdLaulqbgiD4fDgs1me240Gmm1fAXbkAvN1nlLsVLe29v7ApNKlX9pJdckVsrtdvtnVHsC99abyTWLq+QbkB9vJm9L3I68bbFWeUdiLfKOxRV5KBQS+vv715H5MeWuqFk8PT3NgsEgw1putHzf4cElcBeDlDWLyRaPx9n4+PiOwWC4gcsPIA12wBb4Jl//aiimHW5gYIDNzMyoqqP9Y2lpSbRYLE/x4DJYA2X5pT/4XaKB6ooXFxeZx+NhPM9LENR08Wg0Krrd7gL27JOQvAZZxejUKwXaS1RRJBIJaWRkhLpIslwu71tZWelxOp01oRaLRdFqtT6E5AL4CKiNqRrwbgfJ5/OHcrmceXh4eBv50R5MnfuAIAinJyYmDLGY+nQwPz/PfD4fjwIm8d5LWg30+crcdnsebh7GzbfgOsjIE7OF7nIzmUwexFeYVWHjIpVKCQ6H4w0KoRb2Ho5tlRj/fBE3RsEVQIKfgGaYJmISVQfRaC3KiaSKvV4vw1a6CbEH762CLWUclDHJbMAkj0jnCoIys+H5bXTxI+iJFhJOTU0xRFaGMInn18ArqhjkqsU08wbFZ/w7CUFKg+1F1auFQsGBHsjj+ju4Az4Bim9N/sKiSqzMpfpviGnQPeAq2A9uyUXQmYM6CUWWA7+rO0rL0ybktNzswAEsckQ0D3WFleJaiulFWV5ZGZQ937LnNYtCz7O/5NfiM2NXp+IAAAAASUVORK5CYII=',
         'default_1_2' : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAlCAYAAABGWhk4AAADOUlEQVRIS9WWTU8TURSG7/QD2/QLEExYuOEXuHEBbCAhISEENibGRBMTCkgkLpomsPEjsMDGIOqqMfIDSGvC1ohurB9p4gLcaAiaKKi10i4olJZ2xvetUzNMW9qhsHCSJ23mzjxz5pxz7x1JnNAhnZBX/IdiRVECSMdZcEVNiyxJklJviqR8Pn/PZDL5IQqDayAN9iCX65FTfD+TyUxYrVaTxWJ5DtkEiIHdeuQUP0gkEqNzc3P2mZkZGfJXkI6BzXrkFD9KJpPelpYW+9TUlJienlYQfQTSkXrkBTEiHmltbbUxp5QjcgWR1yUvER+XvKz4OOQVxZQPDw+L+fn5nMvlems054eKKe/r6xOhUMiwvKr4qPKaxGXko2or7lSaRDWLi/LFxcW80+l8ZzabOYk2QAryvH76GxJr5Q6HI4peZ+TfyskNi7VydMsKFrCrOPdVLz+SWCt3u92bSMWAXn5kcTW5ITHXkcbGxgN18ng8nEhcW74g8l4M/gR7hsSRSER0dnYKCLK4mZ3AzUDGQiZns1nFbrdzyb0MdgyJOQuXlpYUm822hptDal53WDgQV6P9XVHMV+7o6BBDQ0P69hThcFgZHBxMY82+jsEVQBEj5xvwTfZApiTiYDAovF6vkGVZGR8flxYWFkrk6XRaRtQvMcC9ch1wn9Qe8gHx8vKy6OnpUdCba9i93bFY7HRbW5tVbw4EAsLn8+VQsAsYew9iyPu+9rqCOJVKjcXjcUt7ezt3Zy6RL5gvjAWxFzZMTk6WRI3r883NzasIgjv7R7Ct/Wyg+CEGbyDCdQw8wQVb6oUsxix28AG8tuWQqC9hLAp+aKOWILyFk+fBXdAAEoA7NKvdlMvlVqPRqLurq+tfStgdfr9f9PaybcVTcBOwj1m4wkExZS5QvHFXlbLSduBDIe/09/ebeQOF3d3dAvnlg1+Dx4DdsaEXm3CSFA9+YhW+gvBQyprw+wyfCOewLkgQsmeZU37cfFLhIrSlTpy/EWuEZf9CegoDF8Ft8AZ8AEnwGXwHvwAftq9d9GsR8xoHOAM8gIXcBixuibAYXVWxmhKmirUo5BlHTh+h/nVrEldLV7nxExP/AZYE9DHMyy2oAAAAAElFTkSuQmCC',

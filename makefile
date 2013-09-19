@@ -71,15 +71,16 @@ files=\
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
-	source/js/speech.js \
+  source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
 	source/js/invert.js \
 	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
-	source/js/cursor/element.js \
-	source/js/cursor/images.js \
+	source/js/cursor/images/manager.js \
+	source/js/cursor/images/win.js \
+	source/js/cursor/images/mac.js \
 	source/js/util/template.js \
 	source/js/toolbar.js \
 	source/js/toolbar/bootstrap-dropdown.js \
@@ -87,6 +88,7 @@ files=\
 	source/js/toolbar/messenger.js \
 	source/js/toolbar/resizer.js \
 	source/js/ui-manager.js \
+	source/js/html-build.js \
 
 https=off
 prod=off

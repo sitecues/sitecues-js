@@ -20,7 +20,8 @@
     'util/common',
     'jquery/resize',
     'zoom',
-    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom) {
+    'html-build',
+    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom, htmlBuild) {
     log.trace('toolbar.use()');
 
 
@@ -46,13 +47,13 @@
 
       var $html = $('html');
       if (! toolbar.instance) {
-        toolbar.shim = $('<div class="' + kToolbarShim + '" />').prependTo($html);
+        toolbar.shim = htmlBuild.$div().addClass(kToolbarShim).prependTo($html);
 
         toolbar.shim.css({
           height: ((conf.get('toolbarHeight') || 40) + 'px')
         });
 
-        toolbar.instance = $('<div class="' + kToolbar + ' hori" />').prependTo($html);
+        toolbar.instance = htmlBuild.$div().addClass(kToolbar).addClass('hori').prependTo($html);
 
         var toolbarHeight = conf.get('toolbarHeight');
         toolbar.instance.css({
