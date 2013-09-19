@@ -242,8 +242,6 @@ test-smoke:
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
-	@(make --no-print-directory start-testsite prod=on)
-	@(make --no-print-directory start-saucelabs-connect)
 	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
 
 # TARGET: start-saucelabs-connect
