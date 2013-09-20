@@ -20,11 +20,20 @@ jsdom  = require("jsdom");
 document = jsdom.jsdom();
 window   = document.parentWindow;
 
+// Create & insert a new element we will later use for tests.
+var node = document.createElement("p");
+node.setAttribute("id", "sitecues");
+document.getElementsByTagName('body')[0].appendChild(node);
+
+//var $ = sinon.stub();
+//$.withArgs(node).returns(sinon.stub({style: function(){}}));
+
 // Override/mock sitecues object.
-var def = function(name, callback) {
+var def = function(name, callback, log) {
   var module = {};
   var cb = function() {};
-  return callback(module, cb);
+  var log = {'info': function() {}};
+  return callback(module, cb, log);
 };
 
 use = function(name) {
