@@ -8,7 +8,7 @@ sitecues.def('style', function (style, callback, log) {
 
     style.getComputed = function getStyleObject(dom) {
       var myDom = dom instanceof _jQuery ? dom.get(0) : dom;
-      var returns = {}
+      var returns = {};
       // If browser's function 'getComputedStyle' is declared then use it.
       if (getComputedStyle) {
         var camelize = function(a, b) {
@@ -36,11 +36,11 @@ sitecues.def('style', function (style, callback, log) {
         return returns;
       }
 
-      return {}
+      return {};
     }
 
     if (sitecues.tdd) {
-      exports.getComputed = style.getComputed;
+      exports.style = style;
     }
 
     // done
