@@ -52,4 +52,27 @@ describe('cursor', function() {
         });
 
     });
+
+    describe('#restoreCursorDisplay()', function() {
+      it('should not reset cursor css if custom-cursor is not enabled.', function(done){
+        // 1. Set variables
+        module.cursor.isEnabled = false;
+        // 2. Call method
+
+        var div = document.createElement('div');
+        jquery(div).css('cursor','pointer');
+        module.cursor.restoreCursorDisplay(div);
+
+        // 3. Assert/expect
+        expect(jquery(div).css('cursor')).to.be.equal('pointer', 'some message here');
+        // 4. Call done()
+        done();
+      });
+    });
+
 });
+
+
+
+
+
