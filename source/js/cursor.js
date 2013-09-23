@@ -98,9 +98,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
          */
         function restoreCursorDisplay(target) {
             if (cursor.isEnabled) {
-               $(target).css('cursor', '');
+               $(target).style('cursor', '', 'important');
             }
-            return;
         }
 
         /**
@@ -165,6 +164,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
             if (!cursor.isEnabled) {
               return;
             }
+
             // Target has changed, update its image according to current zoom level and cursor type.
             if (!$(target).is(cursor.prevTarget)) {
               // First, revert last target's cursor property to saved style.
@@ -202,6 +202,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
           exports.cursor = cursor;
           exports.cursor.getCursorHotspotOffset = getCursorHotspotOffset;
           exports.cursor.restoreCursorDisplay = restoreCursorDisplay;
+          exports.cursor.changeCursorDisplay = changeCursorDisplay;
         }
 
         // Done.
