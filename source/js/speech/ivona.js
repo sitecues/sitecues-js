@@ -7,8 +7,8 @@
 sitecues.def('speech/ivona', function (ivona, callback, log) {
   //Fix for EQ-498 - Translate hex representation of html entities to words
   var removeHTMLEntities = (function() {
-    //copyright, &, %, trademark, <, >
-    var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE'];
+    //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
+    var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%A2', '%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
     //@param URIComponent accepts a string of URI encoded text and removes any
     //html entity encoded characters from it
     return function (URIComponent) {
@@ -19,6 +19,11 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
     }
   
   }());
+
+  if (sitecues.tdd) {
+    exports.ivona = ivona;
+    exports.removeHTMLEntities = removeHTMLEntities;
+  }
 
   var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
     var myState = 'init';
