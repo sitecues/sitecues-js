@@ -1,1 +1,1 @@
-custom = {'getImage': function() {}};
+custom = {'getImage': function() {return 'url()'}};

@@ -148,6 +148,11 @@ sitecues.def('badge', function (badge, callback, log) {
           badge.enable(true);
       });
 
+        if (sitecues.tdd) {
+          // todo: maybe export the whole module instead if every single function?
+          exports.badge = badge;
+        }
+
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
     //      https://equinox.atlassian.net/browse/EQ-355

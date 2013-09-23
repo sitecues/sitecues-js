@@ -1,5 +1,5 @@
 /**
- * This file contain unit test(s) for style.js file.
+ * This file contain unit test(s) for cursor.js file.
  */
 
 require('./test/bootstrap');
@@ -10,12 +10,14 @@ var module = require("../../source/js/cursor");
 describe('cursor', function() {
 
    describe('#init()', function() {
+
        it('should not initialize cursor if zoom level <= minimum zoom level.', function(done) {
+         
           var zl = 1;
           sinon.spy(module.cursor, "hide");
 
           module.cursor.init(zl);
-          expect(module.cursor.hide.calledOnce).to.be.false;
+          expect(module.cursor.hide.calledOnce).to.be.true;
           module.cursor.hide.restore();
           done();
         });
@@ -29,50 +31,51 @@ describe('cursor', function() {
           module.cursor.show.restore();
           done();
         });
+
     });
     
     describe('#getCursorHotspot()', function() {
 
+      var zl, kDefaultZoomLevel;
+      before(function() {
+          zl = 1;
+          kDefaultZoomLevel = 1;
+      });
+
+       it('should return initial values for auto cursor type with minimum zoom level.', function(done) {
+          module.cursor.type = 'auto';
+          var res = module.cursor.getCursorHotspotOffset(zl);
+          expect(res).to.be.equal('0 5', 'Incorrect value found for cursor type ' + module.cursor.type + ' and zoom level ' + zl);
+          done();
+        });
+
        it('should return initial values for default cursor type with minimum zoom level.', function(done) {
-          var zl = 1;
-          var kDefaultZoomLevel = 1;
           module.cursor.type = 'default';
           var res = module.cursor.getCursorHotspotOffset(zl);
-          expect(res).to.be.equal('0 5');
+          expect(res).to.be.equal('0 5', 'Incorrect value found for cursor type ' + module.cursor.type + ' and zoom level ' + zl);
           done();
         });
 
        it('should return initial values for pointer cursor type with minimum zoom level.', function(done) {
-          var zl = 1;
-          var kDefaultZoomLevel = 1;
           module.cursor.type = 'pointer';
           var res = module.cursor.getCursorHotspotOffset(zl);
-          expect(res).to.be.equal('10 5', 'Set some informative message here.');
+          expect(res).to.be.equal('10 5', 'Incorrect value found for cursor type ' + module.cursor.type + ' and zoom level ' + zl);
           done();
+        });
+
+       it('should fallback to default cursor type and values if cursor type is unknown.', function(done) {
+          module.cursor.type = 'test'; // any string which is cannot be used a cursor type.
+          var res = module.cursor.getCursorHotspotOffset(zl);
+          expect(res).to.be.equal('0 5', 'Incorrect value found for unknown cursor type and zoom level ' + zl);
+          done();
+        });
+
+        after(function() {
+           // Do cleanup.
+            zl = null;
+            kDefaultZoomLevel = null;
         });
 
     });
 
-    describe('#restoreCursorDisplay()', function() {
-      it('should not reset cursor css if custom-cursor is not enabled.', function(done){
-        // 1. Set variables
-        module.cursor.isEnabled = false;
-        // 2. Call method
-
-        var div = document.createElement('div');
-        jquery(div).css('cursor','pointer');
-        module.cursor.restoreCursorDisplay(div);
-
-        // 3. Assert/expect
-        expect(jquery(div).css('cursor')).to.be.equal('pointer', 'some message here');
-        // 4. Call done()
-        done();
-      });
-    });
-
 });
-
-
-
-
-
