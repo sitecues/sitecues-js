@@ -13,3 +13,5 @@ var
 fetchavatars.pl
 .vagrant
 .jira-url
+.jshintrc
+.jshintrc

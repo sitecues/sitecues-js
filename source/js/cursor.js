@@ -98,8 +98,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
          */
         function restoreCursorDisplay(target) {
             if (cursor.isEnabled) {
-               $(target).style('cursor', '', 'important');
+               $(target).css('cursor', '');
             }
+            return;
         }
 
         /**
@@ -200,6 +201,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
           // todo: maybe export the whole module instead if every single function?
           exports.cursor = cursor;
           exports.cursor.getCursorHotspotOffset = getCursorHotspotOffset;
+          exports.cursor.restoreCursorDisplay = restoreCursorDisplay;
         }
 
         // Done.

@@ -4,7 +4,7 @@
 -d
 -G
 --recursive
--R xunit
+-R nyan
 -t 120000
 -u bdd
 .
