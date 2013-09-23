@@ -5,7 +5,7 @@ var phantom=require('node-phantom');
 phantom.create(function(err,ph) {
   
   return ph.createPage(function(err,page) {
-    return page.open("./svgtest.html", function(err,status) {
+    return page.open("./convert-svgs-to-dataurls.html", function(err,status) {
       
       console.log("Loading SVGs into Canvas via PhantomJS? ", status);
         
