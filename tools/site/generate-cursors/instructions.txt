@@ -1,6 +1,7 @@
 INSTRUCTIONS
 ============
 
+
 1) Prepare the .SVG files
 2) Update "convert-svgs-to-dataurls.js" to include paths to .SVGs
 3) Run "node save-data-urls-to-pngs.js" (should take some time to do generate all files)
