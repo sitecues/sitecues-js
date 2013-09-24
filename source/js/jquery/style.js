@@ -2,7 +2,7 @@
 // todo: rename
 sitecues.def('jquery/style', function(style, callback, log) {
     var toClass = {}.toString;
-    sitecues.use('jquery', function(jQuery) {
+    sitecues.use('jquery', 'browser', function(jQuery, browser) {
 
         // For those who need them (< IE 9), add support for CSS functions
         var isStyleFuncSupported = CSSStyleDeclaration.prototype.getPropertyValue != null;
@@ -77,7 +77,10 @@ sitecues.def('jquery/style', function(style, callback, log) {
                 if (value !== undefined) {
                     // Set style property
                     var priority = priority !== undefined ? priority : '';
-                    style.setProperty(property, value, priority);
+                    if(browser.isIE() && property === 'cursor') {
+                        return;
+                    }
+                    style.setProperty(property, value + '', priority);
                     return;
                 }
             }
