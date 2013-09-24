@@ -47,6 +47,7 @@ use = function() {
     index++;
   }
 
+  // The last parameter is callback.
   var callback = arguments[arguments.length - 1];
   return callback.apply(this, args);
 };
