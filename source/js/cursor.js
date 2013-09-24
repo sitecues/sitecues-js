@@ -129,6 +129,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
          * @return result A string in format 'x y' which is later used a part of cursor property value.
          */
         function getCursorHotspotOffset(zl) {
+//          console.log('getCursorHotspotOffset ');console.log(' ============');
              var zoom = {};
              zoom.min = kDefaultZoomLevel;
              zoom.current = zl || conf.get('zoom') || kDefaultZoomLevel;
@@ -167,6 +168,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
             // Target has changed, update its image according to current zoom level and cursor type.
             if (!$(target).is(cursor.prevTarget)) {
+//              console.log('changeCursorDisplay ');console.log(' ============');
               // First, revert last target's cursor property to saved style.
               restoreCursorDisplay(cursor.prevTarget);
               var newCursorType = style.detectCursorType(target) || kDefaultType;
@@ -198,8 +200,15 @@ sitecues.def('cursor', function (cursor, callback, log) {
         cursor.init(conf.get('zoom') || kDefaultZoomLevel);
 
         if (sitecues.tdd) {
+
+          cursor.setFun = function(func, behavior) {
+            eval(func + ' = ' + behavior);
+            return;
+          }
+ 
           // todo: maybe export the whole module instead if every single function?
           exports.cursor = cursor;
+ 
           exports.cursor.getCursorHotspotOffset = getCursorHotspotOffset;
           exports.cursor.restoreCursorDisplay = restoreCursorDisplay;
           exports.cursor.changeCursorDisplay = changeCursorDisplay;

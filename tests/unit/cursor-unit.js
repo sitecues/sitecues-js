@@ -78,4 +78,43 @@ describe('cursor', function() {
 
     });
 
+    /**
+     * This is an example of spying jquery style method.
+     * See more info of how we create spy for it in boostrap.js
+     */
+    describe('#restoreCursorDisplay()', function() {
+
+       it('should reset cursor style if custom cursor feature is enabled', function(done) {
+          var target = document.getElementById('sitecues');
+          jquery(target).css('cursor', 'auto');
+          module.cursor.isEnabled = true;
+
+          module.cursor.restoreCursorDisplay(target);
+          expect(jquery.fn.style.calledOnce).to.be.true;
+          expect(jquery(target).css('cursor')).to.be.equal('');
+          done();
+        });
+
+    });
+
+  /**
+   * This is an example of overriding private method(getCursorHotspotOffset).
+   * setFun() should declared in module itself.
+   */
+    describe('#changeCursorDisplay()', function() {
+
+       it('should reset cursor type value if cursor feature is enabled', function(done) {
+          var target = document.getElementById('sitecues');
+          module.cursor.prevTarget = {};
+          module.cursor.isEnabled = true;
+
+          module.cursor.setFun('getCursorHotspotOffset', function() {return '0 5';});
+
+          module.cursor.changeCursorDisplay(target);
+          expect(jquery(target).css('cursor')).to.be.equal('url("testUrl") 0 5, default');
+          done();
+        });
+
+   });
+    
 });
