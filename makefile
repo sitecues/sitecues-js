@@ -71,7 +71,7 @@ files=\
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
-  source/js/speech.js \
+	source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
@@ -89,6 +89,7 @@ files=\
 	source/js/toolbar/resizer.js \
 	source/js/ui-manager.js \
 	source/js/html-build.js \
+	source/js/browser.js \
 
 https=off
 prod=off
