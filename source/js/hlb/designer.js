@@ -77,7 +77,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             - parseFloat(closestStyle['padding-right'])
                             - parseFloat(closestStyle['margin-left'])
                             - parseFloat(closestStyle['margin-right'])
-                            - parseFloat(closestStyle['border-left-width'])
+                            - parseFloat(closestStyle['border-left-width'])   // Odd -- why repeated?
                             - parseFloat(closestStyle['border-left-width'])
                             + 'px';
                         }
@@ -185,9 +185,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-                    var width = (jElement.outerWidth(true) + 2 * additionalBoxOffset) * extraZoom;
-                    var height = (jElement.outerHeight(true)+ 2 * additionalBoxOffset) * extraZoom;
-
+                    var rect = positioning.getSmartBoundingBox(this);
+                    var width = (rect.width + 2 * additionalBoxOffset) * extraZoom;
+                    var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
 

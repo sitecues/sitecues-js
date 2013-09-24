@@ -353,7 +353,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        */
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
         // Fetch the exact value for width(not rounded)
-        var clientRect = this.item.getBoundingClientRect();
+        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssBeforeAnimateStyles = {
           'top': cssUpdate.top + 'px',

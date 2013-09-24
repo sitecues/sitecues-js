@@ -73,7 +73,8 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
       sitecues: [
         'graphic'],
       shouldBeChild: true,
-      canHighlight: true
+      canHighlight: true,
+	  alwaysHighlight: true
     },
     // We treat these elements as inline text fragments
     fragment: {
