@@ -7,7 +7,7 @@ var fs = require('fs'),
     page,
     ivona = require('../../source/js/speech/ivona.js'),
     $ = jquery;
-fs.readFile('../pages/htmlentities.html', 'utf8', function (err, file) {
+fs.readFile('../data/html/htmlentities.html', 'utf8', function (err, file) {
   page = file;
 })
 // Require the module file we want to test.
