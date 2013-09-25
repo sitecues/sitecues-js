@@ -43,19 +43,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
 
-		// show mouse highlight (mh.update calls mh.show)
-		mh.show = function() {
-			// can't find any element to work with
-			if (!state.picked) {
-				return;
-			}
+		/**
+		 * Returns true if the "first high zoom" cue should be played.
+		 * @return {boolean}
+		 */
+		function shouldPlayFirstHighZoomCue() {
+		  var fhz = conf.get(FIRST_HIGH_ZOOM_PARAM);
+		  return (!fhz || ((fhz + FIRST_HIGH_ZOOM_RESET_MS) < (new Date()).getTime()));
+		};
 
-			if (!mh.updateOverlayPosition(true)) {
-				return;  // Did not find visible rectangle to highldight
-			}
-
-			mh.updateOverlayColor();
-		}
+		/**
+		 * Signals that the "first high zoom" cue has played.
+		 */
+		function playedFirstHighZoomCue() {
+		  conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
+		};
 
 		function isInterestingBackground(style) {
 
@@ -196,6 +198,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			    blue = Math.round(254 - 5 * decrement),
 			    color = 'rgb(' + red + ',' + green + ',' + blue + ')';
 			return color;
+		}
+
+		// show mouse highlight (mh.update calls mh.show)
+		mh.show = function() {
+			// can't find any element to work with
+			if (!state.picked) {
+				return;
+			}
+
+			if (!mh.updateOverlayPosition(true)) {
+				return;  // Did not find visible rectangle to highldight
+			}
+
+			mh.updateOverlayColor();
 		}
 
 		mh.updateOverlayColor = function() {
@@ -439,22 +455,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			mh.show();
 		}
 
-		/**
-		 * Returns true if the "first high zoom" cue should be played.
-		 * @return {boolean}
-		 */
-		var shouldPlayFirstHighZoomCue = function() {
-		  var fhz = conf.get(FIRST_HIGH_ZOOM_PARAM);
-		  return (!fhz || ((fhz + FIRST_HIGH_ZOOM_RESET_MS) < (new Date()).getTime()));
-		};
-
-		/**
-		 * Signals that the "first high zoom" cue has played.
-		 */
-		var playedFirstHighZoomCue = function() {
-		  conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
-		};
-
 		/*
 		 * Play a verbal cue explaining how mouse highlighting works.
 		 *
@@ -475,7 +475,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			$(document).off('mousemove', mh.update);
 
 			mh.hide();
-			
+
 		}
 
 		mh.hideAndResetState = function() {
