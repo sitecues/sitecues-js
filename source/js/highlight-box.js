@@ -295,7 +295,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1];
-        var clientRect = this.item.getBoundingClientRect();
+        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
