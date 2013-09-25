@@ -5,11 +5,10 @@
 require('./test/bootstrap');
 var fs = require('fs'),
     page,
-    ivona = require('../../source/js/speech/ivona.js'),
+    ivona = require('../../source/js/speech/ivona'),
     $ = jquery;
 fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
   page = file;
-  console.log(file)
 })
 // Require the module file we want to test.
 
@@ -19,7 +18,6 @@ describe('ivona', function() {
       $(page).find('p').each(function () {
         var actual = ivona.removeHTMLEntities(encodeURIComponent($(this).text())),
             expected = '__';
-        console.log(actual)
         expect(actual).to.be.equal(expected);
       });
       done();
