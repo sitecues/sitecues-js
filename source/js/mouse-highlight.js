@@ -550,4 +550,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		callback();
 	});
 
+  if (sitecues.tdd) {
+    exports.mh = mh;
+  }
+
 });
