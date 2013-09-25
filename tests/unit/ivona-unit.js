@@ -19,7 +19,6 @@ describe('ivona', function() {
       $(page).find('p').each(function () {
         var actual = ivona.removeHTMLEntities(encodeURIComponent($(this).text())),
             expected = '__';
-        console.log(actual)
         expect(actual).to.be.equal(expected);
       });
       done();
