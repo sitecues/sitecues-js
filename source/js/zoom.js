@@ -1,7 +1,7 @@
 sitecues.def('zoom', function (zoom, callback, log) {
 
       // Values used for zoom math
-      zoom.max = 5;
+      zoom.max = 3;
       zoom.min = 1;
       zoom.step = 0.1;
       zoom.defaultLevel = 1;
