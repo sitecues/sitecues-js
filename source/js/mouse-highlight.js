@@ -359,13 +359,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			// don't show highlight if current active isn't body
 			if (!$(document.activeElement).is('body')) {
-                return;
-            }
+	      return;
+      }
 
 			// don't show highlight if window isn't active
 			if (!document.hasFocus()) {
-                return;
-            }
+        return;
+      }
 
 			if (event.target === state.target) {
 				// Update rect in case of sub-element scrolling -- we get mouse events in that case
@@ -384,8 +384,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			var picked = picker.find(event.target);
 
 			if (!picked) {
-				if (state.picked)
+				if (state.picked){
 					mh.hideAndResetState();  // Nothing picked anymore
+				}
 				return;
 			}
 
@@ -435,6 +436,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.enable = function() {
 			// handle mouse move on body
 			$(document).on('mousemove', mh.update);
+			mh.show();
 		}
 
 		/**
@@ -462,7 +464,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.verbalCue = function() {
 			if(shouldPlayFirstHighZoomCue()) {
 				speech.cueByKey('verbalCueHighZoom', function() {
-	                playedFirstHighZoomCue();
+	        playedFirstHighZoomCue();
 				});
 	  	}
 		}
@@ -471,7 +473,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.disable = function(element) {
 			// remove mousemove listener from body
 			$(document).off('mousemove', mh.update);
-			mh.hideAndResetState();
+
+			mh.hide();
+			
 		}
 
 		mh.hideAndResetState = function() {
@@ -549,7 +553,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		// done
 		callback();
 	});
-
+	
   if (sitecues.tdd) {
     exports.mh = mh;
   }
