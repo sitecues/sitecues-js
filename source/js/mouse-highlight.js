@@ -1,10 +1,4 @@
-sitecues.def('mouse-highlight', function(mh, callback) {
-
-
-	mh.enabled = false;
-	// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
-	mh.initZoom = 0;
-  
+sitecues.def('mouse-highlight', function (mh, callback) {  
   		// Tracks if the user has heard the "first high zoom" cue.
   var FIRST_HIGH_ZOOM_PARAM = "firstHighZoom",
   		// The high zoom threshold.
@@ -40,13 +34,16 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 
 		// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
-		
-		conf.set('mouseHighlightMinZoom', MIN_ZOOM);
 
+		conf.set('mouseHighlightMinZoom', MIN_ZOOM);
+		
+		mh.enabled = false;
+		// this is the initial zoom level, we're only going to use the verbal cue if someone increases it
+		mh.initZoom = 0;
 		// Remember the initial zoom state
 		mh.initZoom = conf.get('zoom');
 
-		// show mouse highlight
+		// show mouse highlight (mh.update calls mh.show)
 		mh.show = function() {
 			// can't find any element to work with
 			if (!state.picked) {
@@ -54,58 +51,76 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 			}
 
 			if (!mh.updateOverlayPosition(true)) {
-				return;  // Did not find visible rectangle to highlight
+				return;  // Did not find visible rectangle to highldight
 			}
 
 			mh.updateOverlayColor();
 		}
 
 		function isInterestingBackground(style) {
-			if (style.backgroundColor === 'transparent')
+
+			var matchColorsAlpha,
+					match,
+					matchColorsNoAlpha,
+					mostlyWhite;
+
+			if (style.backgroundColor === 'transparent') {
 				return false;
-			var matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-			var match = matchColorsAlpha.exec(style.backgroundColor);
+			}
+			
+			matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
+	    match = matchColorsAlpha.exec(style.backgroundColor);
+			
 			if (match != null) {
 				if (parseFloat(match[4]) < .10) {
 					return false; // Mostly transparent, not interesting
 				}
-			}
-			else {
-				var matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+			} else {
+				matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
 				match = matchColorsNoAlpha.exec(style.backgroundColor);
 				if (match === null) {
 					return true;
 				}
 			}
 			// Non-interesting if mostly white
-			var mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
+			mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
+			
 			return !mostlyWhite;
+		
 		}
 
 		function hasInterestingBackgroundOnAnyOf(collection) {
-			var hasBg = false;
+			
+			var hasBg = false,
+					style;
+			
 			$.each(collection, function() {
-				var style = common.getElementComputedStyles(this, '', true);
+				style = common.getElementComputedStyles(this, '', true);
 				if (isInterestingBackground(style)) {
 					hasBg = true;
 					return false;
 				}
 			});
+		
 			return hasBg;
+		
 		}
 
 		function hasInterestingBackgroundImage(ancestors) {
 			// TODO: we're only checking 3 up, because we get confused by layout/spacer images
 			// We need a better approach!
-			var hasInterestingBgImage = false;
-			var MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE = 3;
+			var hasInterestingBgImage = false,
+			    MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE = 3;
+		
 			$.each(ancestors.slice(0, MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE), function() {
 				if (!common.isEmptyBgImage(this.style.backgroundImage)) {
 					hasInterestingBgImage = true;
 					return false;
 				}
 			});
+
 			return hasInterestingBgImage;
+		
 		}
 
 		function updateColorApproach(style) {
@@ -118,8 +133,7 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 				//	when-to-use: for article or cases where multiple items are selected
 				state.doUseBgColor = true;
 				state.doUseOverlayForBgColor = true; // Washes foreground out
-			}
-			else if ($(state.picked).is(VISUAL_MEDIA_ELEMENTS) || !common.isEmptyBgImage(style.backgroundImage)) {
+			}	else if ($(state.picked).is(VISUAL_MEDIA_ELEMENTS) || !common.isEmptyBgImage(style.backgroundImage)) {
 				//  approach #2 -- don't change background color
 				//                 use overlay for rounded outline
 				//	pros: foreground text does not get washed out
@@ -140,8 +154,8 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 
 		// How visible is the highlight?
 		function getHighlightVisibilityFactor() {
-			var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.3;
-			var vizFactor = state.zoom;
+			var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.3,
+			    vizFactor = state.zoom;
 			if (speech.isEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
 				vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
 			}
@@ -149,15 +163,15 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 		}
 
 		function getHighlightBorderColor() {
-			var viz = getHighlightVisibilityFactor();
-			var opacity = viz - 1.3;
+			var viz = getHighlightVisibilityFactor(),
+			    opacity = viz - 1.3;
 			opacity = Math.min(1, Math.max(opacity, 0));
 			return 'rgba(0,0,0,' + opacity + ')';
 		}
 
 		function getHighlightBorderWidth() {
-			var viz = getHighlightVisibilityFactor();
-			var borderWidth = viz - .4;
+			var viz = getHighlightVisibilityFactor(),
+			    borderWidth = viz - .4;
 			return Math.max(1, borderWidth);
 		}
 
@@ -165,32 +179,33 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 			// Best to use transparent color when the background is interesting or dark, and we don't want to
 			// change it drastically
 			// This lightens at higher levels of zoom
-			var viz = getHighlightVisibilityFactor();
+			var viz = getHighlightVisibilityFactor(),
+					alpha;
 			viz = Math.min(viz, 2);
-			var alpha = .11 * viz;
+			alpha = .11 * viz;
 			return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
 		}
 
 		function getOpaqueBackgroundColor() {
 			// Best to use opaque color, because inner overlay doesn't match up perfectly causing overlaps and gaps
 			// It lightens at higher levels of zoom
-			var viz = getHighlightVisibilityFactor();
-			viz = Math.min(viz, 2);
-			var decrement = viz * 1.4;
-			var red = Math.round(255 - decrement);
-			var green = red;
-			var blue = Math.round(254 - 5 * decrement);
-			var color = 'rgb(' + red + ',' + green + ',' + blue + ')';
+			var viz = Math.min(getHighlightVisibilityFactor(), 2),
+			    decrement = viz * 1.4,
+			    red = Math.round(255 - decrement),
+			    green = red,
+			    blue = Math.round(254 - 5 * decrement),
+			    color = 'rgb(' + red + ',' + green + ',' + blue + ')';
 			return color;
 		}
 
 		mh.updateOverlayColor = function() {
-			var element = state.picked.get(0);
-			var style = common.getElementComputedStyles(element, '', true);
+			var element = state.picked.get(0),
+			    style = common.getElementComputedStyles(element, '', true),
+			    highlightOutline;
 
 			updateColorApproach(style);
 
-			var highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS);
+			highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS);
 
 			if (state.doUseOverlayForBgColor) {  // Approach #1 -- use overlay for bg color
 				highlightOutline.children().style('background-color', BACKGROUND_COLOR_TRANSPARENT, '');
@@ -230,7 +245,6 @@ sitecues.def('mouse-highlight', function(mh, callback) {
 			$(canvas).attr({'width': bgRect.width, 'height': bgRect.height});
 			var ctx = canvas.getContext('2d');
 			ctx.fillStyle = backgroundColor;
-			console.log('BG color ' + backgroundColor);
 			ctx.fillRect(0, 0, bgRect.width, bgRect.height);
 
 			state.savedCss = {
