@@ -7,4 +7,3 @@ INSTRUCTIONS
 4) Check png-output contains .PNG files
 5) Batch convert .PNG files to .ICO icons using software such as: "iConvert Icons"
 6) Run "convert-ico-to-cur.py -x [int] -y [int]" on the icons
-

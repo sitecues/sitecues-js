@@ -6,13 +6,16 @@
  */
 
 (function(){
+  'use strict';
 
   // Create the logger for this module
-  var log = window.sitecues.logger.log('core');
+  if (window.sitecues && window.sitecues.logger) {
+    var log = window.sitecues.logger.log('core');
+  }
 
   // Return if there is sitecues instance on the page
   if (window.sitecues && window.sitecues.coreConfig) {
-    log.warn("sitecues already defined.");
+    log.warn('sitecues already defined.');
     return;
   }
 
@@ -41,15 +44,14 @@
     , parseUrl
     
     , lastModuleDefined
-    
-    , APP_VERSION = '0.0.0-UNVERSIONED'
   ;
 
+  sitecues.APP_VERSION = '0.0.0-UNVERSIONED';
 
   // More convenient way to get epoch time in milliseconds when working with the code
   function time(){
     return + new Date();
-  };
+  }
 
   // Return the core config.
   sitecues.getCoreConfig = function() {
@@ -62,7 +64,7 @@
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
-    while (ev = events.shift()){
+    while ((ev = events.shift())){
       // create an immutable callback list, allowing traversal during
       // modification. the tail is an empty object that will always be used
       // as the next node
@@ -84,15 +86,18 @@
       delete this._events;
     } else if (calls = this._events){
       events = events.split(/\s+/);
-      while (ev = events.shift()){
+      while ((ev = events.shift())){
         node = calls[ev];
         delete calls[ev];
-        if (!callback || !node) continue;
+        if (!callback || !node){
+          continue;
+        }
 
         // create a new list, omitting the indicated event/context pairs
         while ((node = node.next) && node.next) {
-          if (node.callback === callback &&
-            (!context || node.context === context)) continue;
+          if (node.callback === callback && (!context || node.context === context)) {
+            continue;
+          }
           this.on(ev, node.callback, node.context);
         }
       }
@@ -106,21 +111,27 @@
   // listening for `"*"` passes the true event name as the first argument
   sitecues.emit = function(events){
     var event, node, calls, tail, args, all, rest;
-    if (!(calls = this._events)) return this;
+    if (!(calls = this._events)){
+      return this;
+    }
 
     all = calls['*'];
     (events = events.split(/\s+/)).push(null);
 
     // save references to the current heads & tails
-    while (event = events.shift()){
-      if (all) events.push({next: all.next, tail: all.tail, event: event});
-      if (!(node = calls[event])) continue;
+    while ((event = events.shift())){
+      if (all){
+        events.push({next: all.next, tail: all.tail, event: event});
+      }
+      if (!(node = calls[event])) {
+        continue;
+      }
       events.push({next: node.next, tail: node.tail});
     }
 
     // traverse each list, stopping when the saved tail is reached.
     rest = arr.slice.call(arguments, 1);
-    while (node = events.pop()){
+    while ((node = events.pop())){
       tail = node.tail;
       args = node.event ? [node.event].concat(rest) : rest;
       while ((node = node.next) !== tail){
@@ -149,7 +160,7 @@
     }
 
     // The entry is a number, so just return that saved state.
-    if (typeof module === "number") {
+    if (typeof module === 'number') {
       return module;
     }
 
@@ -159,15 +170,16 @@
 
   function checkDefinedModulesAreAllLoaded () {
     var defCount = 0
-    ,   length     = LOAD_LIST.length
+    , l     = LOAD_LIST.length
+    , i
+    , iModule
     ;
 
-    for (var i=0; i< length; i++) {
+    for (i=0; i< l; i++) {
+      iModule = modules[LOAD_LIST[i]];
 
-      var i_module = modules[LOAD_LIST[i]];
-
-      if (i_module) {
-        defCount += i_module.defined === true ? 1 : 0 ;
+      if (iModule) {
+        defCount += iModule.defined === true ? 1 : 0 ;
       }
     }
 
@@ -175,14 +187,14 @@
       window.sitecues.allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
     }
-  };
+  }
 
   // define equinox module
   var _def = function(name, constructor){
     
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-      log.warn("sitecues: module '" + name + "' already defined.");
+      log.warn('sitecues: module "' + name + '" already defined.');
       return;
     }
 
@@ -373,15 +385,17 @@
   // Parse a URL into its components.
   parseUrl = function(urlStr){
     // Ran across this in a Google search... loved the simplicity of the solution.
-    var url = {};
-    var parser = document.createElement('a');
+    var url = {}
+      , parser = document.createElement('a')
+      ;
     parser.href = urlStr;
 
     // No one ever wants the hash on a full URL...
-    if (parser.hash)
+    if (parser.hash){
       url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-    else
+    } else {
       url.raw = parser.href;
+    }
 
     url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
     url.secure   = (url.protocol == "https");
@@ -412,11 +426,11 @@
 
 
   var scriptSrcUrl    = null
-  ,   scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js')
-  ,   scriptTags      = document.getElementsByTagName('script')
-  ;
+    , scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues).js')
+    , scriptTags      = document.getElementsByTagName('script')
+    ;
 
-  sitecues.getScriptSrcUrl = function() {
+  sitecues.getScriptSrcUrl = function () {
     return scriptSrcUrl;
   };
 
@@ -499,115 +513,6 @@
     }
   };
 
-  // The default status formatter: simply log all data to the log.
-  var DEFAULT_STATUS_CALLBACK = function(info) {
-    var printObj = function(o, prefix) {
-        var p, v, s = '';
-        prefix = prefix || '';
-        for (p in o) {
-          if (o.hasOwnProperty(p)) {
-            v = o[p];
-            s += prefix + p + ':';
-            if (typeof v == 'object') {
-              s += '\n' + printObj(v, prefix + '  ');
-            } else {
-              s += ' ' + v + '\n';
-            }
-          }
-        }
-        return s;
-
-      };
-
-    log.info('\n===== BEGIN: SITECUES STATUS =====================\n'
-      + printObj(info)
-      + '===== END: SITECUES STATUS =======================');
-  };
-
-  sitecues.status = function (callback) {
-    callback = callback || DEFAULT_STATUS_CALLBACK;
-
-    sitecues.use("jquery", "speech", 'conf', function ( $, speech, conf ) {
-
-      // Set the ajax URLs
-      var ajax_urls = {
-        up: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" ),
-        ws: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" )
-      };
-      
-      // Define the info object to be formatted by the log
-      var info = {
-        version: {
-          "sitecues_js": APP_VERSION,
-          "sitecues_up": null,
-          "sitecues_ws": null
-        },
-        "current_url": window.location.href,
-        "sitecues_js_url": ( sitecues.getScriptSrcUrl() ).raw,
-        "user_agent":  navigator.userAgent,
-        "tts_status": ( ( speech.isEnabled() ) ? "on" : "off" ),
-      };
-
-      var data = conf.data();
-      for (var setting in data) {
-        info[setting] = data[setting];
-      }
-
-      // Defer the ajax calls so we can respond when both are complete
-      var ajaxCheck = function(){
-        if ( typeof info.version.sitecues_up === 'string' && 
-             typeof info.version.sitecues_ws === 'string' ) {
-          callback(info);
-        }
-      };
-
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.up,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_up = response.version;
-          ajaxCheck();
-        },
-        error: function(){
-          
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_up = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-        
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.ws,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_ws = response.version;
-          ajaxCheck();
-        },
-        error: function(){
-
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-
-    }); // end of use
-
-    // Popup the logger and report status
-    var popup = sitecues.logger.appenders.popup;
-    popup.show();
-    popup.focus();
-    return 'Getting sitecues status.'
-  };
-
   //////////////////////////////////////////////////
   //
   //  START: Core Configuration
@@ -628,9 +533,7 @@
     if (window.sitecues.coreConfig) {
       coreConfig = window.sitecues.coreConfig;
 
-      log.info( coreConfig );
-
-      //window.sitecues.coreConfig = undefined;
+      log.info(coreConfig);
 
       if (coreConfig.hosts) {
         if (coreConfig.hosts.ws) {

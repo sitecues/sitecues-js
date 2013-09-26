@@ -4,5 +4,8 @@ conf = {
   },
   'set': function () {
     return 'test';
+  },
+  'data': function () {
+    return 'test';
   }
 };

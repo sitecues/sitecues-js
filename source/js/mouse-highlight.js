@@ -11,6 +11,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			INIT_STATE = {
 				picked: null,     // JQuery for picked element(s)
 				target: null,     // Mouse was last over this element
+				lastCursorPos: { x: -1, y: -1},
+				isCreated: false, // Has highlight been created
 				savedCSS: null,   // map of saved CSS for highlighted element
 				elementRect: null,
 				fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
@@ -33,7 +35,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 	    state;
 
 		// depends on jquery, conf, mouse-highlight/picker and positioning modules
-	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', function($, conf, picker, positioning, common, speech) {
+	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', function($, conf, picker, positioning, common, speech, geo) {
 
 		conf.set('mouseHighlightMinZoom', MIN_ZOOM);
 		
@@ -99,7 +101,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			$.each(collection, function() {
 				style = common.getElementComputedStyles(this, '', true);
 				if (isInterestingBackground(style)) {
-					hasBg = true; //????
+					hasBg = true; //`
 					return false;
 				}
 			});
@@ -340,18 +342,30 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				}
 				if (elementRect.left === state.elementRect.left &&
 					elementRect.top === state.elementRect.top) {
-					return true; // Optimization -- return quickly if nothing has changed, don't update overlay rect
+					return true; // Optimization -- return quickly if nothing has changed, don't update overlay
 				}
 			}
 
 			// Get exact bounds
 			fixedRects = positioning.getAllBoundingBoxes(element, 99999); // 99999 = Always union into a single rect
+
 			if (!fixedRects.length) {   // No valid rectangle
 				mh.hide();
 				return false;
 			}
+
+			state.zoom = positioning.getTotalZoom(element, true);
+			var x = state.lastCursorPos.x / state.zoom;
+			var y = state.lastCursorPos.y / state.zoom;
+			if (!geo.isPointInAnyRect(x, y, fixedRects)) {
+				mh.hide();
+				return false;
+			}
+
+			positioning.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
 			state.fixedContentRect = fixedRects[0];
 			state.elementRect = $.extend({}, elementRect);
+
 			state.zoom = positioning.getTotalZoom(element, true);
 
 			absoluteRects = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom);
@@ -360,15 +374,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			state.viewRect = $.extend({ 'borderWidth': highlightBorderWidth }, absoluteRects[0]);
 
+
 			if (createOverlay) {
 				// Create and position highlight overlay
 				$('<div>')
 					.attr('class', HIGHLIGHT_OUTLINE_CLASS)
 					.appendTo(document.documentElement);
-
+				state.isCreated = true;
 			}
 			else if (JSON.stringify(previousViewRect) === JSON.stringify(state.viewRect)) {
-				// TODO -- better way to compare objects -- this is not IE9 compatible
 				return true; // Already created and in correct position, don't update DOM
 			}
 
@@ -401,7 +415,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			// don't show highlight if current active isn't body
 			if (!$(document.activeElement).is('body')) {
-	      return false;
+        return false;
       }
 
 			// don't show highlight if window isn't active
@@ -409,7 +423,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
-			if (event.target === state.target) {
+			// Pick an element but don't slow down scrolling
+			mh.pickTimer && clearTimeout(mh.pickTimer );
+			mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
+		}
+
+		function updateImpl(event) {
+			state.lastCursorPos.x = event.clientX;
+			state.lastCursorPos.y = event.clientY;
+
+
+			if (state.isCreated && event.target === state.target) {
 				// Update rect in case of sub-element scrolling -- we get mouse events in that case
 				mh.updateOverlayPosition();
 				return;
@@ -432,7 +456,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				return;
 			}
 
-			if (picked.is(state.picked)) {  // Same thing picked as before
+			if (state.isCreated && picked.is(state.picked)) {  // Same thing picked as before
 				mh.updateOverlayPosition(); // Update rect in case of sub-element scrolling
 				return;
 			}
@@ -440,20 +464,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			mh.hideAndResetState();
 			state.picked = $(picked);
 			// show highlight for picked element
-			mh.timer && clearTimeout(mh.timer);
-			mh.timer = setTimeout(function() {
-				mh.show();
-			}, 40);
+			mh.showTimer && clearTimeout(mh.showTimer);
+			mh.showTimer = setTimeout(mh.show, 40);
 		}
 
 		// refresh status of enhancement on page
 		mh.refresh = function() {
       if (mh.enabled) {
-        // handle mouse move on body
-        $(document).on('mousemove', mh.update);
+        // handle mouse move or scroll on body
+	    // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
+	    // and there is no delay waiting for the user to stop before the event is fired
+        $(document).on('mousemove mousewheel', mh.update);
       } else {
         // remove mousemove listener from body
-        $(document).off('mousemove', mh.update);
+        $(document).off('mousemove mousewheel', mh.update);
       }
 		}
 
@@ -523,9 +547,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		}
 
 		mh.resetState = function() {
-			if (mh.timer) {
-				clearTimeout(mh.timer);
-				mh.timer = 0;
+			if (mh.showTimer) {
+				clearTimeout(mh.showTimer);
+				mh.showTimer = 0;
+			}
+
+			if (mh.pickTimer) {
+				clearTimeout(mh.pickTimer);
+				mh.pickTimer = 0;
 			}
 
 			state = $.extend({}, INIT_STATE); // Copy

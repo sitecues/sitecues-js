@@ -2,7 +2,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild) {
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'browser', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, browser) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -104,23 +104,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         panel.parent.click(function(e) {
           e.preventDefault();
           return false;
-        })
-        // panel.element.css("top",'50');
-        frame.css({"left": '', "right": ''});
-        var scroll = positioning.getScrollPosition();
-        //We're going to leave the panel as a root-level element with position:fixed, but we're going to set it
-        // positioning.centerOn(panel.element, positioning.getCenter(panel.parent), conf.get('zoom'), 'fixed');
-        var panelTop = positioning.getOffset(panel.parent).top - scroll.top - 40;
-        if(panelTop < 0) {
-          panelTop = 0;
-        }
-        frame.style("top", panelTop, 'important');
-
-        var panelLeft = positioning.getOffset(panel.parent).left + (panel.parent.width() / 2) - scroll.left - 250;
-        if(panelLeft < 0) {
-          panelLeft = 0;
-        }
-        frame.style("left", panelLeft, 'important');
+        });
       }
 
       frame.appendTo('html');
@@ -140,10 +124,76 @@ sitecues.def( 'panel', function (panel, callback, log) {
       // Clear timer if present
       timer && clearTimeout(timer);
 
-      // Animate instead of fade.
       panel.element.hide();
+      // Reset styles if any were set
+      panel.element.style({
+        "top": '',
+        "bottom": '',
+        "left": '',
+        "right": ''
+      }, '', 'important');
+
+      // Do we have a badge reference?  If no reference is passed then we
+      // don't really know where we're supposed to put the panel.
+      if(panel.parent) {
+        var badgeRect = $(panel.parent).get(0).getBoundingClientRect();
+
+        // These will tell us where the badge isSticky  
+        var badgeTop = 0;
+        var badgeLeft = 0;
+
+        var viewport = positioning.getViewportDimensions(0, conf.get('zoom'));
+
+        // Set up some standard measurements
+        if(browser.isFirefox()) {
+          badgeTop = (window.pageYOffset + badgeRect.top)/conf.get('zoom');
+          badgeLeft = (window.pageXOffset + badgeRect.left)/conf.get('zoom');
+        } else {
+          badgeTop = badgeRect.top;
+          badgeLeft = badgeRect.left;
+        }
+
+        // These two variables will tell us which -quadrant we're in
+        var topQ = badgeTop < (viewport.height / 2);
+        var leftQ = badgeLeft < (viewport.width / 2);
+
+        // Match the type of positioning of the parent/badge.  Trying to pin a
+        // fixed element to an absolute element is tricky if not impossible.
+        var absolute = panel.parent.offsetParent().css('position') === 'absolute';
+        if(absolute) {
+          panel.element.css('position','absolute');
+        }
+
+        if(topQ) {
+          log.info("Badge is in top half of page (" + panel.parent.offset().top + ")");
+          panel.element.style("top", (panel.parent.offset().top - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
+        } else {
+          log.info("Badge is in bottom half of page");
+          // We can't use the 'bottom' property here because jQuery won't animage properly off of it.
+          panel.element.style("top", (((panel.parent.offset().top + (panel.parent.height()/2)) - (panel.element.height()/2)) - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
+        }
+
+        if(leftQ) {
+          log.info("Badge is in left half of page");
+          panel.element.style("left", Math.min(panel.parent.offset().left, $(window).width() - panel.element.width()) + 'px', 'important');
+        } else {
+          log.info("Badge is in right half of page");
+          if(((panel.parent.offset().left + panel.parent.width()) - panel.element.width()) < 0) {
+            // The panel would go off the left side of the screen
+            panel.element.style("right", panel.element.width() + 'px', 'important');
+            panel.element.style("opacity", 0.5, 'important');
+          } else {
+            // The panel will fit on the screen
+            if(absolute) {
+              panel.element.style("right", viewport.width- (panel.parent.offset().left + panel.parent.width()) + 'px', 'important');
+            } else {
+              panel.element.css('right',($(window.width) - (panel.parent.offset().left) + panel.parent.width())+ 'px', 'important');
+            }
+          }
+        }
+      }
+
       panel.element.animate({
-          // right: '+=0',
           width: 'toggle',
           height: 'toggle',
           opacity: 1.0

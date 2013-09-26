@@ -90,6 +90,7 @@ files=\
 	source/js/ui-manager.js \
 	source/js/html-build.js \
 	source/js/browser.js \
+	source/js/status.js \
 
 https=off
 prod=off

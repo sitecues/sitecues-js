@@ -1,1 +1,3 @@
-speech = {};
+speech = {
+    isEnabled: function(){ return true; }
+};
