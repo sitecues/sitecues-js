@@ -544,7 +544,7 @@
         }
 
         if (coreConfig.hosts.up) {
-          log.info("sitecues up host: " + coreConfig.hosts.up);
+          log.info('sitecues up host: ' + coreConfig.hosts.up);
         } else {
           log.warn("sitecues up host not specified.");
           valid = false;

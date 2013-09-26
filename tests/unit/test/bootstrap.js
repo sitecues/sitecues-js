@@ -14,7 +14,7 @@ jquery.fn.style  = function() {};
 var expectedBehaviour = function(property, value) {
   jquery(this).css(property, value);
 };
-sinon.stub(jquery.fn, 'style', expectedBehaviour);
+    sinon.stub(jquery.fn, 'style', expectedBehaviour);
 
 // Load javascript implementation of W3C and create browser objects we need:
 // document, window, nodes etc.
