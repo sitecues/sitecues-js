@@ -1,7 +1,6 @@
 /**
  * This file contains unit tests for core.js:sitecues.status().
  */
-        // , expected = 'Getting sitecues status.'
 
 require('./test/libs');
 
