@@ -76,8 +76,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			if (match != null) {
 				if (parseFloat(match[4]) < .10) {
 					return false; // Mostly transparent, not interesting
-				}
-			} else {
+				} //???? - should there be an else -> true here?
+			} else { //so I assume that if there isnt a match then the background color is in another format?
 				matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
 				match = matchColorsNoAlpha.exec(style.backgroundColor);
 				if (match === null) {

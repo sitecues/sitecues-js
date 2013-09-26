@@ -16,15 +16,15 @@ describe('mouse-highlight', function() {
       done();
     });
     it('should return false if the background is mostly transparent (alpha level < 10%)', function(done) {
-      expect(mh.isInterestingBackground({'backgroundColor':'rgba(255,255,255,.001)'})).to.be.false;
+      expect(mh.isInterestingBackground({'backgroundColor':'rgba(255, 255, 255, .01)'})).to.be.false;
       done();
     });
-    it('should return true if the background is mostly solid (alpha level > 10%)', function(done) {
-      expect(mh.isInterestingBackground({'backgroundColor':'rgba(255,255,255,1)'})).to.be.true;
+    it('should return true if the background cannot be matched with a regex', function(done) {
+      expect(mh.isInterestingBackground({'backgroundColor':'rgb(wtf)'})).to.be.true;
       done();
     });
     it('should return false if the background is mostly white (rgb levels > 242/255', function(done) {
-      expect(mh.isInterestingBackground({'backgroundColor':'rgb(255,255,255)'})).to.be.false;
+      expect(mh.isInterestingBackground({'backgroundColor':'rgb(255, 255, 255)'})).to.be.false;
       done();
     });
   });
