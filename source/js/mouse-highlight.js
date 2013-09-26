@@ -204,11 +204,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.show = function() {
 			// can't find any element to work with
 			if (!state.picked) {
-				return;
+				return false;
 			}
 
 			if (!mh.updateOverlayPosition(true)) {
-				return;  // Did not find visible rectangle to highldight
+				return false;  // Did not find visible rectangle to highldight
 			}
 
 			mh.updateOverlayColor();
@@ -217,11 +217,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.updateOverlayColor = function() {
 			var element = state.picked.get(0),
 			    style = common.getElementComputedStyles(element, '', true),
-			    highlightOutline;
+			    highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS),
+			    ancestors,
+			    hasInterestingBg,
+			    backgroundColor,
+			    bgRect,
+			    originRect,
+			    offsetLeft,
+			    offsetTop,
+			    canvas,
+			    ctx;
 
-			updateColorApproach(style);
-
-			highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS);
+			updateColorApproach(style); //what approach will we use to update the highlight?
 
 			if (state.doUseOverlayForBgColor) {  // Approach #1 -- use overlay for bg color
 				highlightOutline.children().style('background-color', BACKGROUND_COLOR_TRANSPARENT, '');
@@ -238,28 +245,28 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			// In most cases we want the opaque background because the background color on the element
 			// can overlap the padding over the outline which uses the same color, and not cause problems
 			// We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
-			var ancestors = $(element).parents();
-			var hasInterestingBg = isInterestingBackground(style) || hasInterestingBackgroundOnAnyOf(ancestors) ||
-				hasInterestingBackgroundImage(ancestors);
-			var backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
+			ancestors = $(element).parents();
+			hasInterestingBg = isInterestingBackground(style) || hasInterestingBackgroundOnAnyOf(ancestors) ||
+			asInterestingBackgroundImage(ancestors);
+			backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
-			var bgRect = {   // Address gaps by overlapping with extra padding -- better safe than sorry. Looks pretty good
+			bgRect = {   // Address gaps by overlapping with extra padding -- better safe than sorry. Looks pretty good
 				left: state.viewRect.left - EXTRA_HIGHLIGHT_PIXELS,
 				top: state.viewRect.top - EXTRA_HIGHLIGHT_PIXELS,
 				width: state.viewRect.width + 2 * EXTRA_HIGHLIGHT_PIXELS,
 				height: state.viewRect.height + 2 * EXTRA_HIGHLIGHT_PIXELS
 			}
 			// Get the rectangle for the element itself
-			var originRect = positioning.convertFixedRectsToAbsolute([state.elementRect], state.zoom)[0];
+			originRect = positioning.convertFixedRectsToAbsolute([state.elementRect], state.zoom)[0];
 
 			// Use element rectangle to find origin (left, top) of background
-			var offsetLeft = bgRect.left < originRect.left ? 0 : Math.round(bgRect.left - originRect.left);
-			var offsetTop = bgRect.top < originRect.top? 0 : Math.round(bgRect.top - originRect.top);
+			offsetLeft = bgRect.left < originRect.left ? 0 : Math.round(bgRect.left - originRect.left);
+			offsetTop = bgRect.top < originRect.top? 0 : Math.round(bgRect.top - originRect.top);
 
 			// Build canvas rectangle
-			var canvas = document.createElement("canvas");
+			canvas = document.createElement("canvas");
 			$(canvas).attr({'width': bgRect.width, 'height': bgRect.height});
-			var ctx = canvas.getContext('2d');
+			ctx = canvas.getContext('2d');
 			ctx.fillStyle = backgroundColor;
 			ctx.fillRect(0, 0, bgRect.width, bgRect.height);
 
@@ -306,12 +313,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		// Return false if no valid rect
 		// Only update if createOverlay or position changes
 		mh.updateOverlayPosition = function(createOverlay) {
+			
+			var element,
+					elementRect,
+					fixedRects,
+					absoluteRects,
+					previousViewRect,
+					highlightBorderWidth,
+					extra,
+					borderColor;
+
 			if (!state.picked) {
 				return false;
 			}
 
-			var element = state.picked.get(0);
-			var elementRect = element.getBoundingClientRect(); // Rough bounds
+			element = state.picked.get(0);
+			elementRect = element.getBoundingClientRect(); // Rough bounds
 
 			if (!createOverlay) {   // Just a refresh
 				if (!state.elementRect) {
@@ -324,7 +341,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 
 			// Get exact bounds
-			var fixedRects = positioning.getAllBoundingBoxes(element, 99999); // 99999 = Always union into a single rect
+			fixedRects = positioning.getAllBoundingBoxes(element, 99999); // 99999 = Always union into a single rect
 			if (!fixedRects.length) {   // No valid rectangle
 				mh.hide();
 				return false;
@@ -332,9 +349,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			state.fixedContentRect = fixedRects[0];
 			state.elementRect = $.extend({}, elementRect);
 			state.zoom = positioning.getTotalZoom(element, true);
-			var absoluteRects = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom);
-			var previousViewRect = $.extend({}, state.viewRect);
-			var highlightBorderWidth = getHighlightBorderWidth();
+			absoluteRects = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom);
+			previousViewRect = $.extend({}, state.viewRect);
+			highlightBorderWidth = getHighlightBorderWidth();
 			state.viewRect = $.extend({ borderWidth: highlightBorderWidth}, absoluteRects[0]);
 
 			if (createOverlay) {
@@ -350,8 +367,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 
 			// Finally update overlay CSS -- multiply by state.zoom because it's outside the <body>
-			var extra = EXTRA_HIGHLIGHT_PIXELS + getHighlightBorderWidth();
-			var borderColor = getHighlightBorderColor();
+			extra = EXTRA_HIGHLIGHT_PIXELS + getHighlightBorderWidth();
+			borderColor = getHighlightBorderColor();
 			$('.' + HIGHLIGHT_OUTLINE_CLASS)
 				.style({
 					'top': ((state.viewRect.top - extra) * state.zoom) + 'px',
@@ -555,7 +572,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 	});
 	
   if (sitecues.tdd) {
-    exports.mh = mh;
+    exports = $.extend(mh, {
+    	'isInterestingBackground': isInterestingBackground,
+    	'hasInterestingBackgroundOnAnyOf': hasInterestingBackgroundOnAnyOf,
+
+    });
   }
 
 });
