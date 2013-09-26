@@ -563,18 +563,23 @@
       for (var setting in data) {
         info[setting] = data[setting];
       }
+      
+      function addStatusInfoToDOM(){
+        var div = document.createElement('div');
+        div.setAttribute('id', 'sitecues-status-output');
+        div.setAttribute('style', 'display:none!important;');
+        div.innerHTML = JSON.stringify(info);
+        document.getElementsByTagName('html')[0].appendChild(div);
+      }
 
       // Defer the ajax calls so we can respond when both are complete
       var ajaxCheck = function(){
         if ( typeof info.version.sitecues_up === 'string' && 
              typeof info.version.sitecues_ws === 'string' ) {
+          
+          //Fire 
           callback(info);
-
-          var div = document.createElement('div');
-          div.setAttribute('id', 'sitecues-status-output');
-          div.setAttribute('style', 'display:none!important;');
-          div.innerHTML = JSON.stringify(info);
-          document.getElementsByTagName('html')[0].appendChild(div);
+          addStatusInfoToDOM(info);
         }
       };
 
