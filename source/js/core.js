@@ -6,13 +6,14 @@
  */
 
 (function(){
+  'use strict';
 
   // Create the logger for this module
   var log = window.sitecues.logger.log('core');
 
   // Return if there is sitecues instance on the page
   if (window.sitecues && window.sitecues.coreConfig) {
-    log.warn("sitecues already defined.");
+    log.warn('sitecues already defined.');
     return;
   }
 
@@ -49,7 +50,7 @@
   // More convenient way to get epoch time in milliseconds when working with the code
   function time(){
     return + new Date();
-  };
+  }
 
   // Return the core config.
   sitecues.getCoreConfig = function() {
@@ -62,7 +63,7 @@
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
-    while (ev = events.shift()){
+    while ((ev = events.shift())){
       // create an immutable callback list, allowing traversal during
       // modification. the tail is an empty object that will always be used
       // as the next node
@@ -84,15 +85,18 @@
       delete this._events;
     } else if (calls = this._events){
       events = events.split(/\s+/);
-      while (ev = events.shift()){
+      while ((ev = events.shift())){
         node = calls[ev];
         delete calls[ev];
-        if (!callback || !node) continue;
+        if (!callback || !node){
+          continue;
+        }
 
         // create a new list, omitting the indicated event/context pairs
         while ((node = node.next) && node.next) {
-          if (node.callback === callback &&
-            (!context || node.context === context)) continue;
+          if (node.callback === callback && (!context || node.context === context)) {
+            continue;
+          }
           this.on(ev, node.callback, node.context);
         }
       }
@@ -106,21 +110,27 @@
   // listening for `"*"` passes the true event name as the first argument
   sitecues.emit = function(events){
     var event, node, calls, tail, args, all, rest;
-    if (!(calls = this._events)) return this;
+    if (!(calls = this._events)){
+      return this;
+    }
 
     all = calls['*'];
     (events = events.split(/\s+/)).push(null);
 
     // save references to the current heads & tails
-    while (event = events.shift()){
-      if (all) events.push({next: all.next, tail: all.tail, event: event});
-      if (!(node = calls[event])) continue;
+    while ((event = events.shift())){
+      if (all){
+        events.push({next: all.next, tail: all.tail, event: event});
+      }
+      if (!(node = calls[event])) {
+        continue;
+      }
       events.push({next: node.next, tail: node.tail});
     }
 
     // traverse each list, stopping when the saved tail is reached.
     rest = arr.slice.call(arguments, 1);
-    while (node = events.pop()){
+    while ((node = events.pop())){
       tail = node.tail;
       args = node.event ? [node.event].concat(rest) : rest;
       while ((node = node.next) !== tail){
@@ -149,7 +159,7 @@
     }
 
     // The entry is a number, so just return that saved state.
-    if (typeof module === "number") {
+    if (typeof module === 'number') {
       return module;
     }
 
@@ -159,15 +169,16 @@
 
   function checkDefinedModulesAreAllLoaded () {
     var defCount = 0
-    ,   length     = LOAD_LIST.length
+    , l     = LOAD_LIST.length
+    , i
+    , iModule
     ;
 
-    for (var i=0; i< length; i++) {
+    for (i=0; i< l; i++) {
+      iModule = modules[LOAD_LIST[i]];
 
-      var i_module = modules[LOAD_LIST[i]];
-
-      if (i_module) {
-        defCount += i_module.defined === true ? 1 : 0 ;
+      if (iModule) {
+        defCount += iModule.defined === true ? 1 : 0 ;
       }
     }
 
@@ -175,14 +186,14 @@
       window.sitecues.allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
     }
-  };
+  }
 
   // define equinox module
   var _def = function(name, constructor){
     
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-      log.warn("sitecues: module '" + name + "' already defined.");
+      log.warn('sitecues: module "' + name + '" already defined.');
       return;
     }
 
@@ -552,12 +563,23 @@
       for (var setting in data) {
         info[setting] = data[setting];
       }
+      
+      function addStatusInfoToDOM(){
+        var div = document.createElement('div');
+        div.setAttribute('id', 'sitecues-status-output');
+        div.setAttribute('style', 'display:none!important;');
+        div.innerHTML = JSON.stringify(info);
+        document.getElementsByTagName('html')[0].appendChild(div);
+      }
 
       // Defer the ajax calls so we can respond when both are complete
       var ajaxCheck = function(){
         if ( typeof info.version.sitecues_up === 'string' && 
              typeof info.version.sitecues_ws === 'string' ) {
+          
+          //Fire 
           callback(info);
+          addStatusInfoToDOM(info);
         }
       };
 

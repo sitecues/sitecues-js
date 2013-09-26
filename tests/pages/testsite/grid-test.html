@@ -1,0 +1,37 @@
+<!doctype html>
+<head>
+  <style>
+   *{margin:0;padding:0;}
+    body{
+      background:dimgrey;
+    }
+    #contain{
+      width :500px;
+      height:500px;
+    }
+    #contain div{
+      float:left;
+      width:100px;
+      height:100px;
+      /*border:1px solid black;*/
+    }
+    #contain div:nth-child(odd) {
+      background:white;
+    }
+    #contain div:nth-child(even) {
+      background:black;
+    }
+    #contain div:hover {
+      background:green;
+    }
+  </style>
+</head>
+<body>
+<div id="contain">
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+</div>
+</body>
+<!-- The puspose of this file is to provide test material for checking that the co-ordinates of elements are in their expected positions when zoomed. Ie: a square starting at x:500px y:500px, will start at x:1000px, y:1000px when zoomed. I created this test while working with Steve on a Selenium issue where Selenium does not respect zoom co-ordinates and calculations have to be made as to where an element's position should be. -->

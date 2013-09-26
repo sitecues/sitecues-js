@@ -8,7 +8,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
     }
     var defaultType = 'default';
 
-    sitecues.use('cursor/images/manager', function (images) {
+    sitecues.use('cursor/images/manager', 'zoom', function (images, zoomModule) {
         /*
          * Initialize cursor according to zoom level given.
          */
@@ -25,7 +25,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
                 // if static images
                 var delimiter = '.';
                 // todo: remove this line, this is shim for prototype purpose
-                for (var zoom = 1; zoom <= 5.1; zoom += 0.1) {
+                for (var zoom = zoomModule.min; zoom <= zoomModule.max + zoomModule.step; zoom += zoomModule.step) {
                     var parts = zoom.toString().split(delimiter);
                     var name = type + '_' + parts[0] + '_';
                     name += parts[1] ? parts[1].charAt(0) : '0';

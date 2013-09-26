@@ -9,20 +9,19 @@
  data-sitecues-highlight-role
 
  */
-sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
+sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
 	picker.debug = false;
 
 	// Whitelist of css display properties we'll allow
 	picker.validDisplays = [
 		'block',
-		'inline',
-		'inline-block', 
+		'inline-block',
 		'list-item',
 		'table-cell'
 	];
 
-// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale below)
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable below)
 //	// Element IDs to never highlight
 //	picker.blacklistIds = [
 //		'#sitecues-panel',
@@ -40,15 +39,46 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 
 		/*
 		 * Find the best highlightable element, if any, given a target element.
+		 * Returns JQuery object if anything picked, otherwise null (never returns JQuery object of length 0)
 		 *
 		 * @param hover The element the mouse is hovering over
 		 */
 		picker.find = function find(hover) {
+			var $el = $(hover);
+			// hide previous mh target if now mouseover sitecues toolbar
+			var isInBody = false, isInBadge = false;
+			var badge = $('#sitecues-badge');
+			$.each($el.parents().andSelf(), function(i, parent) {
+				var $parent = $(parent);
+				if ($parent.is(document.body)) {
+					isInBody = true;
+					return null;
+				}
+				if ($parent.is(badge)) {
+					isInBadge = true;
+					return null;
+				}
+			});
+
+			// Ignore elements not in the body: BGD, panel, toolbar
+			if (!isInBody || isInBadge) {
+				return null;
+			}
+
+			var picked = picker.findImpl(hover);
+			if (!picked || !picked.length) {
+				return null; // Normalize
+			}
+			return picked;
+		}
+
+		picker.findImpl = function(hover) {
+
 			var el = hover instanceof $ ? hover : $(hover);
 			var eScore, eTarget = el.data('sitecues-mouse-hl');
 			if (!eTarget) {
 				// Let's determine, and remember, what this element is.
-				eTarget = picker.isTarget(el);
+				eTarget = picker.isTarget(el.get(0));
 				if (eTarget == null) {
 					eTarget = this.kTargetStates['sometimes'];
 				} else if (eTarget) {
@@ -64,11 +94,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 			} else if (eTarget === this.kTargetStates['false']) {
 				// It's definitely not a target as determined previously
 			} else if (eTarget === this.kTargetStates['sometimes']) {
-				eScore = el.data('sitecues-mouse-hl-score');
-				if (eScore == null) {
-					eScore = picker.getScore(el);
-					el.data('sitecues-mouse-hl-score', eScore);
-				}
+				eScore = picker.getScore(el);
 				// The target may or may not be a target, depending on how it scores.
 			}
 			if (eScore && eScore > 0) {
@@ -77,7 +103,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 			}
 			// No candidates
             if (el.parent().length) {
-                return picker.find(el.parent());
+                return picker.findImpl(el.parent());
             }
             return false;
 		};
@@ -90,64 +116,45 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 		 * determination, we'll proceed to the scoring section.
 		 * 
 		 */
-		picker.isTarget = function(el) {
-            var $el = $(el), 
-            // hide previous mh target if now mouseiver sitecues toolbar
-                isInBody = false, 
-                isInBadge = false,
-                $bagde = $('#sitecues-badge'),
-                $parent;
-            //.andSelf() deprecated since 1.8
-            $.each($el.parents().andSelf(), function(i, parent) {
-                
-                $parent = $(parent);
-                
-                if ($parent.is(document.body)) {
-                    isInBody = true;
-                    return;
-                }
-                if ($parent.is($bagde)) {
-                    isInBadge = true;
-                    return;
-                }
-            })
-
-            // Ignore elements not in the body: BGD, panel, toolbar
-            if (!isInBody || isInBadge) {
-              return false;
-            }
-
+		picker.isTarget = function(el, debug) {
+			var $el = $(el);
 			var highlight = $el.data('sitecues-highlight');
 			if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
 				// We have some kind of value for this attribute
+
+
 				if (highlight) {
 					return true;
 				}
 				return false;
 			}
-			var role = roles.find(el);
+			var role = roles.find($el);
 			if (!role || !role.canHighlight) {
 				// Element we ignore
 				return false;
 			}
 
-// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody varibale above)
+// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable above)
 //                      var node = el.get(0);
 //			if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
 //				// IDs we ignore
 //				return false;
 //			}
 
-			var width = el.width();
+			var width = $el.width();
 			if (width < 5) {
 				// Don't highlight things that have no width
 				return false;
 			}
 
-			var height = el.height();
+			var height = $el.height();
 			if (height < 5) {
 				// Don't highlight things that have no height
 				return false;
+			}
+
+			if (role.alwaysHighlight) {
+				return true;
 			}
 
 			var style = styles.getComputed(el);
@@ -167,15 +174,37 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 			 * threshold, the element will be highlightable.
 			 *
 			 */
-		picker.getScore = function(e) { 
-			var role = roles.find(e);
-			var score = 0, txtLen = -1, textNodes = false, highlightableChild = null;
+		picker.getScore = function(e) {
+			var savedScore = e.data('sitecues-mouse-hl-score');
+			if (savedScore != null) {
+				return savedScore;
+			}
 
-			if (e.contents()) {
-				e.contents().each(function() {
-					if (this.nodeType == 3 && this.nodeValue.trim().length > 0) {
-						textNodes = true;
-						//console.info(this); // Removed this to make logs easier to read. - Al
+			var score = picker.getScoreImpl(e);
+			e.data('sitecues-mouse-hl-score', score);
+			return score;
+		}
+		picker.getScoreImpl = function(e) {
+			var role = roles.find(e);
+			var score = 0, txtLen = -1, textNodes = false;
+			var highlightableChild = false, unhighlightableChild = false;
+
+			var contents = e.contents();
+			if (contents) {
+				contents.each(function() {
+					if (this.nodeType === 3) {
+						if (this.nodeValue.trim().length > 0) {
+							textNodes = true;
+							unhighlightableChild = true;
+						}
+					}
+					else if (this.nodeType === 1) {
+						var display = $(this).css('display');
+						if (display === 'inline' || display === 'inline-block')
+							unhighlightableChild = true;
+						else if (picker.isTarget(this) != false) {
+							highlightableChild = true;
+						}
 					}
 				});
 			}
@@ -201,35 +230,33 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, console) {
 				} else {
 					// Has text, but no direct children, this could be something
 					// like a <p><b>text</b></p> or <td><p>foo</p></td>. What
-					// we'll do here is that if we have at least one
+										// we'll do here is that if we have at least one
 					// highlightable child, we'll skip this element.  There is
 					// definitely room for improvement in this logic.
-					if (highlightableChild == null) {
-						e.children().each(function() {
-							if (picker.isTarget($(this)) != false && picker.getScore($(this)) > 0) {
-								highlightableChild = true;
-							}
-						});
-					}
 					if (highlightableChild) {
 						score -= 10;
 					} else {
 						score += 1;
 					}
 				}
-			} else if (role.name === 'graphic') {
-				score += 1;
 			} else if (role.name === 'list' && (e.prop('tagName').toLowerCase() === 'ol' || e.prop('tagName').toLowerCase() === 'ul')) {
-			//if the hovered element is an ['table','dir','dl','form','ol','ul','menu']
-                score += 1;
-		    } else {
-				score -= 1;
+				score += 1;
+			} else {
+				if (unhighlightableChild) {
+					score += 1;
+				}
+				else if (highlightableChild) {
+					score -= 1;
+				}
+				else {
+					score += 1;
+				}
 			}
-			//if the hovered element is an ['dt','th','td','dd','li']
 			if (role.name === 'shortText' && e.prop('tagName').toLowerCase() === 'li') {
-				score = 0;
-			}
+                score = 0;
+            }
 			if (picker.debug) {
+
 				// These are for seeing the results in-context in a web
 				// inspector.
 				e
