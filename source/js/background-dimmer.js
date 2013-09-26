@@ -44,6 +44,12 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
             // Close the SVG
             '</svg>';
 
+        var zIndex = 2147483646;
+        if(browser.isIE()) {
+          // This is specifically a problem with IE9, other versions are TBD
+          zIndex = 2147483643;
+        }
+
         // Create the container for the SVG dimmer
         this.$dimmerContainer = $('<div/>', {
 
@@ -57,7 +63,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         .style({
           'position'      : 'fixed',
           'display'       : 'block',
-          'z-index'       : 2147483646,
+          'z-index'       : zIndex,
           'opacity'       : 0,
           'left'          : '0px',
           'top'           : '0px',
