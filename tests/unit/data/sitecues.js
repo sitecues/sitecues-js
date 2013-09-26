@@ -6,6 +6,17 @@ sitecues = {'def': blankFunction,
             'on' : blankFunction,
             'off': blankFunction,
             'emit': blankFunction,
+            
+            'getCoreConfig': function(){
+              return {
+                hosts: {up :'abc', ws:'def'}
+              };
+            }
+            ,
+            'getScriptSrcUrl': function(){
+              return { raw:true };
+            },
+
             'tdd': true}; // this prop helps to use 'exports' object only under nodejs.
 
 /**

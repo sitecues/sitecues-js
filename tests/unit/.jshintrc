@@ -1,7 +1,19 @@
 {
   
-  // sitecues JSHint Config
+  // sitecues JSHint Config for UNIT-TESTS
 
+  "node"          : true,     // Node.js
+  "strict"        : false,     // true: Requires all functions run in ES5 Strict Mode
+
+  // Define Global Variables Here
+  
+  "predef": [
+    "sitecues",
+    "describe",
+    "expect",
+    "it"
+  ],
+  
   "maxerr"        : 100,
   "indent"        : 2,
   "laxbreak"      : false,
@@ -9,20 +21,12 @@
   "nomen"         : true,
   "onevar"        : true,
   "undef"         : true,
-  "camelcase"     : false,     // true: Identifiers must be in camelCase
+  "camelcase"     : true,     // true: Identifiers must be in camelCase
   "plusplus"      : false,    // true: Prohibit use of `++` & `--`
   "quotmark"      : "single", // Quotation mark consistency
   "unused"        : true,     // true: Require all defined variables be used
-  "strict"        : true,     // true: Requires all functions run in ES5 Strict Mode
   "immed"         : true,     // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
 
-  // Define Global Variables Here
-  
-  "predef": [
-    "XMLHttpRequest",
-    "sitecues",
-    "exports"
-  ],
 
   // Enforcing
 
@@ -77,7 +81,6 @@
   "dojo"          : false,    // Dojo Toolkit
   "jquery"        : false,    // jQuery
   "mootools"      : false,    // MooTools
-  "node"          : false,    // Node.js
   "nonstandard"   : false,    // Widely adopted globals (escape, unescape, etc)
   "prototypejs"   : false,    // Prototype and Scriptaculous
   "rhino"         : false,    // Rhino
