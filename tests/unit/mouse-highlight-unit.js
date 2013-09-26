@@ -3,29 +3,32 @@
  */
 require('./test/bootstrap');
 
-var fs = require('fs'),
-    page,
-    mh = require('../../source/js/mouse-highlight'),
+var mh = require('../../source/js/mouse-highlight').mh,
     $ = jquery;
+    console.log(mh.getPicked)
 // Require the module file we want to test.
 
 describe('mouse-highlight', function() {
   
   describe('#isInterestingBackground()', function () {
     it('should return false if the backgroundColor is transparent', function(done) {
-
+      expect(mh.isInterestingBackground({'backgroundColor':'transparent'})).to.be.false;
+      done();
     });
     it('should return false if the background is mostly transparent (alpha level < 10%)', function(done) {
-
+      expect(mh.isInterestingBackground({'backgroundColor':'rgba(255,255,255,.001)'})).to.be.false;
+      done();
     });
     it('should return true if the background is mostly solid (alpha level > 10%)', function(done) {
-
+      expect(mh.isInterestingBackground({'backgroundColor':'rgba(255,255,255,1)'})).to.be.true;
+      done();
     });
     it('should return false if the background is mostly white (rgb levels > 242/255', function(done) {
-
+      expect(mh.isInterestingBackground({'backgroundColor':'rgb(255,255,255)'})).to.be.false;
+      done();
     });
   });
-  describe('#hasInterestingBackgroundOnAnyOf()', function () {
+  /*describe('#hasInterestingBackgroundOnAnyOf()', function () {
     it('should return false if any backgroundColor is transparent', function(done) {
 
     });
@@ -38,7 +41,7 @@ describe('mouse-highlight', function() {
     it('should return false if any background is mostly white (rgb levels > 242/255', function(done) {
 
     });    
-  });
+  });*/
 /*
   describe('#hasInterestingBackgroundImage()', function () {
 
@@ -62,52 +65,95 @@ describe('mouse-highlight', function() {
 
   });
 */
-  describe('#show()', function () {
+ /* describe('#show()', function () {
     it('should return false if there is no picked element', function (done) {
 
     });
-    it('should return false if mh.updateOverlayPosition returns true', function () {
+    it('should return false if mh.updateOverlayPosition returns true', function (done) {
 
     });
   });
   describe('#updateOverlayColor()', function () {
-    it('should ')
+    it('should return false if state.doUseBgColor is false', function (done) {
+
+    });
   });
   describe('#updateOverlayPosition()', function () {
+    it('should return false if state.picked is false', function (done) {
 
+    });
+    it('should return false if the function is passed false and state.elementRect is false', function (done) {
+
+    });
+    it('should return true if the element.left === state.elementRect.left and element.right === state.elementRect.right and if the function is passed false', function (done) {
+
+    });
+    it('should return false if positioning.getAllBoundingBoxes returns an empty array', function (done) {
+
+    });
   });
   describe('#update()', function () {
+    it('should return false if mh.enabled is false', function (done) {
 
+    });
+    it('should return false if mh.isSticky is true and event.shiftKey is false', function (done) {
+
+    });
+    it('should return false if $(document.activeElement).is("body") returns false', function (done) {
+
+    });
+    it('should return false if document does not have focus', function (done) {
+
+    });
+    it('should invoke mh.updateOverlayPosition once if event.target === state.target', function (done) {
+
+    });
   });
   describe('#refresh()', function () {
+    it('should invoke $.on if mh.enabled is true', function (done) {
 
-  });
-  describe('#updateZoom()', function () {
+    });
+    it('should invoke $.off if mh.enabled is false', function (done) {
 
+    });
   });
   describe('#enable()', function () {
+    it('should invoke $.on and mh.show', function (done) {
 
-  });
-  describe('#verbalCue()', function () {
-
+    });
   });
   describe('#disable()', function () {
+    it('should invoke $.off and mh.hide', function (done) {
 
+    });
   });
   describe('#hideAndResetState()', function () {
+    it('should invoke mh.hide and mh.resetState', function (done) {
 
+    });
   });
   describe('#hide()', function () {
+    it('should reset styles of picked element if there is any saved CSS', function (done) {
 
+    });
+    it('should set state.savedCss to null if there is a picked element and there is savedCss', function (done) {
+
+    });
+    it('should remove and elements from the dome with a class of HIGHLIGHT_OUTLINE_CLASS and HIGHLIGHT_PADDING_CLASS', function (done) {
+
+    });
   });
   describe('#resetState()', function () {
+    it('should set mh.timer to 0 if mh.timer is truthy', function (done) {
 
+    });
+    it('should set the state to the initial state of when the module loaded', function (done) {
+
+    });
   });
   describe('#getPicked()', function () {
+    it('should return the value of state.picked', function (done) {
 
-  });
-  describe('#toggleStickyMH()', function () {
-
-  });
-  
+    });
+  });*/
 }); 

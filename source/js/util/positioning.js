@@ -81,7 +81,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
 	    positioning.convertFixedRectsToAbsolute = function(fixedRects, zoom) {
 		    var absoluteRects = [];
-			var scrollPos = positioning.getScrollPosition();
+			  var scrollPos = positioning.getScrollPosition();
 		    for (var count = 0; count < fixedRects.length; count ++) {
 			    absoluteRects[count] = positioning.getCorrectedBoundingBox(fixedRects[count], zoom, scrollPos);
 		    }
