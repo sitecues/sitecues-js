@@ -9,7 +9,9 @@
   'use strict';
 
   // Create the logger for this module
-  var log = window.sitecues.logger.log('core');
+  if (window.sitecues && window.sitecues.logger) {
+    var log = window.sitecues.logger.log('core');
+  }
 
   // Return if there is sitecues instance on the page
   if (window.sitecues && window.sitecues.coreConfig) {
@@ -42,10 +44,9 @@
     , parseUrl
     
     , lastModuleDefined
-    
-    , APP_VERSION = '0.0.0-UNVERSIONED'
   ;
 
+  sitecues.APP_VERSION = '0.0.0-UNVERSIONED';
 
   // More convenient way to get epoch time in milliseconds when working with the code
   function time(){
@@ -384,15 +385,17 @@
   // Parse a URL into its components.
   parseUrl = function(urlStr){
     // Ran across this in a Google search... loved the simplicity of the solution.
-    var url = {};
-    var parser = document.createElement('a');
+    var url = {}
+      , parser = document.createElement('a')
+      ;
     parser.href = urlStr;
 
     // No one ever wants the hash on a full URL...
-    if (parser.hash)
+    if (parser.hash){
       url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-    else
+    } else {
       url.raw = parser.href;
+    }
 
     url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
     url.secure   = (url.protocol == "https");
@@ -423,11 +426,11 @@
 
 
   var scriptSrcUrl    = null
-  ,   scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js')
-  ,   scriptTags      = document.getElementsByTagName('script')
-  ;
+    , scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues).js')
+    , scriptTags      = document.getElementsByTagName('script')
+    ;
 
-  sitecues.getScriptSrcUrl = function() {
+  sitecues.getScriptSrcUrl = function () {
     return scriptSrcUrl;
   };
 
@@ -510,126 +513,6 @@
     }
   };
 
-  // The default status formatter: simply log all data to the log.
-  var DEFAULT_STATUS_CALLBACK = function(info) {
-    var printObj = function(o, prefix) {
-        var p, v, s = '';
-        prefix = prefix || '';
-        for (p in o) {
-          if (o.hasOwnProperty(p)) {
-            v = o[p];
-            s += prefix + p + ':';
-            if (typeof v == 'object') {
-              s += '\n' + printObj(v, prefix + '  ');
-            } else {
-              s += ' ' + v + '\n';
-            }
-          }
-        }
-        return s;
-
-      };
-
-    log.info('\n===== BEGIN: SITECUES STATUS =====================\n'
-      + printObj(info)
-      + '===== END: SITECUES STATUS =======================');
-  };
-
-  sitecues.status = function (callback) {
-    callback = callback || DEFAULT_STATUS_CALLBACK;
-
-    sitecues.use("jquery", "speech", 'conf', function ( $, speech, conf ) {
-
-      // Set the ajax URLs
-      var ajax_urls = {
-        up: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" ),
-        ws: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" )
-      };
-      
-      // Define the info object to be formatted by the log
-      var info = {
-        version: {
-          "sitecues_js": APP_VERSION,
-          "sitecues_up": null,
-          "sitecues_ws": null
-        },
-        "current_url": window.location.href,
-        "sitecues_js_url": ( sitecues.getScriptSrcUrl() ).raw,
-        "user_agent":  navigator.userAgent,
-        "tts_status": ( ( speech.isEnabled() ) ? "on" : "off" ),
-      };
-
-      var data = conf.data();
-      for (var setting in data) {
-        info[setting] = data[setting];
-      }
-      
-      function addStatusInfoToDOM(){
-        var div = document.createElement('div');
-        div.setAttribute('id', 'sitecues-status-output');
-        div.setAttribute('style', 'display:none!important;');
-        div.innerHTML = JSON.stringify(info);
-        document.getElementsByTagName('html')[0].appendChild(div);
-      }
-
-      // Defer the ajax calls so we can respond when both are complete
-      var ajaxCheck = function(){
-        if ( typeof info.version.sitecues_up === 'string' && 
-             typeof info.version.sitecues_ws === 'string' ) {
-          
-          //Fire 
-          callback(info);
-          addStatusInfoToDOM(info);
-        }
-      };
-
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.up,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_up = response.version;
-          ajaxCheck();
-        },
-        error: function(){
-          
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_up = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-        
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.ws,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_ws = response.version;
-          ajaxCheck();
-        },
-        error: function(){
-
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-
-    }); // end of use
-
-    // Popup the logger and report status
-    var popup = sitecues.logger.appenders.popup;
-    popup.show();
-    popup.focus();
-    return 'Getting sitecues status.'
-  };
-
   //////////////////////////////////////////////////
   //
   //  START: Core Configuration
@@ -650,9 +533,7 @@
     if (window.sitecues.coreConfig) {
       coreConfig = window.sitecues.coreConfig;
 
-      log.info( coreConfig );
-
-      //window.sitecues.coreConfig = undefined;
+      log.info(coreConfig);
 
       if (coreConfig.hosts) {
         if (coreConfig.hosts.ws) {
