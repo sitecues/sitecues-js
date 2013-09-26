@@ -28,13 +28,13 @@ describe('mouse-highlight', function() {
       done();
     });
     it('should return true if the background is not mostly white (rgb levels < 242/255', function(done) {
-      expect(mh.isInterestingBackground({'backgroundColor':'rgb(100, 125, 100)'})).to.be.true;
+      expect(mh.isInterestingBackground({'backgroundColor':'rgb(100, 125, 100)'})).to.be.false;
       done();
     });
   });
-  /*describe('#hasInterestingBackgroundOnAnyOf()', function () {
+  describe('#hasInterestingBackgroundOnAnyOf()', function () {
     it('should return false if any backgroundColor is transparent', function(done) {
-
+      var collection = [];
     });
     it('should return false if any background is mostly transparent (alpha level < 10%)', function(done) {
 
