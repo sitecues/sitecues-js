@@ -5,7 +5,12 @@
  */
 sitecues.def('ui-manager', function (uiManager, callback, log) {
 
+  // Put a reference to the UI Object on the sitecues namespace. This is used to store interfaces for UI objects
+  // such as the slider. These interfaces are used in the page object model to test functionality.
+  sitecues.ui = uiManager;
+
   sitecues.use( 'jquery', 'conf', 'toolbar', 'badge', function ($, conf, toolbar, badge) {
+
 
     // The toggling state.  If true an active toggle is underway and calls to
     // toggle() will be ignored.
