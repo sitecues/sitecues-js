@@ -48,6 +48,7 @@ phantom.create(function(err,ph) {
               fileName = result[i].title+'.png';
               console.log('Saving PNG: ' + fileName);
               dataURL=result[i].data;
+              // console.log(result[i].data);
 
               matches = dataURL.match(regex);
               ext = matches[1];

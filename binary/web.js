@@ -113,6 +113,9 @@ function getInlineJSData(req) {
 	return data;
 }
 
+// Allow serving of HTML/JS tools from the /tools/site/ directory
+app.use('/tools',express.static(path.join(root, '../tools/site')));
+
 // allow dynamic insertion of the JavaScript library in the site files
 var SITE_CONTEXT_PATH = '/site';
 var SITE_ROOT = path.resolve(path.join(root, '../tests/pages'));
