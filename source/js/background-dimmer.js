@@ -4,7 +4,7 @@
 sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'util/positioning', function ($, conf, positioning) {
+  sitecues.use('jquery', 'conf', 'util/positioning', 'browser', function ($, conf, positioning, browser) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
