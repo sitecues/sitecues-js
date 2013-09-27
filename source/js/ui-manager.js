@@ -212,12 +212,15 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
         currentState = STATES.BADGE;
       });
     }
-        if (sitecues.tdd) {
-          // todo: maybe export the whole module instead if every single function?
-          exports.uiManager = uiManager;
-          exports.uiManager.toggle = toggle;
-          exports.uiManager.innerToggle = innerToggle;
-        }
+    
+    if (sitecues.tdd) {
+      // todo: maybe export the whole module instead if every single function?
+      exports.uiManager = uiManager;
+      exports.uiManager.toggle = toggle;
+      exports.uiManager.innerToggle = innerToggle;
+    }
+
+
     callback();
   });
 });

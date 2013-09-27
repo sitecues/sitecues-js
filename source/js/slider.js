@@ -1,6 +1,7 @@
 sitecues.def("slider", function (slider, callback, log) {
-  sitecues.use("jquery", "conf", "zoom", "ui", function ($, conf, zoom, ui) {
+  'use strict';
 
+  sitecues.use("jquery", "conf", "zoom",  function ($, conf, zoom) {
 
     // #### SLIDER INTERFACE #########################################################################
 
@@ -164,16 +165,15 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Store the references to the live SVG DOM elements on this Slider instance
         this.svg = {
-          viewBox       : $svgElem,
+          viewBox       : $svgElem, //
           letterSmlBack : $svgElem.find('.letterSmlBack'),
           trackBack     : $svgElem.find('.trackBack'),
           letterBigBack : $svgElem.find('.letterBigBack'),
           letterSml     : $svgElem.find('.letterSml'),
-          track         : $svgElem.find('.track'),
+          track         : $svgElem.find('.track'), //
           thumb         : $svgElem.find('.thumb'),
           letterBig     : $svgElem.find('.letterBig'),
         };
-
       },
 
 
@@ -462,12 +462,11 @@ sitecues.def("slider", function (slider, callback, log) {
       reportThumbDragPixelsPerZoomStep: function (){        
         var slider = this;
 
-        function getPixelPos (zoomLevel) {
-          console.log( slider.trackOffsetLeft, slider.aspect, slider.trackClientWidth, slider.aspect, zoom.range, zoomLevel, zoom.min);
-          return slider.trackOffsetLeft*slider.aspect + slider.trackClientWidth*slider.aspect/zoom.range * (zoomLevel-zoom.min);
+        function getPos (zoomLevel) {
+          return slider.trackOffsetLeft + slider.trackClientWidth/zoom.range * (zoomLevel-zoom.min);
         }
-        
-        return getPixelPos(1+zoom.step)-getPixelPos(1);
+      
+        return getPos(1+zoom.step) - getPos(1);
       },
 
       // Set the Slider's internal thumb position variable based on the zoom level
@@ -490,7 +489,10 @@ sitecues.def("slider", function (slider, callback, log) {
 
     }; // END: SliderClass.prototype
     
-
+    if (sitecues.tdd) {
+      exports.globalSliderInterface = global_slider;
+      exports.SliderClass = SliderClass;
+    }
 
     // Core callback
     callback();

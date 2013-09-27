@@ -17,6 +17,8 @@ sitecues = {'def': blankFunction,
               return { raw:true };
             },
 
+            'ui': {sliders:[]},
+
             'tdd': true}; // this prop helps to use 'exports' object only under nodejs.
 
 /**
