@@ -10,7 +10,7 @@ sitecues.def('style', function (style, callback, log) {
       var myDom = dom instanceof _jQuery ? dom.get(0) : dom;
       var returns = {};
       // If browser's function 'getComputedStyle' is declared then use it.
-      if (getComputedStyle) {
+      if (getComputedStyle && myDom.nodeType === myDom.ELEMENT_NODE) {
         var camelize = function(a, b) {
           return b.toUpperCase();
         }
