@@ -101,7 +101,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			$.each(collection, function() {
 				style = common.getElementComputedStyles(this, '', true);
 				if (isInterestingBackground(style)) {
-					hasBg = true; //`
+					hasBg = true; //????
 					return false;
 				}
 			});
@@ -537,10 +537,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.hide = function() {
 			if (state.picked && state.savedCss) {
 				$(state.picked).style(state.savedCss);
+				state.savedCss = null;
 				if ($(state.picked).attr('style') === '') {
 					$(state.picked).removeAttr('style'); // Full cleanup of attribute
 				}
-				state.savedCss = null;
 			}
 			$('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
 			$('.' + HIGHLIGHT_PADDING_CLASS).remove();
@@ -612,6 +612,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 	    mh.INIT_STATE = INIT_STATE;
 	    mh.isInterestingBackground = isInterestingBackground;
 	    mh.hasInterestingBackgroundOnAnyOf = hasInterestingBackgroundOnAnyOf;
+	    mh.updateColorApproach = updateColorApproach;
+	    mh.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
+	    mh.getHighlightBorderWidth = getHighlightBorderWidth;
 	    exports.mh = mh;
   	}
 	});
