@@ -215,9 +215,9 @@ sitecues.use('jquery', function ($) {
           }
         });
 
-        callback();
       }
     });
+    callback();
   });
 });
 });
