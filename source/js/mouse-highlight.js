@@ -235,7 +235,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			
 			// Approach #1 -- use overlay for bg color
 			if (state.doUseOverlayForBgColor) {
-				highlightOutline.children().style('background-color', BACKGROUND_COLOR_TRANSPARENT, '');
+				highlightOutline.children().style('background-color', getTransparentBackgroundColor(), '');
 				return;
 			}
 			// Approach #2 -- no bg color
