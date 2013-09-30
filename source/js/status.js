@@ -47,6 +47,8 @@ sitecues.def('status', function (status, callback, log) {
         }
       };
 
+      console.log(" "+ sitecues.getCoreConfig().hosts.ws );
+
       // Set the ajax URLs
       ajax_urls = {
         up: ( '//' + ( sitecues.getCoreConfig() ).hosts.up + '/status' ),
@@ -111,7 +113,7 @@ sitecues.def('status', function (status, callback, log) {
         cache:    false,
         dataType: 'json',
         type:     'GET',
-        url:      ajax_urls.WS,
+        url:      ajax_urls.ws,
         success: function(response){
           
           // Set the version based on the AJAX response object
