@@ -240,9 +240,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 					}
 				}
 			} else if (role.name === 'list' && (e.prop('tagName').toLowerCase() === 'ol' || e.prop('tagName').toLowerCase() === 'ul')) {
-				//if (!$(e).parents('ul').length && !$(e).parents('ol').length) {
 					score += 1;
-				//}
 			} else {
 				if (unhighlightableChild) {
 					score += 1;
