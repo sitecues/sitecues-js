@@ -168,6 +168,7 @@
     return MODULE_STATE.READY;
   };
 
+  var moduleLoadAttempts = 0;
   function checkDefinedModulesAreAllLoaded() {
     var defCount = 0
     , l     = LOAD_LIST.length
@@ -183,9 +184,12 @@
       }
     }
 
-    if (defCount === length) {
+    if (defCount === LOAD_LIST.length) {
       window.sitecues.allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
+    } else if (moduleLoadAttempts++ < 10) {
+      // Keep trying to load, up to 10 times
+      setTimeout(checkDefinedModulesAreAllLoaded, 200);
     }
   }
 
@@ -232,12 +236,16 @@
 
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
-        checkDefinedModulesAreAllLoaded();
+        // This behavior is unreliable on IE9 so we'll use the loop (see below)
+        //checkDefinedModulesAreAllLoaded();
       }
 
     // Pass a new logger into the constructor scope of the module
     }, window.sitecues.logger.log(name));
   };
+
+  // This kicks off a loop that will wait until modules are loaded
+  setTimeout(checkDefinedModulesAreAllLoaded, 50);
 
   // exposed function for defining modules: queues until core is ready.
   var READY_FOR_DEF_CALLS = false
