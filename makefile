@@ -62,6 +62,7 @@ files=\
 	source/js/panel.js \
 	source/js/keys.js \
 	source/js/focus.js \
+	source/js/geo.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \

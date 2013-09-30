@@ -100,11 +100,11 @@ sitecues.def('geo', function(geo, callback, log) {
 		geo.isPointInRect = function(x, y, rect) {
 			var right = rect.left + rect.width;
 			var bottom = rect.top + rect.height;
-			return x >= rect.left && x < right && y >= rect.top && y <= bottom;
+			return (x >= rect.left) && (x < right) && (y >= rect.top) && (y <= bottom);
 		}
 
 		geo.isPointInAnyRect = function(x, y, rects) {
-			for (var count = 0; count < rects.length; count ++) {
+			for (var count = 0; count < rects.length; count++) {
 				if (geo.isPointInRect(x, y, rects[count])) {
 					return true;
 				}
