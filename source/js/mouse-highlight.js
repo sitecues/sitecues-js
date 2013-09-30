@@ -101,7 +101,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			$.each(collection, function() {
 				style = common.getElementComputedStyles(this, '', true);
 				if (isInterestingBackground(style)) {
-					hasBg = true; //????
+					hasBg = true;
 					return false;
 				}
 			});
@@ -118,7 +118,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		
 			$.each(ancestors.slice(0, MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE), function() {
 				if (!common.isEmptyBgImage(this.style.backgroundImage)) {
-					hasInterestingBgImage = true; //????
+					hasInterestingBgImage = true;
 					return false;
 				}
 			});
