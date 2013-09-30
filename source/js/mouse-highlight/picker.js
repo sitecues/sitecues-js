@@ -102,10 +102,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 				return el;
 			}
 			// No candidates
-            if (el.parent().length) {
-                return picker.findImpl(el.parent());
-            }
-            return false;
+      if (el.parent().length) {
+          return picker.findImpl(el.parent());
+      }
+      return false;
 		};
 
 		/*
@@ -240,7 +240,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 					}
 				}
 			} else if (role.name === 'list' && (e.prop('tagName').toLowerCase() === 'ol' || e.prop('tagName').toLowerCase() === 'ul')) {
-				score += 1;
+				//if (!$(e).parents('ul').length && !$(e).parents('ol').length) {
+					score += 1;
+				//}
 			} else {
 				if (unhighlightableChild) {
 					score += 1;
@@ -252,19 +254,36 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 					score += 1;
 				}
 			}
+			//If we are thinking about picking an <li>
 			if (role.name === 'shortText' && e.prop('tagName').toLowerCase() === 'li') {
-                score = 0;
-            }
+				//Give it a positive score if it float or is inline (navigational elements)
+        if ($(e).css('float') !== 'none' || $(e).css('display') === 'inline') {
+          score += 1;
+        } else {
+        //Give it a non-positive score if its just an ordinary list item
+        	score = 0;
+        }
+      }
+      //If we are thinking about picking an <a> that has an <li> as its immediate parent
+      if (e.prop('tagName').toLowerCase() === 'a' && $(e).parent('li').length) {
+      	//Give it a positive score if the <li> is floating or has display:inline
+      	if ($(e).parent('li').css('float') !== 'none' || $(e).parent('li').css('display') === 'inline') {
+      		score += 1;
+      	} else {
+      	//Give it a non-positive score if its an ordinary <li><a></a></li> (We want to select the <li> or its parent <ul>)
+      		score = 0;
+      	}
+      }
 			if (picker.debug) {
 
 				// These are for seeing the results in-context in a web
 				// inspector.
 				e
-                .attr('sitecues-highlight-score',score)
-                .attr('sitecues-highlight-role',role.name)
-                .attr('sitecues-highlight-text-nodes',textNodes)
-                .attr('sitecues-highlight-text-length',txtLen)
-                .attr('sitecues-highlight-child',highlightableChild);
+        .attr('sitecues-highlight-score',score)
+        .attr('sitecues-highlight-role',role.name)
+        .attr('sitecues-highlight-text-nodes',textNodes)
+        .attr('sitecues-highlight-text-length',txtLen)
+        .attr('sitecues-highlight-child',highlightableChild);
 			}
 
 			return score;
