@@ -168,7 +168,7 @@
     return MODULE_STATE.READY;
   };
 
-  function checkDefinedModulesAreAllLoaded () {
+  function checkDefinedModulesAreAllLoaded() {
     var defCount = 0
     , l     = LOAD_LIST.length
     , i
@@ -426,11 +426,11 @@
 
 
   var scriptSrcUrl    = null
-    , scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues).js')
-    , scriptTags      = document.getElementsByTagName('script')
-    ;
+  ,   scriptSrcRegExp = new RegExp('^/*[\\.a-zA-Z0-9]+.*?(equinox|sitecues)\.js') 
+  ,   scriptTags      = document.getElementsByTagName('script')
+  ;
 
-  sitecues.getScriptSrcUrl = function () {
+  sitecues.getScriptSrcUrl = function() {
     return scriptSrcUrl;
   };
 
@@ -441,12 +441,18 @@
       scriptSrcUrl = parseUrl(match[0]);
       break;
     }
+    log.info(scriptTags[i].src + ' is not a match');
+
+  }
+
+  if(!scriptSrcUrl) {
+    log.info('scriptSrcUrl is null');
   }
 
   // TODO: What if we don't find the base URL?
   // The regular expression for an absolute URL. There is a capturing group for
   // the protocol-relative portion of the URL.
-  var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
+  var ABSOLUTE_URL_REQEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
 
   // Resolve a URL as relative to a base URL.
   resolveUrl = function(urlStr, baseUrl) {
@@ -497,8 +503,12 @@
     // enforce async loading
     script.async = true;
 
-    // add callback to track when it will be loaded
-    script.onload = script.onreadystatechange = callback;
+    // add callback to track when it will be loaded.  
+
+    // NOTE: We should not be using script.onreadystatechange here for two
+    // reasons: 1, it doesn't mean that the script as loaded (it could change
+    // state to 'loading') and 2. it has been removed from IE as of v11.
+    script.onload = callback;
 
     // add element to head to start loading
     document.getElementsByTagName('head')[0].appendChild(script);
