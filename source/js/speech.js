@@ -124,7 +124,11 @@ sitecues.def('speech', function (speech, callback, log) {
           log.info("Lazy init of player");
           player = speech.initPlayer(hlb, hlbOptions);
         }
-        player.play();
+        if (player) {
+          player.play();
+        } else {
+          log.warn("No player with which to play");          
+        }
         // Stop speech on any key down.
         jQuery(window).on('keydown', function() {
          speech.stop(hlb);
