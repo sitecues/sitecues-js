@@ -47,6 +47,11 @@ sitecues.def('cursor/custom', function (element, callback, log) {
 
         element.init();
 
+        // Export object fro unit-tests.
+        if (sitecues.tdd) {
+          exports.custom = element;
+        }
+
         // Done.
         callback();
     });
