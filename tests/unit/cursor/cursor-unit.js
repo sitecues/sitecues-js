@@ -2,10 +2,10 @@
  * This file contain unit test(s) for cursor.js file.
  */
 
-require('./test/bootstrap');
+require('../test/bootstrap');
 
 // Require the module file we want to test.
-var module = require("../../source/js/cursor");
+var module = require("../../../source/js/cursor");
 
 describe('cursor', function() {
 

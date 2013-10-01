@@ -2,11 +2,11 @@
  * This file contain unit test(s) for custom.js file.
  */
 
-require('./test/bootstrap');
+require('../test/bootstrap');
 // Require the module file we want to test.
-var module = require("../../source/js/cursor/custom");
+var module = require("../../../source/js/cursor/custom");
 // Let's use zoom values set in data.
-require("./data/modules/zoom");
+require("../data/modules/zoom");
 
 describe('cursor/custom', function() {
 

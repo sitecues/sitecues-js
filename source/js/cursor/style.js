@@ -79,6 +79,9 @@ sitecues.def('cursor/style', function (module, callback, log){
 				}
 			}
 		}
+    if (sitecues.tdd) {
+      exports.style = module;
+    }
 
 		// done
 		callback();
