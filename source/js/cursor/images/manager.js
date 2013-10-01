@@ -10,7 +10,7 @@ sitecues.def('cursor/images/manager', function (images, callback) {
     }
 
     var systemDetect = {
-      'OS': navigator.platform || "Unknown OS",
+      'OS': navigator.platform || "Unknown OS"
     };
     
     var systemOS = {
@@ -19,9 +19,9 @@ sitecues.def('cursor/images/manager', function (images, callback) {
       'Linux': 'LINUX'
     };
 
-    var isMac     = systemDetect.OS.toUpperCase().indexOf(systemOS['Mac'])      !==-1,
-        isWindows = systemDetect.OS.toUpperCase().indexOf(systemOS['Windows'])  !==-1,
-        isLinux   = systemDetect.OS.toUpperCase().indexOf(systemOS['Linux'])    !==-1;
+    var isMac     = systemDetect.OS.toUpperCase().indexOf(systemOS['Mac'])     !== -1,
+        isWindows = systemDetect.OS.toUpperCase().indexOf(systemOS['Windows']) !== -1,
+        isLinux   = systemDetect.OS.toUpperCase().indexOf(systemOS['Linux'])   !== -1;
 
     var imageModuleName = 'mac'; // default
     if (isWindows) {
