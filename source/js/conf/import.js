@@ -24,7 +24,7 @@ sitecues.def('conf/import', function (module, callback, log) {
       }
 
       // export to conf
-      conf_main.set(key, data);
+      conf_main.set(key.replace('-','_'), data);
     }
 
 
@@ -42,6 +42,9 @@ sitecues.def('conf/import', function (module, callback, log) {
         sitecuesConfig = window.sitecues.config;
         if (sitecuesConfig) {
           for(key in sitecuesConfig) {
+            
+            key=key.replace('-','_');
+
             if (sitecuesConfig.hasOwnProperty(key)) {
               conf_main.set(key, window.sitecues.config[key]);
             }

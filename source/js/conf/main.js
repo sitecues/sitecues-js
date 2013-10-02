@@ -77,6 +77,9 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 
 	// get configuration value
 	conf_main.get = function(key, callback){
+
+		// console.log(key);
+
 		// private variables
 		var list;
 
@@ -86,8 +89,9 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 		}
 
 		// create new list if needed
-		if (undefined === (list = listeners[key]))
+		if (undefined === (list = listeners[key])){
 			list = listeners[key] = [];
+		}
 
 		// push callback to listeners list
 		list.push(callback);
