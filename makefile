@@ -241,13 +241,14 @@ test-all: test-smoke test-unit
 # Run the smoke tests.
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options))
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd tests/smoke ; ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options)
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
-	echo "TEST RUN ID: $(test-run-id)"
-	cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
 
 
 # TARGET: start-saucelabs-connect
