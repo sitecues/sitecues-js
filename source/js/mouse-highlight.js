@@ -413,25 +413,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			    return false;
 			}
 
-			// don't show highlight if current active isn't body
-			if (!$(document.activeElement).is('body')) {
-        return false;
-      }
-
-			// don't show highlight if window isn't active
-			if (!document.hasFocus()) {
-        return false;
-      }
-
 			// Pick an element but don't slow down scrolling
 			mh.pickTimer && clearTimeout(mh.pickTimer );
 			mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
 		}
 
 		function updateImpl(event) {
+			// don't show highlight if current document isn't active,
+			// or current active element isn't appropriate for spacebar command
+			if (!mh.isAppropriateFocus) {
+				return;
+			}
+
 			state.lastCursorPos.x = event.clientX;
 			state.lastCursorPos.y = event.clientY;
-
 
 			if (state.isCreated && event.target === state.target) {
 				// Update rect in case of sub-element scrolling -- we get mouse events in that case
@@ -470,15 +465,24 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 		// refresh status of enhancement on page
 		mh.refresh = function() {
-      if (mh.enabled) {
-        // handle mouse move or scroll on body
-	    // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
-	    // and there is no delay waiting for the user to stop before the event is fired
-        $(document).on('mousemove mousewheel', mh.update);
-      } else {
-        // remove mousemove listener from body
-        $(document).off('mousemove mousewheel', mh.update);
-      }
+	      if (mh.enabled) {
+	        // handle mouse move or scroll on body
+		    // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
+		    // and there is no delay waiting for the user to stop before the event is fired
+	        $(document)
+		        .on('mousemove mousewheel', mh.update)
+		        .on('focusin focusout', testFocus);
+		      $(window)
+			      .on('focus', testFocus)
+			      .on('blur', onblurwindow)
+		      } else {
+		        // remove mousemove listener from body
+		        $(document).off('mousemove mousewheel', mh.update)
+			        .off('focusin focusout', testFocus);
+			      $(window)
+				      .off('focus', testFocus)
+				      .off('blur', onblurwindow)
+		      }
 		}
 
 		mh.updateZoom = function(zoom) {
@@ -498,11 +502,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 		}
 
+		function testFocus() {
+			var wasAppropriateFocus = mh.isAppropriateFocus;
+			// don't show highlight if current active isn't body
+			var target = document.activeElement;
+			mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
+			if (wasAppropriateFocus && !mh.isAppropriateFocus)
+				mh.hide();
+		}
+
+		function onblurwindow() {
+			mh.isAppropriateFocus = false;
+			if (!mh.isSticky) {
+				mh.hide();
+			}
+		}
+
 		// enable mouse highlight
-		mh.enable = function() {
+		mh.reenableIfAppropriate = function() {
 			// handle mouse move on body
-			$(document).on('mousemove', mh.update);
-			mh.show();
+			if (mh.enabled) {
+				mh.refresh();
+				mh.show();
+			}
 		}
 
 		/*
@@ -573,7 +595,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		sitecues.on('hlb/deflating', mh.hide);
 
 		// enable mouse highlight back once highlight box deflates
-		sitecues.on('hlb/closed', mh.enable);
+		sitecues.on('hlb/closed', mh.reenableIfAppropriate);
 
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', mh.updateZoom);
@@ -590,11 +612,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			mh.updateZoom(conf.get('zoom'));
 		});
 
-		// hide mouse hightlight when user leave window
-		$(window).blur(function() {
-		    if (!mh.isSticky)
-				mh.hide();
-		});
+		testFocus(); // Set initial focus state
 
 		/**
 		 * Toggle Sticky state of highlight

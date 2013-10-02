@@ -335,9 +335,46 @@ sitecues.def('util/common', function (common, callback, log) {
       return false;
     };
 
-    /* Validates whether the given value is a valid URL
-     * @urlString A string
-     */
+	  /**
+	   * Is the current element editable for any reason???
+	   * @param element
+	   * @returns {boolean} True if editable
+	   */
+	  common.isEditable = function ( element ) {
+		  var tag = element.localName;
+
+		  if (!tag) {
+			  return false;
+		  }
+
+		  tag = tag.toLowerCase();
+
+		  if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+			  return true;
+		  }
+
+		  if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
+			  return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+		  }
+
+		  // Check for rich text editor
+		  var contentEditable = element.getAttribute('contenteditable');
+
+		  if (contentEditable && contentEditable.toLowerCase() !== 'false') {
+			  return true; // In editor
+		  }
+
+		  if (document.designMode === 'on') {
+			  return true; // Another kind of editor
+		  }
+
+		  return false;
+	  };
+
+
+	  /* Validates whether the given value is a valid URL
+	 * @urlString A string
+	 */
     common.validateUrl = function(urlString) {
       return kUrlValidString.test(urlString);
     };
