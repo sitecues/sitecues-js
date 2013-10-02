@@ -1,7 +1,7 @@
 /**
  * This file contain unit test(s) for mouse-highlight.js file.
  */
-require('./test/bootstrap');
+/*require('./test/bootstrap');
 
 var mh = require('../../source/js/mouse-highlight').mh,
     $ = jquery;
@@ -119,7 +119,7 @@ describe('mouse-highlight', function() {
       expect(mh.updateOverlayPosition(false)).to.be.true;
       done()
     });
-    */
+    
   });
   describe('#update()', function () {
     it('should return false if mh.enabled is false', function (done) {
@@ -139,6 +139,7 @@ describe('mouse-highlight', function() {
       expect(mh.update()).to.be.false;
       done();
     });
+    /*
     it('should return false if document does not have focus', function (done) {
       var origMethod = document.hasFocus;
       document.hasFocus = function () {return false;};
@@ -146,6 +147,7 @@ describe('mouse-highlight', function() {
       document.hasFocus = origMethod;
       done();
     });
+    
   });
   describe('#enable()', function () {
     it('should invoke mh.show', function (done) {
@@ -207,4 +209,4 @@ describe('mouse-highlight', function() {
       done()
     });
   });
-}); 
+}); */
