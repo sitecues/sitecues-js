@@ -5,7 +5,7 @@
  *
  */
 
-(function(){
+(function () {
   'use strict';
 
   // Create the logger for this module
