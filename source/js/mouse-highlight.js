@@ -13,6 +13,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				target: null,     // Mouse was last over this element
 				lastCursorPos: { x: -1, y: -1},
 				isCreated: false, // Has highlight been created
+				styles: [],
 				savedCSS: null,   // map of saved CSS for highlighted element
 				elementRect: null,
 				fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
@@ -61,6 +62,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		  conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
 		};
 
+		function getMaxZIndex(styles) {
+			var maxZIndex = 0;
+			for (var count = 0; count < styles.length; count ++) {
+				var zIndexInt = parseInt(styles[count].zIndex);
+				if (zIndexInt > maxZIndex)
+					maxZIndex = zIndexInt;
+			}
+			return maxZIndex;
+		}
+
 		function isInterestingBackground(style) {
 
 			var matchColorsAlpha,
@@ -73,59 +84,53 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 			
 			matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-	    match = matchColorsAlpha.exec(style.backgroundColor);
+			match = matchColorsAlpha.exec(style.backgroundColor);
 			
 			if (match != null) {
 				if (parseFloat(match[4]) < .10) {
 					return false; // Mostly transparent, not interesting
-				}
-			} else { //so I assume that if there isnt a match then the background color is in another format?
+				} // Else fall through and analyze rgb colors
+			} else { // Background is not in rgba() format, check for rgb() format next
 				matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
 				match = matchColorsNoAlpha.exec(style.backgroundColor);
 				if (match === null) {
 					return true;
 				}
 			}
-			// Non-interesting if mostly white
+			// Check r,g,b values  -- We consider it "non-interesting" if mostly white
 			mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
 			
 			return !mostlyWhite;
 		
 		}
 
-		function hasInterestingBackgroundOnAnyOf(collection) {
-			
-			var hasBg = false,
-					style;
-			
-			$.each(collection, function() {
-				style = common.getElementComputedStyles(this, '', true);
-				if (isInterestingBackground(style)) {
-					hasBg = true;
-					return false;
+		function hasInterestingBackgroundOnAnyOf(styles) {
+
+			for (var count = 0; count < styles.length; count ++) {
+				if (isInterestingBackground(styles[count])) {
+					return true;
 				}
-			});
-		
-			return hasBg;
-		
+			}
+
+			return false;
 		}
 
-		function hasInterestingBackgroundImage(ancestors) {
+		function hasInterestingBackgroundImage(styles) {
+
 			// TODO: we're only checking 3 up, because we get confused by layout/spacer images
-			// We need a better approach!
-			var hasInterestingBgImage = false,
-			    MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE = 3;
-		
-			$.each(ancestors.slice(0, MAX_ANCESTORS_TO_CHECK_FOR_BG_IMAGE), function() {
-				if (!common.isEmptyBgImage(this.style.backgroundImage)) {
-					hasInterestingBgImage = true;
-					return false;
+			// We can't always know what size a background image is, without using canvas approach,
+			// and then there are security limitations, unless we use CORS.
+			// In other words, this is complicated.
+			var numAncestorsToCheck = Math.min(3, styles.length);
+			for (var count = 0; count < numAncestorsToCheck; count ++) {
+				if (!common.isEmptyBgImage(styles[count].backgroundImage)) {
+					return true;
 				}
-			});
+			}
 
-			return hasInterestingBgImage;
-		
+			return false;
 		}
+
 
 		function updateColorApproach(style) {
 			// Get the approach used for highlighting
@@ -202,12 +207,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			return color;
 		}
 
+		// Return an array of styles in the ancestor chain, including fromElement, not including toElement
+		function getAncestorStyles(fromElement, toElement) {
+			var styles = [ common.getElementComputedStyles(fromElement, '', true) ];
+			$(fromElement).parentsUntil(toElement).each(function() {
+				styles.push(common.getElementComputedStyles(this, '', true));
+			});
+			return styles;
+		}
+
 		// show mouse highlight (mh.update calls mh.show)
 		mh.show = function() {
 			// can't find any element to work with
 			if (!state.picked) {
 				return false;
 			}
+
+			state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
 
 			if (!mh.updateOverlayPosition(true)) {
 				return false;  // Did not find visible rectangle to highldight
@@ -219,9 +235,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.updateOverlayColor = function() {
 			
 			var element = state.picked.get(0),
-			    style = common.getElementComputedStyles(element, '', true),
 			    highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS),
-			    ancestors,
 			    hasInterestingBg,
 			    backgroundColor,
 			    bgRect,
@@ -230,8 +244,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			    offsetTop,
 			    canvas,
 			    ctx;
+
 			//what approach will we use to update the highlight?
-			updateColorApproach(style);
+			updateColorApproach(state.styles);
 			
 			// Approach #1 -- use overlay for bg color
 			if (state.doUseOverlayForBgColor) {
@@ -248,11 +263,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			// In most cases we want the opaque background because the background color on the element
 			// can overlap the padding over the outline which uses the same color, and not cause problems
 			// We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
-			ancestors = $(element).parents();
-			
-			hasInterestingBg = isInterestingBackground(style) ||
-												 hasInterestingBackgroundOnAnyOf(ancestors) ||
-												 hasInterestingBackgroundImage(ancestors);
+			hasInterestingBg = hasInterestingBackgroundOnAnyOf(state.styles) ||
+		                       hasInterestingBackgroundImage(state.styles);
 
 			backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
@@ -347,7 +359,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 
 			// Get exact bounds
-			fixedRects = positioning.getAllBoundingBoxes(element, 99999); // 99999 = Always union into a single rect
+			fixedRects = positioning.getAllBoundingBoxes(element, 0);
 
 			if (!fixedRects.length) {   // No valid rectangle
 				mh.hide();
@@ -365,9 +377,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			positioning.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
 			state.fixedContentRect = fixedRects[0];
 			state.elementRect = $.extend({}, elementRect);
-
-			state.zoom = positioning.getTotalZoom(element, true);
-
 			absoluteRects = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom);
 			previousViewRect = $.extend({}, state.viewRect);
 			highlightBorderWidth = getHighlightBorderWidth();
@@ -376,9 +385,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 
 			if (createOverlay) {
+				var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
 				// Create and position highlight overlay
 				$('<div>')
 					.attr('class', HIGHLIGHT_OUTLINE_CLASS)
+					.css('z-index', getMaxZIndex(ancestorStyles) + 1) // Below stuff like fixed toolbars
 					.appendTo(document.documentElement);
 				state.isCreated = true;
 			}
@@ -413,25 +424,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			    return false;
 			}
 
-			// don't show highlight if current active isn't body
-			if (!$(document.activeElement).is('body')) {
-        return false;
-      }
-
-			// don't show highlight if window isn't active
-			if (!document.hasFocus()) {
-        return false;
-      }
-
 			// Pick an element but don't slow down scrolling
 			mh.pickTimer && clearTimeout(mh.pickTimer );
 			mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
 		}
 
 		function updateImpl(event) {
+			// don't show highlight if current document isn't active,
+			// or current active element isn't appropriate for spacebar command
+			if (!mh.isAppropriateFocus) {
+				return;
+			}
+
 			state.lastCursorPos.x = event.clientX;
 			state.lastCursorPos.y = event.clientY;
-
 
 			if (state.isCreated && event.target === state.target) {
 				// Update rect in case of sub-element scrolling -- we get mouse events in that case
@@ -442,9 +448,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			// hide highlight for picked element
 
 			var oldState = $.extend({}, state);
-
-			// save target element
-			state.target = event.target;
 
 			// save picked element
 			var picked = picker.find(event.target);
@@ -463,6 +466,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			mh.hideAndResetState();
 			state.picked = $(picked);
+			state.target = event.target;
 			// show highlight for picked element
 			mh.showTimer && clearTimeout(mh.showTimer);
 			mh.showTimer = setTimeout(mh.show, 40);
@@ -470,15 +474,24 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 		// refresh status of enhancement on page
 		mh.refresh = function() {
-      if (mh.enabled) {
-        // handle mouse move or scroll on body
-	    // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
-	    // and there is no delay waiting for the user to stop before the event is fired
-        $(document).on('mousemove mousewheel', mh.update);
-      } else {
-        // remove mousemove listener from body
-        $(document).off('mousemove mousewheel', mh.update);
-      }
+	      if (mh.enabled) {
+	        // handle mouse move or scroll on body
+		    // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
+		    // and there is no delay waiting for the user to stop before the event is fired
+	        $(document)
+		        .on('mousemove mousewheel', mh.update)
+		        .on('focusin focusout', testFocus);
+		      $(window)
+			      .on('focus', testFocus)
+			      .on('blur', onblurwindow)
+		      } else {
+		        // remove mousemove listener from body
+		        $(document).off('mousemove mousewheel', mh.update)
+			        .off('focusin focusout', testFocus);
+			      $(window)
+				      .off('focus', testFocus)
+				      .off('blur', onblurwindow)
+		      }
 		}
 
 		mh.updateZoom = function(zoom) {
@@ -498,11 +511,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 		}
 
+		function testFocus() {
+			var wasAppropriateFocus = mh.isAppropriateFocus;
+			// don't show highlight if current active isn't body
+			var target = document.activeElement;
+			mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
+			if (wasAppropriateFocus && !mh.isAppropriateFocus)
+				mh.hide();
+		}
+
+		function onblurwindow() {
+			mh.isAppropriateFocus = false;
+			if (!mh.isSticky) {
+				mh.hide();
+			}
+		}
+
 		// enable mouse highlight
-		mh.enable = function() {
+		mh.reenableIfAppropriate = function() {
 			// handle mouse move on body
-			$(document).on('mousemove', mh.update);
-			mh.show();
+			if (mh.enabled) {
+				mh.refresh();
+				mh.show();
+			}
 		}
 
 		/*
@@ -573,7 +604,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		sitecues.on('hlb/deflating', mh.hide);
 
 		// enable mouse highlight back once highlight box deflates
-		sitecues.on('hlb/closed', mh.enable);
+		sitecues.on('hlb/closed', mh.reenableIfAppropriate);
 
 		// handle zoom changes to toggle enhancement on/off
 		conf.get('zoom', mh.updateZoom);
@@ -590,11 +621,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			mh.updateZoom(conf.get('zoom'));
 		});
 
-		// hide mouse hightlight when user leave window
-		$(window).blur(function() {
-		    if (!mh.isSticky)
-				mh.hide();
-		});
+		testFocus(); // Set initial focus state
 
 		/**
 		 * Toggle Sticky state of highlight

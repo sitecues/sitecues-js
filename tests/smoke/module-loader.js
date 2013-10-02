@@ -74,7 +74,7 @@ describe('sitecues', function () {
           expect(value).to.have.ownProperty('map');
           expect(value).to.have.ownProperty('hlbKeysMap');
           expect(value).to.have.ownProperty('handle');
-          expect(value).to.have.ownProperty('isEditable');
+          //expect(value).to.have.ownProperty('isEditable'); EQ-1066 Module no longer has this method.
           expect(value).to.have.ownProperty('hook');
           done();
         });
