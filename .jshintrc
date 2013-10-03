@@ -21,7 +21,8 @@
   "predef": [
     "XMLHttpRequest",
     "sitecues",
-    "exports"
+    "exports",
+    "CSSPrimitiveValue"
   ],
 
   // Enforcing

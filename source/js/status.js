@@ -47,8 +47,6 @@ sitecues.def('status', function (status, callback, log) {
         }
       };
 
-      console.log(" "+ sitecues.getCoreConfig().hosts.ws );
-
       // Set the ajax URLs
       ajax_urls = {
         up: ( '//' + ( sitecues.getCoreConfig() ).hosts.up + '/status' ),

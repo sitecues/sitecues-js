@@ -27,12 +27,7 @@ sitecues.def('conf/import', function (module, callback, log) {
       conf_main.set(key, data);
     }
 
-
-    var i
-      , l
-      , key
-      , sitecuesConfig
-      ;
+    var i, l, key, sitecuesConfig;
 
     // settings on the page found
     if (!('_sitecues' in window)) {
@@ -56,22 +51,16 @@ sitecues.def('conf/import', function (module, callback, log) {
 
     } else {
 
-      if('_sitecues' in window){
-        
-        console.log("sitecues in window");
+      if (window._sitecues) {
         
         // iterate over them and push to conf
-        for (i=0, l=_sitecues.length; i < l; i++) {
-          push(_sitecues[i]);
+        for (i=0, l=window._sitecues.length; i < l; i++) {
+          push(window._sitecues[i]);
         }
       }
-
-      console.log( _sitecues, _sitecues.length );
-
       // replace global var
-      _sitecues = { push: push };
+      window._sitecues = { push: push };
     }
-
 
     // done
     callback();
