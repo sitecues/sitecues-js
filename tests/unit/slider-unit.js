@@ -29,7 +29,7 @@ describe('sitecues', function() {
       expect(sitecues.ui.sliders).to.be.an('array');
       done();
     });
-
+    
     it('should instantiate slider object from class', function (done) {
       var div     = document.createElement('div'),
           slider  = mod.slider.globalSliderInterface.build({ container: div });

@@ -371,54 +371,37 @@ sitecues.def('util/common', function (common, callback, log) {
       return false;
     };
 
-    /**
-     * Is the current element editable for any reason???
-     * @param element
-     * @returns {boolean} True if editable
-     */
 
-    common.tt = function(){
-      var x, y;
-      x=y=1;
-    };
-
+     /**
+      * Is the current element editable for any reason???
+      * @param element
+      * @returns {boolean} True if editable
+      */
     common.isEditable = function ( element ) {
-      
-
       var tag = element.localName
         , contentEditable
         ;
-
-
-
+      
       if (!tag) {
         return false;
       }
-
       tag = tag.toLowerCase();
-
       if (tag === 'input' || tag === 'textarea' || tag === 'select') {
         return true;
       }
-
       if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
         return true; // Be safe, looks like a keyboard-accessible interactive JS widget
       }
-
       // Check for rich text editor
       contentEditable = element.getAttribute('contenteditable');
-
       if (contentEditable && contentEditable.toLowerCase() !== 'false') {
         return true; // In editor
       }
-
       if (document.designMode === 'on') {
         return true; // Another kind of editor
       }
-
       return false;
     };
-
 
   /* Validates whether the given value is a valid URL
 	 * @urlString A string
