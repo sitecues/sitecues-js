@@ -163,8 +163,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 		// How visible is the highlight?
 		function getHighlightVisibilityFactor() {
-			var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.3,
-			    vizFactor = state.zoom;
+			var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
+			    vizFactor = (state.zoom +.4) * .9;
 			if (speech.isEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
 				vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
 			}
