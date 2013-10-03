@@ -112,6 +112,10 @@
       c.filleStyle = '';
     }
 
+    if (strokeWidth) {
+      c.lineWidth = strokeWidth;
+    }
+
     if (stroke) {
       c.strokeStyle = stroke * scaleSqrt;
       c.stroke();
@@ -137,7 +141,6 @@
       processCommand[commandType](nextCommand);
     }
 
-    c.closePath();
     applyAttrs(node);
 
   }
@@ -172,36 +175,44 @@
   }
 
 
-  // Get a data URL from the canvas
-  function getDataURL () {
-    return '';
-  };
-
 
   // Public Interface for svg2canvas features
-  window.svg2canvas = function (file, canvasId, pixelDensity, setWidth, setHeight, callback) {
+  window.svg2Canvas = function (file, props) {
 
-    // TODO:
-    // Convert argument list to object list 
-    // If a canvas is not provided, return the canvas
-
-    var response    = load(file)
-      , canvas      = document.getElementById(canvasId)
-      , svg         = response.getElementsByTagName('svg')[0]
-      , svgWidth    = svg.getAttribute('width')
-      , svgHeight   = svg.getAttribute('height')
-      , width       = setWidth  || svgWidth
-      , height      = setHeight || svgHeight
-      , toDataURL
+    var response  = load(file)
+      , svg       = response.getElementsByTagName('svg')[0]
+      , svgWidth  = svg.getAttribute('width')
+      , svgHeight = svg.getAttribute('height')
+      , width     = props.width || svgWidth
+      , height    = props.height || svgHeight
+      , density
+      , canvas
       , result
       ;
+
+    if (!props.density || props.density === 'auto') {
+      density = window.devicePixelRatio;
+    } else if (typeof props.density === 'number') {
+      density = props.density;
+    }
+
+    switch (typeof props.canvas) {
+    case 'string':
+      canvas = document.getElementById(props.canvas);
+      break;
+    case 'object':
+      canvas = props.canvas;
+      break;
+    default:
+      canvas = document.createElement('canvas');
+    }
     
-    scaleX = width / svgWidth * pixelDensity;
-    scaleY = height / svgHeight * pixelDensity;
+    scaleX = width / svgWidth * density;
+    scaleY = height / svgHeight * density;
     scaleSqrt = Math.sqrt(scaleX * scaleY);
 
-    canvas.setAttribute('width', width * pixelDensity);
-    canvas.setAttribute('height', height * pixelDensity);
+    canvas.setAttribute('width', width * density);
+    canvas.setAttribute('height', height * density);
     c = canvas.getContext('2d');
 
     c.save();
@@ -209,12 +220,12 @@
     parse(svg);
     c.restore();
 
-    canvas.style.width =  width  + 'px';
+    canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
 
-    result = toDataURL ? getDataURL() : canvas;
+    result = props.toDataURL ? canvas.toDataURL() : canvas;
 
-    return callback ? callback(result) : result;
+    return props.callback ? props.callback(result) : result;
   
   };
 

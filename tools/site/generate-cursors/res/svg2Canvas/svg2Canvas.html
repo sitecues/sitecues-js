@@ -6,31 +6,37 @@
 
 <canvas id="canvas" width="13" height="20" style="border:1px solid black;"></canvas>
 
-<script src="svg-to-canvas.js"></script>
+<script src="svg2Canvas.js"></script>
 
 <script>
 
   // svg2canvas('./res/cursor/min-osx-retina-arrow-ds.svg', "canvas", 2);
   //svg2canvas('./res/cursor/hand-min-retina.svg', "canvas", 2, null, null);
 
-  svg2Canvas('./res/cursor/hand-min-retina.svg', {
+  console.log( svg2Canvas('./res/cursor/hand-min-retina.svg', {
     
     // If a string is provided, use it as an ID.
     // If an HTML DOM element is provided, draw to the element
     // If an nothing is provided, create the canvas and return it in the callback
     canvas      : "canvas",         // "canvasId", canvasElement, null
+    // canvas      : document.getElementById('canvas'),         // "canvasId", canvasElement, null
+    // canvas      : document.createElement('canvas'),         // "canvasId", canvasElement, null
     
     // Returns a dataurl instead of a canvas element
-    toDataURL   : true,             // true, false
+    // toDataURL   : true,             // true, false
     
     // Sets the rendering width/height of the output image (used to draw at different scales without pixelating)
     width       : 128,
     height      : 128,
 
     // Sets the pixel density
-    density     : 1,                // "auto", 1, 2, x
+    // density     : 'auto',                // "auto", 1, 2, x
+    // density     : 1,                // "auto", 1, 2, x
+    density     : 2,                // "auto", 1, 2, x
+    callback    : function(result){ return result; }
 
-  });
+  }) 
+);
 
 </script>
 
