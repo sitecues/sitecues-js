@@ -1,0 +1,1 @@
+These cursor files were provided by an outsourced deisgner.

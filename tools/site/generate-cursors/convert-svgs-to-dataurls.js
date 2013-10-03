@@ -1,6 +1,6 @@
 
 
-  var path = 'res/cursor/';
+  var path = 'res/svg_cursors/';
   
   // var cursors = [
   //     'cursor_mac_arrow.svg'
@@ -114,20 +114,20 @@
         }
 
         (function(url, step, canvas){
-          canvg(canvas, path+url, {
-              scaleWidth       : realWidth
-            , scaleHeight      : realHeight
-            , ignoreDimensions : true
-            , ignoreMouse      : true
-            , ignoreAnimation  : true
-            , renderCallback   : function(){
+          svg2Canvas(path+url, {
+              width       : realWidth
+            , height      : realHeight
+            , toDataURL   : true
+            , density     : 2
+            , canvas      : canvas
+            , callback    : function(dataURL){
                 var dataurl = document.createElement('dataurl');
                 dataurl.setAttribute('title',url+'_'+step);
                 console.log(url+'_'+step);
 
                 dom.dataURLS.appendChild(dataurl);
                 dom.canvasBin.appendChild(canvas);
-                dataurl.innerHTML = canvas.toDataURL();
+                dataurl.innerHTML = dataURL;
           }});
         })(url, step, canvas);
 
