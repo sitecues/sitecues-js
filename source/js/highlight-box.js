@@ -485,6 +485,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // We don't know what's the text color in the image.
         if (this.item.tagName.toLowerCase() === 'img') {
           cssBeforeAnimateStyles['background-color'] = '#000';
+        } else {
+          cssBeforeAnimateStyles['background-color'] = newBgColor;
         }
       }
  
