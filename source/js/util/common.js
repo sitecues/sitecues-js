@@ -138,7 +138,7 @@ sitecues.def('util/common', function (common, callback, log) {
       // http://en.wikipedia.org/wiki/YIQ
       var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
 
-      return  (yiq >= 128) ? false : true;
+      return  yiq >= 128;
     }
 
     /*
