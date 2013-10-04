@@ -341,6 +341,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
           // If website used to have width/height attributes let's restore those while HLB is defalted.
           for (var attrName in _this.savedStyleAttr) {
+            if (attrName === 'style') {
+               _this.itemNode.removeAttr('style');
+            }
             if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
               _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
             }
