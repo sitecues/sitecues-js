@@ -12,6 +12,8 @@ sitecues.def('util/common', function (common, callback, log) {
       , kUrlValidString = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
       , bodyVertScrollbarWidth
       , rightAlignObjs
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+      , lineHeightValues = {'normal': 1.2}
       ;
 
     // Make sure 'trim()' has cross-browser support.
@@ -21,6 +23,17 @@ sitecues.def('util/common', function (common, callback, log) {
       };
     }
 
+    common.getLineHeight = function(item) {
+      // Values	normal | <number> | <length> | <percentage> | inherit
+      var lineHeight = $(item).css('line-height');
+      if (lineHeightValues.hasOwnProperty(lineHeight)) {
+        return lineHeightValues[lineHeight];
+      }
+      if (lineHeight.indexOf('%') > 0) {
+        return parseFloat(lineHeight) / 100;
+      }
+      return lineHeight;
+    }
     /**
      * Get the element's styles to be used further.
      * @param element The DOM element which styles we want to get.

@@ -146,6 +146,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var size = { width: parseFloat(width), height: parseFloat(height) };
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
+        this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
         this.savedStyleAttr['style'] = this.itemNode.attr('style');
@@ -309,14 +310,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1];
-        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
           transform: 'scale(1)',
-          width: clientRect.width / kExtraZoom,
+          width: this.clientRect.width / kExtraZoom,
           // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
         });
 
         // Deflate the highlight box.
@@ -368,7 +368,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        */
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
         // Fetch the exact value for width(not rounded)
-        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssBeforeAnimateStyles = {
           'top': cssUpdate.top + 'px',
@@ -379,7 +378,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'overflow-x': 'hidden',
           // Sometimes width is rounded, so float part gets lost.
           // Preserve it so that inner content is not rearranged when width is a bit narrowed.
-          'width': parseFloat(clientRect.width) + 'px',
+          'width': parseFloat(this.clientRect.width) + 'px',
           // Don't change height if there's a background image, otherwise it is destroyed.
           'height' : !common.isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
           'z-index': HighlightBox.kBoxZindex.toString(),
@@ -403,7 +402,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         }
         if (this.item.tagName.toLowerCase() === 'img') {
-          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
+          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, this.clientRect)
         }
 
         this.setBgStyle(currentStyle, cssBeforeAnimateStyles);
@@ -469,7 +468,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
           cssBeforeAnimateStyles['background-image']  = oldBgImage;
           cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
-          //cssBeforeAnimateStyles['background-size']   = clientRect.width + 'px ' + clientRect.height+ 'px';
+          //cssBeforeAnimateStyles['background-size']   = this.clientRect.width + 'px ' + this.clientRect.height+ 'px';
           cssBeforeAnimateStyles['background-color']  = common.getRevertColor(newBgColor);
           
           // If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.

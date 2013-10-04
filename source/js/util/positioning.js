@@ -3,7 +3,10 @@
  */
 sitecues.def('util/positioning', function (positioning, callback) {
 
-    sitecues.use('jquery', function ($) {
+	    positioning.kMinRectWidth = 3;
+	    positioning.kMinRectHeight = 3;
+
+    sitecues.use('jquery', 'util/common', function ($, common) {
 
         /**
          * Get the cumulative zoom for an element.
@@ -121,17 +124,14 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     */
 	    positioning.getSmartBoundingBox = function(item)
 	    {
-		    var contentRect = positioning.getAllBoundingBoxes(item, 99999)[0];
-		    var lineHeight = parseFloat($(item).css('line-height'));
-		    var isSingleLine = contentRect.height < lineHeight * 1.5; // Quickly determined whether not line-wrapped
+		    var contentRect = positioning.getAllBoundingBoxes(item, 9999)[0];
+		    var lineHeight = common.getLineHeight(item);
+		    var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
 		    if (isSingleLine)
 			    return item.getBoundingClientRect();
 
 		    return contentRect;
 	    }
-
-	    positioning.kMinRectWidth = 3;
-	    positioning.kMinRectHeight = 3;
 
 	    function getBoundingRectMinusPadding(node) {
 		    var range = document.createRange();
@@ -233,7 +233,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 			    });
 			    allClipRects.push(clipRect);
 		    });
-		    positioning.combineIntersectingRects(allClipRects, 99999);
+		    positioning.combineIntersectingRects(allClipRects, 9999);
 		    return allClipRects[0];
 	    }
 
