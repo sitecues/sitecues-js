@@ -114,25 +114,19 @@ sitecues.def('util/common', function (common, callback, log) {
      * @return Boolean true if colors are contrast; false otherwise
      */
     common.getIsContrastColors = function(colorOne, colorTwo){
-      var tones = []
-        , index
-        , colorValue
-        , RGBColor
-        , yiq
-        ;
-
-      for (index in arguments) {
-        if (arguments.hasOwnProperty(index)) {
-          colorValue = arguments[index];
-          RGBColor = common.getRGBColor(colorValue);
-          // http://en.wikipedia.org/wiki/YIQ
-          yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
-          tones[colorValue] = (yiq >= 128) ? 'dark' : 'light';
-        }
-      }
+      var colorOneTone = this.isLightTone(colorOne);
+      var colorTwoTone = this.isLightTone(colorTwo);
       // Now that we have both colors tones, define if they are contrast or not.
-      return (tones[colorOne] === tones[colorTwo]) ? false : true;
+      return (colorOneTone === colorTwoTone) ? false : true;
     };
+
+    common.isLightTone = function (colorValue) {
+      RGBColor = common.getRGBColor(colorValue);
+      // http://en.wikipedia.org/wiki/YIQ
+      var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
+
+      return  (yiq >= 128) ? false : true;
+    }
 
     /*
      * Converts color given RGB format.
