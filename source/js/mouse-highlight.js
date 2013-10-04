@@ -226,7 +226,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
 
 			if (!mh.updateOverlayPosition(true)) {
-				return false;  // Did not find visible rectangle to highldight
+				// Did not find visible rectangle to highlight
+				state.picked = null; // Don't let HLB open for this
+				return false;
 			}
 
 			mh.updateOverlayColor();

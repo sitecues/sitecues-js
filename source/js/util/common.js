@@ -24,15 +24,12 @@ sitecues.def('util/common', function (common, callback, log) {
     }
 
     common.getLineHeight = function(item) {
-      // Values	normal | <number> | <length> | <percentage> | inherit
+      // Values possible from computed style: normal | <number>px
       var lineHeight = $(item).css('line-height');
       if (lineHeightValues.hasOwnProperty(lineHeight)) {
         return lineHeightValues[lineHeight];
       }
-      if (lineHeight.indexOf('%') > 0) {
-        return parseFloat(lineHeight) / 100;
-      }
-      return lineHeight;
+      return parseFloat(lineHeight);
     }
     /**
      * Get the element's styles to be used further.

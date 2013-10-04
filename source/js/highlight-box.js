@@ -310,17 +310,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1];
+        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
           transform: 'scale(1)',
-          width: this.clientRect.width / kExtraZoom,
+          width: clientRect.width / kExtraZoom,
           // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
+          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
         });
 
         // Deflate the highlight box.
-        this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
+        this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'linear', function () {
           // Cleanup all elements inserted by sitecues on the page.
           if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
           // Remove placeholder wrapper element if the table child highlighted.
