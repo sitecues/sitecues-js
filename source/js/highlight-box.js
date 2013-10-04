@@ -476,14 +476,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
         
         // If background color is not contrast to text color, invert background one.
-        var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-        var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
-        var isContrastColors = common.getIsContrastColors(color, newBgColor);
+        // EQ-1011: I comment code below b/c now we have simplified logic for bg color(alwyas black);
+        // But we may want to use more complicated one. For ex., if it is black text on transparent background.
+        // Then, black bg color will make the text unredible.
+//        var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
+//        var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
+//        var isContrastColors = common.getIsContrastColors(color, newBgColor);
         // We don't know what's the text color in the image.
-        if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
-          cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
-        } else {
-          cssBeforeAnimateStyles['background-color'] = newBgColor;
+        if (this.item.tagName.toLowerCase() === 'img') {
+          cssBeforeAnimateStyles['background-color'] = '#000';
         }
       }
  
