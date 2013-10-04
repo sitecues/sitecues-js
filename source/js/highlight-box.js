@@ -131,7 +131,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.options = $.extend(true, {}, options);
         this.state = STATES.CREATE;
         this.savedCss = [];
-        this.savedStyleAttr = [];
+        this.savedStyleAttr = {};
         this.origRectDimensions = [];
         this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
         this.itemNode = $(this.item);
@@ -147,7 +147,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.savedCss.push(computedStyles);
-        this.savedStyleAttr.push(this.itemNode.attr('style'));
+        // List of attributes we save original values for because we might want to redefine them later.
+        this.savedStyleAttr['style'] = this.itemNode.attr('style');
+        this.savedStyleAttr['width'] = this.itemNode.attr('width');
+        this.savedStyleAttr['height'] = this.itemNode.attr('height');
       }
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
@@ -251,7 +254,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                   }, '', 'important');
         });
 
-        this.itemNode .style(cssBeforeAnimateStyles);
+        // If website uses width/height attributes let's remove those while HLB is inlated.
+        if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
+          for (var attrName in this.savedStyleAttr) {
+            if (attrName === 'style') {
+              continue;
+            }
+            if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
+              this.itemNode.removeAttr(attrName);
+            }
+          }
+        }
+        this.itemNode.style(cssBeforeAnimateStyles);
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
@@ -325,13 +339,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           notifyZoomInOrOut(_this.itemNode, false);
           }, 0);
 
-          var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
-
-          // Wait till animation is finished, then reset animate styles.
-          _this.itemNode.removeAttr('style');
-
-          if (typeof style !== 'undefined') {
-          _this.itemNode.attr('style', style);
+          // If website used to have width/height attributes let's restore those while HLB is defalted.
+          for (var attrName in _this.savedStyleAttr) {
+            if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
+              _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+            }
           }
           // This instance is now officially closed.
           _this.state = STATES.CLOSED;
