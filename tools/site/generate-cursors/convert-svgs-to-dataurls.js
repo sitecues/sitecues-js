@@ -11,6 +11,7 @@
 
       { url: 'min-osx-retina-arrow-ds.svg', type: 'retina',
         min_width  :  27,
+        // hotspotX   :  
         min_height :  42,
         max_width  :  82,
         max_height : 128

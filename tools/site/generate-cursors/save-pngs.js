@@ -1,9 +1,9 @@
-var png_output_path = 'png-output';
-
-var phantom=require('node-phantom');
+var png_output_path = 'cursor_output/png/'
+  , phantom = require('node-phantom')
+  ;
 
 phantom.create(function(err,ph) {
-  
+
   return ph.createPage(function(err,page) {
     return page.open("./convert-svgs-to-dataurls.html", function(err,status) {
       
@@ -60,6 +60,7 @@ phantom.create(function(err,ph) {
             ph.exit();
           });
 
+        // Delay so the page javascript has a chance to draw the cursors
         }, 10000);
 
     });
