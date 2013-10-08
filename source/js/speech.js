@@ -18,7 +18,7 @@ sitecues.def('speech', function (speech, callback, log) {
   var VERBAL_CUE_SPEECH_ON_FIRST = 'verbalCueSpeechOnFirst';
   var VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff';
 
-  sitecues.use('conf', function(conf) {
+  sitecues.use('conf', 'conf/site', function(conf, site) {
 
     sitecues.use('jquery', 'speech/azure', 'speech/ivona', function(_jQuery, _azure, _ivona) {
 
@@ -42,7 +42,7 @@ sitecues.def('speech', function (speech, callback, log) {
       var ttsBypass = false;
 
       // This is the engine we're using, required, no default
-      var ttsEngine = conf.get("ttsEngine");
+      var ttsEngine = site.get("ttsEngine");
 
       if (!ttsEngine) {
         // No engine was set so the whole component is disabled.

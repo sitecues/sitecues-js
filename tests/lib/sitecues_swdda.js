@@ -8,17 +8,19 @@ exports = module.exports = swdda;
 // Constants.
 var	TEST_SITE_DEFAULTS = {
   hostname	: "localhost",
-  siteId		: 1,
+  siteId		: "s-00000001",
   httpPort	: 8000,
   httpsPort	: 8443,
-  secure		: false
+  secure		: false,
+  includeProtocol: true
 };
 
 var SITECUES_URL_DEFAULTS = {
   hostname	: "localhost",
   path		: "/js/equinox.js",
   httpPort	: 8000,
-  httpsPort	: 8443
+  httpsPort	: 8443,
+  includeProtocol: false
 };
 
 // Current configuration.
@@ -32,9 +34,9 @@ configuration.sitecuesUrl = extend(true, {}, SITECUES_URL_DEFAULTS, configuratio
 
 // Helper method used to create test URLs.
 function generateUrl(config) {
-  return 'http' + ( config.secure ? 's' : '' ) + '://'
+  return (config.includeProtocol ? 'http' + ( config.secure ? 's' : '' ) + ':' : '') + '//'
     + config.hostname + ':' + ( config.secure ? config.httpsPort : config.httpPort )
-    + config.path
+    + config.path;
 }
 
 // Helper method used to generate test URLs from configuration.
@@ -48,7 +50,11 @@ swdda.testUrl = function(testSite) {
   var qIndex = testSite.path.indexOf('?');
   var scjsurlParam = ( qIndex < 0 ? '?' : ( qIndex == (testSite.path.length - 1 ? '' : '&' ) ) ) + 'scjsurl=';
 
-  return generateUrl(testSite)
+  var url = generateUrl(testSite)
     + scjsurlParam + encodeURIComponent(generateUrl(sitecuesUrl))
-    + '&scwsid=' + encodeURIComponent(testSite.siteId);
+    + '&scwsid=' + encodeURIComponent(testSite.siteId)
+    + (testSite.uiMode ? '&scuimode=' + encodeURIComponent(testSite.uiMode) : '');
+
+  console.log("TEST SITE URL: " + url);
+  return url;
 };

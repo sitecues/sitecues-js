@@ -1,41 +1,21 @@
-// module provides confinguration management system
-// for other modules to avoid direct communication
-// between modules.
-sitecues.def('conf/main', function (conf_main, callback, log) {
+/**
+ * This module manages all user configuration properties. These
+ * properties represent the state of the user session, and are
+ * persisted in the user preferences data store.
+ */
+sitecues.def('conf/user/manager', function (manager, callback, log) {
 	'use strict';
 
 	// private variables
 	var data      = {}
 		, handlers  = {}
 		, listeners = {}
-		, langE     = document.getElementsByTagName('html')
-		, locale
-		;
-
-	if (langE && langE[0] && langE[0].lang) {
-	
-		locale = langE[0].lang;
-	
-	} else {
-		
-		langE=document.getElementsByTagName('body');
-
-    if (langE && langE[0] && langE[0].lang) {	
-      locale = langE[0].lang;
-    }
-    // We're not going to set a default locale value, 
-    // as that can vary per site.
-	}
-
-	if (locale) {
-		conf_main.locale = locale.toLowerCase().replace('-','_');
-		log.info('Locale: ' + conf_main.locale);
-	}
+    ;
 
 	// string handler, optional regular
 	// expression can be passed to allow
 	// only values matching it
-	conf_main.string = function(regexp){
+	manager.string = function(regexp){
 		return function(value){
 			return !regexp || regexp.test(value) ? value.toString() : undefined;
 		};
@@ -44,7 +24,7 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 	// number handler, optional number of
 	// digits after the decimal point can be
 	// passed
-	conf_main.number = function(digits){
+	manager.number = function(digits){
 		return function(value){
 			value = parseFloat(value).toFixed(digits);
 			return isNaN(value) ? undefined : parseFloat(value);
@@ -56,7 +36,7 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 	// should be inverted (true -> false).
 	// string 'true' and 'false' vlaues will
 	// be treated as booleans
-	conf_main.bool = function(opposite){
+	manager.bool = function(opposite){
 		return function(value){
 			if (value === 'true'){
 				return opposite ? false : true;
@@ -70,7 +50,7 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 		};
 	};
 
-	conf_main.typeCheck = function(data, key){
+	manager.typeCheck = function(data, key){
 		var value = data[key];
 			
 		// NOTE: This logic should be in the zoom module. Not conf. To be updated.
@@ -81,16 +61,15 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 		return value;
 	};
 
-
 	// get configuration value
-	conf_main.get = function(key, callback){
+	manager.get = function(key, callback){
 
 		// private variables
 		var list;
 
 		// handle sync getting of value
 		if (callback === undefined) {
-			return conf_main.typeCheck(data, key);
+			return manager.typeCheck(data, key);
 		}
 
 		// create new list if needed
@@ -103,46 +82,15 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 
 		if (key in data) {
 			// call back if there is value for key
-			callback(conf_main.typeCheck(data, key));
+			callback(manager.typeCheck(data, key));
 		}
 
 		// chain
-		return conf_main;
-	};
-
-	/**
-	 * Gets a locale-specific configuration value.
-	 * 
-	 * If a locale is available, we'll append that to the key first.  
-	 * If no value is found, we'll fall back to just using the key name.  
-	 * For example:
-	 * 
-	 * conf.getLS('pageGreeting') on a page with <html lang="fr-CA"> 
-	 * will call conf.get('pageGreeting_fr_ca') first, 
-	 * and then conf.get('pageGreeting').
-	 * 
-	 * The locale is specified as a lang attribute on the html or body 
-	 * element.  For consistency, it is converted to lowercase, and hypens
-	 * are converted to underscores.
-	 * 
-	 * @TODO We may want to have it fall back from a region to a language 
-	 * before we go to the default, so we try xxx_fr_ca, then xxx_fr.
-	 *
-	 */
-	
-  conf_main.getLS = function (key) {
-		if(!conf_main.locale) {
-			return conf_main.get(key);
-		}
-		var value = conf_main.get(key + '_' + conf_main.locale);
-		if(value) {
-			return value;
-		}
-		return conf_main.get(key);
+		return manager;
 	};
 
 	// set configuration value
-	conf_main.set = function (key, value) {
+	manager.set = function (key, value) {
 		// private variables
 		var list, i, l;
 
@@ -151,7 +99,7 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 
 		// value isn't changed or is empty after handler
 		if (undefined === value || value === data[key]){
-			return conf_main;
+			return manager;
     }
 
 		// save value, use handler if needed
@@ -174,28 +122,28 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
       }
     }
 		// chain
-		return conf_main;
+		return manager;
 	};
 
 	// define key handler
-	conf_main.def = function(key, handler){
+	manager.def = function(key, handler){
 		// set handler for key
 		if ('function' === typeof handler)
 			handlers[key] = handler;
 
 		// chain
-		return conf_main;
-	}
+		return manager;
+	};
 
 	// remove listener from list of listeners
-	conf_main.off = function(key, callback){
+	manager.off = function(key, callback){
 		// private variables
 		var list;
 
 		// remove all listeners
 		if (undefined === callback){
 			delete listeners[key];
-			return conf_main;
+			return manager;
 		}
 
 		// remove callback from listeners
@@ -209,11 +157,11 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 		}
 
 		// chain
-		return conf_main;
-	}
+		return manager;
+	};
 
 	// get/update all stored values
-	conf_main.data = function(update){
+	manager.data = function(update){
 		// return data object if no updates
 		if (undefined === update){
 			return data;
@@ -224,14 +172,13 @@ sitecues.def('conf/main', function (conf_main, callback, log) {
 			if(update.hasOwnProperty(key)) {
 				// If we already have a value for the key, 
 				// don't overwrite it, except zoom
-				if(!conf_main.get(key) || key === 'zoom') {
-					conf_main.set(key, update[key]);
+				if(!manager.get(key) || key === 'zoom') {
+					manager.set(key, update[key]);
 				}
 			}
 		}
-	}
+	};
 
 	// end
 	callback();
-
 });

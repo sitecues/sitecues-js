@@ -1,21 +1,23 @@
-// module for storing settings on the server
-sitecues.def('conf/server', function (server, callback, log) {
+/**
+ * This module is responsible for reading/persisting user configuration to/from the
+ * server
+ */
+sitecues.def('conf/user/server', function (server, callback, log) {
 
   // URLs for loading/saving data
-  var domain = location.hostname.replace(/^www\./, '');
-	var saveUrl = '//' + sitecues.getCoreConfig().hosts.up + '/save/' + domain + '?callback=?';
-  var loadUrl = '//' + sitecues.getCoreConfig().hosts.up + '/load/' + domain + '?callback=?';
+	var saveUrl = '//' + sitecues.getLibraryConfig().hosts.up + '/save/' + location.hostname + '?callback=?';
+  var loadUrl = '//' + sitecues.getLibraryConfig().hosts.up + '/load/' + location.hostname + '?callback=?';
 
   // UGH!!! The preferences server has a race condition that can clobber data! And ...
   // Redis has no transactions (at least it is web-scale). So, THIS code must ensure
-  // that we don't have two simultaneous saves at the same time. Also, we can't
-  // just save ALL config data, as that would save the site IDs, etc... which
-  // we don't want to save. Our config management needs work...
+  // that we don't have two simultaneous saves at the same time.
+  //
+  // Our config management needs work...
   var SAVING_DATA = false;
 
-	sitecues.use('conf/main', 'jquery', function(conf_main, jquery){
-
+	sitecues.use('conf/user/manager', 'jquery', function(manager, jquery){
     // JSONP callback called when a save call returns.
+
     var saveTimeoutId;
     var saveCallback = function() {
       saveTimeoutId && clearTimeout(saveTimeoutId);
@@ -66,12 +68,12 @@ sitecues.def('conf/server', function (server, callback, log) {
     var loadCallback = function(data) {
       loadTimeoutID && clearTimeout(loadTimeoutID);
       // Set the obtained config data (if any).
-      data && conf_main.data(data);
+      data && manager.data(data);
 
       if (!initialized) {
         initialized = true;
         // Update the preferences server on every 'set'.
-        conf_main.get('*', function(key, value) {
+        manager.get('*', function(key, value) {
           saveData(key, value);
         });
         // This module has completed it's loading.

@@ -37,11 +37,11 @@ sitecues.def('status', function (status, callback, log) {
 
       info = {
         'current_url'     : window.location.href,
-        'sitecues_js_url' : (sitecues.getScriptSrcUrl()).raw,
+        'sitecues_js_url' : (sitecues.getLibraryUrl()).raw,
         'user_agent'      : navigator.userAgent,
         'tts_status'      : ((speech.isEnabled()) ? 'on' : 'off'),
         'version'         : {
-          'sitecues_js'   : sitecues.APP_VERSION,
+          'sitecues_js'   : sitecues.getVersion(),
           'sitecues_up'   : null,
           'sitecues_ws'   : null
         }
@@ -49,8 +49,8 @@ sitecues.def('status', function (status, callback, log) {
 
       // Set the ajax URLs
       ajax_urls = {
-        up: ( '//' + ( sitecues.getCoreConfig() ).hosts.up + '/status' ),
-        ws: ( '//' + ( sitecues.getCoreConfig() ).hosts.ws + '/equinox/api/util/status' )
+        up: ( '//' + ( sitecues.getLibraryConfig() ).hosts.up + '/status' ),
+        ws: ( '//' + ( sitecues.getLibraryConfig() ).hosts.ws + '/sitecues/api/util/status' )
       };
 
       // Define the info object to be formatted by the log

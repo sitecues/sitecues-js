@@ -22,7 +22,7 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
   
   }());
 
-  var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
+  var IvonaPlayer = function(_hlb, _siteId, _jQuery, _secure) {
     var myState = 'init';
     var secureFlag = (_secure ? 1 : 0);
     var hlb = _jQuery(_hlb);
@@ -31,13 +31,13 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
     var baseMediaUrl, mp3Url, oggUrl;
 
     if (speechKey) {
-      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/cues/ivona/" + speechKey + ".";
+      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + ".";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";
     } else {
-      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws
+      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws
         // TODO: Remove the hard-coded site ID.
-        + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag
+        + "/sitecues/api/2/ivona/" + _siteId + "/speechfile?contentType=text/plain&secure=" + secureFlag
         + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";
@@ -96,11 +96,11 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
 
   };
 
-  sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
+  sitecues.use('jquery', 'conf/site', 'speech/jplayer', function (_jQuery, site) {
 
     ivona.factory = function(hlb) {
       log.info(hlb);
-      var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
+      var player = new IvonaPlayer(hlb, site.get('site_id'), _jQuery, sitecues.getLibraryUrl().secure);
       player.init();
       return player;
     };

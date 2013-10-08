@@ -77,24 +77,44 @@ if (!prodMode) {
 app.use(express.static(path.join(root, '../target/compile')));
 app.use(express.static(path.join(root, '../target/etc')));
 
-// Process the inline JS file template.
-var INLINE_JS_FILE = path.resolve(path.join(root, '../tests/views/inline.html'));
-function createInlineJsTemplate() {
+// Process the inline JS file templates.
+
+// The previous include template.
+var INLINE_V1_JS_FILE = path.resolve(path.join(root, '../tests/views/inlineV1.html'));
+function createInlineV1JsTemplate() {
 	try {
-		var templateContent = fs.readFileSync(INLINE_JS_FILE, { encoding: 'UTF-8' });
+		var templateContent = fs.readFileSync(INLINE_V1_JS_FILE, { encoding: 'UTF-8' });
 		return hogan.compile(templateContent);
 	} catch (t) {
 		console.log("Unable to create inline JavaScript template (" + t.message + ")");
 		return null;
 	}
 }
-var getInlineJsTemplate = createInlineJsTemplate;
+var getInlineV1JsTemplate = createInlineV1JsTemplate;
+
+// The current include template.
+var INLINE_V2_JS_FILE = path.resolve(path.join(root, '../tests/views/inlineV2.html'));
+function createInlineV2JsTemplate() {
+  try {
+    var templateContent = fs.readFileSync(INLINE_V2_JS_FILE, { encoding: 'UTF-8' });
+    return hogan.compile(templateContent);
+  } catch (t) {
+    console.log("Unable to create inline JavaScript template (" + t.message + ")");
+    return null;
+  }
+}
+var getInlineV2JsTemplate = createInlineV2JsTemplate;
+
 if (prodMode) {
 	(function(){
-		var INLINE_JS_FILE_TEMPLATE = createInlineJsTemplate();
-		getInlineJsTemplate = function() {
-			return INLINE_JS_FILE_TEMPLATE;
+		var INLINE_V1_JS_FILE_TEMPLATE = createInlineV1JsTemplate();
+		getInlineV1JsTemplate = function() {
+			return INLINE_V1_JS_FILE_TEMPLATE;
 		};
+    var INLINE_V2_JS_FILE_TEMPLATE = createInlineV2JsTemplate();
+    getInlineV2JsTemplate = function() {
+      return INLINE_V2_JS_FILE_TEMPLATE;
+    };
 	})();
 }
 
@@ -103,10 +123,20 @@ function getInlineJSData(req) {
 	var data = null;
 	// Is a URL is provided, then insert the
 	if (req.query.scjsurl) {
+    var scisv = req.query.scjsurl || 2;
+    var scuimode = req.query.scuimode;
+    var templateFunction = ( scisv == 1 ? getInlineV1JsTemplate : getInlineV2JsTemplate);
+    var siteConfigProps = '';
+
+    if (scuimode) {
+      siteConfigProps += ', ui_mode: "' + scuimode + '"'
+    }
+
 		data = {
-			markup: getInlineJsTemplate().render({
+			markup: templateFunction().render({
 				scjsurl:	req.query.scjsurl,
-				scwsid:		req.query.scwsid || 1
+				scwsid:		req.query.scwsid || 's-00000001',
+        siteConfigProps: siteConfigProps
 			})
 		}
 	}

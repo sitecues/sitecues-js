@@ -7,14 +7,18 @@ sitecues = {'def': blankFunction,
             'off': blankFunction,
             'emit': blankFunction,
             
-            'getCoreConfig': function(){
+            'getLibraryConfig': function(){
               return {
                 hosts: {up :'abc', ws:'def'}
               };
             }
             ,
-            'getScriptSrcUrl': function(){
+            'getLibraryUrl': function(){
               return { raw:true };
+            },
+
+            'getVersion': function(){
+              return "0.0.0-UNIT";
             },
 
             'ui': {sliders:[]},

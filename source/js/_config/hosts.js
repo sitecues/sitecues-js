@@ -7,17 +7,13 @@
  */
 (function(){
   //// Do not change anything below this line ////////////////////////////////
-  if (!window.sitecues){
-    window.sitecues = {};
-  }
-  if (!window.sitecues.coreConfig){
-    window.sitecues.coreConfig = {};
-  }
+  window.sitecues = window.sitecues || {};
+  window.sitecues.libConfig = window.sitecues.libConfig || {};
   //// Do not change anything above this line ////////////////////////////////
 
-  // Set hosts in the core config object
-  window.sitecues.coreConfig.hosts = {
-    up : "up.dev.sitecues.com",
-    ws : "ws.dev.sitecues.com"
+  // Set hosts in the lib config object
+  window.sitecues.libConfig.hosts = {
+    up : "up.local.sitecues.com",
+    ws : "ws.local.sitecues.com"
   };
 })();
