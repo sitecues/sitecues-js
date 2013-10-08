@@ -50,11 +50,8 @@ swdda.testUrl = function(testSite) {
   var qIndex = testSite.path.indexOf('?');
   var scjsurlParam = ( qIndex < 0 ? '?' : ( qIndex == (testSite.path.length - 1 ? '' : '&' ) ) ) + 'scjsurl=';
 
-  var url = generateUrl(testSite)
+  return generateUrl(testSite)
     + scjsurlParam + encodeURIComponent(generateUrl(sitecuesUrl))
     + '&scwsid=' + encodeURIComponent(testSite.siteId)
     + (testSite.uiMode ? '&scuimode=' + encodeURIComponent(testSite.uiMode) : '');
-
-  console.log("TEST SITE URL: " + url);
-  return url;
 };

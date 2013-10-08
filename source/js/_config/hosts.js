@@ -13,7 +13,7 @@
 
   // Set hosts in the lib config object
   window.sitecues.libConfig.hosts = {
-    up : "up.local.sitecues.com",
-    ws : "ws.local.sitecues.com"
+    up : "up.dev.sitecues.com",
+    ws : "ws.dev.sitecues.com"
   };
 })();
