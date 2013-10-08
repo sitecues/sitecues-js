@@ -225,29 +225,7 @@
 }
 
 .sitecues-highlight-outline {
-    display: block !important;
-    box-sizing: border-box !important;
     position: absolute !important;
-    background-color: transparent !important;
-    border-radius: 7px;
-    border: 2px solid black;
-    pointer-events: none;
-    z-index: 2147483645; /* Below Equinox panel, mouse, HLB, and HLB close button */
-}
-
-/* Inner overlay, adds a little colored padding to match highlight bg color */
-.sitecues-highlight-padding {
-    width: 100%;
-    height: 100%;
-    display: block !important;
-    box-sizing: border-box !important;
-    position: absolute !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0px solid transparent !important;
-    border-radius: 5px !important;
-    outline: 0 !important;
-    border-radius: 1px;
     pointer-events: none;
 }
 

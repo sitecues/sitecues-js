@@ -1,4 +1,4 @@
-sitecues.def('mouse-highlight', function (mh, callback) {  
+sitecues.def('mouse-highlight', function (mh, callback) {
   		// Tracks if the user has heard the "first high zoom" cue.
   var FIRST_HIGH_ZOOM_PARAM = "firstHighZoom",
   		// The high zoom threshold.
@@ -19,6 +19,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
 				// Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
 				viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
+				floatRects: {}, // Interesting float objects
+				pathBorder: [], // In real pixels so that it can live outside of <body>
+				pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
+				pathFillBackground: [], // In element rect coordinates, used with CSS background
+				highlightBorderWidth: 0,
 				doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
 				doUseOverlayforBgColor: false  // was an overlay used to create the background color?
 			},
@@ -29,7 +34,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			// class of highlight
 	    HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
-	    HIGHLIGHT_PADDING_CLASS = 'sitecues-highlight-padding',  // An inner border inside outline (not actually using CSS padding)
 
 			// elements which need overlay for background color
 	    VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame',
@@ -237,22 +241,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		mh.updateOverlayColor = function() {
 			
 			var element = state.picked.get(0),
-			    highlightOutline = $('.' + HIGHLIGHT_OUTLINE_CLASS),
 			    hasInterestingBg,
 			    backgroundColor,
-			    bgRect,
 			    originRect,
 			    offsetLeft,
-			    offsetTop,
-			    canvas,
-			    ctx;
+			    offsetTop;
 
 			//what approach will we use to update the highlight?
 			updateColorApproach(state.styles);
 			
 			// Approach #1 -- use overlay for bg color
 			if (state.doUseOverlayForBgColor) {
-				highlightOutline.children().style('background-color', getTransparentBackgroundColor(), '');
+				// Untested -- add back if we need it for article reading
+				//var extra = EXTRA_HIGHLIGHT_PIXELS + state.highlightBorderWidth;
+				//var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
+				//drawPath($('.' + HIGHLIGHT_OUTLINE_CLASS).get(0).getContext(), 0, 0, getTransparentBackgroundColor());
 				return;
 			}
 			// Approach #2 -- no bg color
@@ -260,52 +263,46 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				return false;
 			}
 			// Approach #3 -- change background
-			// TODO: L shaped highlights near floats when necessary -- don't require the highlight to be rectangular
-
 			// In most cases we want the opaque background because the background color on the element
 			// can overlap the padding over the outline which uses the same color, and not cause problems
 			// We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
 			hasInterestingBg = hasInterestingBackgroundOnAnyOf(state.styles) ||
 		                       hasInterestingBackgroundImage(state.styles);
-
 			backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
-			bgRect = {   // Address gaps by overlapping with extra padding -- better safe than sorry. Looks pretty good
-				left: state.viewRect.left - EXTRA_HIGHLIGHT_PIXELS,
-				top: state.viewRect.top - EXTRA_HIGHLIGHT_PIXELS,
-				width: state.viewRect.width + 2 * EXTRA_HIGHLIGHT_PIXELS,
-				height: state.viewRect.height + 2 * EXTRA_HIGHLIGHT_PIXELS
-			};
+			var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 1);
+
 			// Get the rectangle for the element itself
-			originRect = positioning.convertFixedRectsToAbsolute([state.elementRect], state.zoom)[0];
+			var svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">'
+				+ getSVGForPath(path, 0, 0, backgroundColor)
+				+ '</svg>'
 
 			// Use element rectangle to find origin (left, top) of background
-			offsetLeft = bgRect.left < originRect.left ? 0 : Math.round(bgRect.left - originRect.left);
-			offsetTop = bgRect.top < originRect.top? 0 : Math.round(bgRect.top - originRect.top);
-
-			// Build canvas rectangle
-			canvas = document.createElement("canvas");
-			$(canvas).attr({'width': bgRect.width, 'height': bgRect.height});
-			ctx = canvas.getContext('2d');
-			ctx.fillStyle = backgroundColor;
-			ctx.fillRect(0, 0, bgRect.width, bgRect.height);
+			offsetLeft = state.fixedContentRect.left - state.elementRect.left;
+			offsetTop = state.fixedContentRect.top - state.elementRect.top;
 
 			state.savedCss = {
-				'background-image'   : element.style.backgroundImage,
-				'background-position': element.style.backgroundPosition,
-				'background-origin'  : element.style.backgroundOrigin,
-				'background-repeat'  : element.style.backgroundRepeat,
-				'background-clip'    : element.style.backgroundClip,
+				'background-image'      : element.style.backgroundImage,
+				'background-position'   : element.style.backgroundPosition,
+				'background-origin'     : element.style.backgroundOrigin,
+				'background-repeat'     : element.style.backgroundRepeat,
+				'background-clip'       : element.style.backgroundClip,
 				'background-attachment' : element.style.backgroundAttachment,
-				'background-size': element.style.backgroundSize
+				'background-size'       : element.style.backgroundSize
 			};
 
+			var newBackgroundImage = "url('data:image/svg+xml;utf8," + svgMarkup + "')";
+			// TODO: If IE9 (also 10?), base 64 background image must be done as base64
+			// Here's a nice base 64 encoder: http://phpjs.org/functions/base64_encode/
+			// background-image: url("data:image/svg+xml;base64,[data]>")
+			// If still doesn't work: might need to make sure base64 text ends in enough === that the length
+			// is always divisible by 4 ... or that might be a Webkit-only issue, not sure
 			$(element).style({
-				'background-image': 'url(' + canvas.toDataURL("image/png") + ')',
+				'background-image': newBackgroundImage,
 				'background-origin': 'border-box',
 				'background-clip' : 'border-box',
 				'background-attachment': 'scroll',
-				'background-size': bgRect.width + 'px ' + bgRect.height + 'px',
+				'background-size': state.fixedContentRect.width + 'px ' + state.fixedContentRect.height + 'px',
 			}, '', '!important');
 
 			$(element).style({
@@ -313,20 +310,151 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				'background-position-x': offsetLeft + 'px',
 				'background-position-y': offsetTop + 'px'
 			}, '', ''); // Not using !important for these because it prevented them from getting cleaned up on mh.hide() in Chrome
+		}
 
-			// Add a color border as a child of outline so that the background color on element goes beyond element bounds
-			// and colors all the way to the outline.
-			highlightOutline
-				.append('<div>')
-				.children()
-				.attr('class', HIGHLIGHT_PADDING_CLASS)
-				.style({
-					'border-left-width': (EXTRA_HIGHLIGHT_PIXELS +.5) * state.zoom + 'px',
-					'border-right-width': (EXTRA_HIGHLIGHT_PIXELS +.5) * state.zoom + 'px',
-					'border-top-width': (EXTRA_HIGHLIGHT_PIXELS + 1) * state.zoom + 'px',
-					'border-bottom-width': (EXTRA_HIGHLIGHT_PIXELS + 1) * state.zoom + 'px',
-					'border-color': backgroundColor
-				}, '', 'important');
+		function floatRectForPoint(x, y, expandFloatRectPixels) {
+			var possibleFloat = document.elementFromPoint(Math.max(0, x * state.zoom), Math.max(0, y * state.zoom));
+			if (possibleFloat && possibleFloat !== state.picked.get(0)) {
+				var pickedAncestors = state.picked.parents();
+				var possibleFloatAncestors = $(possibleFloat).parents();
+				if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(state.picked)) {
+					// If potential float is ancestor of picked, or vice-versa, don't use it.
+					// We only use a cousin or sibling float.
+					return null;
+				}
+				var commonAncestor = $(possibleFloat).closest(pickedAncestors);
+				while (possibleFloat !== commonAncestor && possibleFloat != document.body) {
+					if ($(possibleFloat).css('float') !== 'none') {
+						var floatRect = possibleFloat.getBoundingClientRect();
+						return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
+				    }
+					possibleFloat = possibleFloat.parentNode;
+				}
+			}
+			return null;
+		}
+		function getIntersectingFloatRects() {
+			var EXTRA = 3; // Make sure we test a point inside where the float would be, not on a margin
+			var EXPAND_FLOAT_RECT = 7;
+			var left = state.fixedContentRect.left;
+			var right = state.fixedContentRect.left + state.fixedContentRect.width;
+			var top = state.fixedContentRect.top;
+			return {
+				// Floats are always aligned with the top of the element they're associated with,
+				// so we don't need to support botLeft or botRight floats
+				topLeft: floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
+				topRight: floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT)
+			};
+		}
+
+		function extendAll(array, newProps)
+		{
+			for (var index = 0; index < array.length; index ++ )
+				array[index] = $.extend(array[index], newProps );
+			return array;
+		}
+
+		function getPolygonPoints(rect) {
+			// Build points for highlight polygon
+			var orig = geo.expandOrContractRect(rect, 0);
+			var floats = state.floatRects;
+
+			var topLeftPoints;
+			if (floats.topLeft)
+				// Draw around top-left float
+				topLeftPoints = [
+					{ x: orig.left, y: floats.topLeft.bottom },
+					{ x: floats.topLeft.right, y: floats.topLeft.bottom },
+					{ x: floats.topLeft.right, y: orig.top}
+				];
+			else  // No top-left float, just use top-left point
+				topLeftPoints = [ {x: orig.left, y: orig.top } ];
+
+			var topRightPoints;
+			if (floats.topRight)
+				// Draw around top-right float
+				topRightPoints = [
+					{ x: floats.topRight.left, y: orig.top },
+					{ x: floats.topRight.left, y: floats.topRight.bottom },
+					{ x: orig.right, y: floats.topRight.bottom }
+				];
+			else  // No top-right float, just use top-right point
+				topRightPoints = [ {x: orig.right, y: orig.top } ];
+
+			// Can't create bottom-right float, just use point
+			var botRightPoints =  [ { x: orig.right, y: orig.bottom } ];
+
+			// Can't create bottom left float, just use point
+			var botLeftPoints = [{ x: orig.left, y: orig.bottom } ];
+
+			// growX and growY are set to 1 or -1, depending on which direction coordinates should move when polygon grows
+			extendAll(topLeftPoints, { growX: -1, growY: -1 });
+			extendAll(topRightPoints, { growX: 1, growY: -1 });
+			extendAll(botRightPoints, { growX: 1, growY: 1 });
+			extendAll(botLeftPoints, { growX: -1, growY: 1 });
+
+			return topLeftPoints.concat(topRightPoints, botRightPoints, botLeftPoints);
+		}
+
+		function getExpandedPath(points, delta) {
+			var newPath = [];
+			for (var index = 0; index < points.length; index ++) {
+				newPath.push({
+					x: points[index].x + points[index].growX * delta,
+					y: points[index].y + points[index].growY * delta,
+					growX: points[index].growX,
+					growY: points[index].growY
+				});
+			}
+			return newPath;
+		}
+
+		function getAdjustedPath(origPath, offsetX, offsetY, divisor) {
+			var newPath = [];
+			$.each(origPath, function() {
+				newPath.push($.extend({}, this, {
+					x: (this.x - offsetX) / divisor,
+					y: (this.y - offsetY) / divisor
+				}));
+			});
+			return newPath;
+		}
+
+		function getSVGForPath(points, strokeWidth, strokeColor, fillColor) {
+			var radius = 3;
+			var svgBuilder = '<path d="';
+			var count = 0;
+			do {
+				// Start of vertical line (except for first time)
+				var vertCornerDir = (count === 0) ? 1 : (points[count].y > points[count-1].y) ? -1 : 1;
+				var horzCornerDir = (points[(count + 1) % points.length].x > points[count].x) ? 1 : -1;
+				svgBuilder += (count ? "L " : "M ")  // Horizontal line to start of next curve
+					+ (points[count].x) + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
+				svgBuilder += "Q "  // Curved corner
+					+ points[count].x + ' ' + points[count].y + ' '    // Control point
+					+ (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
+				++ count;
+
+				// Start of horizontal line
+				var vertCornerDir = (points[(count + 1) % points.length].y > points[count].y) ? 1 : -1;
+				var horzCornerDir = (points[count].x > points[count-1].x) ? -1 : 1;
+				svgBuilder += "L "  // Vertical line to start of next curve
+					+ (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
+				svgBuilder += "Q "  // Curved corner
+					+ points[count].x + ' ' + points[count].y + ' '    // Control point
+					+ points[count].x + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
+				++count;
+			}
+			while (count < points.length);
+
+
+			svgBuilder += ' Z" style="' +
+				'stroke-width: ' + strokeWidth + ';' +
+				'stroke: ' + strokeColor + ';' +
+				'fill: ' + (fillColor ? fillColor : 'none' ) +
+				'"/>';
+
+			return svgBuilder;
 		}
 
 		// Update highlight overlay
@@ -337,11 +465,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			var element,
 					elementRect,
 					fixedRects,
-					absoluteRects,
-					previousViewRect,
-					highlightBorderWidth,
-					extra,
-					borderColor;
+					absoluteRect,
+					previousViewRect;
 
 			if (!state.picked) {
 				return false;
@@ -379,20 +504,32 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			positioning.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
 			state.fixedContentRect = fixedRects[0];
 			state.elementRect = $.extend({}, elementRect);
-			absoluteRects = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom);
+			absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
 			previousViewRect = $.extend({}, state.viewRect);
-			highlightBorderWidth = getHighlightBorderWidth();
-
-			state.viewRect = $.extend({ 'borderWidth': highlightBorderWidth }, absoluteRects[0]);
-
+			state.highlightBorderWidth = getHighlightBorderWidth();
+			state.viewRect = $.extend({ }, absoluteRect);
+			var extra = EXTRA_HIGHLIGHT_PIXELS + state.highlightBorderWidth;
 
 			if (createOverlay) {
 				var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
+				state.floatRects = getIntersectingFloatRects();
+				state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
+				var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
+				state.pathFillPadding = getExpandedPath(adjustedPath, EXTRA_HIGHLIGHT_PIXELS / 2);
+				state.pathBorder = getExpandedPath(state.pathFillPadding, EXTRA_HIGHLIGHT_PIXELS /2 + state.highlightBorderWidth /2 );
+
 				// Create and position highlight overlay
-				$('<div>')
-					.attr('class', HIGHLIGHT_OUTLINE_CLASS)
-					.css('z-index', getMaxZIndex(ancestorStyles) + 1) // Below stuff like fixed toolbars
-					.appendTo(document.documentElement);
+				var paddingSVG = getSVGForPath(state.pathFillPadding, EXTRA_HIGHLIGHT_PIXELS, getTransparentBackgroundColor(), null);
+				var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null);
+				var svgFragment = common.createSVGFragment(paddingSVG + outlineSVG, HIGHLIGHT_OUTLINE_CLASS);
+				document.documentElement.appendChild(svgFragment);
+				$('.' + HIGHLIGHT_OUTLINE_CLASS)
+					.attr({
+						width : (state.fixedContentRect.width + 2 * extra) * state.zoom,
+						height: (state.fixedContentRect.height + 2 * extra) * state.zoom
+					})
+					.css('z-index', getMaxZIndex(ancestorStyles) + 1); // Just below stuff like fixed toolbars
+
 				state.isCreated = true;
 			}
 			else if (JSON.stringify(previousViewRect) === JSON.stringify(state.viewRect)) {
@@ -400,17 +537,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 
 			// Finally update overlay CSS -- multiply by state.zoom because it's outside the <body>
-			extra = EXTRA_HIGHLIGHT_PIXELS + highlightBorderWidth;
-			borderColor = getHighlightBorderColor();
-
 			$('.' + HIGHLIGHT_OUTLINE_CLASS)
 				.style({
 					'top': ((state.viewRect.top - extra) * state.zoom) + 'px',
-					'left': ((state.viewRect.left - extra) * state.zoom) + 'px',
-					'width': ((state.viewRect.width + 2 * extra) * state.zoom) + 'px',
-					'height': ((state.viewRect.height + 2 * extra) * state.zoom) + 'px',
-					'border-width': (state.viewRect.borderWidth * state.zoom) + 'px',
-					'border-color': borderColor
+					'left': ((state.viewRect.left - extra) * state.zoom) + 'px'
 				}, '', 'important');
 
 			return true;
@@ -576,7 +706,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				}
 			}
 			$('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
-			$('.' + HIGHLIGHT_PADDING_CLASS).remove();
 		}
 
 		mh.resetState = function() {

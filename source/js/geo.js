@@ -112,6 +112,24 @@ sitecues.def('geo', function(geo, callback, log) {
 			return false;
 		}
 
+		/**
+		 * Expand or contract rectangle
+		 * @param rect  Original rectgangle
+		 * @param delta  Positive value to expand rectangle, or negative to contract
+		 * @returns Object new rectangle
+		 */
+		geo.expandOrContractRect = function(rect, delta) {
+			var newRect = {
+				left: rect.left - delta,
+				top: rect.top - delta,
+				width: rect.width + 2*delta,
+				height: rect.height + 2*delta,
+			};
+			newRect.right = newRect.left + newRect.width;
+			newRect.bottom = newRect.top + newRect.height;
+			return newRect;
+		}
+
 		// done
 		callback();
 

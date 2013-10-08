@@ -415,6 +415,23 @@ sitecues.def('util/common', function (common, callback, log) {
       return kUrlValidString.test(urlString);
     };
 
+	  /**
+	   * Create an SVG fragment for insertion into a web page -- ordinary methods don't work.
+	   * See http://stackoverflow.com/questions/3642035/jquerys-append-not-working-with-svg-element
+	   */
+	common.createSVGFragment = function(svgMarkup, className) {
+		  var temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+		  temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
+		  var frag = document.createDocumentFragment();
+		  var child = temp.firstChild;
+		  while (child) {
+			  frag.appendChild(child);
+			  child = child.nextSibling;
+		  }
+		  return frag;
+	  }
+
+
     ////////////////////////////////////////////////////////////////////////////////
     //// START: Logic for fixed right alignment ignoring the vertical scrollbar,
     ////////////////////////////////////////////////////////////////////////////////
