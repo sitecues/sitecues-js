@@ -23,8 +23,8 @@
         min_height :  38,
         max_width  : 114,
         max_height : 128,
-        hotspotX   : 5,
-        hotspotY   : 5
+        hotspotX   : 10.3,
+        hotspotY   : 2.5
       },
 
       // {"url":"osx-retina-pointer.svg", "min-width":34, "min-height":38,"max-width":114, "max-height":128 }, 
@@ -90,8 +90,8 @@
           , callback    : function (dataURL) {
               var dataurl = document.createElement('dataurl');
               dataurl.setAttribute('title', url + '_' + step);
-              dataurl.setAttribute('data-hotspotX', hotspotX);
-              dataurl.setAttribute('data-hotspotY', hotspotY);
+              dataurl.setAttribute('data-hotspotx', hotspotX);
+              dataurl.setAttribute('data-hotspoty', hotspotY);
               dom.dataURLS.appendChild(dataurl);
               dom.canvasBin.appendChild(canvas);
               dataurl.innerHTML = dataURL;
@@ -100,12 +100,14 @@
         );
       }
 
-      for(; step < steps; step++){
+      for(; step < steps+1; step++){
         canvas  = document.createElement('canvas');
-        realWidth = startWidth + (stepSizeX*step);
-        realHeight = startHeight + (stepSizeY*step);
-        hotspotX = parseInt(cur.hotspotX * step);
-        hotspotY = parseInt(cur.hotspotY * step);
+        realWidth = parseInt(startWidth + (stepSizeX*step));
+        realHeight = parseInt(startHeight + (stepSizeY*step));
+        //hotspotX = parseInt(cur.hotspotX * (stepSizeX/(steps-step)));
+        //hotspotY = parseInt(cur.hotspotY * (stepSizeY/(steps-step)));
+        hotspotX = parseInt(cur.hotspotX/startWidth *realWidth *2);
+        hotspotY = parseInt(cur.hotspotY/startHeight*realHeight*2);
 
         canvas.width = realWidth;
         canvas.height = realHeight;
