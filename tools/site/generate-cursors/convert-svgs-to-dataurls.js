@@ -11,18 +11,20 @@
 
       { url: 'min-osx-retina-arrow-ds.svg', type: 'retina',
         min_width  :  27,
-        // hotspotX   :  
         min_height :  42,
         max_width  :  82,
-        max_height : 128
+        max_height : 128,
+        hotspotX   : 1,
+        hotspotY   : 0.1
       },
-
 
       { url: 'hand-min-retina.svg', type: 'retina',
         min_width  :  34,
         min_height :  38,
         max_width  : 114,
-        max_height : 128
+        max_height : 128,
+        hotspotX   : 5,
+        hotspotY   : 5
       },
 
       // {"url":"osx-retina-pointer.svg", "min-width":34, "min-height":38,"max-width":114, "max-height":128 }, 
@@ -32,7 +34,7 @@
 
   , zoom = {
       min  : 1
-    , max  : 5
+    , max  : 3.1
     , step : 0.1
     }
   
@@ -74,9 +76,11 @@
         , canvas
         , realWidth
         , realHeight
+        , hotspotX
+        , hotspotY
         ;
 
-      function drawToCanvas (url, step, canvas) {
+      function drawToCanvas (url, step, canvas, hotspotX, hotspotY) {
         svg2Canvas(path + url, {
             width       : realWidth
           , height      : realHeight
@@ -86,6 +90,8 @@
           , callback    : function (dataURL) {
               var dataurl = document.createElement('dataurl');
               dataurl.setAttribute('title', url + '_' + step);
+              dataurl.setAttribute('data-hotspotX', hotspotX);
+              dataurl.setAttribute('data-hotspotY', hotspotY);
               dom.dataURLS.appendChild(dataurl);
               dom.canvasBin.appendChild(canvas);
               dataurl.innerHTML = dataURL;
@@ -98,13 +104,15 @@
         canvas  = document.createElement('canvas');
         realWidth = startWidth + (stepSizeX*step);
         realHeight = startHeight + (stepSizeY*step);
+        hotspotX = parseInt(cur.hotspotX * step);
+        hotspotY = parseInt(cur.hotspotY * step);
 
         canvas.width = realWidth;
         canvas.height = realHeight;
         canvas.setAttribute('width' , realWidth);
         canvas.setAttribute('height', realHeight);
 
-        drawToCanvas(url, step, canvas);
+        drawToCanvas(url, step, canvas, hotspotX, hotspotY);
       }
 
     })(cur);
