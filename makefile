@@ -40,11 +40,11 @@ files=\
 	target/source/js/core.js \
 	source/js/load.js \
 	source/js/jquery.js \
-	source/js/conf/main.js \
-	source/js/conf/localstorage.js \
-	source/js/conf/import.js \
-	source/js/conf/remote.js \
-	source/js/conf/server.js \
+	source/js/conf/user/provided.js \
+	source/js/conf/user/server.js \
+	source/js/conf/user/manager.js \
+	source/js/conf/user.js \
+	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
@@ -62,6 +62,7 @@ files=\
 	source/js/panel.js \
 	source/js/keys.js \
 	source/js/focus.js \
+	source/js/geo.js \
 	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
@@ -71,7 +72,7 @@ files=\
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
-  source/js/speech.js \
+	source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
@@ -89,6 +90,8 @@ files=\
 	source/js/toolbar/resizer.js \
 	source/js/ui-manager.js \
 	source/js/html-build.js \
+	source/js/browser.js \
+	source/js/status.js \
 
 https=off
 prod=off
@@ -98,17 +101,14 @@ min=true
 port=8000
 uglifyjs-args=
 
-saucelabs-username:=sitecues
-saucelabs-access-key:=43c5470e-8c38-41d8-ba4f-99a558263dad
-
 testsite-timeout:=30000
 phantomjs-timeout:=30000
-saucelabs-connect-timeout:=240000
 
 default-test-run-id:=$(username)-$(shell ./binary/uuid)
 test-run-id=$(default-test-run-id)
 
 common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
+testunit-mocha-options:=-c
 smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
 
 ifeq ($(clean-deps), true)
@@ -160,9 +160,9 @@ build: $(_force_deps_refresh) $(_build_lint_dep)
 	@mkdir -p target/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
 	@mkdir -p target/compile/js
-	@uglifyjs $(uglifyjs-args) -o target/compile/js/equinox.js --source-map target/compile/js/equinox.js.map --source-map-url /equinox.js.map $(files)
+	@uglifyjs $(uglifyjs-args) -o target/compile/js/sitecues.js --source-map target/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 	@mkdir -p target/etc/js
-	@cp -r source/js/.cfg target/etc/js
+	@cp -r source/js/_config target/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
 	@echo "Building completed."
 
@@ -237,25 +237,16 @@ test-all: test-smoke test-unit
 # Run the smoke tests.
 test-smoke:
 	@(make --no-print-directory start-testsite prod=on)
-	@(cd tests/smoke && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options))
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd tests/smoke ; ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options)
 
 # TARGET: test-unit
 # Run the unit tests.
 test-unit:
-	@(make --no-print-directory start-testsite prod=on)
-	@(make --no-print-directory start-saucelabs-connect)
-	@(cd tests/unit && echo "TEST RUN ID: $(test-run-id)" && ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options))
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
 
-# TARGET: start-saucelabs-connect
-# Start the SauceLabs Connect service.
-start-saucelabs-connect:
-	@binary/_saucelabs-connect start --timeout $(saucelabs-connect-timeout) --root $(service-root) -- $(saucelabs-username) $(saucelabs-access-key)
-
-# TARGET: stop-saucelabs-connect
-# Stop the SauceLabs Connect service.
-stop-saucelabs-connect:
-	@binary/_saucelabs-connect stop --root $(service-root)
 
 # TARGET: stop-all-services
 # Stop all known services.
-stop-all-services: stop-testsite stop-saucelabs-connect
+stop-all-services: stop-testsite

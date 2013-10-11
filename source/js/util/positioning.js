@@ -3,7 +3,10 @@
  */
 sitecues.def('util/positioning', function (positioning, callback) {
 
-    sitecues.use('jquery', function ($) {
+	    positioning.kMinRectWidth = 3;
+	    positioning.kMinRectHeight = 3;
+
+    sitecues.use('jquery', 'util/common', function ($, common) {
 
         /**
          * Get the cumulative zoom for an element.
@@ -79,41 +82,159 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    return processResult(result);
 	    }
 
+	    positioning.convertFixedRectsToAbsolute = function(fixedRects, zoom) {
+		    var absoluteRects = [];
+			  var scrollPos = positioning.getScrollPosition();
+		    for (var count = 0; count < fixedRects.length; count ++) {
+			    absoluteRects[count] = positioning.getCorrectedBoundingBox(fixedRects[count], zoom, scrollPos);
+		    }
+		    return absoluteRects;
+	    }
+
 	    /**
-	     * Get the rectangles for the target.
+	     * Get the fixed position rectangles for the target's actual rendered content.
 	     * This is necessary when an inline element such as a link wraps at the end of a line -- there are multiple rects
 	     * DOM function object.getClientRects() returns rectangle objects for each rectangle associated with an object.
+	     * It also helps get just what's visible, as opposed to a parent element's rectangle which could bleed
+	     * over neighboring floats.
 	     * Recursive so that we don't miss any bounds (sometimes children escape the bounds of their parents).
 	     * For example, child images escape the bounds of inline parents and
 	     * relatively positioned children can be outside of the parent that way.
 	     * When adjacent rectangles are within |proximityBeforeRectsMerged| pixels,
 	     * they will be combined into a single rectangle.
+	     * @param selector -- what to get bounding boxes
+	     * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
+	     * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
 	     */
 	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged) {
 		    var allRects = [];
-		    var scrollPosition = positioning.getScrollPosition();
-		    positioning.getAllBoundingBoxesImpl(selector, scrollPosition, allRects);
+
+		    var $selector = $(selector);
+		    var clipRect = getAncestorClipRect($selector);
+		    getAllBoundingBoxesExact($selector, allRects, clipRect);
 		    positioning.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+
 		    return allRects;
 	    }
 
-	    positioning.getAllBoundingBoxesImpl = function (selector, scrollPosition, result) {
-		    $(selector).each(function () {
-			    var boundingBoxes;
-			    if ("getClientRects" in this) {
-				    boundingBoxes = this.getClientRects();
+	    /**
+	     * Use shrink-wrapped box for potentially wrapped content
+	     * Otherwise use element bounds -- this way there is enough room for single-line content and it doesn't need to wrap
+	     * when it didn't need to wrap before.
+	     */
+	    positioning.getSmartBoundingBox = function(item)
+	    {
+		    var contentRect = positioning.getAllBoundingBoxes(item, 9999)[0];
+		    var lineHeight = common.getLineHeight(item);
+		    var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
+		    if (isSingleLine)
+			    return item.getBoundingClientRect();
+
+		    return contentRect;
+	    }
+
+	    function getBoundingRectMinusPadding(node) {
+		    var range = document.createRange();
+		    range.selectNode(node);
+		    var rect = range.getBoundingClientRect();
+		    if (node.nodeType !== 1) {
+			    return rect;
+		    }
+		    // Reduce by padding amount -- useful for images such as Google Logo
+		    // which have a ginormous amount of padding on one side
+		    // TODO: should we use common.getElementComputedStyles() ?
+		    var paddingTop = parseFloat($(node).css('padding-top'));
+		    var paddingLeft = parseFloat($(node).css('padding-left'));
+		    var paddingBottom = parseFloat($(node).css('padding-bottom'));
+		    var paddingRight = parseFloat($(node).css('padding-right'));
+		    rect = {
+			    top: rect.top + paddingTop,
+			    left: rect.left + paddingLeft,
+			    width: rect.width - paddingLeft - paddingRight,
+			    height: rect.height - paddingTop - paddingBottom,
+			    right: rect.right - paddingRight,
+			    bottom: rect.bottom - paddingBottom
+		    };
+		    return rect;
+	    }
+
+	    // Only use leaf nodes (where content resides), in order to avoid rects taht
+	    // were purposely positioned offscreen
+	    function getAllBoundingBoxesExact($selector, allRects, clipRect) {
+		    $selector.each(function () {
+			    var isElement = this.nodeType === 1;
+			    // TODO: should we use common.getElementComputedStyles() ?
+			    if (isElement && $(this).css('visibility') !== 'visible') {
+					return true; // Don't look at this hidden element
 			    }
-			    if (!boundingBoxes || boundingBoxes.length === 0) {
-				    // Fallback
-				    boundingBoxes = [ positioning.getBoundingBox(selector) ];
+			    if (this.hasChildNodes()) {  // TODO do we want to union ourselves if there is a visible border?
+				    // Use bounds of visible descendants, but clipped by the bounds of this ancestor
+				    var isClip = isClipElement(this);
+				    var newClipRect = clipRect;
+				    if (isClip) {
+					    newClipRect = this.getBoundingClientRect();
+					    if (clipRect) {  // Combine parent clip rect with new clip
+						    newClipRect = getClippedRect(clipRect, newClipRect);
+					    }
+				    }
+			        getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
 			    }
-			    var totalZoom = positioning.getTotalZoom(this, true);
-			    for (var count = 0; count < boundingBoxes.length; count ++) {
-				    var boundingBox = boundingBoxes[count];
-				    result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
+			    else { // Leaf node -- has visible contents
+				    var rect = getBoundingRectMinusPadding(this);
+				    rect = getClippedRect(rect, clipRect);
+
+				    if (rect.width > positioning.kMinRectWidth  && rect.height > positioning.kMinRectHeight  &&
+					    rect.right > 0 && rect.bottom > 0) {
+				        // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
+					    allRects.push(rect);
+				    }
 			    }
 		    });
-		    return result;
+	    }
+
+	    function isClipElement(element) {
+		    // TODO: should we use common.getElementComputedStyles() ?
+		    return $(element).css('clip') !== 'auto' || $(element).css('overflow') !== 'visible';
+	    }
+
+	    function getClippedRect(r1, r2) {
+		    if (!r2) {
+			    return r1;
+		    }
+		    var left   = Math.max( r1.left, r2.left);
+		    var right  = Math.min( r1.left + r1.width, r2.left + r2.width);
+		    var top    = Math.max( r1.top, r2.top );
+		    var bottom = Math.min( r1.top + r1.height, r2.top + r2.height);
+		    return {
+			    left: left,
+			    top: top,
+			    bottom: bottom,
+			    right: right,
+			    width: right - left,
+			    height: bottom - top
+		    };
+	    }
+
+	    // Get clip rectangle from ancestors in the case any of them are clipping us
+	    function getAncestorClipRect($selector) {
+		    var kMaxAncestorsToCheck = 5;
+		    var allClipRects = [];
+		    $selector.each(function() {
+			    // Get ancestor clip rect -- do up to kMaxAncestorsToCheck ancestors (beyond that, it's unlikely to clip)
+			    var ancestors = $selector.parents();
+			    var clipRect = null;
+			    ancestors.each(function(index) {
+				    if (index >= kMaxAncestorsToCheck)
+				        return false;
+				    if (isClipElement(this)) {
+					    var newClipRect = this.getBoundingClientRect();
+					    clipRect = clipRect ? getClippedRect(clipRect, newClipRect) : newClipRect;
+				    }
+			    });
+			    allClipRects.push(clipRect);
+		    });
+		    positioning.combineIntersectingRects(allClipRects, 9999);
+		    return allClipRects[0];
 	    }
 
 	    /**
@@ -175,12 +296,13 @@ sitecues.def('util/positioning', function (positioning, callback) {
         positioning.getCenter = function (selector) {
             var result = [];
             $(selector).each(function () {
-                var jElement = $(this);
-                var offset = positioning.getOffset(this);
+	            var fixedRects = positioning.getAllBoundingBoxes(this, 9999);
+	            var zoom = positioning.getTotalZoom(this, true);
+	            var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
                 result.push({
-                    left: offset.left + ((jElement.outerWidth()) / 2),
-                    top:  offset.top + ((jElement.outerHeight()) / 2)
+                    left: rect.left + (rect.width / 2),
+                    top:  rect.top + (rect.height / 2)
                 });
             });
             return processResult(result);
@@ -388,7 +510,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
         var _MATRIX_REGEXP = /matrix\s*\(\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*,\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*\)/i;
         function getMagnification(selector, andZoom) {
             var jElement = $(selector);
-            if (jElement.size()) {
+            if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
                 var result = 1;

@@ -1,68 +1,108 @@
 /*
- * Sitecues:  core.js
- *
- * The core module for loading Sitecues.
- *
+ * Sitecues: core.js
+ *   The core module of the sitecues library.
  */
+(function () {
+  'use strict';
 
-(function(){
+  // NOTE: initialization of this module is at the bottom of this page.
 
-  // Create the logger for this module
-  var log = window.sitecues.logger.log('core');
-
-  // Return if there is sitecues instance on the page
-  if (window.sitecues && window.sitecues.coreConfig) {
-    log.warn("sitecues already defined.");
-    return;
-  }
-
-  // Create a sitecues namespace if it does not already exist
-  // Logging will attach itself to this namespace on window.sitecues.log
-  if (!window.sitecues) {
-    window.sitecues = {};
-  }
-
-  window.sitecues.allModulesLoaded = false;
+  var
+  // The compiled-in library version.
+    version = '0.0.0-UNVERSIONED'
 
   // Private variables
-  var arr               = Array.prototype                 // Array's prototype
-    , has               = Object.prototype.hasOwnProperty // Object's has own property
-    , noop              = function(){}                    // Empty function
-    , coreConfig        = {}                              // Core config container
-    , modules           = {}                              // Modules container
-
-    // Siteuces top-level namespace: all public classes and modules will be
-    // attached to this name space and aliased on "window.sitecues"
-    , sitecues    = window.sitecues
-
+    , arr               = Array.prototype  // Array's prototype
+    , log               = null             // The core module logger
+    , libraryConfig     = null             // Library config container
+    , libraryUrl        = null             // The parsed library URL object
+    , siteConfig        = null             // Site config container
+    , modules           = {}               // Modules container
+    , allModulesLoaded  = false
+    // Sitecues top-level namespace: all public classes and modules will be
+    // attached to this name space and aliased on "window.sitecues". This
+    // variable is initialized at the bottom of this script.
+    , sitecues      = null
+    
   // Private Functions
+    , exportPublicFields
     , resolveUrl
     , parseUrlQuery
     , parseUrl
-    
-    , lastModuleDefined
-    
-    , APP_VERSION = '0.0.0-UNVERSIONED'
-  ;
 
+  // Public Functions (these should be registered in the exportPublicFields() function)
+    , getVersion
+    , getLibraryConfig
+    , getLibraryUrl
+    , getSiteConfig
+    , getAllModulesLoaded
+    , on
+    , off
+    , emit
+    , def
+    , use
+    , resolveSitecuesUrl
+    , loadScript
+    , load
+    ;
 
-  // More convenient way to get epoch time in milliseconds when working with the code
-  function time(){
-    return + new Date();
+  // This function is called when we are sure that no other library already exists in the page. Otherwise,
+  // we risk overwriting the methods of the live library.
+  exportPublicFields = function() {
+    sitecues.getVersion = getVersion;
+    sitecues.getLibraryConfig = getLibraryConfig;
+    sitecues.getLibraryUrl = getLibraryUrl;
+    sitecues.getAllModulesLoaded = getAllModulesLoaded;
+    sitecues.getSiteConfig = getSiteConfig;
+    sitecues.on = on;
+    sitecues.off = off;
+    sitecues.emit = emit;
+    sitecues.def = def;
+    sitecues.use = use;
+    sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
+    sitecues.loadScript = loadScript;
+    sitecues.load = load;
   };
 
-  // Return the core config.
-  sitecues.getCoreConfig = function() {
-    return coreConfig;
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //  Getters
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////
+
+  getVersion = function() {
+    return version;
   };
 
+  getLibraryConfig = function() {
+    return libraryConfig;
+  };
+
+  getLibraryUrl = function() {
+    return libraryUrl;
+  };
+
+  getSiteConfig = function() {
+    return siteConfig;
+  };
+
+  getAllModulesLoaded = function() {
+    return allModulesLoaded;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //  Event Management
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////
+  
   // bind an event, specified by a string name, `events`, to a `callback`
   // function. passing `"*"` will bind the callback to all events fired
-  sitecues.on = function(events, callback, context){
+  on = function(events, callback, context){
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
-    while (ev = events.shift()){
+    while ((ev = events.shift())){
       // create an immutable callback list, allowing traversal during
       // modification. the tail is an empty object that will always be used
       // as the next node
@@ -78,21 +118,24 @@
   // remove one or many callbacks. if `context` is null, removes all callbacks
   // with that function. if `callback` is null, removes all callbacks for the
   // event. if `events` is null, removes all bound callbacks for all events
-  sitecues.off = function(events, callback, context){
+  off = function(events, callback, context){
     var ev, calls, node;
     if (!events){
       delete this._events;
     } else if (calls = this._events){
       events = events.split(/\s+/);
-      while (ev = events.shift()){
+      while ((ev = events.shift())){
         node = calls[ev];
         delete calls[ev];
-        if (!callback || !node) continue;
+        if (!callback || !node){
+          continue;
+        }
 
         // create a new list, omitting the indicated event/context pairs
         while ((node = node.next) && node.next) {
-          if (node.callback === callback &&
-            (!context || node.context === context)) continue;
+          if (node.callback === callback && (!context || node.context === context)) {
+            continue;
+          }
           this.on(ev, node.callback, node.context);
         }
       }
@@ -104,23 +147,29 @@
   // emit an event, firing all bound callbacks. callbacks are passed the
   // same arguments as `trigger` is, apart from the event name.
   // listening for `"*"` passes the true event name as the first argument
-  sitecues.emit = function(events){
+  emit = function(events){
     var event, node, calls, tail, args, all, rest;
-    if (!(calls = this._events)) return this;
+    if (!(calls = this._events)){
+      return this;
+    }
 
     all = calls['*'];
     (events = events.split(/\s+/)).push(null);
 
     // save references to the current heads & tails
-    while (event = events.shift()){
-      if (all) events.push({next: all.next, tail: all.tail, event: event});
-      if (!(node = calls[event])) continue;
+    while ((event = events.shift())){
+      if (all){
+        events.push({next: all.next, tail: all.tail, event: event});
+      }
+      if (!(node = calls[event])) {
+        continue;
+      }
       events.push({next: node.next, tail: node.tail});
     }
 
     // traverse each list, stopping when the saved tail is reached.
     rest = arr.slice.call(arguments, 1);
-    while (node = events.pop()){
+    while ((node = events.pop())){
       tail = node.tail;
       args = node.event ? [node.event].concat(rest) : rest;
       while ((node = node.next) !== tail){
@@ -131,13 +180,26 @@
     return this;
   };
 
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //  Module Management
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////
+
   // Module states management:
   var MODULE_STATE = {
-    NONE: 1,         // A 'def' or 'use' call has never been made for the module.
-    LOADING: 2,      // A 'use' call has been made for a module, and a load request has been started.
-    INITIALIZING: 3, // A 'def' call has been made for a module, and the module is initializing.
-    READY: 4         // The module is initialized and ready for use.
-  };
+    NONE:         1,  // A 'def' or 'use' call has never been made for the module.
+    LOADING:      2,  // A 'use' call has been made for a module, and a load request has been started.
+    INITIALIZING: 3,  // A 'def' call has been made for a module, and the module is initializing.
+    READY:        4   // The module is initialized and ready for use.
+  }
+  , READY_FOR_DEF_CALLS   = false
+  , DEF_QUEUE             = []
+  , LOAD_LIST             = []
+  , definedLastModule     = false
+  , lastDefinedModuleName = undefined
+  , moduleLoadAttempts    = 0
+  ;
 
   // Returns the state of the requested module.
   var getModuleState = function(name) {
@@ -149,7 +211,7 @@
     }
 
     // The entry is a number, so just return that saved state.
-    if (typeof module === "number") {
+    if (typeof module === 'number') {
       return module;
     }
 
@@ -157,32 +219,36 @@
     return MODULE_STATE.READY;
   };
 
-  function checkDefinedModulesAreAllLoaded () {
+  var checkDefinedModulesAreAllLoaded = function() {
     var defCount = 0
-    ,   length     = LOAD_LIST.length
+    , l     = LOAD_LIST.length
+    , i
+    , iModule
     ;
 
-    for (var i=0; i< length; i++) {
+    for (i=0; i< l; i++) {
+      iModule = modules[LOAD_LIST[i]];
 
-      var i_module = modules[LOAD_LIST[i]];
-
-      if (i_module) {
-        defCount += i_module.defined === true ? 1 : 0 ;
+      if (iModule) {
+        defCount += iModule.defined === true ? 1 : 0 ;
       }
     }
 
-    if (defCount === length) {
-      window.sitecues.allModulesLoaded = true;
+    if (defCount === LOAD_LIST.length) {
+      allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
+    } else if (moduleLoadAttempts++ < 10) {
+      // Keep trying to load, up to 10 times
+      setTimeout(checkDefinedModulesAreAllLoaded, 200);
     }
   };
 
   // define equinox module
-  var _def = function(name, constructor){
+  var _def = function(name, constructor) {
     
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-      log.warn("sitecues: module '" + name + "' already defined.");
+      log.warn('sitecues: module "' + name + '" already defined.');
       return;
     }
 
@@ -213,28 +279,26 @@
 
       // Module checking.....
       modules[name].defined = true;
-      
-      if (name===lastDefinedModuleName) {
+
+      if (name === lastDefinedModuleName) {
         definedLastModule = true;
       }
 
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
-        checkDefinedModulesAreAllLoaded();
+        // This behavior is unreliable on IE9 so we'll use the loop (see below)
+        //checkDefinedModulesAreAllLoaded();
       }
 
     // Pass a new logger into the constructor scope of the module
-    }, window.sitecues.logger.log(name));
+    }, sitecues.logger.log(name));
   };
 
-  // exposed function for defining modules: queues until core is ready.
-  var READY_FOR_DEF_CALLS = false
-  ,   DEF_QUEUE           = []
-  ,   LOAD_LIST           = []
-  ,   definedLastModule   = false
-  ,   lastDefinedModuleName
-  ;
-  sitecues.def = function(name, constructor){
+  // This kicks off a loop that will wait until modules are loaded
+  setTimeout(checkDefinedModulesAreAllLoaded, 50);
+
+  // exposed function for defining modules: queues until library is ready.
+  def = function(name, constructor){
     if (READY_FOR_DEF_CALLS) {
       _def(name, constructor);
     } else {
@@ -258,13 +322,8 @@
     READY_FOR_DEF_CALLS = true;
   };
 
-  // Called to initialize the sitecues library.
-  var _initialize = function() {
-    _processDefQueue();
-  };
-
   // load equinox modules
-  sitecues.use = function(){
+  use = function(){
     var i, l, t = this, count = 0,
       args, load, result, callback, register;
 
@@ -326,7 +385,7 @@
           // but it is not yet ready
           t.on('load/' + name, push);
         }
-      }(args[i], register(i, args[i])));
+      } (args[i], register(i, args[i])));
 
       // load all needed modules
       load.length && t.load.apply(t, load);
@@ -334,11 +393,11 @@
     }, 0);
   };
 
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  START: URL Processing Helper Methods
+  //  URL Processing
   //
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
   // Parse a URL query into key/value pairs.
   parseUrlQuery = function(queryStr){
@@ -373,15 +432,17 @@
   // Parse a URL into its components.
   parseUrl = function(urlStr){
     // Ran across this in a Google search... loved the simplicity of the solution.
-    var url = {};
-    var parser = document.createElement('a');
+    var url = {}
+      , parser = document.createElement('a')
+      ;
     parser.href = urlStr;
 
     // No one ever wants the hash on a full URL...
-    if (parser.hash)
+    if (parser.hash){
       url.raw = parser.href.substring(parser.href.length - parser.hash.length);
-    else
+    } else {
       url.raw = parser.href;
+    }
 
     url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
     url.secure   = (url.protocol == "https");
@@ -409,30 +470,9 @@
     return url;
   };
 
-
-
-  var scriptSrcUrl    = null
-  ,   scriptSrcRegExp = new RegExp('^[a-zA-Z]*:/{2,3}.*/(equinox|sitecues)\.js')
-  ,   scriptTags      = document.getElementsByTagName('script')
-  ;
-
-  sitecues.getScriptSrcUrl = function() {
-    return scriptSrcUrl;
-  };
-
-  // Obtain all script tags, and search util we find our script.
-  for (var i = 0; i < scriptTags.length; i++){
-    var match = scriptTags[i].src.match(scriptSrcRegExp);
-    if (match){
-      scriptSrcUrl = parseUrl(match[0]);
-      break;
-    }
-  }
-
-  // TODO: What if we don't find the base URL?
   // The regular expression for an absolute URL. There is a capturing group for
   // the protocol-relative portion of the URL.
-  var ABSOLUTE_URL_REQEXP = /^[a-z]+:(\/\/.*)$/i;
+  var ABSOLUTE_URL_REQEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
 
   // Resolve a URL as relative to a base URL.
   resolveUrl = function(urlStr, baseUrl) {
@@ -456,18 +496,18 @@
   };
 
   // Resolve a URL as relative to the main script URL.
-  sitecues.resolveSitecuesUrl = function(urlStr){
-    return resolveUrl(urlStr, scriptSrcUrl);
+  resolveSitecuesUrl = function(urlStr){
+    return resolveUrl(urlStr, libraryUrl);
   };
 
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  END: URL Processing Helper Methods
+  //  Script Loading
   //
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
   // async script loading
-  sitecues.loadScript = function(url, callback){
+  loadScript = function(url, callback){
     // Resolve the URL as relative to the library URL.
     url = sitecues.resolveSitecuesUrl(url);
 
@@ -483,15 +523,19 @@
     // enforce async loading
     script.async = true;
 
-    // add callback to track when it will be loaded
-    script.onload = script.onreadystatechange = callback;
+    // add callback to track when it will be loaded.  
+
+    // NOTE: We should not be using script.onreadystatechange here for two
+    // reasons: 1, it doesn't mean that the script as loaded (it could change
+    // state to 'loading') and 2. it has been removed from IE as of v11.
+    script.onload = callback;
 
     // add element to head to start loading
     document.getElementsByTagName('head')[0].appendChild(script);
   };
 
   // trigger module loading
-  sitecues.load = function(){
+  load = function(){
     // iterate over passed module names
     for(var i=0, l=arguments.length; i<l; i++){
       // and initiate loading of code for each
@@ -499,206 +543,198 @@
     }
   };
 
-  // The default status formatter: simply log all data to the log.
-  var DEFAULT_STATUS_CALLBACK = function(info) {
-    var printObj = function(o, prefix) {
-        var p, v, s = '';
-        prefix = prefix || '';
-        for (p in o) {
-          if (o.hasOwnProperty(p)) {
-            v = o[p];
-            s += prefix + p + ':';
-            if (typeof v == 'object') {
-              s += '\n' + printObj(v, prefix + '  ');
-            } else {
-              s += ' ' + v + '\n';
-            }
-          }
-        }
-        return s;
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //  Basic Site Configuration
+  //    This section process the basic site configuration, whose absence will
+  //    prevent the library from loading.
+  //
+  //////////////////////////////////////////////////////////////////////////////////////////
 
-      };
+  var processBasicSiteConfiguration = function() {
+    if (!validateBasicSiteConfiguration()) {
+      return false;
+    }
 
-    log.info('\n===== BEGIN: SITECUES STATUS =====================\n'
-      + printObj(info)
-      + '===== END: SITECUES STATUS =======================');
+    // Now that the basic site configuration has been validated, we can populate
+    // internal references.
+
+    // Internal reference to the site config object.
+    siteConfig = sitecues.config;
+
+    // The parsed library URL.
+    libraryUrl = parseUrl(siteConfig.script_url);
+
+    return true;
   };
 
-  sitecues.status = function (callback) {
-    callback = callback || DEFAULT_STATUS_CALLBACK;
+  var validateBasicSiteConfiguration = function() {
+    if (!sitecues.config) {
+      log.error("The 'sitecues.config' object was not provided.");
+      return false;
+    }
 
-    sitecues.use("jquery", "speech", 'conf', function ( $, speech, conf ) {
+    if (typeof sitecues.config != "object") {
+      log.error("The 'sitecues.config' is not an object.");
+      return false;
+    }
 
-      // Set the ajax URLs
-      var ajax_urls = {
-        up: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].up + "/status" ),
-        ws: ( "//" + ( sitecues.getCoreConfig() )[ "hosts" ].ws + "/equinox/api/util/status" )
-      };
-      
-      // Define the info object to be formatted by the log
-      var info = {
-        version: {
-          "sitecues_js": APP_VERSION,
-          "sitecues_up": null,
-          "sitecues_ws": null
-        },
-        "current_url": window.location.href,
-        "sitecues_js_url": ( sitecues.getScriptSrcUrl() ).raw,
-        "user_agent":  navigator.userAgent,
-        "tts_status": ( ( speech.isEnabled() ) ? "on" : "off" ),
-      };
+    if (!sitecues.config.site_id) {
+      log.error("The 'sitecues.config.site_id' parameter was not provided.");
+      return false;
+    }
 
-      var data = conf.data();
-      for (var setting in data) {
-        info[setting] = data[setting];
-      }
+    if (typeof sitecues.config.site_id != "string") {
+      log.error("The 'sitecues.config.site_id' parameter is not a string.");
+      return false;
+    }
 
-      // Defer the ajax calls so we can respond when both are complete
-      var ajaxCheck = function(){
-        if ( typeof info.version.sitecues_up === 'string' && 
-             typeof info.version.sitecues_ws === 'string' ) {
-          callback(info);
-        }
-      };
+    if (!sitecues.config.script_url) {
+      log.error("The 'sitecues.config.script_url' parameter was not provided.");
+      return false;
+    }
 
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.up,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_up = response.version;
-          ajaxCheck();
-        },
-        error: function(){
-          
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_up = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-        
-      $.ajax({
-        cache:    false,
-        dataType: "json",
-        type:     "GET",
-        url:      ajax_urls.ws,
-        success: function(response){
-          
-          // Set the version based on the AJAX response object
-          info.version.sitecues_ws = response.version;
-          ajaxCheck();
-        },
-        error: function(){
+    if (typeof sitecues.config.script_url != "string") {
+      log.error("The 'sitecues.config.script_url' parameter is not a string.");
+      return false;
+    }
 
-          // Set an error message if the AJAX object did not return
-          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
-          ajaxCheck();
-        }
-      });
-
-    }); // end of use
-
-    // Popup the logger and report status
-    var popup = sitecues.logger.appenders.popup;
-    popup.show();
-    popup.focus();
-    return 'Getting sitecues status.'
+    return true;
   };
 
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  START: Core Configuration
-  //      This section loads the core configuration,
-  //      whose absence will prevent the library
-  //      from loading.
+  //  Library Configuration
+  //    This section loads the library configuration, whose absence will prevent the
+  //    library from loading.
   //
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
-  var CORE_CONFIG_NAMES = [ "hosts" ], coreLoadCount;
+  var LIB_CONFIG_NAMES = [ "hosts" ], libraryConfigLoadCount;
 
-  // Validation method for core configuration. If valid, initialize sitecues.
-  var _validateCoreConfigs = function() {
+  // Validation method for library configuration. If valid, initialize sitecues.
+  var validateLibraryConfigs = function(cb) {
     var valid = true;
 
-      //log.info( coreConfig, 1 );
+    if (window.sitecues.libConfig) {
+      libraryConfig = window.sitecues.libConfig;
 
-    if (window.sitecues.coreConfig) {
-      coreConfig = window.sitecues.coreConfig;
+      log.info(libraryConfig);
 
-      log.info( coreConfig );
-
-      //window.sitecues.coreConfig = undefined;
-
-      if (coreConfig.hosts) {
-        if (coreConfig.hosts.ws) {
-          log.info("sitecues ws host: " + coreConfig.hosts.ws);
+      if (libraryConfig.hosts) {
+        if (libraryConfig.hosts.ws) {
+          log.info("sitecues ws host: " + libraryConfig.hosts.ws);
         } else {
           log.warn("sitecues ws host not specified.");
           valid = false;
         }
 
-        if (coreConfig.hosts.up) {
-          log.info("sitecues up host: " + coreConfig.hosts.up);
+        if (libraryConfig.hosts.up) {
+          log.info('sitecues up host: ' + libraryConfig.hosts.up);
         } else {
           log.warn("sitecues up host not specified.");
           valid = false;
         }
       } else {
-        log.warn("sitecues core hosts config not found.");
+        log.warn("sitecues hosts library config not found.");
         valid = false;
       }
     } else {
-      log.warn("sitecues core config not found.");
+      log.warn("sitecues library config not found.");
       valid = false;
     }
 
-    // If the core configs are valid, initialize the library.
-    if (valid) {
-      _initialize();
+
+
+    if (!valid) {
+      log.error("Invalid sitecues library config.");
+    }
+    cb(!valid);
+  };
+
+  var processLibraryConfiguration = function(cb) {
+    // Called after all library configs that require loading are loaded, triggering validation.
+    var onLibraryConfigLoadComplete = function() {
+      libraryConfigLoadCount--;
+      if (libraryConfigLoadCount <= 0) {
+        validateLibraryConfigs(cb);
+      }
+    };
+
+    // Determine which library configs require loading.
+    var libraryConfigLoadNames = [], i;
+    if (!window.sitecues.libConfig) {
+      // We need all of the library configs.
+      libraryConfigLoadNames = LIB_CONFIG_NAMES.splice(0, LIB_CONFIG_NAMES.length);
     } else {
-      log.error("invalid sitecues core config. aborting.");
-    }
-  };
-
-  // Called after all core configs that require loading are loaded, triggering validation.
-  var onCoreLoadComplete = function() {
-    coreLoadCount--;
-    if (coreLoadCount <= 0) {
-      _validateCoreConfigs();
-    }
-  };
-
-  // Determine which core configs require loading.
-  var coreLoadNames = [];
-  if (!window.sitecues.coreConfig) {
-    // We need all of the core configs.
-    coreLoadNames = CORE_CONFIG_NAMES.splice(0, CORE_CONFIG_NAMES.length);
-  } else {
-    for (i=0; i<CORE_CONFIG_NAMES.length; i++) {
-      if (!window.sitecues.coreConfig[CORE_CONFIG_NAMES[i]]) {
-        coreLoadNames.push(CORE_CONFIG_NAMES[i]);
+      for (i = 0; i < LIB_CONFIG_NAMES.length; i++) {
+        if (!window.sitecues.libConfig[LIB_CONFIG_NAMES[i]]) {
+          libraryConfigLoadNames.push(LIB_CONFIG_NAMES[i]);
+        }
       }
     }
-  }
-  // Set the counter of outstanding core configs.
-  coreLoadCount = coreLoadNames.length;
+    // Set the counter of outstanding library configs.
+    libraryConfigLoadCount = libraryConfigLoadNames.length;
 
-  // If there are no outstanding core configs, trigger validation.
-  if (coreLoadCount <= 0) {
-    _validateCoreConfigs();
-  } else { // Trigger loading of missing core configs.
-    for (i=0; i<coreLoadNames.length; i++) {
-      sitecues.loadScript(".cfg/" + coreLoadNames[i] + ".js", onCoreLoadComplete);
+    // If there are no outstanding library configs, trigger validation.
+    if (libraryConfigLoadCount <= 0) {
+      validateLibraryConfigs(cb);
+    } else { // Trigger loading of missing library configs.
+      for (i = 0; i < libraryConfigLoadNames.length; i++) {
+        loadScript("_config/" + libraryConfigLoadNames[i] + ".js", onLibraryConfigLoadComplete);
+      }
     }
-  }
+  };
 
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  END: Core Configuration
+  //  Library Initialization
+  //    This section is responsible for the initialization of the sitecues library.
   //
-  //////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
 
+  var initialize = function() {
+    // If the sitecues global object does not exist, then there is no basic site configuration, nor
+    // is there a logger. Simply print an error to the console and abort initialization.
+    if (!window.sitecues || (typeof window.sitecues != "object")) {
+      console.error("The base 'windows.sitecues' namespace was not found. The sitecues library will not load.");
+      return;
+    }
+
+    // Set the internal reference.
+    sitecues = window.sitecues;
+
+    // See if another sitecues library has "planted it's flag" on this page.
+    if (sitecues._) {
+      console.error("The sitecues library already exists on this page.");
+      return;
+    }
+    // "Plant our flag" on this page.
+    sitecues._ = true;
+
+    // As we have now "planted our flag", export the public fields.
+    exportPublicFields();
+
+    // Create the logger for this module
+    if (sitecues.logger) {
+      log = sitecues.logger.log('core');
+    }
+
+    // Process the basic configuration needed for library initialization.
+    if (!processBasicSiteConfiguration()) {
+        log.error("Unable to load basic site configuration. Library can not initialize.")
+    } else {
+      processLibraryConfiguration(function(err) {
+        if (err) {
+          log.error("Unable to load library configuration. Library can not initialize.")
+        } else {
+          // Start processing the queued-up module definition requests (in essence, load the library).
+          _processDefQueue();
+        }
+      });
+    }
+  };
+
+  // Trigger initialization.
+  initialize();
 }).call(this);

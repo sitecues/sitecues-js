@@ -4,7 +4,7 @@ sitecues.def('iframe-modal', function(iframeModal, callback, log) {
 sitecues.use('jquery', function ($) {
       
   // The URL of the help contents.
-  var IFRAME_CONTENT_ENDPOINT = '//' + sitecues.coreConfig.hosts.up + '/iframeModals';
+  var IFRAME_CONTENT_ENDPOINT = '//' + sitecues.getLibraryConfig().hosts.up + '/iframeModals';
 
   // Initial inset of the help HLB once it is added to the page.
   var IFRAME_DIALOG_INSET = 50;
@@ -55,17 +55,19 @@ sitecues.use('jquery', function ($) {
         var iframes = {};
         (function() {
           for (urlName in helpConfig.urls) {
-              iframes[urlName] = jq('<iframe>').attr({
-              src:          helpConfig.urls[urlName],
-              frameborder:  "0",
-              marginheight: "0",
-              marginwidth:  "0",
-              sandbox:      "allow-forms allow-same-origin allow-scripts allow-top-navigation",
-              seamless:     "seamless",
-              scrolling:    "auto"
-            }).css({
-              //transformOrigin: 'center center'
-            }).addClass('sitecues-iframe-modal').hide().prependTo('html');
+            if (helpConfig.urls.hasOwnProperty(urlName)) {
+                iframes[urlName] = jq('<iframe>').attr({
+                src:          helpConfig.urls[urlName],
+                frameborder:  "0",
+                marginheight: "0",
+                marginwidth:  "0",
+                sandbox:      "allow-forms allow-same-origin allow-scripts allow-top-navigation",
+                seamless:     "seamless",
+                scrolling:    "auto"
+              }).css({
+                //transformOrigin: 'center center'
+              }).addClass('sitecues-iframe-modal').hide().prependTo('html');
+            }
           }
         })();
 
@@ -215,9 +217,9 @@ sitecues.use('jquery', function ($) {
           }
         });
 
-        callback();
       }
     });
+    callback();
   });
 });
 });

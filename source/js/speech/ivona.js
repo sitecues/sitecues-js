@@ -5,8 +5,24 @@
  * a generic audio file player.
  */
 sitecues.def('speech/ivona', function (ivona, callback, log) {
+  //Fix for EQ-498 - Translate hex representation of html entities to words
+  var removeHTMLEntities = (function() {
+    //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
+    //Taken from http://www.w3schools.com/tags/ref_entities.asp and then passed the symbols above into
+    //the native function encodeURIComponent.  Example: encodeURIComponent('®')
+    var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%C2%A2', '%C2%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
+    //@param URIComponent accepts a string of URI encoded text and removes any
+    //html entity encoded characters from it
+    return function (URIComponent) {
+      for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
+        URIComponent = URIComponent.replace(htmlEntityMap[i], '');
+      }
+      return URIComponent;
+    }
+  
+  }());
 
-  var IvonaPlayer = function(_hlb, _conf, _jQuery, _secure) {
+  var IvonaPlayer = function(_hlb, _siteId, _jQuery, _secure) {
     var myState = 'init';
     var secureFlag = (_secure ? 1 : 0);
     var hlb = _jQuery(_hlb);
@@ -15,14 +31,14 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
     var baseMediaUrl, mp3Url, oggUrl;
 
     if (speechKey) {
-      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws + "/equinox/cues/ivona/" + speechKey + ".";
+      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + ".";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";
     } else {
-      baseMediaUrl = "//" + sitecues.getCoreConfig().hosts.ws
+      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws
         // TODO: Remove the hard-coded site ID.
-        + "/equinox/api/ivona/5/speechfile?contentType=text/plain&secure=" + secureFlag
-        + "&text=" + encodeURIComponent(hlb.text()) + "&codecId=";
+        + "/sitecues/api/2/ivona/" + _siteId + "/speechfile?contentType=text/plain&secure=" + secureFlag
+        + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";
     }
@@ -80,16 +96,21 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
 
   };
 
-  sitecues.use('jquery', 'conf', 'speech/jplayer', function (_jQuery, conf) {
+  sitecues.use('jquery', 'conf/site', 'speech/jplayer', function (_jQuery, site) {
 
     ivona.factory = function(hlb) {
       log.info(hlb);
-      var player = new IvonaPlayer(hlb, conf, _jQuery, sitecues.getScriptSrcUrl().secure);
+      var player = new IvonaPlayer(hlb, site.get('site_id'), _jQuery, sitecues.getLibraryUrl().secure);
       player.init();
       return player;
-    }
-  });
+    };
 
+    if (sitecues.tdd) {
+      exports.ivona = ivona;
+      exports.removeHTMLEntities = removeHTMLEntities;
+    }
+  
+  });
   // end
   callback();
 });

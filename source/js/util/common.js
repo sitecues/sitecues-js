@@ -2,32 +2,52 @@
  * This is module for common utilities that might need to be used across all of the different modules.
  */
 sitecues.def('util/common', function (common, callback, log) {
+  'use strict';
 
    // Define dependency modules.
   sitecues.use('jquery', 'jquery/cookie', function ($) {
-    var kRegExpRGBString = /\d+(\.\d+)?%?/g;
-    var kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
-    var kUrlValidString = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    
+    var kRegExpRGBString = /\d+(\.\d+)?%?/g
+      , kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i
+      , kUrlValidString = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+      , bodyVertScrollbarWidth
+      , rightAlignObjs
+      // https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+      , lineHeightValues = {'normal': 1.2}
+      ;
 
     // Make sure 'trim()' has cross-browser support.
     if (typeof String.prototype.trim !== 'function') {
-      String.prototype.trim = function() {
-      return this.replace(/^\s+|\s+$/g, '');
-      }
+      String.prototype.trim = function () {
+        return this.replace(/^\s+|\s+$/g, '');
+      };
     }
 
+    common.getLineHeight = function(item) {
+      // Values possible from computed style: normal | <number>px
+      var lineHeight = $(item).css('line-height');
+      if (lineHeightValues.hasOwnProperty(lineHeight)) {
+        return lineHeightValues[lineHeight];
+      }
+      return parseFloat(lineHeight);
+    }
     /**
      * Get the element's styles to be used further.
      * @param element The DOM element which styles we want to get.
      * @return elementComputedStyles An object of all element computed styles.
      */
-    common.getElementComputedStyles = function(element, prop, doTransform) {
-      if(!element) {
+    common.getElementComputedStyles = function (element, prop, doTransform) {
+      if(!element){
         return;
       }
       // By default, return entire CSS object.
-      var currentProperty, propertyName, propertyParts = [], elementComputedStyles = {};
-      var computedStyles = element.currentStyle || window.getComputedStyle(element, null);
+      var currentProperty
+        , propertyName
+        , propertyParts = []
+        , elementComputedStyles = {}
+        , computedStyles = element.currentStyle || window.getComputedStyle(element, null)
+        , i
+        ;
 
       // If a specific property value is requested then skip the entire CSS object iteration.
       if (prop) {
@@ -36,8 +56,9 @@ sitecues.def('util/common', function (common, callback, log) {
         if (propertyParts.length < 2) {
           return computedStyles[prop];
         }
+        
         // dash-like name: 'margin-top'
-        for (var i = 1; i < propertyParts.length; i++) {
+        for (i = 1; i < propertyParts.length; i++) {
           propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
         }
         return computedStyles[propertyName];
@@ -103,18 +124,19 @@ sitecues.def('util/common', function (common, callback, log) {
      * @return Boolean true if colors are contrast; false otherwise
      */
     common.getIsContrastColors = function(colorOne, colorTwo){
-      var tones = [];
-      for (var index in arguments) {
-        var colorValue = arguments[index];
-        var RGBColor = common.getRGBColor(colorValue);
-        // http://en.wikipedia.org/wiki/YIQ
-        var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
-        tones[colorValue] = (yiq >= 128) ? 'dark' : 'light';
-
-      }
+      var colorOneTone = this.isLightTone(colorOne);
+      var colorTwoTone = this.isLightTone(colorTwo);
       // Now that we have both colors tones, define if they are contrast or not.
-      return !(tones[colorOne] === tones[colorTwo]);
+      return (colorOneTone === colorTwoTone) ? false : true;
     };
+
+    common.isLightTone = function (colorValue) {
+      RGBColor = common.getRGBColor(colorValue);
+      // http://en.wikipedia.org/wiki/YIQ
+      var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
+
+      return  yiq >= 128;
+    }
 
     /*
      * Converts color given RGB format.
@@ -127,11 +149,14 @@ sitecues.def('util/common', function (common, callback, log) {
         return Rgb(colorValue);
       }
       // CSSPrimitiveValue
-      var resultRGBColor = { r: 255, g: 255, b:255 };
+      var resultRGBColor = { r: 255, g: 255, b:255 }
+        , valueType
+        , rgb
+        ;
       try {
-        var valueType = colorValue.primitiveType;
-        if (valueType == CSSPrimitiveValue.CSS_RGBCOLOR) {
-          var rgb = colorValue.getRGBColorValue();
+        valueType = colorValue.primitiveType;
+        if (valueType === CSSPrimitiveValue.CSS_RGBCOLOR) {
+          rgb = colorValue.getRGBColorValue();
           resultRGBColor.r = rgb.red.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
           resultRGBColor.g = rgb.green.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
           resultRGBColor.b = rgb.blue.getFloatValue (CSSPrimitiveValue.CSS_NUMBER);
@@ -206,9 +231,9 @@ sitecues.def('util/common', function (common, callback, log) {
       }
 
       // ~~ used to floor values
-      rgb.r = ~~(rgb.r/count);
-      rgb.g = ~~(rgb.g/count);
-      rgb.b = ~~(rgb.b/count);
+      rgb.r = Math.floor(rgb.r/count);
+      rgb.g = Math.floor(rgb.g/count);
+      rgb.b = Math.floor(rgb.b/count);
 
       return rgb;
     };
@@ -217,15 +242,20 @@ sitecues.def('util/common', function (common, callback, log) {
      * Returns an object of RGB components converted from a string containing either RGB or HEX string.
      */
     function Rgb(rgb){
-      if(!(this instanceof Rgb)) return new Rgb(rgb);
-      var defaultColor = [255, 255, 255];
-      var c = rgb.match(kRegExpRGBString);
+      if (!(this instanceof Rgb)){
+        return new Rgb(rgb);
+      }
+      var defaultColor = [255, 255, 255]
+        , c = rgb.match(kRegExpRGBString)
+        ;
       // RGB
       if (c) {
         c = c.map(function(itm){
           // Take care of plain numbers as well as percentage values
-          if(itm.indexOf('%')!= -1) itm = parseFloat(itm)*2.55;
-          return parseInt(itm);
+          if (itm.indexOf('%') !== -1){
+            itm = parseFloat(itm)*2.55;
+          }
+          return parseInt(itm,10);
         });
       } else if ((kRegExpHEXValidString).test(rgb)) {
         // Valid HEX
@@ -241,10 +271,18 @@ sitecues.def('util/common', function (common, callback, log) {
       this.b = c[2];
     }
 
-    function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
-    function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
-    function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
-    function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+    function hexToR (h) {
+      return parseInt((cutHex(h)).substring(0,2),16);
+    }
+    function hexToG (h) {
+      return parseInt((cutHex(h)).substring(2,4),16);
+    }
+    function hexToB (h) {
+      return parseInt((cutHex(h)).substring(4,6),16);
+    }
+    function cutHex (h) {
+      return (h.charAt(0)==='#') ? h.substring(1,7):h;
+    }
     
     /*
      * Sets a cookie.  Basically just wraps the jQuery cookie plugin.
@@ -280,8 +318,9 @@ sitecues.def('util/common', function (common, callback, log) {
      */
     common.preventDefault = function(e) {
       e = e || window.event; // cross-browser event
-      if (e.preventDefault)
+      if (e.preventDefault){
         e.preventDefault();
+      }
       e.cancelBubble = true; // IE variant
       e.returnValue = false;
     };
@@ -300,8 +339,9 @@ sitecues.def('util/common', function (common, callback, log) {
      * @param e Event Object
      */
     common.wheelUp = function(e) {
-      var evt = e || window.event;
-      var delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1;
+      var evt = e || window.event
+      , delta = evt.originalEvent.detail < 0 || evt.originalEvent.wheelDelta > 0 ? 1 : -1
+      ;
       return delta > 0;
     };
 
@@ -329,18 +369,68 @@ sitecues.def('util/common', function (common, callback, log) {
      */
     common.smoothlyScroll = function(e, el, step, isUp) {
       common.stopDefaultEventBehavior(e);
-      var step = step || 1;
+      step = step || 1;
       step = isUp? -step : step;
       el.scrollTop += step;
       return false;
     };
 
-    /* Validates whether the given value is a valid URL
-     * @urlString A string
-     */
+
+     /**
+      * Is the current element editable for any reason???
+      * @param element
+      * @returns {boolean} True if editable
+      */
+    common.isEditable = function ( element ) {
+      var tag = element.localName
+        , contentEditable
+        ;
+      
+      if (!tag) {
+        return false;
+      }
+      tag = tag.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+        return true;
+      }
+      if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
+        return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+      }
+      // Check for rich text editor
+      contentEditable = element.getAttribute('contenteditable');
+      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
+        return true; // In editor
+      }
+      if (document.designMode === 'on') {
+        return true; // Another kind of editor
+      }
+      return false;
+    };
+
+  /* Validates whether the given value is a valid URL
+	 * @urlString A string
+	 */
+
     common.validateUrl = function(urlString) {
       return kUrlValidString.test(urlString);
     };
+
+	  /**
+	   * Create an SVG fragment for insertion into a web page -- ordinary methods don't work.
+	   * See http://stackoverflow.com/questions/3642035/jquerys-append-not-working-with-svg-element
+	   */
+	common.createSVGFragment = function(svgMarkup, className) {
+		  var temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+		  temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
+		  var frag = document.createDocumentFragment();
+		  var child = temp.firstChild;
+		  while (child) {
+			  frag.appendChild(child);
+			  child = child.nextSibling;
+		  }
+		  return frag;
+	  }
+
 
     ////////////////////////////////////////////////////////////////////////////////
     //// START: Logic for fixed right alignment ignoring the vertical scrollbar,
@@ -348,46 +438,46 @@ sitecues.def('util/common', function (common, callback, log) {
 
     // Body vertical scrollbar width, in pixels.
     // TODO: Determine actual body vertical scrollbar width in current tab.
-    var bodyVertScrollbarWidth = 15;
+    bodyVertScrollbarWidth = 15;
 
     // The tracked objects.
-    var rightAlignObjs = [];
+    rightAlignObjs = [];
 
     // Returns true if the body has a vertical scrollbar.
-    var bodyHasVertScrollbar = function() {
+    function bodyHasVertScrollbar () {
       // See if the document width is within some delta of the window inner width.
       var result = ((window.innerWidth - $(document.documentElement).outerWidth()) > 3);
-      log.info("bodyHasVertScrollbar = " + result);
+      log.info('bodyHasVertScrollbar = ' + result);
       return result;
-    };
+    }
+
     common.bodyHasVertScrollbar = bodyHasVertScrollbar;
 
     // Applies the CSS object for the right alignment styles.
-    var applyDynamicPlacementCSS = function(accessors) {
+    function applyDynamicPlacementCSS (accessors) {
 
       //console.log( $(document).get(0).getClientBoundingRect() );
 
       // Why is this fired so many times?
-      // console.log('________ applyDynamicPlacementCSS ________');
-      // console.log(accessors.obj);
-      // console.log('               doc elem outer width: ' +$(document.documentElement).outerWidth() );
-      // console.log('                accessors get width: ' +accessors.getWidth() );
-      // console.log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
-      // console.log('         accessors get right offset: ' +accessors.getRightOffset() );
-      // console.log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
+      // log('________ applyDynamicPlacementCSS ________');
+      // log(accessors.obj);
+      // log('               doc elem outer width: ' +$(document.documentElement).outerWidth() );
+      // log('                accessors get width: ' +accessors.getWidth() );
+      // log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
+      // log('         accessors get right offset: ' +accessors.getRightOffset() );
+      // log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
 
       var css = {
-        left: ($(document.documentElement).outerWidth()
-          - accessors.getWidth()
-          - (bodyHasVertScrollbar()
-              ? accessors.getRightOffset()
-              : bodyVertScrollbarWidth + accessors.getRightOffset()
-          )) + 'px'
+        left: ($(document.documentElement).outerWidth() - 
+          accessors.getWidth() -
+          (bodyHasVertScrollbar() ?
+            accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
+        )) + 'px'
       };
 
       // Apply the dynamic placement CSS.
       accessors.setCss(css);
-    };
+    }
 
     /**
      * Right aligns an element while ignoring vertical scrollbar jitter.

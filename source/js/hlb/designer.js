@@ -18,13 +18,34 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
     designer.kBoxBorderWidth = '3px';
     designer.kBoxPadding = '4px';
-    designer.kDefaultBgColor = '#ffffff';
+    designer.kDefaultBgColor = 'rgb(255, 255, 255)';
+    designer.kDefaultTextColor = 'rgb(0, 0, 0)';
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
     sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
 
         function ($, conf, positioning, common) {
+          
+            designer.getCurrentTextColor = function(item) {
+              var compStyle = item.currentStyle || window.getComputedStyle(item, null);
+              var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
+              if ($.inArray(color, transparentColorNamesSet) > 0) {
+                  color = designer.kDefaultTextColor;
+                  $(this.item).parents().each(function () {
+                      // Iterate through the parents looking for a background color.
+                      var thisNodeColor = $(this).css('backgroundColor');
+                      // See if the background color is a default or transparent color(if no, then $.inArray() returns '-1' value).
+                      if ($.inArray(thisNodeColor, transparentColorNamesSet) < 0) {
+                          // Found a background color specified in this node, no need to check further up the tree.
+                          color = thisNodeColor;
+                          return false;
+                      }
+                  });
+              }
+              return color;
+            }
+          
             /**
              * Gets the background value of highlight box when it appears.
              * @param itemNode HTML node Object
@@ -77,7 +98,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             - parseFloat(closestStyle['padding-right'])
                             - parseFloat(closestStyle['margin-left'])
                             - parseFloat(closestStyle['margin-right'])
-                            - parseFloat(closestStyle['border-left-width'])
+                            - parseFloat(closestStyle['border-left-width'])   // Odd -- why repeated?
                             - parseFloat(closestStyle['border-left-width'])
                             + 'px';
                         }
@@ -185,9 +206,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-                    var width = (jElement.outerWidth(true) + 2 * additionalBoxOffset) * extraZoom;
-                    var height = (jElement.outerHeight(true)+ 2 * additionalBoxOffset) * extraZoom;
-
+                    var rect = positioning.getSmartBoundingBox(this);
+                    var width = (rect.width + 2 * additionalBoxOffset) * extraZoom;
+                    var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
 

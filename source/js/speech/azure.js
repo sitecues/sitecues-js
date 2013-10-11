@@ -6,19 +6,18 @@
  */
 sitecues.def('speech/azure', function (azure, callback, log) {
 
-    sitecues.use('jquery', 'conf', 'conf/remote', function (_jQuery, conf, remote) {
-
+    sitecues.use('jquery', 'conf', 'conf/site', function (_jQuery, conf, site) {
         azure.factory = function(hlb) {
-          log.info(remote.azureAccessToken.accessToken);
-          var roboVoice = new window.sitecues.RoboVoice(remote.azureAccessToken.accessToken);
-          return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, remote);
+          log.info(site.get('azureAccessToken').accessToken);
+          var roboVoice = new window.sitecues.RoboVoice(site.get('azureAccessToken').accessToken);
+          return new window.sitecues.AzurePlayer(hlb, roboVoice, conf, _jQuery, site);
         }
     });
 
     // end
     callback();
 
-window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _remote) {
+window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQuery, _site) {
 
   var hlb;
   if(hlb instanceof _jQuery) {
@@ -27,14 +26,14 @@ window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQue
     hlb = _jQuery(_hlb);
   }
   var roboVoice = _roboVoice;
-  var remote = _remote;
+  var site = _site;
 
   this.play = function() {
     var speechKey = hlb.data('speechKey');
     if (speechKey) {
-      roboVoice.playAudioUrl("//" + sitecues.getCoreConfig().hosts.ws + "/equinox/cues/azure/" + speechKey + ".wav");
+      roboVoice.playAudioUrl("//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/azure/" + speechKey + ".wav");
     } else {
-      var tokenTTL = remote.azureAccessToken.expires - new Date().getTime();
+      var tokenTTL = site.get('azureAccessToken').expires - new Date().getTime();
       if(tokenTTL < 30000) {
         log.info("Token has expired, re-fetching...");
         this.fetchToken();
@@ -62,7 +61,7 @@ window.sitecues.AzurePlayer = function AzurePlayer(_hlb, _roboVoice, conf, _jQue
   };
 
   this.fetchToken = function() {
-    remote.fetch();
+    site.fetch();
   }
 
 };
@@ -744,7 +743,7 @@ function WMAudioPlayer() {
       },
       function (audioUrl) { 
         if (audioUrl) {
-          if (sitecues.getScriptSrcUrl().secure) {
+          if (sitecues.getLibraryUrl().secure) {
             audioUrl = audioUrl.replace(/^http:/, "https:");
           }
           self._doCallback(self.options.onAudioUrlLoaded, audioUrl, text, language);

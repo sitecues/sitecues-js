@@ -4,7 +4,7 @@
 sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'util/positioning', function ($, conf, positioning) {
+  sitecues.use('jquery', 'conf', 'util/positioning', 'browser', function ($, conf, positioning, browser) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
@@ -27,7 +27,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         wrapper     = svgPath.wrapper;
 
         // Create dimmer SVG overlay
-        var dimmerSVG ='<svg xmlns="http://www.w3.org/2000/svg">' +
+        var dimmerSVG ='<svg width="' + viewport.width + 'px' +'" height="' + viewport.height + 'px' + '" xmlns="http://www.w3.org/2000/svg">' +
 
             // Use an SVG path to create the dimmer area
             '<path '+
@@ -44,6 +44,12 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
             // Close the SVG
             '</svg>';
 
+        var zIndex = 2147483646;
+        if(browser.isIE()) {
+          // This is specifically a problem with IE9, other versions are TBD
+          zIndex = 2147483643;
+        }
+
         // Create the container for the SVG dimmer
         this.$dimmerContainer = $('<div/>', {
 
@@ -57,7 +63,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         .style({
           'position'      : 'fixed',
           'display'       : 'block',
-          'z-index'       : 2147483646,
+          'z-index'       : zIndex,
           'opacity'       : 0,
           'left'          : '0px',
           'top'           : '0px',

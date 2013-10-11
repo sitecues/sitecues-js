@@ -5,51 +5,25 @@
  * It is a quick-n-dirty solution and we might want to improve it in the future.
  */
 
-require("../../lib/mock");
-sinon   = require("sinon");
+// todo: we might need shutdown file wich restores all the objects & fakes we create here.
+// Load the libraries we need to use.
+require('./libs');
 
-// Require assertive library.
-chai    = require("chai");
-expect  = chai.expect;
+// Stub jquery plugin 'style'.
+jquery.fn.style  = function() {};
+var expectedBehaviour = function(property, value) {
+  jquery(this).css(property, value);
+};
+    sinon.stub(jquery.fn, 'style', expectedBehaviour);
 
-// Require other libraries we need.
-jquery = require("jquery");
-jsdom  = require("jsdom");
-
-// Create a basic document with empty <head> and <body> tags; DOM level 3.
-document = jsdom.jsdom();
-window   = document.parentWindow;
+// Load javascript implementation of W3C and create browser objects we need:
+// document, window, nodes etc.
+require('../data/w3c');
 
 // Create & insert a new element we will later use for tests.
-node = document.createElement("p");
+var node = document.createElement("p");
 node.setAttribute("id", "sitecues");
 document.getElementsByTagName('body')[0].appendChild(node);
 
-// Override/mock sitecues object.
-var def = function(name, callback) {
-  var module = {};
-  var cb = function() {};
-  return callback(module, cb);
-};
-
-use = function(name) {
-  var args = [];
-  var index = 0;
-  while (index < arguments.length - 1) {
-    var module = require('../data/modules/' + arguments[index]);
-    // todo: find better way to declare sets of data.
-    var name = arguments[index].split('/');
-    args.push(jquery.isEmptyObject(module) ? eval(name[name.length - 1]) : module);
-    index++;
-  }
-
-  var callback = arguments[arguments.length - 1];
-  return callback.apply(this, args);
-};
-
-sitecues = {'def': def,
-            'use': use,
-            'on' : function() {},
-            'off': function() {},
-            'emit': function() {},
-            'tdd': true}; // this prop helps to use 'exports' object only under nodejs.
+// Load the shim for sitecues global object.
+require('../data/sitecues');

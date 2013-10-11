@@ -3,7 +3,7 @@
     "hostname": "localhost",
     "httpPort": 8000,
     "httpsPort": 8443,
-    "path": "/js/equinox.js"
+    "path": "/js/sitecues.js"
   },
 
   "testSite": {
@@ -11,7 +11,8 @@
     "httpPort": 8000,
     "httpsPort": 8443,
     "secure": false,
-    "siteId": 5
+    "siteId": "s-00000001",
+    "uiMode": "auto"
   },
 
   "providerCommon": {

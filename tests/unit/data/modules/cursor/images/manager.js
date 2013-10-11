@@ -1,8 +1,9 @@
-// todo: maybe, instead use wrappin anonymouse functions to isolate the scope of vars inside.
-//
-////(function () {
-//  imagesManager = {};
-//  imagesManager.offsets = {'test': 'test'};
-//}());
-manager = {'gen': 'gen'};
-manager.offsets = {'test': 'test'};
+manager = {};
+manager.offsets = {
+     'auto'   : {x: 0, y: 5,  step: 2.5},
+     'default': {x: 0, y: 5,  step: 2.5},
+     'pointer': {x: 10, y: 5, step: 3.5}
+    }
+manager.urls = {
+  // Maybe, add some images?
+}

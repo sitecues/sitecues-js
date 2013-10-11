@@ -8,7 +8,7 @@ sitecues.def('invert', function (invert, callback, log) {
       , normal  : 2
     };
 
-    invert.enum = {
+    invert.stateMap = {
         0 : 'invert'
       , 1 : 'match'
       , 2 : 'normal'
@@ -203,7 +203,7 @@ sitecues.def('invert', function (invert, callback, log) {
             // switch statement, but I am not convinced that the cases in the
             // statement were ever executing. Perhaps there is some state that
             // I am not aware of yet.
-            setState("highlight_box", invert.enum[elem_invert_state.page]);
+            setState("highlight_box", invert.stateMap[elem_invert_state.page]);
           }
 
           switch (elem_invert_state.page) {

@@ -21,7 +21,10 @@
     "wd": "0.0.x",
     "empty-port": "0.0.1",
     "jquery" : "*",
-    "jsdom" : "*"
+    "jsdom" : "*",
+    "xmlhttprequest": "*",
+    "location": "*",
+    "navigator": "*"
   },
   "engines": {
     "node": "0.10",

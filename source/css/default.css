@@ -224,13 +224,9 @@
     cursor: pointer;
 }
 
-.sitecues-highlight-overlay {
-    position: fixed;
-    border: 2px solid black;
-    border-radius: 3px;
+.sitecues-highlight-outline {
+    position: absolute !important;
     pointer-events: none;
-    background-color: transparent;
-    z-index: 2147483645; /* Below Equinox panel, mouse, HLB, and HLB close button */
 }
 
 .sitecues-iframe-modal {

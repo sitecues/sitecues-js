@@ -131,7 +131,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.options = $.extend(true, {}, options);
         this.state = STATES.CREATE;
         this.savedCss = [];
-        this.savedStyleAttr = [];
+        this.savedStyleAttr = {};
         this.origRectDimensions = [];
         this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
         this.itemNode = $(this.item);
@@ -146,8 +146,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var size = { width: parseFloat(width), height: parseFloat(height) };
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
+        this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.savedCss.push(computedStyles);
-        this.savedStyleAttr.push(this.itemNode.attr('style'));
+        // List of attributes we save original values for because we might want to redefine them later.
+        this.savedStyleAttr['style'] = this.itemNode.attr('style');
+        this.savedStyleAttr['width'] = this.itemNode.attr('width');
+        this.savedStyleAttr['height'] = this.itemNode.attr('height');
       }
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
@@ -251,7 +255,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                   }, '', 'important');
         });
 
-        this.itemNode .style(cssBeforeAnimateStyles);
+        // If website uses width/height attributes let's remove those while HLB is inlated.
+        if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
+          for (var attrName in this.savedStyleAttr) {
+            if (attrName === 'style') {
+              continue;
+            }
+            if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
+              this.itemNode.removeAttr(attrName);
+            }
+          }
+        }
+        this.itemNode.style(cssBeforeAnimateStyles);
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
@@ -295,7 +310,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1];
-        var clientRect = this.item.getBoundingClientRect();
+        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
@@ -306,7 +321,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         // Deflate the highlight box.
-        this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'easeOutBack', function () {
+        this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'linear', function () {
           // Cleanup all elements inserted by sitecues on the page.
           if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
           // Remove placeholder wrapper element if the table child highlighted.
@@ -325,13 +340,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           notifyZoomInOrOut(_this.itemNode, false);
           }, 0);
 
-          var style = _this.savedStyleAttr && _this.savedStyleAttr[_this.savedStyleAttr.length - 1];
-
-          // Wait till animation is finished, then reset animate styles.
-          _this.itemNode.removeAttr('style');
-
-          if (typeof style !== 'undefined') {
-          _this.itemNode.attr('style', style);
+          // If website used to have width/height attributes let's restore those while HLB is defalted.
+          for (var attrName in _this.savedStyleAttr) {
+            if (attrName === 'style') {
+               _this.itemNode.removeAttr('style');
+            }
+            if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
+              _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+            }
           }
           // This instance is now officially closed.
           _this.state = STATES.CLOSED;
@@ -353,7 +369,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        */
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, cssUpdate) {
         // Fetch the exact value for width(not rounded)
-        var clientRect = this.item.getBoundingClientRect();
 
         var cssBeforeAnimateStyles = {
           'top': cssUpdate.top + 'px',
@@ -364,7 +379,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'overflow-x': 'hidden',
           // Sometimes width is rounded, so float part gets lost.
           // Preserve it so that inner content is not rearranged when width is a bit narrowed.
-          'width': parseFloat(clientRect.width) + 'px',
+          'width': parseFloat(this.clientRect.width) + 'px',
           // Don't change height if there's a background image, otherwise it is destroyed.
           'height' : !common.isEmptyBgImage(currentStyle['background-image']) ? currentStyle.height : 'auto',
           'z-index': HighlightBox.kBoxZindex.toString(),
@@ -388,7 +403,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['overflow-y'] = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         }
         if (this.item.tagName.toLowerCase() === 'img') {
-          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, clientRect)
+          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, this.clientRect)
         }
 
         this.setBgStyle(currentStyle, cssBeforeAnimateStyles);
@@ -454,7 +469,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
           cssBeforeAnimateStyles['background-image']  = oldBgImage;
           cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
-          //cssBeforeAnimateStyles['background-size']   = clientRect.width + 'px ' + clientRect.height+ 'px';
+          //cssBeforeAnimateStyles['background-size']   = this.clientRect.width + 'px ' + this.clientRect.height+ 'px';
           cssBeforeAnimateStyles['background-color']  = common.getRevertColor(newBgColor);
           
           // If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
@@ -464,15 +479,23 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
         
         // If background color is not contrast to text color, invert background one.
-        var compStyle = this.item.currentStyle || window.getComputedStyle(this.item, null);
-        var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
+        var color = designer.getCurrentTextColor(this.item);
         var isContrastColors = common.getIsContrastColors(color, newBgColor);
-        // We don't know what's the text color in the image.
-        if (!isContrastColors || (this.item.tagName.toLowerCase() === 'img')) {
-          cssBeforeAnimateStyles['background-color'] = common.getRevertColor(newBgColor);
-        } else {
-          cssBeforeAnimateStyles['background-color'] = newBgColor;
+        // EQ-1011: always use black for images.
+        if (this.item.tagName.toLowerCase() === 'img') {
+          cssBeforeAnimateStyles['background-color'] = '#000';
+          return;
         }
+        if (!isContrastColors) {
+          // Favor a white background with dark text when original background was white.
+          if (common.isLightTone(newBgColor)) {
+            newBgColor = 'rgb(255, 255, 255)';
+            cssBeforeAnimateStyles['color'] = common.getRevertColor(color);
+          }
+        }
+        
+        cssBeforeAnimateStyles['background-color'] = newBgColor;
+        return;
       }
  
       /**

@@ -11,17 +11,33 @@ sitecues.def('keys', function (keys, callback, log) {
   // define keys map used to bind actions to hotkeys
   // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
   var origTest = keys.test = {
-    'minus':   function(event) {
-      return event.keyCode === 189
+    'editor-safe-minus':   function(event) {
+      return hasCommandModifier(event) &&
+	      (event.keyCode === 189
         || event.keyCode === 109
         || event.keyCode === 173
-        || event.keyCode === 45;
+        || event.keyCode === 45);
     },
-    'plus':  function(event) {  // Also Equals (=) key
-      return event.keyCode === 187
+    'editor-safe-plus':  function(event) {  // Also Equals (=) key
+      return hasCommandModifier(event) &&
+	      (event.keyCode === 187
         || event.keyCode === 61
         || event.keyCode === 107
-        || event.keyCode === 43;
+        || event.keyCode === 43);
+    },
+    'plain-minus':   function(event) {
+      return !hasCommandModifier(event) &&
+	      (event.keyCode === 189
+        || event.keyCode === 109
+        || event.keyCode === 173
+        || event.keyCode === 45);
+    },
+    'plain-plus':  function(event) {  // Also Equals (=) key
+      return !hasCommandModifier(event) &&
+	      (event.keyCode === 187
+        || event.keyCode === 61
+        || event.keyCode === 107
+        || event.keyCode === 43);
     },
     'r':    function(event) {
 	    return (event.keyCode === 82 && event.shiftKey && !event.ctrlKey && event.altKey && !event.metaKey);
@@ -47,14 +63,16 @@ sitecues.def('keys', function (keys, callback, log) {
 
   // define keys map used to bind actions to hotkeys
   var origMap = keys.map = {
-    'minus':  { preventDefault: true, event: 'zoom/decrease' },
-    'plus':   { preventDefault: true, event: 'zoom/increase' },
+    'plain-minus':  { preventDefault: true, event: 'zoom/decrease', preventInEditors: true },
+    'plain-plus':   { preventDefault: true, event: 'zoom/increase', preventInEditors: true },
+    'editor-safe-minus':  { preventDefault: true, event: 'zoom/decrease' },
+    'editor-safe-plus':   { preventDefault: true, event: 'zoom/increase' },
     'r':      { preventDefault: true, event: 'inverse/toggle'},
     'f8':     { event: 'ui/toggle' },
     'space':  {
       event: 'highlight/animate',
       preventDefault: true,
-      requiresMouseHighlight: true
+      requiresMouseHighlightActive: true
     }
   }
 
@@ -74,6 +92,10 @@ sitecues.def('keys', function (keys, callback, log) {
     'esc':    {event: 'iframe-modal/hide'}
   }
 
+  function hasCommandModifier(event) {
+	  return event.altKey || event.ctrlKey || event.metaKey;
+  }
+
   function hasModifier(event) {
 	  return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
   }
@@ -82,48 +104,17 @@ sitecues.def('keys', function (keys, callback, log) {
     // Handle key
     keys.handle = function ( key, event ) {
 
-      // If event defined, emit it
-      if ( key.event ) {
-	      sitecues.emit( key.event, event );
-      }
-
       // prevent default if needed
       if (key.preventDefault) {
         common.preventDefault(event);
         // Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
         event.stopImmediatePropagation();
       }
-    };
 
-    keys.isEditable = function ( element ) {
-      var tag = element.localName;
-
-      if (!tag) {
-        return false;
+      // If event defined, emit it
+      if ( key.event ) {
+	      sitecues.emit( key.event, event );
       }
-
-      tag = tag.toLowerCase();
-
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') {
-        return true;
-      }
-
-      if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
-        return true; // Be safe, looks like a keyboard-accessible interactive JS widget
-      }
-
-      // Check for rich text editor
-      var contentEditable = element.getAttribute('contenteditable');
-
-      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
-        return true; // In editor
-      }
-
-      if (document.designMode === 'on') {
-        return true; // Another kind of editor
-      }
-
-      return false;
     };
 
     // key event hook
@@ -132,43 +123,28 @@ sitecues.def('keys', function (keys, callback, log) {
       // private variables
       var i, l, key, test, parts, result;
 
-      // ignore events from editable elements
-      if ( keys.isEditable(event.target) ) {
-        return;
-      }
-
       // iterate over key map
       for(key in keys.map) {
-        if (has.call(keys.map, key)) {
-          if(keys.map[key].requiresMouseHighlight) {
-            if(!mh.enabled) {
-              // Mouse highlight is disabled, revert to default.
-              return;
-            } else {
-              //We're going to attach the target dom element to the
-              //event, whether it's available or not.
-              extra_event_properties.dom.mouse_highlight = mh.picked ? mh.picked.get(0) : null;
-            }
+        if (has.call(keys.map, key) && keys.test[key](event)) {
+          if(keys.map[key].preventInEditors) {
+	          // ignore events from editable elements
+	          if (common.isEditable(event.target) ) {
+		          return false;
+	          }
+          }
+          if(keys.map[key].requiresMouseHighlightActive) {
+	          if(!mh.enabled || !mh.isAppropriateFocus) {
+		          // Mouse highlight is disabled, revert to default.
+		          return false;
+	          } else {
+		          //We're going to attach the target dom element to the
+		          //event, whether it's available or not.
+		          var picked = mh.getPicked();
+		          extra_event_properties.dom.mouse_highlight = picked ? picked.get(0) : null;
+	          }
           }
 
-          // prepare default value
-          result = true;
-
-          // split key definition to parts
-          parts = key.split(/\s*\+\s*/);
-
-          // check each part of key definition
-          for (i=0, l=parts.length; i<l; i++) {
-            // get test for key
-            test = keys.test[parts[i]];
-
-            // collect all checks
-            result = ( !! result ) & ( test && test( event ) );
-          }
-
-          if (result) {
-            return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
-          }
+          return keys.handle(keys.map[key], $.extend( event, extra_event_properties ));
         }
       }
       return true;

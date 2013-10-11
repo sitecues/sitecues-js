@@ -3,8 +3,13 @@
  * if any, so we don't have to split and duplicate that logic across the
  * choices.
  */
-sitecues.def( 'ui-manager', function (uiManager, callback, log) {
-  sitecues.use( 'jquery', 'conf', 'toolbar', 'badge', function ($, conf, toolbar, badge) {
+sitecues.def('ui-manager', function (uiManager, callback, log) {
+
+  // Put a reference to the UI Object on the sitecues namespace. This is used to store interfaces for UI objects
+  // such as the slider. These interfaces are used in the page object model to test functionality.
+  sitecues.ui = uiManager;
+
+  sitecues.use( 'jquery', 'conf', 'conf/site', 'toolbar', 'badge', function ($, conf, site, toolbar, badge) {
 
     // The toggling state.  If true an active toggle is underway and calls to
     // toggle() will be ignored.
@@ -26,7 +31,7 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         name: 'toolbar'
       }
     };
-    var DEFAULT_STATE = STATES.TOOLBAR;
+    var DEFAULT_STATE = STATES.BADGE;
 
     // The UI modes.
     var MODES = {
@@ -46,7 +51,7 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         name: 'auto'
       }
     };
-    var DEFAULT_MODE = MODES.AUTO;
+    var DEFAULT_MODE = MODES.BADGE;
 
     // Converts a name into the instance property of the provided object with the same name.
     // Returns the default if there is no match.
@@ -75,7 +80,7 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
     };
 
     // Determine the UI mode.
-    var MODE = toMode(conf.get('ui_mode'));
+    var MODE = toMode(site.get('ui_mode'));
 
     // Determine the initial state.
     var determineInitialState = function() {
@@ -98,7 +103,6 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
     var toggle = function () {
       if(toggling) {
         log.info('Toggle call ignored');
-        return;
       }
       toggling = true;
       innerToggle(function() {
@@ -170,8 +174,8 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
           badge.isBadgeRaplacedByToolbar && badge.disable();
           // Make sure toolbar appears after badge is hidden.
           setTimeout(function() {
-            log.info('window.sitecues.allModulesLoaded: ' + window.sitecues.allModulesLoaded);
-            if(window.sitecues.allModulesLoaded) {
+            log.info('sitecues.getAllModulesLoaded(): ' + window.sitecues.getAllModulesLoaded());
+            if(window.sitecues.getAllModulesLoaded()) {
               // It's already loaded up
               toolbar.enable(true);              
             } else {
@@ -207,6 +211,14 @@ sitecues.def( 'ui-manager', function (uiManager, callback, log) {
         currentState = STATES.BADGE;
       });
     }
+    
+    if (sitecues.tdd) {
+      // todo: maybe export the whole module instead if every single function?
+      exports.uiManager = uiManager;
+      exports.uiManager.toggle = toggle;
+      exports.uiManager.innerToggle = innerToggle;
+    }
+
 
     callback();
   });

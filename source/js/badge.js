@@ -118,15 +118,14 @@ sitecues.def('badge', function (badge, callback, log) {
     if (badge.altBadges && (badge.altBadges.length > 0)) {
       badge.panel   = badge.altBadges;
       badge.element = badge.panel;
-      panel.parent  = badge.element;
     } else if ($badge.length > 0) {
       badge.panel   = $badge;
       badge.element = badge.panel;
-      panel.parent  = badge.element;
     } else {
       // We have no alternate or pre-existing badges defined, so create a new one.
       badge.create();
     }
+    panel.parent  = badge.element;
 
     $badge = $('#' + badge.badgeId);
     var isBadgeInDom = $badge && $badge.length > 0;
@@ -147,6 +146,11 @@ sitecues.def('badge', function (badge, callback, log) {
       sitecues.on("badge/enable", function() {
           badge.enable(true);
       });
+
+        if (sitecues.tdd) {
+          // todo: maybe export the whole module instead if every single function?
+          exports.badge = badge;
+        }
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
