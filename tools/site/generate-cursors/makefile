@@ -1,4 +1,6 @@
 all:
+	@echo "Installing node-phantom."
+	@npm install node-phantom
 	@echo "Opening HTML page with node-phantom."
 	@echo "HTML Page will convert SVGs from ./cursor_input/ to DataURLS."
 	@echo "Node will save DataURLS to .png files in ./cursor_output/png/"
