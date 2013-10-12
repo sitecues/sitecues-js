@@ -705,12 +705,12 @@
     sitecues = window.sitecues;
 
     // See if another sitecues library has "planted it's flag" on this page.
-    if (sitecues._) {
+    if (sitecues.exists) {
       console.error("The sitecues library already exists on this page.");
       return;
     }
     // "Plant our flag" on this page.
-    sitecues._ = true;
+    sitecues.exists = true;
 
     // As we have now "planted our flag", export the public fields.
     exportPublicFields();
