@@ -123,7 +123,7 @@ function getInlineJSData(req) {
 	var data = null;
 	// Is a URL is provided, then insert the
 	if (req.query.scjsurl) {
-    var scisv = req.query.scjsurl || 2;
+    var scisv = req.query.scisv || 2;
     var scuimode = req.query.scuimode;
     var templateFunction = ( scisv == 1 ? getInlineV1JsTemplate : getInlineV2JsTemplate);
     var siteConfigProps = '';

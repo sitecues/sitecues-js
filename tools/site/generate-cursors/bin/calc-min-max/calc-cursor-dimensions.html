@@ -1,0 +1,54 @@
+<h1>Maximum Cursor Dimensions</h1>
+
+<img src="osx-lofi-arrow.png" />
+<img src="osx-lofi-pointer.png" />
+<img src="osx-retina-arrow.png" />
+<img src="osx-retina-pointer.png" />
+<img src="win-arrow.png" />
+<img src="win-pointer.png" />
+<div id="output"></div>
+
+<script>
+window.addEventListener('load', function(){
+  
+  var imgs = document.getElementsByTagName('img')
+    , output = document.getElementById('output')
+    , i=0
+    , l=imgs.length
+    , img, name
+    , width, height
+    , maxCursorSize = 128
+    , maxZoomLevel = 5
+    , ratio
+    ;
+
+    for(; i< l; i++){
+      img = imgs[i];
+      name = img.getAttribute('src').split('.png')[0];
+      width = img.offsetWidth;
+      height = img.offsetHeight;
+
+      ratio = height/width;
+
+      diff = 128-height;
+      
+      nw=parseInt(128/ratio);
+      nh=128;
+
+      img.setAttribute('width', nw);
+      img.setAttribute('height', nh);
+      output.innerHTML += '{"name":"'+ name+'", "min-width":' +width+', "min-height":'+height + ',"max-width":' +nw+', "max-height":'+nh+ ' }, <br>';
+      
+    }
+});
+
+// var data = [
+// {"name":"osx-lofi-arrow", "min-width":13, "min-height":20,"max-width":83, "max-height":128 }, 
+// {"name":"osx-lofi-pointer", "min-width":18, "min-height":20,"max-width":115, "max-height":128 }, 
+// {"name":"osx-retina-arrow", "min-width":27, "min-height":42,"max-width":82, "max-height":128 }, 
+// {"name":"osx-retina-pointer", "min-width":34, "min-height":38,"max-width":114, "max-height":128 }, 
+// {"name":"win-arrow", "min-width":12, "min-height":19,"max-width":80, "max-height":128 }, 
+// {"name":"win-pointer", "min-width":17, "min-height":22,"max-width":98, "max-height":128 }
+// ];
+// console.log(data);
+</script>
