@@ -37,3 +37,5 @@ describe('cursor/images/manager', function() {
        })
   });
 });
+
+require('../test/discharge');

@@ -3,6 +3,7 @@
  */
 
 require('../test/bootstrap');
+
 // Require the module file we want to test.
 var module = require("../../../source/js/cursor/custom");
 // Let's use zoom values set in data.
@@ -40,3 +41,5 @@ describe('cursor/custom', function() {
      });
   });
 });
+
+require('../test/discharge');

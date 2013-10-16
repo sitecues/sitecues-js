@@ -27,7 +27,3 @@ delete require.cache[name];
 
 var name = require.resolve('../data/sitecues');
 delete require.cache[name];
-
-var name = require.resolve('../test/bootstrap');
-delete require.cache[name];
-

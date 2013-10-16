@@ -118,3 +118,5 @@ describe('cursor', function() {
    });
     
 });
+
+require('../test/discharge');

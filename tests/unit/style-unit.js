@@ -21,3 +21,5 @@ describe('style', function() {
 
     });
 });
+
+require('./test/discharge');

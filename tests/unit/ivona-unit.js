@@ -26,3 +26,5 @@ describe('ivona', function() {
     });
   });
 });
+
+require('./test/discharge');

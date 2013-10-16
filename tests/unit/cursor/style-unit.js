@@ -3,6 +3,7 @@
  */
 
 require('../test/bootstrap');
+
 // Require the module file we want to test.
 var module = require("../../../source/js/cursor/style");
 
@@ -38,3 +39,5 @@ describe('cursor/style', function() {
         });
   });
 });
+
+require('../test/discharge');

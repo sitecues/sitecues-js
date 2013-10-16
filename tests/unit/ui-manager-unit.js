@@ -18,7 +18,6 @@ describe('ui-manager', function() {
 //          module.uiManager.innerToogle.restore();
           done();
         });
-
     });
     
 });
