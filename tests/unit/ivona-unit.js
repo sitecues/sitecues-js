@@ -3,14 +3,16 @@
  */
 
 require('./test/bootstrap');
+
 var fs = require('fs'),
     page,
+    // Require the module file we want to test.
     ivona = require('../../source/js/speech/ivona'),
     $ = jquery;
+
 fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
   page = file;
-})
-// Require the module file we want to test.
+});
 
 describe('ivona', function() {
   describe('#removeHTMLEntities()', function() {
@@ -23,4 +25,4 @@ describe('ivona', function() {
       done();
     });
   });
-}); 
+});

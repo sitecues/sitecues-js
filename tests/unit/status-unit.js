@@ -4,8 +4,7 @@
 
 require('./test/libs');
 
-navigator={ userAgent:true };
-
+navigator = { userAgent:true };
 
 // Require the module file we want to test.
 var module = require('../../source/js/status');
