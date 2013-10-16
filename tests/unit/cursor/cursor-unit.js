@@ -108,7 +108,7 @@ describe('cursor', function() {
           module.cursor.prevTarget = {};
           module.cursor.isEnabled = true;
 
-          module.cursor.setFun('getCursorHotspotOffset', function() {return '0 5';});
+          module.cursor.setCursorHotspotOffset();
 
           module.cursor.changeCursorDisplay(target);
           expect(jquery(target).css('cursor')).to.be.equal('url("testUrl") 0 5, default');
