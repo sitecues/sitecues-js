@@ -34,8 +34,15 @@ describe('cursor/images/manager', function() {
           // Unload module from nodejs's cache
           var name = require.resolve(managerPath);
           delete require.cache[name];
-       })
+       });
   });
+
+   after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(managerPath);
+      delete require.cache[name];
+   });
+
 });
 
 require('../test/discharge');

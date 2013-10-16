@@ -7,7 +7,8 @@ require('./test/bootstrap');
 var fs = require('fs'),
     page,
     // Require the module file we want to test.
-    ivona = require('../../source/js/speech/ivona'),
+    ivonaPath = '../../source/js/speech/ivona';
+    ivona = require(ivonaPath),
     $ = jquery;
 
 fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
@@ -25,6 +26,11 @@ describe('ivona', function() {
       done();
     });
   });
+   after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(ivonaPath);
+      delete require.cache[name];
+   });
 });
 
 require('./test/discharge');

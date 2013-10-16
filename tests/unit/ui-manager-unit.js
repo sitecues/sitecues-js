@@ -5,7 +5,8 @@
 require('./test/bootstrap');
 
 // Require the module file we want to test.
-var module = require("../../source/js/ui-manager");
+var uiManagerPath = '../../source/js/ui-manager';
+var module = require(uiManagerPath);
 
 describe('ui-manager', function() {
 
@@ -19,5 +20,9 @@ describe('ui-manager', function() {
           done();
         });
     });
-    
+    after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(uiManagerPath);
+      delete require.cache[name];
+   });
 });
