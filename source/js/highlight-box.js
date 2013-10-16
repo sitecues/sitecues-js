@@ -310,14 +310,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1];
-        var clientRect = positioning.getSmartBoundingBox(this.item);
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
           transform: 'scale(1)',
-          width: clientRect.width / kExtraZoom,
+          width: this.clientRect.width / kExtraZoom,
           // Don't change height if there's a backgroudn image, otherwise it is destroyed.
-          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
         });
 
         // Deflate the highlight box.
