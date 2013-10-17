@@ -156,7 +156,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
       HighlightBox.kShowBoxSpeed = 300;
-      HighlightBox.kHideBoxSpeed = 150;
+      HighlightBox.kHideBoxSpeed = 1500;
       HighlightBox.kBoxZindex = 2147483644;
       HighlightBox.kBoxBorderWidth = '3px';
       HighlightBox.kBoxPadding   = '4px';  // Give the text a little extra room
@@ -281,6 +281,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
           log.info("hlb ready");
           sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
+          // Update the dimensions object.
+          _this.clientRect = positioning.getSmartBoundingBox(_this.item);
         });
 
         return false;
@@ -315,7 +317,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           position: 'absolute',
           transform: 'scale(1)',
           width: this.clientRect.width / kExtraZoom,
-          // Don't change height if there's a backgroudn image, otherwise it is destroyed.
+          // Don't change height if there's a background image, otherwise it is destroyed.
           height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
         });
 
