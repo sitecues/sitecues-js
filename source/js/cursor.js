@@ -22,18 +22,20 @@ sitecues.def('cursor', function (cursor, callback, log) {
         SITECUES_CSS_ID = 'sitecues-css',
         SITECUES_CSS_DEFAULT = 
         '
-          body {
+          body, ul, li {
             cursor: auto;
           }
 
-          a, a:link, a:hover {
+          a *, a, a:link, a:hover {
             cursor: pointer;
           }
-          html body a>h1 {
-            cursor: pointer
+
+          iframe {
+            cursor: default
           }
-          a>h1 {
-           cursor: pointer 
+
+          iframe a {
+            cursor: pointer
           }
 
           button {
