@@ -9,7 +9,7 @@
 sitecues.def('cursor', function (cursor, callback, log) {
 
   sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', function ($, conf, view, imagesManager) {
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa')
+
     //@param method GET, POST
     //@param url The stylesheet href attribute
     var stylesheetElement,
