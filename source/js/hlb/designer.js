@@ -184,6 +184,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
             designer.getNewRectStyle = function(selector, center, extraZoom, totalZoom) {
+                //TODO: Figure out a better way to get the offset.left...I've tried to figure
+                //      out the math involved for way too long, and decided to use the easier way.
+                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
+				//EQ-880
+                if (!('zoom' in document.createElement('div').style)) {
+                    $('body').css({'transform':'scale(1)'});
+                }
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 // Use the proper center.
@@ -286,6 +293,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // AK: leave it in case we get regression bugs. todo: should be removed in future.
                 //cssUpdates.maxHeight = viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset;
                 });
+                //TODO: Figure out a better way to get the offset.left...I've tried to figure
+                //      out the math involved for way too long, and decided to use the easier way.
+                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
+				//EQ-880                
+				if (!('zoom' in document.createElement('div').style)) {
+                    $('body').css({'transform':'scale('+totalZoom+')'});
+                }
                 return cssUpdates;
             }
 

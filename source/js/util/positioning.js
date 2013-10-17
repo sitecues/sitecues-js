@@ -58,12 +58,22 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     * Return a corrected bounding box given the total zoom for the element and current scroll position
 	     */
 	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
-		    return {
-			    left: boundingBox.left + scrollPosition.left/ totalZoom,
-			    top:  boundingBox.top + scrollPosition.top  / totalZoom,
-			    width: boundingBox.width,
-			    height: boundingBox.height
-		    };
+		  //EQ-880  
+          if ('zoom' in document.createElement('div').style) {
+            return {
+              left: boundingBox.left + scrollPosition.left/ totalZoom,
+              top:  boundingBox.top + scrollPosition.top  / totalZoom,
+              width: boundingBox.width,
+              height: boundingBox.height
+            };
+          } else {
+            return {
+              left: boundingBox.left + scrollPosition.left,
+              top:  boundingBox.top + scrollPosition.top,
+              width: boundingBox.width,
+              height: boundingBox.height
+            };
+          }
 	    }
 
 	    /**
@@ -347,10 +357,12 @@ sitecues.def('util/positioning', function (positioning, callback) {
             result.centerY = result.top + (result.height / 2);
 
             // In any other case, re-scale dimensions to get pure(not zoomed) values.
-            for (var prop in result) {
-                result[prop] /= zoom;
-            }
-            
+            //EQ-880
+            if ('zoom' in document.createElement('div').style) {
+              for (var prop in result) {
+                  result[prop] /= zoom;
+              }
+            }           
 
             return result;
         }

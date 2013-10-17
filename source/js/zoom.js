@@ -109,15 +109,16 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
         // if native zoom is supported, change it
         $body.style({'zoom': value}, '', 'important');
-        sitecues.emit('zoom', value);
+
 
       } else {
 
         // native zoom isn't supported, use
         // css3 transforms scale option
+		//Updated in EQ-880 (scales from center of X axis, top of Y axis)
         $body.style({
           'transform': 'scale(' + value + ')',
-          'transform-origin': '0 0'
+          'transform-origin': '50% 0'
         }, '', 'important');
 
       }
@@ -126,7 +127,8 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
       // notify all about zoom change
       sitecues.emit('zoom', value);
-
+      // notify all about zoom change
+      
     });
 
     // done

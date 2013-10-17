@@ -311,14 +311,28 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
         this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
-        var currentStyle = this.savedCss[this.savedCss.length - 1];
+        var currentStyle = this.savedCss[this.savedCss.length - 1],
+            clientRect;
+        try {
+          clientRect = positioning.getSmartBoundingBox(this.item);
+          if (!clientRect) {
+            clientRect = positioning.getBoundingBox(this.item); 
+          }
+          console.log(clientRect)
+        } catch(e) {
+          clientRect = positioning.getBoundingBox(this.item);
+        }
+
+        
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
           position: 'absolute',
           transform: 'scale(1)',
+
           width: this.clientRect.width / kExtraZoom,
           // Don't change height if there's a background image, otherwise it is destroyed.
           height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
+
         });
 
         // Deflate the highlight box.
