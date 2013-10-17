@@ -26,8 +26,14 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursor: auto;
           }
 
-          a {
+          a, a:link, a:hover {
             cursor: pointer;
+          }
+          html body a>h1 {
+            cursor: pointer
+          }
+          a>h1 {
+           cursor: pointer 
           }
 
           button {
@@ -251,10 +257,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
         }
         
         cursor.changeStyle('cursor', function (rule, style) {
-        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image  
+        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image 
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (rule[style].indexOf(cursorTypes[i]) > -1) {
-              rule[style] = cursorTypeURLS[cursorTypes[i]];
+              //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+              rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
             } 
           }        
         });
@@ -334,15 +341,18 @@ sitecues.def('cursor', function (cursor, callback, log) {
         cursor.createCORSRequest('GET', validSheets[i], function (request) {
           console.log('%c CORS Successful for ' + request.url, 'color:green;background:#ccc');
           stylesheetElement.innerHTML += request.responseText;
-          stylesheetObject = (function () {
-            for (var i = 0; i < document.styleSheets.length; i += 1) {
-              if (document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
-                return document.styleSheets[i];
+          setTimeout(function () {
+            //Hmm, interesting that I needed to do this...
+            stylesheetObject = (function () {
+              for (var i = 0; i < document.styleSheets.length; i += 1) {
+                if (document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
+                  return document.styleSheets[i];
+                }
               }
-            }
-          }());
-          lastZoom = conf.get('zoom');
-          createStyleSheet();
+            }());
+            lastZoom = conf.get('zoom');
+            createStyleSheet();
+          }, 1);
         });
 
       } 
