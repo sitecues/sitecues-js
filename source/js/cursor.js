@@ -200,9 +200,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
         if (sitecues.tdd) {
 
-          cursor.setFun = function(func, behavior) {
-            eval(func + ' = ' + behavior);
-            return;
+          cursor.setCursorHotspotOffset = function() {
+             getCursorHotspotOffset = function() {
+                return '0 5';
+            }
           }
 
           exports.cursor = cursor;

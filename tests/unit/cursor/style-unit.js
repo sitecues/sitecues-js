@@ -3,8 +3,10 @@
  */
 
 require('../test/bootstrap');
+
 // Require the module file we want to test.
-var module = require("../../../source/js/cursor/style");
+var stylePath = '../../../source/js/cursor/style';
+var module = require(stylePath);
 
 describe('cursor/style', function() {
 
@@ -37,4 +39,13 @@ describe('cursor/style', function() {
           done();
         });
   });
+
+   after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(stylePath);
+      delete require.cache[name];
+   });
+
 });
+
+require('../test/discharge');

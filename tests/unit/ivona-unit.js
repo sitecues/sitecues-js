@@ -3,14 +3,17 @@
  */
 
 require('./test/bootstrap');
+
 var fs = require('fs'),
     page,
-    ivona = require('../../source/js/speech/ivona'),
+    // Require the module file we want to test.
+    ivonaPath = '../../source/js/speech/ivona';
+    ivona = require(ivonaPath),
     $ = jquery;
+
 fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
   page = file;
-})
-// Require the module file we want to test.
+});
 
 describe('ivona', function() {
   describe('#removeHTMLEntities()', function() {
@@ -23,4 +26,11 @@ describe('ivona', function() {
       done();
     });
   });
-}); 
+   after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(ivonaPath);
+      delete require.cache[name];
+   });
+});
+
+require('./test/discharge');

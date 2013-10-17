@@ -36,8 +36,8 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
       oggUrl = baseMediaUrl + "ogg";
     } else {
       baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws
-        // TODO: Remove the hard-coded site ID.
-        + "/sitecues/api/2/ivona/" + _siteId + "/speechfile?contentType=text/plain&secure=" + secureFlag
+        // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+        + "/sitecues/api/2/ivona/" + _siteId + "/speechfile?p=1&contentType=text/plain&secure=" + secureFlag
         + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=";
       mp3Url = baseMediaUrl + "mp3";
       oggUrl = baseMediaUrl + "ogg";

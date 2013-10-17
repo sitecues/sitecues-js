@@ -3,8 +3,10 @@
  */
 
 require('../test/bootstrap');
+
 // Require the module file we want to test.
-var module = require("../../../source/js/cursor/custom");
+var customPath = '../../../source/js/cursor/custom';
+var module = require(customPath);
 // Let's use zoom values set in data.
 require("../data/modules/zoom");
 
@@ -39,4 +41,13 @@ describe('cursor/custom', function() {
          done();
      });
   });
+
+   after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(customPath);
+      delete require.cache[name];
+   });
+
 });
+
+require('../test/discharge');

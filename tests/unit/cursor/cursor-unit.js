@@ -5,7 +5,8 @@
 require('../test/bootstrap');
 
 // Require the module file we want to test.
-var module = require("../../../source/js/cursor");
+var cursorPath = '../../../source/js/cursor';
+var module = require(cursorPath);
 
 describe('cursor', function() {
 
@@ -108,7 +109,7 @@ describe('cursor', function() {
           module.cursor.prevTarget = {};
           module.cursor.isEnabled = true;
 
-          module.cursor.setFun('getCursorHotspotOffset', function() {return '0 5';});
+          module.cursor.setCursorHotspotOffset();
 
           module.cursor.changeCursorDisplay(target);
           expect(jquery(target).css('cursor')).to.be.equal('url("testUrl") 0 5, default');
@@ -116,5 +117,13 @@ describe('cursor', function() {
         });
 
    });
+   
+    after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(cursorPath);
+      delete require.cache[name];
+   });
     
 });
+
+require('../test/discharge');

@@ -4,12 +4,15 @@
 
 require('./test/libs');
 
+var uiManagerPath = '../../source/js/ui-manager',
+    sliderPath    = '../../source/js/slider';
+
 // Require the module files we want to test
 var mod = {
   // ui-manager.js puts "ui" object on the sitecues namespace.
-  // This is where slider objects are referenced in functional testing  
-  uiManager : require('../../source/js/ui-manager'),
-  slider    : require('../../source/js/slider')
+  // This is where slider objects are referenced in functional testing
+  uiManager : require(uiManagerPath),
+  slider    : require(sliderPath)
 };
 
 describe('sitecues', function() {
@@ -51,4 +54,14 @@ describe('sitecues', function() {
     });
 
   });
+
+  after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(uiManagerPath);
+      delete require.cache[name];
+      
+      name = require.resolve(sliderPath);
+      delete require.cache[name];
+   });
+
 });
