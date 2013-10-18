@@ -35,9 +35,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			// class of highlight
 	    HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
 
-			// elements which need overlay for background color
-	    VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame',
-	    state;
+      // elements which need overlay for background color
+      VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame',
+      state, nativeZoom = 'zoom' in document.createElement('div').style; //EQ-880
 
 		// depends on jquery, conf, mouse-highlight/picker and positioning modules
 	sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', function($, conf, picker, positioning, common, speech, geo) {
@@ -496,7 +496,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			state.zoom = positioning.getTotalZoom(element, true);
 			var x = state.lastCursorPos.x / state.zoom;
 			var y = state.lastCursorPos.y / state.zoom;
-			if (!geo.isPointInAnyRect(x, y, fixedRects)) {
+			if (nativeZoom && !geo.isPointInAnyRect(x, y, fixedRects)) { //EQ-880
 				mh.hide();
 				return false;
 			}
@@ -525,8 +525,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				document.documentElement.appendChild(svgFragment);
 				$('.' + HIGHLIGHT_OUTLINE_CLASS)
 					.attr({
-						width : (state.fixedContentRect.width + 2 * extra) * state.zoom,
-						height: (state.fixedContentRect.height + 2 * extra) * state.zoom
+						'width' : (state.fixedContentRect.width + 2 * extra) * state.zoom,
+						'height': (state.fixedContentRect.height + 2 * extra) * state.zoom
 					})
 					.css('z-index', getMaxZIndex(ancestorStyles) + 1); // Just below stuff like fixed toolbars
 
@@ -540,7 +540,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			$('.' + HIGHLIGHT_OUTLINE_CLASS)
 				.style({
 					'top': ((state.viewRect.top - extra) * state.zoom) + 'px',
-					'left': ((state.viewRect.left - extra) * state.zoom) + 'px'
+					'left': nativeZoom ? ((state.viewRect.left - extra) * state.zoom) + 'px' : state.elementRect.left - extra + 'px'
 				}, '', 'important');
 
 			return true;
