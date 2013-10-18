@@ -343,15 +343,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
       for(var i = 0; i < validSheets.length; i += 1) {
 
         cursor.createCORSRequest('GET', validSheets[i], function (request) {
-          console.log('%c CORS Successful for ' + request.url, 'color:green;background:#ccc');
-          var css = request.responseText; 
-          css = css.replace(/{/g, ' { 
-          ');
-          css = css.replace(/}/g, '
-          } 
-          ');
-          css = css.replace(/;/g, '; ')
-          stylesheetElement.innerHTML += css;
+          
+          //console.log('%c CORS Successful for ' + request.url, 'color:green;background:#ccc');
+
+          stylesheetElement.innerHTML += request.responseText;;
           setTimeout(function () {
             //Hmm, interesting that I needed to do this...
             stylesheetObject = (function () {
