@@ -26,7 +26,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursor: auto;
           }
 
-          div, span {
+          div, span, input {
             cursor: auto
           }
 
