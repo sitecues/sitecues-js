@@ -11,7 +11,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			INIT_STATE = {
 				picked: null,     // JQuery for picked element(s)
 				target: null,     // Mouse was last over this element
-				lastCursorPos: { x: -1, y: -1},
+				lastCursorPos: null,
 				isCreated: false, // Has highlight been created
 				styles: [],
 				savedCSS: null,   // map of saved CSS for highlighted element
@@ -219,7 +219,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			});
 			return styles;
 		}
-
+ 		
+ 		function isCursorInFixedRects(fixedRects) {
+      return !state.lastCursorPos ||
+    		     geo.isPointInAnyRect(state.lastCursorPos.x / state.zoom, state.lastCursorPos.y / state.zoom, fixedRects);
+    }
 		// show mouse highlight (mh.update calls mh.show)
 		mh.show = function() {
 			// can't find any element to work with
@@ -487,19 +491,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 			// Get exact bounds
 			fixedRects = positioning.getAllBoundingBoxes(element, 0);
-
-			if (!fixedRects.length) {   // No valid rectangle
-				mh.hide();
-				return false;
-			}
-
+			
 			state.zoom = positioning.getTotalZoom(element, true);
-			var x = state.lastCursorPos.x / state.zoom;
-			var y = state.lastCursorPos.y / state.zoom;
-			if (nativeZoom && !geo.isPointInAnyRect(x, y, fixedRects)) { //EQ-880
-				mh.hide();
-				return false;
-			}
+
+			if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
+        // No valid highlighted content rectangles or cursor not inside of them
+        mh.hide();
+        return false;
+      }
 
 			positioning.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
 			state.fixedContentRect = fixedRects[0];
@@ -568,8 +567,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				return;
 			}
 
-			state.lastCursorPos.x = event.clientX;
-			state.lastCursorPos.y = event.clientY;
+			state.lastCursorPos = {
+				'x': event.clientX,
+				'y': event.clientY
+			}
 
 			if (state.isCreated && event.target === state.target) {
 				// Update rect in case of sub-element scrolling -- we get mouse events in that case
@@ -631,7 +632,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			var was = mh.enabled;
 	        // The mouse highlight is always enabled when TTS is on.
 			mh.enabled = speech.isEnabled() || (zoom >= conf.get('mouseHighlightMinZoom'));
+      
+      if (mh.isSticky && state.picked) {
+        // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
+        mh.hide();
+        state.lastCursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
+        mh.show();
+        return;
+      }
+			
 			mh.hideAndResetState();
+			
 			if (was !== mh.enabled) {
 				mh.refresh();
 			}
