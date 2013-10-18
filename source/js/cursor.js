@@ -26,6 +26,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursor: auto;
           }
 
+          div, span {
+            cursor: auto
+          }
+
           a *, a, a:link, a:hover {
             cursor: pointer;
           }
