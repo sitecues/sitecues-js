@@ -21,7 +21,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         DEFAULT_TYPE = 'default',
         SITECUES_CSS_ID = 'sitecues-css',
         SITECUES_CSS_DEFAULT = 
-        '
+        "
           body, ul, li {
             cursor: auto;
           }
@@ -42,35 +42,35 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursor: pointer;
           }
 
-          input[type="button"] {
+          input[type='button'] {
             cursor: pointer
           }
 
-          input[type="checkbox"] {
+          input[type='checkbox'] {
             cursor: pointer
           }
 
-          input[type="email"] {
+          input[type='email'] {
             cursor: text
           }
 
-          input[type="image"] {
+          input[type='image'] {
             cursor: pointer
           }
 
-          input[type="radio"] {
+          input[type='radio'] {
             cursor: pointer
           }
 
-          input[type="search"] {
+          input[type='search'] {
             cursor: text
           }
 
-          input[type="submit"] {
+          input[type='submit'] {
             cursor: pointer
           }
 
-          input[type="text"] {
+          input[type='text'] {
             cursor: text
           }
 
@@ -150,7 +150,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursor: pointer
           }
 
-        ';
+        ";
 
     function createCORSRequest(method, url) {
       //Credit to Nicholas Zakas 
@@ -173,7 +173,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
           linkTags = document.getElementsByTagName('link');
 
       for(var i = 0; i < linkTags.length; i += 1) {
-        if (linkTags[i].href.indexOf('.css') !== -1) {
+        //might be redundant to check if it has a .css extension...
+        //for now we don't want to include media dependent css files...
+        if (linkTags[i].href.indexOf('.css') !== -1 && !linkTags[i].media) {
           stylesheets.push(linkTags[i].href);
         }
       }
@@ -229,7 +231,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (stylesheetObject) {
         for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
           rule = rules[i].style;
-          if (rule[style].length) {
+          if (rule && rule[style] && rule[style].length) {
             //@param rule an object representing some css selector + properties
             //@param style is the key for accessing property information
             if (callback) {
@@ -261,7 +263,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         cursor.changeStyle('cursor', function (rule, style) {
         //find the cursor type (auto, crosshair, etc) and replace the style with our generated image 
           for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (rule[style].indexOf(cursorTypes[i]) > -1) {
+            if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
               rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
             } 
@@ -342,7 +344,14 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
         cursor.createCORSRequest('GET', validSheets[i], function (request) {
           console.log('%c CORS Successful for ' + request.url, 'color:green;background:#ccc');
-          stylesheetElement.innerHTML += request.responseText;
+          var css = request.responseText; 
+          css = css.replace(/{/g, ' { 
+          ');
+          css = css.replace(/}/g, '
+          } 
+          ');
+          css = css.replace(/;/g, '; ')
+          stylesheetElement.innerHTML += css;
           setTimeout(function () {
             //Hmm, interesting that I needed to do this...
             stylesheetObject = (function () {
