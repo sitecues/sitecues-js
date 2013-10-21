@@ -20,141 +20,24 @@ sitecues.def('cursor', function (cursor, callback, log) {
         DEFAULT_MIN_ZOOM_LEVEL = 1.1,
         DEFAULT_TYPE = 'default',
         SITECUES_CSS_ID = 'sitecues-css',
-        SITECUES_CSS_DEFAULT = 
-        "
-          body, ul, li {
-            cursor: auto;
-          }
-
-          div, span, input {
-            cursor: auto
-          }
-
-          a *, a, a:link, a:hover {
-            cursor: pointer;
-          }
-
-          iframe {
-            cursor: default
-          }
-
-          iframe a {
-            cursor: pointer
-          }
-
-          button {
-            cursor: pointer;
-          }
-
-          input[type='button'] {
-            cursor: pointer
-          }
-
-          input[type='checkbox'] {
-            cursor: pointer
-          }
-
-          input[type='email'] {
-            cursor: text
-          }
-
-          input[type='image'] {
-            cursor: pointer
-          }
-
-          input[type='radio'] {
-            cursor: pointer
-          }
-
-          input[type='search'] {
-            cursor: text
-          }
-
-          input[type='submit'] {
-            cursor: pointer
-          }
-
-          input[type='text'] {
-            cursor: text
-          }
-
-          label {
-            cursor: pointer
-          }
-
-          p {
-            cursor: text
-          }
-
-          select {
-            cursor: pointer
-          }
-
-          textarea {
-            cursor: text
-          }
-
-          .sitecues-badge {
-            cursor: default
-          }
-
-          #sitecues-panel {
-            cursor: default
-          }
-
-          #sitecues-panel .tts {
-            cursor: pointer
-          }
-
-          #sitecues-close-button {
-            cursor: pointer
-          }                
-
-          .dropdown-menu > .disabled > a:focus {
-            cursor: default
-          }
-
-          .sitecues-slider {
-            cursor: pointer
-          }
-
-          .sitecues-toolbar, .hori {
-            cursor: default
-          }
-
-          .sitecues-slider-thumb {
-            cursor: pointer;
-          }
-
-          .sitecues-toolbar .slider-wrap {
-            cursor: pointer
-          }
-          
-          .sitecues-toolbar .slider-wrap * {
-            cursor: pointer
-          }
-
-          .sitecues-toolbar svg {
-            cursor: pointer
-          }
-
-          .slider-wrap svg {
-            cursor: pointer
-          }
-          
-          .sitecues-toolbar .tts {
-            cursor: pointer
-          }
-
-          .sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {
-            cursor: pointer
-          }
-
-          .sitecues-toolbar.hori .dropdown-toggle {
-            cursor: pointer
-          }
-
-        ";
+        SITECUES_CSS_DEFAULT =         
+        "* {cursor:auto}\n" +
+        "input[type='submit'], input[type='radio'], input[type='button'], input[type='checkbox'], input[type='image'], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n" +
+        "input[type='text'], input[type='email'], input[type='search'] {cursor:text}\n" +
+        "p, textarea {cursor:text}\n" +
+        "#sitecues-panel, .sitecues-badge {cursor:default}\n" +
+        "#sitecues-panel .tts {cursor:pointer}\n" +
+        "#sitecues-close-button {cursor:pointer}\n" +                
+        ".dropdown-menu > .disabled > a:focus {cursor:default}\n" +
+        ".sitecues-slider {cursor:pointer}\n" +
+        ".sitecues-toolbar, .hori {cursor:default}\n" +
+        ".sitecues-slider-thumb {cursor:pointer}\n" +
+        ".sitecues-toolbar .slider-wrap * {cursor:pointer}\n" +
+        ".sitecues-toolbar svg * {cursor:pointer}\n" +
+        ".slider-wrap svg * {cursor:pointer}\n" +
+        ".sitecues-toolbar .tts {cursor:pointer}\n" +
+        ".sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n" +
+        ".sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n";
 
     function createCORSRequest(method, url) {
       //Credit to Nicholas Zakas 
