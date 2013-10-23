@@ -139,6 +139,8 @@ endif
 
 ifeq ($(min), false)
 	uglifyjs-args+=-b
+else
+    uglifyjs-args+=-m
 endif
 
 # HIDDEN TARGET: .no-lint-on-build
