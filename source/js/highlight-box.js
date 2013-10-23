@@ -266,7 +266,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
           }
         }
-        this.itemNode.style(cssBeforeAnimateStyles);
+        this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
