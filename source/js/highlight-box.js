@@ -266,7 +266,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
           }
         }
-        this.itemNode.style(cssBeforeAnimateStyles);
+        this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
@@ -313,12 +313,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             clientRect;
-        try {
+        
+        try { //Required for FF
           clientRect = positioning.getSmartBoundingBox(this.item);
           if (!clientRect) {
             clientRect = positioning.getBoundingBox(this.item); 
           }
-          console.log(clientRect)
         } catch(e) {
           clientRect = positioning.getBoundingBox(this.item);
         }
@@ -326,12 +326,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         
 
         var cssAnimateStyles = $.extend({}, currentStyle, {
-          position: 'absolute',
-          transform: 'scale(1)',
+          'position': 'absolute',
+          'transform': 'scale(1)',
 
-          width: this.clientRect.width / kExtraZoom,
+          'width': clientRect.width / kExtraZoom,
           // Don't change height if there's a background image, otherwise it is destroyed.
-          height: currentStyle['background-image'] ? currentStyle.height / kExtraZoom : this.clientRect.height / kExtraZoom
+          'height': currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
 
         });
 
