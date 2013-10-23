@@ -241,7 +241,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
             //Hmm, interesting that I needed to do this...
             stylesheetObject = (function () {
               for (var i = 0; i < document.styleSheets.length; i += 1) {
-                if (document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
+                if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
                   return document.styleSheets[i];
                 }
               }
@@ -257,7 +257,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         //Hmm, interesting that I needed to do this...
         stylesheetObject = (function () {
           for (var i = 0; i < document.styleSheets.length; i += 1) {
-            if (document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
+            if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
               return document.styleSheets[i];
             }
           }
