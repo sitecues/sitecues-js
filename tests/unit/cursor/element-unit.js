@@ -29,11 +29,6 @@ describe('cursor/custom', function () {
         , actualAmountOfImages    = Object.keys(module.custom.data).length
         ;
 
-      console.log('_____________________');
-      console.log((((zoom.max + zoom.step) - zoom.min) / zoom.step));
-      console.log('_____________________');
-
-
       expect(actualAmountOfImages).to.be.equal(expectedAmountOfImages);
 
       done();
