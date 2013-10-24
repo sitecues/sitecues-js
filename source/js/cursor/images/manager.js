@@ -20,7 +20,7 @@ sitecues.def('cursor/images/manager', function (images, callback) {
   };
 
   systemDetect = {
-    'OS': navigator.platform || "Unknown OS"
+    'OS': navigator.platform || 'Unknown OS'
   };
 
   systemOS = {
