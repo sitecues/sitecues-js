@@ -1,8 +1,8 @@
-sitecues.def('cursor/custom', function (element, callback, log) {
+sitecues.def('cursor/custom', function (view, callback, log) {
   'use strict';
 
   // Cursor types.
-  element.TYPES = {
+  view.TYPES = {
     'default': 'A',
     'pointer': 'B'
   };
@@ -14,7 +14,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
     /*
      * Initialize cursor according to zoom level given.
      */
-    element.init = function() {
+    view.init = function() {
 
       var zoomLimit = zoomModule.max + zoomModule.step
         , zoomStep  = zoomModule.step
@@ -26,8 +26,8 @@ sitecues.def('cursor/custom', function (element, callback, log) {
 
       this.data = {};
 
-      for (type in element.TYPES) {
-        if(element.TYPES.hasOwnProperty(type) || element.TYPES.hasOwnProperty('auto')){
+      for (type in view.TYPES) {
+        if(view.TYPES.hasOwnProperty(type) || view.TYPES.hasOwnProperty('auto')){
           
           for (zoom = zoomModule.min; zoom <= zoomLimit; zoom += zoomStep) {
             parts = zoom.toString().split('.');
@@ -41,7 +41,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
     };
 
 
-    element.getImage = function(type, zl) {
+    view.getImage = function(type, zl) {
       
       var zoom  = zl || 1
         , parts = zoom.toString().split('.')
@@ -50,7 +50,7 @@ sitecues.def('cursor/custom', function (element, callback, log) {
 
       // 'auto' type takes 'default' image.
       // TODO: we need to finally removethe right hardcode part of check "|| type === 'auto'"
-      if (!element.TYPES.hasOwnProperty(type) || type === 'auto') {
+      if (!view.TYPES.hasOwnProperty(type) || type === 'auto') {
         type = defaultType;
       }
 
@@ -59,11 +59,11 @@ sitecues.def('cursor/custom', function (element, callback, log) {
       return this.data[name];
     };
 
-    element.init();
+    view.init();
 
     // Export object fro unit-tests.
     if (sitecues.tdd) {
-      exports.custom = element;
+      exports.custom = view;
     }
 
     // Done.

@@ -1,7 +1,7 @@
 /*
  * This file manages retrival of images depending on the current user's platform.
  */
-sitecues.def('cursor/images/manager', function (images, callback) {
+sitecues.def('cursor/images/manager', function (imagesManager, callback) {
   'use strict';
 
   var imageModuleName
@@ -13,7 +13,7 @@ sitecues.def('cursor/images/manager', function (images, callback) {
     ;
   
   // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
-  images.offsets = {
+  imagesManager.offsets = {
     'auto'   : {x: 0,  y: 5, step: 2.5},
     'default': {x: 0,  y: 5, step: 2.5},
     'pointer': {x: 10, y: 5, step: 3.5}
@@ -44,11 +44,11 @@ sitecues.def('cursor/images/manager', function (images, callback) {
   // Get dependencies: either images for Windows, or for MacOs.
   sitecues.use('cursor/images/' + imageModuleName, function (osImages) {
 
-    images.urls = osImages.urls;
+    imagesManager.urls = osImages.urls;
 
    // Export manager object for unit testing purposes.
     if (sitecues.tdd) {
-      exports.manager = images;
+      exports.manager = imagesManager;
     }
 
     // Done.
