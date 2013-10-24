@@ -24,9 +24,9 @@ sitecues.def('cursor/images/manager', function (images, callback) {
   };
 
   systemOS = {
-    'Windows': 'WIN',
-    'Mac': 'MAC',
-    'Linux': 'LINUX'
+    'Windows' : 'WIN',
+    'Mac'     : 'MAC',
+    'Linux'   : 'LINUX'
   };
 
   isMac     = systemDetect.OS.toUpperCase().indexOf(systemOS.Mac)     !== -1;
