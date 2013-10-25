@@ -8,7 +8,7 @@
  */
 sitecues.def('cursor', function (cursor, callback, log) {
 
-  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', function ($, conf, view, imagesManager) {
+  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', 'platform', function ($, conf, view, imagesManager, platform) {
 
     //@param method GET, POST
     //@param url The stylesheet href attribute
@@ -147,8 +147,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
-          // cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
-          cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
+          
+          if (platform.pixel.ratio > 1 && platform.pixel.support[platform.browser.is]) {
+            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
+          } else {
+            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
+          }
+
         }
         
         cursor.changeStyle('cursor', function (rule, style) {
@@ -175,33 +180,16 @@ sitecues.def('cursor', function (cursor, callback, log) {
     
     cursor.generateCursorStyle1x = function (type, zoom) {
       var cursorStyle = 'url(' +view.getImage(type,zoom)+ ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
-      // var cursorStyle = 'url(' +view.getImage(type,zoom)+ '), ' + type + ';\n' +
-      
-      // var cursorStyle = ' -webkit-image-set(\n' +
-      //   '    url(' +view.getImage(type,zoom)+ ') 1x,\n' +
-      //   '    url('+view.getImage(type,zoom)+ ') 2x \n'+
-      //   '), ' + type +';'
-      // ;
-
-      console.log( cursorStyle );
       return cursorStyle;
     };
 
     cursor.generateCursorStyle2x = function (type, zoom) {
-      var cursorStyle = ' -webkit-image-set(\n' +
-         '    url(' +view.getImage(type,zoom)+ ') 1x,\n' +
-         '    url('+view.getImage(type,zoom)+ ') 2x \n'+
+      var cursorStyle = '-webkit-image-set(' +
+         '    url(' +view.getImage(type,zoom)+ ') 2x,' +
+         '    url(' +view.getImage(type,zoom)+ ') 2x'+
          '), ' + type;
-
-
-      console.log( cursorStyle );
       return cursorStyle;
     }
-    
-    
-
-
-
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     // The maths below based on experience and doesn't use any kind of specific logic.

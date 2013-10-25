@@ -14,9 +14,12 @@ sitecues.def('platform', function (platformModule, callback) {
     ;
 
   // Determine which browser is being used
-  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox'    : 
+  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' : 
             agent.indexOf(' MSIE')     > 0 ||
-            agent.indexOf(' Trident')  > 0 ? 'IE'    : 'Unknown Browser' ;
+            agent.indexOf(' Trident')  > 0 ? 'IE'      :
+            agent.indexOf(' Chrome')   > 0 ? 'Chrome'  :
+            agent.indexOf(' Safari')   > 0 ? 'Safari'  :
+            'Unknown Browser';
 
   // Set globally accessible browser constants
   platformModule.browser = {
@@ -38,6 +41,14 @@ sitecues.def('platform', function (platformModule, callback) {
     isMac     : os === 'mac',
     isWin     : os === 'win',
     isLinux   : os === 'linux'
+  };
+
+  // Determine the device pixel ratio of the
+  platformModule.pixel = {
+    ratio: window.devicePixelRatio,
+    support: {
+      Chrome: true
+    }
   };
 
   // Done
