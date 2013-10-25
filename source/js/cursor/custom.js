@@ -14,11 +14,10 @@ sitecues.def('cursor/custom', function (view, callback, log) {
     /*
      * Initialize cursor according to zoom level given.
      */
-    view.init = function() {
+    view.init = function () {
 
-      var zoomLimit = zoomModule.max + zoomModule.step
-        , zoomStep  = zoomModule.step
-        , zoom      = zoomModule.min
+      var zoomStep = zoomModule.step
+        , zoom     = zoomModule.min
         , parts
         , name
         , type
@@ -26,26 +25,32 @@ sitecues.def('cursor/custom', function (view, callback, log) {
 
       this.data = {};
 
-      for (type in view.TYPES) {
-        if(view.TYPES.hasOwnProperty(type) || view.TYPES.hasOwnProperty('auto')){
-          
-          for (zoom = zoomModule.min; zoom <= zoomLimit; zoom += zoomStep) {
-            parts = zoom.toString().split('.');
-            name = type + '_' + parts[0] + '_';
-            name += parts[1] ? parts[1].charAt(0) : '0';
-            this.data[name] = images.urls[name];
-          }
+      function doSetData (type) {
+        for (zoom = zoomModule.min; zoom <= zoomModule.max + zoomModule.step; zoom += zoomStep) {
+          parts = zoom.toString().split('.');
+          name = type + '_' + parts[0] + '_';
+          name += parts[1] ? parts[1].charAt(0) : '0';
+          view.data[name] = images.urls[name];
+        }
+      }
 
+      for (type in view.TYPES) {
+        if (view.TYPES.hasOwnProperty(type)) {
+          doSetData(type);
+        } else {
+          if (type === 'auto') {
+            type = defaultType;
+            doSetData(type);
+          }
         }
       }
     };
 
+   view.getImage = function(type, zl) {
 
-    view.getImage = function(type, zl) {
-      
       var zoom  = zl || 1
         , parts = zoom.toString().split('.')
-        , name  = type + '_' + parts[0] + '_'
+        , name
         ;
 
       // 'auto' type takes 'default' image.
@@ -53,7 +58,7 @@ sitecues.def('cursor/custom', function (view, callback, log) {
       if (!view.TYPES.hasOwnProperty(type) || type === 'auto') {
         type = defaultType;
       }
-
+      name = type + '_' + parts[0] + '_';
       name += parts[1] ? parts[1].charAt(0) : '0';
 
       return this.data[name];

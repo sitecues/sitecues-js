@@ -18,6 +18,7 @@ describe('cursor/images/manager', function() {
          // Require the module file we want to test.
           navigator['platform'] = 'Win32';
           var module = require(managerPath);
+          
           expect(module.manager.urls).to.deep.equal(win.urls);
 
           done();

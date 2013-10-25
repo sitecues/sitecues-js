@@ -105,5 +105,5 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
   
   // Done.
   callback();
-  
+
 });
