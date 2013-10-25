@@ -14,12 +14,9 @@ sitecues.def('cursor/images/mac', function (osImages, callback) {
   // 128px is max possible cursor dimensions (w/h), anything above will silently fail and you will see no cursor
 
   function prepareCursor (size) {
-    // var cursorSVG = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
-    //                 'width="'+(128)+'px" height="'+(128)+'px" '+
-    //                 'viewBox="0, 0,'+(128)+','+(128)+'"><g '+
-    //                 'transform="scale('+(size)+','+(size)+')"><defs><filter id="f1" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceGraphic" dx="20" dy="20" /><feBlend in="SourceGraphic" in2="offOut" mode="normal" /></filter></defs><g filter="url(#f1)"><path fill="#FFF" d="M1.016,0.422 L1.031,16.781 L4.312,13.281 L6.446,18.479 L10.344,17.031 L8.062,11.875 L12.496,11.871 L1.016,0.422 z" /></g><path fill="#000" d="M1.938,2.875 L2.031,14.188 L4.531,11.625 L6.969,17.312 L9.031,16.562 L6.688,10.938 L10,10.938"/></g></svg>';
+    size=size*2;
 
-    var cursorSVG = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="128px" height="128px" viewBox="0, 0,128,128"><defs><filter id="f1" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx=".25" dy=".5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="1" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="'+
+    var cursorSVG = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="256px" height="256px" viewBox="0, 0,256,256"><defs><filter id="f1" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx=".25" dy=".5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="1" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="'+
       'scale('+size+','+size+')" ' +
       'filter="url(#f1)"><path fill="#FFF" d="M1.016,0.422 L1.031,16.781 L4.312,13.281 L6.446,18.479 L10.344,17.031 L8.062,11.875 L12.496,11.871 L1.016,0.422 z" /><path fill="#000" d="M1.938,2.875 L2.031,14.188 L4.531,11.625 L6.969,17.312 L9.031,16.562 L6.688,10.938 L10,10.938"/></g></svg>'
       ;
