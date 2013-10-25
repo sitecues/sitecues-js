@@ -173,6 +173,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
     }());
     
     cursor.generateCursorStyle = function (type, zoom) {
+      console.log( '______________________' );
+      console.log( view.getImage(type, zoom) );
+      console.log( getCursorHotspotOffset(type, zoom) );
+      console.log( type );
       return 'url(' + view.getImage(type, zoom) + ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
     }
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.

@@ -6,6 +6,7 @@
  * @param {function} callback
  */
 sitecues.def('cursor/images/win', function (osImages, callback) {
+
   'use strict';
 
   // Cursor images according to zoom level values, in dataUrl format. Name pattern is: <cursor_type>_<zoom_level>. Example: default_1_0.
