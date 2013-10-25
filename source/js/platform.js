@@ -14,16 +14,16 @@ sitecues.def('platform', function (platformModule, callback) {
     ;
 
   // Determine which browser is being used
-  browser = agent.indexOf(' Firefox/') > 0 ? 'fx'    : 
+  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox'    : 
             agent.indexOf(' MSIE')     > 0 ||
-            agent.indexOf(' Trident')  > 0 ? 'ie'    : 'Unknown Browser' ;
+            agent.indexOf(' Trident')  > 0 ? 'IE'    : 'Unknown Browser' ;
 
   // Set globally accessible browser constants
   platformModule.browser = {
     zoom      : 'zoom' in document.createElement('div').style,
     is        : browser,
-    isFirefox : browser === 'fx',
-    isIE      : browser === 'ie'
+    isFirefox : browser === 'Firefox',
+    isIE      : browser === 'IE'
   };
     
   // Determine which opperating system is being used
