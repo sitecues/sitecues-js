@@ -14,7 +14,9 @@
     "after",
     "afterAll",
     "afterEach",
-    "it"
+    "it",
+    "navigator",
+    "module"
   ],
   
   "maxerr"        : 100,

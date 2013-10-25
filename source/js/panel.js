@@ -1,4 +1,5 @@
 sitecues.def( 'panel', function (panel, callback, log) {
+  'use strict';
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
@@ -35,9 +36,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // Helper function to make panel sticky
     sitecues.toggleStickyPanel = function () {
       if (panel.isSticky===false) {
-        return panel.isSticky = true;
+        panel.isSticky = true;
+        return true;
       } else {
-        return panel.isSticky = false;
+        panel.isSticky = false;
+        return false;
       }
     };
 
@@ -47,7 +50,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
     panel.create = function() {
 
       // private variables
-      var frame, wrap, slider, ttsButton;
+      var frame, ttsButton;
 
       // create element and add element id for proper styling
       frame = htmlBuild.$div()
@@ -62,13 +65,13 @@ sitecues.def( 'panel', function (panel, callback, log) {
         height:80,
         container: this.slider.wrap,
         color: {
-          letterSmlBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          trackBack         : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          letterBigBack     : { normal: "rgba(0,0,0,0)", hover: "rgba(0,0,0,0)"},
-          letterSml         : { normal: "#000000", hover: "#000000"},
-          track             : { normal: "#000000", hover: "#000000"},
-          thumb             : { normal: "#3265c1", hover: "#3265c1"},
-          letterBig         : { normal: "#000000", hover: "#000000"},
+          letterSmlBack     : { normal: 'rgba(0,0,0,0)', hover: 'rgba(0,0,0,0)'},
+          trackBack         : { normal: 'rgba(0,0,0,0)', hover: 'rgba(0,0,0,0)'},
+          letterBigBack     : { normal: 'rgba(0,0,0,0)', hover: 'rgba(0,0,0,0)'},
+          letterSml         : { normal: '#000000', hover: '#000000'},
+          track             : { normal: '#000000', hover: '#000000'},
+          thumb             : { normal: '#3265c1', hover: '#3265c1'},
+          letterBig         : { normal: '#000000', hover: '#000000'},
         }
       });
 
@@ -92,7 +95,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
       if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
         ttsButton.data( 'tts-enable', 'enabled' );
       } else {
-        ttsButton.addClass( "tts-disabled" );
+        ttsButton.addClass( 'tts-disabled' );
         ttsButton.data( 'tts-enable', 'disabled' );
       }
       ttsButton.click(function() {
@@ -121,31 +124,47 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
     // Show panel.
     panel.show = function(){
+      
+      // Variables used further down within this very large function
+      // Probably worth breaking this function down a lot - Al
+      var badgeRect
+        , badgeTop
+        , badgeLeft
+        , viewport
+        , topQ
+        , leftQ
+        , absolute
+        , sliderWidget
+        ;
+
       // Clear timer if present
-      timer && clearTimeout(timer);
+      if (timer) {
+        clearTimeout(timer);
+      }
 
       panel.element.hide();
       // Reset styles if any were set
+      
       panel.element.style({
-        "top": '',
-        "bottom": '',
-        "left": '',
-        "right": ''
+        'top'     : '',
+        'bottom'  : '',
+        'left'    : '',
+        'right'   : ''
       }, '', 'important');
 
       // Do we have a badge reference?  If no reference is passed then we
       // don't really know where we're supposed to put the panel.
-      if(panel.parent) {
-        var badgeRect = $(panel.parent).get(0).getBoundingClientRect();
-
+      if (panel.parent) {
+        
+        badgeRect = $(panel.parent).get(0).getBoundingClientRect();
+         
         // These will tell us where the badge isSticky  
-        var badgeTop = 0;
-        var badgeLeft = 0;
-
-        var viewport = positioning.getViewportDimensions(0, conf.get('zoom'));
+        badgeTop = 0;
+        badgeLeft = 0;
+        viewport = positioning.getViewportDimensions(0, conf.get('zoom'));
 
         // Set up some standard measurements
-        if(browser.isFirefox()) {
+        if (browser.isFirefox) {
           badgeTop = (window.pageYOffset + badgeRect.top)/conf.get('zoom');
           badgeLeft = (window.pageXOffset + badgeRect.left)/conf.get('zoom');
         } else {
@@ -154,38 +173,39 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
 
         // These two variables will tell us which -quadrant we're in
-        var topQ = badgeTop < (viewport.height / 2);
-        var leftQ = badgeLeft < (viewport.width / 2);
+        topQ = badgeTop < (viewport.height / 2);
+        leftQ = badgeLeft < (viewport.width / 2);
 
         // Match the type of positioning of the parent/badge.  Trying to pin a
         // fixed element to an absolute element is tricky if not impossible.
-        var absolute = panel.parent.offsetParent().css('position') === 'absolute';
+        absolute = panel.parent.offsetParent().css('position') === 'absolute';
+        
         if(absolute) {
           panel.element.css('position','absolute');
         }
 
-        if(topQ) {
-          log.info("Badge is in top half of page (" + panel.parent.offset().top + ")");
-          panel.element.style("top", (panel.parent.offset().top - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
+        if (topQ) {
+          log.info('Badge is in top half of page (' + panel.parent.offset().top + ')');
+          panel.element.style('top', (panel.parent.offset().top - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
         } else {
-          log.info("Badge is in bottom half of page");
+          log.info('Badge is in bottom half of page');
           // We can't use the 'bottom' property here because jQuery won't animage properly off of it.
-          panel.element.style("top", (((panel.parent.offset().top + (panel.parent.height()/2)) - (panel.element.height()/2)) - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
+          panel.element.style('top', (((panel.parent.offset().top + (panel.parent.height()/2)) - (panel.element.height()/2)) - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
         }
 
         if(leftQ) {
-          log.info("Badge is in left half of page");
-          panel.element.style("left", Math.min(panel.parent.offset().left, $(window).width() - panel.element.width()) + 'px', 'important');
+          log.info('Badge is in left half of page');
+          panel.element.style('left', Math.min(panel.parent.offset().left, $(window).width() - panel.element.width()) + 'px', 'important');
         } else {
-          log.info("Badge is in right half of page");
+          log.info('Badge is in right half of page');
           if(((panel.parent.offset().left + panel.parent.width()) - panel.element.width()) < 0) {
             // The panel would go off the left side of the screen
-            panel.element.style("right", panel.element.width() + 'px', 'important');
-            panel.element.style("opacity", 0.5, 'important');
+            panel.element.style('right', panel.element.width() + 'px', 'important');
+            panel.element.style('opacity', 0.5, 'important');
           } else {
             // The panel will fit on the screen
             if(absolute) {
-              panel.element.style("right", viewport.width- (panel.parent.offset().left + panel.parent.width()) + 'px', 'important');
+              panel.element.style('right', viewport.width- (panel.parent.offset().left + panel.parent.width()) + 'px', 'important');
             } else {
               panel.element.css('right',($(window.width) - (panel.parent.offset().left) + panel.parent.width())+ 'px', 'important');
             }
@@ -194,9 +214,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
       }
 
       panel.element.animate({
-          width: 'toggle',
-          height: 'toggle',
-          opacity: 1.0
+          width   : 'toggle',
+          height  : 'toggle',
+          opacity : 1.0
         },
         750,
         function() {
@@ -207,10 +227,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
           sliderWidget.setdimensions(sliderWidget);
           sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
           sliderWidget.translateThumbSVG.call(sliderWidget);
-      });
+        }
+      );
 
       // Set/recheck the dimensions of the slider
-      var sliderWidget = panel.slider.widget;
+      sliderWidget = panel.slider.widget;
       sliderWidget.setdimensions(sliderWidget);
       sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
       sliderWidget.translateThumbSVG.call(sliderWidget);
@@ -223,7 +244,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         // Hover out.
         panel.element.data('hover','false');
       });
-    }
+    };
 
     // Hide panel.
     panel.hide = function(){
@@ -257,16 +278,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
     // Show TTS is enabled.
     function showTTSbuttonEnabled(ttsButton) {
-        var ttsButton = ttsButton || $('#sitecues-panel .tts');
-        ttsButton.data('tts-enable','enabled');
-        ttsButton.removeClass("tts-disabled");
+      ttsButton = ttsButton || $('#sitecues-panel .tts');
+      ttsButton.data('tts-enable','enabled');
+      ttsButton.removeClass('tts-disabled');
     }
 
     // Show TTS is disabled.
-    function showTTSbuttonDisabled(ttsButton) {
-        var ttsButton = ttsButton || $('#sitecues-panel .tts');
-        ttsButton.data('tts-enable','disabled');
-        ttsButton.addClass("tts-disabled");
+    function showTTSbuttonDisabled (ttsButton) {
+      ttsButton = ttsButton || $('#sitecues-panel .tts');
+      ttsButton.data('tts-enable','disabled');
+      ttsButton.addClass('tts-disabled');
     }
 
     // EVENT HANLERS
@@ -284,12 +305,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
     });
 
     sitecues.on('speech/enabled',  showTTSbuttonEnabled);
-    sitecues.on('speech/disabled', showTTSbuttonDisabled)
-
+    sitecues.on('speech/disabled', showTTSbuttonDisabled);
 
     panel.create();
-
-
 
     // Adjust the position of the toolbar items when the document vertical scrollbar appears
     sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
@@ -300,7 +318,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
       // Calculate the updated position
       , newRightValPanel    = (parseFloat(panelRight) - scrollbarWidth) +'px'
       ;
-
 
       // Set the updated CSS position
       $('#sitecues-panel').css({right: newRightValPanel});
@@ -321,8 +338,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
       $('#sitecues-panel').css({right: newRightValPanel});
     
     });
-
-
 
     // panel is ready
     callback();

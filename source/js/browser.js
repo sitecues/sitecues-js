@@ -3,17 +3,16 @@
  * Ideally we should operate on capabilities, but often we need to be browser
  * or even version-specific.
 */
-sitecues.def('browser', function (browser, callback, log) {
+sitecues.def('browser', function (browserModule, callback, log) {
+  'use strict';
 
-  browser.zoom = 'zoom' in document.createElement('div').style;
+  var agent = navigator && navigator.userAgent ? navigator.userAgent : null ;
 
-  browser.isFirefox = function() {
-    return navigator && navigator.userAgent && navigator.userAgent.indexOf(' Firefox/') > 0;
-  }
-
-  browser.isIE = function() {
-    return navigator && navigator.userAgent && (navigator.userAgent.indexOf(' MSIE') > 0 || navigator.userAgent.indexOf(' Trident') > 0);
-  }
+  browserModule = {
+    zoom      : 'zoom' in document.createElement('div').style,
+    isFirefox : agent.indexOf(' Firefox/') > 0 ? true : false,
+    isIE      : agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 ? true : false
+  };
 
   // done
   callback();

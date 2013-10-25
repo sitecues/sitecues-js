@@ -6,8 +6,8 @@ require('../test/bootstrap');
 
 // Default value.
 navigator = {'platform': ''};
-require("../data/modules/cursor/images/win");
-require("../data/modules/cursor/images/mac");
+require('../data/modules/cursor/images/win');
+require('../data/modules/cursor/images/mac');
 
 var module = {}
   , managerPath = '../../../source/js/cursor/images/manager'
