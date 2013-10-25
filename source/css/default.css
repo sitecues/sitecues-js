@@ -1,7 +1,7 @@
 @media print {
-      #sitecues-BWCG{display:none;}  
-      #sitecues-panel{display:none;}
-      #sitecues-badge{display:none;}
+      #sitecues-BWCG{display:none!important;}  
+      #sitecues-panel{display:none!important;}
+      #sitecues-badge{display:none!important;}
 }
 
 
