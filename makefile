@@ -75,7 +75,6 @@ files=\
 	source/js/speech.js \
 	source/js/speech/azure.js \
 	source/js/speech/ivona.js \
-	source/js/speech/jplayer.js \
 	source/js/invert.js \
 	source/js/cursor/custom.js \
 	source/js/cursor/images/manager.js \

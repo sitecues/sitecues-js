@@ -22,85 +22,82 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
   
   }());
 
-  var IvonaPlayer = function(_hlb, _siteId, _jQuery, _secure) {
-    var myState = 'init';
-    var secureFlag = (_secure ? 1 : 0);
-    var hlb = _jQuery(_hlb);
+  //What audio format will we use? 
+  var audioFormat =  (function () {
+    var a = new Audio();
+    if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+      return 'ogg';
+    }
+    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
+      return 'mp3';
+    }
+  }());
 
-    var speechKey = hlb.data('speechKey');
-    var baseMediaUrl, mp3Url, oggUrl;
+  var IvonaPlayer = function(_hlb, _siteId, $, _secure) {
+    
+    var myState = 'init',
+        secureFlag = (_secure ? 1 : 0),
+        hlb = $(_hlb),
+        speechKey = hlb.data('speechKey'),
+        baseMediaUrl;
 
     if (speechKey) {
-      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + ".";
-      mp3Url = baseMediaUrl + "mp3";
-      oggUrl = baseMediaUrl + "ogg";
+      baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + "." + audioFormat;
     } else {
       baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws
         // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
         + "/sitecues/api/2/ivona/" + _siteId + "/speechfile?p=1&contentType=text/plain&secure=" + secureFlag
-        + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=";
-      mp3Url = baseMediaUrl + "mp3";
-      oggUrl = baseMediaUrl + "ogg";
+        + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=" + audioFormat;
     }
 
-    this.init = function() {
-      _jQuery("body").append(_jQuery('<div id="jPlayer-' + hlb.attr('id')  + '" class="jPlayerControl"></div>'));
-      log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
-      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer({
-        ready: function() {
-          log.info("jPlayer Ready");
-          _jQuery(this).jPlayer( "setMedia", {
-            mp3: mp3Url,
-            oga: oggUrl
-          });
-          if(myState === 'waiting') {
-            _jQuery(this).jPlayer('play');
-          } else {
-            myState = 'ready';
-          }
-        },
-        preload: 'auto',
-        play: function() {
-          log.info("Playing");
-        },
-        error: function(event) {
-          log.warn("Error: via Ivona");
-          log.info(event)
-        },
-        supplied: "oga, mp3"
+    var audioElement = undefined;
+
+    this.init = function () {
+
+      if (audioElement) return; //never create more than one <audio>
+                 
+      audioElement = new Audio();
+      audioElement.src = baseMediaUrl;
+      
+      $(audioElement).on('canplay', function () { //native event for <audio>
+        sitecues.emit('canplay');
       });
-      log.info(_jQuery("#jPlayer-" + hlb.attr('id')));
-    };
 
-    this.play = function() {
-      log.info("Playing via ivona: " + hlb.text());
-      if(myState === 'ready') {
-        _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("play");
-      } else {
-        myState = 'waiting';
+    }
+
+    this.play = function () {
+
+      if (audioElement.readyState = 4) { // enough data available to start playing
+        audioElement.play();
+      } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
+        sitecues.on('canplay', function () {
+          this.play();
+        }, this);
       }
-      return true;
-    };
 
-    this.stop = function() {
-      log.info("Stopping ivona player");
-      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("stop");
-    };
+    } 
 
-    this.destroy = function() {
-      log.info("Destroying ivona player");
-      this.stop();
-      _jQuery("#jPlayer-" + hlb.attr('id')).jPlayer("destroy");
-      _jQuery("#jPlayer-" + hlb.attr('id')).remove();
-    };
+    this.stop = function () {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+    }
+
+    this.destroy = function () {
+      if (audioElement) {
+        this.stop()
+        audioElement = undefined;
+      }
+    }
 
   };
 
-  sitecues.use('jquery', 'conf/site', 'speech/jplayer', function (_jQuery, site) {
+  sitecues.use('jquery', 'conf/site', function ($, site) {
 
     ivona.factory = function(hlb) {
       log.info(hlb);
-      var player = new IvonaPlayer(hlb, site.get('site_id'), _jQuery, sitecues.getLibraryUrl().secure);
+      var player = new IvonaPlayer(hlb, site.get('site_id'), $, sitecues.getLibraryUrl().secure);
       player.init();
       return player;
     };
