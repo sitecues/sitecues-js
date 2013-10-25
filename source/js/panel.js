@@ -1,9 +1,10 @@
 sitecues.def( 'panel', function (panel, callback, log) {
+  
   'use strict';
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'browser', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, browser) {
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, platform) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -164,7 +165,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         viewport = positioning.getViewportDimensions(0, conf.get('zoom'));
 
         // Set up some standard measurements
-        if (browser.isFirefox) {
+        if (platform.browser.isFirefox) {
           badgeTop = (window.pageYOffset + badgeRect.top)/conf.get('zoom');
           badgeLeft = (window.pageXOffset + badgeRect.left)/conf.get('zoom');
         } else {

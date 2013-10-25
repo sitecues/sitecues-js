@@ -6,7 +6,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
   'use strict';
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'util/positioning', 'browser', function ($, conf, positioning, browser) {
+  sitecues.use('jquery', 'conf', 'util/positioning', 'platform', function ($, conf, positioning, platform) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
@@ -16,8 +16,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       }
     );
 
-    var wrapper
-      , nativeZoom = 'zoom' in document.createElement('div').style
+    var nativeZoom = 'zoom' in document.createElement('div').style
+      , wrapper
       ;
 
     // Dims stuff. Word. ///////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         offsetLeft /= zoom;
       }
 
-      if(browser.isIE()) {
+      if(platform.browser.isIE) {
         // This is specifically a problem with IE9, other versions are TBD
         zIndex = 2147483643;
       }
@@ -168,17 +168,24 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         //      out the math involved for way too long, and decided to use the easier way.
         //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
       if (!('zoom' in document.createElement('div').style)) {
+        
         $('body').css({'transform':'scale(1)'});
-        offsetLeft = $hlbNode.offset().left; 
+        
+        offsetLeft   = $hlbNode.offset().left; 
+        
         $('body').css({'transform':'scale('+zoom+')'});
-        elem.width /= zoom; 
+        
+        elem.width  /= zoom; 
         elem.height /= zoom;
-        offsetTop /= zoom;
-        offsetLeft -= pageXOffset / zoom;
-        offsetTop -= pageYOffset / zoom;
+        offsetTop   /= zoom;
+        offsetLeft  -= pageXOffset / zoom;
+        offsetTop   -= pageYOffset / zoom;
+
       } else {
-        offsetLeft -= pageXOffset;
-        offsetTop -= pageYOffset;
+
+        offsetLeft  -= pageXOffset;
+        offsetTop   -= pageYOffset;
+
       }
 
       inner = 'M'+ (offsetLeft + 2)  +' '+ (offsetTop + 2)   +' '+
@@ -233,6 +240,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     });
     
     sitecues.on('hlb/deflating', function(hlb) {
+      
       // Remove the zoom event handler for background dimmer.
       sitecues.off('zoom zoom/increase zoom/decrease', function() {
         onZoomChange(hlb);

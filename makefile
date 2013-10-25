@@ -46,6 +46,7 @@ files=\
 	source/js/conf/user.js \
 	source/js/conf/site.js \
 	source/js/conf.js \
+	source/js/platform.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
@@ -89,7 +90,6 @@ files=\
 	source/js/toolbar/resizer.js \
 	source/js/ui-manager.js \
 	source/js/html-build.js \
-	source/js/browser.js \
 	source/js/status.js \
 
 https=off

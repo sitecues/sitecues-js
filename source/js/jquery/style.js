@@ -7,7 +7,7 @@ sitecues.def('jquery/style', function (style, callback, log) {
     , isStyleFuncSupported
     ;
   
-  sitecues.use('jquery', 'browser', function (jQuery, browser) {
+  sitecues.use('jquery', 'platform', function (jQuery, platform) {
 
   // For those who need them (< IE 9), add support for CSS functions
     isStyleFuncSupported = CSSStyleDeclaration.prototype.getPropertyValue !== null;
@@ -100,7 +100,7 @@ sitecues.def('jquery/style', function (style, callback, log) {
           // Set style property
           priority = priority !== undefined ? priority : '';
           
-          if (browser.isIE && property === 'cursor') {
+          if (platform.browser.isIE && property === 'cursor') {
             return;
           }
 
