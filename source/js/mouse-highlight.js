@@ -327,7 +327,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 					return null;
 				}
 				var commonAncestor = $(possibleFloat).closest(pickedAncestors);
-				while (possibleFloat !== commonAncestor && possibleFloat != document.body) {
+				while (possibleFloat !== commonAncestor && possibleFloat != document.body &&
++            possibleFloat != document.documentElement && possibleFloat != document) {
 					if ($(possibleFloat).css('float') !== 'none') {
 						var floatRect = possibleFloat.getBoundingClientRect();
 						return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
@@ -424,6 +425,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			return newPath;
 		}
 
+    function getSVGStyle(strokeWidth, strokeColor, fillColor) {
+      return ' style="' +'stroke-width: ' + strokeWidth + ';' +
+          'stroke: ' + strokeColor + ';' +
+          'fill: ' + (fillColor ? fillColor : 'none' ) + '"';
+    }
+
 		function getSVGForPath(points, strokeWidth, strokeColor, fillColor) {
 			var radius = 3;
 			var svgBuilder = '<path d="';
@@ -451,15 +458,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 			while (count < points.length);
 
-
-			svgBuilder += ' Z" style="' +
-				'stroke-width: ' + strokeWidth + ';' +
-				'stroke: ' + strokeColor + ';' +
-				'fill: ' + (fillColor ? fillColor : 'none' ) +
-				'"/>';
-
+			svgBuilder += ' Z"' + getSVGStyle(strokeWidth, strokeColor, fillColor) + '/>';
+			
 			return svgBuilder;
 		}
+
+		// For list bullet area, when it is inside margin instead of padding, and thus couldn't be covered with bg image
+    function getSVGForExtraLeftPadding(extra) {
+      extra *= state.zoom;
+      var extraLeft = (state.elementRect.left - state.fixedContentRect.left) * state.zoom;
+      if (extraLeft <= 0)
+        return "";
+
+      return '<rect x="' + extra + '" y="' + extra +
+          '"  width="' + extraLeft + '" height="' + (state.fixedContentRect.height * state.zoom) + '"' +
+          getSVGStyle(0, 0, getTransparentBackgroundColor()) + '/>';
+    }
 
 		// Update highlight overlay
 		// Return false if no valid rect
@@ -520,7 +534,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				// Create and position highlight overlay
 				var paddingSVG = getSVGForPath(state.pathFillPadding, EXTRA_HIGHLIGHT_PIXELS, getTransparentBackgroundColor(), null);
 				var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null);
-				var svgFragment = common.createSVGFragment(paddingSVG + outlineSVG, HIGHLIGHT_OUTLINE_CLASS);
+				var extraLeftPaddingSVG = getSVGForExtraLeftPadding(extra);
+				var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraLeftPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 				document.documentElement.appendChild(svgFragment);
 				$('.' + HIGHLIGHT_OUTLINE_CLASS)
 					.attr({
@@ -563,6 +578,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		function updateImpl(event) {
 			// don't show highlight if current document isn't active,
 			// or current active element isn't appropriate for spacebar command
+			testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
 			if (!mh.isAppropriateFocus) {
 				return;
 			}
