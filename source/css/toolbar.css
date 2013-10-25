@@ -1,3 +1,5 @@
+/* NOTE! cursor rules must go into cursor.js */
+
 .sitecues-toolbar {
   background-color:#000;
   font-family: Calibri, Candara, Segoe, “Segoe UI”, Optima, Arial, sans-serif;
@@ -20,7 +22,6 @@
   height:100%;
   width:63%;
   margin:0 15%;
-  cursor:pointer;
 }
 
   
@@ -35,20 +36,17 @@
   /*-webkit-box-shadow: 0 0 4px #555;*/
   z-index: 1;
   top:20%;
-  cursor: pointer;
 }
 
 
 
 .sitecues-toolbar .slider-wrap *{
-  cursor:pointer;
   -webkit-user-select : none!important;
   -moz-user-select    : none!important;
   -ms-user-select     : none!important;
 }
 
 .sitecues-toolbar .slider-wrap {
-  cursor:pointer;
   -webkit-user-select : none!important;
   -moz-user-select    : none!important;
   -ms-user-select     : none!important;
@@ -79,7 +77,6 @@
 }
 
 .sitecues-toolbar .tts {
-  cursor: pointer;
   position: absolute;
   top: 5%;
   right: 15px;
@@ -149,7 +146,6 @@
 .sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {
   font-family: Calibri, Candara, Segoe, “Segoe UI”, Optima, Arial, sans-serif;
   text-decoration:none;
-  cursor:pointer;
   line-height: 1;
 }
 .sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a:hover {
@@ -174,7 +170,6 @@
 .sitecues-toolbar.hori .dropdown-toggle {
   height: 100%;
   display: block;
-  cursor: pointer;
 }
 
 .noselect {
