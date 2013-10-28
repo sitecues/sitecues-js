@@ -136,8 +136,6 @@ sitecues.def('speech', function (speech, callback, log) {
             if (audioElement && audioElement.readyState === 4) {
               audioElement.pause();
               audioElement.currentTime = 0;
-            } else {
-              audioElement = undefined;
             }
           };
 
@@ -145,7 +143,7 @@ sitecues.def('speech', function (speech, callback, log) {
             if (audioElement) {
               this.stop();
               sitecues.off('canplay');
-              audioElement = undefined;
+              audioElement = undefined;             
             }
           };
 
@@ -221,7 +219,6 @@ sitecues.def('speech', function (speech, callback, log) {
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
       //end variable declarations 
-    console.log(AudioPlayer);
     if (!context) {
       if (typeof AudioContext !== 'undefined') {
         context = new AudioContext();
@@ -251,7 +248,9 @@ sitecues.def('speech', function (speech, callback, log) {
         log.info('HLB disabled TTS for this content');
         return null;
       }
-
+      //TODO While HLB is a singleton, let's clear out any other players
+      speech.destroyAll();
+      
       var hlbId = speech.getHlbId(hlb),
           player = speech.factory(hlb);
 
@@ -259,8 +258,7 @@ sitecues.def('speech', function (speech, callback, log) {
         log.warn('No hightlightbox ID!');
         return null;
       }
-      //TODO While HLB is a singleton, let's clear out any other players
-      speech.destroyAll();
+
 
       log.info('Initializing player for ' + hlbId);
       
