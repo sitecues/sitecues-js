@@ -10,8 +10,6 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
   sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', function ($, conf, view, imagesManager) {
 
-    //@param method GET, POST
-    //@param url The stylesheet href attribute
     var stylesheetElement,
         stylesheetObject,
         lastZoom = conf.get('zoom'),
@@ -41,7 +39,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
         '.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n' +
         '.sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n'
     };
-    
+    /**
+     * [Cross browser solution to initiating an XMLHTTPRequest 
+     * that supports the Origin HTTP header]
+     * @param  {[string]} method
+     * @param  {[string]} url
+     * @return {[XMLHTTPRequest]}
+     */
     function createRequest(method, url) {
       //Credit to Nicholas Zakas 
       var xhr = new XMLHttpRequest();
@@ -56,7 +60,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }
       return xhr;
     }
-
+    /**
+     * [Creates an array of all <link> href attribute values]
+     * @return {[array]}
+     */
     function getStylesheets () {
       
       var stylesheets = [],
@@ -76,7 +83,15 @@ sitecues.def('cursor', function (cursor, callback, log) {
       return stylesheets;
     
     }
-
+    /**
+     * [Abstracts away creating XMLHTTPRequests that support the
+     * Origin HTTP Header, and also sets up the callback when the 
+     * response returns]
+     * @param  {[string]}   method
+     * @param  {[string]}   url
+     * @param  {Function} callback
+     * @return {[undefined]}
+     */
     function createCORSRequest (method, url, callback) {
       
       var request = createRequest(method, url);
@@ -94,11 +109,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
       request.send();
 
     }
-
-    /*
-      @param style - String specifying what style we are interested in
-      @param callback - Function that gets passed ...
-    */
+    /**
+     * [This function allows the targeting of styles, such as "cursor", and invokes a callback
+     * that gets passed the style and the rule associated with it for any CSS selector]
+     * @param  {[string]}   style
+     * @param  {Function} callback
+     * @return {[undefined]}
+     */
     function changeStyle (style, callback) {
       var rule;
       if (stylesheetObject) {
@@ -113,18 +130,24 @@ sitecues.def('cursor', function (cursor, callback, log) {
           }
         }
         if (lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL) {
-          //if the current zoom level is less than the minimum needed to enable custom cursors...
+          //if the current zoom level is less than the minimum needed to enable custom cursors, disable the <style>
           stylesheetObject.disabled = true;
         } else {
+          //otherwise enable it
           stylesheetObject.disabled = false;
         }
       }
     }
-    
+    /**
+     * [Returns a function that, when executed, generates a CSS cursor property for every supported
+     * cursor type and then changes all cursor properties in a <style> that we create for the current
+     * zoom level]
+     * @return {[function]}
+     */
     var createStyleSheet = (function () {
 
       var cursorTypes = ['auto', 'crosshair', 'default', 'help', 'pointer', 'text'];
-      
+
       return function () {
       
         var cursorTypeURLS = [];
@@ -154,7 +177,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
       };
 
     }());
-    
+    /**
+     * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
+     * then sets the zoom, and updates our styles for cursors]
+     */
     function setStyleSheetObject () {
       stylesheetObject = (function () {
         for (var i = 0; i < document.styleSheets.length; i += 1) {
@@ -166,7 +192,12 @@ sitecues.def('cursor', function (cursor, callback, log) {
       lastZoom = conf.get('zoom');
       createStyleSheet();
     }
-
+    /**
+     * [Generates the cursor url for a given type and zoom level]
+     * @param  {[string]} type
+     * @param  {[number]} zoom
+     * @return {[string]}
+     */
     function generateCursorStyle (type, zoom) {
       return 'url(' + view.getImage(type, zoom) + ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
     }
@@ -210,7 +241,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }
       return result;
     }    
-    
+    /**
+     * [Initializes our module by getting all <style> and <link> tags, and concatenates their styles
+     * to a <style> we create.  It then will update all cursor styles within that tag]
+     * @return {[undefined]}
+     */
     (function () {  //initializer
       /*
         Basically, we will begin by creating a <style> containing rules found in SITECUES_CSS_DEFAULT.
