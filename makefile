@@ -77,7 +77,6 @@ files=\
 	source/js/speech/ivona.js \
 	source/js/speech/jplayer.js \
 	source/js/invert.js \
-	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
 	source/js/cursor/images/manager.js \
 	source/js/cursor/images/win.js \

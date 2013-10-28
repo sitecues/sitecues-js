@@ -155,7 +155,15 @@ sitecues.def('cursor', function (cursor, callback, log) {
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
+              try {
+                rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
+              } catch (e) {
+                try {
+                  rule[style] = cursorTypeURLS[cursorTypes[i]];
+                } catch (e) {
+                  
+                }
+              }
             } 
           }        
         });
