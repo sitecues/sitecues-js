@@ -94,7 +94,8 @@ sitecues.def('speech', function (speech, callback, log) {
           var secureFlag = (secure ? 1 : 0),
               speechKey = hlb.data('speechKey'),
               baseMediaUrl,
-              audioElement;
+              audioElement,
+              playing = false;
           
           if (speechKey) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
@@ -122,7 +123,8 @@ sitecues.def('speech', function (speech, callback, log) {
 
           this.play = function () {
 
-            if (audioElement && audioElement.readyState === 4) { // enough data available to start playing
+            if (audioElement && audioElement.readyState === 4 && !playing) { // enough data available to start playing
+              playing = true;
               audioElement.play();
             } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
               sitecues.on('canplay', function () {
@@ -136,6 +138,7 @@ sitecues.def('speech', function (speech, callback, log) {
             if (audioElement && audioElement.readyState === 4) {
               audioElement.pause();
               audioElement.currentTime = 0;
+              playing = false;
             }
           };
 
@@ -250,7 +253,7 @@ sitecues.def('speech', function (speech, callback, log) {
       }
       //TODO While HLB is a singleton, let's clear out any other players
       speech.destroyAll();
-      
+
       var hlbId = speech.getHlbId(hlb),
           player = speech.factory(hlb);
 
@@ -372,7 +375,8 @@ sitecues.def('speech', function (speech, callback, log) {
       
       $.each(players, function(key, value) {
         if (value) {
-          setTimeout(value.stop, 5);
+          //setTimeout(value.stop, 5);
+          value.stop();
         }
       });
     
@@ -387,7 +391,8 @@ sitecues.def('speech', function (speech, callback, log) {
       
       $.each(players, function(key, value) {
         if (value) {
-          setTimeout(value.destroy, 5);
+          //setTimeout(value.destroy, 5);
+          value.destroy();
         }
         players[key] = null;
       });
