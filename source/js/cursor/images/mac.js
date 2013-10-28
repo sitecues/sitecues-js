@@ -9,8 +9,6 @@ sitecues.def('cursor/images/mac', function (osImages, callback) {
 
   'use strict';
 
-  // function forcePowerofTwo
-
   // 128px is max possible cursor dimensions (w/h), anything above will silently fail and you will see no cursor
 
   sitecues.use('platform', function (platform) {

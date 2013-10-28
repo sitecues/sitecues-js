@@ -185,8 +185,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
     cursor.generateCursorStyle2x = function (type, zoom) {
       var cursorStyle = '-webkit-image-set(' +
-         '    url(' +view.getImage(type,zoom)+ ') 2x,' +
-         '    url(' +view.getImage(type,zoom)+ ') 2x'+
+         '    url(' +view.getImage(type,zoom)+ ') 1x,' +
+         '    url(' +view.getImage(type,zoom)+ ') 2x'  +
          '), ' + type;
       return cursorStyle;
     }
