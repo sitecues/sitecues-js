@@ -166,18 +166,78 @@ sitecues.def('util/positioning', function (positioning, callback) {
 			    bottom: rect.bottom - paddingBottom
 		    };
 		    return rect;
-	    }
+     }
+ 
+     function isVisibleElement(element) {
+       return $.inArray(["video", "audio", "canvas", "object", "embed", "img"], element.localName) >= 0;
+     }
 
+     function hasVisibleBorder(style) {
+       return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
+     }
+
+     function getEmsToPx(fontSize, ems) {
+       var measureDiv = $('<div/>')
+           .appendTo(document.body)
+           .css({
+             'font-size': fontSize,
+             'width': ems + 'em',
+             'visibility': 'hidden'
+           });
+       var px = measureDiv.width();
+       measureDiv.remove();
+       return px;
+     }
+
+     function getBulletWidth(element, style, bulletType) {
+       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0)
+         ems = 1; // Simple bullet
+       else if (bulletType === 'decimal') {
+         var start = parseInt($(element).attr('start'));
+         var end = (start || 1) + element.childElementCount - 1;
+         ems = .9 + .5 * end.toString().length;
+       }
+       return getEmsToPx(style['font-size'], ems);
+     }
+     function getBulletRect(element, style) {
+       var bulletType = style['list-style-type'];
+       if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside')
+         return null; // inside, will already have bullet incorporated in bounds
+        if (style['display'] !== 'list-item') {
+         if ($(element).children(":first").css('display') !== 'list-item') {
+           return null; /// Needs to be list-item or have list-item child
+          }
+        }
+        var bulletWidth = getBulletWidth(element, style, bulletType);
+        var boundingRect = getBoundingRectMinusPadding(element);
+        return {
+          top: boundingRect.top,
+          height: boundingRect.height,
+          left: boundingRect.left - bulletWidth,
+          width: bulletWidth
+        };
+      }
 	    // Only use leaf nodes (where content resides), in order to avoid rects taht
 	    // were purposely positioned offscreen
 	    function getAllBoundingBoxesExact($selector, allRects, clipRect) {
 		    $selector.each(function () {
 			    var isElement = this.nodeType === 1;
-			    // TODO: should we use common.getElementComputedStyles() ?
-			    if (isElement && $(this).css('visibility') !== 'visible') {
-					return true; // Don't look at this hidden element
-			    }
-			    if (this.hasChildNodes()) {  // TODO do we want to union ourselves if there is a visible border?
+          var style = {};
+          if (isElement) {
+            style = common.getElementComputedStyles(this);
+            if (style['visibility'] !== 'visible')
+             return true; // Don't look at this hidden element
+            // Check special case for lists. We have to do extra work
+            // to determine the affect of bullets/numbers on the bounding box
+            var bulletRect = getBulletRect(this, style);
+            if (bulletRect)
+              allRects.push(bulletRect);
+          }
+          var unclippedRect;
+          if (isElement && hasVisibleBorder(style)) {
+            unclippedRect = this.getBoundingClientRect(); // Make it all visible, including padding and border
+          } else if (isElement && this.hasChildNodes() && !isVisibleElement(this)) {
 				    // Use bounds of visible descendants, but clipped by the bounds of this ancestor
 				    var isClip = isClipElement(this);
 				    var newClipRect = clipRect;
@@ -188,16 +248,16 @@ sitecues.def('util/positioning', function (positioning, callback) {
 					    }
 				    }
 			        getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
-			    }
-			    else { // Leaf node -- has visible contents
-				    var rect = getBoundingRectMinusPadding(this);
-				    rect = getClippedRect(rect, clipRect);
+              return true;
+			    } else {// Leaf node or visible container element -- something with visible contents
+               unclippedRect = getBoundingRectMinusPadding(this);
+          }
+          var rect = getClippedRect(unclippedRect, clipRect);
 
-				    if (rect.width > positioning.kMinRectWidth  && rect.height > positioning.kMinRectHeight  &&
-					    rect.right > 0 && rect.bottom > 0) {
-				        // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
-					    allRects.push(rect);
-				    }
+          if (rect.width > positioning.kMinRectWidth  && rect.height > positioning.kMinRectHeight  &&
+            rect.right > 0 && rect.bottom > 0) {
+              // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
+            allRects.push(rect);  
 			    }
 		    });
 	    }
@@ -207,14 +267,14 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    return $(element).css('clip') !== 'auto' || $(element).css('overflow') !== 'visible';
 	    }
 
-	    function getClippedRect(r1, r2) {
-		    if (!r2) {
-			    return r1;
-		    }
-		    var left   = Math.max( r1.left, r2.left);
-		    var right  = Math.min( r1.left + r1.width, r2.left + r2.width);
-		    var top    = Math.max( r1.top, r2.top );
-		    var bottom = Math.min( r1.top + r1.height, r2.top + r2.height);
+      function getClippedRect(unclippedRect, clipRect) {
+        if (!clipRect) {
+          return unclippedRect;
+        }
+        var left   = Math.max( unclippedRect.left, clipRect.left);
+        var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
+        var top    = Math.max( unclippedRect.top, clipRect.top );
+        var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
 		    return {
 			    left: left,
 			    top: top,

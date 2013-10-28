@@ -10,42 +10,49 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
   sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', 'platform', function ($, conf, view, imagesManager, platform) {
 
-    //@param method GET, POST
-    //@param url The stylesheet href attribute
     var stylesheetElement,
         stylesheetObject,
         lastZoom = conf.get('zoom'),
-        lastZoomTimeout,
-        DEFAULT_ZOOM_LEVEL = 1,
-        DEFAULT_MIN_ZOOM_LEVEL = 1.1,
-        DEFAULT_TYPE = 'default',
-        SITECUES_CSS_ID = 'sitecues-css',
-        SITECUES_CSS_DEFAULT =         
-        "* {cursor:auto}\n" +
-        "input[type='submit'], input[type='radio'], input[type='button'], input[type='checkbox'], input[type='image'], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n" +
-        "input[type='text'], input[type='email'], input[type='search'] {cursor:text}\n" +
-        "p, textarea {cursor:text}\n" +
-        "#sitecues-panel, .sitecues-badge {cursor:default}\n" +
-        "#sitecues-panel .tts {cursor:pointer}\n" +
-        "#sitecues-close-button {cursor:pointer}\n" +                
-        ".dropdown-menu > .disabled > a:focus {cursor:default}\n" +
-        ".sitecues-slider {cursor:pointer}\n" +
-        ".sitecues-toolbar, .hori {cursor:default}\n" +
-        ".sitecues-slider-thumb {cursor:pointer}\n" +
-        ".sitecues-toolbar .slider-wrap * {cursor:pointer}\n" +
-        ".sitecues-toolbar svg * {cursor:pointer}\n" +
-        ".slider-wrap svg * {cursor:pointer}\n" +
-        ".sitecues-toolbar .tts {cursor:pointer}\n" +
-        ".sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n" +
-        ".sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n";
-
-    function createCORSRequest(method, url) {
+        lastZoomTimeout;
+    
+    cursor.CONTANTS = {
+      'DEFAULT_ZOOM_LEVEL'     : 1,
+      'DEFAULT_MIN_ZOOM_LEVEL' : 1.1,
+      'DEFAULT_TYPE'           : 'default',
+      'SITECUES_CSS_ID'        : 'sitecues-css',
+      'SITECUES_CSS_DEFAULT'   :         
+        '* {cursor:auto}\n' +
+        'input[type="submit"], input[type="radio"], input[type="button"], input[type="checkbox"], input[type="image"], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n' +
+        'input[type="text"], input[type="email"], input[type="search"] {cursor:text}\n' +
+        'p, textarea {cursor:text}\n' +
+        '#sitecues-panel, .sitecues-badge {cursor:default}\n' +
+        '#sitecues-panel .tts {cursor:pointer}\n' +
+        '#sitecues-close-button {cursor:pointer}\n' +                
+        '.dropdown-menu > .disabled > a:focus {cursor:default}\n' +
+        '.sitecues-slider {cursor:pointer}\n' +
+        '.sitecues-toolbar, .hori {cursor:default}\n' +
+        '.sitecues-slider-thumb {cursor:pointer}\n' +
+        '.sitecues-toolbar .slider-wrap * {cursor:pointer}\n' +
+        '.sitecues-toolbar svg * {cursor:pointer}\n' +
+        '.slider-wrap svg * {cursor:pointer}\n' +
+        '.sitecues-toolbar .tts {cursor:pointer}\n' +
+        '.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n' +
+        '.sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n'
+    };
+    /**
+     * [Cross browser solution to initiating an XMLHTTPRequest 
+     * that supports the Origin HTTP header]
+     * @param  {[string]} method
+     * @param  {[string]} url
+     * @return {[XMLHTTPRequest]}
+     */
+    function createRequest(method, url) {
       //Credit to Nicholas Zakas 
       var xhr = new XMLHttpRequest();
       
-      if ("withCredentials" in xhr) {
+      if ('withCredentials' in xhr) {
         xhr.open(method, url, true);
-      } else if (typeof XDomainRequest != "undefined") {
+      } else if (typeof XDomainRequest !== 'undefined') {
         xhr = new XDomainRequest();
         xhr.open(method, url);
       } else {
@@ -53,8 +60,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }
       return xhr;
     }
-
-    cursor.getStylesheets = function () {
+    /**
+     * [Creates an array of all <link> href attribute values]
+     * @return {[array]}
+     */
+    function getStylesheets () {
       
       var stylesheets = [],
           linkTags = document.getElementsByTagName('link');
@@ -72,26 +82,19 @@ sitecues.def('cursor', function (cursor, callback, log) {
       
       return stylesheets;
     
-    };
-
-    cursor.getDomainStylesheets = function () {
+    }
+    /**
+     * [Abstracts away creating XMLHTTPRequests that support the
+     * Origin HTTP Header, and also sets up the callback when the 
+     * response returns]
+     * @param  {[string]}   method
+     * @param  {[string]}   url
+     * @param  {Function} callback
+     * @return {[undefined]}
+     */
+    function createCORSRequest (method, url, callback) {
       
-      var stylesheets = cursor.getStylesheets(),
-          domainStyleSheets = [];
-
-      for(var i = 0; i < stylesheets.length; i += 1) {
-        if (stylesheets[i].indexOf(document.location.host) !== -1) {
-          domainStyleSheets.push(stylesheets[i]);
-        }
-      }
-
-      return domainStyleSheets;
-
-    };
-
-    cursor.createCORSRequest = function (method, url, callback) {
-      
-      var request = createCORSRequest(method, url);
+      var request = createRequest(method, url);
       
       request.url = url;
 
@@ -102,21 +105,18 @@ sitecues.def('cursor', function (cursor, callback, log) {
       request.onload = function () {
         callback(request);
       };
-      
-      request.onerror = function () {
-        //console.log('%c CORS request for ' + request.url + ' failed', 'color:red;background:#ccc');
-        //throw new Error('Error making the CORS request');
-      }
 
       request.send();
 
-    };
-
-    /*
-      @param style - String specifying what style we are interested in
-      @param callback - Function that gets passed ...
-    */
-    cursor.changeStyle = function (style, callback) {
+    }
+    /**
+     * [This function allows the targeting of styles, such as "cursor", and invokes a callback
+     * that gets passed the style and the rule associated with it for any CSS selector]
+     * @param  {[string]}   style
+     * @param  {Function} callback
+     * @return {[undefined]}
+     */
+    function changeStyle (style, callback) {
       var rule;
       if (stylesheetObject) {
         for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
@@ -129,24 +129,31 @@ sitecues.def('cursor', function (cursor, callback, log) {
             }
           }
         }
-        if (lastZoom < DEFAULT_MIN_ZOOM_LEVEL) {
-          //if the current zoom level is less than the minimum needed to enable custom cursors...
+        if (lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL) {
+          //if the current zoom level is less than the minimum needed to enable custom cursors, disable the <style>
           stylesheetObject.disabled = true;
         } else {
+          //otherwise enable it
           stylesheetObject.disabled = false;
         }
       }
-    };
-    
+    }
+    /**
+     * [Returns a function that, when executed, generates a CSS cursor property for every supported
+     * cursor type and then changes all cursor properties in a <style> that we create for the current
+     * zoom level]
+     * @return {[function]}
+     */
     var createStyleSheet = (function () {
 
       var cursorTypes = ['auto', 'crosshair', 'default', 'help', 'pointer', 'text'];
-      
+
       return function () {
       
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
+<<<<<<< HEAD
           
           if (platform.pixel.ratio > 1 && platform.pixel.support[platform.browser.is]) {
             cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
@@ -154,9 +161,12 @@ sitecues.def('cursor', function (cursor, callback, log) {
             cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
           }
 
+=======
+          cursorTypeURLS[cursorTypes[i]] = generateCursorStyle(cursorTypes[i], lastZoom);
+>>>>>>> 13a150a0cdd8f28f35836726d3055726d4256450
         }
         
-        cursor.changeStyle('cursor', function (rule, style) {
+        changeStyle('cursor', function (rule, style) {
         //find the cursor type (auto, crosshair, etc) and replace the style with our generated image 
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
@@ -173,22 +183,34 @@ sitecues.def('cursor', function (cursor, callback, log) {
             } 
           }        
         });
-        
-      }
+      
+      };
 
     }());
-    
-    cursor.generateCursorStyle1x = function (type, zoom) {
-      var cursorStyle = 'url(' +view.getImage(type,zoom)+ ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
-      return cursorStyle;
-    };
 
-    cursor.generateCursorStyle2x = function (type, zoom) {
-      var cursorStyle = '-webkit-image-set(' +
-         '    url(' +view.getImage(type,zoom)+ ') 1x,' +
-         '    url(' +view.getImage(type,zoom)+ ') 2x'  +
-         '), ' + type;
-      return cursorStyle;
+    /**
+     * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
+     * then sets the zoom, and updates our styles for cursors]
+     */
+    function setStyleSheetObject () {
+      stylesheetObject = (function () {
+        for (var i = 0; i < document.styleSheets.length; i += 1) {
+          if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === cursor.CONTANTS.SITECUES_CSS_ID) {
+            return document.styleSheets[i];
+          }
+        }
+      }());
+      lastZoom = conf.get('zoom');
+      createStyleSheet();
+    }
+    /**
+     * [Generates the cursor url for a given type and zoom level]
+     * @param  {[string]} type
+     * @param  {[number]} zoom
+     * @return {[string]}
+     */
+    function generateCursorStyle (type, zoom) {
+      return 'url(' + view.getImage(type, zoom) + ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
     }
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
@@ -202,33 +224,40 @@ sitecues.def('cursor', function (cursor, callback, log) {
      */
     function getCursorHotspotOffset(type, zl) {
        
-       var zoom = {
-         'min': DEFAULT_ZOOM_LEVEL,
-         'current': zl || conf.get('zoom') || DEFAULT_ZOOM_LEVEL,
-       };
+      var zoom = {
+        'min': cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
+        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
+      },
+
+      offset,
+      result;
        
-       zoom.diff = zoom.current - zoom.min;
+      zoom.diff = zoom.current - zoom.min;
        
-       var offset = imagesManager.offsets[type || DEFAULT_TYPE];
+      offset = imagesManager.offsets[type || cursor.CONTANTS.DEFAULT_TYPE];
        
-       var result = '';
+      result = '';
        
-       if (offset) {
-          switch (type) {
-           case 'auto':
-           case 'default':
-             result = offset.x + ' ' + Math.round(offset.y + offset.step * zoom.diff);
-             break
-           case 'pointer':
-             result = Math.round(offset.x + offset.step * zoom.diff) + ' ' + Math.round(offset.y + (offset.step / 2) * zoom.diff);
-             break;
-           default:
-             break;
-         }
-       }
-       return result;
+      if (offset) {
+        switch (type) {
+        case 'auto':
+        case 'default':
+          result = offset.x + ' ' + Math.round(offset.y + offset.step * zoom.diff);
+          break;
+        case 'pointer':
+          result = Math.round(offset.x + offset.step * zoom.diff) + ' ' + Math.round(offset.y + (offset.step / 2) * zoom.diff);
+          break;
+        default:
+          break;
+        }
+      }
+      return result;
     }    
-    
+    /**
+     * [Initializes our module by getting all <style> and <link> tags, and concatenates their styles
+     * to a <style> we create.  It then will update all cursor styles within that tag]
+     * @return {[undefined]}
+     */
     (function () {  //initializer
       /*
         Basically, we will begin by creating a <style> containing rules found in SITECUES_CSS_DEFAULT.
@@ -237,58 +266,33 @@ sitecues.def('cursor', function (cursor, callback, log) {
         downloaded, then we simply concatenate our <style> with the response text.
         At the end of each successful callback, we update our <style> to reflect the current level of zoom.
       */
-      var validSheets = cursor.getStylesheets(),
+      var validSheets = getStylesheets(),
           styleTags = document.getElementsByTagName('style'),
           sheet = document.createElement('style');
       
-      sheet.innerHTML = SITECUES_CSS_DEFAULT;
-      sheet.id        = SITECUES_CSS_ID;
+      sheet.innerHTML = cursor.CONTANTS.SITECUES_CSS_DEFAULT;
+      sheet.id        = cursor.CONTANTS.SITECUES_CSS_ID;
       
       document.head.appendChild(sheet);
       
-      stylesheetElement = document.getElementById(SITECUES_CSS_ID);
+      stylesheetElement = document.getElementById(cursor.CONTANTS.SITECUES_CSS_ID);
 
       for(var k = 0; k < styleTags.length; k += 1) {
-        if (styleTags[k].id !== SITECUES_CSS_ID) {
+        if (styleTags[k].id !== cursor.CONTANTS.SITECUES_CSS_ID) {
           stylesheetElement.innerHTML += styleTags[k].innerHTML;
         }
       }
 
       for(var i = 0; i < validSheets.length; i += 1) {
 
-        cursor.createCORSRequest('GET', validSheets[i], function (request) {
-          
-          //console.log('%c CORS Successful for ' + request.url, 'color:green;background:#ccc');
-
-          stylesheetElement.innerHTML += request.responseText;;
-          setTimeout(function () {
-            //Hmm, interesting that I needed to do this...
-            stylesheetObject = (function () {
-              for (var i = 0; i < document.styleSheets.length; i += 1) {
-                if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
-                  return document.styleSheets[i];
-                }
-              }
-            }());
-            lastZoom = conf.get('zoom');
-            createStyleSheet();
-          }, 1);
+        createCORSRequest('GET', validSheets[i], function (request) {
+          stylesheetElement.innerHTML += request.responseText;
+          setTimeout(setStyleSheetObject, 1);
         });
 
       } 
        
-      setTimeout(function () {
-        //Hmm, interesting that I needed to do this...
-        stylesheetObject = (function () {
-          for (var i = 0; i < document.styleSheets.length; i += 1) {
-            if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === SITECUES_CSS_ID) {
-              return document.styleSheets[i];
-            }
-          }
-        }());
-        lastZoom = conf.get('zoom');
-        createStyleSheet();
-      }, 1);
+      setTimeout(setStyleSheetObject, 1);
 
     }());
     
@@ -298,7 +302,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         clearTimeout(lastZoomTimeout);
         lastZoomTimeout = setTimeout(createStyleSheet, 10);
       }
-    })
+    });
 
     callback();
   

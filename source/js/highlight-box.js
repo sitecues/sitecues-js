@@ -256,17 +256,37 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         // If website uses width/height attributes let's remove those while HLB is inlated.
-        if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
-          for (var attrName in this.savedStyleAttr) {
-            if (attrName === 'style') {
-              continue;
+        if (!common.isCufonPart(this.itemNode)) {
+            if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
+              for (var attrName in this.savedStyleAttr) {
+                if (attrName === 'style') {
+                  continue;
+                }
+                if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
+                  this.itemNode.removeAttr(attrName);
+                }
+              }
             }
-            if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
-              this.itemNode.removeAttr(attrName);
-            }
-          }
         }
+
+        if (common.isCufonPart(this.itemNode)) {
+            delete cssBeforeAnimateStyles.width;
+            delete cssBeforeAnimateStyles.height;
+            // todo: remove this awful hardcode
+            cssBeforeAnimateStyles['background-color'] = 'rgb(173, 172, 167)';
+        }
+
         this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
+
+        // Since jQuery animate doesn't understand 'important' then do:
+        // - remove properties having 'important' priority animation is going to override;
+        // - set non-important property with the same value it used to have.
+        var styleObj = this.itemNode[0].style;
+        for (var prop in cssAnimateStyles) {
+            styleObj.removeProperty(prop);
+            this.itemNode[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
+        }
+
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
@@ -323,17 +343,19 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           clientRect = positioning.getBoundingBox(this.item);
         }
 
-        
-
         var cssAnimateStyles = $.extend({}, currentStyle, {
           'position': 'absolute',
-          'transform': 'scale(1)',
-
-          'width': clientRect.width / kExtraZoom,
-          // Don't change height if there's a background image, otherwise it is destroyed.
-          'height': currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+          'transform': 'scale(1)'
 
         });
+
+        if (!!common.isCufonPart(this.itemNode)) { 
+            $.extend(cssAnimateStyles, {
+                'width': clientRect.width / kExtraZoom,
+                // Don't change height if there's a background image, otherwise it is destroyed.
+                'height': currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+            });
+        }
 
         // Deflate the highlight box.
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'linear', function () {
@@ -359,9 +381,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           for (var attrName in _this.savedStyleAttr) {
             if (attrName === 'style') {
                _this.itemNode.removeAttr('style');
-            }
-            if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
-              _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+            } else if (!common.isCufonPart(_this.itemNode)) {
+                if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
+                  _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+                }
             }
           }
           // This instance is now officially closed.
@@ -501,7 +524,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-color'] = '#000';
           return;
         }
-        if (!isContrastColors) {
+        if (!isContrastColors && !common.isCufonPart(this.itemNode)) {
           // Favor a white background with dark text when original background was white.
           if (common.isLightTone(newBgColor)) {
             newBgColor = 'rgb(255, 255, 255)';
