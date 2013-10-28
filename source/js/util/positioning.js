@@ -3,13 +3,17 @@
  */
 sitecues.def('util/positioning', function (positioning, callback) {
 
-	    positioning.kMinRectWidth = 3;
-	    positioning.kMinRectHeight = 3;
+	    positioning.kMinRectWidth = 4;
+	    positioning.kMinRectHeight = 4;
 
     sitecues.use('jquery', 'util/common', function ($, common) {
 
         /**
          * Get the cumulative zoom for an element.
+         * TODO: what is andZoom? I don't understand it.
+         * I think you use it like this:
+         * true: if you're going to be positioning outside of <body> (child of <html>)
+         * false: you're going to be positioning inside of <body>
          */
         positioning.getTotalZoom = function (selector, andZoom) {
             var _recurse = function (element) {
@@ -167,9 +171,18 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    };
 		    return rect;
      }
- 
-     function isVisibleElement(element) {
-       return $.inArray(["video", "audio", "canvas", "object", "embed", "img"], element.localName) >= 0;
+
+     var RENDERED_ELEMENTS = {
+       video: 1,
+       audio: 1,
+       canvas: 1,
+       object: 1,
+       embed: 1,
+       img: 1
+     };
+
+     function isRenderedElement(element) {
+       return RENDERED_ELEMENTS[element.localName] === 1;
      }
 
      function hasVisibleBorder(style) {
@@ -218,26 +231,71 @@ sitecues.def('util/positioning', function (positioning, callback) {
           width: bulletWidth
         };
       }
+
+      function getSpriteRect(element, style) {
+        // Check special case for sprites, often used for fake bullets
+        if (style['background-image'] === 'none' || style['background-repeat'] !== 'no-repeat')
+          return null;
+
+        // Background sprites tend to be to the left side of the element
+        var rect = element.getBoundingClientRect();
+        rect.width = positioning.kMinRectWidth;   // Don't go all the way to the right -- that's likely to overrun a float
+        return rect;
+      }
+
+      function addRect(allRects, clipRect, unclippedRect) {
+          if (!unclippedRect)
+            return;
+          var rect = getClippedRect(unclippedRect, clipRect);
+
+          if (rect.width >= positioning.kMinRectWidth  && rect.height >= positioning.kMinRectHeight  &&
+              rect.right > 0 && rect.bottom > 0) {
+              // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
+              allRects.push(rect);
+          }
+      }
+
 	    // Only use leaf nodes (where content resides), in order to avoid rects taht
 	    // were purposely positioned offscreen
 	    function getAllBoundingBoxesExact($selector, allRects, clipRect) {
 		    $selector.each(function () {
 			    var isElement = this.nodeType === 1;
-          var style = {};
-          if (isElement) {
-            style = common.getElementComputedStyles(this);
-            if (style['visibility'] !== 'visible')
-             return true; // Don't look at this hidden element
-            // Check special case for lists. We have to do extra work
-            // to determine the affect of bullets/numbers on the bounding box
-            var bulletRect = getBulletRect(this, style);
-            if (bulletRect)
-              allRects.push(bulletRect);
+
+          // --- Leaf nodes ---
+          if (!isElement) {
+            if (this.nodeType === 3 && $.trim(this.textContent) !== '')
+              addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            return true;
           }
-          var unclippedRect;
-          if (isElement && hasVisibleBorder(style)) {
-            unclippedRect = this.getBoundingClientRect(); // Make it all visible, including padding and border
-          } else if (isElement && this.hasChildNodes() && !isVisibleElement(this)) {
+
+          var style = common.getElementComputedStyles(this);
+
+          // --- Invisible elements ---
+          if (style['visibility'] !== 'visible')
+            return true;
+
+          // --- Visible border ---
+          if (hasVisibleBorder(style)) {
+            addRect(allRects, clipRect, this.getBoundingClientRect()); // Make it all visible, including padding and border
+            return true;
+          }
+
+          // --- List bullets ---
+          addRect(allRects, clipRect, getBulletRect(this, style));
+
+          // --- Background sprites ---
+          addRect(allRects, clipRect, getSpriteRect(this, style));
+
+          console.log('#5');
+          // --- Rendered elements ---
+          if (isRenderedElement(this)) {
+            // Elements with rendered content such as images and videos
+            addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            return true;
+          }
+
+          // --- Elements with children ---
+          if (this.hasChildNodes()) {
 				    // Use bounds of visible descendants, but clipped by the bounds of this ancestor
 				    var isClip = isClipElement(this);
 				    var newClipRect = clipRect;
@@ -247,20 +305,12 @@ sitecues.def('util/positioning', function (positioning, callback) {
 						    newClipRect = getClippedRect(clipRect, newClipRect);
 					    }
 				    }
-			        getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
-              return true;
-			    } else {// Leaf node or visible container element -- something with visible contents
-               unclippedRect = getBoundingRectMinusPadding(this);
-          }
-          var rect = getClippedRect(unclippedRect, clipRect);
-
-          if (rect.width > positioning.kMinRectWidth  && rect.height > positioning.kMinRectHeight  &&
-            rect.right > 0 && rect.bottom > 0) {
-              // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
-            allRects.push(rect);  
+			      getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
+            return true;
 			    }
-		    });
+        });
 	    }
+
 
 	    function isClipElement(element) {
 		    // TODO: should we use common.getElementComputedStyles() ?
