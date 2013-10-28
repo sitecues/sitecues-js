@@ -79,11 +79,12 @@ sitecues.def('speech', function (speech, callback, log) {
         //What audio format will we use? 
         audioFormat =  (function () {
           var a = new Audio();
-          if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
-            return 'ogg';
-          }
+          //Default to mp3 if it's supported, otherwise, ogg.
           if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
             return 'mp3';
+          }
+          if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+            return 'ogg';
           }
         }()),
 
