@@ -266,7 +266,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
           }
         }
+
         this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
+
+        // Since jQuery animate doesn't understand 'important' then do:
+        // - remove properties having 'important' priority animation is going to override;
+        // - set non-important property with the same value it used to have.
+        var styleObj = this.itemNode[0].style;
+        for (var prop in cssAnimateStyles) {
+            styleObj.removeProperty(prop);
+            this.itemNode[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
+        }
+
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;

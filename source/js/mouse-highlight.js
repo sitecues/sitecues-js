@@ -633,6 +633,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 		      $(window)
 			      .on('focus', testFocus)
 			      .on('blur', onblurwindow)
+			      .on('resize', mh.hideAndResetState);
 		      } else {
 		        // remove mousemove listener from body
 		        $(document).off('mousemove mousewheel', mh.update)
@@ -640,6 +641,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			      $(window)
 				      .off('focus', testFocus)
 				      .off('blur', onblurwindow)
+				      .off('resize', mh.hideAndResetState);
 		      }
 		}
 
