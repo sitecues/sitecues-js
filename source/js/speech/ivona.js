@@ -18,12 +18,12 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
         URIComponent = URIComponent.replace(htmlEntityMap[i], '');
       }
       return URIComponent;
-    }
+    };
   
-  }());
+  }()),
 
   //What audio format will we use? 
-  var audioFormat =  (function () {
+  audioFormat =  (function () {
     var a = new Audio();
     if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
       return 'ogg';
@@ -31,15 +31,15 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
     if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
       return 'mp3';
     }
-  }());
+  }()),
 
-  var IvonaPlayer = function(_hlb, _siteId, $, _secure) {
+  IvonaPlayer = function(hlb, _siteId, $, secure) {
     
-    var myState = 'init',
-        secureFlag = (_secure ? 1 : 0),
-        hlb = $(_hlb),
+    var secureFlag = (secure ? 1 : 0),
+        hlb = $(hlb),
         speechKey = hlb.data('speechKey'),
-        baseMediaUrl;
+        baseMediaUrl,
+        audioElement;
 
     if (speechKey) {
       baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + "." + audioFormat;
@@ -50,11 +50,11 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
         + "&text=" + removeHTMLEntities(encodeURIComponent(hlb.text())) + "&codecId=" + audioFormat;
     }
 
-    var audioElement = undefined;
-
     this.init = function () {
 
-      if (audioElement) return; //never create more than one <audio>
+      if (audioElement) {
+        return; //never create more than one <audio>
+      }
                  
       audioElement = new Audio();
       audioElement.src = baseMediaUrl;
@@ -63,11 +63,11 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
         sitecues.emit('canplay');
       });
 
-    }
+    };
 
     this.play = function () {
 
-      if (audioElement.readyState = 4) { // enough data available to start playing
+      if (audioElement.readyState === 4) { // enough data available to start playing
         audioElement.play();
       } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
         sitecues.on('canplay', function () {
@@ -75,21 +75,22 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
         }, this);
       }
 
-    } 
+    };
 
     this.stop = function () {
       if (audioElement) {
         audioElement.pause();
         audioElement.currentTime = 0;
       }
-    }
+    };
 
     this.destroy = function () {
       if (audioElement) {
-        this.stop()
+        this.stop();
+        sitecues.off('canplay');
         audioElement = undefined;
       }
-    }
+    };
 
   };
 
