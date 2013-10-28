@@ -4,12 +4,13 @@
 .DS_Store
 .jonathan-*
 .pip
-howards-jokes.js
 node_modules
 target
 tmp
 var
-#Wowwerd dot j.s. dot com . dot net . dot org . dot wordpress slash startup dot schwab.
 fetchavatars.pl
+#Wowwerd dot j.s. dot com . dot net . dot org . dot wordpress slash startup dot schwab.
+howards-jokes.js
 .vagrant
-#test
+tools/site/generate-cursors/cursor_output/cur/
+tools/site/generate-cursors/cursor_output/ico/
