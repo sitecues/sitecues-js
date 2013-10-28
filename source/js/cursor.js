@@ -298,7 +298,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         clearTimeout(lastZoomTimeout);
         lastZoomTimeout = setTimeout(createStyleSheet, 10);
       }
-    })
+    });
 
     callback();
   
