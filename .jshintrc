@@ -22,7 +22,9 @@
     "XMLHttpRequest",
     "sitecues",
     "exports",
-    "CSSPrimitiveValue"
+    "CSSPrimitiveValue",
+    "CSSStyleDeclaration",
+    "escape"
   ],
 
   // Enforcing

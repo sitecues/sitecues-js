@@ -8,7 +8,7 @@
  */
 sitecues.def('cursor', function (cursor, callback, log) {
 
-  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', function ($, conf, view, imagesManager) {
+  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', 'platform', function ($, conf, view, imagesManager, platform) {
 
     var stylesheetElement,
         stylesheetObject,
@@ -153,7 +153,17 @@ sitecues.def('cursor', function (cursor, callback, log) {
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
+<<<<<<< HEAD
+          
+          if (platform.pixel.ratio > 1 && platform.pixel.support[platform.browser.is]) {
+            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
+          } else {
+            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
+          }
+
+=======
           cursorTypeURLS[cursorTypes[i]] = generateCursorStyle(cursorTypes[i], lastZoom);
+>>>>>>> 13a150a0cdd8f28f35836726d3055726d4256450
         }
         
         changeStyle('cursor', function (rule, style) {
@@ -177,6 +187,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       };
 
     }());
+
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
      * then sets the zoom, and updates our styles for cursors]
@@ -201,6 +212,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
     function generateCursorStyle (type, zoom) {
       return 'url(' + view.getImage(type, zoom) + ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
     }
+
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     // The maths below based on experience and doesn't use any kind of specific logic.
     // We are liely to change it better one when we have final images.
