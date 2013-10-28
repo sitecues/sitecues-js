@@ -32,15 +32,15 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
       return 'mp3';
     }
   }()),
-
-  IvonaPlayer = function(hlb, _siteId, $, secure) {
+  
+  IvonaPlayer = function(_hlb, _siteId, $, secure) {
     
     var secureFlag = (secure ? 1 : 0),
-        hlb = $(hlb),
+        hlb = $(_hlb),
         speechKey = hlb.data('speechKey'),
         baseMediaUrl,
         audioElement;
-
+    
     if (speechKey) {
       baseMediaUrl = "//" + sitecues.getLibraryConfig().hosts.ws + "/sitecues/cues/ivona/" + speechKey + "." + audioFormat;
     } else {
@@ -67,20 +67,22 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
 
     this.play = function () {
 
-      if (audioElement.readyState === 4) { // enough data available to start playing
+      if (audioElement && audioElement.readyState === 4) { // enough data available to start playing
         audioElement.play();
       } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
         sitecues.on('canplay', function () {
-          this.play();
+          this.play();  
         }, this);
       }
 
     };
 
     this.stop = function () {
-      if (audioElement) {
+      if (audioElement && audioElement.readyState === 4) {
         audioElement.pause();
         audioElement.currentTime = 0;
+      } else {
+        audioElement = undefined;
       }
     };
 
@@ -98,9 +100,11 @@ sitecues.def('speech/ivona', function (ivona, callback, log) {
 
     ivona.factory = function(hlb) {
       log.info(hlb);
-      var player = new IvonaPlayer(hlb, site.get('site_id'), $, sitecues.getLibraryUrl().secure);
-      player.init();
-      return player;
+      if ($(hlb).text().length) {
+        var player = new IvonaPlayer(hlb, site.get('site_id'), $, sitecues.getLibraryUrl().secure);
+        player.init();
+        return player;
+      }
     };
 
     if (sitecues.tdd) {
