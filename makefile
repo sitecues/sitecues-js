@@ -74,8 +74,6 @@ files=\
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
 	source/js/speech.js \
-	source/js/speech/azure.js \
-	source/js/speech/ivona.js \
 	source/js/invert.js \
 	source/js/cursor/custom.js \
 	source/js/cursor/images/manager.js \

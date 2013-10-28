@@ -22,7 +22,7 @@ sitecues.def('speech', function (speech, callback, log) {
 
   };
   
-  sitecues.use('conf', 'conf/site', 'jquery', function(conf, site, $) {
+  sitecues.use('conf', 'conf/site', 'jquery', 'platform', function(conf, site, $, platform) {
 
     var players = {},
         // Use the site and user settings, if available, but if neither is
@@ -86,8 +86,10 @@ sitecues.def('speech', function (speech, callback, log) {
             return 'mp3';
           }
         }()),
+
+        context,
       
-        AudioPlayer = function(hlb, siteId, secure) {
+        NotSafariAudioPlayer = function(hlb, siteId, secure) {
           
           var secureFlag = (secure ? 1 : 0),
               speechKey = hlb.data('speechKey'),
@@ -147,9 +149,87 @@ sitecues.def('speech', function (speech, callback, log) {
             }
           };
 
-        };
+        },
+        
+        SafariAudioPlayer = function(hlb, siteId, secure) {
+          
+          var secureFlag = (secure ? 1 : 0),
+              speechKey = hlb.data('speechKey'),
+              baseMediaUrl;
+          
+          if (speechKey) {
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+          } else {
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+              // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+              + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+              + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+          }
+
+          this.soundSource = undefined;
+          this.soundBuffer = undefined;
+          this.startTime   = undefined;
+
+          this.init = function () {
+
+            var that = this, //required for ajax callback
+                volumeNode = context.createGainNode(),
+                request = new XMLHttpRequest();
+            
+            that.soundSource = context.createBufferSource();
+            
+            volumeNode.gain.value = 0.1;
+          
+            this.soundSource.connect(volumeNode);
+            
+            volumeNode.connect(context.destination);
+          
+            request.open('GET', baseMediaUrl, true);
+            request.responseType = 'arraybuffer';
+            // Our asynchronous callback
+            request.onload = function() { 
+              context.decodeAudioData(request.response, function (buffer) {
+                that.soundSource.buffer = buffer;
+                sitecues.emit('audioReady');
+              });
+            };
+            request.send();
+          };
+
+          this.play = function () {
+            if (this.soundSource.buffer) {
+              this.soundSource.noteOn(context.currentTime);
+              sitecues.off('audioReady');
+            } else {
+              sitecues.on('audioReady', this.play, this);
+            }
+          };
+
+          this.stop = function () {
+            if (this.soundSource.buffer) {
+              this.soundSource.noteOff(context.currentTime);
+            }
+          };
+
+          this.destroy = function () {
+           // this.context     = undefined;
+            this.soundSource = undefined;
+            this.soundBuffer = undefined;
+          };
+
+        },
+
+        AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
       //end variable declarations 
-      
+    console.log(AudioPlayer);
+    if (!context) {
+      if (typeof AudioContext !== 'undefined') {
+        context = new AudioContext();
+      } else if (typeof webkitAudioContext !== 'undefined') {
+        context = new webkitAudioContext();
+      }
+    }
+   
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
     
     if (!ttsEngine) {
