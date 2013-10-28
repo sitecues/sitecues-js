@@ -42,6 +42,7 @@ files=\
 	source/js/jquery.js \
 	source/js/conf/user/provided.js \
 	source/js/conf/user/server.js \
+	source/js/conf/user/manager.js \
 	source/js/conf/user.js \
 	source/js/conf/site.js \
 	source/js/conf.js \
