@@ -126,7 +126,7 @@ sitecues.def('speech', function (speech, callback, log) {
             if (audioElement && audioElement.readyState === 4 && !playing) { // enough data available to start playing
               playing = true;
               audioElement.play();
-            } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
+            } else if (audioElement) { // not enough data to start playing, so listen for the even that is fired when this is not the case
               sitecues.on('canplay', function () {
                 this.play();  
               }, this);
@@ -136,9 +136,20 @@ sitecues.def('speech', function (speech, callback, log) {
 
           this.stop = function () {
             if (audioElement && audioElement.readyState === 4) {
+              //audioElement has been initiated and the response has come
+              //back and audio is ready to play.  We want to just pause it
+              //and configure it so that if we want we can start playing the 
+              //audio again without making another request
               audioElement.pause();
               audioElement.currentTime = 0;
               playing = false;
+              sitecues.off('canplay');
+            } else {
+              //audioElement has been initiated, but the request hasnt completed.
+              //We need to make sure it does not play at all. This happens if the
+              //HLB opens and closes before the request comes back
+              audioElement = undefined;
+              sitecues.off('canplay');
             }
           };
 
@@ -355,6 +366,7 @@ sitecues.def('speech', function (speech, callback, log) {
       log.info('Stopping ' + hlbId);
 
       if (player) {
+        console.log('STOPPPPP')
         player.stop();
       } else {
         log.info(players);
