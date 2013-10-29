@@ -121,14 +121,16 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
           this.play = function () {
-
-            if (audioElement && audioElement.readyState === 4 && !playing) { // enough data available to start playing
-              playing = true;
-              audioElement.play();
-            } else if (audioElement) { // not enough data to start playing, so listen for the even that is fired when this is not the case
-              sitecues.on('canplay', function () {
-                this.play();  
-              }, this);
+            
+            if (audioElement) {
+              if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
+                playing = true;
+                audioElement.play();
+              } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
+                sitecues.on('canplay', function () {
+                  this.play();  
+                }, this);
+              }
             }
 
           };
@@ -137,7 +139,7 @@ sitecues.def('speech', function (speech, callback, log) {
             
             sitecues.off('canplay');
             
-            if (audioElement && audioElement.readyState === 4) {
+            if (audioElement && audioElement.readyState >= 3) {
               //audioElement has been initiated and the response has come
               //back and audio is ready to play.  We want to just pause it
               //and configure it so that if we want we can start playing the 
@@ -163,7 +165,7 @@ sitecues.def('speech', function (speech, callback, log) {
 
         },
         
- //Using an immediately invoking function that returns 
+        //Using an immediately invoking function that returns 
         //a function to contain all logic needed for playing audio
         //in Safari in case we want to separate this into its own module.
         SafariAudioPlayer = (function () {
@@ -239,7 +241,6 @@ sitecues.def('speech', function (speech, callback, log) {
             };
 
             this.destroy = function () {
-             // this.context     = undefined;
               this.soundSource = undefined;
               this.soundBuffer = undefined;
             };
@@ -247,7 +248,6 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
         }()),
-
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
       //end variable declarations 
@@ -278,6 +278,7 @@ sitecues.def('speech', function (speech, callback, log) {
 
       var hlbId = speech.getHlbId(hlb),
           player = speech.factory(hlb);
+
       if(!hlbId) {
         log.warn('No hightlightbox ID!');
         return null;
