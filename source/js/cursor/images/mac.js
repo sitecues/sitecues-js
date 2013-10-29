@@ -18,7 +18,7 @@ sitecues.def('cursor/images/mac', function (osImages, callback) {
     function prepareCursor (size, type) {
 
       if (!platform.pixel.support[platform.browser.is]) {
-        pixelRatio = 1
+        pixelRatio = 1;
       }
 
       size *= pixelRatio;
