@@ -23,6 +23,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 				pathBorder: [], // In real pixels so that it can live outside of <body>
 				pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
 				pathFillBackground: [], // In element rect coordinates, used with CSS background
+                highlightPaddingWidth: 0,
 				highlightBorderWidth: 0,
 				doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
 				doUseOverlayforBgColor: false  // was an overlay used to create the background color?
@@ -138,15 +139,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 		function updateColorApproach(style) {
 			// Get the approach used for highlighting
-			if ($(state.picked).length > 1) {
+			if ($(state.picked).length > 1 ||
+         (style[0].backgroundImage !== 'none' && style[0].backgroundRepeat === 'no-repeat')) {
 				//  approach #1 -- use overlay for background color
 				//                 use overlay for rounded outline
 				//	pros: one single rectangle instead of potentially many
 				//	cons: does not highlight text the way user expects (washes it out)
 				//	when-to-use: for article or cases where multiple items are selected
+                //               when background sprites are used, which we don't want to overwrite with out background
 				state.doUseBgColor = true;
 				state.doUseOverlayForBgColor = true; // Washes foreground out
-			}	else if ($(state.picked).is(VISUAL_MEDIA_ELEMENTS) || !common.isEmptyBgImage(style.backgroundImage)) {
+			}	else if ($(state.picked).is(VISUAL_MEDIA_ELEMENTS) || !common.isEmptyBgImage(style[0].backgroundImage)) {
 				//  approach #2 -- don't change background color
 				//                 use overlay for rounded outline
 				//	pros: foreground text does not get washed out
@@ -232,6 +235,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			}
 
 			state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
+            updateColorApproach(state.styles);
 
 			if (!mh.updateOverlayPosition(true)) {
 				// Did not find visible rectangle to highlight
@@ -247,23 +251,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			var element = state.picked.get(0),
 			    hasInterestingBg,
 			    backgroundColor,
-			    originRect,
 			    offsetLeft,
 			    offsetTop;
 
-			//what approach will we use to update the highlight?
-			updateColorApproach(state.styles);
-			
-			// Approach #1 -- use overlay for bg color
-			if (state.doUseOverlayForBgColor) {
-				// Untested -- add back if we need it for article reading
-				//var extra = EXTRA_HIGHLIGHT_PIXELS + state.highlightBorderWidth;
-				//var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
-				//drawPath($('.' + HIGHLIGHT_OUTLINE_CLASS).get(0).getContext(), 0, 0, getTransparentBackgroundColor());
-				return;
-			}
-			// Approach #2 -- no bg color
-			if (!state.doUseBgColor) {
+			// Approach #1 or #2 -- no change to background of element
+			if (state.doUseOverlayForBgColor || !state.doUseBgColor) {
 				return false;
 			}
 			// Approach #3 -- change background
@@ -520,19 +512,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
 			previousViewRect = $.extend({}, state.viewRect);
 			state.highlightBorderWidth = getHighlightBorderWidth();
+            state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
 			state.viewRect = $.extend({ }, absoluteRect);
-			var extra = EXTRA_HIGHLIGHT_PIXELS + state.highlightBorderWidth;
+			var extra = state.highlightPaddingWidth + state.highlightBorderWidth;
 
 			if (createOverlay) {
 				var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
 				state.floatRects = getIntersectingFloatRects();
 				state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
 				var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
-				state.pathFillPadding = getExpandedPath(adjustedPath, EXTRA_HIGHLIGHT_PIXELS / 2);
-				state.pathBorder = getExpandedPath(state.pathFillPadding, EXTRA_HIGHLIGHT_PIXELS /2 + state.highlightBorderWidth /2 );
+				state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
+				state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
 				// Create and position highlight overlay
-				var paddingSVG = getSVGForPath(state.pathFillPadding, EXTRA_HIGHLIGHT_PIXELS, getTransparentBackgroundColor(), null);
+				var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
+                    state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null);
 				var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null);
 				var extraLeftPaddingSVG = getSVGForExtraLeftPadding(extra);
 				var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraLeftPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
