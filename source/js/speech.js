@@ -79,12 +79,12 @@ sitecues.def('speech', function (speech, callback, log) {
         //What audio format will we use? 
         audioFormat =  (function () {
           var a = new Audio();
-          //Default to mp3 if it's supported, otherwise, ogg.
-          if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
-            return 'mp3';
-          }
+          //Default to ogg if it's supported, otherwise, mp3
           if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
             return 'ogg';
+          }
+          if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
+            return 'mp3';
           }
         }()),
 
@@ -302,7 +302,7 @@ sitecues.def('speech', function (speech, callback, log) {
       if (ttsEngine) {
         log.info(hlb);
         if ($(hlb).text().length || $(hlb).data('speechKey')) {
-          var player = new AudioPlayer($(hlb), site.get('site_id'), $, sitecues.getLibraryUrl().secure);
+          var player = new AudioPlayer($(hlb), site.get('site_id'), sitecues.getLibraryUrl().secure);
           player.init();
           return player;
         }
