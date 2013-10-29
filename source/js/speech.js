@@ -87,9 +87,7 @@ sitecues.def('speech', function (speech, callback, log) {
             return 'ogg';
           }
         }()),
-
-        context,
-      
+        
         NotSafariAudioPlayer = function(hlb, siteId, secure) {
           
           var secureFlag = (secure ? 1 : 0),
@@ -136,6 +134,9 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
           this.stop = function () {
+            
+            sitecues.off('canplay');
+            
             if (audioElement && audioElement.readyState === 4) {
               //audioElement has been initiated and the response has come
               //back and audio is ready to play.  We want to just pause it
@@ -144,103 +145,112 @@ sitecues.def('speech', function (speech, callback, log) {
               audioElement.pause();
               audioElement.currentTime = 0;
               playing = false;
-              sitecues.off('canplay');
+            
             } else {
               //audioElement has been initiated, but the request hasnt completed.
               //We need to make sure it does not play at all. This happens if the
               //HLB opens and closes before the request comes back
               audioElement = undefined;
-              sitecues.off('canplay');
             }
           };
 
           this.destroy = function () {
             if (audioElement) {
               this.stop();
-              sitecues.off('canplay');
               audioElement = undefined;             
             }
           };
 
         },
         
-        SafariAudioPlayer = function(hlb, siteId, secure) {
+ //Using an immediately invoking function that returns 
+        //a function to contain all logic needed for playing audio
+        //in Safari in case we want to separate this into its own module.
+        SafariAudioPlayer = (function () {
           
-          var secureFlag = (secure ? 1 : 0),
-              speechKey = hlb.data('speechKey'),
-              baseMediaUrl;
+          var context;
           
-          if (speechKey) {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
-          } else {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-              // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-              + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+          if (!context) {
+            if (typeof AudioContext !== 'undefined') {
+              context = new AudioContext();
+            } else if (typeof webkitAudioContext !== 'undefined') {
+              context = new webkitAudioContext();
+            }
           }
-
-          this.soundSource = undefined;
-          this.soundBuffer = undefined;
-          this.startTime   = undefined;
-
-          this.init = function () {
-
-            var that = this, //required for ajax callback
-                volumeNode = context.createGainNode(),
-                request = new XMLHttpRequest();
-            
-            that.soundSource = context.createBufferSource();
-            
-            volumeNode.gain.value = 0.1;
           
-            this.soundSource.connect(volumeNode);
-            
-            volumeNode.connect(context.destination);
+          return function(hlb, siteId, secure) {
           
-            request.open('GET', baseMediaUrl, true);
-            request.responseType = 'arraybuffer';
-            // Our asynchronous callback
-            request.onload = function() { 
-              context.decodeAudioData(request.response, function (buffer) {
-                that.soundSource.buffer = buffer;
-                sitecues.emit('audioReady');
-              });
-            };
-            request.send();
-          };
-
-          this.play = function () {
-            if (this.soundSource.buffer) {
-              this.soundSource.noteOn(context.currentTime);
-              sitecues.off('audioReady');
+            var secureFlag = (secure ? 1 : 0),
+                speechKey = hlb.data('speechKey'),
+                baseMediaUrl;
+            
+            if (speechKey) {
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
             } else {
-              sitecues.on('audioReady', this.play, this);
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+                // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+                + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+                + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
             }
-          };
 
-          this.stop = function () {
-            if (this.soundSource.buffer) {
-              this.soundSource.noteOff(context.currentTime);
-            }
-          };
-
-          this.destroy = function () {
-           // this.context     = undefined;
             this.soundSource = undefined;
             this.soundBuffer = undefined;
+            this.startTime   = undefined;
+
+            this.init = function () {
+
+              var that = this, //required for ajax callback
+                  volumeNode = context.createGainNode(),
+                  request = new XMLHttpRequest();
+              
+              that.soundSource = context.createBufferSource();
+              
+              volumeNode.gain.value = 0.1;
+            
+              this.soundSource.connect(volumeNode);
+              
+              volumeNode.connect(context.destination);
+            
+              request.open('GET', baseMediaUrl, true);
+              request.responseType = 'arraybuffer';
+              // Our asynchronous callback
+              request.onload = function() { 
+                context.decodeAudioData(request.response, function (buffer) {
+                  that.soundSource.buffer = buffer;
+                  sitecues.emit('audioReady');
+                });
+              };
+              request.send();
+            };
+
+            this.play = function () {
+              if (this.soundSource.buffer) {
+                this.soundSource.noteOn(context.currentTime);
+                sitecues.off('audioReady');
+              } else {
+                sitecues.on('audioReady', this.play, this);
+              }
+            };
+
+            this.stop = function () {
+              if (this.soundSource.buffer) {
+                this.soundSource.noteOff(context.currentTime);
+              }
+            };
+
+            this.destroy = function () {
+             // this.context     = undefined;
+              this.soundSource = undefined;
+              this.soundBuffer = undefined;
+            };
+
           };
 
-        },
+        }()),
+
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
       //end variable declarations 
-    if (!context) {
-      if (typeof AudioContext !== 'undefined') {
-        context = new AudioContext();
-      } else if (typeof webkitAudioContext !== 'undefined') {
-        context = new webkitAudioContext();
-      }
-    }
    
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
     
