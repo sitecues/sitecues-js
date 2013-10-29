@@ -213,24 +213,25 @@ sitecues.def('util/positioning', function (positioning, callback) {
        }
        return getEmsToPx(style['font-size'], ems);
      }
-     function getBulletRect(element, style) {
-       var bulletType = style['list-style-type'];
-       if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside')
-         return null; // inside, will already have bullet incorporated in bounds
-        if (style['display'] !== 'list-item') {
-         if ($(element).children(":first").css('display') !== 'list-item') {
-           return null; /// Needs to be list-item or have list-item child
-          }
+
+    function getBulletRect(element, style) {
+      var bulletType = style['list-style-type'];
+      if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside')
+        return null; // inside, will already have bullet incorporated in bounds
+      if (style['display'] !== 'list-item') {
+        if ($(element).children(":first").css('display') !== 'list-item') {
+          return null; /// Needs to be list-item or have list-item child
         }
-        var bulletWidth = getBulletWidth(element, style, bulletType);
-        var boundingRect = getBoundingRectMinusPadding(element);
-        return {
-          top: boundingRect.top,
-          height: boundingRect.height,
-          left: boundingRect.left - bulletWidth,
-          width: bulletWidth
-        };
       }
+      var bulletWidth = getBulletWidth(element, style, bulletType);
+      var boundingRect = getBoundingRectMinusPadding(element);
+      return {
+        top: boundingRect.top,
+        height: boundingRect.height,
+        left: boundingRect.left - bulletWidth,
+        width: bulletWidth
+      };
+    }
 
       function getSpriteRect(element, style) {
         // Check special case for sprites, often used for fake bullets
@@ -244,15 +245,16 @@ sitecues.def('util/positioning', function (positioning, callback) {
       }
 
       function addRect(allRects, clipRect, unclippedRect) {
-          if (!unclippedRect)
-            return;
-          var rect = getClippedRect(unclippedRect, clipRect);
+        if (!unclippedRect) {
+          return;
+        }
+        var rect = getClippedRect(unclippedRect, clipRect);
 
-          if (rect.width >= positioning.kMinRectWidth  && rect.height >= positioning.kMinRectHeight  &&
-              rect.right > 0 && rect.bottom > 0) {
-              // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
-              allRects.push(rect);
-          }
+        if (rect.width >= positioning.kMinRectWidth  && rect.height >= positioning.kMinRectHeight  &&
+            rect.right > 0 && rect.bottom > 0) {
+            // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
+            allRects.push(rect);
+        }
       }
 
 	    // Only use leaf nodes (where content resides), in order to avoid rects taht
@@ -286,7 +288,6 @@ sitecues.def('util/positioning', function (positioning, callback) {
           // --- Background sprites ---
           addRect(allRects, clipRect, getSpriteRect(this, style));
 
-          console.log('#5');
           // --- Rendered elements ---
           if (isRenderedElement(this)) {
             // Elements with rendered content such as images and videos
@@ -319,6 +320,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
       function getClippedRect(unclippedRect, clipRect) {
         if (!clipRect) {
+          // Ensure right and bottom are set as well
+          unclippedRect.right = unclippedRect.left + unclippedRect.width;
+          unclippedRect.bottom = unclippedRect.top + unclippedRect.height;
           return unclippedRect;
         }
         var left   = Math.max( unclippedRect.left, clipRect.left);
