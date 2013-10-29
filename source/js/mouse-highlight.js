@@ -36,8 +36,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 			// class of highlight
 	    HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
 
-      // elements which need overlay for background color
-      VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame',
       state, nativeZoom = 'zoom' in document.createElement('div').style; //EQ-880
 
 		// depends on jquery, conf, mouse-highlight/picker and positioning modules
@@ -149,7 +147,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                 //               when background sprites are used, which we don't want to overwrite with out background
 				state.doUseBgColor = true;
 				state.doUseOverlayForBgColor = true; // Washes foreground out
-			}	else if ($(state.picked).is(VISUAL_MEDIA_ELEMENTS) || !common.isEmptyBgImage(style[0].backgroundImage)) {
+			}	else if (common.isVisualMedia(state.picked) || !common.isEmptyBgImage(style[0].backgroundImage)) {
 				//  approach #2 -- don't change background color
 				//                 use overlay for rounded outline
 				//	pros: foreground text does not get washed out

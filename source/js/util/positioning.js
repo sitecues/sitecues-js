@@ -172,19 +172,6 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    return rect;
      }
 
-     var RENDERED_ELEMENTS = {
-       video: 1,
-       audio: 1,
-       canvas: 1,
-       object: 1,
-       embed: 1,
-       img: 1
-     };
-
-     function isRenderedElement(element) {
-       return RENDERED_ELEMENTS[element.localName] === 1;
-     }
-
      function hasVisibleBorder(style) {
        return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
      }
@@ -288,8 +275,8 @@ sitecues.def('util/positioning', function (positioning, callback) {
           // --- Background sprites ---
           addRect(allRects, clipRect, getSpriteRect(this, style));
 
-          // --- Rendered elements ---
-          if (isRenderedElement(this)) {
+          // --- Media elements ---
+          if (common.isVisualMedia(this)) {
             // Elements with rendered content such as images and videos
             addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
             return true;
