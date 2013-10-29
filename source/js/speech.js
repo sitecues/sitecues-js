@@ -367,7 +367,6 @@ sitecues.def('speech', function (speech, callback, log) {
       log.info('Stopping ' + hlbId);
 
       if (player) {
-        console.log('STOPPPPP')
         player.stop();
       } else {
         log.info(players);
