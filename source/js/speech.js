@@ -263,7 +263,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
      */
     speech.initPlayer = function(hlb, hlbOptions) {
-
+      console.log('hi')
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return null;
