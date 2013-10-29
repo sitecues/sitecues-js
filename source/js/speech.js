@@ -87,7 +87,7 @@ sitecues.def('speech', function (speech, callback, log) {
             return 'ogg';
           }
         }()),
-        
+
         NotSafariAudioPlayer = function(hlb, siteId, secure) {
           
           var secureFlag = (secure ? 1 : 0),
@@ -278,7 +278,6 @@ sitecues.def('speech', function (speech, callback, log) {
 
       var hlbId = speech.getHlbId(hlb),
           player = speech.factory(hlb);
-
       if(!hlbId) {
         log.warn('No hightlightbox ID!');
         return null;
@@ -301,7 +300,7 @@ sitecues.def('speech', function (speech, callback, log) {
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
       if (ttsEngine) {
         log.info(hlb);
-        if ($(hlb).text().length) {
+        if ($(hlb).text().length || $(hlb).data('speechKey')) {
           var player = new AudioPlayer($(hlb), site.get('site_id'), $, sitecues.getLibraryUrl().secure);
           player.init();
           return player;
@@ -322,6 +321,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * @return true if something was played, or false if there was an error or nothing to play.
      */
     speech.play = function(hlb, hlbOptions) {
+
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return false;
