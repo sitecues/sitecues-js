@@ -118,14 +118,12 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     /*
-     * https://github.com/sorccu/cufon/wiki/about
      * @param {HTMLObject Array} el DOM node (array)
-     * @returns {Boolean} True if the element is assumed to be created by font-style
-     */
-    common.isCufonPart = function(el) {
-        return el[0].localName === 'canvas' && el.parent()[0].localName === 'cufon';
-    };
-
+     * @returns {Boolean} True if the element is related to canvas.
+     */  
+    common.isCanvasElement = function (el) {
+       return el[0].localName === "canvas" || el.find('canvas').length > 0;
+     }
     /*
      * Converts both colors to the same [RGB] format and then find out if they are contrast.
      * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare

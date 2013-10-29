@@ -256,7 +256,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         // If website uses width/height attributes let's remove those while HLB is inlated.
-        if (!common.isCufonPart(this.itemNode)) {
+        if (!common.isCanvasElement(this.itemNode)) {
             if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
               for (var attrName in this.savedStyleAttr) {
                 if (attrName === 'style') {
@@ -269,7 +269,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
         }
 
-        if (common.isCufonPart(this.itemNode)) {
+        if (common.isCanvasElement(this.itemNode)) {
             delete cssBeforeAnimateStyles.width;
             delete cssBeforeAnimateStyles.height;
             // todo: remove this awful hardcode
@@ -349,7 +349,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         });
 
-        if (!!common.isCufonPart(this.itemNode)) { 
+        if (!common.isCanvasElement(this.itemNode)) { 
             $.extend(cssAnimateStyles, {
                 'width': clientRect.width / kExtraZoom,
                 // Don't change height if there's a background image, otherwise it is destroyed.
@@ -381,7 +381,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           for (var attrName in _this.savedStyleAttr) {
             if (attrName === 'style') {
                _this.itemNode.removeAttr('style');
-            } else if (!common.isCufonPart(_this.itemNode)) {
+            } else if (!common.isCanvasElement(_this.itemNode)) {
                 if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
                   _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
                 }
@@ -524,7 +524,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-color'] = '#000';
           return;
         }
-        if (!isContrastColors && !common.isCufonPart(this.itemNode)) {
+        if (!isContrastColors && common.isCanvasElement(this.itemNode)) {
           // Favor a white background with dark text when original background was white.
           if (common.isLightTone(newBgColor)) {
             newBgColor = 'rgb(255, 255, 255)';
