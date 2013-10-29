@@ -512,6 +512,12 @@ sitecues.def('util/common', function (common, callback, log) {
       }
     };
 
+    // Return true if the element has media contents which can be rendered
+    common.isVisualMedia = function(selector) {
+      var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
+      return $(selector).is(VISUAL_MEDIA_ELEMENTS);
+    }
+
     // Only update the right alignments when the window width changes.
     $(window).on('resizeEnd', function() {
       // console.log('RESIZE END________________________________________________');
