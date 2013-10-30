@@ -6,7 +6,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	    positioning.kMinRectWidth = 4;
 	    positioning.kMinRectHeight = 4;
 
-    sitecues.use('jquery', 'util/common', function ($, common) {
+    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
 
         /**
          * Get the cumulative zoom for an element.
@@ -252,16 +252,18 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
           // --- Leaf nodes ---
           if (!isElement) {
-            if (this.nodeType === 3 && $.trim(this.textContent) !== '')
+            if (this.nodeType === 3 && $.trim(this.textContent) !== '') {               
               addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            }
             return true;
           }
 
           var style = common.getElementComputedStyles(this);
 
           // --- Invisible elements ---
-          if (style['visibility'] !== 'visible')
+          if (style['visibility'] !== 'visible' && !platform.browser.isIE) {
             return true;
+          }
 
           // --- Visible border ---
           if (hasVisibleBorder(style)) {
@@ -272,8 +274,10 @@ sitecues.def('util/positioning', function (positioning, callback) {
           // --- List bullets ---
           addRect(allRects, clipRect, getBulletRect(this, style));
 
+
           // --- Background sprites ---
           addRect(allRects, clipRect, getSpriteRect(this, style));
+
 
           // --- Media elements ---
           if (common.isVisualMedia(this)) {
