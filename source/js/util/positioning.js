@@ -120,12 +120,12 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
 	     * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
 	     */
-	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged) {
+	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
 		    var allRects = [];
 
 		    var $selector = $(selector);
 		    var clipRect = getAncestorClipRect($selector);
-		    getAllBoundingBoxesExact($selector, allRects, clipRect);
+		    getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
 		    positioning.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
 		    return allRects;
@@ -203,8 +203,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
     function getBulletRect(element, style) {
       var bulletType = style['list-style-type'];
-      if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside')
+      if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside') {
         return null; // inside, will already have bullet incorporated in bounds
+      }
       if (style['display'] !== 'list-item') {
         if ($(element).children(":first").css('display') !== 'list-item') {
           return null; /// Needs to be list-item or have list-item child
@@ -246,7 +247,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
 	    // Only use leaf nodes (where content resides), in order to avoid rects taht
 	    // were purposely positioned offscreen
-	    function getAllBoundingBoxesExact($selector, allRects, clipRect) {
+	    function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 		    $selector.each(function () {
 			    var isElement = this.nodeType === 1;
 
@@ -273,7 +274,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
           addRect(allRects, clipRect, getBulletRect(this, style));
 
           // --- Background sprites ---
-          addRect(allRects, clipRect, getSpriteRect(this, style));
+          if (stretchForSprites) {
+            addRect(allRects, clipRect, getSpriteRect(this, style));
+          }
 
           // --- Media elements ---
           if (common.isVisualMedia(this)) {
@@ -293,7 +296,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 						    newClipRect = getClippedRect(clipRect, newClipRect);
 					    }
 				    }
-			      getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
+			      getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect, stretchForSprites);  // Recursion
             return true;
 			    }
         });

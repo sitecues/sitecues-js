@@ -474,7 +474,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           elementRect,
           fixedRects,
           absoluteRect,
-          previousViewRect;
+          previousViewRect,
+          stretchForSprites = true;
 
       if (!state.picked) {
         return false;
@@ -491,10 +492,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           elementRect.top === state.elementRect.top) {
           return true; // Optimization -- return quickly if nothing has changed, don't update overlay
         }
+
+        stretchForSprites = state.doUseOverlayForBgColor; // For highlight refreshes, do not consider our bg a sprite
       }
 
       // Get exact bounds
-      fixedRects = positioning.getAllBoundingBoxes(element, 0);
+      fixedRects = positioning.getAllBoundingBoxes(element, 0, stretchForSprites);
       
       state.zoom = positioning.getTotalZoom(element, true);
 
