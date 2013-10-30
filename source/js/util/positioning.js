@@ -6,7 +6,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	    positioning.kMinRectWidth = 4;
 	    positioning.kMinRectHeight = 4;
 
-    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+    sitecues.use('jquery', 'util/common', function ($, common) {
 
         /**
          * Get the cumulative zoom for an element.
