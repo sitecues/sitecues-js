@@ -213,6 +213,7 @@ sitecues.def('speech', function (speech, callback, log) {
               volumeNode.connect(context.destination);
             
               request.open('GET', baseMediaUrl, true);
+              
               request.responseType = 'arraybuffer';
               // Our asynchronous callback
               request.onload = function() { 
