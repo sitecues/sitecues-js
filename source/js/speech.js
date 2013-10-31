@@ -175,13 +175,7 @@ sitecues.def('speech', function (speech, callback, log) {
           var context = typeof AudioContext !== 'undefined' ? new AudioContext() :
                         typeof webkitAudioContext !== 'undefined' ? new webkitAudioContext() :
                         undefined,
-              
-              volumeNode = context ? context.createGainNode() : undefined;
-
-          if (volumeNode) {
-            volumeNode.gain.value = 0.1;
-          }
-          
+              volumeNode;        
           
           return function(hlb, siteId, secure) {
             
@@ -190,6 +184,11 @@ sitecues.def('speech', function (speech, callback, log) {
                 baseMediaUrl;
                 //startTime = (new Date).getTime() / 1000;
             
+            if (!volumeNode) {
+              volumeNode = context.createGainNode();
+              volumeNode.gain.value = 0.1;
+            }
+
             if (speechKey) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
             } else {
