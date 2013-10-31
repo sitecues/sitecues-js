@@ -138,7 +138,7 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     common.isLightTone = function (colorValue) {
-      RGBColor = common.getRGBColor(colorValue);
+      var RGBColor = common.getRGBColor(colorValue);
       // http://en.wikipedia.org/wiki/YIQ
       var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
 

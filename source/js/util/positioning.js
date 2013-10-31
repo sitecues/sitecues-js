@@ -261,8 +261,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
           var style = common.getElementComputedStyles(this);
 
           // --- Invisible elements ---
-          if (style['visibility'] !== 'visible')
+          if (style['visibility'] === 'hidden' || style['visibility'] === 'collapse') {
             return true;
+          }
 
           // --- Visible border ---
           if (hasVisibleBorder(style)) {
