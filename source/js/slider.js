@@ -70,8 +70,9 @@ sitecues.def("slider", function (slider, callback, log) {
       // Half the width of the SVG thumb element at it's original size
       originalThumbWidth: 84,
 
-      firstPress: true,
-      
+      firstPress: true,  //used in setInterval to not emit a zoom if its the very first zoom on a mouse press
+                          //it is reset to true when there is a mouseup event
+                          //set to false after one tick of the interval
       // TODO: Make the color settings object configurable on instantiation using deep object merge
 
       // Color settings object
@@ -301,7 +302,6 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalSml = setInterval(function(){
-          console.log(conf.get('zoom'))
           // Call the letterupdate function to adjust zoom, passing it the correct context
           if (!slider.firstPress) {
             sitecues.emit('zoom/decrease');
@@ -332,7 +332,6 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalBig = setInterval(function(){
-          console.log(conf.get('zoom'))
           // Call the letterupdate function to adjust zoom, passing it the correct context
           if (!slider.firstPress) {
             sitecues.emit('zoom/increase');
