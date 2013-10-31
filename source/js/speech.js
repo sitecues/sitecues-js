@@ -178,7 +178,9 @@ sitecues.def('speech', function (speech, callback, log) {
               
               volumeNode = context ? context.createGainNode() : undefined;
 
-          volumeNode.gain.value = 0.1;
+          if (volumeNode) {
+            volumeNode.gain.value = 0.1;
+          }
           
           
           return function(hlb, siteId, secure) {
