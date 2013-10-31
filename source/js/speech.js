@@ -170,17 +170,16 @@ sitecues.def('speech', function (speech, callback, log) {
         //Using an immediately invoking function that returns 
         //a function to contain all logic needed for playing audio
         //in Safari in case we want to separate this into its own module.
-        SafariAudioPlayer = (function () {
+        SafariAudioPlayer = (function () {  
+          //Best practice is to use a single audio context per window.
+          var context = typeof AudioContext !== 'undefined' ? new AudioContext() :
+                        typeof webkitAudioContext !== 'undefined' ? new webkitAudioContext() :
+                        undefined,
+              
+              volumeNode = context ? context.createGainNode() : undefined;
+
+          volumeNode.gain.value = 0.1;
           
-          var context;
-          
-          if (!context) {
-            if (typeof AudioContext !== 'undefined') {
-              context = new AudioContext();
-            } else if (typeof webkitAudioContext !== 'undefined') {
-              context = new webkitAudioContext();
-            }
-          }
           
           return function(hlb, siteId, secure) {
             
@@ -199,18 +198,14 @@ sitecues.def('speech', function (speech, callback, log) {
             }
 
             this.soundSource = undefined;
-            this.soundBuffer = undefined;
 
             this.init = function () {
 
               var that = this, //required for ajax callback
-                  volumeNode = context.createGainNode(),
                   request = new XMLHttpRequest();
               
               that.soundSource = context.createBufferSource();
-              
-              volumeNode.gain.value = 0.1;
-            
+
               this.soundSource.connect(volumeNode);
               
               volumeNode.connect(context.destination);
@@ -220,20 +215,30 @@ sitecues.def('speech', function (speech, callback, log) {
               request.responseType = 'arraybuffer';
               // Our asynchronous callback
               request.onload = function() { 
+                //Asynchronously decodes the audio file data contained in the ArrayBuffer.
                 context.decodeAudioData(request.response, function (buffer) {
-                  that.soundSource.buffer = buffer;
-                  sitecues.emit('audioReady');
+                  
+                  if (that.soundSource && !that.soundSource.buffer) {
+                    that.soundSource.buffer = buffer;
+                    sitecues.emit('audioReady');
+                  }
+                
                 });
+              
               };
+              
               request.send();
+            
             };
 
             this.play = function () {
+
               if (this.soundSource.buffer) {
+
                 console.log((new Date).getTime() / 1000 - startTime);
 
-                this.soundSource.noteOn(context.currentTime);
-                sitecues.off('audioReady');
+                this.soundSource.noteOn(0);
+                
               } else {
                 sitecues.on('audioReady', this.play, this);
               }
@@ -247,8 +252,8 @@ sitecues.def('speech', function (speech, callback, log) {
             };
 
             this.destroy = function () {
+              this.stop();
               this.soundSource = undefined;
-              this.soundBuffer = undefined;
             };
 
           };
@@ -256,6 +261,7 @@ sitecues.def('speech', function (speech, callback, log) {
         }()),
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
+      
       if (platform.browser.is === 'Safari') {
         console.log('Using Safari Player');
       } else {
