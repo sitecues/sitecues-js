@@ -69,6 +69,8 @@ sitecues.def("slider", function (slider, callback, log) {
       originalWidth: 690,
       // Half the width of the SVG thumb element at it's original size
       originalThumbWidth: 84,
+
+      firstPress: true,
       
       // TODO: Make the color settings object configurable on instantiation using deep object merge
 
@@ -299,9 +301,13 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalSml = setInterval(function(){
-          
+          console.log(conf.get('zoom'))
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/decrease');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/decrease');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -326,9 +332,13 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalBig = setInterval(function(){
-          
+          console.log(conf.get('zoom'))
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/increase');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/increase');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -348,6 +358,7 @@ sitecues.def("slider", function (slider, callback, log) {
         slider.mouseDownTrack     = false;
         slider.mouseDownLetterSml = false;
         slider.mouseDownLetterBig = false;
+        slider.firstPress         = true;
 
         // Switch off user-select on when the mouse is released
         $('html').css({
