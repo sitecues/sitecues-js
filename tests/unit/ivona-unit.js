@@ -1,6 +1,6 @@
 /**
  * This file contain unit test(s) for ivona.js file.
- */
+ *
 
 require('./test/bootstrap');
 
@@ -34,3 +34,4 @@ describe('ivona', function() {
 });
 
 require('./test/discharge');
+*/
