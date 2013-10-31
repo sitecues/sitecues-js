@@ -94,8 +94,8 @@ sitecues.def('speech', function (speech, callback, log) {
               speechKey = hlb.data('speechKey'),
               baseMediaUrl,
               audioElement,
-              playing = false,
-              startTime = (new Date).getTime() / 1000;
+              playing = false;
+              //startTime = (new Date).getTime() / 1000;
           
           if (speechKey) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
@@ -126,7 +126,7 @@ sitecues.def('speech', function (speech, callback, log) {
             if (audioElement) {
               if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
                 playing = true;
-                console.log((new Date).getTime() / 1000  - startTime);
+                //console.log((new Date).getTime() / 1000  - startTime);
                 audioElement.play();
               } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
                 sitecues.on('canplay', function () {
@@ -185,8 +185,8 @@ sitecues.def('speech', function (speech, callback, log) {
             
             var secureFlag = (secure ? 1 : 0),
                 speechKey = hlb.data('speechKey'),
-                baseMediaUrl,
-                startTime = (new Date).getTime() / 1000;
+                baseMediaUrl;
+                //startTime = (new Date).getTime() / 1000;
             
             if (speechKey) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
@@ -235,7 +235,7 @@ sitecues.def('speech', function (speech, callback, log) {
 
               if (this.soundSource.buffer) {
 
-                console.log((new Date).getTime() / 1000 - startTime);
+                //console.log((new Date).getTime() / 1000 - startTime);
 
                 this.soundSource.noteOn(0);
                 
@@ -262,11 +262,11 @@ sitecues.def('speech', function (speech, callback, log) {
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
       
-      if (platform.browser.is === 'Safari') {
+      /*if (platform.browser.is === 'Safari') {
         console.log('Using Safari Player');
       } else {
         console.log('Using <audio> Player');
-      }
+      }*/
       //end variable declarations 
    
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
