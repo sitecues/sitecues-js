@@ -78,14 +78,24 @@ sitecues.def('speech', function (speech, callback, log) {
 
         //What audio format will we use? 
         audioFormat =  (function () {
-          var a = new Audio();
-          //Default to ogg if it's supported, otherwise, mp3
-          if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
-            return 'ogg';
+
+          try {
+            var a = new Audio();
+            //Default to ogg if it's supported, otherwise, mp3
+            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+              return 'ogg';
+            }
+            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
+              return 'mp3';
+            }
+          } catch (e) {
+            if (platform.browser.isChrome || platform.browser.isFirefox) {
+              return 'ogg';
+            } else {
+              return 'mp3';
+            }        
           }
-          if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
-            return 'mp3';
-          }
+        
         }()),
 
         NotSafariAudioPlayer = function(hlb, siteId, secure) {
