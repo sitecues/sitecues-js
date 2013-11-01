@@ -26,7 +26,8 @@ sitecues.def('platform', function (platformModule, callback) {
     zoom      : 'zoom' in document.createElement('div').style,
     is        : browser,
     isFirefox : browser === 'Firefox',
-    isIE      : browser === 'IE'
+    isIE      : browser === 'IE',
+    isChrome  : browser === 'Chrome'
   };
     
   // Determine which opperating system is being used
