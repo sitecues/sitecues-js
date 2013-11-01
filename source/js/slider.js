@@ -386,12 +386,10 @@ sitecues.def("slider", function (slider, callback, log) {
         
         // If the slider has put the mouse-down inside the Slider Track Back bounds...
         if (slider.mouseDownTrack) {
-
-          
           //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
           
-          // Get the postition of the mouse relative to the Slider
-          var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
+          // Get the position of the mouse relative to the Slider
+          var thumbX = e.clientX - slider.trackBounds.left;
 
           // Contain the Thumb position in the Track bounds
           if (thumbX < 0) {
