@@ -9,6 +9,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       EXTRA_HIGHLIGHT_PIXELS = 3,
 
       INIT_STATE = {
+        isVisible: false,
         picked: null,     // JQuery for picked element(s)
         target: null,     // Mouse was last over this element
         lastCursorPos: null,
@@ -237,10 +238,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!mh.updateOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
-        state.picked = null; // Don't let HLB open for this
         return false;
       }
 
+      state.isVisible = true;
       mh.updateElementBgImage();
     }
 
@@ -490,7 +491,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
         if (elementRect.left === state.elementRect.left &&
           elementRect.top === state.elementRect.top) {
-          return true; // Optimization -- return quickly if nothing has changed, don't update overlay
+          // Optimization -- reuse old fixed content rect info
+          // Show/hide highlight if cursor moves into or out of highlight
+          var isCursorInHighlight = isCursorInFixedRects([state.fixedContentRect]);
+          if (isCursorInHighlight !== state.isVisible) {
+            if (!isCursorInHighlight) {
+              mh.hide();  // Hide highlight -- cursor has moved out of it
+            }
+            else {
+              mh.show(); // Create and show highlight -- cursor has moved into it
+            }
+          }
+          return isCursorInHighlight;
         }
 
         stretchForSprites = state.doUseOverlayForBgColor; // For highlight refreshes, do not consider our bg a sprite
@@ -571,6 +583,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function updateImpl(event) {
+      var cursorPos,
+        picked;
+
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
       testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
@@ -578,23 +593,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return;
       }
 
-      state.lastCursorPos = {
-        'x': event.clientX,
-        'y': event.clientY
-      }
-
       if (state.isCreated && event.target === state.target) {
         // Update rect in case of sub-element scrolling -- we get mouse events in that case
+        state.lastCursorPos = { x: event.clientX, y: event.clientY };
         mh.updateOverlayPosition();
         return;
       }
 
-      // hide highlight for picked element
-
-      var oldState = $.extend({}, state);
-
       // save picked element
-      var picked = picker.find(event.target);
+      picked = picker.find(event.target);
 
       if (!picked) {
         if (state.picked){
@@ -611,6 +618,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.hideAndResetState();
       state.picked = $(picked);
       state.target = event.target;
+      state.lastCursorPos = { x: event.clientX, y: event.clientY };
       // show highlight for picked element
       mh.showTimer && clearTimeout(mh.showTimer);
       mh.showTimer = setTimeout(mh.show, 40);
@@ -679,7 +687,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function onblurwindow() {
       mh.isAppropriateFocus = false;
       if (!mh.isSticky) {
-        mh.hide();
+        mh.hideAndResetState();
       }
     }
 
@@ -730,6 +738,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
+      state.isVisible = false;
     }
 
     mh.resetState = function() {
@@ -747,7 +756,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     mh.getPicked = function() {
-      return state.picked;
+      return state.isVisible ? state.picked : null;
     }
 
     mh.resetState();
