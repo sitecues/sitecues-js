@@ -62,22 +62,17 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     * Return a corrected bounding box given the total zoom for the element and current scroll position
 	     */
 	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
-		  //EQ-880  
-          if ('zoom' in document.createElement('div').style) {
-            return {
-              left: boundingBox.left + scrollPosition.left/ totalZoom,
-              top:  boundingBox.top + scrollPosition.top  / totalZoom,
-              width: boundingBox.width,
-              height: boundingBox.height
-            };
-          } else {
-            return {
-              left: boundingBox.left + scrollPosition.left,
-              top:  boundingBox.top + scrollPosition.top,
-              width: boundingBox.width,
-              height: boundingBox.height
-            };
-          }
+		    //EQ-880
+        var realZoom = ('zoom' in document.createElement('div').style) ? totalZoom : 1;
+        var rect = {
+          left: boundingBox.left + scrollPosition.left / realZoom,
+          top:  boundingBox.top + scrollPosition.top  / realZoom,
+          width: boundingBox.width,
+          height: boundingBox.height,
+        };
+        rect.right = rect.left + rect.width;
+        rect.bottom = rect.top + rect.height;
+        return rect;
 	    }
 
 	    /**
@@ -203,7 +198,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 
     function getBulletRect(element, style) {
       var bulletType = style['list-style-type'];
-      if ((bulletType === 'none' && style['list-style-image'] !== 'none') || style['list-style-position'] !== 'outside') {
+      if ((bulletType === 'none' && style['list-style-image'] === 'none') || style['list-style-position'] !== 'outside') {
         return null; // inside, will already have bullet incorporated in bounds
       }
       if (style['display'] !== 'list-item') {
@@ -227,9 +222,44 @@ sitecues.def('util/positioning', function (positioning, callback) {
           return null;
 
         // Background sprites tend to be to the left side of the element
+        var backgroundLeft = style['background-position']
+        var left = backgroundLeft ? parseFloat(backgroundLeft) : 0;
         var rect = element.getBoundingClientRect();
-        rect.width = positioning.kMinRectWidth;   // Don't go all the way to the right -- that's likely to overrun a float
-        return rect;
+        rect.left += left;
+        rect.width = positioning.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
+        return rect.width > 0 ? rect : null;
+      }
+
+      function getOverflowRect(element, style) {
+        var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
+        var overflowY = style['overflow-y'] === 'visible' && element.scrollHeight - element.clientHeight >= common.getLineHeight(element);
+        if (!overflowX && !overflowY) {
+          return null;
+        }
+
+        // Check for descendant with visibility: hidden -- those break our overflow check.
+        // Example: google search results with hidden drop down menu
+        // For now, we will not support overflow in this case.
+        var hasVisibilityHiddenDescendant = false;
+        $(element).find('*').each(function() {
+          if ($(this).css('visibility') === 'hidden') {
+            hasVisibilityHiddenDescendant = true;
+            return false;
+          }
+        });
+        if (hasVisibilityHiddenDescendant) {
+          return null;
+        }
+
+        // Overflow is visible: add right and bottom sides of overflowing content
+        var rect = element.getBoundingClientRect();
+        var newRect = {
+          left: rect.left,
+          top: rect.top,
+          width: overflowX ? element.scrollWidth : rect.width,
+          height: overflowY ? element.scrollHeight : rect.height
+        };
+        return newRect;
       }
 
       function addRect(allRects, clipRect, unclippedRect) {
@@ -237,24 +267,32 @@ sitecues.def('util/positioning', function (positioning, callback) {
           return;
         }
         var rect = getClippedRect(unclippedRect, clipRect);
-
-        if (rect.width >= positioning.kMinRectWidth  && rect.height >= positioning.kMinRectHeight  &&
-            rect.right > 0 && rect.bottom > 0) {
-            // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
-            allRects.push(rect);
+        if (rect.width < positioning.kMinRectWidth || rect.height < positioning.kMinRectHeight) {
+          return; // Not large enough to matter
         }
+
+        if (rect.right < 0 || rect.bottom < 0) {
+          var zoom = positioning.getTotalZoom(this, true);
+          var absoluteRect = positioning.convertFixedRectsToAbsolute([rect], zoom)[0];
+          if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
+            // Don't be fooled by items hidden offscreen -- those rects don't count
+            return;
+          }
+        }
+
+        allRects.push(rect);
       }
 
-	    // Only use leaf nodes (where content resides), in order to avoid rects taht
-	    // were purposely positioned offscreen
 	    function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 		    $selector.each(function () {
 			    var isElement = this.nodeType === 1;
 
           // --- Leaf nodes ---
           if (!isElement) {
-            if (this.nodeType === 3 && $.trim(this.textContent) !== '')
+            if (this.nodeType === 3 && $.trim(this.textContent) !== '') {
+              // -- Acutal text rect --
               addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            }
             return true;
           }
 
@@ -264,6 +302,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
           if (style['visibility'] === 'hidden' || style['visibility'] === 'collapse') {
             return true;
           }
+
+          // --- Overflowing content ---
+          addRect(allRects, clipRect, getOverflowRect(this, style));
 
           // --- Visible border ---
           if (hasVisibleBorder(style)) {
@@ -381,7 +422,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
 				    left: left,
 				    top: top,
 				    width: right - left,
-				    height: bottom - top
+				    height: bottom - top,
+				    right: right,
+				    bottom: bottom
 			    };
 		    }
 

@@ -269,7 +269,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">'
-        + getSVGForPath(path, 0, 0, backgroundColor)
+        + getSVGForPath(path, 0, 0, backgroundColor, 1)
         + '</svg>'
 
       // Use element rectangle to find origin (left, top) of background
@@ -422,8 +422,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           'fill: ' + (fillColor ? fillColor : 'none' ) + '"';
     }
 
-    function getSVGForPath(points, strokeWidth, strokeColor, fillColor) {
-      var radius = 3;
+    function getSVGForPath(points, strokeWidth, strokeColor, fillColor, radius) {
       var svgBuilder = '<path d="';
       var count = 0;
       do {
@@ -454,16 +453,31 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return svgBuilder;
     }
 
-    // For list bullet area, when it is inside margin instead of padding, and thus couldn't be covered with bg image
-    function getSVGForExtraLeftPadding(extra) {
-      extra *= state.zoom;
-      var extraLeft = (state.elementRect.left - state.fixedContentRect.left) * state.zoom;
-      if (extraLeft <= 0)
-        return "";
+    function getSVGFillRectMarkup(left, top, width, height, fillColor) {
+      return '<rect x="' + left + '" y="' + top + '"  width="' + width + '" height="' + height + '"' +
+        getSVGStyle(0, 0, fillColor) + '/>';
+    }
 
-      return '<rect x="' + extra + '" y="' + extra +
-          '"  width="' + extraLeft + '" height="' + (state.fixedContentRect.height * state.zoom) + '"' +
-          getSVGStyle(0, 0, getTransparentBackgroundColor()) + '/>';
+    // For list bullet area, when it is inside margin instead of padding, and thus couldn't be covered with bg image
+    // Also for right or bottom overflow
+    function getSVGForExtraPadding(extra) {
+      var svg = "",
+        color = getTransparentBackgroundColor(),
+        extraLeft = (state.elementRect.left - state.fixedContentRect.left) * state.zoom,
+        extraRight = (state.fixedContentRect.right - state.elementRect.right) * state.zoom,
+        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) * state.zoom;
+      extra *= state.zoom;
+
+      if (extraLeft > 0) {
+        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height * state.zoom), color);
+      }
+      if (extraRight > 0) {
+        svg += getSVGFillRectMarkup(state.elementRect.width * state.zoom + extra, extra, extraRight, (state.fixedContentRect.height * state.zoom), color);
+      }
+      if (extraBottom > 0) {
+        svg += getSVGFillRectMarkup(extra, state.elementRect.height * state.zoom + extra, state.fixedContentRect.width * state.zoom, extraBottom, color);
+      }
+      return svg;
     }
 
     // Update highlight overlay
@@ -510,7 +524,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get exact bounds
       fixedRects = positioning.getAllBoundingBoxes(element, 0, stretchForSprites);
-      
+
       state.zoom = positioning.getTotalZoom(element, true);
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
@@ -539,10 +553,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         // Create and position highlight overlay
         var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
-                    state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null);
-        var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null);
-        var extraLeftPaddingSVG = getSVGForExtraLeftPadding(extra);
-        var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraLeftPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
+                    state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null, 1);
+        var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3);
+        var extraPaddingSVG = getSVGForExtraPadding(extra);
+        var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
         document.documentElement.appendChild(svgFragment);
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
