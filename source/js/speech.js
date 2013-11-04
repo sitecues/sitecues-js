@@ -123,10 +123,10 @@ sitecues.def('speech', function (speech, callback, log) {
             }
                        
             audioElement = new Audio();
-            audioElement.src = baseMediaUrl;
+            audioElement.src = baseMediaUrl;  //fetches the resource
             
             $(audioElement).on('canplay', function () { //native event for <audio>
-              sitecues.emit('canplay');
+              sitecues.emit('canplay'); //custom event required for unpredictable timing
             });
 
           };
@@ -214,11 +214,11 @@ sitecues.def('speech', function (speech, callback, log) {
 
               var that = this, //required for ajax callback
                   request = new XMLHttpRequest();
-              
+              //create a buffer containing the binary data that the Web Audio API uses
               that.soundSource = context.createBufferSource();
-
+              //Connect the source to the node that controls volume
               this.soundSource.connect(volumeNode);
-              
+              //Connect the volume node to the output
               volumeNode.connect(context.destination);
             
               request.open('GET', baseMediaUrl, true);
@@ -247,7 +247,7 @@ sitecues.def('speech', function (speech, callback, log) {
               if (this.soundSource.buffer) {
 
                 //console.log((new Date).getTime() / 1000 - startTime);
-
+                //Play from beginning of audio file
                 this.soundSource.noteOn(0);
                 
               } else {
