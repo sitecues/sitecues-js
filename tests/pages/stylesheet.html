@@ -1,0 +1,30 @@
+<!doctype>
+<html>
+    Code style.css	
+    <head>
+        <style id="myStyle" type="text/css">
+            body { background-color: red; }
+            button { background-color: cyan; border: solid 1px blue; }
+        </style>
+
+        <style type="text/css">
+            html { background-color: yellow; }
+            body { color: blue; }
+        </style>
+        
+      <!-- Define _sitecues in window scope & add sitecues production script. -->
+      <script>
+        // get styles; uglified via http://marijnhaverbeke.nl/uglifyjs
+          function getStyleSheetContent(){for(var a=document.styleSheets.length,b=0;a>b;b++){var c=document.styleSheets[b],d="";if("cssText"in c)d=c.cssText;else for(var e=0;e<c.cssRules.length;e++)d+=c.cssRules[e].cssText;console.log("Stylesheet #"+b+": "+d)}}
+        // local version of code; add styles into sitecues(maybe, pass to init function)
+        // (function(){try{var e=document.createElement("script");e.type="text/javascript",e.src="http://localhost/js/equinox.js",document.getElementsByTagName("head")[0].appendChild(e),this._sitecues=this._sitecues||[],this._sitecues.push(["site-id",""]),this._sitecues["stylesheets"] = getStyleSheetContent(),this._sitecues.push(["ui_mode","toolbar"]),this._sitecues.push(["ui","toolbar"]),this._sitecues.push(["defaultUI","toolbar"])}catch(s){console.log("sitecues extension: unable to inline JavaScript code ("+s.message+")")}})();
+        // production version of code     
+         (function(){try{var e=document.createElement("script");e.type="text/javascript",e.src="//js.sitecues.com/js/equinox.js",document.getElementsByTagName("head")[0].appendChild(e),this._sitecues=this._sitecues||[],this._sitecues.push(["site-id",""]),this._sitecues["stylesheets"] = getStyleSheetContent(),this._sitecues.push(["ui_mode","toolbar"]),this._sitecues.push(["ui","toolbar"]),this._sitecues.push(["defaultUI","toolbar"])}catch(s){console.log("sitecues extension: unable to inline JavaScript code ("+s.message+")")}})();
+      </script>
+
+    </head>
+
+    <body>
+        <button>Get the contents of the styleSheet!</button>
+    </body>
+</html>
