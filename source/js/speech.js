@@ -196,7 +196,7 @@ sitecues.def('speech', function (speech, callback, log) {
             
             if (!volumeNode) {
               volumeNode = context.createGainNode();
-              volumeNode.gain.value = 0.1;
+              volumeNode.gain.value = 1;
             }
 
             if (speechKey) {
