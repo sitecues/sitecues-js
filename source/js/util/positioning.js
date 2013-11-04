@@ -315,10 +315,12 @@ sitecues.def('util/positioning', function (positioning, callback) {
           // --- List bullets ---
           addRect(allRects, clipRect, getBulletRect(this, style));
 
+
           // --- Background sprites ---
           if (stretchForSprites) {
             addRect(allRects, clipRect, getSpriteRect(this, style));
           }
+
 
           // --- Media elements ---
           if (common.isVisualMedia(this)) {

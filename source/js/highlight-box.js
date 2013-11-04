@@ -283,8 +283,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // - set non-important property with the same value it used to have.
         var styleObj = this.itemNode[0].style;
         for (var prop in cssAnimateStyles) {
+          //first check that both of these objects has the property we are interested in
+          if (cssBeforeAnimateStyles.hasOwnProperty(prop) && cssAnimateStyles.hasOwnProperty(prop)) {
             styleObj.removeProperty(prop);
             this.itemNode[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
+          }
         }
 
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {

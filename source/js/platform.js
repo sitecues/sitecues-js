@@ -26,13 +26,14 @@ sitecues.def('platform', function (platformModule, callback) {
     zoom      : 'zoom' in document.createElement('div').style,
     is        : browser,
     isFirefox : browser === 'Firefox',
-    isIE      : browser === 'IE'
+    isIE      : browser === 'IE',
+    isChrome  : browser === 'Chrome'
   };
     
   // Determine which opperating system is being used
   os = platform.indexOf('mac')   >-1       ? 'mac'   :
        platform.indexOf('win')   >-1       ? 'win'   : 
-       platform.indexOf('linux') >-1       ? 'mac'   : 'Unknown OS' ;
+       platform.indexOf('linux') >-1       ? 'linux'   : 'Unknown OS' ;
 
   
   // Set globally accessible operating system constants
