@@ -733,7 +733,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // remove mousemove listener from body
       $(document).off('mousemove', mh.update);
 
-      mh.hide();
+      mh.hideAndResetState();
 
     }
 
