@@ -229,7 +229,7 @@ stop-testsite:
 
 # TARGET: test-all
 # Run all tests.
-test-all: test-smoke test-unit
+test-all: test-unit test-smoke
 
 # TARGET: test-smoke
 # Run the smoke tests.
@@ -248,3 +248,4 @@ test-unit:
 # TARGET: stop-all-services
 # Stop all known services.
 stop-all-services: stop-testsite
+
