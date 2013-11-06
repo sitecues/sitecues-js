@@ -135,8 +135,10 @@ endif
 
 ifeq ($(min), false)
 	uglifyjs-args+=-b
+	min-label:=" \(not minified\)"
 else
     uglifyjs-args+=-m
+	min-label:=
 endif
 
 # HIDDEN TARGET: .no-lint-on-build
@@ -163,6 +165,9 @@ build: $(_force_deps_refresh) $(_build_lint_dep)
 	@cp -r source/js/_config target/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
 	@echo "Building completed."
+ifneq ($(dev), true)
+	@echo "===== sitecues.js file size$(min-label): $$(ls -lh target/compile/js/sitecues.js | awk '{print($$5);}') ====="
+endif
 
 # TARGET: package
 # Package up the files into a deployable bundle, and create a manifest for local file deployment
@@ -244,8 +249,6 @@ test-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
 	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
 
-
 # TARGET: stop-all-services
 # Stop all known services.
 stop-all-services: stop-testsite
-
