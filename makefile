@@ -135,7 +135,7 @@ endif
 
 ifeq ($(min), false)
 	uglifyjs-args+=-b
-	min-label:=" \(not minified\)"
+	min-label:=" \(files were not minified\)"
 else
     uglifyjs-args+=-m
 	min-label:=
@@ -164,9 +164,17 @@ build: $(_force_deps_refresh) $(_build_lint_dep)
 	@mkdir -p target/etc/js
 	@cp -r source/js/_config target/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
+	@echo "Creating compressed (gzipped) JavaScript files."
+	@(cd target/compile/js ; for FILE in *.js ; do \
+		gzip -c $$FILE > $$FILE.gz ; \
+	done)
 	@echo "Building completed."
 ifneq ($(dev), true)
-	@echo "===== sitecues.js file size$(min-label): $$(ls -lh target/compile/js/sitecues.js | awk '{print($$5);}') ====="
+	@echo "===== File sizes$(min-label):"
+	@(cd target/compile/js ; \
+	for FILE in `ls *.js *.js.gz | sort` ; do \
+		printf "=====   %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
+	done)
 endif
 
 # TARGET: package
