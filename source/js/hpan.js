@@ -12,6 +12,7 @@ sitecues.def('hpan', function (hpan, callback, log) {
   sitecues.use('conf', 'util/common', 'jquery', function (conf, common, $) {
 
     hpan.mousemove = function(evt) {
+      
       if (common.isInSitecuesUI(evt.target))
         return; // Don't pan while interacting with sitecues badge
 
@@ -19,17 +20,17 @@ sitecues.def('hpan', function (hpan, callback, log) {
       var movementX = hpan.getBackfillMovementX(evt);
 
       // Amount of content that didn't fit in the window
-      var ratioContentToWindowWidth = document.width / window.innerWidth;
+      var ratioContentToWindowWidth = $(document).width() / $(window).width();
 
       // Amount of edge to use for panning
       var edgePortion = Math.max(Math.min((ratioContentToWindowWidth - 1.1), MAX_EDGE_PORTION), MIN_EDGE_PORTION);
-      var edgeSize = window.innerWidth * edgePortion;
+      var edgeSize = $(window).width() * edgePortion;
 
       // Get direction to pan, or return if mouse too near center of screen to cause panning
       var direction;
       if (evt.clientX < edgeSize && movementX < 0)
         direction = -1;
-      else if (evt.clientX > window.innerWidth - edgeSize && movementX > 0)
+      else if (evt.clientX > $(window).width() - edgeSize && movementX > 0)
         direction = 1;
       else
         return;
@@ -72,15 +73,17 @@ sitecues.def('hpan', function (hpan, callback, log) {
     }
 
     hpan.refresh = function() {
+
       // Turn on if zoom is > 1 and content overflows window more than a tiny amount
       var zoom = conf.get('zoom');
-      var on = zoom > 1 && document.width / window.innerWidth > 1.01 && !hpan.isHlbOn;
+      var on = zoom > 1 && $(document).width() / $(window).width() > 1.01 && !hpan.isHlbOn;
+
       if (on != hpan.isOn) {
         if (on) {
-          document.addEventListener('mousemove', hpan.mousemove);
+          $(document).on('mousemove', hpan.mousemove);
         }
         else {
-          document.removeEventListener('mousemove', hpan.mousemove);
+          $(document).off('mousemove', hpan.mousemove);
           hpan.xLastPos = undefined;
         }
       }

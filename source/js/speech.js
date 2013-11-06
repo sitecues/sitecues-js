@@ -65,8 +65,10 @@ sitecues.def('speech', function (speech, callback, log) {
           //Taken from http://www.w3schools.com/tags/ref_entities.asp and then passed the symbols above into
           //the native function encodeURIComponent.  Example: encodeURIComponent('®')
           var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%C2%A2', '%C2%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
-          //@param URIComponent accepts a string of URI encoded text and removes any
-          //html entity encoded characters from it
+          /**
+           * @param URIComponent accepts a string of URI encoded text and removes any
+           *  html entity encoded characters from it
+           */
           return function (URIComponent) {
             for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
               URIComponent = URIComponent.replace(htmlEntityMap[i], '');

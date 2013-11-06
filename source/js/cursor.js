@@ -122,8 +122,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
         for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
           rule = rules[i].style;
           if (rule && rule[style] && rule[style].length) {
-            //@param rule an object representing some css selector + properties
-            //@param style is the key for accessing property information
+            /**
+             * @param rule an object representing some css selector + properties
+             * @param style is the key for accessing property information
+             */
             if (callback) {
               callback(rule, style);
             }
