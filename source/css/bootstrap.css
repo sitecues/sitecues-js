@@ -7,6 +7,8 @@
  *
  * Designed and built with all the love in the world @twitter by @mdo and @fat.
  */
+
+ /* NOTE! cursor rules must go into cursor.js */
 .clearfix {
   *zoom: 1;
 }
@@ -148,7 +150,6 @@
   background-color: transparent;
   background-image: none;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-  cursor: default;
 }
 .open {
   *z-index: 1000;

@@ -69,7 +69,10 @@ sitecues.def("slider", function (slider, callback, log) {
       originalWidth: 690,
       // Half the width of the SVG thumb element at it's original size
       originalThumbWidth: 84,
-      
+
+      firstPress: true,  //used in setInterval to not emit a zoom if its the very first zoom on a mouse press
+                          //it is reset to true when there is a mouseup event
+                          //set to false after one tick of the interval
       // TODO: Make the color settings object configurable on instantiation using deep object merge
 
       // Color settings object
@@ -110,13 +113,13 @@ sitecues.def("slider", function (slider, callback, log) {
         return '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
 
           'width="'+slider.width+'" height="'+slider.height+'" viewBox="0, 0, 690, 161" preserveAspectRatio="none">' +
-          '<path cursor="pointer" class="letterSmlBack" fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
-          '<path cursor="pointer" class="trackBack"     fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
-          '<path cursor="pointer" class="letterBigBack" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
-          '<path cursor="pointer" class="letterSml"     fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,145.475 L16.803,145.475 L42.351,72.953 L63.434,72.953 L89.611,145.475 L70.706,145.475 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
-          '<path cursor="pointer" class="track"         fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
-          '<path cursor="pointer" class="thumb"         fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,141.0 z" stroke-width="8" stroke-linejoin="round" />' +
-          '<path cursor="pointer" class="letterBig"     fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,145.0 L551.484,145.0 L594.99,24.213 L629.008,24.213 L672.199,145.0 L640.91,145.0 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
+          '<path class="letterSmlBack" fill="'+color.letterSmlBack.normal+'"                         d="M-0,0 L106.906,0 L106.906,161 L-0,161 z" />' +
+          '<path class="trackBack"     fill="'+color.trackBack.normal+'"                             d="M106.906,0 L539.23,0 L539.23,161 L106.906,161 z" />' +        
+          '<path class="letterBigBack" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
+          '<path class="letterSml"     fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,145.475 L16.803,145.475 L42.351,72.953 L63.434,72.953 L89.611,145.475 L70.706,145.475 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
+          '<path class="track"         fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
+          '<path class="thumb"         fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,141.0 z" stroke-width="8" stroke-linejoin="round" />' +
+          '<path class="letterBig"     fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,145.0 L551.484,145.0 L594.99,24.213 L629.008,24.213 L672.199,145.0 L640.91,145.0 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
         '</svg>';
 
       },
@@ -299,9 +302,12 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalSml = setInterval(function(){
-          
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/decrease');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/decrease');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -326,9 +332,12 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalBig = setInterval(function(){
-          
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/increase');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/increase');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -348,6 +357,7 @@ sitecues.def("slider", function (slider, callback, log) {
         slider.mouseDownTrack     = false;
         slider.mouseDownLetterSml = false;
         slider.mouseDownLetterBig = false;
+        slider.firstPress         = true;
 
         // Switch off user-select on when the mouse is released
         $('html').css({
@@ -376,12 +386,10 @@ sitecues.def("slider", function (slider, callback, log) {
         
         // If the slider has put the mouse-down inside the Slider Track Back bounds...
         if (slider.mouseDownTrack) {
-
-          
           //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
           
-          // Get the postition of the mouse relative to the Slider
-          var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
+          // Get the position of the mouse relative to the Slider
+          var thumbX = e.clientX - slider.trackBounds.left;
 
           // Contain the Thumb position in the Track bounds
           if (thumbX < 0) {

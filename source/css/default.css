@@ -1,4 +1,12 @@
+@media print {
+      #sitecues-BWCG{display:none!important;}  
+      #sitecues-panel{display:none!important;}
+      #sitecues-badge{display:none!important;}
+}
+
+
 /* Badge */
+/* NOTE! cursor rules must go into cursor.js */
 .sitecues-badge {
     z-index: 2147483645;
     margin: 0px;
@@ -7,7 +15,6 @@
     width: 150px;
     top: 5px;
     color: rgba(0, 0, 0, 0.6);
-    cursor: default;
     -webkit-transition: color 1s;
     -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: content-box;    /* Firefox, other Gecko */
@@ -123,7 +130,6 @@
 }
 
 #sitecues-panel .tts {
-    cursor: pointer;
     position: absolute;
     top: 0;
     right: 0;
@@ -221,7 +227,6 @@
     background-image: url('../images/hlb_close_button.png');
     background-size: 36px 36px;
     z-index: 2147483647; /* above all */
-    cursor: pointer;
 }
 
 .sitecues-highlight-outline {

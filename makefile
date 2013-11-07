@@ -46,6 +46,7 @@ files=\
 	source/js/conf/user.js \
 	source/js/conf/site.js \
 	source/js/conf.js \
+	source/js/platform.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
@@ -73,11 +74,7 @@ files=\
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
 	source/js/speech.js \
-	source/js/speech/azure.js \
-	source/js/speech/ivona.js \
-	source/js/speech/jplayer.js \
 	source/js/invert.js \
-	source/js/cursor/style.js \
 	source/js/cursor/custom.js \
 	source/js/cursor/images/manager.js \
 	source/js/cursor/images/win.js \
@@ -90,7 +87,6 @@ files=\
 	source/js/toolbar/resizer.js \
 	source/js/ui-manager.js \
 	source/js/html-build.js \
-	source/js/browser.js \
 	source/js/status.js \
 
 https=off
@@ -139,6 +135,8 @@ endif
 
 ifeq ($(min), false)
 	uglifyjs-args+=-b
+else
+    uglifyjs-args+=-m
 endif
 
 # HIDDEN TARGET: .no-lint-on-build
@@ -231,7 +229,7 @@ stop-testsite:
 
 # TARGET: test-all
 # Run all tests.
-test-all: test-smoke test-unit
+test-all: test-unit test-smoke
 
 # TARGET: test-smoke
 # Run the smoke tests.
@@ -250,3 +248,4 @@ test-unit:
 # TARGET: stop-all-services
 # Stop all known services.
 stop-all-services: stop-testsite
+

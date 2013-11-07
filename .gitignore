@@ -13,3 +13,4 @@ var
 fetchavatars.pl
 .vagrant
 #test
+.idea/
