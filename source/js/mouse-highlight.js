@@ -105,7 +105,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
       
       return !mostlyWhite;
-    
     }
 
     function hasInterestingBackgroundOnAnyOf(styles) {
@@ -222,10 +221,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return styles;
     }
      
-     function isCursorInFixedRects(fixedRects) {
+    function isCursorInFixedRects(fixedRects) {
       return !state.lastCursorPos ||
              geo.isPointInAnyRect(state.lastCursorPos.x / state.zoom, state.lastCursorPos.y / state.zoom, fixedRects);
     }
+
     // show mouse highlight (mh.update calls mh.show)
     mh.show = function() {
       // can't find any element to work with
@@ -304,7 +304,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         'background-repeat': 'no-repeat',
         'background-position-x': offsetLeft + 'px',
         'background-position-y': offsetTop + 'px'
-      }, '', ''); // Not using !important for these because it prevented them from getting cleaned up on mh.hide() in Chrome
+      }, '', ''); // Not using !important for these because it prevented them from getting cleaned up on mh.pause() in Chrome
     }
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
@@ -329,6 +329,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       return null;
     }
+
     function getIntersectingFloatRects() {
       var EXTRA = 3; // Make sure we test a point inside where the float would be, not on a margin
       var EXPAND_FLOAT_RECT = 7;
@@ -510,7 +511,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           var isCursorInHighlight = isCursorInFixedRects([state.fixedContentRect]);
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
-              mh.hide();  // Hide highlight -- cursor has moved out of it
+              mh.pause();  // Hide highlight -- cursor has moved out of it
             }
             else {
               mh.show(); // Create and show highlight -- cursor has moved into it
@@ -529,7 +530,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
-        mh.hide();
+        mh.pause();
         return false;
       }
 
@@ -670,7 +671,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       
       if (mh.isSticky && state.picked) {
         // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
-        mh.hide();
+        mh.pause();
         state.lastCursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
         mh.show();
         return;
@@ -695,7 +696,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var target = document.activeElement;
       mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
       if (wasAppropriateFocus && !mh.isAppropriateFocus)
-        mh.hide();
+        mh.pause();
     }
 
     function onblurwindow() {
@@ -728,22 +729,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    // disable mouse highlight
+    // disable mouse highlight temporarily
     mh.disable = function(element) {
       // remove mousemove listener from body
       $(document).off('mousemove', mh.update);
 
-      mh.hideAndResetState();
+      mh.pause();
 
     }
 
     mh.hideAndResetState = function() {
-      mh.hide();
+      mh.pause();
       mh.resetState();
     }
 
-    // hide mouse highlight
-    mh.hide = function() {
+    // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
+    mh.pause = function() {
       if (state.picked && state.savedCss) {
         $(state.picked).style(state.savedCss);
         state.savedCss = null;
@@ -752,10 +753,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
-      state.isVisible = false;
-    }
-
-    mh.resetState = function() {
       if (mh.showTimer) {
         clearTimeout(mh.showTimer);
         mh.showTimer = 0;
@@ -766,6 +763,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         mh.pickTimer = 0;
       }
 
+      state.isVisible = false;
+    }
+
+    mh.resetState = function() {
       state = $.extend({}, INIT_STATE); // Copy
     }
 
@@ -779,7 +780,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     sitecues.on('hlb/create hlb/inflating hlb/ready', mh.disable);
 
     // hide mouse highlight once highlight box is dismissed
-    sitecues.on('hlb/deflating', mh.hide);
+    sitecues.on('hlb/deflating', mh.pause);
 
     // enable mouse highlight back once highlight box deflates
     sitecues.on('hlb/closed', mh.reenableIfAppropriate);
