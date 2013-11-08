@@ -141,6 +141,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var computedStyles = common.getElementComputedStyles(this.item);
         var offset = positioning.getOffset(this.item);
+
         var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
         var size = { width: parseFloat(width), height: parseFloat(height) };
@@ -211,7 +212,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = $.extend({}, cssUpdate, {
-          transform: 'scale(' + kExtraZoom + ')'
+          transform: 'scale(' + (kExtraZoom + 2)  + ')'
         });
 
         // Insert placeholder before HLB target is absoultely positioned.

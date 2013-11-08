@@ -23,9 +23,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
+    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'platform', 
 
-        function ($, conf, positioning, common) {
+        function ($, conf, positioning, common, platform) {
           
             designer.getCurrentTextColor = function(item) {
               var compStyle = item.currentStyle || window.getComputedStyle(item, null);
@@ -191,6 +191,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale(1)'});
                 }
+                var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 1;
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 // Use the proper center.
@@ -218,12 +219,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
-
                     // If we need to change the element's dimensions, so be it. However, explicitly
                     // set the dimensions only if needed.
                     var newWidth, newHeight;
 
-                    // Check the width and horizontal positioning.
+                    // Check the width and horizontal positioning.   
                     if (width > viewport.width) {
                         // Easiest case: fit to width and horizontal center of viewport.
                         centerLeft = viewport.centerX;
@@ -286,7 +286,15 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     if (newHeight) {
-                        cssUpdates.height = height - 2* additionalBoxOffset * extraZoom;
+                        cssUpdates.height = height - 2 * additionalBoxOffset * extraZoom;
+                    }
+
+                    if (platform.browser.isIE) {
+                        var scroll = positioning.getScrollPosition();
+                        cssUpdates.left += scroll.left;
+                        cssUpdates.top += scroll.top;
+                        cssUpdates.width = (newWidth || width) / (zoomModifier + extraZoom);
+                        //cssUpdates.height = newHeight || height;
                     }
                 // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
                 // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
