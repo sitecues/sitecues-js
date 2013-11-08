@@ -80,10 +80,10 @@ sitecues.def('hpan', function (hpan, callback, log) {
 
       if (on != hpan.isOn) {
         if (on) {
-          $(document).on('mousemove', hpan.mousemove);
+          $(document).get(0).addEventListener('mousemove', hpan.mousemove, false);
         }
         else {
-          $(document).off('mousemove', hpan.mousemove);
+          $(document).get(0).removeEventListener('mousemove', hpan.mousemove, false);
           hpan.xLastPos = undefined;
         }
       }
