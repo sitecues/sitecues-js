@@ -213,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = $.extend({}, cssUpdate, {
-          transform: 'scale(' + (kExtraZoom + IEZoom)  + ')'
+          transform: 'scale(' + (kExtraZoom + IEZoom)  + ')' //Add some extra IEZoom, because of position.getMagnification doesnt work in IE
         });
 
         // Insert placeholder before HLB target is absoultely positioned.

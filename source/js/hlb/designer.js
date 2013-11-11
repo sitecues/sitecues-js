@@ -191,8 +191,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale(1)'});
                 }
-
+                //Check out positioning.getMagnification for the reason I use zoomModifier
                 var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
+
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 // Use the proper center.
@@ -291,12 +292,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         cssUpdates.height = height - 2 * additionalBoxOffset * extraZoom;
                     }
 
-                    if (platform.browser.isIE) {
+                    if (platform.browser.isIE) { //IE hack
                        cssUpdates.width = (((cssUpdates.width && cssUpdates.width * extraZoom) || width) / (zoomModifier + extraZoom)) + 2 * additionalBoxOffset * extraZoom;
                        cssUpdates.left += scroll.left + (cssUpdates.width / 2);
                        cssUpdates.top += scroll.top;
-
-                        //cssUpdates.height = (newHeight || height) / (zoomModifier + extraZoom);
+                     //cssUpdates.height = (newHeight || height) / (zoomModifier + extraZoom);
                     }
                 // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
                 // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
@@ -310,6 +310,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 				if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale('+totalZoom+')'});
                 }
+
                 return cssUpdates;
             }
 

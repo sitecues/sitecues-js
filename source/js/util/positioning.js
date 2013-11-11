@@ -676,6 +676,10 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
             if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
+               /*
+                 Interestingly enough, any functionality that relies on this method will return 1
+                 if running in IE.  Fixing this with the code below will make IE much much worse. :(
+               */
                /* if (ieFix && zoom.indexOf && zoom.indexOf('%') !== -1) {
                   zoom = zoom.replace('%','') / 100;
                 }*/
