@@ -191,9 +191,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale(1)'});
                 }
-                if (platform.browser.isIE) {
-                   // totalZoom = conf.get('zoom');
-                }
+
                 var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
