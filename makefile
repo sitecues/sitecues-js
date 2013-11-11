@@ -68,6 +68,7 @@ files=\
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
 	source/js/hlb/designer.js \
+	source/js/hpan.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
