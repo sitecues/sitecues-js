@@ -6,7 +6,7 @@ sitecues.def('hpan', function (hpan, callback, log) {
 
   var MIN_EDGE_PORTION = .1;
   var MAX_EDGE_PORTION = .25;
-  var MAX_SPEED = 25;
+  var MAX_SPEED = 100;
 
   // get dependencies
   sitecues.use('conf', 'util/common', 'jquery', function (conf, common, $) {
