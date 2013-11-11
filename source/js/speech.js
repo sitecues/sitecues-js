@@ -330,7 +330,6 @@ sitecues.def('speech', function (speech, callback, log) {
     speech.factory = function(hlb) {
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
       if (ttsEngine) {
-        log.info(hlb);
         if ($(hlb).text().length || $(hlb).data('speechKey')) {
           var player = new AudioPlayer($(hlb), site.get('site_id'), sitecues.getLibraryUrl().secure);
           player.init();

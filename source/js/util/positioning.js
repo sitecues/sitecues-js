@@ -1,13 +1,13 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-sitecues.def('util/positioning', function (positioning, callback) {
+sitecues.def('util/positioning', function (positioning, callback, log) {
 
 	    positioning.kMinRectWidth = 4;
 	    positioning.kMinRectHeight = 4;
 
-    sitecues.use('jquery', 'util/common', function ($, common) {
-
+    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+        var ieFix = platform.browser.isIE;
         /**
          * Get the cumulative zoom for an element.
          * TODO: what is andZoom? I don't understand it.
@@ -61,7 +61,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	    /**
 	     * Return a corrected bounding box given the total zoom for the element and current scroll position
 	     */
-	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
+	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition, t) {
 		    //EQ-880
         var realZoom = ('zoom' in document.createElement('div').style) ? totalZoom : 1;
         var rect = {
@@ -70,6 +70,7 @@ sitecues.def('util/positioning', function (positioning, callback) {
           width: boundingBox.width,
           height: boundingBox.height,
         };
+        if (t) alert(realZoom)
         rect.right = rect.left + rect.width;
         rect.bottom = rect.top + rect.height;
         return rect;
@@ -675,6 +676,13 @@ sitecues.def('util/positioning', function (positioning, callback) {
             if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
+               /*
+                 Interestingly enough, any functionality that relies on this method will return 1
+                 if running in IE.  Fixing this with the code below will make IE much much worse. :(
+               */
+               /* if (ieFix && zoom.indexOf && zoom.indexOf('%') !== -1) {
+                  zoom = zoom.replace('%','') / 100;
+                }*/
                 var result = 1;
                 if (transformStr !== 'none' && $.trim(transformStr) !== '') {
                     var result = _MATRIX_REGEXP.exec(transformStr);
