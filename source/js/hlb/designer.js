@@ -191,7 +191,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale(1)'});
                 }
-                var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 1;
+                if (platform.browser.isIE) {
+                   // totalZoom = conf.get('zoom');
+                }
+                var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 // Use the proper center.
@@ -211,16 +214,17 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var offsetParent = jElement.offsetParent();
                     var offsetParentPosition = positioning.getOffset(offsetParent);
                     var offsetParentZoom = positioning.getTotalZoom(offsetParent);
-
+                    var scroll = positioning.getScrollPosition();
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
                     var rect = positioning.getSmartBoundingBox(this);
-                    var width = (rect.width + 2 * additionalBoxOffset) * extraZoom;
-                    var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
+                    var width = (rect.width + 2 * additionalBoxOffset) * (extraZoom + zoomModifier);
+                    var height = (rect.height + 2 * additionalBoxOffset) * (extraZoom + zoomModifier);
                     var left = centerLeft - (width / 2);
                     var top = centerTop - (height / 2);
                     // If we need to change the element's dimensions, so be it. However, explicitly
                     // set the dimensions only if needed.
+
                     var newWidth, newHeight;
 
                     // Check the width and horizontal positioning.   
@@ -252,14 +256,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     // Reduce the dimensions to a non-zoomed value.
-                    width = (newWidth || width) / extraZoom;
-                    height = (newHeight || height) / extraZoom;
+                    width = (newWidth || width) / (extraZoom + zoomModifier);
+                    height = (newHeight || height) / (extraZoom + zoomModifier);
 
                     // Determine what the left and top CSS values must be to center the
                     // (possibly zoomed) element over the determined center.
                     var css = jElement.css(['marginLeft', 'marginTop']);
 
-                    var cssLeft = (centerLeft
+                    var cssLeft = (centerLeft 
                         - offsetParentPosition.left
                         - (width * offsetParentZoom / 2)
                         ) / offsetParentZoom;
@@ -267,7 +271,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         - offsetParentPosition.top
                         - (height * offsetParentZoom / 2)
                         ) / offsetParentZoom;
-
+                  
                     // If offset parent is html then no need to do this.
                     // todo: do we really use it?
                     if (offsetParent[0].tagName.toLowerCase() !== 'html') {
@@ -285,16 +289,16 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         cssUpdates.width = width - 2 * additionalBoxOffset * extraZoom;
                     }
 
-                    if (newHeight) {
+                    if (newHeight) {      
                         cssUpdates.height = height - 2 * additionalBoxOffset * extraZoom;
                     }
 
                     if (platform.browser.isIE) {
-                        var scroll = positioning.getScrollPosition();
-                        cssUpdates.left += scroll.left;
-                        cssUpdates.top += scroll.top;
-                        cssUpdates.width = (newWidth || width) / (zoomModifier + extraZoom);
-                        //cssUpdates.height = newHeight || height;
+                       cssUpdates.width = (((cssUpdates.width && cssUpdates.width * extraZoom) || width) / (zoomModifier + extraZoom)) + 2 * additionalBoxOffset * extraZoom;
+                       cssUpdates.left += scroll.left + (cssUpdates.width / 2);
+                       cssUpdates.top += scroll.top;
+
+                        //cssUpdates.height = (newHeight || height) / (zoomModifier + extraZoom);
                     }
                 // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
                 // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.

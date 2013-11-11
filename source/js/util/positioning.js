@@ -61,7 +61,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 	    /**
 	     * Return a corrected bounding box given the total zoom for the element and current scroll position
 	     */
-	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
+	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition, t) {
 		    //EQ-880
         var realZoom = ('zoom' in document.createElement('div').style) ? totalZoom : 1;
         var rect = {
@@ -70,6 +70,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           width: boundingBox.width,
           height: boundingBox.height,
         };
+        if (t) alert(realZoom)
         rect.right = rect.left + rect.width;
         rect.bottom = rect.top + rect.height;
         return rect;

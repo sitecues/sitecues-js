@@ -4,8 +4,8 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/close-button',
-  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton) {
+  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/close-button', 'platform',
+  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton, platform) {
 
     // Constants
 
@@ -196,6 +196,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
 
         var _this = this;
+        var IEZoom = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -212,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = $.extend({}, cssUpdate, {
-          transform: 'scale(' + (kExtraZoom + 2)  + ')'
+          transform: 'scale(' + (kExtraZoom + IEZoom)  + ')'
         });
 
         // Insert placeholder before HLB target is absoultely positioned.
