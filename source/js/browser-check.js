@@ -62,17 +62,6 @@ sitecues.def('browser/check', function (browser, callback, log) {
 		browser._browserArr = _browserArr;
 		browser._reqFallback = _reqFallback;
 
-		// browser._ie6 = IE6;
-		// browser._ie7 = IE7;
-		// browser._ie8 = IE8;
-		// browser._ie9 = IE9;
-		// browser._ie10 = IE10;
-		// browser._ie11 = IE11;
-		// browser._moz = MOZ;
-		// browser._opera = OPERA;
-		// browser._saf = SAF;
-		// browser._chrome = CHROME;
-
 	});
 callback();
 });	

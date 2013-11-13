@@ -151,46 +151,16 @@ sitecues.def('badge', function (badge, callback, log) {
                           });
 
                       break;
+
               case false:
                           $(badge.panel).hover(function (evt) {
                               sitecues.emit('badge/hover', badge.element); // emit event about hover
                           }, function () {
                               sitecues.emit('badge/leave', badge.element); // emit event about leave
                           });
+                          
                       break;  
                       }      
-
-
-
-    
-    //I removed the hover event in favor of mouseenter/mouseleave for more control over
-    //firing specific events
-//     $(badge.panel).on("mouseenter", function () {
-
-//         var _e = evt;
-//           _e.preventDefault();
-
-//           
-
-//               fallback.create();
-//             break;
-//             case false:
-
-//               return sitecues.emit('badge/hover', badge.element);
-//           }
-
-
-// });
-
-//      $(badge.panel).on("mouseleave", function () {
-
-//       if( $("#sitecues-panel").is(":visible") ){
-//             sitecues.emit('badge/leave', badge.element); // emit event about leave
-//           }
-
-
-//      });
-
     
 
       sitecues.on("badge/enable", function() {
