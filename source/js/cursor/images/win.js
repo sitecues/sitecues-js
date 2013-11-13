@@ -23,12 +23,9 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
 
       size *= pixelRatio;
 
-
-      console.log("WINWINWIN!");
-
       var  cursorSVG = {
           0: '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+
-        'width="'+(128*pixelRatio)+'px" height="'+(128*pixelRatio)+'px" viewBox="0,0,'+(128*pixelRatio)+','+(128*pixelRatio)+'"><defs><filter id="d" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx=".25" dy=".5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation=".5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="'+
+        'width="'+(128*pixelRatio)+'px" height="'+(128*pixelRatio)+'px" viewBox="0,0,'+(128*pixelRatio)+','+(128*pixelRatio)+'"><defs><filter id="d" x="0" y="0" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx=".25" dy=".25" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation=".5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="'+
         'scale('+(size)+','+(size)+')" filter="url(#d)"><path fill="#000000" d="M0,0 L0,17.75 L4.188,13.875 L8.25,21.062 L11.531,18.719 L7.75,12.062 L12.594,12 L0,0 z" /><path fill="#FFFFFF" d="M0.931,2.277 L1,15.062 L4.281,12 L8.562,19.469 L10.156,18.406 L5.875,11.062 L10.062,11 L0.931,2.277 z" /></g></svg>'
 
         , 1: '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" '+

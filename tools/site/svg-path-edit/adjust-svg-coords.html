@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="jquery-2.0.3.min.js"></script>
+  <script src="update-svg-path.js"></script>
+</head>
+
+<body>
+
+<div id="controls">
+  <button>Export SVG Data</button>
+</div>
+<div id="path-window"></div>
+
+<div class="cursor-window">
+  <svg id="cursor1x" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="14" height="23" viewBox="0, 0, 14, 23">
+    <defs><filter id="dropshadow" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feComponentTransfer in="SourceAlpha"><feFuncB type="discrete" tableValues=".6"/><feFuncG type="discrete" tableValues=".6"/><feFuncR type="discrete" tableValues=".6"/></feComponentTransfer><feGaussianBlur stdDeviation=".75"/><feOffset dx="1.25" dy=".25" result="shadow"/><feComposite in="SourceGraphic" in2="shadow" operator="over"/></filter></defs>
+    <g transform="scale(1,1) translate(0,0)" filter="url(#)" shape-rendering="crispEdges">
+      <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1" fill="#000" d="M0,0 L0,18 L4.20,13.60 L8.10,21.30 L11.10,19.70 L7.90,12.20 L13.00,12.20 L0,0 z" />
+      <path fill="#FFF" d="M1,1 L1.00,15.50 L4.50,11.90 L8.50,20.10 L10.00,19.30 L6.50,11.20 L10.80,11.20 L1.00,2.00 z" />
+    </g>
+  </svg>
+</div>
+
+<div class="cursor-window">
+  <svg id="cursor5x" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="70" height="115" viewBox="0, 0, 70, 115">
+    <defs><filter id="dropshadow" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feComponentTransfer in="SourceAlpha"><feFuncB type="discrete" tableValues=".6"/><feFuncG type="discrete" tableValues=".6"/><feFuncR type="discrete" tableValues=".6"/></feComponentTransfer><feGaussianBlur stdDeviation=".75"/><feOffset dx="1.25" dy=".25" result="shadow"/><feComposite in="SourceGraphic" in2="shadow" operator="over"/></filter></defs>
+    <g transform="scale(5,5) translate(0,0)" filter="url(#)">
+      <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1" fill="#000" d="M0,0 L0,18 L4.20,13.60 L8.10,21.30 L11.10,19.70 L7.90,12.20 L13.00,12.20 L0,0 z" />
+      <path fill="#FFF" d="M1,1 L1.00,15.50 L4.50,11.90 L8.50,20.10 L10.00,19.30 L6.50,11.20 L10.80,11.20 L1.00,2.00 z" />
+    </g>
+  </svg>
+</div>
+
+<div class="clear"></div>
+
+</body>
+</html>
