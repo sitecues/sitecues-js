@@ -1,5 +1,6 @@
 sitecues.def('compatibility/fallback', function (fallback, callback, log) {
 	
+	'use strict';
 
 	var _reqFallback;
 
@@ -20,82 +21,92 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 
 
 	var	_warning = [
-			/*[0]*/"<h3>Our apologies!</h3>",
-			/*[1]*/"<strong>sitecues</strong> zoom &amp; speech tools",
-			/*[2]*/"require a more recent version of your web browser.",
-			/*[3]*/"are coming to your browser soon!",
-			/*[4]*/"require a different web browser in order to work."	
-			];	
+	/*[0]*/"<h3>Our apologies!</h3>",
+	/*[1]*/"<strong>sitecues</strong> zoom &amp; speech tools",
+	/*[2]*/"require a more recent version of your web browser.",
+	/*[3]*/"are coming to your browser soon!",
+	/*[4]*/"require a different web browser in order to work."	
+	];	
 	var _compiledMessage;		
-			//ie6-8
-			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
-			//coming soon
-			if(MOZ || IE9 || IE10 || IE11) {
-				_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];}
-			//requires a different browser		
-			if(OPERA) {
-				_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];}
-			//safari
-			if(SAF){	
-			/* SAFARI FOR WINDOWS OR OS X */
-			switch(_windows){
-				case true:
-					_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
-				break;
-				case false:
-					_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];
-				break;
-				}	
-			}
+	//ie6-8
+	_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
+	//coming soon
+	if(MOZ || IE9 || IE10 || IE11) {
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];}
+	//requires a different browser		
+	if(OPERA) {
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];}
+	//safari
+	if(SAF){	
+	/* SAFARI FOR WINDOWS OR OS X */
+	switch(_windows){
+		case true:
+			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
+		break;
+		case false:
+			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];
+		break;
+		}	
+	}
 
 
 	fallback.create = function(success) {
-     		 fallback.modal =  htmlBuild.$div()
-              	.attr('id', 'sitecues-fallback-unsupported-browser')
-              	.addClass('sitecues-unsupported-browser').appendTo('html');
+     		 fallback.modal =  htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'})
+     		 .addClass('sitecues-unsupported-browser').appendTo('html');
 
               fallback.table = $('<table/>')
-		      	.attr({'id': 'unsupported-browser-warning', 'height': '215'})
+		      	.attr({ 'id': 'unsupported-browser-warning', height: 215})
 		      	.addClass('sitecues-badge-image')
 		      	.appendTo(fallback.modal)
-		      	.append("<tr id='content-holder'/>", "<tr class='btn-group'/>");
+		      	.append( $('<tr/>').attr('id', 'content-holder'), $("<tr/>").addClass('btn-group') );
 
 		      fallback.sitecuesLogoContainer = $('<td/>')
-		      	.attr({'id': 'sitecues-unsupported-browser', 'colspan': 1, 'rowspan': 2 })
-		      	.appendTo( $("tr#content-holder") )
+			     .attr({ 'id': 'sitecues-unsupported-browser', colspan: 1, rowspan: 2 })
+			     .appendTo( $("tr#content-holder") )
 
 		      fallback.sitecuesLogo = $('<img/>')
 		      	.attr({	'id': 'sitecues-unsupported-browser-img',
 		      			'src': sitecues.resolveSitecuesUrl('../images/no-sitecues-support-warning.png'),
 		      			'href':'http://www.sitecues.com/',
 		      			'title':'Visit sitecues.com for more information.',
-		      			'alt':'Visit sitecues.com for more information.'
+		      			'alt': 'Visit sitecues.com for more information.'
 		      		})
-		      	.appendTo( $("td#sitecues-unsupported-browser") )
+		      	.appendTo( $('td#sitecues-unsupported-browser') )
 
 	      	  fallback.message = $('<td/>')
-		      	.attr({'id': 'warning-message', 'colspan': 2, 'rowspan': 1 })
+		      		.attr({ id: 'warning-message', 
+				      		colspan: 2, 
+				      		rowspan: 1
+					      	})
 		      	.appendTo( $('tr#content-holder') )
 		      	.html(_compiledMessage);
 
 	      	  fallback.btnGroup = $('tr.btn-group')	
-	      	  	.attr({'colspan': 2, 'rowspan': 1 })
-		      	.append( $("<td id='dismiss-btn'/>").attr({rowspan:1,colspan:1}) ) 
-		      	.append( $("<td id='explore-btn'/>").attr({rowspan:1,colspan:1}) );
+	      	  	.attr({ colspan: 2, 
+	      	  			rowspan: 1 
+	      	  			})
+		      	.append( $('<td/>').attr({ 	id:'dismiss-btn',
+		      								rowspan:1, 
+		      								colspan:1
+		      							}) 
+		      						) 
+		      	.append( $("<td/>").attr({ 	id:'explore-btn', 
+		      								rowspan:1, 
+		      								colspan:1
+		      							})
+		      						);
 
 		      fallback.btn1 = $('<a/>')	
 		      	.attr('type','button')
-		      	.addClass('btn')
-		      	.addClass('btn-default')
+		      	.addClass('btn btn-default')
 		      	.text('Dismiss')
-		      	.appendTo( $('#dismiss-btn').on("click", function(){ fallback.slideUp(); return false} ) )
+		      	.appendTo( $('#dismiss-btn').on("click", function(evt){evt.preventDefault(); fallback.slideUp(); return false} ) )
 
 		      fallback.btn2 = $('<a/>')	
 		      	.attr({'type':'button',
 		      			'href':'http://www.sitecues.com/compatibility.php',
 		      			'target':'_self'})
-		      	.addClass('btn')
-		      	.addClass('btn-primary')
+		      	.addClass('btn btn-primary')
 		      	.text('Learn More')
 		      	.appendTo( $('#explore-btn') );
 
@@ -106,7 +117,6 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 						      	}
 						      });
 				   		}
-
 				   	fallback.slideUp = function (success,evt) {
 				   		  $(fallback.modal).stop(true,true).animate({"top":"-250px"}, 500, function() {
 						      	if (success) {
@@ -114,13 +124,10 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 						      	}
 						      });
 							};
-
-				      
 				      if (success) {
 				        success();
 				      }
 		          }
-
 
 			if(CHROME){
 				_reqFallback = false;
