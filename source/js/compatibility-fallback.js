@@ -99,27 +99,27 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 		      	.text('Learn More')
 		      	.appendTo( $('#explore-btn') );
 
-			fallback.slideDown = function (success,evt) {
-		   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
-				      	if (success) {
-				      		success();
-				      	}
-				      });
-		   		}
+					fallback.slideDown = function (success,evt) {
+				   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
+						      	if (success) {
+						      		success();
+						      	}
+						      });
+				   		}
 
-		   	fallback.slideUp = function (success,evt) {
-		   		  $(fallback.modal).stop(true,true).animate({"top":"-250px"}, 50, function() {
-				      	if (success) {
-				      		success();
-				      	}
-				      });
-					};
+				   	fallback.slideUp = function (success,evt) {
+				   		  $(fallback.modal).stop(true,true).animate({"top":"-250px"}, 500, function() {
+						      	if (success) {
+						      		success();
+						      	}
+						      });
+							};
 
-		      
-		      if (success) {
-		        success();
-		      }
-          }
+				      
+				      if (success) {
+				        success();
+				      }
+		          }
 
 
 			if(CHROME){

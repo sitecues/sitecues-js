@@ -10,11 +10,11 @@ window.sitecues && sitecues.use(
 	'focus',
 	'cursor',
 	'speech/azure',
-	'browser-check',
-	'compatibility-fallback',
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
 	'invert',
-	'hpan'
+	'hpan',
+	'browser-check',
+	'compatibility-fallback'
 );
