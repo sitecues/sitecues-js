@@ -1,19 +1,20 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-sitecues.def('util/positioning', function (positioning, callback) {
+sitecues.def('util/positioning', function (positioning, callback, log) {
 
 	    positioning.kMinRectWidth = 4;
 	    positioning.kMinRectHeight = 4;
 
-    sitecues.use('jquery', 'util/common', function ($, common) {
-
+    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+//        var ieFix = platform.browser.isIE;
         /**
          * Get the cumulative zoom for an element.
-         * TODO: what is andZoom? I don't understand it.
-         * I think you use it like this:
-         * true: if you're going to be positioning outside of <body> (child of <html>)
-         * false: you're going to be positioning inside of <body>
+         * @param {selector} selector
+         * @param {boolean} andZoom False if we only want to get 'transform:scale' zoom;
+         * True if we want to take full zoom, union of 'transfor:scale' + 'zoom' property.
+         * @returns {undefined|single result|array} The value or an array of values
+         * of current page's zoom.
          */
         positioning.getTotalZoom = function (selector, andZoom) {
             var _recurse = function (element) {
@@ -675,6 +676,13 @@ sitecues.def('util/positioning', function (positioning, callback) {
             if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
+               /*
+                 Interestingly enough, any functionality that relies on this method will return 1
+                 if running in IE.  Fixing this with the code below will make IE much much worse. :(
+               */
+               /* if (ieFix && zoom.indexOf && zoom.indexOf('%') !== -1) {
+                  zoom = zoom.replace('%','') / 100;
+                }*/
                 var result = 1;
                 if (transformStr !== 'none' && $.trim(transformStr) !== '') {
                     var result = _MATRIX_REGEXP.exec(transformStr);

@@ -200,6 +200,26 @@ sitecues.def('util/common', function (common, callback, log) {
      * @param imgEl An object.
      * @return rgb A string which represents the average image color in RGB format.
      */
+    common.isInSitecuesUI = function(element) {
+      var isInBadge = false,
+          isInBody = false,
+          badge = $('#sitecues-badge');
+
+      $.each($(element).parents().andSelf(), function(i, parent) {
+        var $parent = $(parent);
+        if ($parent.is(document.body)) {
+          isInBody = true;
+          return null;
+        }
+        if ($parent.is(badge)) {
+          isInBadge = true;
+          return null;
+        }
+      });
+
+      return isInBadge || !isInBody;
+    };
+ 
     common.getAverageRGB = function(imgEl) {
       var blockSize = 5, // only visit every 5 pixels
       defaultRGB = {r:0, g:0, b:0}, // for non-supporting envs
