@@ -69,7 +69,10 @@ sitecues.def("slider", function (slider, callback, log) {
       originalWidth: 690,
       // Half the width of the SVG thumb element at it's original size
       originalThumbWidth: 84,
-      
+
+      firstPress: true,  //used in setInterval to not emit a zoom if its the very first zoom on a mouse press
+                          //it is reset to true when there is a mouseup event
+                          //set to false after one tick of the interval
       // TODO: Make the color settings object configurable on instantiation using deep object merge
 
       // Color settings object
@@ -299,9 +302,12 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalSml = setInterval(function(){
-          
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/decrease');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/decrease');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -326,9 +332,12 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Set interval while the mouse is pressed over the letter and held down
         slider.letterIntervalBig = setInterval(function(){
-          
           // Call the letterupdate function to adjust zoom, passing it the correct context
-          sitecues.emit('zoom/increase');
+          if (!slider.firstPress) {
+            sitecues.emit('zoom/increase');
+          }
+
+          slider.firstPress = false;
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
@@ -348,6 +357,7 @@ sitecues.def("slider", function (slider, callback, log) {
         slider.mouseDownTrack     = false;
         slider.mouseDownLetterSml = false;
         slider.mouseDownLetterBig = false;
+        slider.firstPress         = true;
 
         // Switch off user-select on when the mouse is released
         $('html').css({
@@ -376,12 +386,10 @@ sitecues.def("slider", function (slider, callback, log) {
         
         // If the slider has put the mouse-down inside the Slider Track Back bounds...
         if (slider.mouseDownTrack) {
-
-          
           //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
           
-          // Get the postition of the mouse relative to the Slider
-          var thumbX = e.clientX - slider.trackBounds.left + $(document).scrollLeft();
+          // Get the position of the mouse relative to the Slider
+          var thumbX = e.clientX - slider.trackBounds.left;
 
           // Contain the Thumb position in the Track bounds
           if (thumbX < 0) {
