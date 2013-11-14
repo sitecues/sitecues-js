@@ -58,7 +58,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 		      	.attr({ 'id': 'unsupported-browser-warning', height: 215})
 		      	.addClass('sitecues-badge-image')
 		      	.appendTo(fallback.modal)
-		      	.append( $('<tr/>').attr('id', 'content-holder'), $("<tr/>").addClass('btn-group') );
+		      	.append( $('<tr/>').attr('id', 'content-holder'), $('<tr/>').addClass('btn-group') );
 
 		      fallback.sitecuesLogoContainer = $('<td/>')
 			     .attr({ 'id': 'sitecues-unsupported-browser', colspan: 1, rowspan: 2 })
@@ -94,13 +94,17 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 		      								rowspan:1, 
 		      								colspan:1
 		      							})
-		      						);
+		      	);
 
 		      fallback.btn1 = $('<a/>')	
 		      	.attr('type','button')
 		      	.addClass('btn btn-default')
 		      	.text('Dismiss')
-		      	.appendTo( $('#dismiss-btn').on("click", function(evt){evt.preventDefault(); fallback.slideUp(); return false} ) )
+		      	.appendTo( $('#dismiss-btn').on("click", function(evt){ 
+		      									evt.preventDefault(); 
+		      									fallback.slideUp(); 
+		      									return false}) 
+		      									);
 
 		      fallback.btn2 = $('<a/>')	
 		      	.attr({'type':'button',

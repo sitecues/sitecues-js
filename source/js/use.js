@@ -9,12 +9,12 @@ window.sitecues && sitecues.use(
 	'keys',
 	'focus',
 	'cursor',
-	'speech/azure',
+	//'speech/azure',
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
 	'invert',
 	'hpan',
-	'browser-check',
+	//'browser-check',
 	'compatibility-fallback'
 );
