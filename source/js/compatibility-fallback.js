@@ -4,40 +4,51 @@ sitecues.def('compatibility/fallback', function (fallback, callback, log) {
 
 	var _reqFallback;
 
-sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function ($, conf, style, htmlBuild, load) {
+sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',  function ($, conf, style, htmlBuild, platform, load) {
 
 
-	var IE6 = (navigator.userAgent.indexOf("MSIE 6")>=0) ? true : false;
-	var IE7 = (navigator.userAgent.indexOf("MSIE 7")>=0) ? true : false;
-	var IE8 = (navigator.userAgent.indexOf("MSIE 8")>=0) ? true : false;
-	var IE9 = (navigator.userAgent.indexOf("MSIE 9")>=0) ? true : false;
-	var IE10 = (navigator.userAgent.indexOf("MSIE 10")>=0) ? true : false;
-	var IE11 = (navigator.userAgent.indexOf("MSIE 11")>=0) ? true : false;
-	var MOZ = (navigator.userAgent.indexOf("Gecko/201")>=0) ? true : false;
-	var OPERA = (navigator.userAgent.indexOf("Opera")>=0) ? true : false;
-	var SAF = (navigator.userAgent.indexOf("AppleWebKit")>=0) ? true : false;
-	var CHROME = (navigator.userAgent.indexOf("Chrome/")>=0) ? true : false;
-	var _windows = (navigator.appVersion.indexOf("Win")!=-1) ? true : false;
+	var IE 	 		= platform.browser.isIE,
+		MOZ 		= platform.browser.isFirefox,
+		OPERA 		= platform.browser.isOpera,
+		SAF 	  	= platform.browser.isSafari,
+		CHROME 	  	= platform.browser.isChrome,
+	 	isWindows 	= platform.os.isWin;
 
 
+	 	if(IE){
+ 			var IE6 		= platform.ieVersion.isIE6,
+				IE7 		= platform.ieVersion.isIE7,
+				IE8 		= platform.ieVersion.isIE8,
+				IE9 		= platform.ieVersion.isIE9,
+				IE10 		= platform.ieVersion.isIE10,
+				IE11  		= platform.ieVersion.isIE11;
+			}
+
+	var _windows = platform.os.isWin;
+
+	/* We are generating a message based different criteris - coming soon, not supported (older browsers) and coming soon.
+	Any suggestions to change whether an array is the best choice? */
+	var _compiledMessage;
 	var	_warning = [
-	/*[0]*/"<h3>Our apologies!</h3>",
-	/*[1]*/"<strong>sitecues</strong> zoom &amp; speech tools",
-	/*[2]*/"require a more recent version of your web browser.",
-	/*[3]*/"are coming to your browser soon!",
-	/*[4]*/"require a different web browser in order to work."	
-	];	
+		/*[0]*/	"<h3>Our apologies!</h3>",
+		/*[1]*/	"<strong>sitecues</strong> zoom &amp; speech tools",
+		/*[2]*/	"require a more recent version of your web browser.",
+		/*[3]*/	"are coming to your browser soon!",
+		/*[4]*/	"require a different web browser in order to work.",
+		/*[5]*/	"touch interaction are coming device soon!"
+			];	
+
 	var _compiledMessage;		
 	//ie6-8
 	_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
 	//coming soon
-	if(MOZ || IE9 || IE10 || IE11) {
+	if( MOZ || IE9 || IE10 || IE11 ) {
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];}
 	//requires a different browser		
-	if(OPERA) {
+	if( OPERA ) {
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];}
 	//safari
-	if(SAF){	
+	if( SAF ){	
 	/* SAFARI FOR WINDOWS OR OS X */
 	switch(_windows){
 		case true:
@@ -115,6 +126,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'load',  function (
 		      	.appendTo( $('#explore-btn') );
 
 					fallback.slideDown = function (success,evt) {
+						console.log("fallback click was set")
 				   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
 						      	if (success) {
 						      		success();

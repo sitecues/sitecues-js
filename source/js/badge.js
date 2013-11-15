@@ -140,10 +140,8 @@ sitecues.def('badge', function (badge, callback, log) {
 
     //EQ-881: As a customer, I want sitecues to degrade gracefully or provide
     //a useful fallback when it can't work, so that my users aren't confused by the icon.
-    var _requiresFallback = platform.requiresFallback;// browserCheck._reqFallback;
+    var _requiresFallback = platform.requiresFallback;
 
-     console.log(_requiresFallback)
-      //console.log(platform.ieVersion)
       switch(_requiresFallback){
              case true:
 
@@ -157,7 +155,6 @@ sitecues.def('badge', function (badge, callback, log) {
 
               case false:
                           $(badge.panel).hover(function (evt) {
-
                               sitecues.emit('badge/hover', badge.element); // emit event about hover
                           }, function () {
                               sitecues.emit('badge/leave', badge.element); // emit event about leave
