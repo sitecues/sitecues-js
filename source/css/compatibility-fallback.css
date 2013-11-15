@@ -17,15 +17,34 @@ table,td,th,tbody{
 	background-color:transparent!important;
 	background:transparent!important;
 	}
-#sitecues-fallback-unsupported-browser {
-	/*top:50px; */
+
+
+/*div#sitecues-fallback-unsupported-browser{
+
+	position:absolute!important; 
+	top:-250px; 
+	right:25px; 
+}
+
+div#sitecues-fallback-touch-browser{
+	position:absolute!important;
+	display:block;
+	float:left;
+    top: 50% !important;
+    left: 50% !important;
+    margin-left: -550px !important;
+	}*/
+
+div#sitecues-fallback-unsupported-browser,
+div#sitecues-fallback-touch-browser {
+	position:absolute!important; 
 	top:-250px; 
 	right:25px; 
 	width:500px; 
 	height:235px; 
-	position:absolute; 
+	
 	z-index:6000;
-	border:3px solid #CCC !important;  
+	border:3px solid #666;  
 	border-radius:6px; 
 	-moz-border-radius:6px; 
 	-o-border-radius:6px; 
@@ -41,12 +60,11 @@ table,td,th,tbody{
 	background: -ms-linear-gradient(top,  rgba(249,249,249,1) 0%,rgba(209,209,209,1) 100%); 
 	background: linear-gradient(to bottom,  rgba(249,249,249,1) 0%,rgba(209,209,209,1) 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#d1d1d1',GradientType=0 );
 	}
+	
 #dismiss-btn,#explore-btn {
 	vertical-align:bottom;
 	}
-/*#explore-btn{
-	float:right;
-	}*/
+
 #unsupported-browser-warning{
 	width:475px;
 	margin:10px;
@@ -54,24 +72,27 @@ table,td,th,tbody{
 	vertical-align:top;
 	background-color:transparent!important;
 	}
-#sitecues-fallback-unsupported-browser #sitecues-unsupported-browser-img {
+#sitecues-unsupported-browser-img {
 	vertical-align:top;
 	/*height:213px;*/
 	}
-#sitecues-fallback-unsupported-browser #sitecues-badge-unsupported-browser-img {
+#sitecues-badge-unsupported-browser-img {
 	float:left;
 	}
-#sitecues-fallback-unsupported-browser #warning-message {
+#warning-message {
 	padding-top:10px;
 	font-size:20px;
 	font-family: 'Helvetica', Arial, sans-serif;
 	color:#333;
 	vertical-align:top;
 	}							
-#sitecues-fallback-unsupported-browser #warning-message a {
+#warning-message a {
 	color:#00659b;
 	text-decoration:none;
 	}
+#warning-message strong {
+	font-wieght:bold;
+}	
 /* THE FOLLOWING BUTTON STYLES ARE TAKEN FROM BOOTSTRAP 3 */		
 .btn{
 	font-family:'Helvetica',Arial,sans-serif;

@@ -13,6 +13,7 @@ sitecues.def('platform', function (platformModule, callback) {
     , browser
     , ieVersion
     , os
+    , isTouchDevice
     ;
 
   // Determine which browser is being used
@@ -33,6 +34,13 @@ sitecues.def('platform', function (platformModule, callback) {
       isOpera     : browser === 'Opera',
       isSafari    : browser === 'Safari'
     };
+
+   function hasTouch(){
+    return !!('ontouchstart' in window) || !!('msmaxtouchpoints' in window.navigator);
+   }
+
+   platformModule.isTouchDevice = hasTouch();
+
 
 
   ieVersion = 'NA';

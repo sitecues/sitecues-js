@@ -12,7 +12,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		OPERA 		= platform.browser.isOpera,
 		SAF 	  	= platform.browser.isSafari,
 		CHROME 	  	= platform.browser.isChrome,
-	 	isWindows 	= platform.os.isWin;
+	 	isWindows 	= platform.os.isWin,
+	 	hasTouch    = platform.isTouchDevice;
 
 
 	 	if(IE){
@@ -60,10 +61,22 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		}	
 	}
 
+	if(hasTouch){
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[5];
+	}
+
 
 	fallback.create = function(success) {
-     		 fallback.modal =  htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'})
-     		 .addClass('sitecues-unsupported-browser').appendTo('html');
+
+			load.style('../css/compatibility-fallback.css');
+
+			/*fallback.modal =  htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'})
+											.addClass('sitecues-unsupported-browser').appendTo('html');*/
+
+			fallback.modal =  hasTouch 	? 	htmlBuild.$div().attr({ 'id': 'sitecues-fallback-touch-browser'}) :
+											htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'});
+
+			fallback.modal.addClass('sitecues-unsupported-browser').appendTo('html');
 
               fallback.table = $('<table/>')
 		      	.attr({ 'id': 'unsupported-browser-warning', height: 215})
@@ -142,13 +155,23 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 				      if (success) {
 				        success();
 				      }
-		          }
+		          }			
+
+
+
+		    	// var _touchy =  $('#sitecues-fallback-touch-browser');
+				   //  _touchy.css({  'top'		: ( ( $( window ).height() - '235px' ) / 2) + $( window ).scrollTop() + "px!important",
+							// 		'left'		: ( ( $( window ).width() - '500px' ) / 2) + $( window ).scrollLeft() + "px!important"
+							// 	});
+
+			    	console.log($( window ).height(), $( document ).height() )
+
 
 			if(CHROME){
 				_reqFallback = false;
 				
 			}else if( IE6 || IE7 || IE8 || IE9 || IE10 || IE11 || MOZ || OPERA || SAF ){
-				load.style('../css/compatibility-fallback.css');
+				//load.style('../css/compatibility-fallback.css');
 				_reqFallback = true;
 			}
 

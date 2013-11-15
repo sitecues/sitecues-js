@@ -138,19 +138,58 @@ sitecues.def('badge', function (badge, callback, log) {
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
     badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
 
-    //EQ-881: As a customer, I want sitecues to degrade gracefully or provide
-    //a useful fallback when it can't work, so that my users aren't confused by the icon.
+    // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
+    // a useful fallback when it can't work, so that my users aren't confused by the icon.
+    // -csimari
     var _requiresFallback = platform.requiresFallback;
+    var _supportsTouch = platform.isTouchDevice;
+
+    //console.log("attempt at platform integration :: " + platform.isTouchDevice );
+
+      // EQ-657 - Handle tablet and smartphone case
+      // Determine if event was touch based - only limited to event at this level
+      // 'msgesturechange' is for IE10 - WTF?!
+      // -csimari
+ 
+    if( _requiresFallback || _supportsTouch ) { 
+
+      fallback.create(); 
+
+   }
+
+
+
+      switch(_supportsTouch){
+                            case true:
+
+                                $(badge.panel).on('touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', function (evt) {
+                                              evt.preventDefault();
+                                              fallback.slideDown();
+                                          }); 
+
+                            break;
+                            case false:
+
+                           
+                            break;
+                      } 
+      
+
 
       switch(_requiresFallback){
              case true:
 
-                      fallback.create();
 
-                      $(badge.panel).on("click", function (evt) {
-                              fallback.slideDown();
-                          });
 
+              $(badge.panel).on('click', function (evt) {
+                                                  evt.preventDefault();
+                                                  fallback.slideDown();
+                                                    });
+
+
+
+                      
+         
                       break;
 
               case false:
@@ -161,7 +200,9 @@ sitecues.def('badge', function (badge, callback, log) {
                           });
 
                       break;  
-                      }      
+                      } 
+
+
     
 
       sitecues.on("badge/enable", function() {
