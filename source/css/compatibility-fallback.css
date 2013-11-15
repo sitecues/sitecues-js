@@ -19,32 +19,21 @@ table,td,th,tbody{
 	}
 
 
-/*div#sitecues-fallback-unsupported-browser{
 
-	position:absolute!important; 
-	top:-250px; 
-	right:25px; 
-}
+div#sitecues-fallback-unsupported-browser {
 
-div#sitecues-fallback-touch-browser{
-	position:absolute!important;
-	display:block;
-	float:left;
-    top: 50% !important;
-    left: 50% !important;
-    margin-left: -550px !important;
-	}*/
+	display:none;
 
-div#sitecues-fallback-unsupported-browser,
-div#sitecues-fallback-touch-browser {
-	position:absolute!important; 
-	top:-250px; 
-	right:25px; 
+	top:50%;
+	left:50%;
+	margin-top: -130px;
+	margin-left: -250px;
+
 	width:500px; 
 	height:235px; 
 	
 	z-index:6000;
-	border:3px solid #666;  
+	border:3px solid #999;  
 	border-radius:6px; 
 	-moz-border-radius:6px; 
 	-o-border-radius:6px; 

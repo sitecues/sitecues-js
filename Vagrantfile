@@ -1,13 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require 'etc'
-require 'yaml'
-
-# Build username.
-$USERNAME = Etc.getlogin
-
-
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -16,27 +9,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
 
-  # Initialize the workspace
-  initialize_workspace
-
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "sitecues-js"
+  config.vm.box = "base"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://s3.amazonaws.com/vagrant.sitecues.com/boxes/sitecues-js.box"
-
-  config.vm.provider :virtualbox do |vb|
-    vb.name = "sitecues-js-vagrant"
-  end
-
-  # Perform
-
-  # Set the build username.
-  config.vm.provision :shell do |s|
-    s.path = "tools/vagrant/set_build_user.sh"
-    s.args = $USERNAME
-  end
+  # config.vm.box_url = "http://domain.com/path/to/above.box"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -97,7 +75,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #
   # config.vm.provision :puppet do |puppet|
   #   puppet.manifests_path = "manifests"
-  #   puppet.manifest_file  = "init.pp"
+  #   puppet.manifest_file  = "site.pp"
   # end
 
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
@@ -137,55 +115,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # chef-validator, unless you changed the configuration.
   #
   #   chef.validation_client_name = "ORGNAME-validator"
-end
-
-# Perform any vagrant workspace initializations.
-def initialize_workspace()
-  workspace_data_dir = File.join('.vagrant', 'workspace')
-  FileUtils.mkdir_p workspace_data_dir
-  workspace_data_file = File.join(workspace_data_dir, 'data.yml')
-  data = {}
-  if File.exists? workspace_data_file
-    data = YAML::load_file workspace_data_file
-  end
-
-  if !data[:git_attributes_applied]
-    git_attributes_applied = false
-    puts 'Appling .gitattributes to the workspace.'
-    puts 'Stashing current updates...'
-    if system 'git stash'
-      puts "Changes stashed."
-
-      puts 'Clearing file cache...'
-      if system 'git rm --cached -r .'
-        puts "File cache cleared."
-
-        puts 'Resetting workspace...'
-        if system 'git reset --hard'
-          puts 'Workspace reset.'
-          git_attributes_applied = true
-        else
-          puts 'Unable to reset workspace'
-        end
-      else
-        puts 'Unable to clear file cache.'
-      end
-
-      puts 'Popping stash...'
-      if system 'git stash pop'
-        puts 'Stash popped.'
-      else
-        puts 'Unable to pop stash.'
-      end
-
-    else
-      puts 'Unable to stash changes.'
-    end
-
-    data[:git_attributes_applied] = git_attributes_applied
-  end
-
-  File.open(workspace_data_file, 'w' ) do |out|
-    YAML.dump(data, out)
-  end
 end

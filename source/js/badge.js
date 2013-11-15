@@ -141,71 +141,76 @@ sitecues.def('badge', function (badge, callback, log) {
     // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
     // a useful fallback when it can't work, so that my users aren't confused by the icon.
     // -csimari
-    var _requiresFallback = platform.requiresFallback;
-    var _supportsTouch = platform.isTouchDevice;
-
-    //console.log("attempt at platform integration :: " + platform.isTouchDevice );
+    var _requiresFallback = platform.requiresFallback,
+        _supportsTouch = platform.isTouchDevice,
+        _errMsg;
 
       // EQ-657 - Handle tablet and smartphone case
       // Determine if event was touch based - only limited to event at this level
       // 'msgesturechange' is for IE10 - WTF?!
       // -csimari
+
+      var setFallbackEvents = function (evt){
+                                  evt.preventDefault();
+                                  fallback.fadeIn();
+                                };
+      var setDefaultEventOver = function (evt) {
+                                  sitecues.emit('badge/hover', badge.element);
+                                };     
+      var setDefaultEventLeave = function (evt) {
+                                  sitecues.emit('badge/leave', badge.element);
+                                };                             
  
     if( _requiresFallback || _supportsTouch ) { 
 
       fallback.create(); 
 
+        if( _requiresFallback && _supportsTouch ){
+
+           // _errMsg = ['Browser requires fallback with touch support.',
+           //            'hover, touchstart, touchmove, touchend, msgesturechange'
+           //          ] 
+
+           $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+           $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+          }
+
+        else if( _requiresFallback && !_supportsTouch ){
+            
+            // _errMsg = ['Browser requires fallback and does not support touch.',
+            //           'click'
+            //         ]  
+
+            $(badge.panel).on( 'click', setEvents );     
+          } 
+
+        else if( !_requiresFallback && _supportsTouch ){
+
+          // _errMsg = ['Browser requires fallback for touch events only.',
+          //           'hover, touchstart, touchmove, touchend, msgesturechange'
+          //         ]
+
+          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+          $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+        }
+
+
+   }else{
+          // _errMsg = ['sitecues deployed without need for fallback!',
+          //             'hover'
+          //           ]
+          $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+
    }
 
 
 
-      switch(_supportsTouch){
-                            case true:
 
-                                $(badge.panel).on('touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', function (evt) {
-                                              evt.preventDefault();
-                                              fallback.slideDown();
-                                          }); 
-
-                            break;
-                            case false:
-
-                           
-                            break;
-                      } 
-      
-
-
-      switch(_requiresFallback){
-             case true:
+    //console.log(_errMsg)
 
 
 
-              $(badge.panel).on('click', function (evt) {
-                                                  evt.preventDefault();
-                                                  fallback.slideDown();
-                                                    });
-
-
-
-                      
-         
-                      break;
-
-              case false:
-                          $(badge.panel).hover(function (evt) {
-                              sitecues.emit('badge/hover', badge.element); // emit event about hover
-                          }, function () {
-                              sitecues.emit('badge/leave', badge.element); // emit event about leave
-                          });
-
-                      break;  
-                      } 
-
-
-    
-
-      sitecues.on("badge/enable", function() {
+      sitecues.on('badge/enable', function() {
           badge.enable(true);
       });
 

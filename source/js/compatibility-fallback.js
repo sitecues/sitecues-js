@@ -4,7 +4,7 @@ sitecues.def('compatibility/fallback', function (fallback, callback, log) {
 
 	var _reqFallback;
 
-sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',  function ($, conf, style, htmlBuild, platform, load) {
+sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($, conf, style, platform, load) {
 
 
 	var IE 	 		= platform.browser.isIE,
@@ -66,17 +66,16 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 	}
 
 
+
+
 	fallback.create = function(success) {
 
 			load.style('../css/compatibility-fallback.css');
 
-			/*fallback.modal =  htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'})
-											.addClass('sitecues-unsupported-browser').appendTo('html');*/
-
-			fallback.modal =  hasTouch 	? 	htmlBuild.$div().attr({ 'id': 'sitecues-fallback-touch-browser'}) :
-											htmlBuild.$div().attr({ 'id': 'sitecues-fallback-unsupported-browser'});
-
-			fallback.modal.addClass('sitecues-unsupported-browser').appendTo('html');
+			fallback.modal = $('<div/>')
+							.attr({ 'id': 'sitecues-fallback-unsupported-browser'})
+							.addClass('sitecues-unsupported-browser')
+							.appendTo('html');
 
               fallback.table = $('<table/>')
 		      	.attr({ 'id': 'unsupported-browser-warning', height: 215})
@@ -126,7 +125,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		      	.text('Dismiss')
 		      	.appendTo( $('#dismiss-btn').on("click", function(evt){ 
 		      									evt.preventDefault(); 
-		      									fallback.slideUp(); 
+		      									fallback.fadeOut(); 
 		      									return false}) 
 		      									);
 
@@ -138,7 +137,33 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		      	.text('Learn More')
 		      	.appendTo( $('#explore-btn') );
 
-					fallback.slideDown = function (success,evt) {
+		      	fallback.fadeIn = function (success,evt) {
+					$(fallback.modal).center()
+		      		$(fallback.modal).stop(true,true).promise().done(
+
+
+		      			$(fallback.modal).fadeIn('slow', function() {
+						      	if (success) {
+						      		success();
+						      	}
+						      })
+		      			)
+		      	}
+
+				fallback.fadeOut = function (success,evt) {
+
+					$(fallback.modal).stop(true,true).promise().done(
+
+		      			$(fallback.modal).fadeOut('slow', function() {
+						      	if (success) {
+						      		success();
+						      	}
+						      })
+		      			)
+				}   		
+
+
+					/*fallback.slideDown = function (success,evt) {
 				   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
 						      	if (success) {
 						      		success();
@@ -151,13 +176,40 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 						      		success();
 						      	}
 						      });
-							};
+							};*/
 				      if (success) {
 				        success();
 				      }
 		          }			
 
 
+		          $.fn.center = function() {
+					    var container = $(window);
+					    var top = -($(this).height()*.5);
+					    var left = -($(this).width()*.5);
+					    console.log("center test")
+					    return this.css('position', 'absolute').css({ 	'margin-left': -($(this).width()*.5) + 'px', 
+					    												'margin-top': -($(this).height()*.5) + 'px', 
+					    												'left': (50+'%') /*+ $( window ).scrollLeft()+ 'px'*/ , 
+					    												'top': ($(window).scrollTop() + ($(this).height()) )+'px' /*-($(this).height()*.5) + 'px'*///)-($(this).height()*.5) + $( window ).scrollTop()+ 'px'*/ 
+					    											});
+									}
+
+					if( $("#sitecues-fallback-unsupported-browser") ){
+						console.log("test")
+						$("#sitecues-fallback-unsupported-browser").center();
+					}
+			
+
+					$(window).on('resize', function(){
+						$("#sitecues-fallback-unsupported-browser").center();
+					});
+					$(window).on('scroll', function(){
+						$("#sitecues-fallback-unsupported-browser").center();
+	
+					});
+
+					 
 
 		    	// var _touchy =  $('#sitecues-fallback-touch-browser');
 				   //  _touchy.css({  'top'		: ( ( $( window ).height() - '235px' ) / 2) + $( window ).scrollTop() + "px!important",
