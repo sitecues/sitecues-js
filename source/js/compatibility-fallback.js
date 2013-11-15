@@ -35,7 +35,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		/*[2]*/	"require a more recent version of your web browser.",
 		/*[3]*/	"are coming to your browser soon!",
 		/*[4]*/	"require a different web browser in order to work.",
-		/*[5]*/	"touch interaction are coming device soon!"
+		/*[5]*/	"touch support is coming to your device soon!"
 			];	
 
 	var _compiledMessage;		
@@ -126,7 +126,6 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'html-build', 'platform', 'load',
 		      	.appendTo( $('#explore-btn') );
 
 					fallback.slideDown = function (success,evt) {
-						console.log("fallback click was set")
 				   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
 						      	if (success) {
 						      		success();
