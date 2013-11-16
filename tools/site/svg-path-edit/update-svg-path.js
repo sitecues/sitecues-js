@@ -1,85 +1,131 @@
-(function(win, $){
+/*
+ * LIVE SVG-Path Update
+ *
+ * This script allows us to update SVG paths in realtime within a browser window using the keyboard.
+ * It is used to get pixel-perfect shapes for the cursors, so that they look the same as the OS cursors.
+ 
+ * Without this script, the process would be:
+ *  - Generate/updating an SVG, 
+ *  - Export it to a file
+ *  - Look at it on another OS/browser to check it looks right.
+ *
+ * Just because a shape looks correct small, does not mean it looks correct large. Getting scalable
+ * graphics to look good regardless of the resolution takes time and experimentation. This is a
+ * very, very slow process. You can imagine what it would be like to do this for all cursors every time
+ * the graphics change.
+ * 
+ * This script allows us to manipulate the subpixels of a path element without using the mouse, making
+ * the edit more accurate and less fiddly (trying to click and drag in the right places). Importantly,
+ * the live changes made to SVG path is visible on multiple scales at one time. This means we can get 
+ * quality graphics on multiple scales, fast.
+ *
+ * Much of the SVG code I have re-used from MIT Lisenced open-source code I have on Github, some of
+ * it going back as far as 2008. (See: The Burst Engine and svg2Canvas.js)
+ *
+ *  - Alistair MacDonald
+ * 
+ */
+
+(function(){
 
   'use strict';
 
-  var 
+  //// HELPER FUNCTIONS ////
 
-    // Regular Experssions for SVG Paths
-    expression  = {
-      pathCommand   : '[mzlhvcqtaMZLHVCQTA][^mzlhvcqtaMZLHVCQTA]+'
-    , move          : '[0-9][^,]+'
-    , curveTo       : '[0-9][^,|^ ]+'
-    }
+  // Regular expressions used to break up the SVG path segments.
+  var expression  = {
+    pathCommand   : '[MLCz][^MLCz]+|z',
+    // move          : '[-0-9][^,]+',
+    move          : '[0-9-.]+',
+    curveTo       : '[-0-9|.]+'
+  };
 
-    // Get the arguments for a Path command
-    , processCommand = {
+  // Processes the arguments of a path segment command into a coordinate array.
+  var processCommand = {
 
-        // Move To (Absolute)
-        M: function (command) {
-          var regex   = new RegExp(expression.move, 'g')
-            , coord   = []
-            , nextCoord
-            ;
-
-          while((nextCoord = regex.exec(command))){
-            coord.push(nextCoord[0]);
-          }
-
-          //c.moveTo(coord[0], coord[1]);
-        },
-
-        // Line To (Absolute)
-        L: function (command) {
-          var regex   = new RegExp(expression.move, 'g')
-            , coord   = []
-            , nextCoord
-            ;
-
-          while((nextCoord = regex.exec(command))){
-            coord.push(nextCoord[0]);
-          }
-
-          //c.lineTo(coord[0], coord[1]);
-        },
-
-        // Curve To (Absolute:Bezier)
-        C: function (command) {
-          var regex   = new RegExp(expression.curveTo, 'g')
-            , coord   = []
-            , nextCoord
-            ;
-
-          while((nextCoord = regex.exec(command))){
-            coord.push(nextCoord[0]);
-          }
-
-          //c.bezierCurveTo(coord[0], coord[1], coord[2], coord[3], coord[4], coord[5]);
-        },
-
-        // Close Path
-        z: function () {
-          //c.closePath();
-        }
-
+    // Move To (Absolute)
+    M: function (command) {
+      var regex   = new RegExp(expression.move, 'g'),
+          coord   = [],
+          nextCoord;
+        
+      while((nextCoord = regex.exec(command))){
+        coord.push(parseFloat(nextCoord[0]));
       }
 
-  , svg
-  , $pathDisplay = null
-  , selPath   = 0
-  , pathCount  = 0
-  , selCmd    = 0
-  , cmdCount  = 0
+      return coord;
+    },
 
-  , pathElem = null
-  , pathStr  = null
-  , pathComs = null
+    // Line To (Absolute)
+    L: function (command) {
+      var regex   = new RegExp(expression.move, 'g'),
+          coord   = [],
+          nextCoord;
 
-  , nudgeAmt = 0.1
-  ;
+      while((nextCoord = regex.exec(command))){
+        coord.push(parseFloat(nextCoord[0]));
+      }
+
+      return coord;
+    },
+
+    // Curve To (Absolute:Bezier)
+    C: function (command) {
+      var regex   = new RegExp(expression.curveTo, 'g'),
+          coord   = [],
+          nextCoord;
+
+      while((nextCoord = regex.exec(command))){
+       coord.push(parseFloat(nextCoord[0]));
+      }
+
+      return coord;
+    },
+
+    // Close Path
+    z: function () {
+      return [];
+    },
+
+  };
+
+  // Create a commandList Array from an SVG path String
+  function pathToCommandList (pathStr) {
+    var regex       = new RegExp(expression.pathCommand, 'g'),
+        pathd       = pathStr,
+        commandList = [],
+        nextCommand,
+        commandType;
+
+    while((nextCommand = regex.exec(pathd))){
+      commandType = nextCommand[0][0];
+      commandList.push({
+          type    : commandType,
+          coords  : processCommand[commandType](nextCommand)
+        });
+    }
+
+    return commandList;
+  }
 
 
-  function storeSVGData () {
-    svg = {
+
+  //// GLOBAL VARS ////
+
+  var svgRefs,
+      $pathDataElem   = null,
+      curSelPathIdx   = 0,      // The currently selected/focused path index (within the svg)
+      curSelPathElem  = null,   // The currently selected/focused path element
+      curSelSegCmd    = 0,      // The currently selected/focused path-segment (command)
+      numPaths        = 0,      // Number of paths in the SVG
+      numSegsInPath   = 0,      // Number of commands/segments in the selected path
+      pathCommandList = [],     // An Array of segment commands in the current selected path
+      nudgeAmt      = 0.1;    // The amount/speed which points and controls-points are moved per key event
+
+
+  // Stores references to the SVG DOM elements
+  function storeSVGRefs () {
+    svgRefs = {
       cursor1x: {
         elem: $('#cursor1x'),
         paths: $('#cursor1x').find('path')
@@ -89,196 +135,287 @@
         paths: $('#cursor5x').find('path')
       }
     };
-    pathCount = svg.cursor1x.paths.length;
+    numPaths = svgRefs.cursor1x.paths.length;
   }
 
+  // 
+  function displayPathDataAsHTML () {
+    var pl  = numPaths,
+        p   = 0,
+        d,
+        c,
+        cl,
+        pathd;
 
-  function selectPath (idx) {
-    selPath = idx;
-
-    pathElem  = $(svg.cursor1x.paths[selPath]);
-    pathStr   = pathElem.attr('d').trim();
-    pathComs  = pathStr.split(' ');
-    cmdCount  = pathComs.length;
-    
-    if (cmdCount<selCmd) {
-      selCmd=cmdCount-1;
-    }
-  }
-
-
-  function drawPathsToDisplay () {
-    var p   = 0
-      , c
-      , pl  = pathCount
-      , cl  = cmdCount
-      , pathd
-      ;
-
-    $pathDisplay.html('');
+    $pathDataElem.html('');
 
     for(;p< pl; p++){
       
       pathd = $('<div>',{
         id : 'path:'+p,
-        class : 'pathd'+(p===selPath?' sel':''),
+        class : 'pathd'+(p===curSelPathIdx?' sel':''),
       });
-    
-      var pathElem  = $(svg.cursor1x.paths[p])
-        , pathStr   = pathElem.attr('d').trim()
-        , pathComs  = pathStr.split(' ')
-        ;
+
+      var pathComs = pathToCommandList($(svgRefs.cursor1x.paths[p]).attr('d'));
+      cl=pathComs.length;
 
       for(c=0 ;c< cl; c++){
+
+        var c_com     = pathComs[c],
+            type      = c_com.type,
+            coords    = c_com.coords,
+            dl        = coords.length,
+            coordStr  = '';
+          
+        for(d=0; d< dl; d+=2){
+          coordStr += coords[d] +','+ coords[d+1] +' ';
+        }
+
         pathd.append( $('<span>',{
-          text:pathComs[c],
-          class: 'pathcommand'+(c===selCmd&&p===selPath?' sel':''),
+          text: (type + coordStr).trim(),
+          class: 'pathcommand'+(c===curSelSegCmd&&p===curSelPathIdx?' sel':''),
         }));
       }
 
-      $pathDisplay.append(pathd);
+      $pathDataElem.append(pathd);
     }
   }
 
 
-  var mover = {
-    coords: [],
-    selPath: null,
-    selCmd: null,
-    active:false
+  // Operates on a segment to update the position of points/control-points in the SVG path
+  var segMover = {
+    
+    segRef: null,  // Referece to segment being moved
+    active:false,  // Becomes active when this particular kind of segment can be moved
+
+    // Focuses the segMover on a particular segment of the currently selected path
+    focusOnSeg: function focusOnSeg () {
+      
+      // TODO: Don't use globals here, it's going to become unreliable.
+      this.segRef = pathCommandList[curSelSegCmd];
+    },
+
+    // Updates the coordinates of the currently selected segment
+    updateSegCoords: function updateSegCoords (x, y) {
+
+      // 1ST CP: Modify the first control-point (if it exists)
+      if (keyStack[ keyDownIs.shift ]) {
+
+        // console.log(typeof this.segRef.coords[2]);
+        if (typeof this.segRef.coords[2] === 'number') {
+          this.segRef.coords[2] += x*nudgeAmt;
+          this.segRef.coords[3] += y*nudgeAmt;
+        }
+      
+      // 2ND CP: Modify the second control point (if it exists)
+      } else if (keyStack[ keyDownIs.command ]) {
+        
+        // console.log(typeof this.segRef.coords[2]);
+        if (typeof this.segRef.coords[4] === 'number') {
+          this.segRef.coords[4] += x*nudgeAmt;
+          this.segRef.coords[5] += y*nudgeAmt;
+        }
+      
+      // BASE COORD: Modify the base coordinate (always exists except for close-path 'z')
+      } else {
+
+        if (typeof this.segRef.coords === 'object') {
+          this.segRef.coords[0] += x*nudgeAmt;
+          this.segRef.coords[1] += y*nudgeAmt;
+        }
+      }
+      
+      updateSelectedSVGPath();
+      updateHTMLDataSegment(this.segRef);
+      
+      // console.log(this.segRef.coords);
+    }
   };
 
-  function activateMover () {
 
-    // pathElem  = $(svg.cursor1x.paths[selPath]);
-    // pathStr   = pathElem.attr('d').trim();
-    // pathComs  = pathStr.split(' ');
-    // cmdCount  = pathComs.length;
+  function updateHTMLDataSegment (segRef) {
+    var type      = segRef.type,
+        coords    = segRef.coords,
+        d,
+        dl        = coords.length,
+        pathdSeg  = '',
+        coordStr  = '';
 
-    console.log(pathComs[selCmd]);
 
-    var curCom = pathComs[selCmd]
-      , coords
-      ;
-    if (curCom[0] !== 'z'||curCom[0] !== 'Z') {
-      coords = (curCom.slice(1)).split(',');
-      mover.coords[0] = parseFloat(coords[0]);
-      mover.coords[1] = parseFloat(coords[1]);
-      mover.selPath = selPath;
-      mover.selCmd  = selCmd;
-      mover.cmdType = curCom[0];
-      mover.active=true;
+    if (dl>0) {
+      for(d=0; d< dl; d+=2){
+        coordStr += (coords[d]).toFixed(2) +','+ (coords[d+1]).toFixed(2) +' ';
+      }
+      pathdSeg += type + coordStr;
     } else {
-      mover.active=false;
+      pathdSeg = 'z';
     }
+    // console.log(dl);
+
+    $('.sel > .sel').text(pathdSeg);
+    //console.log(pathdSeg);
   }
 
-  function updateMover (x, y) {
-    if (mover.active) {
-      if (x) {
-        mover.coords[0] += parseFloat(x);
-      }
-      if (y) {
-        mover.coords[1] += parseFloat(y);
-      }
-    }
-    updateSVGPath(mover);
-  }
+  // Updates all instances of the currently selected SVG paths, across multiple sized visible copies of the SVG
+  function updateSelectedSVGPath () {  
+    var i     = 0,
+        l     = pathCommandList.length,
+        pathd = '',
+        d;
 
-
-
-  function updateSVGPath (mover) {
-    if (mover.active) {
-      var curCom  = pathComs[selCmd]
-        , newCom  = mover.cmdType+mover.coords[0].toFixed(2)+','+mover.coords[1].toFixed(2)
-        , newPath = ''
-        ;
+    for(;i< l; i++){
+      var i_com     = pathCommandList[i],
+          type      = i_com.type,
+          coords    = i_com.coords,
+          dl        = coords.length,
+          coordStr  = '';
       
-      $('.sel > .sel').text(newCom);
-      $('.sel:first').find('span').each(function(e,i){
-        newPath+=$(this).text()+' ';
-      });
-      
-      $(svg.cursor1x.paths[selPath]).attr('d', newPath);
-      $(svg.cursor5x.paths[selPath]).attr('d', newPath);
+      if (dl>0) {
+        for(d=0; d< dl; d+=2){
+          coordStr += (coords[d]).toFixed(2) +','+ (coords[d+1]).toFixed(2) +' ';
+        }
+        pathd += type + coordStr;
 
-      drawPathsToDisplay();
+      } else {
+        pathd += 'z';
+      }
     }
+    
+    //console.log(pathd);
+    $(svgRefs.cursor1x.paths[curSelPathIdx]).attr('d', pathd);
+    $(svgRefs.cursor5x.paths[curSelPathIdx]).attr('d', pathd);
   }
 
 
-  win.addEventListener('keydown', function(e){
 
-    switch(e.keyCode){
+  // A stack containing boolean keydown states
+  var keyStack = {},
+
+      keyDownIs = {
+        shift: 16,
+        command: 91
+      };
+
+
+  // Handle keys being released
+  window.addEventListener('keyup', function(e){
+    var keyCode = e.keyCode;
+    keyStack[keyCode] = false;
+  });
+
+  // Handle keys being pressed
+  window.addEventListener('keydown', function(e){
+    var keyCode = e.keyCode,
+        preventDefault = true;
+
+    //console.log(keyCode);
+    
+    // Track the state of the keys for modifiers
+    keyStack[keyCode] = true;
+
+    switch(keyCode){
+    
+    // Modifier keys
+    case 16:
+      break;
+    case 91:
+      break;
+    
     case 38: // Up
-      updateMover(false, -nudgeAmt);
+      segMover.updateSegCoords(0, -1);
       break;
     case 40: // Down
-      updateMover(false, +nudgeAmt);
+      segMover.updateSegCoords(0, +1);
       break;
     case 37: // Left
-      updateMover(-nudgeAmt, false);
+      segMover.updateSegCoords(-1, 0);
       break;
     case 39: // Right
-      updateMover(+nudgeAmt, false);
+      segMover.updateSegCoords(+1, 0);
       break;
 
     // Select Previous Path
     case 87: // W
-      selPath--;
-      if (selPath<0) {
-        selPath = pathCount-1;
+      curSelPathIdx--;
+      if (curSelPathIdx<0) {
+        curSelPathIdx = numPaths-1;
       }
-      selectPath(selPath);
-      drawPathsToDisplay();
-      activateMover();
+      selectPath(curSelPathIdx);
+      displayPathDataAsHTML();
+      segMover.focusOnSeg();
       break;
 
     // Select Next Path
     case 83: // S
-      selPath++;
-      if (selPath>pathCount-1) {
-        selPath = 0;
+      curSelPathIdx++;
+      if (curSelPathIdx>numPaths-1) {
+        curSelPathIdx = 0;
       }
-      selectPath(selPath);
-      drawPathsToDisplay();
-      activateMover();
+      selectPath(curSelPathIdx);
+      displayPathDataAsHTML();
+      segMover.focusOnSeg();
       break;
     
     // Select Prev Command
     case 65: // A
-      selCmd--;
-      if (selCmd<0) {
-        selCmd=cmdCount-1;
+      curSelSegCmd--;
+      if (curSelSegCmd<0) {
+        curSelSegCmd=numSegsInPath-1;
       }
-      selectPath(selPath);
-      drawPathsToDisplay();
-      activateMover();
+      displayPathDataAsHTML();
+      segMover.focusOnSeg();
       break;
     
     // Select Next Command
     case 68: // D
-      selCmd++;
-      if (selCmd>cmdCount-1) {
-        selCmd=0;
+      curSelSegCmd++;
+      if (curSelSegCmd>numSegsInPath-1) {
+        curSelSegCmd=0;
       }
-      selectPath(selPath);
-      drawPathsToDisplay();
-      activateMover();
+      displayPathDataAsHTML();
+      segMover.focusOnSeg();
+      break;
+
+    // If none of the keys were captured... it's OK to resume default key behavior
+    default:
+      preventDefault = false;
+      console.log('pdf = false');
       break;
     }
 
-    // console.log(e.keyCode);
+    if (preventDefault === true) {
+      e.preventDefault();
+    }
   });
 
 
+  // Selects a path by it's index in the SVG
+  function selectPath (idx) {
+    curSelPathIdx   = idx;
+    curSelPathElem  = $(svgRefs.cursor1x.paths[idx]);
+    pathCommandList = pathToCommandList( curSelPathElem.attr('d') );
+    numSegsInPath   = pathCommandList.length;
+    if (numSegsInPath < curSelSegCmd) {
+      curSelSegCmd = numSegsInPath - 1;
+    }
+  }
 
-  win.addEventListener('DOMContentLoaded', function(){
-    $pathDisplay = $('#path-window');
-    storeSVGData();
+
+  function init () {
+    $pathDataElem = $('#path-data');
+    storeSVGRefs();
     selectPath(0);
-    drawPathsToDisplay();
-    activateMover();
-  });
+    segMover.focusOnSeg(0);
+    displayPathDataAsHTML();
+  }
 
-})(window, $);
+  window.addEventListener('DOMContentLoaded', init);
+
+})();
+
+
+
+
+
+
+

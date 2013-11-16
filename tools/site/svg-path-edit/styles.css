@@ -23,10 +23,11 @@ div.cursor-window{
   /*background:white;*/
 }
 
-#path-window{
+#path-data{
   /*font-family: "Courier New", Courier, monospace;*/
   font-family: arial;
   font-size: 12px;
+  font-weight:normal;
 }
 
 .pathd{
