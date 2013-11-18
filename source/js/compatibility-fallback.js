@@ -1,8 +1,6 @@
 sitecues.def('compatibility/fallback', function (fallback, callback, log) {
 	
-	'use strict';
-
-	var _reqFallback;
+	//'use strict';
 
 sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($, conf, style, platform, load) {
 
@@ -27,7 +25,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 	var _windows = platform.os.isWin;
 
-	/* We are generating a message based different criteris - coming soon, not supported (older browsers) and coming soon.
+	/* We are generating a message based different criteria - coming soon, not supported (older browsers) and touch coming soon.
 	Any suggestions to change whether an array is the best choice? */
 	var _compiledMessage;
 	var	_warning = [
@@ -91,7 +89,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      	.attr({	'id': 'sitecues-unsupported-browser-img',
 		      			'src': sitecues.resolveSitecuesUrl('../images/no-sitecues-support-warning.png'),
 		      			'href':'http://www.sitecues.com/',
-		      			'title':'Visit sitecues.com for more information.',
+		      			'title':'sitecues - unsupported browser image.',
 		      			'alt': 'Visit sitecues.com for more information.'
 		      		})
 		      	.appendTo( $('td#sitecues-unsupported-browser') )
@@ -162,21 +160,6 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      			)
 				}   		
 
-
-					/*fallback.slideDown = function (success,evt) {
-				   		  $(fallback.modal).stop(true,true).animate({"top":"50px"}, 750, function() {
-						      	if (success) {
-						      		success();
-						      	}
-						      });
-				   		}
-				   	fallback.slideUp = function (success,evt) {
-				   		  $(fallback.modal).stop(true,true).animate({"top":"-250px"}, 500, function() {
-						      	if (success) {
-						      		success();
-						      	}
-						      });
-							};*/
 				      if (success) {
 				        success();
 				      }
@@ -187,16 +170,15 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 					    var container = $(window);
 					    var top = -($(this).height()*.5);
 					    var left = -($(this).width()*.5);
-					    console.log("center test")
-					    return this.css('position', 'absolute').css({ 	'margin-left': -($(this).width()*.5) + 'px', 
-					    												'margin-top': -($(this).height()*.5) + 'px', 
-					    												'left': (50+'%') /*+ $( window ).scrollLeft()+ 'px'*/ , 
-					    												'top': ($(window).scrollTop() + ($(this).height()) )+'px' /*-($(this).height()*.5) + 'px'*///)-($(this).height()*.5) + $( window ).scrollTop()+ 'px'*/ 
+					    return this.css('position', 'absolute').css({ 	
+			    												'margin-left': -($(this).width()*.5) + 'px', 
+			    												'margin-top': -($(this).height()*.5) + 'px', 
+			    												'left': (50+'%'), 
+			    												'top': ($(window).scrollTop() + ($(this).height()) )+'px' 
 					    											});
 									}
 
 					if( $("#sitecues-fallback-unsupported-browser") ){
-						console.log("test")
 						$("#sitecues-fallback-unsupported-browser").center();
 					}
 			
@@ -207,27 +189,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 					$(window).on('scroll', function(){
 						$("#sitecues-fallback-unsupported-browser").center();
 	
-					});
+			});
 
-					 
-
-		    	// var _touchy =  $('#sitecues-fallback-touch-browser');
-				   //  _touchy.css({  'top'		: ( ( $( window ).height() - '235px' ) / 2) + $( window ).scrollTop() + "px!important",
-							// 		'left'		: ( ( $( window ).width() - '500px' ) / 2) + $( window ).scrollLeft() + "px!important"
-							// 	});
-
-			    	console.log($( window ).height(), $( document ).height() )
-
-
-			if(CHROME){
-				_reqFallback = false;
-				
-			}else if( IE6 || IE7 || IE8 || IE9 || IE10 || IE11 || MOZ || OPERA || SAF ){
-				//load.style('../css/compatibility-fallback.css');
-				_reqFallback = true;
-			}
-
-		fallback._reqFallback = _reqFallback;
 	});
 	callback();
 });	

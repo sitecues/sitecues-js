@@ -142,12 +142,11 @@ sitecues.def('badge', function (badge, callback, log) {
     // a useful fallback when it can't work, so that my users aren't confused by the icon.
     // -csimari
     var _requiresFallback = platform.requiresFallback,
-        _supportsTouch = platform.isTouchDevice,
-        _errMsg;
+        _supportsTouch = platform.isTouchDevice;
 
       // EQ-657 - Handle tablet and smartphone case
       // Determine if event was touch based - only limited to event at this level
-      // 'msgesturechange' is for IE10 - WTF?!
+      // 'msgesturechange' is for IE10 - wtf?!
       // -csimari
 
       var setFallbackEvents = function (evt){
@@ -160,53 +159,26 @@ sitecues.def('badge', function (badge, callback, log) {
       var setDefaultEventLeave = function (evt) {
                                   sitecues.emit('badge/leave', badge.element);
                                 };                             
- 
-    if( _requiresFallback || _supportsTouch ) { 
+     
+        if( _requiresFallback || _supportsTouch ) { 
 
-      fallback.create(); 
+          fallback.create();
 
-        if( _requiresFallback && _supportsTouch ){
+            switch(_supportsTouch){
+                case true: 
+                      $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+                  break;
 
-           // _errMsg = ['Browser requires fallback with touch support.',
-           //            'hover, touchstart, touchmove, touchend, msgesturechange'
-           //          ] 
+                case false: 
+                      $(badge.panel).on( 'click', setFallbackEvents );
+                  break;
+              }
 
-           $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-           $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-          }
+          }else{
+                // sitecues deployed without need for fallback.',
+                $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+         }
 
-        else if( _requiresFallback && !_supportsTouch ){
-            
-            // _errMsg = ['Browser requires fallback and does not support touch.',
-            //           'click'
-            //         ]  
-
-            $(badge.panel).on( 'click', setEvents );     
-          } 
-
-        else if( !_requiresFallback && _supportsTouch ){
-
-          // _errMsg = ['Browser requires fallback for touch events only.',
-          //           'hover, touchstart, touchmove, touchend, msgesturechange'
-          //         ]
-
-          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-          $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-        }
-
-
-   }else{
-          // _errMsg = ['sitecues deployed without need for fallback!',
-          //             'hover'
-          //           ]
-          $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-
-   }
-
-
-
-
-    //console.log(_errMsg)
 
 
 
