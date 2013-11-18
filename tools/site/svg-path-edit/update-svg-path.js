@@ -21,6 +21,8 @@
  *
  * Much of the SVG code I have re-used from MIT Lisenced open-source code I have on Github, some of
  * it going back as far as 2008. (See: The Burst Engine and svg2Canvas.js)
+ * 
+ * (Currently working with absolution positioning SVG path commands, using M, L and C only.)
  *
  *  - Alistair MacDonald
  * 
@@ -132,10 +134,19 @@
       },
       cursor5x: {
         elem: $('#cursor5x'),
-        paths: $('#cursor5x').find('path')
-      }
+        paths: $('#cursor5x').find('path'),
+        controlPoints: {
+          cp0Box  :$('#cursor5x').find('rect[data-ui="control-point-0-box"]'),
+          cp1Box  :$('#cursor5x').find('rect[data-ui="control-point-1-box"]'),
+          cp2Box  :$('#cursor5x').find('rect[data-ui="control-point-2-box"]'),
+          cp1Line :$('#cursor5x').find('path[data-ui="control-point-1-line"]'),
+          cp2Line :$('#cursor5x').find('path[data-ui="control-point-2-line"]')
+        }
+      },
+
     };
     numPaths = svgRefs.cursor1x.paths.length;
+    console.log(svgRefs.cursor5x.controlPoints.cp1Line.length);
   }
 
   // 
@@ -193,6 +204,46 @@
       
       // TODO: Don't use globals here, it's going to become unreliable.
       this.segRef = pathCommandList[curSelSegCmd];
+
+      // Update control points to match the position of the currently selected segment
+      this.updateControlPoints();
+
+    },
+
+    updateControlPoints: function updateControlPoints () {
+      
+      // If there are any coordinates at all (it's not a close-path 'z' command)...
+      if (typeof this.segRef.coords[0] === 'number') {
+
+        // Move the base control point coordinate box and make it visible
+        svgRefs.cursor5x.controlPoints.cp0Box.attr('transform', 'translate('+this.segRef.coords[0]+','+this.segRef.coords[1]+')' );
+        svgRefs.cursor5x.controlPoints.cp0Box.attr('opacity', '1' );
+
+        if (this.segRef.coords.length >4) {
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('transform', 'translate('+this.segRef.coords[2]+','+this.segRef.coords[3]+')' );
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('transform', 'translate('+this.segRef.coords[4]+','+this.segRef.coords[5]+')' );
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '1' );
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '1' );
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('d', 'M'+this.segRef.coords[0]+','+this.segRef.coords[1] +' L'+ this.segRef.coords[2]+','+this.segRef.coords[3] );
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('d', 'M'+this.segRef.coords[0]+','+this.segRef.coords[1] +' L'+ this.segRef.coords[4]+','+this.segRef.coords[5] );
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '1' );
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '1' );
+        } else {
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0' );
+        }
+      }else{
+        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0' );
+      }
     },
 
     // Updates the coordinates of the currently selected segment
@@ -227,6 +278,8 @@
       
       updateSelectedSVGPath();
       updateHTMLDataSegment(this.segRef);
+      this.updateControlPoints();
+
       
       // console.log(this.segRef.coords);
     }
@@ -291,10 +344,10 @@
   // A stack containing boolean keydown states
   var keyStack = {},
 
-      keyDownIs = {
-        shift: 16,
-        command: 91
-      };
+    keyDownIs = {
+      shift: 16,
+      command: 91
+    };
 
 
   // Handle keys being released
