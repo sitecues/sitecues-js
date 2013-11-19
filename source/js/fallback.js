@@ -1,4 +1,4 @@
-sitecues.def('compatibility-fallback', function (fallback, callback, log) {
+sitecues.def('fallback', function (fallback, callback, log) {
 	
 	'use strict';
 
@@ -150,6 +150,15 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	        success();
 	      }
       }			
+
+
+    var $fallback = $('#sitecues-fallback-unsupported-browser');
+      if ($fallback.length > 0) {
+        fallback.modal = $fallback;
+      } else {
+        // We have no alternate or pre-existing badges defined, so create a new one.
+        fallback.create();
+      }
 
 
 		          $.fn.center = function() {

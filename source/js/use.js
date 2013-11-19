@@ -15,5 +15,5 @@ window.sitecues && sitecues.use(
 	'highlight-box',
 	'invert',
 	'hpan',
-	'compatibility-fallback'
+	'fallback'
 );
