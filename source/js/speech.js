@@ -65,26 +65,6 @@ sitecues.def('speech', function (speech, callback, log) {
           conf.set(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
         },
 
-        removeHTMLEntities = (function() {
-          //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
-          //Taken from http://www.w3schools.com/tags/ref_entities.asp and then passed the symbols above into
-          //the native function encodeURIComponent.  Example: encodeURIComponent('®')
-          var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%C2%A2', '%C2%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
-          /**
-           * @param URIComponent accepts a string of URI encoded text and removes any
-           *  html entity encoded characters from it
-           */
-          return function (URIComponent) {
-            for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
-              URIComponent = URIComponent.replace(htmlEntityMap[i], '');
-            }
-
-            
-            return URIComponent;
-          };
-      
-        }()),
-
         //What audio format will we use? 
         audioFormat =  (function () {
 
@@ -122,7 +102,7 @@ sitecues.def('speech', function (speech, callback, log) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
               // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
               + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+              + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
           }
 
           this.init = function () {
@@ -218,7 +198,7 @@ sitecues.def('speech', function (speech, callback, log) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
                 // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
                 + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+                + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
             }
 
             this.soundSource = undefined;
