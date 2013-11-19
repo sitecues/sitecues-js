@@ -146,7 +146,6 @@
 
     };
     numPaths = svgRefs.cursor1x.paths.length;
-    console.log(svgRefs.cursor5x.controlPoints.cp1Line.length);
   }
 
   // 
@@ -205,7 +204,7 @@
       // TODO: Don't use globals here, it's going to become unreliable.
       this.segRef = pathCommandList[curSelSegCmd];
 
-      // Update control points to match the position of the currently selected segment
+      // Update control points to match the position of the currently sele2ted segment
       this.updateControlPoints();
 
     },
@@ -216,33 +215,38 @@
       if (typeof this.segRef.coords[0] === 'number') {
 
         // Move the base control point coordinate box and make it visible
-        svgRefs.cursor5x.controlPoints.cp0Box.attr('transform', 'translate('+this.segRef.coords[0]+','+this.segRef.coords[1]+')' );
-        svgRefs.cursor5x.controlPoints.cp0Box.attr('opacity', '1' );
+        svgRefs.cursor5x.controlPoints.cp0Box.attr('transform',   'translate('+this.segRef.coords[0]+','+this.segRef.coords[1]+')');
+        svgRefs.cursor5x.controlPoints.cp0Box.attr('opacity', '1');
 
+        // If we are dealing with multipole control points for this segment...
         if (this.segRef.coords.length >4) {
-          svgRefs.cursor5x.controlPoints.cp1Box.attr('transform', 'translate('+this.segRef.coords[2]+','+this.segRef.coords[3]+')' );
-          svgRefs.cursor5x.controlPoints.cp2Box.attr('transform', 'translate('+this.segRef.coords[4]+','+this.segRef.coords[5]+')' );
-          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '1' );
-          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '1' );
-          svgRefs.cursor5x.controlPoints.cp1Line.attr('d', 'M'+this.segRef.coords[0]+','+this.segRef.coords[1] +' L'+ this.segRef.coords[2]+','+this.segRef.coords[3] );
-          svgRefs.cursor5x.controlPoints.cp2Line.attr('d', 'M'+this.segRef.coords[0]+','+this.segRef.coords[1] +' L'+ this.segRef.coords[4]+','+this.segRef.coords[5] );
-          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '1' );
-          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '1' );
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('transform', 'translate('+this.segRef.coords[2]+','+this.segRef.coords[3]+')');
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('transform', 'translate('+this.segRef.coords[4]+','+this.segRef.coords[5]+')');
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('d',                 'M'+this.segRef.coords[2]+','+this.segRef.coords[3] +' L'+ this.segRef.coords[0]+','+this.segRef.coords[1]);
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('d',                 'M'+this.segRef.coords[2]+','+this.segRef.coords[3] +' L'+ this.segRef.coords[4]+','+this.segRef.coords[5]);
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '1');
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '1');
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '1');
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '1');
+        
+        // If we only have 2 control points... make points 1 & 2 invisible, (point 0 remains visible)
         } else {
-          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
-          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
-          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
-          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
-          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0' );
-          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0' );
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0');
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0');
+          svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0');
+          svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0');
+          svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0');
+          svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0');
         }
+      
+      // If we only have 0 control points (z close-path)... make points 1 & 2 invisible, (point 0 remains visible)
       }else{
-        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
-        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
-        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0' );
-        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0' );
-        svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0' );
-        svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0' );
+        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0');
+        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0');
+        svgRefs.cursor5x.controlPoints.cp1Box.attr('opacity', '0');
+        svgRefs.cursor5x.controlPoints.cp2Box.attr('opacity', '0');
+        svgRefs.cursor5x.controlPoints.cp1Line.attr('opacity', '0');
+        svgRefs.cursor5x.controlPoints.cp2Line.attr('opacity', '0');
       }
     },
 
@@ -259,7 +263,7 @@
         }
       
       // 2ND CP: Modify the second control point (if it exists)
-      } else if (keyStack[ keyDownIs.command ]) {
+      } else if (keyStack[ keyDownIs.command ] ||  keyStack[ keyDownIs.alt ]) {
         
         // console.log(typeof this.segRef.coords[2]);
         if (typeof this.segRef.coords[4] === 'number') {
@@ -345,8 +349,9 @@
   var keyStack = {},
 
     keyDownIs = {
-      shift: 16,
-      command: 91
+      shift   : 16,
+      alt     : 18,
+      command : 91
     };
 
 
@@ -371,9 +376,11 @@
     // Modifier keys
     case 16:
       break;
+    case 18:
+      break;
     case 91:
       break;
-    
+
     case 38: // Up
       segMover.updateSegCoords(0, -1);
       break;
@@ -432,7 +439,6 @@
     // If none of the keys were captured... it's OK to resume default key behavior
     default:
       preventDefault = false;
-      console.log('pdf = false');
       break;
     }
 
@@ -460,6 +466,24 @@
     selectPath(0);
     segMover.focusOnSeg(0);
     displayPathDataAsHTML();
+    
+    $('#export-button').click(function(){
+      $('#export-data').html('');
+
+      $('.pathd').each(function(e,i){
+        var data='';
+
+        $(this).find('.pathcommand').each(function(i,e){
+          data+=e.textContent+' ';
+        });
+        
+        $('#export-data').append($('<div>',{
+          class: 'output-data',
+          text: data
+        }));
+      });
+
+    });
   }
 
   window.addEventListener('DOMContentLoaded', init);
