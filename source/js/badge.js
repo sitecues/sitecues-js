@@ -149,9 +149,6 @@ sitecues.def('badge', function (badge, callback, log) {
       // 'msgesturechange' is for IE10 - wtf?!
       // -csimari
 
-      var _dataProvider = sitecues.getLibraryUrl();
-
-      console.log( _dataProvider )
 
       var setFallbackEvents = function (evt){
                                   evt.preventDefault();
@@ -162,13 +159,21 @@ sitecues.def('badge', function (badge, callback, log) {
                                 };     
       var setDefaultEventLeave = function (evt) {
                                   sitecues.emit('badge/leave', badge.element);
-                                };                             
+                                };   
+
+                                console.log(sitecues.toggleCompatibilityCheck())                          
      
+  //if (sitecues.toggleCompatibilityCheck()){
+
+    if(fallback._dataProvider == 'localhost'){
+       $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+     }else{
+
         if( _requiresFallback || _supportsTouch ) { 
 
-          fallback.create();
+             fallback.create();
 
-            switch(_supportsTouch){
+              switch(_supportsTouch){
                 case true: 
                       $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
                   break;
@@ -178,11 +183,17 @@ sitecues.def('badge', function (badge, callback, log) {
                   break;
               }
 
-          }else{
+              if( _requiresFallback && _supportsTouch ){
+
+                $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+                $(badge.panel).on( 'click', setFallbackEvents );
+              }
+          
+  }else{
                 // sitecues deployed without need for fallback.',
                 $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
          }
-
+}
 
 
 

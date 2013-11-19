@@ -43,11 +43,9 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
 	}
 	//safari
-	if( SAF ){	
+	if( SAF && isWindows ){	
 	/* SAFARI FOR WINDOWS */
-			if(isWindows){
-					_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
-				}	
+			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
 			}
 
 	if(hasTouch){
@@ -55,9 +53,16 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	}
 
 
+
+	var _dataProvider = sitecues.getLibraryUrl();			
+	var $fallback = $('#sitecues-fallback-unsupported-browser');
+
+
+
+
 	fallback.create = function(success) {
 
-			load.style('../css/compatibility-fallback.css')
+			load.style('../css/fallback.css')
 
 			fallback.modal = $('<div/>')
 							.attr({ 'id': 'sitecues-fallback-unsupported-browser'})
@@ -94,31 +99,22 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 			      	.append( $('<td/>').attr({ 	id:'explore-btn', rowspan:1, colspan:1 }) )
 
 
-		      	fallback.btn1 = $('<a/>')	
-		      	.attr('type','button')
-		      	.addClass('btn btn-default')
-		      	.text('Dismiss')
-		      	.appendTo( $('#dismiss-btn'))
-
-		      	fallback.btn2 = $('<a/>')	
-		      	.attr({ 'type':'button',
-		      			'href':'http://www.sitecues.com/compatibility.php',
-		      			'target':'_blank'
-		      			})
-		      	.addClass('btn btn-primary')
-		      	.text('Learn More')
-		      	.appendTo( $('#explore-btn') )
+		      	fallback.btn1 = $('<a/>').attr('type','button').addClass('btn btn-default').text('Dismiss').appendTo( $('tr.btn-group').find('#dismiss-btn'))
+		      	fallback.btn2 = $('<a/>').attr({ 'type':'button', 'href':'http://www.sitecues.com/compatibility.php', 'target':'_blank'})
+				      	.addClass('btn btn-primary')
+				      	.text('Learn More')
+				      	.appendTo( $('tr.btn-group').find('#explore-btn') )
 
 
 		      	fallback.btn1.on("click", function(evt){ 
 						      									evt.preventDefault(); 
 						      									fallback.fadeOut(); 
-						      								});
+						      								})
 
 		      	
 			      						
 
-		      fallback.fadeIn = function (success,evt) {
+		      fallback.fadeIn = function (success) {
 					$(fallback.modal).center()
 		      		$(fallback.modal).stop(true,true).promise().done(
 		      			$(fallback.modal).fadeIn('slow', function() {
@@ -129,7 +125,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      			);
 		      	}
 
-				fallback.fadeOut = function (success,evt) {
+				fallback.fadeOut = function (success) {
 
 					$(fallback.modal).stop(true,true).promise().done(
 		      			$(fallback.modal).fadeOut('slow', function() {
@@ -138,27 +134,35 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 						      	}
 						      })
 		      			);
+
+					
 				}
 
-		      		
+		   if (success) {
+	        success();
+	      }
+	  }, fallback.destroy = function(event){
+	  		$fallback.remove();
+	  } 
 
-				
 
-				
-						      							
-				
+	  fallback._dataProvider = _dataProvider['host'];
 
-				    var $fallback = $('#sitecues-fallback-unsupported-browser');
-				      if ($fallback.length > 0) {
-				        fallback.modal = $fallback;
-				      } else {
-				        fallback.create();
-				      }
 
-// sitecues.toggleCompatibilityCheck = function () {
-//       mh.isSticky = !mh.isSticky;
-//       return mh.isSticky;
-//     };
+
+
+		 if ($fallback.length > 0) {
+	        fallback.modal = $fallback;
+	      } else {
+	        fallback.create();
+	      }
+
+    		sitecues.toggleCompatibilityCheck = function () {
+
+		      	fallback.isRequired = !fallback.isRequired;
+      			return fallback.isRequired;
+		    	}
+
 
 
 		          $.fn.center = function() {
@@ -177,6 +181,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 					}
 			
 
+			fallback.refresh = function() {	
+			  if (fallback.enabled) {		
 					$(window).on('resize', function(evt){
 						evt.stopImmediatePropagation();
 						$("#sitecues-fallback-unsupported-browser").center();
@@ -185,14 +191,31 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 						evt.stopImmediatePropagation();
 						$("#sitecues-fallback-unsupported-browser").center();
 						});
-				
+					}
+				}
 
-			if (success) {
-	        success();
-	      }
-	  }
+			fallback.update = function(event) {
+			      // break if fallback is disabled
+			      if (!fallback.enabled) {
+			        return false;
+			      }
+
+			      if (fallback.isRequired) {
+			          return false;
+			      }
+			    }	
+
+			 fallback.disable = function(element) {
+      				// remove mousemove listener from body
+      				fallback.update();
+
+      				//fallback.pause();
+    			} 
+
+
+
+			
 	})
-
 
 
 	callback();
