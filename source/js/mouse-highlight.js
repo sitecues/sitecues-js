@@ -2,7 +2,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Tracks if the user has heard the "first high zoom" cue.
   var FIRST_HIGH_ZOOM_PARAM = "firstHighZoom",
       // The high zoom threshold.
-      HIGH_ZOOM_THRESHOLD = 2,
+      HIGH_ZOOM_THRESHOLD = 1.6,
       // Time in millis after which the "first high zoom" cue should replay.
       FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000, // 7 days
 
@@ -722,10 +722,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      *       moving this to the speech module.
      */
     mh.verbalCue = function() {
+
       if(shouldPlayFirstHighZoomCue()) {
+        
         speech.cueByKey('verbalCueHighZoom', function() {
-          playedFirstHighZoomCue();
-        });
+                playedFirstHighZoomCue();
+          });
       }
     }
 
