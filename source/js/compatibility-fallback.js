@@ -1,4 +1,4 @@
-sitecues.def('compatibility/fallback', function (fallback, callback, log) {
+sitecues.def('compatibility-fallback', function (fallback, callback, log) {
 	
 	'use strict';
 

@@ -2,7 +2,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'html-build', 'zoom', 'platform', 'compatibility/fallback', function ($, conf, panel, ui, common, htmlBuild, zoom, platform, fallback) {
+  sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'html-build', 'zoom', 'platform', 'compatibility-fallback', function ($, conf, panel, ui, common, htmlBuild, zoom, platform, fallback) {
 
     var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
