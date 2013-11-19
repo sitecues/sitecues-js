@@ -167,7 +167,6 @@ sitecues.def('cursor', function (cursor, callback, log) {
                 try {
                   rule[style] = cursorTypeURLS[cursorTypes[i]];
                 } catch (e) {
-                  
                 }
               }
             } 
@@ -179,8 +178,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
     }());
     
     cursor.generateCursorStyle1x = function (type, zoom) {
-      var cursorStyle = 'url(' +view.getImage(type,zoom)+ ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
-      return cursorStyle;
+      var hotspotOffset;
+      
+      if (platform.browser.is!=='IE') {
+        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+      }
+      
+      return 'url(' +view.getImage(type,zoom)+ ')'+(hotspotOffset?hotspotOffset:'')+', ' + type;
     };
 
     cursor.generateCursorStyle2x = function (type, zoom) {
