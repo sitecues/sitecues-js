@@ -1,6 +1,6 @@
 sitecues.def('fallback', function (fallback, callback, log) {
 	
-	'use strict';
+	//'use strict';
 
 sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($, conf, style, platform, load) {
 
