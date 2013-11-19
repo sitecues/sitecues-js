@@ -11,19 +11,13 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		SAF 	  	= platform.browser.isSafari,
 		CHROME 	  	= platform.browser.isChrome,
 	 	isWindows 	= platform.os.isWin,
-	 	hasTouch    = platform.isTouchDevice;
-
-
-	 	if(IE){
- 			var IE6 		= platform.ieVersion.isIE6,
-				IE7 		= platform.ieVersion.isIE7,
-				IE8 		= platform.ieVersion.isIE8,
-				IE9 		= platform.ieVersion.isIE9,
-				IE10 		= platform.ieVersion.isIE10,
-				IE11  		= platform.ieVersion.isIE11;
-			}
-
-	var _windows = platform.os.isWin;
+	 	hasTouch    = platform.isTouchDevice,
+	 	IE6 		= (IE) ? platform.ieVersion.isIE6 : platform.ieVersion.vNA,
+	    IE7 		= (IE) ? platform.ieVersion.isIE7 : platform.ieVersion.vNA, 
+	    IE8 		= (IE) ? platform.ieVersion.isIE8 : platform.ieVersion.vNA, 
+	    IE9 		= (IE) ? platform.ieVersion.isIE9 : platform.ieVersion.vNA, 
+	    IE10 		= (IE) ? platform.ieVersion.isIE10 : platform.ieVersion.vNA, 
+	    IE11 		= (IE) ? platform.ieVersion.isIE11 : platform.ieVersion.vNA;
 
 	/* We are generating a message based different criteria - coming soon, not supported (older browsers) and touch coming soon.
 	Any suggestions to change whether an array is the best choice? */
@@ -42,28 +36,23 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
 	//coming soon
 	if( MOZ || IE9 || IE10 || IE11 ) {
-		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];}
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];
+	}
 	//requires a different browser		
 	if( OPERA ) {
-		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];}
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
+	}
 	//safari
 	if( SAF ){	
-	/* SAFARI FOR WINDOWS OR OS X */
-	switch(_windows){
-		case true:
-			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
-		break;
-		case false:
-			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];
-		break;
-		}	
-	}
+	/* SAFARI FOR WINDOWS */
+			if(isWindows){
+					_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
+				}	
+			}
 
 	if(hasTouch){
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[5];
 	}
-
-
 
 
 	fallback.create = function(success) {
@@ -95,27 +84,23 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      	.appendTo( $('td#sitecues-unsupported-browser') )
 
 	      	  fallback.message = $('<td/>')
-		      		.attr({ id: 'warning-message', 
-				      		colspan: 2, 
-				      		rowspan: 1
-					      	})
+		      	.attr({ id: 'warning-message', colspan: 2, rowspan: 1 })
 		      	.appendTo( $('tr#content-holder') )
 		      	.html(_compiledMessage);
 
-	      	  fallback.btnGroup = $('tr.btn-group')	
-	      	  	.attr({ colspan: 2, 
-	      	  			rowspan: 1 
-	      	  			})
-		      	.append( $('<td/>').attr({ 	id:'dismiss-btn',
-		      								rowspan:1, 
-		      								colspan:1
-		      							}) 
-		      						) 
-		      	.append( $("<td/>").attr({ 	id:'explore-btn', 
-		      								rowspan:1, 
-		      								colspan:1
-		      							})
-		      	);
+  fallback.btnGroup = $('tr.btn-group').attr({  colspan: 2, 
+							      	  			rowspan: 1 
+							      	  			})
+			      	.append( $('<td/>').attr({ 	id:'dismiss-btn',
+			      								rowspan:1, 
+			      								colspan:1
+			      							}) 
+			      						)
+			      	.append( $("<td/>").attr({ 	id:'explore-btn', 
+			      								rowspan:1, 
+			      								colspan:1
+			      							})
+			      						);
 
 		      fallback.btn1 = $('<a/>')	
 		      	.attr('type','button')
@@ -124,13 +109,15 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      	.appendTo( $('#dismiss-btn').on("click", function(evt){ 
 		      									evt.preventDefault(); 
 		      									fallback.fadeOut(); 
-		      									return false}) 
-		      									);
+		      									return false;
+		      								}) 
+		      							);
 
 		      fallback.btn2 = $('<a/>')	
-		      	.attr({'type':'button',
+		      	.attr({ 'type':'button',
 		      			'href':'http://www.sitecues.com/compatibility.php',
-		      			'target':'_self'})
+		      			'target':'_self'
+		      			})
 		      	.addClass('btn btn-primary')
 		      	.text('Learn More')
 		      	.appendTo( $('#explore-btn') );
@@ -158,12 +145,11 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 						      	}
 						      })
 		      			)
-				}   		
-
-				      if (success) {
-				        success();
-				      }
-		          }			
+				
+	      if (success) {
+	        success();
+	      }
+      }			
 
 
 		          $.fn.center = function() {
@@ -174,8 +160,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 			    												'margin-left': -($(this).width()*.5) + 'px', 
 			    												'margin-top': -($(this).height()*.5) + 'px', 
 			    												'left': (50+'%'), 
-			    												'top': ($(window).scrollTop() + ($(this).height()) )+'px' 
-					    											});
+			    												'top': ($(window).scrollTop() + ($(this).height()) )+'px'});
 									}
 
 					if( $("#sitecues-fallback-unsupported-browser") ){
@@ -183,14 +168,16 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 					}
 			
 
-					$(window).on('resize', function(){
+					$(window).on('resize', function(evt){
+						evt.stopImmediatePropagation();
 						$("#sitecues-fallback-unsupported-browser").center();
-					});
-					$(window).on('scroll', function(){
+						});
+					$(window).on('scroll', function(evt){
+						evt.stopImmediatePropagation();
 						$("#sitecues-fallback-unsupported-browser").center();
-	
-			});
+						});
+				}
+	})
 
-	});
 	callback();
 });	
