@@ -9,7 +9,6 @@ window.sitecues && sitecues.use(
 	'keys',
 	'focus',
 	'cursor',
-	'speech/azure',
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
