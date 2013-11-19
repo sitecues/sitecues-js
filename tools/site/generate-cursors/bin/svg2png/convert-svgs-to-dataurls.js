@@ -9,19 +9,38 @@
       
       //{ "url":"max-osx-retina-arrow2.svg", "type":"retina", "min-width":27, "min-height":42, "max-width":82, "max-height":128 }, 
 
-      { url: 'min-osx-retina-arrow-ds.svg', type: 'retina',
-        min_width  :  27,
-        min_height :  42,
-        max_width  :  82,
+      // { url: 'min-osx-retina-arrow-ds.svg', type: 'retina',
+      //   min_width  :  27,
+      //   min_height :  42,
+      //   max_width  :  82,
+      //   max_height : 128,
+      //   hotspotX   : 1,
+      //   hotspotY   : 0.1
+      // },
+
+      // { url: 'hand-min-retina.svg', type: 'retina',
+      //   min_width  :  34,
+      //   min_height :  38,
+      //   max_width  : 114,
+      //   max_height : 128,
+      //   hotspotX   : 10.3,
+      //   hotspotY   : 2.5
+      // },
+
+
+      { url: 'win_default.svg', type: null,
+        min_width  :  14,
+        min_height :  23,
+        max_width  :  80,
         max_height : 128,
         hotspotX   : 1,
         hotspotY   : 0.1
       },
 
-      { url: 'hand-min-retina.svg', type: 'retina',
-        min_width  :  34,
-        min_height :  38,
-        max_width  : 114,
+      { url: 'win_pointer.svg', type: null,
+        min_width  :  17,
+        min_height :  22,
+        max_width  : 98,
         max_height : 128,
         hotspotX   : 10.3,
         hotspotY   : 2.5
@@ -81,6 +100,9 @@
         ;
 
       function drawToCanvas (url, step, canvas, hotspotX, hotspotY) {
+        
+        //console.log(url.split('.svg')[0]);
+
         svg2Canvas(path + url, {
             width       : realWidth
           , height      : realHeight
@@ -89,7 +111,7 @@
           , canvas      : canvas
           , callback    : function (dataURL) {
               var dataurl = document.createElement('dataurl');
-              dataurl.setAttribute('title', url + '_' + step);
+              dataurl.setAttribute('title', (url.split('.svg')[0]) + '_' + step);
               dataurl.setAttribute('data-hotspotx', hotspotX);
               dataurl.setAttribute('data-hotspoty', hotspotY);
               dom.dataURLS.appendChild(dataurl);
