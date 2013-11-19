@@ -89,7 +89,7 @@ files=\
 	source/js/ui-manager.js \
 	source/js/html-build.js \
 	source/js/status.js \
-	source/js/compatibility-fallback.js \
+	source/js/fallback.js \
 
 https=off
 prod=off
