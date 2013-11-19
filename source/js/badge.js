@@ -149,6 +149,10 @@ sitecues.def('badge', function (badge, callback, log) {
       // 'msgesturechange' is for IE10 - wtf?!
       // -csimari
 
+      var _dataProvider = sitecues.getLibraryUrl();
+
+      console.log( _dataProvider )
+
       var setFallbackEvents = function (evt){
                                   evt.preventDefault();
                                   fallback.fadeIn();

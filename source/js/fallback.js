@@ -57,7 +57,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 	fallback.create = function(success) {
 
-			load.style('../css/compatibility-fallback.css');
+			load.style('../css/compatibility-fallback.css')
 
 			fallback.modal = $('<div/>')
 							.attr({ 'id': 'sitecues-fallback-unsupported-browser'})
@@ -86,79 +86,79 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	      	  fallback.message = $('<td/>')
 		      	.attr({ id: 'warning-message', colspan: 2, rowspan: 1 })
 		      	.appendTo( $('tr#content-holder') )
-		      	.html(_compiledMessage);
+		      	.html(_compiledMessage);  
 
-  fallback.btnGroup = $('tr.btn-group').attr({  colspan: 2, 
-							      	  			rowspan: 1 
-							      	  			})
-			      	.append( $('<td/>').attr({ 	id:'dismiss-btn',
-			      								rowspan:1, 
-			      								colspan:1
-			      							}) 
-			      						)
-			      	.append( $("<td/>").attr({ 	id:'explore-btn', 
-			      								rowspan:1, 
-			      								colspan:1
-			      							})
-			      						);
 
-		      fallback.btn1 = $('<a/>')	
+		      	fallback.btnGroup = $('tr.btn-group').attr({  colspan: 2, rowspan: 1 })
+			      	.append( $('<td/>').attr({ 	id:'dismiss-btn', rowspan:1, colspan:1 }) ) 
+			      	.append( $('<td/>').attr({ 	id:'explore-btn', rowspan:1, colspan:1 }) )
+
+
+		      	fallback.btn1 = $('<a/>')	
 		      	.attr('type','button')
 		      	.addClass('btn btn-default')
 		      	.text('Dismiss')
-		      	.appendTo( $('#dismiss-btn').on("click", function(evt){ 
-		      									evt.preventDefault(); 
-		      									fallback.fadeOut(); 
-		      									return false;
-		      								}) 
-		      							);
+		      	.appendTo( $('#dismiss-btn'))
 
-		      fallback.btn2 = $('<a/>')	
+		      	fallback.btn2 = $('<a/>')	
 		      	.attr({ 'type':'button',
 		      			'href':'http://www.sitecues.com/compatibility.php',
-		      			'target':'_self'
+		      			'target':'_blank'
 		      			})
 		      	.addClass('btn btn-primary')
 		      	.text('Learn More')
-		      	.appendTo( $('#explore-btn') );
+		      	.appendTo( $('#explore-btn') )
 
-		      	fallback.fadeIn = function (success,evt) {
+
+		      	fallback.btn1.on("click", function(evt){ 
+						      									evt.preventDefault(); 
+						      									fallback.fadeOut(); 
+						      								});
+
+		      	
+			      						
+
+		      fallback.fadeIn = function (success,evt) {
 					$(fallback.modal).center()
 		      		$(fallback.modal).stop(true,true).promise().done(
-
-
 		      			$(fallback.modal).fadeIn('slow', function() {
 						      	if (success) {
 						      		success();
 						      	}
 						      })
-		      			)
+		      			);
 		      	}
 
 				fallback.fadeOut = function (success,evt) {
 
 					$(fallback.modal).stop(true,true).promise().done(
-
 		      			$(fallback.modal).fadeOut('slow', function() {
 						      	if (success) {
 						      		success();
 						      	}
 						      })
-		      			)
+		      			);
+				}
+
+		      		
+
 				
-	      if (success) {
-	        success();
-	      }
-      }			
 
+				
+						      							
+				
 
-    var $fallback = $('#sitecues-fallback-unsupported-browser');
-      if ($fallback.length > 0) {
-        fallback.modal = $fallback;
-      } else {
-        // We have no alternate or pre-existing badges defined, so create a new one.
-        fallback.create();
-      }
+				    var $fallback = $('#sitecues-fallback-unsupported-browser');
+				      if ($fallback.length > 0) {
+				        fallback.modal = $fallback;
+				      } else {
+				        fallback.create();
+				      }
+
+// sitecues.toggleCompatibilityCheck = function () {
+//       mh.isSticky = !mh.isSticky;
+//       return mh.isSticky;
+//     };
 
 
 		          $.fn.center = function() {
@@ -185,8 +185,15 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 						evt.stopImmediatePropagation();
 						$("#sitecues-fallback-unsupported-browser").center();
 						});
-				}
+				
+
+			if (success) {
+	        success();
+	      }
+	  }
 	})
+
+
 
 	callback();
 });	
