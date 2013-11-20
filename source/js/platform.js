@@ -2,7 +2,7 @@
  * platform.js
  * Determines the Browser Version and Operating System version constants
  */
-sitecues.def('platform', function (platformModule, callback) {
+sitecues.def('platform', function (platformModule, callback, log) {
   
   'use strict';
 
@@ -76,18 +76,23 @@ sitecues.def('platform', function (platformModule, callback) {
       // EQ-881 - As a customer, I want sitecues to degrade gracefully or provide a useful
       // fallback when it can't work, so that my users aren't confused by the icon.
       // Set globally accessible operating fallback constants
+
+       function hasTouch(success){
+          return !!('ontouchstart' in window) || !!('msmaxtouchpoints' in window.navigator);
+         }
+
       if( platformModule.browser.isChrome ){ 
         requiresFallback = false;
       }
       if( platformModule.browser.isSafari && platformModule.os.isMac ){ 
         requiresFallback = false;
       }
+
         // Requires fallback - current browser is not supported by sitecues
-        // specific message [browser/os/supports touch] is assembled in compatibility-fallback.js
+        // specific message [browser/os/supports touch] is assembled in ./fallback.js
         platformModule.requiresFallback = requiresFallback;
         // Device has touch capabilities
         platformModule.isTouchDevice = hasTouch();
-        
 
   // Determine the device pixel ratio of the
   platformModule.pixel = {
@@ -102,6 +107,4 @@ sitecues.def('platform', function (platformModule, callback) {
 });
 
 
-function hasTouch(){
-    return !!('ontouchstart' in window) || !!('msmaxtouchpoints' in window.navigator);
-   }
+

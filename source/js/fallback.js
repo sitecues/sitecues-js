@@ -1,6 +1,6 @@
 sitecues.def('fallback', function (fallback, callback, log) {
 	
-	//'use strict';
+	'use strict';
 
 sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($, conf, style, platform, load) {
 
@@ -21,19 +21,20 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 	/* We are generating a message based different criteria - coming soon, not supported (older browsers) and touch coming soon.
 	Any suggestions to change whether an array is the best choice? */
-	var _compiledMessage;
-	var	_warning = [
+	var _compiledMessage,
+		_warning = [
 		/*[0]*/	"<h3>Our apologies!</h3>",
 		/*[1]*/	"<strong>sitecues</strong> zoom &amp; speech tools",
-		/*[2]*/	"require a more recent version of your web browser.",
+		/*[2]*/	"require a more current version of your web browser.",
 		/*[3]*/	"are coming to your browser soon!",
 		/*[4]*/	"require a different web browser in order to work.",
 		/*[5]*/	"touch support is coming to your device soon!"
 			];	
 
-	var _compiledMessage;		
 	//ie6-8
-	_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
+	if( IE6 || IE7 || IE8 ) {
+		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[2];
+	}
 	//coming soon
 	if( MOZ || IE9 || IE10 || IE11 ) {
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[3];
@@ -42,9 +43,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	if( OPERA ) {
 		_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
 	}
-	//safari
-	if( SAF && isWindows ){	
-	/* SAFARI FOR WINDOWS */
+	//safari for OS X is good to go
+	if( SAF && isWindows ){/* SAFARI FOR WINDOWS */	
 			_compiledMessage =  _warning[0] + _warning[1] + " " + _warning[4];
 			}
 
@@ -54,19 +54,25 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 
 
-	var _dataProvider = sitecues.getLibraryUrl();			
-	var $fallback = $('#sitecues-fallback-unsupported-browser');
+	var _dataProvider = sitecues.getLibraryUrl();	
 
+	fallback._dataProvider = _dataProvider['host'];
+	fallback.fallbackId = conf.get('fallbackId');
+
+	    if (!fallback.fallbackId) {
+	      fallback.fallbackId = 'sitecues-fallback-unsupported-browser';
+	    }
 
 
 
 	fallback.create = function(success) {
 
-			load.style('../css/fallback.css')
+		load.style('../css/fallback.css')
 
 			fallback.modal = $('<div/>')
-							.attr({ 'id': 'sitecues-fallback-unsupported-browser'})
+							.attr({ 'id': fallback.fallbackId })
 							.addClass('sitecues-unsupported-browser')
+							.hide()
 							.appendTo('html');
 
               fallback.table = $('<table/>')
@@ -85,134 +91,164 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		      			'href':'http://www.sitecues.com/',
 		      			'title':'sitecues - unsupported browser image.',
 		      			'alt': 'Visit sitecues.com for more information.'
-		      		})
-		      	.appendTo( $('td#sitecues-unsupported-browser') )
+		      		}).appendTo( $('td#sitecues-unsupported-browser') )
 
 	      	  fallback.message = $('<td/>')
 		      	.attr({ id: 'warning-message', colspan: 2, rowspan: 1 })
 		      	.appendTo( $('tr#content-holder') )
 		      	.html(_compiledMessage);  
 
-
 		      	fallback.btnGroup = $('tr.btn-group').attr({  colspan: 2, rowspan: 1 })
 			      	.append( $('<td/>').attr({ 	id:'dismiss-btn', rowspan:1, colspan:1 }) ) 
 			      	.append( $('<td/>').attr({ 	id:'explore-btn', rowspan:1, colspan:1 }) )
 
-
-		      	fallback.btn1 = $('<a/>').attr('type','button').addClass('btn btn-default').text('Dismiss').appendTo( $('tr.btn-group').find('#dismiss-btn'))
+		      	fallback.btn1 = $('<a/>').attr('type','button').addClass('btn btn-default').text('Dismiss').on("click", function(evt){ 
+						      									evt.preventDefault(); 
+						      									fallback.hide(); 
+						      								})
+		      	.appendTo( $('tr.btn-group').find('#dismiss-btn'))
 		      	fallback.btn2 = $('<a/>').attr({ 'type':'button', 'href':'http://www.sitecues.com/compatibility.php', 'target':'_blank'})
 				      	.addClass('btn btn-primary')
 				      	.text('Learn More')
 				      	.appendTo( $('tr.btn-group').find('#explore-btn') )
 
+		   if (success) {
+	        success();
+	      }
+	  }
 
-		      	fallback.btn1.on("click", function(evt){ 
-						      									evt.preventDefault(); 
-						      									fallback.fadeOut(); 
-						      								})
+	
 
-		      	
-			      						
 
-		      fallback.fadeIn = function (success) {
-					$(fallback.modal).center()
-		      		$(fallback.modal).stop(true,true).promise().done(
-		      			$(fallback.modal).fadeIn('slow', function() {
-						      	if (success) {
-						      		success();
-						      	}
-						      })
-		      			);
-		      	}
+		          fallback.center = function() {
+					    var container = $(window);
+					    var top = -($(fallback.modal).height()*.5);
+					    var left = -($(fallback.modal).width()*.5);
+					    return fallback.modal.css('position', 'absolute').css({ 	
+			    												'margin-left': -($(fallback.modal).width()*.5) + 'px', 
+			    												'margin-top': -($(fallback.modal).height()*.5) + 'px', 
+			    												'left': (50+'%'), 
+			    												'top': ($(window).scrollTop() + ($(fallback.modal).height()) )+'px'});
+									}
 
-				fallback.fadeOut = function (success) {
+					// $.fn.center = function() {
+					//     var container = $(window);
+					//     var top = -($(this).height()*.5);
+					//     var left = -($(this).width()*.5);
+					//     return this.css('position', 'absolute').css({ 	
+			  //   												'margin-left': -($(this).width()*.5) + 'px', 
+			  //   												'margin-top': -($(this).height()*.5) + 'px', 
+			  //   												'left': (50+'%'), 
+			  //   												'top': ($(window).scrollTop() + ($(this).height()) )+'px'});
+					// 				}				
 
-					$(fallback.modal).stop(true,true).promise().done(
+
+
+			fallback.refresh = function() {	
+			  if (conf.get('fallbackEnabled')) {		
+					$(window).on('resize', function(evt){
+						evt.stopImmediatePropagation();
+						fallback.center();
+						});
+					$(window).on('scroll', function(evt){
+						evt.stopImmediatePropagation();
+						fallback.center();
+						});
+					}
+				}
+
+				fallback.show = function (success) {
+
+					if (conf.get('fallbackEnabled')) {
+	        				log.info('Showing fallback');
+
+	        				fallback.center();
+					        $(fallback.modal).fadeIn('slow', function() {
+					        	console.log()
+					          if (success) {
+					            success();
+					          }
+					        });
+				      } else {
+				      	console.log("fallback.fadeIn() was called but fallback is disabled. Use sitecues.toggleFallback() in console.")
+					        log.warn("fallback.fadeIn() was called but fallback is disabled. Use sitecues.toggleFallback() in console.");
+					        //throw e;
+					      }
+					}
+
+				fallback.hide = function (success) {
+
 		      			$(fallback.modal).fadeOut('slow', function() {
 						      	if (success) {
 						      		success();
 						      	}
-						      })
-		      			);
-
-					
-				}
-
-		   if (success) {
-	        success();
-	      }
-	  }, fallback.destroy = function(event){
-	  		$fallback.remove();
-	  } 
-
-
-	  fallback._dataProvider = _dataProvider['host'];
-
-
-
-
-		 if ($fallback.length > 0) {
-	        fallback.modal = $fallback;
-	      } else {
-	        fallback.create();
-	      }
-
-    		sitecues.toggleCompatibilityCheck = function () {
-
-		      	fallback.isRequired = !fallback.isRequired;
-      			return fallback.isRequired;
-		    	}
-
-
-
-		          $.fn.center = function() {
-					    var container = $(window);
-					    var top = -($(this).height()*.5);
-					    var left = -($(this).width()*.5);
-					    return this.css('position', 'absolute').css({ 	
-			    												'margin-left': -($(this).width()*.5) + 'px', 
-			    												'margin-top': -($(this).height()*.5) + 'px', 
-			    												'left': (50+'%'), 
-			    												'top': ($(window).scrollTop() + ($(this).height()) )+'px'});
-									}
-
-					if( $("#sitecues-fallback-unsupported-browser") ){
-						$("#sitecues-fallback-unsupported-browser").center();
+						      });
 					}
-			
 
-			fallback.refresh = function() {	
-			  if (fallback.enabled) {		
-					$(window).on('resize', function(evt){
-						evt.stopImmediatePropagation();
-						$("#sitecues-fallback-unsupported-browser").center();
-						});
-					$(window).on('scroll', function(evt){
-						evt.stopImmediatePropagation();
-						$("#sitecues-fallback-unsupported-browser").center();
-						});
-					}
-				}
-
-			fallback.update = function(event) {
-			      // break if fallback is disabled
-			      if (!fallback.enabled) {
-			        return false;
-			      }
-
-			      if (fallback.isRequired) {
-			          return false;
-			      }
-			    }	
-
-			 fallback.disable = function(element) {
-      				// remove mousemove listener from body
-      				fallback.update();
-
-      				//fallback.pause();
-    			} 
+				fallback.destroy = function(success){
+				  		fallback.remove();
+				  } 
 
 
+	
+
+	/**
+     * Closes the fallback and sets the preference so it stays closed.
+     *
+     * @param success Function executed if successful.
+     * @return void
+     */
+    fallback.disable = function (success) {
+      log.info('Disabling fallback');
+      conf.set('fallbackEnabled', false);
+      //document.write("Disabling fallback");
+      fallback.fadeOut(success);
+    };
+
+    /**
+     * Opens the fallback and sets the preference so it stays opened.
+     *
+     * @param success Function executed if successful.
+     * @return void
+     */
+    fallback.enable = function (success) {
+      log.info('Enabling fallback');
+      conf.set('fallbackEnabled', true);
+
+      //if( conf.get('fallbackEnabled') ) {
+
+      // if( $fallback.length == 0){
+      // 		fallback.create(success);
+      
+      // } else if (success) {
+      // 	success();
+      // }
+    };
+
+    //fallback.isEnabled = conf.get('fallbackEnabled');
+
+    var $fallback = $('#' + fallback.fallbackId);
+
+		if ($fallback.length > 0) {
+        fallback = $fallback;
+
+      } else {
+        // We have no alternate or pre-existing fallback modal defined, so create a new one.
+        fallback.create();
+        fallback.center();
+
+      }
+
+      
+
+
+
+	sitecues.toggleFallback = function () {
+
+		fallback.isEnabled = !fallback.isEnabled;
+		conf.set('fallbackEnabled',fallback.isEnabled)
+		return fallback.isEnabled;
+    	}	
 
 			
 	})

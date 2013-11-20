@@ -25,7 +25,6 @@ sitecues.def('badge', function (badge, callback, log) {
               .attr(REPLACE_BADGE_ATTR, true)
               .addClass('sitecues-badge')
               .hide()
-              // .prependTo('html');
               .appendTo('html');
       // Determine the badge visible width
       var badgeVisibleWidth = badge.panel.outerWidth();
@@ -152,7 +151,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
       var setFallbackEvents = function (evt){
                                   evt.preventDefault();
-                                  fallback.fadeIn();
+                                  fallback.show();
                                 };
       var setDefaultEventOver = function (evt) {
                                   sitecues.emit('badge/hover', badge.element);
@@ -160,24 +159,16 @@ sitecues.def('badge', function (badge, callback, log) {
       var setDefaultEventLeave = function (evt) {
                                   sitecues.emit('badge/leave', badge.element);
                                 };   
-
-                                console.log(sitecues.toggleCompatibilityCheck())                          
      
-  //if (sitecues.toggleCompatibilityCheck()){
-
-    if(fallback._dataProvider == 'localhost'){
-       $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-     }else{
-
-        if( _requiresFallback || _supportsTouch ) { 
-
-             fallback.create();
-
+      // Check if fallbacks are enabled otherwise use default hover
+      if (conf.get('fallbackEnabled')) {
+           log.info('fallbacks are enabled');
+            // Delegate Events
+           if( _requiresFallback || _supportsTouch ) { 
               switch(_supportsTouch){
                 case true: 
                       $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
                   break;
-
                 case false: 
                       $(badge.panel).on( 'click', setFallbackEvents );
                   break;
@@ -189,11 +180,26 @@ sitecues.def('badge', function (badge, callback, log) {
                 $(badge.panel).on( 'click', setFallbackEvents );
               }
           
-  }else{
+          }else{
                 // sitecues deployed without need for fallback.',
                 $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-         }
-}
+           }
+
+        
+              } else {
+                $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+                console.log("Fallback modal is currently disabled.")
+                log.warn("Fallback modal is currently disabled.");
+                }
+
+
+
+
+
+
+
+
+        
 
 
 
