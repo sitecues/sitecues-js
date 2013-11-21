@@ -1,15 +1,20 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  */
-sitecues.def('util/positioning', function (positioning, callback) {
+sitecues.def('util/positioning', function (positioning, callback, log) {
 
-	    positioning.kMinRectWidth = 3;
-	    positioning.kMinRectHeight = 3;
+	    positioning.kMinRectWidth = 4;
+	    positioning.kMinRectHeight = 4;
 
-    sitecues.use('jquery', 'util/common', function ($, common) {
-
+    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+//        var ieFix = platform.browser.isIE;
         /**
          * Get the cumulative zoom for an element.
+         * @param {selector} selector
+         * @param {boolean} andZoom False if we only want to get 'transform:scale' zoom;
+         * True if we want to take full zoom, union of 'transfor:scale' + 'zoom' property.
+         * @returns {undefined|single result|array} The value or an array of values
+         * of current page's zoom.
          */
         positioning.getTotalZoom = function (selector, andZoom) {
             var _recurse = function (element) {
@@ -58,22 +63,17 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     * Return a corrected bounding box given the total zoom for the element and current scroll position
 	     */
 	    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
-		  //EQ-880  
-          if ('zoom' in document.createElement('div').style) {
-            return {
-              left: boundingBox.left + scrollPosition.left/ totalZoom,
-              top:  boundingBox.top + scrollPosition.top  / totalZoom,
-              width: boundingBox.width,
-              height: boundingBox.height
-            };
-          } else {
-            return {
-              left: boundingBox.left + scrollPosition.left,
-              top:  boundingBox.top + scrollPosition.top,
-              width: boundingBox.width,
-              height: boundingBox.height
-            };
-          }
+		    //EQ-880
+        var realZoom = ('zoom' in document.createElement('div').style) ? totalZoom : 1;
+        var rect = {
+          left: boundingBox.left + scrollPosition.left / realZoom,
+          top:  boundingBox.top + scrollPosition.top  / realZoom,
+          width: boundingBox.width,
+          height: boundingBox.height,
+        };
+        rect.right = rect.left + rect.width;
+        rect.bottom = rect.top + rect.height;
+        return rect;
 	    }
 
 	    /**
@@ -98,6 +98,11 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    for (var count = 0; count < fixedRects.length; count ++) {
 			    absoluteRects[count] = positioning.getCorrectedBoundingBox(fixedRects[count], zoom, scrollPos);
 		    }
+                    // AK: this is quick'n'dirty fix for the case rect is undefined
+                    if (absoluteRects.length === 0) {
+                       absoluteRects = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
+                    }
+                    
 		    return absoluteRects;
 	    }
 
@@ -116,12 +121,12 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	     * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
 	     * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
 	     */
-	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged) {
+	    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
 		    var allRects = [];
 
 		    var $selector = $(selector);
 		    var clipRect = getAncestorClipRect($selector);
-		    getAllBoundingBoxesExact($selector, allRects, clipRect);
+		    getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
 		    positioning.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
 		    return allRects;
@@ -139,8 +144,8 @@ sitecues.def('util/positioning', function (positioning, callback) {
 		    var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
 		    if (isSingleLine)
 			    return item.getBoundingClientRect();
-
-		    return contentRect;
+                    // AK: this is quick'n'dirty fix for the case rect is undefined
+		    return contentRect || {'left': 0, 'top': 0, 'width': 0, 'height': 0};
 	    }
 
 	    function getBoundingRectMinusPadding(node) {
@@ -166,18 +171,172 @@ sitecues.def('util/positioning', function (positioning, callback) {
 			    bottom: rect.bottom - paddingBottom
 		    };
 		    return rect;
-	    }
+     }
 
-	    // Only use leaf nodes (where content resides), in order to avoid rects taht
-	    // were purposely positioned offscreen
-	    function getAllBoundingBoxesExact($selector, allRects, clipRect) {
+     function hasVisibleBorder(style) {
+       return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
+     }
+
+     function getEmsToPx(fontSize, ems) {
+       var measureDiv = $('<div/>')
+           .appendTo(document.body)
+           .css({
+             'font-size': fontSize,
+             'width': ems + 'em',
+             'visibility': 'hidden'
+           });
+       var px = measureDiv.width();
+       measureDiv.remove();
+       return px;
+     }
+
+     function getBulletWidth(element, style, bulletType) {
+       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0)
+         ems = 1; // Simple bullet
+       else if (bulletType === 'decimal') {
+         var start = parseInt($(element).attr('start'));
+         var end = (start || 1) + element.childElementCount - 1;
+         ems = .9 + .5 * end.toString().length;
+       }
+       return getEmsToPx(style['font-size'], ems);
+     }
+
+    function getBulletRect(element, style) {
+      var bulletType = style['list-style-type'];
+      if ((bulletType === 'none' && style['list-style-image'] === 'none') || style['list-style-position'] !== 'outside') {
+        return null; // inside, will already have bullet incorporated in bounds
+      }
+      if (style['display'] !== 'list-item') {
+        if ($(element).children(":first").css('display') !== 'list-item') {
+          return null; /// Needs to be list-item or have list-item child
+        }
+      }
+      var bulletWidth = getBulletWidth(element, style, bulletType);
+      var boundingRect = getBoundingRectMinusPadding(element);
+      return {
+        top: boundingRect.top,
+        height: boundingRect.height,
+        left: boundingRect.left - bulletWidth,
+        width: bulletWidth
+      };
+    }
+
+      function getSpriteRect(element, style) {
+        // Check special case for sprites, often used for fake bullets
+        if (style['background-image'] === 'none' || style['background-repeat'] !== 'no-repeat')
+          return null;
+
+        // Background sprites tend to be to the left side of the element
+        var backgroundLeft = style['background-position']
+        var left = backgroundLeft ? parseFloat(backgroundLeft) : 0;
+        var rect = element.getBoundingClientRect();
+        rect.left += left;
+        rect.width = positioning.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
+        return rect.width > 0 ? rect : null;
+      }
+
+      function getOverflowRect(element, style) {
+        var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
+        var overflowY = style['overflow-y'] === 'visible' && element.scrollHeight - element.clientHeight >= common.getLineHeight(element);
+        if (!overflowX && !overflowY) {
+          return null;
+        }
+
+        // Check for descendant with visibility: hidden -- those break our overflow check.
+        // Example: google search results with hidden drop down menu
+        // For now, we will not support overflow in this case.
+        var hasVisibilityHiddenDescendant = false;
+        $(element).find('*').each(function() {
+          if ($(this).css('visibility') === 'hidden') {
+            hasVisibilityHiddenDescendant = true;
+            return false;
+          }
+        });
+        if (hasVisibilityHiddenDescendant) {
+          return null;
+        }
+
+        // Overflow is visible: add right and bottom sides of overflowing content
+        var rect = element.getBoundingClientRect();
+        var newRect = {
+          left: rect.left,
+          top: rect.top,
+          width: overflowX ? element.scrollWidth : rect.width,
+          height: overflowY ? element.scrollHeight : rect.height
+        };
+        return newRect;
+      }
+
+      function addRect(allRects, clipRect, unclippedRect) {
+        if (!unclippedRect) {
+          return;
+        }
+        var rect = getClippedRect(unclippedRect, clipRect);
+        if (rect.width < positioning.kMinRectWidth || rect.height < positioning.kMinRectHeight) {
+          return; // Not large enough to matter
+        }
+
+        if (rect.right < 0 || rect.bottom < 0) {
+          var zoom = positioning.getTotalZoom(this, true);
+          var absoluteRect = positioning.convertFixedRectsToAbsolute([rect], zoom)[0];
+          if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
+            // Don't be fooled by items hidden offscreen -- those rects don't count
+            return;
+          }
+        }
+
+        allRects.push(rect);
+      }
+
+	    function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 		    $selector.each(function () {
 			    var isElement = this.nodeType === 1;
-			    // TODO: should we use common.getElementComputedStyles() ?
-			    if (isElement && $(this).css('visibility') !== 'visible') {
-					return true; // Don't look at this hidden element
-			    }
-			    if (this.hasChildNodes()) {  // TODO do we want to union ourselves if there is a visible border?
+
+          // --- Leaf nodes ---
+          if (!isElement) {
+            if (this.nodeType === 3 && $.trim(this.textContent) !== '') {
+              // -- Acutal text rect --
+              addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            }
+            return true;
+          }
+
+          var style = common.getElementComputedStyles(this);
+
+          // --- Invisible elements ---
+          if (style['visibility'] === 'hidden' || style['visibility'] === 'collapse') {
+            return true;
+          }
+
+          // --- Overflowing content ---
+          addRect(allRects, clipRect, getOverflowRect(this, style));
+
+          // --- Visible border ---
+          if (hasVisibleBorder(style)) {
+            addRect(allRects, clipRect, this.getBoundingClientRect()); // Make it all visible, including padding and border
+            return true;
+          }
+
+          // --- List bullets ---
+          addRect(allRects, clipRect, getBulletRect(this, style));
+
+
+          // --- Background sprites ---
+          if (stretchForSprites) {
+            addRect(allRects, clipRect, getSpriteRect(this, style));
+          }
+
+
+          // --- Media elements ---
+          if (common.isVisualMedia(this)) {
+            // Elements with rendered content such as images and videos
+            addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+            return true;
+          }
+
+          // --- Elements with children ---
+          if (this.hasChildNodes()) {
 				    // Use bounds of visible descendants, but clipped by the bounds of this ancestor
 				    var isClip = isClipElement(this);
 				    var newClipRect = clipRect;
@@ -187,34 +346,29 @@ sitecues.def('util/positioning', function (positioning, callback) {
 						    newClipRect = getClippedRect(clipRect, newClipRect);
 					    }
 				    }
-			        getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect);  // Recursion
+			      getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect, stretchForSprites);  // Recursion
+            return true;
 			    }
-			    else { // Leaf node -- has visible contents
-				    var rect = getBoundingRectMinusPadding(this);
-				    rect = getClippedRect(rect, clipRect);
-
-				    if (rect.width > positioning.kMinRectWidth  && rect.height > positioning.kMinRectHeight  &&
-					    rect.right > 0 && rect.bottom > 0) {
-				        // Don't be fooled by items hidden offscreen or by empty nodes -- those rects don't count
-					    allRects.push(rect);
-				    }
-			    }
-		    });
+        });
 	    }
+
 
 	    function isClipElement(element) {
 		    // TODO: should we use common.getElementComputedStyles() ?
 		    return $(element).css('clip') !== 'auto' || $(element).css('overflow') !== 'visible';
 	    }
 
-	    function getClippedRect(r1, r2) {
-		    if (!r2) {
-			    return r1;
-		    }
-		    var left   = Math.max( r1.left, r2.left);
-		    var right  = Math.min( r1.left + r1.width, r2.left + r2.width);
-		    var top    = Math.max( r1.top, r2.top );
-		    var bottom = Math.min( r1.top + r1.height, r2.top + r2.height);
+      function getClippedRect(unclippedRect, clipRect) {
+        if (!clipRect) {
+          // Ensure right and bottom are set as well
+          unclippedRect.right = unclippedRect.left + unclippedRect.width;
+          unclippedRect.bottom = unclippedRect.top + unclippedRect.height;
+          return unclippedRect;
+        }
+        var left   = Math.max( unclippedRect.left, clipRect.left);
+        var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
+        var top    = Math.max( unclippedRect.top, clipRect.top );
+        var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
 		    return {
 			    left: left,
 			    top: top,
@@ -276,7 +430,9 @@ sitecues.def('util/positioning', function (positioning, callback) {
 				    left: left,
 				    top: top,
 				    width: right - left,
-				    height: bottom - top
+				    height: bottom - top,
+				    right: right,
+				    bottom: bottom
 			    };
 		    }
 
@@ -310,6 +466,10 @@ sitecues.def('util/positioning', function (positioning, callback) {
 	            var zoom = positioning.getTotalZoom(this, true);
 	            var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
+                // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
+                if (!rect) {
+                   rect = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
+                }
                 result.push({
                     left: rect.left + (rect.width / 2),
                     top:  rect.top + (rect.height / 2)
@@ -525,6 +685,13 @@ sitecues.def('util/positioning', function (positioning, callback) {
             if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
                 var transformStr = jElement.css('transform') || 1;
                 var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
+               /*
+                 Interestingly enough, any functionality that relies on this method will return 1
+                 if running in IE.  Fixing this with the code below will make IE much much worse. :(
+               */
+               /* if (ieFix && zoom.indexOf && zoom.indexOf('%') !== -1) {
+                  zoom = zoom.replace('%','') / 100;
+                }*/
                 var result = 1;
                 if (transformStr !== 'none' && $.trim(transformStr) !== '') {
                     var result = _MATRIX_REGEXP.exec(transformStr);

@@ -118,6 +118,13 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     /*
+     * @param {HTMLObject Array} el DOM node (array)
+     * @returns {Boolean} True if the element is related to canvas.
+     */  
+    common.isCanvasElement = function (el) {
+       return el[0].localName === "canvas" || el.find('canvas').length > 0;
+     }
+    /*
      * Converts both colors to the same [RGB] format and then find out if they are contrast.
      * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare
      * @param colorTwo String/CSSPrimitiveValue represents the other color to compare
@@ -131,7 +138,7 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     common.isLightTone = function (colorValue) {
-      RGBColor = common.getRGBColor(colorValue);
+      var RGBColor = common.getRGBColor(colorValue);
       // http://en.wikipedia.org/wiki/YIQ
       var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
 
@@ -193,6 +200,26 @@ sitecues.def('util/common', function (common, callback, log) {
      * @param imgEl An object.
      * @return rgb A string which represents the average image color in RGB format.
      */
+    common.isInSitecuesUI = function(element) {
+      var isInBadge = false,
+          isInBody = false,
+          badge = $('#sitecues-badge');
+
+      $.each($(element).parents().andSelf(), function(i, parent) {
+        var $parent = $(parent);
+        if ($parent.is(document.body)) {
+          isInBody = true;
+          return null;
+        }
+        if ($parent.is(badge)) {
+          isInBadge = true;
+          return null;
+        }
+      });
+
+      return isInBadge || !isInBody;
+    };
+ 
     common.getAverageRGB = function(imgEl) {
       var blockSize = 5, // only visit every 5 pixels
       defaultRGB = {r:0, g:0, b:0}, // for non-supporting envs
@@ -504,6 +531,12 @@ sitecues.def('util/common', function (common, callback, log) {
         }
       }
     };
+
+    // Return true if the element has media contents which can be rendered
+    common.isVisualMedia = function(selector) {
+      var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
+      return $(selector).is(VISUAL_MEDIA_ELEMENTS);
+    }
 
     // Only update the right alignments when the window width changes.
     $(window).on('resizeEnd', function() {

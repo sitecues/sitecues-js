@@ -1,6 +1,6 @@
 /**
  * This file contain unit test(s) for ivona.js file.
- */
+ *
 
 require('./test/bootstrap');
 
@@ -16,16 +16,6 @@ fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
 });
 
 describe('ivona', function() {
-  describe('#removeHTMLEntities()', function() {
-    it('should remove any URI encoded html entities from a string', function(done) {
-      $(page).find('p').each(function () {
-        var actual = ivona.removeHTMLEntities(encodeURIComponent($(this).text())),
-            expected = '__';
-        expect(actual).to.be.equal(expected);
-      });
-      done();
-    });
-  });
    after(function() {
       // Unload module from nodejs's cache
       var name = require.resolve(ivonaPath);
@@ -34,3 +24,4 @@ describe('ivona', function() {
 });
 
 require('./test/discharge');
+*/

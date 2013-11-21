@@ -4,8 +4,8 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/close-button',
-  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton) {
+  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/close-button', 'platform',
+  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton, platform) {
 
     // Constants
 
@@ -141,6 +141,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var computedStyles = common.getElementComputedStyles(this.item);
         var offset = positioning.getOffset(this.item);
+
         var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
         var size = { width: parseFloat(width), height: parseFloat(height) };
@@ -195,6 +196,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
 
         var _this = this;
+        var IEZoom = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -211,7 +213,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = $.extend({}, cssUpdate, {
-          transform: 'scale(' + kExtraZoom + ')'
+          transform: 'scale(' + (kExtraZoom + IEZoom)  + ')' //Add some extra IEZoom, because of position.getMagnification doesnt work in IE
         });
 
         // Insert placeholder before HLB target is absoultely positioned.
@@ -256,17 +258,40 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         // If website uses width/height attributes let's remove those while HLB is inlated.
-        if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
-          for (var attrName in this.savedStyleAttr) {
-            if (attrName === 'style') {
-              continue;
+        if (!common.isCanvasElement(this.itemNode)) {
+            if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
+              for (var attrName in this.savedStyleAttr) {
+                if (attrName === 'style') {
+                  continue;
+                }
+                if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
+                  this.itemNode.removeAttr(attrName);
+                }
+              }
             }
-            if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
-              this.itemNode.removeAttr(attrName);
-            }
+        }
+
+        if (common.isCanvasElement(this.itemNode)) {
+            delete cssBeforeAnimateStyles.width;
+            delete cssBeforeAnimateStyles.height;
+            // todo: remove this awful hardcode
+            cssBeforeAnimateStyles['background-color'] = 'rgb(173, 172, 167)';
+        }
+
+        this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
+
+        // Since jQuery animate doesn't understand 'important' then do:
+        // - remove properties having 'important' priority animation is going to override;
+        // - set non-important property with the same value it used to have.
+        var styleObj = this.itemNode[0].style;
+        for (var prop in cssAnimateStyles) {
+          //first check that both of these objects has the property we are interested in
+          if (cssBeforeAnimateStyles.hasOwnProperty(prop) && cssAnimateStyles.hasOwnProperty(prop)) {
+            styleObj.removeProperty(prop);
+            this.itemNode[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
           }
         }
-        this.itemNode.style(cssBeforeAnimateStyles, '', 'important');
+
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, 'easeOutBack', function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
@@ -323,17 +348,19 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           clientRect = positioning.getBoundingBox(this.item);
         }
 
-        
-
         var cssAnimateStyles = $.extend({}, currentStyle, {
           'position': 'absolute',
-          'transform': 'scale(1)',
-
-          'width': clientRect.width / kExtraZoom,
-          // Don't change height if there's a background image, otherwise it is destroyed.
-          'height': currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+          'transform': 'scale(1)'
 
         });
+
+        if (!common.isCanvasElement(this.itemNode)) { 
+            $.extend(cssAnimateStyles, {
+                'width': clientRect.width / kExtraZoom,
+                // Don't change height if there's a background image, otherwise it is destroyed.
+                'height': currentStyle['background-image'] ? currentStyle.height / kExtraZoom : clientRect.height / kExtraZoom
+            });
+        }
 
         // Deflate the highlight box.
         this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , 'linear', function () {
@@ -359,9 +386,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           for (var attrName in _this.savedStyleAttr) {
             if (attrName === 'style') {
                _this.itemNode.removeAttr('style');
-            }
-            if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
-              _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+            } else if (!common.isCanvasElement(_this.itemNode)) {
+                if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
+                  _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+                }
             }
           }
           // This instance is now officially closed.
@@ -501,7 +529,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-color'] = '#000';
           return;
         }
-        if (!isContrastColors) {
+        if (!isContrastColors && common.isCanvasElement(this.itemNode)) {
           // Favor a white background with dark text when original background was white.
           if (common.isLightTone(newBgColor)) {
             newBgColor = 'rgb(255, 255, 255)';

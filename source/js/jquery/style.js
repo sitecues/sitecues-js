@@ -104,7 +104,11 @@ sitecues.def('jquery/style', function (style, callback, log) {
             return;
           }
 
-          style.setProperty(property, value + '', priority);
+          try { 
+            style.setProperty(property, value + '', priority);
+          } catch (e) {
+            // Report something  
+          }
 
           return;
         }

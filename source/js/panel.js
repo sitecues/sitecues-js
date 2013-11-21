@@ -4,7 +4,8 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, platform) {
+
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -72,7 +73,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
           letterSml         : { normal: '#000000', hover: '#000000'},
           track             : { normal: '#000000', hover: '#000000'},
           thumb             : { normal: '#3265c1', hover: '#3265c1'},
-          letterBig         : { normal: '#000000', hover: '#000000'},
+          letterBig         : { normal: '#000000', hover: '#000000'}
         }
       });
 
@@ -87,7 +88,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
           top:'0px',
           left:'0px',
           display:'hidden'
-        },
+        }
       }).appendTo('html');
     
      // create TTS button and set it up
@@ -122,20 +123,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
       return frame;
     };
 
-
     // Show panel.
     panel.show = function(){
-      
+
       // Variables used further down within this very large function
       // Probably worth breaking this function down a lot - Al
       var badgeRect
-        , badgeTop
-        , badgeLeft
-        , viewport
-        , topQ
-        , leftQ
-        , absolute
-        , sliderWidget
+        , $panel
+        , useLeft
+        , left
+        , right
         ;
 
       // Clear timer if present
@@ -144,74 +141,37 @@ sitecues.def( 'panel', function (panel, callback, log) {
       }
 
       panel.element.hide();
-      // Reset styles if any were set
-      
-      panel.element.style({
-        'top'     : '',
-        'bottom'  : '',
-        'left'    : '',
-        'right'   : ''
-      }, '', 'important');
 
       // Do we have a badge reference?  If no reference is passed then we
       // don't really know where we're supposed to put the panel.
-      if (panel.parent) {
-        
+      if(panel.parent) {
         badgeRect = $(panel.parent).get(0).getBoundingClientRect();
-         
-        // These will tell us where the badge isSticky  
-        badgeTop = 0;
-        badgeLeft = 0;
-        viewport = positioning.getViewportDimensions(0, conf.get('zoom'));
+        zoom = positioning.getTotalZoom(panel.parent, true);
+        $panel = panel.element;
+        left = right = '';
 
-        // Set up some standard measurements
-        if (platform.browser.isFirefox) {
-          badgeTop = (window.pageYOffset + badgeRect.top)/conf.get('zoom');
-          badgeLeft = (window.pageXOffset + badgeRect.left)/conf.get('zoom');
-        } else {
-          badgeTop = badgeRect.top;
-          badgeLeft = badgeRect.left;
+        // Would panel go off the right side of screen? If YES -> open to the left
+        useLeft = badgeRect.left * zoom +  $panel.width() + 15 < window.innerWidth;
+        if (useLeft) { /* Panel moved, expands right */
+          left = ((badgeRect.left - 5) * zoom) + 'px';
+        }
+        else {  /* Panel expands left */
+          right = (document.documentElement.offsetWidth - badgeRect.right * zoom - 4) + 'px';
         }
 
-        // These two variables will tell us which -quadrant we're in
-        topQ = badgeTop < (viewport.height / 2);
-        leftQ = badgeLeft < (viewport.width / 2);
+        $panel.style({
+          top: ((badgeRect.top - 5) * zoom) + 'px',
+          left: left,
+          right: right
+        }, '', 'important');
+      }
 
-        // Match the type of positioning of the parent/badge.  Trying to pin a
-        // fixed element to an absolute element is tricky if not impossible.
-        absolute = panel.parent.offsetParent().css('position') === 'absolute';
-        
-        if(absolute) {
-          panel.element.css('position','absolute');
-        }
-
-        if (topQ) {
-          log.info('Badge is in top half of page (' + panel.parent.offset().top + ')');
-          panel.element.style('top', (panel.parent.offset().top - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
-        } else {
-          log.info('Badge is in bottom half of page');
-          // We can't use the 'bottom' property here because jQuery won't animage properly off of it.
-          panel.element.style('top', (((panel.parent.offset().top + (panel.parent.height()/2)) - (panel.element.height()/2)) - positioning.getScrollPosition().top) * conf.get('zoom') + 'px', 'important');
-        }
-
-        if(leftQ) {
-          log.info('Badge is in left half of page');
-          panel.element.style('left', Math.min(panel.parent.offset().left, $(window).width() - panel.element.width()) + 'px', 'important');
-        } else {
-          log.info('Badge is in right half of page');
-          if(((panel.parent.offset().left + panel.parent.width()) - panel.element.width()) < 0) {
-            // The panel would go off the left side of the screen
-            panel.element.style('right', panel.element.width() + 'px', 'important');
-            panel.element.style('opacity', 0.5, 'important');
-          } else {
-            // The panel will fit on the screen
-            if(absolute) {
-              panel.element.style('right', viewport.width- (panel.parent.offset().left + panel.parent.width()) + 'px', 'important');
-            } else {
-              panel.element.css('right',($(window.width) - (panel.parent.offset().left) + panel.parent.width())+ 'px', 'important');
-            }
-          }
-        }
+      function setSliderDimensions() {
+        // Set/recheck the dimensions of the slider
+        var sliderWidget = panel.slider.widget;
+        sliderWidget.setdimensions(sliderWidget);
+        sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+        sliderWidget.translateThumbSVG.call(sliderWidget);
       }
 
       panel.element.animate({
@@ -222,21 +182,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
         750,
         function() {
           sitecues.emit('panel/show', panel.element);
-          
-          // Set/recheck the dimensions of the slider
-          var sliderWidget = panel.slider.widget;
-          sliderWidget.setdimensions(sliderWidget);
-          sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
-          sliderWidget.translateThumbSVG.call(sliderWidget);
+          setSliderDimensions();
         }
       );
 
-      // Set/recheck the dimensions of the slider
-      sliderWidget = panel.slider.widget;
-      sliderWidget.setdimensions(sliderWidget);
-      sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
-      sliderWidget.translateThumbSVG.call(sliderWidget);
-
+      setSliderDimensions();
 
       panel.element.hover(function() {
         // Hover in.
@@ -291,7 +241,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
       ttsButton.addClass('tts-disabled');
     }
 
-    // EVENT HANLERS
+    // EVENT HANDLERS
 
     // Setup trigger to show panel.
     sitecues.on('badge/hover', function() {
@@ -309,36 +259,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
     sitecues.on('speech/disabled', showTTSbuttonDisabled);
 
     panel.create();
-
-    // Adjust the position of the toolbar items when the document vertical scrollbar appears
-    sitecues.on('zoom/documentScrollbarShow', function(scrollbarWidth){
-
-      // Get the right position of the panel
-      var   panelRight = $('#sitecues-panel').css('right')
-
-      // Calculate the updated position
-      , newRightValPanel    = (parseFloat(panelRight) - scrollbarWidth) +'px'
-      ;
-
-      // Set the updated CSS position
-      $('#sitecues-panel').css({right: newRightValPanel});
-
-    });
-
-    // Adjust the position of the toolbar items when the document vertical scrollbar disappears
-    sitecues.on('zoom/documentScrollbarHide', function(scrollbarWidth){
-   
-      // Get the right position of the panel
-      var   panelRight = $('#sitecues-panel').css('right')
-
-      // Calculate the updated position
-      , newRightValPanel    = (parseFloat(panelRight) + scrollbarWidth) +'px'
-      ;
-
-      // Set the updated CSS position
-      $('#sitecues-panel').css({right: newRightValPanel});
-    
-    });
 
     // panel is ready
     callback();

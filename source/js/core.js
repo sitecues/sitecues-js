@@ -3,6 +3,7 @@
  *   The core module of the sitecues library.
  */
 (function () {
+  
   'use strict';
 
   // NOTE: initialization of this module is at the bottom of this page.
@@ -13,7 +14,6 @@
 
   // Private variables
     , arr               = Array.prototype  // Array's prototype
-    , log               = null             // The core module logger
     , libraryConfig     = null             // Library config container
     , libraryUrl        = null             // The parsed library URL object
     , siteConfig        = null             // Site config container
@@ -44,7 +44,17 @@
     , resolveSitecuesUrl
     , loadScript
     , load
-    ;
+
+  // Define place-holder for Logger
+  , log = {
+      fatal: function () {},
+      error: function () {},
+      warn : function () {},
+      info : function () {},
+      debug: function () {},
+      trace: function () {},
+      newLogger: function(){ return this; }
+    };
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
@@ -291,7 +301,7 @@
       }
 
     // Pass a new logger into the constructor scope of the module
-    }, sitecues.logger.log(name));
+    }, log.newLogger(name));
   };
 
   // This kicks off a loop that will wait until modules are loaded
