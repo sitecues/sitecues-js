@@ -1,5 +1,6 @@
 /**
  * This is module for common positioning utilities that might need to be used across all of the different modules.
+ * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
 sitecues.def('util/positioning', function (positioning, callback, log) {
 
