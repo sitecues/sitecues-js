@@ -1,5 +1,6 @@
 /**
  * This is the box that appears when the user asks to read the highlighted text in a page.
+ * See more info on https://equinox.atlassian.net/wiki/display/RD/New+HLB+based+on+position%3A+relative
  */
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
