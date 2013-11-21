@@ -38,11 +38,16 @@ sitecues.def('speech', function (speech, callback, log) {
         ttsBypass = false,
         // This is the engine we're using, required, no default
         ttsEngine = site.get('ttsEngine'),
+
+        timesCued = 0,
+        maxCued = 3,
+
         /**
          * Returns true if the "first speech on" cue should be played.
          * @return {boolean}
          */
         shouldPlayFirstSpeechOnCue = function() {
+
           var fso = conf.get(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM);
           return (!fso || ((fso + speech.CONSTANTS.FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
         },
@@ -59,24 +64,6 @@ sitecues.def('speech', function (speech, callback, log) {
         playedFirstSpeechOnCue = function() {
           conf.set(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
         },
-
-        removeHTMLEntities = (function() {
-          //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
-          //Taken from http://www.w3schools.com/tags/ref_entities.asp and then passed the symbols above into
-          //the native function encodeURIComponent.  Example: encodeURIComponent('®')
-          var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%C2%A2', '%C2%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
-          /**
-           * @param URIComponent accepts a string of URI encoded text and removes any
-           *  html entity encoded characters from it
-           */
-          return function (URIComponent) {
-            for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
-              URIComponent = URIComponent.replace(htmlEntityMap[i], '');
-            }
-            return URIComponent;
-          };
-      
-        }()),
 
         //What audio format will we use? 
         audioFormat =  (function () {
@@ -115,7 +102,7 @@ sitecues.def('speech', function (speech, callback, log) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
               // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
               + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+              + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
           }
 
           this.init = function () {
@@ -133,8 +120,11 @@ sitecues.def('speech', function (speech, callback, log) {
 
           };
 
+
+
+
           this.play = function () {
-            
+            //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
             if (audioElement) {
               if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
                 playing = true;
@@ -150,7 +140,8 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
           this.stop = function () {
-            
+                        //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
+
             sitecues.off('canplay');
             
             if (audioElement && audioElement.readyState >= 3) {
@@ -207,7 +198,7 @@ sitecues.def('speech', function (speech, callback, log) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
                 // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
                 + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+                + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
             }
 
             this.soundSource = undefined;
@@ -417,7 +408,6 @@ sitecues.def('speech', function (speech, callback, log) {
       });
     
     };
-
     /*
      * Iterates through all of the players and stops them.
      */
@@ -461,11 +451,22 @@ sitecues.def('speech', function (speech, callback, log) {
         conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, true);
         conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
 
+
+         // EQ-996 - As a user, I want multiple chances to learn about the 
+         // spacebar command so that I can benefit from One Touch Read 
+         //---------------------------------------------------------------------------------------------------//
+         // 1) For the TTS-spacebar hint (currently given when TTS is turned on the first time):
+         // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
+         speech.timesCued = timesCued++;
+
         if(!shouldPlayFirstSpeechOnCue()) {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON);
         } else {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON_FIRST, function() {
-            playedFirstSpeechOnCue();
+
+                    if( speech.timesCued == maxCued ){
+                      playedFirstSpeechOnCue();
+                    }
           });
         }
         if (callback) {

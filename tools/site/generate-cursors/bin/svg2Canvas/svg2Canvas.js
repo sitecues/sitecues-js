@@ -11,9 +11,9 @@
     
   // Regular Experssions for SVG Paths
   , expression  = {
-      pathCommand   : '[mzlhvcqtaMZLHVCQTA][^mzlhvcqtaMZLHVCQTA]+'
-    , move          : '[0-9][^,]+'
-    , curveTo       : '[0-9][^,|^ ]+'
+      pathCommand   : '[MLCz][^MLCz]+|z'
+    , move          : '[0-9-.]+'
+    , curveTo       : '[-0-9|.]+'
     }
 
   // Get the arguments for a Path command
@@ -179,12 +179,18 @@
   // Public Interface for svg2canvas features
   window.svg2Canvas = function (file, props) {
 
+    console.log(props.width);
+
     var response  = load(file)
       , svg       = response.getElementsByTagName('svg')[0]
       , svgWidth  = svg.getAttribute('width')
       , svgHeight = svg.getAttribute('height')
       , width     = props.width || svgWidth
       , height    = props.height || svgHeight
+      
+      , widthC     = 96
+      , heightC    = 96
+      
       , density
       , canvas
       , result
@@ -211,22 +217,21 @@
     scaleY = height / svgHeight * density;
     scaleSqrt = Math.sqrt(scaleX * scaleY);
 
-    canvas.setAttribute('width', width * density);
-    canvas.setAttribute('height', height * density);
+    canvas.setAttribute('width', widthC * density);
+    canvas.setAttribute('height', heightC * density);
     c = canvas.getContext('2d');
 
     c.save();
-    c.scale( scaleX, scaleY);
+    c.scale( scaleX, scaleY );
     parse(svg);
     c.restore();
 
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
+    canvas.style.width = widthC + 'px';
+    canvas.style.height = heightC + 'px';
 
     result = props.toDataURL ? canvas.toDataURL() : canvas;
 
     return props.callback ? props.callback(result) : result;
-  
   };
 
 })();

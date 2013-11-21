@@ -107,7 +107,7 @@ sitecues.def('jquery/style', function (style, callback, log) {
           try { 
             style.setProperty(property, value + '', priority);
           } catch (e) {
-            
+            // Report something  
           }
 
           return;

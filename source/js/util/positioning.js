@@ -98,6 +98,11 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 		    for (var count = 0; count < fixedRects.length; count ++) {
 			    absoluteRects[count] = positioning.getCorrectedBoundingBox(fixedRects[count], zoom, scrollPos);
 		    }
+                    // AK: this is quick'n'dirty fix for the case rect is undefined
+                    if (absoluteRects.length === 0) {
+                       absoluteRects = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
+                    }
+                    
 		    return absoluteRects;
 	    }
 
@@ -139,8 +144,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 		    var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
 		    if (isSingleLine)
 			    return item.getBoundingClientRect();
-
-		    return contentRect;
+                    // AK: this is quick'n'dirty fix for the case rect is undefined
+		    return contentRect || {'left': 0, 'top': 0, 'width': 0, 'height': 0};
 	    }
 
 	    function getBoundingRectMinusPadding(node) {
@@ -461,6 +466,10 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 	            var zoom = positioning.getTotalZoom(this, true);
 	            var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
+                // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
+                if (!rect) {
+                   rect = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
+                }
                 result.push({
                     left: rect.left + (rect.width / 2),
                     top:  rect.top + (rect.height / 2)

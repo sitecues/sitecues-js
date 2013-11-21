@@ -2,13 +2,13 @@
  * This file contain unit test(s) for cursor.js file.
  */
 
-require('../test/bootstrap');
+// require('../test/bootstrap');
 
 // Require the module file we want to test.
-var cursorPath = '../../../source/js/cursor';
-var module = require(cursorPath);
+// var cursorPath = '../../../source/js/cursor';
+// var module = require(cursorPath);
 
-describe('cursor', function() {
+// describe('cursor', function() {
 
   //  describe('#init()', function() {
 
@@ -124,6 +124,6 @@ describe('cursor', function() {
   //     delete require.cache[name];
   //  });
     
-});
+// });
 
-require('../test/discharge');
+// require('../test/discharge');

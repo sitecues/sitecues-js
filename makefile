@@ -35,8 +35,6 @@ package-dir:=$(package-basedir)/$(package-name)
 # Production files (combine all modules into one).
 # Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
-	source/js/logging/log4javascript_uncompressed.js \
-	source/js/logging/init_logger.js \
 	target/source/js/core.js \
 	source/js/load.js \
 	source/js/jquery.js \
@@ -89,7 +87,7 @@ files=\
 	source/js/ui-manager.js \
 	source/js/html-build.js \
 	source/js/status.js \
-	source/js/compatibility-fallback.js \
+	source/js/fallback.js \
 
 https=off
 prod=off
@@ -118,9 +116,6 @@ endif
 # Developement files (load modules separately).
 ifeq ($(dev), true)
 	files=\
-		source/js/logging/log4javascript_uncompressed.js \
-		source/js/logging/init_logger.js \
-		source/js/logging/init_logger_dev.js \
 		target/source/js/core.js \
 		source/js/use.js source/js/debug.js
 endif
