@@ -25,7 +25,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		_warning = [
 		/*[0]*/	"<h3>Our apologies!</h3>",
 		/*[1]*/	"<strong>sitecues</strong> zoom &amp; speech tools",
-		/*[2]*/	"require a more current version of your web browser.",
+		/*[2]*/	"require a more recent version of your web browser.",
 		/*[3]*/	"are coming to your browser soon!",
 		/*[4]*/	"require a different web browser in order to work.",
 		/*[5]*/	"touch support is coming to your device soon!"
@@ -57,11 +57,15 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	var _dataProvider = sitecues.getLibraryUrl();	
 
 	fallback._dataProvider = _dataProvider['host'];
-	fallback.fallbackId = conf.get('fallbackId');
 
-	    if (!fallback.fallbackId) {
-	      fallback.fallbackId = 'sitecues-fallback-unsupported-browser';
-	    }
+
+
+	//console.log(_dataProvider)
+	// fallback.fallbackId = conf.get('fallbackId');
+
+	//     if (!fallback.fallbackId) {
+	//       fallback.fallbackId = 'sitecues-fallback-unsupported-browser';
+	//     }
 
 
 
@@ -70,7 +74,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 		load.style('../css/fallback.css')
 
 			fallback.modal = $('<div/>')
-							.attr({ 'id': fallback.fallbackId })
+							.attr({ 'id': 'sitecues-fallback-unsupported-browser' })
 							.addClass('sitecues-unsupported-browser')
 							.hide()
 							.appendTo('html');
@@ -145,7 +149,7 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 
 			fallback.refresh = function() {	
-			  if (conf.get('fallbackEnabled')) {		
+			  if (window.sitecues.getLibraryConfig().fallback.enabled) {		
 					$(window).on('resize', function(evt){
 						evt.stopImmediatePropagation();
 						fallback.center();
@@ -159,16 +163,16 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 
 				fallback.show = function (success) {
 
-					if (conf.get('fallbackEnabled')) {
+					if (window.sitecues.getLibraryConfig().fallback.enabled) {
 	        				log.info('Showing fallback');
 
 	        				fallback.center();
 					        $(fallback.modal).fadeIn('slow', function() {
-					        	console.log()
 					          if (success) {
 					            success();
 					          }
 					        });
+
 				      } else {
 				      	console.log("fallback.fadeIn() was called but fallback is disabled. Use sitecues.toggleFallback() in console.")
 					        log.warn("fallback.fadeIn() was called but fallback is disabled. Use sitecues.toggleFallback() in console.");
@@ -185,9 +189,9 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 						      });
 					}
 
-				fallback.destroy = function(success){
-				  		fallback.remove();
-				  } 
+				// fallback.destroy = function(success){
+				//   		fallback.remove();
+				//   } 
 
 
 	
@@ -200,8 +204,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
      */
     fallback.disable = function (success) {
       log.info('Disabling fallback');
-      conf.set('fallbackEnabled', false);
-      //document.write("Disabling fallback");
+      window.sitecues.getLibraryConfig().fallback.enabled = false;
+      //conf.set('fallbackEnabled', false);
       fallback.fadeOut(success);
     };
 
@@ -213,19 +217,21 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
      */
     fallback.enable = function (success) {
       log.info('Enabling fallback');
-      conf.set('fallbackEnabled', true);
-
+      //conf.set('fallbackEnabled', true);
+      window.sitecues.getLibraryConfig().fallback.enabled = true;
       //if( conf.get('fallbackEnabled') ) {
 
       // if( $fallback.length == 0){
       // 		fallback.create(success);
       
-      // } else if (success) {
-      // 	success();
-      // }
+      // } else 
+
+      if (success) {
+      	success();
+      }
     };
 
-    //fallback.isEnabled = conf.get('fallbackEnabled');
+    //fallback.isEnabled = window.sitecues.getLibraryConfig().fallback.enabled;
 
     var $fallback = $('#' + fallback.fallbackId);
 
@@ -246,7 +252,8 @@ sitecues.use('jquery', 'conf', 'jquery/style', 'platform', 'load',  function ($,
 	sitecues.toggleFallback = function () {
 
 		fallback.isEnabled = !fallback.isEnabled;
-		conf.set('fallbackEnabled',fallback.isEnabled)
+		window.sitecues.getLibraryConfig().fallback.enabled = fallback.isEnabled;
+		//conf.set('fallbackEnabled',fallback.isEnabled)
 		return fallback.isEnabled;
     	}	
 

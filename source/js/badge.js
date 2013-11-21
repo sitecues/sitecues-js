@@ -124,12 +124,10 @@ sitecues.def('badge', function (badge, callback, log) {
         // We have no alternate or pre-existing badges defined, so create a new one.
         badge.create();
       }
-
-      
+ 
     panel.parent  = badge.element;
 
     $badge = $('#' + badge.badgeId);
-
 
     var isBadgeInDom = $badge && $badge.length > 0;
  
@@ -137,18 +135,14 @@ sitecues.def('badge', function (badge, callback, log) {
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
     badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
 
-    // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
-    // a useful fallback when it can't work, so that my users aren't confused by the icon.
-    // -csimari
+    /* EQ-881: As a customer, I want sitecues to degrade gracefully or provide
+    /* a useful fallback when it can't work, so that my users aren't confused by the icon.*/
     var _requiresFallback = platform.requiresFallback,
         _supportsTouch = platform.isTouchDevice;
 
-      // EQ-657 - Handle tablet and smartphone case
-      // Determine if event was touch based - only limited to event at this level
-      // 'msgesturechange' is for IE10 - wtf?!
-      // -csimari
-
-
+      /* EQ-657 - Handle tablet and smartphone case
+      /* Determine if event was touch based - only limited to event at this level
+      /* 'msgesturechange' is for IE10 - wtf?! */
       var setFallbackEvents = function (evt){
                                   evt.preventDefault();
                                   fallback.show();
@@ -161,47 +155,36 @@ sitecues.def('badge', function (badge, callback, log) {
                                 };   
      
       // Check if fallbacks are enabled otherwise use default hover
-      if (conf.get('fallbackEnabled')) {
+      if (window.sitecues.getLibraryConfig().fallback.enabled) {
+        console.log('fallbacks are enabled')
            log.info('fallbacks are enabled');
             // Delegate Events
            if( _requiresFallback || _supportsTouch ) { 
-              switch(_supportsTouch){
-                case true: 
-                      $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-                  break;
-                case false: 
-                      $(badge.panel).on( 'click', setFallbackEvents );
-                  break;
-              }
+             
+                  switch(_supportsTouch){
+                    case true: 
+                          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+                      break;
+                    case false: 
+                          $(badge.panel).on( 'click', setFallbackEvents );
+                      break;
+                    }
 
-              if( _requiresFallback && _supportsTouch ){
-
-                $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-                $(badge.panel).on( 'click', setFallbackEvents );
-              }
+                  if( _requiresFallback && _supportsTouch ){
+                    $(badge.panel).on( 'click' || 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+                  }
           
-          }else{
+            }else{
                 // sitecues deployed without need for fallback.',
                 $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-           }
-
+              }
         
               } else {
-                $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
-                console.log("Fallback modal is currently disabled.")
-                log.warn("Fallback modal is currently disabled.");
+
+                  $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+                  console.log("Fallback modal is currently disabled.")
+                  log.warn("Fallback modal is currently disabled.");
                 }
-
-
-
-
-
-
-
-
-        
-
-
 
       sitecues.on('badge/enable', function() {
           badge.enable(true);
