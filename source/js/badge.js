@@ -1,5 +1,7 @@
 sitecues.def('badge', function (badge, callback, log) {
 
+  'use strict';
+
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
   sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'html-build', 'zoom', 'platform', 'fallback', function ($, conf, panel, ui, common, htmlBuild, zoom, platform, fallback) {
@@ -48,7 +50,7 @@ sitecues.def('badge', function (badge, callback, log) {
       if (success) {
         success();
       }
-    }
+    };
 
     /**
      * Hides the badge.
@@ -58,9 +60,9 @@ sitecues.def('badge', function (badge, callback, log) {
      */
     badge.hide = function (success) {
       $(badge.panel).fadeOut('fast', function() {
-      	if (success) {
-      		success();
-      	}
+        if (success) {
+          success();
+        }
       });
     };
 
@@ -79,8 +81,7 @@ sitecues.def('badge', function (badge, callback, log) {
           }
         });
       } else {
-        log.warn("badge.show() was called but badge is disabled");
-        throw e;
+        log.warn('badge.show() was called but badge is disabled');
       }
     };
 
@@ -106,14 +107,15 @@ sitecues.def('badge', function (badge, callback, log) {
       log.info('Enabling badge');
       conf.set('badgeEnabled', true);
       if(show) {
-      	badge.show(success);
+        badge.show(success);
       } else if (success) {
-      	success();
+        success();
       }
     };
  
     // BODY
     var $badge = $('#' + badge.badgeId);
+<<<<<<< HEAD
       if (badge.altBadges && (badge.altBadges.length > 0)) {
         badge.panel   = badge.altBadges;
         badge.element = badge.panel;
@@ -125,6 +127,21 @@ sitecues.def('badge', function (badge, callback, log) {
         badge.create();
       }
  
+=======
+
+    if (badge.altBadges && (badge.altBadges.length > 0)) {
+      badge.panel   = badge.altBadges;
+      badge.element = badge.panel;
+    } else if ($badge.length > 0) {
+      badge.panel   = $badge;
+      badge.element = badge.panel;
+    } else {
+      // We have no alternate or pre-existing badges defined, so create a new one.
+      badge.create();
+    }
+
+      
+>>>>>>> 9d37c1f64b193bc6ffbc99f752aff23ab15c4055
     panel.parent  = badge.element;
 
     $badge = $('#' + badge.badgeId);
@@ -135,6 +152,7 @@ sitecues.def('badge', function (badge, callback, log) {
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
     badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
 
+<<<<<<< HEAD
     /* EQ-881: As a customer, I want sitecues to degrade gracefully or provide
     /* a useful fallback when it can't work, so that my users aren't confused by the icon.*/
     var _requiresFallback = platform.requiresFallback,
@@ -185,15 +203,74 @@ sitecues.def('badge', function (badge, callback, log) {
                   console.log("Fallback modal is currently disabled.")
                   log.warn("Fallback modal is currently disabled.");
                 }
+=======
+    // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
+    // a useful fallback when it can't work, so that my users aren't confused by the icon.
+    // -csimari
+    var requiresFallback = platform.requiresFallback,
+        supportsTouch = platform.isTouchDevice;
 
-      sitecues.on('badge/enable', function() {
-          badge.enable(true);
-      });
+      // EQ-657 - Handle tablet and smartphone case
+      // Determine if event was touch based - only limited to event at this level
+      // 'msgesturechange' is for IE10 - wtf?!
+      // -csimari
 
-        if (sitecues.tdd) {
-          // todo: maybe export the whole module instead if every single function?
-          exports.badge = badge;
+
+    var setFallbackEvents = function (evt){
+      evt.preventDefault();
+      fallback.show();
+    };
+  
+    var setDefaultEventOver = function () {
+      sitecues.emit('badge/hover', badge.element);
+    };     
+  
+    var setDefaultEventLeave = function () {
+      sitecues.emit('badge/leave', badge.element);
+    };   
+     
+    // Check if fallbacks are enabled otherwise use default hover
+    if (conf.get('fallbackEnabled')) {
+      
+      log.info('fallbacks are enabled');
+      
+      // Delegate Events
+      if (requiresFallback || supportsTouch){
+        
+        switch(supportsTouch){
+        case true: 
+          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+          break;
+        case false: 
+          $(badge.panel).on( 'click', setFallbackEvents );
+          break;
         }
+        
+        if( requiresFallback && supportsTouch ){
+          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
+          $(badge.panel).on( 'click', setFallbackEvents );
+        }
+
+      }else{
+        // sitecues deployed without need for fallback.',
+        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+      }
+
+    } else {
+      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+      // console.log("Fallback modal is currently disabled.")
+      log.warn('Fallback modal is currently disabled.');
+    }
+>>>>>>> 9d37c1f64b193bc6ffbc99f752aff23ab15c4055
+
+    sitecues.on('badge/enable', function() {
+      badge.enable(true);
+    });
+
+    if (sitecues.tdd) {
+      // todo: maybe export the whole module instead if every single function?
+      exports.badge = badge;
+    }
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

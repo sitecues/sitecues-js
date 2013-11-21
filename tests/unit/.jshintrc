@@ -11,7 +11,12 @@
     "sitecues",
     "describe",
     "expect",
-    "it"
+    "after",
+    "afterAll",
+    "afterEach",
+    "it",
+    "navigator",
+    "module"
   ],
   
   "maxerr"        : 100,

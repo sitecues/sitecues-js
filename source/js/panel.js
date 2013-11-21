@@ -1,4 +1,4 @@
-sitecues.def( 'panel', function (panel, callback) {
+sitecues.def( 'panel', function (panel, callback, log) {
   
   'use strict';
 
