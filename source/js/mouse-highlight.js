@@ -534,7 +534,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
-      positioning.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
+      common.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
       state.fixedContentRect = fixedRects[0];
       state.elementRect = $.extend({}, elementRect);
       absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];

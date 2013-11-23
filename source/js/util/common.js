@@ -4,6 +4,9 @@
 sitecues.def('util/common', function (common, callback, log) {
   'use strict';
 
+  common.kMinRectWidth = 4;
+  common.kMinRectHeight = 4;
+
    // Define dependency modules.
   sitecues.use('jquery', 'jquery/cookie', function ($) {
     
@@ -59,7 +62,7 @@ sitecues.def('util/common', function (common, callback, log) {
         
         // dash-like name: 'margin-top'
         for (i = 1; i < propertyParts.length; i++) {
-          propertyName += common.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
+          propertyName += this.capitaliseFirstLetter(propertyParts[i]); // in format 'marginTop'
         }
         return computedStyles[propertyName];
       }
@@ -117,13 +120,88 @@ sitecues.def('util/common', function (common, callback, log) {
       return !val || val.trim() === '';
     };
 
+    /**
+     * Checks if the element has media contents which can be rendered.
+     */ 
+    common.isVisualMedia = function(selector) {
+      var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
+      return $(selector).is(VISUAL_MEDIA_ELEMENTS);
+    };
+
+    /**
+     * Checks if the current element has non-auto clip property value.
+     */
+   common.isClipElement = function(element) {
+        // TODO: should we use common.getElementComputedStyles() ?
+        return $(element).css('clip') !== 'auto' || $(element).css('overflow') !== 'visible';
+    };
+
     /*
      * @param {HTMLObject Array} el DOM node (array)
      * @returns {Boolean} True if the element is related to canvas.
      */  
     common.isCanvasElement = function (el) {
        return el[0].localName === "canvas" || el.find('canvas').length > 0;
-     }
+     };
+
+    /*
+     * Check if current image value is not empty.
+     * @imageValue A string that represents current image value.
+     * @return true if image value contains some not-empty value.
+     */
+    common.isEmptyBgImage = function(imageValue) {
+      return this.isEmpty(imageValue) || imageValue === 'none';
+    };
+
+     /**
+      * Checks if the element has a visible border(based on left and top border widths.
+      */
+    common.hasVisibleBorder = function(style) {
+       return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
+     };
+
+    /**
+      * Is the current element editable for any reason???
+      * @param element
+      * @returns {boolean} True if editable
+      */
+    common.isEditable = function ( element ) {
+      var tag = element.localName
+        , contentEditable
+        ;
+      
+      if (!tag) {
+        return false;
+      }
+      tag = tag.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+        return true;
+      }
+      if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
+        return true; // Be safe, looks like a keyboard-accessible interactive JS widget
+      }
+      // Check for rich text editor
+      contentEditable = element.getAttribute('contenteditable');
+      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
+        return true; // In editor
+      }
+      if (document.designMode === 'on') {
+        return true; // Another kind of editor
+      }
+      return false;
+    };
+
+    /**
+     * Checks if the color value given of a light tone or not.
+     */
+    common.isLightTone = function (colorValue) {
+      var RGBColor = this.getRGBColor(colorValue);
+      // http://en.wikipedia.org/wiki/YIQ
+      var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
+
+      return  yiq >= 128;
+    }
+
     /*
      * Converts both colors to the same [RGB] format and then find out if they are contrast.
      * @param colorOne String/CSSPrimitiveValue represents one of the colors to compare
@@ -136,14 +214,6 @@ sitecues.def('util/common', function (common, callback, log) {
       // Now that we have both colors tones, define if they are contrast or not.
       return (colorOneTone === colorTwoTone) ? false : true;
     };
-
-    common.isLightTone = function (colorValue) {
-      var RGBColor = common.getRGBColor(colorValue);
-      // http://en.wikipedia.org/wiki/YIQ
-      var yiq = ((RGBColor.r*299)+(RGBColor.g*587)+(RGBColor.b*114))/1000;
-
-      return  yiq >= 128;
-    }
 
     /*
      * Converts color given RGB format.
@@ -182,17 +252,8 @@ sitecues.def('util/common', function (common, callback, log) {
      * @return String that represents RGB value. Format : 'rgb(numericValueR, numericValueG, numericValueB)'
      */
     common.getRevertColor = function(colorValue) {
-      var RGBColor = common.getRGBColor(colorValue);
+      var RGBColor = this.getRGBColor(colorValue);
       return 'rgb(' + (255 - RGBColor.r) + ', ' + (255 - RGBColor.g) + ', ' + (255 - RGBColor.b) + ')';
-    };
-
-    /*
-     * Check if current image value is not empty.
-     * @imageValue A string that represents current image value.
-     * @return true if image value contains some not-empty value.
-     */
-    common.isEmptyBgImage = function(imageValue) {
-      return common.isEmpty(imageValue) || imageValue === 'none';
     };
 
     /*
@@ -357,7 +418,7 @@ sitecues.def('util/common', function (common, callback, log) {
      * @param e Event Object
      */
     common.stopDefaultEventBehavior = function(e) {
-      common.preventDefault(e);
+      this.preventDefault(e);
       e.stopPropagation();
     };
 
@@ -381,56 +442,16 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     /**
-     * Defines if the element given contains vertical scroll.
-     * @param el HTMLObject
-     */
-    common.hasVertScroll = function(el) {
-      return el.clientHeight < el.scrollHeight;
-    };
-
-    /**
      * @param e EventObject
      * @param el HTMLObject
      * @param step Number the number of pixels set as scroll interval
      * @param isUp Boolean True if scroll direction is up
      */
     common.smoothlyScroll = function(e, el, step, isUp) {
-      common.stopDefaultEventBehavior(e);
+      this.stopDefaultEventBehavior(e);
       step = step || 1;
       step = isUp? -step : step;
       el.scrollTop += step;
-      return false;
-    };
-
-
-     /**
-      * Is the current element editable for any reason???
-      * @param element
-      * @returns {boolean} True if editable
-      */
-    common.isEditable = function ( element ) {
-      var tag = element.localName
-        , contentEditable
-        ;
-      
-      if (!tag) {
-        return false;
-      }
-      tag = tag.toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') {
-        return true;
-      }
-      if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
-        return true; // Be safe, looks like a keyboard-accessible interactive JS widget
-      }
-      // Check for rich text editor
-      contentEditable = element.getAttribute('contenteditable');
-      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
-        return true; // In editor
-      }
-      if (document.designMode === 'on') {
-        return true; // Another kind of editor
-      }
       return false;
     };
 
@@ -442,21 +463,21 @@ sitecues.def('util/common', function (common, callback, log) {
       return kUrlValidString.test(urlString);
     };
 
-	  /**
-	   * Create an SVG fragment for insertion into a web page -- ordinary methods don't work.
-	   * See http://stackoverflow.com/questions/3642035/jquerys-append-not-working-with-svg-element
-	   */
-	common.createSVGFragment = function(svgMarkup, className) {
-		  var temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-		  temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
-		  var frag = document.createDocumentFragment();
-		  var child = temp.firstChild;
-		  while (child) {
-			  frag.appendChild(child);
-			  child = child.nextSibling;
-		  }
-		  return frag;
-	  }
+  /**
+   * Create an SVG fragment for insertion into a web page -- ordinary methods don't work.
+   * See http://stackoverflow.com/questions/3642035/jquerys-append-not-working-with-svg-element
+   */
+    common.createSVGFragment = function(svgMarkup, className) {
+              var temp = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+              temp.innerHTML= '<svg xmlns="http://www.w3.org/2000/svg" class="' + className + '">'+svgMarkup+'</svg>';
+              var frag = document.createDocumentFragment();
+              var child = temp.firstChild;
+              while (child) {
+                      frag.appendChild(child);
+                      child = child.nextSibling;
+              }
+              return frag;
+      }
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -470,6 +491,7 @@ sitecues.def('util/common', function (common, callback, log) {
     // The tracked objects.
     rightAlignObjs = [];
 
+    // TODO: remove one of two dubs below: either bodyHasVertScrollbar or hasVertScroll.
     // Returns true if the body has a vertical scrollbar.
     function bodyHasVertScrollbar () {
       // See if the document width is within some delta of the window inner width.
@@ -477,6 +499,13 @@ sitecues.def('util/common', function (common, callback, log) {
       log.info('bodyHasVertScrollbar = ' + result);
       return result;
     }
+    /**
+     * Defines if the element given contains vertical scroll.
+     * @param el HTMLObject
+     */
+    common.hasVertScroll = function(el) {
+      return el.clientHeight < el.scrollHeight;
+    };
 
     common.bodyHasVertScrollbar = bodyHasVertScrollbar;
 
@@ -532,12 +561,6 @@ sitecues.def('util/common', function (common, callback, log) {
       }
     };
 
-    // Return true if the element has media contents which can be rendered
-    common.isVisualMedia = function(selector) {
-      var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
-      return $(selector).is(VISUAL_MEDIA_ELEMENTS);
-    }
-
     // Only update the right alignments when the window width changes.
     $(window).on('resizeEnd', function() {
       // console.log('RESIZE END________________________________________________');
@@ -548,6 +571,225 @@ sitecues.def('util/common', function (common, callback, log) {
 
     ////////////////////////////////////////////////////////////////////////////////
     //// END: Logic for fixed right alignment ignoring the vertical scrollbar,
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //// START: Logic for mouse-highlight intellegent selection,
+    ////////////////////////////////////////////////////////////////////////////////
+
+ common.getBulletRect = function(element, style) {
+      var bulletType = style['list-style-type'];
+      if ((bulletType === 'none' && style['list-style-image'] === 'none') || style['list-style-position'] !== 'outside') {
+        return null; // inside, will already have bullet incorporated in bounds
+      }
+      if (style['display'] !== 'list-item') {
+        if ($(element).children(":first").css('display') !== 'list-item') {
+          return null; /// Needs to be list-item or have list-item child
+        }
+      }
+      var bulletWidth = getBulletWidth(element, style, bulletType);
+      var boundingRect = this.getBoundingRectMinusPadding(element);
+      return {
+        top: boundingRect.top,
+        height: boundingRect.height,
+        left: boundingRect.left - bulletWidth,
+        width: bulletWidth
+      };
+    }
+
+    common.getSpriteRect = function(element, style) {
+        // Check special case for sprites, often used for fake bullets
+        if (style['background-image'] === 'none' || style['background-repeat'] !== 'no-repeat')
+          return null;
+
+        // Background sprites tend to be to the left side of the element
+        var backgroundLeft = style['background-position']
+        var left = backgroundLeft ? parseFloat(backgroundLeft) : 0;
+        var rect = element.getBoundingClientRect();
+        rect.left += left;
+        rect.width = common.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
+        return rect.width > 0 ? rect : null;
+      }
+
+     common.getOverflowRect = function(element, style) {
+        var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
+        var overflowY = style['overflow-y'] === 'visible' && element.scrollHeight - element.clientHeight >= this.getLineHeight(element);
+        if (!overflowX && !overflowY) {
+          return null;
+        }
+
+        // Check for descendant with visibility: hidden -- those break our overflow check.
+        // Example: google search results with hidden drop down menu
+        // For now, we will not support overflow in this case.
+        var hasVisibilityHiddenDescendant = false;
+        $(element).find('*').each(function() {
+          if ($(this).css('visibility') === 'hidden') {
+            hasVisibilityHiddenDescendant = true;
+            return false;
+          }
+        });
+        if (hasVisibilityHiddenDescendant) {
+          return null;
+        }
+
+        // Overflow is visible: add right and bottom sides of overflowing content
+        var rect = element.getBoundingClientRect();
+        var newRect = {
+          left: rect.left,
+          top: rect.top,
+          width: overflowX ? element.scrollWidth : rect.width,
+          height: overflowY ? element.scrollHeight : rect.height
+        };
+        return newRect;
+      }
+
+      common.getClippedRect = function(unclippedRect, clipRect) {
+        if (!clipRect) {
+          // Ensure right and bottom are set as well
+          unclippedRect.right = unclippedRect.left + unclippedRect.width;
+          unclippedRect.bottom = unclippedRect.top + unclippedRect.height;
+          return unclippedRect;
+        }
+        var left   = Math.max( unclippedRect.left, clipRect.left);
+        var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
+        var top    = Math.max( unclippedRect.top, clipRect.top );
+        var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
+		    return {
+			    left: left,
+			    top: top,
+			    bottom: bottom,
+			    right: right,
+			    width: right - left,
+			    height: bottom - top
+		    };
+	    }
+
+        // Get clip rectangle from ancestors in the case any of them are clipping us
+        common.getAncestorClipRect = function($selector) {
+                var kMaxAncestorsToCheck = 5;
+                var allClipRects = [];
+                $selector.each(function() {
+                        // Get ancestor clip rect -- do up to kMaxAncestorsToCheck ancestors (beyond that, it's unlikely to clip)
+                        var ancestors = $selector.parents();
+                        var clipRect = null;
+                        ancestors.each(function(index) {
+                                if (index >= kMaxAncestorsToCheck)
+                                    return false;
+                                if (common.isClipElement(this)) {
+                                        var newClipRect = this.getBoundingClientRect();
+                                        clipRect = clipRect ? this.getClippedRect(clipRect, newClipRect) : newClipRect;
+                                }
+                        });
+                        allClipRects.push(clipRect);
+                });
+                common.combineIntersectingRects(allClipRects, 9999);
+                return allClipRects[0];
+        }
+
+
+	    /**
+	     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+	     */
+	    common.combineIntersectingRects = function(rects, extraSpace) {
+		    function intersects(r1, r2) {
+			    return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
+				    || r2.left + r2.width + extraSpace < r1.left - extraSpace
+				    || r2.top - extraSpace > r1.top + r1.height + extraSpace
+				    || r2.top + r2.height + extraSpace < r1.top - extraSpace
+				    );
+		    }
+
+		    function merge(r1, r2) {
+			    var left = Math.min(r1.left, r2.left);
+			    var top = Math.min(r1.top, r2.top);
+			    var right = Math.max(r1.left + r1.width, r2.left + r2.width);
+			    var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
+			    return {
+				    left: left,
+				    top: top,
+				    width: right - left,
+				    height: bottom - top,
+				    right: right,
+				    bottom: bottom
+			    };
+		    }
+
+		    // TODO O(n^2), not ideal.
+		    // Probably want to use well-known algorithm for merging adjacent rects
+		    // into a polygon, such as:
+		    // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
+		    // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
+		    // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
+		    for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
+			    var index2 = index1 + 1;
+			    while (index2 < rects.length) {
+				    if (intersects(rects[index1], rects[index2])) {
+					    rects[index1] = merge(rects[index1], rects[index2]);
+					    rects.splice(index2, 1);
+				    }
+				    else {
+					    index2++;
+				    }
+			    }
+		    }
+	    }
+
+     /**
+      * Helper methods.
+      */
+     function getEmsToPx(fontSize, ems) {
+       var measureDiv = $('<div/>')
+           .appendTo(document.body)
+           .css({
+             'font-size': fontSize,
+             'width': ems + 'em',
+             'visibility': 'hidden'
+           });
+       var px = measureDiv.width();
+       measureDiv.remove();
+       return px;
+     }
+
+     function getBulletWidth(element, style, bulletType) {
+       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0)
+         ems = 1; // Simple bullet
+       else if (bulletType === 'decimal') {
+         var start = parseInt($(element).attr('start'));
+         var end = (start || 1) + element.childElementCount - 1;
+         ems = .9 + .5 * end.toString().length;
+       }
+       return getEmsToPx(style['font-size'], ems);
+     }
+
+    common.getBoundingRectMinusPadding = function(node) {
+            var range = document.createRange();
+            range.selectNode(node);
+            var rect = range.getBoundingClientRect();
+            if (node.nodeType !== 1) {
+                    return rect;
+            }
+            // Reduce by padding amount -- useful for images such as Google Logo
+            // which have a ginormous amount of padding on one side
+            // TODO: should we use common.getElementComputedStyles() ?
+            var paddingTop = parseFloat($(node).css('padding-top'));
+            var paddingLeft = parseFloat($(node).css('padding-left'));
+            var paddingBottom = parseFloat($(node).css('padding-bottom'));
+            var paddingRight = parseFloat($(node).css('padding-right'));
+            rect = {
+                    top: rect.top + paddingTop,
+                    left: rect.left + paddingLeft,
+                    width: rect.width - paddingLeft - paddingRight,
+                    height: rect.height - paddingTop - paddingBottom,
+                    right: rect.right - paddingRight,
+                    bottom: rect.bottom - paddingBottom
+            };
+            return rect;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //// END: Logic for mouse-highlight intellegent selection,
     ////////////////////////////////////////////////////////////////////////////////
 
     // Done.
