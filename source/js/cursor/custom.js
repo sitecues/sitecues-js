@@ -30,7 +30,9 @@ sitecues.def('cursor/custom', function (view, callback, log) {
           parts = zoom.toString().split('.');
           name = type + '_' + parts[0] + '_';
           name += parts[1] ? parts[1].charAt(0) : '0';
-          view.data[name] = images.urls[name];
+          // Temporary shim for custom.js - to be able to work in dev mode for now.
+          // TODO: [EQ-1348] TO BE REPLACED with the better solution(probably, by Alistair MacDonald).
+          view.data[name] = images.urls? images.urls[name]: 'default';
         }
       }
 
@@ -47,11 +49,9 @@ sitecues.def('cursor/custom', function (view, callback, log) {
     };
 
    view.getImage = function(type, zl) {
-
-      var zoom  = zl || 1
-        , parts = zoom.toString().split('.')
-        , name
-        ;
+      var zoom  = zl || 1,
+        parts = zoom.toString().split('.'),
+        name;
 
       // 'auto' type takes 'default' image.
       // TODO: we need to finally removethe right hardcode part of check "|| type === 'auto'"
