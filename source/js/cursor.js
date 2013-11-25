@@ -195,11 +195,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
     cursor.generateCursorStyle1x = function (type, zoom) {
       var hotspotOffset;
       
-      if (platform.browser.is!=='IE') {
+      if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
       }
       
-      return 'url(' +view.getImage(type,zoom)+ ')'+(hotspotOffset?hotspotOffset:'')+', ' + type;
+      return 'url(' + view.getImage(type,zoom)+ ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
     };
 
     /**
@@ -210,8 +210,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
      */
     cursor.generateCursorStyle2x = function (type, zoom) {
       var cursorStyle = '-webkit-image-set(' +
-         '    url(' +view.getImage(type,zoom)+ ') 1x,' +
-         '    url(' +view.getImage(type,zoom)+ ') 2x'  +
+         '    url(' + view.getImage(type,zoom) + ') 1x,' +
+         '    url(' + view.getImage(type,zoom) + ') 2x'  +
          '), ' + type;
       return cursorStyle;
     };

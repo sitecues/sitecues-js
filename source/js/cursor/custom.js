@@ -49,11 +49,9 @@ sitecues.def('cursor/custom', function (view, callback, log) {
     };
 
    view.getImage = function(type, zl) {
-
-      var zoom  = zl || 1
-        , parts = zoom.toString().split('.')
-        , name
-        ;
+      var zoom  = zl || 1,
+        parts = zoom.toString().split('.'),
+        name;
 
       // 'auto' type takes 'default' image.
       // TODO: we need to finally removethe right hardcode part of check "|| type === 'auto'"

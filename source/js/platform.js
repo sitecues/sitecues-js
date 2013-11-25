@@ -83,7 +83,7 @@ sitecues.def('platform', function (platformModule, callback, log) {
   if (platformModule.browser.isChrome) { 
     requiresFallback = false;
   }
-  if( platformModule.browser.isSafari && platformModule.os.isMac ){ 
+  if (platformModule.browser.isSafari && platformModule.os.isMac) { 
     requiresFallback = false;
   }
 
