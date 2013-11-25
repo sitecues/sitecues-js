@@ -1,8 +1,8 @@
 /**
- * This file contains custom Mac-like cursor images for each zoom level.
+ * This file contains custom Windows-like cursor images for each zoom level.
  * It aims to isolate images storage from the code. We might want to change the
  * format or the way they are represented, so encapsulation sounds like a good idea.
- * @param {object} imagesMac
+ * @param {object} imagesWin
  * @param {function} callback
  */
 sitecues.def('cursor/images/win', function (osImages, callback) {
@@ -28,7 +28,7 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
 
       } else {
         
-        if (!platform.pixel.support[platform.browser.is]) {
+        if (!platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
           pixelRatio = 1;
         }
 

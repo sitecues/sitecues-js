@@ -7,7 +7,7 @@ sitecues.def('platform', function (platformModule, callback, log) {
   'use strict';
 
   // Store the agent and platform variables for later use
-  var agent    = navigator && navigator.userAgent ? navigator.userAgent : null
+  var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null'
     , platform = navigator.platform.toLowerCase()  // Chris: No longer used? Please remove if not being used.
     , browser
     , os                                           // Chris: No longer used? Please remove if not being used.
@@ -90,13 +90,24 @@ sitecues.def('platform', function (platformModule, callback, log) {
   // Requires fallback - current browser is not supported by sitecues
   // specific message [browser/os/supports touch] is assembled in ./fallback.js
   platformModule.requiresFallback = requiresFallback;
+  
   // Device has touch capabilities
   platformModule.isTouchDevice = hasTouch();
 
-  // Determine the device pixel ratio of the
+  // Determine the device pixel ratio and cursor scale support of the platform. 
+
   platformModule.pixel = {
+
+    // platform.pixel.ratio checks the pixel-ratio of the browser, for example, retina displays
+    // on OS X use a pixel ratio of 2:1. A MacBook with a Retina display will show 4 pixels for
+    // every 1 pixel on a regular screen. (2 pixels horizontally, 2 pixels vertically)
     ratio: window.devicePixelRatio,
-    support: {
+
+
+    // platform.pixel.cssCursorScaleSupport lists the browsers that support scaling of css cursors.
+    // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear 
+    // crisp.
+    cssCursorScaleSupport: {
       Chrome: true
     }
   };

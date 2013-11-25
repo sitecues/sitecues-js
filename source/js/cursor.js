@@ -156,9 +156,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
-          
-          if (platform.pixel.ratio > 1 && platform.pixel.support[platform.browser.is]) {
+
+          // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the 
+          // platform.browser supports css cursor scaling
+          if (platform.pixel.ratio > 1 && platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
             cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
+          
+          // For all other ratios/un-supported browsers, use a 1x ratio cursor
           } else {
             cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
           }

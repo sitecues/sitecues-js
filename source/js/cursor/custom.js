@@ -25,7 +25,7 @@ sitecues.def('cursor/custom', function (view, callback, log) {
 
       this.data = {};
 
-      function doSetData (type) {
+      function setData (type) {
         for (zoom = zoomModule.min; zoom <= zoomModule.max + zoomModule.step; zoom += zoomStep) {
           parts = zoom.toString().split('.');
           name = type + '_' + parts[0] + '_';
@@ -36,11 +36,11 @@ sitecues.def('cursor/custom', function (view, callback, log) {
 
       for (type in view.TYPES) {
         if (view.TYPES.hasOwnProperty(type)) {
-          doSetData(type);
+          setData(type);
         } else {
           if (type === 'auto') {
             type = defaultType;
-            doSetData(type);
+            setData(type);
           }
         }
       }
