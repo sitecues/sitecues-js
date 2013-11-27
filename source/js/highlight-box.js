@@ -123,9 +123,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     var displayCloseButton = function(hlbTarget, totalZoom) {
       var hlbNode = $(hlbTarget);
       var hlbBorderWidth = parseFloat(hlbNode.css('borderWidth')) || 0;
-      var bb = positioning.getBoundingBox(hlbTarget);
-      var left = ((bb.left  + hlbBorderWidth) * totalZoom) + closeButtonInset;
-      var top = ((bb.top   + hlbBorderWidth) * totalZoom) + closeButtonInset;
+      var boundingBox = positioning.getBoundingBox(hlbTarget);
+      var left = ((boundingBox.left  + hlbBorderWidth) * totalZoom) + closeButtonInset;
+      var top  = ((boundingBox.top   + hlbBorderWidth) * totalZoom) + closeButtonInset;
 
       closeButton.enable(left, top);
     };
