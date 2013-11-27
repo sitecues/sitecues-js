@@ -213,10 +213,17 @@ sitecues.def('cursor', function (cursor, callback, log) {
      * @return {[string]}
      */
     cursor.generateCursorStyle2x = function (type, zoom) {
+      var hotspotOffset;
+      
+      if (platform.browser.is !== 'IE') {
+        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+      }
+      
       var cursorStyle = '-webkit-image-set(' +
          '    url(' + view.getImage(type,zoom) + ') 1x,' +
          '    url(' + view.getImage(type,zoom) + ') 2x'  +
-         '), ' + type;
+         ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
+
       return cursorStyle;
     };
 

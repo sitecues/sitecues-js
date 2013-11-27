@@ -1,0 +1,60 @@
+<!doctype html>
+<head>
+<style>
+  /**{margin:0;padding:0}*/
+  body{
+    cursor: -webkit-image-set(
+      url('img/win_pointer_3.1.png') 2x
+    ) 6 0, auto;
+  }
+  #redbox{
+    cursor:pointer;
+    width:100px;
+    height:100px;
+    background:red;
+    float:left;
+  }
+  #greenbox{
+    width:100px;
+    height:100px;
+    background:limegreen;
+    float:left;
+    margin-right:20px;
+  }
+  #clickhere{
+    position:absolute;
+    margin-left:3px;
+    margin-top:15px;
+    width:3px;
+    height:3px;
+    background:white;
+    pointer-events:none;
+  }
+  .green{
+    color:limegreen;
+  }
+  .red{
+    color:red;
+  }
+  pre p {margin:0;padding:0}
+  output{clear:both}
+</style>
+</head>
+<body>
+<div id="redbox"></div>
+<div id="greenbox"><div id="clickhere"></div></div>
+<h1>cursor-hotspot.html</h1>
+<p><b>Click on the white spot in the green box.</b></p>
+<p>The cursor hotspot offset should work as expected in this example.</p>
+<p>See: <a href="https://equinox.atlassian.net/wiki/pages/viewpage.action?pageId=21004333">"How The sitecues™ Mouse Cursor Works"</a> for more information.</p>
+<pre id="output"></pre>
+</body>
+<script>
+redbox.addEventListener('click', function(){
+  output.innerHTML+="<p class='red'>You clicked the red box.</p>";
+});
+greenbox.addEventListener('click', function(){
+  output.innerHTML+="<p class='green'>You clicked the green box.</p>";
+});
+
+</script>
