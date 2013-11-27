@@ -62,7 +62,6 @@ files=\
 	source/js/keys.js \
 	source/js/focus.js \
 	source/js/geo.js \
-	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
 	source/js/hlb/designer.js \
@@ -74,10 +73,11 @@ files=\
 	source/js/iframe-modal.js \
 	source/js/speech.js \
 	source/js/invert.js \
-	source/js/cursor/custom.js \
-	source/js/cursor/images/manager.js \
 	source/js/cursor/images/win.js \
 	source/js/cursor/images/mac.js \
+	source/js/cursor/images/manager.js \
+	source/js/cursor/custom.js \
+	source/js/cursor.js \
 	source/js/util/template.js \
 	source/js/toolbar.js \
 	source/js/toolbar/bootstrap-dropdown.js \

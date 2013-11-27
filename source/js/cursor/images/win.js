@@ -17,7 +17,7 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
 
     function prepareCursor (size, type) {
 
-      if (platform.browser.is==='IE') {
+      if (platform.browser.is === 'IE') {
         
         var cursorFile = {
             0: '../images/cursors/win_default_'+size+'.cur'
