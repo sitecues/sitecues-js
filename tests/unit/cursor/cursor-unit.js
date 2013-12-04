@@ -5,35 +5,33 @@
 // require('../test/bootstrap');
 
 // Require the module file we want to test.
-// var cursorPath = '../../../source/js/cursor';
-// var module = require(cursorPath);
+// var module = require('../../../source/js/cursor');
+// var mod_zoom = require('../../../source/js/zoom');
+
 
 // describe('cursor', function() {
 
-  //  describe('#init()', function() {
+   // describe('#init()', function() {
 
-  //      it('should not initialize cursor if zoom level <= minimum zoom level.', function(done) {
-         
-  //         var zl = 1;
-  //         sinon.spy(module.cursor, "hide");
+    // it('should not apply cursor styles if zoom level <= minimum zoom level.', function(done) {
+    //   sinon.spy(module.cursor, "hide");
+    //   module.cursor.init(zl);
+    //   expect(module.cursor.hide.calledOnce).to.be.true;
+    //   module.cursor.hide.restore();
+    //   done();
+    // });
 
-  //         module.cursor.init(zl);
-  //         expect(module.cursor.hide.calledOnce).to.be.true;
-  //         module.cursor.hide.restore();
-  //         done();
-  //       });
+    // it('should initialize cursor if zoom level > then minimum zoom level.', function(done) {
+    //    var zl = 1.2;
+    //    sinon.spy(module.cursor, "show");      
+    //    module.cursor.init(zl);
+    //    expect(module.cursor.show.calledOnce).to.be.true;
+    //    module.cursor.show.restore();
+    //    done();
+    //  });
 
-  //      it('should initialize cursor if zoom level > then minimum zoom level.', function(done) {
-  //         var zl = 1.2;
-  //         sinon.spy(module.cursor, "show");
-          
-  //         module.cursor.init(zl);
-  //         expect(module.cursor.show.calledOnce).to.be.true;
-  //         module.cursor.show.restore();
-  //         done();
-  //       });
 
-  //   });
+    // });
     
   //   describe('#getCursorHotspot()', function() {
 

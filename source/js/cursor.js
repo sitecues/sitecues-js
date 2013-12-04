@@ -120,6 +120,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
      */
     function changeStyle (style, callback) {
       var rule;
+
       if (stylesheetObject) {
         for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
           rule = rules[i].style;
@@ -152,7 +153,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       var cursorTypes = ['auto', 'crosshair', 'default', 'help', 'pointer', 'text'];
 
       return function () {
-      
+
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
@@ -160,11 +161,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
           // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the 
           // platform.browser supports css cursor scaling
           if (platform.pixel.ratio > 1 && platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
-            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle2x(cursorTypes[i], lastZoom);
+            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle2x(cursorTypes[i], lastZoom);
           
           // For all other ratios/un-supported browsers, use a 1x ratio cursor
           } else {
-            cursorTypeURLS[cursorTypes[i]] = cursor.generateCursorStyle1x(cursorTypes[i], lastZoom);
+            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle1x(cursorTypes[i], lastZoom);
           }
 
         }
@@ -196,7 +197,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
      * @param  {[number]} zoom
      * @return {[string]}
      */
-    cursor.generateCursorStyle1x = function (type, zoom) {
+    function generateCursorStyle1x (type, zoom) {
       var hotspotOffset;
       
       if (platform.browser.is !== 'IE') {
@@ -204,7 +205,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }
       
       return 'url(' + view.getImage(type,zoom)+ ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
-    };
+    }
 
     /**
      * [Generates the cursor url for a given type and zoom level for retina displays]
@@ -212,7 +213,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
      * @param  {[number]} zoom
      * @return {[string]}
      */
-    cursor.generateCursorStyle2x = function (type, zoom) {
+    function generateCursorStyle2x (type, zoom) {
       var hotspotOffset;
       
       if (platform.browser.is !== 'IE') {
@@ -326,6 +327,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
     }());
     
+    
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
         lastZoom = zoom;
@@ -333,6 +335,15 @@ sitecues.def('cursor', function (cursor, callback, log) {
         lastZoomTimeout = setTimeout(createStyleSheet, 10);
       }
     });
+
+    // if (sitecues.tdd) {
+    //   exports.cursor = {
+    //     "stylesheetObject": stylesheetObject,
+    //     "createStyleSheet": createStyleSheet,
+    //     "generateCursorStyle1x": generateCursorStyle1x,
+    //     "generateCursorStyle2x": generateCursorStyle2x
+    //   };
+    // }
 
     callback();
   
