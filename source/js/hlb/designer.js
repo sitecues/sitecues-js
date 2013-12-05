@@ -14,6 +14,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     'rgba(0, 0, 0, 0)'
     ];
 
+    designer.heightDiffValue = 0;
+
     // Copied from source/highlight-box.js
     designer.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
     designer.kBoxBorderWidth = '3px';
@@ -23,10 +25,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
-    sitecues.use('jquery', 'util/positioning', 'util/common', 'ui',
+    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
 
-        function ($, positioning, common) {
-          
+        function ($, conf, positioning, common) {
+
+            designer.getHeightDiffValue = function() {
+                return this.heightDiffValue;
+            }
+
             designer.getCurrentTextColor = function(item) {
               var compStyle = item.currentStyle || window.getComputedStyle(item, null);
               var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
@@ -197,7 +203,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var centerLeft = center.left;
                 var centerTop = center.top;
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(0, totalZoom);
+                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, totalZoom);
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
@@ -215,12 +221,15 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var shortenWidthValue = narrowWidth(jElement, currentStyle);
                     var expandedHeightValue;
                     if (shortenWidthValue) {
-                        expandedHeightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
+                        var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
+                        if (expandedHeightValue > parseFloat(currentStyle)) {
+                            expandedHeightValue = heightValue;
+                        }
                     }
 
                     var rect = this.getBoundingClientRect();
                     var width  = shortenWidthValue || (rect.width + 2 * additionalBoxOffset)  * extraZoom;
-                    var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
+                    var height = expandedHeightValue || (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
 
@@ -232,7 +241,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     if (width > viewport.width) {
                         // Easiest case: fit to width and horizontal center of viewport.
                         newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
-                        newLeft    = - jElement.offset().left  + window.pageXOffset + designer.kMinDistanceFromEdge;
+                        newLeft    = - jElement.offset().left  + window.pageXOffset;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > left) {
@@ -247,7 +256,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset * totalZoom) / extraZoom;
                         // Set top to viewport's left border.
-                        newTop = - jElement.offset().top  + window.pageYOffset + designer.kMinDistanceFromEdge;
+                        newTop = viewport.top - top; //- jElement.offset().top  + window.pageYOffset + 32;
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
                         if (viewport.top > top) {
@@ -263,9 +272,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         top:  newTop,
                         width:  shortenWidthValue || newWidth,
                         height: newHeight || expandedHeightValue,
-                        maxHeight: newWidth || shortenWidthValue? newMaxHeight: undefined,
-                        expandHeight: expandedHeightValue
+                        maxHeight: newWidth? newMaxHeight: undefined
                     };
+                    designer.heightDiffValue = (parseFloat(cssUpdates.height) - parseFloat(currentStyle.height)) || 0;
 
                 // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
                 // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
@@ -275,8 +284,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 //TODO: Figure out a better way to get the offset.left...I've tried to figure
                 //      out the math involved for way too long, and decided to use the easier way.
                 //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-				//EQ-880                
-				if (!('zoom' in document.createElement('div').style)) {
+				//EQ-880
+                if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale('+totalZoom+')'});
                 }
                 return cssUpdates;
@@ -330,8 +339,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var oldWidth  = parseFloat(currentStyle.width);
                 var newWidth = shortenWidthValue;
 
-                var oldLineNumber = oldHeight / lineHeight;
-                var newLineNumber = Math.ceil((oldWidth / newWidth) * oldLineNumber);
+                var oldLineNumber = Math.round(oldHeight / lineHeight);
+                var newLineNumber = Math.round(((conf.get('absoluteRect').width || oldWidth) / newWidth) * oldLineNumber);
                 var expandedHeight = newLineNumber * lineHeight + 'px';
 
                 return expandedHeight;

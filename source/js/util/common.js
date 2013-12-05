@@ -32,7 +32,9 @@ sitecues.def('util/common', function (common, callback, log) {
       // Values possible from computed style: normal | <number>px
       var lineHeight = $(item).css('line-height');
       if (lineHeightValues.hasOwnProperty(lineHeight)) {
-        return lineHeightValues[lineHeight];
+        var fontSize = $(item).css('font-size');
+        var lineHeight = Math.floor(parseInt(fontSize.replace('px','')) * 1.5);
+        return lineHeight;
       }
       return parseFloat(lineHeight);
     }

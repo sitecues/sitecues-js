@@ -587,7 +587,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * Show a highlight reading box when triggered.
        */
       HighlightBox.prototype.inflate = function () {
-
         // Immediately enter the HLB
         this.state = STATES.INFLATING;
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
@@ -718,7 +717,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
           // todo: use '$.style' instead of '$.css'
           // also update top, left
-          //_this.itemNode.css(roundingsStyle);
+           _this.itemNode.css(roundingsStyle);
         }
 
         return false;
@@ -845,11 +844,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         newPadding = HighlightBox.kBoxPadding;
 
         var maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
+        var newTop = designer.getHeightDiffValue()? cssUpdate.top || 0 + designer.getHeightDiffValue() +'px': cssUpdate.top;
 
         var cssBeforeAnimateStyles = {
           'position': 'relative',
-          'top': cssUpdate.top + 'px',
-          'left': cssUpdate.left + 'px',
+          'top': newTop,
+          'left': cssUpdate.left,
           'height': maxHeight? undefined: parseFloat(newHeight) + 'px',
           'max-height': maxHeight,
           'width':  cssUpdate.width ? cssUpdate.width  + 'px': computedStyles.width,
@@ -886,7 +886,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var belowBox = boundingBoxes.below;
         var aboveBox = boundingBoxes.above;
-        var compensateShiftFloat = parseFloat(compensateShift['vert']);
+        var compensateShiftFloat = parseFloat(compensateShift['vert']) - designer.getHeightDiffValue();
 
         if (currentStyle['clear'] === 'both') {
             if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
@@ -910,19 +910,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // If there any interesting float we need to do some more adjustments for height/width/top etc.
         var floatRectHeight = setStyleForInterestingFloatings(this.itemNode, cssBeforeAnimateStyles, currentStyle);
-        if (isFloated) {
-            vertMargin['margin-bottom'] = vertMargin['margin-bottom']
-            ? vertMargin['margin-bottom'] - floatRectHeight + 'px'
-            : parseFloat(currentStyle['margin-bottom']) - floatRectHeight + 'px';
-        }
-
-        // todo: use getted for expandHeight b/c it doesn't have any reference to ccsUpdate
-//        var shortenedRectHeight = parseFloat(cssUpdate.expandHeight) - parseFloat(currentStyle.height);
-//        if (shortenedRectHeight) {
-//            vertMargin['margin-bottom'] = vertMargin['margin-bottom']
-//            ? vertMargin['margin-bottom'] - shortenedRectHeight + 'px'
-//            : parseFloat(currentStyle['margin-bottom']) - shortenedRectHeight + 'px';
-//        }
+        vertMargin['margin-bottom'] = vertMargin['margin-bottom']
+        ? vertMargin['margin-bottom'] - floatRectHeight + 'px'
+        : parseFloat(currentStyle['margin-bottom']) - floatRectHeight + 'px';
 
         $.extend(cssBeforeAnimateStyles, vertMargin);
         $.extend(cssBeforeAnimateStyles, horizMargin);

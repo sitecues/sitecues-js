@@ -274,8 +274,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
          * Obtains the viewport dimensions, with an optional inset.
          */
         positioning.getViewportDimensions = function (inset, zoom) {
-            inset = inset || 0;
-			zoom  = zoom  || 1;
+            zoom  = zoom  || 1;
+            inset = inset * zoom || 0;
             var insetX2 = inset * 2;
             var scrollPos = this.getScrollPosition();
             /*
