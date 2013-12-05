@@ -538,6 +538,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = fixedRects[0];
       state.elementRect = $.extend({}, elementRect);
       absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
+      conf.set('absoluteRect', absoluteRect);
       previousViewRect = $.extend({}, state.viewRect);
       state.highlightBorderWidth = getHighlightBorderWidth();
             state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
@@ -547,6 +548,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
         state.floatRects = getIntersectingFloatRects();
+        conf.set('floatRects', state.floatRects);
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
         var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
         state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);

@@ -23,9 +23,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'platform', 
+    sitecues.use('jquery', 'util/positioning', 'util/common', 'ui',
 
-        function ($, conf, positioning, common, platform) {
+        function ($, positioning, common) {
           
             designer.getCurrentTextColor = function(item) {
               var compStyle = item.currentStyle || window.getComputedStyle(item, null);
@@ -98,8 +98,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             - parseFloat(closestStyle['padding-right'])
                             - parseFloat(closestStyle['margin-left'])
                             - parseFloat(closestStyle['margin-right'])
-                            - parseFloat(closestStyle['border-left-width'])   // Odd -- why repeated?
                             - parseFloat(closestStyle['border-left-width'])
+                            - parseFloat(closestStyle['border-right-width'])
                             + 'px';
                         }
                         $(closest).children().wrapAll("<div class='" + designer.kPlaceHolderWrapperClass + "'></div>");
@@ -183,7 +183,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
-            designer.getNewRectStyle = function(selector, center, extraZoom, totalZoom) {
+            designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom, totalZoom) {
                 //TODO: Figure out a better way to get the offset.left...I've tried to figure
                 //      out the math involved for way too long, and decided to use the easier way.
                 //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
@@ -191,18 +191,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale(1)'});
                 }
-                //Check out positioning.getMagnification for the reason I use zoomModifier
-                var zoomModifier = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
-
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
-
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, totalZoom);
-
+                var viewport = positioning.getViewportDimensions(0, totalZoom);
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
@@ -213,91 +208,65 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var offsetParent = jElement.offsetParent();
                     var offsetParentPosition = positioning.getOffset(offsetParent);
                     var offsetParentZoom = positioning.getTotalZoom(offsetParent);
-                    var scroll = positioning.getScrollPosition();
+                    
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-                    var rect = positioning.getSmartBoundingBox(this);
-                    var width = (rect.width + 2 * additionalBoxOffset) * (extraZoom + zoomModifier);
-                    var height = (rect.height + 2 * additionalBoxOffset) * (extraZoom + zoomModifier);
+
+                    var shortenWidthValue = narrowWidth(jElement, currentStyle);
+                    var expandedHeightValue;
+                    if (shortenWidthValue) {
+                        expandedHeightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
+                    }
+
+                    var rect = this.getBoundingClientRect();
+                    var width  = shortenWidthValue || (rect.width + 2 * additionalBoxOffset)  * extraZoom;
+                    var height = (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
-                    var top = centerTop - (height / 2);
+                    var top  = centerTop - (height / 2);
+
                     // If we need to change the element's dimensions, so be it. However, explicitly
                     // set the dimensions only if needed.
-
-                    var newWidth, newHeight;
+                    var newWidth, newHeight, newLeft, newTop;
 
                     // Check the width and horizontal positioning.   
                     if (width > viewport.width) {
                         // Easiest case: fit to width and horizontal center of viewport.
-                        centerLeft = viewport.centerX;
-                        newWidth = viewport.width;
+                        newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
+                        newLeft    = - jElement.offset().left  + window.pageXOffset + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > left) {
-                            centerLeft += viewport.left - left;
+                            newLeft = viewport.left - left;
                         } else if ((left + width) > viewport.right) {
-                            centerLeft -= (left + width) - viewport.right;
+                            newLeft = viewport.right - (left + width);
                         }
                     }
 
                     // Check the height and vertical positioning.
                     if (height > viewport.height) {
-                        // Easiest case: fit to height and vertical center of viewport.
-                        centerTop = viewport.centerY;
-                        newHeight = viewport.height;
+                        // Shrink the height.
+                        newHeight = (viewport.height - 2 * additionalBoxOffset * totalZoom) / extraZoom;
+                        // Set top to viewport's left border.
+                        newTop = - jElement.offset().top  + window.pageYOffset + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
                         if (viewport.top > top) {
-                            centerTop += viewport.top - top;
+                            newTop = viewport.top - top;
                         } else if ((top + height) > viewport.bottom) {
-                            centerTop -= (top + height) - viewport.bottom;
+                            newTop = viewport.bottom - (top + height);
                         }
                     }
-
-                    // Reduce the dimensions to a non-zoomed value.
-                    width = (newWidth || width) / (extraZoom + zoomModifier);
-                    height = (newHeight || height) / (extraZoom + zoomModifier);
-
-                    // Determine what the left and top CSS values must be to center the
-                    // (possibly zoomed) element over the determined center.
-                    var css = jElement.css(['marginLeft', 'marginTop']);
-
-                    var cssLeft = (centerLeft 
-                        - offsetParentPosition.left
-                        - (width * offsetParentZoom / 2)
-                        ) / offsetParentZoom;
-                    var cssTop = (centerTop
-                        - offsetParentPosition.top
-                        - (height * offsetParentZoom / 2)
-                        ) / offsetParentZoom;
-                  
-                    // If offset parent is html then no need to do this.
-                    // todo: do we really use it?
-                    if (offsetParent[0].tagName.toLowerCase() !== 'html') {
-                        cssLeft -=  (parseFloat(css.marginLeft) * offsetParentZoom);
-                        cssTop  -=  (parseFloat(css.marginTop) * offsetParentZoom);
-                    }
+                    var newMaxHeight = newHeight || (viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset) / extraZoom;
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
                     cssUpdates = {
-                        left: cssLeft,
-                        top: cssTop
+                        left: newLeft,
+                        top:  newTop,
+                        width:  shortenWidthValue || newWidth,
+                        height: newHeight || expandedHeightValue,
+                        maxHeight: newWidth || shortenWidthValue? newMaxHeight: undefined,
+                        expandHeight: expandedHeightValue
                     };
 
-                    // Only update the dimensions if needed.
-                    if (newWidth) {
-                        cssUpdates.width = width - 2 * additionalBoxOffset * extraZoom;
-                    }
-
-                    if (newHeight) {      
-                        cssUpdates.height = height - 2 * additionalBoxOffset * extraZoom;
-                    }
-
-                    if (platform.browser.isIE) { //IE hack
-                       cssUpdates.width = (((cssUpdates.width && cssUpdates.width * extraZoom) || width) / (zoomModifier + extraZoom)) + 2 * additionalBoxOffset * extraZoom;
-                       cssUpdates.left += scroll.left + (cssUpdates.width / 2);
-                       cssUpdates.top += scroll.top;
-                     //cssUpdates.height = (newHeight || height) / (zoomModifier + extraZoom);
-                    }
                 // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
                 // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
                 // AK: leave it in case we get regression bugs. todo: should be removed in future.
@@ -310,8 +279,62 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 				if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale('+totalZoom+')'});
                 }
-
                 return cssUpdates;
+            }
+
+            // todo: do not use scroll unless absolutely necessary.
+            function narrowWidth($el, currentStyle) {
+                // EQ-1359: If width > 50 x-width characters and text is word-wrappable
+                // then shorten to 50 x-widths
+                if ($el[0].localName !== 'img') {
+                    /* Font characteristics:
+                        font-family: "Arial, Helvetica, sans-serif"
+                        font-size: "19.230770111083984px"
+                        font-style: "normal"
+                        font-variant: "normal"
+                        font-weight: "500"
+                     */
+                    var fontStyle = {
+                        'font-family': currentStyle['font-family'],
+                        'font-size':   currentStyle['font-size'],
+                        'font-style':  currentStyle['font-style'],
+                        'font-variant':currentStyle['font-variant'],
+                        'font-weight': currentStyle['font-weight']
+                    };
+                    // Pixel-based solution isn't reliable b/c each font had differences
+                    // in terms of char height and width.
+                    // Let's check how many pixles each char takes in average.
+                    $('body').append('<div id="testwidth"><span>&nbsp;</span></div>');
+                    var wSlim = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+                    $('#testwidth').remove();
+
+                    $('body').append('<div id="testwidth2"><span>w</span></div>');
+                    var wThick = $('#testwidth2 span').css('width', '1ch').width();
+                    $('#testwidth2').remove();
+
+                    var wMiddle = (wSlim + wThick) / 2;
+                    var charsQuantity = 50;
+                    var textWidth = wMiddle * charsQuantity;
+                    if (parseFloat(currentStyle.width) > (textWidth)) {
+                        return textWidth;
+                    }
+                }
+                return false;
+            }
+
+            function expandHeight($el, currentStyle, shortenWidthValue) {
+                // todo: common.hasVertScroll($el[0]);
+                var lineHeight = common.getLineHeight($el);
+
+                var oldHeight  = parseFloat(currentStyle.height);
+                var oldWidth  = parseFloat(currentStyle.width);
+                var newWidth = shortenWidthValue;
+
+                var oldLineNumber = oldHeight / lineHeight;
+                var newLineNumber = Math.ceil((oldWidth / newWidth) * oldLineNumber);
+                var expandedHeight = newLineNumber * lineHeight + 'px';
+
+                return expandedHeight;
             }
 
             /**

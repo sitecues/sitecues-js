@@ -19,6 +19,8 @@ sitecues.def('util/common', function (common, callback, log) {
       , lineHeightValues = {'normal': 1.2}
       ;
 
+    var validNonVisualElements = ['document', 'body', 'html', 'head'];
+
     // Make sure 'trim()' has cross-browser support.
     if (typeof String.prototype.trim !== 'function') {
       String.prototype.trim = function () {
@@ -143,6 +145,10 @@ sitecues.def('util/common', function (common, callback, log) {
     common.isCanvasElement = function (el) {
        return el[0].localName === "canvas" || el.find('canvas').length > 0;
      };
+
+     common.isValidNonVisualElement = function(el) {
+         return $.inArray(el.localName, validNonVisualElements);
+     }
 
     /*
      * Check if current image value is not empty.
