@@ -194,7 +194,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
  * 
  */
         // Those objects are sared across the file so do not make them local.
-        var computedStyles, correctedStyle, isFloated = false, isShortened = false, compensateShift, boundingBoxes = {};
+        var computedStyles, correctedStyle, isFloated = false, compensateShift, boundingBoxes = {};
         // todo: change the rule for isChrome.
         var padWidth = parseFloat(HighlightBox.kBoxPadding),
             borWidth = parseFloat(HighlightBox.kBoxBorderWidth),
@@ -281,6 +281,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             $.extend(boundingBoxes, prevBoxes);
             $.extend(boundingBoxes, nextBoxes);
 
+console.log(boundingBoxes);
             return boundingBoxes;
         }
 
@@ -366,7 +367,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          *  re-calculate its values: top, width, height etc.
          *  @return floatRectHeight The shift height value produces by floating elements.
          */
-        function setStyleForInterestingFloatings($el, cssBeforeAnimateStyles, currentStyle) {
+        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
             var floatRectHeight = 0;
             var floatRects = conf.get('floatRects');
             var floatRectsKeys = Object.keys(floatRects);
@@ -413,13 +414,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          * @returns {Number}
          */
         function getShiftVert($el) {
-//            var aboveBox = boundingBoxes.above;
+            var aboveBox = boundingBoxes.above;
             // #1 case: general case.
             var compensateShiftVert = getTopIndent();
             // #2 case: first element in the body or the prev element has bigger margin bottom.
-//            if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= parseFloat($el.css('margin-top'))) {
-//                compensateShiftVert -= parseFloat(computedStyles.marginTop);
-//            }
+            if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= parseFloat($el.css('margin-top'))) {
+                compensateShiftVert -= parseFloat(computedStyles.marginTop);
+            }
             return compensateShiftVert;
         }
 
@@ -440,32 +441,32 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
 
         function getTopIndent() {
-            var fullTopInset, minimumTopInset;
-            var isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
+            var fullTopInset, minimumTopInset, isNotImage;
+            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
             minimumTopInset =
                     (parseFloat(computedStyles.borderTopWidth) + parseFloat(computedStyles.borderBottomWidth)
                     + parseFloat(computedStyles.marginTop))
                     - 2 * borWidth;
-//            if (isNotImage) {
+            if (isNotImage) {
                 fullTopInset =
                     minimumTopInset
                     + parseFloat(computedStyles.paddingTop) + parseFloat(computedStyles.paddingBottom)
                     - 2 * padWidth;
-//            }
+            }
             return fullTopInset || minimumTopInset;
         }
 
         function getLeftIndent() {
-            var fullLeftInset, minimumLeftInset;
-            var isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
+            var fullLeftInset, minimumLeftInset, isNotImage;
+            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
             minimumLeftInset = (parseFloat(computedStyles.borderLeftWidth) + parseFloat(computedStyles.borderRightWidth)
                     + parseFloat(computedStyles.marginLeft))
                     - 2 * borWidth;
-//            if (isNotImage) {
+            if (isNotImage) {
                 fullLeftInset = minimumLeftInset
                     + parseFloat(computedStyles.paddingLeft) + parseFloat(computedStyles.paddingRight)
                     - 2 * padWidth;
-//            }
+            }
             return fullLeftInset || minimumLeftInset;
         }
 
@@ -538,10 +539,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                         // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
                         && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateShiftFloat
                         && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
-                            vertMargin = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
-                                          'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
+                            roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
+                                              'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
                     } else {
-                         roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                         roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                     }
                 }
             }
@@ -587,6 +588,44 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * Show a highlight reading box when triggered.
        */
       HighlightBox.prototype.inflate = function () {
+          
+//          $('body').click(function(e) {
+//              var $el = $(e.target);  
+//              if ($el[0].localName === 'input') {
+//                return;
+//              }
+//              var scaleZoom = 1.5;
+//              var compensateMargin = 20;
+//              var zoomHeightDiff =
+//                      ($el[0].getBoundingClientRect().height * scaleZoom  // new height
+//                      - $el[0].getBoundingClientRect().height) / 2 ;      // old height
+//              ;
+//              var zoomWidthDiff =
+//                      ($el[0].getBoundingClientRect().width * scaleZoom   // new width
+//                      - $el[0].getBoundingClientRect().width) / 2 ;       // old width
+//              ;
+//              var marginVertDiff = parseFloat($el.css('margin-top'))      // old margin
+//                      - compensateMargin                                  // new margin
+//              ;
+//              var marginHorizDiff = parseFloat($el.css('margin-left'))    // old margin
+//                      - compensateMargin                                  // new margin
+//              ;
+//              var edgeDistance = 0;
+//              var correctedStyle = {
+//                  'position': 'relative',
+//                  'left':  - $el.offset().left  + window.pageXOffset + zoomWidthDiff  - marginHorizDiff + edgeDistance,
+//                  'top':   - $el.offset().top   + window.pageYOffset + zoomHeightDiff - marginVertDiff + edgeDistance,
+//                  'margin-top': - compensateMargin + 'px',
+//                  'margin-left': - compensateMargin + 'px',
+//                  'webkit-transform': 'scale(' + scaleZoom + ')',
+//                  'webkit-transform-origin': '50% 50%',
+//                  'background-color': 'yellow'
+//              }
+//
+//              $el.css(correctedStyle);
+//
+//            });
+          
         // Immediately enter the HLB
         this.state = STATES.INFLATING;
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
@@ -715,9 +754,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         if (isChrome && !isFloated) {
           var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
-          // todo: use '$.style' instead of '$.css'
-          // also update top, left
-           _this.itemNode.css(roundingsStyle);
+          roundingsStyle.left = (cssBeforeAnimateStyles.left || 0) - (parseFloat(roundingsStyle['margin-left']) || parseFloat(roundingsStyle['margin-right']));
+          //_this.itemNode.css(roundingsStyle);
         }
 
         return false;
@@ -838,26 +876,71 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * @return Object
        */
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
-        var newHeight, newPadding, newOverflowY;
-        newHeight = cssUpdate.height? cssUpdate.height + 'px': computedStyles.height;
+        var newHeight, newOverflowY, newTop, newLeft,maxHeight;
+        newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
-        newPadding = HighlightBox.kBoxPadding;
+        newTop = designer.getHeightDiffValue()? (cssUpdate.top || 0) + designer.getHeightDiffValue(): cssUpdate.top;
+        newLeft = cssUpdate.left;
 
-        var maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
-        var newTop = designer.getHeightDiffValue()? cssUpdate.top || 0 + designer.getHeightDiffValue() +'px': cssUpdate.top;
+        maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
+
+        // Correct margins for simple case: assume that HLB fits the viewport.
+        // Note: there is no documentation describing the way these margins are
+        // calculated by. I used my logic & empiristic data.
+        var belowBox = boundingBoxes.below;
+        var aboveBox = boundingBoxes.above;
+        var compensateVertShiftFloat = parseFloat(compensateShift['vert']);
+        var compensateHorizShiftFloat = parseFloat(compensateShift['horiz']);
+        
+        var vertMargin = {};
+        var horizMargin = {'margin-left': compensateHorizShiftFloat + 'px'};
+
+        if (compensateVertShiftFloat) {
+            if (currentStyle['clear'] === 'both') {
+                if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateVertShiftFloat)) {
+                    vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
+                } else if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateVertShiftFloat)) {
+                    vertMargin['margin-top'] = compensateVertShiftFloat + 'px';
+                }
+            } else if (this.item.localName === 'h3') {
+                
+            } else {
+                // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
+                if (compensateVertShiftFloat > 0 // New margin is positive.
+                    && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateVertShiftFloat
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateVertShiftFloat))) {
+                        vertMargin = {'margin-top': - compensateVertShiftFloat / 2 + 'px', 'margin-bottom': - compensateVertShiftFloat / 2 + 'px'};
+                } else if (compensateVertShiftFloat < 0
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
+                    vertMargin['margin-top'] = compensateVertShiftFloat - parseFloat($(aboveBox).css('margin-bottom')) +'px';
+                } else {
+                    vertMargin['margin-top'] = compensateVertShiftFloat + 'px';
+                }
+            }
+        }
+
+        // If there any interesting float we need to do some more adjustments for height/width/top etc.
+        var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
+        vertMargin['margin-bottom'] = (vertMargin['margin-bottom'] || parseFloat(currentStyle['margin-bottom']))
+                                    - floatRectHeight + 'px';
+
+        // Margins affect the element's position. To make sure top & left are
+        // correct we need to substract margin value from them. 
+        newTop  = newTop  && (parseFloat(newTop)  - compensateVertShiftFloat);
+        newLeft = newLeft && (parseFloat(newLeft) - compensateHorizShiftFloat);
 
         var cssBeforeAnimateStyles = {
           'position': 'relative',
           'top': newTop,
-          'left': cssUpdate.left,
+          'left': newLeft,
           'height': maxHeight? undefined: parseFloat(newHeight) + 'px',
           'max-height': maxHeight,
           'width':  cssUpdate.width ? cssUpdate.width  + 'px': computedStyles.width,
-          
+
           'z-index': HighlightBox.kBoxZindex.toString(),
           'border' : HighlightBox.kBoxNoOutline,
           'list-style-position': 'inside',
-          'padding': newPadding,
+          'padding': HighlightBox.kBoxPadding,
           'margin-top': currentStyle['margin-top'],
           'margin-right': currentStyle['margin-right'],
           'margin-bottom': currentStyle['margin-bottom'],
@@ -877,48 +960,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'transform-origin': '50% 50%'
         };
 
-        // Correct margins for simple case: assume that HLB fits the viewport.
-        // Note: there is no documentation describing the way these margins are=
-        // calculated by. I used my logic & empiristic data.
-
-        var horizMargin = {'margin-left': compensateShift['horiz']};
-        var vertMargin = {};
-
-        var belowBox = boundingBoxes.below;
-        var aboveBox = boundingBoxes.above;
-        var compensateShiftFloat = parseFloat(compensateShift['vert']) - designer.getHeightDiffValue();
-
-        if (currentStyle['clear'] === 'both') {
-            if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
-                vertMargin['margin-bottom'] = compensateShiftFloat + 'px';
-            } else if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
-                vertMargin['margin-top'] = compensateShiftFloat + 'px';
-            }
-        } else {
-            // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-            if (compensateShiftFloat > 0 // New margin is positive.
-                && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateShiftFloat
-                && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
-                    vertMargin = {'margin-top': - compensateShiftFloat / 2 + 'px', 'margin-bottom': - compensateShiftFloat / 2 + 'px'};
-            } else if (compensateShiftFloat < 0
-                && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
-                vertMargin['margin-top'] = compensateShiftFloat - parseFloat($(aboveBox).css('margin-bottom')) +'px';
-            } else {
-                vertMargin['margin-top'] = compensateShiftFloat + 'px';
-            }
-        }
-
-        // If there any interesting float we need to do some more adjustments for height/width/top etc.
-        var floatRectHeight = setStyleForInterestingFloatings(this.itemNode, cssBeforeAnimateStyles, currentStyle);
-        vertMargin['margin-bottom'] = vertMargin['margin-bottom']
-        ? vertMargin['margin-bottom'] - floatRectHeight + 'px'
-        : parseFloat(currentStyle['margin-bottom']) - floatRectHeight + 'px';
-
         $.extend(cssBeforeAnimateStyles, vertMargin);
         $.extend(cssBeforeAnimateStyles, horizMargin);
 
         if (this.item.tagName.toLowerCase() === 'img') {
-          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, this.clientRect)
+          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, this.clientRect);
         }
 
         this.setBgStyle(currentStyle, cssBeforeAnimateStyles);

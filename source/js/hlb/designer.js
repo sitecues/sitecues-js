@@ -218,7 +218,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
 
-                    var shortenWidthValue = narrowWidth(jElement, currentStyle);
+                    var shortenWidthValue = false; narrowWidth(jElement, currentStyle);
                     var expandedHeightValue;
                     if (shortenWidthValue) {
                         var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
@@ -228,7 +228,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     var rect = this.getBoundingClientRect();
-                    var width  = shortenWidthValue || (rect.width + 2 * additionalBoxOffset)  * extraZoom;
+                    var width  = shortenWidthValue || (rect.width + 2 * additionalBoxOffset)    * extraZoom;
                     var height = expandedHeightValue || (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
@@ -239,9 +239,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Check the width and horizontal positioning.   
                     if (width > viewport.width) {
-                        // Easiest case: fit to width and horizontal center of viewport.
+                        // Fit to width of viewport.
                         newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
-                        newLeft    = - jElement.offset().left  + window.pageXOffset;
+                        var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ;          // new width - old width
+                        newLeft = - jElement.offsetlefttop + window.pageXOffset + zoomWidthDiff + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > left) {
@@ -255,8 +256,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     if (height > viewport.height) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset * totalZoom) / extraZoom;
-                        // Set top to viewport's left border.
-                        newTop = viewport.top - top; //- jElement.offset().top  + window.pageYOffset + 32;
+                        // Set top to viewport's top border.
+                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (2 * extraZoom) ;          // new height - old height
+                        newTop = - jElement.offset().top + window.pageYOffset + zoomHeightDiff + designer.kMinDistanceFromEdge;
+                        
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
                         if (viewport.top > top) {
@@ -276,15 +279,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     };
                     designer.heightDiffValue = (parseFloat(cssUpdates.height) - parseFloat(currentStyle.height)) || 0;
 
-                // If the width is narrowed then inner content is likely to be rearranged in Live time(while animation performs).
-                // In this case we need to make sure result HLB height will not exceed the viewport bottom limit.
-                // AK: leave it in case we get regression bugs. todo: should be removed in future.
-                //cssUpdates.maxHeight = viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset;
                 });
                 //TODO: Figure out a better way to get the offset.left...I've tried to figure
                 //      out the math involved for way too long, and decided to use the easier way.
                 //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-				//EQ-880
+                //EQ-880
                 if (!('zoom' in document.createElement('div').style)) {
                     $('body').css({'transform':'scale('+totalZoom+')'});
                 }

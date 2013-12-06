@@ -149,7 +149,16 @@ sitecues.def('util/common', function (common, callback, log) {
      };
 
      common.isValidNonVisualElement = function(el) {
-         return $.inArray(el.localName, validNonVisualElements);
+         return $.inArray(el.localName, validNonVisualElements) > 0;
+     }
+
+     common.isValidBoundingElement = function(el) {
+         var $el = el && $(el);
+         var isValidBoundingElement =
+                el && el.localName && el.localName !== 'script'
+                && $el.is(':visible')
+                && $el.height() > 5 && $el.width() > 5;
+        return isValidBoundingElement? true: false;
      }
 
     /*
