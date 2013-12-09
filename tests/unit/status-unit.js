@@ -13,8 +13,8 @@ describe('sitecues', function() {
   describe('#status()', function() {
     
     it('should call the function and return the string (for readability in console)', function (done) {
-      var expected = 'Getting sitecues status.'
-        , actual   = module.status.get()
+      var expected = 'Fetching sitecues status...'
+        , actual   = module.status()
         ;
       expect(actual).to.equal(expected);
       done();
@@ -25,8 +25,9 @@ describe('sitecues', function() {
         expect(data).to.be.an('object');
         done();
       }
-      module.status.get(callback);
+      module.status(callback);
     });
 
   });
+
 });
