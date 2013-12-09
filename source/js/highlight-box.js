@@ -545,44 +545,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * Show a highlight reading box when triggered.
        */
       HighlightBox.prototype.inflate = function () {
-          
-//          $('body').click(function(e) {
-//              var $el = $(e.target);  
-//              if ($el[0].localName === 'input') {
-//                return;
-//              }
-//              var scaleZoom = 1.5;
-//              var compensateMargin = 20;
-//              var zoomHeightDiff =
-//                      ($el[0].getBoundingClientRect().height * scaleZoom  // new height
-//                      - $el[0].getBoundingClientRect().height) / 2 ;      // old height
-//              ;
-//              var zoomWidthDiff =
-//                      ($el[0].getBoundingClientRect().width * scaleZoom   // new width
-//                      - $el[0].getBoundingClientRect().width) / 2 ;       // old width
-//              ;
-//              var marginVertDiff = parseFloat($el.css('margin-top'))      // old margin
-//                      - compensateMargin                                  // new margin
-//              ;
-//              var marginHorizDiff = parseFloat($el.css('margin-left'))    // old margin
-//                      - compensateMargin                                  // new margin
-//              ;
-//              var edgeDistance = 0;
-//              var correctedStyle = {
-//                  'position': 'relative',
-//                  'left':  - $el.offset().left  + window.pageXOffset + zoomWidthDiff  - marginHorizDiff + edgeDistance,
-//                  'top':   - $el.offset().top   + window.pageYOffset + zoomHeightDiff - marginVertDiff + edgeDistance,
-//                  'margin-top': - compensateMargin + 'px',
-//                  'margin-left': - compensateMargin + 'px',
-//                  'webkit-transform': 'scale(' + scaleZoom + ')',
-//                  'webkit-transform-origin': '50% 50%',
-//                  'background-color': 'yellow'
-//              }
-//
-//              $el.css(correctedStyle);
-//
-//            });
-          
         // Immediately enter the HLB
         this.state = STATES.INFLATING;
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
