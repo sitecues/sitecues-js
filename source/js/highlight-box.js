@@ -834,11 +834,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
         }
 
-        // If there any interesting float we need to do some more adjustments for height/width/top etc.
-        var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
-        vertMargin['margin-bottom'] = (vertMargin['margin-bottom'] || parseFloat(currentStyle['margin-bottom']))
-                                    - floatRectHeight + 'px';
-
         // Margins affect the element's position. To make sure top & left are
         // correct we need to substract margin value from them. 
         // newTop  = newTop  && (parseFloat(newTop)  - compensateVertShiftFloat);
@@ -873,6 +868,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           '-moz-transform-origin': '50% 50%',
           'transform-origin': '50% 50%'
         };
+
+        // If there any interesting float we need to do some more adjustments for height/width/top etc.
+        var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
+        vertMargin['margin-bottom'] = (vertMargin['margin-bottom'] || parseFloat(currentStyle['margin-bottom']))
+                                    - floatRectHeight + 'px';
 
         if (currentStyle['display'] === 'inline-block') {
              // Substract border value so that HLB wouldn't affect the following elements.
