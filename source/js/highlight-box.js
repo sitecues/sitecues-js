@@ -261,7 +261,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             var vertMargin = {};
 
             var belowBox = boundingBoxes.below;
-            var vertMargin = {'margin-top': parseFloat(compensateShift['vert']) + 'px'};
+            var vertMargin = {'margin-top': parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px'};
             if (currentStyle['clear'] === 'both' && belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(parseFloat(compensateShift['vert']))) {
                 vertMargin = {'margin-bottom': compensateShift['vert']};
             }
@@ -281,7 +281,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             $.extend(boundingBoxes, prevBoxes);
             $.extend(boundingBoxes, nextBoxes);
 
-console.log(boundingBoxes);
             return boundingBoxes;
         }
 
@@ -521,35 +520,38 @@ console.log(boundingBoxes);
             var compensateShiftFloat = parseFloat(compensateShift['vert']);
             var newComputedStyles = el.currentStyle || window.getComputedStyle(el, null);
 
-            var diffHeight = getDiffHeight(currentStyle, newComputedStyles);
-            var diffWidth  = getDiffWidth(currentStyle, newComputedStyles);
-
-            if (diffHeight !== 0) {
-                if ($(el).css('clear') === 'both') {
-                    if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
-                        roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
-                    }
-                    if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
-                        roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
-                    }
-                } else {
-                    if (
-                        // New margin is positive.
-                        compensateShiftFloat > 0
-                        // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-                        && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateShiftFloat
-                        && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
-                            roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
-                                              'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
-                    } else {
-                         roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
-                    }
-                }
-            }
+            var diffHeight = designer.getHeightExpandedDiffValue()? 0: getDiffHeight(currentStyle, newComputedStyles);
+            var diffWidth  = designer.getWidthNarrowedDiffValue()?  0: getDiffWidth(currentStyle, newComputedStyles);
 
             if (diffWidth !== 0) {
                 // todo: copy the diffHeight part, making specific changes.
-                roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffHeight + magicNumber + 'px';
+                roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
+            }
+
+            if (diffHeight === 0) {
+                return roundingsStyle;
+            }
+
+            if ($(el).css('clear') === 'both') {
+                if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
+                    roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
+                }
+                if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
+                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                }
+            } else {
+                if (
+                    // New margin is positive.
+                    compensateShiftFloat > 0
+                    // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
+                    && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateShiftFloat
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
+                        roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
+                                          'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
+                } else {
+                    roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + magicNumber + 'px';
+                    // roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                }
             }
 
             return roundingsStyle;
@@ -754,8 +756,7 @@ console.log(boundingBoxes);
 
         if (isChrome && !isFloated) {
           var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
-          roundingsStyle.left = (cssBeforeAnimateStyles.left || 0) - (parseFloat(roundingsStyle['margin-left']) || parseFloat(roundingsStyle['margin-right']));
-          //_this.itemNode.css(roundingsStyle);
+          this.itemNode.css(roundingsStyle);
         }
 
         return false;
@@ -879,7 +880,7 @@ console.log(boundingBoxes);
         var newHeight, newOverflowY, newTop, newLeft,maxHeight;
         newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
-        newTop = designer.getHeightDiffValue()? (cssUpdate.top || 0) + designer.getHeightDiffValue(): cssUpdate.top;
+        newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
         newLeft = cssUpdate.left;
 
         maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
@@ -902,8 +903,6 @@ console.log(boundingBoxes);
                 } else if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateVertShiftFloat)) {
                     vertMargin['margin-top'] = compensateVertShiftFloat + 'px';
                 }
-            } else if (this.item.localName === 'h3') {
-                
             } else {
                 // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
                 if (compensateVertShiftFloat > 0 // New margin is positive.
@@ -912,9 +911,10 @@ console.log(boundingBoxes);
                         vertMargin = {'margin-top': - compensateVertShiftFloat / 2 + 'px', 'margin-bottom': - compensateVertShiftFloat / 2 + 'px'};
                 } else if (compensateVertShiftFloat < 0
                     && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
-                    vertMargin['margin-top'] = compensateVertShiftFloat - parseFloat($(aboveBox).css('margin-bottom')) +'px';
+                        vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
+                        // vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px';
                 } else {
-                    vertMargin['margin-top'] = compensateVertShiftFloat + 'px';
+                    vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px';
                 }
             }
         }
@@ -926,8 +926,8 @@ console.log(boundingBoxes);
 
         // Margins affect the element's position. To make sure top & left are
         // correct we need to substract margin value from them. 
-        newTop  = newTop  && (parseFloat(newTop)  - compensateVertShiftFloat);
-        newLeft = newLeft && (parseFloat(newLeft) - compensateHorizShiftFloat);
+        // newTop  = newTop  && (parseFloat(newTop)  - compensateVertShiftFloat);
+        // newLeft = newLeft && (parseFloat(newLeft) - compensateHorizShiftFloat);
 
         var cssBeforeAnimateStyles = {
           'position': 'relative',

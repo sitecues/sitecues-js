@@ -14,7 +14,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     'rgba(0, 0, 0, 0)'
     ];
 
-    designer.heightDiffValue = 0;
+    designer.heightExpandedDiffValue = 0;
+    designer.widthNarrowedDiffValue  = 0;
 
     // Copied from source/highlight-box.js
     designer.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
@@ -29,8 +30,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
         function ($, conf, positioning, common) {
 
-            designer.getHeightDiffValue = function() {
-                return this.heightDiffValue;
+            designer.getHeightExpandedDiffValue = function() {
+                return this.heightExpandedDiffValue;
+            }
+
+            designer.getWidthNarrowedDiffValue = function() {
+                return this.widthNarrowedDiffValue;
             }
 
             designer.getCurrentTextColor = function(item) {
@@ -207,18 +212,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
-
-                    // As we are not moving the element within the DOM, we need to position the
-                    // element relative to it's offset parent. These calculations need to factor
-                    // in the total zoom of the parent.
-                    var offsetParent = jElement.offsetParent();
-                    var offsetParentPosition = positioning.getOffset(offsetParent);
-                    var offsetParentZoom = positioning.getTotalZoom(offsetParent);
                     
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
 
-                    var shortenWidthValue = false; narrowWidth(jElement, currentStyle);
+                    var shortenWidthValue = narrowWidth(jElement, currentStyle);
                     var expandedHeightValue;
                     if (shortenWidthValue) {
                         var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
@@ -242,7 +240,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // Fit to width of viewport.
                         newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
                         var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ;          // new width - old width
-                        newLeft = - jElement.offsetlefttop + window.pageXOffset + zoomWidthDiff + designer.kMinDistanceFromEdge;
+                        newLeft = - jElement.offset().left + window.pageXOffset + zoomWidthDiff + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > left) {
@@ -277,7 +275,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         height: newHeight || expandedHeightValue,
                         maxHeight: newWidth? newMaxHeight: undefined
                     };
-                    designer.heightDiffValue = (parseFloat(cssUpdates.height) - parseFloat(currentStyle.height)) || 0;
+                    // Only use difference in height if it was shortened(we need to compensate it in margin).
+                    designer.heightExpandedDiffValue = expandedHeightValue? (cssUpdates.height - parseFloat(currentStyle.height)) || 0 : 0;
+                    designer.widthNarrowedDiffValue  = shortenWidthValue?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
                 });
                 //TODO: Figure out a better way to get the offset.left...I've tried to figure
