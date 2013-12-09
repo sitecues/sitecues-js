@@ -227,51 +227,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             return correctedStyle;
         }
 
-        /**
-         * Extends shift styles by HLB styles.
-         * @param {HTMLObject} $el
-         * @param {Object} compensateShift
-         * @returns {Object} correctedStyle
-         */
-        function getCorrectedStyle(currentStyle, compensateShift, cssUpdate) {
-            var height;
-            if (common.isEmptyBgImage(currentStyle['background-image'])) {
-                height = 'auto';
-            } else {
-                height = cssUpdate.height? cssUpdate.height + 'px': computedStyles.height;
-            }
-            var maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
-            var correctedStyle = {
-                // HLB styles.
-                'position': 'relative',
-                'border': borWidth + 'px solid black',
-                'border-radius': padWidth + 'px',
-                'height': maxHeight? undefined: height,
-                'max-height': maxHeight,
-                'width':  cssUpdate.width ? cssUpdate.width  + 'px': computedStyles.width,
-
-                // Animation.
-                'webkit-transform-origin': '50% 50%',
-                '-moz-transform-origin': '50% 50%',
-                'transform-origin': '50% 50%'
-            }
-
-            // Correct margins for simple case: assume that HLB fits the viewport.
-            var horizMargin = {'margin-left': compensateShift['horiz']};
-            var vertMargin = {};
-
-            var belowBox = boundingBoxes.below;
-            var vertMargin = {'margin-top': parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px'};
-            if (currentStyle['clear'] === 'both' && belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(parseFloat(compensateShift['vert']))) {
-                vertMargin = {'margin-bottom': compensateShift['vert']};
-            }
-
-            $.extend(correctedStyle, vertMargin);
-            $.extend(correctedStyle, horizMargin);
-
-            return correctedStyle;
-        }
-
         function getBoundingElements(pickedElement) {
             var pickedRect = pickedElement.getBoundingClientRect();
 
@@ -651,8 +606,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         computedStyles  = getStyleObject(el); // global
         boundingBoxes   = getBoundingElements(el),
-        compensateShift = getShift($el),
-        correctedStyle  = getCorrectedStyle(currentStyle, compensateShift, cssUpdate);
+        compensateShift = getShift($el);
 
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, compensateShift, cssUpdate);
 
@@ -912,7 +866,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 } else if (compensateVertShiftFloat < 0
                     && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
                         vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
-                        // vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px';
                 } else {
                     vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px';
                 }
@@ -940,7 +893,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'z-index': HighlightBox.kBoxZindex.toString(),
           'border' : HighlightBox.kBoxNoOutline,
           'list-style-position': 'inside',
-          'padding': HighlightBox.kBoxPadding,
           'margin-top': currentStyle['margin-top'],
           'margin-right': currentStyle['margin-right'],
           'margin-bottom': currentStyle['margin-bottom'],
@@ -959,6 +911,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           '-moz-transform-origin': '50% 50%',
           'transform-origin': '50% 50%'
         };
+
+        if (currentStyle['display'] === 'inline-block') {
+             // Substract border value so that HLB wouldn't affect the following elements.
+            cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px';
+        } else {
+            // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
+            cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding;
+        }
 
         $.extend(cssBeforeAnimateStyles, vertMargin);
         $.extend(cssBeforeAnimateStyles, horizMargin);
