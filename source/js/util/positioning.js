@@ -4,7 +4,7 @@
  */
 sitecues.def('util/positioning', function (positioning, callback, log) {
 
-    sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+    sitecues.use('jquery', 'util/common', 'platform', 'conf', function ($, common, platform, conf) {
 
         /**
          * Get the cumulative zoom for an element.
@@ -247,6 +247,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 	            var fixedRects = positioning.getAllBoundingBoxes(this, 9999);
 	            var zoom = positioning.getTotalZoom(this, true);
 	            var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
+                    conf.set('rect', rect);
 
                 // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
                 if (!rect) {

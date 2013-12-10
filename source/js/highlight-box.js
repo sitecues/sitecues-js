@@ -793,8 +793,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * @return Object
        */
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
-        var newHeight, newOverflowY, newTop, newLeft,maxHeight;
+        var rect = conf.get('rect');
+        var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
         newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
+        newWidth = cssUpdate.width ? cssUpdate.width  + 'px': rect.width;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
         newLeft = cssUpdate.left;
@@ -845,7 +847,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'left': newLeft,
           'height': maxHeight? undefined: parseFloat(newHeight) + 'px',
           'max-height': maxHeight,
-          'width':  cssUpdate.width ? cssUpdate.width  + 'px': computedStyles.width,
+          'width':  newWidth,
 
           'z-index': HighlightBox.kBoxZindex.toString(),
           'border' : HighlightBox.kBoxNoOutline,
