@@ -21,21 +21,20 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     'table-cell'
   ];
 
-  var PICK_ME_FIRST =
-    [
-      { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
-      { "url": "scotiabank.", selector: ".frutiger", enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
-      { "url": "cnib.ca", selector: ".slides", enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
-      { "url": "texasat.net", selector: "#slideshow", enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net }
-    ];
+  var PICK_ME_FIRST = [
+    { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
+    { "url": "scotiabank.", selector: ".frutiger",       enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
+    { "url": "cnib.ca", selector: ".slides",             enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
+    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net }
+  ];
 
   
-    for( var i = 0; i <  PICK_ME_FIRST.length; i++){
+  for( var i = 0; i <  PICK_ME_FIRST.length; i++){
 
-        if( (PICK_ME_FIRST[i].enabled) === false ){
+      if( (PICK_ME_FIRST[i].enabled) === false ){
 
-          PICK_ME_FIRST.splice( i, 1);
-        }
+        PICK_ME_FIRST.splice( i, 1);
+      }
     }
 
 
@@ -48,11 +47,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 //    '#sitecues-eq360-bg'
 //  ];
 //    
-    picker.kTargetStates = {
-        'sometimes': 's',
-        'true'     : 't',
-        'false'    : 'f'
-    }
+  picker.kTargetStates = {
+      'sometimes': 's',
+      'true'     : 't',
+      'false'    : 'f'
+  }
 
   sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles) {
 
