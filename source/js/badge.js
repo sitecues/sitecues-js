@@ -4,7 +4,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'html-build', 'zoom', 'platform', 'fallback', function ($, conf, panel, ui, common, htmlBuild, zoom, platform, fallback) {
+  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'fallback', function ($, conf, panel, common, htmlBuild, fallback) {
 
     var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
@@ -14,8 +14,7 @@ sitecues.def('badge', function (badge, callback, log) {
     if (!badge.badgeId) {
       // Use the default value
       badge.badgeId = 'sitecues-badge';
-    }
-
+    } 
   /**
    * Creates a markup for new badge and inserts it right into the DOM.
    * @param function success
@@ -51,7 +50,6 @@ sitecues.def('badge', function (badge, callback, log) {
         success();
       }
     };
-
     /**
      * Hides the badge.
      *
@@ -65,7 +63,6 @@ sitecues.def('badge', function (badge, callback, log) {
         }
       });
     };
-
     /**
      * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
      *
@@ -127,11 +124,8 @@ sitecues.def('badge', function (badge, callback, log) {
       badge.create();
     }
 
-      
     panel.parent  = badge.element;
-
     $badge = $('#' + badge.badgeId);
-
 
     var isBadgeInDom = $badge && $badge.length > 0;
  
@@ -141,60 +135,80 @@ sitecues.def('badge', function (badge, callback, log) {
 
     // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
     // a useful fallback when it can't work, so that my users aren't confused by the icon.
-    // -csimari
-    var requiresFallback = platform.requiresFallback,
-        supportsTouch = platform.isTouchDevice;
-
-      // EQ-657 - Handle tablet and smartphone case
-      // Determine if event was touch based - only limited to event at this level
-      // 'msgesturechange' is for IE10 - wtf?!
-      // -csimari
-
-
     var setFallbackEvents = function (evt){
       evt.preventDefault();
       fallback.show();
     };
   
-    var setDefaultEventOver = function () {
-      sitecues.emit('badge/hover', badge.element);
+    var setDefaultEventOver = function (evt) {
+      evt.stopPropagation();
+      return sitecues.emit('badge/hover', badge.element);
     };     
   
-    var setDefaultEventLeave = function () {
-      sitecues.emit('badge/leave', badge.element);
-    };   
-     
-    // Check if fallbacks are enabled otherwise use default hover
-    if (conf.get('fallbackEnabled')) {
+    var setDefaultEventLeave = function (evt) {
+      evt.stopPropagation();
+      return sitecues.emit('badge/leave', badge.element);
+    };  
+
+    var watchMouseConnection = function(evt){
+      evt.stopPropagation();
+      sitecues.mousePresent = true;
       
-      log.info('fallbacks are enabled');
+      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+      // $(badge.panel).unbind( 'click' && 'touchstart' && 'touchmove' && 'touchend' && 'msgesturechange' );
+      // Should we 'unbind'?
+      window.removeEventListener('mousemove', watchMouseConnection, false);
       
-      // Delegate Events
-      if (requiresFallback || supportsTouch){
-        
-        switch(supportsTouch){
-        case true: 
+      // The function (in progress) below will be to account
+      // for mouse connectivity, specifically for touch
+      //
+      // var checkMousePulse = function () {
+      //   var thisDeviceStatus;
+      //   window.addEventListener('mousemove', watchMouseConnection, false);
+      // };
+      //Check on mouse status every 15 seconds
+      //setInterval( checkMousePulse, 15000); 
+    };
+
+
+    if( fallback.isEnabled ){
+/**
+* Check if user is on a supported platform
+**/
+      switch(sitecues.supportedPlatform){
+      case true:
+
+        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+/** 
+* Check for touch support
+**/
+        if(sitecues.supportsTouch){
+          sitecues.mousePresent = false;
           $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-          break;
-        case false: 
-          $(badge.panel).on( 'click', setFallbackEvents );
-          break;
-        }
-        
-        if( requiresFallback && supportsTouch ){
-          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-          $(badge.panel).on( 'click', setFallbackEvents );
+/**
+* Listen for mouse
+*/  
+          window.addEventListener('mousemove', watchMouseConnection, false);
         }
 
-      }else{
-        // sitecues deployed without need for fallback.',
-        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+        log.info('Compatibility fallback is enabled to simulate a production environment - use sitecues.toggleFalllback() to toggle for development.');
+
+        break;
+      case false:
+/** 
+* Not a supported platform
+**/
+        $(badge.panel).on('click', setFallbackEvents);
+        break;
       }
 
     } else {
-      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
-      // console.log("Fallback modal is currently disabled.")
-      log.warn('Fallback modal is currently disabled.');
+/** 
+* Fallback is not enabled
+* Defaults to normal behavior
+**/
+      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
+      log.info('Compatibility fallback is not enabled - use sitecues.toggleFalllback() to disable for development.');
     }
 
     sitecues.on('badge/enable', function() {

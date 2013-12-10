@@ -2,53 +2,55 @@
  * platform.js
  * Determines the Browser Version and Operating System version constants
  */
-sitecues.def('platform', function (platformModule, callback, log) {
+sitecues.def('platform', function (platformModule, callback) {
   
   'use strict';
 
   // Store the agent and platform variables for later use
-  var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null'
-    , platform = navigator.platform.toLowerCase()  // Chris: No longer used? Please remove if not being used.
-    , browser
-    , os                                           // Chris: No longer used? Please remove if not being used.
-    , requiresFallback = true                      // Chris: No longer used? Please remove if not being used.
-    , ieVersion = false                            // Chris: No longer used? Please remove if not being used.
-    , isTouchDevice = false                        // Chris: is this variable ever used?
-    ;
+  var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null',
+      platform = navigator.platform.toLowerCase(),
+      browser,
+      os, 
+      ieVersion = 'NA',
+      requiresFallback = true,
+      supportsTouch = false;
 
   // Determine which browser is being used
-  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' : 
-    agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 ? 'IE' :
-    agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
-    agent.indexOf(' Safari') > 0 ? 'Safari'  :
-    agent.indexOf(' Opera') > 0 ? 'Opera'  :  'Unknown Browser';
+  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
+            agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 ? 'IE' :
+            agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
+            agent.indexOf(' Safari') > 0 ? 'Safari'  :
+            agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/') > 0 ? 'Opera'  :
+            'Unknown Browser';
 
   // Set globally accessible browser constants
   platformModule.browser = {
-    zoom        : 'zoom' in document.createElement('div').style,
-    is          : browser,
-    isFirefox   : browser === 'Firefox',
-    isIE        : browser === 'IE',
-    isChrome    : browser === 'Chrome',
-    isOpera     : browser === 'Opera',
-    isSafari    : browser === 'Safari'
-  };
+      zoom        : 'zoom' in document.createElement('div').style,
+      is          : browser,
+      isFirefox   : browser === 'Firefox',
+      isIE        : browser === 'IE',
+      isChrome    : browser === 'Chrome',
+      isOpera     : browser === 'Opera',
+      isSafari    : browser === 'Safari',
+      isUnknown   : browser === 'Unknown Browser'
+    };
+
 
   // If IE is being used, determine which version
   if( platformModule.browser.isIE ){
     // Get the current IE version to serve the appropriate fallback message
-    // platformModule.ieVersion = ieVersion;
-    ieVersion = agent.indexOf('MSIE 6') >= 0 ? 'IE6' : 
+    ieVersion = agent.indexOf('MSIE 6') >= 0 ? 'IE6' :
                 agent.indexOf('MSIE 7') >= 0 ? 'IE7' :
                 agent.indexOf('MSIE 8') >= 0 ? 'IE8' :
                 agent.indexOf('MSIE 9') >= 0 ? 'IE9' :
                 agent.indexOf('MSIE 10') >= 0 ? 'IE10' :
-                agent.indexOf('MSIE 11') >= 0 ? 'IE11' : 'Unknown IE Version';
+                agent.indexOf('rv:11') >= 0 ? 'IE11' :
+                'Unknown IE Version';
   }
 
   // Set globally accessible IE version constants 
   platformModule.ieVersion = {
-    vNA       : ieVersion === false,
+    vNA       : ieVersion === 'NA',
     isIE6     : ieVersion === 'IE6',
     isIE7     : ieVersion === 'IE7',
     isIE8     : ieVersion === 'IE8',
@@ -56,54 +58,64 @@ sitecues.def('platform', function (platformModule, callback, log) {
     isIE10    : ieVersion === 'IE10',
     isIE11    : ieVersion === 'IE11',
     isUnknown : ieVersion === 'Unknown IE Version'
-  };
-              
+  };       
 
   // Determine which opperating system is being used
   os = platform.indexOf('mac') >-1 ? 'mac' :
-       platform.indexOf('win') >-1 ? 'win' : 
-       platform.indexOf('linux') >-1 ? 'mac' : 'Unknown OS'; // This should say 'mac', not 'linux'
+       platform.indexOf('win') >-1 ? 'win' :
+       platform.indexOf('linux') >-1 ? 'mac' : // This should say 'mac', not 'linux'
+       'Unknown OS'; 
   
   // Set globally accessible operating system constants
   platformModule.os = {
     is        : os,
     isMac     : os === 'mac',
     isWin     : os === 'win',
-    isLinux   : os === 'linux'
+    isLinux   : os === 'mac', // This should say 'mac', not 'linux'
+    isUnknown : os === 'Unknown OS'
   };
 
   // EQ-881 - As a customer, I want sitecues to degrade gracefully or provide a useful
   // fallback when it can't work, so that my users aren't confused by the icon.
   // Set globally accessible operating fallback constants
-
   function hasTouch () {
     return !!('ontouchstart' in window) || !!('msmaxtouchpoints' in window.navigator);
   }
-
-  if (platformModule.browser.isChrome) { 
-    requiresFallback = false;
-  }
-  if (platformModule.browser.isSafari && platformModule.os.isMac) { 
-    requiresFallback = false;
-  }
-
-  // Requires fallback - current browser is not supported by sitecues
-  // specific message [browser/os/supports touch] is assembled in ./fallback.js
-  platformModule.requiresFallback = requiresFallback;
   
-  // Device has touch capabilities
-  platformModule.isTouchDevice = hasTouch();
+  supportsTouch = hasTouch();
 
-  // Determine the device pixel ratio and cursor scale support of the platform. 
+  if ( (platformModule.browser.isChrome) || ( platformModule.browser.isSafari && platformModule.os.isMac ) ) { 
+/**
+* CASE 1:  This platform is supported by sitecues.
+*/
+    sitecues.supportedPlatform = true;
+/**
+* CASE 2:  This platform requires a fallback for touch events.
+*/
+    requiresFallback = supportsTouch ? true : false;
+    
+  } else {
+/**
+* CASE 3:  Not a supported platform.
+*/
+    sitecues.supportedPlatform = false;
+    requiresFallback = true; 
+  }
+/** 
+* Checks if fallback is required
+*/
+  sitecues.requiresFallback = requiresFallback;
+/** 
+* Checks for touch capabilities
+*/
+  sitecues.supportsTouch = supportsTouch;
+
 
   platformModule.pixel = {
-
     // platform.pixel.ratio checks the pixel-ratio of the browser, for example, retina displays
     // on OS X use a pixel ratio of 2:1. A MacBook with a Retina display will show 4 pixels for
     // every 1 pixel on a regular screen. (2 pixels horizontally, 2 pixels vertically)
     ratio: window.devicePixelRatio,
-
-
     // platform.pixel.cssCursorScaleSupport lists the browsers that support scaling of css cursors.
     // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear 
     // crisp.
@@ -111,8 +123,6 @@ sitecues.def('platform', function (platformModule, callback, log) {
       Chrome: true
     }
   };
-
   // Done
   callback();
-
 });
