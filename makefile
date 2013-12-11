@@ -45,6 +45,7 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
+	source/js/fallback.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
@@ -72,6 +73,7 @@ files=\
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
 	source/js/speech.js \
+	source/js/speech-builder.js \
 	source/js/invert.js \
 	source/js/cursor/images/win.js \
 	source/js/cursor/images/mac.js \
@@ -87,7 +89,8 @@ files=\
 	source/js/ui-manager.js \
 	source/js/html-build.js \
 	source/js/status.js \
-	source/js/fallback.js \
+	source/js/sitepicker.js \
+	
 
 https=off
 prod=off

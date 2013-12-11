@@ -72,7 +72,13 @@
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
     sitecues.loadScript = loadScript;
     sitecues.load = load;
+    sitecues.supportedPlatform = true;
+    sitecues.requiresFallback = true;
+    sitecues.supportsTouch = false;
+    sitecues.mousePresent = true;
   };
+
+
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -287,6 +293,8 @@
       // notify about new module load once
       sitecues.emit('load/' + name, module).off('load/' + name);
 
+      //console.log(name)
+
       // Module checking.....
       modules[name].defined = true;
 
@@ -312,25 +320,36 @@
     if (READY_FOR_DEF_CALLS) {
       _def(name, constructor);
     } else {
+
       DEF_QUEUE.push({
         name: name,
         constructor: constructor
       });
+
       LOAD_LIST.push(name);
+      
       lastDefinedModuleName = name;
     }
   };
 
   // processes the def queue once initialization has completed.
   var _processDefQueue = function() {
+    
     var defObj;
-    while (DEF_QUEUE.length) {
+
+       // iterate over passed module names
+      while (DEF_QUEUE.length) {
+
+    //if (sitecues.supportedPlatform === true) {
       defObj = DEF_QUEUE.shift();
       _def(defObj.name, defObj.constructor);
-    }
+    //} else {
+    //  DEF_QUEUE = [];
+    //}
+  }
 
     READY_FOR_DEF_CALLS = true;
-  };
+};
 
   // load equinox modules
   use = function(){
@@ -544,13 +563,23 @@
     document.getElementsByTagName('head')[0].appendChild(script);
   };
 
-  // trigger module loading
+  /* EQ-881 - As a customer, I want sitecues to degrade gracefully or provide a useful
+  /* fallback when it can't work, so that my users aren't confused by the icon.
+  /* *********************************************************************************
+  /* trigger module loading
+  /*/
   load = function(){
-    // iterate over passed module names
-    for(var i=0, l=arguments.length; i<l; i++){
-      // and initiate loading of code for each
-      sitecues.loadScript(arguments[i] + '.js');
-    }
+    
+  if (sitecues.supportedPlatform !== false) {
+       // iterate over passed module names
+
+      for(var i=0, l=arguments.length; i<l; i++){
+
+       console.log(arguments[i] + '.js');
+        // and initiate loading of code for each
+        sitecues.loadScript(arguments[i] + '.js');
+      }
+   }
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -620,18 +649,64 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var LIB_CONFIG_NAMES = [ "hosts" ], libraryConfigLoadCount;
-
+  var LIB_CONFIG_NAMES = [ "hosts", "sitepicker" ], libraryConfigLoadCount;
   // Validation method for library configuration. If valid, initialize sitecues.
   var validateLibraryConfigs = function(cb) {
-    var valid = true;
+  var valid = true;
 
     if (window.sitecues.libConfig) {
       libraryConfig = window.sitecues.libConfig;
 
       log.info(libraryConfig);
+       /**
+       * EQ-1349
+       * Use temporary workaround for site/picker customizations
+       */
 
-      if (libraryConfig.hosts) {
+      if(libraryConfig.sitepicker){
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     
+      if (libraryConfig.sitepicker.eeoc_gov) {
+          log.info("eeoc_gov site/picker is enabled : " + libraryConfig.sitepicker.eeoc_gov);
+        } else {
+          log.warn("eeoc_gov site/picker is disabled.");
+        }
+
+        if (libraryConfig.sitepicker.scotiabank_com) {
+          log.info("scotiabank_com site/picker is enabled : " + libraryConfig.sitepicker.scotiabank_com);
+        } else {
+          log.warn("scotiabank_com site/picker is disabled.");
+        }
+
+        if (libraryConfig.sitepicker.cnib_ca) {
+          log.info("cnib_ca site/picker is enabled : " + libraryConfig.sitepicker.cnib_ca);
+        } else {
+          log.warn("cnib_ca site/picker is disabled.");
+        }
+
+        if (libraryConfig.sitepicker.texasat_net) {
+          log.info("texasat_net site/picker is enabled : " + libraryConfig.sitepicker.texasat_net);
+        } else {
+          log.warn("texasat_net site/picker is disabled.");
+        }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      }
+
+
+  // if (libraryConfig.fallback) {
+
+  //       if (libraryConfig.fallback.enabled) {
+  //         console.log("(_config/fallback.js) sitecues fallback enabled :: " + libraryConfig.fallback.enabled );
+  //       } else {
+  //         console.log("(_config/fallback.js) sitecues fallback is not enabled.");
+  //         //libraryConfig.fallback.enabled = false;
+  //       }
+
+
+  // }    
+
+  if (libraryConfig.hosts) {
+
         if (libraryConfig.hosts.ws) {
           log.info("sitecues ws host: " + libraryConfig.hosts.ws);
         } else {
@@ -653,8 +728,6 @@
       log.warn("sitecues library config not found.");
       valid = false;
     }
-
-
 
     if (!valid) {
       log.error("Invalid sitecues library config.");
@@ -703,7 +776,7 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var initialize = function() {
+  var initialize = function () {
     // If the sitecues global object does not exist, then there is no basic site configuration, nor
     // is there a logger. Simply print an error to the console and abort initialization.
     if (!window.sitecues || (typeof window.sitecues != "object")) {
@@ -721,7 +794,6 @@
     }
     // "Plant our flag" on this page.
     sitecues.exists = true;
-
     // As we have now "planted our flag", export the public fields.
     exportPublicFields();
 
