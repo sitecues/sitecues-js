@@ -649,12 +649,7 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-  var LIB_CONFIG_NAMES = [ "hosts", "fallback" ], libraryConfigLoadCount;
-
-=======
   var LIB_CONFIG_NAMES = [ "hosts", "sitepicker" ], libraryConfigLoadCount;
->>>>>>> 181cd6407fb84277c56117689531554db420d31f
   // Validation method for library configuration. If valid, initialize sitecues.
   var validateLibraryConfigs = function(cb) {
   var valid = true;
@@ -712,20 +707,6 @@
 
   if (libraryConfig.hosts) {
 
-<<<<<<< HEAD
-
-      if (!libraryConfig.fallback) {
-          log.warn("fallback library configuration not found: Defaulting to true.");
-          libraryConfig.fallback = { enabled: true};
-        } else {
-          log.info("fallback library configuration set to :: "+libraryConfig.fallback.enabled);
-        }
-
-
-
-      if (libraryConfig.hosts) {
-=======
->>>>>>> 181cd6407fb84277c56117689531554db420d31f
         if (libraryConfig.hosts.ws) {
           log.info("sitecues ws host: " + libraryConfig.hosts.ws);
         } else {
