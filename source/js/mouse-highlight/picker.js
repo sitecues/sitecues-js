@@ -21,6 +21,24 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     'table-cell'
   ];
 
+  var PICK_ME_FIRST = [
+    { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
+    { "url": "scotiabank.", selector: ".frutiger",       enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
+    { "url": "cnib.ca", selector: ".slides",             enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
+    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net }
+  ];
+
+  
+  for( var i = 0; i <  PICK_ME_FIRST.length; i++){
+
+      if( (PICK_ME_FIRST[i].enabled) === false ){
+
+        PICK_ME_FIRST.splice( i, 1);
+      }
+    }
+
+
+
 // AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable below)
 //  // Element IDs to never highlight
 //  picker.blacklistIds = [
@@ -29,11 +47,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 //    '#sitecues-eq360-bg'
 //  ];
 //    
-    picker.kTargetStates = {
-        'sometimes': 's',
-        'true'     : 't',
-        'false'    : 'f'
-    }
+  picker.kTargetStates = {
+      'sometimes': 's',
+      'true'     : 't',
+      'false'    : 'f'
+  }
 
   sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles) {
 
@@ -48,7 +66,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       // hide previous mh target if now mouseover sitecues toolbar
       var isInBody = false, isInBadge = false;
       var badge = $('#sitecues-badge');
-      $.each($el.parents().andSelf(), function(i, parent) {
+      var parents = $el.parents().andSelf();
+      $.each(parents, function(i, parent) {
         var $parent = $(parent);
         if ($parent.is(document.body)) {
           isInBody = true;
@@ -65,11 +84,29 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         return null;
       }
 
-      var picked = picker.findImpl(hover);
+      var picked = pickMeFirst(parents);
+      if (picked && picked.length) {
+        return picked;
+      }
+
+      picked = picker.findImpl(hover);
       if (!picked || !picked.length) {
         return null; // Normalize
       }
       return picked;
+    };
+
+    function pickMeFirst(parents) {
+      var currLoc = window.location;
+
+      for (var count = 0; count < PICK_ME_FIRST.length; count ++) {
+        if (currLoc.toString().indexOf(PICK_ME_FIRST[count].url) >= 0) {
+
+          var selector = PICK_ME_FIRST[count].selector;
+          return parents.filter(selector).first();
+        }
+      }
+      return null;
     }
 
     picker.findImpl = function(hover) {
@@ -122,7 +159,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       if (typeof sitecues != 'undefined' && highlight != '' && highlight != null) {
         // We have some kind of value for this attribute
 
-
         if (highlight) {
           return true;
         }
@@ -135,7 +171,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       }
 
 // AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable above)
-//                      var node = el.get(0);
+//                      var node = eltry.get(0);
 //      if (node.id && $.inArray(node.id, picker.blacklistIds) >= 0) {
 //        // IDs we ignore
 //        return false;
@@ -240,7 +276,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           }
         }
       } else if (role.name === 'list' && (e.prop('tagName').toLowerCase() === 'ol' || e.prop('tagName').toLowerCase() === 'ul')) {
-          score += 1;
+      score += 1;
       } else {
         if (unhighlightableChild) {
           score += 1;

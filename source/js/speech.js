@@ -22,7 +22,8 @@ sitecues.def('speech', function (speech, callback, log) {
 
   };
   
-  sitecues.use('conf', 'conf/site', 'jquery', 'platform', function(conf, site, $, platform) {
+  sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
+    function(conf, site, common, $, builder, platform) {
 
     var players = {},
         // Use the site and user settings, if available, but if neither is
@@ -87,10 +88,9 @@ sitecues.def('speech', function (speech, callback, log) {
         
         }()),
 
-        NotSafariAudioPlayer = function(hlb, siteId, secure) {
+        NotSafariAudioPlayer = function(speechKey, text, siteId, secure) {
           
           var secureFlag = (secure ? 1 : 0),
-              speechKey = hlb.data('speechKey'),
               baseMediaUrl,
               audioElement,
               playing = false;
@@ -102,7 +102,7 @@ sitecues.def('speech', function (speech, callback, log) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
               // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
               + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
+              + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
           }
 
           this.init = function () {
@@ -119,9 +119,6 @@ sitecues.def('speech', function (speech, callback, log) {
             });
 
           };
-
-
-
 
           this.play = function () {
             //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
@@ -180,10 +177,9 @@ sitecues.def('speech', function (speech, callback, log) {
                         undefined,
               volumeNode;        
           
-          return function(hlb, siteId, secure) {
+          return function(speechKey, text, siteId, secure) {
             
             var secureFlag = (secure ? 1 : 0),
-                speechKey = hlb.data('speechKey'),
                 baseMediaUrl;
                 //startTime = (new Date).getTime() / 1000;
             
@@ -198,7 +194,7 @@ sitecues.def('speech', function (speech, callback, log) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
                 // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
                 + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + encodeURIComponent(hlb.text()) + '&codecId=' + audioFormat;
+                + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
             }
 
             this.soundSource = undefined;
@@ -271,8 +267,8 @@ sitecues.def('speech', function (speech, callback, log) {
       } else {
         console.log('Using <audio> Player');
       }*/
-      //end variable declarations 
-   
+      //end variable declarations
+
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
     
     if (!ttsEngine) {
@@ -284,7 +280,6 @@ sitecues.def('speech', function (speech, callback, log) {
      * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
      */
     speech.initPlayer = function(hlb, hlbOptions) {
-
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return null;
@@ -319,13 +314,19 @@ sitecues.def('speech', function (speech, callback, log) {
     };
 
     speech.factory = function(hlb) {
+      var text, player, speechKey;
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
       if (ttsEngine) {
-        if ($(hlb).text().length || $(hlb).data('speechKey')) {
-          var player = new AudioPlayer($(hlb), site.get('site_id'), sitecues.getLibraryUrl().secure);
-          player.init();
-          return player;
+        speechKey = $(hlb).data('speechKey');
+        if (!speechKey) {
+          text = builder.getText(hlb);
+          if (!text.length) {
+            return;
+          }
         }
+        player = new AudioPlayer(speechKey, text, site.get('site_id'), sitecues.getLibraryUrl().secure);
+        player.init();
+        return player;
       } else {
         // No matching plugins, disable TTS
         log.warn('No engine configured!');
@@ -342,7 +343,6 @@ sitecues.def('speech', function (speech, callback, log) {
      * @return true if something was played, or false if there was an error or nothing to play.
      */
     speech.play = function(hlb, hlbOptions) {
-
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return false;
