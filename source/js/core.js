@@ -745,7 +745,7 @@
     // If the sitecues global object does not exist, then there is no basic site configuration, nor
     // is there a logger. Simply print an error to the console and abort initialization.
     if (!window.sitecues || (typeof window.sitecues != 'object')) {
-      console.error('The base 'windows.sitecues' namespace was not found. The sitecues library will not load.');
+      console.error('The base '+windows.sitecues+' namespace was not found. The sitecues library will not load.');
       return;
     }
 

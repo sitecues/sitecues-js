@@ -12,7 +12,6 @@ sitecues.def('platform', function (platformModule, callback) {
       browser,
       os, 
       ieVersion = 'NA',
-      requiresFallback = true,
       supportsTouch = false;
 
   // Determine which browser is being used
@@ -75,41 +74,17 @@ sitecues.def('platform', function (platformModule, callback) {
     isUnknown : os === 'Unknown OS'
   };
 
-  // EQ-881 - As a customer, I want sitecues to degrade gracefully or provide a useful
-  // fallback when it can't work, so that my users aren't confused by the icon.
-  // Set globally accessible operating fallback constants
+ /** 
+  * EQ-881 - Harmless remnant of fallback… may use for EQ-1387
+  * Checks for touch capabilities
+  * @return {Boolean} [description]
+  */
   function hasTouch () {
     return !!('ontouchstart' in window) || !!('msmaxtouchpoints' in window.navigator);
   }
   
   supportsTouch = hasTouch();
-
-  if ( (platformModule.browser.isChrome) || ( platformModule.browser.isSafari && platformModule.os.isMac ) ) { 
-/**
-* CASE 1:  This platform is supported by sitecues.
-*/
-    sitecues.supportedPlatform = true;
-/**
-* CASE 2:  This platform requires a fallback for touch events.
-*/
-    requiresFallback = supportsTouch ? true : false;
-    
-  } else {
-/**
-* CASE 3:  Not a supported platform.
-*/
-    sitecues.supportedPlatform = false;
-    requiresFallback = true; 
-  }
-/** 
-* Checks if fallback is required
-*/
-  sitecues.requiresFallback = requiresFallback;
-/** 
-* Checks for touch capabilities
-*/
   sitecues.supportsTouch = supportsTouch;
-
 
   platformModule.pixel = {
     // platform.pixel.ratio checks the pixel-ratio of the browser, for example, retina displays

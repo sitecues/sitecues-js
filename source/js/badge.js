@@ -4,7 +4,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'fallback', function ($, conf, panel, common, htmlBuild, fallback) {
+  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', function ($, conf, panel, common, htmlBuild) {
 
     var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
@@ -133,83 +133,17 @@ sitecues.def('badge', function (badge, callback, log) {
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
     badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
 
-    // EQ-881: As a customer, I want sitecues to degrade gracefully or provide
-    // a useful fallback when it can't work, so that my users aren't confused by the icon.
-    var setFallbackEvents = function (evt){
-      evt.preventDefault();
-      fallback.show();
-    };
-  
     var setDefaultEventOver = function (evt) {
-      evt.stopPropagation();
+      //evt.stopPropagation();
       return sitecues.emit('badge/hover', badge.element);
     };     
   
     var setDefaultEventLeave = function (evt) {
-      evt.stopPropagation();
+      //evt.stopPropagation();
       return sitecues.emit('badge/leave', badge.element);
     };  
 
-    var watchMouseConnection = function(evt){
-      evt.stopPropagation();
-      sitecues.mousePresent = true;
-      
-      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
-      // $(badge.panel).unbind( 'click' && 'touchstart' && 'touchmove' && 'touchend' && 'msgesturechange' );
-      // Should we 'unbind'?
-      window.removeEventListener('mousemove', watchMouseConnection, false);
-      
-      // The function (in progress) below will be to account
-      // for mouse connectivity, specifically for touch
-      //
-      // var checkMousePulse = function () {
-      //   var thisDeviceStatus;
-      //   window.addEventListener('mousemove', watchMouseConnection, false);
-      // };
-      //Check on mouse status every 15 seconds
-      //setInterval( checkMousePulse, 15000); 
-    };
-
-
-    if( fallback.isEnabled ){
-/**
-* Check if user is on a supported platform
-**/
-      switch(sitecues.supportedPlatform){
-      case true:
-
-        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-/** 
-* Check for touch support
-**/
-        if(sitecues.supportsTouch){
-          sitecues.mousePresent = false;
-          $(badge.panel).on( 'touchstart' || 'touchmove' || 'touchend' || 'msgesturechange', setFallbackEvents );
-/**
-* Listen for mouse
-*/  
-          window.addEventListener('mousemove', watchMouseConnection, false);
-        }
-
-        log.info('Compatibility fallback is enabled to simulate a production environment - use sitecues.toggleFalllback() to toggle for development.');
-
-        break;
-      case false:
-/** 
-* Not a supported platform
-**/
-        $(badge.panel).on('click', setFallbackEvents);
-        break;
-      }
-
-    } else {
-/** 
-* Fallback is not enabled
-* Defaults to normal behavior
-**/
-      $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave); 
-      log.info('Compatibility fallback is not enabled - use sitecues.toggleFalllback() to disable for development.');
-    }
+    $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
 
     sitecues.on('badge/enable', function() {
       badge.enable(true);
