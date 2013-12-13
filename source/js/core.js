@@ -72,10 +72,6 @@
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
     sitecues.loadScript = loadScript;
     sitecues.load = load;
-    sitecues.supportedPlatform = true;
-    sitecues.requiresFallback = true;
-    sitecues.supportsTouch = false;
-    sitecues.mousePresent = true;
   };
 
 
@@ -544,21 +540,16 @@
     document.getElementsByTagName('head')[0].appendChild(script);
   };
 
-  /* EQ-881 - As a customer, I want sitecues to degrade gracefully or provide a useful
-  /* fallback when it can't work, so that my users aren't confused by the icon.
-  /* *********************************************************************************
+  /**
   /* trigger module loading
   /*/
   load = function(){
-    
-    if (sitecues.supportedPlatform !== false) {
        // iterate over passed module names
       for(var i=0, l=arguments.length; i<l; i++){
         // and initiate loading of code for each
         sitecues.loadScript(arguments[i] + '.js');
       }
-    }
-  };
+    };
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -640,9 +631,7 @@
        * EQ-1349
        * Use temporary workaround for site/picker customizations
        */
-
       if(libraryConfig.sitepicker){
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      
         if (libraryConfig.sitepicker.eeoc_gov) {
           log.info('eeoc_gov site/picker is enabled : ' + libraryConfig.sitepicker.eeoc_gov);
@@ -667,7 +656,6 @@
         } else {
           log.warn('texasat_net site/picker is disabled.');
         }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       }
 
       if (libraryConfig.hosts) {
