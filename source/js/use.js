@@ -8,10 +8,13 @@ window.sitecues && sitecues.use(
 	'zoom',
 	'keys',
 	'focus',
+	'cursor/images/mac',
+	'cursor/images/win',
+	'cursor/images/manager',
 	'cursor',
-	'speech/azure',
 	'speech',
 	'mouse-highlight',
 	'highlight-box',
-	'invert'
+	'invert',
+	'hpan'
 );

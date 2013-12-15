@@ -22,7 +22,8 @@ sitecues.def('speech', function (speech, callback, log) {
 
   };
   
-  sitecues.use('conf', 'conf/site', 'jquery', 'platform', function(conf, site, $, platform) {
+  sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
+    function(conf, site, common, $, builder, platform) {
 
     var players = {},
         // Use the site and user settings, if available, but if neither is
@@ -38,11 +39,16 @@ sitecues.def('speech', function (speech, callback, log) {
         ttsBypass = false,
         // This is the engine we're using, required, no default
         ttsEngine = site.get('ttsEngine'),
+
+        timesCued = 0,
+        maxCued = 3,
+
         /**
          * Returns true if the "first speech on" cue should be played.
          * @return {boolean}
          */
         shouldPlayFirstSpeechOnCue = function() {
+
           var fso = conf.get(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM);
           return (!fso || ((fso + speech.CONSTANTS.FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
         },
@@ -59,22 +65,6 @@ sitecues.def('speech', function (speech, callback, log) {
         playedFirstSpeechOnCue = function() {
           conf.set(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
         },
-
-        removeHTMLEntities = (function() {
-          //©, &, %, ™, <, >,  ®, ¢,  £, ¥, €, § (most common?)
-          //Taken from http://www.w3schools.com/tags/ref_entities.asp and then passed the symbols above into
-          //the native function encodeURIComponent.  Example: encodeURIComponent('®')
-          var htmlEntityMap = ['%C2%A9', '%26', '%25', '%E2%84%A2', '%3C', '%3E', '%C2%AE', '%C2%A2', '%C2%A3', '%C2%A5','%E2%82%AC','%C2%A7'];
-          //@param URIComponent accepts a string of URI encoded text and removes any
-          //html entity encoded characters from it
-          return function (URIComponent) {
-            for (var i = 0, len = htmlEntityMap.length; i < len; i++) {
-              URIComponent = URIComponent.replace(htmlEntityMap[i], '');
-            }
-            return URIComponent;
-          };
-      
-        }()),
 
         //What audio format will we use? 
         audioFormat =  (function () {
@@ -98,10 +88,9 @@ sitecues.def('speech', function (speech, callback, log) {
         
         }()),
 
-        NotSafariAudioPlayer = function(hlb, siteId, secure) {
+        NotSafariAudioPlayer = function(speechKey, text, siteId, secure) {
           
           var secureFlag = (secure ? 1 : 0),
-              speechKey = hlb.data('speechKey'),
               baseMediaUrl,
               audioElement,
               playing = false;
@@ -113,7 +102,7 @@ sitecues.def('speech', function (speech, callback, log) {
             baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
               // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
               + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+              + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
           }
 
           this.init = function () {
@@ -132,7 +121,7 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
           this.play = function () {
-            
+            //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
             if (audioElement) {
               if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
                 playing = true;
@@ -148,7 +137,8 @@ sitecues.def('speech', function (speech, callback, log) {
           };
 
           this.stop = function () {
-            
+                        //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
+
             sitecues.off('canplay');
             
             if (audioElement && audioElement.readyState >= 3) {
@@ -187,10 +177,9 @@ sitecues.def('speech', function (speech, callback, log) {
                         undefined,
               volumeNode;        
           
-          return function(hlb, siteId, secure) {
+          return function(speechKey, text, siteId, secure) {
             
             var secureFlag = (secure ? 1 : 0),
-                speechKey = hlb.data('speechKey'),
                 baseMediaUrl;
                 //startTime = (new Date).getTime() / 1000;
             
@@ -205,7 +194,7 @@ sitecues.def('speech', function (speech, callback, log) {
               baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
                 // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
                 + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + removeHTMLEntities(encodeURIComponent(hlb.text())) + '&codecId=' + audioFormat;
+                + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
             }
 
             this.soundSource = undefined;
@@ -278,8 +267,8 @@ sitecues.def('speech', function (speech, callback, log) {
       } else {
         console.log('Using <audio> Player');
       }*/
-      //end variable declarations 
-   
+      //end variable declarations
+
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
     
     if (!ttsEngine) {
@@ -291,7 +280,6 @@ sitecues.def('speech', function (speech, callback, log) {
      * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
      */
     speech.initPlayer = function(hlb, hlbOptions) {
-
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return null;
@@ -326,14 +314,19 @@ sitecues.def('speech', function (speech, callback, log) {
     };
 
     speech.factory = function(hlb) {
+      var text, player, speechKey;
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
       if (ttsEngine) {
-        log.info(hlb);
-        if ($(hlb).text().length || $(hlb).data('speechKey')) {
-          var player = new AudioPlayer($(hlb), site.get('site_id'), sitecues.getLibraryUrl().secure);
-          player.init();
-          return player;
+        speechKey = $(hlb).data('speechKey');
+        if (!speechKey) {
+          text = builder.getText(hlb);
+          if (!text.length) {
+            return;
+          }
         }
+        player = new AudioPlayer(speechKey, text, site.get('site_id'), sitecues.getLibraryUrl().secure);
+        player.init();
+        return player;
       } else {
         // No matching plugins, disable TTS
         log.warn('No engine configured!');
@@ -350,7 +343,6 @@ sitecues.def('speech', function (speech, callback, log) {
      * @return true if something was played, or false if there was an error or nothing to play.
      */
     speech.play = function(hlb, hlbOptions) {
-
       if (!ttsEnable && !ttsBypass) {
         log.info('TTS is disabled');
         return false;
@@ -416,7 +408,6 @@ sitecues.def('speech', function (speech, callback, log) {
       });
     
     };
-
     /*
      * Iterates through all of the players and stops them.
      */
@@ -460,11 +451,22 @@ sitecues.def('speech', function (speech, callback, log) {
         conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, true);
         conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
 
+
+         // EQ-996 - As a user, I want multiple chances to learn about the 
+         // spacebar command so that I can benefit from One Touch Read 
+         //---------------------------------------------------------------------------------------------------//
+         // 1) For the TTS-spacebar hint (currently given when TTS is turned on the first time):
+         // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
+         speech.timesCued = timesCued++;
+
         if(!shouldPlayFirstSpeechOnCue()) {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON);
         } else {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON_FIRST, function() {
-            playedFirstSpeechOnCue();
+
+                    if( speech.timesCued == maxCued ){
+                      playedFirstSpeechOnCue();
+                    }
           });
         }
         if (callback) {

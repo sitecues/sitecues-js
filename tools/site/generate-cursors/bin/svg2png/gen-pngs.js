@@ -27,7 +27,7 @@ phantom.create(function(err,ph) {
                 data: dataURLS[i].innerHTML
               });
             }
-
+  
             return results;
 
           }, function(err,result) {

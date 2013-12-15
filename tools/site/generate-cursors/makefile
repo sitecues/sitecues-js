@@ -11,3 +11,5 @@ all:
 	@./bin/icotool/png2cur
 	@echo "Finished!"
 	@echo "Please check ./cursor_output/cur/ to see your generated cursor files."
+	@echo "Copying .cur files to /source/images/cursors/"
+	cp cursor_output/cur/*.cur ../../../source/images/cursors

@@ -8,7 +8,9 @@
  */
 sitecues.def('cursor', function (cursor, callback, log) {
 
-  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', function ($, conf, view, imagesManager) {
+  'use strict';
+  
+  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', 'platform', function ($, conf, view, imagesManager, platform) {
 
     var stylesheetElement,
         stylesheetObject,
@@ -118,12 +120,14 @@ sitecues.def('cursor', function (cursor, callback, log) {
      */
     function changeStyle (style, callback) {
       var rule;
+
       if (stylesheetObject) {
         for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
           rule = rules[i].style;
           if (rule && rule[style] && rule[style].length) {
-            //@param rule an object representing some css selector + properties
-            //@param style is the key for accessing property information
+            /**@param rule an object representing some css selector + properties
+             * @param style is the key for accessing property information
+             */
             if (callback) {
               callback(rule, style);
             }
@@ -149,11 +153,21 @@ sitecues.def('cursor', function (cursor, callback, log) {
       var cursorTypes = ['auto', 'crosshair', 'default', 'help', 'pointer', 'text'];
 
       return function () {
-      
+
         var cursorTypeURLS = [];
         //generate cursor images for every cursor type...      
         for(var i = 0; i < cursorTypes.length; i += 1) {
-          cursorTypeURLS[cursorTypes[i]] = generateCursorStyle(cursorTypes[i], lastZoom);
+
+          // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the 
+          // platform.browser supports css cursor scaling
+          if (platform.pixel.ratio > 1 && platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
+            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle2x(cursorTypes[i], lastZoom);
+          
+          // For all other ratios/un-supported browsers, use a 1x ratio cursor
+          } else {
+            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle1x(cursorTypes[i], lastZoom);
+          }
+
         }
         
         changeStyle('cursor', function (rule, style) {
@@ -167,7 +181,6 @@ sitecues.def('cursor', function (cursor, callback, log) {
                 try {
                   rule[style] = cursorTypeURLS[cursorTypes[i]];
                 } catch (e) {
-                  
                 }
               }
             } 
@@ -177,6 +190,44 @@ sitecues.def('cursor', function (cursor, callback, log) {
       };
 
     }());
+    
+    /**
+     * [Generates the cursor url for a given type and zoom level for non retina displays]
+     * @param  {[string]} type
+     * @param  {[number]} zoom
+     * @return {[string]}
+     */
+    function generateCursorStyle1x (type, zoom) {
+      var hotspotOffset;
+      
+      if (platform.browser.is !== 'IE') {
+        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+      }
+      
+      return 'url(' + view.getImage(type,zoom)+ ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+    }
+
+    /**
+     * [Generates the cursor url for a given type and zoom level for retina displays]
+     * @param  {[string]} type
+     * @param  {[number]} zoom
+     * @return {[string]}
+     */
+    function generateCursorStyle2x (type, zoom) {
+      var hotspotOffset;
+      
+      if (platform.browser.is !== 'IE') {
+        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+      }
+      
+      var cursorStyle = '-webkit-image-set(' +
+         '    url(' + view.getImage(type,zoom) + ') 1x,' +
+         '    url(' + view.getImage(type,zoom) + ') 2x'  +
+         ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
+
+      return cursorStyle;
+    };
+
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
      * then sets the zoom, and updates our styles for cursors]
@@ -192,15 +243,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       lastZoom = conf.get('zoom');
       createStyleSheet();
     }
-    /**
-     * [Generates the cursor url for a given type and zoom level]
-     * @param  {[string]} type
-     * @param  {[number]} zoom
-     * @return {[string]}
-     */
-    function generateCursorStyle (type, zoom) {
-      return 'url(' + view.getImage(type, zoom) + ') ' + getCursorHotspotOffset(type, zoom) + ', ' + type;
-    }
+
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     // The maths below based on experience and doesn't use any kind of specific logic.
     // We are liely to change it better one when we have final images.
@@ -271,18 +314,19 @@ sitecues.def('cursor', function (cursor, callback, log) {
         }
       }
 
+      function applyCORSRequest (request) {
+        stylesheetElement.innerHTML += request.responseText;
+        setTimeout(setStyleSheetObject, 1);
+      }
+
       for(var i = 0; i < validSheets.length; i += 1) {
-
-        createCORSRequest('GET', validSheets[i], function (request) {
-          stylesheetElement.innerHTML += request.responseText;
-          setTimeout(setStyleSheetObject, 1);
-        });
-
+        createCORSRequest('GET', validSheets[i], applyCORSRequest);
       } 
        
       setTimeout(setStyleSheetObject, 1);
 
     }());
+    
     
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
@@ -291,6 +335,15 @@ sitecues.def('cursor', function (cursor, callback, log) {
         lastZoomTimeout = setTimeout(createStyleSheet, 10);
       }
     });
+
+    // if (sitecues.tdd) {
+    //   exports.cursor = {
+    //     "stylesheetObject": stylesheetObject,
+    //     "createStyleSheet": createStyleSheet,
+    //     "generateCursorStyle1x": generateCursorStyle1x,
+    //     "generateCursorStyle2x": generateCursorStyle2x
+    //   };
+    // }
 
     callback();
   

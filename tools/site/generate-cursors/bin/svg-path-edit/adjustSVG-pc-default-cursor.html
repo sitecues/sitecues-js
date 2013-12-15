@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="jquery-2.0.3.min.js"></script>
+  <script src="update-svg-path.js"></script>
+</head>
+
+<body>
+
+<div id="path-data"></div>
+
+<div class="cursor-window">
+  <svg id="cursor1x" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="14" height="23" viewBox="0, 0, 14, 23">
+    <defs><filter id="dropshadow" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feComponentTransfer in="SourceAlpha"><feFuncB type="discrete" tableValues=".6"/><feFuncG type="discrete" tableValues=".6"/><feFuncR type="discrete" tableValues=".6"/></feComponentTransfer><feGaussianBlur stdDeviation=".75"/><feOffset dx="1.25" dy=".25" result="shadow"/><feComposite in="SourceGraphic" in2="shadow" operator="over"/></filter></defs>
+    <g transform="scale(1,1) translate(0,0)" filter="url(#)" shape-rendering="crispEdges">
+      <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1" fill="#000" d="M0,0 L0,18 L4.20,13.60 L8.10,21.30 L11.10,19.70 L7.90,12.20 L13.00,12.20 L0,0 z" />
+      <path fill="#FFF" d="M1,1 L1.00,15.50 L4.50,11.90 L8.50,20.10 L10.00,19.30 L6.50,11.20 L10.80,11.20 L1.00,2.00 z" />
+    </g>
+  </svg>
+</div>
+
+<div class="cursor-window">
+  <svg id="cursor5x" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="140" height="230" viewBox="0, 0, 140, 230">
+    <defs><filter id="dropshadow" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feComponentTransfer in="SourceAlpha"><feFuncB type="discrete" tableValues=".6"/><feFuncG type="discrete" tableValues=".6"/><feFuncR type="discrete" tableValues=".6"/></feComponentTransfer><feGaussianBlur stdDeviation=".75"/><feOffset dx="1.25" dy=".25" result="shadow"/><feComposite in="SourceGraphic" in2="shadow" operator="over"/></filter></defs>
+    <g transform="scale(10,10) translate(0,0)" filter="url(#)">
+      <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1" fill="#000" d="M0,0 L0,18 L4.20,13.60 L8.10,21.30 L11.10,19.70 L7.90,12.20 L13.00,12.20 L0,0 z" />
+      <path fill="#FFF" d="M1,1 L1.00,15.50 L4.50,11.90 L8.50,20.10 L10.00,19.30 L6.50,11.20 L10.80,11.20 L1.00,2.00 z" />
+
+      <g>
+        <g transform="translate(-.25,-.25)">
+          <rect data-ui="control-point-0-box" transform="translate(2,2)" width=".5" height=".5" fill="rgba(255,0,255,.7)" opacity="0" stroke-width=".1" stroke="rgba(255,255,0,1)" />
+        </g>
+
+        <path data-ui="control-point-1-line" d="M2,2 L4,2" fill="rgba(255,128,0,.7)"  stroke="rgba(255,0,255,.9)" stroke-width=".1" opacity="0" />
+        <g transform="translate(-.25,-.25)">
+          <rect data-ui="control-point-1-box" transform="translate(4,2)" width=".5" height=".5" fill="rgba(0,128,255,.8)" opacity="0" stroke-width=".1" stroke="rgba(255,0,255,.8)" />
+        </g>
+        
+        <path data-ui="control-point-2-line" d="M2,2 L2,4" fill="rgba(255,128,0,.7)" stroke="rgba(255,0,255,.9)" stroke-width=".1" opacity="0" />
+        <g transform="translate(-.25,-.25)">
+          <rect data-ui="control-point-2-box" transform="translate(2,4)" width=".5" height=".5" fill="rgba(0,255,0,.8)" opacity="0"   stroke-width=".1" stroke="rgba(255,0,255,.8)" />
+        </g>
+      </g>
+
+
+    </g>
+  </svg>
+</div>
+
+
+<div class="clear"></div>
+
+<div id="controls">
+  <button id="export-button">Export SVG Data</button>
+</div>
+
+<div id="export-data"></div>
+
+</body>
+</html>

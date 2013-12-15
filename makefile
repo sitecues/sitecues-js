@@ -35,8 +35,6 @@ package-dir:=$(package-basedir)/$(package-name)
 # Production files (combine all modules into one).
 # Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
-	source/js/logging/log4javascript_uncompressed.js \
-	source/js/logging/init_logger.js \
 	target/source/js/core.js \
 	source/js/load.js \
 	source/js/jquery.js \
@@ -64,21 +62,23 @@ files=\
 	source/js/keys.js \
 	source/js/focus.js \
 	source/js/geo.js \
-	source/js/cursor.js \
 	source/js/highlight-box.js \
 	source/js/hlb/event-handlers.js \
 	source/js/hlb/designer.js \
+	source/js/hpan.js \
 	source/js/background-dimmer.js \
 	source/js/mouse-highlight.js \
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
 	source/js/iframe-modal.js \
 	source/js/speech.js \
+	source/js/speech-builder.js \
 	source/js/invert.js \
-	source/js/cursor/custom.js \
-	source/js/cursor/images/manager.js \
 	source/js/cursor/images/win.js \
 	source/js/cursor/images/mac.js \
+	source/js/cursor/images/manager.js \
+	source/js/cursor/custom.js \
+	source/js/cursor.js \
 	source/js/util/template.js \
 	source/js/toolbar.js \
 	source/js/toolbar/bootstrap-dropdown.js \
@@ -88,6 +88,8 @@ files=\
 	source/js/ui-manager.js \
 	source/js/html-build.js \
 	source/js/status.js \
+	source/js/sitepicker.js \
+	
 
 https=off
 prod=off
@@ -116,9 +118,6 @@ endif
 # Developement files (load modules separately).
 ifeq ($(dev), true)
 	files=\
-		source/js/logging/log4javascript_uncompressed.js \
-		source/js/logging/init_logger.js \
-		source/js/logging/init_logger_dev.js \
 		target/source/js/core.js \
 		source/js/use.js source/js/debug.js
 endif
@@ -135,8 +134,10 @@ endif
 
 ifeq ($(min), false)
 	uglifyjs-args+=-b
+	min-label:=" \(files were not minified\)"
 else
     uglifyjs-args+=-m
+	min-label:=
 endif
 
 # HIDDEN TARGET: .no-lint-on-build
@@ -162,7 +163,18 @@ build: $(_force_deps_refresh) $(_build_lint_dep)
 	@mkdir -p target/etc/js
 	@cp -r source/js/_config target/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
+	@echo "Creating compressed (gzipped) JavaScript files."
+	@(cd target/compile/js ; for FILE in *.js ; do \
+		gzip -c $$FILE > $$FILE.gz ; \
+	done)
 	@echo "Building completed."
+ifneq ($(dev), true)
+	@echo "===== File sizes$(min-label):"
+	@(cd target/compile/js ; \
+	for FILE in `ls *.js *.js.gz | sort` ; do \
+		printf "=====   %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
+	done)
+endif
 
 # TARGET: package
 # Package up the files into a deployable bundle, and create a manifest for local file deployment
@@ -244,8 +256,6 @@ test-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
 	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
 
-
 # TARGET: stop-all-services
 # Stop all known services.
 stop-all-services: stop-testsite
-

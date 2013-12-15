@@ -1,8 +1,10 @@
 sitecues.def('badge', function (badge, callback, log) {
 
+  'use strict';
+
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'ui', 'util/common', 'html-build', 'zoom', function ($, conf, panel, ui, common, htmlBuild) {
+  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', function ($, conf, panel, common, htmlBuild) {
 
     var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
@@ -12,8 +14,7 @@ sitecues.def('badge', function (badge, callback, log) {
     if (!badge.badgeId) {
       // Use the default value
       badge.badgeId = 'sitecues-badge';
-    }
-
+    } 
   /**
    * Creates a markup for new badge and inserts it right into the DOM.
    * @param function success
@@ -25,7 +26,6 @@ sitecues.def('badge', function (badge, callback, log) {
               .attr(REPLACE_BADGE_ATTR, true)
               .addClass('sitecues-badge')
               .hide()
-              // .prependTo('html');
               .appendTo('html');
       // Determine the badge visible width
       var badgeVisibleWidth = badge.panel.outerWidth();
@@ -49,8 +49,7 @@ sitecues.def('badge', function (badge, callback, log) {
       if (success) {
         success();
       }
-    }
-
+    };
     /**
      * Hides the badge.
      *
@@ -59,12 +58,11 @@ sitecues.def('badge', function (badge, callback, log) {
      */
     badge.hide = function (success) {
       $(badge.panel).fadeOut('fast', function() {
-      	if (success) {
-      		success();
-      	}
+        if (success) {
+          success();
+        }
       });
     };
-
     /**
      * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
      *
@@ -80,8 +78,7 @@ sitecues.def('badge', function (badge, callback, log) {
           }
         });
       } else {
-        log.warn("badge.show() was called but badge is disabled");
-        throw e;
+        log.warn('badge.show() was called but badge is disabled');
       }
     };
 
@@ -107,14 +104,15 @@ sitecues.def('badge', function (badge, callback, log) {
       log.info('Enabling badge');
       conf.set('badgeEnabled', true);
       if(show) {
-      	badge.show(success);
+        badge.show(success);
       } else if (success) {
-      	success();
+        success();
       }
     };
  
     // BODY
     var $badge = $('#' + badge.badgeId);
+
     if (badge.altBadges && (badge.altBadges.length > 0)) {
       badge.panel   = badge.altBadges;
       badge.element = badge.panel;
@@ -125,32 +123,36 @@ sitecues.def('badge', function (badge, callback, log) {
       // We have no alternate or pre-existing badges defined, so create a new one.
       badge.create();
     }
-    panel.parent  = badge.element;
 
+    panel.parent  = badge.element;
     $badge = $('#' + badge.badgeId);
+
     var isBadgeInDom = $badge && $badge.length > 0;
  
     // EQ-770: check if badge is created by site provided script or by extension-based one.
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
     badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
 
-    $(badge.panel).hover(function () {
-      sitecues.emit('badge/hover', badge.element); // emit event about hover
-    }, function () {
-      sitecues.emit('badge/leave', badge.element); // emit event about leave
+    var setDefaultEventOver = function (evt) {
+      //evt.stopPropagation();
+      return sitecues.emit('badge/hover', badge.element);
+    };     
+  
+    var setDefaultEventLeave = function (evt) {
+      //evt.stopPropagation();
+      return sitecues.emit('badge/leave', badge.element);
+    };  
+
+    $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+
+    sitecues.on('badge/enable', function() {
+      badge.enable(true);
     });
 
-    $(badge.panel).on('click', function () {
-      sitecues.emit('badge/click', badge.element); // emit event about badge click
-    });
-      sitecues.on("badge/enable", function() {
-          badge.enable(true);
-      });
-
-        if (sitecues.tdd) {
-          // todo: maybe export the whole module instead if every single function?
-          exports.badge = badge;
-        }
+    if (sitecues.tdd) {
+      // todo: maybe export the whole module instead if every single function?
+      exports.badge = badge;
+    }
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

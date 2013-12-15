@@ -25,33 +25,31 @@ sitecues.def('cursor/custom', function (view, callback, log) {
 
       this.data = {};
 
-      function doSetData (type) {
+      function setData (type) {
         for (zoom = zoomModule.min; zoom <= zoomModule.max + zoomModule.step; zoom += zoomStep) {
           parts = zoom.toString().split('.');
           name = type + '_' + parts[0] + '_';
           name += parts[1] ? parts[1].charAt(0) : '0';
-          view.data[name] = images.urls[name];
+          view.data[name] = images.urls? images.urls[name]: 'default';
         }
       }
 
       for (type in view.TYPES) {
         if (view.TYPES.hasOwnProperty(type)) {
-          doSetData(type);
+          setData(type);
         } else {
           if (type === 'auto') {
             type = defaultType;
-            doSetData(type);
+            setData(type);
           }
         }
       }
     };
 
    view.getImage = function(type, zl) {
-
-      var zoom  = zl || 1
-        , parts = zoom.toString().split('.')
-        , name
-        ;
+      var zoom  = zl || 1,
+        parts = zoom.toString().split('.'),
+        name;
 
       // 'auto' type takes 'default' image.
       // TODO: we need to finally removethe right hardcode part of check "|| type === 'auto'"

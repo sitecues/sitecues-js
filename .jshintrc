@@ -7,7 +7,7 @@
   "laxbreak"      : false,
   "laxcomma"      : true,
   "nomen"         : true,
-  "onevar"        : true,
+  "onevar"        : false,
   "undef"         : true,
   "camelcase"     : false,     // true: Identifiers must be in camelCase
   "plusplus"      : false,    // true: Prohibit use of `++` & `--`
@@ -22,7 +22,9 @@
     "XMLHttpRequest",
     "sitecues",
     "exports",
-    "CSSPrimitiveValue"
+    "CSSPrimitiveValue",
+    "CSSStyleDeclaration",
+    "escape"
   ],
 
   // Enforcing

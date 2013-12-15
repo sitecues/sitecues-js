@@ -2,38 +2,36 @@
  * This file contain unit test(s) for cursor.js file.
  */
 
-require('../test/bootstrap');
+// require('../test/bootstrap');
 
 // Require the module file we want to test.
-var cursorPath = '../../../source/js/cursor';
-var module = require(cursorPath);
+// var module = require('../../../source/js/cursor');
+// var mod_zoom = require('../../../source/js/zoom');
 
-describe('cursor', function() {
 
-  //  describe('#init()', function() {
+// describe('cursor', function() {
 
-  //      it('should not initialize cursor if zoom level <= minimum zoom level.', function(done) {
-         
-  //         var zl = 1;
-  //         sinon.spy(module.cursor, "hide");
+   // describe('#init()', function() {
 
-  //         module.cursor.init(zl);
-  //         expect(module.cursor.hide.calledOnce).to.be.true;
-  //         module.cursor.hide.restore();
-  //         done();
-  //       });
+    // it('should not apply cursor styles if zoom level <= minimum zoom level.', function(done) {
+    //   sinon.spy(module.cursor, "hide");
+    //   module.cursor.init(zl);
+    //   expect(module.cursor.hide.calledOnce).to.be.true;
+    //   module.cursor.hide.restore();
+    //   done();
+    // });
 
-  //      it('should initialize cursor if zoom level > then minimum zoom level.', function(done) {
-  //         var zl = 1.2;
-  //         sinon.spy(module.cursor, "show");
-          
-  //         module.cursor.init(zl);
-  //         expect(module.cursor.show.calledOnce).to.be.true;
-  //         module.cursor.show.restore();
-  //         done();
-  //       });
+    // it('should initialize cursor if zoom level > then minimum zoom level.', function(done) {
+    //    var zl = 1.2;
+    //    sinon.spy(module.cursor, "show");      
+    //    module.cursor.init(zl);
+    //    expect(module.cursor.show.calledOnce).to.be.true;
+    //    module.cursor.show.restore();
+    //    done();
+    //  });
 
-  //   });
+
+    // });
     
   //   describe('#getCursorHotspot()', function() {
 
@@ -124,6 +122,6 @@ describe('cursor', function() {
   //     delete require.cache[name];
   //  });
     
-});
+// });
 
-require('../test/discharge');
+// require('../test/discharge');

@@ -1,32 +1,49 @@
-sitecues.def('status', function (status, callback, log) {
+sitecues.def('status', function (status_module, callback, log) {
+  
   'use strict';
 
   sitecues.use('jquery', 'speech', 'conf', function ( $, speech, conf ) {
 
-    // The default status formatter: simply log all data to the log.
-    function statusCallback (info) {
-      function printObj (o, prefix) {
-          var p, v, s = '';
-          prefix = prefix || '';
-          for (p in o) {
-            if (o.hasOwnProperty(p)) {
-              v = o[p];
-              s += prefix + p + ':';
-              if (typeof v == 'object') {
-                s += '\n' + printObj(v, prefix + '  ');
-              } else {
-                s += ' ' + v + '\n';
-              }
-            }
-          }
-          return s;
+    // The default status formatter: simply log all data to the console log.
+    function consoleCallback (info) {
+     
+      // We need to have JSON and JSON.stringify if this is to work...
+      if (console && console.log && JSON && JSON.stringify) {
+         
+        // Make sure we are not running from a file (unit testing in node)
+        if (window.location.protocol !== 'file:') {
+          // Make it clear where to begin copying...
+          console.log('\n\n-----BEGIN SITECUES STATUS-----');
+          
+          // Log with pretty-print
+          console.log(JSON.stringify(info, null, '\t'));
+          
+          // Make it clear where to end copying
+          console.log('-----END SITECUES STATUS-----\n\n');
+        }
+      
+        // '...sitecues Status logged as JSON Object.';
+
+      // If we don't have JSON or Stringify...
+      } else {
+        
+        // Make sure we are not running from a file (unit testing in node)
+        if (window.location.protocol !== 'file:') {
+           
+           // ...the output will not be quite so pretty
+           console.log(info);
+
         }
 
-      log.info('\n===== BEGIN: SITECUES STATUS =====================\n' + printObj(info) + '===== END: SITECUES STATUS =======================');
-    }
+        // '...sitecues Status logged as JavaScript Object.';
 
-    status = function (callback) {
-      callback = callback || statusCallback;
+      }
+
+    }
+  
+
+    status_module = function (callback) {
+      callback = callback || consoleCallback;
 
       var data = conf.data()
         , ajax_urls
@@ -126,20 +143,13 @@ sitecues.def('status', function (status, callback, log) {
         }
       });
 
-      // Popup the logger and report status
-      if (sitecues.logger){
-        popup = sitecues.logger.appenders.popup;
-        popup.show();
-        popup.focus();
-      }
-
-      return 'Getting sitecues status.';
+      return 'Fetching sitecues status...';
     };
 
-    sitecues.status = status;
+    sitecues.status = status_module;
 
     if (sitecues.tdd) {
-      exports.status = { get: status };
+      exports.status = status_module;
     }
 
     callback();

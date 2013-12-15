@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="13" height="20" viewBox="0, 0, 13, 20">
+  <!-- filter:d - is used to apply drop-shadow to the cursors. -->
+  <defs>
+    <filter id="d" x="0" y="0" width="200%" height="200%">
+      <feOffset result="offOut" in="SourceAlpha" dx=".25" dy=".5" />
+      <feGaussianBlur result="blurOut" in="offOut" stdDeviation="1" />
+      <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+    </filter>
+  </defs>
+  <!-- g:scale - is used to size the cursors on the fly in browsers that allow SVGs as cursor data-urls. -->
+  <!-- g:filter - is used to apply drop-shadow to the cursors in browsers that allow SVGs as cursor data-urls. -->
+  <g transform="scale(1,1)" filter="url(#d)">
+    <!-- canvas2svg uses: shadow, shadow-blur, shadow-offset-x, shadow-offset-y to generate shadows for IE's .cur files. -->
+    <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1"
+      fill="#FFFFFF" d="M1.016,0.422 L1.031,16.781 L4.312,13.281 L6.446,18.479 L10.344,17.031 L8.062,11.875 L12.496,11.871 L1.016,0.422 z" />
+    <path
+      fill="#000000" d="M1.938,2.875 L2.031,14.188 L4.531,11.625 L6.969,17.312 L9.031,16.562 L6.688,10.938 L10,10.938" />
+  </g>
+</svg>

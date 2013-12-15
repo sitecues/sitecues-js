@@ -3,6 +3,7 @@
  *   The core module of the sitecues library.
  */
 (function () {
+  
   'use strict';
 
   // NOTE: initialization of this module is at the bottom of this page.
@@ -13,14 +14,13 @@
 
   // Private variables
     , arr               = Array.prototype  // Array's prototype
-    , log               = null             // The core module logger
     , libraryConfig     = null             // Library config container
     , libraryUrl        = null             // The parsed library URL object
     , siteConfig        = null             // Site config container
     , modules           = {}               // Modules container
     , allModulesLoaded  = false
     // Sitecues top-level namespace: all public classes and modules will be
-    // attached to this name space and aliased on "window.sitecues". This
+    // attached to this name space and aliased on 'window.sitecues'. This
     // variable is initialized at the bottom of this script.
     , sitecues      = null
     
@@ -44,7 +44,17 @@
     , resolveSitecuesUrl
     , loadScript
     , load
-    ;
+
+  // Define place-holder for Logger
+  , log = {
+      fatal: function () {},
+      error: function () {},
+      warn : function () {},
+      info : function () {},
+      debug: function () {},
+      trace: function () {},
+      newLogger: function(){ return this; }
+    };
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
@@ -63,6 +73,8 @@
     sitecues.loadScript = loadScript;
     sitecues.load = load;
   };
+
+
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -97,7 +109,7 @@
   //////////////////////////////////////////////////////////////////////////////////////////
   
   // bind an event, specified by a string name, `events`, to a `callback`
-  // function. passing `"*"` will bind the callback to all events fired
+  // function. passing `'*'` will bind the callback to all events fired
   on = function(events, callback, context){
     var ev, list, tail;
     events = events.split(/\s+/);
@@ -146,7 +158,7 @@
 
   // emit an event, firing all bound callbacks. callbacks are passed the
   // same arguments as `trigger` is, apart from the event name.
-  // listening for `"*"` passes the true event name as the first argument
+  // listening for `'*'` passes the true event name as the first argument
   emit = function(events){
     var event, node, calls, tail, args, all, rest;
     if (!(calls = this._events)){
@@ -197,7 +209,7 @@
   , DEF_QUEUE             = []
   , LOAD_LIST             = []
   , definedLastModule     = false
-  , lastDefinedModuleName = undefined
+  , lastDefinedModuleName
   , moduleLoadAttempts    = 0
   ;
 
@@ -248,7 +260,7 @@
     
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-      log.warn('sitecues: module "' + name + '" already defined.');
+      log.warn('sitecues: module ' + name + ' already defined.');
       return;
     }
 
@@ -259,7 +271,6 @@
 
     // call constructor for module
     constructor(module, function (result) {
-
       // if return present
       if (result) {
         module = result;
@@ -267,23 +278,18 @@
         // Modules can double-load when an sitecues.def use statement
         // does not fire callback();
       }
-
       // save module for future call
       modules[name] = module;
-
       // notify about new module
       sitecues.emit('module', name, module);
-
       // notify about new module load once
       sitecues.emit('load/' + name, module).off('load/' + name);
-
       // Module checking.....
       modules[name].defined = true;
 
       if (name === lastDefinedModuleName) {
         definedLastModule = true;
       }
-
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
         // This behavior is unreliable on IE9 so we'll use the loop (see below)
@@ -291,7 +297,7 @@
       }
 
     // Pass a new logger into the constructor scope of the module
-    }, sitecues.logger.log(name));
+    }, log.newLogger(name));
   };
 
   // This kicks off a loop that will wait until modules are loaded
@@ -302,23 +308,29 @@
     if (READY_FOR_DEF_CALLS) {
       _def(name, constructor);
     } else {
+
       DEF_QUEUE.push({
         name: name,
         constructor: constructor
       });
+
       LOAD_LIST.push(name);
+      
       lastDefinedModuleName = name;
     }
   };
 
   // processes the def queue once initialization has completed.
   var _processDefQueue = function() {
+    
     var defObj;
+
+    // iterate over passed module names
     while (DEF_QUEUE.length) {
+
       defObj = DEF_QUEUE.shift();
       _def(defObj.name, defObj.constructor);
     }
-
     READY_FOR_DEF_CALLS = true;
   };
 
@@ -334,9 +346,7 @@
     args = arr.slice.call(arguments, 0);
 
     // get callback as last argument
-    callback = 'function' === typeof args[args.length - 1]
-      ? args.pop()
-      : undefined;
+    callback = 'function' === typeof args[args.length - 1] ? args.pop() : undefined;
 
     // count of modules
     count = args.length;
@@ -352,7 +362,7 @@
         if (--count === 0 && 'function' === typeof callback) {
           callback.apply(t, result);
         }
-      }
+      };
     };
 
     // perform all actions in next tick
@@ -364,32 +374,28 @@
 
       // iterate over module names
       for(i=0, l=count; i<l; i++) (function(name, push){
-        var moduleState = getModuleState(name);
+          var moduleState = getModuleState(name);
 
-        if (moduleState === MODULE_STATE.NONE) {
+          if (moduleState === MODULE_STATE.NONE) {
           // The module has never been used or defined.
-
-          // mark module as loading
-          modules[name] = MODULE_STATE.LOADING;
-
-          // add to load queue
-          load.push(name);
-
-          // wait for module load
-          t.on('load/' + name, push);
-        } else if (moduleState === MODULE_STATE.READY) {
+            // mark module as loading
+            modules[name] = MODULE_STATE.LOADING;
+            // add to load queue
+            load.push(name);
+            // wait for module load
+            t.on('load/' + name, push);
+          } else if (moduleState === MODULE_STATE.READY) {
           // The module is ready for use, so no need to load it
-          push();
-        } else {
+            push();
+          } else {
           // A previous request to either use or define the module has occurred,
           // but it is not yet ready
-          t.on('load/' + name, push);
-        }
-      } (args[i], register(i, args[i])));
+            t.on('load/' + name, push);
+          }
+        } ( args[i], register(i, args[i] ) ));
 
       // load all needed modules
       load.length && t.load.apply(t, load);
-
     }, 0);
   };
 
@@ -407,7 +413,7 @@
 
     // Parse the query into key/value pairs.
     var start = 0, end = 0;
-    if (queryStr[start] == '?')
+    if (queryStr[start] === '?')
       start++;
 
     while (start < queryStr.length){
@@ -445,15 +451,15 @@
     }
 
     url.protocol = parser.protocol.substring(0, parser.protocol.length - 1).toLowerCase();
-    url.secure   = (url.protocol == "https");
+    url.secure   = (url.protocol === 'https');
     url.hostname = parser.hostname;
     url.host     = parser.host;
 
-    if (parser.search)
-      url.query = parseUrlQuery(parser.search);
-    else
-      url.query = null;
-
+    if (parser.search){
+       url.query = parseUrlQuery(parser.search);
+    }else{
+       url.query = null;
+    }
     // Extract the path and file portion of the pathname.
     var pathname = parser.pathname;
     
@@ -534,14 +540,16 @@
     document.getElementsByTagName('head')[0].appendChild(script);
   };
 
-  // trigger module loading
+  /**
+  /* trigger module loading
+  /*/
   load = function(){
-    // iterate over passed module names
-    for(var i=0, l=arguments.length; i<l; i++){
-      // and initiate loading of code for each
-      sitecues.loadScript(arguments[i] + '.js');
-    }
-  };
+       // iterate over passed module names
+      for(var i=0, l=arguments.length; i<l; i++){
+        // and initiate loading of code for each
+        sitecues.loadScript(arguments[i] + '.js');
+      }
+    };
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -570,32 +578,32 @@
 
   var validateBasicSiteConfiguration = function() {
     if (!sitecues.config) {
-      log.error("The 'sitecues.config' object was not provided.");
+      log.error('The '+sitecues.config+' object was not provided.');
       return false;
     }
 
-    if (typeof sitecues.config != "object") {
-      log.error("The 'sitecues.config' is not an object.");
+    if (typeof sitecues.config !== 'object') {
+      log.error('The '+sitecues.config+' is not an object.');
       return false;
     }
 
     if (!sitecues.config.site_id) {
-      log.error("The 'sitecues.config.site_id' parameter was not provided.");
+      log.error('The '+sitecues.config.site_id+' parameter was not provided.');
       return false;
     }
 
-    if (typeof sitecues.config.site_id != "string") {
-      log.error("The 'sitecues.config.site_id' parameter is not a string.");
+    if (typeof sitecues.config.site_id !== 'string') {
+      log.error('The '+sitecues.config.site_id+' parameter is not a string.');
       return false;
     }
 
     if (!sitecues.config.script_url) {
-      log.error("The 'sitecues.config.script_url' parameter was not provided.");
+      log.error('The '+sitecues.config.script_url+' parameter was not provided.');
       return false;
     }
 
-    if (typeof sitecues.config.script_url != "string") {
-      log.error("The 'sitecues.config.script_url' parameter is not a string.");
+    if (typeof sitecues.config.script_url !== 'string') {
+      log.error('The '+sitecues.config.script_url+' parameter is not a string.');
       return false;
     }
 
@@ -610,8 +618,7 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var LIB_CONFIG_NAMES = [ "hosts" ], libraryConfigLoadCount;
-
+  var LIB_CONFIG_NAMES = [ 'hosts', 'sitepicker' ], libraryConfigLoadCount;
   // Validation method for library configuration. If valid, initialize sitecues.
   var validateLibraryConfigs = function(cb) {
     var valid = true;
@@ -620,34 +627,63 @@
       libraryConfig = window.sitecues.libConfig;
 
       log.info(libraryConfig);
+       /**
+       * EQ-1349
+       * Use temporary workaround for site/picker customizations
+       */
+      if(libraryConfig.sitepicker){
+     
+        if (libraryConfig.sitepicker.eeoc_gov) {
+          log.info('eeoc_gov site/picker is enabled : ' + libraryConfig.sitepicker.eeoc_gov);
+        } else {
+          log.warn('eeoc_gov site/picker is disabled.');
+        }
+
+        if (libraryConfig.sitepicker.scotiabank_com) {
+          log.info('scotiabank_com site/picker is enabled : ' + libraryConfig.sitepicker.scotiabank_com);
+        } else {
+          log.warn('scotiabank_com site/picker is disabled.');
+        }
+
+        if (libraryConfig.sitepicker.cnib_ca) {
+          log.info('cnib_ca site/picker is enabled : ' + libraryConfig.sitepicker.cnib_ca);
+        } else {
+          log.warn('cnib_ca site/picker is disabled.');
+        }
+
+        if (libraryConfig.sitepicker.texasat_net) {
+          log.info('texasat_net site/picker is enabled : ' + libraryConfig.sitepicker.texasat_net);
+        } else {
+          log.warn('texasat_net site/picker is disabled.');
+        }
+      }
 
       if (libraryConfig.hosts) {
+
         if (libraryConfig.hosts.ws) {
-          log.info("sitecues ws host: " + libraryConfig.hosts.ws);
+          log.info('sitecues ws host: ' + libraryConfig.hosts.ws);
         } else {
-          log.warn("sitecues ws host not specified.");
+          log.warn('sitecues ws host not specified.');
           valid = false;
         }
 
         if (libraryConfig.hosts.up) {
           log.info('sitecues up host: ' + libraryConfig.hosts.up);
         } else {
-          log.warn("sitecues up host not specified.");
+          log.warn('sitecues up host not specified.');
           valid = false;
         }
       } else {
-        log.warn("sitecues hosts library config not found.");
+        log.warn('sitecues hosts library config not found.');
         valid = false;
       }
     } else {
-      log.warn("sitecues library config not found.");
+      log.warn('sitecues library config not found.');
       valid = false;
     }
 
-
-
     if (!valid) {
-      log.error("Invalid sitecues library config.");
+      log.error('Invalid sitecues library config.');
     }
     cb(!valid);
   };
@@ -681,7 +717,7 @@
       validateLibraryConfigs(cb);
     } else { // Trigger loading of missing library configs.
       for (i = 0; i < libraryConfigLoadNames.length; i++) {
-        loadScript("_config/" + libraryConfigLoadNames[i] + ".js", onLibraryConfigLoadComplete);
+        loadScript('_config/' + libraryConfigLoadNames[i] + '.js', onLibraryConfigLoadComplete);
       }
     }
   };
@@ -693,26 +729,25 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var initialize = function() {
+  var initialize = function () {
     // If the sitecues global object does not exist, then there is no basic site configuration, nor
     // is there a logger. Simply print an error to the console and abort initialization.
-    if (!window.sitecues || (typeof window.sitecues != "object")) {
-      console.error("The base 'windows.sitecues' namespace was not found. The sitecues library will not load.");
+    if (!window.sitecues || (typeof window.sitecues != 'object')) {
+      console.error('The base '+windows.sitecues+' namespace was not found. The sitecues library will not load.');
       return;
     }
 
     // Set the internal reference.
     sitecues = window.sitecues;
 
-    // See if another sitecues library has "planted it's flag" on this page.
+    // See if another sitecues library has 'planted it's flag' on this page.
     if (sitecues.exists) {
-      console.error("The sitecues library already exists on this page.");
+      console.error('The sitecues library already exists on this page.');
       return;
     }
-    // "Plant our flag" on this page.
+    // 'Plant our flag' on this page.
     sitecues.exists = true;
-
-    // As we have now "planted our flag", export the public fields.
+    // As we have now 'planted our flag', export the public fields.
     exportPublicFields();
 
     // Create the logger for this module
@@ -722,11 +757,11 @@
 
     // Process the basic configuration needed for library initialization.
     if (!processBasicSiteConfiguration()) {
-        log.error("Unable to load basic site configuration. Library can not initialize.")
+        log.error('Unable to load basic site configuration. Library can not initialize.')
     } else {
       processLibraryConfiguration(function(err) {
         if (err) {
-          log.error("Unable to load library configuration. Library can not initialize.")
+          log.error('Unable to load library configuration. Library can not initialize.')
         } else {
           // Start processing the queued-up module definition requests (in essence, load the library).
           _processDefQueue();
