@@ -16,6 +16,5 @@ window.sitecues && sitecues.use(
 	'mouse-highlight',
 	'highlight-box',
 	'invert',
-	'hpan',
-	'fallback'
+	'hpan'
 );

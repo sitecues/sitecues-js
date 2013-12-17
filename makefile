@@ -45,7 +45,6 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/fallback.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
