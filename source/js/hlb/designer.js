@@ -212,15 +212,16 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var cssUpdates = {};
                 $(selector).each(function () {
                     var jElement = $(this);
-                    
+
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-                    currentStyle['width'] = Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px';
-                    var shortenWidthValue = narrowWidth(jElement, currentStyle);
+                    // For floated elements the visual width and the actual width are different. Here we need the visual one.
+                    var newCurrentStyle = $.extend({}, currentStyle, {'width': Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px'});
+                    var shortenWidthValue = narrowWidth(jElement, newCurrentStyle);
                     var expandedHeightValue;
                     if (shortenWidthValue) {
                         var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
-                        if (expandedHeightValue > parseFloat(currentStyle)) {
+                        if (expandedHeightValue > parseFloat(currentStyle.height)) {
                             expandedHeightValue = heightValue;
                         }
                     }
@@ -323,7 +324,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var wMiddle = (wSlim + wThick) / 2;
                     var charsQuantity = 50;
                     var textWidth = wMiddle * charsQuantity;
-                    if (parseFloat(currentStyle.width) > (textWidth)) {
+                    if (parseFloat(currentStyle.width) > textWidth) {
                         return textWidth;
                     }
                 }

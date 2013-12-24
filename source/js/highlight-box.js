@@ -340,7 +340,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     var clippedSpace = fullSpace - innerSpace;
 
                     // Update position.
-                    cssBeforeAnimateStyles.top = cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top) || 0 - innerKeys && innerKeys.height;
+                    cssBeforeAnimateStyles.top = cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top) || 0 - (innerKeys && innerKeys.height);
                     cssBeforeAnimateStyles.width = conf.get('absoluteRect').width + 'px';
                     // The width is expanded, so height has some extra-space. Let's cut it out!
                     cssBeforeAnimateStyles.height = innerKeys? clippedSpace / conf.get('absoluteRect').height + 'px': conf.get('absoluteRect').height;
