@@ -323,7 +323,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          */
         function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
             var floatRectHeight = 0;
-            var floatRects = conf.get('floatRects');
+            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
             var floatRectsKeys = Object.keys(floatRects);
 
             for (var index in floatRectsKeys) {
@@ -796,7 +796,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var rect = conf.get('rect');
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
         newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
-        newWidth = cssUpdate.width ? cssUpdate.width  + 'px': rect.width;
+        var extraIndent = 2 * (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
+        newWidth = cssUpdate.width ? cssUpdate.width + 'px': rect.width - extraIndent + 'px';
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
         newLeft = cssUpdate.left;

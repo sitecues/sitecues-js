@@ -215,7 +215,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-
+                    currentStyle['width'] = Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px';
                     var shortenWidthValue = narrowWidth(jElement, currentStyle);
                     var expandedHeightValue;
                     if (shortenWidthValue) {
