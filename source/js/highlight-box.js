@@ -138,24 +138,24 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.savedStyleAttr = {};
         this.origRectDimensions = [];
         this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
-        this.itemNode = $(this.item);
+        this.$item = $(this.item);
 
         // notify about new hlb
         sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
         var computedStyles = common.getElementComputedStyles(this.item);
         var offset = positioning.getOffset(this.item);
-        var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.itemNode.width() : computedStyles.width;
-        var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.itemNode.height() : computedStyles.height;
+        var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.$item.width() : computedStyles.width;
+        var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
         var size = { width: parseFloat(width), height: parseFloat(height) };
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
-        this.savedStyleAttr['style'] = this.itemNode.attr('style');
-        this.savedStyleAttr['width'] = this.itemNode.attr('width');
-        this.savedStyleAttr['height'] = this.itemNode.attr('height');
+        this.savedStyleAttr['style'] = this.$item.attr('style');
+        this.savedStyleAttr['width'] = this.$item.attr('width');
+        this.savedStyleAttr['height'] = this.$item.attr('height');
       }
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
@@ -164,9 +164,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.kShowAnimationSchema = 'easeOutBack';
       HighlightBox.kHideAnimationSchema = 'linear';
       HighlightBox.kBoxZindex = 2147483644;
-      HighlightBox.kBoxBorderWidth = '3px';
-      HighlightBox.kBoxPadding   = '4px';  // Give the text a little extra room
-      HighlightBox.kBoxBorderRadius = '4px';
+      HighlightBox.kBoxBorderWidth = 3;
+      HighlightBox.kBoxPadding     = 4;  // Give the text a little extra room
+      HighlightBox.kBoxBorderRadius = 4;
       HighlightBox.kBoxBorderStyle = 'solid';
       HighlightBox.kBoxBorderColor = '#222222';
       HighlightBox.kDefaultBgColor = '#ffffff';
@@ -196,8 +196,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Those objects are sared across the file so do not make them local.
         var computedStyles, correctedStyle, isFloated = false, compensateShift, boundingBoxes = {};
         // todo: change the rule for isChrome.
-        var padWidth = parseFloat(HighlightBox.kBoxPadding),
-            borWidth = parseFloat(HighlightBox.kBoxBorderWidth),
+        var padWidth = HighlightBox.kBoxPadding,
+            borWidth = HighlightBox.kBoxBorderWidth,
             // todo: use platform.js
             isChrome = platform.browser.isChrome,
             // todo: find our where those roundings come from "magicNumber"?
@@ -558,12 +558,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var center  = positioning.getCenter(this.item),
           totalZoom = positioning.getTotalZoom(this.item, true),
-          cssUpdate = designer.getNewRectStyle(this.itemNode, currentStyle, center, kExtraZoom, totalZoom);
+          cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom, totalZoom);
 
         // Handle table special behaviour on inner contents.
-        designer.handleTableElement(this.itemNode, currentStyle);
+        designer.handleTableElement(this.$item, currentStyle);
 
-        var $el = this.itemNode,
+        var $el = this.$item,
              el = this.item;
 
         computedStyles  = getStyleObject(el); // global
@@ -601,7 +601,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Animate HLB (keep in mind $.animate() is non-blocking).
         var ancestorCSS = [ ];
-        $(this.itemNode).parents().each(function () {
+        $(this.$item).parents().each(function () {
           ancestorCSS.push({
             zIndex   : this.style.zIndex,
             overflowX: this.style.overflowX,
@@ -610,7 +610,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         this.savedAncestorCSS = ancestorCSS;
-        var parents = this.itemNode.parentsUntil(document.body);
+        var parents = this.$item.parentsUntil(document.body);
         $.each(parents, function() {
           $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
                   'overflow': 'visible'
@@ -618,20 +618,20 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         // If website uses width/height attributes let's remove those while HLB is inlated.
-        if (!common.isCanvasElement(this.itemNode)) {
+        if (!common.isCanvasElement(this.$item)) {
             if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
               for (var attrName in this.savedStyleAttr) {
                 if (attrName === 'style') {
                   continue;
                 }
                 if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
-                  this.itemNode.removeAttr(attrName);
+                  this.$item.removeAttr(attrName);
                 }
               }
             }
         }
 
-        if (common.isCanvasElement(this.itemNode)) {
+        if (common.isCanvasElement(this.$item)) {
             delete cssBeforeAnimateStyles.width;
             delete cssBeforeAnimateStyles.height;
             // todo: remove this awful hardcode
@@ -641,18 +641,18 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Since jQuery animate doesn't understand 'important' then do:
         // - remove properties having 'important' priority animation is going to override;
         // - set non-important property with the same value it used to have.
-        var styleObj = this.itemNode[0].style;
+        var styleObj = this.$item[0].style;
         for (var prop in cssAnimateStyles) {
           //first check that both of these objects has the property we are interested in
           if (cssBeforeAnimateStyles.hasOwnProperty(prop) && cssAnimateStyles.hasOwnProperty(prop)) {
             styleObj.removeProperty(prop);
-            this.itemNode[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
+            this.$item[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
           }
         }
 
         // todo: use '$.style' instead of '$.css'
-        this.itemNode.css(cssBeforeAnimateStyles);
-        this.itemNode.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
+        this.$item.css(cssBeforeAnimateStyles);
+        this.$item.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
 
@@ -672,7 +672,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         if (isChrome && !isFloated) {
           var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
-          this.itemNode.css(roundingsStyle);
+          this.$item.css(roundingsStyle);
         }
 
         return false;
@@ -691,7 +691,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Get the current element styles.
           var ancestorCSS = this.savedAncestorCSS;
-        var parents = this.itemNode.parentsUntil(document.body);
+        var parents = this.$item.parentsUntil(document.body);
         $.each(parents, function() {
           var css = ancestorCSS.shift();
           $(this).style({'z-index'   : css.zIndex,
@@ -699,7 +699,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                  'overflow-y': css.overflowY,
                  'overflow'  : css.overflow});
         });
-        this.itemNode.style('outline', HighlightBox.kBoxNoOutline, 'important');
+        this.$item.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             clientRect;
@@ -717,7 +717,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'transform': 'scale(1)'
         };
 
-        if (!common.isCanvasElement(this.itemNode)) { 
+        if (!common.isCanvasElement(this.$item)) { 
 //            $.extend(cssAnimateStyles, {
 //                'width': clientRect.width / kExtraZoom,
 //                // Don't change height if there's a background image, otherwise it is destroyed.
@@ -728,8 +728,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
 
         // Deflate the highlight box.
-        this.itemNode.css(cssBeforeAnimateStyles);
-        this.itemNode.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
+        this.$item.css(cssBeforeAnimateStyles);
+        this.$item.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
           // Cleanup all elements inserted by sitecues on the page.
           if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
             // Remove placeholder wrapper element if the table child highlighted.
@@ -743,17 +743,17 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           setTimeout(function () {
             // Animation callback: notify all inputs about zoom out.
             // We should do this with next tick to allow handlers catch right scale level.
-            notifyZoomInOrOut(_this.itemNode, false);
+            notifyZoomInOrOut(_this.$item, false);
           }, 0);
 
           // If website used to have width/height attributes let's restore those while HLB is defalted.
           for (var attrName in _this.savedStyleAttr) {
             if (attrName === 'style') {
-               _this.itemNode.removeAttr('style');
+               _this.$item.removeAttr('style');
             }
-            if (!common.isCanvasElement(_this.itemNode)) {
+            if (!common.isCanvasElement(_this.$item)) {
                 if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
-                  _this.itemNode.attr(attrName, _this.savedStyleAttr[attrName]);
+                  _this.$item.attr(attrName, _this.savedStyleAttr[attrName]);
                 }
             }
           }
@@ -796,12 +796,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var rect = conf.get('rect');
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
         newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
-        var extraIndent = 2 * (parseFloat(HighlightBox.kBoxBorderWidth) + parseFloat(HighlightBox.kBoxPadding));
-        newWidth = cssUpdate.width ? cssUpdate.width + 'px': rect.width - extraIndent + 'px';
+        newWidth = cssUpdate.width ? cssUpdate.width + 'px': rect.width + 'px';
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
         newLeft = cssUpdate.left;
-
         maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
 
         // Correct margins for simple case: assume that HLB fits the viewport.
@@ -857,10 +855,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'margin-right': currentStyle['margin-right'],
           'margin-bottom': currentStyle['margin-bottom'],
           'margin-left': currentStyle['margin-left'],
-          'border-radius': HighlightBox.kBoxBorderRadius,
+          'border-radius': HighlightBox.kBoxBorderRadius + 'px',
           'border-color':  HighlightBox.kBoxBorderColor,
           'border-style':  HighlightBox.kBoxBorderStyle,
-          'border-width':  HighlightBox.kBoxBorderWidth,
+          'border-width':  HighlightBox.kBoxBorderWidth + 'px',
           'outline'   :  HighlightBox.kBoxNoOutline,
 
           'overflow-y': newOverflowY,
@@ -876,13 +874,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
         vertMargin['margin-bottom'] = (vertMargin['margin-bottom'] || parseFloat(currentStyle['margin-bottom']))
                                     - floatRectHeight + 'px';
-
-        if (currentStyle['display'] === 'inline-block') {
-             // Substract border value so that HLB wouldn't affect the following elements.
-            cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - 2 * parseFloat(HighlightBox.kBoxBorderWidth) + 'px';
+        var extraIndent = 2 * HighlightBox.kBoxBorderWidth;
+        // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
+        if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline' || this.item.localName === 'img') {
+            cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - extraIndent + 'px';
+            cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
         } else {
-            // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-            cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding;
+            cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding + 'px';
+            extraIndent += 2 * HighlightBox.kBoxPadding; 
+            cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
         }
 
         $.extend(cssBeforeAnimateStyles, vertMargin);
@@ -905,7 +905,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.prototype.setBgStyle = function(currentStyle, cssBeforeAnimateStyles) {
         var oldBgColor = currentStyle['background-color'];
         var oldBgImage = currentStyle['background-image'];
-        var newBg = designer.getNewBackground(this.itemNode, oldBgColor, oldBgImage);
+        var newBg = designer.getNewBackground(this.$item, oldBgColor, oldBgImage);
         var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
         
         // If color and background color are not contrast then either set background image or invert background color.
@@ -930,7 +930,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           cssBeforeAnimateStyles['background-color'] = '#000';
           return;
         }
-        if (!isContrastColors && common.isCanvasElement(this.itemNode)) {
+        if (!isContrastColors && common.isCanvasElement(this.$item)) {
           // Favor a white background with dark text when original background was white.
           if (common.isLightTone(newBgColor)) {
             newBgColor = 'rgb(255, 255, 255)';
