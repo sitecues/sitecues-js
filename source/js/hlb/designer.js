@@ -221,13 +221,15 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var expandedHeightValue;
                     if (shortenWidthValue) {
                         var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
-                        if (expandedHeightValue > parseFloat(currentStyle.height)) {
+                        // If it is a text node we want to get the exact text range's height;
+                        // that is why we use conf.get('absoluteRect') instead of currentStyle
+                        if (heightValue > conf.get('absoluteRect').height) {
                             expandedHeightValue = heightValue;
                         }
                     }
 
                     var rect = this.getBoundingClientRect();
-                    var width  = shortenWidthValue || (rect.width + 2 * additionalBoxOffset)    * extraZoom;
+                    var width  = shortenWidthValue || (Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset)    * extraZoom;
                     var height = expandedHeightValue || (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
@@ -335,13 +337,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // todo: common.hasVertScroll($el[0]);
                 var lineHeight = common.getLineHeight($el);
 
-                var oldHeight  = parseFloat(currentStyle.height);
-                var oldWidth  = parseFloat(currentStyle.width);
-                var newWidth = shortenWidthValue;
+                var oldHeight  = conf.get('absoluteRect').height;
+                var oldWidth   = parseFloat(currentStyle.width);
+                var newWidth   = shortenWidthValue;
 
-                var oldLineNumber = Math.round(oldHeight / lineHeight);
-                var newLineNumber = Math.round(((conf.get('absoluteRect').width || oldWidth) / newWidth) * oldLineNumber);
-                var expandedHeight = newLineNumber * lineHeight + 'px';
+                var oldLineNumber  = Math.round(oldHeight / lineHeight);
+                var newLineNumber  = Math.round(((conf.get('absoluteRect').width || oldWidth) / newWidth) * oldLineNumber);
+                var expandedHeight = newLineNumber * lineHeight;
 
                 return expandedHeight;
             }

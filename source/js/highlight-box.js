@@ -323,6 +323,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          */
         function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
             var floatRectHeight = 0;
+            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
+            var delta = 14; 
             var floatRects = conf.get('floatRects'); // See mouse-highlight.js
             var floatRectsKeys = Object.keys(floatRects);
 
@@ -335,17 +337,19 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     // Current element's area(width * height)
                     var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
                     // Floating element's area(width * height)
-                    var innerSpace = innerKeys? innerKeys.width * innerKeys.height: 0;
+                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
                     // Substract floated element's space from the full area.
                     var clippedSpace = fullSpace - innerSpace;
 
                     // Update position.
-                    cssBeforeAnimateStyles.top = cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top) || 0 - (innerKeys && innerKeys.height);
-                    cssBeforeAnimateStyles.width = conf.get('absoluteRect').width + 'px';
+                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
+                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
+                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
                     // The width is expanded, so height has some extra-space. Let's cut it out!
-                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / conf.get('absoluteRect').height + 'px': conf.get('absoluteRect').height;
-
-                    floatRectHeight = (innerKeys && innerKeys.height) || 0 - (oldHeight - parseFloat(cssBeforeAnimateStyles.height));
+                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
+                    // Difference between original height and the new one.
+                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
+                    floatRectHeight = interestingFloatingHeight - heightDiff;
                 }
              }
              return floatRectHeight;
@@ -478,7 +482,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             var diffHeight = designer.getHeightExpandedDiffValue()? 0: getDiffHeight(currentStyle, newComputedStyles);
             var diffWidth  = designer.getWidthNarrowedDiffValue()?  0: getDiffWidth(currentStyle, newComputedStyles);
 
-            if (diffWidth !== 0) {
+            // todo: we need a new algo that will detect the simple floatings.
+            if (diffWidth !== 0 && $(el).attr('id') !== 'eeoc') {
                 // todo: copy the diffHeight part, making specific changes.
                 roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
             }
@@ -847,6 +852,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           'height': maxHeight? undefined: parseFloat(newHeight) + 'px',
           'max-height': maxHeight,
           'width':  newWidth,
+          'box-sizing': 'content-box',
 
           'z-index': HighlightBox.kBoxZindex.toString(),
           'border' : HighlightBox.kBoxNoOutline,
@@ -872,17 +878,26 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // If there any interesting float we need to do some more adjustments for height/width/top etc.
         var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
-        vertMargin['margin-bottom'] = (vertMargin['margin-bottom'] || parseFloat(currentStyle['margin-bottom']))
+        vertMargin['margin-bottom'] = (parseFloat(vertMargin['margin-bottom']) || parseFloat(currentStyle['margin-bottom']))
                                     - floatRectHeight + 'px';
         var extraIndent = 2 * HighlightBox.kBoxBorderWidth;
         // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-        if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline' || this.item.localName === 'img') {
+        if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'
+                // nytimes.com images such as $('.thumb.runaroundRight')
+                || (this.item.localName === 'img' && this.$item.parent().css('float') !== 'none')) {
             cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - extraIndent + 'px';
             cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
         } else {
             cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding + 'px';
-            extraIndent += 2 * HighlightBox.kBoxPadding; 
-            cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
+            extraIndent += 2 * HighlightBox.kBoxPadding;
+
+            // Floated menu items get overall/outer width specified below
+            // Other floated elements get the same value as content/inner width only
+            // todo: Define the cases when we need ti shrink/expand width with the extraIndent.
+            // (for now I give a favour to eeoc.gov where we need to shrink it)
+            cssBeforeAnimateStyles['width']  = currentStyle['float'] === 'none'
+                                             ? cssBeforeAnimateStyles['width']
+                                             : parseFloat(cssBeforeAnimateStyles['width']) + extraIndent + 'px';
         }
 
         $.extend(cssBeforeAnimateStyles, vertMargin);
