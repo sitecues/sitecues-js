@@ -315,15 +315,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Pixel-based solution isn't reliable b/c each font had differences
                     // in terms of char height and width.
                     // Let's check how many pixles each char takes in average.
-                    $('body').append('<div id="testwidth"><span>&nbsp;</span></div>');
-                    var wSlim = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+                    $('body').append('<div id="testwidth"><span>x</span></div>');
+                    var wMiddle = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
                     $('#testwidth').remove();
 
-                    $('body').append('<div id="testwidth2"><span>w</span></div>');
-                    var wThick = $('#testwidth2 span').css('width', '1ch').width();
-                    $('#testwidth2').remove();
-
-                    var wMiddle = (wSlim + wThick) / 2;
                     var charsQuantity = 50;
                     var textWidth = wMiddle * charsQuantity;
                     if (parseFloat(currentStyle.width) > textWidth) {
