@@ -234,15 +234,15 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
 
-                    // If we need to change the element's dimensions, so be it. However, explicitly
-                    // set the dimensions only if needed.
+                    // If we need to change the element's dimensions, so be it.
+                    // However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
 
                     // Check the width and horizontal positioning.   
                     if (width > viewport.width) {
                         // Fit to width of viewport.
                         newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
-                        var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ;          // new width - old width
+                        var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
                         newLeft = - jElement.offset().left + window.pageXOffset + zoomWidthDiff + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
@@ -270,7 +270,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         }
                     }
                     var newMaxHeight = newHeight || (viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset) / extraZoom;
+
                     // Create the CSS needed to place the element where it needs to be, and to zoom it.
+                    // todo: if the height or width has been constrained then also set margin to keep the content.
+                    // No need to do any shift compensations b/c user will not see anything beyond the viewport.
+                    // if (diffHeight > viewport.height) {
+                    //     roundingsStyle['top'] = '32px';
+                    // }
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
