@@ -295,9 +295,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
             // todo: do not use scroll unless absolutely necessary.
             function narrowWidth($el, currentStyle) {
-                // EQ-1359: If width > 50 x-width characters and text is word-wrappable
-                // then shorten to 50 x-widths
-                if ($el[0].localName !== 'img') {
+                // EQ-1359: If width > 50 x-width characters and text is word-wrappable(e.g.
+                // not a table) then shorten to 50 x-widths.
+                if (common.isWordWrappableElement($el[0])) {
                     /* Font characteristics:
                         font-family: "Arial, Helvetica, sans-serif"
                         font-size: "19.230770111083984px"

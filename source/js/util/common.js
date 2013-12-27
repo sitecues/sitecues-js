@@ -20,6 +20,11 @@ sitecues.def('util/common', function (common, callback, log) {
       ;
 
     var validNonVisualElements = ['document', 'body', 'html', 'head'];
+    var nonWordWrappableElements = ['img', 'table', 'thead', 'tbody', 'tr', 'td'];
+    var nodeTypes = {
+        'elementNode': 1,
+        'textNode':    3
+    }
 
     // Make sure 'trim()' has cross-browser support.
     if (typeof String.prototype.trim !== 'function') {
@@ -148,8 +153,48 @@ sitecues.def('util/common', function (common, callback, log) {
        return el[0].localName === "canvas" || el.find('canvas').length > 0;
      };
 
-     common.isValidNonVisualElement = function(el) {
-         return $.inArray(el.localName, validNonVisualElements) > 0;
+    /**
+     * Detect if the current element containts wrappable content.
+     * @param {type} el DOM node
+     * @returns {Boolean}t ture if the content is wrappable.
+     */
+    common.isWordWrappableElement = function(el) {
+         var localName = el.localName;
+         var nodeType  = el.nodeType;
+
+         var hasWordWrappableElementTag = $.inArray(localName, nonWordWrappableElements) < 0;
+         var hasVisualElementTag = $.inArray(localName, validNonVisualElements) < 0;
+
+         var isTextNode    = nodeType === nodeTypes['textNode'];
+         var isElementNode = nodeType === nodeTypes['elementNode'];
+         
+         var isNotDirectChildOfNonVisualElement = $.inArray($(el).parent()[0].localName, validNonVisualElements) < 0;
+         var isAssumedToBeTextNode = true;
+
+         // todo: Alternatively, we may try BFS and compare the benchmarks.
+         (function _recurse(children) {
+             if (!isAssumedToBeTextNode || children.length === 0) {
+                 return;
+             }
+             children.each(function() {
+                 if ($(this).children().length > 0) {
+                     return _recurse($(this).children());
+                 }
+                 if ($.inArray($(this)[0].localName, nonWordWrappableElements) >= 0) {
+                     isAssumedToBeTextNode = false;
+                     return;
+                 }
+             });
+         }($(el).children()));
+
+         return hasWordWrappableElementTag
+             && hasVisualElementTag
+             && isNotDirectChildOfNonVisualElement
+             && ((isElementNode && isAssumedToBeTextNode) || isTextNode);
+    }
+
+    common.isValidNonVisualElement = function(el) {
+         return $.inArray(el.localName, validNonVisualElements) >= 0;
      }
 
      common.isValidBoundingElement = function(el) {
