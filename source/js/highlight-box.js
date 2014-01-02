@@ -508,9 +508,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
                         roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
                                           'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
+                } else if (compensateShiftFloat < 0
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
+                        roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
                 } else {
-                    roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + magicNumber + 'px';
-                    // roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             }
 
@@ -791,12 +793,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             }
            return correctedStyle;
         }
+
       /*
        * Calculate CSS styles to set before inflation animation.
        * @param currentStyle Object
        * @param cssUpdate Object
        * @return Object
        */
+      // todo: cut the expanded height value!
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
         var rect = conf.get('rect');
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
@@ -812,9 +816,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // calculated by. I used my logic & empiristic data.
         var belowBox = boundingBoxes.below;
         var aboveBox = boundingBoxes.above;
-        var compensateVertShiftFloat = parseFloat(compensateShift['vert']);
-        var compensateHorizShiftFloat = parseFloat(compensateShift['horiz']);
         
+        var expandedHeight = (designer.getHeightExpandedDiffValue() || 0);
+
+        var compensateVertShiftFloat = parseFloat(compensateShift['vert']) - expandedHeight;
+        var compensateHorizShiftFloat = parseFloat(compensateShift['horiz']);
+
         var vertMargin = {};
         var horizMargin = {'margin-left': compensateHorizShiftFloat + 'px'};
 
@@ -835,7 +842,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
                         vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
                 } else {
-                    vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + parseFloat(compensateShift['vert']) + 'px';
+                    vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + compensateVertShiftFloat + 'px';
                 }
             }
         }
@@ -880,6 +887,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
         vertMargin['margin-bottom'] = (parseFloat(vertMargin['margin-bottom']) || parseFloat(currentStyle['margin-bottom']))
                                     - floatRectHeight + 'px';
+
         var extraIndent = 2 * HighlightBox.kBoxBorderWidth;
         // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
         if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'

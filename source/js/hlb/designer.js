@@ -229,8 +229,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     var rect = this.getBoundingClientRect();
-                    var width  = shortenWidthValue || (Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset)    * extraZoom;
-                    var height = expandedHeightValue || (rect.height + 2 * additionalBoxOffset) * extraZoom;
+                    var width  = shortenWidthValue
+                                 ? shortenWidthValue * extraZoom
+                                 : (Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset) * extraZoom;
+                    var height = expandedHeightValue
+                                 ? expandedHeightValue * extraZoom
+                                 : (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
 
