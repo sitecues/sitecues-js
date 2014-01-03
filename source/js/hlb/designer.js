@@ -14,6 +14,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     'rgba(0, 0, 0, 0)'
     ];
 
+    designer.lineHeight = 20;
+
     designer.heightExpandedDiffValue = 0;
     designer.widthNarrowedDiffValue  = 0;
 
@@ -216,24 +218,25 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
                     // For floated elements the visual width and the actual width are different. Here we need the visual one.
-                    var newCurrentStyle = $.extend({}, currentStyle, {'width': Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px'});
-                    var shortenWidthValue = narrowWidth(jElement, newCurrentStyle);
-                    var expandedHeightValue;
-                    if (shortenWidthValue) {
-                        var heightValue = expandHeight(jElement, currentStyle, shortenWidthValue);
+                    var newCurrentStyle = $.extend({}, currentStyle,
+                                          {'width': Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px'});
+                    var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport.height);
+                    var expandedHeight;
+                    if (constrainedWidth) {
+                        var heightValue = getExpandedheight(jElement, currentStyle, constrainedWidth);
                         // If it is a text node we want to get the exact text range's height;
                         // that is why we use conf.get('absoluteRect') instead of currentStyle
                         if (heightValue > conf.get('absoluteRect').height) {
-                            expandedHeightValue = heightValue;
+                            expandedHeight = heightValue;
                         }
                     }
 
                     var rect = this.getBoundingClientRect();
-                    var width  = shortenWidthValue
-                                 ? shortenWidthValue * extraZoom
+                    var width  = constrainedWidth
+                                 ? constrainedWidth * extraZoom
                                  : (Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset) * extraZoom;
-                    var height = expandedHeightValue
-                                 ? expandedHeightValue * extraZoom
+                    var height = expandedHeight
+                                 ? expandedHeight * extraZoom
                                  : (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
                     var top  = centerTop - (height / 2);
@@ -284,13 +287,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
-                        width:  shortenWidthValue || newWidth,
-                        height: newHeight || expandedHeightValue,
+                        width:  constrainedWidth || newWidth,
+                        height: newHeight || expandedHeight,
                         maxHeight: newWidth? newMaxHeight: undefined
                     };
                     // Only use difference in height if it was shortened(we need to compensate it in margin).
-                    designer.heightExpandedDiffValue = expandedHeightValue? (cssUpdates.height - parseFloat(currentStyle.height)) || 0 : 0;
-                    designer.widthNarrowedDiffValue  = shortenWidthValue?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
+                    designer.heightExpandedDiffValue = expandedHeight? (cssUpdates.height - parseFloat(currentStyle.height)) || 0 : 0;
+                    designer.widthNarrowedDiffValue  = constrainedWidth?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
                 });
                 //TODO: Figure out a better way to get the offset.left...I've tried to figure
@@ -304,47 +307,97 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             }
 
             // todo: do not use scroll unless absolutely necessary.
-            function narrowWidth($el, currentStyle) {
-                // EQ-1359: If width > 50 x-width characters and text is word-wrappable(e.g.
-                // not a table) then shorten to 50 x-widths.
-                if (common.isWordWrappableElement($el[0])) {
-                    /* Font characteristics:
-                        font-family: "Arial, Helvetica, sans-serif"
-                        font-size: "19.230770111083984px"
-                        font-style: "normal"
-                        font-variant: "normal"
-                        font-weight: "500"
-                     */
-                    var fontStyle = {
-                        'font-family': currentStyle['font-family'],
-                        'font-size':   currentStyle['font-size'],
-                        'font-style':  currentStyle['font-style'],
-                        'font-variant':currentStyle['font-variant'],
-                        'font-weight': currentStyle['font-weight']
-                    };
-                    // Pixel-based solution isn't reliable b/c each font had differences
-                    // in terms of char height and width.
-                    // Let's check how many pixles each char takes in average.
-                    $('body').append('<div id="testwidth"><span>x</span></div>');
-                    var wMiddle = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
-                    $('#testwidth').remove();
-
-                    var charsQuantity = 50;
-                    var textWidth = wMiddle * charsQuantity;
-                    if (parseFloat(currentStyle.width) > textWidth) {
-                        return textWidth;
-                    }
+            // todo: re-name the function to 'getConstrainedWidth'
+            // common.hasVertScroll($el[0]);
+            /**
+             * 
+             * @param {type} $el
+             * @param {type} currentStyle
+             * @returns {Number|Boolean} False if we don't need to narrow the width;
+             * Number of pixels otherwise.
+             */
+            function getConstrainedWidth($el, currentStyle, maxHeight) {
+                // EQ-1359: If text is word-wrappable(e.g. not a table) then shorten width to 50 x-widths.
+                if (!common.isWordWrappableElement($el[0])) {
+                    return false;
                 }
-                return false;
+
+                // Pixel-based solution isn't reliable b/c each font had differences
+                // in terms of char height and width. Let's find out how much space 50-x
+                // chars text takes and use the value as constrained width.
+                var currentWidth = parseFloat(currentStyle.width),
+                    constrainedWidth = currentWidth,                // default value
+                    xCharsQuantity = 50;
+                
+                var fontStyle = {
+                    'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
+                    'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
+                    'font-style':  currentStyle['font-style'],      // font-size: "19.230770111083984px"
+                    'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
+                    'font-weight': currentStyle['font-weight']      // font-weight: "500"
+                };
+
+                $('body').append('<div id="testwidth"><span>x</span></div>');
+                var wMiddle = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+                $('#testwidth').remove();
+                var widthOf50xChars = wMiddle * xCharsQuantity;
+
+                // If current width less than 50 x-width characters then no need for constrains.
+                if (currentWidth <= widthOf50xChars) {
+                    return false;
+                }
+
+                // If width greater than 50 x-width characters then...
+                constrainedWidth = widthOf50xChars;
+                if (common.hasVertScroll($el[0])) {
+                     // If vertical scrolling was already necessary, shorten to 50 x-widths.
+                    return constrainedWidth;
+                }
+
+                // Vertical scrolling was not necessary --
+                // shorten lines as close to 50 x-widths as possible,
+                // up to the point where vertical scrolling still is not necessary.
+
+                // Clone an element and check if the vertical scroll appears at any step.
+                // todo: use 'false' instead of 'true'( do not copy events and data)
+                var testNode = $el[0].cloneNode(true);
+                $(testNode).css('visibility', 'visisble').css('background-color', 'red').appendTo("body");
+
+                // Find the best constrained width, if any needed.
+                return function _recurse(width) {
+                    // Exit if the constrained width become equal to the current width.
+                    if (Math.round(currentWidth - width) === 0) {
+                        return false;
+                    }
+                    var savedHeight = parseFloat($(testNode).css('height'));
+                    $(testNode).css({'width': width + 'px'});
+                    if (common.hasVertScroll(testNode)) {
+                        // Define the constained width as close to 50 x-widths as possible:
+                        // Add 1/2 of width clipped iteratively.
+                        _recurse(width + Math.round(currentWidth - width) / 2);
+                    } else {
+                        var changedHeight = parseFloat($(testNode).css('height'));
+                        if (changedHeight >= maxHeight) {
+                            // The new height is greater than viewport's height;
+                            // this will cause vertical scroll finally to appear.
+                            $(testNode).css({'height': savedHeight + 'px'});
+                            _recurse(width + Math.round(currentWidth - width) / 2);
+                        }
+                        // No vertical scroll should appear, we are done(finally).
+                        return width;
+                    }
+                }(constrainedWidth);
+ 
             }
 
-            function expandHeight($el, currentStyle, shortenWidthValue) {
+            function getExpandedheight($el, currentStyle, constrainedWidth) {
                 // todo: common.hasVertScroll($el[0]);
                 var lineHeight = common.getLineHeight($el);
+                designer.lineHeight = lineHeight;
 
                 var oldHeight  = conf.get('absoluteRect').height;
                 var oldWidth   = parseFloat(currentStyle.width);
-                var newWidth   = shortenWidthValue;
+                var newWidth   = constrainedWidth;
 
                 var oldLineNumber  = Math.round(oldHeight / lineHeight);
                 var newLineNumber  = Math.round(((conf.get('absoluteRect').width || oldWidth) / newWidth) * oldLineNumber);
