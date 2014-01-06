@@ -367,7 +367,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // todo: use 'false' instead of 'true'( do not copy events and data)
                 // or, simply remove the attrs, copying the styles before that
                 var testNode = $el[0].cloneNode(true);
-                $(testNode).css('visibility', 'hidden').css('background-color', 'red').appendTo("body");
+                $(testNode)
+                        // todo: copy-set all of the styles assigned to ID as they may affect the font?
+                        // Having > 1 element with the same ID may cause layout problems.
+                        .attr('id', '')
+                        .css('visibility', 'hidden')
+                        .appendTo("body");
 
                 // Find the best constrained width, if any needed.
                 return function _recurse(width) {
@@ -390,6 +395,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             return _recurse(width + Math.round(currentWidth - width) / 2);
                         }
                         // No vertical scroll should appear, we are done(finally).
+                        $(testNode).remove();
                         designer.expandedHeight = changedHeight;
                         return width;
                     }
