@@ -22,8 +22,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
     // Copied from source/highlight-box.js
     designer.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
-    designer.kBoxBorderWidth = '3px';
-    designer.kBoxPadding = '4px';
+    designer.kBoxBorderWidth = 3;
+    designer.kBoxPadding = 4;
     designer.kDefaultBgColor = 'rgb(255, 255, 255)';
     designer.kDefaultTextColor = 'rgb(0, 0, 0)';
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
@@ -211,7 +211,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 }
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
-                var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
+                var additionalBoxOffset = designer.kBoxBorderWidth + designer.kBoxPadding;
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
@@ -332,23 +332,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // chars text takes and use the value as constrained width.
                 var currentWidth = parseFloat(currentStyle.width),
                     constrainedWidth = currentWidth,                // default value
-                    xCharsQuantity = 50;
-                
-                var fontStyle = {
-                    'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
-                    'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
-                    'font-style':  currentStyle['font-style'],      // font-size: "19.230770111083984px"
-                    'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
-                    'font-weight': currentStyle['font-weight']      // font-weight: "500"
-                };
-
-                $('body').append('<div id="testwidth"><span>x</span></div>');
-                var wMiddle = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
-                $('#testwidth').remove();
-                var widthOf50xChars = wMiddle * xCharsQuantity;
+                    xCharWidth = getXCharWidth(currentStyle),
+                    xCharsQuantity = 50,
+                    widthOf50xChars = xCharWidth * xCharsQuantity;
 
                 // If current width less than 50 x-width characters then no need for constrains.
                 if (currentWidth <= widthOf50xChars) {
+                    // todo:
+                    // #1 add width up to max of 65 x-widths if it doesn't cause box to go offscren and removes need for vertical scrolling
                     return false;
                 }
 
@@ -356,7 +347,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 constrainedWidth = widthOf50xChars;
                 if (common.hasVertScroll($el[0])) {
                      // If vertical scrolling was already necessary, shorten to 50 x-widths.
-                    return constrainedWidth;
+                     // todo:
+                     // #2 add width up to max of 65 x-widths if it doesn't cause box to go offscren and removes need for vertical scrolling
+                     return constrainedWidth;
                 }
 
                 // Vertical scrolling was not necessary --
@@ -401,6 +394,27 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
                 }(constrainedWidth);
  
+            }
+
+            /**
+             * Caclualate the width of a single x-char based on current styles.
+             * @param {Object} currentStyle
+             * @returns {Number} Amount of pixels single x-char takes.
+             */
+            function getXCharWidth(currentStyle) {
+                var fontStyle = {
+                    'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
+                    'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
+                    'font-style':  currentStyle['font-style'],      // font-style: "normal"
+                    'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
+                    'font-weight': currentStyle['font-weight']      // font-weight: "500"
+                };
+
+                $('body').append('<div id="testwidth"><span>x</span></div>');
+                var xCharWidth = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+                $('#testwidth').remove();
+
+                return xCharWidth;
             }
 
             /**
