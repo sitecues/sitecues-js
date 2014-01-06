@@ -802,10 +802,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        */
       // todo: cut the expanded height value!
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
-        var rect = conf.get('rect');
+        // todo: for floated elements we can use positioning.getCenter():absRect
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
         newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
-        newWidth = cssUpdate.width ? cssUpdate.width + 'px': rect.width + 'px';
+        newWidth = cssUpdate.width ? cssUpdate.width + 'px': currentStyle.width;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
         newLeft = cssUpdate.left;

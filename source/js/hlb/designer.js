@@ -15,6 +15,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     ];
 
     designer.lineHeight = 20;
+    designer.expandedHeight = 0;
 
     designer.heightExpandedDiffValue = 0;
     designer.widthNarrowedDiffValue  = 0;
@@ -38,6 +39,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
             designer.getWidthNarrowedDiffValue = function() {
                 return this.widthNarrowedDiffValue;
+            }
+
+            designer.getExpandedHeight = function() {
+                return this.expandedHeight;
             }
 
             designer.getCurrentTextColor = function(item) {
@@ -206,27 +211,31 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 }
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
+                var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
                 // Correctly compute the viewport.
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, totalZoom);
                 var cssUpdates = {};
+                // The actual dimensions of the box: corrected for text nodes.
+                var absRect = conf.get('absoluteRect');
+                // For floated elements the visual width and the actual width are different. Here we need the visual one.
+                var newCurrentStyle = $.extend({}, currentStyle,
+                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
+                
                 $(selector).each(function () {
                     var jElement = $(this);
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
-                    var additionalBoxOffset = (parseFloat(designer.kBoxBorderWidth) + parseFloat(designer.kBoxPadding));
-                    // For floated elements the visual width and the actual width are different. Here we need the visual one.
-                    var newCurrentStyle = $.extend({}, currentStyle,
-                                          {'width': Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 'px'});
+                    // Change the dimensions when needeed.
                     var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport.height);
                     var expandedHeight;
                     if (constrainedWidth) {
-                        var heightValue = getExpandedheight(jElement, currentStyle, constrainedWidth);
+                        var heightValue = designer.getExpandedHeight(); 
                         // If it is a text node we want to get the exact text range's height;
                         // that is why we use conf.get('absoluteRect') instead of currentStyle
-                        if (heightValue > conf.get('absoluteRect').height) {
+                        if (heightValue > absRect.height) {
                             expandedHeight = heightValue;
                         }
                     }
@@ -234,15 +243,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var rect = this.getBoundingClientRect();
                     var width  = constrainedWidth
                                  ? constrainedWidth * extraZoom
-                                 : (Math.min(conf.get('rect').width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset) * extraZoom;
+                                 : (Math.min(absRect.width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset) * extraZoom;
                     var height = expandedHeight
                                  ? expandedHeight * extraZoom
                                  : (rect.height + 2 * additionalBoxOffset) * extraZoom;
                     var left = centerLeft - (width / 2);
-                    var top  = centerTop - (height / 2);
+                    var top  = centerTop -  (height / 2);
 
-                    // If we need to change the element's dimensions, so be it.
-                    // However, explicitly set the dimensions only if needed.
+                    // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
 
                     // Check the width and horizontal positioning.   
@@ -306,9 +314,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 return cssUpdates;
             }
 
-            // todo: do not use scroll unless absolutely necessary.
-            // todo: re-name the function to 'getConstrainedWidth'
-            // common.hasVertScroll($el[0]);
             /**
              * 
              * @param {type} $el
@@ -360,8 +365,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                 // Clone an element and check if the vertical scroll appears at any step.
                 // todo: use 'false' instead of 'true'( do not copy events and data)
+                // or, simply remove the attrs, copying the styles before that
                 var testNode = $el[0].cloneNode(true);
-                $(testNode).css('visibility', 'visisble').css('background-color', 'red').appendTo("body");
+                $(testNode).css('visibility', 'hidden').css('background-color', 'red').appendTo("body");
 
                 // Find the best constrained width, if any needed.
                 return function _recurse(width) {
@@ -374,36 +380,21 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     if (common.hasVertScroll(testNode)) {
                         // Define the constained width as close to 50 x-widths as possible:
                         // Add 1/2 of width clipped iteratively.
-                        _recurse(width + Math.round(currentWidth - width) / 2);
+                        return _recurse(width + Math.round(currentWidth - width) / 2);
                     } else {
                         var changedHeight = parseFloat($(testNode).css('height'));
                         if (changedHeight >= maxHeight) {
                             // The new height is greater than viewport's height;
                             // this will cause vertical scroll finally to appear.
                             $(testNode).css({'height': savedHeight + 'px'});
-                            _recurse(width + Math.round(currentWidth - width) / 2);
+                            return _recurse(width + Math.round(currentWidth - width) / 2);
                         }
                         // No vertical scroll should appear, we are done(finally).
+                        designer.expandedHeight = changedHeight;
                         return width;
                     }
                 }(constrainedWidth);
  
-            }
-
-            function getExpandedheight($el, currentStyle, constrainedWidth) {
-                // todo: common.hasVertScroll($el[0]);
-                var lineHeight = common.getLineHeight($el);
-                designer.lineHeight = lineHeight;
-
-                var oldHeight  = conf.get('absoluteRect').height;
-                var oldWidth   = parseFloat(currentStyle.width);
-                var newWidth   = constrainedWidth;
-
-                var oldLineNumber  = Math.round(oldHeight / lineHeight);
-                var newLineNumber  = Math.round(((conf.get('absoluteRect').width || oldWidth) / newWidth) * oldLineNumber);
-                var expandedHeight = newLineNumber * lineHeight;
-
-                return expandedHeight;
             }
 
             /**
