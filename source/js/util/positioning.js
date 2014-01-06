@@ -238,7 +238,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 	        return { left : rect.left, top : rect.top };
         }
 
-	    /**
+	/**
          * Returns the center of the provided element.
          */
         positioning.getCenter = function (selector) {
@@ -247,7 +247,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 	            var fixedRects = positioning.getAllBoundingBoxes(this, 9999);
 	            var zoom = positioning.getTotalZoom(this, true);
 	            var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
-                    conf.set('rect', rect);
 
                 // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
                 if (!rect) {
