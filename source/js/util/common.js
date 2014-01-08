@@ -43,6 +43,7 @@ sitecues.def('util/common', function (common, callback, log) {
       }
       return parseFloat(lineHeight);
     }
+
     /**
      * Get the element's styles to be used further.
      * @param element The DOM element which styles we want to get.
@@ -94,6 +95,27 @@ sitecues.def('util/common', function (common, callback, log) {
       });
       return elementComputedStyles;
     };
+
+    /**
+     * Calcualate the width of a single x-char based on current styles.
+     * @param {Object} currentStyle
+     * @returns {Number} Amount of pixels single x-char takes.
+     */
+    common.getXCharWidth = function(currentStyle) {
+        var fontStyle = {
+            'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
+            'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
+            'font-style':  currentStyle['font-style'],      // font-style: "normal"
+            'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
+            'font-weight': currentStyle['font-weight']      // font-weight: "500"
+        };
+
+        $('body').append('<div id="testwidth"><span>x</span></div>');
+        var xCharWidth = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+        $('#testwidth').remove();
+
+        return xCharWidth;
+    }
 
     /**
      * Remove all the attributes from the DOM element given.

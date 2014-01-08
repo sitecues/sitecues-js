@@ -229,7 +229,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport.height);
+                    var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -321,8 +321,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @returns {Number|Boolean} False if we don't need to narrow the width;
              * Number of pixels otherwise.
              */
-            function getConstrainedWidth($el, currentStyle, maxHeight) {
-                // EQ-1359: If text is word-wrappable(e.g. not a table) then shorten width to 50 x-widths.
+            function getConstrainedWidth($el, currentStyle, viewport) {
+                // If text is non-word-wrappable forget about it.
                 if (!common.isWordWrappableElement($el[0])) {
                     return false;
                 }
@@ -331,91 +331,83 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // in terms of char height and width. Let's find out how much space 50-x
                 // chars text takes and use the value as constrained width.
                 var currentWidth = parseFloat(currentStyle.width),
-                    constrainedWidth = currentWidth,                // default value
-                    xCharWidth = getXCharWidth(currentStyle),
-                    xCharsQuantity = 50,
-                    widthOf50xChars = xCharWidth * xCharsQuantity;
+                    xCharWidth = common.getXCharWidth(currentStyle),
+                    minXCharsQuantity = 50,
+                    maxXCharsQuantity = 65,
+                    widthOf50xChars = xCharWidth * minXCharsQuantity,
+                    widthOf65xChars = xCharWidth * maxXCharsQuantity,
+                    $testNode = createTestNode($el[0]),
+                     maxWidth  = viewport.width,
+                    maxHeight = viewport.height;
+            
+                // setTimeout(0, function() {$testNode.remove();}); 
 
-                // If current width less than 50 x-width characters then no need for constrains.
-                if (currentWidth <= widthOf50xChars) {
-                    // todo:
-                    // #1 add width up to max of 65 x-widths if it doesn't cause box to go offscren and removes need for vertical scrolling
+                if ((currentWidth <= widthOf50xChars) && !common.hasVertScroll($el[0])) {
+                    // All good, no need for constrains.
                     return false;
                 }
 
                 // If width greater than 50 x-width characters then...
-                constrainedWidth = widthOf50xChars;
                 if (common.hasVertScroll($el[0])) {
-                     // If vertical scrolling was already necessary, shorten to 50 x-widths.
-                     // todo:
-                     // #2 add width up to max of 65 x-widths if it doesn't cause box to go offscren and removes need for vertical scrolling
-                     return constrainedWidth;
+                     // If vertical scrolling was already necessary, try to add width up max of 65 x-widths
+                     var expandedWidth = _recurseWidthCloseToNChars($testNode, maxXCharsQuantity, widthOf65xChars, currentWidth, maxHeight);
+                     // If it doesn't cause box to go offscren and removes need for vertical scrolling
+                     if (expandedWidth && (expandedWidth < maxWidth)) {
+                         return expandedWidth;
+                     }
+                     $testNode.remove();
+                     // Otherwise, shorten to 50 x-widths
+                     return widthOf50xChars;
                 }
 
                 // Vertical scrolling was not necessary --
                 // shorten lines as close to 50 x-widths as possible,
                 // up to the point where vertical scrolling still is not necessary.
 
+                // Find the best constrained width, if any needed.
+                var constrainedWidth = _recurseWidthCloseToNChars($testNode, minXCharsQuantity, currentWidth, widthOf50xChars, maxHeight);
+                $testNode.remove();
+                return constrainedWidth;
+            }
+
+            function createTestNode(el) {
                 // Clone an element and check if the vertical scroll appears at any step.
                 // todo: use 'false' instead of 'true'( do not copy events and data)
                 // or, simply remove the attrs, copying the styles before that
-                var testNode = $el[0].cloneNode(true);
+                var testNode = el.cloneNode(true);
                 $(testNode)
                         // todo: copy-set all of the styles assigned to ID as they may affect the font?
                         // Having > 1 element with the same ID may cause layout problems.
                         .attr('id', '')
                         .css('visibility', 'hidden')
-                        .appendTo("body");
-
-                // Find the best constrained width, if any needed.
-                return function _recurse(width) {
-                    // Exit if the constrained width become equal to the current width.
-                    if (Math.round(currentWidth - width) === 0) {
-                        return false;
-                    }
-                    var savedHeight = parseFloat($(testNode).css('height'));
-                    $(testNode).css({'width': width + 'px'});
-                    if (common.hasVertScroll(testNode)) {
-                        // Define the constained width as close to 50 x-widths as possible:
-                        // Add 1/2 of width clipped iteratively.
-                        return _recurse(width + Math.round(currentWidth - width) / 2);
-                    } else {
-                        var changedHeight = parseFloat($(testNode).css('height'));
-                        if (changedHeight >= maxHeight) {
-                            // The new height is greater than viewport's height;
-                            // this will cause vertical scroll finally to appear.
-                            $(testNode).css({'height': savedHeight + 'px'});
-                            return _recurse(width + Math.round(currentWidth - width) / 2);
-                        }
-                        // No vertical scroll should appear, we are done(finally).
-                        $(testNode).remove();
-                        designer.expandedHeight = changedHeight;
-                        return width;
-                    }
-                }(constrainedWidth);
- 
+                        .appendTo('body');
+                return $(testNode);
             }
 
-            /**
-             * Caclualate the width of a single x-char based on current styles.
-             * @param {Object} currentStyle
-             * @returns {Number} Amount of pixels single x-char takes.
-             */
-            function getXCharWidth(currentStyle) {
-                var fontStyle = {
-                    'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
-                    'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
-                    'font-style':  currentStyle['font-style'],      // font-style: "normal"
-                    'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
-                    'font-weight': currentStyle['font-weight']      // font-weight: "500"
-                };
-
-                $('body').append('<div id="testwidth"><span>x</span></div>');
-                var xCharWidth = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
-                $('#testwidth').remove();
-
-                return xCharWidth;
-            }
+            function _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth, maxHeight) {
+                // Exit if the constrained width become equal to the current width.
+                if (Math.round(currentWidth - limitedWidth) === 0) {
+                    return false;
+                }
+                var savedHeight = parseFloat($testNode.css('height'));
+                $testNode.css({'width': limitedWidth + 'px'});
+                if (common.hasVertScroll($testNode[0])) {
+                    // Define the constained width as close to 50 x-widths as possible:
+                    // Add 1/2 of width clipped iteratively.
+                    return _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth + Math.round(currentWidth - limitedWidth) / 2, maxHeight);
+                } else {
+                    var changedHeight = parseFloat($testNode.css('height'));
+                    if (changedHeight >= maxHeight) {
+                        // The new height is greater than viewport's height;
+                        // this will cause vertical scroll finally to appear.
+                        $testNode.css({'height': savedHeight + 'px'});
+                        return _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth + Math.round(currentWidth - limitedWidth) / 2, maxHeight);
+                    }
+                    // No vertical scroll should appear, we are done(finally).
+                    designer.expandedHeight = changedHeight;
+                    return limitedWidth;
+                }
+            };
 
             /**
              * Get new background color of highlight box when it appears.
