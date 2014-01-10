@@ -1,46 +1,47 @@
 sitecues.def('mouse-highlight', function (mh, callback) {
+  'use strict';
       // Tracks if the user has heard the "first high zoom" cue.
-  var FIRST_HIGH_ZOOM_PARAM = "firstHighZoom",
-      // The high zoom threshold.
-      HIGH_ZOOM_THRESHOLD = 1.6,
-      // Time in millis after which the "first high zoom" cue should replay.
-      FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000, // 7 days
+  var FIRST_HIGH_ZOOM_PARAM = 'firstHighZoom',
+  // The high zoom threshold.
+  HIGH_ZOOM_THRESHOLD = 1.6,
+  // Time in millis after which the "first high zoom" cue should replay.
+  FIRST_HIGH_ZOOM_RESET_MS = 7 *86400000, // 7 days
 
-      EXTRA_HIGHLIGHT_PIXELS = 3,
+  EXTRA_HIGHLIGHT_PIXELS = 3,
 
-      INIT_STATE = {
-        isVisible: false,
-        picked: null,     // JQuery for picked element(s)
-        target: null,     // Mouse was last over this element
-        lastCursorPos: null,
-        isCreated: false, // Has highlight been created
-        styles: [],
-        savedCSS: null,   // map of saved CSS for highlighted element
-        elementRect: null,
-        fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
-        // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
-        viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
-        floatRects: {}, // Interesting float objects
-        pathBorder: [], // In real pixels so that it can live outside of <body>
-        pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
-        pathFillBackground: [], // In element rect coordinates, used with CSS background
-                highlightPaddingWidth: 0,
-        highlightBorderWidth: 0,
-        doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
-        doUseOverlayforBgColor: false  // was an overlay used to create the background color?
-      },
+  INIT_STATE = {
+    isVisible: false,
+    picked: null,     // JQuery for picked element(s)
+    target: null,     // Mouse was last over this element
+    lastCursorPos: null,
+    isCreated: false, // Has highlight been created
+    styles: [],
+    savedCSS: null,   // map of saved CSS for highlighted element
+    elementRect: null,
+    fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
+    // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
+    viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
+    floatRects: {}, // Interesting float objects
+    pathBorder: [], // In real pixels so that it can live outside of <body>
+    pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
+    pathFillBackground: [], // In element rect coordinates, used with CSS background
+    highlightPaddingWidth: 0,
+    highlightBorderWidth: 0,
+    doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
+    doUseOverlayforBgColor: false  // was an overlay used to create the background color?
+  },
 
-      // minimum zoom level to enable highlight
-      // This is the default setting, the value used at runtime will be in conf.
-      MIN_ZOOM = 1.01,
+  // minimum zoom level to enable highlight
+  // This is the default setting, the value used at runtime will be in conf.
+  MIN_ZOOM = 1.01,
 
-      // class of highlight
-      HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
+  // class of highlight
+  HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
 
-      state, nativeZoom = 'zoom' in document.createElement('div').style; //EQ-880
+  state;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
-  sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', function($, conf, picker, positioning, common, speech, geo) {
+  sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', 'platform', function($, conf, picker, positioning, common, speech, geo, platform) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
     
@@ -57,21 +58,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function shouldPlayFirstHighZoomCue() {
       var fhz = conf.get(FIRST_HIGH_ZOOM_PARAM);
       return (!fhz || ((fhz + FIRST_HIGH_ZOOM_RESET_MS) < (new Date()).getTime()));
-    };
+    }
 
     /**
      * Signals that the "first high zoom" cue has played.
      */
     function playedFirstHighZoomCue() {
       conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
-    };
+    }
 
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
       for (var count = 0; count < styles.length; count ++) {
         var zIndexInt = parseInt(styles[count].zIndex);
-        if (zIndexInt > maxZIndex)
+        if (zIndexInt > maxZIndex) {
           maxZIndex = zIndexInt;
+        }
       }
       return maxZIndex;
     }
@@ -169,7 +171,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // How visible is the highlight?
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-          vizFactor = (state.zoom +.4) * .9;
+          vizFactor = (state.zoom + 0.4) * 0.9;
       if (speech.isEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
@@ -185,7 +187,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
-          borderWidth = viz - .4;
+          borderWidth = viz - 0.4;
       return Math.max(1, borderWidth);
     }
 
@@ -196,8 +198,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var viz = getHighlightVisibilityFactor(),
           alpha;
       viz = Math.min(viz, 2);
-      alpha = .11 * viz;
-      return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
+      alpha = 0.11 * viz;
+      return 'rgba(0, 0, 255, 1)'; // Works with any background -- lightens it slightly
+      // return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
     function getOpaqueBackgroundColor() {
@@ -209,7 +212,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           green = red,
           blue = Math.round(254 - 5 * decrement),
           color = 'rgb(' + red + ',' + green + ',' + blue + ')';
-      return color;
+      // return color;
+      return 'rgba(255, 0, 0, 1)'; // Works with any background -- lightens it slightly
     }
 
     // Return an array of styles in the ancestor chain, including fromElement, not including toElement
@@ -223,7 +227,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      
     function isCursorInFixedRects(fixedRects) {
       return !state.lastCursorPos ||
-             geo.isPointInAnyRect(state.lastCursorPos.x / state.zoom, state.lastCursorPos.y / state.zoom, fixedRects);
+             geo.isPointInAnyRect(state.lastCursorPos.x, state.lastCursorPos.y, fixedRects);
     }
 
     // show mouse highlight (mh.update calls mh.show)
@@ -234,7 +238,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
-            updateColorApproach(state.styles);
+      updateColorApproach(state.styles);
 
       if (!mh.updateOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
@@ -246,7 +250,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     mh.updateElementBgImage = function() {
-      
+
       var element = state.picked.get(0),
           hasInterestingBg,
           backgroundColor,
@@ -265,7 +269,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                            hasInterestingBackgroundImage(state.styles);
       backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
-      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 1);
+      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -297,18 +301,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         'background-origin': 'border-box',
         'background-clip' : 'border-box',
         'background-attachment': 'scroll',
-        'background-size': state.fixedContentRect.width + 'px ' + state.fixedContentRect.height + 'px',
+        'background-size': state.fixedContentRect.width / conf.get('zoom') + 'px ' + state.fixedContentRect.height / conf.get('zoom') + 'px',
       }, '', '!important');
 
       $(element).style({
         'background-repeat': 'no-repeat',
-        'background-position-x': offsetLeft + 'px',
-        'background-position-y': offsetTop + 'px'
+        'background-position-x': offsetLeft / conf.get('zoom') + 'px',
+        'background-position-y': offsetTop / conf.get('zoom') + 'px'
       }, '', ''); // Not using !important for these because it prevented them from getting cleaned up on mh.pause() in Chrome
     }
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
-      var possibleFloat = document.elementFromPoint(Math.max(0, x * state.zoom), Math.max(0, y * state.zoom));
+      var possibleFloat = document.elementFromPoint(Math.max(0, x), Math.max(0, y));
       if (possibleFloat && possibleFloat !== state.picked.get(0)) {
         var pickedAncestors = state.picked.parents();
         var possibleFloatAncestors = $(possibleFloat).parents();
@@ -455,7 +459,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getSVGFillRectMarkup(left, top, width, height, fillColor) {
-      return '<rect x="' + left + '" y="' + top + '"  width="' + width + '" height="' + height + '"' +
+
+      return '<rect x="' + left / conf.get('zoom') + '" y="' + top / conf.get('zoom') + '"  width="' + width / conf.get('zoom') + '" height="' + height / conf.get('zoom') + '"' +
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
@@ -464,19 +469,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getSVGForExtraPadding(extra) {
       var svg = "",
         color = getTransparentBackgroundColor(),
-        extraLeft = (state.elementRect.left - state.fixedContentRect.left) * state.zoom,
-        extraRight = (state.fixedContentRect.right - state.elementRect.right) * state.zoom,
-        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) * state.zoom;
+        extraLeft = (state.elementRect.left - state.fixedContentRect.left) / conf.get('zoom'),
+        extraRight = (state.fixedContentRect.right - state.elementRect.right) / conf.get('zoom'),
+        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) / conf.get('zoom');
       extra *= state.zoom;
 
       if (extraLeft > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height * state.zoom), color);
+        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height / conf.get('zoom')), color);
       }
       if (extraRight > 0) {
-        svg += getSVGFillRectMarkup(state.elementRect.width * state.zoom + extra, extra, extraRight, (state.fixedContentRect.height * state.zoom), color);
+        svg += getSVGFillRectMarkup(state.elementRect.width / conf.get('zoom') + extra, extra, extraRight, (state.fixedContentRect.height / conf.get('zoom')), color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, state.elementRect.height * state.zoom + extra, state.fixedContentRect.width * state.zoom, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, state.elementRect.height / conf.get('zoom') + extra, state.fixedContentRect.width / conf.get('zoom'), extraBottom, color);
       }
       return svg;
     }
@@ -492,7 +497,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           absoluteRect,
           previousViewRect,
           stretchForSprites = true;
-
       if (!state.picked) {
         return false;
       }
@@ -524,8 +528,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Get exact bounds
+      //This is a horrible hack, suprisingly fixes a lot (especially (if not only) in firefox)
       fixedRects = positioning.getAllBoundingBoxes(element, 0, stretchForSprites);
-
+      //in Firefox only, comment out the line above and uncomment the line below...
+      //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
+        //fixedRects = [elementRect];
+      
       state.zoom = positioning.getTotalZoom(element, true);
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
@@ -536,11 +544,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       common.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
       state.fixedContentRect = fixedRects[0];
+
       state.elementRect = $.extend({}, elementRect);
       absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
       previousViewRect = $.extend({}, state.viewRect);
       state.highlightBorderWidth = getHighlightBorderWidth();
-            state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
+      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
       state.viewRect = $.extend({ }, absoluteRect);
       var extra = state.highlightPaddingWidth + state.highlightBorderWidth;
 
@@ -548,7 +557,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
         state.floatRects = getIntersectingFloatRects();
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
-        var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra, state.fixedContentRect.top - extra, 1/state.zoom);
+        var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra * conf.get('zoom'), state.fixedContentRect.top - extra * conf.get('zoom'), conf.get('zoom'));
         state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
@@ -561,8 +570,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         document.documentElement.appendChild(svgFragment);
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
-            'width' : (state.fixedContentRect.width + 2 * extra) * state.zoom,
-            'height': (state.fixedContentRect.height + 2 * extra) * state.zoom
+            'width' : (state.fixedContentRect.width / conf.get('zoom') + 2 * extra) + 'px',
+            'height': (state.fixedContentRect.height / conf.get('zoom') + 2 * extra) + 'px'
           })
           .css('z-index', getMaxZIndex(ancestorStyles) + 1); // Just below stuff like fixed toolbars
 
@@ -575,10 +584,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Finally update overlay CSS -- multiply by state.zoom because it's outside the <body>
       $('.' + HIGHLIGHT_OUTLINE_CLASS)
         .style({
-          'top': ((state.viewRect.top - extra) * state.zoom) + 'px',
-          'left': nativeZoom ? ((state.viewRect.left - extra) * state.zoom) + 'px' : state.elementRect.left - extra + 'px'
+          'top': state.viewRect.top / conf.get('zoom') - extra + 'px',
+          'left':  state.viewRect.left / conf.get('zoom') - extra + 'px'
         }, '', 'important');
-
       return true;
     }
 
@@ -593,7 +601,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Pick an element but don't slow down scrolling
-      mh.pickTimer && clearTimeout(mh.pickTimer );
+      mh.pickTimer && clearTimeout(mh.pickTimer);
       mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
     }
 
@@ -612,7 +620,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Update rect in case of sub-element scrolling -- we get mouse events in that case
         state.lastCursorPos = { x: event.clientX, y: event.clientY };
         mh.updateOverlayPosition();
-        return;
+        return
       }
 
       // save picked element
