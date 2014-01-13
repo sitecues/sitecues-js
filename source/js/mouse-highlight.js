@@ -171,7 +171,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // How visible is the highlight?
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-          vizFactor = (state.zoom + 0.4) * 0.9;
+          vizFactor = (conf.get('zoom') + 0.4) * 0.9;
       if (speech.isEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
@@ -181,7 +181,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getHighlightBorderColor() {
       var viz = getHighlightVisibilityFactor(),
           opacity = viz - 1.3;
-      opacity = Math.min(1, Math.max(opacity, 0));
+      opacity = Math.min(1, Math.max(opacity, 0))
       return 'rgba(0,0,0,' + opacity + ')';
     }
 
@@ -296,12 +296,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element.style.backgroundImageOrigin = 'border-box';
       element.style.backgroundClip = 'border-box';
       element.style.backgroundAttachment = 'scroll';
-      element.style.backgroundSize = state.fixedContentRect.width / conf.get('zoom') + 'px ' + state.fixedContentRect.height / conf.get('zoom') + 'px';
+      
+      // This following line made the SVG background in IE smaller than the highlighted element.
+      // element.style.backgroundSize = state.fixedContentRect.width * conf.get('zoom') + 'px ' + state.fixedContentRect.height * conf.get('zoom') + 'px';
+       
       element.style.backgroundImage = newBackgroundImage;
       element.style.backgroundRepeat= 'no-repeat';
+      
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      element.style.backgroundPositionX = offsetLeft / conf.get('zoom') + 'px';
-      element.style.backgroundPositionY = offsetTop / conf.get('zoom') + 'px';
+      element.style.backgroundPosition = (offsetLeft / conf.get('zoom')) + 'px '+ (offsetTop / conf.get('zoom')) + 'px';
     }
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
@@ -462,19 +465,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getSVGForExtraPadding(extra) {
       var svg = "",
         color = getTransparentBackgroundColor(),
-        extraLeft = (state.elementRect.left - state.fixedContentRect.left) / conf.get('zoom'),
-        extraRight = (state.fixedContentRect.right - state.elementRect.right) / conf.get('zoom'),
-        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) / conf.get('zoom');
-      extra *= state.zoom;
+        extraLeft = (state.elementRect.left - state.fixedContentRect.left) ,
+        extraRight = (state.fixedContentRect.right - state.elementRect.right) ,
+        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) ;
+      
+      // extra *= conf.get('zoom');
 
       if (extraLeft > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height / conf.get('zoom')), color);
+        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height ), color);
       }
       if (extraRight > 0) {
-        svg += getSVGFillRectMarkup(state.elementRect.width / conf.get('zoom') + extra, extra, extraRight, (state.fixedContentRect.height / conf.get('zoom')), color);
+        svg += getSVGFillRectMarkup(state.elementRect.width  + extra, extra, extraRight, (state.fixedContentRect.height ), color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, state.elementRect.height / conf.get('zoom') + extra, state.fixedContentRect.width / conf.get('zoom'), extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, state.elementRect.height  + extra, state.fixedContentRect.width , extraBottom, color);
       }
       return svg;
     }
@@ -483,19 +487,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Return false if no valid rect
     // Only update if createOverlay or position changes
     mh.updateOverlayPosition = function(createOverlay) {
-      
+
       var element,
           elementRect,
           fixedRects,
           absoluteRect,
           previousViewRect,
           stretchForSprites = true;
+      
       if (!state.picked) {
         return false;
       }
 
       element = state.picked.get(0);
       elementRect = element.getBoundingClientRect(); // Rough bounds
+
+      console.log( elementRect.top );
 
       if (!createOverlay) {   // Just a refresh
         if (!state.elementRect) {
@@ -539,7 +546,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = fixedRects[0];
 
       state.elementRect = $.extend({}, elementRect);
-      absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
+      absoluteRect = positioning.convertFixedRectsToAbsolute([state.fixedContentRect], conf.get('zoom'))[0];
       previousViewRect = $.extend({}, state.viewRect);
       state.highlightBorderWidth = getHighlightBorderWidth();
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
@@ -560,7 +567,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3);
         var extraPaddingSVG = getSVGForExtraPadding(extra);
         var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
+
         document.documentElement.appendChild(svgFragment);
+
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
             'width' : (state.fixedContentRect.width / conf.get('zoom') + 2 * extra) + 'px',
@@ -574,7 +583,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return true; // Already created and in correct position, don't update DOM
       }
 
-      // Finally update overlay CSS -- multiply by state.zoom because it's outside the <body>
+      // Finally update overlay CSS -- multiply by conf.zoom because it's outside the <body>
       $('.' + HIGHLIGHT_OUTLINE_CLASS)
         .style({
           'top': state.viewRect.top / conf.get('zoom') - extra + 'px',

@@ -195,6 +195,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         rect = scaleRect(rect, zoom, window.pageXOffset, window.pageYOffset);
 
       }
+      // console.log(rect);
+      
       if (node.nodeType !== 1) {
         return rect;
       }
