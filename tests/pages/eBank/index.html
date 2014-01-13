@@ -93,3 +93,24 @@
 <div class="centerDivs" align="center" style="color:red;"><br/><small><b>eBank, N.A. is not a real bank.</b></small></div>
 </body>
 </html>
+
+
+<script data-provider="sitecues" type="text/javascript">
+// DO NOT MODIFY THIS SCRIPT WITHOUT ASSISTANCE FROM SITECUES
+var sitecues = window.sitecues || {};
+ 
+sitecues.config = {
+  site_id : 's-00000005',
+  speechOff: false
+};
+ 
+(function(){
+  var script = document.createElement('script'),
+  first = document.getElementsByTagName('script')[0];
+  sitecues.config.script_url=document.location.protocol+'//192.168.128.242:8000/js/sitecues.js';
+  script.src=sitecues.config.script_url;
+  script.type = 'text/javascript';
+  script.async = true;
+  first.parentNode.insertBefore(script, first);
+})();
+</script>

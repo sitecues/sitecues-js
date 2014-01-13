@@ -8,7 +8,7 @@ sitecues.def('util/common', function (common, callback, log) {
   common.kMinRectHeight = 4;
 
    // Define dependency modules.
-  sitecues.use('jquery', 'jquery/cookie', function ($) {
+  sitecues.use('jquery', 'jquery/cookie', 'conf', 'platform', function ($, ckie, conf, platform) {
     
     var kRegExpRGBString = /\d+(\.\d+)?%?/g
       , kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i
@@ -456,8 +456,8 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
   /* Validates whether the given value is a valid URL
-	 * @urlString A string
-	 */
+   * @urlString A string
+   */
 
     common.validateUrl = function(urlString) {
       return kUrlValidString.test(urlString);
@@ -522,15 +522,23 @@ sitecues.def('util/common', function (common, callback, log) {
       // log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
       // log('         accessors get right offset: ' +accessors.getRightOffset() );
       // log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
-
-      var css = {
-        left: ($(document.documentElement).outerWidth() - 
-          accessors.getWidth() -
-          (bodyHasVertScrollbar() ?
-            accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
-        )) + 'px'
-      };
-
+      if (!platform.browser.isIE) {
+        var css = {
+          left: (document.documentElement.clientWidth / conf.get('zoom') - 
+            accessors.getWidth() / conf.get('zoom') -
+            (bodyHasVertScrollbar() ?
+              accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
+          )) + 'px'
+        };
+      } else {
+        var css = {
+          left: (document.documentElement.clientWidth - 
+            accessors.getWidth() -
+            (bodyHasVertScrollbar() ?
+              accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
+          )) + 'px'
+        };
+      }
       // Apply the dynamic placement CSS.
       accessors.setCss(css);
     }
@@ -655,15 +663,15 @@ sitecues.def('util/common', function (common, callback, log) {
         var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
         var top    = Math.max( unclippedRect.top, clipRect.top );
         var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
-		    return {
-			    left: left,
-			    top: top,
-			    bottom: bottom,
-			    right: right,
-			    width: right - left,
-			    height: bottom - top
-		    };
-	    }
+        return {
+          left: left,
+          top: top,
+          bottom: bottom,
+          right: right,
+          width: right - left,
+          height: bottom - top
+        };
+      }
 
         // Get clip rectangle from ancestors in the case any of them are clipping us
         common.getAncestorClipRect = function($selector) {
@@ -688,52 +696,52 @@ sitecues.def('util/common', function (common, callback, log) {
         }
 
 
-	    /**
-	     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
-	     */
-	    common.combineIntersectingRects = function(rects, extraSpace) {
-		    function intersects(r1, r2) {
-			    return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
-				    || r2.left + r2.width + extraSpace < r1.left - extraSpace
-				    || r2.top - extraSpace > r1.top + r1.height + extraSpace
-				    || r2.top + r2.height + extraSpace < r1.top - extraSpace
-				    );
-		    }
+      /**
+       * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+       */
+      common.combineIntersectingRects = function(rects, extraSpace) {
+        function intersects(r1, r2) {
+          return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
+            || r2.left + r2.width + extraSpace < r1.left - extraSpace
+            || r2.top - extraSpace > r1.top + r1.height + extraSpace
+            || r2.top + r2.height + extraSpace < r1.top - extraSpace
+            );
+        }
 
-		    function merge(r1, r2) {
-			    var left = Math.min(r1.left, r2.left);
-			    var top = Math.min(r1.top, r2.top);
-			    var right = Math.max(r1.left + r1.width, r2.left + r2.width);
-			    var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
-			    return {
-				    left: left,
-				    top: top,
-				    width: right - left,
-				    height: bottom - top,
-				    right: right,
-				    bottom: bottom
-			    };
-		    }
+        function merge(r1, r2) {
+          var left = Math.min(r1.left, r2.left);
+          var top = Math.min(r1.top, r2.top);
+          var right = Math.max(r1.left + r1.width, r2.left + r2.width);
+          var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
+          return {
+            left: left,
+            top: top,
+            width: right - left,
+            height: bottom - top,
+            right: right,
+            bottom: bottom
+          };
+        }
 
-		    // TODO O(n^2), not ideal.
-		    // Probably want to use well-known algorithm for merging adjacent rects
-		    // into a polygon, such as:
-		    // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
-		    // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
-		    // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
-		    for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
-			    var index2 = index1 + 1;
-			    while (index2 < rects.length) {
-				    if (intersects(rects[index1], rects[index2])) {
-					    rects[index1] = merge(rects[index1], rects[index2]);
-					    rects.splice(index2, 1);
-				    }
-				    else {
-					    index2++;
-				    }
-			    }
-		    }
-	    }
+        // TODO O(n^2), not ideal.
+        // Probably want to use well-known algorithm for merging adjacent rects
+        // into a polygon, such as:
+        // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
+        // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
+        // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
+        for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
+          var index2 = index1 + 1;
+          while (index2 < rects.length) {
+            if (intersects(rects[index1], rects[index2])) {
+              rects[index1] = merge(rects[index1], rects[index2]);
+              rects.splice(index2, 1);
+            }
+            else {
+              index2++;
+            }
+          }
+        }
+      }
 
      /**
       * Helper methods.
@@ -762,31 +770,6 @@ sitecues.def('util/common', function (common, callback, log) {
        }
        return getEmsToPx(style['font-size'], ems);
      }
-
-    common.getBoundingRectMinusPadding = function(node) {
-            var range = document.createRange();
-            range.selectNode(node);
-            var rect = range.getBoundingClientRect();
-            if (node.nodeType !== 1) {
-                    return rect;
-            }
-            // Reduce by padding amount -- useful for images such as Google Logo
-            // which have a ginormous amount of padding on one side
-            // TODO: should we use common.getElementComputedStyles() ?
-            var paddingTop = parseFloat($(node).css('padding-top'));
-            var paddingLeft = parseFloat($(node).css('padding-left'));
-            var paddingBottom = parseFloat($(node).css('padding-bottom'));
-            var paddingRight = parseFloat($(node).css('padding-right'));
-            rect = {
-                    top: rect.top + paddingTop,
-                    left: rect.left + paddingLeft,
-                    width: rect.width - paddingLeft - paddingRight,
-                    height: rect.height - paddingTop - paddingBottom,
-                    right: rect.right - paddingRight,
-                    bottom: rect.bottom - paddingBottom
-            };
-            return rect;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////
     //// END: Logic for mouse-highlight intellegent selection,

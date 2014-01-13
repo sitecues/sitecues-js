@@ -85,7 +85,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           matchColorsNoAlpha,
           mostlyWhite;
 
-      if (style.backgroundColor === 'transparent') {
+      if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') {
         return false;
       }
       
@@ -199,7 +199,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           alpha;
       viz = Math.min(viz, 2);
       alpha = 0.11 * viz;
-      return 'rgba(0, 0, 255, 1)'; // Works with any background -- lightens it slightly
+      return 'rgba(0, 255, 0, 1)'; // Works with any background -- lightens it slightly
       // return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
@@ -269,10 +269,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                            hasInterestingBackgroundImage(state.styles);
       backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
+      // var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
 
       // Get the rectangle for the element itself
-      var svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">'
+      var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' // width="100px" height="100px" x="0px" y="0px" viewBox="0,0,100,100"
         + getSVGForPath(path, 0, 0, backgroundColor, 1)
         + '</svg>'
 
@@ -290,25 +291,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         'background-size'       : element.style.backgroundSize
       };
 
-      var newBackgroundImage = "url('data:image/svg+xml;utf8," + svgMarkup + "')";
-      // TODO: If IE9 (also 10?), base 64 background image must be done as base64
-      // Here's a nice base 64 encoder: http://phpjs.org/functions/base64_encode/
-      // background-image: url("data:image/svg+xml;base64,[data]>")
-      // If still doesn't work: might need to make sure base64 text ends in enough === that the length
-      // is always divisible by 4 ... or that might be a Webkit-only issue, not sure
-      $(element).style({
-        'background-image': newBackgroundImage,
-        'background-origin': 'border-box',
-        'background-clip' : 'border-box',
-        'background-attachment': 'scroll',
-        'background-size': state.fixedContentRect.width / conf.get('zoom') + 'px ' + state.fixedContentRect.height / conf.get('zoom') + 'px',
-      }, '', '!important');
-
-      $(element).style({
-        'background-repeat': 'no-repeat',
-        'background-position-x': offsetLeft / conf.get('zoom') + 'px',
-        'background-position-y': offsetTop / conf.get('zoom') + 'px'
-      }, '', ''); // Not using !important for these because it prevented them from getting cleaned up on mh.pause() in Chrome
+      var newBackgroundImage = "url('data:image/svg+xml," + escape(svgMarkup) + "')";
+      
+      element.style.backgroundImageOrigin = 'border-box';
+      element.style.backgroundClip = 'border-box';
+      element.style.backgroundAttachment = 'scroll';
+      element.style.backgroundSize = state.fixedContentRect.width / conf.get('zoom') + 'px ' + state.fixedContentRect.height / conf.get('zoom') + 'px';
+      element.style.backgroundImage = newBackgroundImage;
+      element.style.backgroundRepeat= 'no-repeat';
+      // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
+      element.style.backgroundPositionX = offsetLeft / conf.get('zoom') + 'px';
+      element.style.backgroundPositionY = offsetTop / conf.get('zoom') + 'px';
     }
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
