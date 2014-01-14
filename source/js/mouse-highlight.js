@@ -678,7 +678,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       lastScrollY = newScrollY;
 
       if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
-        verticalShift = window.pageYOffset + $('body').get(0).getBoundingClientRect().top;
+        var marginTop = parseInt($('body').css('marginTop').split('px')[0]),
+        paddingTop = parseInt($('body').css('paddingTop').split('px')[0]);
+        verticalShift = (window.pageYOffset + $('body').get(0).getBoundingClientRect().top) - (marginTop*conf.get('zoom'));
       }else{
         verticalShift = 0;
       }
