@@ -279,7 +279,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Use element rectangle to find origin (left, top) of background
       offsetLeft = state.fixedContentRect.left - state.elementRect.left;
-      offsetTop = state.fixedContentRect.top - state.elementRect.top;
+      offsetTop = (state.fixedContentRect.top - state.elementRect.top)+verticalShift;
 
       state.savedCss = {
         'background-image'      : element.style.backgroundImage,
@@ -493,7 +493,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           fixedRects,
           absoluteRect,
           previousViewRect,
-          verticalShift = 0,
           stretchForSprites = true;
       
       if (!state.picked) {
@@ -506,18 +505,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // We found a bug in IE10 & IE11 that caused getBoundingClientRect to report the .top value incorrectly,
       // by the height of the scrollbar. The following code, detects this happening, and adjusts the property
       // so that the overlay can be rendered in the correct place. This only happens, when we use transform-zoom.
-      if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
-        verticalShift = window.pageYOffset + $('body').get(0).getBoundingClientRect().top;
-        if ( verticalShift > 0 ){
-          elementRect = {
-            top: elementRect.top       + verticalShift,
-            bottom: elementRect.bottom + verticalShift,
-            left: elementRect.left,
-            right: elementRect.right,
-            width: elementRect.width,
-            height: elementRect.height
-          };
-        }
+      if ( verticalShift > 0 ){
+        elementRect = {
+          top: elementRect.top       + verticalShift,
+          bottom: elementRect.bottom + verticalShift,
+          left: elementRect.left,
+          right: elementRect.right,
+          width: elementRect.width,
+          height: elementRect.height
+        };
       }
 
       if (!createOverlay) {   // Just a refresh
@@ -667,7 +663,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     var lastScrollY = 0,
-      lastScrollDirection = null;
+      lastScrollDirection = null,
+      verticalShift = 0;
     
     mh.scrollCheck = function (e) {
       var newScrollY = window.scrollY || window.pageYOffset;
@@ -679,6 +676,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       lastScrollY = newScrollY;
+
+      if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
+        verticalShift = window.pageYOffset + $('body').get(0).getBoundingClientRect().top;
+      }else{
+        verticalShift = 0;
+      }
     }
 
     // refresh status of enhancement on page
