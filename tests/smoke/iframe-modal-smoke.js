@@ -66,7 +66,7 @@ describe("sitecues", function() {
       
 
 /******************* HELP PAGE *******************************/
-
+/*
       // Here we begin to test 'Help'
       it("Should open toolbar dropdown and show Help page", function(done) {
         session.browser.elementById(CSS_SELECTOR_LOGO, function(error, logo) {
@@ -142,9 +142,9 @@ describe("sitecues", function() {
           });
         });
       });
-
+*/
 /******************* FEEDBACK PAGE *************************/
-
+/*
       // Here we begin to test 'Feedback'
       it("Should open toolbar dropdown and show Feedback page", function(done) {
         session.browser.elementById(CSS_SELECTOR_LOGO, function(error, logo) {
