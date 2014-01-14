@@ -486,13 +486,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Update highlight overlay
     // Return false if no valid rect
     // Only update if createOverlay or position changes
-    mh.updateOverlayPosition = function(createOverlay) {
+    mh.updateOverlayPosition = function(createOverlay) {/////////
 
       var element,
           elementRect,
           fixedRects,
           absoluteRect,
           previousViewRect,
+          verticalShift = 0,
           stretchForSprites = true;
       
       if (!state.picked) {
@@ -502,7 +503,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element = state.picked.get(0);
       elementRect = element.getBoundingClientRect(); // Rough bounds
 
-      console.log( elementRect.top );
+      // We found a bug in IE10 & IE11 that caused getBoundingClientRect to report the .top value incorrectly,
+      // by the height of the scrollbar. The following code, detects this happening, and adjusts the property
+      // so that the overlay can be rendered in the correct place. This only happens, when we use transform-zoom.
+      if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
+        verticalShift = window.pageYOffset + $('body').get(0).getBoundingClientRect().top;
+        if ( verticalShift > 0 ){
+          elementRect = {
+            top: elementRect.top       + verticalShift,
+            bottom: elementRect.bottom + verticalShift,
+            left: elementRect.left,
+            right: elementRect.right,
+            width: elementRect.width,
+            height: elementRect.height
+          };
+        }
+      }
 
       if (!createOverlay) {   // Just a refresh
         if (!state.elementRect) {
@@ -586,7 +602,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Finally update overlay CSS -- multiply by conf.zoom because it's outside the <body>
       $('.' + HIGHLIGHT_OUTLINE_CLASS)
         .style({
-          'top': state.viewRect.top / conf.get('zoom') - extra + 'px',
+          'top': ((state.viewRect.top / conf.get('zoom') - extra)-(verticalShift/conf.get('zoom'))) + 'px',
           'left':  state.viewRect.left / conf.get('zoom') - extra + 'px'
         }, '', 'important');
       return true;
@@ -594,6 +610,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     mh.update = function(event) {
       // break if highlight is disabled
+
       if (!mh.enabled) {
         return false;
       }
@@ -649,6 +666,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.showTimer = setTimeout(mh.show, 40);
     }
 
+    var lastScrollY = 0,
+      lastScrollDirection = null;
+    
+    mh.scrollCheck = function (e) {
+      var newScrollY = window.scrollY || window.pageYOffset;
+
+      if (lastScrollY < newScrollY) {
+        lastScrollDirection = 1; // Down
+      } else if (lastScrollY > newScrollY) {
+        lastScrollDirection = -1; // Up
+      }
+
+      lastScrollY = newScrollY;
+    }
+
     // refresh status of enhancement on page
     mh.refresh = function() {
         if (mh.enabled) {
@@ -656,6 +688,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
         // and there is no delay waiting for the user to stop before the event is fired
           $(document)
+            .on('scroll', mh.scrollCheck)
             .on('mousemove mousewheel', mh.update)
             .on('focusin focusout', testFocus);
           $(window)
