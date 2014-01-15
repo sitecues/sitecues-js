@@ -103,11 +103,11 @@ sitecues.def('zoom', function (zoom, callback, log) {
      */
     var renderPage = function () {
       setTimeout(function() {
-        document.body.style.webkitTransform = "rotate(0)";
+        document.body.style.webkitTransform = "";
         setTimeout(function() {
-          document.body.style.webkitTransform = "";
-        }, 50);
-      }, 50);
+          document.body.style.webkitTransform = "rotate(0deg)"; 
+        }, 5);
+      }, 5);
           
     }
     /**
@@ -152,11 +152,13 @@ sitecues.def('zoom', function (zoom, callback, log) {
                     }); 
       
       if (!zoom.resizing){ sitecues.emit('zoomAfter'); } //Required for re-positioning the fixed elements.
-      // Do we need this line below as this may be calculated elswhere?
+      
+      // Un-Blur text in Chrome
       if (platform.browser.isChrome) {
-        //renderPage();
+        renderPage();
       }
 
+      // Do we need this line below as this may be calculated elswhere?
       zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
       
       zoom.checkForScrollbar();
