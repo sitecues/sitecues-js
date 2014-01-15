@@ -22,7 +22,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
   zoom.resizing = false;
 
   // get dependencies
-  sitecues.use('jquery', 'conf', 'util/common', function ($, conf, common) {
+  sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
     
     zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
     
@@ -88,14 +88,28 @@ sitecues.def('zoom', function (zoom, callback, log) {
     sitecues.on('zoom/decrease', function() {
       conf.set('zoom', conf.get('zoom') - zoom.step);
     });
-    /**
-    * [
-    * The width of the html element should always match the width of the viewport.
-    * document.documentElement.clientWidth reports the *viewport* dimensions (regardless of the <html> dimensions)
-    * in CSS pixels and is cross-browser compatible.  Does not factor in the scrollbar dimensions.
-    * ]
-    * 
-    */
+      /**
+     * [renderPage purpose is to render text clearly in browsers (chrome mac only (for now))
+     * that do not repaint the DOM when using CSS Transforms.  This function simply sets a 
+     * property, which is hopefully not set on pages sitecues runs on, that forces repaint.
+     * 50ms of time is required, in my opinion, because the browser may not be done Transforming
+     * by the time Javascript is executed without the setTimeout.
+     *  
+     * See here: https://equinox.atlassian.net/wiki/display/EN/Known+Issues
+     *
+     * Note: This problem is not consistent across websites.  This function is in response to 
+     * behavior experienced on www.nytimes.com]
+     * 
+     */
+    var renderPage = function () {
+      setTimeout(function() {
+        document.body.style.webkitTransform = "rotate(0)";
+        setTimeout(function() {
+          document.body.style.webkitTransform = "";
+        }, 50);
+      }, 50);
+          
+    }
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
     * viewport to properly resize the html elements' width.  We must also re-zoom the page as it handles the logic
@@ -118,7 +132,14 @@ sitecues.def('zoom', function (zoom, callback, log) {
       zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
     });
     
-    
+    /**
+    * [
+    * The width of the html element should always match the width of the viewport.
+    * document.documentElement.clientWidth reports the *viewport* dimensions (regardless of the <html> dimensions)
+    * in CSS pixels and is cross-browser compatible.  Does not factor in the scrollbar dimensions.
+    * ]
+    * 
+    */
     var zoomFn = function (value) {
       
       var newBodyWidth = Math.round(zoom.originalDocumentWidth/value);
@@ -132,9 +153,14 @@ sitecues.def('zoom', function (zoom, callback, log) {
       
       if (!zoom.resizing){ sitecues.emit('zoomAfter'); } //Required for re-positioning the fixed elements.
       // Do we need this line below as this may be calculated elswhere?
+      if (platform.browser.isChrome) {
+        //renderPage();
+      }
+
       zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
       
       zoom.checkForScrollbar();
+
 
       // notify all about zoom change
       sitecues.emit('zoom', value);
