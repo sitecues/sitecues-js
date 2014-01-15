@@ -199,8 +199,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           alpha;
       viz = Math.min(viz, 2);
       alpha = 0.11 * viz;
-      return 'rgba(0, 255, 0, 1)'; // Works with any background -- lightens it slightly
-      // return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
+      // return 'rgba(0, 255, 0, 1)'; // Works with any background -- lightens it slightly
+      return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
     function getOpaqueBackgroundColor() {
@@ -212,8 +212,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           green = red,
           blue = Math.round(254 - 5 * decrement),
           color = 'rgb(' + red + ',' + green + ',' + blue + ')';
-      // return color;
-      return 'rgba(255, 0, 0, 1)'; // Works with any background -- lightens it slightly
+      return color;
+      // return 'rgba(255, 0, 0, 1)'; // Works with any background -- lightens it slightly
     }
 
     // Return an array of styles in the ancestor chain, including fromElement, not including toElement
