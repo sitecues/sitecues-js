@@ -89,6 +89,7 @@ files=\
 	source/js/html-build.js \
 	source/js/status.js \
 	source/js/sitepicker.js \
+	source/js/fixFixedBadgeAndPanel.js \
 	
 
 https=off
