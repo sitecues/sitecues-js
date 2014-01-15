@@ -8,7 +8,7 @@ sitecues.def('util/common', function (common, callback, log) {
   common.kMinRectHeight = 4;
 
    // Define dependency modules.
-  sitecues.use('jquery', 'jquery/cookie', 'conf', 'platform', function ($, ckie, conf, platform) {
+  sitecues.use('jquery', 'jquery/cookie', 'conf', 'platform', function ($, cockie, conf, platform) {
     
     var kRegExpRGBString = /\d+(\.\d+)?%?/g
       , kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i

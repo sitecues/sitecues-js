@@ -564,6 +564,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
       state.viewRect = $.extend({ }, absoluteRect);
       var extra = state.highlightPaddingWidth + state.highlightBorderWidth;
+      conf.set('absoluteRect', absoluteRect);
 
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
