@@ -337,11 +337,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     widthOf50xChars = xCharWidth * minXCharsQuantity,
                     widthOf65xChars = xCharWidth * maxXCharsQuantity,
                     $testNode = createTestNode($el[0]),
-                     maxWidth  = viewport.width,
+                    maxWidth  = viewport.width,
                     maxHeight = viewport.height;
             
-                // setTimeout(0, function() {$testNode.remove();}); 
-
+                // Remove testNode once the script finished execution.
+                setTimeout(function() {$testNode.remove();}, 0);
                 if ((currentWidth <= widthOf50xChars) && !common.hasVertScroll($el[0])) {
                     // All good, no need for constrains.
                     return false;
@@ -355,7 +355,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                      if (expandedWidth && (expandedWidth < maxWidth)) {
                          return expandedWidth;
                      }
-                     $testNode.remove();
                      // Otherwise, shorten to 50 x-widths
                      return widthOf50xChars;
                 }
@@ -366,7 +365,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                 // Find the best constrained width, if any needed.
                 var constrainedWidth = _recurseWidthCloseToNChars($testNode, minXCharsQuantity, currentWidth, widthOf50xChars, maxHeight);
-                $testNode.remove();
                 return constrainedWidth;
             }
 
@@ -379,8 +377,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // todo: copy-set all of the styles assigned to ID as they may affect the font?
                         // Having > 1 element with the same ID may cause layout problems.
                         .attr('id', '')
-                        .css('visibility', 'hidden')
-                        .appendTo('body');
+                        .css('visibility', 'visible')
+                        .appendTo($(el).parent()[0]);
                 return $(testNode);
             }
 
