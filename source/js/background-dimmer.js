@@ -16,9 +16,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       }
     );
 
-    var nativeZoom = 'zoom' in document.createElement('div').style
-      , wrapper
-      ;
+    var wrapper;
 
     // Dims stuff. Word. ///////////////////////////////////////////////////////
     backgroundDimmer.dimBackgroundContent = function (hlbNode, zoom) {
@@ -28,8 +26,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       // Define the coordinates of the whole document to be dimmed out
       var viewport    = positioning.getViewportDimensions(0, zoom)
         , zIndex      = 2147483646
-        , offsetTop   = viewport.top
-        , offsetLeft  = viewport.left
+        , offsetTop   = viewport.top / zoom
+        , offsetLeft  = viewport.left / zoom
         , svgPath     = getSVGPath(viewport, hlbNode)
         , inner       = svgPath.inner
         , dimmerSVG
@@ -38,7 +36,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       wrapper = svgPath.wrapper;
 
       // Create dimmer SVG overlay
-      dimmerSVG = '<svg width="' + viewport.width + 'px' +'" height="' + viewport.height + 'px' + '" xmlns="http://www.w3.org/2000/svg">' +
+      dimmerSVG = '<svg width="' + viewport.width/zoom + 'px' +'" height="' + viewport.height/zoom + 'px' + '" xmlns="http://www.w3.org/2000/svg">' +
 
           // Use an SVG path to create the dimmer area
           '<path '+
@@ -55,10 +53,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
           // Close the SVG
           '</svg>';
 
-      if (!('zoom' in document.createElement('div').style)) {
-        offsetTop /= zoom;
-        offsetLeft /= zoom;
-      }
+
 
       if(platform.browser.isIE) {
         // This is specifically a problem with IE9, other versions are TBD
@@ -82,10 +77,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'display'       : 'block',
         'z-index'       : zIndex,
         'opacity'       : 0,
-        'left'          : !nativeZoom ? offsetLeft   + 'px' : '0px', //EQ-880
-        'top'           : !nativeZoom ? offsetTop    + 'px' : '0px', //EQ-880
-        'width'         : viewport.width  + 'px',
-        'height'        : viewport.height + 'px',
+        'left'          : offsetLeft   + 'px', //EQ-880
+        'top'           : offsetTop    + 'px', //EQ-880
+        'width'         : viewport.width/zoom  + 'px',
+        'height'        : viewport.height/zoom + 'px',
         'overflow'      : 'visible',
         'pointer-events': 'none',
         'transition'    : 'opacity 150ms ease-out'
@@ -157,41 +152,22 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       RETURNS SLIGHTLY DIFFERENT...and only when zoom is lvl 1! ugh.
       */
       var zoom        = conf.get('zoom')
-        , offsetLeft  = $hlbNode.offset().left
+        , offsetLeft  = $hlbNode.offset().left/zoom
         , offsetTop   = $hlbNode.offset().top
         , pageXOffset = window.pageXOffset
         , pageYOffset = window.pageYOffset
         , inner
         ;
-      
-        //TODO: Figure out a better way to get the offset.left...I've tried to figure
-        //      out the math involved for way too long, and decided to use the easier way.
-        //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-      if (!('zoom' in document.createElement('div').style)) {
-        
-        $('body').css({'transform':'scale(1)'});
-        
-        offsetLeft   = $hlbNode.offset().left; 
-        
-        $('body').css({'transform':'scale('+zoom+')'});
-        
-        elem.width  /= zoom; 
-        elem.height /= zoom;
-        offsetTop   /= zoom;
-        offsetLeft  -= pageXOffset / zoom;
-        offsetTop   -= pageYOffset / zoom;
 
-      } else {
 
-        offsetLeft  -= pageXOffset;
+        offsetLeft  -= pageXOffset/zoom;
         offsetTop   -= pageYOffset;
 
-      }
 
-      inner = 'M'+ (offsetLeft + 2)  +' '+ (offsetTop + 2)   +' '+
-                  'l'+ (elem.width - 4)  +' '+ 0                 +' '+
-                  'l'+ 0                 +' '+ (elem.height - 4) +' '+
-                  'l'+ (-elem.width + 4) +' '+ 0;
+      inner = 'M'+ (offsetLeft + 2)  +' '+ (offsetTop/zoom + 2)   +' '+
+                  'l'+ (elem.width/zoom - 4)  +' '+ 0                 +' '+
+                  'l'+ 0                 +' '+ (elem.height/zoom - 4) +' '+
+                  'l'+ (-elem.width/zoom + 4) +' '+ 0;
 
       return inner;
     
@@ -210,18 +186,13 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         
         //EQ-880
         , svgPath = getSVGPath(viewport, hlb)
-        , offsetTop = viewport.top
-        , offsetLeft = viewport.left
-        ;
-
-      if (!('zoom' in document.createElement('div').style)) {
-        offsetTop /= zoom;
-        offsetLeft /= zoom;
-      }        
+        , offsetTop = viewport.top/zoom
+        , offsetLeft = viewport.left/zoom
+        ;    
       
       backgroundDimmer.$dimmerContainer.style({
-        'width'  : viewport.width  + 'px',
-        'height' : viewport.height + 'px',
+        'width'  : viewport.width/zoom  + 'px',
+        'height' : viewport.height/zoom + 'px',
         'top'    : offsetTop       + 'px',
         'left'   : offsetLeft      + 'px'
       }, '', 'important');
