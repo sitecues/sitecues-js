@@ -142,15 +142,14 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
     sitecues.on('scroll', function (e) {
       scrollCheck();
       fixBadgeAndPanel(); //Reposition the badge and panel
-      fixedElements = getFixedElementsMinusBadgeAndPanel(); //There might be new fixed elements, so cache them.
-      fixFixedElements(fixedElements); //Reposition the fixed elements
+      fixFixedElements(getFixedElementsMinusBadgeAndPanel()); //Reposition the fixed elements
     });
     /**
      * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
      */
-    sitecues.on('zoomAfter', function (value) {
+    sitecues.on('zoom', function (value) {
       fixBadgeAndPanel();
-      fixFixedElements(fixedElements, value);      
+      fixFixedElements(getFixedElementsMinusBadgeAndPanel(), value);      
     });
     //When the panel has completed its animation, cache the coordinates
     sitecues.on('panel/show', function () {
