@@ -12,7 +12,30 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
                      } else {
                        return false;
                      }
-                   }());
+                   }()),
+        lastScrollY = 0,
+        lastScrollDirection = null,
+        verticalShift = 0;
+    
+    var scrollCheck = function (e) {
+      var newScrollY = window.scrollY || window.pageYOffset;
+
+      if (lastScrollY < newScrollY) {
+        lastScrollDirection = 1; // Down
+      } else if (lastScrollY > newScrollY) {
+        lastScrollDirection = -1; // Up
+      }
+
+      lastScrollY = newScrollY;
+
+      if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
+        var marginTop = parseInt($('body').css('marginTop').split('px')[0]),
+        paddingTop = parseInt($('body').css('paddingTop').split('px')[0]);
+        verticalShift = (window.pageYOffset + $('body').get(0).getBoundingClientRect().top) - (marginTop*conf.get('zoom'));
+      }else{
+        verticalShift = 0;
+      }
+    };
     /**
      * [Helper function that returns the translateX and translateY of an element]
      * @return {[array]} [translateX and translateY of an element]
@@ -49,7 +72,9 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
                                           (zoom.badgeBoundingBox.top  - document.getElementById('sitecues-badge').getBoundingClientRect().top)  + 'px) ' 
             });            
           }
-        } 
+        } else {
+          $('#sitecues-badge').css({'transform':'translate(0px,'+verticalShift+'px)'})
+        }
       }
       if (!platform.browser.isIE) { //If the browser is not IE
         if (zoom.panelBoundingBox) {//If the bounding box of the panel is cached
@@ -62,6 +87,8 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
                                         (zoom.panelBoundingBox.top  - document.getElementById('sitecues-panel').getBoundingClientRect().top)  + 'px) ' 
           });
         }
+      } else {
+        $('#sitecues-panel').css({'transform':'translate(0px,'+verticalShift+'px)'})
       }
     };
     /**
@@ -92,6 +119,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
         the badge and panel, already have transforms applied.  Therefore, we must apply
         the transforms that are reactions to the scroll events on top of any transforms.
        */
+      console.log(verticalShift)
       for (var i = 0; i < elements.length; i += 1) {
         if (!platform.browser.isIE) {
           $(elements[i]).css({
@@ -103,7 +131,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
           $(elements[i]).css({
             'transform':'scale('+conf.get('zoom')+')',
             'transform-origin':(-($(elements[i]).get(0).getBoundingClientRect().left)) + 'px ' + 
-                               (-($(elements[i]).get(0).getBoundingClientRect().top)) + 'px'
+                               (-($(elements[i]).get(0).getBoundingClientRect().top) - verticalShift/value) + 'px'
           })
         }       
       }
@@ -112,6 +140,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
      * [When the page scrolls, reposition fixed elements, badge, and panel]
      */
     sitecues.on('scroll', function (e) {
+      scrollCheck();
       fixBadgeAndPanel(); //Reposition the badge and panel
       fixedElements = getFixedElementsMinusBadgeAndPanel(); //There might be new fixed elements, so cache them.
       fixFixedElements(fixedElements); //Reposition the fixed elements
