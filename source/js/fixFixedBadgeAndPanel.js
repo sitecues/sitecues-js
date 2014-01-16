@@ -81,8 +81,10 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
      * [Generalized zooming function that works across browsers using CSS Transforms]
      * @param  {[float]} value [The amount we will transform scale the html element]
      */
-    var fixFixedElements = function (elements) {
-         
+    var fixFixedElements = function (elements, value) {
+      
+      var value = value || conf.get('zoom');
+      
       if (!elements || !elements.length) return;
       /*
         For every fixed element on the page, we must translate them to their correct positions using
@@ -97,10 +99,11 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
                                        window.pageYOffset/conf.get('zoom') + 'px)'
           });
         } else {
+          $(elements[i]).css({'transform':''});
           $(elements[i]).css({
             'transform':'scale('+conf.get('zoom')+')',
-            'transform-origin':(-($(elements[i]).get(0).getBoundingClientRect().left)/conf.get('zoom')) + 'px ' + 
-                               (-($(elements[i]).get(0).getBoundingClientRect().top)/conf.get('zoom')) + 'px'
+            'transform-origin':(-($(elements[i]).get(0).getBoundingClientRect().left)) + 'px ' + 
+                               (-($(elements[i]).get(0).getBoundingClientRect().top)) + 'px'
           })
         }       
       }
@@ -118,7 +121,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
      */
     sitecues.on('zoomAfter', function (value) {
       fixBadgeAndPanel();
-      fixFixedElements(fixedElements);      
+      fixFixedElements(fixedElements, value);      
     });
     //When the panel has completed its animation, cache the coordinates
     sitecues.on('panel/show', function () {
@@ -134,6 +137,8 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
         }
       }
     });
+
+    fixFixedElements(getFixedElementsMinusBadgeAndPanel(), conf.get('zoom'));
 
   });
 
