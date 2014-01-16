@@ -176,7 +176,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         else {  /* Panel expands left */
           
           if (!platform.browser.isIE) {
-            right = ((document.documentElement.clientWidth - badgeRect.right) / conf.get('zoom') - 4);
+            right = ((document.documentElement.clientWidth - badgeRect.right) / conf.get('zoom') - 4 / conf.get('zoom'));
           } else {
             right = ((document.documentElement.clientWidth - badgeRect.right) - 4);
           }
@@ -188,7 +188,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
 
         $panel.style({
-          top:  ((badgeRect.top / conf.get('zoom') - 5)) + 'px',
+          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom'))) + 'px',
           left: left,
           right: right         
         }, '', 'important');
