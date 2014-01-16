@@ -4,14 +4,19 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
 
   sitecues.use('jquery', 'zoom', 'conf', 'badge', 'platform', function ($, zoom, conf, badge, platform) {
 
-    var fixedElements,
-        fixBadge = (function () {
-          if ($('#sitecues-badge').css('position') === 'fixed') {
-            return true;
-          }
-          return false;
-        }());
-
+    var fixedElements, //All elements on a page that have fixed positions, with the exception of panel & badge
+        
+        fixBadge = (function () { //boolean to determine if badge requires repositioning
+                     if ($('#sitecues-badge').css('position') === 'fixed') {
+                       return true;
+                     } else {
+                       return false;
+                     }
+                   }());
+    /**
+     * [Helper function that returns the translateX and translateY of an element]
+     * @return {[array]} [translateX and translateY of an element]
+     */
     var getTranslate = (function () {
       var _MATRIX_REGEXP = /matrix\s*\(\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*,\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*\)/i;
       return function (element) {
@@ -24,55 +29,33 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
         return [parseFloat(translateX), parseFloat(translateY)];
       };
     }());
-    //We should investigate if we can break this method (e.g. scrolling really fast)
-    var fixBadgeAndPanelOnScroll = function () {
     
-      var currentTransformBadge = getTranslate(document.getElementById('sitecues-badge')),
-          currentTransformPanel = getTranslate(document.getElementById('sitecues-panel')),
-          currentZoom           = conf.get('zoom'),
-          lastScrollX           = zoom.lastScroll[0],
-          lastScrollY           = zoom.lastScroll[1],
-          currentScrollX        = window.pageXOffset/currentZoom,
-          currentScrollY        = window.pageYOffset/currentZoom,
-          //Add the amount scrolled since the last scroll
-          badgeTranslateX = (currentTransformBadge[0] * currentZoom) + (currentScrollX - lastScrollX) * currentZoom,
-          badgeTranslateY = (currentTransformBadge[1] * currentZoom) + (currentScrollY - lastScrollY) * currentZoom,
-          panelTranslateX = (currentTransformPanel[0] * currentZoom) + (currentScrollX - lastScrollX) * currentZoom,
-          panelTranslateY = (currentTransformPanel[1] * currentZoom) + (currentScrollY - lastScrollY) * currentZoom;
-      
-      if (fixBadge) {
-        if (!platform.browser.isIE) {
-          $('#sitecues-badge').css({
-            'transform':'scale('+1/currentZoom+') translate(' + badgeTranslateX + 'px, ' + badgeTranslateY + 'px)'
-          });
-        }
-      }
-      if (!platform.browser.isIE) {
-        $('#sitecues-panel').css({
-          'transform':'scale('+1/currentZoom+') translate(' + panelTranslateX + 'px, ' + panelTranslateY + 'px)'
-        });
-      }
-    };
-
-    var fixBadgeAndPanelOnZoom = function () {
-      if (fixBadge) {
-        if (!platform.browser.isIE) {
-          if (zoom.badgeBoundingBox) {
-            $('#sitecues-badge').css({'transform': ''})
-            $('#sitecues-badge').css({
+    //We should investigate if we can break this method (e.g. scrolling really fast)
+    /**
+     * [fixBadgeAndPanelOnScroll Fixes the positioning of the panel and badge.]
+     * @return {[undefined]}
+     */
+    var fixBadgeAndPanel = function () {
+    
+      if (fixBadge) {                  //If the badge is fixed
+        if (!platform.browser.isIE) {  //If the browser is not IE
+          if (zoom.badgeBoundingBox) { //If the bounding box of the badge is cached
+            $('#sitecues-badge').css({'transform': ''}); //Remove all transforms
+            //Set the origin to top left, Inversely scale, Translate by the difference between the cached coordinates and the current coordinates
+            $('#sitecues-badge').css({  
               'transform-origin' : '0% 0%',
-              'transform': 'scale('+1/conf.get('zoom')+')' + 
+              'transform': 'scale('+1/conf.get('zoom')+')' +
                            'translate(' + (zoom.badgeBoundingBox.left - document.getElementById('sitecues-badge').getBoundingClientRect().left) + 'px, ' + 
                                           (zoom.badgeBoundingBox.top  - document.getElementById('sitecues-badge').getBoundingClientRect().top)  + 'px) ' 
-            });
-            
+            });            
           }
         } 
       }
-      if (!platform.browser.isIE) {
-        if (zoom.panelBoundingBox) {
-          $('#sitecues-panel').css({'transform': ''})
-          $('#sitecues-panel').css({
+      if (!platform.browser.isIE) { //If the browser is not IE
+        if (zoom.panelBoundingBox) {//If the bounding box of the panel is cached
+          $('#sitecues-panel').css({'transform': ''}); //Remove all transforms
+          //Set the origin to top left, Inversely scale, Translate by the difference between the cached coordinates and the current coordinates 
+          $('#sitecues-panel').css({ 
             'transform-origin' : '0% 0%',
             'transform': 'scale('+1/conf.get('zoom')+')' +
                          'translate(' + (zoom.panelBoundingBox.left - document.getElementById('sitecues-panel').getBoundingClientRect().left) + 'px, ' + 
@@ -126,31 +109,30 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
      * [When the page scrolls, reposition fixed elements, badge, and panel]
      */
     sitecues.on('scroll', function (e) {
+      fixBadgeAndPanel(); //Reposition the badge and panel
       fixedElements = getFixedElementsMinusBadgeAndPanel(); //There might be new fixed elements, so cache them.
       fixFixedElements(fixedElements); //Reposition the fixed elements
-      fixBadgeAndPanelOnScroll(); //Reposition the badge and panel
-    });
-    /**
-     * [Prepare to reposition fixed elements, badge, and panel]
-     */
-    sitecues.on('zoomBefore', function (value) {
-      
-      if (fixBadge) {
-        if (!zoom.badgeBoundingBox && $('#sitecues-badge').length) {
-          zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
-        }
-      }
-      if ($('#sitecues-panel').length) {
-        zoom.panelBoundingBox = document.getElementById('sitecues-panel').getBoundingClientRect();
-      }  
-     
     });
     /**
      * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
      */
     sitecues.on('zoomAfter', function (value) {
-      fixFixedElements(fixedElements)
-      fixBadgeAndPanelOnZoom();      
+      fixBadgeAndPanel();
+      fixFixedElements(fixedElements);      
+    });
+    //When the panel has completed its animation, cache the coordinates
+    sitecues.on('panel/show', function () {
+      if ($('#sitecues-panel').length) {
+        zoom.panelBoundingBox = document.getElementById('sitecues-panel').getBoundingClientRect();
+      }  
+    });
+    //When the badge has completed its animation, cache the coordinates
+    sitecues.on('badge/show', function () {
+      if (fixBadge) {
+        if (!zoom.badgeBoundingBox && $('#sitecues-badge').length) {
+          zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
+        }
+      }
     });
 
   });

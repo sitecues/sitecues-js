@@ -78,6 +78,7 @@ sitecues.def('badge', function (badge, callback, log) {
       if (conf.get('badgeEnabled')) {
         log.info('Showing badge');
         $(badge.panel).fadeIn('slow', function() {
+          sitecues.emit('badge/show')
           if (success) {
             success();
           }

@@ -144,8 +144,6 @@ sitecues.def('zoom', function (zoom, callback, log) {
       
       var newBodyWidth = Math.round(zoom.originalDocumentWidth/value);
       
-      if (!zoom.resizing){ sitecues.emit('zoomBefore');  }//Required for caching the positions of fixed elements.
-      
       $('html').css({'width'             : newBodyWidth + 'px',
                      'transform-origin'  : '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
                      'transform'         : 'scale('+value+')',
