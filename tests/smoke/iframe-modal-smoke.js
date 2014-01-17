@@ -57,9 +57,9 @@ describe("sitecues", function() {
         });
       });
 
-      it("Should see the toolbar on the page", function(done) {
-        session.browser.elementByClassName(CSS_SELECTOR_TOOLBAR, function(error) {
-          expect(error).to.be.null;
+      it("Should not see the toolbar on the page", function(done) {
+        session.browser.elementByClassNameOrNull(CSS_SELECTOR_TOOLBAR, function(error, value) {
+          expect(value).to.be.null;
           done();
         });
       });
