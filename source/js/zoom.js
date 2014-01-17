@@ -141,18 +141,15 @@ sitecues.def('zoom', function (zoom, callback, log) {
     * 
     */
     var zoomFn = function (value) {
-      
+
       var newBodyWidth = Math.round(zoom.originalDocumentWidth/value);
-      
-      if (!zoom.resizing){ sitecues.emit('zoomBefore');  }//Required for caching the positions of fixed elements.
       
       $('html').css({'width'             : newBodyWidth + 'px',
                      'transform-origin'  : '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
                      'transform'         : 'scale('+value+')',
                     }); 
       
-      if (!zoom.resizing){ sitecues.emit('zoomAfter'); } //Required for re-positioning the fixed elements.
-      
+      if (!zoom.resizing){ sitecues.emit('zoomAfter', value);} //Required for re-positioning the fixed elements.
       // Un-Blur text in Chrome
       if (platform.browser.isChrome) {
         renderPage();
@@ -173,8 +170,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
     // Get and set are now in 'source/js/conf/user/manager.js'
     conf.get('zoom', zoomFn);  //This use to be an anonymous function, 
                                //but we must force a zoom if the browser window is resized
-                               //
-
+                               //      
     // done
     callback();
 
