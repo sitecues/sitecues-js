@@ -26,13 +26,16 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       // Define the coordinates of the whole document to be dimmed out
       var viewport    = positioning.getViewportDimensions(0, zoom)
         , zIndex      = 2147483646
-        , offsetTop   = viewport.top / zoom
-        , offsetLeft  = viewport.left / zoom
+        , offsetTop   = viewport.top 
+        , offsetLeft  = viewport.left
         , svgPath     = getSVGPath(viewport, hlbNode)
         , inner       = svgPath.inner
         , dimmerSVG
         ;
-
+      if (platform.browser.isIE) {
+        offsetLeft = 0;
+        offsetTop  = 0;
+      }
       wrapper = svgPath.wrapper;
 
       // Create dimmer SVG overlay
