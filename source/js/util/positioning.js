@@ -568,8 +568,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       var result = {
         left: scrollPos.left + inset,
         top: scrollPos.top + inset,
-        width: window.innerWidth - insetX2,
-        height: window.innerHeight - insetX2
+        width: document.documentElement.clientWidth - insetX2,
+        height: document.documentElement.clientHeight - insetX2
       };
       result.right = result.left + result.width;
       result.bottom = result.top + result.height;

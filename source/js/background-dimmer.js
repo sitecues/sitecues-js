@@ -86,15 +86,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'transition'    : 'opacity 150ms ease-out'
       }, '', 'important');
 
-      $('body').append( this.$dimmerContainer );
+      $('html').append( this.$dimmerContainer );
       
       // Animate the dimmer background container
       this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
-
-      //TODO - Necessary to get pixel perfect in FF EQ-880
-      if (!('zoom' in document.createElement('div').style)) {
-        onZoomChange(hlbNode);
-      }
 
     };
 
@@ -147,10 +142,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     
     function getInnerDimensions (elem, $hlbNode) {
       // Wind clockwise path around whole document.
-      /* EQ-880
-      $hlbNode.offset().left - window.pageXOffset + 2) +' '+ ($hlbNode.offset().top - window.pageYOffset + 2)
-      RETURNS SLIGHTLY DIFFERENT...and only when zoom is lvl 1! ugh.
-      */
+
       var zoom        = conf.get('zoom')
         , offsetLeft  = $hlbNode.offset().left/zoom
         , offsetTop   = $hlbNode.offset().top
