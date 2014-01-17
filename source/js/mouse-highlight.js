@@ -664,26 +664,51 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.showTimer = setTimeout(mh.show, 40);
     }
 
+    // Remember the last scrollY value
     var lastScrollY = 0,
+      
+      // Remember the last scroll direction
       lastScrollDirection = null,
+      
+      // The virtical shift is the amount that the viewport height changes when the horizontal scrollbar appears
       verticalShift = 0;
     
+    // Check if the window is scrolled up or down
     mh.scrollCheck = function (e) {
+
+      // Get the scrollY value for all browsers
       var newScrollY = window.scrollY || window.pageYOffset;
 
+      // Decide which direction the user has scrolled
       if (lastScrollY < newScrollY) {
         lastScrollDirection = 1; // Down
       } else if (lastScrollY > newScrollY) {
         lastScrollDirection = -1; // Up
       }
 
+      // Store the last scrollY position
       lastScrollY = newScrollY;
 
+      // IE10 & IE11 report getBoundingClientRect wrong when using transform-zoom and scrolling down,
+      // We need to correct the getBoundingClientRect results if the scroll diection is down (1) and the browser is IE10-IE11
       if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
+        
+        // Get the margin top of the body
         var marginTop = parseInt($('body').css('marginTop').split('px')[0]),
+        
+        // Store the padding top of the body
         paddingTop = parseInt($('body').css('paddingTop').split('px')[0]);
+
+        // Store the number of pixels tha page has been shifted by the horizonal scrollbar
+        // (this calculates the correct scroll bar height even when the heigh/width of scrollbars
+        // are changed in the OS.
+        // 
+        // The virtical shift is used later on of make minor adjustments to the getBoundingClientRect
+        // values when the SVGs are drawn for the mouse-highlight.
         verticalShift = (window.pageYOffset + $('body').get(0).getBoundingClientRect().top) - (marginTop*conf.get('zoom'));
       }else{
+
+        // Remember to switch virticalshift off when it is not needed
         verticalShift = 0;
       }
     }
