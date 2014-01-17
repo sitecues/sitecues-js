@@ -80,16 +80,15 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'display'       : 'block',
         'z-index'       : zIndex,
         'opacity'       : 0,
-        'left'          : offsetLeft / zoom   + 'px', //EQ-880
-        'top'           : offsetTop / zoom   + 'px', //EQ-880
+        'left'          : offsetLeft / zoom   + 'px',
+        'top'           : offsetTop / zoom   + 'px',
         'width'         : viewport.width/zoom  + 'px',
         'height'        : viewport.height/zoom + 'px',
         'overflow'      : 'visible',
         'pointer-events': 'none',
         'transition'    : 'opacity 150ms ease-out'
       }, '', 'important');
-      console.log(offsetLeft)
-      console.log(offsetTop)
+
       $('html').append( this.$dimmerContainer );
       
       // Animate the dimmer background container

@@ -202,13 +202,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
             designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom, totalZoom) {
-                //TODO: Figure out a better way to get the offset.left...I've tried to figure
-                //      out the math involved for way too long, and decided to use the easier way.
-                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-				//EQ-880
-                if (!('zoom' in document.createElement('div').style)) {
-                    $('body').css({'transform':'scale(1)'});
-                }
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 var additionalBoxOffset = designer.kBoxBorderWidth + designer.kBoxPadding;
@@ -304,13 +297,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     designer.widthNarrowedDiffValue  = constrainedWidth?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
                 });
-                //TODO: Figure out a better way to get the offset.left...I've tried to figure
-                //      out the math involved for way too long, and decided to use the easier way.
-                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-                //EQ-880
-                if (!('zoom' in document.createElement('div').style)) {
-                    $('body').css({'transform':'scale('+totalZoom+')'});
-                }
                 return cssUpdates;
             }
 
