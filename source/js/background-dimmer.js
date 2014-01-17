@@ -26,8 +26,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       // Define the coordinates of the whole document to be dimmed out
       var viewport    = positioning.getViewportDimensions(0, zoom)
         , zIndex      = 2147483646
-        , offsetTop   = viewport.top 
-        , offsetLeft  = viewport.left
+        , offsetTop   = viewport.top //window.pageYOffset
+        , offsetLeft  = viewport.left //window.pageXOffset
         , svgPath     = getSVGPath(viewport, hlbNode)
         , inner       = svgPath.inner
         , dimmerSVG
@@ -80,15 +80,16 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'display'       : 'block',
         'z-index'       : zIndex,
         'opacity'       : 0,
-        'left'          : offsetLeft   + 'px', //EQ-880
-        'top'           : offsetTop    + 'px', //EQ-880
+        'left'          : offsetLeft / zoom   + 'px', //EQ-880
+        'top'           : offsetTop / zoom   + 'px', //EQ-880
         'width'         : viewport.width/zoom  + 'px',
         'height'        : viewport.height/zoom + 'px',
         'overflow'      : 'visible',
         'pointer-events': 'none',
         'transition'    : 'opacity 150ms ease-out'
       }, '', 'important');
-
+      console.log(offsetLeft)
+      console.log(offsetTop)
       $('html').append( this.$dimmerContainer );
       
       // Animate the dimmer background container
