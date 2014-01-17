@@ -26,13 +26,16 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       // Define the coordinates of the whole document to be dimmed out
       var viewport    = positioning.getViewportDimensions(0, zoom)
         , zIndex      = 2147483646
-        , offsetTop   = viewport.top / zoom
-        , offsetLeft  = viewport.left / zoom
+        , offsetTop   = viewport.top //window.pageYOffset
+        , offsetLeft  = viewport.left //window.pageXOffset
         , svgPath     = getSVGPath(viewport, hlbNode)
         , inner       = svgPath.inner
         , dimmerSVG
         ;
-
+      if (platform.browser.isIE) {
+        offsetLeft = 0;
+        offsetTop  = 0;
+      }
       wrapper = svgPath.wrapper;
 
       // Create dimmer SVG overlay
@@ -77,8 +80,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'display'       : 'block',
         'z-index'       : zIndex,
         'opacity'       : 0,
-        'left'          : offsetLeft   + 'px', //EQ-880
-        'top'           : offsetTop    + 'px', //EQ-880
+        'left'          : offsetLeft / zoom   + 'px',
+        'top'           : offsetTop / zoom   + 'px',
         'width'         : viewport.width/zoom  + 'px',
         'height'        : viewport.height/zoom + 'px',
         'overflow'      : 'visible',
@@ -86,15 +89,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'transition'    : 'opacity 150ms ease-out'
       }, '', 'important');
 
-      $('body').append( this.$dimmerContainer );
+      $('html').append( this.$dimmerContainer );
       
       // Animate the dimmer background container
       this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
-
-      //TODO - Necessary to get pixel perfect in FF EQ-880
-      if (!('zoom' in document.createElement('div').style)) {
-        onZoomChange(hlbNode);
-      }
 
     };
 
@@ -147,10 +145,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     
     function getInnerDimensions (elem, $hlbNode) {
       // Wind clockwise path around whole document.
-      /* EQ-880
-      $hlbNode.offset().left - window.pageXOffset + 2) +' '+ ($hlbNode.offset().top - window.pageYOffset + 2)
-      RETURNS SLIGHTLY DIFFERENT...and only when zoom is lvl 1! ugh.
-      */
+
       var zoom        = conf.get('zoom')
         , offsetLeft  = $hlbNode.offset().left/zoom
         , offsetTop   = $hlbNode.offset().top
