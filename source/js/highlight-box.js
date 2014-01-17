@@ -296,10 +296,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 if (!res['above'] && (Math.abs(rect.bottom) <= Math.abs(pickedRect.top))) {
                     res['above'] = current;
                 }
-                if (!res['left'] && (Math.abs(rect.right) <= Math.abs(pickedRect.left))) {
-                    res['left'] = current;
+                if (!res['left']) {
+                    if ((Math.abs(rect.right) <= Math.abs(pickedRect.left))
+                        // #eeoc
+                        || ($(current).css('float') !== 'none'
+                        && (Math.abs(rect.right) <=  Math.abs(pickedRect.left) + rect.width + (Math.abs(rect.left) - Math.abs(pickedRect.left))))) {
+                        res['left'] = current;
+                    }
                 }
-
                 return _recurse(pickedRect, current);
 
             }(pickedRect, current);
@@ -482,8 +486,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             var diffHeight = designer.getHeightExpandedDiffValue()? 0: getDiffHeight(currentStyle, newComputedStyles);
             var diffWidth  = designer.getWidthNarrowedDiffValue()?  0: getDiffWidth(currentStyle, newComputedStyles);
 
-            // todo: we need a new algo that will detect the simple floatings.
-            if (diffWidth !== 0 && $(el).attr('id') !== 'eeoc') {
+            if (diffWidth !== 0) {
                 // todo: copy the diffHeight part, making specific changes.
                 roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
             }
@@ -500,12 +503,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             } else {
-                if (
-                    // New margin is positive.
-                    compensateShiftFloat > 0
-                    // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-                    && (belowBox && parseFloat($(belowBox).css('margin-top')) > compensateShiftFloat
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) > compensateShiftFloat))) {
+                if (// The current element has biggest the top & bottom margins initially but new one(s) are smaller.
+                     (belowBox && Math.abs(parseFloat($(belowBox).css('margin-top'))) > Math.abs(compensateShiftFloat)
+                  && (aboveBox && Math.abs(parseFloat($(aboveBox).css('margin-bottom'))) > Math.abs(compensateShiftFloat)))) {
                         roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
                                           'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
                 } else if (compensateShiftFloat < 0
@@ -515,7 +515,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             }
-
             return roundingsStyle;
         }
 
@@ -893,8 +892,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'
                 // nytimes.com images such as $('.thumb.runaroundRight')
                 || (this.item.localName === 'img' && this.$item.parent().css('float') !== 'none')) {
-            cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - extraIndent + 'px';
-            cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
+           // cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - extraIndent + 'px';
+           // cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
         } else {
             cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding + 'px';
             extraIndent += 2 * HighlightBox.kBoxPadding;

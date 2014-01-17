@@ -221,15 +221,15 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // The actual dimensions of the box: corrected for text nodes.
                 var absRect = conf.get('absoluteRect');
                 // For floated elements the visual width and the actual width are different. Here we need the visual one.
-                var newCurrentStyle = $.extend({}, currentStyle,
-                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
+//                var newCurrentStyle = $.extend({}, currentStyle,
+//                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
                 
                 $(selector).each(function () {
                     var jElement = $(this);
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport);
+                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -271,7 +271,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Check the height and vertical positioning.
                     if (height > viewport.height) {
                         // Shrink the height.
-                        newHeight = (viewport.height - 2 * additionalBoxOffset * totalZoom) / extraZoom;
+                        newHeight = (viewport.height) / extraZoom;
                         // Set top to viewport's top border.
                         var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (2 * extraZoom) ;          // new height - old height
                         newTop = - jElement.offset().top + window.pageYOffset + zoomHeightDiff + designer.kMinDistanceFromEdge;
@@ -377,8 +377,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // todo: copy-set all of the styles assigned to ID as they may affect the font?
                         // Having > 1 element with the same ID may cause layout problems.
                         .attr('id', '')
-                        .css('visibility', 'visible')
-                        .appendTo($(el).parent()[0]);
+                        .css('visibility', 'hidden')
+                        .appendTo('body');
                 return $(testNode);
             }
 
