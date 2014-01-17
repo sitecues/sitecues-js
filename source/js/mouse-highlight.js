@@ -622,9 +622,36 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
     }
 
+    var mouseSpeedThreshold = 3
+      , lastMouseX = 0
+      , lastMouseY = 0
+      ;
+
     function updateImpl(event) {
+
+      var mouseX = event.clientX,
+          mouseY = event.clientY,
+          target = event.target;
+      function dist(x1, y1, x2, y2) {
+        var dx = x1 - x2,
+            dy = y1 - y2;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      if (dist(mouseX, mouseY, lastMouseX, lastMouseY) < mouseSpeedThreshold) {
+        mh.checkPickerAfterUpdate(target, mouseX, mouseY);
+      }
+
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
+
+    }
+
+
+    mh.checkPickerAfterUpdate = function (target, mouseX, mouseY) {
+
       var cursorPos,
-        picked;
+          picked;
 
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
@@ -633,15 +660,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return;
       }
 
-      if (state.isCreated && event.target === state.target) {
+      if (state.isCreated && target === state.target) {
         // Update rect in case of sub-element scrolling -- we get mouse events in that case
-        state.lastCursorPos = { x: event.clientX, y: event.clientY };
+        state.lastCursorPos = { x: mouseX, y: mouseY };
         mh.updateOverlayPosition();
         return
       }
 
       // save picked element
-      picked = picker.find(event.target);
+      picked = picker.find(target);
 
       if (!picked) {
         if (state.picked){
@@ -657,12 +684,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       mh.hideAndResetState();
       state.picked = $(picked);
-      state.target = event.target;
-      state.lastCursorPos = { x: event.clientX, y: event.clientY };
+      state.target = target;
+      state.lastCursorPos = { x: mouseX, y: mouseY };
       // show highlight for picked element
       mh.showTimer && clearTimeout(mh.showTimer);
       mh.showTimer = setTimeout(mh.show, 40);
-    }
+
+    };
+
 
     // Remember the last scrollY value
     var lastScrollY = 0,
