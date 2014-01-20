@@ -167,19 +167,19 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
         }
       }
     });
-
-    sitecues.on('resize', function () {
-      console.log('resize')
+    /**
+     * [A continuation of positioning logic from common.js.  Instead of using a setTimeout, we created a specific
+     * event that is fired when the positioning logic is complete in common.js until a better re-factoring]
+     */
+    sitecues.on('resizeEndEnd', function () {
       if (fixBadge) {
         if ($('#sitecues-badge').length) {
-          setTimeout(function () {
-            if (!platform.browser.isIE) {
-              $('#sitecues-badge').css({
-                'transform':'scale('+1/conf.get('zoom')+') translate('+ window.pageXOffset +'px, '+ window.pageYOffset +'px)'
-              });
-            }
-            zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
-          }, 100)
+          if (!platform.browser.isIE) {
+            $('#sitecues-badge').css({
+              'transform':'scale('+1/conf.get('zoom')+') translate('+ window.pageXOffset +'px, '+ window.pageYOffset +'px)'
+            });
+          }
+          zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
         }
       }
     });
