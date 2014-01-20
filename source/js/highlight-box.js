@@ -562,9 +562,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var currentStyle = this.savedCss[this.savedCss.length - 1],
           origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-        var center  = positioning.getCenter(this.item),
+        var center  = positioning.getCenter(this.item, conf.get('zoom')),
           totalZoom = positioning.getTotalZoom(this.item, true),
-          cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom, totalZoom);
+          cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         // Handle table special behaviour on inner contents.
         designer.handleTableElement(this.$item, currentStyle);

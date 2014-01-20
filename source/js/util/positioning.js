@@ -518,11 +518,10 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     /**
      * Returns the center of the provided element.
      */
-    positioning.getCenter = function (selector) {
+    positioning.getCenter = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
         var fixedRects = positioning.getAllBoundingBoxes(this, 9999);
-        var zoom = positioning.getTotalZoom(this, true);
         var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
         // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
@@ -532,8 +531,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         }
         result.push({
-          left: rect.left + (rect.width / 2),
-          top:  rect.top + (rect.height / 2)
+          left: (rect.left + (rect.width / 2)) / zoom,
+          top:  (rect.top + (rect.height / 2)) / zoom
         });
       });
       return processResult(result);
@@ -552,7 +551,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     /**
      * Obtains the viewport dimensions, with an optional inset.
      */
-    positioning.getViewportDimensions = function (inset) {
+    positioning.getViewportDimensions = function (inset, zoom) {
       inset = inset || 0;
       var insetX2 = inset * 2;
       var scrollPos = this.getScrollPosition();
@@ -566,15 +565,15 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
        * consistency.
        */
       var result = {
-        left: scrollPos.left + inset,
-        top: scrollPos.top + inset,
-        width: document.documentElement.clientWidth - insetX2,
-        height: document.documentElement.clientHeight - insetX2
+        left: scrollPos.left / zoom + inset,
+        top:  scrollPos.top  / zoom + inset,
+        width: document.documentElement.clientWidth   / zoom - insetX2,
+        height: document.documentElement.clientHeight / zoom - insetX2
       };
       result.right = result.left + result.width;
       result.bottom = result.top + result.height;
       result.centerX = result.left + (result.width / 2);
-      result.centerY = result.top + (result.height / 2);        
+      result.centerY = result.top + (result.height / 2);
 
       return result;
     };

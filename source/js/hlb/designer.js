@@ -201,7 +201,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
-            designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom, totalZoom) {
+            designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 var additionalBoxOffset = designer.kBoxBorderWidth + designer.kBoxPadding;
@@ -209,7 +209,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var centerLeft = center.left;
                 var centerTop = center.top;
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, totalZoom);
+                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
+//var div = document.createElement('div');  
+//document.getElementsByTagName("html")[0].appendChild(div).setAttribute('id', 'vp');
+//$('#vp').css({'opacity': 0.5, 'position': 'absolute', 'top': viewport.top + 'px', 'left' : viewport.left + 'px', 'width': viewport.width + 'px', 'height': viewport.height+'px', 'background-color': 'green'});
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
                 var absRect = conf.get('absoluteRect');
@@ -266,8 +269,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // Shrink the height.
                         newHeight = (viewport.height) / extraZoom;
                         // Set top to viewport's top border.
-                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (2 * extraZoom) ;          // new height - old height
-                        newTop = - jElement.offset().top + window.pageYOffset + zoomHeightDiff + designer.kMinDistanceFromEdge;
+                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (extraZoom) ;          // new height - old height
+                        newTop = - jElement.offset().top + window.pageYOffset/ conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge;
                         
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
