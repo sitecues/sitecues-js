@@ -11,6 +11,6 @@ sitecues.def('ui', function (ui, callback, log) {
 
 		// load default style, and only after it
 		// is loaded module is ready
-		load.style('../css/default.css', callback)
+		load.style('../css/sitecues-default.css', callback)
 	});
 });
