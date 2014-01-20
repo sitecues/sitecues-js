@@ -39,7 +39,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       wrapper = svgPath.wrapper;
 
       // Create dimmer SVG overlay
-      dimmerSVG = '<svg width="' + viewport.width/zoom + 'px' +'" height="' + viewport.height/zoom + 'px' + '" xmlns="http://www.w3.org/2000/svg">' +
+      dimmerSVG = '<svg width="' + viewport.width + 'px' +'" height="' + viewport.height + 'px' + '" xmlns="http://www.w3.org/2000/svg">' +
 
           // Use an SVG path to create the dimmer area
           '<path '+
@@ -80,10 +80,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'display'       : 'block',
         'z-index'       : zIndex,
         'opacity'       : 0,
-        'left'          : offsetLeft / zoom   + 'px',
-        'top'           : offsetTop / zoom   + 'px',
-        'width'         : viewport.width/zoom  + 'px',
-        'height'        : viewport.height/zoom + 'px',
+        'left'          : offsetLeft   + 'px',
+        'top'           : offsetTop    + 'px',
+        'width'         : viewport.width  + 'px',
+        'height'        : viewport.height + 'px',
         'overflow'      : 'visible',
         'pointer-events': 'none',
         'transition'    : 'opacity 150ms ease-out'
@@ -181,13 +181,13 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         
         //EQ-880
         , svgPath = getSVGPath(viewport, hlb)
-        , offsetTop = viewport.top/zoom
-        , offsetLeft = viewport.left/zoom
+        , offsetTop = viewport.top
+        , offsetLeft = viewport.left
         ;    
       
       backgroundDimmer.$dimmerContainer.style({
-        'width'  : viewport.width/zoom  + 'px',
-        'height' : viewport.height/zoom + 'px',
+        'width'  : viewport.width  + 'px',
+        'height' : viewport.height + 'px',
         'top'    : offsetTop       + 'px',
         'left'   : offsetLeft      + 'px'
       }, '', 'important');
