@@ -201,14 +201,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
              */
-            designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom, totalZoom) {
-                //TODO: Figure out a better way to get the offset.left...I've tried to figure
-                //      out the math involved for way too long, and decided to use the easier way.
-                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-				//EQ-880
-                if (!('zoom' in document.createElement('div').style)) {
-                    $('body').css({'transform':'scale(1)'});
-                }
+            designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 var additionalBoxOffset = designer.kBoxBorderWidth + designer.kBoxPadding;
@@ -216,20 +209,23 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var centerLeft = center.left;
                 var centerTop = center.top;
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, totalZoom);
+                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
+//var div = document.createElement('div');  
+//document.getElementsByTagName("html")[0].appendChild(div).setAttribute('id', 'vp');
+//$('#vp').css({'opacity': 0.5, 'position': 'absolute', 'top': viewport.top + 'px', 'left' : viewport.left + 'px', 'width': viewport.width + 'px', 'height': viewport.height+'px', 'background-color': 'green'});
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
                 var absRect = conf.get('absoluteRect');
                 // For floated elements the visual width and the actual width are different. Here we need the visual one.
-                var newCurrentStyle = $.extend({}, currentStyle,
-                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
+//                var newCurrentStyle = $.extend({}, currentStyle,
+//                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
                 
                 $(selector).each(function () {
                     var jElement = $(this);
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, newCurrentStyle, viewport);
+                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -271,10 +267,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Check the height and vertical positioning.
                     if (height > viewport.height) {
                         // Shrink the height.
-                        newHeight = (viewport.height - 2 * additionalBoxOffset * totalZoom) / extraZoom;
+                        newHeight = (viewport.height) / extraZoom;
                         // Set top to viewport's top border.
-                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (2 * extraZoom) ;          // new height - old height
-                        newTop = - jElement.offset().top + window.pageYOffset + zoomHeightDiff + designer.kMinDistanceFromEdge;
+                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (extraZoom) ;          // new height - old height
+                        newTop = - jElement.offset().top + window.pageYOffset/ conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge;
                         
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
@@ -304,13 +300,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     designer.widthNarrowedDiffValue  = constrainedWidth?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
                 });
-                //TODO: Figure out a better way to get the offset.left...I've tried to figure
-                //      out the math involved for way too long, and decided to use the easier way.
-                //      I myself don't notice the scaling to 1, so maybe we can get away with this but I don't like it.
-                //EQ-880
-                if (!('zoom' in document.createElement('div').style)) {
-                    $('body').css({'transform':'scale('+totalZoom+')'});
-                }
                 return cssUpdates;
             }
 
@@ -377,8 +366,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // todo: copy-set all of the styles assigned to ID as they may affect the font?
                         // Having > 1 element with the same ID may cause layout problems.
                         .attr('id', '')
-                        .css('visibility', 'visible')
-                        .appendTo($(el).parent()[0]);
+                        .css('visibility', 'hidden')
+                        .appendTo('body');
                 return $(testNode);
             }
 

@@ -4,13 +4,24 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild) {
+  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, platform) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
     // move mouse cursor out of panel
     var timer;
-
+    var getTranslate = (function () {
+      var _MATRIX_REGEXP = /matrix\s*\(\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*,\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*\)/i;
+      return function (element) {
+        if ($(element).css('transform') === 'none') {
+          return [0, 0];
+        }
+        var transformArray = _MATRIX_REGEXP.exec($(element).css('transform'))[0].split(','),
+            translateX = transformArray[4],
+            translateY = transformArray[5];
+        return [parseFloat(translateX), parseFloat(translateY)];
+      }
+    }());
     panel.hideDelay = 1500;
     // Forcing a change to merge from Thom into master
     // to make sure that I'm actually getting the real code.
@@ -46,7 +57,11 @@ sitecues.def( 'panel', function (panel, callback, log) {
     };
 
     // PANEL OBJECT'S METHODS
-
+    function bodyHasVertScrollbar () {
+      // See if the document width is within some delta of the window inner width.
+      var result = ((window.innerWidth - $(document.documentElement).outerWidth()) > 3);
+      return result;
+    }
     // Create panel element.
     panel.create = function() {
 
@@ -132,6 +147,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
         , useLeft
         , left
         , right
+        , translateX
+        , translateY
+        , hasScrollbar = bodyHasVertScrollbar()
         ;
 
       // Clear timer if present
@@ -144,7 +162,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
       // Do we have a badge reference?  If no reference is passed then we
       // don't really know where we're supposed to put the panel.
       if(panel.parent) {
-        badgeRect = $(panel.parent).get(0).getBoundingClientRect();
+        badgeRect = $('#sitecues-badge').get(0).getBoundingClientRect();
         zoom = positioning.getTotalZoom(panel.parent, true);
         $panel = panel.element;
         left = right = '';
@@ -153,16 +171,34 @@ sitecues.def( 'panel', function (panel, callback, log) {
         useLeft = badgeRect.left * zoom +  $panel.width() + 15 < window.innerWidth;
         if (useLeft) { /* Panel moved, expands right */
           left = ((badgeRect.left - 5) * zoom) + 'px';
+          
         }
         else {  /* Panel expands left */
-          right = (document.documentElement.offsetWidth - badgeRect.right * zoom - 4) + 'px';
+          
+          if (!platform.browser.isIE) {
+            right = ((document.documentElement.clientWidth - badgeRect.right) / conf.get('zoom') - 4 / conf.get('zoom'));
+          } else {
+            right = ((document.documentElement.clientWidth - badgeRect.right) - 4);
+          }
+          
+          if (hasScrollbar && $('#sitecues-badge').css('position') === 'fixed') {
+            right += 15 / conf.get('zoom');
+          }
+          right += 'px';
         }
 
         $panel.style({
-          top: ((badgeRect.top - 5) * zoom) + 'px',
+          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom'))) + 'px',
           left: left,
-          right: right
+          right: right         
         }, '', 'important');
+        if (!platform.browser.isIE) {
+          $panel.css({
+            'transform-origin': '100% 0%',
+            'transform': 'scale('+ 1/conf.get('zoom') +') translate(' + window.pageXOffset + 'px, ' + window.pageYOffset + 'px)'
+          });
+        }
+       
       }
 
       function setSliderDimensions() {

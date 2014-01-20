@@ -4,7 +4,7 @@ sitecues.def('badge', function (badge, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', function ($, conf, panel, common, htmlBuild) {
+  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function ($, conf, panel, common, htmlBuild, platform) {
 
     var REPLACE_BADGE_ATTR = 'data-toolbar-will-replace';
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
@@ -45,7 +45,12 @@ sitecues.def('badge', function (badge, callback, log) {
        .addClass('sitecues-badge-image')
        .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
        .appendTo(badge.panel);
-      
+       if (!platform.browser.isIE) {
+         badge.panel.css({
+          'transform-origin': '0% 0%',
+          'transform':'scale('+1/conf.get('zoom')+') translate(' + window.pageXOffset/conf.get('zoom') + 'px, ' + window.pageYOffset/conf.get('zoom') + 'px)'
+         });
+       }
       if (success) {
         success();
       }
@@ -73,6 +78,7 @@ sitecues.def('badge', function (badge, callback, log) {
       if (conf.get('badgeEnabled')) {
         log.info('Showing badge');
         $(badge.panel).fadeIn('slow', function() {
+          sitecues.emit('badge/show')
           if (success) {
             success();
           }
