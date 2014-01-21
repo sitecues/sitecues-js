@@ -210,9 +210,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var centerTop = center.top;
                 // Correctly compute the viewport.
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
-//var div = document.createElement('div');  
-//document.getElementsByTagName("html")[0].appendChild(div).setAttribute('id', 'vp');
-//$('#vp').css({'opacity': 0.5, 'position': 'absolute', 'top': viewport.top + 'px', 'left' : viewport.left + 'px', 'width': viewport.width + 'px', 'height': viewport.height+'px', 'background-color': 'green'});
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
                 var absRect = conf.get('absoluteRect');
@@ -231,71 +228,71 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         var heightValue = designer.getExpandedHeight(); 
                         // If it is a text node we want to get the exact text range's height;
                         // that is why we use conf.get('absoluteRect') instead of currentStyle
-                        if (heightValue > absRect.height) {
+                        if (heightValue > absRect.height/ conf.get('zoom')) {
                             expandedHeight = heightValue;
                         }
                     }
 
-                    var rect = this.getBoundingClientRect();
+                    // Real box dimensions.
                     var width  = constrainedWidth
-                                 ? constrainedWidth * extraZoom
-                                 : (Math.min(absRect.width, parseFloat(currentStyle.width)) + 2 * additionalBoxOffset) * extraZoom;
+                                 ? constrainedWidth
+                                 : (Math.min(absRect.width/ conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
                     var height = expandedHeight
-                                 ? expandedHeight * extraZoom
-                                 : (rect.height + 2 * additionalBoxOffset) * extraZoom;
-                    var left = centerLeft - (width / 2);
-                    var top  = centerTop -  (height / 2);
+                                 ? expandedHeight
+                                 : (parseFloat(currentStyle.height) + 2 * additionalBoxOffset);
+                    var left = centerLeft - width / 2; // encounts scroll: rect.left / conf.get('zoom');
+                    var top  = centerTop  - height / 2;
+
+                    // Calculate box's dimensions when it is inflated.
+                    var inflatedHeight = height * extraZoom;
+                    var inflatedWidth = width * extraZoom;
+                    var inflatedLeft = left - (width*extraZoom  - width - 2 * additionalBoxOffset) / 2;
+                    var inflatedTop =  top  - (height*extraZoom - height - 2 * additionalBoxOffset) / 2;
 
                     // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
 
-                    // Check the width and horizontal positioning.   
-                    if (width > viewport.width) {
+                    // Check the width and horizontal positioning.
+                    if (inflatedWidth > viewport.width) {
                         // Fit to width of viewport.
-                        newWidth   = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
-                        var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
-                        newLeft = - jElement.offset().left + window.pageXOffset + zoomWidthDiff + designer.kMinDistanceFromEdge;
+                        newWidth = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
+                        //  var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
+                        newLeft = (- jElement.offset().left/conf.get('zoom') +window.pageXOffset/conf.get('zoom')+ designer.kMinDistanceFromEdge)/ conf.get('zoom');
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
-                        if (viewport.left > left) {
-                            newLeft = viewport.left - left;
-                        } else if ((left + width) > viewport.right) {
-                            newLeft = viewport.right - (left + width);
+                        if (viewport.left > inflatedLeft) {
+                            newLeft = viewport.left - inflatedLeft;
+                        } else if ((inflatedLeft + inflatedWidth) > viewport.right) {
+                            newLeft = viewport.right - (inflatedLeft + inflatedWidth);
                         }
                     }
 
+                    var zoomHeightDiff = (inflatedHeight - jElement[0].getBoundingClientRect().height) / 2 ;          // new height - old height
                     // Check the height and vertical positioning.
-                    if (height > viewport.height) {
+                    if (inflatedHeight > viewport.height) {
                         // Shrink the height.
-                        newHeight = (viewport.height) / extraZoom;
+                        newHeight = (viewport.height - 2 * additionalBoxOffset) / extraZoom;
                         // Set top to viewport's top border.
-                        var zoomHeightDiff = (height - jElement[0].getBoundingClientRect().height) / (extraZoom) ;          // new height - old height
-                        newTop = - jElement.offset().top + window.pageYOffset/ conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge;
-                        
+                        newTop = (- jElement.offset().top/conf.get('zoom') + window.pageYOffset/conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge)/ conf.get('zoom');
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
-                        if (viewport.top > top) {
-                            newTop = viewport.top - top;
-                        } else if ((top + height) > viewport.bottom) {
-                            newTop = viewport.bottom - (top + height);
+                        if (viewport.top > inflatedTop) {
+                            newTop = viewport.top - inflatedTop;
+                        } else if ((inflatedTop + inflatedHeight) > viewport.bottom) {
+                            newTop = viewport.bottom - (inflatedTop + inflatedHeight);
                         }
                     }
                     var newMaxHeight = newHeight || (viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset) / extraZoom;
-
-                    // Create the CSS needed to place the element where it needs to be, and to zoom it.
-                    // todo: if the height or width has been constrained then also set margin to keep the content.
-                    // No need to do any shift compensations b/c user will not see anything beyond the viewport.
-                    // if (diffHeight > viewport.height) {
-                    //     roundingsStyle['top'] = '32px';
-                    // }
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
-                        width:  constrainedWidth || newWidth,
+                        width:  newWidth || constrainedWidth,
                         height: newHeight || expandedHeight,
                         maxHeight: newWidth? newMaxHeight: undefined
                     };
                     // Only use difference in height if it was shortened(we need to compensate it in margin).
+                    // var tempH = (cssUpdates.height - parseFloat(currentStyle.height)) || 0;
+                    // designer.heightExpandedDiffValue = expandedHeight?  tempH : -tempH;
                     designer.heightExpandedDiffValue = expandedHeight? (cssUpdates.height - parseFloat(currentStyle.height)) || 0 : 0;
                     designer.widthNarrowedDiffValue  = constrainedWidth?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
