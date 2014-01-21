@@ -556,7 +556,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
 
         var _this = this;
-        var IEZoom = platform.browser.isIE ? conf.get('zoom') - 1 : 0;
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
@@ -580,11 +579,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = {
-          'webkit-transform': 'scale(' + kExtraZoom + IEZoom + ')',
-          '-moz-transform':   'scale(' + kExtraZoom + IEZoom + ')',
-          '-o-transform':     'scale(' + kExtraZoom + IEZoom + ')',
-          '-ms-transform':    'scale(' + kExtraZoom + IEZoom + ')',
-          'transform':        'scale(' + kExtraZoom + IEZoom + ')'
+          'webkit-transform': 'scale(' + kExtraZoom + ')',
+          '-moz-transform':   'scale(' + kExtraZoom + ')',
+          '-o-transform':     'scale(' + kExtraZoom + ')',
+          '-ms-transform':    'scale(' + kExtraZoom + ')',
+          'transform':        'scale(' + kExtraZoom + ')'
         };
 
         // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then

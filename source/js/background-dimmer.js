@@ -178,8 +178,6 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         
         // Define the coordinates of the whole document to be dimmed out
         , viewport = positioning.getViewportDimensions(0, zoom)
-        
-        //EQ-880
         , svgPath = getSVGPath(viewport, hlb)
         , offsetTop = viewport.top
         , offsetLeft = viewport.left

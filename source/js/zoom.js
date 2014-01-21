@@ -120,8 +120,8 @@ sitecues.def('zoom', function (zoom, callback, log) {
       zoom.originalDocumentWidth = document.documentElement.clientWidth;
       zoomFn(conf.get('zoom'));
       zoom.resizing = false;
-    });
-  
+      sitecues.emit('resize');
+    });  
     /**
      * [Scrolling the page requires positioning any fixed elements.  We also cache the scroll offsets after
      * all scroll event callbacks have been executed.]
@@ -149,7 +149,6 @@ sitecues.def('zoom', function (zoom, callback, log) {
                      'transform'         : 'scale('+value+')',
                     }); 
       
-      if (!zoom.resizing){ sitecues.emit('zoomAfter', value);} //Required for re-positioning the fixed elements.
       // Un-Blur text in Chrome
       if (platform.browser.isChrome) {
         renderPage();

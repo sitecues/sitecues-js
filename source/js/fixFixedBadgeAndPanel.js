@@ -119,7 +119,6 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
         the badge and panel, already have transforms applied.  Therefore, we must apply
         the transforms that are reactions to the scroll events on top of any transforms.
        */
-      console.log(verticalShift)
       for (var i = 0; i < elements.length; i += 1) {
         if (!platform.browser.isIE) {
           $(elements[i]).css({
@@ -148,8 +147,11 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
      * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
      */
     sitecues.on('zoom', function (value) {
-      fixBadgeAndPanel();
-      fixFixedElements(getFixedElementsMinusBadgeAndPanel(), value);      
+      if (!zoom.resizing) {
+        fixBadgeAndPanel();
+        fixFixedElements(getFixedElementsMinusBadgeAndPanel(), value);
+        zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
+      }   
     });
     //When the panel has completed its animation, cache the coordinates
     sitecues.on('panel/show', function () {
@@ -161,6 +163,22 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback,
     sitecues.on('badge/show', function () {
       if (fixBadge) {
         if (!zoom.badgeBoundingBox && $('#sitecues-badge').length) {
+          zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
+        }
+      }
+    });
+    /**
+     * [A continuation of positioning logic from common.js.  Instead of using a setTimeout, we created a specific
+     * event that is fired when the positioning logic is complete in common.js until a better re-factoring]
+     */
+    sitecues.on('resizeEndEnd', function () {
+      if (fixBadge) {
+        if ($('#sitecues-badge').length) {
+          if (!platform.browser.isIE) {
+            $('#sitecues-badge').css({
+              'transform':'scale('+1/conf.get('zoom')+') translate('+ window.pageXOffset +'px, '+ window.pageYOffset +'px)'
+            });
+          }
           zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
         }
       }

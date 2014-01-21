@@ -659,6 +659,7 @@ sitecues.def('util/common', function (common, callback, log) {
       for (var i = 0; i < rightAlignObjs.length; i++) {
         applyDynamicPlacementCSS(rightAlignObjs[i]);
       }
+      sitecues.emit('resizeEndEnd');
     });
 
     ////////////////////////////////////////////////////////////////////////////////
