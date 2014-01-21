@@ -719,7 +719,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
         var cssBeforeAnimateStyles = getCorrectedDeflateStyle(currentStyle);
         var cssAnimateStyles = {
-          'transform': 'scale(1)'
+                'webkit-transform': 'scale(1)',
+                '-moz-transform': 'scale(1)',
+                '-o-transform': 'scale(1)',
+                '-ms-transform': 'scale(1)',
+                'transform': 'scale(1)'
         };
 
         if (!common.isCanvasElement(this.$item)) { 
@@ -776,18 +780,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         function getCorrectedDeflateStyle(currentStyle) {
             var correctedStyle = {
                 // HLB styles.
-                'position': currentStyle.position,
+                'position': 'relative',
                 'background-color': currentStyle.backgroundColor,
                 'padding': currentStyle.padding,
                 'border': currentStyle.border,
-                'border-radius': currentStyle.borderRadius,
-
-                // Revert animation.
-                'webkit-transform': 'scale(1)',
-                '-moz-transform': 'scale(1)',
-                '-o-transform': 'scale(1)',
-                '-ms-transform': 'scale(1)',
-                'transform': 'scale(1)'
+                'border-radius': currentStyle.borderRadius
             }
            return correctedStyle;
         }
