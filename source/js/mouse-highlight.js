@@ -622,28 +622,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
     }
 
-    var mouseSpeedThreshold = 3
-      , lastMouseX = 0
-      , lastMouseY = 0
-      ;
+    // var mouseSpeedThreshold = 3
+    //   , lastMouseX = 0
+    //   , lastMouseY = 0
+    //   ;
 
     function updateImpl(event) {
 
       var mouseX = event.clientX,
           mouseY = event.clientY,
           target = event.target;
-      function dist(x1, y1, x2, y2) {
-        var dx = x1 - x2,
-            dy = y1 - y2;
-        return Math.sqrt(dx * dx + dy * dy);
-      }
+      
+      // function dist(x1, y1, x2, y2) {
+      //   var dx = x1 - x2,
+      //       dy = y1 - y2;
+      //   return Math.sqrt(dx * dx + dy * dy);
+      // }
 
-      if (dist(mouseX, mouseY, lastMouseX, lastMouseY) < mouseSpeedThreshold) {
+      // if (dist(mouseX, mouseY, lastMouseX, lastMouseY) < mouseSpeedThreshold) {
         mh.checkPickerAfterUpdate(target, mouseX, mouseY);
-      }
+      // }
 
-      lastMouseX = event.clientX;
-      lastMouseY = event.clientY;
+      // lastMouseX = event.clientX;
+      // lastMouseY = event.clientY;
 
     }
 
