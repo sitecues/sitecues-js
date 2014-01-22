@@ -199,15 +199,16 @@ sitecues.def('util/common', function (common, callback, log) {
                  return;
              }
              children.each(function() {
-                 if ($(this).children().length > 0) {
-                     return _recurse($(this).children());
-                 }
                  if (($.inArray($(this)[0].localName, nonWordWrappableElements) >= 0)
                     // List item that has bg image.
-                     && !(($(this)[0].localName === 'li') && !common.isEmptyBgImage($(this).css('background-image')))) {
+                     || (($(this)[0].localName === 'li') && !common.isEmptyBgImage($(this).css('background-image')))) {
                      isAssumedToBeTextNode = false;
                      return;
                  }
+                 if ($(this).children().length > 0) {
+                     return _recurse($(this).children());
+                 }
+
              });
          }($(el).children()));
 
