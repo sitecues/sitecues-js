@@ -20,7 +20,7 @@ sitecues.def('util/common', function (common, callback, log) {
       ;
 
     var validNonVisualElements = ['document', 'body', 'html', 'head'];
-    var nonWordWrappableElements = ['table', 'thead', 'tbody', 'tr', 'td', 'img', 'li'];
+    var nonWordWrappableElements = ['table', 'thead', 'tbody', 'tr', 'td', 'img'];
     var nodeTypes = {
         'elementNode': 1,
         'textNode':    3
@@ -202,7 +202,9 @@ sitecues.def('util/common', function (common, callback, log) {
                  if ($(this).children().length > 0) {
                      return _recurse($(this).children());
                  }
-                 if ($.inArray($(this)[0].localName, nonWordWrappableElements) >= 0) {
+                 if (($.inArray($(this)[0].localName, nonWordWrappableElements) >= 0)
+                    // List item that has bg image.
+                     && !(($(this)[0].localName === 'li') && !common.isEmptyBgImage($(this).css('background-image')))) {
                      isAssumedToBeTextNode = false;
                      return;
                  }
