@@ -20,7 +20,7 @@ sitecues.def('util/common', function (common, callback, log) {
       ;
 
     var validNonVisualElements = ['document', 'body', 'html', 'head'];
-    var nonWordWrappableElements = ['img', 'table', 'thead', 'tbody', 'tr', 'td'];
+    var nonWordWrappableElements = ['table', 'thead', 'tbody', 'tr', 'td', 'img', 'li'];
     var nodeTypes = {
         'elementNode': 1,
         'textNode':    3
