@@ -517,6 +517,16 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     };
     /**
      * Returns the center of the provided element.
+     * Note: uses visible dimensions of the element instead of actual ones set by styles.
+     * 
+     * Example of the element that has different actual and visible width:
+     * actual width = visible + not visible width.
+     * _______________________________________________
+     * |                             |////////////////|
+     * | From the makers of ZoomText.|///not visible//|
+     * |        (visible width)      |//////width/////|
+     * |_____________________________|________________|
+     * 
      */
     positioning.getCenter = function (selector, zoom) {
       var result = [];

@@ -200,6 +200,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @param center   The center over which selector is positioned
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
+             * Example of the element that has different actual and visible width:
+             * actual width = visible + not visible width.
+             * _______________________________________________
+             * |                             |////////////////|
+             * | From the makers of ZoomText.|///not visible//|
+             * |        (visible width)      |//////width/////|
+             * |_____________________________|________________|
              */
             designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom) {
                 // Ensure a zoom exists.
@@ -212,6 +219,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
+                // We only need it b/c positioning.js logic is based on the visible dimensions.
+                // For example. see positioning.getCenter().
+                // So, let's follow up the existing logic, OK?
                 var absRect = conf.get('absoluteRect');
                 // For floated elements the visual width and the actual width are different. Here we need the visual one.
 //                var newCurrentStyle = $.extend({}, currentStyle,
@@ -222,7 +232,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
+                    var constrainedWidth = false; //getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -236,7 +246,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Real box dimensions.
                     var width  = constrainedWidth
                                  ? constrainedWidth
-                                 : (Math.min(absRect.width/ conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
+                                 : (Math.min(absRect.width / conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
                     var height = expandedHeight
                                  ? expandedHeight
                                  : (parseFloat(currentStyle.height) + 2 * additionalBoxOffset);
@@ -244,10 +254,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var top  = centerTop  - height / 2;
 
                     // Calculate box's dimensions when it is inflated.
-                    var inflatedHeight = height * extraZoom;
-                    var inflatedWidth = width * extraZoom;
-                    var inflatedLeft = left - (width*extraZoom  - width - 2 * additionalBoxOffset) / 2;
-                    var inflatedTop =  top  - (height*extraZoom - height - 2 * additionalBoxOffset) / 2;
+                    // Since this moment we can use the actual width set to the element
+                    // instead of visible one.
+                    width = constrainedWidth || (parseFloat(currentStyle.width) + 2 * additionalBoxOffset);
+                    var inflatedHeight = height * extraZoom,
+                        inflatedWidth = width * extraZoom,
+                        inflatedLeft = left - (width * extraZoom  - width) / 2,
+                        inflatedTop =  top  - (height * extraZoom - height) / 2;
 
                     // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
