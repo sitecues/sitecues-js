@@ -200,6 +200,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              * @param center   The center over which selector is positioned
              * @param zoom     Zooming the selector element if needed
              * @return cssUpdates An object containing left, top, width and height of the positioned element.
+             * Example of the element that has different actual and visible width:
+             * actual width = visible + not visible width.
+             * _______________________________________________
+             * |                             |////////////////|
+             * | From the makers of ZoomText.|///not visible//|
+             * |        (visible width)      |//////width/////|
+             * |_____________________________|________________|
              */
             designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom) {
                 // Ensure a zoom exists.
@@ -208,10 +215,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
+
                 // Correctly compute the viewport.
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
+                // We only need it b/c positioning.js logic is based on the visible dimensions.
+                // For example. see positioning.getCenter().
+                // So, let's follow up the existing logic, OK?
                 var absRect = conf.get('absoluteRect');
                 // For floated elements the visual width and the actual width are different. Here we need the visual one.
 //                var newCurrentStyle = $.extend({}, currentStyle,
@@ -222,7 +233,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
+                    var constrainedWidth = false; //getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -234,20 +245,32 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     // Real box dimensions.
-                    var width  = constrainedWidth
-                                 ? constrainedWidth
-                                 : (Math.min(absRect.width/ conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
-                    var height = expandedHeight
-                                 ? expandedHeight
-                                 : (parseFloat(currentStyle.height) + 2 * additionalBoxOffset);
-                    var left = centerLeft - width / 2; // encounts scroll: rect.left / conf.get('zoom');
+//                    var width  = constrainedWidth
+//                                 ? constrainedWidth
+//                                 : (Math.min(absRect.width / conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
+                    var leftInset = (parseFloat(currentStyle['border-left-width']) + parseFloat(currentStyle['border-right-width'])
+                               + parseFloat(currentStyle['padding-left']) + parseFloat(currentStyle['padding-right']));
+                    var topInset = (parseFloat(currentStyle['border-top-width']) + parseFloat(currentStyle['border-bottom-width'])
+                               + parseFloat(currentStyle['padding-top']) + parseFloat(currentStyle['padding-bottom']));
+
+                    // // Calculate box's dimensions before it is inflated.
+                    var width = constrainedWidth || (parseFloat(currentStyle.width) + leftInset);
+                    var height = expandedHeight  || (parseFloat(currentStyle.height) + topInset);
+                    var left = centerLeft - width / 2;
                     var top  = centerTop  - height / 2;
 
-                    // Calculate box's dimensions when it is inflated.
-                    var inflatedHeight = height * extraZoom;
-                    var inflatedWidth = width * extraZoom;
-                    var inflatedLeft = left - (width*extraZoom  - width - 2 * additionalBoxOffset) / 2;
-                    var inflatedTop =  top  - (height*extraZoom - height - 2 * additionalBoxOffset) / 2;
+                    // Calculate box's dimensions when it is inflated: insets may be changed by kBoxPadding and kBoxBorderWidth.
+                    width  += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-left-width']) - parseFloat(currentStyle['border-right-width'])) * extraZoom;
+                    height += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-top-width']) - parseFloat(currentStyle['border-bottom-width'])) * extraZoom;
+                    var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline');
+                    if (assumedToBeText) {
+                        width  += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-left']) - parseFloat(currentStyle['padding-right'])) * extraZoom;
+                        height += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-top']) - parseFloat(currentStyle['padding-bottom'])) * extraZoom;
+                    }
+                    var inflatedHeight = height * extraZoom,
+                        inflatedWidth = width * extraZoom,
+                        inflatedLeft = left - (width * extraZoom  - width) / 2,
+                        inflatedTop =  top  - (height * extraZoom - height) / 2;
 
                     // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
@@ -255,9 +278,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Check the width and horizontal positioning.
                     if (inflatedWidth > viewport.width) {
                         // Fit to width of viewport.
+                        // todo: replace additionalBoxOffset with real data, padding not always equals to 4.
                         newWidth = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
                         //  var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
-                        newLeft = (- jElement.offset().left/conf.get('zoom') +window.pageXOffset/conf.get('zoom')+ designer.kMinDistanceFromEdge)/ conf.get('zoom');
+                        newLeft = - inflatedLeft + window.pageXOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > inflatedLeft) {
@@ -273,7 +297,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset) / extraZoom;
                         // Set top to viewport's top border.
-                        newTop = (- jElement.offset().top/conf.get('zoom') + window.pageYOffset/conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge)/ conf.get('zoom');
+                        newTop = - inflatedTop + window.pageYOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
                         if (viewport.top > inflatedTop) {

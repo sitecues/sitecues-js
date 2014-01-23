@@ -515,6 +515,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             }
+
+            roundingsStyle['top'] = parseFloat($(el).css('top')) - (parseFloat(roundingsStyle['margin-top']) - parseFloat(currentStyle['margin-top']));
+            roundingsStyle['left'] = parseFloat($(el).css('left')) - (parseFloat(roundingsStyle['margin-left']) - parseFloat(currentStyle['margin-left']));
             return roundingsStyle;
         }
 
@@ -561,7 +564,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var currentStyle = this.savedCss[this.savedCss.length - 1],
           origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
 
-        var center  = positioning.getCenter(this.item, conf.get('zoom')),
+        var center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
           totalZoom = positioning.getTotalZoom(this.item, true),
           cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
@@ -748,6 +751,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           }
 
           backgroundDimmer.removeDimmer();
+//          $('#vp').remove();
 
           setTimeout(function () {
             // Animation callback: notify all inputs about zoom out.
@@ -885,12 +889,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var extraIndent = 2 * HighlightBox.kBoxBorderWidth;
         // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-        if (currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'
+        // todo: take out 'assumedToBeText' to common.js; also used in designer.js
+        var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'
                 // nytimes.com images such as $('.thumb.runaroundRight')
-                || (this.item.localName === 'img' && this.$item.parent().css('float') !== 'none')) {
-           // cssBeforeAnimateStyles['height'] = parseFloat(cssBeforeAnimateStyles['height']) - extraIndent + 'px';
-           // cssBeforeAnimateStyles['width']  = parseFloat(cssBeforeAnimateStyles['width'])  - extraIndent + 'px';
-        } else {
+                || (this.item.localName === 'img' && this.$item.parent().css('float') !== 'none'));
+        if (assumedToBeText) {
             cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding + 'px';
             extraIndent += 2 * HighlightBox.kBoxPadding;
 
