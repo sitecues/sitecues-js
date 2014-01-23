@@ -215,6 +215,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
+
                 // Correctly compute the viewport.
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
                 var cssUpdates = {};
@@ -244,19 +245,28 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     // Real box dimensions.
-                    var width  = constrainedWidth
-                                 ? constrainedWidth
-                                 : (Math.min(absRect.width / conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
-                    var height = expandedHeight
-                                 ? expandedHeight
-                                 : (parseFloat(currentStyle.height) + 2 * additionalBoxOffset);
-                    var left = centerLeft - width / 2; // encounts scroll: rect.left / conf.get('zoom');
+//                    var width  = constrainedWidth
+//                                 ? constrainedWidth
+//                                 : (Math.min(absRect.width / conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
+                    var leftInset = (parseFloat(currentStyle['border-left-width']) + parseFloat(currentStyle['border-right-width'])
+                               + parseFloat(currentStyle['padding-left']) + parseFloat(currentStyle['padding-right']));
+                    var topInset = (parseFloat(currentStyle['border-top-width']) + parseFloat(currentStyle['border-bottom-width'])
+                               + parseFloat(currentStyle['padding-top']) + parseFloat(currentStyle['padding-bottom']));
+
+                    // // Calculate box's dimensions before it is inflated.
+                    var width = constrainedWidth || (parseFloat(currentStyle.width) + leftInset);
+                    var height = expandedHeight  || (parseFloat(currentStyle.height) + topInset);
+                    var left = centerLeft - width / 2;
                     var top  = centerTop  - height / 2;
 
-                    // Calculate box's dimensions when it is inflated.
-                    // Since this moment we can use the actual width set to the element
-                    // instead of visible one.
-                    width = constrainedWidth || (parseFloat(currentStyle.width) + 2 * additionalBoxOffset);
+                    // Calculate box's dimensions when it is inflated: insets may be changed by kBoxPadding and kBoxBorderWidth.
+                    width  += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-left-width']) - parseFloat(currentStyle['border-right-width'])) * extraZoom;
+                    height += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-top-width']) - parseFloat(currentStyle['border-bottom-width'])) * extraZoom;
+                    var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline');
+                    if (assumedToBeText) {
+                        width  += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-left']) - parseFloat(currentStyle['padding-right'])) * extraZoom;
+                        height += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-top']) - parseFloat(currentStyle['padding-bottom'])) * extraZoom;
+                    }
                     var inflatedHeight = height * extraZoom,
                         inflatedWidth = width * extraZoom,
                         inflatedLeft = left - (width * extraZoom  - width) / 2,

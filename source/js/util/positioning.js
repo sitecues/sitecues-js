@@ -548,6 +548,26 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       return processResult(result);
     };
 
+    positioning.getCenterForActualElement = function (selector, zoom) {
+      var result = [];
+      $(selector).each(function () {
+        var boundingBox = this.getBoundingClientRect();
+        var scrollPos = positioning.getScrollPosition();
+        var rect = {
+          left: boundingBox.left + scrollPos.left,
+          top:  boundingBox.top  + scrollPos.top,
+          width: boundingBox.width,
+          height: boundingBox.height,
+        };
+
+        result.push({
+          left: (rect.left + (rect.width / 2)) / zoom,
+          top:  (rect.top + (rect.height / 2)) / zoom
+        });
+      });
+      return processResult(result);
+    };
+
     /**
      * Obtain the scroll position.
      */
