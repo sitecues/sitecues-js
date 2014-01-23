@@ -515,6 +515,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             }
+
+            roundingsStyle['top'] = parseFloat($(el).css('top')) - (parseFloat(roundingsStyle['margin-top']) - parseFloat(currentStyle['margin-top']));
+            roundingsStyle['left'] = parseFloat($(el).css('left')) - (parseFloat(roundingsStyle['margin-left']) - parseFloat(currentStyle['margin-left']));
             return roundingsStyle;
         }
 

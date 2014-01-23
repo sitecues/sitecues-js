@@ -278,9 +278,10 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Check the width and horizontal positioning.
                     if (inflatedWidth > viewport.width) {
                         // Fit to width of viewport.
+                        // todo: replace additionalBoxOffset with real data, padding not always equals to 4.
                         newWidth = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
                         //  var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
-                        newLeft = (- jElement.offset().left/conf.get('zoom') +window.pageXOffset/conf.get('zoom')+ designer.kMinDistanceFromEdge)/ conf.get('zoom');
+                        newLeft = - inflatedLeft + window.pageXOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
                         if (viewport.left > inflatedLeft) {
@@ -296,7 +297,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset) / extraZoom;
                         // Set top to viewport's top border.
-                        newTop = (- jElement.offset().top/conf.get('zoom') + window.pageYOffset/conf.get('zoom') + zoomHeightDiff + designer.kMinDistanceFromEdge)/ conf.get('zoom');
+                        newTop = - inflatedTop + window.pageYOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too tall. However, if the element is out of the view area, move it back in.
                         if (viewport.top > inflatedTop) {
