@@ -751,8 +751,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           }
 
           backgroundDimmer.removeDimmer();
-//          $('#vp').remove();
-
           setTimeout(function () {
             // Animation callback: notify all inputs about zoom out.
             // We should do this with next tick to allow handlers catch right scale level.
