@@ -489,6 +489,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             if (diffWidth !== 0) {
                 // todo: copy the diffHeight part, making specific changes.
                 roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
+                roundingsStyle['left'] = (parseFloat($(el).css('left')) || 0) - ((parseFloat(roundingsStyle['margin-left']) || 0) - parseFloat(currentStyle['margin-left']));
             }
 
             if (diffHeight === 0) {
@@ -516,8 +517,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 }
             }
 
-            roundingsStyle['top'] = parseFloat($(el).css('top')) - (parseFloat(roundingsStyle['margin-top']) - parseFloat(currentStyle['margin-top']));
-            roundingsStyle['left'] = parseFloat($(el).css('left')) - (parseFloat(roundingsStyle['margin-left']) - parseFloat(currentStyle['margin-left']));
+            roundingsStyle['top'] = (parseFloat($(el).css('top')) || 0) - ((parseFloat(roundingsStyle['margin-top']) || 0) - parseFloat(currentStyle['margin-top']));
             return roundingsStyle;
         }
 
@@ -751,8 +751,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           }
 
           backgroundDimmer.removeDimmer();
-//          $('#vp').remove();
-
           setTimeout(function () {
             // Animation callback: notify all inputs about zoom out.
             // We should do this with next tick to allow handlers catch right scale level.

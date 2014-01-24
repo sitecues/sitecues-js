@@ -48,7 +48,7 @@ sitecues.def('badge', function (badge, callback, log) {
        if (!platform.browser.isIE) {
          badge.panel.css({
           'transform-origin': '0% 0%',
-          'transform':'scale('+1/conf.get('zoom')+') translate(' + window.pageXOffset/conf.get('zoom') + 'px, ' + window.pageYOffset/conf.get('zoom') + 'px)'
+          'transform':'scale('+1/conf.get('zoom')+') translate(' + window.pageXOffset + 'px, ' + window.pageYOffset + 'px)'
          });
        }
       if (success) {

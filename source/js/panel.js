@@ -187,7 +187,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
 
         $panel.style({
-          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom'))) + 'px',
+          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom') + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
           left: left,
           right: right         
         }, '', 'important');
