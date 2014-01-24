@@ -680,7 +680,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         if (isChrome && !isFloated) {
           var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
-          console.log(roundingsStyle);
           this.$item.css(roundingsStyle);
         }
 
