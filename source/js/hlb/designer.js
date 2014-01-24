@@ -306,7 +306,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             newTop = viewport.bottom - (inflatedTop + inflatedHeight);
                         }
                     }
-                    var newMaxHeight = newHeight || (viewport.bottom - positioning.getOffset(jElement).top - 2 * additionalBoxOffset) / extraZoom;
+                    var newMaxHeight = newHeight || (viewport.height - 2 * additionalBoxOffset)/ extraZoom;
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
@@ -318,7 +318,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // var tempH = (cssUpdates.height - parseFloat(currentStyle.height)) || 0;
                     // designer.heightExpandedDiffValue = expandedHeight?  tempH : -tempH;
                     designer.heightExpandedDiffValue = expandedHeight? (cssUpdates.height - parseFloat(currentStyle.height)) || 0 : 0;
-                    designer.widthNarrowedDiffValue  = constrainedWidth?   (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
+                    designer.widthNarrowedDiffValue  = constrainedWidth? (cssUpdates.width  - parseFloat(currentStyle.width))  || 0 : 0;
 
                 });
                 return cssUpdates;
