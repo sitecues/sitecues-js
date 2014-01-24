@@ -211,7 +211,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             designer.getNewRectStyle = function(selector, currentStyle, center, extraZoom) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
-                var additionalBoxOffset = designer.kBoxBorderWidth + designer.kBoxPadding;
+                var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline');
+                var additionalBoxOffset = designer.kBoxBorderWidth;
+                if (assumedToBeText) {
+                    additionalBoxOffset += designer.kBoxPadding;
+                }
+
                 // Use the proper center.
                 var centerLeft = center.left;
                 var centerTop = center.top;
@@ -275,12 +280,16 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
 
+                    //var zoomHeightDiff = (inflatedHeight - jElement[0].getBoundingClientRect().height) / 2 ;          // new height - old height
+                    //var zoomWidthDiff = (parseFloat(currentStyle.width) - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
+
                     // Check the width and horizontal positioning.
                     if (inflatedWidth > viewport.width) {
                         // Fit to width of viewport.
-                        // todo: replace additionalBoxOffset with real data, padding not always equals to 4.
                         newWidth = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
-                        //  var zoomWidthDiff = (width - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
+                        // Since we change the width here, the 50% 50% center for trancformation is shifted.
+                        // todo: AK: still don't get where '4' comes from????
+                        inflatedLeft += (parseFloat(currentStyle.width) - newWidth) / 4;
                         newLeft = - inflatedLeft + window.pageXOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
                         // The element isn't too wide. However, if the element is out of the view area, move it back in.
@@ -291,11 +300,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         }
                     }
 
-                    var zoomHeightDiff = (inflatedHeight - jElement[0].getBoundingClientRect().height) / 2 ;          // new height - old height
                     // Check the height and vertical positioning.
                     if (inflatedHeight > viewport.height) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset) / extraZoom;
+                        // Since we change the width here, the 50% 50% center for trancformation is shifted.
+                        // todo: AK: still don't get where '4' comes from????
+                        inflatedTop += (parseFloat(currentStyle.height) - newHeight) / 4;
                         // Set top to viewport's top border.
                         newTop = - inflatedTop + window.pageYOffset/conf.get('zoom') + designer.kMinDistanceFromEdge;
                     } else {
