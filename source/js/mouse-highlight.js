@@ -839,7 +839,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // disable mouse highlight temporarily
     mh.disable = function(element) {
       // remove mousemove listener from body
-      $(document).off('mousemove', mh.update);
+      $(document).off('mousemove mousewheel', mh.update);
 
       mh.pause();
 
