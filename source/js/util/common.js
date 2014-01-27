@@ -143,7 +143,18 @@ sitecues.def('util/common', function (common, callback, log) {
     common.capitaliseFirstLetter = function(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     };
-    
+
+    /*
+     * Check if two Javascript objects are equal.
+     */
+    common.equals = function(obj1, obj2) {
+        function _equals(obj1, obj2) {
+            return JSON.stringify(obj1)
+                === JSON.stringify($.extend(true, {}, obj1, obj2));
+        }
+        return _equals(obj1, obj2) && _equals(obj2, obj1);
+    }
+
     /**
      * Checks if the value given is empty or not.
      */
