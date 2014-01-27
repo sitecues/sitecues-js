@@ -143,7 +143,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // notify about new hlb
         sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
-        var computedStyles = common.getElementComputedStyles(this.item);
+        this.computedStyles  = common.getElementComputedStyles(this.item);
+        var computedStyles = this.computedStyles; // a bit shorter alias
         var offset = positioning.getOffset(this.item);
         var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.$item.width() : computedStyles.width;
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
@@ -151,6 +152,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
+        this.boundingBoxes = designer.getBoundingElements(this.item);
+        this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles)
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
         this.savedStyleAttr['style'] = this.$item.attr('style');
@@ -189,367 +192,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         return this.state;
       };
 
-/**
- * ============== THE START ====================================================
- * 
- */
-        // Those objects are sared across the file so do not make them local.
-        var computedStyles, correctedStyle, isFloated = false, compensateShift, boundingBoxes = {};
-        // todo: change the rule for isChrome.
-        var padWidth = HighlightBox.kBoxPadding,
-            borWidth = HighlightBox.kBoxBorderWidth,
-            // todo: use platform.js
-            isChrome = platform.browser.isChrome,
-            // todo: find our where those roundings come from "magicNumber"?
-            magicNumber = 0.1;
-        /**
-         * Stores original styles to be able to revert the new ones.
-         * @param {type} prevStyle
-         * @returns {Object} correctedStyle
-         */
-        function getOrigStyle(prevStyle) {
-            var correctedStyle = {
-                // HLB styles.
-                'position': prevStyle.position,
-                'background-color': prevStyle.backgroundColor,
-                'padding': prevStyle.padding,
-                'border': prevStyle.border,
-                'border-radius': prevStyle.borderRadius,
-
-                // Revert animation.
-                'webkit-transform': 'scale(1)',
-                '-moz-transform': 'scale(1)',
-                '-o-transform': 'scale(1)',
-                '-ms-transform': 'scale(1)',
-                'transform': 'scale(1)'
-            }
-
-            return correctedStyle;
-        }
-
-        function getBoundingElements(pickedElement) {
-            var pickedRect = pickedElement.getBoundingClientRect();
-
-            var prevBoxes = getElementsAround(pickedRect, pickedElement, false);
-            var nextBoxes = getElementsAround(pickedRect, pickedElement, true);
-
-            $.extend(boundingBoxes, prevBoxes);
-            $.extend(boundingBoxes, nextBoxes);
-
-            return boundingBoxes;
-        }
-
-        /**
-         * Gets the bounding elements based on previous or next siblings;
-         * Second part of DFS algorithm used.
-         * @param {Object} pickedRect
-         * @param {HTMLObject} current
-         * @param {boolean} next Defines which direction to use: nextSibling if true; previousSibling if false.
-         * @returns {Object} res Two-element array containing bounding boxes:
-         * - right & below boxes if next siblings are looked thhrough;
-         * - above & left boxes if previous elements are looked through.
-         * 
-         * Example of result:
-         * Object {above: input{Object}, left: head{Object}, below: p#p2{Object}}
-         * 
-         */
-        function getElementsAround(pickedRect, current, next) {
-            var res = {};
-            var whichDirectionSibling = next? 'nextSibling' : 'previousSibling';
-
-            return function _recurse(pickedRect, current) {
-                if (Object.keys(res).length === 2 || common.isValidNonVisualElement(current)) {
-                    return res;
-                }
-
-               var iter = current[whichDirectionSibling];
-                if (!iter) {
-                    iter = current.parentNode;
-                    current = iter;
-                    return _recurse(pickedRect, current);
-                }
-
-                while (!common.isValidBoundingElement(iter)) {
-                    iter = iter[whichDirectionSibling];
-                    if (!iter) {
-                        iter = current.parentNode;
-                        current = iter;
-                        return _recurse(pickedRect, current);
-                    }
-                    if (common.isValidNonVisualElement(iter)) {
-                       return res; 
-                    }
-                }
-
-                current = iter;
-                var rect = current.getBoundingClientRect();
-                if (next) {
-                    if (!res['below'] && (Math.abs(rect.top) >= Math.abs(pickedRect.bottom))) {
-                        res['below'] = current;
-                    }
-                    if (!res['right'] && (Math.abs(rect.left) >= Math.abs(pickedRect.right))) {
-                        res['right'] = current;
-                    }
-                    return _recurse(pickedRect, current);
-                }
-                // Previous
-                if (!res['above'] && (Math.abs(rect.bottom) <= Math.abs(pickedRect.top))) {
-                    res['above'] = current;
-                }
-                if (!res['left']) {
-                    if ((Math.abs(rect.right) <= Math.abs(pickedRect.left))
-                        // #eeoc
-                        || ($(current).css('float') !== 'none'
-                        && (Math.abs(rect.right) <=  Math.abs(pickedRect.left) + rect.width + (Math.abs(rect.left) - Math.abs(pickedRect.left))))) {
-                        res['left'] = current;
-                    }
-                }
-                return _recurse(pickedRect, current);
-
-            }(pickedRect, current);
-        }
-
-        /** 
-         * Ley's define if there any interesting floats:
-         * topLeft, topRight then change the dimensions.
-         * See example below:
-         *  -------------------------
-         *  |          |// - 1 -//|  |
-         *  |          |//////////|  |
-         *  |                        |
-         *  |     - 2 -              |
-         *  -------------------------
-         *  wrapping element contains 2 blocks:
-         *  #1 is the interesting floating
-         *  #2 is the text which floats #1, we inflate it and need to
-         *  re-calculate its values: top, width, height etc.
-         *  @return floatRectHeight The shift height value produces by floating elements.
-         */
-        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
-            var floatRectHeight = 0;
-            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
-            var delta = 14; 
-            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
-            var floatRectsKeys = Object.keys(floatRects);
-
-            for (var index in floatRectsKeys) {
-                var innerKeys = floatRects[floatRectsKeys[index]];
-                // todo: fix the dirty trick for #eeoc.
-                if (innerKeys && Object.keys(innerKeys).length > 0) {
-                    isFloated = true;
-                    var oldHeight = parseFloat(cssBeforeAnimateStyles.height);
-                    // Current element's area(width * height)
-                    var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
-                    // Floating element's area(width * height)
-                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
-                    // Substract floated element's space from the full area.
-                    var clippedSpace = fullSpace - innerSpace;
-
-                    // Update position.
-                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
-                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
-                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
-                    // The width is expanded, so height has some extra-space. Let's cut it out!
-                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
-                    // Difference between original height and the new one.
-                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
-                    floatRectHeight = interestingFloatingHeight - heightDiff;
-                }
-             }
-             return floatRectHeight;
-        }
-
-        /**
-         * Make sure underlying content doesn't shift after we apply HLBs styles.
-         * Calculates margin shift to be applied.
-         * @param {HTMLObject} $el
-         * @returns {Object}
-         */
-        function getShift($el) {
-            // todo:  2* additionalBoxOffset * extraZoom
-            return {'vert': getShiftVert($el) + 'px', 'horiz': getShiftHoriz($el) + 'px'};
-        }
-
-        /**
-         * Get vertical shift to be compensated after we apply HLB styles.
-         * @param {HTMLObject} $el
-         * @returns {Number}
-         */
-        function getShiftVert($el) {
-            var aboveBox = boundingBoxes.above;
-            // #1 case: general case.
-            var compensateShiftVert = getTopIndent();
-            // #2 case: first element in the body or the prev element has bigger margin bottom.
-            if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= parseFloat($el.css('margin-top'))) {
-                compensateShiftVert -= parseFloat(computedStyles.marginTop);
-            }
-            return compensateShiftVert;
-        }
-
-        /**
-         * Get horizontal shift to be compensated after we apply HLB styles.
-         * @param {HTMLObject} $el
-         * @returns {Number}
-         */
-        function getShiftHoriz($el) {
-            var leftBox = boundingBoxes.left;
-             // #1 case: general case.
-            var compensateShiftHoriz = getLeftIndent();
-            // #2 case: first element in the body or the previous element has the bigger margin-right.
-            if (leftBox && parseFloat($(leftBox).css('margin-right')) >= parseFloat($el.css('margin-left'))) {
-                compensateShiftHoriz -= + parseFloat(computedStyles.marginLeft);
-            }
-            return compensateShiftHoriz;
-        }
-
-        function getTopIndent() {
-            var fullTopInset, minimumTopInset, isNotImage;
-            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
-            minimumTopInset =
-                    (parseFloat(computedStyles.borderTopWidth) + parseFloat(computedStyles.borderBottomWidth)
-                    + parseFloat(computedStyles.marginTop))
-                    - 2 * borWidth;
-            if (isNotImage) {
-                fullTopInset =
-                    minimumTopInset
-                    + parseFloat(computedStyles.paddingTop) + parseFloat(computedStyles.paddingBottom)
-                    - 2 * padWidth;
-            }
-            return fullTopInset || minimumTopInset;
-        }
-
-        function getLeftIndent() {
-            var fullLeftInset, minimumLeftInset, isNotImage;
-            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
-            minimumLeftInset = (parseFloat(computedStyles.borderLeftWidth) + parseFloat(computedStyles.borderRightWidth)
-                    + parseFloat(computedStyles.marginLeft))
-                    - 2 * borWidth;
-            if (isNotImage) {
-                fullLeftInset = minimumLeftInset
-                    + parseFloat(computedStyles.paddingLeft) + parseFloat(computedStyles.paddingRight)
-                    - 2 * padWidth;
-            }
-            return fullLeftInset || minimumLeftInset;
-        }
-
-        function getDiffHeight(currentStyle, newComputedStyles) {
-            var origMarginHeight = parseFloat(currentStyle['margin-top']) + parseFloat(currentStyle['margin-bottom']);
-            var newMarginHeight  = parseFloat(newComputedStyles.marginTop) + parseFloat(newComputedStyles.marginBottom);
-
-            var origBorderHeight =  parseFloat(currentStyle['border-top-width']) + parseFloat(currentStyle['border-bottom-width'])
-            var newBorderHeight  = parseFloat(newComputedStyles.borderTopWidth) + parseFloat(newComputedStyles.borderBottomWidth);
-
-            var origPaddingHeight = parseFloat(currentStyle['padding-top']) + parseFloat(currentStyle['padding-bottom']);
-            var newPaddingHeight  = parseFloat(newComputedStyles.paddingTop) + parseFloat(newComputedStyles.paddingBottom);
-
-            var origHeight = parseFloat(currentStyle['height']);
-            var newHeight  = parseFloat(newComputedStyles.height);
-
-            var diffHeight = origMarginHeight + origBorderHeight + origPaddingHeight + origHeight
-                           - (newMarginHeight + newBorderHeight + newPaddingHeight + newHeight);
-
-            return diffHeight;
-        }
-
-        function getDiffWidth(currentStyle, newComputedStyles) {
-            var origMarginWidth = parseFloat(currentStyle['margin-left']) + parseFloat(currentStyle['margin-right']);
-            var newMarginWidth  = parseFloat(newComputedStyles.marginLeft) + parseFloat(newComputedStyles.marginRight);
-
-            var origBorderWidth =  parseFloat(currentStyle['border-left-width']) + parseFloat(currentStyle['border-right-width'])
-            var newBorderWidth  = parseFloat(newComputedStyles.borderLeftWidth) + parseFloat(newComputedStyles.borderRightWidth);
-
-            var origPaddingWidth = parseFloat(currentStyle['padding-left']) + parseFloat(currentStyle['padding-right']);
-            var newPaddingWidth  = parseFloat(newComputedStyles.paddingLeft) + parseFloat(newComputedStyles.paddingRight);
-
-            var origWidth = parseFloat(currentStyle['width']);
-            var newWidth  = parseFloat(newComputedStyles.width);
-
-            var diffWidth = origMarginWidth + origBorderWidth + origPaddingWidth + origWidth
-                           - (newMarginWidth + newBorderWidth + newPaddingWidth + newWidth);
-            return diffWidth;
-        }
-
-        /**
-         * On zoom chrome behavies differently from the rest of browsers:
-         * instead of fixed value, for ex., '10px', it sets '9.99999999663px'.
-         * This brings shifts of underlying content when we inflate the element.
-         * The method below neutralizes roundings problem.
-         * @returns {Object} Set of styles to be set.
-         */
-        function getRoudingsOnZoom(el, currentStyle) {
-            var roundingsStyle = {};
-            var belowBox = boundingBoxes.below;
-            var aboveBox = boundingBoxes.above;
-            var compensateShiftFloat = parseFloat(compensateShift['vert']);
-            var newComputedStyles = el.currentStyle || window.getComputedStyle(el, null);
-
-            var diffHeight = designer.getHeightExpandedDiffValue()? 0: getDiffHeight(currentStyle, newComputedStyles);
-            var diffWidth  = designer.getWidthNarrowedDiffValue()?  0: getDiffWidth(currentStyle, newComputedStyles);
-
-            if (diffWidth !== 0) {
-                // todo: copy the diffHeight part, making specific changes.
-                roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
-                roundingsStyle['left'] = (parseFloat($(el).css('left')) || 0) - ((parseFloat(roundingsStyle['margin-left']) || 0) - parseFloat(currentStyle['margin-left']));
-            }
-
-            if (diffHeight === 0) {
-                return roundingsStyle;
-            }
-
-            if ($(el).css('clear') === 'both') {
-                if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
-                    roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
-                }
-                if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
-                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
-                }
-            } else {
-                if (// The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-                     (belowBox && Math.abs(parseFloat($(belowBox).css('margin-top'))) > Math.abs(compensateShiftFloat)
-                  && (aboveBox && Math.abs(parseFloat($(aboveBox).css('margin-bottom'))) > Math.abs(compensateShiftFloat)))) {
-                        roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
-                                          'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
-                } else if (compensateShiftFloat < 0
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
-                        roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
-                } else {
-                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
-                }
-            }
-
-            roundingsStyle['top'] = (parseFloat($(el).css('top')) || 0) - ((parseFloat(roundingsStyle['margin-top']) || 0) - parseFloat(currentStyle['margin-top']));
-            return roundingsStyle;
-        }
-
-        // jquery plugin 'style'
-        function getStyleObject(dom) {
-          var myDom = dom instanceof $ ? dom.get(0) : dom;
-          var returns = {};
-          // If browser's function 'getComputedStyle' is declared then use it.
-          if (getComputedStyle && myDom.nodeType === myDom.ELEMENT_NODE) {
-            var camelize = function(a, b) {
-              return b.toUpperCase();
-            }
-
-            var computedStyle = getComputedStyle(myDom, "");
-
-            if (computedStyle) {
-              for(var i = 0, l = computedStyle.length; i < l; i++) {
-                var prop = computedStyle[i];
-                var camel = prop.replace(/\-([a-z])/g, camelize);
-                var val = computedStyle.getPropertyValue(prop);
-                returns[camel] = val;
-              }
-            }
-            return returns;
-          }
-          return {};
-        }
-
-/**
- * ============= THE END =======================================================
- */
-
       /**
        * Show a highlight reading box when triggered.
        */
@@ -562,24 +204,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
-          origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
-
-        var center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
-          totalZoom = positioning.getTotalZoom(this.item, true),
-          cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
+            center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
+            totalZoom = positioning.getTotalZoom(this.item, true),
+            cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         // Handle table special behaviour on inner contents.
         designer.handleTableElement(this.$item, currentStyle);
 
-        var $el = this.$item,
-             el = this.item;
-
-        computedStyles  = getStyleObject(el); // global
-        boundingBoxes   = getBoundingElements(el),
-        compensateShift = getShift($el);
-
-        var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, compensateShift, cssUpdate);
-
+        var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, this.compensateShift, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = {
           'webkit-transform': 'scale(' + kExtraZoom + ')',
@@ -679,7 +311,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         if (isChrome && !isFloated) {
-          var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
+          var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
           this.$item.css(roundingsStyle);
         }
 
@@ -801,7 +433,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
         // todo: for floated elements we can use positioning.getCenter():absRect
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
-        newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
+        newHeight = cssUpdate.height? cssUpdate.height: this.computedStyles.height;
         newWidth = cssUpdate.width ? cssUpdate.width + 'px': currentStyle.width;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
@@ -811,8 +443,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Correct margins for simple case: assume that HLB fits the viewport.
         // Note: there is no documentation describing the way these margins are
         // calculated by. I used my logic & empiristic data.
-        var belowBox = boundingBoxes.below;
-        var aboveBox = boundingBoxes.above;
+        var belowBox = this.boundingBoxes.below;
+        var aboveBox = this.boundingBoxes.above;
         
         var expandedHeight = (designer.getHeightExpandedDiffValue() || 0);
 
@@ -960,6 +592,61 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         cssBeforeAnimateStyles['background-color'] = newBgColor;
         return;
       }
+ 
+        // Those objects are sared across the file so do not make them local.
+        var isFloated = false,
+            // todo: change the rule for isChrome.
+            isChrome = platform.browser.isChrome;
+
+        /** 
+         * Ley's define if there any interesting floats:
+         * topLeft, topRight then change the dimensions.
+         * See example below:
+         *  -------------------------
+         *  |          |// - 1 -//|  |
+         *  |          |//////////|  |
+         *  |                        |
+         *  |     - 2 -              |
+         *  -------------------------
+         *  wrapping element contains 2 blocks:
+         *  #1 is the interesting floating
+         *  #2 is the text which floats #1, we inflate it and need to
+         *  re-calculate its values: top, width, height etc.
+         *  @return floatRectHeight The shift height value produces by floating elements.
+         */
+        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
+            var floatRectHeight = 0;
+            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
+            var delta = 14; 
+            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
+            var floatRectsKeys = Object.keys(floatRects);
+
+            for (var index in floatRectsKeys) {
+                var innerKeys = floatRects[floatRectsKeys[index]];
+                // todo: fix the dirty trick for #eeoc.
+                if (innerKeys && Object.keys(innerKeys).length > 0) {
+                    isFloated = true;
+                    var oldHeight = parseFloat(cssBeforeAnimateStyles.height);
+                    // Current element's area(width * height)
+                    var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
+                    // Floating element's area(width * height)
+                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
+                    // Substract floated element's space from the full area.
+                    var clippedSpace = fullSpace - innerSpace;
+
+                    // Update position.
+                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
+                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
+                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
+                    // The width is expanded, so height has some extra-space. Let's cut it out!
+                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
+                    // Difference between original height and the new one.
+                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
+                    floatRectHeight = interestingFloatingHeight - heightDiff;
+                }
+             }
+             return floatRectHeight;
+        }
  
       /**
        * Notify all inputs if zoom in or out.

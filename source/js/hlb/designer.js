@@ -14,6 +14,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     'rgba(0, 0, 0, 0)'
     ];
 
+    // todo: find our where those roundings come from "magicNumber"?
+    var magicNumber = 0.1;
+
     designer.lineHeight = 20;
     designer.expandedHeight = 0;
 
@@ -334,6 +337,252 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 });
                 return cssUpdates;
             }
+
+
+        designer.getBoundingElements = function(pickedElement) {
+            var boundingBoxes = {};
+            var pickedRect = pickedElement.getBoundingClientRect();
+
+            var prevBoxes = getElementsAround(pickedRect, pickedElement, false);
+            var nextBoxes = getElementsAround(pickedRect, pickedElement, true);
+
+            $.extend(boundingBoxes, prevBoxes);
+            $.extend(boundingBoxes, nextBoxes);
+
+            return boundingBoxes;
+        }
+
+        /**
+         * Gets the bounding elements based on previous or next siblings;
+         * Second part of DFS algorithm used.
+         * @param {Object} pickedRect
+         * @param {HTMLObject} current
+         * @param {boolean} next Defines which direction to use: nextSibling if true; previousSibling if false.
+         * @returns {Object} res Two-element array containing bounding boxes:
+         * - right & below boxes if next siblings are looked thhrough;
+         * - above & left boxes if previous elements are looked through.
+         * 
+         * Example of result:
+         * Object {above: input{Object}, left: head{Object}, below: p#p2{Object}}
+         * 
+         */
+        function getElementsAround(pickedRect, current, next) {
+            var res = {};
+            var whichDirectionSibling = next? 'nextSibling' : 'previousSibling';
+
+            return function _recurse(pickedRect, current) {
+                if (Object.keys(res).length === 2 || common.isValidNonVisualElement(current)) {
+                    return res;
+                }
+
+               var iter = current[whichDirectionSibling];
+                if (!iter) {
+                    iter = current.parentNode;
+                    current = iter;
+                    return _recurse(pickedRect, current);
+                }
+
+                while (!common.isValidBoundingElement(iter)) {
+                    iter = iter[whichDirectionSibling];
+                    if (!iter) {
+                        iter = current.parentNode;
+                        current = iter;
+                        return _recurse(pickedRect, current);
+                    }
+                    if (common.isValidNonVisualElement(iter)) {
+                       return res; 
+                    }
+                }
+
+                current = iter;
+                var rect = current.getBoundingClientRect();
+                if (next) {
+                    if (!res['below'] && (Math.abs(rect.top) >= Math.abs(pickedRect.bottom))) {
+                        res['below'] = current;
+                    }
+                    if (!res['right'] && (Math.abs(rect.left) >= Math.abs(pickedRect.right))) {
+                        res['right'] = current;
+                    }
+                    return _recurse(pickedRect, current);
+                }
+                // Previous
+                if (!res['above'] && (Math.abs(rect.bottom) <= Math.abs(pickedRect.top))) {
+                    res['above'] = current;
+                }
+                if (!res['left']) {
+                    if ((Math.abs(rect.right) <= Math.abs(pickedRect.left))
+                        // #eeoc
+                        || ($(current).css('float') !== 'none'
+                        && (Math.abs(rect.right) <=  Math.abs(pickedRect.left) + rect.width + (Math.abs(rect.left) - Math.abs(pickedRect.left))))) {
+                        res['left'] = current;
+                    }
+                }
+                return _recurse(pickedRect, current);
+
+            }(pickedRect, current);
+        }
+
+        /**
+         * Make sure underlying content doesn't shift after we apply HLBs styles.
+         * Calculates margin shift to be applied.
+         * @param {HTMLObject} $el
+         * @returns {Object}
+         */
+        designer.getShift = function($el, boundingBoxes, computedStyles) {
+            // todo:  2* additionalBoxOffset * extraZoom
+            return {'vert': getShiftVert($el, boundingBoxes, computedStyles) + 'px', 'horiz': getShiftHoriz($el, boundingBoxes, computedStyles) + 'px'};
+        }
+
+        /**
+         * Get vertical shift to be compensated after we apply HLB styles.
+         * @param {HTMLObject} $el
+         * @returns {Number}
+         */
+        function getShiftVert($el, boundingBoxes, computedStyles) {
+            var aboveBox = boundingBoxes.above;
+            // #1 case: general case.
+            var compensateShiftVert = getTopIndent(computedStyles);
+            // #2 case: first element in the body or the prev element has bigger margin bottom.
+            if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= parseFloat($el.css('margin-top'))) {
+                compensateShiftVert -= parseFloat(computedStyles.marginTop);
+            }
+            return compensateShiftVert;
+        }
+
+        /**
+         * Get horizontal shift to be compensated after we apply HLB styles.
+         * @param {HTMLObject} $el
+         * @returns {Number}
+         */
+        function getShiftHoriz($el, boundingBoxes, computedStyles) {
+            var leftBox = boundingBoxes.left;
+             // #1 case: general case.
+            var compensateShiftHoriz = getLeftIndent(computedStyles);
+            // #2 case: first element in the body or the previous element has the bigger margin-right.
+            if (leftBox && parseFloat($(leftBox).css('margin-right')) >= parseFloat($el.css('margin-left'))) {
+                compensateShiftHoriz -= + parseFloat(computedStyles.marginLeft);
+            }
+            return compensateShiftHoriz;
+        }
+
+        function getTopIndent(computedStyles) {
+            var fullTopInset, minimumTopInset, isNotImage;
+            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
+            minimumTopInset =
+                    (parseFloat(computedStyles.borderTopWidth) + parseFloat(computedStyles.borderBottomWidth)
+                    + parseFloat(computedStyles.marginTop))
+                    - 2 * designer.kBoxBorderWidth;
+            if (isNotImage) {
+                fullTopInset =
+                    minimumTopInset
+                    + parseFloat(computedStyles.paddingTop) + parseFloat(computedStyles.paddingBottom)
+                    - 2 * designer.kBoxPadding;
+            }
+            return fullTopInset || minimumTopInset;
+        }
+
+        function getLeftIndent(computedStyles) {
+            var fullLeftInset, minimumLeftInset, isNotImage;
+            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
+            minimumLeftInset = (parseFloat(computedStyles.borderLeftWidth) + parseFloat(computedStyles.borderRightWidth)
+                    + parseFloat(computedStyles.marginLeft))
+                    - 2 * designer.kBoxBorderWidth;
+            if (isNotImage) {
+                fullLeftInset = minimumLeftInset
+                    + parseFloat(computedStyles.paddingLeft) + parseFloat(computedStyles.paddingRight)
+                    - 2 * designer.kBoxPadding;
+            }
+            return fullLeftInset || minimumLeftInset;
+        }
+
+        /**
+         * On zoom chrome behavies differently from the rest of browsers:
+         * instead of fixed value, for ex., '10px', it sets '9.99999999663px'.
+         * This brings shifts of underlying content when we inflate the element.
+         * The method below neutralizes roundings problem.
+         * @returns {Object} Set of styles to be set.
+         */
+        designer.getRoudingsOnZoom = function(el, boundingBoxes, currentStyle, compensateShift) {
+            var roundingsStyle = {};
+            var belowBox = boundingBoxes.below;
+            var aboveBox = boundingBoxes.above;
+            var compensateShiftFloat = parseFloat(compensateShift['vert']);
+            var newComputedStyles = el.currentStyle || window.getComputedStyle(el, null);
+
+            var diffHeight = this.getHeightExpandedDiffValue()? 0: getDiffHeight(currentStyle, newComputedStyles);
+            var diffWidth  = this.getWidthNarrowedDiffValue()?  0: getDiffWidth(currentStyle, newComputedStyles);
+
+            if (diffWidth !== 0) {
+                // todo: copy the diffHeight part, making specific changes.
+                roundingsStyle['margin-left'] = parseFloat(newComputedStyles['margin-left']) + diffWidth + magicNumber + 'px';
+                roundingsStyle['left'] = (parseFloat($(el).css('left')) || 0) - ((parseFloat(roundingsStyle['margin-left']) || 0) - parseFloat(currentStyle['margin-left']));
+            }
+
+            if (diffHeight === 0) {
+                return roundingsStyle;
+            }
+
+            if ($(el).css('clear') === 'both') {
+                if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
+                    roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
+                }
+                if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
+                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                }
+            } else {
+                if (// The current element has biggest the top & bottom margins initially but new one(s) are smaller.
+                     (belowBox && Math.abs(parseFloat($(belowBox).css('margin-top'))) > Math.abs(compensateShiftFloat)
+                  && (aboveBox && Math.abs(parseFloat($(aboveBox).css('margin-bottom'))) > Math.abs(compensateShiftFloat)))) {
+                        roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
+                                          'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
+                } else if (compensateShiftFloat < 0
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
+                        roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
+                } else {
+                    roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
+                }
+            }
+
+            roundingsStyle['top'] = (parseFloat($(el).css('top')) || 0) - ((parseFloat(roundingsStyle['margin-top']) || 0) - parseFloat(currentStyle['margin-top']));
+            return roundingsStyle;
+        }
+
+        function getDiffHeight(currentStyle, newComputedStyles) {
+            var origMarginHeight = parseFloat(currentStyle['margin-top']) + parseFloat(currentStyle['margin-bottom']);
+            var newMarginHeight  = parseFloat(newComputedStyles.marginTop) + parseFloat(newComputedStyles.marginBottom);
+
+            var origBorderHeight =  parseFloat(currentStyle['border-top-width']) + parseFloat(currentStyle['border-bottom-width'])
+            var newBorderHeight  = parseFloat(newComputedStyles.borderTopWidth) + parseFloat(newComputedStyles.borderBottomWidth);
+
+            var origPaddingHeight = parseFloat(currentStyle['padding-top']) + parseFloat(currentStyle['padding-bottom']);
+            var newPaddingHeight  = parseFloat(newComputedStyles.paddingTop) + parseFloat(newComputedStyles.paddingBottom);
+
+            var origHeight = parseFloat(currentStyle['height']);
+            var newHeight  = parseFloat(newComputedStyles.height);
+
+            var diffHeight = origMarginHeight + origBorderHeight + origPaddingHeight + origHeight
+                           - (newMarginHeight + newBorderHeight + newPaddingHeight + newHeight);
+
+            return diffHeight;
+        }
+
+        function getDiffWidth(currentStyle, newComputedStyles) {
+            var origMarginWidth = parseFloat(currentStyle['margin-left']) + parseFloat(currentStyle['margin-right']);
+            var newMarginWidth  = parseFloat(newComputedStyles.marginLeft) + parseFloat(newComputedStyles.marginRight);
+
+            var origBorderWidth =  parseFloat(currentStyle['border-left-width']) + parseFloat(currentStyle['border-right-width'])
+            var newBorderWidth  = parseFloat(newComputedStyles.borderLeftWidth) + parseFloat(newComputedStyles.borderRightWidth);
+
+            var origPaddingWidth = parseFloat(currentStyle['padding-left']) + parseFloat(currentStyle['padding-right']);
+            var newPaddingWidth  = parseFloat(newComputedStyles.paddingLeft) + parseFloat(newComputedStyles.paddingRight);
+
+            var origWidth = parseFloat(currentStyle['width']);
+            var newWidth  = parseFloat(newComputedStyles.width);
+
+            var diffWidth = origMarginWidth + origBorderWidth + origPaddingWidth + origWidth
+                           - (newMarginWidth + newBorderWidth + newPaddingWidth + newWidth);
+            return diffWidth;
+        }
 
             /**
              * 
