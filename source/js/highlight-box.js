@@ -151,6 +151,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
+        this.boundingBoxes = designer.getBoundingElements(this.item);
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
         this.savedStyleAttr['style'] = this.$item.attr('style');
@@ -194,120 +195,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
  * 
  */
         // Those objects are sared across the file so do not make them local.
-        var computedStyles, correctedStyle, isFloated = false, compensateShift, boundingBoxes = {};
+        var computedStyles, isFloated = false, compensateShift;
         // todo: change the rule for isChrome.
         var padWidth = HighlightBox.kBoxPadding,
             borWidth = HighlightBox.kBoxBorderWidth,
-            // todo: use platform.js
             isChrome = platform.browser.isChrome,
             // todo: find our where those roundings come from "magicNumber"?
             magicNumber = 0.1;
-        /**
-         * Stores original styles to be able to revert the new ones.
-         * @param {type} prevStyle
-         * @returns {Object} correctedStyle
-         */
-        function getOrigStyle(prevStyle) {
-            var correctedStyle = {
-                // HLB styles.
-                'position': prevStyle.position,
-                'background-color': prevStyle.backgroundColor,
-                'padding': prevStyle.padding,
-                'border': prevStyle.border,
-                'border-radius': prevStyle.borderRadius,
-
-                // Revert animation.
-                'webkit-transform': 'scale(1)',
-                '-moz-transform': 'scale(1)',
-                '-o-transform': 'scale(1)',
-                '-ms-transform': 'scale(1)',
-                'transform': 'scale(1)'
-            }
-
-            return correctedStyle;
-        }
-
-        function getBoundingElements(pickedElement) {
-            var pickedRect = pickedElement.getBoundingClientRect();
-
-            var prevBoxes = getElementsAround(pickedRect, pickedElement, false);
-            var nextBoxes = getElementsAround(pickedRect, pickedElement, true);
-
-            $.extend(boundingBoxes, prevBoxes);
-            $.extend(boundingBoxes, nextBoxes);
-
-            return boundingBoxes;
-        }
-
-        /**
-         * Gets the bounding elements based on previous or next siblings;
-         * Second part of DFS algorithm used.
-         * @param {Object} pickedRect
-         * @param {HTMLObject} current
-         * @param {boolean} next Defines which direction to use: nextSibling if true; previousSibling if false.
-         * @returns {Object} res Two-element array containing bounding boxes:
-         * - right & below boxes if next siblings are looked thhrough;
-         * - above & left boxes if previous elements are looked through.
-         * 
-         * Example of result:
-         * Object {above: input{Object}, left: head{Object}, below: p#p2{Object}}
-         * 
-         */
-        function getElementsAround(pickedRect, current, next) {
-            var res = {};
-            var whichDirectionSibling = next? 'nextSibling' : 'previousSibling';
-
-            return function _recurse(pickedRect, current) {
-                if (Object.keys(res).length === 2 || common.isValidNonVisualElement(current)) {
-                    return res;
-                }
-
-               var iter = current[whichDirectionSibling];
-                if (!iter) {
-                    iter = current.parentNode;
-                    current = iter;
-                    return _recurse(pickedRect, current);
-                }
-
-                while (!common.isValidBoundingElement(iter)) {
-                    iter = iter[whichDirectionSibling];
-                    if (!iter) {
-                        iter = current.parentNode;
-                        current = iter;
-                        return _recurse(pickedRect, current);
-                    }
-                    if (common.isValidNonVisualElement(iter)) {
-                       return res; 
-                    }
-                }
-
-                current = iter;
-                var rect = current.getBoundingClientRect();
-                if (next) {
-                    if (!res['below'] && (Math.abs(rect.top) >= Math.abs(pickedRect.bottom))) {
-                        res['below'] = current;
-                    }
-                    if (!res['right'] && (Math.abs(rect.left) >= Math.abs(pickedRect.right))) {
-                        res['right'] = current;
-                    }
-                    return _recurse(pickedRect, current);
-                }
-                // Previous
-                if (!res['above'] && (Math.abs(rect.bottom) <= Math.abs(pickedRect.top))) {
-                    res['above'] = current;
-                }
-                if (!res['left']) {
-                    if ((Math.abs(rect.right) <= Math.abs(pickedRect.left))
-                        // #eeoc
-                        || ($(current).css('float') !== 'none'
-                        && (Math.abs(rect.right) <=  Math.abs(pickedRect.left) + rect.width + (Math.abs(rect.left) - Math.abs(pickedRect.left))))) {
-                        res['left'] = current;
-                    }
-                }
-                return _recurse(pickedRect, current);
-
-            }(pickedRect, current);
-        }
 
         /** 
          * Ley's define if there any interesting floats:
@@ -365,9 +259,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          * @param {HTMLObject} $el
          * @returns {Object}
          */
-        function getShift($el) {
+        function getShift($el, boundingBoxes) {
             // todo:  2* additionalBoxOffset * extraZoom
-            return {'vert': getShiftVert($el) + 'px', 'horiz': getShiftHoriz($el) + 'px'};
+            return {'vert': getShiftVert($el, boundingBoxes) + 'px', 'horiz': getShiftHoriz($el, boundingBoxes) + 'px'};
         }
 
         /**
@@ -375,7 +269,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          * @param {HTMLObject} $el
          * @returns {Number}
          */
-        function getShiftVert($el) {
+        function getShiftVert($el, boundingBoxes) {
             var aboveBox = boundingBoxes.above;
             // #1 case: general case.
             var compensateShiftVert = getTopIndent();
@@ -391,7 +285,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          * @param {HTMLObject} $el
          * @returns {Number}
          */
-        function getShiftHoriz($el) {
+        function getShiftHoriz($el, boundingBoxes) {
             var leftBox = boundingBoxes.left;
              // #1 case: general case.
             var compensateShiftHoriz = getLeftIndent();
@@ -476,7 +370,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
          * The method below neutralizes roundings problem.
          * @returns {Object} Set of styles to be set.
          */
-        function getRoudingsOnZoom(el, currentStyle) {
+        function getRoudingsOnZoom(el, boundingBoxes, currentStyle) {
             var roundingsStyle = {};
             var belowBox = boundingBoxes.below;
             var aboveBox = boundingBoxes.above;
@@ -562,21 +456,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
-          origRectSize = this.origRectDimensions[this.origRectDimensions.length - 1];
-
-        var center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
-          totalZoom = positioning.getTotalZoom(this.item, true),
-          cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
+            center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
+            totalZoom = positioning.getTotalZoom(this.item, true),
+            cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         // Handle table special behaviour on inner contents.
         designer.handleTableElement(this.$item, currentStyle);
 
-        var $el = this.$item,
-             el = this.item;
-
-        computedStyles  = getStyleObject(el); // global
-        boundingBoxes   = getBoundingElements(el),
-        compensateShift = getShift($el);
+        computedStyles  = getStyleObject(this.item); // global
+        compensateShift = getShift(this.$item, this.boundingBoxes);
 
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, compensateShift, cssUpdate);
 
@@ -679,7 +567,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         if (isChrome && !isFloated) {
-          var roundingsStyle = getRoudingsOnZoom(el, currentStyle);
+          var roundingsStyle = getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle);
           this.$item.css(roundingsStyle);
         }
 
@@ -811,8 +699,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Correct margins for simple case: assume that HLB fits the viewport.
         // Note: there is no documentation describing the way these margins are
         // calculated by. I used my logic & empiristic data.
-        var belowBox = boundingBoxes.below;
-        var aboveBox = boundingBoxes.above;
+        var belowBox = this.boundingBoxes.below;
+        var aboveBox = this.boundingBoxes.above;
         
         var expandedHeight = (designer.getHeightExpandedDiffValue() || 0);
 

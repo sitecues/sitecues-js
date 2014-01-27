@@ -335,6 +335,90 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 return cssUpdates;
             }
 
+
+        designer.getBoundingElements = function(pickedElement) {
+            var boundingBoxes = {};
+            var pickedRect = pickedElement.getBoundingClientRect();
+
+            var prevBoxes = getElementsAround(pickedRect, pickedElement, false);
+            var nextBoxes = getElementsAround(pickedRect, pickedElement, true);
+
+            $.extend(boundingBoxes, prevBoxes);
+            $.extend(boundingBoxes, nextBoxes);
+
+            return boundingBoxes;
+        }
+
+        /**
+         * Gets the bounding elements based on previous or next siblings;
+         * Second part of DFS algorithm used.
+         * @param {Object} pickedRect
+         * @param {HTMLObject} current
+         * @param {boolean} next Defines which direction to use: nextSibling if true; previousSibling if false.
+         * @returns {Object} res Two-element array containing bounding boxes:
+         * - right & below boxes if next siblings are looked thhrough;
+         * - above & left boxes if previous elements are looked through.
+         * 
+         * Example of result:
+         * Object {above: input{Object}, left: head{Object}, below: p#p2{Object}}
+         * 
+         */
+        function getElementsAround(pickedRect, current, next) {
+            var res = {};
+            var whichDirectionSibling = next? 'nextSibling' : 'previousSibling';
+
+            return function _recurse(pickedRect, current) {
+                if (Object.keys(res).length === 2 || common.isValidNonVisualElement(current)) {
+                    return res;
+                }
+
+               var iter = current[whichDirectionSibling];
+                if (!iter) {
+                    iter = current.parentNode;
+                    current = iter;
+                    return _recurse(pickedRect, current);
+                }
+
+                while (!common.isValidBoundingElement(iter)) {
+                    iter = iter[whichDirectionSibling];
+                    if (!iter) {
+                        iter = current.parentNode;
+                        current = iter;
+                        return _recurse(pickedRect, current);
+                    }
+                    if (common.isValidNonVisualElement(iter)) {
+                       return res; 
+                    }
+                }
+
+                current = iter;
+                var rect = current.getBoundingClientRect();
+                if (next) {
+                    if (!res['below'] && (Math.abs(rect.top) >= Math.abs(pickedRect.bottom))) {
+                        res['below'] = current;
+                    }
+                    if (!res['right'] && (Math.abs(rect.left) >= Math.abs(pickedRect.right))) {
+                        res['right'] = current;
+                    }
+                    return _recurse(pickedRect, current);
+                }
+                // Previous
+                if (!res['above'] && (Math.abs(rect.bottom) <= Math.abs(pickedRect.top))) {
+                    res['above'] = current;
+                }
+                if (!res['left']) {
+                    if ((Math.abs(rect.right) <= Math.abs(pickedRect.left))
+                        // #eeoc
+                        || ($(current).css('float') !== 'none'
+                        && (Math.abs(rect.right) <=  Math.abs(pickedRect.left) + rect.width + (Math.abs(rect.left) - Math.abs(pickedRect.left))))) {
+                        res['left'] = current;
+                    }
+                }
+                return _recurse(pickedRect, current);
+
+            }(pickedRect, current);
+        }
+
             /**
              * 
              * @param {type} $el
