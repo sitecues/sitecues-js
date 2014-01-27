@@ -143,7 +143,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // notify about new hlb
         sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
-        var computedStyles = common.getElementComputedStyles(this.item);
+        this.computedStyles  = common.getElementComputedStyles(this.item);
+        var computedStyles = this.computedStyles; // a bit shorter alias
         var offset = positioning.getOffset(this.item);
         var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.$item.width() : computedStyles.width;
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
@@ -152,6 +153,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.boundingBoxes = designer.getBoundingElements(this.item);
+        this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles)
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
         this.savedStyleAttr['style'] = this.$item.attr('style');
@@ -190,94 +192,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         return this.state;
       };
 
-/**
- * ============== THE START ====================================================
- * 
- */
-        // Those objects are sared across the file so do not make them local.
-        var computedStyles, isFloated = false, compensateShift;
-        // todo: change the rule for isChrome.
-        var isChrome = platform.browser.isChrome;
-
-        /** 
-         * Ley's define if there any interesting floats:
-         * topLeft, topRight then change the dimensions.
-         * See example below:
-         *  -------------------------
-         *  |          |// - 1 -//|  |
-         *  |          |//////////|  |
-         *  |                        |
-         *  |     - 2 -              |
-         *  -------------------------
-         *  wrapping element contains 2 blocks:
-         *  #1 is the interesting floating
-         *  #2 is the text which floats #1, we inflate it and need to
-         *  re-calculate its values: top, width, height etc.
-         *  @return floatRectHeight The shift height value produces by floating elements.
-         */
-        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
-            var floatRectHeight = 0;
-            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
-            var delta = 14; 
-            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
-            var floatRectsKeys = Object.keys(floatRects);
-
-            for (var index in floatRectsKeys) {
-                var innerKeys = floatRects[floatRectsKeys[index]];
-                // todo: fix the dirty trick for #eeoc.
-                if (innerKeys && Object.keys(innerKeys).length > 0) {
-                    isFloated = true;
-                    var oldHeight = parseFloat(cssBeforeAnimateStyles.height);
-                    // Current element's area(width * height)
-                    var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
-                    // Floating element's area(width * height)
-                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
-                    // Substract floated element's space from the full area.
-                    var clippedSpace = fullSpace - innerSpace;
-
-                    // Update position.
-                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
-                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
-                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
-                    // The width is expanded, so height has some extra-space. Let's cut it out!
-                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
-                    // Difference between original height and the new one.
-                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
-                    floatRectHeight = interestingFloatingHeight - heightDiff;
-                }
-             }
-             return floatRectHeight;
-        }
-
-        // jquery plugin 'style'
-        function getStyleObject(dom) {
-          var myDom = dom instanceof $ ? dom.get(0) : dom;
-          var returns = {};
-          // If browser's function 'getComputedStyle' is declared then use it.
-          if (getComputedStyle && myDom.nodeType === myDom.ELEMENT_NODE) {
-            var camelize = function(a, b) {
-              return b.toUpperCase();
-            }
-
-            var computedStyle = getComputedStyle(myDom, "");
-
-            if (computedStyle) {
-              for(var i = 0, l = computedStyle.length; i < l; i++) {
-                var prop = computedStyle[i];
-                var camel = prop.replace(/\-([a-z])/g, camelize);
-                var val = computedStyle.getPropertyValue(prop);
-                returns[camel] = val;
-              }
-            }
-            return returns;
-          }
-          return {};
-        }
-
-/**
- * ============= THE END =======================================================
- */
-
       /**
        * Show a highlight reading box when triggered.
        */
@@ -297,11 +211,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Handle table special behaviour on inner contents.
         designer.handleTableElement(this.$item, currentStyle);
 
-        computedStyles  = getStyleObject(this.item); // global
-        compensateShift = designer.getShift(this.$item, this.boundingBoxes, computedStyles);
-
-        var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, compensateShift, cssUpdate);
-
+        var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, this.compensateShift, cssUpdate);
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = {
           'webkit-transform': 'scale(' + kExtraZoom + ')',
@@ -401,7 +311,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         if (isChrome && !isFloated) {
-          var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, compensateShift);
+          var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
           this.$item.css(roundingsStyle);
         }
 
@@ -523,7 +433,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
         // todo: for floated elements we can use positioning.getCenter():absRect
         var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
-        newHeight = cssUpdate.height? cssUpdate.height: computedStyles.height;
+        newHeight = cssUpdate.height? cssUpdate.height: this.computedStyles.height;
         newWidth = cssUpdate.width ? cssUpdate.width + 'px': currentStyle.width;
         newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
         newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
@@ -682,6 +592,61 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         cssBeforeAnimateStyles['background-color'] = newBgColor;
         return;
       }
+ 
+        // Those objects are sared across the file so do not make them local.
+        var isFloated = false,
+            // todo: change the rule for isChrome.
+            isChrome = platform.browser.isChrome;
+
+        /** 
+         * Ley's define if there any interesting floats:
+         * topLeft, topRight then change the dimensions.
+         * See example below:
+         *  -------------------------
+         *  |          |// - 1 -//|  |
+         *  |          |//////////|  |
+         *  |                        |
+         *  |     - 2 -              |
+         *  -------------------------
+         *  wrapping element contains 2 blocks:
+         *  #1 is the interesting floating
+         *  #2 is the text which floats #1, we inflate it and need to
+         *  re-calculate its values: top, width, height etc.
+         *  @return floatRectHeight The shift height value produces by floating elements.
+         */
+        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
+            var floatRectHeight = 0;
+            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
+            var delta = 14; 
+            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
+            var floatRectsKeys = Object.keys(floatRects);
+
+            for (var index in floatRectsKeys) {
+                var innerKeys = floatRects[floatRectsKeys[index]];
+                // todo: fix the dirty trick for #eeoc.
+                if (innerKeys && Object.keys(innerKeys).length > 0) {
+                    isFloated = true;
+                    var oldHeight = parseFloat(cssBeforeAnimateStyles.height);
+                    // Current element's area(width * height)
+                    var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
+                    // Floating element's area(width * height)
+                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
+                    // Substract floated element's space from the full area.
+                    var clippedSpace = fullSpace - innerSpace;
+
+                    // Update position.
+                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
+                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
+                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
+                    // The width is expanded, so height has some extra-space. Let's cut it out!
+                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
+                    // Difference between original height and the new one.
+                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
+                    floatRectHeight = interestingFloatingHeight - heightDiff;
+                }
+             }
+             return floatRectHeight;
+        }
  
       /**
        * Notify all inputs if zoom in or out.
