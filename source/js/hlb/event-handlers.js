@@ -22,8 +22,12 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback, log) {
            var hlb = e.data.hlb[0];
            // Find out if target is a child of HLB(inner content element).
            var isChild = targetIsChildOfHlb(hlb, e.target);
-           var target = isChild ? e.target : hlb;
-            // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
+           //The line below has been commented out because it breaks the ability to scroll within an HLB
+           //if the mouse is hovering over a child that does not have a scrollbar. 
+           //The function common.hasVertScroll returns true even when elements do not have a vertical scrollbar.
+           //var target = isChild ? e.target : hlb;
+           var target = hlb;
+           // Don't scroll target if it is a HLB(not a descendant) and doesn't have scroll bar.
            if (!isChild && !common.hasVertScroll(target)
                || (common.wheelUp(e) && $(target).scrollTop() <= 0)
                || (common.wheelDown(e) && $(target).scrollTop() + target.clientHeight + 1 >= target.scrollHeight)) {
