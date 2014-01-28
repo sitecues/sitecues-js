@@ -526,20 +526,21 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             }
 
             if ($(el).css('clear') === 'both') {
-                if (belowBox && parseFloat($(belowBox).css('margin-top')) < Math.abs(compensateShiftFloat)) {
+                if (belowBox && parseFloat($(belowBox).css('margin-top')) <= compensateShiftFloat) {
                     roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
                 }
-                if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < Math.abs(compensateShiftFloat)) {
+                if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= compensateShiftFloat) {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
             } else {
-                if (// The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-                     (belowBox && Math.abs(parseFloat($(belowBox).css('margin-top'))) > Math.abs(compensateShiftFloat)
-                  && (aboveBox && Math.abs(parseFloat($(aboveBox).css('margin-bottom'))) > Math.abs(compensateShiftFloat)))) {
+                // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
+                if (compensateShiftFloat > 0
+                  && (belowBox && parseFloat($(belowBox).css('margin-top')) >= compensateShiftFloat)
+                  && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= compensateShiftFloat)) {
                         roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
                                           'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
                 } else if (compensateShiftFloat < 0
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) < parseFloat(currentStyle['margin-top']))) {
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= parseFloat(currentStyle['margin-top']))) {
                         roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
                 } else {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';

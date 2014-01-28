@@ -454,7 +454,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var vertMargin = {};
         var horizMargin = {'margin-left': compensateHorizShiftFloat + 'px'};
 
-        if (compensateVertShiftFloat) {
+        if (compensateVertShiftFloat) { // note: similar logic is used in getRoundings
             if (currentStyle['clear'] === 'both') {
                 if (belowBox && parseFloat($(belowBox).css('margin-top')) <= Math.abs(compensateVertShiftFloat)) {
                     vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
@@ -464,8 +464,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             } else {
                 // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
                 if (compensateVertShiftFloat > 0 // New margin is positive.
-                    && (belowBox && parseFloat($(belowBox).css('margin-top')) >= compensateVertShiftFloat
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= compensateVertShiftFloat))) {
+                    && (belowBox && parseFloat($(belowBox).css('margin-top')) >= compensateVertShiftFloat)
+                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= compensateVertShiftFloat)) {
                         vertMargin = {'margin-top': - compensateVertShiftFloat / 2 + 'px', 'margin-bottom': - compensateVertShiftFloat / 2 + 'px'};
                 } else if (compensateVertShiftFloat < 0
                     && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= parseFloat(currentStyle['margin-top']))) {
