@@ -444,7 +444,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             var compensateShiftVert = getTopIndent(computedStyles);
             // #2 case: first element in the body or the prev element has bigger margin bottom.
             if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= parseFloat($el.css('margin-top'))) {
-                compensateShiftVert -= parseFloat(computedStyles.marginTop);
+                compensateShiftVert -= parseFloat(computedStyles['margin-top']);
             }
             return compensateShiftVert;
         }
@@ -460,22 +460,22 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             var compensateShiftHoriz = getLeftIndent(computedStyles);
             // #2 case: first element in the body or the previous element has the bigger margin-right.
             if (leftBox && parseFloat($(leftBox).css('margin-right')) >= parseFloat($el.css('margin-left'))) {
-                compensateShiftHoriz -= + parseFloat(computedStyles.marginLeft);
+                compensateShiftHoriz -= + parseFloat(computedStyles['margin-left']);
             }
             return compensateShiftHoriz;
         }
 
         function getTopIndent(computedStyles) {
             var fullTopInset, minimumTopInset, isNotImage;
-            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
+            isNotImage = common.isEmptyBgImage(computedStyles['background-image']);
             minimumTopInset =
-                    (parseFloat(computedStyles.borderTopWidth) + parseFloat(computedStyles.borderBottomWidth)
-                    + parseFloat(computedStyles.marginTop))
+                    (parseFloat(computedStyles['border-top-width']) + parseFloat(computedStyles['border-bottom-width'])
+                    + parseFloat(computedStyles['margin-top']))
                     - 2 * designer.kBoxBorderWidth;
             if (isNotImage) {
                 fullTopInset =
                     minimumTopInset
-                    + parseFloat(computedStyles.paddingTop) + parseFloat(computedStyles.paddingBottom)
+                    + parseFloat(computedStyles['padding-top']) + parseFloat(computedStyles['paddin-bottom'])
                     - 2 * designer.kBoxPadding;
             }
             return fullTopInset || minimumTopInset;
@@ -483,13 +483,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
         function getLeftIndent(computedStyles) {
             var fullLeftInset, minimumLeftInset, isNotImage;
-            isNotImage = common.isEmptyBgImage(computedStyles.backgroundImage);
-            minimumLeftInset = (parseFloat(computedStyles.borderLeftWidth) + parseFloat(computedStyles.borderRightWidth)
-                    + parseFloat(computedStyles.marginLeft))
+            isNotImage = common.isEmptyBgImage(computedStyles['background-image']);
+            minimumLeftInset = (parseFloat(computedStyles['border-left-width']) + parseFloat(computedStyles['border-right-width'])
+                    + parseFloat(computedStyles['margin-left']))
                     - 2 * designer.kBoxBorderWidth;
             if (isNotImage) {
                 fullLeftInset = minimumLeftInset
-                    + parseFloat(computedStyles.paddingLeft) + parseFloat(computedStyles.paddingRight)
+                    + parseFloat(computedStyles['padding-left']) + parseFloat(computedStyles['padding-right'])
                     - 2 * designer.kBoxPadding;
             }
             return fullLeftInset || minimumLeftInset;
