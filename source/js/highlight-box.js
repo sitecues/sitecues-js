@@ -153,7 +153,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.boundingBoxes = designer.getBoundingElements(this.item);
-        this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles)
+        this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles);
         this.savedCss.push(computedStyles);
         // List of attributes we save original values for because we might want to redefine them later.
         this.savedStyleAttr['style'] = this.$item.attr('style');
