@@ -146,6 +146,9 @@ sitecues.def('util/common', function (common, callback, log) {
 
     /*
      * Check if two Javascript objects are equal.
+     * @param {type} obj1
+     * @param {type} obj2
+     * @returns {unresolved}
      */
     common.equals = function(obj1, obj2) {
         function _equals(obj1, obj2) {
