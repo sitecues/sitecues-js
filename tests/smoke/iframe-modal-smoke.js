@@ -57,16 +57,16 @@ describe("sitecues", function() {
         });
       });
 
-      it("Should see the toolbar on the page", function(done) {
-        session.browser.elementByClassName(CSS_SELECTOR_TOOLBAR, function(error) {
-          expect(error).to.be.null;
+      it("Should not see the toolbar on the page", function(done) {
+        session.browser.elementByClassNameOrNull(CSS_SELECTOR_TOOLBAR, function(error, value) {
+          expect(value).to.be.null;
           done();
         });
       });
       
 
 /******************* HELP PAGE *******************************/
-
+/*
       // Here we begin to test 'Help'
       it("Should open toolbar dropdown and show Help page", function(done) {
         session.browser.elementById(CSS_SELECTOR_LOGO, function(error, logo) {
@@ -142,9 +142,9 @@ describe("sitecues", function() {
           });
         });
       });
-
+*/
 /******************* FEEDBACK PAGE *************************/
-
+/*
       // Here we begin to test 'Feedback'
       it("Should open toolbar dropdown and show Feedback page", function(done) {
         session.browser.elementById(CSS_SELECTOR_LOGO, function(error, logo) {

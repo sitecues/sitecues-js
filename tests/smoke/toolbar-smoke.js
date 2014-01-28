@@ -26,13 +26,14 @@ describe("sitecues", function() {
         });
       });
 
-      it("should see the toolbar on the page", function(done) {
-        session.browser.elementByClassName("sitecues-toolbar", function(error) {
-          expect(error).to.be.null;
+      it("should not see the toolbar on the page", function(done) {
+        session.browser.elementByClassNameOrNull("sitecues-toolbar", function(error, value) {
+          expect(value).to.be.null;
           done();
         });
       });
 
+      /*
       it("should change tts button icon and tts state", function(done) {
         session.browser.elementByClassName('tts', function(error, ttsButton) {
           expect(error).to.be.null;
@@ -40,7 +41,7 @@ describe("sitecues", function() {
           setTimeout(done, 500);
         });
       });
-
+      */
     });
   });
 });

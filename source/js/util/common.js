@@ -8,7 +8,7 @@ sitecues.def('util/common', function (common, callback, log) {
   common.kMinRectHeight = 4;
 
    // Define dependency modules.
-  sitecues.use('jquery', 'jquery/cookie', function ($) {
+  sitecues.use('jquery', 'jquery/cookie', 'conf', 'platform', function ($, cockie, conf, platform) {
     
     var kRegExpRGBString = /\d+(\.\d+)?%?/g
       , kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i
@@ -18,6 +18,13 @@ sitecues.def('util/common', function (common, callback, log) {
       // https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
       , lineHeightValues = {'normal': 1.2}
       ;
+
+    var validNonVisualElements = ['document', 'body', 'html', 'head'];
+    var nonWordWrappableElements = ['table', 'thead', 'tbody', 'tr', 'td', 'img'];
+    var nodeTypes = {
+        'elementNode': 1,
+        'textNode':    3
+    }
 
     // Make sure 'trim()' has cross-browser support.
     if (typeof String.prototype.trim !== 'function') {
@@ -30,10 +37,13 @@ sitecues.def('util/common', function (common, callback, log) {
       // Values possible from computed style: normal | <number>px
       var lineHeight = $(item).css('line-height');
       if (lineHeightValues.hasOwnProperty(lineHeight)) {
-        return lineHeightValues[lineHeight];
+        var fontSize = $(item).css('font-size');
+        var lineHeight = Math.floor(parseInt(fontSize.replace('px','')) * 1.5);
+        return lineHeight;
       }
       return parseFloat(lineHeight);
     }
+
     /**
      * Get the element's styles to be used further.
      * @param element The DOM element which styles we want to get.
@@ -87,6 +97,27 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     /**
+     * Calcualate the width of a single x-char based on current styles.
+     * @param {Object} currentStyle
+     * @returns {Number} Amount of pixels single x-char takes.
+     */
+    common.getXCharWidth = function(currentStyle) {
+        var fontStyle = {
+            'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
+            'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
+            'font-style':  currentStyle['font-style'],      // font-style: "normal"
+            'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
+            'font-weight': currentStyle['font-weight']      // font-weight: "500"
+        };
+
+        $('body').append('<div id="testwidth"><span>x</span></div>');
+        var xCharWidth = $('#testwidth span').css($.extend({'width': '1ch'}, fontStyle)).width();
+        $('#testwidth').remove();
+
+        return xCharWidth;
+    }
+
+    /**
      * Remove all the attributes from the DOM element given.
      */
     common.removeAttributes = function(element) {
@@ -112,7 +143,21 @@ sitecues.def('util/common', function (common, callback, log) {
     common.capitaliseFirstLetter = function(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     };
-    
+
+    /*
+     * Check if two Javascript objects are equal.
+     * @param {type} obj1
+     * @param {type} obj2
+     * @returns {unresolved}
+     */
+    common.equals = function(obj1, obj2) {
+        function _equals(obj1, obj2) {
+            return JSON.stringify(obj1)
+                === JSON.stringify($.extend(true, {}, obj1, obj2));
+        }
+        return _equals(obj1, obj2) && _equals(obj2, obj1);
+    }
+
     /**
      * Checks if the value given is empty or not.
      */
@@ -143,6 +188,62 @@ sitecues.def('util/common', function (common, callback, log) {
     common.isCanvasElement = function (el) {
        return el[0].localName === "canvas" || el.find('canvas').length > 0;
      };
+
+    /**
+     * Detect if the current element containts wrappable content.
+     * @param {type} el DOM node
+     * @returns {Boolean}t ture if the content is wrappable.
+     */
+    common.isWordWrappableElement = function(el) {
+         var localName = el.localName;
+         var nodeType  = el.nodeType;
+
+         var hasWordWrappableElementTag = $.inArray(localName, nonWordWrappableElements) < 0;
+         var hasVisualElementTag = $.inArray(localName, validNonVisualElements) < 0;
+
+         var isTextNode    = nodeType === nodeTypes['textNode'];
+         var isElementNode = nodeType === nodeTypes['elementNode'];
+         
+         var isNotDirectChildOfNonVisualElement = $.inArray($(el).parent()[0].localName, validNonVisualElements) < 0;
+         var isAssumedToBeTextNode = true;
+
+         // todo: Alternatively, we may try BFS and compare the benchmarks.
+         (function _recurse(children) {
+             if (!isAssumedToBeTextNode || children.length === 0) {
+                 return;
+             }
+             children.each(function() {
+                 if (($.inArray($(this)[0].localName, nonWordWrappableElements) >= 0)
+                    // List item that has bg image.
+                     || (($(this)[0].localName === 'li') && !common.isEmptyBgImage($(this).css('background-image')))) {
+                     isAssumedToBeTextNode = false;
+                     return;
+                 }
+                 if ($(this).children().length > 0) {
+                     return _recurse($(this).children());
+                 }
+
+             });
+         }($(el).children()));
+
+         return hasWordWrappableElementTag
+             && hasVisualElementTag
+             && isNotDirectChildOfNonVisualElement
+             && ((isElementNode && isAssumedToBeTextNode) || isTextNode);
+    }
+
+    common.isValidNonVisualElement = function(el) {
+         return $.inArray(el.localName, validNonVisualElements) >= 0;
+     }
+
+     common.isValidBoundingElement = function(el) {
+         var $el = el && $(el);
+         var isValidBoundingElement =
+                el && el.localName && el.localName !== 'script'
+                && $el.is(':visible')
+                && $el.height() > 5 && $el.width() > 5;
+        return isValidBoundingElement? true: false;
+     }
 
     /*
      * Check if current image value is not empty.
@@ -456,8 +557,8 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
   /* Validates whether the given value is a valid URL
-	 * @urlString A string
-	 */
+   * @urlString A string
+   */
 
     common.validateUrl = function(urlString) {
       return kUrlValidString.test(urlString);
@@ -522,15 +623,23 @@ sitecues.def('util/common', function (common, callback, log) {
       // log('                body vert scrollbar: ' +bodyHasVertScrollbar() );
       // log('         accessors get right offset: ' +accessors.getRightOffset() );
       // log('accessors body vert scrollbar width: ' +bodyVertScrollbarWidth );
-
-      var css = {
-        left: ($(document.documentElement).outerWidth() - 
-          accessors.getWidth() -
-          (bodyHasVertScrollbar() ?
-            accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
-        )) + 'px'
-      };
-
+      if (!platform.browser.isIE) {
+        var css = {
+          left: (document.documentElement.clientWidth / conf.get('zoom') - 
+            accessors.getWidth() / conf.get('zoom') -
+            (bodyHasVertScrollbar() ?
+              accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
+          )) + 'px'
+        };
+      } else {
+        var css = {
+          left: (document.documentElement.clientWidth - 
+            accessors.getWidth() -
+            (bodyHasVertScrollbar() ?
+              accessors.getRightOffset() : bodyVertScrollbarWidth + accessors.getRightOffset()
+          )) + 'px'
+        };
+      }
       // Apply the dynamic placement CSS.
       accessors.setCss(css);
     }
@@ -567,6 +676,7 @@ sitecues.def('util/common', function (common, callback, log) {
       for (var i = 0; i < rightAlignObjs.length; i++) {
         applyDynamicPlacementCSS(rightAlignObjs[i]);
       }
+      sitecues.emit('resizeEndEnd');
     });
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -655,15 +765,15 @@ sitecues.def('util/common', function (common, callback, log) {
         var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
         var top    = Math.max( unclippedRect.top, clipRect.top );
         var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
-		    return {
-			    left: left,
-			    top: top,
-			    bottom: bottom,
-			    right: right,
-			    width: right - left,
-			    height: bottom - top
-		    };
-	    }
+        return {
+          left: left,
+          top: top,
+          bottom: bottom,
+          right: right,
+          width: right - left,
+          height: bottom - top
+        };
+      }
 
         // Get clip rectangle from ancestors in the case any of them are clipping us
         common.getAncestorClipRect = function($selector) {
@@ -688,52 +798,52 @@ sitecues.def('util/common', function (common, callback, log) {
         }
 
 
-	    /**
-	     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
-	     */
-	    common.combineIntersectingRects = function(rects, extraSpace) {
-		    function intersects(r1, r2) {
-			    return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
-				    || r2.left + r2.width + extraSpace < r1.left - extraSpace
-				    || r2.top - extraSpace > r1.top + r1.height + extraSpace
-				    || r2.top + r2.height + extraSpace < r1.top - extraSpace
-				    );
-		    }
+      /**
+       * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+       */
+      common.combineIntersectingRects = function(rects, extraSpace) {
+        function intersects(r1, r2) {
+          return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
+            || r2.left + r2.width + extraSpace < r1.left - extraSpace
+            || r2.top - extraSpace > r1.top + r1.height + extraSpace
+            || r2.top + r2.height + extraSpace < r1.top - extraSpace
+            );
+        }
 
-		    function merge(r1, r2) {
-			    var left = Math.min(r1.left, r2.left);
-			    var top = Math.min(r1.top, r2.top);
-			    var right = Math.max(r1.left + r1.width, r2.left + r2.width);
-			    var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
-			    return {
-				    left: left,
-				    top: top,
-				    width: right - left,
-				    height: bottom - top,
-				    right: right,
-				    bottom: bottom
-			    };
-		    }
+        function merge(r1, r2) {
+          var left = Math.min(r1.left, r2.left);
+          var top = Math.min(r1.top, r2.top);
+          var right = Math.max(r1.left + r1.width, r2.left + r2.width);
+          var bottom = Math.max(r1.top + r1.height, r2.top + r2.height);
+          return {
+            left: left,
+            top: top,
+            width: right - left,
+            height: bottom - top,
+            right: right,
+            bottom: bottom
+          };
+        }
 
-		    // TODO O(n^2), not ideal.
-		    // Probably want to use well-known algorithm for merging adjacent rects
-		    // into a polygon, such as:
-		    // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
-		    // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
-		    // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
-		    for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
-			    var index2 = index1 + 1;
-			    while (index2 < rects.length) {
-				    if (intersects(rects[index1], rects[index2])) {
-					    rects[index1] = merge(rects[index1], rects[index2]);
-					    rects.splice(index2, 1);
-				    }
-				    else {
-					    index2++;
-				    }
-			    }
-		    }
-	    }
+        // TODO O(n^2), not ideal.
+        // Probably want to use well-known algorithm for merging adjacent rects
+        // into a polygon, such as:
+        // http://stackoverflow.com/questions/643995/algorithm-to-merge-adjacent-rectangles-into-polygon
+        // http://www.raymondhill.net/puzzle-rhill/jigsawpuzzle-rhill-3.js
+        // http://stackoverflow.com/questions/13746284/merging-multiple-adjacent-rectangles-into-one-polygon
+        for (var index1 = 0; index1 < rects.length - 1; index1 ++) {
+          var index2 = index1 + 1;
+          while (index2 < rects.length) {
+            if (intersects(rects[index1], rects[index2])) {
+              rects[index1] = merge(rects[index1], rects[index2]);
+              rects.splice(index2, 1);
+            }
+            else {
+              index2++;
+            }
+          }
+        }
+      }
 
      /**
       * Helper methods.
@@ -762,31 +872,6 @@ sitecues.def('util/common', function (common, callback, log) {
        }
        return getEmsToPx(style['font-size'], ems);
      }
-
-    common.getBoundingRectMinusPadding = function(node) {
-            var range = document.createRange();
-            range.selectNode(node);
-            var rect = range.getBoundingClientRect();
-            if (node.nodeType !== 1) {
-                    return rect;
-            }
-            // Reduce by padding amount -- useful for images such as Google Logo
-            // which have a ginormous amount of padding on one side
-            // TODO: should we use common.getElementComputedStyles() ?
-            var paddingTop = parseFloat($(node).css('padding-top'));
-            var paddingLeft = parseFloat($(node).css('padding-left'));
-            var paddingBottom = parseFloat($(node).css('padding-bottom'));
-            var paddingRight = parseFloat($(node).css('padding-right'));
-            rect = {
-                    top: rect.top + paddingTop,
-                    left: rect.left + paddingLeft,
-                    width: rect.width - paddingLeft - paddingRight,
-                    height: rect.height - paddingTop - paddingBottom,
-                    right: rect.right - paddingRight,
-                    bottom: rect.bottom - paddingBottom
-            };
-            return rect;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////
     //// END: Logic for mouse-highlight intellegent selection,
