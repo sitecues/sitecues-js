@@ -285,6 +285,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     //var zoomHeightDiff = (inflatedHeight - jElement[0].getBoundingClientRect().height) / 2 ;          // new height - old height
                     //var zoomWidthDiff = (parseFloat(currentStyle.width) - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
+                    // todo: use heightDiff instead of newMaxHeight when the element is too wide
+                    // and we shrink the width => the height may be expanded.
+                    var newMaxHeight = inflatedHeight / extraZoom;
 
                     // Check the width and horizontal positioning.
                     if (inflatedWidth > viewport.width) {
@@ -320,7 +323,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                             newTop = viewport.bottom - (inflatedTop + inflatedHeight);
                         }
                     }
-                    var newMaxHeight = newHeight || (viewport.height - 2 * additionalBoxOffset)/ extraZoom;
+                    newMaxHeight = newHeight || newMaxHeight || (viewport.height - 2 * additionalBoxOffset)/ extraZoom;
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
