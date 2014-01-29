@@ -242,17 +242,60 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Animate HLB (keep in mind $.animate() is non-blocking).
         var ancestorCSS = [ ];
         var parents = this.$item.parentsUntil(document.body);
-        $.each(parents, function () {
+        var parentsSiblings = [];
+        // todo: take out to constructor
+        var elementsWithGreaterZIndexes = [], parentsWithLowerZIndex = [];
+
+        // Detect the parents' siblings. Note: we only care about visual elements.
+        $.each(parents, function() {
+            var siblings = $(this).siblings();
+            $.each(siblings, function() {
+                if (common.isValidBoundingElement(this)) {
+                    parentsSiblings.push(this);
+                };
+            });
+        });
+
+        // Detect the elements that have greater z-index values than the item's parents' siblings.
+        $('*').filter(function() {
+            return common.hasNonEmptyZIndex(this);
+        }).each(function() {
+            var currentZIndexEl = this;
+            if (!common.isAddedBySitecues(currentZIndexEl)) {
+                $.each(parentsSiblings, function() {
+                   var parentSibling = this;
+                   var parentZIndex = common.hasNonEmptyZIndex(parentSibling)? $(parentSibling)[0].style['z-index']: 0;
+                   var currentZIndex = $(currentZIndexEl)[0].style['z-index'] || $(currentZIndexEl).css('z-index');
+                   // todo: what if the they are equal?
+                   if (parseFloat(currentZIndex) > parseFloat(parentZIndex)) {
+                       // todo: maybe, change format to key => value?
+                       parentsWithLowerZIndex.push(parentSibling);
+                      // elementsWithGreaterZIndexes.push($(currentZIndexEl)[0]);
+                   }
+                });
+            }
+        });
+
+        // Now, convert z-index values.
+        
+
+        $.each(parentsWithLowerZIndex, function () {
           ancestorCSS.push({
             zIndex   : this.style.zIndex,
             overflowX: this.style.overflowX,
             overflowY: this.style.overflowY,
-            overflow : this.style.overflow});
+            overflow : this.style.overflow
+            });
         });
 
+        // We need these arrays later in .deflate();
         this.savedAncestorCSS = ancestorCSS;
-        $.each(parents, function() {
-          $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
+        this.parentsWithLowerZIndex = parentsWithLowerZIndex;
+        this.elementsWithGreaterZIndexes = elementsWithGreaterZIndexes;
+        
+        $.each(parentsWithLowerZIndex, function() {
+          $(this).style({
+                  'z-index': HighlightBox.kBoxZindex.toString(),
                   'overflow': 'visible'
                   }, '', 'important');
         });
@@ -328,14 +371,16 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         sitecues.emit('hlb/deflating', _this.item, $.extend(true, {}, _this.options));
 
         // Get the current element styles.
-          var ancestorCSS = this.savedAncestorCSS;
-        var parents = this.$item.parentsUntil(document.body);
-        $.each(parents, function() {
+        var ancestorCSS = this.savedAncestorCSS;
+        var parentsWithLowerZIndex = this.parentsWithLowerZIndex;
+        $.each(parentsWithLowerZIndex, function() {
           var css = ancestorCSS.shift();
-          $(this).style({'z-index'   : css.zIndex,
+          $(this).style({
+                 'z-index'   : css.zIndex,
                  'overflow-x': css.overflowX,
                  'overflow-y': css.overflowY,
-                 'overflow'  : css.overflow});
+                 'overflow'  : css.overflow
+             });
         });
         this.$item.style('outline', HighlightBox.kBoxNoOutline, 'important');
 
