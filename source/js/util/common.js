@@ -254,12 +254,23 @@ sitecues.def('util/common', function (common, callback, log) {
       return this.isEmpty(imageValue) || imageValue === 'none';
     };
 
+    // For now it is just a stub
+    // todo: fill in with logic
+    common.isAddedBySitecues = function (el) {
+        return false;
+    };
+
      /**
       * Checks if the element has a visible border(based on left and top border widths.
       */
     common.hasVisibleBorder = function(style) {
        return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
      };
+
+    common.hasNonEmptyZIndex = function(el) {
+        return (($(el).css('z-index') !== 'auto' && $(el).css('z-index') !== '')
+                || (el.style['z-index'] !== 'auto' && el.style['z-index'] !== ''))
+    };
 
     /**
       * Is the current element editable for any reason???
