@@ -241,7 +241,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Animate HLB (keep in mind $.animate() is non-blocking).
         var ancestorCSS = [ ];
-        $(this.$item).parents().each(function () {
+        var parents = this.$item.parentsUntil(document.body);
+        $.each(parents, function () {
           ancestorCSS.push({
             zIndex   : this.style.zIndex,
             overflowX: this.style.overflowX,
@@ -250,7 +251,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
 
         this.savedAncestorCSS = ancestorCSS;
-        var parents = this.$item.parentsUntil(document.body);
         $.each(parents, function() {
           $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
                   'overflow': 'visible'
@@ -269,9 +269,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 }
               }
             }
-        }
-
-        if (common.isCanvasElement(this.$item)) {
+        } else {
             delete cssBeforeAnimateStyles.width;
             delete cssBeforeAnimateStyles.height;
             // todo: remove this awful hardcode
