@@ -102,7 +102,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
     // Un-dims stuff. Ballin' //////////////////////////////////////////////////
     backgroundDimmer.removeDimmer = function () {
-      
+      if (!this.$dimmerContainer) {
+          return;
+      }
+
       // Animate out the dimmerContainer
       this.$dimmerContainer.style({opacity: 0}, '', 'important');
 
