@@ -61,12 +61,92 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      *
      * @param hover The element the mouse is hovering over
      */
+/*
+           :#++++:                    @+++@                            
+          +#'+'++#                   #++'''#                  :@@:     
+        `,@`:,+`;.,,              ;:,++'''''#`              .@';'';+:  
+       @+#;,.,,:;+`:#            #;;;#;,;:,;,              ,::.+'';;,  
+      #;@@,,,:.++#:'##          +;+@@##;,..,+           #+':,,@#;#'+,  
+     :#@@@'';;:,:'+###'        #+;+#@@::,;:`+#        #+:#@;;:#+:.,..  
+     ;+@'###+++'##@####`      '+'#@@##::;,',##@      ;++#@###'##';;;#  
+     +#+####+'''+#`#####     ;++#@@#;#+';#+#+##     +'++++';#;''+@#+## 
+     +++##++'''+@@@##+++:    '##+';+#;';;++####+    +'''+;'+;;;'@@@''+ 
+     +#####+#'+@@@###@      .+++##++';;;#@@@+###;   '+'+'+#'';@@###    
+     `+++##@##@@@@#++        #++'+@#++#@@#@##;''`   ;+#+#+;++@@@#+,    
+       '+++#@@@#@##           .'++#@#@@@@###+       `'';'+++@@'#+      
+       `.#@'+;;'';,            `:#@+';;+##;          ,+##'+'+:::`.     
+        `;::'; ;',.            ``:,,:'.`:,``          `.,;'+';.,+:     
+          ,',:                    .,,,.`.               `  .:` `       
+          no see                   no say                no hear
+*/    
     picker.find = function find(hover) {
 
-      // console.log(hover.tagName);
+      function doHoveryTypePickyThing (hover) {
+        // console.log(hover.tagName);
+
+        var $el = $(hover);
+        // hide previous mh target if now mouseover sitecues toolbar
+        var isInBody = false, isInBadge = false;
+        var badge = $('#sitecues-badge');
+        var parents = $el.parents().andSelf();
+        $.each(parents, function(i, parent) {
+          var $parent = $(parent);
+          if ($parent.is(document.body)) {
+            isInBody = true;
+            return null;
+          }
+          if ($parent.is(badge)) {
+            isInBadge = true;
+            return null;
+          }
+        });
+
+        // Ignore elements not in the body: BGD, panel, toolbar
+        if (!isInBody || isInBadge) {
+          return null;
+        }
+
+        var picked = pickMeFirst(parents);
+        if (picked && picked.length) {
+          return picked;
+        }
+
+        picked = picker.findImpl(hover);
+        if (!picked || !picked.length) {
+          return null; // Normalize
+        }
+        
+        return picked;
+      }
+
+      // var kosherTags = [
+      //   "H1","H2","H3","H4","H5","H6",
+      //   "I","B","STRONG",
+      //   "DD","DT",
+      //   "ADDRESS",
+      //   "IMG",
+      //   "LI",
+      //   "A",
+      //   "P",
+      // ];
+
+      // function hasTextOrKosherChildren (node) {
+      //   if (node.textContent.length > 3) {
+      //     // return true;
+      //   } else {
+      //     for (var k=0; k<kosherTags.length; k++) {
+      //       var childrenWeLike = 0;
+      //       if (node.children[j].tagName === kosherTags[k]) {
+      //         childrenWeLike+=1;
+      //         console.log('yo!');
+      //       }
+      //     }
+      //     return !!childrenWeLike;
+      //   }
+      // }
+
 
       switch (hover.tagName) {
-      case "SPAN":
       case "P":
       case "H1":
       case "H2":
@@ -83,42 +163,23 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       case "LI":
       case "DD":
       case "DT":
-            var $el = $(hover);
-            // hide previous mh target if now mouseover sitecues toolbar
-            var isInBody = false, isInBadge = false;
-            var badge = $('#sitecues-badge');
-            var parents = $el.parents().andSelf();
-            $.each(parents, function(i, parent) {
-              var $parent = $(parent);
-              if ($parent.is(document.body)) {
-                isInBody = true;
-                return null;
-              }
-              if ($parent.is(badge)) {
-                isInBadge = true;
-                return null;
-              }
-            });
-
-            // Ignore elements not in the body: BGD, panel, toolbar
-            if (!isInBody || isInBadge) {
-              return null;
-            }
-
-            var picked = pickMeFirst(parents);
-            if (picked && picked.length) {
-              return picked;
-            }
-
-            picked = picker.findImpl(hover);
-            if (!picked || !picked.length) {
-              return null; // Normalize
-            }
-            return picked;
+        return doHoveryTypePickyThing(hover);
         break;
+
+      case "SPAN":
+          return doHoveryTypePickyThing(hover);
+          // var elementIsCool = hasTextOrKosherChildren(hover);
+          // console.log('elementiscool', elementIsCool);
+
+          // if (elementIsCool) { 
+          //   return doHoveryTypePickyThing(hover);
+          // }
+        break;
+      
       default:
         break;
       }
+
     };
 
     function pickMeFirst(parents) {
