@@ -608,17 +608,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     
     
-    var scrollPickInterval = 30
-      , scrollTimeout
-      ;
+    // var scrollPickInterval = 30
+    //   , scrollTimeout
+    //   ;
 
-    mh.scrollInterrupter = function (event) {
-      clearTimeout(scrollTimeout);
+    // mh.scrollInterrupter = function (event) {
+    //   clearTimeout(scrollTimeout);
 
-      scrollTimeout = setTimeout(function(){
-          mh.update(event);
-      }, scrollPickInterval);
-    };
+    //   scrollTimeout = setTimeout(function(){
+    //       mh.update(event);
+    //   }, scrollPickInterval);
+    // };
 
     mh.update = function(event) {
       // break if highlight is disabled
@@ -764,11 +764,32 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           // handle mouse move or scroll on body
         // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
         // and there is no delay waiting for the user to stop before the event is fired
+          
+          // $(document)
+          //   .on('scroll', mh.scrollCheck)
+          //   .on('mousemove', mh.update)
+          //   .on('mousewheel', mh.scrollInterrupter)
+          //   .on('focusin focusout', testFocus);
+          // $(window)
+          //   .on('focus', testFocus)
+          //   .on('blur', onblurwindow)
+          //   .on('resize', mh.hideAndResetState);
+          // } else {
+          //   // remove mousemove listener from body
+          //   $(document).off('mousewheel', mh.scrollInterrupter)
+          //   .off('mousemove', mh.update)
+          //     .off('focusin focusout', testFocus)
+          //     .off('scroll', mh.scrollCheck);
+          //   $(window)
+          //     .off('focus', testFocus)
+          //     .off('blur', onblurwindow)
+          //     .off('resize', mh.hideAndResetState);
+          // }
+          
+          
           $(document)
             .on('scroll', mh.scrollCheck)
-            // .on('mousemove mousewheel', mh.update)
-            .on('mousemove', mh.update)
-            .on('mousewheel', mh.scrollInterrupter)
+            .on('mousemove mousewheel', mh.update)
             .on('focusin focusout', testFocus);
           $(window)
             .on('focus', testFocus)
@@ -776,11 +797,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             .on('resize', mh.hideAndResetState);
           } else {
             // remove mousemove listener from body
-            // $(document).off('mousemove mousewheel', mh.update)
-            $(document).off('mousewheel', mh.scrollInterrupter)
-            .off('mousemove', mh.update)
-              .off('focusin focusout', testFocus)
-              .off('scroll', mh.scrollCheck);
+            $(document).off('mousemove mousewheel', mh.update)
+              .off('focusin focusout', testFocus);
             $(window)
               .off('focus', testFocus)
               .off('blur', onblurwindow)
