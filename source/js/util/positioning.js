@@ -345,7 +345,9 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     }
 
     function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
-      $selector.each(function () {
+
+      $selector.each(function () {                  
+
         var isElement = this.nodeType === 1;
 
         // --- Leaf nodes ---

@@ -62,38 +62,63 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      * @param hover The element the mouse is hovering over
      */
     picker.find = function find(hover) {
-      var $el = $(hover);
-      // hide previous mh target if now mouseover sitecues toolbar
-      var isInBody = false, isInBadge = false;
-      var badge = $('#sitecues-badge');
-      var parents = $el.parents().andSelf();
-      $.each(parents, function(i, parent) {
-        var $parent = $(parent);
-        if ($parent.is(document.body)) {
-          isInBody = true;
-          return null;
-        }
-        if ($parent.is(badge)) {
-          isInBadge = true;
-          return null;
-        }
-      });
 
-      // Ignore elements not in the body: BGD, panel, toolbar
-      if (!isInBody || isInBadge) {
-        return null;
-      }
+      // console.log(hover.tagName);
 
-      var picked = pickMeFirst(parents);
-      if (picked && picked.length) {
-        return picked;
-      }
+      switch (hover.tagName) {
+      case "SPAN":
+      case "P":
+      case "H1":
+      case "H2":
+      case "H3":
+      case "H4":
+      case "H5":
+      case "H6":
+      case "B":
+      case "I":
+      case "A":
+      case "IMG":
+      case "STRONG":
+      case "ADDRESS":
+      case "LI":
+      case "DD":
+      case "DT":
+            var $el = $(hover);
+            // hide previous mh target if now mouseover sitecues toolbar
+            var isInBody = false, isInBadge = false;
+            var badge = $('#sitecues-badge');
+            var parents = $el.parents().andSelf();
+            $.each(parents, function(i, parent) {
+              var $parent = $(parent);
+              if ($parent.is(document.body)) {
+                isInBody = true;
+                return null;
+              }
+              if ($parent.is(badge)) {
+                isInBadge = true;
+                return null;
+              }
+            });
 
-      picked = picker.findImpl(hover);
-      if (!picked || !picked.length) {
-        return null; // Normalize
+            // Ignore elements not in the body: BGD, panel, toolbar
+            if (!isInBody || isInBadge) {
+              return null;
+            }
+
+            var picked = pickMeFirst(parents);
+            if (picked && picked.length) {
+              return picked;
+            }
+
+            picked = picker.findImpl(hover);
+            if (!picked || !picked.length) {
+              return null; // Normalize
+            }
+            return picked;
+        break;
+      default:
+        break;
       }
-      return picked;
     };
 
     function pickMeFirst(parents) {
