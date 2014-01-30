@@ -616,7 +616,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       clearTimeout(scrollTimeout);
 
       scrollTimeout = setTimeout(function(){
-          console.log('stopped scrolling');
           mh.update(event);
       }, scrollPickInterval);
     };
