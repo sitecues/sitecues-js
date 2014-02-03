@@ -478,7 +478,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             if (isNotImage) {
                 fullTopInset =
                     minimumTopInset
-                    + parseFloat(computedStyles['padding-top']) + parseFloat(computedStyles['paddin-bottom'])
+                    + parseFloat(computedStyles['padding-top']) + parseFloat(computedStyles['padding-bottom'])
                     - 2 * designer.kBoxPadding;
             }
             return fullTopInset || minimumTopInset;
@@ -539,9 +539,14 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                   && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= compensateShiftFloat)) {
                         roundingsStyle = {'margin-top': parseFloat(newComputedStyles['margin-top']) - diffHeight / 2  + 'px',
                                           'margin-bottom':  parseFloat(newComputedStyles['margin-bottom']) - diffHeight / 2  + 'px'};
-                } else if (compensateShiftFloat < 0
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= parseFloat(currentStyle['margin-top']))) {
+                } else if (compensateShiftFloat < 0) {
+                    // The block below has greater margin value, we don't care to compensate it.
+                    if (belowBox && parseFloat($(belowBox).css('margin-top')) > parseFloat(currentStyle['margin-bottom'])) {
+                        // Basically, do nothing.
+                    } else if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= parseFloat(currentStyle['margin-top'])) {
+                        // The block above has greater margin value, so change of current el margin-top will not take any effect.
                         roundingsStyle['margin-bottom'] = parseFloat(newComputedStyles['margin-bottom']) + diffHeight + 'px';
+                    }
                 } else {
                     roundingsStyle['margin-top'] = parseFloat(newComputedStyles['margin-top']) + diffHeight + 'px';
                 }
