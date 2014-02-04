@@ -221,8 +221,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 }
 
                 // Use the proper center.
-                var centerLeft = center.left;
-                var centerTop = center.top;
+                var centerLeft = center.left,
+                    centerTop  = center.top;
 
                 // Correctly compute the viewport.
                 var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
@@ -241,7 +241,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = false; //getConstrainedWidth(jElement, currentStyle, viewport);
+                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -252,16 +252,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                         }
                     }
 
-                    // Real box dimensions.
-//                    var width  = constrainedWidth
-//                                 ? constrainedWidth
-//                                 : (Math.min(absRect.width / conf.get('zoom'), parseFloat(currentStyle.width)) + 2 * additionalBoxOffset);
                     var leftInset = (parseFloat(currentStyle['border-left-width']) + parseFloat(currentStyle['border-right-width'])
                                + parseFloat(currentStyle['padding-left']) + parseFloat(currentStyle['padding-right']));
                     var topInset = (parseFloat(currentStyle['border-top-width']) + parseFloat(currentStyle['border-bottom-width'])
                                + parseFloat(currentStyle['padding-top']) + parseFloat(currentStyle['padding-bottom']));
 
-                    // // Calculate box's dimensions before it is inflated.
+                    // Calculate box's dimensions before it is inflated.
                     var width = constrainedWidth || (parseFloat(currentStyle.width) + leftInset);
                     var height = expandedHeight  || (parseFloat(currentStyle.height) + topInset);
                     var left = centerLeft - width / 2;
@@ -270,7 +266,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // Calculate box's dimensions when it is inflated: insets may be changed by kBoxPadding and kBoxBorderWidth.
                     width  += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-left-width']) - parseFloat(currentStyle['border-right-width'])) * extraZoom;
                     height += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-top-width']) - parseFloat(currentStyle['border-bottom-width'])) * extraZoom;
-                    var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline');
+
                     if (assumedToBeText) {
                         width  += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-left']) - parseFloat(currentStyle['padding-right'])) * extraZoom;
                         height += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-top']) - parseFloat(currentStyle['padding-bottom'])) * extraZoom;
@@ -283,13 +279,18 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     // If we need to change the element's dimensions, so be it. However, explicitly set the dimensions only if needed.
                     var newWidth, newHeight, newLeft, newTop;
 
-                    //var zoomHeightDiff = (inflatedHeight - jElement[0].getBoundingClientRect().height) / 2 ;          // new height - old height
-                    //var zoomWidthDiff = (parseFloat(currentStyle.width) - jElement[0].getBoundingClientRect().width) / (2 * extraZoom) ; // new width - old width
                     // todo: use heightDiff instead of newMaxHeight when the element is too wide
                     // and we shrink the width => the height may be expanded.
                     var newMaxHeight = inflatedHeight / extraZoom;
 
                     // Check the width and horizontal positioning.
+                    if (constrainedWidth) {
+                        // Fit to width of viewport.
+                        newWidth = inflatedWidth / extraZoom;
+                        // Since we change the width here, the 50% 50% center for trancformation is shifted.
+                        inflatedLeft -= ((parseFloat(currentStyle.width) - newWidth) / 2) + designer.kMinDistanceFromEdge;
+                    }
+
                     if (inflatedWidth > viewport.width) {
                         // Fit to width of viewport.
                         newWidth = (viewport.width - 2 * additionalBoxOffset) / extraZoom;
@@ -307,6 +308,13 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     }
 
                     // Check the height and vertical positioning.
+                    if (expandedHeight) {
+                        // Fit to width of viewport.
+                        newHeight = inflatedHeight / extraZoom;
+                        // Since we change the width here, the 50% 50% center for trancformation is shifted.
+                        inflatedTop -= ((parseFloat(currentStyle.height) - newHeight) / 2) + designer.kMinDistanceFromEdge;
+                    }
+
                     if (inflatedHeight > viewport.height) {
                         // Shrink the height.
                         newHeight = (viewport.height - 2 * additionalBoxOffset) / extraZoom;
@@ -327,8 +335,8 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     cssUpdates = {
                         left: newLeft,
                         top:  newTop,
-                        width:  newWidth || constrainedWidth,
-                        height: newHeight || expandedHeight,
+                        width:  newWidth,
+                        height: newHeight,
                         maxHeight: newWidth? newMaxHeight: undefined
                     };
                     // Only use difference in height if it was shortened(we need to compensate it in margin).
