@@ -189,6 +189,17 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       var rect = range.getBoundingClientRect(),
           zoom = positioning.getTotalZoom(node, true);
 
+      var isEmptyRect = true;
+
+      for (var prop in rect) {
+       if (rect[prop] !== 0) {
+           isEmptyRect = false;
+           continue;
+       }   
+      }
+
+      if (isEmptyRect) { rect = node.getBoundingClientRect();}
+
       if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
         //return
         //console.log('FF Normalize')
@@ -203,10 +214,11 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
       // TODO: should we use common.getElementComputedStyles() ?
-      var paddingTop = parseFloat($(node).css('padding-top'));
-      var paddingLeft = parseFloat($(node).css('padding-left'));
-      var paddingBottom = parseFloat($(node).css('padding-bottom'));
-      var paddingRight = parseFloat($(node).css('padding-right'));
+      var $node = $(node);
+      var paddingTop = parseFloat($node.css('padding-top'));
+      var paddingLeft = parseFloat($node.css('padding-left'));
+      var paddingBottom = parseFloat($node.css('padding-bottom'));
+      var paddingRight = parseFloat($node.css('padding-right'));
       rect = {
         top: rect.top + paddingTop,
         left: rect.left + paddingLeft,
