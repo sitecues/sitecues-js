@@ -481,9 +481,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var cssBeforeAnimateStyles = {
           'position': 'relative',
-          'top': newTop,
-          'left': newLeft,
-          'height': maxHeight? undefined: parseFloat(newHeight) + 'px',
+          'top': newTop && newTop + 'px',
+          'left': newLeft && newLeft + 'px',
+          'height': maxHeight? undefined: newHeight && parseFloat(newHeight) + 'px',
           'max-height': maxHeight,
           'width':  newWidth,
           'box-sizing': 'content-box',

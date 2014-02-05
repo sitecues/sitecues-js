@@ -58,7 +58,7 @@ sitecues.def('util/common', function (common, callback, log) {
         , propertyName
         , propertyParts = []
         , elementComputedStyles = {}
-        , computedStyles = element.currentStyle || window.getComputedStyle(element, null)
+        , computedStyles = window.getComputedStyle(element, null) || element.currentStyle
         , i
         ;
 
