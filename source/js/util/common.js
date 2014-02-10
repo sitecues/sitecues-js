@@ -103,11 +103,11 @@ sitecues.def('util/common', function (common, callback, log) {
      */
     common.getXCharWidth = function(currentStyle) {
         var fontStyle = {
-            'font-family': currentStyle['font-family'],     // font-family: "Arial, Helvetica, sans-serif"
-            'font-size':   currentStyle['font-size'],       // font-size: "19.230770111083984px"
-            'font-style':  currentStyle['font-style'],      // font-style: "normal"
+            'font-family': currentStyle['font-family'],     // font-family:  "Arial, Helvetica, sans-serif"
+            'font-size':   currentStyle['font-size'],       // font-size:    "19.230770111083984px"
+            'font-style':  currentStyle['font-style'],      // font-style:   "normal"
             'font-variant':currentStyle['font-variant'],    // font-variant: "normal"
-            'font-weight': currentStyle['font-weight']      // font-weight: "500"
+            'font-weight': currentStyle['font-weight']      // font-weight:  "500"
         };
 
         $('body').append('<div id="testwidth"><span>x</span></div>');
@@ -152,8 +152,7 @@ sitecues.def('util/common', function (common, callback, log) {
      */
     common.equals = function(obj1, obj2) {
         function _equals(obj1, obj2) {
-            return JSON.stringify(obj1)
-                === JSON.stringify($.extend(true, {}, obj1, obj2));
+            return JSON.stringify(obj1) === JSON.stringify($.extend(true, {}, obj1, obj2));
         }
         return _equals(obj1, obj2) && _equals(obj2, obj1);
     }

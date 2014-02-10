@@ -1,6 +1,6 @@
 sitecues.def('mouse-highlight', function (mh, callback) {
   'use strict';
-      // Tracks if the user has heard the "first high zoom" cue.
+  // Tracks if the user has heard the "first high zoom" cue.
   var FIRST_HIGH_ZOOM_PARAM = 'firstHighZoom',
   // The high zoom threshold.
   HIGH_ZOOM_THRESHOLD = 1.6,
@@ -541,7 +541,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get exact bounds
       //This is a horrible hack, suprisingly fixes a lot (especially (if not only) in firefox)
-      fixedRects = positioning.getAllBoundingBoxes(element, 0, stretchForSprites);
+      fixedRects = positioning.getAllBoundingBoxes(element, 0, stretchForSprites); // [elementRect]
       //in Firefox only, comment out the line above and uncomment the line below...
       //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
         //fixedRects = [elementRect];

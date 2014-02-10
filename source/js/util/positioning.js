@@ -189,6 +189,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       var rect = range.getBoundingClientRect(),
           zoom = positioning.getTotalZoom(node, true);
 
+      // If range is created on node w/o text, getBoundingClientRect() returns zero values.
+      // This concerns images and other nodes such as paragraphs - with no text inside.
       var isEmptyRect = true;
 
       for (var prop in rect) {
