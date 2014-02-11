@@ -200,7 +200,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
        }   
       }
 
-      if (isEmptyRect) { rect = node.getBoundingClientRect();}
+      if (isEmptyRect) {rect = node.getBoundingClientRect && node.getBoundingClientRect();}
 
       if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
         //return
