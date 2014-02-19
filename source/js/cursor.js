@@ -72,12 +72,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
           linkTags = document.getElementsByTagName('link');
 
       for(var i = 0; i < linkTags.length; i += 1) {
-        //might be redundant to check if it has a .css extension...
-        //for now we don't want to include media dependent css files...
-        if (linkTags[i].href.indexOf('.css') !== -1 &&
-            !linkTags[i].media && 
-            linkTags[i].href.indexOf('sitecues') === -1 && 
-            linkTags[i].href.indexOf('localhost') === -1) {
+        //for now we don't want to include media dependent css files...(like print)
+        //Ignore "sitecues-" because this is the scheme for sitecues css files
+        if (!linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
           stylesheets.push(linkTags[i].href);
         }
       }
