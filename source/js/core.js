@@ -232,10 +232,11 @@
   };
 
   var checkDefinedModulesAreAllLoaded = function() {
+
     var defCount = 0
-    , l     = LOAD_LIST.length
-    , i
+    , l = LOAD_LIST.length
     , iModule
+    , i
     ;
 
     for (i=0; i< l; i++) {
@@ -245,6 +246,10 @@
         defCount += iModule.defined === true ? 1 : 0 ;
       }
     }
+
+    // console.log('modLoadCheck', LOAD_LIST.length, defCount);
+    // console.dir(LOAD_LIST);
+
 
     if (defCount === LOAD_LIST.length) {
       allModulesLoaded = true;
