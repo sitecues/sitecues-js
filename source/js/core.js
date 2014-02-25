@@ -247,10 +247,6 @@
       }
     }
 
-    // console.log('modLoadCheck', LOAD_LIST.length, defCount);
-    // console.dir(LOAD_LIST);
-
-
     if (defCount === LOAD_LIST.length) {
       allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
