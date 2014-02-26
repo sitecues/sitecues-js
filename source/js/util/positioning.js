@@ -200,7 +200,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
        }   
       }
 
-      if (isEmptyRect) { rect = node.getBoundingClientRect();}
+      if (isEmptyRect) {rect = node.getBoundingClientRect && node.getBoundingClientRect();}
 
       if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
         //return
@@ -288,8 +288,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       }
 
       // Background sprites tend to be to the left side of the element
-      var backgroundLeft = style['background-position'];
-      var left = backgroundLeft ? parseFloat(backgroundLeft) : 0;
+      var backgroundPos = style['background-position'];
+      var left = backgroundPos ? parseFloat(backgroundPos) : 0;
       var rect = element.getBoundingClientRect();
       rect = {
         left: rect.left,
@@ -300,7 +300,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         height: rect.height
       };
       rect.left += left;
-      rect.width = positioning.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
+    //  rect.width = positioning.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
       return rect.width > 0 ? rect : null;
     }
 

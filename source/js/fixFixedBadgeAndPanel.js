@@ -299,4 +299,6 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
 
   });
 
+  callback();
+  
 });

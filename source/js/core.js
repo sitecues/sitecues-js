@@ -232,10 +232,11 @@
   };
 
   var checkDefinedModulesAreAllLoaded = function() {
+
     var defCount = 0
-    , l     = LOAD_LIST.length
-    , i
+    , l = LOAD_LIST.length
     , iModule
+    , i
     ;
 
     for (i=0; i< l; i++) {
