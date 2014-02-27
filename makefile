@@ -56,6 +56,7 @@ files=\
 	source/js/util/positioning.js \
 	source/js/util/common.js \
 	source/js/badge.js \
+	source/js/fixFixedBadgeAndPanel.js \
 	source/js/zoom.js \
 	source/js/slider.js \
 	source/js/panel.js \

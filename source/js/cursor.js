@@ -72,12 +72,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
           linkTags = document.getElementsByTagName('link');
 
       for(var i = 0; i < linkTags.length; i += 1) {
-        //might be redundant to check if it has a .css extension...
-        //for now we don't want to include media dependent css files...
-        if (linkTags[i].href.indexOf('.css') !== -1 &&
-            !linkTags[i].media && 
-            linkTags[i].href.indexOf('sitecues') === -1 && 
-            linkTags[i].href.indexOf('localhost') === -1) {
+        //for now we don't want to include media dependent css files...(like print)
+        //Ignore "sitecues-" because this is the scheme for sitecues css files
+        if (!linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
           stylesheets.push(linkTags[i].href);
         }
       }
@@ -313,9 +310,28 @@ sitecues.def('cursor', function (cursor, callback, log) {
           stylesheetElement.innerHTML += styleTags[k].innerHTML;
         }
       }
-
+      /**
+       * [applyCORSRequest Makes a xmlhttprequest for CSS resources.  Replaces all
+       * relatively defined style resources with their absolute counterparts. See EQ-1302]
+       * @param  {[xmlhttprequest Object]} request [description]
+       */
       function applyCORSRequest (request) {
-        stylesheetElement.innerHTML += request.responseText;
+        
+        var urlReplacementForDotDotSlash,
+            newText;
+        //If there are any relatively defined URLs in the response text, replace
+        //them with their absolute counterparts.
+        if (request.responseText.indexOf('../')) {
+          urlReplacementForDotDotSlash = request.url.split('/');
+          urlReplacementForDotDotSlash.pop();
+          urlReplacementForDotDotSlash.pop();
+          urlReplacementForDotDotSlash = urlReplacementForDotDotSlash.join('/');
+          newText = request.responseText.replace(/\.\.\//g, urlReplacementForDotDotSlash + '/');
+        } else {
+          newText = request.responseText;
+        }
+        
+        stylesheetElement.innerHTML += newText;
         setTimeout(setStyleSheetObject, 1);
       }
 

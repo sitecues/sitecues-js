@@ -25,7 +25,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
     { "url": "scotiabank.", selector: ".frutiger",       enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
     { "url": "cnib.ca", selector: ".slides",             enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
-    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net }
+    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net },
+    { "url": "calstate.edu", selector: "#slider",        enabled: window.sitecues.getLibraryConfig().sitepickermods.calstate_edu},
   ];
 
   

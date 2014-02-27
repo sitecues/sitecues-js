@@ -319,8 +319,8 @@
     });
 
     // load special toolbar css
-    load.style('../css/toolbar.css');
-    load.style('../css/bootstrap.css');
+    load.style('../css/sitecues-toolbar.css');
+    load.style('../css/sitecues-bootstrap.css');
 
     function adjustToolbarContent(isSrollBarShown, scrollbarWidth) {
       scrollbarWidth  *= isSrollBarShown ? -1 : 1;
