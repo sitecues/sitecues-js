@@ -260,8 +260,8 @@
  // define equinox module
   var _def = function(name, constructor) {
     
-    console.log('_________________________________________________________');
-    console.log('source/js/'+name+'.js');
+    // console.log('_________________________________________________________');
+    // console.log('source/js/'+name+'.js');
 
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
@@ -367,7 +367,7 @@
       }
       requiredModules.push( modules[moduleName] );
     }
-    console.log(modNames);
+    // console.log(modNames);
     
     useCallback.apply(sitecuesScope, requiredModules);
   };
