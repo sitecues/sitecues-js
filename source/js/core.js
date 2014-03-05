@@ -22,7 +22,7 @@
     // Sitecues top-level namespace: all public classes and modules will be
     // attached to this name space and aliased on 'window.sitecues'. This
     // variable is initialized at the bottom of this script.
-    , sitecues      = null
+    , sitecues          = null
     
   // Private Functions
     , exportPublicFields
@@ -250,6 +250,7 @@
     if (defCount === LOAD_LIST.length) {
       allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
+      sitecues.ready.call(sitecues);
     } else if (moduleLoadAttempts++ < 10) {
       // Keep trying to load, up to 10 times
       setTimeout(checkDefinedModulesAreAllLoaded, 200);
