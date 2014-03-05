@@ -214,7 +214,7 @@
   ;
 
   // Returns the state of the requested module.
-  var getModuleState = function(name) {
+  var getModuleState = function (name) {
     var module = modules[name];
 
     if (!module) {
@@ -257,8 +257,12 @@
   };
 
   // define equinox module
+ // define equinox module
   var _def = function(name, constructor) {
     
+    console.log('_________________________________________________________');
+    console.log('source/js/'+name+'.js');
+
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
       log.warn('sitecues: module ' + name + ' already defined.');
@@ -322,7 +326,7 @@
   };
 
   // processes the def queue once initialization has completed.
-  var _processDefQueue = function() {
+  var _processDefQueue = function () {
     
     var defObj;
 
@@ -335,69 +339,37 @@
     READY_FOR_DEF_CALLS = true;
   };
 
-  // load equinox modules
-  use = function(){
-    var i, l, t = this, count = 0,
-      args, load, result, callback, register;
+  // Fire use callbacks from module files
+  use = function () {
+    
+    var i = 0
+      , args = arguments
+      , l = args.length
+      , requiredModules = []
+      , sitecuesScope = this
+      , useCallback
+      , moduleName
+      , argument 
+      , modNames = []
+      ;
 
-    // prepare result
-    result = [];
+    for (; i < l; i++) {
+      argument = args[i];
+      switch (typeof argument) {
+        case 'string':
+          moduleName = argument;
+          modNames.push(moduleName);
+          break;
 
-    // get all arguments as array
-    args = arr.slice.call(arguments, 0);
-
-    // get callback as last argument
-    callback = 'function' === typeof args[args.length - 1] ? args.pop() : undefined;
-
-    // count of modules
-    count = args.length;
-
-    // register helper
-    register = function(index, name){
-      // return push result function
-      return function(){
-        // put module in result set
-        result[index] = modules[name];
-
-        // call callback if finished
-        if (--count === 0 && 'function' === typeof callback) {
-          callback.apply(t, result);
-        }
-      };
-    };
-
-    // perform all actions in next tick
-    // this needed for correct loading
-    // modules defined below `use` call
-    count && setTimeout(function(){
-      // modules to load
-      load = [];
-
-      // iterate over module names
-      for(i=0, l=count; i<l; i++) (function(name, push){
-          var moduleState = getModuleState(name);
-
-          if (moduleState === MODULE_STATE.NONE) {
-          // The module has never been used or defined.
-            // mark module as loading
-            modules[name] = MODULE_STATE.LOADING;
-            // add to load queue
-            load.push(name);
-            // wait for module load
-            t.on('load/' + name, push);
-          } else if (moduleState === MODULE_STATE.READY) {
-          // The module is ready for use, so no need to load it
-            push();
-          } else {
-          // A previous request to either use or define the module has occurred,
-          // but it is not yet ready
-            t.on('load/' + name, push);
-          }
-        } ( args[i], register(i, args[i] ) ));
-
-      // load all needed modules
-      load.length && t.load.apply(t, load);
-    }, 0);
+        case 'function':
+          useCallback = argument;
+          break;
+      }
+      requiredModules.push( modules[moduleName] );
+    }
+    console.log(modNames);
+    
+    useCallback.apply(sitecuesScope, requiredModules);
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
