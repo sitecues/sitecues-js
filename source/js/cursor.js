@@ -172,11 +172,12 @@ sitecues.def('cursor', function (cursor, callback, log) {
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
               try {
-                rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
+                rule.setProperty(style, cursorValueURL, 'important');
               } catch (e) {
                 try {
-                  rule[style] = cursorTypeURLS[cursorTypes[i]];
+                  rule[style] = cursorValueURL;
                 } catch (e) {
                 }
               }
@@ -200,8 +201,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
       }
-      
-      return 'url(' + view.getImage(type,zoom)+ ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+
+      return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
     }
 
     /**
@@ -216,10 +217,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
       }
-      
+
+      var image = view.getImage(type,zoom);
       var cursorStyle = '-webkit-image-set(' +
-         '    url(' + view.getImage(type,zoom) + ') 1x,' +
-         '    url(' + view.getImage(type,zoom) + ') 2x'  +
+         '    url(' + image + ') 1x,' +
+         '    url(' + image + ') 2x'  +
          ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
 
       return cursorStyle;
