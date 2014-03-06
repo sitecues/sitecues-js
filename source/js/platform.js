@@ -78,7 +78,7 @@ sitecues.def('platform', function (platformModule, callback) {
     // platform.pixel.ratio checks the pixel-ratio of the browser, for example, retina displays
     // on OS X use a pixel ratio of 2:1. A MacBook with a Retina display will show 4 pixels for
     // every 1 pixel on a regular screen. (2 pixels horizontally, 2 pixels vertically)
-    ratio: window.devicePixelRatio,
+    ratio: 1, //window.devicePixelRatio
     // platform.pixel.cssCursorScaleSupport lists the browsers that support scaling of css cursors.
     // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear 
     // crisp.

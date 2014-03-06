@@ -219,6 +219,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }
 
       var image = view.getImage(type,zoom);
+      // image-set() will not fallback to just the first url in older browsers. So...
+      // todo: provide fallback for older browsers.
       var cursorStyle = '-webkit-image-set(' +
          '    url(' + image + ') 1x,' +
          '    url(' + image + ') 2x'  +
