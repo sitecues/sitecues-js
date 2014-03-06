@@ -10,6 +10,8 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
   'use strict';
 
   // 128px is max possible cursor dimensions (w/h), anything above will silently fail and you will see no cursor
+  // See more info about cursor size support:
+  // https://equinox.atlassian.net/wiki/display/RD/Custom+cursor+feature+implementation+investigation
 
   sitecues.use('platform', function (platform) {
 
