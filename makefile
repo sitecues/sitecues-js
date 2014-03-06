@@ -36,6 +36,8 @@ package-dir:=$(package-basedir)/$(package-name)
 # Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
 	target/source/js/core.js \
+	source/js/custom.js \
+	source/js/custom-scripts/custom001.js \
 	source/js/load.js \
 	source/js/jquery.js \
   source/js/conf/user/manager.js \

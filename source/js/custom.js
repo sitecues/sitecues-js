@@ -1,10 +1,8 @@
 /**
- * Custom.js
+ * Custom.js - Please make sure this remains the first script after core.js in the build process
  */
 sitecues.def('custom', function (custom, callback, log) {
-
-  console.log('execute custom.js____________________________________', +new Date()/1000);
-
+  
   'use strict';
 
   custom.registry = {};
@@ -25,19 +23,12 @@ sitecues.def('custom', function (custom, callback, log) {
 
   };
 
-  
-  sitecues.on('core/allModulesLoaded', function(){
-    console.log('ok bro');
-    console.log(this, arguments);
-  })
-
   // Checks if there are fixes for a module,and executes their fix functions with the module's scope
-  custom.check = function () {
+  custom.check = function (moduleName) {
+    // The scope of 'this' with the custom.check function is the module being passed via call()
+    // from the callback in core.js's _def function
 
-    // The scope ot 'this' is the module being passed via call() from the bottom of the module
-    var module = custom.registry[this.moduleName];
-
-    console.log(this.moduleName);
+    var module = custom.registry[moduleName];
 
     if (module) {
       for (var customId in module) {

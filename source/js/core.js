@@ -258,12 +258,7 @@
   };
 
   // define equinox module
- // define equinox module
   var _def = function(name, constructor) {
-    
-    // console.log('_________________________________________________________');
-    // console.log('source/js/'+name+'.js');
-
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
       log.warn('sitecues: module ' + name + ' already defined.');
@@ -299,15 +294,16 @@
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
         // This behavior is unreliable on IE9 so we'll use the loop (see below)
-        //checkDefinedModulesAreAllLoaded();
+        checkDefinedModulesAreAllLoaded();
       }
+
+      // Apply any registered customizations
+      modules.custom.check.call(module, name);
 
     // Pass a new logger into the constructor scope of the module
     }, log.newLogger(name));
   };
 
-  // This kicks off a loop that will wait until modules are loaded
-  setTimeout(checkDefinedModulesAreAllLoaded, 50);
 
   // exposed function for defining modules: queues until library is ready.
   def = function(name, constructor){
@@ -342,7 +338,7 @@
 
   // Fire use callbacks from module files
   use = function () {
-    
+
     var i = 0
       , args = arguments
       , l = args.length
@@ -368,7 +364,6 @@
       }
       requiredModules.push( modules[moduleName] );
     }
-    // console.log(modNames);
     
     useCallback.apply(sitecuesScope, requiredModules);
   };
