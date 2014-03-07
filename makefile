@@ -37,7 +37,7 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	target/source/js/core.js \
 	source/js/custom.js \
-	source/js/custom-scripts/custom001.js \
+	source/js/custom-scripts/custom_a-0000ee0c_EQ-1508.js \
 	source/js/load.js \
 	source/js/jquery.js \
   source/js/conf/user/manager.js \

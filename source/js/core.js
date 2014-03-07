@@ -293,7 +293,6 @@
       }
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
-        // This behavior is unreliable on IE9 so we'll use the loop (see below)
         checkDefinedModulesAreAllLoaded();
       }
 

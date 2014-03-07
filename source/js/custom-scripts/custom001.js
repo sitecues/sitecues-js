@@ -2,10 +2,10 @@ sitecues.def('custom001', function (module, callback, log) {
   sitecues.use('custom', function (custom) {
 
     custom.register({
-      module: 'highlight-box',
+      module: 'picker',
       customId: 'custom001',
       func: function (event) {
-        
+
       }  
     });
 
