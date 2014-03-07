@@ -25,9 +25,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
       'sometimes': 's',
       'true'     : 't',
       'false'    : 'f'
-  }
+  };
 
-  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles) {
+  picker.PICK_ME_FIRST = [];
+
+  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function ($, styles, roles) {
 
     /*
      * Find the best highlightable element, if any, given a target element.
@@ -72,7 +74,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
 
     function pickMeFirst(parents) {
       var currLoc = window.location;
-      var PICK_ME_FIRST = []; //picker.getPickMeFirst();
+      var PICK_ME_FIRST = picker.PICK_ME_FIRST;
+      
+      console.log(PICK_ME_FIRST);
+
       for (var count = 0; count < PICK_ME_FIRST.length; count ++) {
         if (currLoc.toString().indexOf(PICK_ME_FIRST[count].url) >= 0) {
 

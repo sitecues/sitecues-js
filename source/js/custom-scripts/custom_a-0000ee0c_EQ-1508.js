@@ -11,8 +11,15 @@ sitecues.def('custom_a-0000ee0c_EQ-1508', function (module, callback, log) {
     custom.register({
       module   : 'mouse-highlight/picker',
       customId : 'custom_a-0000ee0c_EQ-1508',
+      
       func: function (event) {
-        
+      
+        this.PICK_ME_FIRST = {
+          'url'      : 'eeoc.gov',
+          'selector' : '#CS_Element_bigbox',
+          'enabled'  : true
+        };
+
       }
     });
 
