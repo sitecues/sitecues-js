@@ -250,7 +250,10 @@
     if (defCount === LOAD_LIST.length) {
       allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
-      sitecues.ready.call(sitecues);
+      if( sitecues.ready && typeof sitecues.ready === 'function' ){
+        sitecues.ready.call(sitecues);
+      }
+      
     } else if (moduleLoadAttempts++ < 10) {
       // Keep trying to load, up to 10 times
       setTimeout(checkDefinedModulesAreAllLoaded, 200);

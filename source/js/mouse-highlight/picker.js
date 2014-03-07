@@ -75,9 +75,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
     function pickMeFirst(parents) {
       var currLoc = window.location;
       var PICK_ME_FIRST = picker.PICK_ME_FIRST;
-      
-      console.log(PICK_ME_FIRST);
-
       for (var count = 0; count < PICK_ME_FIRST.length; count ++) {
         if (currLoc.toString().indexOf(PICK_ME_FIRST[count].url) >= 0) {
 
