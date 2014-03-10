@@ -6,7 +6,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
 
     var fixedElements, //All elements on a page that have fixed positions, with the exception of panel & badge
         
-        fixBadge                 = $('#sitecues-badge').css('position') === 'fixed' ? true : false,
+        fixBadge                 = $('#sitecues-badge').css('position') === 'fixed',
         lastScrollY              = 0,    //IE specific fix
         lastScrollDirection      = null, //IE specific fix
         verticalShift            = 0,    //IE specific fix
@@ -30,7 +30,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
       lastScrollY = newScrollY;
 
       if (lastScrollDirection === 1 && (platform.ieVersion.isIE10 || platform.ieVersion.isIE11)){
-        var marginTop = parseInt($('body').css('marginTop').split('px')[0]);
+        var marginTop = parseInt($('body').css('marginTop'));
         verticalShift = (window.pageYOffset + $('body').get(0).getBoundingClientRect().top) - (marginTop*conf.get('zoom'));
       } else{
         verticalShift = 0;
@@ -41,17 +41,20 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
      * @return {[undefined]}
      */
     var fixBadgeAndPanel = function () {
+      var badgeBoundingBox,
+          panelBoundingBox;
       //Badge positioning
       if (fixBadge) {                  //If the badge is fixed
         if (!platform.browser.isIE) {  //If the browser is not IE
           if (zoom.badgeBoundingBox) { //If the bounding box of the badge is cached
             $('#sitecues-badge').css({'transform': ''}); //Remove all transforms
             //Set the origin to top left, Inversely scale, Translate by the difference between the cached coordinates and the current coordinates
+            badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
             $('#sitecues-badge').css({  
               'transform-origin' : '0% 0%',
               'transform': 'scale('+1/conf.get('zoom')+')' +
-                           'translate(' + (zoom.badgeBoundingBox.left - document.getElementById('sitecues-badge').getBoundingClientRect().left) + 'px, ' + 
-                                          (zoom.badgeBoundingBox.top  - document.getElementById('sitecues-badge').getBoundingClientRect().top)  + 'px) ' 
+                           'translate(' + (zoom.badgeBoundingBox.left - badgeBoundingBox.left) + 'px, ' + 
+                                          (zoom.badgeBoundingBox.top  - badgeBoundingBox.top)  + 'px) ' 
             });            
           }
         } else {
@@ -63,11 +66,12 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
         if (zoom.panelBoundingBox) {//If the bounding box of the panel is cached
           $('#sitecues-panel').css({'transform': ''}); //Remove all transforms
           //Set the origin to top left, Inversely scale, Translate by the difference between the cached coordinates and the current coordinates 
+          panelBoundingBox = document.getElementById('sitecues-panel').getBoundingClientRect();
           $('#sitecues-panel').css({ 
             'transform-origin' : '0% 0%',
             'transform': 'scale('+1/conf.get('zoom')+')' +
-                         'translate(' + (zoom.panelBoundingBox.left - document.getElementById('sitecues-panel').getBoundingClientRect().left) + 'px, ' + 
-                                        (zoom.panelBoundingBox.top  - document.getElementById('sitecues-panel').getBoundingClientRect().top)  + 'px) ' 
+                         'translate(' + (zoom.panelBoundingBox.left - panelBoundingBox.left) + 'px, ' + 
+                                        (zoom.panelBoundingBox.top  - panelBoundingBox.top)  + 'px) ' 
           });
         }
       } else {
@@ -128,11 +132,11 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
       }
     };
     /**
-     * [unfixTheFixedFixedElements removes any styles sitecues applies to fixed elements to correctly position them. 
+     * [unfixFixedFixedElements removes any styles sitecues applies to fixed elements to correctly position them. 
      * This is necessary when the site has javascript which dynamically fixes elements.]
      * @param  {[array]} elements [list of elements]
      */
-    var unfixTheFixedFixedElements = function (elements) {
+    var unfixFixedFixedElements = function (elements) {
       if (elements && elements.length) {
         for (var i = 0; i < elements.length; i += 1) {
           $(elements[i]).css({
@@ -213,6 +217,9 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
           }
         }
         if (!match) {
+          //The code below is equivelant to the code in this comment
+          //var element = elementsToUnfix.splice(i, 1)[0]; 
+          //newUnfixedElements.push(element);
           newUnfixedElements.push(elementsToUnfix.splice(i, 1)[0]);
           i -= 1;
         }
@@ -228,7 +235,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
       scrollCheck();
       fixBadgeAndPanel(); //Reposition the badge and panel
       fixFixedElements(getFixedElementsMinusBadgeAndPanel().concat(newFixedElements)); //Reposition the fixed elements
-      unfixTheFixedFixedElements(getNewUnfixedElements(newFixedElements));
+      unfixFixedFixedElements(getNewUnfixedElements(newFixedElements));
     });
     /**
      * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
@@ -238,7 +245,7 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
         var newFixedElements = getNewFixedElements();  
         fixBadgeAndPanel();
         fixFixedElements(getFixedElementsMinusBadgeAndPanel().concat(newFixedElements), value);
-        unfixTheFixedFixedElements(getNewUnfixedElements(newFixedElements));
+        unfixFixedFixedElements(getNewUnfixedElements(newFixedElements));
         zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
       }   
     }); 
