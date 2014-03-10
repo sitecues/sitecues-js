@@ -7,6 +7,8 @@
 sitecues.def('speech-builder', function (builder, callback, log) {
   
   'use strict';
+  /*
+  TTS DICTIONARY NOW BEING HANDLED ON THE WS SERVER.
 
   // Putting - after "A" at end prevents it from being read as "uh"
   var CASE_SENSITIVE_REPLACEMENTS= [
@@ -51,14 +53,15 @@ sitecues.def('speech-builder', function (builder, callback, log) {
     { word: "scotia", to: "skoasha" },
     { word: "tdbank", to: "T D Bank" }
   ];
+  */
 
   sitecues.use('util/common', 'jquery', function(common, $) {
 
     builder.getText = function(subtreeRootNode) {
-      var origText = appendAccessibleTextFromSubtree(subtreeRootNode);
-      var middle = replaceAll(origText, CASE_SENSITIVE_REPLACEMENTS, "");
-      var final = replaceAll(middle, CASE_INSENSITIVE_REPLACEMENTS, "i");
-      return $.trim(final);
+      var text = appendAccessibleTextFromSubtree(subtreeRootNode);
+      //text = replaceAll(origText, CASE_SENSITIVE_REPLACEMENTS, "");
+      //text = replaceAll(middle, CASE_INSENSITIVE_REPLACEMENTS, "i");
+      return $.trim(text);
     }
 
     function replaceAll(text, replacements, options) {

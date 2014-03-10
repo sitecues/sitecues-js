@@ -18,6 +18,12 @@ hogan = require('hogan.js');
 express = require('express');
 app = express();
 
+// Custom MIME types
+express.static.mime.define({
+  // JavaScript 'map' files.
+  'application/javascript': [ 'map' ]
+});
+
 // We may run this as root to bind to ports 80/443,
 // so determine who the owner of this script is, and
 // chown all created dirs and files to that owner.
@@ -71,9 +77,17 @@ app.use(express.logger());
 // setup paths to serve static files from
 // use relative path from binary to provide
 // robust way for finding files
+
+// Mapped context roots for the sitecues.js.map entries.
+app.use('/js/target', express.static(path.join(root, '../target')));
+app.use('/js/source', express.static(path.join(root, '../source')));
+
+// In prod mode, skip the 'source' directory.
 if (!prodMode) {
 	app.use(express.static(path.join(root, '../source')));
 }
+
+// Generated, processed, etc... assets,
 app.use(express.static(path.join(root, '../target/compile')));
 app.use(express.static(path.join(root, '../target/etc')));
 
@@ -144,7 +158,7 @@ function getInlineJSData(req) {
 }
 
 // Allow serving of HTML/JS tools from the /tools/site/ directory
-app.use('/tools',express.static(path.join(root, '../tools/site')));
+app.use('/tools', express.static(path.join(root, '../tools/site')));
 
 // allow dynamic insertion of the JavaScript library in the site files
 var SITE_CONTEXT_PATH = '/site';

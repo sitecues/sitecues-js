@@ -241,7 +241,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
+                    var constrainedWidth = false; // getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
