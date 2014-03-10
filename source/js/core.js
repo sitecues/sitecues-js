@@ -300,7 +300,9 @@
       }
 
       // Apply any registered customizations
-      modules.custom.check.call(module, name);
+      if (modules.custom && modules.custom.check) {
+        modules.custom.check.call(module, name);
+      }
 
     // Pass a new logger into the constructor scope of the module
     }, log.newLogger(name));
