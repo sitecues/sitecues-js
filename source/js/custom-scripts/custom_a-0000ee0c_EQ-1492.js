@@ -2,7 +2,8 @@
  * Customer-Customization File
  * CustomId    : custom_a-0000ee0c_EQ-1508
  * IssueLink   : https://equinox.atlassian.net/browse/EQ-1508
- * Description : 
+ * Description : This customization fixes problems with overflow:hidden elements
+ *               on EEOC.gov by updating the CSS rules of some elements of the home-page.
  * 
 */
 sitecues.def('custom_a-0000ee0c_EQ-1492', function (module, callback, log) {
