@@ -35,12 +35,13 @@ package-dir:=$(package-basedir)/$(package-name)
 # Production files (combine all modules into one).
 # Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
-    target/source/js/core.js \
-    source/js/custom.js \
-    source/js/custom-scripts/custom_a-0000ee0c_EQ-1508.js \
-    source/js/custom-scripts/custom-a-0000calstate_EQ-1506.js \
-    source/js/load.js \
-    source/js/jquery.js \
+  target/source/js/core.js \
+  source/js/custom.js \
+  source/js/custom-scripts/custom_a-0000ee0c_EQ-1508.js \
+  source/js/custom-scripts/custom_a-0000ee0c_EQ-1492.js \
+  source/js/custom-scripts/custom-a-0000calstate_EQ-1506.js \
+  source/js/load.js \
+  source/js/jquery.js \
   source/js/conf/user/manager.js \
   source/js/conf/user/server.js \
   source/js/conf/user/provided.js \
@@ -59,7 +60,7 @@ files=\
   source/js/style.js \
   source/js/util/common.js \
   source/js/util/positioning.js \
-	source/js/html-build.js \
+  source/js/html-build.js \
   source/js/speech-builder.js \
   source/js/speech.js \
   source/js/zoom.js \
@@ -68,7 +69,7 @@ files=\
   source/js/badge.js \
   source/js/fixFixedBadgeAndPanel.js \
   source/js/focus.js \
-	source/js/mouse-highlight/roles.js \
+  source/js/mouse-highlight/roles.js \
   source/js/mouse-highlight/picker.js \
   source/js/mouse-highlight.js \
   source/js/keys.js \
