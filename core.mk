@@ -32,10 +32,10 @@ package-dir:=$(package-basedir)/$(package-name)
 # Production file list (combine all modules into one).
 files=\
 	$(build-dir)/source/js/core.js \
+	source/js/jquery.js \
 	source/js/custom.js \
 	$(custom-files) \
 	source/js/load.js \
-	source/js/jquery.js \
 	source/js/conf/user/manager.js \
 	source/js/conf/user/server.js \
 	source/js/conf/user/provided.js \
