@@ -1,265 +1,287 @@
-# Parameters.
-name:=sitecues
-username:=$(shell ./tools/build/username.sh -c)
-local-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
-version=$(local-version)
+################################################################################
+# sitecues JavaScript Library Makefile
+################################################################################
 
-# Set vagrant-dependent variables
-is-vagrant:=$(shell ./tools/build/is_vagrant.sh)
-ifeq ($(is-vagrant), 1)
-	service-root:=/home/vagrant
-	phantomjs-service-root:=/home/vagrant
-else
-	service-root:=.
-	phantomjs-service-root:=../..
-endif
+################################################################################
+# DEFAULT TARGET: all
+# 	(To keep this target as the defauly target, this target must be
+#	 declared before all other targets).
+# 	Clean the target direcetory, update Node.js dependecies, and build the
+#	JavaScript library.
+################################################################################
+all: clean deps build
 
-# Determine if we need to force a deps refresh
-deps-sig:=$(shell $$(which 'md5sum'&> /dev/null && echo 'md5sum' || echo 'md5 -q') ./package.json | awk '{print($$1);}')
-deps-sig-file:=./node_modules/.sig
-existing-deps-sig:=$(shell if [ -s $(deps-sig-file) ] ; then cat $(deps-sig-file) ; else echo 0 ; fi)
-ifneq ($(deps-sig), $(existing-deps-sig))
-	_force_deps_refresh=deps-clean deps
-else
-	_force_deps_refresh=
-endif
+################################################################################
+# Command line options.
+################################################################################
 
+targets=common $(shell cd custom-config && ls *.mk | sed 's%.mk%%g')
+custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
+
+# If true, clean and update the Node.js package dependencies.
 clean-deps=false
+
+# If true, create a 'dev' build, in which files are fetched separately.
+# Otherwise, a 'prod' build is created, in which all files are combined
+# into a single file. 
 dev=false
 
-package-basedir:=target/package
-package-name:=$(name)-js-$(version)
-package-file-name:=$(package-name).tgz
-package-dir:=$(package-basedir)/$(package-name)
-
-# Production files (combine all modules into one).
-# Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
-files=\
-  target/source/js/core.js \
-  source/js/custom.js \
-  source/js/custom-scripts/custom_a-0000ee0c_EQ-1508.js \
-  source/js/custom-scripts/custom_a-0000ee0c_EQ-1492.js \
-  source/js/custom-scripts/custom-a-0000calstate_EQ-1506.js \
-  source/js/load.js \
-  source/js/jquery.js \
-  source/js/conf/user/manager.js \
-  source/js/conf/user/server.js \
-  source/js/conf/user/provided.js \
-  source/js/conf/user.js \
-  source/js/conf/site.js \
-  source/js/conf.js \
-  source/js/geo.js \
-  source/js/platform.js \
-  source/js/jquery/color.js \
-  source/js/jquery/cookie.js \
-  source/js/jquery/transform2d.js \
-  source/js/jquery/style.js \
-  source/js/jquery/resize.js \
-  source/js/util/close-button.js \
-  source/js/ui.js \
-  source/js/style.js \
-  source/js/util/common.js \
-  source/js/util/positioning.js \
-  source/js/html-build.js \
-  source/js/speech-builder.js \
-  source/js/speech.js \
-  source/js/zoom.js \
-  source/js/slider.js \
-  source/js/panel.js \
-  source/js/badge.js \
-  source/js/fixFixedBadgeAndPanel.js \
-  source/js/focus.js \
-  source/js/mouse-highlight/roles.js \
-  source/js/mouse-highlight/picker.js \
-  source/js/mouse-highlight.js \
-  source/js/keys.js \
-  source/js/background-dimmer.js \
-  source/js/cursor/images/win.js \
-  source/js/cursor/images/mac.js \
-  source/js/cursor/images/manager.js \
-  source/js/cursor/custom.js \
-  source/js/cursor.js \
-  source/js/hlb/designer.js \
-  source/js/hlb/event-handlers.js \
-  source/js/highlight-box.js \
-  source/js/hpan.js \
-  source/js/iframe-modal.js \
-  source/js/invert.js \
-  source/js/util/template.js \
-  source/js/toolbar/bootstrap-dropdown.js \
-  source/js/toolbar/dropdown.js \
-  source/js/toolbar/messenger.js \
-  source/js/toolbar/resizer.js \
-  source/js/toolbar.js \
-  source/js/ui-manager.js \
-  source/js/status.js \
-  source/js/sitepicker.js \
-
+# Whether or not to enable HTTPS on the test server. 
 https=off
-prod=off
-ports-env-file:=./var/data/testsite/ports.txt
+
+# Whether or not to lint the codebase before the build. 
 lint=true
+
+# Whether or not to minify the generated sitecues.js file.
 min=true
+
+# Node.js express test server HTTP port.
 port=8000
-uglifyjs-args=
 
+# Whether or not to run the test server in prod-only mode, in which source
+# file locations will not be checked for async module loads. 
+prod=off
+
+# The build version.
+export version=$(default-version)
+
+################################################################################
+# Tools
+################################################################################
+export md5sum:=$(shell which 'md5sum' > /dev/null 2>&1 && echo 'md5sum' || echo 'md5 -q')
+export rmd5=$(shell echo "$$(hostname)$$(date +'%s%N')" | $(md5sum) | cut -f 1 -d ' ')
+export to-upper=tr '[:lower:]' '[:upper:]'
+
+################################################################################
+# Settings/constants.
+################################################################################
+
+# The name of the project.
+export product-name=sitecues
+
+# The name of the user running this build.
+export username:=$(shell ./tools/build/username.sh -c)
+
+# The default version, used in absence of a supplied version.
+default-version:=0.0.$(shell date -u +'%Y%m%d%H%M%S')-LOCAL-$(username)
+
+# The file generated by the Node.js test server and used by the SWDDA library
+# to determine what ports should be used in URL generation.
+ports-env-file:=./var/data/testsite/ports.txt
+
+# Test server start-up timeout.
 testsite-timeout:=30000
-phantomjs-timeout:=30000
 
-default-test-run-id:=$(username)-$(shell ./binary/uuid)
-test-run-id=$(default-test-run-id)
+# The default test run ID
+export default-test-run-rmd5:=$(rmd5)
+default-test-run-id=$(username)-$(default-test-run-rmd5)
+export test-run-id=$(default-test-run-id)
 
-common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
-testunit-mocha-options:=-c
-smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
+# Options common to all Macchiato test runs.
+export common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
 
+# Mocha unit test command line options.  
+export testunit-mocha-options:=-c
+
+# Macchiato smoke test command line options.  
+export smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
+
+################################################################################
+# Processed and conditional settings.
+################################################################################
+
+# If the 'clean-deps' option is 'true', set the 'deps-clean' target as a
+# dependency of 'deps'. Otherwise, print a message stating that the
+# dependencies will not be cleaned before the update. 
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
 else
 	_clean_deps:=.no-clean-deps
 endif
 
-# Developement files (load modules separately).
-ifeq ($(dev), true)
-	files=\
-		target/source/js/core.js \
-		source/js/use.js source/js/debug.js
-endif
-
+# If the 'https' option is 'on', set the http port to 80.
 ifeq ($(https), on)
 	port:=80
 endif
 
+# If the 'list' option is 'true', set the 'lint' target as a
+# dependency of 'build'. Otherwise, print a message stating that the
+# linting is disabled. 
 ifeq ($(lint), true)
 	_build_lint_dep:=lint
 else
 	_build_lint_dep:=.no-lint-on-build
 endif
 
+# If the 'min' option is 'false', set uglify-js options that beautify the
+# code. Otherwise set uglify-js options that minify the code. 
 ifeq ($(min), false)
-	uglifyjs-args+=-b
-	min-label:=" \(files were not minified\)"
+	export uglifyjs-args+=-b
+	export min-label:=" \(files were not minified\)"
 else
-    uglifyjs-args+=-m
-	min-label:=
+	export uglifyjs-args+=-m
+	export min-label:=
 endif
 
-# HIDDEN TARGET: .no-lint-on-build
-# Alternate target when not linting during build.
-.no-lint-on-build:
-	@echo "Linting disabled on build."
+################################################################################
+# Determine if we need to force a deps update.
+################################################################################
 
-.no-clean-deps:
-	@echo "Cleaning dependencies disabled."
+# Existing package.json checksum.
+node-package-checksum:=$(shell $(md5sum) ./package.json | cut -f 1 -d ' ')
 
-# TARGET: all
-# Run all targets.
-all: clean deps build
+# File containing the checksum during the last dependecy update.
+node-package-checksum-file:=./node_modules/.node-package-checksum
 
+# The checksum during the last dependecy update.
+existing-node-package-checksum:=$(shell [ -s $(node-package-checksum-file) ] && cat $(node-package-checksum-file) || echo 0)
+
+# If the checksum has changed, force a node deps update.
+ifneq ($(node-package-checksum), $(existing-node-package-checksum))
+	_force-deps-refresh=deps-clean deps
+else
+	_force-deps-refresh=
+endif
+
+################################################################################
+# Settings affected by the vagrant environment.
+################################################################################
+
+is-vagrant:=$(shell ./tools/build/is_vagrant.sh)
+ifeq ($(is-vagrant), 1)
+	service-root:=/home/vagrant
+	phantomjs-service-root:=/home/vagrant
+else
+	service-root:=$(shell pwd)
+	phantomjs-service-root:=$(shell cd ../.. && pwd)
+endif
+
+################################################################################
 # TARGET: build
-# Build the compressed file and, optionally, run gjslint.
-build: $(_force_deps_refresh) $(_build_lint_dep)
-	@echo "Building started."
-	@mkdir -p target/source/js
-	@sed 's%0.0.0-UNVERSIONED%'$(version)'%g' source/js/core.js > target/source/js/core.js
-	@mkdir -p target/compile/js
-	@uglifyjs $(uglifyjs-args) -o target/compile/js/sitecues.js --source-map target/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
-	@mkdir -p target/etc/js
-	@cp -r source/js/_config target/etc/js
-	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F target/etc ; done)
-	@echo "Creating compressed (gzipped) JavaScript files."
-	@(cd target/compile/js ; for FILE in *.js ; do \
-		gzip -c $$FILE > $$FILE.gz ; \
-	done)
-	@echo "Building completed."
-ifneq ($(dev), true)
-	@echo "===== File sizes$(min-label):"
-	@(cd target/compile/js ; \
-	for FILE in `ls *.js *.js.gz | sort` ; do \
-		printf "=====   %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
-	done)
-endif
+#	Build the compressed file and, optionally, run gjslint.
+################################################################################
+build: $(_force-deps-refresh) $(_build_lint_dep)
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
 
+################################################################################
 # TARGET: package
-# Package up the files into a deployable bundle, and create a manifest for local file deployment
+#	Package up the files into a deployable bundle, and create a manifest for local file deployment
+################################################################################
 package: build
 ifeq ($(dev), true)
 	$(error Unable to package a development build)
 endif
-	@echo "Packaging started."
-	@mkdir -p $(package-dir)
-	@echo $(version) > $(package-dir)/VERSION.TXT
-	@cp -R target/compile/* $(package-dir)
-	@cp -R source/css $(package-dir)
-	@cp -R source/images $(package-dir)
-	@tar -C $(package-basedir) -zcf target/$(package-file-name) $(package-name)
-	@rm -f target/manifest.txt
-	@(cd $(package-dir) ; for FILE in `find * -type f | sort` ; do \
-		echo "$(CURDIR)/$$FILE\t$$FILE" >> ../../manifest.txt ; \
-	done)
-	@echo "Packaging completed."
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk package custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
 
+################################################################################
 # TARGET: clean
-# Clean the target directory.
+#	Clean the target directory.
+################################################################################
 clean:
 	@echo "Cleaning started."
 	@rm -fr target
 	@echo "Cleaning completed."
 
+################################################################################
 # TARGET: deps
-# Set up the dependencies.
+#	Set up the Node.js dependencies.
+################################################################################
 deps: $(_clean_deps)
 	@echo "Dependency setup started."
 	@mkdir -p node_modules
 	@npm install
-	@echo $(deps-sig) > $(deps-sig-file)
+	@echo $(node-package-checksum) > $(node-package-checksum-file)
 	@echo "Dependency setup completed."
 
+################################################################################
+# TARGET: deps-clean
+#	Clean the Node.js dependencies.
+################################################################################
 deps-clean:
 	@echo "Cleaning dependencies started."
 	@rm -fr node_modules
 	@echo "Cleaning dependencies completed."
 
+################################################################################
 # TARGET: lint
-# Run gjslint on the JavaScript source.
-#@gjslint --nojsdoc -r source/js
+#	Run lenienter on the JavaScript source.
+#
+# ALTERNATE: Run Google Closure Linter
+#	@gjslint --nojsdoc -r source/js
+################################################################################
 lint:
 	@echo "Linting started."
 	@lenient-lint --beep --error_trace --multiprocess --nojsdoc -r source/js --summary --time --unix_mode
 	@echo "Linting completed."
 
+################################################################################
 # TARGET: run
-# Run the web server, giving access to the library and test pages.
+#	Run the web server, giving access to the library and test pages.
+#	DEPRECATED: Use start-testsite instead
+################################################################################
 run:
 	@./binary/web.js $(port) $(https) $(prod)
 
+################################################################################
 # TARGET: start-testsite
-# Run the web server as a service, giving access to the library and test pages.
+#	Run the web server as a service, giving access to the library and test pages.
+################################################################################
 start-testsite:
 	@./binary/_web start --timeout $(testsite-timeout) --root $(service-root) -- $(port) $(https) $(prod) $(ports-env-file)
 
+################################################################################
 # TARGET: stop-testsite
-# Run the web server as a service, giving access to the library and test pages.
+#	Stop the web server service.
+################################################################################
 stop-testsite:
 	@./binary/_web stop --root $(service-root)
 
+################################################################################
 # TARGET: test-all
-# Run all tests.
+#	Run all tests.
+################################################################################
 test-all: test-unit test-smoke
 
+################################################################################
 # TARGET: test-smoke
-# Run the smoke tests.
+#	Run the smoke tests.
+################################################################################
 test-smoke:
-	@(make --no-print-directory start-testsite prod=on)
-	@echo "TEST RUN ID: $(test-run-id)"
-	@cd tests/smoke ; ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options)
+	#$(MAKE) --no-print-directory start-testsite prod=on
+	#@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+	#	$(MAKE) --no-print-directory -f core.mk test-smoke custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	#done
+	@echo '===== Target test-smoke currently disabled ====='
 
+################################################################################
 # TARGET: test-unit
-# Run the unit tests.
+#	Run the unit tests.
+################################################################################
 test-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
 	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
 
+################################################################################
 # TARGET: stop-all-services
-# Stop all known services.
+#	Stop all known services.
+################################################################################
 stop-all-services: stop-testsite
+
+################################################################################
+# HIDDEN TARGET: .no-lint-on-build
+# 	Alternate target when not linting during build.
+################################################################################
+.no-lint-on-build:
+	@echo "Linting disabled on build."
+
+################################################################################
+# HIDDEN TARGET: .no-clean-deps
+# 	Alternate target when not cleaning Node.js dependencies.
+################################################################################
+.no-clean-deps:
+	@echo "Cleaning dependencies disabled."
+
