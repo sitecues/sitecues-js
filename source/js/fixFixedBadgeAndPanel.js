@@ -293,12 +293,9 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
     });
 
     fixFixedElements(getFixedElementsMinusBadgeAndPanel(), conf.get('zoom'));
-    fixedElements = getFixedElementsMinusBadgeAndPanel();
-
+    
     callback();
 
   });
-
-  callback();
   
 });
