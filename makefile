@@ -36,12 +36,12 @@ package-dir:=$(package-basedir)/$(package-name)
 # Note: 'log4javascript_uncompressed.js' will be swapped for a smaller version at a later date
 files=\
   target/source/js/core.js \
+  source/js/jquery.js \
   source/js/custom.js \
   source/js/custom-scripts/custom_a-0000ee0c_EQ-1508.js \
   source/js/custom-scripts/custom_a-0000ee0c_EQ-1492.js \
-  source/js/custom-scripts/custom-a-0000calstate_EQ-1506.js \
+  source/js/custom-scripts/custom-a-f35c8b26_EQ-1506.js \
   source/js/load.js \
-  source/js/jquery.js \
   source/js/conf/user/manager.js \
   source/js/conf/user/server.js \
   source/js/conf/user/provided.js \
