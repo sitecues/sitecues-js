@@ -45,7 +45,7 @@
     //     
     sitecues.use('custom', '[required-module-1]', '[required-module-2]', function (custom, required_module_1, required_module_2) {
 
-      customization.register({
+      custom.register({
 
         // 9 - Insert the [module-to-customize] for the module that the customization should run in.
         //          You can find the [module-to-customize] name in the def() statement of the module
@@ -75,5 +75,5 @@
 
   // 13 - Delete all instruction comments from you customization script file.
 
-  // 14 - Include a reference to your customization file in the makefile. Place the cusomization
+  // 14 - Include a reference to your customization file in the makefile. Place the customization
   // script before the module you are customizing.
