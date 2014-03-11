@@ -15,6 +15,8 @@
    *
    *                  "custom_[site-id]_[JIRA-issue-number]"
    *
+   *              , where site_id is a value from https://equinox.atlassian.net/wiki/display/EN/Account+and+Site+IDs
+   *
    *              For example the full Customization-ID should appear like this:
    *
    *                  "custom_FFF123_EQ-1234"
