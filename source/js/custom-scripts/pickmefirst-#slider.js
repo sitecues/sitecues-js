@@ -13,11 +13,11 @@
         customId : 'custom-a-0000calstate_EQ-1506',
 
         func: function (event) {
-            this.PICK_ME_FIRST = {
+            this.PICK_ME_FIRST = [{
               'url'      : 'calstate.edu',
               'selector' : '#slider',
               'enabled'  : true
-            };
+            }];
 
         }
           
