@@ -40,7 +40,7 @@ sitecues.def('speech', function (speech, callback, log) {
         // This is the engine we're using, required, no default
         ttsEngine = site.get('ttsEngine'),
 
-        timesCued = 0,
+        timesCued = 1,
         maxCued = 3,
 
         /**
