@@ -170,7 +170,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         // Would panel go off the right side of screen? If YES -> open to the left
         useLeft = badgeRect.left * zoom +  $panel.width() + 15 < window.innerWidth;
         if (useLeft) { /* Panel moved, expands right */
-          left = ((badgeRect.left / conf.get('zoom') / conf.get('zoom') - 5)) + 'px';
+          left = ((badgeRect.left  / conf.get('zoom'))) + 'px';
         }
         else {  /* Panel expands left */
           
@@ -187,7 +187,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
 
         $panel.style({
-          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom') + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
+          top:  ((badgeRect.top / conf.get('zoom')  + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
           left: left,
           right: right         
         }, '', 'important');
@@ -199,7 +199,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
             });
           } else {
             $panel.css({
-              'transform-origin': '50% 0%',
+              'transform-origin': '0% 0%',
               'transform': 'scale('+ 1/conf.get('zoom') +') translate(' + window.pageXOffset + 'px, ' + window.pageYOffset + 'px)'
             });
           }

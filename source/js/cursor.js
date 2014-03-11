@@ -123,10 +123,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
           rule = rules[i].style;
           if (rule && rule[style] && rule[style].length) {
             /**@param rule an object representing some css selector + properties
+
              * @param style is the key for accessing property information
              */
             if (callback) {
-              callback(rule, style);
+              callback(rule, style, stylesheetObject.cssRules[i]);
             }
           }
         }
@@ -227,7 +228,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
          ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
 
       return cursorStyle;
-    };
+    }
 
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
@@ -243,6 +244,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }());
       lastZoom = conf.get('zoom');
       createStyleSheet();
+      sitecues.emit('cursor/addingStyles');
     }
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
@@ -312,6 +314,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       for(var k = 0; k < styleTags.length; k += 1) {
         if (styleTags[k].id !== cursor.CONTANTS.SITECUES_CSS_ID) {
           stylesheetElement.innerHTML += styleTags[k].innerHTML;
+          sitecues.emit('cursor/addingStyles');
         }
       }
       /**
@@ -336,17 +339,18 @@ sitecues.def('cursor', function (cursor, callback, log) {
         }
         
         stylesheetElement.innerHTML += newText;
-        setTimeout(setStyleSheetObject, 1);
+        setTimeout(setStyleSheetObject, 50);
       }
 
       for(var i = 0; i < validSheets.length; i += 1) {
         createCORSRequest('GET', validSheets[i], applyCORSRequest);
       } 
        
-      setTimeout(setStyleSheetObject, 1);
+      setTimeout(setStyleSheetObject, 50);
 
     }());
-    
+
+    cursor.changeStyle = changeStyle;    
     
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
