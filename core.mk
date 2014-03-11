@@ -61,7 +61,6 @@ files=\
 	source/js/slider.js \
 	source/js/panel.js \
 	source/js/badge.js \
-	source/js/fixFixedBadgeAndPanel.js \
 	source/js/focus.js \
 	source/js/mouse-highlight/roles.js \
 	source/js/mouse-highlight/picker.js \
@@ -73,6 +72,7 @@ files=\
 	source/js/cursor/images/manager.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
+	source/js/fixFixedBadgeAndPanel.js \
 	source/js/hlb/designer.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \
