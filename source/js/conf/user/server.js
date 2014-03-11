@@ -15,6 +15,8 @@ sitecues.def('conf/user/server', function (server, callback, log) {
   // Our config management needs work...
   var SAVING_DATA = false;
 
+  // server.initialUserDataReturned = false;
+
 	sitecues.use('conf/user/manager', 'jquery', function(manager, jquery){
     // JSONP callback called when a save call returns.
 
@@ -25,7 +27,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
     };
 
     // Saves a key/value pair.
-    var saveData = function(key, value) {
+    var saveData = function (key, value) {
       // Skip this try if we are in the middle of saving something.
       if (SAVING_DATA) {
         setTimeout(function() {
@@ -40,7 +42,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
         data[key] = value;
 
         // Set a save set timeout.
-        saveTimeoutId = setTimeout(function() {
+        saveTimeoutId = setTimeout( function () {
           saveCallback()
         }, 500);
 
@@ -48,13 +50,13 @@ sitecues.def('conf/user/server', function (server, callback, log) {
           type: 'GET',
           url: saveUrl,
           data: data,
-          //async: false,
+          async: false,
           contentType: "application/json",
           dataType: 'jsonp',
-          success: function(data) {
+          success: function (data) {
             saveCallback();
           },
-          error: function(e) {
+          error: function (e) {
             log.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
             saveCallback();
           }
@@ -65,19 +67,24 @@ sitecues.def('conf/user/server', function (server, callback, log) {
     // JSONP callback called when a load call returns.
     var loadTimeoutID;
     var initialized = false;
-    var loadCallback = function(data) {
+    var loadCallback = function (data) {
       loadTimeoutID && clearTimeout(loadTimeoutID);
       // Set the obtained config data (if any).
       data && manager.data(data);
 
       if (!initialized) {
         initialized = true;
+
+        // server.initialUserDataReturned = true;
+        
         // Update the preferences server on every 'set'.
         manager.get('*', function(key, value) {
           saveData(key, value);
         });
+        
         // This module has completed it's loading.
-        callback();
+        // Emitted for other mods to see if the inital user data has returned (JSONP is always ASYNC)
+        sitecues.emit('server/userDataReturned')
       }
     };
 
@@ -85,16 +92,18 @@ sitecues.def('conf/user/server', function (server, callback, log) {
     jquery.ajax({
       type: 'GET',
       url: loadUrl,
-      //async: false,
+      async: false,
       contentType: "application/json",
       dataType: 'jsonp',
-      success: function(data) {
+      success: function (data) {
         loadCallback(data);
       },
-      error: function(e) {
+      error: function (e) {
         log.info("Unable to load server config: " + e.message);
         loadCallback();
       }
     });
+    
+    callback();
 	});
 });

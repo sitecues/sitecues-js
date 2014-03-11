@@ -48,7 +48,6 @@ sitecues.def('speech', function (speech, callback, log) {
          * @return {boolean}
          */
         shouldPlayFirstSpeechOnCue = function() {
-
           var fso = conf.get(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM);
           return (!fso || ((fso + speech.CONSTANTS.FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
         },
@@ -463,10 +462,9 @@ sitecues.def('speech', function (speech, callback, log) {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON);
         } else {
           speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON_FIRST, function() {
-
-                    if( speech.timesCued == maxCued ){
-                      playedFirstSpeechOnCue();
-                    }
+            if( speech.timesCued == maxCued ){
+              playedFirstSpeechOnCue();
+            }
           });
         }
         if (callback) {
