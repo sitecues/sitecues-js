@@ -2,7 +2,7 @@
 # The CalState custom build configuration.
 ################################################################################
 
-custom-name=eeoc
+custom-name=csu
 custom-files=\
 	source/js/custom-scripts/pickmefirst-\#slider.js
 
