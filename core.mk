@@ -114,7 +114,7 @@ endif
 # TARGET: build
 ################################################################################
 build:
-	@echo "\n===== STARTING: Building '$(custom-name)' library"
+	@echo "===== STARTING: Building '$(custom-name)' library"
 	@mkdir -p $(build-dir)/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
@@ -142,7 +142,7 @@ package:
 ifeq ($(dev), true)
 	$(error Unable to package a development build)
 endif
-	@echo "\n===== STARTING: Packaging '$(custom-name)' library"
+	@echo "===== STARTING: Packaging '$(custom-name)' library"
 	@mkdir -p $(package-dir)
 	@echo $(custom-version) > $(package-dir)/VERSION.TXT
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
