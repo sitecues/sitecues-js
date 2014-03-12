@@ -4,5 +4,5 @@
 
 custom-name=csu
 custom-files=\
-	source/js/custom-scripts/pickmefirst-\#slider.js
+	source/js/custom-scripts/calstate/pickmefirst-\#slider.js
 
