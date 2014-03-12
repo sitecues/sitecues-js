@@ -74,9 +74,44 @@ root = path.dirname(module.filename);
 // about all incoming requests
 app.use(express.logger());
 
+// Process the custom build site ID map.
+var SITE_ID_TO_BUILD_NAME_MAP = {};
+(function(){
+  var siteIdMapFilePath = path.join(root, '../custom-config/site-id-map.json');
+  if (fs.existsSync(siteIdMapFilePath)) {
+    var fileMap = fs.readJsonSync(siteIdMapFilePath);
+    for (var buildName in fileMap) {
+      if (fileMap.hasOwnProperty(buildName)) {
+        var siteIdArray = fileMap[buildName];
+        var len = siteIdArray.length;
+        for (var i = 0; i < len; i++) {
+          SITE_ID_TO_BUILD_NAME_MAP[siteIdArray[i]] = buildName;
+        }
+      }
+    }
+  }
+})();
+
 // setup paths to serve static files from
 // use relative path from binary to provide
 // robust way for finding files
+
+// Set a listener for the per-site-ID libraries.
+app.get('/l/s;id=:siteId/*', function (req, res, next) {
+
+  var buildName = SITE_ID_TO_BUILD_NAME_MAP[req.params.siteId] || 'common',
+    libraryRoot = path.join(root, '..', 'target', buildName),
+    compilePath = path.join(libraryRoot, 'compile', req.params[0]),
+    etcPath = path.join(libraryRoot, 'etc', req.params[0]);
+
+  if (fs.existsSync(compilePath)) {
+    res.sendfile(compilePath);
+  } else if (fs.existsSync(etcPath)) {
+    res.sendfile(etcPath);
+  } else {
+    res.send(404, 'File not found: ' + req.path);
+  }
+});
 
 // Mapped context roots for the sitecues.js.map entries.
 app.use('/js/target', express.static(path.join(root, '../target')));
@@ -87,9 +122,9 @@ if (!prodMode) {
 	app.use(express.static(path.join(root, '../source')));
 }
 
-// Generated, processed, etc... assets,
-app.use(express.static(path.join(root, '../target/compile')));
-app.use(express.static(path.join(root, '../target/etc')));
+// The common assets,
+app.use(express.static(path.join(root, '../target/common/compile')));
+app.use(express.static(path.join(root, '../target/common/etc')));
 
 // Process the inline JS file templates.
 

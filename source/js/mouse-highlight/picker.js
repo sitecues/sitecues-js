@@ -9,7 +9,7 @@
  data-sitecues-highlight-role
 
  */
-sitecues.def('mouse-highlight/picker', function(picker, callback) {
+sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
 
   picker.debug = false;
 
@@ -21,40 +21,15 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     'table-cell'
   ];
 
-  var PICK_ME_FIRST = [
-    { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
-    { "url": "scotiabank.", selector: ".frutiger",       enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
-    { "url": "cnib.ca", selector: ".slides",             enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
-    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net },
-    { "url": "calstate.edu", selector: "#slider",        enabled: window.sitecues.getLibraryConfig().sitepickermods.calstate_edu},
-  ];
-
-  
-  for( var i = 0; i <  PICK_ME_FIRST.length; i++){
-
-      if( (PICK_ME_FIRST[i].enabled) === false ){
-
-        PICK_ME_FIRST.splice( i, 1);
-      }
-    }
-
-
-
-// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable below)
-//  // Element IDs to never highlight
-//  picker.blacklistIds = [
-//    '#sitecues-panel',
-//    '#sitecues-badge',
-//    '#sitecues-eq360-bg'
-//  ];
-//    
   picker.kTargetStates = {
       'sometimes': 's',
       'true'     : 't',
       'false'    : 'f'
-  }
+  };
 
-  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles) {
+  picker.PICK_ME_FIRST = [];
+
+  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function ($, styles, roles) {
 
     /*
      * Find the best highlightable element, if any, given a target element.
@@ -99,7 +74,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     function pickMeFirst(parents) {
       var currLoc = window.location;
-
+      var PICK_ME_FIRST = picker.PICK_ME_FIRST;
       for (var count = 0; count < PICK_ME_FIRST.length; count ++) {
         if (currLoc.toString().indexOf(PICK_ME_FIRST[count].url) >= 0) {
 

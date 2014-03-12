@@ -22,7 +22,7 @@
     // Sitecues top-level namespace: all public classes and modules will be
     // attached to this name space and aliased on 'window.sitecues'. This
     // variable is initialized at the bottom of this script.
-    , sitecues      = null
+    , sitecues          = null
     
   // Private Functions
     , exportPublicFields
@@ -214,7 +214,7 @@
   ;
 
   // Returns the state of the requested module.
-  var getModuleState = function(name) {
+  var getModuleState = function (name) {
     var module = modules[name];
 
     if (!module) {
@@ -250,6 +250,10 @@
     if (defCount === LOAD_LIST.length) {
       allModulesLoaded = true;
       sitecues.emit('core/allModulesLoaded');
+      if( sitecues.ready && typeof sitecues.ready === 'function' ){
+        sitecues.ready.call(sitecues);
+      }
+      
     } else if (moduleLoadAttempts++ < 10) {
       // Keep trying to load, up to 10 times
       setTimeout(checkDefinedModulesAreAllLoaded, 200);
@@ -258,7 +262,6 @@
 
   // define equinox module
   var _def = function(name, constructor) {
-    
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
       log.warn('sitecues: module ' + name + ' already defined.');
@@ -293,16 +296,18 @@
       }
       // Only spend the cpu-clicks required to test,after last module has been defined
       if (definedLastModule) {
-        // This behavior is unreliable on IE9 so we'll use the loop (see below)
-        //checkDefinedModulesAreAllLoaded();
+        checkDefinedModulesAreAllLoaded();
+      }
+
+      // Apply any registered customizations
+      if (modules.custom && modules.custom.check) {
+        modules.custom.check.call(module, name);
       }
 
     // Pass a new logger into the constructor scope of the module
     }, log.newLogger(name));
   };
 
-  // This kicks off a loop that will wait until modules are loaded
-  setTimeout(checkDefinedModulesAreAllLoaded, 50);
 
   // exposed function for defining modules: queues until library is ready.
   def = function(name, constructor){
@@ -322,7 +327,7 @@
   };
 
   // processes the def queue once initialization has completed.
-  var _processDefQueue = function() {
+  var _processDefQueue = function () {
     
     var defObj;
 
@@ -335,69 +340,36 @@
     READY_FOR_DEF_CALLS = true;
   };
 
-  // load equinox modules
-  use = function(){
-    var i, l, t = this, count = 0,
-      args, load, result, callback, register;
+  // Fire use callbacks from module files
+  use = function () {
 
-    // prepare result
-    result = [];
+    var i = 0
+      , args = arguments
+      , l = args.length
+      , requiredModules = []
+      , sitecuesScope = this
+      , useCallback
+      , moduleName
+      , argument 
+      , modNames = []
+      ;
 
-    // get all arguments as array
-    args = arr.slice.call(arguments, 0);
+    for (; i < l; i++) {
+      argument = args[i];
+      switch (typeof argument) {
+        case 'string':
+          moduleName = argument;
+          modNames.push(moduleName);
+          break;
 
-    // get callback as last argument
-    callback = 'function' === typeof args[args.length - 1] ? args.pop() : undefined;
-
-    // count of modules
-    count = args.length;
-
-    // register helper
-    register = function(index, name){
-      // return push result function
-      return function(){
-        // put module in result set
-        result[index] = modules[name];
-
-        // call callback if finished
-        if (--count === 0 && 'function' === typeof callback) {
-          callback.apply(t, result);
-        }
-      };
-    };
-
-    // perform all actions in next tick
-    // this needed for correct loading
-    // modules defined below `use` call
-    count && setTimeout(function(){
-      // modules to load
-      load = [];
-
-      // iterate over module names
-      for(i=0, l=count; i<l; i++) (function(name, push){
-          var moduleState = getModuleState(name);
-
-          if (moduleState === MODULE_STATE.NONE) {
-          // The module has never been used or defined.
-            // mark module as loading
-            modules[name] = MODULE_STATE.LOADING;
-            // add to load queue
-            load.push(name);
-            // wait for module load
-            t.on('load/' + name, push);
-          } else if (moduleState === MODULE_STATE.READY) {
-          // The module is ready for use, so no need to load it
-            push();
-          } else {
-          // A previous request to either use or define the module has occurred,
-          // but it is not yet ready
-            t.on('load/' + name, push);
-          }
-        } ( args[i], register(i, args[i] ) ));
-
-      // load all needed modules
-      load.length && t.load.apply(t, load);
-    }, 0);
+        case 'function':
+          useCallback = argument;
+          break;
+      }
+      requiredModules.push( modules[moduleName] );
+    }
+    
+    useCallback.apply(sitecuesScope, requiredModules);
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
