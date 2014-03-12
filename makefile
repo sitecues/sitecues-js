@@ -30,7 +30,7 @@ dev=false
 https=off
 
 # Whether or not to lint the codebase before the build. 
-lint=true
+lint=false
 
 # Whether or not to minify the generated sitecues.js file.
 min=true
