@@ -259,6 +259,7 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
           if($.inArray(nodeName, value.tags) >= 0) {
             // console.info("Tag name match for " + nodeName + " to " + value.name);
             match = value;
+            return false;
           }
         });
 
