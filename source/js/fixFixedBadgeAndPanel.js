@@ -246,7 +246,6 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
         fixBadgeAndPanel();
         fixFixedElements(getFixedElementsMinusBadgeAndPanel().concat(newFixedElements), value);
         unfixFixedFixedElements(getNewUnfixedElements(newFixedElements));
-        zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
       }   
     }); 
     //When the panel has completed its animation, cache the coordinates
@@ -275,7 +274,9 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
               'transform':'scale('+1/conf.get('zoom')+') translate('+ window.pageXOffset +'px, '+ window.pageYOffset +'px)'
             });
           }
-          zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
+          if (zoom.badgeBoundingBox) {
+            zoom.badgeBoundingBox = document.getElementById('sitecues-badge').getBoundingClientRect();
+          }
         }
       }
     });
@@ -297,6 +298,13 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
         }
       });
 
+    });
+
+    sitecues.on('server/userDataReturned', function () {
+      //Positioning the badge requires the user configuration to be loaded.
+      //server/userDataReturned notifies the application that it has loaded, and 
+      //triggers resizeEnd, which dynamically positions the badge. 
+      $(window).trigger('resizeEnd');
     });
 
     fixFixedElements(getFixedElementsMinusBadgeAndPanel(), conf.get('zoom'));
