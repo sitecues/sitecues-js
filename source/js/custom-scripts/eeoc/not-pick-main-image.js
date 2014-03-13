@@ -12,7 +12,9 @@ sitecues.def('not-pick-main-image', function (module, callback, log) {
       customId : 'not-pick-main-image',
       
       func: function () {
-          this.roles.ignore.selectors.push('#CS_Element_bigbox');
+          this.roles.ignore.selectors.push('#cs_control_161910');
+          this.roles.ignore.selectors.push('#cs_control_161910 *');
+          this.roles.ignore.selectors.push('#cs_control_161910 img');
       }
     });
 

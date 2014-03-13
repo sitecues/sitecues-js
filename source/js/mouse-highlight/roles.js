@@ -12,12 +12,13 @@
  * em tag with display:block setting is no longer a fragment, it is now a
  * shortText or a longText or something else, depending on what it contains. 
  */
-sitecues.def('mouse-highlight/roles', function(role, callback, console) {
+sitecues.def('mouse-highlight/roles', function(role, callback, log) {
 
   role.roles = {
      // We completely ignore these elements
     ignore: {
-       name: 'ignore',
+      name: 'ignore',
+      selectors: [],
       tags: [
         '!--...--',
         '!doctype',
@@ -253,21 +254,37 @@ sitecues.def('mouse-highlight/roles', function(role, callback, console) {
           }
         }
 
+        var match, pick = true;
+        if (role.roles.ignore.selectors.length) { // ignore.selectors("not pick list")
+            $.each(role.roles.ignore.selectors, function(key, selector) {
+                if ($(selector).is(elem)) {
+                    pick = false;
+                    match = role.roles.ignore;
+                    return false;
+                }
+            });
+        }
+
+        if (!pick && match) {
+            return match;
+        } 
+
         // Now we'll fall back to tag names
-        var match;
         $.each(role.roles, function(key, value) {
           if($.inArray(nodeName, value.tags) >= 0) {
             // console.info("Tag name match for " + nodeName + " to " + value.name);
             match = value;
+            return false; // break loop
           }
         });
 
         if (match) {
           return match;
         } 
-
+        
         // console.info("No match for " + nodeName);
         return role.roles.container;
+
       }
     }
 
