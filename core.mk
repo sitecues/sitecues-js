@@ -99,6 +99,7 @@ files=\
 	source/js/status.js \
 	source/js/sitepicker.js \
 
+
 # Development files (load modules separately).
 ifeq ($(dev), true)
 	files=\
@@ -107,6 +108,7 @@ ifeq ($(dev), true)
 		$(custom-files) \
 		source/js/use.js \
 		source/js/debug.js \
+
 
 endif
 
@@ -126,14 +128,15 @@ build:
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-	@echo "===== COMPLETE: Building '$(custom-name)' library"
 ifneq ($(dev), true)
-	@echo "===== File sizes$(min-label):"
+	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
-		printf "=====	%-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
+		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
 endif
+	@echo "===== COMPLETE: Building '$(custom-name)' library"
+	@echo
 
 ################################################################################
 # TARGET: package
@@ -152,3 +155,4 @@ endif
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
+	@echo
