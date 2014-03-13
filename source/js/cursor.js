@@ -301,7 +301,22 @@ sitecues.def('cursor', function (cursor, callback, log) {
         At the end of each successful callback, we update our <style> to reflect the current level of zoom.
       */
       var validSheets = getStylesheets(),
-          styleTags = document.getElementsByTagName('style'),
+          
+          styleTags = (function () {
+          
+            var allStyleTags   = document.getElementsByTagName('style'),
+                validStyleTags = [];
+          
+            for (var i = 0; i < allStyleTags.length; i += 1) {
+              if (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1) {
+                validStyleTags.push(allStyleTags[i]);
+              }
+            }
+            
+            return validStyleTags;
+          
+          }()),
+          
           sheet = document.createElement('style');
       
       sheet.innerHTML = cursor.CONTANTS.SITECUES_CSS_DEFAULT;
