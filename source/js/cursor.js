@@ -15,7 +15,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
     var stylesheetElement,
         stylesheetObject,
         lastZoom = conf.get('zoom'),
-        lastZoomTimeout;
+        lastZoomTimeout,
+        styleTagStylesList = [], //An ordered list of style tag styles to be applied to the page
+        linkTagStylesList  = []; //An ordered list of external stylesheet styles to be applied to the page.
     
     cursor.CONTANTS = {
       'DEFAULT_ZOOM_LEVEL'     : 1,
@@ -81,6 +83,21 @@ sitecues.def('cursor', function (cursor, callback, log) {
       
       return stylesheets;
     
+    }
+    /**
+     * [constructStyleTag builds a <style> tag, maintaining the sites original precedence for styles]
+     */
+    function constructStyleTag () {
+      for (var i = 0; i < linkTagStylesList.length; i += 1) {
+        if (linkTagStylesList[i]) {
+          stylesheetElement.innerHTML += linkTagStylesList[i]; 
+        }
+      }
+      for (var i = 0; i < styleTagStylesList.length; i += 1) {
+        if (styleTagStylesList[i]) {
+          stylesheetElement.innerHTML += styleTagStylesList[i];
+        }
+      }
     }
     /**
      * [Abstracts away creating XMLHTTPRequests that support the
@@ -328,8 +345,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
       for(var k = 0; k < styleTags.length; k += 1) {
         if (styleTags[k].id !== cursor.CONTANTS.SITECUES_CSS_ID) {
-          stylesheetElement.innerHTML += styleTags[k].innerHTML;
-          sitecues.emit('cursor/addingStyles');
+          styleTagStylesList.push(styleTags[k].innerHTML);
         }
       }
       /**
@@ -353,14 +369,20 @@ sitecues.def('cursor', function (cursor, callback, log) {
           newText = request.responseText;
         }
         
-        stylesheetElement.innerHTML += newText;
+        linkTagStylesList[validSheets.indexOf(request.url)] = newText;
+
+        constructStyleTag(); //Builds the <style> tags and <link> tags
+      
         setTimeout(setStyleSheetObject, 50);
+      
       }
 
       for(var i = 0; i < validSheets.length; i += 1) {
         createCORSRequest('GET', validSheets[i], applyCORSRequest);
       } 
-       
+      
+      constructStyleTag(); //Builds the <style> tags
+
       setTimeout(setStyleSheetObject, 50);
 
     }());
