@@ -17,7 +17,9 @@ sitecues.def('not-pick-main-image', function (module, callback, log) {
               '#cs_control_161910 *',
               '#cs_control_161910 img',
           ];
-          this.roles.ignore.selectors.push(ignoredList);
+          // Merge array with another array.
+          var selectorsList = this.roles.ignore.selectors;
+          selectorsList.push.apply(selectorsList, ignoredList);
       }
     });
 
