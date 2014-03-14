@@ -13,9 +13,8 @@ sitecues.def('not-pick-main-image', function (module, callback, log) {
       
       func: function () {
           var ignoredList = [
-              '#cs_control_161910',
-              '#cs_control_161910 *',
               '#cs_control_161910 img',
+              // add more selectors to ignore list here...
           ];
           // Merge array with another array.
           var selectorsList = this.roles.ignore.selectors;
