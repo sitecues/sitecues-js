@@ -14,7 +14,6 @@ sitecues.def('custom_a-0000ee0c_EQ-1492', function (module, callback, log) {
       customId : 'custom_a-0000ee0c_EQ-1492',
       
       func: function (event) {
-        if (true) {
 
          // todo: still need to find out whether it is eeoc?
          // #1 way
@@ -32,7 +31,7 @@ sitecues.def('custom_a-0000ee0c_EQ-1492', function (module, callback, log) {
                  return _rec($(this).children());
              });
          }($('#centercol').children()));
-         }
+         console.log(this.cssBeforeAnimateStyles);
 
          console.log(this);
 
