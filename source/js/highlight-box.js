@@ -212,6 +212,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         designer.handleTableElement(this.$item, currentStyle);
 
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, this.compensateShift, cssUpdate);
+        // Anything on the module namespace will be available in the customization file.
+        // this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
+        // highlightBox.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
+        HighlightBox.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = {
           'webkit-transform': 'scale(' + kExtraZoom + ')',
