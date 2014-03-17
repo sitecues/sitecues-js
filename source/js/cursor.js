@@ -76,7 +76,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       for(var i = 0; i < linkTags.length; i += 1) {
         //for now we don't want to include media dependent css files...(like print)
         //Ignore "sitecues-" because this is the scheme for sitecues css files
-        if (!linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
+        if (linkTags[i].href.indexOf('.css') !== -1 && !linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
           stylesheets.push(linkTags[i].href);
         }
       }
