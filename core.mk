@@ -1,23 +1,33 @@
 ################################################################################
 # sitecues JavaScript Library Core Makefile
+#	NOTE: This make file should not be called directly, and instead should be
+#	called via 'makefile'. Any variables declared in 'makefile' that are needed
+#	by this file must be exported in 'makefile'.
 ################################################################################
 
 ################################################################################
 # Load the custom configuration file
 ################################################################################
 
-# Not a fan of special cases, but less of a fan of an unneeded config file.
+# Not a fan of special cases, but 'common' is a special case.
 ifeq ($(custom-config-name), common)
 	custom-name=common
 	custom-files=
+	# The common build does not modify the version, etc...
+	custom-suffix=
+	custom-suffix-upper=
 else
+	# Include the 'configuration' file.
 	include custom-config/$(custom-config-name).mk
+	# The custom builds append their name to the version, etc...
+	custom-suffix=-$(custom-name)
+	custom-suffix-upper=-$(shell echo $(custom-name) | $(to-upper))
 endif
 
-custom-name-upper=$(shell echo $(custom-name) | $(to-upper))
-custom-version=$(version)-$(custom-name-upper)
-custom-test-run-id=$(test-run-id)-$(custom-name-upper)
+# Make a build-specific version.
+custom-version=$(version)$(custom-suffix-upper)
 
+# Set up the build-specific directory and package name.
 build-basedir:=target
 build-dir:=$(build-basedir)/$(custom-name)
 package-name:=$(product-name)-js-$(custom-version)
@@ -89,6 +99,7 @@ files=\
 	source/js/status.js \
 	source/js/sitepicker.js \
 
+
 # Development files (load modules separately).
 ifeq ($(dev), true)
 	files=\
@@ -98,13 +109,14 @@ ifeq ($(dev), true)
 		source/js/use.js \
 		source/js/debug.js \
 
+
 endif
 
 ################################################################################
 # TARGET: build
 ################################################################################
 build:
-	@echo "\n===== STARTING: Build $(custom-name) library"
+	@echo "===== STARTING: Building '$(custom-name)' library"
 	@mkdir -p $(build-dir)/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
@@ -116,14 +128,15 @@ build:
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-	@echo "===== COMPLETE: Build $(custom-name) library"
 ifneq ($(dev), true)
-	@echo "===== File sizes$(min-label):"
+	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
-		printf "=====	%-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
+		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
 endif
+	@echo "===== COMPLETE: Building '$(custom-name)' library"
+	@echo
 
 ################################################################################
 # TARGET: package
@@ -132,19 +145,14 @@ package:
 ifeq ($(dev), true)
 	$(error Unable to package a development build)
 endif
-	@echo "\n===== STARTING: Packaging $(custom-name) library"
+	@echo "===== STARTING: Packaging '$(custom-name)' library"
 	@mkdir -p $(package-dir)
-	@echo $(version) > $(package-dir)/VERSION.TXT
+	@echo $(custom-version) > $(package-dir)/VERSION.TXT
+	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
+	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 	@cp -R $(build-dir)/compile/* $(package-dir)
 	@cp -R source/css $(package-dir)
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
-	@echo "===== COMPLETE: Packaging $(custom-name) library"
-
-################################################################################
-# TARGET: test-smoke
-#	Run the smoke tests.
-################################################################################
-test-smoke:
-	@echo "TEST RUN ID: $(custom-test-run-id)"
-	@cd tests/smoke ; ../../node_modules/.bin/macchiato `cat ../../$(ports-env-file)` $(common-macchiato-options) $(smoke-macchiato-options)
+	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
+	@echo

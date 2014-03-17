@@ -34,6 +34,8 @@ sitecues.def('custom_a-0000ee0c_EQ-1492', function (module, callback, log) {
          }($('#centercol').children()));
          }
 
+         console.log(this);
+
       }
     });
 
