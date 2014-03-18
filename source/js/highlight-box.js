@@ -132,7 +132,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     var HighlightBox = (function () {
       // Initialize.
       function HighlightBox(target, options) {
-        this.options = $.extend(true, {}, options);
+        this.options = $.extend(true, {'needsCompensation': true}, options);
         this.state = STATES.CREATE;
         this.savedCss = [];
         this.savedStyleAttr = {};
@@ -213,9 +213,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, this.compensateShift, cssUpdate);
         // Anything on the module namespace will be available in the customization file.
-        // this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
-        // highlightBox.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
-        HighlightBox.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
+        _this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
+        sitecues.emit('hlb/animation/styles', _this, $.extend(true, {}, _this.options));
         // Only animate the most important values so that animation is smoother
         var cssAnimateStyles = {
           'webkit-transform': 'scale(' + kExtraZoom + ')',
@@ -312,7 +311,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           _this.clientRect = positioning.getSmartBoundingBox(_this.item);
         });
 
-        if (isChrome && !isFloated) {
+        if (isChrome && !isFloated && this.options.needsCompensation) {
           var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
           this.$item.css(roundingsStyle);
         }
