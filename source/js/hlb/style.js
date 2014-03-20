@@ -154,8 +154,7 @@ sitecues.def('hlb/style', function (hlbStyle, callback, log) {
           };
         };
 
-    });
-
     // Done.
     callback();
+    });
 });

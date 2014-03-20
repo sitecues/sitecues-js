@@ -773,9 +773,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     };
                 }
             }
-
+        // Done.
+        callback();
         });
-
-    // Done.
-    callback();
 });
