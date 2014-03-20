@@ -83,6 +83,7 @@ files=\
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixFixedBadgeAndPanel.js \
+        source/js/hlb/style.js \
 	source/js/hlb/designer.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \

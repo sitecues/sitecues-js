@@ -4,14 +4,17 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common', 'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech', 'util/close-button', 'platform',
-  function ($, conf, cursor, positioning, common, eventHandlers, designer, backgroundDimmer, ui, speech, closeButton, platform) {
+  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common',
+    'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech',
+    'util/close-button', 'platform', 'hlb/style',
+  function ($, conf, cursor, positioning, common,
+    eventHandlers, designer, backgroundDimmer, ui, speech,
+    closeButton, platform, hlbStyle) {
 
     // Constants
 
     // This is the default setting, the value used at runtime will be in conf.
     var kMinHighlightZoom = 0.99;
-
     var kExtraZoom = 1.5;
 
     // The states that the HLB can be in.
@@ -130,19 +133,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     };
 
     var HighlightBox = (function () {
-      // Initialize.
+      // Constructor: Initialize HLB.
       function HighlightBox(target, options) {
-        this.options = $.extend(true, {'needsCompensation': true}, options);
-        this.state = STATES.CREATE;
-        this.savedCss = [];
-        this.savedStyleAttr = {};
-        this.origRectDimensions = [];
-        this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
-        this.$item = $(this.item);
-
-        // notify about new hlb
+        this.initHLBValues(target, options);
+        // Notify about new HLB
         sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
+        // Temp values.
         this.computedStyles  = common.getElementComputedStyles(this.item);
         var computedStyles = this.computedStyles; // a bit shorter alias
         var offset = positioning.getOffset(this.item);
@@ -150,16 +147,41 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
         var size = { width: parseFloat(width), height: parseFloat(height) };
 
+        this.fillHLBValues(offset, size);
+      }
+
+      HighlightBox.prototype.initHLBValues = function(target, options) {
+        this.options = $.extend(true,
+            {'needsCompensation': true,
+                'isChrome': platform.browser.isChrome,
+            }, options);
+        this.state = STATES.CREATE;
+        this.savedCss = [];
+        this.savedStyleAttr = {};
+        this.origRectDimensions = [];
+        this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
+        this.$item = $(this.item);
+      };
+
+      HighlightBox.prototype.fillHLBValues = function(offset, size) {
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
         this.clientRect = positioning.getSmartBoundingBox(this.item);
         this.boundingBoxes = designer.getBoundingElements(this.item);
         this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles);
-        this.savedCss.push(computedStyles);
-        // List of attributes we save original values for because we might want to redefine them later.
-        this.savedStyleAttr['style'] = this.$item.attr('style');
-        this.savedStyleAttr['width'] = this.$item.attr('width');
-        this.savedStyleAttr['height'] = this.$item.attr('height');
-      }
+        this.savedCss.push(this.computedStyles);
+        this.saveAttrs(['style', 'width', 'height']);
+      };
+
+      /**
+       * List of attributes we save original values for because we might want to redefine them later.
+       * @returns {undefined}
+       */
+      HighlightBox.prototype.saveAttrs = function(attrsList) {
+        for(var key in attrsList) {
+            var attr = attrsList[key];
+            this.savedStyleAttr[attr] = this.$item.attr(attr);
+        }
+      };
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
       HighlightBox.kShowBoxSpeed = 400;
@@ -167,13 +189,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.kShowAnimationSchema = 'easeOutBack';
       HighlightBox.kHideAnimationSchema = 'linear';
       HighlightBox.kBoxZindex = 2147483644;
-      HighlightBox.kBoxBorderWidth = 3;
-      HighlightBox.kBoxPadding     = 4;  // Give the text a little extra room
-      HighlightBox.kBoxBorderRadius = 4;
-      HighlightBox.kBoxBorderStyle = 'solid';
-      HighlightBox.kBoxBorderColor = '#222222';
-      HighlightBox.kDefaultBgColor = '#ffffff';
-      HighlightBox.kBoxNoOutline   = '0px solid transparent';
       HighlightBox.isSticky = false;
       HighlightBox.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
@@ -203,26 +218,25 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         var _this = this;
 
         // Get the current element styles.
+        
+        // *** #1 Calculate cssBeforeAnimateStyles ***
+        
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
             totalZoom = positioning.getTotalZoom(this.item, true),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         // Handle table special behaviour on inner contents.
-        designer.handleTableElement(this.$item, currentStyle);
+//        designer.handleTableElement(this.$item, currentStyle);
 
-        var cssBeforeAnimateStyles = this.getInflateBeforeAnimateStyles(currentStyle, this.compensateShift, cssUpdate);
+        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateStyles(this, currentStyle, cssUpdate);
         // Anything on the module namespace will be available in the customization file.
         _this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
         sitecues.emit('hlb/animation/styles', _this, $.extend(true, {}, _this.options));
         // Only animate the most important values so that animation is smoother
-        var cssAnimateStyles = {
-          'webkit-transform': 'scale(' + kExtraZoom + ')',
-          '-moz-transform':   'scale(' + kExtraZoom + ')',
-          '-o-transform':     'scale(' + kExtraZoom + ')',
-          '-ms-transform':    'scale(' + kExtraZoom + ')',
-          'transform':        'scale(' + kExtraZoom + ')'
-        };
+        
+        // *** #2 Calcualte cssAnimateStyles ***
+        var cssAnimateStyles = hlbStyle.getCssAnimateStyles(kExtraZoom);
 
         // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then
         // close it out.
@@ -311,7 +325,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           _this.clientRect = positioning.getSmartBoundingBox(_this.item);
         });
 
-        if (isChrome && !isFloated && this.options.needsCompensation) {
+        if (this.options.isChrome
+            && this.options.needsCompensation
+            && !isFloated) {
           var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
           this.$item.css(roundingsStyle);
         }
@@ -340,7 +356,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                  'overflow-y': css.overflowY,
                  'overflow'  : css.overflow});
         });
-        this.$item.style('outline', HighlightBox.kBoxNoOutline, 'important');
+        this.$item.style('outline', hlbStyle.kBoxNoOutline, 'important');
 
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             clientRect;
@@ -425,131 +441,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         }
 
       /*
-       * Calculate CSS styles to set before inflation animation.
-       * @param currentStyle Object
-       * @param cssUpdate Object
-       * @return Object
-       */
-      // todo: cut the expanded height value!
-      HighlightBox.prototype.getInflateBeforeAnimateStyles = function(currentStyle, compensateShift, cssUpdate) {
-        // todo: for floated elements we can use positioning.getCenter():absRect
-        var newHeight, newWidth, newOverflowY, newTop, newLeft,maxHeight;
-        newHeight = cssUpdate.height? cssUpdate.height: this.computedStyles.height;
-        newWidth = cssUpdate.width ? cssUpdate.width + 'px': currentStyle.width;
-        newOverflowY = currentStyle.overflow || currentStyle['overflow-y'] ? currentStyle.overflow || currentStyle['overflow-y'] : 'auto';
-        newTop = designer.getHeightExpandedDiffValue()? (cssUpdate.top || 0) + designer.getHeightExpandedDiffValue(): cssUpdate.top;
-        newLeft = cssUpdate.left;
-        maxHeight = cssUpdate.maxHeight? cssUpdate.maxHeight + 'px': undefined;
-
-        // Correct margins for simple case: assume that HLB fits the viewport.
-        // Note: there is no documentation describing the way these margins are
-        // calculated by. I used my logic & empiristic data.
-        var belowBox = this.boundingBoxes.below;
-        var aboveBox = this.boundingBoxes.above;
-        
-        var expandedHeight = (designer.getHeightExpandedDiffValue() || 0);
-
-        var compensateVertShiftFloat = parseFloat(compensateShift['vert']) - expandedHeight;
-        var compensateHorizShiftFloat = parseFloat(compensateShift['horiz']);
-
-        var vertMargin = {};
-        var horizMargin = {'margin-left': compensateHorizShiftFloat + 'px'};
-
-        if (compensateVertShiftFloat) { // note: similar logic is used in getRoundings
-            if (currentStyle['clear'] === 'both') {
-                if (belowBox && parseFloat($(belowBox).css('margin-top')) <= Math.abs(compensateVertShiftFloat)) {
-                    vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
-                } else if (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= Math.abs(compensateVertShiftFloat)) {
-                    vertMargin['margin-top'] = compensateVertShiftFloat + 'px';
-                }
-            } else {
-                // The current element has biggest the top & bottom margins initially but new one(s) are smaller.
-                if (compensateVertShiftFloat > 0 // New margin is positive.
-                    && (belowBox && parseFloat($(belowBox).css('margin-top')) >= compensateVertShiftFloat)
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) >= compensateVertShiftFloat)) {
-                        vertMargin = {'margin-top': - compensateVertShiftFloat / 2 + 'px', 'margin-bottom': - compensateVertShiftFloat / 2 + 'px'};
-                } else if (compensateVertShiftFloat < 0
-                    && (aboveBox && parseFloat($(aboveBox).css('margin-bottom')) <= parseFloat(currentStyle['margin-top']))) {
-                        vertMargin['margin-bottom'] = compensateVertShiftFloat + 'px';
-                } else {
-                    vertMargin['margin-top'] = parseFloat(currentStyle['margin-top']) + compensateVertShiftFloat + 'px';
-                }
-            }
-        }
-
-        // Margins affect the element's position. To make sure top & left are
-        // correct we need to substract margin value from them. 
-        // newTop  = newTop  && (parseFloat(newTop)  - compensateVertShiftFloat);
-        // newLeft = newLeft && (parseFloat(newLeft) - compensateHorizShiftFloat);
-
-        var cssBeforeAnimateStyles = {
-          'position': 'relative',
-          'top': newTop && newTop + 'px',
-          'left': newLeft && newLeft + 'px',
-          'height': maxHeight? undefined: newHeight && parseFloat(newHeight) + 'px',
-          'max-height': maxHeight,
-          'width':  newWidth,
-          'box-sizing': 'content-box',
-
-          'z-index': HighlightBox.kBoxZindex.toString(),
-          'border' : HighlightBox.kBoxNoOutline,
-          'list-style-position': 'inside',
-          'margin-top': currentStyle['margin-top'],
-          'margin-right': currentStyle['margin-right'],
-          'margin-bottom': currentStyle['margin-bottom'],
-          'margin-left': currentStyle['margin-left'],
-          'border-radius': HighlightBox.kBoxBorderRadius + 'px',
-          'border-color':  HighlightBox.kBoxBorderColor,
-          'border-style':  HighlightBox.kBoxBorderStyle,
-          'border-width':  HighlightBox.kBoxBorderWidth + 'px',
-          'outline'   :  HighlightBox.kBoxNoOutline,
-
-          'overflow-y': newOverflowY,
-          'overflow-x': 'hidden',
-  
-          // Animation.
-          'webkit-transform-origin': '50% 50%',
-          '-moz-transform-origin': '50% 50%',
-          'transform-origin': '50% 50%'
-        };
-
-        // If there any interesting float we need to do some more adjustments for height/width/top etc.
-        var floatRectHeight = setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle);
-        vertMargin['margin-bottom'] = (parseFloat(vertMargin['margin-bottom']) || parseFloat(currentStyle['margin-bottom']))
-                                    - floatRectHeight + 'px';
-
-        var extraIndent = 2 * HighlightBox.kBoxBorderWidth;
-        // Leave some extra space for text, only if there's no background image which is displayed incorrectly in this case.
-        // todo: take out 'assumedToBeText' to common.js; also used in designer.js
-        var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline'
-                // nytimes.com images such as $('.thumb.runaroundRight')
-                || (this.item.localName === 'img' && this.$item.parent().css('float') !== 'none'));
-        if (assumedToBeText) {
-            cssBeforeAnimateStyles['padding'] = HighlightBox.kBoxPadding + 'px';
-            extraIndent += 2 * HighlightBox.kBoxPadding;
-
-            // Floated menu items get overall/outer width specified below
-            // Other floated elements get the same value as content/inner width only
-            // todo: Define the cases when we need ti shrink/expand width with the extraIndent.
-            // (for now I give a favour to eeoc.gov where we need to shrink it)
-            cssBeforeAnimateStyles['width']  = currentStyle['float'] === 'none'
-                                             ? cssBeforeAnimateStyles['width']
-                                             : parseFloat(cssBeforeAnimateStyles['width']) + extraIndent + 'px';
-        }
-
-        $.extend(cssBeforeAnimateStyles, vertMargin);
-        $.extend(cssBeforeAnimateStyles, horizMargin);
-
-        if (this.item.tagName.toLowerCase() === 'img') {
-          designer.preserveImageRatio(cssBeforeAnimateStyles, cssUpdate, this.clientRect);
-        }
-
-        this.setBgStyle(currentStyle, cssBeforeAnimateStyles);
-
-        return cssBeforeAnimateStyles;
-      };
-
-      /*
        * Defines which background suits to HLB & sets it: both background image and color.
        * @param currentStyle Object
        * @param cssBeforeAnimateStyles Object
@@ -595,9 +486,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       }
  
         // Those objects are sared across the file so do not make them local.
-        var isFloated = false,
-            // todo: change the rule for isChrome.
-            isChrome = platform.browser.isChrome;
+        var isFloated = false;
 
         /** 
          * Ley's define if there any interesting floats:

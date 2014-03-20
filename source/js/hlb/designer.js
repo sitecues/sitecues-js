@@ -25,16 +25,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
     // Copied from source/highlight-box.js
     designer.kMinDistanceFromEdge = 32;       // The viewport inset from the window edges.
-    designer.kBoxBorderWidth = 3;
-    designer.kBoxPadding = 4;
-    designer.kDefaultBgColor = 'rgb(255, 255, 255)';
-    designer.kDefaultTextColor = 'rgb(0, 0, 0)';
     designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
+    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'hlb/style', 'ui',
 
-        function ($, conf, positioning, common) {
+        function ($, conf, positioning, common, hlbStyle) {
 
             designer.getHeightExpandedDiffValue = function() {
                 return this.heightExpandedDiffValue;
@@ -52,7 +48,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
               var compStyle = item.currentStyle || window.getComputedStyle(item, null);
               var color = compStyle instanceof CSSStyleDeclaration ? compStyle["color"] : compStyle.getPropertyCSSValue("color");
               if ($.inArray(color, transparentColorNamesSet) > 0) {
-                  color = designer.kDefaultTextColor;
+                  color = hlbStyle.kDefaultTextColor;
                   $(this.item).parents().each(function () {
                       // Iterate through the parents looking for a background color.
                       var thisNodeColor = $(this).css('backgroundColor');
@@ -215,9 +211,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 // Ensure a zoom exists.
                 var extraZoom = extraZoom || 1;
                 var assumedToBeText = !(currentStyle['display'] === 'inline-block' || currentStyle['display'] === 'inline');
-                var additionalBoxOffset = designer.kBoxBorderWidth;
+                var additionalBoxOffset = hlbStyle.kBoxBorderWidth;
                 if (assumedToBeText) {
-                    additionalBoxOffset += designer.kBoxPadding;
+                    additionalBoxOffset += hlbStyle.kBoxPadding;
                 }
 
                 // Use the proper center.
@@ -264,12 +260,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     var top  = centerTop  - height / 2;
 
                     // Calculate box's dimensions when it is inflated: insets may be changed by kBoxPadding and kBoxBorderWidth.
-                    width  += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-left-width']) - parseFloat(currentStyle['border-right-width'])) * extraZoom;
-                    height += (2 * designer.kBoxBorderWidth - parseFloat(currentStyle['border-top-width']) - parseFloat(currentStyle['border-bottom-width'])) * extraZoom;
+                    width  += (2 * hlbStyle.kBoxBorderWidth - parseFloat(currentStyle['border-left-width']) - parseFloat(currentStyle['border-right-width'])) * extraZoom;
+                    height += (2 * hlbStyle.kBoxBorderWidth - parseFloat(currentStyle['border-top-width']) - parseFloat(currentStyle['border-bottom-width'])) * extraZoom;
 
                     if (assumedToBeText) {
-                        width  += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-left']) - parseFloat(currentStyle['padding-right'])) * extraZoom;
-                        height += (2 * designer.kBoxPadding - parseFloat(currentStyle['padding-top']) - parseFloat(currentStyle['padding-bottom'])) * extraZoom;
+                        width  += (2 * hlbStyle.kBoxPadding - parseFloat(currentStyle['padding-left']) - parseFloat(currentStyle['padding-right'])) * extraZoom;
+                        height += (2 * hlbStyle.kBoxPadding - parseFloat(currentStyle['padding-top']) - parseFloat(currentStyle['padding-bottom'])) * extraZoom;
                     }
                     var inflatedHeight = height * extraZoom,
                         inflatedWidth = width * extraZoom,
@@ -482,12 +478,12 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             minimumTopInset =
                     (parseFloat(computedStyles['border-top-width']) + parseFloat(computedStyles['border-bottom-width'])
                     + parseFloat(computedStyles['margin-top']))
-                    - 2 * designer.kBoxBorderWidth;
+                    - 2 * hlbStyle.kBoxBorderWidth;
             if (isNotImage) {
                 fullTopInset =
                     minimumTopInset
                     + parseFloat(computedStyles['padding-top']) + parseFloat(computedStyles['padding-bottom'])
-                    - 2 * designer.kBoxPadding;
+                    - 2 * hlbStyle.kBoxPadding;
             }
             return fullTopInset || minimumTopInset;
         }
@@ -497,11 +493,11 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             isNotImage = common.isEmptyBgImage(computedStyles['background-image']);
             minimumLeftInset = (parseFloat(computedStyles['border-left-width']) + parseFloat(computedStyles['border-right-width'])
                     + parseFloat(computedStyles['margin-left']))
-                    - 2 * designer.kBoxBorderWidth;
+                    - 2 * hlbStyle.kBoxBorderWidth;
             if (isNotImage) {
                 fullLeftInset = minimumLeftInset
                     + parseFloat(computedStyles['padding-left']) + parseFloat(computedStyles['padding-right'])
-                    - 2 * designer.kBoxPadding;
+                    - 2 * hlbStyle.kBoxPadding;
             }
             return fullLeftInset || minimumLeftInset;
         }
@@ -702,7 +698,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
              */
             function getNewBgColor(itemNode, parents) {
                 // Set a variable for the default background in case we don't find one.
-                var bgColor = designer.kDefaultBgColor;
+                var bgColor = hlbStyle.kDefaultBgColor;
                 // Special treatment for images since they might have text on transparent background.
                 // We should make sure text is readable anyways.
                 if (!common.isEmptyBgImage($(itemNode).css('backgroundImage'))) {
