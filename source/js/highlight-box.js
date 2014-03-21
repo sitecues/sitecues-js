@@ -5,11 +5,13 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
   sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common',
-    'hlb/event-handlers', 'hlb/designer', 'background-dimmer', 'ui', 'speech',
+    'hlb/event-handlers', 'hlb/designer', 'hlb/specificElement', 'hlb/style',
+    'background-dimmer', 'ui', 'speech',
     'util/close-button', 'platform', 'hlb/style',
   function ($, conf, cursor, positioning, common,
-    eventHandlers, designer, backgroundDimmer, ui, speech,
-    closeButton, platform, hlbStyle) {
+    eventHandlers, designer, hlbSpecificElement, hlbStyle,
+    backgroundDimmer, ui, speech,
+    closeButton, platform) {
 
     // Constants
 
@@ -188,7 +190,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       HighlightBox.kHideBoxSpeed = 150;
       HighlightBox.kShowAnimationSchema = 'easeOutBack';
       HighlightBox.kHideAnimationSchema = 'linear';
-      HighlightBox.kBoxZindex = 2147483644;
       HighlightBox.isSticky = false;
       HighlightBox.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
@@ -217,29 +218,30 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         var _this = this;
 
+        /*
+         * *** Calculate cssBeforeAnimateStyles ***
+         */
+
         // Get the current element styles.
-        
-        // *** #1 Calculate cssBeforeAnimateStyles ***
-        
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
             totalZoom = positioning.getTotalZoom(this.item, true),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
-        // Handle table special behaviour on inner contents.
-//        designer.handleTableElement(this.$item, currentStyle);
-
-        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateStyles(this, currentStyle, cssUpdate);
+        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, currentStyle, cssUpdate);
         // Anything on the module namespace will be available in the customization file.
         _this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
         sitecues.emit('hlb/animation/styles', _this, $.extend(true, {}, _this.options));
-        // Only animate the most important values so that animation is smoother
         
-        // *** #2 Calcualte cssAnimateStyles ***
-        var cssAnimateStyles = hlbStyle.getCssAnimateStyles(kExtraZoom);
+        /*
+         *  *** Calcualte cssAnimateStyles ***
+         */
 
-        // Quick state issue fix! If the HLB is still inflating slightly after the animation is supposed to end, then
-        // close it out.
+        // Only animate the most important values so that animation is smoother.
+        var cssAnimateStyles = hlbStyle.getCssAnimateInflationStyles(kExtraZoom);
+
+        // Quick state issue fix! If the HLB is still inflating slightly after
+        // the animation is supposed to end, then close it out.
         setTimeout(function() {
           if (getState() === STATES.INFLATING) {
             log.warn("hlb in bad state. resetting.");
@@ -254,28 +256,28 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             log.info("hlb closed");
             sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
           }
-        }, HighlightBox.kShowBoxSpeed + 100);
+        }, HighlightBox.kShowBoxSpeed + 100);      
 
-        // Animate HLB (keep in mind $.animate() is non-blocking).
-        var ancestorCSS = [ ];
-        var parents = this.$item.parentsUntil(document.body);
-        $.each(parents, function () {
-          ancestorCSS.push({
-            zIndex   : this.style.zIndex,
-            overflowX: this.style.overflowX,
-            overflowY: this.style.overflowY,
-            overflow : this.style.overflow});
-        });
+        /*
+         * *** Customizations for specific elements. ***
+         */
 
-        this.savedAncestorCSS = ancestorCSS;
-        $.each(parents, function() {
-          $(this).style({'z-index': HighlightBox.kBoxZindex.toString(),
-                  'overflow': 'visible'
-                  }, '', 'important');
-        });
+        // Change the stacking contexts if necessary.
+        this.savedAncestorCSS = hlbSpecificElement.handleZindexOverflow(this);
+        
+        // Preserve ratio for images.
+        if (this.item.tagName.toLowerCase() === 'img') {
+          hlbSpecificElement.preserveImageRatio(cssUpdate, this.clientRect);
+        }
 
-        // If website uses width/height attributes let's remove those while HLB is inlated.
-        if (!common.isCanvasElement(this.$item)) {
+        // Table special behaviour on inner contents needs special care.
+        hlbSpecificElement.handleTableElement(this.$item, currentStyle);
+
+        // Canvas elements are also different.
+        if (common.isCanvasElement(this.$item)) {
+            hlbSpecificElement.handleCanvas();
+        } else {
+            // If website uses width/height attributes let's remove those while HLB is inlated.
             if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
               for (var attrName in this.savedStyleAttr) {
                 if (attrName === 'style') {
@@ -286,12 +288,11 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
                 }
               }
             }
-        } else {
-            delete cssBeforeAnimateStyles.width;
-            delete cssBeforeAnimateStyles.height;
-            // todo: remove this awful hardcode
-            cssBeforeAnimateStyles['background-color'] = 'rgb(173, 172, 167)';
         }
+
+        /*
+         * *** Animate HLB (keep in mind $.animate() is non-blocking) ***
+         */
 
         // Since jQuery animate doesn't understand 'important' then do:
         // - remove properties having 'important' priority animation is going to override;
@@ -325,9 +326,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           _this.clientRect = positioning.getSmartBoundingBox(_this.item);
         });
 
-        if (this.options.isChrome
-            && this.options.needsCompensation
-            && !isFloated) {
+        if (this.options.isChrome && this.options.needsCompensation && !hlbStyle.isFloated) {
           var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
           this.$item.css(roundingsStyle);
         }
@@ -347,7 +346,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         sitecues.emit('hlb/deflating', _this.item, $.extend(true, {}, _this.options));
 
         // Get the current element styles.
-          var ancestorCSS = this.savedAncestorCSS;
+        var ancestorCSS = this.savedAncestorCSS;
         var parents = this.$item.parentsUntil(document.body);
         $.each(parents, function() {
           var css = ancestorCSS.shift();
@@ -369,14 +368,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         } catch(e) {
           clientRect = positioning.getBoundingBox(this.item);
         }
-        var cssBeforeAnimateStyles = getCorrectedDeflateStyle(currentStyle);
-        var cssAnimateStyles = {
-                'webkit-transform': 'scale(1)',
-                '-moz-transform': 'scale(1)',
-                '-o-transform': 'scale(1)',
-                '-ms-transform': 'scale(1)',
-                'transform': 'scale(1)'
-        };
+        var cssBeforeAnimateStyles = hlbStyle.cssBeforeAnimateDeflationStyles(currentStyle);
+        var cssAnimateStyles = hlbStyle.getCssAnimateDeflationStyles();
 
         if (!common.isCanvasElement(this.$item)) { 
 //            $.extend(cssAnimateStyles, {
@@ -428,17 +421,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         });
         }
       };
-        function getCorrectedDeflateStyle(currentStyle) {
-            var correctedStyle = {
-                // HLB styles.
-                'position': 'relative',
-                'background-color': currentStyle.backgroundColor,
-                'padding': currentStyle.padding,
-                'border': currentStyle.border,
-                'border-radius': currentStyle.borderRadius
-            }
-           return correctedStyle;
-        }
 
       /*
        * Defines which background suits to HLB & sets it: both background image and color.
@@ -483,61 +465,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         
         cssBeforeAnimateStyles['background-color'] = newBgColor;
         return;
-      }
- 
-        // Those objects are sared across the file so do not make them local.
-        var isFloated = false;
+      };
 
-        /** 
-         * Ley's define if there any interesting floats:
-         * topLeft, topRight then change the dimensions.
-         * See example below:
-         *  -------------------------
-         *  |          |// - 1 -//|  |
-         *  |          |//////////|  |
-         *  |                        |
-         *  |     - 2 -              |
-         *  -------------------------
-         *  wrapping element contains 2 blocks:
-         *  #1 is the interesting floating
-         *  #2 is the text which floats #1, we inflate it and need to
-         *  re-calculate its values: top, width, height etc.
-         *  @return floatRectHeight The shift height value produces by floating elements.
-         */
-        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
-            var floatRectHeight = 0;
-            // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
-            var delta = 14; 
-            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
-            var floatRectsKeys = Object.keys(floatRects);
-
-            for (var index in floatRectsKeys) {
-                var innerKeys = floatRects[floatRectsKeys[index]];
-                // todo: fix the dirty trick for #eeoc.
-                if (innerKeys && Object.keys(innerKeys).length > 0) {
-                    isFloated = true;
-                    var oldHeight = parseFloat(cssBeforeAnimateStyles.height);
-                    // Current element's area(width * height)
-                    var fullSpace = parseFloat(currentStyle.width) * parseFloat(currentStyle.height);
-                    // Floating element's area(width * height)
-                    var innerSpace = innerKeys? (innerKeys.width - delta) * (innerKeys.height - delta): 0;
-                    // Substract floated element's space from the full area.
-                    var clippedSpace = fullSpace - innerSpace;
-
-                    // Update position.
-                    var interestingFloatingHeight  = (innerKeys && innerKeys.height) || 0;
-                    var currentPosTop = (cssBeforeAnimateStyles.top && parseFloat(cssBeforeAnimateStyles.top)) || 0;
-                    cssBeforeAnimateStyles.top = currentPosTop - interestingFloatingHeight;
-                    // The width is expanded, so height has some extra-space. Let's cut it out!
-                    cssBeforeAnimateStyles.height = innerKeys? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px': conf.get('absoluteRect').height;
-                    // Difference between original height and the new one.
-                    var heightDiff  = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
-                    floatRectHeight = interestingFloatingHeight - heightDiff;
-                }
-             }
-             return floatRectHeight;
-        }
- 
       /**
        * Notify all inputs if zoom in or out.
        * todo: define if we need to leave this code after code transferring to a new event model.
