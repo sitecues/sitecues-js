@@ -1,5 +1,5 @@
 /**
- * 
+ * This file contains functionality that fixes specific elements' styles when necessary.
  */
 sitecues.def('hlb/specificElement', function (hlbSpecificElement, callback, log) {
 

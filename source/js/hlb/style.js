@@ -1,5 +1,5 @@
 /**
- * 
+ * This file contains functions related to HLB styles on inflation/deflation.
  */
 sitecues.def('hlb/style', function(hlbStyle, callback, log) {
 
