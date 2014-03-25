@@ -5,21 +5,23 @@ sitecues.def('custom', function (custom, callback, log) {
   
   'use strict';
 
+  var customIndex = 0;
+
   custom.registry = {};
   
-  custom.register = function (customScript) {
-
-    var module = customScript.module;
+  custom.register = function (moduleName, script) {
 
     // Create a object for the module you want to customize if it does not exist
-    if (!custom.registry[module]) {
-      custom.registry[module] = {};
+    if (!custom.registry[moduleName]) {
+      custom.registry[moduleName] = {};
     }
 
-    var registryEntry = custom.registry[module][customScript.customId] = {};
+    var registryEntry = custom.registry[moduleName][customIndex] = {};
 
-    registryEntry.module = customScript.module;
-    registryEntry.func = customScript.func;
+    customIndex++;
+
+    registryEntry.module = moduleName;
+    registryEntry.func = script;
 
   };
 
@@ -31,8 +33,8 @@ sitecues.def('custom', function (custom, callback, log) {
     var module = custom.registry[moduleName];
 
     if (module) {
-      for (var customId in module) {
-        module[customId].func.call(this);
+      for (var customIndex in module) {
+        module[customIndex].func.call(this);
       }
     }
 
