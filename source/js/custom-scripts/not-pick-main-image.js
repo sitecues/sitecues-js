@@ -5,21 +5,18 @@
  * Description : 
  * 
 */
-sitecues.def('not-pick-main-image', function (module, callback, log) {
+sitecues.def(function (module, callback, log) {
   sitecues.use('custom', function (custom) {
-    custom.register({
-      module   : 'mouse-highlight/roles',
-      customId : 'not-pick-main-image',
-      
-      func: function () {
-          var ignoredList = [
-              '#cs_control_161910 img',
-              // add more selectors to ignore list here...
-          ];
-          // Merge array with another array.
-          var selectorsList = this.roles.ignore.selectors;
-          selectorsList.push.apply(selectorsList, ignoredList);
-      }
+    
+    custom.register('mouse-highlight/roles', function () {
+      var ignoredList = [
+        '#cs_control_161910 img',
+        // add more selectors to ignore list here...
+      ];
+      // Merge array with another array.
+      var selectorsList = this.roles.ignore.selectors;
+      selectorsList.push.apply(selectorsList, ignoredList);
+
     });
 
     callback();

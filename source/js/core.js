@@ -13,16 +13,18 @@
     version = '0.0.0-UNVERSIONED'
 
   // Private variables
-    , arr               = Array.prototype  // Array's prototype
-    , libraryConfig     = null             // Library config container
-    , libraryUrl        = null             // The parsed library URL object
-    , siteConfig        = null             // Site config container
-    , modules           = {}               // Modules container
-    , allModulesLoaded  = false
+    , arr                = Array.prototype  // Array's prototype
+    , libraryConfig      = null             // Library config container
+    , libraryUrl         = null             // The parsed library URL object
+    , siteConfig         = null             // Site config container
+    , modules            = {}               // Modules container
+    , allModulesLoaded   = false
+    , customizationIndex = 0
+
     // Sitecues top-level namespace: all public classes and modules will be
     // attached to this name space and aliased on 'window.sitecues'. This
     // variable is initialized at the bottom of this script.
-    , sitecues          = null
+    , sitecues           = null
     
   // Private Functions
     , exportPublicFields
@@ -261,7 +263,15 @@
   };
 
   // define equinox module
-  var _def = function(name, constructor) {
+  var _def = function (name, constructor) {
+    
+    // Handle customizations that do not require a def name for defining the module
+    if (typeof name === 'function') {
+      constructor = name;
+      name = 'custom_' + customizationIndex;
+      customizationIndex ++;
+    }
+
     // do not define modules twice.
     if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
       log.warn('sitecues: module ' + name + ' already defined.');
