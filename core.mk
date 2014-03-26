@@ -100,6 +100,7 @@ files=\
 	source/js/ui-manager.js \
 	source/js/status.js \
 	source/js/sitepicker.js \
+        source/js/metrics.js \
 
 
 # Development files (load modules separately).
