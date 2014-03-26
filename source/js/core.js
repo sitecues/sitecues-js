@@ -19,6 +19,9 @@
     , siteConfig         = null             // Site config container
     , modules            = {}               // Modules container
     , allModulesLoaded   = false
+    
+    // Each customization that is registered requires a new index by which it is referenced in the
+    // future
     , customizationIndex = 0
 
     // Sitecues top-level namespace: all public classes and modules will be
@@ -265,7 +268,7 @@
   // define equinox module
   var _def = function (name, constructor) {
     
-    // Handle customizations that do not require a def name for defining the module
+    // Handle customizations, which do not require a def name for defining the module
     if (typeof name === 'function') {
       constructor = name;
       name = 'custom_' + customizationIndex;
