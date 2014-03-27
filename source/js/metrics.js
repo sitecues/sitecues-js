@@ -18,6 +18,11 @@ sitecues.def('metrics', function(metrics, callback, log) {
      
      */
 
+    var SITECUES_STATES = {
+       'off': 0,
+       'on': 1
+    };
+
     var TTS_STATES = {
         'disabled': 0,
         'enabled': 1,
@@ -46,14 +51,22 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 function Metrics() {
                     // todo: extend with pre-defined state.
                     this.options = {};
-                    sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
                     // Default state.
-                    this.metrics = DEFAULT_STATE;
+                    this.data = DEFAULT_STATE;
                     // Initialize.
-                    // todo: think over a better UUID
-                    this.metrics.session_id = Math.random();
-                }
-                ;
+                    // todo: this is just an example, later we will fill the props with better data.
+                    this.data.session_id = Math.random();
+                    this.data.client_time_ms = (new Date()).getMilliseconds();
+                    this.data.page_url = location && location.host? location.host: '';
+                    this.data.zoom_level = conf.get('zoom') || 1;
+                    this.data.tts_state = conf.get('speechOff') === true ? TTS_STATES['disabled']: TTS_STATES['enabled'];
+                    this.data.sitecues_on = ((this.data.zoom_level > 1) || (this.data.tts_state === TTS_STATES['enabled']))
+                                            ? SITECUES_STATES['on']
+                                            : SITECUES_STATES['off'];
+                    this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
+                    this.data.client_language = navigator && navigator.language ? navigator.language: '';
+                    sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
+                };
 
                 // Singleton.
                 return {
@@ -62,11 +75,9 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     }
                 };
 
-                sitecues.on('zoom/increase', function() {
-                    instance = Metrics.createInstance();
-                    console.log(instance);
-                });
             })();
+
+            instance = Metrics.createInstance();
 
             // Done.
             callback();
