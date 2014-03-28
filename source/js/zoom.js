@@ -103,12 +103,11 @@ sitecues.def('zoom', function (zoom, callback, log) {
      */
     var renderPage = function () {
       setTimeout(function() {
-        document.body.style.webkitTransform = "";
+        document.body.style.webkitBackfaceVisibility = '';
         setTimeout(function() {
-          document.body.style.webkitTransform = "rotate(0deg)"; 
+          document.body.style.webkitBackfaceVisibility = 'hidden'; 
         }, 5);
-      }, 5);
-          
+      }, 5);      
     }
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
@@ -150,7 +149,7 @@ sitecues.def('zoom', function (zoom, callback, log) {
                     }); 
       
       // Un-Blur text in Chrome
-      if (platform.browser.isChrome) {
+      if (platform.browser.isChrome && platform.os.isMac) {
         renderPage();
       }
 
