@@ -45,6 +45,10 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
             PageVisited.sendData();
             PageVisited.clearData();
         });
+        
+       sitecues.on('metrics/update', function(metrics) {
+
+        });
 
         // Done.
         callback();

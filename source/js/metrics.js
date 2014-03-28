@@ -40,6 +40,8 @@ sitecues.def('metrics', function(metrics, callback, log) {
         'client_language': ''
     };
     
+    var toClass = {}.toString;
+    
     var instance = null;
 
     sitecues.use('jquery', 'conf', 'ui',
@@ -72,12 +74,35 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 return {
                     createInstance: function(options) {
                         return (new Metrics(options) || null);
+                    },
+                    updateInstance: function(newData) {
+                        // Flat structure.
+                        if (arguments.length === 2) {
+                            var prop = arguments[0],
+                                    value = arguments[1];
+                            instance.data[prop] = value;
+                        } else {
+                            // Object is passed.
+                            var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
+                            if (newDataType === 'Object' && Object.keys(newData).length === 1) {
+                                for (var prop in newData) {
+                                    instance.data[prop] = newData[prop];
+                                }
+                            }
+                        }
+                        sitecues.emit('metrics/update', instance);
                     }
                 };
 
             })();
 
             instance = Metrics.createInstance();
+            
+            sitecues.on('zoom', function(zoomLevel) {
+                console.log('Changing zoom....');
+                console.log(instance);
+                Metrics.updateInstance({'zoom_level': parseFloat(zoomLevel)});
+            });
 
             // Done.
             callback();
