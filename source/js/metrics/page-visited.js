@@ -13,7 +13,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
             // Constructor.
             function PageVisited() {
                 // Init default values.
-                this.data = {};
+                this.data = {'name': 'page-visited'};
             };
 
             // Singleton.
