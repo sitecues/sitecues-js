@@ -27,6 +27,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
     var DEFAULT_STATE = {
         'session_id': '',
         'client_time_ms': '',
+        'client_time_utc': '',
         'page_url': '',
         'zoom_level': '',
         'tts_state': '',
@@ -52,7 +53,8 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     // Initialize.
                     // todo: this is just an example, later we will fill the props with better data.
                     this.data.session_id = Math.random();
-                    this.data.client_time_ms = (new Date()).getMilliseconds();
+                    this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
+                    this.data.client_time_utc = (new Date).toUTCString(); // epoch time in UTC when the event occurred
                     this.data.page_url = location && location.host? location.host: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
                     this.data.tts_state = conf.get('speechOff') === true ? TTS_STATES['disabled']: TTS_STATES['enabled'];
