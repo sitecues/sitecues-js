@@ -1,25 +1,34 @@
 /*
- * Create and send a metric event when the library loads on the page.
+ * Create and send a metric event when the user opens an HLB.
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
- * (Send it only once when the user goes to a new page)
  */
-sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
+sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
+    
+    var DEFAULT_STATE = {
+        'name': 'panel-closed',
+        'slider_interacted': false,
+        'large_a_clicked': false,
+        'small_a_clicked': false,
+        'tts_clicked': false
+    };
 
     var instance = null;
 
     sitecues.use('jquery', 'ui', function($) {
 
-        var PageVisited = (function() {
+        var PanelClosed = (function() {
             // Constructor.
-            function PageVisited() {
-                // Init default values.
-                this.data = {'name': 'page-visited'};
+            function PanelClosed() {
+                // Default state.
+                this.data = DEFAULT_STATE;
+                // Initialize.
+                
             };
 
             // Singleton.
             return {
                 createInstance: function(options) {
-                    return (new PageVisited(options) || null);
+                    return (new PanelClosed(options) || null);
                 },
                 fillData: function(data) {
                    $.extend(instance.data, data);
@@ -27,7 +36,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
                 },
                 sendData: function() {
                     // Send data in JSON format to backend using end point.
-                    sitecues.emit('metrics/page-visited/sent', this);
+                    sitecues.emit('metrics/panel-closed/sent', this);
                 },
                 clearData: function() {
                     this.data = {};
@@ -36,17 +45,15 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
             };
         })();
 
-        instance = PageVisited.createInstance();
+        instance = PanelClosed.createInstance();
 
         sitecues.on('metrics/create', function(metrics) {
-            console.log('== PAGE VISITED == ');
-            PageVisited.fillData(metrics.data);
-            PageVisited.sendData();
-            PageVisited.clearData();
+            console.log('== PANEL CLOSED == ');
+            PanelClosed.fillData(metrics.data);
         });
-        
-       sitecues.on('metrics/update', function(metrics) {
-            // Skip it. We already sent the metrics for this event and do not care about updates.
+
+        sitecues.on('metrics/update', function(metrics) {
+            PanelClosed.fillData(metrics.data);
         });
 
         // Done.

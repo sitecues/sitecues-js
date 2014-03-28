@@ -101,6 +101,7 @@ files=\
 	source/js/status.js \
 	source/js/sitepicker.js \
 	source/js/metrics/page-visited.js \
+	source/js/metrics/panel-closed.js \
 	source/js/metrics.js \
 
 # Development files (load modules separately).
