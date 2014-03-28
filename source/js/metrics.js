@@ -93,7 +93,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
             
             sitecues.on('zoom', function(zoomLevel) {
                 console.log('Changing zoom....');
-                console.log(instance);
+//                console.log(instance);
                 Metrics.updateInstance({'zoom_level': parseFloat(zoomLevel)});
             });
 

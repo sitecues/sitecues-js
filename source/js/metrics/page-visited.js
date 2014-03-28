@@ -23,10 +23,10 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
                 },
                 fillData: function(data) {
                    $.extend(instance.data, data);
-                   console.log(JSON.stringify(instance.data));
                 },
                 sendData: function() {
                     // Send data in JSON format to backend using end point.
+                    console.log(JSON.stringify(instance.data));
                     sitecues.emit('metrics/page-visited/sent', this);
                 },
                 clearData: function() {

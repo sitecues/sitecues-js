@@ -22,7 +22,23 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                 // Default state.
                 this.data = DEFAULT_STATE;
                 // Initialize.
-                
+                var _this = this;
+                $('.track, .trackBack, .thumb').mousedown(function() {
+                    _this.data.slider_interacted = true;
+                });
+
+                $('.letterBig, .letterBigBack').mousedown(function() {
+                    _this.data.large_a_clicked = true;
+                });
+
+                $('.letterSml, .letterSmlBack').mousedown(function() {
+                    _this.data.small_a_clicked = true;
+                });
+
+                $('.tts').mousedown(function() {
+                    _this.data.tts_clicked = true;
+                });
+
             };
 
             // Singleton.
@@ -32,15 +48,16 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                 },
                 fillData: function(data) {
                    $.extend(instance.data, data);
-                   console.log(JSON.stringify(instance.data));
                 },
                 sendData: function() {
                     // Send data in JSON format to backend using end point.
+                    console.log('Panel close sending data...');
+                    console.log(JSON.stringify(instance.data));
                     sitecues.emit('metrics/panel-closed/sent', this);
                 },
                 clearData: function() {
-                    this.data = {};
-                    instance = null;
+//                    this.data = {};
+//                    instance = null;
                 }
             };
         })();
@@ -54,6 +71,11 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
 
         sitecues.on('metrics/update', function(metrics) {
             PanelClosed.fillData(metrics.data);
+        });
+
+        sitecues.on('panel/hide', function() {
+            PanelClosed.sendData();
+            PanelClosed.clearData();
         });
 
         // Done.
