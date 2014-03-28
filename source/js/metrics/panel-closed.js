@@ -55,6 +55,7 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                     console.log(JSON.stringify(instance.data));
                     sitecues.emit('metrics/panel-closed/sent', this);
                 },
+                // todo: only clear panel-closed event type data.
                 clearData: function() {
 //                    this.data = {};
 //                    instance = null;
