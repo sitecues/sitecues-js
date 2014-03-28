@@ -18,11 +18,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
      
      */
 
-    var SITECUES_STATES = {
-       'off': 0,
-       'on': 1
-    };
-
     var TTS_STATES = {
         'disabled': 0,
         'enabled': 1,
@@ -35,7 +30,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
         'page_url': '',
         'zoom_level': '',
         'tts_state': '',
-        'sitecues_on': '',
         'browser_user_agent': '',
         'client_language': ''
     };
@@ -62,9 +56,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     this.data.page_url = location && location.host? location.host: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
                     this.data.tts_state = conf.get('speechOff') === true ? TTS_STATES['disabled']: TTS_STATES['enabled'];
-                    this.data.sitecues_on = ((this.data.zoom_level > 1) || (this.data.tts_state === TTS_STATES['enabled']))
-                                            ? SITECUES_STATES['on']
-                                            : SITECUES_STATES['off'];
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
                     this.data.client_language = navigator && navigator.language ? navigator.language: '';
                     sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
