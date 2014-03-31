@@ -15,7 +15,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
      * *sitecues on/off:* if the zoom > 1 OR TTS is on, sitecues is ON. Otherwise, if none of those criteria exist, sitecues is OFF.
      * *Browser User Agent:* the raw user agent, to be processed by the back-end
      * *User language*: (OPTIONAL) the language the browser is set to, not the page language.
-     
      */
 
     var TTS_STATES = {
@@ -30,7 +29,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
         'client_time_utc': '',
         'page_url': '',
         'zoom_level': '',
-        'tts_state': '',
+        'tts_state': '', // not implemented yet!
         'browser_user_agent': '',
         'client_language': ''
     };
@@ -49,7 +48,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     // todo: extend with pre-defined state.
                     this.options = {};
                     // Default state.
-                    this.data = DEFAULT_STATE;
+                    this.data = $.extend({}, DEFAULT_STATE);
                     // Initialize.
                     // todo: this is just an example, later we will fill the props with better data.
                     this.data.session_id = Math.random();
@@ -57,7 +56,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     this.data.client_time_utc = (new Date).toUTCString(); // epoch time in UTC when the event occurred
                     this.data.page_url = location && location.host? location.host: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
-                    this.data.tts_state = conf.get('speechOff') === true ? TTS_STATES['disabled']: TTS_STATES['enabled'];
+
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
                     this.data.client_language = navigator && navigator.language ? navigator.language: '';
                     sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
@@ -68,6 +67,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     createInstance: function(options) {
                         return (new Metrics(options) || null);
                     },
+                    // todo: take out the dubs(here and in the other metrics).
                     updateInstance: function(newData) {
                         // Flat structure.
                         if (arguments.length === 2) {
@@ -77,7 +77,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                         } else {
                             // Object is passed.
                             var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
-                            if (newDataType === 'Object' && Object.keys(newData).length === 1) {
+                            if (newDataType === 'Object') {
                                 for (var prop in newData) {
                                     instance.data[prop] = newData[prop];
                                 }
@@ -93,8 +93,23 @@ sitecues.def('metrics', function(metrics, callback, log) {
             
             sitecues.on('zoom', function(zoomLevel) {
                 console.log('Changing zoom....');
-//                console.log(instance);
                 Metrics.updateInstance({'zoom_level': parseFloat(zoomLevel)});
+            });
+
+            // todo: find an event and add callback
+            sitecues.on('speech/toggle', function() {
+                console.log('Changing tts....');
+                // shim
+                // todo: test 'ttsEnable' 'siteTTSEnable'
+                Metrics.updateInstance({'tts_state':  conf.get('ttsEnable') === true ? TTS_STATES['disabled']: TTS_STATES['enabled']});
+            });
+
+            sitecues.on('metrics/panel-closed/clear', function() {
+                console.log('Clear metrics data....');
+                Metrics.updateInstance({
+                    'client_time_ms':  +new Date,
+                    'client_time_utc': (new Date).toUTCString()
+                });
             });
 
             // Done.

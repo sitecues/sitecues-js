@@ -14,28 +14,35 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
 
     var instance = null;
 
+   var toClass = {}.toString;
+
     sitecues.use('jquery', 'ui', function($) {
 
         var PanelClosed = (function() {
             // Constructor.
             function PanelClosed() {
                 // Default state.
-                this.data = DEFAULT_STATE;
+                this.data = $.extend({}, DEFAULT_STATE);
                 // Initialize.
                 var _this = this;
-                $('.track, .trackBack, .thumb').mousedown(function() {
+                var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
+                    $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
+                    $letterSmall = $('#sitecues-panel .letterSml, #sitecues-panel .letterSmlBack'),
+                    $ttsButton = $('#sitecues-panel .tts');
+
+                $slider.mousedown(function() {
                     _this.data.slider_interacted = true;
                 });
 
-                $('.letterBig, .letterBigBack').mousedown(function() {
+                $letterBig.mousedown(function() {
                     _this.data.large_a_clicked = true;
                 });
 
-                $('.letterSml, .letterSmlBack').mousedown(function() {
+                $letterSmall.mousedown(function() {
                     _this.data.small_a_clicked = true;
                 });
 
-                $('.tts').mousedown(function() {
+                $ttsButton.mousedown(function() {
                     _this.data.tts_clicked = true;
                 });
 
@@ -45,6 +52,23 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
             return {
                 createInstance: function(options) {
                     return (new PanelClosed(options) || null);
+                },
+                updateInstance: function(newData) {
+                        // Flat structure.
+                        if (arguments.length === 2) {
+                            var prop = arguments[0],
+                                    value = arguments[1];
+                            instance.data[prop] = value;
+                        } else {
+                            // Object is passed.
+                            var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
+                            if (newDataType === 'Object') {
+                                for (var prop in newData) {
+                                    instance.data[prop] = newData[prop];
+                                }
+                            }
+                        }
+                        sitecues.emit('metrics/panel-closed/update', instance);
                 },
                 fillData: function(data) {
                    $.extend(instance.data, data);
@@ -57,8 +81,9 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                 },
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
-//                    this.data = {};
-//                    instance = null;
+                    this.updateInstance(DEFAULT_STATE);
+                    console.log('Clear panel-closed data....');
+                    sitecues.emit('metrics/panel-closed/clear', instance);
                 }
             };
         })();
@@ -73,10 +98,13 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
         sitecues.on('metrics/update', function(metrics) {
             PanelClosed.fillData(metrics.data);
         });
+        
+        sitecues.on('panel/show', function() {
+            PanelClosed.clearData();
+        });
 
         sitecues.on('panel/hide', function() {
             PanelClosed.sendData();
-            PanelClosed.clearData();
         });
 
         // Done.
