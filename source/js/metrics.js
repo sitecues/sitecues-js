@@ -34,12 +34,10 @@ sitecues.def('metrics', function(metrics, callback, log) {
         'client_language': ''
     };
     
-    var toClass = {}.toString;
-    
     var instance = null;
 
-    sitecues.use('jquery', 'conf', 'ui',
-        function($, conf) {
+    sitecues.use('metrics/util', 'jquery', 'conf', 'ui',
+        function(metricsUtil, $, conf) {
 
             var Metrics = (function() {
 
@@ -68,32 +66,16 @@ sitecues.def('metrics', function(metrics, callback, log) {
                         return (new Metrics(options) || null);
                     },
                     // todo: take out the dubs(here and in the other metrics).
-                    updateInstance: function(newData) {
-                        // Flat structure.
-                        if (arguments.length === 2) {
-                            var prop = arguments[0],
-                                    value = arguments[1];
-                            instance.data[prop] = value;
-                        } else {
-                            // Object is passed.
-                            var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
-                            if (newDataType === 'Object') {
-                                for (var prop in newData) {
-                                    instance.data[prop] = newData[prop];
-                                }
-                            }
-                        }
-                        sitecues.emit('metrics/update', instance);
-                    }
+                    updateInstance: metricsUtil.update,
                 };
-
             })();
 
             instance = Metrics.createInstance();
             
             sitecues.on('zoom', function(zoomLevel) {
                 console.log('Changing zoom....');
-                Metrics.updateInstance({'zoom_level': parseFloat(zoomLevel)});
+                var data = {'zoom_level': parseFloat(zoomLevel)};
+                Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
             // todo: find an event and add callback
@@ -101,15 +83,19 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 console.log('Changing tts....');
                 // shim
                 // todo: test 'ttsEnable' 'siteTTSEnable'
-                Metrics.updateInstance({'tts_state':  conf.get('ttsEnable') === true ? TTS_STATES['disabled']: TTS_STATES['enabled']});
+                var data = {'tts_state': conf.get('ttsEnable') === true
+                                         ? TTS_STATES['disabled']
+                                         : TTS_STATES['enabled']};
+                Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
             sitecues.on('metrics/panel-closed/clear', function() {
                 console.log('Clear metrics data....');
-                Metrics.updateInstance({
+                var data = {
                     'client_time_ms':  +new Date,
                     'client_time_utc': (new Date).toUTCString()
-                });
+                };
+                Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
             // Done.

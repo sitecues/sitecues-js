@@ -7,7 +7,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
 
     var instance = null;
 
-    sitecues.use('jquery', 'ui', function($) {
+    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
         var PageVisited = (function() {
             // Constructor.
@@ -24,11 +24,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
                 fillData: function(data) {
                    $.extend(instance.data, data);
                 },
-                sendData: function() {
-                    // Send data in JSON format to backend using end point.
-                    console.log(JSON.stringify(instance.data));
-                    sitecues.emit('metrics/page-visited/sent', this);
-                },
+                sendData: metricsUtil.send,
                 clearData: function() {
                     this.data = {};
                     instance = null;
@@ -41,8 +37,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
         sitecues.on('metrics/create', function(metrics) {
             console.log('== PAGE VISITED == ');
             PageVisited.fillData(metrics.data);
-            PageVisited.sendData();
-            PageVisited.clearData();
+            PageVisited.sendData(instance);
         });
         
        sitecues.on('metrics/update', function(metrics) {

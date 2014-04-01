@@ -100,6 +100,7 @@ files=\
 	source/js/ui-manager.js \
 	source/js/status.js \
 	source/js/sitepicker.js \
+	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \

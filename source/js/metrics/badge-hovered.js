@@ -9,10 +9,8 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
     };
 
     var instance = null;
-    
-   var toClass = {}.toString;
 
-    sitecues.use('jquery', 'ui', function($) {
+    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil,$) {
 
         var BadgeHovered = (function() {
             // Constructor.
@@ -27,37 +25,15 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
                 createInstance: function(options) {
                     return (new BadgeHovered(options) || null);
                 },
-                updateInstance: function(newData) {
-                        // Flat structure.
-                        if (arguments.length === 2) {
-                            var prop = arguments[0],
-                                    value = arguments[1];
-                            instance.data[prop] = value;
-                        } else {
-                            // Object is passed.
-                            var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
-                            if (newDataType === 'Object') {
-                                for (var prop in newData) {
-                                    instance.data[prop] = newData[prop];
-                                }
-                            }
-                        }
-                        sitecues.emit('metrics/badge-hovered/update', instance);
-                },
+                updateInstance: metricsUtil.update,
                 fillData: function(data) {
                    $.extend(instance.data, data);
                 },
-                sendData: function() {
-                    // Send data in JSON format to backend using end point.
-                    console.log('Panel close sending data...');
-                    console.log(JSON.stringify(instance.data));
-                    sitecues.emit('metrics/badge-hovered/sent', this);
-                },
+                sendData: metricsUtil.send,
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
-                    this.updateInstance(DEFAULT_STATE);
-                    console.log('Clear panel-closed data....');
-                    sitecues.emit('metrics/badge-hovered/clear', instance);
+                    this.updateInstance(instance, DEFAULT_STATE, 'metrics/badge-hovered/clear');
+                    console.log('Clear badge-hovered data....');
                 }
             };
         })();
@@ -65,7 +41,7 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         instance = BadgeHovered.createInstance();
 
         sitecues.on('metrics/create', function(metrics) {
-            console.log('== PANEL CLOSED == ');
+            console.log('== BADGE HOVERED == ');
             BadgeHovered.fillData(metrics.data);
         });
 
@@ -78,7 +54,7 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         });
 
         sitecues.on('panel/hide', function() {
-            BadgeHovered.sendData();
+            BadgeHovered.sendData(instance);
         });
 
         // Done.
