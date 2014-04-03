@@ -38,15 +38,23 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
             };
         })();
 
-        instance = HlbOpened.createInstance();
-
-        sitecues.on('metrics/create', function(metrics) {
+        // Create an instance on hlb create event.
+        sitecues.on('hlb/create', function() {
             console.log('== HLB OPENED == ');
-            HlbOpened.fillData(metrics.data);
+            if (instance === null) {
+                instance = HlbOpened.createInstance();
+            }
+            sitecues.emit('metrics/hlb-opened/create');
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            HlbOpened.fillData(metrics.data);
+            instance && HlbOpened.fillData(metrics.data);
+        });
+
+        // Clear an instance data on hlb opened(ready) event.
+        sitecues.on('hlb/ready', function() {
+            HlbOpened.sendData(instance);
+            HlbOpened.clearData();
         });
 
         // Done.

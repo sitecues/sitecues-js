@@ -38,23 +38,23 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
             };
         })();
 
-        instance = BadgeHovered.createInstance();
-
-        sitecues.on('metrics/create', function(metrics) {
+        // Create an instance on panel show event.
+        sitecues.on('panel/show', function() {
             console.log('== BADGE HOVERED == ');
-            BadgeHovered.fillData(metrics.data);
+            if (instance === null) {
+                instance = BadgeHovered.createInstance();
+            }
+            sitecues.emit('metrics/badge-hovered/create');
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            BadgeHovered.fillData(metrics.data);
-        });
-        
-        sitecues.on('panel/show', function() {
-            BadgeHovered.clearData();
+            instance && BadgeHovered.fillData(metrics.data);
         });
 
+        // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
             BadgeHovered.sendData(instance);
+            BadgeHovered.clearData();
         });
 
         // Done.

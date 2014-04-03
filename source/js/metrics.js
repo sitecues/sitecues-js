@@ -1,5 +1,5 @@
 /**
- * 
+ * Basic metrics.
  */
 sitecues.def('metrics', function(metrics, callback, log) {
     /**
@@ -89,8 +89,8 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
-            sitecues.on('metrics/panel-closed/clear', function() {
-                console.log('Clear metrics data....');
+            // Update the basic metrics when panel is showed.
+            sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create', function() {
                 var data = {
                     'client_time_ms':  +new Date,
                     'client_time_utc': (new Date).toUTCString()

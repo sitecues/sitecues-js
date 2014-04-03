@@ -38,10 +38,8 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
             console.log('== PAGE VISITED == ');
             PageVisited.fillData(metrics.data);
             PageVisited.sendData(instance);
-        });
-        
-       sitecues.on('metrics/update', function(metrics) {
-            // Skip it. We already sent the metrics for this event and do not care about updates.
+            //  We already sent the metrics for this event, no need to keep the intance.
+            instance = null;
         });
 
         // Done.

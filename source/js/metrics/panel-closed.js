@@ -64,23 +64,23 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
             };
         })();
 
-        instance = PanelClosed.createInstance();
-
-        sitecues.on('metrics/create', function(metrics) {
+        // Create an instance on panel show event.
+        sitecues.on('panel/show', function() {
             console.log('== PANEL CLOSED == ');
-            PanelClosed.fillData(metrics.data);
+            if (instance === null) {
+                instance = PanelClosed.createInstance();
+            }
+            sitecues.emit('metrics/panel-closed/create');
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            PanelClosed.fillData(metrics.data);
-        });
-        
-        sitecues.on('panel/show', function() {
-            PanelClosed.clearData();
+            instance && PanelClosed.fillData(metrics.data);
         });
 
+        // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
             PanelClosed.sendData(instance);
+            PanelClosed.clearData();
         });
 
         // Done.
