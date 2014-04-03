@@ -8,11 +8,11 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
    var toClass = {}.toString;
 
     // Define dependency modules.
-    sitecues.use('jquery', 'ui', function($) {
+    sitecues.use('conf/site', 'jquery', 'ui', function(site, $) {
 
         metricsUtil.send = function(instance) {
             // Send data in JSON format to backend using end point.
-            var siteId = 's-00000005';
+            var siteId =  site.get('site_id');
             var request = $.ajax({
                 url: "http://ws.dev.sitecues.com/sitecues/api/metrics/site/" + siteId + "/notify.json",
                 type: "POST",
