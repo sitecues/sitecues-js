@@ -345,18 +345,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.state = STATES.DEFLATING;
         sitecues.emit('hlb/deflating', _this.item, $.extend(true, {}, _this.options));
 
-        // Get the current element styles.
-        var ancestorCSS = this.savedAncestorCSS;
-        var parents = this.$item.parentsUntil(document.body);
-        $.each(parents, function() {
-          var css = ancestorCSS.shift();
-          $(this).style({'z-index'   : css.zIndex,
-                 'overflow-x': css.overflowX,
-                 'overflow-y': css.overflowY,
-                 'overflow'  : css.overflow});
-        });
-        this.$item.style('outline', hlbStyle.kBoxNoOutline, 'important');
-
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             clientRect;
         
@@ -384,40 +372,52 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Deflate the highlight box.
         this.$item.css(cssBeforeAnimateStyles);
         this.$item.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
-          // Cleanup all elements inserted by sitecues on the page.
-          if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
-            // Remove placeholder wrapper element if the table child highlighted.
-            $('.' + HighlightBox.kPlaceHolderWrapperClass)
-              .children()
-              .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
-          }
-
-          backgroundDimmer.removeDimmer();
-          setTimeout(function () {
-            // Animation callback: notify all inputs about zoom out.
-            // We should do this with next tick to allow handlers catch right scale level.
-            notifyZoomInOrOut(_this.$item, false);
-          }, 0);
-
-          // If website used to have width/height attributes let's restore those while HLB is defalted.
-          for (var attrName in _this.savedStyleAttr) {
-            if (attrName === 'style') {
-               _this.$item.removeAttr('style');
+            // Cleanup all elements inserted by sitecues on the page.
+            if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
+                // Remove placeholder wrapper element if the table child highlighted.
+                $('.' + HighlightBox.kPlaceHolderWrapperClass)
+                        .children()
+                        .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
             }
-            if (!common.isCanvasElement(_this.$item)) {
-                if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
-                  _this.$item.attr(attrName, _this.savedStyleAttr[attrName]);
+
+            // Get the current element styles.
+            var ancestorCSS = _this.savedAncestorCSS;
+            var parents = _this.$item.parentsUntil(document.body);
+            $.each(parents, function() {
+                var css = ancestorCSS.shift();
+                $(this).style({'z-index': css.zIndex,
+                    'overflow-x': css.overflowX,
+                    'overflow-y': css.overflowY,
+                    'overflow': css.overflow});
+            });
+            _this.$item.style('outline', hlbStyle.kBoxNoOutline, 'important');
+
+            backgroundDimmer.removeDimmer();
+            setTimeout(function() {
+                // Animation callback: notify all inputs about zoom out.
+                // We should do this with next tick to allow handlers catch right scale level.
+                notifyZoomInOrOut(_this.$item, false);
+            }, 0);
+
+            // If website used to have width/height attributes let's restore those while HLB is defalted.
+            for (var attrName in _this.savedStyleAttr) {
+                if (attrName === 'style') {
+                    _this.$item.removeAttr('style');
+                }
+                if (!common.isCanvasElement(_this.$item)) {
+                    if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
+                        _this.$item.attr(attrName, _this.savedStyleAttr[attrName]);
+                    }
                 }
             }
-          }
-          // This instance is now officially closed.
-          _this.state = STATES.CLOSED;
+            // This instance is now officially closed.
+            _this.state = STATES.CLOSED;
 
-          // Call the module method to clean up after close BEFORE calling listeners.
-          onHighlightBoxClosed(_this.item);
+            // Call the module method to clean up after close BEFORE calling listeners.
+            onHighlightBoxClosed(_this.item);
 
-          log.info("hlb closed");
-          sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
+            log.info("hlb closed");
+            sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
         });
         }
       };
