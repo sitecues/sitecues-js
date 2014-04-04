@@ -133,6 +133,9 @@ sitecues.def('badge', function (badge, callback, log) {
     }
 
     panel.parent  = badge.element;
+    // Update state.
+    $badge = $('#' + badge.badgeId);
+    isBadgeInDom  = $badge && $badge.length > 0;
 
     // EQ-770: check if badge is created by site provided script or by extension-based one.
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
