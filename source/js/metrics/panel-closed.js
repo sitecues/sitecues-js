@@ -6,10 +6,10 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
     
     var DEFAULT_STATE = {
         'name': 'panel-closed',
-        'slider_interacted': false,
-        'large_a_clicked': false,
-        'small_a_clicked': false,
-        'tts_clicked': false
+        'slider_interacted': 0,
+        'large_a_clicked': 0,
+        'small_a_clicked': 0,
+        'tts_clicked': 0
     };
 
     var instance = null;
@@ -29,19 +29,19 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                     $ttsButton = $('#sitecues-panel .tts');
 
                 $slider.mousedown(function() {
-                    _this.data.slider_interacted = true;
+                    _this.data.slider_interacted = 1;
                 });
 
                 $letterBig.mousedown(function() {
-                    _this.data.large_a_clicked = true;
+                    _this.data.large_a_clicked = 1;
                 });
 
                 $letterSmall.mousedown(function() {
-                    _this.data.small_a_clicked = true;
+                    _this.data.small_a_clicked = 1;
                 });
 
                 $ttsButton.mousedown(function() {
-                    _this.data.tts_clicked = true;
+                    _this.data.tts_clicked = 1;
                 });
 
             };
