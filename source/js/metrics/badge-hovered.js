@@ -45,6 +45,7 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
                 instance = BadgeHovered.createInstance();
             }
             sitecues.emit('metrics/badge-hovered/create');
+            BadgeHovered.sendData(instance);
         });
 
         sitecues.on('metrics/update', function(metrics) {
@@ -53,7 +54,6 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
 
         // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
-            BadgeHovered.sendData(instance);
             BadgeHovered.clearData();
         });
 
