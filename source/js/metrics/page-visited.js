@@ -34,7 +34,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
 
         instance = PageVisited.createInstance();
 
-        sitecues.on('metrics/create', function(metrics) {
+        sitecues.on('metrics/ready', function(metrics) {
             console.log('== PAGE VISITED == ');
             PageVisited.fillData(metrics.data);
             PageVisited.sendData(instance);

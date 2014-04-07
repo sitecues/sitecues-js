@@ -52,7 +52,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
                     this.data.page_url = location && location.href? location.href: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
-
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
                     this.data.client_language = navigator && navigator.language ? navigator.language: '';
                     sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
@@ -68,10 +67,14 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 };
             })();
 
-            instance = Metrics.createInstance();
-            
-            sitecues.on('zoom/init', function(zoomLevel) {
-                console.log('Changing zoom....');
+            sitecues.on('zoom', function(zoomLevel) {
+                if (!instance) {
+                    // New instance
+                    instance = Metrics.createInstance();
+                    sitecues.emit('metrics/ready', instance);
+                    return;
+                }
+                // Update zoom.
                 var data = {'zoom_level': parseFloat(zoomLevel)};
                 Metrics.updateInstance(instance, data, 'metrics/update');
             });
