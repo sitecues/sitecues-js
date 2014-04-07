@@ -18,7 +18,7 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
                     xhrObj.setRequestHeader("Content-Type","application/json");
                     xhrObj.setRequestHeader("Accept","application/json");
                 },
-                url: "http://ws.dev.sitecues.com/sitecues/api/metrics/site/" + siteId + "/notify.json",
+                url: "//ws.dev.sitecues.com/sitecues/api/metrics/site/" + siteId + "/notify.json",
                 type: "POST",
                 data: instance && JSON.stringify(instance.data),
                 dataType: "json"
