@@ -43,6 +43,8 @@ sitecues.def('speech', function (speech, callback, log) {
         timesCued = 1,
         maxCued = 3,
 
+        pageLanguage = document.documentElement.lang ? '&l=' + document.documentElement.lang : '',
+
         /**
          * Returns true if the "first speech on" cue should be played.
          * @return {boolean}
@@ -66,21 +68,26 @@ sitecues.def('speech', function (speech, callback, log) {
         },
 
         //What audio format will we use? 
+        //At the moment, mp3 and ogg are sufficient for the browser/OS combinations we support. 
         audioFormat =  (function () {
-
+          var possibleAudioFormats = site.get('ttsAudioFormats'),
+              mp3 = possibleAudioFormats.indexOf('MP3') !== -1,
+              ogg = possibleAudioFormats.indexOf('OGG') !== -1;
+              //aac = possibleAudioFormats.indexOf('aac') !== -1
+              //wav = possibleAudioFormats.indexOf('wav') !== -1
           try {
             var a = new Audio();
             //Default to ogg if it's supported, otherwise, mp3
-            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, '')) && ogg) {
               return 'ogg';
             }
-            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
+            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, '')) && mp3) {
               return 'mp3';
             }
           } catch (e) {
-            if (platform.browser.isChrome || platform.browser.isFirefox) {
+            if ((platform.browser.isChrome || platform.browser.isFirefox) && ogg) {
               return 'ogg';
-            } else {
+            } else if (mp3) {
               return 'mp3';
             }        
           }
@@ -94,14 +101,16 @@ sitecues.def('speech', function (speech, callback, log) {
               audioElement,
               playing = false;
               //startTime = (new Date).getTime() / 1000;
-          
           if (speechKey) {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
+            //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
           } else {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-              // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-              + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+            // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+            //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+            //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+            //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
+                            siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
           }
 
           this.init = function () {
@@ -188,12 +197,15 @@ sitecues.def('speech', function (speech, callback, log) {
             }
 
             if (speechKey) {
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
+              //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
             } else {
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-                // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-                + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+              // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+              //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+              //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+              //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
+                              siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
             }
 
             this.soundSource = undefined;
@@ -260,7 +272,7 @@ sitecues.def('speech', function (speech, callback, log) {
         }()),
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
-      
+
       /*if (platform.browser.is === 'Safari') {
         console.log('Using Safari Player');
       } else {
