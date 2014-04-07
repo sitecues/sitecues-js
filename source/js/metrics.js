@@ -52,7 +52,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     this.data.session_id = Math.random();
                     this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
                     this.data.client_time_utc = (new Date).toUTCString(); // epoch time in UTC when the event occurred
-                    this.data.page_url = location && location.host? location.host: '';
+                    this.data.page_url = location && location.href? location.href: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
 
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
