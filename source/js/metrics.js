@@ -26,7 +26,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
     var DEFAULT_STATE = {
         'session_id': '',
         'client_time_ms': '',
-        'client_time_utc': '',
         'page_url': '',
         'zoom_level': '',
         'tts_state': '', // not implemented yet!
@@ -51,7 +50,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     // todo: this is just an example, later we will fill the props with better data.
                     this.data.session_id = Math.random();
                     this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
-                    this.data.client_time_utc = (new Date).toUTCString(); // epoch time in UTC when the event occurred
                     this.data.page_url = location && location.href? location.href: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
 
@@ -72,7 +70,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
 
             instance = Metrics.createInstance();
             
-            sitecues.on('zoom', function(zoomLevel) {
+            sitecues.on('zoom/init', function(zoomLevel) {
                 console.log('Changing zoom....');
                 var data = {'zoom_level': parseFloat(zoomLevel)};
                 Metrics.updateInstance(instance, data, 'metrics/update');
@@ -92,8 +90,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
             // Update the basic metrics when panel is showed.
             sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create', function() {
                 var data = {
-                    'client_time_ms':  +new Date,
-                    'client_time_utc': (new Date).toUTCString()
+                    'client_time_ms':  +new Date
                 };
                 Metrics.updateInstance(instance, data, 'metrics/update');
             });
