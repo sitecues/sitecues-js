@@ -14,6 +14,10 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
             // Send data in JSON format to backend using end point.
             var siteId =  site.get('site_id');
             var request = $.ajax({
+                xhrFields: {
+                  withCredentials: true
+                },
+                crossDomain: true,
                 beforeSend: function(xhrObj){
                     xhrObj.setRequestHeader("Content-Type","application/json");
                     xhrObj.setRequestHeader("Accept","application/json");
