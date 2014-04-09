@@ -3,7 +3,7 @@
  */
 sitecues.def('metrics', function(metrics, callback, log) {
     /**
-     * *Session ID:* A random UUID generated for this library session.
+     * *Session ID:* A random UUID v4 generated for this library session.
      * *Client time milliseconds:* The epoch time in milliseconds when the event occurred
      * *Page URL:* Full URL of the page being viewed.
      * *Site ID:* The s-XXXXXXXX site ID
@@ -38,11 +38,9 @@ sitecues.def('metrics', function(metrics, callback, log) {
 
     var instance = null;
 
-    sitecues.use('metrics/util', 'jquery', 'conf', 'ui',
-        function(metricsUtil, $, conf) {
-
+    sitecues.use('metrics/util', 'jquery', 'conf', 'conf/site', 'speech', 'ui',
+        function(metricsUtil, $, conf, site, speech) {
             var Metrics = (function() {
-
                 // Constructor.
                 function Metrics() {
                     // todo: extend with pre-defined state.
@@ -50,11 +48,16 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     // Default state.
                     this.data = $.extend({}, DEFAULT_STATE);
                     // Initialize.
-                    // todo: this is just an example, later we will fill the props with better data.
+                    // A random UUID v4 generated for this library session.
                     this.data.session_id = UUIDv4();
-                    this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
+                    // Epoch time in milliseconds  when the event occurred
+                    this.data.client_time_ms = +new Date;
                     this.data.page_url = location && location.href? location.href: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
+                    this.data.tts_state = !site.get('ttsAvailable')
+                                          ? TTS_STATES['unavailable']
+                                          // 1 - for 'enabled', 0 - for 'disabled'
+                                          : +speech.isEnabled();
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
                     this.data.client_language = navigator && navigator.language ? navigator.language: '';
                     sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
@@ -65,39 +68,31 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     createInstance: function(options) {
                         return (new Metrics(options) || null);
                     },
-                    // todo: take out the dubs(here and in the other metrics).
-                    updateInstance: metricsUtil.update,
+                    updateInstance: metricsUtil.update
                 };
             })();
 
             sitecues.on('zoom', function(zoomLevel) {
+                // New instance
                 if (!instance) {
-                    // New instance
                     instance = Metrics.createInstance();
-                    sitecues.emit('metrics/ready', instance);
                     return;
                 }
                 // Update zoom.
                 var data = {'zoom_level': parseFloat(zoomLevel)};
-                Metrics.updateInstance(instance, data, 'metrics/update');
+                Metrics.updateInstance(instance, data, 'metrics/update metrics/ready');
             });
 
-            // todo: find an event and add callback
-            sitecues.on('speech/toggle', function() {
+            sitecues.on('speech/enable speech/disable', function() {
                 console.log('Changing tts....');
-                // shim
-                // todo: test 'ttsEnable' 'siteTTSEnable'
-                var data = {'tts_state': conf.get('ttsEnable') === true
-                                         ? TTS_STATES['disabled']
-                                         : TTS_STATES['enabled']};
+                var ttsState = conf.get('siteTTSEnable') ? TTS_STATES['enabled'] : TTS_STATES['disabled'];
+                var data = {'tts_state': ttsState};
                 Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
             // Update the basic metrics when panel is showed.
             sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create', function() {
-                var data = {
-                    'client_time_ms':  +new Date
-                };
+                var data = {'client_time_ms': +new Date};
                 Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
