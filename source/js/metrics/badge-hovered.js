@@ -17,7 +17,6 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
             function BadgeHovered() {
                 // Default state.
                 this.data = $.extend({}, DEFAULT_STATE);
-                // Initialize.
             };
 
             // Singleton.
