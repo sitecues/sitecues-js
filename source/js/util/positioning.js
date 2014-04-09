@@ -10,7 +10,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
   positioning.kMinRectWidth = 4;
   positioning.kMinRectHeight = 4;
 
-  sitecues.use('jquery', 'util/common', 'platform', function ($, common, platform) {
+  sitecues.use('jquery', 'util/common', 'conf', function ($, common, conf) {
     /**
      * Get the cumulative zoom for an element.
      * @param {selector} selector
@@ -183,11 +183,22 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     return element;
   
   }
+
+    function getUserAgentCorrectionsForRect(node, rect) {
+      var zoom;
+      if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
+        //return
+        //console.log('FF Normalize')
+        zoom = positioning.getTotalZoom(node, true);
+        rect = scaleRect(rect, zoom, window.pageXOffset, window.pageYOffset);
+      }
+      return rect;
+    }
+
     function getBoundingRectMinusPadding(node) {
       var range = document.createRange();
       range.selectNode(node);
-      var rect = range.getBoundingClientRect(),
-          zoom = positioning.getTotalZoom(node, true);
+      var rect = range.getBoundingClientRect();
 
       // If range is created on node w/o text, getBoundingClientRect() returns zero values.
       // This concerns images and other nodes such as paragraphs - with no text inside.
@@ -202,14 +213,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
       if (isEmptyRect) {rect = node.getBoundingClientRect && node.getBoundingClientRect();}
 
-      if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
-        //return
-        //console.log('FF Normalize')
-        rect = scaleRect(rect, zoom, window.pageXOffset, window.pageYOffset);
+      rect = getUserAgentCorrectionsForRect(node, rect);
 
-      }
-      // console.log(rect);
-      
       if (node.nodeType !== 1) {
         return rect;
       }
@@ -358,6 +363,12 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       allRects.push(rect);
     }
 
+    function getContentsRect(containerNode) {
+      var range = document.createRange();
+      range.selectNodeContents(containerNode);
+      return getUserAgentCorrectionsForRect(containerNode, range.getBoundingClientRect());
+    }
+
     function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 
       $selector.each(function () {                  
@@ -366,9 +377,16 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // --- Leaf nodes ---
         if (!isElement) {
-          if (this.nodeType === 3 && $.trim(this.textContent) !== '') {
-            // -- Acutal text rect --
-            addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+          if (this.nodeType === 3) { /* Non-empty text node */
+            // Fast path for text containers:
+            // We found a child text node, so get the bounds of all children at once via a DOM range.
+            // This is much faster than iterating through all of the sibling text/inline nodes, by
+            // reducing the number of nodes we touch.
+            // Note: this would not work if any of the children were display: block, because
+            // the returned rectangle would be the larger element rect, rather for just the visible content.
+            var parentContentsRect = getContentsRect(this.parentNode);
+            addRect(allRects, clipRect, parentContentsRect);
+            return false;
           }
           return true;
         }
@@ -379,6 +397,13 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         if (style.visibility === 'hidden' || style.visibility === 'collapse') {
           return true;
         }
+
+//        // --- Inline elements ---
+//        if (style.display === 'inline' || style.display === 'inline-block') {
+//          var parentContentsRect = getContentsRect(this.parentNode);
+//          addRect(allRects, clipRect, parentContentsRect);
+//          return false;
+//        }
 
         // --- Overflowing content ---
         addRect(allRects, clipRect, getOverflowRect(this, style));
