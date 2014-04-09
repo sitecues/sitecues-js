@@ -32,7 +32,10 @@ sitecues.def('metrics', function(metrics, callback, log) {
         'browser_user_agent': '',
         'client_language': ''
     };
-    
+
+    // Taken from here(free puplic license): https://gist.github.com/jed/982883
+    var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b)};
+
     var instance = null;
 
     sitecues.use('metrics/util', 'jquery', 'conf', 'ui',
@@ -48,7 +51,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     this.data = $.extend({}, DEFAULT_STATE);
                     // Initialize.
                     // todo: this is just an example, later we will fill the props with better data.
-                    this.data.session_id = Math.random();
+                    this.data.session_id = UUIDv4();
                     this.data.client_time_ms = +new Date; // epoch time in milliseconds  when the event occurred
                     this.data.page_url = location && location.href? location.href: '';
                     this.data.zoom_level = conf.get('zoom') || 1;
