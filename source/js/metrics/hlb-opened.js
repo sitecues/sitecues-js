@@ -33,14 +33,12 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
                     this.updateInstance(instance,DEFAULT_STATE, 'metrics/hlb-opened/clear');
-                    console.log('Clear hlb-opened data....');
                 }
             };
         })();
 
         // Create an instance on hlb create event.
         sitecues.on('hlb/create', function() {
-            console.log('== HLB OPENED == ');
             if (instance === null) {
                 instance = HlbOpened.createInstance();
             }

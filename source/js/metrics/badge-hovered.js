@@ -32,14 +32,12 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
                     this.updateInstance(instance, DEFAULT_STATE, 'metrics/badge-hovered/clear');
-                    console.log('Clear badge-hovered data....');
                 }
             };
         })();
 
         // Create an instance on panel show event.
         sitecues.on('panel/show', function() {
-            console.log('== BADGE HOVERED == ');
             if (instance === null) {
                 instance = BadgeHovered.createInstance();
             }

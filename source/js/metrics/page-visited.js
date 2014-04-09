@@ -35,7 +35,6 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
         instance = PageVisited.createInstance();
 
         sitecues.on('metrics/ready', function(metrics) {
-            console.log('== PAGE VISITED == ');
             PageVisited.fillData(metrics.data);
             PageVisited.sendData(instance);
             //  We already sent the metrics for this event, no need to keep the intance.

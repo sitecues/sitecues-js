@@ -84,7 +84,6 @@ sitecues.def('metrics', function(metrics, callback, log) {
             });
 
             sitecues.on('speech/enable speech/disable', function() {
-                console.log('Changing tts....');
                 var ttsState = conf.get('siteTTSEnable') ? TTS_STATES['enabled'] : TTS_STATES['disabled'];
                 var data = {'tts_state': ttsState};
                 Metrics.updateInstance(instance, data, 'metrics/update');

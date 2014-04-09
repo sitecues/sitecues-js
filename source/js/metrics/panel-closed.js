@@ -59,14 +59,12 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
                     this.updateInstance(instance, DEFAULT_STATE, 'metrics/panel-closed/clear');
-                    console.log('Clear panel-closed data....');
                 }
             };
         })();
 
         // Create an instance on panel show event.
         sitecues.on('panel/show', function() {
-            console.log('== PANEL CLOSED == ');
             if (instance === null) {
                 instance = PanelClosed.createInstance();
             }

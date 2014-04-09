@@ -31,11 +31,11 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
             });
 
             request.done(function(msg) {
-                console.log('Request succeeded', msg);
+//                console.log('Request succeeded', msg);
             });
 
             request.fail(function(jqXHR, textStatus) {
-                console.log("Request failed: " + textStatus);
+//                console.log("Request failed: " + textStatus);
             });
         };
 
