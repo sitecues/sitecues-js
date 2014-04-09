@@ -5,10 +5,10 @@
 sitecues.def('metrics/util', function(metricsUtil, callback, log) {
     'use strict';
 
-   var toClass = {}.toString;
+    var toClass = {}.toString;
 
     // Define dependency modules.
-    sitecues.use('conf/site', 'jquery', 'ui', function(site, $) {
+    sitecues.use('conf/site', 'jquery', 'ui', 'user', function(site, $) {
 
         metricsUtil.send = function(instance) {
             // Send data in JSON format to backend using end point.
