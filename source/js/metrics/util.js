@@ -13,6 +13,8 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
         metricsUtil.send = function(instance) {
             // Send data in JSON format to backend using end point.
             var siteId =  site.get('site_id');
+            // Update timestamp before send.
+            metricsUtil.update(instance, {'client_time_ms': +new Date}, 'metrics/update');
             var request = $.ajax({
                 xhrFields: {
                   withCredentials: true
@@ -38,6 +40,7 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
         };
 
         metricsUtil.update = function(instance, newData, event) {
+
             // Object is passed.
             var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
             if (newDataType === 'Object') {
@@ -45,6 +48,7 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
                     instance.data[prop] = newData[prop];
                 }
             } else {
+                // Flat structure.
                 var prop  = arguments[0],
                     value = arguments[1];
                 instance.data[prop] = value;
