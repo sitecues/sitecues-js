@@ -14,7 +14,7 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
             // Send data in JSON format to backend using end point.
             var siteId =  site.get('site_id');
             // Update timestamp before send.
-            metricsUtil.update(instance, {'client_time_ms': +new Date}, 'metrics/update');
+            metricsUtil.update(instance, {'client_time_ms': +new Date});
             var request = $.ajax({
                 xhrFields: {
                   withCredentials: true

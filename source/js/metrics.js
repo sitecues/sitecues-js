@@ -60,7 +60,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                                           : +speech.isEnabled();
                     this.data.browser_user_agent = navigator && navigator.userAgent ? navigator.userAgent : '';
                     this.data.client_language = navigator && navigator.language ? navigator.language: '';
-                    sitecues.emit('metrics/create', this, $.extend(true, {}, this.options));
+                    sitecues.emit('metrics/ready', this, $.extend(true, {}, this.options));
                 };
 
                 // Singleton.
@@ -80,7 +80,7 @@ sitecues.def('metrics', function(metrics, callback, log) {
                 }
                 // Update zoom.
                 var data = {'zoom_level': parseFloat(zoomLevel)};
-                Metrics.updateInstance(instance, data, 'metrics/update metrics/ready');
+                Metrics.updateInstance(instance, data, 'metrics/update');
             });
 
             sitecues.on('speech/enable speech/disable', function() {

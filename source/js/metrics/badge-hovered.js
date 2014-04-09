@@ -47,7 +47,7 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
             BadgeHovered.sendData(instance);
         });
 
-        sitecues.on('metrics/update', function(metrics) {
+        sitecues.on('metrics/ready metrics/update', function(metrics) {
             instance && BadgeHovered.fillData(metrics.data);
         });
 
