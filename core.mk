@@ -43,6 +43,7 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	$(build-dir)/source/js/core.js \
 	source/js/jquery.js \
+	source/js/user.js \
 	source/js/custom.js \
 	$(custom-files) \
 	source/js/load.js \
@@ -84,6 +85,8 @@ files=\
 	source/js/cursor.js \
 	source/js/fixFixedBadgeAndPanel.js \
 	source/js/hlb/designer.js \
+        source/js/hlb/style.js \
+        source/js/hlb/specificElement.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \
@@ -98,7 +101,12 @@ files=\
 	source/js/ui-manager.js \
 	source/js/status.js \
 	source/js/sitepicker.js \
-
+	source/js/metrics/util.js \
+	source/js/metrics/page-visited.js \
+	source/js/metrics/panel-closed.js \
+	source/js/metrics/badge-hovered.js \
+        source/js/metrics/hlb-opened.js \
+	source/js/metrics.js \
 
 # Development files (load modules separately).
 ifeq ($(dev), true)
