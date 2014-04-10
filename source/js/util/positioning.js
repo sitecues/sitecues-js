@@ -11,34 +11,14 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
   positioning.kMinRectHeight = 4;
 
   sitecues.use('jquery', 'util/common', 'conf', function ($, common, conf) {
-    /**
-     * Get the cumulative zoom for an element.
-     * @param {selector} selector
-     * @param {boolean} andZoom False if we only want to get 'transform:scale' zoom;
-     * True if we want to take full zoom, union of 'transfor:scale' + 'zoom' property.
-     * @returns {undefined|single result|array} The value or an array of values
-     * of current page's zoom.
-     */
     positioning.getBoundingClientRect = function (element, clone) {
       return element.getBoundingClientRect();
     };
 
-    positioning.getTotalZoom = (function () {
-      var recurse = function (element, andZoom) {
-        if (!element) {
-          return 1;
-        }
-        var value = getMagnification(element, andZoom);
-        return (value ? value : 1) * recurse(element.parentElement, andZoom);
-      };
-      return function (selector, andZoom) {
-        var result = [];
-        $(selector).each(function () {
-            result.push(recurse(this, andZoom));
-          });
-        return processResult(result);
-      };
-    }());
+    positioning.getTotalZoom = function () {
+      return conf.get('zoom');
+    };
+
     /**
      * Sets the zoom of an element, with the body being the default element.
      */
@@ -92,7 +72,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       var result = [];
       var scrollPosition = positioning.getScrollPosition();
       $(selector).each(function () {
-        var totalZoom = positioning.getTotalZoom(this, true);
+        var totalZoom = positioning.getTotalZoom();
         var boundingBox = this.getBoundingClientRect();
         result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
       });
@@ -187,9 +167,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     function getUserAgentCorrectionsForRect(node, rect) {
       var zoom;
       if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
-        //return
-        //console.log('FF Normalize')
-        zoom = positioning.getTotalZoom(node, true);
+        zoom = positioning.getTotalZoom();
         rect = scaleRect(rect, zoom, window.pageXOffset, window.pageYOffset);
       }
       return rect;
@@ -352,7 +330,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       }
 
       if (rect.right < 0 || rect.bottom < 0) {
-        var zoom = positioning.getTotalZoom(this, true);
+        var zoom = positioning.getTotalZoom();
         var absoluteRect = positioning.convertFixedRectsToAbsolute([rect], zoom)[0];
         if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
           // Don't be fooled by items hidden offscreen -- those rects don't count
@@ -386,7 +364,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
             // the returned rectangle would be the larger element rect, rather for just the visible content.
             var parentContentsRect = getContentsRect(this.parentNode);
             addRect(allRects, clipRect, parentContentsRect);
-            return false;
+            return false;  // Don't keep iterating over text/inlines in this container
           }
           return true;
         }
@@ -398,12 +376,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           return true;
         }
 
-//        // --- Inline elements ---
-//        if (style.display === 'inline' || style.display === 'inline-block') {
-//          var parentContentsRect = getContentsRect(this.parentNode);
-//          addRect(allRects, clipRect, parentContentsRect);
-//          return false;
-//        }
 
         // --- Overflowing content ---
         addRect(allRects, clipRect, getOverflowRect(this, style));
@@ -679,7 +651,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         // in the total zoom of the parent.
         var offsetParent = jElement.offsetParent();
         var offsetParentPosition = positioning.getOffset(offsetParent);
-        var offsetParentZoom = positioning.getTotalZoom(offsetParent);
+        var offsetParentZoom = positioning.getTotalZoom();
         var elementTotalZoom = offsetParentZoom;
 
         // Determine where we would display the centered and (possibly) zoomed element,

@@ -204,8 +204,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
-            center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
-            totalZoom = positioning.getTotalZoom(this.item, true),
+            totalZoom = conf.get('zoom'),
+            center  = positioning.getCenterForActualElement(this.item, totalZoom),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         // Handle table special behaviour on inner contents.

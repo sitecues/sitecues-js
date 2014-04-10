@@ -554,7 +554,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
         //fixedRects = [elementRect];
       
-      state.zoom = positioning.getTotalZoom(element, true);
+      state.zoom = conf.get('zoom');
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
