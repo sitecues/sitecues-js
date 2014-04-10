@@ -25,9 +25,6 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
                     return (new BadgeHovered(options) || null);
                 },
                 updateInstance: metricsUtil.update,
-                fillData: function(data) {
-                   $.extend(instance.data, data);
-                },
                 sendData: metricsUtil.send,
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
@@ -46,7 +43,7 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         });
 
         sitecues.on('metrics/ready metrics/update', function(metrics) {
-            instance && BadgeHovered.fillData(metrics.data);
+            instance && BadgeHovered.updateInstance(instance, metrics.data);
         });
 
         // Clear an instance data on panel hide event.
