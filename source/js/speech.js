@@ -25,6 +25,16 @@ sitecues.def('speech', function (speech, callback, log) {
   sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
     function(conf, site, common, $, builder, platform) {
 
+    var indexOfIgnoreCase = function(a, s) {
+      s = s.toLowerCase();
+      for (var i = 0; i < a.length; i++) {
+        if (s === a[i].toLowerCase()) {
+          return i;
+        }
+      }
+      return -1;
+    };
+
     var players = {},
         // Use the site and user settings, if available, but if neither is
         // available, we'll fall back to being disabled
@@ -69,12 +79,12 @@ sitecues.def('speech', function (speech, callback, log) {
 
         //What audio format will we use? 
         //At the moment, mp3 and ogg are sufficient for the browser/OS combinations we support. 
-        audioFormat =  (function () {
+        audioFormat =  (function() {
           var possibleAudioFormats = site.get('ttsAudioFormats'),
-              mp3 = possibleAudioFormats.indexOf('MP3') !== -1,
-              ogg = possibleAudioFormats.indexOf('OGG') !== -1;
-              //aac = possibleAudioFormats.indexOf('aac') !== -1
-              //wav = possibleAudioFormats.indexOf('wav') !== -1
+              mp3 = indexOfIgnoreCase(possibleAudioFormats, 'mp3') >= 0,
+              ogg = indexOfIgnoreCase(possibleAudioFormats, 'ogg') >= 0;
+              //aac = indexOfIgnoreCase(possibleAudioFormats, 'aac') >= 0
+              //wav = indexOfIgnoreCase(possibleAudioFormats, 'wav') >= 0
           try {
             var a = new Audio();
             //Default to ogg if it's supported, otherwise, mp3
