@@ -52,9 +52,6 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
                     return (new PanelClosed(options) || null);
                 },
                 updateInstance: metricsUtil.update,
-                fillData: function(data) {
-                   $.extend(instance.data, data);
-                },
                 sendData: metricsUtil.send,
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
@@ -72,7 +69,7 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            instance && PanelClosed.fillData(metrics.data);
+            instance && PanelClosed.updateInstance(instance, metrics.data);
         });
 
         // Clear an instance data on panel hide event.

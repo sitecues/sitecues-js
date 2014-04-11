@@ -26,9 +26,6 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
                     return (new HlbOpened(options) || null);
                 },
                 updateInstance: metricsUtil.update,
-                fillData: function(data) {
-                   $.extend(instance.data, data);
-                },
                 sendData: metricsUtil.send,
                 // todo: only clear panel-closed event type data.
                 clearData: function() {
@@ -46,7 +43,7 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            instance && HlbOpened.fillData(metrics.data);
+            instance && HlbOpened.updateInstance(instance, metrics.data);
         });
 
         // Clear an instance data on hlb opened(ready) event.

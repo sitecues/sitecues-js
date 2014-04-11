@@ -21,9 +21,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
                 createInstance: function(options) {
                     return (new PageVisited(options) || null);
                 },
-                fillData: function(data) {
-                   $.extend(instance.data, data);
-                },
+                updateInstance: metricsUtil.update,
                 sendData: metricsUtil.send,
                 clearData: function() {
                     this.data = {};
@@ -35,7 +33,7 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
         instance = PageVisited.createInstance();
 
         sitecues.on('metrics/ready', function(metrics) {
-            PageVisited.fillData(metrics.data);
+            PageVisited.updateInstance(instance, metrics.data);
             PageVisited.sendData(instance);
             //  We already sent the metrics for this event, no need to keep the intance.
             instance = null;
