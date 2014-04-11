@@ -587,7 +587,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     /**
      * Obtains the viewport dimensions, with an optional inset.
      */
-    positioning.getViewportDimensions = function (inset, zoom) {
+    positioning.getViewportDimensions = function (inset) {
+      var zoomFactor = platform.browser.isIE ? 1 : conf.get('zoom');
       inset = inset || 0;
       var insetX2 = inset * 2;
       var scrollPos = this.getScrollPosition();
@@ -601,10 +602,10 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
        * consistency.
        */
       var result = {
-        left: scrollPos.left / zoom + inset,
-        top:  scrollPos.top  / zoom + inset,
-        width: document.documentElement.clientWidth   / zoom - insetX2,
-        height: document.documentElement.clientHeight / zoom - insetX2
+        left: scrollPos.left / zoomFactor + inset,
+        top:  scrollPos.top  / zoomFactor + inset,
+        width: document.documentElement.clientWidth   / zoomFactor - insetX2,
+        height: document.documentElement.clientHeight / zoomFactor - insetX2
       };
       result.right = result.left + result.width;
       result.bottom = result.top + result.height;
@@ -637,15 +638,12 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // Obtain the equinox state data for the element.
         var equinoxData = this.equinoxData || (this.equinoxData = {});
-        var existingZoom = equinoxData.zoom || (equinoxData.zoom = 1);
 
         // As we are not moving the element within the DOM, we need to position the
         // element relative to it's offset parent. These calculations need to factor
-        // in the total zoom of the parent.
+        // in zoom.
         var offsetParent = jElement.offsetParent();
         var offsetParentPosition = positioning.getOffset(offsetParent);
-        var offsetParentZoom = conf.get('zoom')
-        var elementTotalZoom = offsetParentZoom * zoom;
 
         // Determine where we would display the centered and (possibly) zoomed element,
         // and what it's dimensions would be.
@@ -653,8 +651,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         var centerTop = center.top;
 
         // Determine the final dimensions, and their affect on the CSS dimensions.
-        var width = jElement.outerWidth() * elementTotalZoom;
-        var height = jElement.outerHeight() * elementTotalZoom;
+        var width = jElement.outerWidth() * zoom;
+        var height = jElement.outerHeight() * zoom;
 
         var left = centerLeft - (width / 2);
         var top = centerTop - (height / 2);
@@ -679,6 +677,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           } else if ((left + width) > viewport.right) {
             centerLeft -= (left + width) - viewport.right;
           }
+
+
         }
 
         // Check the width and horizontal positioning.
@@ -696,8 +696,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         }
 
         // Reduce the dimensions to a non-zoomed value.
-        width = (newWidth || width) / elementTotalZoom;
-        height = (newHeight || height) / elementTotalZoom;
+        width = (newWidth || width) / zoom;
+        height = (newHeight || height) / zoom;
 
         // Determine what the left and top CSS values must be to center the
         // (possibly zoomed) element over the determined center.
@@ -705,15 +705,15 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         var cssMarginTop = jElement.css('marginTop') || 0;
 
         var cssLeft = (centerLeft
-          - offsetParentPosition.left
-          - (width * offsetParentZoom / 2)
-          - (parseFloat(cssMarginLeft) * offsetParentZoom)
-          ) / offsetParentZoom;
+                       - offsetParentPosition.left
+                       - (width * zoom / 2)
+                       - (parseFloat(cssMarginLeft) * zoom)
+                      ) / zoom;
         var cssTop = (centerTop
-          - offsetParentPosition.top
-          - (height * offsetParentZoom / 2)
-          - (parseFloat(cssMarginTop) * offsetParentZoom)
-          ) / offsetParentZoom;
+                       - offsetParentPosition.top
+                       - (height * zoom / 2)
+                       - (parseFloat(cssMarginTop) * zoom)
+                      ) / zoom;
 
         // Create the CSS needed to place the element where it needs to be, and to zoom it.
         var cssUpdates = {
@@ -744,7 +744,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         // Set the zoom state.
         equinoxData.zoom = zoom;
       });
-    }
+    };
 
     ////////////////////////////////////////////////////////////////////////////////
     //

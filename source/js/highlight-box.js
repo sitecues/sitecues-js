@@ -315,7 +315,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           // Trigger the background blur effect if there is a highlight box only.
           // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
           onHighlightBoxReady($(this));
-          backgroundDimmer.dimBackgroundContent(this, totalZoom);
+          backgroundDimmer.dimBackgroundContent(this);
           if (_this.options.close_button) {
             displayCloseButton(_this.item, totalZoom);
           }
