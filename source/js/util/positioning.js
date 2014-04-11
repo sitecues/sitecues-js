@@ -10,7 +10,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
   positioning.kMinRectWidth = 4;
   positioning.kMinRectHeight = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', function ($, common, conf) {
+  sitecues.use('jquery', 'util/common', 'conf', 'platform', function ($, common, conf, platform) {
     positioning.getBoundingClientRect = function (element, clone) {
       return element.getBoundingClientRect();
     };
@@ -165,12 +165,9 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
   }
 
     function getUserAgentCorrectionsForRect(node, rect) {
-      var zoom;
-      if ((navigator && navigator.userAgent) ? navigator.userAgent.indexOf(' Firefox/') > 0 : false) {
-        zoom = positioning.getTotalZoom();
-        rect = scaleRect(rect, zoom, window.pageXOffset, window.pageYOffset);
-      }
-      return rect;
+      return platform.browser.isFirefox ?
+        scaleRect(rect, positioning.getTotalZoom(), window.pageXOffset, window.pageYOffset) :
+        rect;
     }
 
     function getBoundingRectMinusPadding(node) {
