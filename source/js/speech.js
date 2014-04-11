@@ -25,6 +25,9 @@ sitecues.def('speech', function (speech, callback, log) {
   sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
     function(conf, site, common, $, builder, platform) {
 
+    // console.log(site);
+    // console.log(site.get);
+
     var players = {},
         // Use the site and user settings, if available, but if neither is
         // available, we'll fall back to being disabled

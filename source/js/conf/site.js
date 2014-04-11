@@ -43,38 +43,39 @@ sitecues.def('conf/site', function (site, callback, log) {
     };
 
     site.fetch = function(cb) {
-      $.ajax({
-        // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
-        url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
-        dataType: 'json',
-        async: false,
-        success: function(data, status, xhr) {
-          log.info("Successfully fetched site config from server");
-
-          // Reset the site configuration object.
-          siteConfig = {};
-
-          // Copy the fetched key/value pairs into the site configuration.
-          for (var i = 0; i < data.settings.length; i++) {
-            siteConfig[data.settings[i].key] = data.settings[i].value;
-          }
-
-          // Add the provided configuration
-          siteConfig = $.extend(true, siteConfig, providedSiteConfig);
-
-          cb && cb(site);
-        },
-        error: function() {
-          log.error("Unable to fetch site config from server");
-          cb && cb(site);
-        }
-      });
     };
 
     // Initialize the site configuration to the default.
     siteConfig = $.extend(true, {}, defaultSiteConfig, providedSiteConfig);
 
     // Trigger the initial fetch.
-    site.fetch(callback);
+    $.ajax({
+      // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
+      url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
+      dataType: 'json',
+      async: false,
+      success: function(data, status, xhr) {
+        log.info("Successfully fetched site config from server");
+
+        // Reset the site configuration object.
+        siteConfig = {};
+
+        // Copy the fetched key/value pairs into the site configuration.
+        for (var i = 0; i < data.settings.length; i++) {
+          siteConfig[data.settings[i].key] = data.settings[i].value;
+        }
+
+        // Add the provided configuration
+        siteConfig = $.extend(true, siteConfig, providedSiteConfig);
+
+        callback(site);
+      },
+      error: function() {
+        log.error("Unable to fetch site config from server");
+        callback(site);
+      }
+    });
+
   });
+  
 });

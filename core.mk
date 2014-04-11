@@ -85,8 +85,8 @@ files=\
 	source/js/cursor.js \
 	source/js/fixFixedBadgeAndPanel.js \
 	source/js/hlb/designer.js \
-        source/js/hlb/style.js \
-        source/js/hlb/specificElement.js \
+  source/js/hlb/style.js \
+  source/js/hlb/specificElement.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \
@@ -105,7 +105,7 @@ files=\
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
-        source/js/metrics/hlb-opened.js \
+  source/js/metrics/hlb-opened.js \
 	source/js/metrics.js \
 
 # Development files (load modules separately).
