@@ -40,23 +40,16 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
         };
 
         metricsUtil.update = function(instance, newData, event) {
-
             // Object is passed.
             var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
             if (newDataType === 'Object') {
-                for (var prop in newData) {
-                    instance.data[prop] = newData[prop];
-                }
-            } else {
-                // Flat structure.
-                var prop  = arguments[0],
-                    value = arguments[1];
-                instance.data[prop] = value;
+                $.extend(instance.data, newData);
             }
 
             if (event) {
                 sitecues.emit(event, instance);
             }
+            return instance;
         };
         // Done.
         callback();

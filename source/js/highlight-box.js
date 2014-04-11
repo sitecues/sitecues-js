@@ -179,10 +179,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
        * @returns {undefined}
        */
       HighlightBox.prototype.saveAttrs = function(attrsList) {
-        for(var key in attrsList) {
-            var attr = attrsList[key];
-            this.savedStyleAttr[attr] = this.$item.attr(attr);
-        }
+        var _this = this;
+        $.each(attrsList, function(key, attr) {
+            _this.savedStyleAttr[attr] = _this.$item.attr(attr);
+        });
       };
 
       // Constants. NOTE: some of them are duplicated in hlb/designer.js too.

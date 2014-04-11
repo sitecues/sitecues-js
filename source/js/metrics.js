@@ -71,13 +71,10 @@ sitecues.def('metrics', function(metrics, callback, log) {
                     updateInstance: metricsUtil.update
                 };
             })();
+            
+            instance = Metrics.createInstance();
 
             sitecues.on('zoom', function(zoomLevel) {
-                // New instance
-                if (!instance) {
-                    instance = Metrics.createInstance();
-                    return;
-                }
                 // Update zoom.
                 var data = {'zoom_level': parseFloat(zoomLevel)};
                 Metrics.updateInstance(instance, data, 'metrics/update');
