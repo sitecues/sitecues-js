@@ -15,10 +15,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       return element.getBoundingClientRect();
     };
 
-    positioning.getTotalZoom = function () {
-      return conf.get('zoom');
-    };
-
     /**
      * Sets the zoom of an element, with the body being the default element.
      */
@@ -72,7 +68,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       var result = [];
       var scrollPosition = positioning.getScrollPosition();
       $(selector).each(function () {
-        var totalZoom = positioning.getTotalZoom();
+        var totalZoom = conf.get('zoom');
         var boundingBox = this.getBoundingClientRect();
         result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
       });
@@ -166,7 +162,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
     function getUserAgentCorrectionsForRect(node, rect) {
       return platform.browser.isFirefox ?
-        scaleRect(rect, positioning.getTotalZoom(), window.pageXOffset, window.pageYOffset) :
+        scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset) :
         rect;
     }
 
@@ -327,7 +323,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       }
 
       if (rect.right < 0 || rect.bottom < 0) {
-        var zoom = positioning.getTotalZoom();
+        var zoom = conf.get('zoom');
         var absoluteRect = positioning.convertFixedRectsToAbsolute([rect], zoom)[0];
         if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
           // Don't be fooled by items hidden offscreen -- those rects don't count
@@ -352,7 +348,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // --- Leaf nodes ---
         if (!isElement) {
-          if (this.nodeType === 3) { /* Non-empty text node */
+          if (this.nodeType === 3) { /* Text node */
             // Fast path for text containers:
             // We found a child text node, so get the bounds of all children at once via a DOM range.
             // This is much faster than iterating through all of the sibling text/inline nodes, by
@@ -648,8 +644,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         // in the total zoom of the parent.
         var offsetParent = jElement.offsetParent();
         var offsetParentPosition = positioning.getOffset(offsetParent);
-        var offsetParentZoom = positioning.getTotalZoom();
-        var elementTotalZoom = offsetParentZoom;
 
         // Determine where we would display the centered and (possibly) zoomed element,
         // and what it's dimensions would be.
@@ -657,8 +651,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         var centerTop = center.top;
 
         // Determine the final dimensions, and their affect on the CSS dimensions.
-        var width = jElement.outerWidth() * elementTotalZoom;
-        var height = jElement.outerHeight() * elementTotalZoom;
+        var width = jElement.outerWidth() * zoom;
+        var height = jElement.outerHeight() * zoom;
 
         var left = centerLeft - (width / 2);
         var top = centerTop - (height / 2);
@@ -702,8 +696,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         }
 
         // Reduce the dimensions to a non-zoomed value.
-        width = (newWidth || width) / elementTotalZoom;
-        height = (newHeight || height) / elementTotalZoom;
+        width = (newWidth || width) / zoom;
+        height = (newHeight || height) / zoom;
 
         // Determine what the left and top CSS values must be to center the
         // (possibly zoomed) element over the determined center.
@@ -712,14 +706,14 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         var cssLeft = (centerLeft
                        - offsetParentPosition.left
-                       - (width * offsetParentZoom / 2)
-                       - (parseFloat(cssMarginLeft) * offsetParentZoom)
-                      ) / offsetParentZoom;
+                       - (width * zoom / 2)
+                       - (parseFloat(cssMarginLeft) * zoom)
+                      ) / zoom;
         var cssTop = (centerTop
                        - offsetParentPosition.top
-                       - (height * offsetParentZoom / 2)
-                       - (parseFloat(cssMarginTop) * offsetParentZoom)
-                      ) / offsetParentZoom;
+                       - (height * zoom / 2)
+                       - (parseFloat(cssMarginTop) * zoom)
+                      ) / zoom;
 
         // Create the CSS needed to place the element where it needs to be, and to zoom it.
         var cssUpdates = {
@@ -769,35 +763,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         return array[0];
       }
       return array;
-    }
-
-    // Get the zoom from the selected element's transform style.
-    var _MATRIX_REGEXP = /matrix\s*\(\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*,\s*([-0-9.]+)\s*,\s*[-0-9.]+\s*,\s*[-0-9.]+\s*\)/i;
-    function getMagnification(selector, andZoom) {
-      var jElement = $(selector), result;
-      if (jElement.size() && jElement.get(0).nodeType === 1 /* Element */) {
-        var transformStr = jElement.css('transform') || 1;
-        var zoom = andZoom ? jElement.css('zoom') || 1 : 1;
-       /*
-         Interestingly enough, any functionality that relies on this method will return 1
-         if running in IE.  Fixing this with the code below will make IE much much worse. :(
-       */
-       /* if (ieFix && zoom.indexOf && zoom.indexOf('%') !== -1) {
-          zoom = zoom.replace('%','') / 100;
-        }*/
-        result = 1;
-        if (transformStr !== 'none' && $.trim(transformStr) !== '') {
-          var result = _MATRIX_REGEXP.exec(transformStr);
-          if (result && result.length > 1) {
-            var scaleX = parseFloat(result[1]);
-            result = scaleX;
-            // There is an issue here... what should we do in the case of skewed scaling?
-            // return scaleX;
-          }
-        }
-        result *= zoom;
-      }
-      return result || '1';
     }
 
     // Done.
