@@ -163,7 +163,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
       // don't really know where we're supposed to put the panel.
       if(panel.parent) {
         badgeRect = $('#sitecues-badge').get(0).getBoundingClientRect();
-        zoom = positioning.getTotalZoom(panel.parent, true);
+        zoom = conf.get('zoom');
         $panel = panel.element;
         left = right = '';
 

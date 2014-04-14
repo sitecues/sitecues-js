@@ -19,12 +19,12 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     var wrapper;
 
     // Dims stuff. Word. ///////////////////////////////////////////////////////
-    backgroundDimmer.dimBackgroundContent = function (hlbNode, zoom) {
+    backgroundDimmer.dimBackgroundContent = function (hlbNode) {
 
       ////  Set the coordinates for the SVG Dimmer overlay
 
       // Define the coordinates of the whole document to be dimmed out
-      var viewport    = positioning.getViewportDimensions(0, zoom)
+      var viewport    = positioning.getViewportDimensions(0)
         , zIndex      = 2147483646
         , offsetTop   = viewport.top //window.pageYOffset
         , offsetLeft  = viewport.left //window.pageXOffset
