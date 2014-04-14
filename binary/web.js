@@ -1,218 +1,385 @@
 #!/usr/bin/env node
 
-// helpers
-var TRUE_VALUES = ['yes', 'on', 'true'];
-function strToBool(str) {
-	return (TRUE_VALUES.indexOf(str && str.toLowerCase()) >=0);
-}
+// Dependencies
+var
+  fs = require('fs-extra'),
+  path = require('path'),
+  mime = require('mime'),
+  https = require('https'),
+  hogan = require('hogan.js'),
+  express = require('express');
 
-// initialize express application
-var fs, app, root, path, mime, port, https, hogan, express;
-
-// dependencies
-fs = require('fs-extra');
-path = require('path');
-mime = require('mime');
-https = require('https');
-hogan = require('hogan.js');
-express = require('express');
-app = express();
-
-// We may run this as root to bind to ports 80/443,
-// so determine who the owner of this script is, and
-// chown all created dirs and files to that owner.
-var uid, gid;
+// Boolean deserialization helper function.
+var strToBool;
 (function(){
-  var rootStat = fs.statSync(__filename);
-  uid = rootStat.uid;
-  gid = rootStat.gid;
+  var trueValues = ['yes', 'on', 'true'];
+  strToBool = function(str) {
+    return (trueValues.indexOf(str && str.toLowerCase()) >=0);
+  }
 })();
 
-function mkdirs(dir) {
-  // Find the first existing dir.
-  dir = path.resolve(dir);
-  var firstExisting = '' + dir;
-  while (!fs.existsSync(firstExisting)) {
-    firstExisting = path.dirname(firstExisting);
+// Path join helper function that takes both strings and arrays.
+var pathJoin = function() {
+  var i, pathComps, arg, len = arguments.length;
+
+  if (len == 0) {
+    return undefined;
   }
 
-  fs.mkdirsSync(dir);
+  pathComps = [];
+  for (i = 0; i < len; i++) {
+    arg = arguments[i];
 
-  while (dir != firstExisting) {
-    fs.chownSync(dir, uid, gid);
-    dir = path.dirname(dir);
+    if (arg instanceof Array) {
+      pathComps = pathComps.concat(arg);
+    } else if (typeof(arg) == 'string') {
+      pathComps.push(arg);
+    } else {
+      return undefined;
+    }
   }
-}
 
-// process cmd line args
-var useHttps = strToBool(process.argv[3]),
+  return path.join.apply(path, pathComps);
+};
+
+// Determine the project root, so that paths may be correctly resolved.
+var projectRoot = path.normalize(path.resolve(pathJoin(path.dirname(module.filename), '..')));
+
+// We may run this as root to bind to ports 80/443,so determine who the owner of this script is, and chown all
+// created dirs and files to that owner.
+var mkdirs, chown;
+(function(){
+  var
+    fileStat = fs.statSync(__filename),
+    uid = fileStat.uid,
+    gid = fileStat.gid;
+
+  // Changes ownership of the file to the proper user.
+  chown = function(file) {
+    fs.chownSync(file, uid, gid);
+  };
+
+  // Helper method for making directories, while also chown'ing the new directories to the proper user.
+  mkdirs = function(dir) {
+    // Find the first existing dir.
+    dir = path.resolve(dir);
+    var firstExisting = '' + dir;
+    while (!fs.existsSync(firstExisting)) {
+      firstExisting = path.dirname(firstExisting);
+    }
+
+    fs.mkdirsSync(dir);
+
+    while (dir != firstExisting) {
+      chown(dir);
+      dir = path.dirname(dir);
+    }
+  };
+})();
+
+// Initialize the express application
+app = express();
+
+// Set custom MIME types
+express.static.mime.define({
+  // MicroSoft cursor files.
+  'image/vnd.microsoft.icon' : [ 'cur' ],
+  // JavaScript 'map' files.
+  'application/javascript': [ 'map' ]
+});
+
+// Process the command line args.
+var
+  useHttps = strToBool(process.argv[3]),
 	prodMode = strToBool(process.argv[4]),
   portFile = null;
 
+// The fifth argument is the port file destination.
 if (process.argv.length > 5) {
   var portFileComps = process.argv[5].split('/');
   portFileComps.unshift(process.cwd());
-  portFile = path.resolve(path.join.apply(path, portFileComps));
+  portFile = path.resolve(pathJoin(portFileComps));
   console.log("PORTSFILE: " + portFile);
   mkdirs(path.dirname(portFile));
 }
 
+// Use the express logger to show info about all incoming requests.
+app.use(express.logger());
+
+// Log listen events.
 app.on('listen', function(e){
   console.log('LISTEN: ' + JSON.stringify(e));
 });
 
-// handle relative paths properly
-root = path.dirname(module.filename);
-
-// use express logger to show info
-// about all incoming requests
-app.use(express.logger());
-
-// setup paths to serve static files from
-// use relative path from binary to provide
-// robust way for finding files
-if (!prodMode) {
-	app.use(express.static(path.join(root, '../source')));
-}
-app.use(express.static(path.join(root, '../target/compile')));
-app.use(express.static(path.join(root, '../target/etc')));
-
-// Process the inline JS file templates.
-
-// The previous include template.
-var INLINE_V1_JS_FILE = path.resolve(path.join(root, '../tests/views/inlineV1.html'));
-function createInlineV1JsTemplate() {
-	try {
-		var templateContent = fs.readFileSync(INLINE_V1_JS_FILE, { encoding: 'UTF-8' });
-		return hogan.compile(templateContent);
-	} catch (t) {
-		console.log("Unable to create inline JavaScript template (" + t.message + ")");
-		return null;
-	}
-}
-var getInlineV1JsTemplate = createInlineV1JsTemplate;
-
-// The current include template.
-var INLINE_V2_JS_FILE = path.resolve(path.join(root, '../tests/views/inlineV2.html'));
-function createInlineV2JsTemplate() {
-  try {
-    var templateContent = fs.readFileSync(INLINE_V2_JS_FILE, { encoding: 'UTF-8' });
-    return hogan.compile(templateContent);
-  } catch (t) {
-    console.log("Unable to create inline JavaScript template (" + t.message + ")");
-    return null;
-  }
-}
-var getInlineV2JsTemplate = createInlineV2JsTemplate;
-
-if (prodMode) {
-	(function(){
-		var INLINE_V1_JS_FILE_TEMPLATE = createInlineV1JsTemplate();
-		getInlineV1JsTemplate = function() {
-			return INLINE_V1_JS_FILE_TEMPLATE;
-		};
-    var INLINE_V2_JS_FILE_TEMPLATE = createInlineV2JsTemplate();
-    getInlineV2JsTemplate = function() {
-      return INLINE_V2_JS_FILE_TEMPLATE;
+// Set up the handling of the per-siteID URLs of the format /l/s;id=s-XXXXXXXX/*
+(function(){
+  // Creates a build data instance
+  var createBuildData = function(buildName) {
+    var buildData = {
+      name: buildName,
+      searchPath: []
     };
-	})();
-}
 
-// Return the data regarding inserting the library JS into files.
-function getInlineJSData(req) {
-	var data = null;
-	// Is a URL is provided, then insert the
-	if (req.query.scjsurl) {
-    var scisv = req.query.scisv || 2;
-    var scuimode = req.query.scuimode;
-    var templateFunction = ( scisv == 1 ? getInlineV1JsTemplate : getInlineV2JsTemplate);
-    var siteConfigProps = '';
+    // Needed for source maps.
+    buildData.searchPath.push({
+      urlPrefix : 'js/source/',
+      pathRoot  : pathJoin(projectRoot, 'source')
+    });
 
-    if (scuimode) {
-      siteConfigProps += ', ui_mode: "' + scuimode + '"'
+    // Needed for source maps.
+    buildData.searchPath.push({
+      urlPrefix : 'js/target/' + buildName + '/',
+      pathRoot  : pathJoin(projectRoot, 'target', buildName)
+    });
+
+    // In prod mode, skip the 'source' directory.
+    if (!prodMode) {
+      buildData.searchPath.push({
+        pathRoot : pathJoin(projectRoot, 'source')
+      });
     }
 
-		data = {
-			markup: templateFunction().render({
-				scjsurl:	req.query.scjsurl,
-				scwsid:		req.query.scwsid || 's-00000001',
-        siteConfigProps: siteConfigProps
-			})
-		}
-	}
-	return data;
-}
+    buildData.searchPath.push({
+      pathRoot : pathJoin(projectRoot, 'target', buildName, 'compile')
+    });
+
+    buildData.searchPath.push({
+      pathRoot : pathJoin(projectRoot, 'target', buildName, 'etc')
+    });
+
+    return buildData;
+  };
+
+  // The 'common' build data.
+  var commonBuildData = createBuildData('common');
+
+  // Process the custom build site ID map.
+  var siteIdToBuildDataMap = {};
+  var siteIdMapFilePath = pathJoin(projectRoot, 'custom-config', 'site-id-map.json');
+  if (fs.existsSync(siteIdMapFilePath)) {
+    var fileMap = fs.readJsonSync(siteIdMapFilePath);
+    for (var buildName in fileMap) {
+      if (fileMap.hasOwnProperty(buildName)) {
+        // Create the build data.
+        var buildData = createBuildData(buildName);
+
+        // Add this build data as the value for each site ID key
+        var siteIdArray = fileMap[buildName];
+        var len = siteIdArray.length;
+        for (var i = 0; i < len; i++) {
+          siteIdToBuildDataMap[siteIdArray[i]] = buildData;
+        }
+      }
+    }
+  }
+
+  // Set a listener for the per-site-ID libraries.
+  app.get('/l/s;id=:siteId/*', function (req, res, next) {
+    var
+      siteId = req.params.siteId,
+      buildData = siteIdToBuildDataMap[siteId] || commonBuildData,
+      searchPath = buildData.searchPath,
+      assetPath = req.params[0],
+      filePath = null,
+      found = false;
+
+    // Quick test to see if the requestor is trying to access files outside of the scope of this server
+    // by using '..' notation.
+    var testPath = path.normalize(pathJoin(projectRoot, req.params[0].split('/')));
+    if ((testPath.length < projectRoot.length) || (testPath.substr(0, projectRoot.length) != projectRoot)) {
+      res.send(403, 'Forbidden: ' + req.path);
+    } else {
+      // Look in each path for this build to see if the file is found.
+      for (var i = 0; i < searchPath.length; i++) {
+        var pathData = searchPath[i], assetPathComps = null;
+
+        // If the path data has a URL prefix, the asset must have the same prefix in order to be a candidate...
+        if (pathData.urlPrefix) {
+          if ((assetPath.length >= pathData.urlPrefix.length)
+              && (assetPath.substr(0, pathData.urlPrefix.length) == pathData.urlPrefix)) {
+            assetPathComps = assetPath.substr(pathData.urlPrefix.length).split('/');
+          }
+        // otherwise, this path is always a possible candidate.
+        } else {
+          assetPathComps = assetPath.split('/');
+        }
+
+        // If path components exist, then this path is a candidate. Prefix the path with the project root,
+        // and see if the requested file exists.
+        if (assetPathComps) {
+          assetPathComps.unshift(pathData.pathRoot);
+          filePath = pathJoin(assetPathComps);
+
+          if (fs.existsSync(filePath)) {
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // If found, return the file. Otherwise, we have exhausted the paths, and have a 404.
+      if (found) {
+        res.sendfile(filePath);
+      } else {
+        res.send(404, 'File not found: ' + req.path);
+      }
+    }
+  });
+})();
 
 // Allow serving of HTML/JS tools from the /tools/site/ directory
-app.use('/tools',express.static(path.join(root, '../tools/site')));
+app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 
-// allow dynamic insertion of the JavaScript library in the site files
-var SITE_CONTEXT_PATH = '/site';
-var SITE_ROOT = path.resolve(path.join(root, '../tests/pages'));
-app.get(SITE_CONTEXT_PATH + '/*', function (req, res, next) {
-	var exists = false,
-		filepath = path.normalize(path.join(SITE_ROOT, '/', req.params[0]));
+// Allow dynamic insertion of the JavaScript library in the site files
+(function(){
+  // The previous include template.
+  var inlineJsV1File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV1.html'));
+  var createInlineV1JsTemplate = function() {
+    try {
+      var templateContent = fs.readFileSync(inlineJsV1File, { encoding: 'UTF-8' });
+      return hogan.compile(templateContent);
+    } catch (t) {
+      console.log("Unable to create inline JavaScript template (" + t.message + ")");
+      return null;
+    }
+  };
+  var getInlineV1JsTemplate = createInlineV1JsTemplate;
 
-	if (filepath.length < SITE_ROOT.length) {
-		res.send(403, 'Forbidden');
-	} else {
-		if (fs.existsSync(filepath)) {
-			var stats = fs.statSync(filepath);
-			exists = true;
+  // The current include template.
+  var inlineJsV2File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV2.html'));
+  var createInlineV2JsTemplate = function() {
+    try {
+      var templateContent = fs.readFileSync(inlineJsV2File, { encoding: 'UTF-8' });
+      return hogan.compile(templateContent);
+    } catch (t) {
+      console.log("Unable to create inline JavaScript template (" + t.message + ")");
+      return null;
+    }
+  };
+  var getInlineV2JsTemplate = createInlineV2JsTemplate;
 
-			if (stats.isDirectory()) {
-				filepath = path.normalize(path.join(filepath, '/index.html'));
-				exists = fs.existsSync(filepath);
-			}
-		}
+  // Process the inline JS file templates.
+  if (prodMode) {
+    (function(){
+      var inlineV1JsFileTemplate = createInlineV1JsTemplate();
+      getInlineV1JsTemplate = function() {
+        return inlineV1JsFileTemplate;
+      };
+      var inlineV2JsFileTemplate = createInlineV2JsTemplate();
+      getInlineV2JsTemplate = function() {
+        return inlineV2JsFileTemplate;
+      };
+    })();
+  }
 
-		if (exists) {
-			var inlineJsData = getInlineJSData(req);
+  // Return the data regarding inserting the library JS into files.
+  var getInlineJSData = function(req) {
+    var data = null;
+    // Is a URL is provided, then insert the
+    if (req.query.scjsurl) {
+      var scisv = req.query.scisv || 2;
+      var scuimode = req.query.scuimode;
+      var templateFunction = ( scisv == 1 ? getInlineV1JsTemplate : getInlineV2JsTemplate);
+      var siteConfigProps = '';
 
-			if (inlineJsData) {
-				var content = fs.readFileSync(filepath, { encoding: 'UTF-8' });
+      if (scuimode) {
+        siteConfigProps += ', ui_mode: "' + scuimode + '"'
+      }
 
-				// Insert the markup.
-				content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
-					return headStart + inlineJsData.markup;
-				});
+      data = {
+        markup: templateFunction().render({
+          scjsurl:	req.query.scjsurl,
+          scwsid:		req.query.scwsid || 's-00000001',
+          siteConfigProps: siteConfigProps
+        })
+      }
+    }
+    return data;
+  };
 
-				res.writeHead(200, {"Content-Type": mime.lookup(filepath)});
-				res.write(content);
-				res.end();
-			} else {
-				res.sendfile(filepath);
-			}
-		} else {
-			res.send(404, 'File not found: ' + SITE_CONTEXT_PATH + filepath.substr(SITE_ROOT.length));
-		}
-	}
-});
+  // Set the root listener.
+  var siteRoot = path.normalize(pathJoin(projectRoot, 'tests', 'pages'));
+  app.get('/site/*', function (req, res, next) {
+    var exists = false, filePath = path.normalize(pathJoin(siteRoot, req.params[0].split('/')));
 
-// start http server (express app) on specified port
-// detect what port number use for server
+    // See if the user is trying to access files outside of the site directory by using '..' notation.
+    if ((filePath.length < siteRoot.length) || (filePath.substr(0, siteRoot.length) != siteRoot)) {
+      res.send(403, 'Forbidden: ' + req.path);
+    } else {
+      if (fs.existsSync(filePath)) {
+        var stats = fs.statSync(filePath);
+        exists = true;
+  
+        if (stats.isDirectory()) {
+          filePath = path.normalize(pathJoin(filePath, 'index.html'));
+          exists = fs.existsSync(filePath);
+        }
+      }
+  
+      if (exists) {
+        var inlineJsData = getInlineJSData(req);
+  
+        if (inlineJsData) {
+          var content = fs.readFileSync(filePath, { encoding: 'UTF-8' });
+  
+          // Insert the markup.
+          content = content.replace(/(<head[^>]*>)/i, function(match, headStart) {
+            return headStart + inlineJsData.markup;
+          });
+  
+          res.writeHead(200, {"Content-Type": mime.lookup(filePath)});
+          res.write(content);
+          res.end();
+        } else {
+          res.sendfile(filePath);
+        }
+      } else {
+        res.send(404, 'File not found: ' + req.path);
+      }
+    }
+  });
+})();
+
+// Set the default (/) search paths.
+(function(){
+  // Set listeners for all
+  app.use('/js/source', express.static(pathJoin(projectRoot, 'source')));
+  app.use('/js/target', express.static(pathJoin(projectRoot, 'target')));
+
+  // In prod mode, skip the 'source' directory.
+  if (!prodMode) {
+    app.use(express.static(pathJoin(projectRoot, 'source')));
+  }
+
+  // The common assets,
+  app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'compile')));
+  app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'etc')));
+})();
+
+// Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
 app.listen(port, function() {
 	console.log('Listening at "http://localhost:' + port + '/"');
 });
 
+// If needed, create the ports file with the proper ports
 if (portFile) {
   fs.writeFileSync(portFile, '-Dswdda.testSite.httpPort=' + port + ' -Dswdda.sitecuesUrl.httpPort=' + port, {flag:'w'});
-  fs.chownSync(portFile, uid, gid);
+  chown(portFile);
 }
 
-// if https option passed to script
+// Enable HTTPS if needed.
 if (useHttps){
+  // Update the ports file.
   if (portFile) {
     fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
   }
 
-	// create https server and start it on 443 port
+	// Start the HTTPS server on port 443. 
 	https.createServer({
 		key:	fs.readFileSync('binary/cert/localhost.key'),
 		cert:	fs.readFileSync('binary/cert/localhost.cert')
 	}, app).listen(443, function(){
 		console.log('Listening at "https://localhost:443/"');
-
 	});
 }

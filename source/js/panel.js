@@ -4,7 +4,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, platform) {
+  sitecues.use( 'jquery', 'conf', 'conf/site', 'speech', 'slider', 'util/positioning', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, site, speech, SliderClass, positioning, ui, common, zoom, htmlBuild, platform) {
 
     // timer needed for handling
     // ui mistake - when user occasionally
@@ -108,7 +108,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
      // create TTS button and set it up
       ttsButton = $('<div>').addClass('tts').appendTo(frame);
       
-      if ( speech.isEnabled() && conf.get('tts-service-available') === true ) {
+      if ( speech.isEnabled() && site.get('ttsAvailable')) {
         ttsButton.data( 'tts-enable', 'enabled' );
       } else {
         ttsButton.addClass( 'tts-disabled' );
@@ -170,7 +170,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         // Would panel go off the right side of screen? If YES -> open to the left
         useLeft = badgeRect.left * zoom +  $panel.width() + 15 < window.innerWidth;
         if (useLeft) { /* Panel moved, expands right */
-          left = ((badgeRect.left / conf.get('zoom') / conf.get('zoom') - 5)) + 'px';
+          left = ((badgeRect.left  / conf.get('zoom'))) + 'px';
         }
         else {  /* Panel expands left */
           
@@ -187,7 +187,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
         }
 
         $panel.style({
-          top:  ((badgeRect.top / conf.get('zoom') - 5/conf.get('zoom') + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
+          top:  ((badgeRect.top / conf.get('zoom')  + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
           left: left,
           right: right         
         }, '', 'important');
@@ -199,7 +199,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
             });
           } else {
             $panel.css({
-              'transform-origin': '50% 0%',
+              'transform-origin': '0% 0%',
               'transform': 'scale('+ 1/conf.get('zoom') +') translate(' + window.pageXOffset + 'px, ' + window.pageYOffset + 'px)'
             });
           }
@@ -257,7 +257,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
     // Function that will toggle tts on or off.
     panel.ttsToggle = function() {
       var ttsButton = $('#sitecues-panel .tts');
-      if(ttsButton.data('tts-enable') === 'disabled' && conf.get('tts-service-available') === true ) {
+      if(ttsButton.data('tts-enable') === 'disabled' && site.get('ttsAvailable')) {
         // It's disabled, so enable it
         sitecues.emit('speech/enable');
         showTTSbuttonEnabled(ttsButton);

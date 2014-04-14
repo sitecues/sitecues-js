@@ -13,6 +13,7 @@
     eeoc_gov        : true,
     scotiabank_com  : true,
     cnib_ca         : true,
-    texasat_net     : true
+    texasat_net     : true,
+    calstate_edu    : true,
   };
 })();

@@ -1,7 +1,7 @@
 sitecues.def("slider", function (slider, callback, log) {
   'use strict';
 
-  sitecues.use("jquery", "conf", "zoom",  function ($, conf, zoom) {
+  sitecues.use("jquery", "conf", "zoom", "ui", function ($, conf, zoom, ui) {
 
     // #### SLIDER INTERFACE #########################################################################
 
@@ -12,7 +12,7 @@ sitecues.def("slider", function (slider, callback, log) {
     global_slider.stack = [];
 
     // Make the slider instances accessible for fuctional testing by adding the slider stack to the uiManager
-    sitecues.ui.sliders = global_slider.stack;
+    sitecues.sliders = global_slider.stack;
 
     // Interface to instantiate the Slider
     global_slider.build = function (props) {

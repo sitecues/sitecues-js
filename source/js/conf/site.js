@@ -16,69 +16,66 @@ sitecues.def('conf/site', function (site, callback, log) {
 
   var
     // The site configuration.
-    siteConfig = {}
+    defaultSiteConfig = {
+      ttsAvailable : false
+    }
+    // The site configuration data object.
+    ,siteConfig
     // Keep a reference to the provided site config so that we do not override.
     , providedSiteConfig = sitecues.getSiteConfig()
-    // Simple no-op function
-    , noop = function(){}
     ;
 
-  sitecues.use('jquery', 'conf/user', function($, user){
-
-    // Simple get that denies direct access to the root data object. Root scaler properties can not be overwritten,
+  sitecues.use('jquery', 'conf/user', function($, user) {
+    // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
     // but the contents of root object properties can be modified.
     site.get = function(key) {
       return siteConfig[key];
     };
 
-    site.fetch = function(cb) {
-      cb = cb || noop;
-      $.ajax({
-        // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
-        url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
-        dataType: 'json',
-        async: false,
-        success: function(data, status, xhr) {
-          log.info("successfully fetched site config from server");
-
-          // Initialize the site configuration object.
-          siteConfig = {};
-
-          // TODO: Remove the azure settings form the site configuration and move them to a separate server call.
-          if (data.azureAccessToken) {
-            // Adjust expiration for offset.
-            data.azureAccessToken.expires +=
-              new Date().getTime() - data.azureAccessToken.now; // Compute difference in server/local time
-
-            // Set the new azure config.
-            siteConfig.azureAccessToken = data.azureAccessToken;
-          }
-
-          // Copy the fetched key/value pairs into the site configuration.
-          for (var i = 0; i < data.settings.length; i++) {
-            siteConfig[data.settings[i].key] = data.settings[i].value;
-          }
-
-          // Overlay the provided site configuration.
-          for (var key in providedSiteConfig) {
-            if (providedSiteConfig.hasOwnProperty(key)) {
-              siteConfig[key] = providedSiteConfig[key];
-            }
-          }
-
-          // TODO: This should not be stored in user config, as it will be persisted across sessions.
-          user.set('tts-service-available', true);
-          cb();
-        },
-        error: function() {
-          // TODO: This should not be stored in user config, as it will be persisted across sessions.
-          user.set('tts-service-available', false);
-          cb();
+    // Extend the provided config object with the site provided config.
+    var extendWithProvided = function(config) {
+      for (var key in providedSiteConfig) {
+        if (providedSiteConfig.hasOwnProperty(key)) {
+          config[key] = providedSiteConfig[key];
         }
-      });
+      }
+      return config;
     };
 
+    site.fetch = function(cb) {
+    };
+
+    // Initialize the site configuration to the default.
+    siteConfig = $.extend(true, {}, defaultSiteConfig, providedSiteConfig);
+
     // Trigger the initial fetch.
-    site.fetch(callback);
+    $.ajax({
+      // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
+      url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
+      dataType: 'json',
+      async: false,
+      success: function(data, status, xhr) {
+        log.info("Successfully fetched site config from server");
+
+        // Reset the site configuration object.
+        siteConfig = {};
+
+        // Copy the fetched key/value pairs into the site configuration.
+        for (var i = 0; i < data.settings.length; i++) {
+          siteConfig[data.settings[i].key] = data.settings[i].value;
+        }
+
+        // Add the provided configuration
+        siteConfig = $.extend(true, siteConfig, providedSiteConfig);
+
+        callback(site);
+      },
+      error: function() {
+        log.error("Unable to fetch site config from server");
+        callback(site);
+      }
+    });
+
   });
+  
 });

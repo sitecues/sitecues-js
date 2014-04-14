@@ -15,7 +15,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
     var stylesheetElement,
         stylesheetObject,
         lastZoom = conf.get('zoom'),
-        lastZoomTimeout;
+        lastZoomTimeout,
+        styleTagStylesList = [], //An ordered list of style tag styles to be applied to the page
+        linkTagStylesList  = []; //An ordered list of external stylesheet styles to be applied to the page.
     
     cursor.CONTANTS = {
       'DEFAULT_ZOOM_LEVEL'     : 1,
@@ -72,18 +74,30 @@ sitecues.def('cursor', function (cursor, callback, log) {
           linkTags = document.getElementsByTagName('link');
 
       for(var i = 0; i < linkTags.length; i += 1) {
-        //might be redundant to check if it has a .css extension...
-        //for now we don't want to include media dependent css files...
-        if (linkTags[i].href.indexOf('.css') !== -1 &&
-            !linkTags[i].media && 
-            linkTags[i].href.indexOf('sitecues') === -1 && 
-            linkTags[i].href.indexOf('localhost') === -1) {
+        //for now we don't want to include media dependent css files...(like print)
+        //Ignore "sitecues-" because this is the scheme for sitecues css files
+        if (linkTags[i].href.indexOf('.css') !== -1 && !linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
           stylesheets.push(linkTags[i].href);
         }
       }
       
       return stylesheets;
     
+    }
+    /**
+     * [constructStyleTag builds a <style> tag, maintaining the sites original precedence for styles]
+     */
+    function constructStyleTag () {
+      for (var i = 0; i < linkTagStylesList.length; i += 1) {
+        if (linkTagStylesList[i]) {
+          stylesheetElement.innerHTML += linkTagStylesList[i]; 
+        }
+      }
+      for (var i = 0; i < styleTagStylesList.length; i += 1) {
+        if (styleTagStylesList[i]) {
+          stylesheetElement.innerHTML += styleTagStylesList[i];
+        }
+      }
     }
     /**
      * [Abstracts away creating XMLHTTPRequests that support the
@@ -126,10 +140,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
           rule = rules[i].style;
           if (rule && rule[style] && rule[style].length) {
             /**@param rule an object representing some css selector + properties
+
              * @param style is the key for accessing property information
              */
             if (callback) {
-              callback(rule, style);
+              callback(rule, style, stylesheetObject.cssRules[i]);
             }
           }
         }
@@ -175,11 +190,12 @@ sitecues.def('cursor', function (cursor, callback, log) {
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
               try {
-                rule.setProperty(style, cursorTypeURLS[cursorTypes[i]], 'important');
+                rule.setProperty(style, cursorValueURL, 'important');
               } catch (e) {
                 try {
-                  rule[style] = cursorTypeURLS[cursorTypes[i]];
+                  rule[style] = cursorValueURL;
                 } catch (e) {
                 }
               }
@@ -203,8 +219,8 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
       }
-      
-      return 'url(' + view.getImage(type,zoom)+ ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+
+      return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
     }
 
     /**
@@ -219,14 +235,17 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
       }
-      
+
+      var image = view.getImage(type,zoom);
+      // image-set() will not fallback to just the first url in older browsers. So...
+      // todo: provide fallback for older browsers.
       var cursorStyle = '-webkit-image-set(' +
-         '    url(' + view.getImage(type,zoom) + ') 1x,' +
-         '    url(' + view.getImage(type,zoom) + ') 2x'  +
+         '    url(' + image + ') 1x,' +
+         '    url(' + image + ') 2x'  +
          ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
 
       return cursorStyle;
-    };
+    }
 
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
@@ -242,6 +261,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       }());
       lastZoom = conf.get('zoom');
       createStyleSheet();
+      sitecues.emit('cursor/addingStyles');
     }
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
@@ -298,7 +318,22 @@ sitecues.def('cursor', function (cursor, callback, log) {
         At the end of each successful callback, we update our <style> to reflect the current level of zoom.
       */
       var validSheets = getStylesheets(),
-          styleTags = document.getElementsByTagName('style'),
+          
+          styleTags = (function () {
+          
+            var allStyleTags   = document.getElementsByTagName('style'),
+                validStyleTags = [];
+          
+            for (var i = 0; i < allStyleTags.length; i += 1) {
+              if (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1) {
+                validStyleTags.push(allStyleTags[i]);
+              }
+            }
+            
+            return validStyleTags;
+          
+          }()),
+          
           sheet = document.createElement('style');
       
       sheet.innerHTML = cursor.CONTANTS.SITECUES_CSS_DEFAULT;
@@ -310,7 +345,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
       for(var k = 0; k < styleTags.length; k += 1) {
         if (styleTags[k].id !== cursor.CONTANTS.SITECUES_CSS_ID) {
-          stylesheetElement.innerHTML += styleTags[k].innerHTML;
+          styleTagStylesList.push(styleTags[k].innerHTML);
         }
       }
       /**
@@ -334,18 +369,25 @@ sitecues.def('cursor', function (cursor, callback, log) {
           newText = request.responseText;
         }
         
-        stylesheetElement.innerHTML += newText;
-        setTimeout(setStyleSheetObject, 1);
+        linkTagStylesList[validSheets.indexOf(request.url)] = newText;
+
+        constructStyleTag(); //Builds the <style> tags and <link> tags
+      
+        setTimeout(setStyleSheetObject, 50);
+      
       }
 
       for(var i = 0; i < validSheets.length; i += 1) {
         createCORSRequest('GET', validSheets[i], applyCORSRequest);
       } 
-       
-      setTimeout(setStyleSheetObject, 1);
+      
+      constructStyleTag(); //Builds the <style> tags
+
+      setTimeout(setStyleSheetObject, 50);
 
     }());
-    
+
+    cursor.changeStyle = changeStyle;    
     
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {

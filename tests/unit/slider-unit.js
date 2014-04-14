@@ -29,7 +29,7 @@ describe('sitecues', function() {
     });
 
     it('should place a sliders[] array on the sitecues namespace', function (done) {
-      expect(sitecues.ui.sliders).to.be.an('array');
+      expect(sitecues.sliders).to.be.an('array');
       done();
     });
     
@@ -42,7 +42,7 @@ describe('sitecues', function() {
 
     it('should get pixel values from ', function (done) {
       // This slider was already defined in the above test 'should instantiate slider object from class'
-      var slider = sitecues.ui.sliders[0];
+      var slider = sitecues.sliders[0];
       zoom.min = 1;
       zoom.step = .1;
       zoom.range = 2;

@@ -3,9 +3,6 @@
  */
 sitecues.def('hlb/designer', function (designer, callback, log) {
 
-    // Constants.
-    var toClass = {}.toString;
-
     // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
     // Array of what we'd expect if we didn't have a background color
@@ -29,7 +26,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kBoxPadding = 4;
     designer.kDefaultBgColor = 'rgb(255, 255, 255)';
     designer.kDefaultTextColor = 'rgb(0, 0, 0)';
-    designer.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
 
     // Get dependencies
     sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
@@ -90,113 +86,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 return $.extend({}, bgColorObj, bgImageObj);
             }
 
-            /*
-            * Table elements require extra work for some cases - especially when table has flexible layout.
-            * @param itemNode HTML node Object
-            * @param currentStyle Object
-            */
-            designer.handleTableElement = function(itemNode, currentStyle) {
-                // To reposition 'table'-like(for example,'td') elements, we need to set the td, tr, tbody, and table to display: block;
-                var savedDisplay = currentStyle.display;
-                // If the target is <td>, <tr>, <table> or any other table cell element then exit.
-                if (savedDisplay.indexOf('table') === 0) {
-                    itemNode.style('display', 'block', 'important');
-                    return false;
-                }
-
-                // If the target is some inner element, like <div> or <p> inside of table cell then
-                // handle flexible table width effect dependent of the inner elements.
-                var tableCellAncestorParents = this.getTableCellAncestorParents(itemNode);
-                tableCellAncestorParents.each(function () {
-                    if (this.tagName.toLowerCase() === 'table') {
-                        // todo: try to set table-layout:fixed to table
-                        var closest = itemNode.closest('td');
-                        var closestStyle = common.getElementComputedStyles(closest[0]);
-                        var updateInnerElStyle = {};
-                        if(closestStyle) {
-                            updateInnerElStyle.width = parseFloat(closestStyle['width'])
-                            - parseFloat(closestStyle['padding-left'])
-                            - parseFloat(closestStyle['padding-right'])
-                            - parseFloat(closestStyle['margin-left'])
-                            - parseFloat(closestStyle['margin-right'])
-                            - parseFloat(closestStyle['border-left-width'])
-                            - parseFloat(closestStyle['border-right-width'])
-                            + 'px';
-                        }
-                        $(closest).children().wrapAll("<div class='" + designer.kPlaceHolderWrapperClass + "'></div>");
-                        itemNode.style('display', 'block', 'important');
-                        $('.' + designer.kPlaceHolderWrapperClass).style('width', updateInnerElStyle.width, 'important');
-
-                        return false; // Break the each loop
-                    }
-                })
-                return false;
-            }
-
-            /*
-             * Gets table ancestor element's parents.
-             * @param itemNode
-             * @return false if this is not a child of table element; otherwise, return an array of parent objects.
-             */
-            designer.getTableCellAncestorParents = function(itemNode) {
-                var parents = itemNode.parents().andSelf();
-                if (parents && parents.length > 0) {
-                    return parents;
-                }
-                return false;
-            }
-
-            // Keep ratio for images
-            designer.preserveImageRatio = function(cssBeforeAnimateStyles, cssUpdate, clientRect) {
-                var initialRatio  = clientRect.width / clientRect.height;
-
-                // If dimensions are recalculated, use the new values.
-                if (cssUpdate.width || cssUpdate.height) {
-                    delete cssBeforeAnimateStyles.width;
-                    delete cssBeforeAnimateStyles.height;
-
-                    if ((cssUpdate.height && cssUpdate.width) || cssUpdate.width) {
-                        delete cssUpdate.height;
-                        cssBeforeAnimateStyles.width =  cssUpdate.width;
-                        cssBeforeAnimateStyles.height = cssUpdate.width / initialRatio;
-                    } else if (cssUpdate.height) {
-                        delete cssUpdate.width;
-                        cssBeforeAnimateStyles.height = cssUpdate.height;
-                        cssBeforeAnimateStyles.width = cssUpdate.height * initialRatio;
-                    }
-                    return;
-                }
-
-                // Otherwise, no specific dimensions set, so, use the original ones(if any available).
-                var height = parseFloat(cssBeforeAnimateStyles.height);
-                var width  = parseFloat(cssBeforeAnimateStyles.width);
-
-                var widthType  = width ? toClass.call(width).slice(8, -1) : '';
-                var heightType = height? toClass.call(height).slice(8, -1) : '';
-
-                // If image dimensions are good and don't need recalculations, return.
-                if (widthType === 'Number' && heightType === 'Number') {
-                    return;
-                }
-
-                if (widthType === 'Number' || heightType === 'Number') {
-                    delete cssBeforeAnimateStyles.width;
-                    delete cssBeforeAnimateStyles.height;
-
-                    // Rely on width since it is set(whereas height is not set(or, '', 'auto' specified))
-                    if ((widthType === 'Number' && heightType === 'Number') || widthType === 'Number') {
-                        delete cssUpdate.height;
-                        cssBeforeAnimateStyles.height = width / initialRatio;
-                    } else if (heightType === 'Number') {
-                        // Rely on height since it is set(whereas width is not set(or, '', 'auto' specified))
-                        delete cssUpdate.width;
-                        cssBeforeAnimateStyles.width = height * initialRatio;
-                    }
-                }
-
-                return;
-            }
-
             /**
              * Get the size and position of the current HLB to inflate.
              * @param selector What element is being positioned
@@ -241,7 +130,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
-                    var constrainedWidth = getConstrainedWidth(jElement, currentStyle, viewport);
+                    var constrainedWidth = false; // getConstrainedWidth(jElement, currentStyle, viewport);
                     var expandedHeight;
                     if (constrainedWidth) {
                         var heightValue = designer.getExpandedHeight(); 
@@ -778,8 +667,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                 }
             }
 
+        // Done.
+        callback();
         });
-
-    // Done.
-    callback();
 });

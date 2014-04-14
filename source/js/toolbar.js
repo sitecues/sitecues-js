@@ -11,6 +11,7 @@
   sitecues.use(
     'jquery',
     'conf',
+    'conf/site',
     'load',
     'util/template',
     'toolbar/dropdown',
@@ -21,7 +22,7 @@
     'jquery/resize',
     'zoom',
     'html-build',
-    function ($, conf, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom, htmlBuild) {
+    function ($, conf, site, load, template, dropdown, SliderClass, resizer, messenger, common, jqresize, zoom, htmlBuild) {
     log.trace('toolbar.use()');
 
 
@@ -83,7 +84,7 @@
 
         // Toolbar instance is created, let's define if it is enabled or disabled? Okey-dokey!
         var speechEnabled = conf.get('siteTTSEnable')
-          , ttsServiceAvailable = conf.get('tts-service-available')
+          , ttsServiceAvailable = site.get('ttsAvailable')
           ;
 
         if (speechEnabled && ttsServiceAvailable) {
@@ -196,7 +197,7 @@
       log.trace('toolbar.toggle()');
 
       log.info('Toggling toolbar from state ' + toolbar.currentState.name);
-      if (toolbar.currentState === toolbar.STATES.ON && conf.get('tts-service-available') === true) {
+      if (toolbar.currentState === toolbar.STATES.ON && site.get('ttsAvailable')) {
         toolbar.disable();
         toolbar.slideIn();
       } else {
@@ -206,7 +207,7 @@
     };
 
     toolbar.enableSpeech = function () {
-      if (conf.get('tts-service-available') === true) {
+      if (site.get('ttsAvailable')) {
       log.trace('toolbar.enableSpeech()');
       if (toolbar && toolbar.ttsButton) {
         toolbar.ttsButton.removeClass(kTtsDisabled);
@@ -288,7 +289,7 @@
 
       // Turn off TTS if it is on.
       var speechEnabled = conf.get('siteTTSEnable')
-        , ttsServiceAvailable = conf.get('tts-service-available')
+        , ttsServiceAvailable = site.get('ttsAvailable')
         ;
       if (speechEnabled && ttsServiceAvailable) {
          conf.set('speechOff', false);
@@ -319,8 +320,8 @@
     });
 
     // load special toolbar css
-    load.style('../css/sitecues-toolbar.css');
-    load.style('../css/sitecues-bootstrap.css');
+    // load.style('../css/sitecues-toolbar.css');
+    // load.style('../css/sitecues-bootstrap.css');
 
     function adjustToolbarContent(isSrollBarShown, scrollbarWidth) {
       scrollbarWidth  *= isSrollBarShown ? -1 : 1;

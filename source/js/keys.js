@@ -4,7 +4,7 @@ sitecues.def('keys', function (keys, callback, log) {
       highlight_box: null
     }
   };
-
+  keys.zoomEnabled = true;
   // shortcut to hasOwnProperty
   var has = Object.prototype.hasOwnProperty;
 
@@ -114,6 +114,11 @@ sitecues.def('keys', function (keys, callback, log) {
 
       // If event defined, emit it
       if ( key.event ) {
+        //EQ-1342 (Block +/- keys while HLB open)
+        //If hlb is open and the key event is zoom decrease or zoom increase...dont do anything.
+        if (!keys.zoomEnabled && (key.event === 'zoom/decrease' || key.event === 'zoom/increase')) {
+          return;
+        }
 	      sitecues.emit( key.event, event );
       }
     };
@@ -166,6 +171,14 @@ sitecues.def('keys', function (keys, callback, log) {
       $.extend(keys.test, keys.hlbKeysTest);
       $.extend(keys.map, keys.hlbKeysMap);
     } );
+
+    sitecues.on('hlb/create', function () {
+      keys.zoomEnabled = false;
+    });
+
+    sitecues.on('hlb/closed', function () {
+      keys.zoomEnabled = true;
+    });
 
     sitecues.on( 'hlb/closed', function (hlbElement) {
       delete keys.test[ 'esc' ];

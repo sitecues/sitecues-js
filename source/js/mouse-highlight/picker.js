@@ -9,7 +9,7 @@
  data-sitecues-highlight-role
 
  */
-sitecues.def('mouse-highlight/picker', function(picker, callback) {
+sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
 
   picker.debug = false;
 
@@ -21,39 +21,16 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     'table-cell'
   ];
 
-  var PICK_ME_FIRST = [
-    { "url": "eeoc.gov", selector: '#CS_Element_bigbox', enabled: window.sitecues.getLibraryConfig().sitepickermods.eeoc_gov },
-    { "url": "scotiabank.", selector: ".frutiger",       enabled: window.sitecues.getLibraryConfig().sitepickermods.scotiabank_com },
-    { "url": "cnib.ca", selector: ".slides",             enabled: window.sitecues.getLibraryConfig().sitepickermods.cnib_ca },
-    { "url": "texasat.net", selector: "#slideshow",      enabled: window.sitecues.getLibraryConfig().sitepickermods.texasat_net }
-  ];
-
-  
-  for( var i = 0; i <  PICK_ME_FIRST.length; i++){
-
-      if( (PICK_ME_FIRST[i].enabled) === false ){
-
-        PICK_ME_FIRST.splice( i, 1);
-      }
-    }
-
-
-
-// AK >> this is not used b/c we already exluded these elements from highlight valid targets (see isInBody variable below)
-//  // Element IDs to never highlight
-//  picker.blacklistIds = [
-//    '#sitecues-panel',
-//    '#sitecues-badge',
-//    '#sitecues-eq360-bg'
-//  ];
-//    
   picker.kTargetStates = {
       'sometimes': 's',
       'true'     : 't',
-      'false'    : 'f'
-  }
+      'false'    : 'f',
+      'ignore'   : 'i'
+  };
 
-  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function($, styles, roles) {
+  picker.PICK_ME_FIRST = [];
+
+  sitecues.use('jquery', 'style', 'mouse-highlight/roles', function ($, styles, roles) {
 
     /*
      * Find the best highlightable element, if any, given a target element.
@@ -61,44 +38,130 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      *
      * @param hover The element the mouse is hovering over
      */
+/*
+           :#++++:                    @+++@                            
+          +#'+'++#                   #++'''#                  :@@:     
+        `,@`:,+`;.,,              ;:,++'''''#`              .@';'';+:  
+       @+#;,.,,:;+`:#            #;;;#;,;:,;,              ,::.+'';;,  
+      #;@@,,,:.++#:'##          +;+@@##;,..,+           #+':,,@#;#'+,  
+     :#@@@'';;:,:'+###'        #+;+#@@::,;:`+#        #+:#@;;:#+:.,..  
+     ;+@'###+++'##@####`      '+'#@@##::;,',##@      ;++#@###'##';;;#  
+     +#+####+'''+#`#####     ;++#@@#;#+';#+#+##     +'++++';#;''+@#+## 
+     +++##++'''+@@@##+++:    '##+';+#;';;++####+    +'''+;'+;;;'@@@''+ 
+     +#####+#'+@@@###@      .+++##++';;;#@@@+###;   '+'+'+#'';@@###    
+     `+++##@##@@@@#++        #++'+@#++#@@#@##;''`   ;+#+#+;++@@@#+,    
+       '+++#@@@#@##           .'++#@#@@@@###+       `'';'+++@@'#+      
+       `.#@'+;;'';,            `:#@+';;+##;          ,+##'+'+:::`.     
+        `;::'; ;',.            ``:,,:'.`:,``          `.,;'+';.,+:     
+          ,',:                    .,,,.`.               `  .:` `       
+          no see                   no say                no hear
+*/    
     picker.find = function find(hover) {
-      var $el = $(hover);
-      // hide previous mh target if now mouseover sitecues toolbar
-      var isInBody = false, isInBadge = false;
-      var badge = $('#sitecues-badge');
-      var parents = $el.parents().andSelf();
-      $.each(parents, function(i, parent) {
-        var $parent = $(parent);
-        if ($parent.is(document.body)) {
-          isInBody = true;
+
+      function doHoveryTypePickyThing (hover) {
+        // console.log(hover.tagName);
+
+        var $el = $(hover);
+        // hide previous mh target if now mouseover sitecues toolbar
+        var isInBody = false, isInBadge = false;
+        var badge = $('#sitecues-badge');
+        var parents = $el.parents().andSelf();
+        $.each(parents, function(i, parent) {
+          var $parent = $(parent);
+          if ($parent.is(document.body)) {
+            isInBody = true;
+            return null;
+          }
+          if ($parent.is(badge)) {
+            isInBadge = true;
+            return null;
+          }
+        });
+
+        // Ignore elements not in the body: BGD, panel, toolbar
+        if (!isInBody || isInBadge) {
           return null;
         }
-        if ($parent.is(badge)) {
-          isInBadge = true;
-          return null;
+
+        var picked = pickMeFirst(parents);
+        if (picked && picked.length) {
+          return picked;
         }
-      });
 
-      // Ignore elements not in the body: BGD, panel, toolbar
-      if (!isInBody || isInBadge) {
-        return null;
-      }
-
-      var picked = pickMeFirst(parents);
-      if (picked && picked.length) {
+        picked = picker.findImpl(hover);
+        if (!picked || !picked.length) {
+          return null; // Normalize
+        }
+        
         return picked;
       }
 
-      picked = picker.findImpl(hover);
-      if (!picked || !picked.length) {
-        return null; // Normalize
+      // var kosherTags = [
+      //   "H1","H2","H3","H4","H5","H6",
+      //   "I","B","STRONG",
+      //   "DD","DT",
+      //   "ADDRESS",
+      //   "IMG",
+      //   "LI",
+      //   "A",
+      //   "P",
+      // ];
+
+      // function hasTextOrKosherChildren (node) {
+      //   if (node.textContent.length > 3) {
+      //     // return true;
+      //   } else {
+      //     for (var k=0; k<kosherTags.length; k++) {
+      //       var childrenWeLike = 0;
+      //       if (node.children[j].tagName === kosherTags[k]) {
+      //         childrenWeLike+=1;
+      //         console.log('yo!');
+      //       }
+      //     }
+      //     return !!childrenWeLike;
+      //   }
+      // }
+
+
+      switch (hover.tagName) {
+      case "P":
+      case "H1":
+      case "H2":
+      case "H3":
+      case "H4":
+      case "H5":
+      case "H6":
+      case "B":
+      case "I":
+      case "A":
+      case "IMG":
+      case "STRONG":
+      case "ADDRESS":
+      case "LI":
+      case "DD":
+      case "DT":
+        return doHoveryTypePickyThing(hover);
+        break;
+
+      case "SPAN":
+          return doHoveryTypePickyThing(hover);
+          // var elementIsCool = hasTextOrKosherChildren(hover);
+          // console.log('elementiscool', elementIsCool);
+
+          // if (elementIsCool) { 
+          //   return doHoveryTypePickyThing(hover);
+          // }
+        break;
+      
+      default:
+        break;
       }
-      return picked;
+
     };
 
     function pickMeFirst(parents) {
       var currLoc = window.location;
-
+      var PICK_ME_FIRST = picker.PICK_ME_FIRST;
       for (var count = 0; count < PICK_ME_FIRST.length; count ++) {
         if (currLoc.toString().indexOf(PICK_ME_FIRST[count].url) >= 0) {
 
@@ -116,13 +179,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       if (!eTarget) {
         // Let's determine, and remember, what this element is.
         eTarget = picker.isTarget(el.get(0));
-        if (eTarget == null) {
-          eTarget = this.kTargetStates['sometimes'];
-        } else if (eTarget) {
-          eTarget = this.kTargetStates['true'];
-        } else { 
-          eTarget = this.kTargetStates['false'];
-        }
         el.data('sitecues-mouse-hl', eTarget);
       }
       if (eTarget === this.kTargetStates['true']) {
@@ -133,6 +189,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       } else if (eTarget === this.kTargetStates['sometimes']) {
         eScore = picker.getScore(el);
         // The target may or may not be a target, depending on how it scores.
+      } else if (eTarget ===  this.kTargetStates['ignore']) {
+          return false;
       }
       if (eScore && eScore > 0) {
         // The hovered element is a viable choice and no better one has been identified.
@@ -165,6 +223,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         return false;
       }
       var role = roles.find($el);
+      if (role && role.name == 'ignore') {
+          return this.kTargetStates['ignore'];
+      }
       if (!role || !role.canHighlight) {
         // Element we ignore
         return false;
@@ -186,11 +247,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var height = $el.height();
       if (height < 5) {
         // Don't highlight things that have no height
-        return false;
+        return this.kTargetStates['false'];
       }
 
       if (role.alwaysHighlight) {
-        return true;
+        return this.kTargetStates['true'];
       }
 
       var style = styles.getComputed(el);
@@ -198,7 +259,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         // Don't highlight things that aren't block elements
         return false;
       }
-      return null;
+      return this.kTargetStates['sometimes'];
     }
 
       /*
@@ -238,7 +299,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
             var display = $(this).css('display');
             if (display === 'inline' || display === 'inline-block')
               unhighlightableChild = true;
-            else if (picker.isTarget(this) != false) {
+            else if (picker.isTarget(this) != picker.kTargetStates['false']) {
               highlightableChild = true;
             }
           }
@@ -331,7 +392,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         e = $("body");
       }
       e.children().each(function() {
-        if (picker.isTarget($(this) || picker.find($(this)) == $(this))) {
+        if (picker.isTarget($(this) || picker.find($(this)) == $(this)) !== picker.kTargetStates['false']) {
           // Tell all children that they have a highlightable parent
           $(this).find('*').data('sitecues-parent-hl','1');
           $(this).style("border", "1px solid red", 'important');

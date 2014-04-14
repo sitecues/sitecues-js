@@ -9,11 +9,12 @@
  * For library-specific configuration (such as the server host FQDNs), refer to the
  * 'conf/library' module.
  */
-sitecues.def('conf/user', function (user, callback, log) {
+sitecues.def('conf/user', function (userPrefs, callback, log) {
   // The order of preference for module loading is as follows...
 
   // First, load the manager module, which is responsible for the actual management of the user configuration.
-  sitecues.use('conf/user/manager', function(manager) {
+  // Also ensure there is a valid user ID.
+  sitecues.use('conf/user/manager', 'user', function(manager, user) {
 
     // Second, load the persisted user configuration from the user preferences server.
     sitecues.use('conf/user/server', function(server) {
