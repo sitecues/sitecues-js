@@ -118,8 +118,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
         throw new Error('CORS not supported');
       }
       
-      request.onload = function () {
-        callback(request);
+      request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+          callback(request);
+        }
       };
 
       request.send();
@@ -368,7 +370,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
         } else {
           newText = request.responseText;
         }
-        
+
         linkTagStylesList[validSheets.indexOf(request.url)] = newText;
 
         constructStyleTag(); //Builds the <style> tags and <link> tags
