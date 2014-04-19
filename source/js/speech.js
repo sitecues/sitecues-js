@@ -47,8 +47,8 @@ sitecues.def('speech', function (speech, callback, log) {
         * variable.  The primary intent here is for use by cue()
        */
         ttsBypass = false,
-        // This is the engine we're using, required, no default
-        ttsEngine = site.get('ttsEngine'),
+        // Flag indicating that this site is enabled for TTS.
+        ttsAvailable = site.get('ttsAvailable'),
 
         timesCued = 1,
         maxCued = 3,
@@ -292,7 +292,7 @@ sitecues.def('speech', function (speech, callback, log) {
 
     log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
     
-    if (!ttsEngine) {
+    if (!ttsAvailable) {
       // No engine was set so the whole component is disabled.
       ttsEnable = false;
     }
@@ -337,7 +337,7 @@ sitecues.def('speech', function (speech, callback, log) {
     speech.factory = function(hlb) {
       var text, player, speechKey;
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
-      if (ttsEngine) {
+      if (ttsAvailable) {
         speechKey = $(hlb).data('speechKey');
         if (!speechKey) {
           text = builder.getText(hlb);
@@ -466,7 +466,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * Enables TTS, invokes callback with no args
      */
     speech.enable = function(callback) {
-      if (ttsEngine) {
+      if (ttsAvailable) {
         // An engine is set so we can enable the component
         ttsEnable = true;
         conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, true);
