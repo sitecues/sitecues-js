@@ -75,6 +75,8 @@
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
     sitecues.loadScript = loadScript;
     sitecues.load = load;
+    sitecues.parseUrl = parseUrl;
+    sitecues.resolveUrl = resolveUrl;
   };
 
 

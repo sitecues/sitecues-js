@@ -76,7 +76,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
       for(var i = 0; i < linkTags.length; i += 1) {
         //for now we don't want to include media dependent css files...(like print)
         //Ignore "sitecues-" because this is the scheme for sitecues css files
-        if (linkTags[i].href.indexOf('.css') !== -1 && !linkTags[i].media && linkTags[i].href.indexOf('sitecues-') === -1) {
+        if (linkTags[i].href.indexOf('.css') !== -1 &&
+          !linkTags[i].media &&
+          linkTags[i].href.indexOf('sitecues-') === -1 &&
+          linkTags[i].rel !== 'alternate stylesheet') {
           stylesheets.push(linkTags[i].href);
         }
       }
@@ -118,8 +121,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
         throw new Error('CORS not supported');
       }
       
-      request.onload = function () {
-        callback(request);
+      request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+          callback(request);
+        }
       };
 
       request.send();
@@ -349,26 +354,117 @@ sitecues.def('cursor', function (cursor, callback, log) {
         }
       }
       /**
+       * [extractUrlsForReplacing removes the redundancy in the array of URLs]
+       * @param  {[array]} matches [URLs extracted from response text]
+       * @return {[array]}         [URLs extracted from response text minus the redundancy]
+       * @example ['../a/b/styles.css','../a/b/styles.css?#iefix'] => ['../a/b/styles.css']
+       * Above is an example of a redundancy that needs to be addressed before we globally
+       * do a replacement.
+       */
+      function extractUrlsForReplacing (matches) {
+        for (var i = 0; i < matches.length; i += 1) {
+          for (var j = 0; j < matches.length; j += 1) {
+            if (i !== j) {
+              if (matches[i].indexOf(matches[j]) !== -1) {
+                matches.splice(i, 1);
+                i -= 1;
+                j -= 1;
+              }
+            }
+          }
+        }
+        return matches;
+      }
+      /**
+       * [extractUniqueUrlsFromMatches extracts the unique URLS from the array returned by matching
+       * CSS file response text with the Regular Expression used in applyCORSRequest.]
+       * @param  {[array]} matches [RegEx matches]
+       * @return {[array]}         [list of URLs]
+       * @example ['url(../images/a.png', 'url(../images/b.png']
+       */
+      function extractUniqueUrlsFromMatches (matches) {
+
+        var urls = [],
+            match;
+
+        if (matches && matches.length) {
+
+          for (var i = 0; i < matches.length; i += 1) {
+
+            match = matches[i].trim(); //Trim whitespace
+            match = match.substr(4);   //remove url(
+
+            if (match.charAt(0) === "\"") {              //If the URL is surrounded by a double quote
+              match = match.substr(1);                   //remove the first
+              match = match.substr(0, match.length - 1); //remove the last
+            }
+
+            match = match.trim(); //Trim whitespace
+
+            if (match.charAt(0) === "\'") {              //If the URL is surrounded by a single quote
+              match = match.substr(1);                   //remove the first
+              match = match.substr(0, match.length - 1); //remove the last
+            }
+
+            match = match.trim(); //Trim whitespace
+
+            if (urls.indexOf(match) === -1) { //Get rid of duplicates
+              if (match.indexOf('?') !== -1) { //Escape the ?
+                match = match.replace('?', '\\?');
+              }
+              urls.push(match);
+            }
+          }
+        }
+        return urls;
+      }
+      /**
        * [applyCORSRequest Makes a xmlhttprequest for CSS resources.  Replaces all
        * relatively defined style resources with their absolute counterparts. See EQ-1302]
        * @param  {[xmlhttprequest Object]} request [description]
        */
       function applyCORSRequest (request) {
+      /*
+        One of our goals is to extract from a CSS file all relative URLs. This document outlines
+        valid URLs for CSS: http://www.w3.org/TR/CSS21/syndata.html#uri
         
-        var urlReplacementForDotDotSlash,
-            newText;
-        //If there are any relatively defined URLs in the response text, replace
-        //them with their absolute counterparts.
-        if (request.responseText.indexOf('../')) {
-          urlReplacementForDotDotSlash = request.url.split('/');
-          urlReplacementForDotDotSlash.pop();
-          urlReplacementForDotDotSlash.pop();
-          urlReplacementForDotDotSlash = urlReplacementForDotDotSlash.join('/');
-          newText = request.responseText.replace(/\.\.\//g, urlReplacementForDotDotSlash + '/');
-        } else {
-          newText = request.responseText;
+        The RegEx below will MATCH the following:
+          
+          background: url(instant/templates/_default_/images/nyromodal/close.gif);
+          background: url('instant/templates/_default_/images/nyromodal/close.gif');
+          background: url("instant/templates/_default_/images/nyromodal/close.gif");
+          background: url(  instant/templates/_default_/images/nyromodal/close.gif  );
+          background: url(./instant/templates/_default_/images/nyromodal/close.gif);
+          background: url('./instant/templates/_default_/images/nyromodal/close.gif');
+          background: url("./instant/templates/_default_/images/nyromodal/close.gif");
+          background: url(  ./instant/templates/_default_/images/nyromodal/close.gif  );
+          background: url(../instant/templates/_default_/images/nyromodal/close.gif);
+          background: url('../instant/templates/_default_/images/nyromodal/close.gif');
+          background: url("../instant/templates/_default_/images/nyromodal/close.gif");
+          background: url(  ../../instant/templates/_default_/images/nyromodal/close.gif  );
+        
+        The RegEx below will IGNORE the following:  
+          
+          background: url(http://example.ru/templates/_default_/close.gif)
+          background: url(https://instant/templates/_default_/images/nyromodal/close.gif);
+          background: url('http://example.ru/templates/_default_/close.gif')
+          background: url('https://instant/templates/_default_/images/nyromodal/close.gif');
+          background: url("http://example.ru/templates/_default_/close.gif")
+          background: url("https://instant/templates/_default_/images/nyromodal/close.gif");
+          background: url(   http://example.ru/templates/_default_/close.gif   )
+          background: url(   https://instant/templates/_default_/images/nyromodal/close.gif   );
+          background:url(data:jpg;base64,/QL9Av0GaqAAA//2Q==)
+
+       */
+        var relativeRegEx = new RegExp(/url(\((['\" ])*(?!data:|.*https?:\/\/)([^\"'\)]+)['\" ]*)/g),
+            baseUrlObject = sitecues.parseUrl(request.url),
+            newText       = request.responseText,
+            matches       = extractUrlsForReplacing(extractUniqueUrlsFromMatches(newText.match(relativeRegEx)));
+
+        for (var i = 0; i < matches.length; i += 1) {
+          newText = newText.replace(new RegExp(matches[i], 'g'), sitecues.resolveUrl(matches[i], baseUrlObject));
         }
-        
+
         linkTagStylesList[validSheets.indexOf(request.url)] = newText;
 
         constructStyleTag(); //Builds the <style> tags and <link> tags
