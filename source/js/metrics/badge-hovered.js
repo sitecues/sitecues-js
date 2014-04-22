@@ -35,13 +35,11 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         });
 
         sitecues.on('metrics/ready metrics/update', function(metrics) {
-            console.log(this);
             badgeHovered['data'] && badgeHovered.update(metrics.data);
         });
 
         // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
-            console.log(this);
             badgeHovered.reset();
         });
 
