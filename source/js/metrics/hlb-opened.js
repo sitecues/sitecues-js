@@ -11,16 +11,16 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
         // ============= Objects methods ======================
         hlbOpened = {
             init: function() {
-                this.data = DEFAULT_STATE;
+                hlbOpened.data = DEFAULT_STATE;
             },
             update: function(data) {
-                this.update(this, data);
+                hlbOpened.update(hlbOpened, data);
             },
             send: function() {
-                this.send(this);
+                hlbOpened.send(hlbOpened);
             },
             reset: function() {
-                this.update(DEFAULT_STATE);
+                hlbOpened.update(DEFAULT_STATE);
             }
         };
 

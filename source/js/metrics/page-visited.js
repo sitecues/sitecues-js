@@ -10,13 +10,13 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
         // ============= Objects methods ======================
         pageVisited = {
             init: function() {
-                this.data = {'name': 'page-visited'};
+                pageVisited.data = {'name': 'page-visited'};
             },
             update: function(data) {
-                metricsUtil.update(this, data);
+                metricsUtil.update(pageVisited, data);
             },
             send: function() {
-                metricsUtil.send(this);
+                metricsUtil.send(pageVisited);
             },
             clear: function() {
                 pageVisited = null;

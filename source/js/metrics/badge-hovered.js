@@ -11,16 +11,16 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         // ============= Objects methods ======================
         badgeHovered = {
             init: function() {
-                this.data = DEFAULT_STATE;
+                badgeHovered.data = DEFAULT_STATE;
             },
             update: function(data) {
-                metricsUtil.update(this, data);
+                metricsUtil.update(badgeHovered, data);
             },
             send: function() {
-                metricsUtil.send(this);
+                metricsUtil.send(badgeHovered);
             },
             reset: function() {
-                this.update(DEFAULT_STATE);
+                badgeHovered.update(DEFAULT_STATE);
             }
         };
 
