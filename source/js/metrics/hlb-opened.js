@@ -14,10 +14,10 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
                 hlbOpened.data = DEFAULT_STATE;
             },
             update: function(data) {
-                hlbOpened.update(hlbOpened, data);
+                metricsUtil.update(hlbOpened, data);
             },
             send: function() {
-                hlbOpened.send(hlbOpened);
+                metricsUtil.send(hlbOpened);
             },
             reset: function() {
                 hlbOpened.update(DEFAULT_STATE);
