@@ -11,16 +11,16 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         // ============= Objects methods ======================
         badgeHovered = {
             init: function() {
-                badgeHovered.data = DEFAULT_STATE;
+                this.data = DEFAULT_STATE;
             },
             update: function(data) {
-                metricsUtil.update(badgeHovered, data);
+                metricsUtil.update(this, data);
             },
             send: function() {
-                metricsUtil.send(badgeHovered);
+                metricsUtil.send(this);
             },
             reset: function() {
-                badgeHovered.update(DEFAULT_STATE);
+                this.update(DEFAULT_STATE);
             }
         };
 
@@ -35,11 +35,13 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
         });
 
         sitecues.on('metrics/ready metrics/update', function(metrics) {
+            console.log(this);
             badgeHovered['data'] && badgeHovered.update(metrics.data);
         });
 
         // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
+            console.log(this);
             badgeHovered.reset();
         });
 

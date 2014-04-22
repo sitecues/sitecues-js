@@ -19,13 +19,13 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
         panelClosed = {
             init: initPanelClosed,
             update: function(data) {
-                metricsUtil.update(panelClosed, data);
+                metricsUtil.update(this, data);
             },
             send: function() {
-                metricsUtil.send(panelClosed);
+                metricsUtil.send(this);
             },
             reset: function() {
-                panelClosed.update(DEFAULT_STATE);
+                this.update(DEFAULT_STATE);
             },
         };
 
