@@ -74,12 +74,10 @@ sitecues.def('cursor', function (cursor, callback, log) {
           linkTags = document.getElementsByTagName('link');
 
       for(var i = 0; i < linkTags.length; i += 1) {
-        //for now we don't want to include media dependent css files...(like print)
-        //Ignore "sitecues-" because this is the scheme for sitecues css files
-        if (linkTags[i].href.indexOf('.css') !== -1 &&
-          !linkTags[i].media &&
-          linkTags[i].href.indexOf('sitecues-') === -1 &&
-          linkTags[i].rel !== 'alternate stylesheet') {
+        if (linkTags[i].href.indexOf('.css') !== -1 &&    //Make sure it is actually a CSS file
+          !linkTags[i].media &&                           //Ignore all CSS with a media attribute. (print)
+          linkTags[i].href.indexOf('sitecues-') === -1 && //Ignore sitecues CSS
+          linkTags[i].rel !== 'alternate stylesheet') {   //Ignore alternate stylesheets
           stylesheets.push(linkTags[i].href);
         }
       }
@@ -120,7 +118,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
       if (!request) {
         throw new Error('CORS not supported');
       }
-      
+      //Only execute the callback if the response status is 200
       request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
           callback(request);
@@ -362,13 +360,22 @@ sitecues.def('cursor', function (cursor, callback, log) {
        * do a replacement.
        */
       function extractUrlsForReplacing (matches) {
-        for (var i = 0; i < matches.length; i += 1) {
-          for (var j = 0; j < matches.length; j += 1) {
+
+        var i = 0,
+            j,
+            match_i,
+            len = matches.length;
+        
+        for (; i < len; i += 1) {
+          match_i = matches[i];
+          for (j = 0; j < len; j += 1) {
             if (i !== j) {
-              if (matches[i].indexOf(matches[j]) !== -1) {
+              if (match_i.indexOf(matches[j]) !== -1) {
                 matches.splice(i, 1);
-                i -= 1;
-                j -= 1;
+                i = i > 0 ? i - 1 : 0;
+                j = j > 0 ? j - 1 : 0;
+                len = matches.length;
+                match_i = matches[i];
               }
             }
           }
@@ -387,35 +394,37 @@ sitecues.def('cursor', function (cursor, callback, log) {
         var urls = [],
             match;
 
-        if (matches && matches.length) {
+        if (!matches || !matches.length) {
+          return urls;
+        }
 
-          for (var i = 0; i < matches.length; i += 1) {
+        for (var i = 0; i < matches.length; i += 1) {
 
-            match = matches[i].trim(); //Trim whitespace
-            match = match.substr(4);   //remove url(
+          match = matches[i].trim(); //Trim whitespace
+          match = match.substr(4);   //remove url(
 
-            if (match.charAt(0) === "\"") {              //If the URL is surrounded by a double quote
-              match = match.substr(1);                   //remove the first
-              match = match.substr(0, match.length - 1); //remove the last
+          if (match.charAt(0) === "\"") {              //If the URL is surrounded by a double quote
+            match = match.substr(1);                   //remove the first
+            match = match.substr(0, match.length - 1); //remove the last
+          }
+
+          match = match.trim(); //Trim whitespace
+
+          if (match.charAt(0) === "\'") {              //If the URL is surrounded by a single quote
+            match = match.substr(1);                   //remove the first
+            match = match.substr(0, match.length - 1); //remove the last
+          }
+
+          match = match.trim(); //Trim whitespace
+
+          if (urls.indexOf(match) === -1) { //Get rid of duplicates
+            if (match.indexOf('?') !== -1) { //Escape the ?
+              match = match.replace('?', '\\?');
             }
-
-            match = match.trim(); //Trim whitespace
-
-            if (match.charAt(0) === "\'") {              //If the URL is surrounded by a single quote
-              match = match.substr(1);                   //remove the first
-              match = match.substr(0, match.length - 1); //remove the last
-            }
-
-            match = match.trim(); //Trim whitespace
-
-            if (urls.indexOf(match) === -1) { //Get rid of duplicates
-              if (match.indexOf('?') !== -1) { //Escape the ?
-                match = match.replace('?', '\\?');
-              }
-              urls.push(match);
-            }
+            urls.push(match);
           }
         }
+
         return urls;
       }
       /**
