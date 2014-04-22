@@ -16,7 +16,21 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
         // ============= Objects methods ======================
-        panelClosed.init = function() {
+        panelClosed = {
+            init: initPanelClosed,
+            update: function(data) {
+                metricsUtil.update(panelClosed, data);
+            },
+            send: function() {
+                metricsUtil.send(panelClosed);
+            },
+            reset: function() {
+                panelClosed.update(DEFAULT_STATE);
+            },
+        };
+
+
+        function initPanelClosed() {
             panelClosed.data = $.extend({}, DEFAULT_STATE);
             var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
                 $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
@@ -38,15 +52,7 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
             $ttsButton.mousedown(function() {
                 panelClosed.data.tts_clicked = 1;
             });
-        };
-        panelClosed.update = function(data) {
-            metricsUtil.update(panelClosed, data);
-        };
-        panelClosed.send = function() {
-            metricsUtil.send(panelClosed);
-        };
-        panelClosed.reset = function() {
-            panelClosed.update(DEFAULT_STATE);
+            return false;
         };
 
         // ============= Events Handlers ======================

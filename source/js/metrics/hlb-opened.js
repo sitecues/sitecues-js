@@ -9,18 +9,21 @@ sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
         // ============= Objects methods ======================
-        hlbOpened.init = function() {
-            hlbOpened.data = DEFAULT_STATE;
+        hlbOpened = {
+            init: function() {
+                hlbOpened.data = DEFAULT_STATE;
+            },
+            update: function(data) {
+                metricsUtil.update(hlbOpened, data);
+            },
+            send: function() {
+                metricsUtil.send(hlbOpened);
+            },
+            reset: function() {
+                hlbOpened.update(DEFAULT_STATE);
+            }
         };
-        hlbOpened.update = function(data) {
-            metricsUtil.update(hlbOpened, data);
-        };
-        hlbOpened.send = function() {
-            metricsUtil.send(hlbOpened);
-        };
-        hlbOpened.reset = function() {
-            hlbOpened.update(DEFAULT_STATE);
-        };
+
 
         // ============= Events Handlers ======================
         // Create an instance on hlb create event.

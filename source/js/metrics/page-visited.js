@@ -8,17 +8,19 @@ sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
         // ============= Objects methods ======================
-        pageVisited.init = function() {
-            pageVisited.data = {'name': 'page-visited'};
-        };
-        pageVisited.update = function(data) {
-            metricsUtil.update(pageVisited, data);
-        };
-        pageVisited.send = function() {
-            metricsUtil.send(pageVisited);
-        };
-        pageVisited.clear = function() {
-            pageVisited = null;
+        pageVisited = {
+            init: function() {
+                pageVisited.data = {'name': 'page-visited'};
+            },
+            update: function(data) {
+                metricsUtil.update(pageVisited, data);
+            },
+            send: function() {
+                metricsUtil.send(pageVisited);
+            },
+            clear: function() {
+                pageVisited = null;
+            }
         };
 
         // ============= Body =================================

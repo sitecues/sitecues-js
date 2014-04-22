@@ -9,17 +9,19 @@ sitecues.def('metrics/badge-hovered', function(badgeHovered, callback, log) {
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil,$) {
 
         // ============= Objects methods ======================
-        badgeHovered.init = function() {
-            badgeHovered.data = DEFAULT_STATE;
-        };
-        badgeHovered.update = function(data) {
-            metricsUtil.update(badgeHovered, data);
-        };
-        badgeHovered.send = function() {
-            metricsUtil.send(badgeHovered);
-        };
-        badgeHovered.reset = function() {
-            badgeHovered.update(DEFAULT_STATE);
+        badgeHovered = {
+            init: function() {
+                badgeHovered.data = DEFAULT_STATE;
+            },
+            update: function(data) {
+                metricsUtil.update(badgeHovered, data);
+            },
+            send: function() {
+                metricsUtil.send(badgeHovered);
+            },
+            reset: function() {
+                badgeHovered.update(DEFAULT_STATE);
+            }
         };
 
         // ============= Events Handlers ======================
