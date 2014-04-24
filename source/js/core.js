@@ -2,6 +2,7 @@
  * Sitecues: core.js
  *   The core module of the sitecues library.
  */
+
 (function () {
   
   'use strict';
