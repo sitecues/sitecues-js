@@ -56,16 +56,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * @return {boolean}
      */
     function shouldPlayFirstHighZoomCue (callback) {
-      sitecues.on('server/userDataReturned', function(){
-        var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
-          , timeNow  = (+new Date())
-          , result
-          ;
-        
-        result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+      var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
+        , timeNow  = (+new Date())
+        , result
+        ;
 
-        callback(result);
-      });
+      result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+
+      callback(result);
     }
 
     /**

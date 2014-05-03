@@ -81,10 +81,8 @@ sitecues.def('conf/user/server', function (server, callback, log) {
         manager.get('*', function(key, value) {
           saveData(key, value);
         });
-        
-        // This module has completed it's loading.
-        // Emitted for other mods to see if the inital user data has returned (JSONP is always ASYNC)
-        sitecues.emit('server/userDataReturned')
+
+        callback();
       }
     };
 
@@ -99,11 +97,9 @@ sitecues.def('conf/user/server', function (server, callback, log) {
         loadCallback(data);
       },
       error: function (e) {
-        log.info("Unable to load server config: " + e.message);
+        log.warn("Unable to load server config: " + e.message);
         loadCallback();
       }
     });
-    
-    callback();
-	});
+  });
 });
