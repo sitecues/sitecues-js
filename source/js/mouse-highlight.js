@@ -44,7 +44,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', 'platform', 'conf/user/server', function($, conf, picker, positioning, common, speech, geo, platform, server) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
-    
+
     mh.enabled = false;
     // this is the initial zoom level, we're only going to use the verbal cue if someone increases it
     mh.initZoom = 0;
@@ -961,6 +961,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.isSticky = !mh.isSticky;
       return mh.isSticky;
     };
+
+    // Initialize the highlight state;
+    mh.updateZoom(conf.get('zoom') || 1);
 
     // done
     callback();
