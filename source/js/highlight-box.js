@@ -308,14 +308,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // todo: use '$.style' instead of '$.css'
         this.$item.css(cssBeforeAnimateStyles);
-        this.$item.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
+        this.$item.effects(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
 
           // Trigger the background blur effect if there is a highlight box only.
           // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
-          onHighlightBoxReady($(this));
-          backgroundDimmer.dimBackgroundContent(this);
+          onHighlightBoxReady(_this.$item);
+
+          backgroundDimmer.dimBackgroundContent(_this.$item);
           if (_this.options.close_button) {
             displayCloseButton(_this.item, totalZoom);
           }
@@ -371,7 +372,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Deflate the highlight box.
         this.$item.css(cssBeforeAnimateStyles);
-        this.$item.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
+        this.$item.effects(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
             // Cleanup all elements inserted by sitecues on the page.
             if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
                 // Remove placeholder wrapper element if the table child highlighted.

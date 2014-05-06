@@ -62,7 +62,14 @@ sitecues.def('badge', function (badge, callback, log) {
      * @return void
      */
     badge.hide = function (success) {
-      $(badge.panel).fadeOut('fast', function() {
+      $(badge.panel)
+        .css('display', 'none')
+        .effects({
+          opacity : 0
+        },
+        400,
+        null,
+        function() {
         if (success) {
           success();
         }
@@ -77,7 +84,14 @@ sitecues.def('badge', function (badge, callback, log) {
     badge.show = function(success) {
       if (conf.get('badgeEnabled')) {
         log.info('Showing badge');
-        $(badge.panel).fadeIn('slow', function() {
+        $(badge.panel)
+        .css('display', 'block')
+        .effects({
+          opacity : 1.0
+        },
+        750,
+        null,
+        function() {
           sitecues.emit('badge/show')
           if (success) {
             success();

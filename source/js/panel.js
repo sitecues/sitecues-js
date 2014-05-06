@@ -215,12 +215,13 @@ sitecues.def( 'panel', function (panel, callback, log) {
         sliderWidget.translateThumbSVG.call(sliderWidget);
       }
 
-      panel.element.animate({
-          width   : 'toggle',
-          height  : 'toggle',
+      panel.element
+        .css('display', 'block')
+        .effects({
           opacity : 1.0
         },
         750,
+        null,
         function() {
           sitecues.emit('panel/show', panel.element);
           setSliderDimensions();
@@ -245,9 +246,16 @@ sitecues.def( 'panel', function (panel, callback, log) {
         setTimeout(panel.hide, panel.hideDelay);
         return;
       }
-      if (panel.isSticky===false) {
+      if (panel.isSticky === false) {
         // Hide panel.
-        panel.element.fadeOut('fast', function(){
+        panel.element
+        .css('display', 'none')
+        .effects({
+          opacity : 0
+        },
+        'fast',
+        null,
+        function(){
           // Notify about panel hiding.
           sitecues.emit('panel/hide', panel.element);
         });

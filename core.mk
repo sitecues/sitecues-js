@@ -60,6 +60,7 @@ files=\
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
+        source/js/jquery/effects.js \
 	source/js/util/close-button.js \
 	source/js/ui.js \
 	source/js/style.js \

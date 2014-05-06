@@ -259,6 +259,12 @@
     z-index: 2147483643; /* behind the toolbar */
 }
 
+#sitecues-panel.animate {
+    opacity: 1.0;
+    -webkit-transition: opacity 0.75s ease;
+    border: red;
+}
+
 /* Simulate Windows Scrollbars in Webkit */
 /*
 body::-webkit-scrollbar {
