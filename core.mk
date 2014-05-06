@@ -61,6 +61,7 @@ files=\
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
         source/js/jquery/effects.js \
+        source/js/jquery/effects1.js \
 	source/js/util/close-button.js \
 	source/js/ui.js \
 	source/js/style.js \
