@@ -216,12 +216,10 @@ sitecues.def( 'panel', function (panel, callback, log) {
       }
 
       panel.element
-        .css('display', 'block')
         .effects({
-          opacity : 1.0
+          'opacity': 1.0,
+          'display': 'block'
         },
-        750,
-        null,
         function() {
           sitecues.emit('panel/show', panel.element);
           setSliderDimensions();
@@ -249,12 +247,10 @@ sitecues.def( 'panel', function (panel, callback, log) {
       if (panel.isSticky === false) {
         // Hide panel.
         panel.element
-        .css('display', 'none')
         .effects({
+          display: 'none',
           opacity : 0
         },
-        'fast',
-        null,
         function(){
           // Notify about panel hiding.
           sitecues.emit('panel/hide', panel.element);
