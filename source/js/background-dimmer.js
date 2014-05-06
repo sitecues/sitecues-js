@@ -85,14 +85,15 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         'width'         : viewport.width  + 'px',
         'height'        : viewport.height + 'px',
         'overflow'      : 'visible',
-        'pointer-events': 'none',
-        'transition'    : 'opacity 150ms ease-out'
-      }, '', 'important');
+        'pointer-events': 'none'
+      }, '', '')
+      .effects({
+          opacity : 1
+        },
+        150
+      );
 
       $('html').append( this.$dimmerContainer );
-      
-      // Animate the dimmer background container
-      this.$dimmerContainer.style({ opacity: 1 }, '', 'important');
 
     };
 
