@@ -147,8 +147,6 @@ sitecues.def( 'panel', function (panel, callback, log) {
         , useLeft
         , left
         , right
-        , translateX
-        , translateY
         , hasScrollbar = bodyHasVertScrollbar()
         ;
 
@@ -189,8 +187,9 @@ sitecues.def( 'panel', function (panel, callback, log) {
         $panel.style({
           top:  ((badgeRect.top / conf.get('zoom')  + parseFloat($('#sitecues-badge').css('padding-top')))) + 'px',
           left: left,
-          right: right         
-        }, '', 'important');
+          right: right,
+          opacity: 0
+        }, '', '');
         if (!platform.browser.isIE) {
           if (!useLeft) {
             $panel.css({
@@ -294,6 +293,7 @@ sitecues.def( 'panel', function (panel, callback, log) {
 
     // Setup trigger to show panel.
     sitecues.on('badge/hover', function() {
+//      badge.hide();
       panel.show();
       panel.element.data('badge-hover','true');
     });
