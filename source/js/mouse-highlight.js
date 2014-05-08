@@ -44,7 +44,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', 'platform', 'conf/user/server', function($, conf, picker, positioning, common, speech, geo, platform, server) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
-    
+
     mh.enabled = false;
     // this is the initial zoom level, we're only going to use the verbal cue if someone increases it
     mh.initZoom = 0;
@@ -56,16 +56,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * @return {boolean}
      */
     function shouldPlayFirstHighZoomCue (callback) {
-      sitecues.on('server/userDataReturned', function(){
-        var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
-          , timeNow  = (+new Date())
-          , result
-          ;
-        
-        result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+      var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
+        , timeNow  = (+new Date())
+        , result
+        ;
 
-        callback(result);
-      });
+      result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+
+      callback(result);
     }
 
     /**
@@ -554,7 +552,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
         //fixedRects = [elementRect];
       
-      state.zoom = positioning.getTotalZoom(element, true);
+      state.zoom = conf.get('zoom');
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
@@ -963,6 +961,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.isSticky = !mh.isSticky;
       return mh.isSticky;
     };
+
+    // Initialize the highlight state;
+    mh.updateZoom(conf.get('zoom') || 1);
 
     // done
     callback();

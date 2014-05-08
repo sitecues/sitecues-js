@@ -300,17 +300,8 @@ sitecues.def('fixFixedPanelAndBadge', function (fixFixedPanelAndBadge, callback)
 
     });
 
-    sitecues.on('server/userDataReturned', function () {
-      //Positioning the badge requires the user configuration to be loaded.
-      //server/userDataReturned notifies the application that it has loaded, and 
-      //triggers resizeEnd, which dynamically positions the badge. 
-      $(window).trigger('resizeEnd');
-    });
-
     fixFixedElements(getFixedElementsMinusBadgeAndPanel(), conf.get('zoom'));
-    
+    $(window).trigger('resizeEnd');
     callback();
-
   });
-  
 });

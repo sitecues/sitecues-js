@@ -51,7 +51,6 @@ sitecues.def('caret/coords', function (coords, callback, log) {
 
 			// get current zoom level
 			var zoom = conf.get('zoom');
-			var scale = positioning.getTotalZoom(element);
 
 			// Now, trim to use just the last line -- from this we can get the x coordinate as well as the line height
 			if (element.localName !== 'input') {
@@ -60,10 +59,10 @@ sitecues.def('caret/coords', function (coords, callback, log) {
 
 			lineHeight = span.height();
 			var caretRect = {
-				top: (totHeight - lineHeight - item.scrollTop() * zoom) * scale,
-				left: (span.width() - item.scrollLeft() * zoom) * scale,
-				width: 1 * scale,
-				height: lineHeight * scale
+				top: (totHeight - lineHeight - item.scrollTop() * zoom),
+				left: (span.width() - item.scrollLeft() * zoom),
+				width: 1,
+				height: lineHeight
 			};
 
 			setTimeout(function () {

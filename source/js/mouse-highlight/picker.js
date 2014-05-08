@@ -38,124 +38,42 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
      *
      * @param hover The element the mouse is hovering over
      */
-/*
-           :#++++:                    @+++@                            
-          +#'+'++#                   #++'''#                  :@@:     
-        `,@`:,+`;.,,              ;:,++'''''#`              .@';'';+:  
-       @+#;,.,,:;+`:#            #;;;#;,;:,;,              ,::.+'';;,  
-      #;@@,,,:.++#:'##          +;+@@##;,..,+           #+':,,@#;#'+,  
-     :#@@@'';;:,:'+###'        #+;+#@@::,;:`+#        #+:#@;;:#+:.,..  
-     ;+@'###+++'##@####`      '+'#@@##::;,',##@      ;++#@###'##';;;#  
-     +#+####+'''+#`#####     ;++#@@#;#+';#+#+##     +'++++';#;''+@#+## 
-     +++##++'''+@@@##+++:    '##+';+#;';;++####+    +'''+;'+;;;'@@@''+ 
-     +#####+#'+@@@###@      .+++##++';;;#@@@+###;   '+'+'+#'';@@###    
-     `+++##@##@@@@#++        #++'+@#++#@@#@##;''`   ;+#+#+;++@@@#+,    
-       '+++#@@@#@##           .'++#@#@@@@###+       `'';'+++@@'#+      
-       `.#@'+;;'';,            `:#@+';;+##;          ,+##'+'+:::`.     
-        `;::'; ;',.            ``:,,:'.`:,``          `.,;'+';.,+:     
-          ,',:                    .,,,.`.               `  .:` `       
-          no see                   no say                no hear
-*/    
+
     picker.find = function find(hover) {
 
-      function doHoveryTypePickyThing (hover) {
-        // console.log(hover.tagName);
-
-        var $el = $(hover);
-        // hide previous mh target if now mouseover sitecues toolbar
-        var isInBody = false, isInBadge = false;
-        var badge = $('#sitecues-badge');
-        var parents = $el.parents().andSelf();
-        $.each(parents, function(i, parent) {
-          var $parent = $(parent);
-          if ($parent.is(document.body)) {
-            isInBody = true;
-            return null;
-          }
-          if ($parent.is(badge)) {
-            isInBadge = true;
-            return null;
-          }
-        });
-
-        // Ignore elements not in the body: BGD, panel, toolbar
-        if (!isInBody || isInBadge) {
+      var $el = $(hover);
+      // hide previous mh target if now mouseover sitecues toolbar
+      var isInBody = false, isInBadge = false;
+      var badge = $('#sitecues-badge');
+      var parents = $el.parents().andSelf();
+      $.each(parents, function(i, parent) {
+        var $parent = $(parent);
+        if ($parent.is(document.body)) {
+          isInBody = true;
           return null;
         }
-
-        var picked = pickMeFirst(parents);
-        if (picked && picked.length) {
-          return picked;
+        if ($parent.is(badge)) {
+          isInBadge = true;
+          return null;
         }
+      });
 
-        picked = picker.findImpl(hover);
-        if (!picked || !picked.length) {
-          return null; // Normalize
-        }
-        
+      // Ignore elements not in the body: BGD, panel, toolbar
+      if (!isInBody || isInBadge) {
+        return null;
+      }
+
+      var picked = pickMeFirst(parents);
+      if (picked && picked.length) {
         return picked;
       }
 
-      // var kosherTags = [
-      //   "H1","H2","H3","H4","H5","H6",
-      //   "I","B","STRONG",
-      //   "DD","DT",
-      //   "ADDRESS",
-      //   "IMG",
-      //   "LI",
-      //   "A",
-      //   "P",
-      // ];
-
-      // function hasTextOrKosherChildren (node) {
-      //   if (node.textContent.length > 3) {
-      //     // return true;
-      //   } else {
-      //     for (var k=0; k<kosherTags.length; k++) {
-      //       var childrenWeLike = 0;
-      //       if (node.children[j].tagName === kosherTags[k]) {
-      //         childrenWeLike+=1;
-      //         console.log('yo!');
-      //       }
-      //     }
-      //     return !!childrenWeLike;
-      //   }
-      // }
-
-
-      switch (hover.tagName) {
-      case "P":
-      case "H1":
-      case "H2":
-      case "H3":
-      case "H4":
-      case "H5":
-      case "H6":
-      case "B":
-      case "I":
-      case "A":
-      case "IMG":
-      case "STRONG":
-      case "ADDRESS":
-      case "LI":
-      case "DD":
-      case "DT":
-        return doHoveryTypePickyThing(hover);
-        break;
-
-      case "SPAN":
-          return doHoveryTypePickyThing(hover);
-          // var elementIsCool = hasTextOrKosherChildren(hover);
-          // console.log('elementiscool', elementIsCool);
-
-          // if (elementIsCool) { 
-          //   return doHoveryTypePickyThing(hover);
-          // }
-        break;
-      
-      default:
-        break;
+      picked = picker.findImpl(hover);
+      if (!picked || !picked.length) {
+        return null; // Normalize
       }
+      
+      return picked;
 
     };
 

@@ -224,8 +224,8 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
-            center  = positioning.getCenterForActualElement(this.item, conf.get('zoom')),
-            totalZoom = positioning.getTotalZoom(this.item, true),
+            totalZoom = conf.get('zoom'),
+            center  = positioning.getCenterForActualElement(this.item, totalZoom),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, currentStyle, cssUpdate);
@@ -315,7 +315,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           // Trigger the background blur effect if there is a highlight box only.
           // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
           onHighlightBoxReady($(this));
-          backgroundDimmer.dimBackgroundContent(this, totalZoom);
+          backgroundDimmer.dimBackgroundContent(this);
           if (_this.options.close_button) {
             displayCloseButton(_this.item, totalZoom);
           }

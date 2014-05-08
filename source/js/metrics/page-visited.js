@@ -5,38 +5,33 @@
  */
 sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
 
-    var instance = null;
-
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
-        var PageVisited = (function() {
-            // Constructor.
-            function PageVisited() {
-                // Init default values.
-                this.data = {'name': 'page-visited'};
-            };
+        // ============= Objects methods ======================
+        pageVisited = {
+            init: function() {
+                pageVisited.data = {'name': 'page-visited'};
+            },
+            update: function(data) {
+                metricsUtil.update(pageVisited, data);
+            },
+            send: function() {
+                metricsUtil.send(pageVisited);
+            },
+            clear: function() {
+                pageVisited = null;
+            }
+        };
 
-            // Singleton.
-            return {
-                createInstance: function(options) {
-                    return (new PageVisited(options) || null);
-                },
-                updateInstance: metricsUtil.update,
-                sendData: metricsUtil.send,
-                clearData: function() {
-                    this.data = {};
-                    instance = null;
-                }
-            };
-        })();
+        // ============= Body =================================
+        pageVisited.init();
 
-        instance = PageVisited.createInstance();
-
+        // ============= Events Handlers ======================
         sitecues.on('metrics/ready', function(metrics) {
-            PageVisited.updateInstance(instance, metrics.data);
-            PageVisited.sendData(instance);
+            pageVisited.update(metrics.data);
+            pageVisited.send();
             //  We already sent the metrics for this event, no need to keep the intance.
-            instance = null;
+            pageVisited.clear();
         });
 
         // Done.

@@ -3,7 +3,7 @@
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
 sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
-    
+
     var DEFAULT_STATE = {
         'name': 'panel-closed',
         'slider_interacted': 0,
@@ -12,70 +12,66 @@ sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
         'tts_clicked': 0
     };
 
-    var instance = null;
 
     sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
 
-        var PanelClosed = (function() {
-            // Constructor.
-            function PanelClosed() {
-                // Default state.
-                this.data = $.extend({}, DEFAULT_STATE);
-                // Initialize.
-                var _this = this;
-                var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
-                    $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
-                    $letterSmall = $('#sitecues-panel .letterSml, #sitecues-panel .letterSmlBack'),
-                    $ttsButton = $('#sitecues-panel .tts');
+        // ============= Objects methods ======================
+        panelClosed = {
+            init: initPanelClosed,
+            update: function(data) {
+                metricsUtil.update(panelClosed, data);
+            },
+            send: function() {
+                metricsUtil.send(panelClosed);
+            },
+            reset: function() {
+                panelClosed.update(DEFAULT_STATE);
+            },
+        };
 
-                $slider.mousedown(function() {
-                    _this.data.slider_interacted = 1;
-                });
 
-                $letterBig.mousedown(function() {
-                    _this.data.large_a_clicked = 1;
-                });
+        function initPanelClosed() {
+            panelClosed.data = $.extend({}, DEFAULT_STATE);
+            var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
+                $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
+                $letterSmall = $('#sitecues-panel .letterSml, #sitecues-panel .letterSmlBack'),
+                $ttsButton = $('#sitecues-panel .tts');
 
-                $letterSmall.mousedown(function() {
-                    _this.data.small_a_clicked = 1;
-                });
+            $slider.mousedown(function() {
+                panelClosed.data.slider_interacted = 1;
+            });
 
-                $ttsButton.mousedown(function() {
-                    _this.data.tts_clicked = 1;
-                });
+            $letterBig.mousedown(function() {
+                panelClosed.data.large_a_clicked = 1;
+            });
 
-            };
+            $letterSmall.mousedown(function() {
+                panelClosed.data.small_a_clicked = 1;
+            });
 
-            // Singleton.
-            return {
-                createInstance: function(options) {
-                    return (new PanelClosed(options) || null);
-                },
-                updateInstance: metricsUtil.update,
-                sendData: metricsUtil.send,
-                // todo: only clear panel-closed event type data.
-                clearData: function() {
-                    this.updateInstance(instance, DEFAULT_STATE, 'metrics/panel-closed/clear');
-                }
-            };
-        })();
+            $ttsButton.mousedown(function() {
+                panelClosed.data.tts_clicked = 1;
+            });
+            return false;
+        };
 
+        // ============= Events Handlers ======================
         // Create an instance on panel show event.
         sitecues.on('panel/show', function() {
-            if (instance === null) {
-                instance = PanelClosed.createInstance();
+            if (!panelClosed['data']) {
+                panelClosed.init();
             }
             sitecues.emit('metrics/panel-closed/create');
         });
 
         sitecues.on('metrics/update', function(metrics) {
-            instance && PanelClosed.updateInstance(instance, metrics.data);
+            panelClosed['data'] && panelClosed.update(metrics.data);
         });
 
         // Clear an instance data on panel hide event.
         sitecues.on('panel/hide', function() {
-            PanelClosed.sendData(instance);
-            PanelClosed.clearData();
+            panelClosed.send();
+            panelClosed.reset();
         });
 
         // Done.
