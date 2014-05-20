@@ -3,7 +3,7 @@
 sitecues.def('caret/coords', function (coords, callback, log) {
 
 	// depends on `jquery`, `conf` and `util` modules
-	sitecues.use('jquery', 'conf', 'util/positioning', function($, conf, positioning) {
+	sitecues.use('jquery', 'conf', 'util/geo', function($, conf, geo) {
 
 		coords.getUpdatedCaretRect = function getUpdatedCaretRect(element, styleObj, caretPos) {
 			// Create an object with the same positioning but flexible width and height
@@ -24,7 +24,7 @@ sitecues.def('caret/coords', function (coords, callback, log) {
 			log.info('Old border: ' + styleObj['border-top-width']);
 			if (isDebuggingOn) {
 				extendStyle['visibility'] = 'visible';
-				var inputRect = positioning.getOffset(element);
+				var inputRect = geo.getOffset(element);
 				extendStyle['left'] = inputRect.left;
 				extendStyle['top'] = inputRect.top;
 			}

@@ -128,38 +128,36 @@ sitecues.def('cursor', function (cursor, callback, log) {
       request.send();
 
     }
+
     /**
      * [This function allows the targeting of styles, such as "cursor", and invokes a callback
      * that gets passed the style and the rule associated with it for any CSS selector]
-     * @param  {[string]}   style
+     * @param  {[string]}   propertyName
+     * @param  {[string]}   matchValue, optional value to match, null to match anything
      * @param  {Function} callback
-     * @return {[undefined]}
      */
-    function changeStyle (style, callback) {
-      var rule;
+    cursor.getStyles = function(propertyName, matchValue, callback) {
+      var rules, rule, cssStyleDeclaration, ruleValue, i;
 
-      if (stylesheetObject) {
-        for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
-          rule = rules[i].style;
-          if (rule && rule[style] && rule[style].length) {
+      if (!stylesheetObject || !callback) {
+        return;
+      }
+
+      for (i = 0, rules = stylesheetObject.cssRules; i < rules.length; i++) {
+        rule = rules[i];
+        cssStyleDeclaration = rule.style;
+        if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
+          ruleValue = cssStyleDeclaration[propertyName];
+          if (matchValue ? (ruleValue === matchValue) : (ruleValue !== null)) {
             /**@param rule an object representing some css selector + properties
-
              * @param style is the key for accessing property information
              */
-            if (callback) {
-              callback(rule, style, stylesheetObject.cssRules[i]);
-            }
+            callback(rule, ruleValue);
           }
-        }
-        if (lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL) {
-          //if the current zoom level is less than the minimum needed to enable custom cursors, disable the <style>
-          stylesheetObject.disabled = true;
-        } else {
-          //otherwise enable it
-          stylesheetObject.disabled = false;
         }
       }
     }
+
     /**
      * [Returns a function that, when executed, generates a CSS cursor property for every supported
      * cursor type and then changes all cursor properties in a <style> that we create for the current
@@ -187,18 +185,24 @@ sitecues.def('cursor', function (cursor, callback, log) {
           }
 
         }
-        
-        changeStyle('cursor', function (rule, style) {
-        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image 
+
+        if (stylesheetObject) {
+          // TODO we need a better setup/shutdown function for this entire module that lazily instantiates and cleans up after itself
+          // We shouldn't run this code at all unless the user zooms
+          stylesheetObject.disabled = lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL;
+        }
+
+        cursor.getStyles('cursor', null, function (rule, value) {
+        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
           for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
+            if (value.indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
               var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
               try {
-                rule.setProperty(style, cursorValueURL, 'important');
+                rule.style.setProperty("cursor", cursorValueURL, 'important');
               } catch (e) {
                 try {
-                  rule[style] = cursorValueURL;
+                  rule.style.cursor = cursorValueURL;
                 } catch (e) {
                 }
               }
@@ -492,8 +496,6 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
     }());
 
-    cursor.changeStyle = changeStyle;    
-    
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
         lastZoom = zoom;

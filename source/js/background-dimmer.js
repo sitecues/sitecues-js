@@ -6,7 +6,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
   'use strict';
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'util/positioning', 'platform', function ($, conf, positioning, platform) {
+  sitecues.use('jquery', 'conf', 'mouse-highlight/highlight-position', 'util/geo', 'platform',
+    function ($, conf, positioning, geo, platform) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'
@@ -24,7 +25,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       ////  Set the coordinates for the SVG Dimmer overlay
 
       // Define the coordinates of the whole document to be dimmed out
-      var viewport    = positioning.getViewportDimensions(0)
+      var viewport    = geo.getViewportDimensions(0)
         , zIndex      = 2147483646
         , offsetTop   = viewport.top //window.pageYOffset
         , offsetLeft  = viewport.left //window.pageXOffset
@@ -121,7 +122,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
         
       // Define the coordinates of the element being highlighted
       // [ highlight-box.js/itemNode ]
-      var elem = positioning.getBoundingBox(hlbNode)
+      var elem = geo.getBoundingBox(hlbNode.get(0))
 
         // Wind clockwise path around whole document.
         , wrapper = getWrapperDimensions(viewport)
@@ -178,11 +179,10 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
      */
     function onZoomChange (hlb) {
 
-      var zoom = conf.get('zoom')
-        
+      var
         // Define the coordinates of the whole document to be dimmed out
-        , viewport = positioning.getViewportDimensions(0, zoom)
-        , svgPath = getSVGPath(viewport, hlb)
+        viewport = geo.getViewportDimensions(0)
+        , svgPath = getSVGPath(viewport)
         , offsetTop = viewport.top
         , offsetLeft = viewport.left
         ;    
@@ -208,7 +208,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
     });
     
     sitecues.on('hlb/deflating', function(hlb) {
-      
+
       // Remove the zoom event handler for background dimmer.
       sitecues.off('zoom zoom/increase zoom/decrease', function() {
         onZoomChange(hlb);
@@ -216,12 +216,12 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
 
       // Remove the inner path so that hole will not be visible.
       backgroundDimmer.updateBackgroundPath(wrapper);
-    
+
     });
-    
+
     // Done
     callback();
 
   });
-
+ 
 });

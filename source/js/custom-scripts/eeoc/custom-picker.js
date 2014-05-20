@@ -8,13 +8,11 @@
 sitecues.def(function (module, callback, log) {
   sitecues.use('custom', function (custom) {
     
-    custom.register('mouse-highlight/picker', function (event) {
-      return; // EQ-1553: temporary fix requested by EEOC
-      this.PICK_ME_FIRST = [{
-        'url'      : 'eeoc.gov',
-        'selector' : '#CS_Element_bigbox',
-        'enabled'  : true
-      }];
+    custom.register('mouse-highlight/pick', function (event) {
+      this.customize = {
+        prefer: '#CS_Element_bigbox',
+        disable: '#cs_control_161910 img'
+      };
     });
 
     callback();

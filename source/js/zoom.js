@@ -1,4 +1,4 @@
-sitecues.def('zoom', function (zoom, callback, log) {
+sitecues.def('zoom', function (zoom, callback) {
  
   'use strict';
 
@@ -14,19 +14,15 @@ sitecues.def('zoom', function (zoom, callback, log) {
 
   // Calculate the zoom range. This calc is used throughout library. Easier to do here only.
   zoom.range = zoom.max - zoom.min;
-  zoom.documentHasScrollbar = false;
-  zoom.badgeBoundingBox;
-  zoom.panelBoundingBox;
-  zoom.lastScroll;
-  zoom.originalDocumentWidth = document.documentElement.clientWidth; //Save this value to reduce the width of the <html> when zooming;
   zoom.resizing = false;
+
+  var documentHasScrollbar = false;
+  var originalDocumentWidth = document.documentElement.clientWidth; //Save this value to reduce the width of the <html> when zooming;
 
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
     
-    zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
-    
-    // Handle the appearing/dissapearing vertical scrollbar in document (changes document width)
+    // Handle the appearing/disappearing vertical scrollbar in document (changes document width)
     zoom.checkForScrollbar = function () {
 
       var scrollbarWidth = window.innerHeight - document.documentElement.clientHeight || 15;
@@ -34,9 +30,9 @@ sitecues.def('zoom', function (zoom, callback, log) {
       // #1 - Body has a scrollbar
       if (common.bodyHasVertScrollbar()) {
         // If scrollbar was not present during last resize...
-        if (zoom.documentHasScrollbar === false) {
+        if (documentHasScrollbar === false) {
           // Set the zoom scrollbar boolean ready for next resize check
-          zoom.documentHasScrollbar = true;
+          documentHasScrollbar = true;
           // Emit the scrollbar show event to subscribers as the doc now has scrollbar
           sitecues.emit('zoom/documentScrollbarShow', scrollbarWidth);
         }
@@ -44,11 +40,11 @@ sitecues.def('zoom', function (zoom, callback, log) {
       }
       // #2 - Body doesn't have a scrollbar
       // If scrollbar was present during last resize...
-      if (zoom.documentHasScrollbar === true) {
+      if (documentHasScrollbar === true) {
         // Emit the scrollbar hide event to subscribers as the doc scrollbar is gone
         sitecues.emit('zoom/documentScrollbarHide', scrollbarWidth);
         // Set the zoom scrollbar boolean ready for next resize check
-        zoom.documentHasScrollbar = false;
+        documentHasScrollbar = false;
       }
     };
     // use conf module for sharing
@@ -99,16 +95,18 @@ sitecues.def('zoom', function (zoom, callback, log) {
      *
      * Note: This problem is not consistent across websites.  This function is in response to 
      * behavior experienced on www.nytimes.com]
-     * 
+     *
+     * Weird: Aaron tried to reverse this and it caused the text on nytimes.com to blur every 7 seconds. WEIRD!!!
      */
     var renderPage = function () {
       setTimeout(function() {
         document.body.style.webkitBackfaceVisibility = '';
         setTimeout(function() {
-          document.body.style.webkitBackfaceVisibility = 'hidden'; 
+          document.body.style.webkitBackfaceVisibility = 'hidden';
         }, 5);
-      }, 5);      
-    }
+      }, 5);
+    };
+
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
     * viewport to properly resize the html elements' width.  We must also re-zoom the page as it handles the logic
@@ -116,21 +114,12 @@ sitecues.def('zoom', function (zoom, callback, log) {
     */
     $(window).resize(function () {
       zoom.resizing = true;
-      zoom.originalDocumentWidth = document.documentElement.clientWidth;
+      originalDocumentWidth = document.documentElement.clientWidth;
       zoomFn(conf.get('zoom'));
       zoom.resizing = false;
       sitecues.emit('resize');
-    });  
-    /**
-     * [Scrolling the page requires positioning any fixed elements.  We also cache the scroll offsets after
-     * all scroll event callbacks have been executed.]
-     * @param  {[object]} e [jquery event object]
-     */
-    $(window).scroll(function (e) {
-      sitecues.emit('scroll', e);
-      zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
     });
-    
+
     /**
     * [
     * The width of the html element should always match the width of the viewport.
@@ -141,11 +130,17 @@ sitecues.def('zoom', function (zoom, callback, log) {
     */
     var zoomFn = function (value) {
 
-      var newBodyWidth = Math.round(zoom.originalDocumentWidth/value);
+      if (value === 1) {
+        // Clear all CSS values
+        $('html').css({ width: '', transform: '', transformOrigin: '' });
+        return;
+      }
+
+      var newBodyWidth = Math.round(originalDocumentWidth/value);
       
-      $('html').css({'width'             : newBodyWidth + 'px',
-                     'transform-origin'  : '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-                     'transform'         : 'scale('+value+')',
+      $('html').css({width             : newBodyWidth + 'px',
+                     transformOrigin   : '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
+                     transform         : 'scale('+value+')'
                     }); 
       
       // Un-Blur text in Chrome
@@ -153,16 +148,9 @@ sitecues.def('zoom', function (zoom, callback, log) {
         renderPage();
       }
 
-      // Do we need this line below as this may be calculated elswhere?
-      zoom.lastScroll = [window.pageXOffset/conf.get('zoom'), window.pageYOffset/conf.get('zoom')];
-      
       zoom.checkForScrollbar();
 
-
-      // notify all about zoom change
-      sitecues.emit('zoom', value);
-      // notify all about zoom change
-      
+      sitecues.emit('zoom', value);   // notify all about zoom change
     };
 
     // Get and set are now in 'source/js/conf/user/manager.js'

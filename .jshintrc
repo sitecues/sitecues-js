@@ -4,7 +4,7 @@
 
   "maxerr"        : 100,
   "indent"        : 2,
-  "laxbreak"      : false,
+  "laxbreak"      : true,
   "laxcomma"      : true,
   "nomen"         : true,
   "onevar"        : false,
@@ -16,7 +16,7 @@
   "strict"        : true,     // true: Requires all functions run in ES5 Strict Mode
   "immed"         : true,     // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
 
-  // Define Global Variables Here
+  // Define Global Variables Here   -- copy to both predef and globals sections
   
   "predef": [
     "XMLHttpRequest",
@@ -26,6 +26,17 @@
     "CSSStyleDeclaration",
     "escape"
   ],
+
+  // Globals -- copy to both predef and globals sections
+
+  "globals": {
+    "XMLHttpRequest": true,
+    "sitecues": true,
+    "exports": true,
+    "CSSPrimitiveValue": true,
+    "CSSStyleDeclaration": true,
+    "escape": true
+  },
 
   // Enforcing
 
@@ -88,5 +99,11 @@
   "wsh"           : false,    // Windows Scripting Host
   "yui"           : false,    // Yahoo User Interface
   "passfail"      : false,
-  "white"         : false
-}
+  "white"         : false,
+
+  // JS Lint Warnings
+
+  "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
+  "-W008": true      // Leading 0 before decimal point
+
+  }
