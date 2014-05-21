@@ -21,32 +21,6 @@ sitecues.def('zoom', function (zoom, callback) {
 
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
-    
-    // Handle the appearing/disappearing vertical scrollbar in document (changes document width)
-    zoom.checkForScrollbar = function () {
-
-      var scrollbarWidth = window.innerHeight - document.documentElement.clientHeight || 15;
-      // Check whether a scrollbar has appeared in the document now zoom has changed
-      // #1 - Body has a scrollbar
-      if (common.bodyHasVertScrollbar()) {
-        // If scrollbar was not present during last resize...
-        if (documentHasScrollbar === false) {
-          // Set the zoom scrollbar boolean ready for next resize check
-          documentHasScrollbar = true;
-          // Emit the scrollbar show event to subscribers as the doc now has scrollbar
-          sitecues.emit('zoom/documentScrollbarShow', scrollbarWidth);
-        }
-        return;
-      }
-      // #2 - Body doesn't have a scrollbar
-      // If scrollbar was present during last resize...
-      if (documentHasScrollbar === true) {
-        // Emit the scrollbar hide event to subscribers as the doc scrollbar is gone
-        sitecues.emit('zoom/documentScrollbarHide', scrollbarWidth);
-        // Set the zoom scrollbar boolean ready for next resize check
-        documentHasScrollbar = false;
-      }
-    };
     // use conf module for sharing
     // current zoom level value
     conf.def('zoom', function (value) {
@@ -133,22 +107,20 @@ sitecues.def('zoom', function (zoom, callback) {
       if (value === 1) {
         // Clear all CSS values
         $('html').css({ width: '', transform: '', transformOrigin: '' });
-        return;
       }
+      else {
+        var newBodyWidth = Math.round(originalDocumentWidth / value);
 
-      var newBodyWidth = Math.round(originalDocumentWidth/value);
-      
-      $('html').css({width             : newBodyWidth + 'px',
-                     transformOrigin   : '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-                     transform         : 'scale('+value+')'
-                    }); 
-      
-      // Un-Blur text in Chrome
-      if (platform.browser.isChrome && platform.os.isMac) {
-        renderPage();
+        $('html').css({width: newBodyWidth + 'px',
+          transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
+          transform: 'scale(' + value + ')'
+        });
+
+        // Un-Blur text in Chrome
+        if (platform.browser.isChrome && platform.os.isMac) {
+          renderPage();
+        }
       }
-
-      zoom.checkForScrollbar();
 
       sitecues.emit('zoom', value);   // notify all about zoom change
     };

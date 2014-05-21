@@ -37,8 +37,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     var MIN_SCORE_TO_PICK = -100;  // If nothing above this, will pick nothing
 
     var PICK_RULE_DISABLE = 'disable'; // don't pick this item, any ancestor, or any descendant
-    var PICK_RULE_IGNORE = '-';  // don't pick this item
-    var PICK_RULE_PREFER = '+';  // pick this item
+    var PICK_RULE_IGNORE = 'ignore';  // don't pick this item
+    var PICK_RULE_PREFER = 'prefer';  // pick this item
 
     // The following weights are used to multiple each judgement of the same name, defined in judgements.js
     // The initialScore is a sum of these weights * judgements
@@ -156,7 +156,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // Ways a deterministic result can occur:
     // 1) A customization in highlight.disable="[selector]" or highlight.prefer="[selector]"
     // 2) The value of previous computations saved in the pickRuleCache
-    // 3) HTML attribute @data-sc-pick on the element itself ('+' or 'disable') -- see PICK_RULE_FOO constants
+    // 3) HTML attribute @data-sc-pick on the element itself ('prefer' or 'disable') -- see PICK_RULE_FOO constants
     function getDeterministicResult(candidates) {
       // 1. Check customizations
       var picked = getCustomizationResult(candidates);
@@ -313,6 +313,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           });
         }
       }
+
+      // Temporary until we either reintroduce sibling vote code or decide to remove sibling vote concept.
+      // Aaron to follow-up.
+      scoreObj.finalScore = scoreObj.initialScore;
 
       return scoreObj;
     }

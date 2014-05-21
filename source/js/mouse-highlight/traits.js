@@ -81,11 +81,11 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
           parentRect = parentTraits.unzoomedRect,
           adjacentEdges = [];
 
-      if (parentRect.top + parentTraits.topPadding + 1 >= rect.top + traits.topMargin) {
+      if (parentRect.top + parentTraits.topPadding + 1 >= rect.top - traits.topMargin) {
         adjacentEdges.push('top');
       }
 
-      if (parentRect.left + parentTraits.leftPadding + 1 >= rect.left + traits.leftMargin) {
+      if (parentRect.left + parentTraits.leftPadding + 1 >= rect.left - traits.leftMargin) {
         adjacentEdges.push('left');
       }
 

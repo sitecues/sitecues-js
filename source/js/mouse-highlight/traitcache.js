@@ -93,7 +93,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       traitcache.viewSize.zoom = conf.get('zoom');
       // Keys guaranteed to ge in same order since we always create object here,
       // therefore JSON.stringify() works for equality check
-      return (old !== JSON.stringify(traitcache.viewSize));
+      return (JSON.stringify(old) !== JSON.stringify(traitcache.viewSize));
     }
 
     function updateViewPosition() {

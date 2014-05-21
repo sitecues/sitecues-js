@@ -481,12 +481,6 @@ sitecues.def('util/common', function (common, callback, log) {
       return frag;
     }
 
-    // Returns true if the body has a vertical scrollbar.
-    common.bodyHasVertScrollbar = function() {
-      // See if the document width is within some delta of the window inner width.
-      return window.innerWidth - $(document.documentElement).outerWidth() > 3;
-    };
-
     /**
      * Defines if the element given contains vertical scroll.
      * @param el HTMLObject

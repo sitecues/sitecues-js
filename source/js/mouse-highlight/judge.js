@@ -168,17 +168,21 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // It is more likely that choosing the child element is correct, because it was already a distinct visual unit
       $.extend(growthJudgements, {
         badGrowthTop: // If our top is far above child's, and child already had good top separator, then child is probably it's own group
-          (growthJudgements.topGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            judgements.topSeparationImpact > SIGNIFICANT_SEPARATION) * judgements.topSeparationImpact,
+          belowJudgements ?
+            (growthJudgements.topGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
+            belowJudgements.topSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.topSeparationImpact : 0,
         badGrowthBottom: // Similar to badGrowthTop
-          (growthJudgements.bottomGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            judgements.bottomSeparationImpact > SIGNIFICANT_SEPARATION) * judgements.bottomSeparationImpact,
+          belowJudgements ?
+            (growthJudgements.bottomGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
+            belowJudgements.bottomSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.bottomSeparationImpact : 0,
         badGrowthLeft: // Similar to badGrowthTop
+          belowJudgements ?
           (growthJudgements.leftGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            judgements.leftSeparationImpact > SIGNIFICANT_SEPARATION) * judgements.leftSeparationImpact,
+            belowJudgements.leftSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.leftSeparationImpact : 0,
         badGrowthRight: // Similar to badGrowthTop
+          belowJudgements ?
           (growthJudgements.rightGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            judgements.rightSeparationImpact > SIGNIFICANT_SEPARATION) * judgements.rightSeparationImpact
+            belowJudgements.rightSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.rightSeparationImpact : 0
       });
 
       // Type of growth
@@ -295,8 +299,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           isGroupedWithImage(traits, node, index),
         isSectionStartContainer: // Don't consider it a section start if we already were one and grew from that
           (!belowTraits.isSectionStartContainer || judgements.topGrowth +
-            judgements.bottomGrowth + judgements.leftGrowth +
-            judgements.rightGrowth < MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER) &&
+            judgements.bottomGrowth + judgements.leftGrowth + judgements.rightGrowth < MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER) &&
           isSectionStartContainer(node),
         isDivided: isDivided(node),
         isWideMediaContainer:
