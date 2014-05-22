@@ -95,32 +95,36 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     picker.find = function find(start) {
       var candidates, picked;
 
+      // 1. Don't pick anything in the sitecues UI
       if (common.isInSitecuesUI(start)) {
         return null;
       }
 
-      if (!isDirectlyOverVisibleContent(start)) {
-        return null; // Helps avoid slow, jumpy highlight, and selecting large containers while over whitespace
+      // 2. Avoid slow, jumpy highlight, and selecting large containers while over whitespace
+      if (isOverWhitespace(start)) {
+        return null;
       }
 
+      // 3. Reset pick results cache if view has resized or zoom has changed,
+      //    because some picks are dependent on the size of the item relative to the viewport.
       if (traitcache.checkViewHasChanged()) {
-        // If view has resized or zoom has changed, we invalidate the previous picks,
-        // because some picks are dependent on the size of the item relative to the viewport.
         resetPickedItemsCache();
       }
 
+      // 4. Get candidate nodes that could be picked
       candidates = [start].concat($.makeArray($(start).parentsUntil(document.body)));
 
-        // Get result from customizations or previously stored results
+      // 5. Get deterministic results
+      //    a) from customizations or b) previously stored picker results
       picked = getDeterministicResult(candidates);
       if (picked !== null) {
         return picked;
       }
 
-      // Get result from "smart" rules
+      // 6. Get result from "smart" heuristic rules
       picked = getHeuristicResult(candidates);
 
-      // Save results in picked items cache for later use
+      // 7. Save results in picked items cache for later reuse
       if (picked.length) {
         pickedItemsCache[traitcache.getUniqueId(picked[0])] = PICK_RULE_PREFER;
       }
@@ -132,21 +136,21 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
     }
 
-    function isDirectlyOverVisibleContent(current) {
+    function isOverWhitespace(current) {
       var children, index;
       if (common.isVisualMedia(current)) {
-        return true;
+        return false;
       }
       children = current.childNodes;
       if (current.childElementCount === children.length) {
-        return false; // Could not have text children because all children are elements
+        return true; // Could not have text children because all children are elements
       }
       for (index = 0; index < children.length; index++) {
         if (isNonEmptyTextNode(children[index])) {
-          return true;
+          return false;
         }
       }
-      return false;
+      return true;
     }
 
     // --------- Deterministic results ---------

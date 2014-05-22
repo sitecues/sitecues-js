@@ -126,6 +126,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       // Cascade the spacing of each edge on the parent downward, as appropriate
       // For example, if the element is at the top of the parent, treat both object's top as
       // having the same aggregated values.
+      // Because we compare each element to its parent, we start at one below the parent (spacingTraitStack.length - 2)
       for (index = spacingTraitStack.length - 2; index >= 0; index --) {
         getAdjacentEdges(traitStack, index)
           .forEach(addToAdjacentEdges);
