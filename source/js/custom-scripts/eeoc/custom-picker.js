@@ -5,14 +5,14 @@
  * Description : 
  * 
 */
-sitecues.def(function (module, callback, log) {
+sitecues.def(function (module, callback) {
   sitecues.use('custom', function (custom) {
     
     custom.register('mouse-highlight/pick', function (event) {
-      this.customize = {
+      this.provideCustomSelectors({
         prefer: '#CS_Element_bigbox',
         disable: '#cs_control_161910 img'
-      };
+      });
     });
 
     callback();

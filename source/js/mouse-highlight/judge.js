@@ -6,8 +6,10 @@
  * - Does it use a good tag or role?
  * - Does it define its own interesting background?
  * - What is the visual impact of the spacing/border around its edges?
- * - Does it look like a cell in row or column?
- * - Did it grow a lot larger compared with the previous item?
+ * - Does it look like a cell in a row or column?
+ * - Did it grow a lot larger compared with the child candidate?
+ *
+ * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
 sitecues.def('mouse-highlight/judge', function(judge, callback) {
@@ -15,47 +17,46 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
   sitecues.use('jquery', 'util/common', function($, common) {
 
     // ----------- PUBLIC  ----------------
-    judge.getJudgementStack = function (traitStack, nodeStack) {
-      var baseIndex = getBaseIndex(traitStack),
-        judgementStack = [],
-        belowJudgements = null;
+    judge.getJudgementStack = function (traitStack, nodeStack, customJudgementRules) {
+      var firstNonInlineIndex = getFirstNonInlineIndex(traitStack),
+        firstNonInlineTraits = traitStack[firstNonInlineIndex],
+        childJudgements = null;
 
-      traitStack.forEach(function (traits, index) {
+      function mapJudgements(traits, index) {
         var judgements;
         if (!isUsable(traits, nodeStack[index])) {
           judgements = null;
         }
         else {
-          judgements = getJudgements(traitStack, index, baseIndex, nodeStack[index], belowJudgements);
-          belowJudgements = judgements;
+          judgements = getJudgements(traitStack, index, firstNonInlineTraits, nodeStack[index],
+                                     childJudgements, customJudgementRules);
+          childJudgements = judgements;
         }
-        judgementStack.push(judgements);
-      });
+        return judgements;
+      }
 
-      return judgementStack;
-    };
-
-    // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-    // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
-    judge.getCustomJudgements = function() { //judgements, traits, belowTraits, belowJudgements, aboveTraits, baseTraits, node, index) {
-      return {};
+      return traitStack.map(mapJudgements);
     };
 
     // ------------ PRIVATE -------------
 
-    function getJudgements(allTraits, index, baseIndex, node, belowJudgements) {
+    function getJudgements(allTraits, index, firstNonInlineTraits, node, childJudgements, customJudgementRules) {
       var traits = allTraits[index],
-        belowTraits = index > 0 ? allTraits[index - 1] : traits,  // For computing simplicity, always set (non-null)
-        aboveTraits = index < allTraits.length - 1 ? allTraits[index + 1] : traits,  // "
-        baseTraits = allTraits[baseIndex],
-        judgements;
+        childTraits = index > 0 ? allTraits[index - 1] : traits,  // For computing simplicity, always set (non-null)
+        parentTraits = index < allTraits.length - 1 ? allTraits[index + 1] : traits,  // "
+        judgements,
+        customJudgement;
 
-      judgements = getVisualSeparationJudgements(traits, belowTraits, aboveTraits);
+      judgements = getVisualSeparationJudgements(traits, childTraits, parentTraits);
       $.extend(judgements, getSizeJudgements(traits));
-      $.extend(judgements, getGrowthJudgements(judgements, traits, belowTraits, aboveTraits, baseTraits, belowJudgements));
-      $.extend(judgements, getCellLayoutJudgements(judgements, traits, belowTraits, belowJudgements));
-      $.extend(judgements, getDOMStructureJudgements(judgements, traits, belowTraits, belowJudgements, node, index));
-      $.extend(judgements, judge.getCustomJudgements(judgements, traits, belowTraits, belowJudgements, aboveTraits, baseTraits, node, index));
+      $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements));
+      $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
+      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index));
+      for (customJudgement in customJudgementRules) {
+        if (customJudgementRules.hasOwnProperty(customJudgement)) {
+          $.extend(judgements, customJudgement(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
+        }
+      }
 
       return judgements;
     }
@@ -101,7 +102,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     var MAX_ANCESTORS_IMAGE_GROUP = 4;
     var MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER = 120;
 
-    function getVisualSeparationJudgements(traits, aboveTraits) {
+    function getVisualSeparationJudgements(traits, parentTraits) {
       var visualSeparationJudgements = {
         // Get a number that represents the visual impact of margin, padding, border
         topSeparationImpact: getSeparationImpact(traits.topSpacing, traits.topBorder),
@@ -113,7 +114,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // (for example, it has a different background-color or uses a background-image).
         // Don't include non-repeating sprites (positioned background images) -- these are used for bullets, etc.
         isNewBgContainer:
-          (traits.style.backgroundColor !== aboveTraits.style.backgroundColor &&
+          (traits.style.backgroundColor !== parentTraits.style.backgroundColor &&
             traits.style.backgroundColor !== 'rgba(0, 0, 0, 0)' && traits.style.backgroundColor !== 'transparent') ||
           (traits.style.backgroundImage !== 'none' && traits.style.backgroundRepeat !== 'no-repeat')
       };
@@ -145,22 +146,22 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Judge different types of growth:
     // - From a child candidate to the current candidate
     // - From the current candidate to its parent
-    // - From the first candidate (baseTraits) to the current candidate
-    function getGrowthJudgements(judgements, traits, belowTraits, aboveTraits, baseTraits, belowJudgements) {
+    // - Total (from the first non-inline candidate to the current candidate)
+    function getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements) {
       var growthJudgements = {
         // Ratio of sizes between objects
-        baseHorizGrowthFactor: traits.visualWidth / baseTraits.visualWidth,
-        baseVertGrowthFactor: traits.visualHeight / baseTraits.visualHeight,
-        parentHorizGrowthFactor: aboveTraits.visualWidth / traits.visualWidth,
-        parentVertGrowthFactor: aboveTraits.visualHeight / traits.visualHeight,
-        childVertGrowthFactor: traits.visualHeight / belowTraits.visualHeight,
-        childHorizGrowthFactor: traits.visualWidth / belowTraits.visualWidth,
+        totalHorizGrowthFactor: traits.visualWidth / firstNonInlineTraits.visualWidth,
+        totalVertGrowthFactor: traits.visualHeight / firstNonInlineTraits.visualHeight,
+        parentHorizGrowthFactor: parentTraits.visualWidth / traits.visualWidth,
+        parentVertGrowthFactor: parentTraits.visualHeight / traits.visualHeight,
+        childVertGrowthFactor: traits.visualHeight / childTraits.visualHeight,
+        childHorizGrowthFactor: traits.visualWidth / childTraits.visualWidth,
 
         // Growth in particular direction
-        topGrowth: belowTraits.unzoomedRect.top - traits.unzoomedRect.top,
-        bottomGrowth: traits.unzoomedRect.bottom - belowTraits.unzoomedRect.bottom,
-        leftGrowth: belowTraits.unzoomedRect.left - traits.unzoomedRect.left,
-        rightGrowth: traits.unzoomedRect.right - belowTraits.unzoomedRect.right
+        topGrowth: childTraits.unzoomedRect.top - traits.unzoomedRect.top,
+        bottomGrowth: traits.unzoomedRect.bottom - childTraits.unzoomedRect.bottom,
+        leftGrowth: childTraits.unzoomedRect.left - traits.unzoomedRect.left,
+        rightGrowth: traits.unzoomedRect.right - childTraits.unzoomedRect.right
       };
 
       // Growth in a direction after there was already visual separation in that direction.
@@ -168,21 +169,21 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // It is more likely that choosing the child element is correct, because it was already a distinct visual unit
       $.extend(growthJudgements, {
         badGrowthTop: // If our top is far above child's, and child already had good top separator, then child is probably it's own group
-          belowJudgements ?
+          childJudgements ?
             (growthJudgements.topGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            belowJudgements.topSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.topSeparationImpact : 0,
+            childJudgements.topSeparationImpact > SIGNIFICANT_SEPARATION) * childJudgements.topSeparationImpact : 0,
         badGrowthBottom: // Similar to badGrowthTop
-          belowJudgements ?
+          childJudgements ?
             (growthJudgements.bottomGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            belowJudgements.bottomSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.bottomSeparationImpact : 0,
+            childJudgements.bottomSeparationImpact > SIGNIFICANT_SEPARATION) * childJudgements.bottomSeparationImpact : 0,
         badGrowthLeft: // Similar to badGrowthTop
-          belowJudgements ?
+          childJudgements ?
           (growthJudgements.leftGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            belowJudgements.leftSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.leftSeparationImpact : 0,
+            childJudgements.leftSeparationImpact > SIGNIFICANT_SEPARATION) * childJudgements.leftSeparationImpact : 0,
         badGrowthRight: // Similar to badGrowthTop
-          belowJudgements ?
+          childJudgements ?
           (growthJudgements.rightGrowth > SIGNIFICANT_AMOUNT_OF_PIXELS &&
-            belowJudgements.rightSeparationImpact > SIGNIFICANT_SEPARATION) * belowJudgements.rightSeparationImpact : 0
+            childJudgements.rightSeparationImpact > SIGNIFICANT_SEPARATION) * childJudgements.rightSeparationImpact : 0
       });
 
       // Type of growth
@@ -190,13 +191,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Our child was already very tall, and we're even larger --
         // generally better to go with the child, it's already big, and the parent might be a group of groups
         isLargeGrowthOverTallChild: traits.percentOfViewportHeight > 100 &&
-          belowTraits.percentOfViewportHeight > IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
+          childTraits.percentOfViewportHeight > IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
           growthJudgements.childVertGrowthFactor > EXTREME_GROWTH_FACTOR,
 
         // Significantly larger both horizontally and vertically when compared with the first block candidate.
         // This is rarely good. It generally means we're in a group of visual groups.
         // If we don't have this rule, we tend to pick containers that are used for 2d layout.
-        isLarge2dGrowthFromBase: // Grew a lot in 2 directions from non-inline descendant
+        isLarge2dGrowth: // Grew a lot in 2 directions from non-inline descendant
           (growthJudgements.baseHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
             growthJudgements.baseVertGrowthFactor > EXTREME_GROWTH_FACTOR),
 
@@ -218,19 +219,19 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // This is a good thing, we are just encompassing a little more information such as an image or caption
         // If we don't have this rule we tend to miss attaching supplemental information such as captions.
         isModerate1dGrowthOverChild:
-          belowJudgements && belowJudgements.isModerate1dGrowthIntoParent,
+          childJudgements && childJudgements.isModerate1dGrowthIntoParent,
 
         // Growing much larger horizontally is generally a bad thing unless the original item was an image
         // This is often a horizontal row of cells -- better to pick the smaller cells.
         isLargeWidthExpansion: growthJudgements.baseHorizGrowthFactor > EXTREME_GROWTH_FACTOR &&
-                               !baseTraits.isVisualMedia
+                               !firstNonInlineTraits.isVisualMedia
       });
 
       return growthJudgements;
     }
 
     // Heuristics to see if something looks like a box based on box coordinate information
-    function getCellLayoutJudgements(judgements, traits, belowTraits, belowJudgements) {
+    function getCellLayoutJudgements(judgements, traits, childTraits, childJudgements) {
       var cellLayoutJudgements = {};
       // If it is a float, does it look like it's a float to create an appearance of cells?
       // We judge this as true if:
@@ -244,18 +245,18 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           (judgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
            judgements.parentHorizGrowthFactor > EXTREME_GROWTH_FACTOR);
 
-      // Is anything below us already a cell?
+      // Is anything child us already a cell?
       // If yes, we're unlikely to be the right choice.
       cellLayoutJudgements.isAncestorOfCell =
-        belowJudgements !== null &&
-        (belowJudgements.isAncestorOfCell ||
-          belowJudgements.isFloatForColumnLayout ||
-          belowJudgements.isCellInCol ||
-          belowJudgements.isCellInRow ||
-          belowTraits.tag === 'td' ||
-          belowTraits.tag === 'tr');
+        childJudgements !== null &&
+        (childJudgements.isAncestorOfCell ||
+          childJudgements.isFloatForColumnLayout ||
+          childJudgements.isCellInCol ||
+          childJudgements.isCellInRow ||
+          childTraits.tag === 'td' ||
+          childTraits.tag === 'tr');
 
-      // Is something below us already a cell and we're much wider?
+      // Is something child us already a cell and we're much wider?
       // If yes, we're a terrible choice. We're probably a row of cells.
       cellLayoutJudgements.isWideAncestorOfCell =
         cellLayoutJudgements.isAncestorOfCell &&
@@ -264,7 +265,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // Do we look like a cell in a column of cells?
       cellLayoutJudgements.isCellInCol =
-          !cellLayoutJudgements.isAncestorOfCell && belowTraits.style.display !== 'inline' &&
+          !cellLayoutJudgements.isAncestorOfCell && childTraits.style.display !== 'inline' &&
           judgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&      // Approx. same width
           judgements.parentVertGrowthFactor > MIN_CELL_IN_COLUMN_VERT_GROWTH &&       // Large vertical growth
           !SEMANTIC_TEXT_CONTAINING_TAGS.hasOwnProperty(traits.tag) &&  // Text, not a cell
@@ -275,7 +276,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // Do we look like a cell in a row of cells?
       cellLayoutJudgements.isCellInRow =
-          !cellLayoutJudgements.isAncestorOfCell && belowTraits.style.display !== 'inline' &&
+          !cellLayoutJudgements.isAncestorOfCell && childTraits.style.display !== 'inline' &&
           traits.style.display !== 'inline-block' &&
           judgements.parentVertGrowthFactor < EXTREME_GROWTH_FACTOR &&
           judgements.parentHorizGrowthFactor > MIN_CELL_IN_ROW_HORIZ_GROWTH  &&      // Large horizontal growth
@@ -290,7 +291,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // The tags and role may lie to us, so we don't necessarily score high for tags/roles
     // Being grouped with an image, or a heading at the beginning, are very good clues.
     // Being divided by a heading or separator in the middle indicates we are probably an ancestor smaller useful groups.
-    function getDOMStructureJudgements(judgements, traits, belowTraits, belowJudgements, node, index) {
+    function getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index) {
       return {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
@@ -298,12 +299,12 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isGroupedWithImage: traits.visHeight > SIGNIFICANT_AMOUNT_OF_PIXELS &&
           isGroupedWithImage(traits, node, index),
         isSectionStartContainer: // Don't consider it a section start if we already were one and grew from that
-          (!belowTraits.isSectionStartContainer || judgements.topGrowth +
+          (!childTraits.isSectionStartContainer || judgements.topGrowth +
             judgements.bottomGrowth + judgements.leftGrowth + judgements.rightGrowth < MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER) &&
           isSectionStartContainer(node),
         isDivided: isDivided(node),
         isWideMediaContainer:
-          (belowJudgements !== null && belowJudgements.isWideMediaContainer) ||   // We don't generally want to pick the hero image or any ancestor of it
+          (childJudgements !== null && childJudgements.isWideMediaContainer) ||   // We don't generally want to pick the hero image or any ancestor of it
           (traits.isVisualMedia && traits.percentOfViewportWidth > MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH)
       };
     }
@@ -380,7 +381,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // Get the index of the first non-inline containing rectangle as we go up ancestor chain
     // At index 0 = original event target, index 1 is the parent of that, 2 is the grandparent, etc.
-    function getBaseIndex(traitStack) {
+    function getFirstNonInlineIndex(traitStack) {
       var index, displayStyle;
       for (index = 0; index < traitStack.length; index++) {
         displayStyle = traitStack[index].style.display;

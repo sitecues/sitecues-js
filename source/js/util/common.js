@@ -273,6 +273,7 @@ sitecues.def('util/common', function (common, callback, log) {
     };
 
     // Return true if the element is part of the sitecues user interface
+    // Everything inside the <body> other than the page-inserted badge
     common.isInSitecuesUI = function(element) {
       var closest = $(element).closest('body,#sitecues-badge');
       return closest.length === 0 || $(closest).attr('id') === 'sitecues-badge';

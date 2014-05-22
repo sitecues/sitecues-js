@@ -9,9 +9,9 @@ sitecues.def(function (module, callback, log) {
 
     custom.register('mouse-highlight/pick', function (event) {
       
-      this.customize = {
+      this.provideCustomSelectors({
         prefer: '#slider'
-      };
+      });
 
     });
 
