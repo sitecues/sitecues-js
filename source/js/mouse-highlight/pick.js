@@ -14,7 +14,7 @@
  *                 Final result
  *`
  * In this process we compute store the following arrays:
- * nodes -- an array of candidate nodes
+ * candidates -- an array of candidate nodes
  *          The 0th item is always the original event target, #1 is the parent, #2, grandparent, etc.
  * traitStack
  *       -- an array of corresponding traits for each node
@@ -250,23 +250,23 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      */
     function getHeuristicResult(candidates) {
       // 1. Limit the number of candidate nodes we analyze (for performance)
-      var nodes = candidates.slice(0, MAX_ANCESTORS_TO_ANALYZE);
+      var restrictedCandidates = candidates.slice(0, MAX_ANCESTORS_TO_ANALYZE);
 
       // 2. Get traits -- basic info such as tag, role, style, coordinates
-      var traitStack = traits.getTraitStack(nodes);
+      var traitStack = traits.getTraitStack(restrictedCandidates);
 
       // 3. Get judgements -- higher level concepts from hand-tweaked logic
-      var judgementStack = judge.getJudgementStack(traitStack, nodes, customJudgements);
+      var judgementStack = judge.getJudgementStack(traitStack, restrictedCandidates, customJudgements);
 
       // 4. Get the best choice
-      return getBestCandidate(traitStack, judgementStack, nodes);
+      return getBestCandidate(traitStack, judgementStack, restrictedCandidates);
     }
 
-    function getBestCandidate(traitStack, judgementStack, nodes) {
+    function getBestCandidate(traitStack, judgementStack, candidates) {
       var scoreObjs, bestIndex;
 
       // 1. Get scores for candidate nodes
-      scoreObjs = getInitialScores(judgementStack, nodes);
+      scoreObjs = getInitialScores(judgementStack, candidates);
 
       // 2. Parents of only children are strongly influenced by that child
       refineScoresForParentsOfOneChild(traitStack, scoreObjs);
@@ -275,10 +275,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       bestIndex = getCandidateWithHighestScore(scoreObjs);
 
       // 4. Log the results if necessary
-      picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, nodes);
+      picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
 
       // 5. Return item, or nothing if score was too low
-      return scoreObjs[bestIndex].finalScore < MIN_SCORE_TO_PICK ? $() : $(nodes[bestIndex]);
+      return scoreObjs[bestIndex].finalScore < MIN_SCORE_TO_PICK ? $() : $(candidates[bestIndex]);
     }
 
     // Placeholder used by 'debug' customization
@@ -286,15 +286,15 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     // Get a score for each candidate node
     // Unusable nodes get UNUSABLE_SCORE -- a score so low it will never be picked
-    function getInitialScores(judgementStack, nodes) {
+    function getInitialScores(judgementStack, candidates) {
       var index,
           scoreObj = null,
           allScoreObjs = [];
 
       for (index = 0; index < judgementStack.length; index ++) {
         // Check if node is usable
-        if ((customSelectors.ignore && $(nodes[index]).is(customSelectors.ignore)) ||
-             nodes[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE ||
+        if ((customSelectors.ignore && $(candidates[index]).is(customSelectors.ignore)) ||
+          candidates[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE ||
              !judgementStack[index]) {
           scoreObj = {
             initialScore: UNUSABLE_SCORE,
