@@ -126,7 +126,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 7. Save results in picked items cache for later reuse
       if (picked.length) {
-        pickedItemsCache[traitcache.getUniqueId(picked[0])] = PICK_RULE_PREFER;
+        pickedItemsCache[traitcache.getUniqueId(picked[0])] = 1; // Set to anything, so that it's stored in the map
       }
 
       return picked.length? picked : null;
@@ -168,7 +168,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         return picked;
       }
 
-      // 2. Check pickRuleCache and @data-sc-pick
+      // 2. Check pickRuleCache (previously stored results) and @data-sc-pick (markup-specified rule)
       return getPickRuleResult(candidates);
     }
 
@@ -218,8 +218,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var pickRule = $(item).attr('data-sc-pick'); // This attribute can be used to override everything
       if (!pickRule) {
         var id = traitcache.getUniqueId(item);
-        if (id) {
-          pickRule = pickedItemsCache[id];
+        if (id && pickedItemsCache[id]) {
+          pickRule = PICK_RULE_PREFER;
         }
       }
       return pickRule;
@@ -237,49 +237,61 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      * Uses a scoring system for each candidate ancestor
      */
     function getHeuristicResult(candidates) {
-      var nodes = candidates.slice(0, MAX_ANCESTORS_TO_ANALYZE),
-          traitStack = traits.getTraitStack(nodes),                      // Basic info such as tag, role, style, coordinates
-          judgementStack = judge.getJudgementStack(traitStack, nodes);  // Higher level traits, hand-crafted
+      // 1. Limit the number of candidate nodes we analyze (for performance)
+      var nodes = candidates.slice(0, MAX_ANCESTORS_TO_ANALYZE);
 
-      return getBestAncestor(traitStack, judgementStack, nodes);
+      // 2. Get traits -- basic info such as tag, role, style, coordinates
+      var traitStack = traits.getTraitStack(nodes);
+
+      // 3. Get judgements -- higher level concepts from hand-tweaked logic
+      var judgementStack = judge.getJudgementStack(traitStack, nodes);
+
+      // 4. Get the best choice
+      return getBestCandidate(traitStack, judgementStack, nodes);
     }
 
-    function getBestAncestor(traitStack, judgementStack, nodes) {
+    function getBestCandidate(traitStack, judgementStack, nodes) {
       var scoreObjs, bestIndex;
 
-      // 1. Get initial scores for candidate nodes
+      // 1. Get scores for candidate nodes
       scoreObjs = getInitialScores(judgementStack, nodes);
 
       // 2. Parents of only children are strongly influenced by that child
-      refineParentsOfOneChild(traitStack, scoreObjs);
+      refineScoresForParentsOfOneChild(traitStack, scoreObjs);
 
-      // 3. Get the initial best candidate
-      bestIndex = getBestCandidateIndex(scoreObjs);
+      // 3. Get the best candidate
+      bestIndex = getCandidateWithHighestScore(scoreObjs);
 
       // 4. Log the results if necessary
       picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, nodes);
 
+      // 5. Return item, or nothing if score was too low
       return scoreObjs[bestIndex].finalScore < MIN_SCORE_TO_PICK ? $() : $(nodes[bestIndex]);
     }
 
     // Placeholder used by 'debug' customization
     picker.logResults = function() { };
 
+    // Get a score for each candidate node
+    // Unusable nodes get UNUSABLE_SCORE -- a score so low it will never be picked
     function getInitialScores(judgementStack, nodes) {
       var index,
           scoreObj = null,
           allScoreObjs = [];
 
       for (index = 0; index < judgementStack.length; index ++) {
+        // Check if node is usable
         if ((picker.customize.ignore && $(nodes[index]).is(picker.customize.ignore)) ||
-             nodes[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE) {
+             nodes[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE ||
+             !judgementStack[index]) {
           scoreObj = {
             initialScore: UNUSABLE_SCORE,
             finalScore: UNUSABLE_SCORE,
-            about: 'Ancestor #' + index + '. (ignored via ' + picker.customize.ignore + ')'  // Debug
+            about: 'Ancestor #' + index + '. Ignored'  // Debug
           };
         }
         else {
+          // Get the score for the candidate node at the given index
           scoreObj = computeInitialScore(judgementStack, index);
         }
         allScoreObjs.push(scoreObj);
@@ -287,7 +299,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return allScoreObjs;
     }
 
-    // Traits -> Scoring factors * weights -> score
+    // Get the score for the candidate node at the given index
     function computeInitialScore(judgementStack, index) {
       var judgements = judgementStack[index],
         factorKey, value, scoreDelta, weight,
@@ -298,12 +310,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           about: 'Ancestor #' + index  // Debug
         };
 
-      if (!judgements) {
-        scoreObj.initialScore = scoreObj.finalScore = UNUSABLE_SCORE;
-        scoreObj.about = 'Ancestor #' + index + ' (not usable)'; // Debug
-        return scoreObj;
-      }
-
+      // Score = judgements * weights
       for (factorKey in picker.JUDGEMENT_WEIGHTS) {
         if (picker.JUDGEMENT_WEIGHTS.hasOwnProperty(factorKey)) {
           value = judgements[factorKey];
@@ -325,7 +332,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return scoreObj;
     }
 
-    function getBestCandidateIndex(scores) {
+    function getCandidateWithHighestScore(scores) {
       var index,
           bestScore = scores[0].initialScore,
           bestScoreIndex = 0;
@@ -345,7 +352,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // For every single parent, add child's score to us
     // A parent is likely to be even more right/wrong than its child
     // Therefore the child's goodness reflects on the parent. We add it's score to the parent score.
-    function refineParentsOfOneChild(traitStack, scoreObjs) {
+    function refineScoresForParentsOfOneChild(traitStack, scoreObjs) {
       var index, delta;
       for (index = 1; index < traitStack.length - 1; index ++ ) {
         if (traitStack[index].childCount === 1 && scoreObjs[index-1].initialScore !== UNUSABLE_SCORE) {
