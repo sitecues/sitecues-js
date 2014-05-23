@@ -47,13 +47,13 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isGoodRole: 8,
         isGroupedWithImage: 10,
         isDivided: -10,
-        isNewBgContainer: 20,
+        hasOwnBackground: 20,
         vertSeparationImpact: 1,
         horizSeparationImpact: 1,
-        percentHeightUnderIdealMin: -.5,
-        percentHeightOverIdealMax: -.7,
-        percentWidthUnderIdealMin: -.5,
-        percentWidthOverIdealMax: -.5,
+        percentOfViewportHeightUnderIdealMin: -.5,
+        percentOfViewportHeightOverIdealMax: -.7,
+        percentOfViewportWidthUnderIdealMin: -.5,
+        percentOfViewportWidthOverIdealMax: -.5,
         isLargeGrowthOverTallChild: -10,   // Maybe change to: is large growth over good rich child
         tinyHeightFactor: -3,
         tinyWidthFactor: -5,
@@ -76,7 +76,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       REFINEMENT_WEIGHTS = {
         isParentOfOnlyChild: .25  // Done in separate stage after WEIGHTS used
       },
-      customJudgements = {},
       customSelectors = { // Inject selectors via customization modules
         //prefer: "[selector]",
         //ignore: "[selector]",
@@ -256,7 +255,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var traitStack = traits.getTraitStack(restrictedCandidates);
 
       // 3. Get judgements -- higher level concepts from hand-tweaked logic
-      var judgementStack = judge.getJudgementStack(traitStack, restrictedCandidates, customJudgements);
+      var judgementStack = judge.getJudgementStack(traitStack, restrictedCandidates);
 
       // 4. Get the best choice
       return getBestCandidate(traitStack, judgementStack, restrictedCandidates);
@@ -387,15 +386,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // Pass in as { judgementName: weightValue, judgementName2: weightValue2, etc. }
     picker.provideCustomWeights = function(weights) {
       $.extend(judgementWeights, weights);
-    };
-
-    // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-    // Pass in as { judgementName: fn(), judgementName2: fn2(), etc. }
-    // Parameters to judgement functions are:
-    //   judgements, traits, belowTraits, belowJudgements, parentTraits, firstNonInlineTraits, node, index
-    // For each judgement, a weight of the same name must exist.
-    picker.provideCustomJudgements = function(judgements) {
-      customJudgements = judgements;
     };
 
     // --- For debugging ----------------------
