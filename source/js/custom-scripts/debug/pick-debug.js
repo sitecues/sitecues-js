@@ -42,12 +42,7 @@ sitecues.def(function (module, callback) {
         scoreObj = scoreObjs[index];
         var headingStyle = 'font-weight: bold; font-size: 10pt; ' +
           (index === bestScoreIndex && 'background-color: green; color: white;');
-        if (scoreObj.initialScore === scoreObj.finalScore) {
-          console.group('%c%s    Score = %d', headingStyle, scoreObj.about, scoreObj.finalScore);
-        }
-        else {
-          console.group('%c%s    Pre-vote score = %d    Final score = %d', headingStyle, scoreObj.about, scoreObj.initialScore, scoreObj.finalScore);
-        }
+        console.group('%c%s    Score = %d', headingStyle, scoreObj.about, scoreObj.score);
 
         console.log(nodes[index]);
         logObject('Traits', traitStack[index]);

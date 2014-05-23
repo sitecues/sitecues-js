@@ -39,7 +39,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       PICK_RULE_PREFER = 'prefer',   // pick this item
       PICK_RULE_IGNORE = 'ignore',   // don't pick this item
       // The following weights are used to multiple each judgement of the same name, defined in judgements.js
-      // The initialScore is a sum of these weights * judgements
+      // The score is a sum of these weights * judgements
       // Public in order to allow customizations
       judgementWeights = {
         isGreatTag: 13,
@@ -266,7 +266,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var scoreObjs, bestIndex;
 
       // 1. Get scores for candidate nodes
-      scoreObjs = getInitialScores(judgementStack, candidates);
+      scoreObjs = getScores(judgementStack, candidates);
 
       // 2. Parents of only children are strongly influenced by that child
       refineScoresForParentsOfOneChild(traitStack, scoreObjs);
@@ -278,7 +278,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
 
       // 5. Return item, or nothing if score was too low
-      return scoreObjs[bestIndex].finalScore < MIN_SCORE_TO_PICK ? $() : $(candidates[bestIndex]);
+      return scoreObjs[bestIndex].score < MIN_SCORE_TO_PICK ? $() : $(candidates[bestIndex]);
     }
 
     // Placeholder used by 'debug' customization
@@ -286,7 +286,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     // Get a score for each candidate node
     // Unusable nodes get UNUSABLE_SCORE -- a score so low it will never be picked
-    function getInitialScores(judgementStack, candidates) {
+    function getScores(judgementStack, candidates) {
       var index,
           scoreObj = null,
           allScoreObjs = [];
@@ -297,14 +297,15 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           candidates[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE ||
              !judgementStack[index]) {
           scoreObj = {
-            initialScore: UNUSABLE_SCORE,
-            finalScore: UNUSABLE_SCORE,
-            about: 'Ancestor #' + index + '. Ignored'  // Debug
+            score: UNUSABLE_SCORE,
+            about: 'Ancestor #' + index + '. Ignored',  // Debug
+            info: [],
+            isUsable: false
           };
         }
         else {
           // Get the score for the candidate node at the given index
-          scoreObj = computeInitialScore(judgementStack, index);
+          scoreObj = computeScore(judgementStack, index);
         }
         allScoreObjs.push(scoreObj);
       }
@@ -312,14 +313,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     }
 
     // Get the score for the candidate node at the given index
-    function computeInitialScore(judgementStack, index) {
+    function computeScore(judgementStack, index) {
       var judgements = judgementStack[index],
         factorKey, value, scoreDelta, weight,
         scoreObj = {
-          initialScore: 0,
-          finalScore: 0,
+          score: 0,
           info: [],
-          about: 'Ancestor #' + index  // Debug
+          about: 'Ancestor #' + index,  // Debug
+          isUsable: true
         };
 
       // Score = judgements * weights
@@ -328,7 +329,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           value = judgements[factorKey];
           weight = judgementWeights[factorKey];
           scoreDelta = value * weight;  // Numeric or Boolean value: JS treats true=1, false=0
-          scoreObj.initialScore += scoreDelta;
+          scoreObj.score += scoreDelta;
           scoreObj.info.push({
             about: factorKey,
             value: value,
@@ -337,21 +338,17 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         }
       }
 
-      // Temporary until we either reintroduce sibling vote code or decide to remove sibling vote concept.
-      // Aaron to follow-up.
-      scoreObj.finalScore = scoreObj.initialScore;
-
       return scoreObj;
     }
 
     function getCandidateWithHighestScore(scores) {
       var index,
-          bestScore = scores[0].initialScore,
+          bestScore = scores[0].score,
           bestScoreIndex = 0;
 
       for (index = 1; index < scores.length; index ++) {
-        if (scores[index].initialScore > bestScore) {
-          bestScore = scores[index].initialScore;
+        if (scores[index].score > bestScore) {
+          bestScore = scores[index].score;
           bestScoreIndex = index;
         }
       }
@@ -367,9 +364,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     function refineScoresForParentsOfOneChild(traitStack, scoreObjs) {
       var index, delta;
       for (index = 1; index < traitStack.length - 1; index ++ ) {
-        if (traitStack[index].childCount === 1 && scoreObjs[index-1].initialScore !== UNUSABLE_SCORE) {
-          delta = scoreObjs[index - 1].initialScore;
-          scoreObjs[index].initialScore += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
+        if (traitStack[index].childCount === 1 && scoreObjs[index-1].isUsable) {
+          delta = scoreObjs[index - 1].score;
+          scoreObjs[index].score += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
           scoreObjs[index].info.push({
             about: 'singleParentRefinement',
             value: delta,
