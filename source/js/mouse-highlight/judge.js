@@ -64,7 +64,6 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index));
 
-      // TODO provide example for review
       for (judgementGetter in customJudgements) {
         if (customJudgements.hasOwnProperty(judgementGetter)) {
           $.extend(judgements, judgementGetter(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
@@ -76,7 +75,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // ** Semantic constants ***
     // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
-    var SECTION_START_SELECTOR = 'h1, h2, h3, h4, h5 h6, header, hr, dt, div[role="separator"],div[role="heading"]',
+    var SECTION_START_SELECTOR = 'h1, h2, h3, h4, h5, h6, header, hr, dt, div[role="separator"],div[role="heading"]',
       GREAT_TAGS = { blockquote:1, td:1, tr: 1, ul:1, ol: 1, menu:1, section: 1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, img:1, p:1, pre:1, li:1 },
       // These are less likely to be used to layout a cell/box
@@ -110,10 +109,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       ROW_HORIZ_GROWTH_THRESHOLD = 1.8,            // Because text is horizontal, it is unlikely to have a narrow cell in a row. Generally the row width will be nearly 2x the cell width.
       VERY_SMALL_GROWTH_FACTOR = 1.1,
       SMALL_GROWTH_FACTOR = 1.2,
+      MIN_IMAGE_GROUP_HEIGHT = 100,                // Image groups must be taller than this
       MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       MAX_ANCESTOR_INDEX_IMAGE_GROUP = 3,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
-      MAX_ANCESTORS_IMAGE_GROUP = 4,
-      MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER = 120,
+      ROUGHLY_SAME_SIZE_THRESHOLD = 120,           // If parent grows by fewer pixels than this, it is considered roughly the same size as the child
       customJudgements = {};
 
     function getVisualSeparationJudgements(traits, parentTraits) {
@@ -218,18 +217,6 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // Judge categories of growth
       $.extend(growthJudgements, {
-        // Our child was already very tall, and we're even taller --
-        // generally better to go with the child, because it's already big, and the parent might be a group of groups.
-        // This helps avoid super containers and side columns that have boxes within them.
-        // TODO This rule could be unnecessary, or at least have a better standard for what is a tall child, and
-        //      how much more growth is bad. We should determine whether/if the viewport height is a useful input,
-        //      or whether we should be measuring height in pixels.
-        isLargeGrowthOverTallChild:
-          // Is tall child
-          childTraits.percentOfViewportHeight > IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
-          // Lots of height growth
-          growthJudgements.childVertGrowthFactor > EXTREME_GROWTH_FACTOR,
-
         // Significantly larger both horizontally and vertically when compared with the first non-inline candidate.
         // This is rarely good. It generally means we're in a group of visual groups.
         // If we don't have this rule, we tend to pick containers that are used for 2d layout.
@@ -267,6 +254,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isLargeWidthExpansion: growthJudgements.totalHorizGrowthFactor > EXTREME_GROWTH_FACTOR &&
                                !firstNonInlineTraits.isVisualMedia
       });
+
+      // Roughly the same size if the total growth is less than a threshold
+      growthJudgements.isRoughlySameSizeAsChild = growthJudgements.topGrowth +
+        growthJudgements.bottomGrowth + growthJudgements.leftGrowth + growthJudgements.rightGrowth < ROUGHLY_SAME_SIZE_THRESHOLD;
 
       return growthJudgements;
     }
@@ -353,20 +344,14 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Note: authors do not always use semantics in a reasonable way. Because of this, we do not
     // weigh the use of grouping tags and roles very highly.
     function getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index) {
-      return {
+      var domJudgements = {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
         // Being grouped with a single image indicates something is likely good to pick
-        isGroupedWithImage: traits.visualHeight > SIGNIFICANT_EDGE_PIXEL_GROWTH && isCandidateGroupedWithImage(traits, node, index),
-        // A container that begins with a heading or dividing element is likely a good item to pick
-        // Don't consider it a section-start-container if the child is a significantly smaller section-start-container.
-        // TODO don't consider us a section start container when any descendant was one and we're significantly larger
-        // TODO make "significantly larger" easier to read and understand in the code
-        isSectionStartContainer:
-          (!childTraits.isSectionStartContainer || judgements.topGrowth +
-            judgements.bottomGrowth + judgements.leftGrowth + judgements.rightGrowth < MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER) &&
-          isSectionStartContainer(node),
+        isGroupedWithImage: traits.visualHeight > MIN_IMAGE_GROUP_HEIGHT && isCandidateGroupedWithImage(traits, node, index),
+        // A child candidate was considered a section start container
+        isAncestorOfSectionStartContainer: childJudgements && (childJudgements.isSectionStartContainer || childJudgements.isAncestorOfSectionStartContainer),
         // A divided group should be avoided. Rather, the subgroups should be picked.
         // Avoid picking the current candidate if it is divided by a heading or separator in the middle, because
         // it is probably an ancestor of smaller useful groups.
@@ -376,6 +361,15 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           (childJudgements !== null && childJudgements.isWideMediaContainer) ||
           (traits.isVisualMedia && traits.percentOfViewportWidth > MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH)
       };
+
+      // A container that begins with a heading or dividing element is likely a good item to pick
+      // Don't check if it's a section-start-container when it's an ancestor of another section start container,
+      // unless the parent is about the same size as the child
+      domJudgements.isSectionStartContainer = (!domJudgements.isAncestorOfSectionStartContainer ||
+        judgements.isRoughlySameSizeAsChild) &&
+        isSectionStartContainer(node);
+
+      return domJudgements;
     }
 
     // Should we even consider this node or not?
@@ -399,13 +393,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         return false;  // Relatively high up in element tree. The benefit of doing this check is not worth cost.
       }
       images = node.getElementsByTagName('img'); // Faster than querySelectorAll()
-      if (images.length !== 1) {
-        return false; // No images or multiple images: doesn't fit the pattern
-      }
-
-      // Return true if the image is not too deep of an ancestor
-      // TODO see if this rule is really needed
-      return $(images[0]).parentsUntil(node).length < MAX_ANCESTORS_IMAGE_GROUP;
+      return images.length === 1;   // No images or multiple images: doesn't fit the pattern
     }
 
     // Check first rendered descendant element to see if it's a heading, or any element
@@ -424,6 +412,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // Is the content divided into 2 or more sections?
     // IOW, is there a heading/hr in the middle of it rather than just at the start?
+    // This will return true even if there is something before the heading that is not grouped with <header>.
     function isDivided(container) {
       // Find descendants which start a section
       var dividingElements = $(container).find(SECTION_START_SELECTOR),
@@ -436,13 +425,12 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         parentSectionStart = $(lastDividingElement).parentsUntil(container).has(SECTION_START_SELECTOR),
 
         // Starting point
-        currentAncestor = (parentSectionStart.length ? parentSectionStart[0] : lastDividingElement),
+        currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
 
         // Used in while loop
         sibling;
 
       // Go up from starting point to see if a non-section-start exists before it in the container.
-      // TODO what about a date before the heading, such as in a blog?
       while (currentAncestor && currentAncestor !== container) {
         sibling = currentAncestor.parentNode.firstElementChild;
 
@@ -464,12 +452,14 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         MAX_SEPARATION_IMPACT) + borderWidth * BORDER_WIDTH_BONUS;
     }
 
+    function isTransparentColor(color) {
+      return color === 'transparent' || color.match(/^rgba.*0\)$/);
+    }
+
     function hasOwnBackground(traits, parentTraits) {
       // 1. Background colors
-      if (traits.style.backgroundColor !== parentTraits.style.backgroundColor &&
-        // TODO: have better check for transparent background ('a' value of 0, other values can be anything)
-        traits.style.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
-        traits.style.backgroundColor !== 'transparent') {
+      var bgColor = traits.style.backgroundColor;
+      if (bgColor !== parentTraits.style.backgroundColor && !isTransparentColor(bgColor)) {
         return true;
       }
 

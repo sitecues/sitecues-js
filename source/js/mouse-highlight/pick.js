@@ -54,7 +54,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         percentOfViewportHeightOverIdealMax: -.7,
         percentOfViewportWidthUnderIdealMin: -.5,
         percentOfViewportWidthOverIdealMax: -.5,
-        isLargeGrowthOverTallChild: -10,   // Maybe change to: is large growth over good rich child
         tinyHeightFactor: -3,
         tinyWidthFactor: -5,
         isFloatForCellLayout: 20,
