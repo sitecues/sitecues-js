@@ -34,8 +34,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         var judgements = null, node = nodeStack[index], parentTraits;
         if (isUsable(traits, node)) {
           parentTraits = index < numCandidates - 1 ? traitStack[index + 1] : traits;
-          judgements = getJudgements(parentTraits, traits, childTraits, firstNonInlineTraits, node,
-            childJudgements, index);
+          judgements = getJudgements(parentTraits, traits, childTraits, firstNonInlineTraits, node, childJudgements, index);
           childJudgements = judgements;
           childTraits = traits;
         }
@@ -57,15 +56,18 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // ------------ PRIVATE -------------
 
     function getJudgements(parentTraits, traits, childTraits, firstNonInlineTraits, node, childJudgements, index) {
-      var customJudgement,
+      var judgementGetter,
         judgements = getVisualSeparationJudgements(traits, parentTraits);
+
       $.extend(judgements, getSizeJudgements(traits));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index));
-      for (customJudgement in customJudgements) {
-        if (customJudgements.hasOwnProperty(customJudgement)) {
-          $.extend(judgements, customJudgement(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
+
+      // TODO provide example for review
+      for (judgementGetter in customJudgements) {
+        if (customJudgements.hasOwnProperty(judgementGetter)) {
+          $.extend(judgements, judgementGetter(judgements, traits, childTraits, childJudgements, parentTraits, firstNonInlineTraits, node, index));
         }
       }
 
@@ -77,8 +79,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     var SECTION_START_SELECTOR = 'h1, h2, h3, h4, h5 h6, header, hr, dt, div[role="separator"],div[role="heading"]',
       GREAT_TAGS = { blockquote:1, td:1, tr: 1, ul:1, ol: 1, menu:1, section: 1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, img:1, p:1, pre:1, li:1 },
-      SEMANTIC_TEXT_CONTAINING_TAGS =   // These are less likely to be used to layout a cell/box
-      { a: 1, li: 1, ol: 1, ul: 1, p: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1 },
+      // These are less likely to be used to layout a cell/box
+      UNLIKELY_CELL_TAGS = { a: 1, ol: 1, ul: 1, p: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1 },
       UNUSABLE_TAGS = { area:1, base:1, basefont:1, bdo:1, br:1, col:1, colgroup:1, font:1, frame:1, iframe:1,
         legend:1, link:1, map:1, optgroup:1, option:1, tbody:1, tfoot:1, thead:1, object:1, embed:1 },
       GOOD_ROLES = {list:1, region:1, complementary:1, dialog:1, alert:1, alertdialog:1, gridcell:1,
@@ -88,7 +90,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // ** Layout and geometrical constants ***
       MAX_PERCENT_OF_VIEWPORT_HEIGHT = 250,        // If larger than this, stop processing (saves time)
-      MIN_COLUMN_CELL_HEIGHT = 50,
+      MIN_COLUMN_CELL_HEIGHT = 50,                 // If fewer pixels than this, don't consider it to be a cell in a column
       IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT = 25,   // Smaller than this is bad
       IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT = 60,   // Larger than this is bad
       IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH = 20,    // Smaller than this is bad
@@ -99,17 +101,17 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       SEPARATION_IMPACT_POWER = 1.4,               // Exponent for visual impact of whitespace
       MAX_SEPARATION_IMPACT = 25,                  // The maximum impact of whitespace, for a given edge
       BORDER_WIDTH_BONUS = 10,                     // Bonus points for each pixel of border width
-      SIGNIFICANT_EDGE_PIXEL_GROWTH = 50,          // Number of pixels of growth on a side that clearly mean additional content is encompassed on that side
+      SIGNIFICANT_EDGE_PIXEL_GROWTH = 50,          // Number of pixels of growth on a side that likely means additional content is encompassed on that side
       SIGNIFICANT_SEPARATION_IMPACT = 7,           // Amount of separation impact on a side that clearly shows a visual separation
-      MIN_CELL_VERT_SEPARATION = 10,
+      MIN_CELL_VERT_SEPARATION = 10,               // Amount of separation impact required above or below an object before we consider a possible cell in a column.
       EXTREME_GROWTH_FACTOR = 2.5,                 // If parent's height ratio of child is larger than this, we consider it significantly larger than child
       MODERATE_GROWTH_FACTOR = 1.6,                // An amount of growth that is significant but not huge
-      MIN_CELL_IN_COLUMN_VERT_GROWTH = 1.3,        // Sometimes there is a very small cell in a column of only 2 cells, we only require 30% larger
-      MIN_CELL_IN_ROW_HORIZ_GROWTH = 1.8,          // Because text is horizontal, it is unlikely to have a narrow cell in a row. Generally rows will nearly double the size of the cell.
+      COLUMN_VERT_GROWTH_THRESHOLD = 1.3,          // Sometimes there is a very small cell in a column of only 2 cells. We only require that the column be 30% taller than the cell
+      ROW_HORIZ_GROWTH_THRESHOLD = 1.8,            // Because text is horizontal, it is unlikely to have a narrow cell in a row. Generally the row width will be nearly 2x the cell width.
       VERY_SMALL_GROWTH_FACTOR = 1.1,
       SMALL_GROWTH_FACTOR = 1.2,
-      MAX_SIBLINGS_IMAGE_GROUP = 4,
-      MAX_ANCESTOR_INDEX_IMAGE_GROUP = 3,
+      MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
+      MAX_ANCESTOR_INDEX_IMAGE_GROUP = 3,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       MAX_ANCESTORS_IMAGE_GROUP = 4,
       MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER = 120,
       customJudgements = {};
@@ -160,14 +162,19 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     }
 
     // Judge different types of growth:
-    // - From a child candidate to the current candidate
-    // - From the current candidate to its parent
-    // - Total (from the first non-inline candidate to the current candidate)
+    // "Growth" is size comparison between an element and a descendant.
+    // It can be measured as:
+    // - A difference in pixels, as a ratio or as a percentage.
+    // The comparisons can be between:
+    // - A parent candidate to the child candidate
+    // - From the current candidate to its child candidate
+    // - From the current candidate to first non-inline candidate
     function getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements) {
       var growthJudgements = {
         // Ratio of sizes between objects
 
-        // Comparison with first candidate that can provide usefile size to compare with
+        // Comparison with first non-inline candidate.
+        // This is the first element can provide useful size to compare with.
         totalHorizGrowthFactor: traits.visualWidth / firstNonInlineTraits.visualWidth,
         totalVertGrowthFactor: traits.visualHeight / firstNonInlineTraits.visualHeight,
 
@@ -179,7 +186,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         childVertGrowthFactor: traits.visualHeight / childTraits.visualHeight,
         childHorizGrowthFactor: traits.visualWidth / childTraits.visualWidth,
 
-        // Amount of growth in particular direction.
+        // Amount of growth in particular direction, in pixels.
         // We use unzoomedRect so that the numbers are not impacted by the amount of zoom.
         topGrowth: childTraits.unzoomedRect.top - traits.unzoomedRect.top,
         bottomGrowth: traits.unzoomedRect.bottom - childTraits.unzoomedRect.bottom,
@@ -187,91 +194,96 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         rightGrowth: traits.unzoomedRect.right - childTraits.unzoomedRect.right
       };
 
-      // Growth in a direction after there was already visual separation in that direction.
+      function getBadGrowth(edge) {
+        if (!childJudgements) {
+          return 0;
+        }
+        var separationImpact = childJudgements[edge + 'SeparationImpact'];
+        if (growthJudgements[edge + 'Growth'] < SIGNIFICANT_EDGE_PIXEL_GROWTH ||
+            separationImpact < SIGNIFICANT_SEPARATION_IMPACT) {
+          return 0;
+        }
+        return separationImpact;
+      }
+
+      // "Bad growth" is growth in a direction after there was already visual separation in that direction.
       // For example, a child element has right padding, and the parent element grows to the right over that.
-      // It is more likely that choosing the child element is correct, because it was already a distinct visual unit
+      // It is more likely that choosing the child element is correct, because it was already a distinct visual unit.
       $.extend(growthJudgements, {
-        badGrowthTop: // If our top is far above child's, and child already had good top separator, then child is probably it's own group
-          childJudgements ?
-            (growthJudgements.topGrowth > SIGNIFICANT_EDGE_PIXEL_GROWTH &&
-            childJudgements.topSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT) * childJudgements.topSeparationImpact : 0,
-        badGrowthBottom: // Similar to badGrowthTop
-          childJudgements ?
-            (growthJudgements.bottomGrowth > SIGNIFICANT_EDGE_PIXEL_GROWTH &&
-            childJudgements.bottomSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT) * childJudgements.bottomSeparationImpact : 0,
-        badGrowthLeft: // Similar to badGrowthTop
-          childJudgements ?
-          (growthJudgements.leftGrowth > SIGNIFICANT_EDGE_PIXEL_GROWTH &&
-            childJudgements.leftSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT) * childJudgements.leftSeparationImpact : 0,
-        badGrowthRight: // Similar to badGrowthTop
-          childJudgements ?
-          (growthJudgements.rightGrowth > SIGNIFICANT_EDGE_PIXEL_GROWTH &&
-            childJudgements.rightSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT) * childJudgements.rightSeparationImpact : 0
+        badGrowthTop: getBadGrowth('top'),
+        badGrowthBottom: getBadGrowth('bottom'),
+        badGrowthLeft: getBadGrowth('left'),
+        badGrowthRight: getBadGrowth('right')
       });
 
-      // Type of growth
+      // Judge categories of growth
       $.extend(growthJudgements, {
-        // Our child was already very tall, and we're even larger --
-        // generally better to go with the child, it's already big, and the parent might be a group of groups
-        isLargeGrowthOverTallChild: traits.percentOfViewportHeight > 100 &&
+        // Our child was already very tall, and we're even taller --
+        // generally better to go with the child, because it's already big, and the parent might be a group of groups.
+        // This helps avoid super containers and side columns that have boxes within them.
+        // TODO This rule could be unnecessary, or at least have a better standard for what is a tall child, and
+        //      how much more growth is bad. We should determine whether/if the viewport height is a useful input,
+        //      or whether we should be measuring height in pixels.
+        isLargeGrowthOverTallChild:
+          // Is tall child
           childTraits.percentOfViewportHeight > IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
+          // Lots of height growth
           growthJudgements.childVertGrowthFactor > EXTREME_GROWTH_FACTOR,
 
-        // Significantly larger both horizontally and vertically when compared with the first block candidate.
+        // Significantly larger both horizontally and vertically when compared with the first non-inline candidate.
         // This is rarely good. It generally means we're in a group of visual groups.
         // If we don't have this rule, we tend to pick containers that are used for 2d layout.
-        isLarge2dGrowth: // Grew a lot in 2 directions from non-inline descendant
-          (growthJudgements.baseHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
-            growthJudgements.baseVertGrowthFactor > EXTREME_GROWTH_FACTOR),
+        // Only need moderate horizontal growth -- things tend to be wider than they are tall.
+        // Also, by requiring extreme vertical growth we don't fire as much when the first non-inline was a single line of text.
+        isLarge2dGrowth:
+          (growthJudgements.totalHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
+            growthJudgements.totalVertGrowthFactor > EXTREME_GROWTH_FACTOR),
 
         // Moderate one dimensional growth often means the parent is just stretching to cover a little more
         // information. For example, adding a thumbnail or a caption. This is good for the parent and bad for the child.
-        // Rule used to give the child a penalty.
+        // This rule is used to give the child a penalty.
         // If we don't have this rule we tend to miss attaching supplemental information such as captions.
-        isModerate1dGrowthIntoParent: // Probably not this as parent is just a little larger, this looks like a piece of the parent
-          // Horizontal growth is very small to moderate, and vertical growth is very small
+        isModeratelySmallerThanParentInOneDimension:
+          // Horizontal growth: very small to moderate
+          // Vertical growth: very small
           (growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
             growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
             growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
-          // Or, vertical growth is very small to moderate, and horizontal growth is very small
+          // Or:
+          // Vertical growth: very small to moderate
+          // Horizontal growth: very small
           (growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR  &&
             growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
             growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR),
 
         // Similar rule, used to give the parent a bonus:
-        // This is a good thing, we are just encompassing a little more information such as an image or caption
+        // This is a good thing, we are just encompassing a little more information such as an image or caption.
         // If we don't have this rule we tend to miss attaching supplemental information such as captions.
-        isModerate1dGrowthOverChild:
-          childJudgements && childJudgements.isModerate1dGrowthIntoParent,
+        isModeratelyLargerThanChildInOneDimension:
+          childJudgements && childJudgements.isModeratelySmallerThanParentInOneDimension,
 
-        // Growing much larger horizontally is generally a bad thing unless the original item was an image
+        // Growing much larger horizontally is generally a bad thing unless the original item was an image.
         // This is often a horizontal row of cells -- better to pick the smaller cells.
-        isLargeWidthExpansion: growthJudgements.baseHorizGrowthFactor > EXTREME_GROWTH_FACTOR &&
+        isLargeWidthExpansion: growthJudgements.totalHorizGrowthFactor > EXTREME_GROWTH_FACTOR &&
                                !firstNonInlineTraits.isVisualMedia
       });
 
       return growthJudgements;
     }
 
-    // Heuristics to see if something looks like a box based on box coordinate information
+    // Heuristics to see if something looks like a cell/box based on box coordinate information.
+    // By cell, we mean a box-shaped container of related information.
+    // We call it a cell because it's generally grouped in rows and/or columns.
+    // It is not necessarily a table cell.
     function getCellLayoutJudgements(judgements, traits, childTraits, childJudgements) {
       var cellLayoutJudgements = {};
-      // If it is a float, does it look like it's a float to create an appearance of cells?
-      // We judge this as true if:
-      // - The parent height growth is relatively small, and
-      // - The parent width growth is large
-      // Note: often the sibling cells are a lot taller, so we have to be a little forgiving on parent height growth
-      cellLayoutJudgements.isFloatForCellLayout =
-          traits.style.float !== 'none' && traits.style.display !== 'inline-block' &&
-          (judgements.parentVertGrowthFactor < SMALL_GROWTH_FACTOR &&
-            judgements.parentHorizGrowthFactor > MIN_CELL_IN_ROW_HORIZ_GROWTH) ||
-          (judgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
-           judgements.parentHorizGrowthFactor > EXTREME_GROWTH_FACTOR);
-
-      // Is anything child us already a cell?
-      // If yes, we're unlikely to be the right choice.
-      cellLayoutJudgements.isAncestorOfCell =
-        childJudgements !== null &&
+      // Is any descendant of the candidate already a cell?
+      // If yes, avoid picking this candidate because it's likely a super container.
+      // TODO We may want to be more forgiving of parents of real table cells when they are used in
+      //      data tables, where the cell is a small object. In this case the user may wish to read an
+      //      entire table or table row all at once in the HLB. We need to do more UX testing and research
+      //      with regards to data tables.
+      cellLayoutJudgements.isAncestorOfCell = childJudgements &&
         (childJudgements.isAncestorOfCell ||
           childJudgements.isFloatForColumnLayout ||
           childJudgements.isCellInCol ||
@@ -279,55 +291,89 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           childTraits.tag === 'td' ||
           childTraits.tag === 'tr');
 
-      // Is something child us already a cell and we're much wider?
-      // If yes, we're a terrible choice. We're probably a row of cells.
-      cellLayoutJudgements.isWideAncestorOfCell =
-        cellLayoutJudgements.isAncestorOfCell &&
-        traits.percentOfViewportWidth > IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH &&
-        judgements.baseHorizGrowthFactor > EXTREME_GROWTH_FACTOR;
+      // Is any descendant of the candidate already a cell and the candidate is much wider than the cell?
+      // If yes, avoid picking this candidate because it's probably a row of cells.
+      cellLayoutJudgements.isWideAncestorOfCell = cellLayoutJudgements.isAncestorOfCell &&
+        traits.percentOfViewportWidth > IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH;
 
-      // Do we look like a cell in a column of cells?
-      cellLayoutJudgements.isCellInCol =
-          !cellLayoutJudgements.isAncestorOfCell && childTraits.style.display !== 'inline' &&
-          judgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&      // Approx. same width
-          judgements.parentVertGrowthFactor > MIN_CELL_IN_COLUMN_VERT_GROWTH &&       // Large vertical growth
-          !SEMANTIC_TEXT_CONTAINING_TAGS.hasOwnProperty(traits.tag) &&  // Text, not a cell
-          (traits.visualHeight > MIN_COLUMN_CELL_HEIGHT) &&
-          (traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT) &&
-          (judgements.topSeparationImpact > MIN_CELL_VERT_SEPARATION ||
-            judgements.bottomSeparationImpact > MIN_CELL_VERT_SEPARATION);
+      cellLayoutJudgements.isFloatForCellLayout = false;
+      cellLayoutJudgements.isCellInCol = false;
+      cellLayoutJudgements.isCellInRow = false;
 
-      // Do we look like a cell in a row of cells?
-      cellLayoutJudgements.isCellInRow =
-          !cellLayoutJudgements.isAncestorOfCell && childTraits.style.display !== 'inline' &&
-          traits.style.display !== 'inline-block' &&
-          judgements.parentVertGrowthFactor < EXTREME_GROWTH_FACTOR &&
-          judgements.parentHorizGrowthFactor > MIN_CELL_IN_ROW_HORIZ_GROWTH  &&      // Large horizontal growth
-          (judgements.leftSeparationImpact = SIGNIFICANT_SEPARATION_IMPACT ||
-            judgements.rightSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT ||
-            traits.style.float !== 'none');
+      function isPossibleCell() {
+        // Avoid parents of existing cells
+        if (cellLayoutJudgements.isAncestorOfCell) {
+          return false;
+        }
+        // Avoid certain tags
+        if (UNLIKELY_CELL_TAGS.hasOwnProperty(traits.tag)) {
+          return false;
+        }
+
+        // Avoid inline blocks
+        if (traits.style.display !== 'inline-block') {
+          return false;
+        }
+      }
+
+      if (isPossibleCell()) {
+        // If it is a float, is it a float to create an appearance of cells in a row?
+        // We judge this as true if:
+        // - The parent height growth is relatively small, and
+        // - The parent width growth is large
+        // Note: often the parent row is a lot taller than the current candidate,
+        // so we have to be a little forgiving on parent height growth.
+        cellLayoutJudgements.isFloatForCellLayout = traits.style.float !== 'none' &&
+          // Narrow row -- make sure height of candidate cell is nearly the height of the row
+          (judgements.parentVertGrowthFactor < SMALL_GROWTH_FACTOR &&
+            judgements.parentHorizGrowthFactor > ROW_HORIZ_GROWTH_THRESHOLD) ||
+          // Wide row -- more forgiving about height of cell compared with row
+          (judgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
+            judgements.parentHorizGrowthFactor > EXTREME_GROWTH_FACTOR);
+
+        // Do we look like a cell in a column of cells?
+        cellLayoutJudgements.isCellInCol = judgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&      // Approx. same width
+          judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
+          traits.visualHeight > MIN_COLUMN_CELL_HEIGHT &&
+          traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
+          judgements.vertSeparationImpact > MIN_CELL_VERT_SEPARATION;
+
+        // Do we look like a cell in a row of cells?
+        cellLayoutJudgements.isCellInRow = judgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&
+          judgements.parentHorizGrowthFactor > ROW_HORIZ_GROWTH_THRESHOLD &&      // Large horizontal growth
+          traits.percentOfViewportWidth < IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH &&
+          judgements.horizSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT;
+      }
 
       return cellLayoutJudgements;
     }
 
-    // Simple DOM judgements
-    // The tags and role may lie to us, so we don't necessarily score high for tags/roles
-    // Being grouped with an image, or a heading at the beginning, are very good clues.
-    // Being divided by a heading or separator in the middle indicates we are probably an ancestor smaller useful groups.
+    // DOM judgements
+    // Judgements based on the DOM, including tags, roles and hierarchical relationships.
+    // Note: authors do not always use semantics in a reasonable way. Because of this, we do not
+    // weigh the use of grouping tags and roles very highly.
     function getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index) {
       return {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
-        isGroupedWithImage: traits.visualHeight > SIGNIFICANT_EDGE_PIXEL_GROWTH &&
-          isGroupedWithImage(traits, node, index),
-        isSectionStartContainer: // Don't consider it a section start if we already were one and grew from that
+        // Being grouped with a single image indicates something is likely good to pick
+        isGroupedWithImage: traits.visualHeight > SIGNIFICANT_EDGE_PIXEL_GROWTH && isCandidateGroupedWithImage(traits, node, index),
+        // A container that begins with a heading or dividing element is likely a good item to pick
+        // Don't consider it a section-start-container if the child is a significantly smaller section-start-container.
+        // TODO don't consider us a section start container when any descendant was one and we're significantly larger
+        // TODO make "significantly larger" easier to read and understand in the code
+        isSectionStartContainer:
           (!childTraits.isSectionStartContainer || judgements.topGrowth +
             judgements.bottomGrowth + judgements.leftGrowth + judgements.rightGrowth < MAX_TOTAL_GROWTH_DOUBLE_MULTI_START_CONTAINER) &&
           isSectionStartContainer(node),
+        // A divided group should be avoided. Rather, the subgroups should be picked.
+        // Avoid picking the current candidate if it is divided by a heading or separator in the middle, because
+        // it is probably an ancestor of smaller useful groups.
         isDivided: isDivided(node),
+        // Avoid picking things like hero images or ancestors of them
         isWideMediaContainer:
-          (childJudgements !== null && childJudgements.isWideMediaContainer) ||   // We don't generally want to pick the hero image or any ancestor of it
+          (childJudgements !== null && childJudgements.isWideMediaContainer) ||
           (traits.isVisualMedia && traits.percentOfViewportWidth > MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH)
       };
     }
@@ -344,19 +390,21 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     }
 
     // Groups of related content often pair an image with text -- this is a noticeable pattern, e.g. on news sites
-    function isGroupedWithImage(traits, node, ancestorIndex) {
+    function isCandidateGroupedWithImage(traits, node, ancestorIndex) {
       var images;
-      if (traits.childCount === 0 || traits.childCount > MAX_SIBLINGS_IMAGE_GROUP) {
+      if (traits.childCount === 0 || traits.childCount > MAX_CHILDREN_IMAGE_GROUP) {
         return false;  // If too many siblings this doesn't fit the pattern
       }
       if (ancestorIndex > MAX_ANCESTOR_INDEX_IMAGE_GROUP) {
-        return false;  // Higher up in element tree -- benefit of doing this check is not worth cost
+        return false;  // Relatively high up in element tree. The benefit of doing this check is not worth cost.
       }
-      images = node.getElementsByTagName('img'); // Fastest
+      images = node.getElementsByTagName('img'); // Faster than querySelectorAll()
       if (images.length !== 1) {
         return false; // No images or multiple images: doesn't fit the pattern
       }
 
+      // Return true if the image is not too deep of an ancestor
+      // TODO see if this rule is really needed
       return $(images[0]).parentsUntil(node).length < MAX_ANCESTORS_IMAGE_GROUP;
     }
 
@@ -377,19 +425,31 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Is the content divided into 2 or more sections?
     // IOW, is there a heading/hr in the middle of it rather than just at the start?
     function isDivided(container) {
-      var dividingElements = $(container).find(SECTION_START_SELECTOR), // Find descendants which start a section
-        lastSectionStart = dividingElements.get(dividingElements.length - 1), // Last section starting descendant
-        parentSectionStart = $(lastSectionStart).parentsUntil(container).has(SECTION_START_SELECTOR),  // Go up from last section start, to find the topmost section grouping element
-        currentAncestor = parentSectionStart.length ? parentSectionStart[0] : lastSectionStart, // Starting point
+      // Find descendants which start a section
+      var dividingElements = $(container).find(SECTION_START_SELECTOR),
+
+        // Get the last dividing element
+        lastDividingElement = dividingElements.last(),
+
+        // Go up from last dividing element, to find the topmost section-grouping-element
+        // This protects against nested dividing elements confusing us.
+        parentSectionStart = $(lastDividingElement).parentsUntil(container).has(SECTION_START_SELECTOR),
+
+        // Starting point
+        currentAncestor = (parentSectionStart.length ? parentSectionStart[0] : lastDividingElement),
+
+        // Used in while loop
         sibling;
 
-      // Go up section start to see if something exists before it in the container
-      // that is not a section start
+      // Go up from starting point to see if a non-section-start exists before it in the container.
+      // TODO what about a date before the heading, such as in a blog?
       while (currentAncestor && currentAncestor !== container) {
         sibling = currentAncestor.parentNode.firstElementChild;
+
+        // Look at all the siblings before the currentAncestor
         while (sibling && sibling !== currentAncestor) {
           if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling)) {
-            return true;  // Some other type of item than the selector comes before, which means we are divided!
+            return true;  // A non-section-start element exists before the section-start-element, which means we are divided!
           }
           sibling = sibling.nextElementSibling;
         }
