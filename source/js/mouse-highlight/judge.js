@@ -22,6 +22,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         firstNonInlineTraits = traitStack[firstNonInlineIndex],
         childJudgements = null;
 
+      // Return the judgements for the candidate at the given index
+      // Return null if the candidate is unusable
       function mapJudgements(traits, index) {
         var judgements;
         if (!isUsable(traits, nodeStack[index])) {

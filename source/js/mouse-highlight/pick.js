@@ -262,17 +262,34 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return getBestCandidate(traitStack, judgementStack, restrictedCandidates);
     }
 
-    function getBestCandidate(traitStack, judgementStack, candidates) {
-      var scoreObjs, bestIndex;
+    function isUsable(element, judgements) {
+      // If no judgements exist, the candidate was already marked as unusable by the judgements system
+      if (!judgements) {
+        return false;
+      }
+      // Check custom selectors
+      if (customSelectors.ignore && $(element).is(customSelectors.ignore)) {
+        return false;
+      }
+      // Check data attribute
+      if (element.getAttribute('data-sc-pick') === PICK_RULE_IGNORE) {
+        return false;
+      }
+      return true;
+    }
 
+    function getBestCandidate(traitStack, judgementStack, candidates) {
       // 1. Get scores for candidate nodes
-      scoreObjs = getScores(judgementStack, candidates);
+      function getScore(judgements, index) {
+        return computeScore(judgements, candidates[index], index);
+      }
+      var scoreObjs = judgementStack.map(getScore);
 
       // 2. Parents of only children are strongly influenced by that child
       refineScoresForParentsOfOneChild(traitStack, scoreObjs);
 
       // 3. Get the best candidate
-      bestIndex = getCandidateWithHighestScore(scoreObjs);
+      var bestIndex = getCandidateWithHighestScore(scoreObjs);
 
       // 4. Log the results if necessary
       picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
@@ -284,53 +301,34 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // Placeholder used by 'debug' customization
     picker.logResults = function() { };
 
-    // Get a score for each candidate node
-    // Unusable nodes get UNUSABLE_SCORE -- a score so low it will never be picked
-    function getScores(judgementStack, candidates) {
-      var index,
-          scoreObj = null,
-          allScoreObjs = [];
-
-      for (index = 0; index < judgementStack.length; index ++) {
-        // Check if node is usable
-        if ((customSelectors.ignore && $(candidates[index]).is(customSelectors.ignore)) ||
-          candidates[index].getAttribute('data-sc-pick') === PICK_RULE_IGNORE ||
-             !judgementStack[index]) {
-          scoreObj = {
-            score: UNUSABLE_SCORE,
-            about: 'Ancestor #' + index + '. Ignored',  // Debug
-            info: [],
-            isUsable: false
-          };
-        }
-        else {
-          // Get the score for the candidate node at the given index
-          scoreObj = computeScore(judgementStack, index);
-        }
-        allScoreObjs.push(scoreObj);
-      }
-      return allScoreObjs;
-    }
-
     // Get the score for the candidate node at the given index
-    function computeScore(judgementStack, index) {
-      var judgements = judgementStack[index],
-        factorKey, value, scoreDelta, weight,
+    function computeScore(judgements, element, index) {
+      // 1. Check if usable: if item is not usable mark it as such
+      if (!isUsable(element, judgements)) {
+        return {
+          score: UNUSABLE_SCORE,
+          about: 'Ancestor #' + index + '. Unusable/ignored',
+          factors: [],
+          isUsable: false
+        };
+      }
+
+      // 2. Compute score: add up judgements * weights
+      var factorKey, value, scoreDelta, weight,
         scoreObj = {
           score: 0,
-          info: [],
+          factors: [],
           about: 'Ancestor #' + index,  // Debug
           isUsable: true
         };
 
-      // Score = judgements * weights
       for (factorKey in judgementWeights) {
         if (judgementWeights.hasOwnProperty(factorKey)) {
           value = judgements[factorKey];
           weight = judgementWeights[factorKey];
           scoreDelta = value * weight;  // Numeric or Boolean value: JS treats true=1, false=0
           scoreObj.score += scoreDelta;
-          scoreObj.info.push({
+          scoreObj.factors.push({
             about: factorKey,
             value: value,
             weight: weight
@@ -367,7 +365,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         if (traitStack[index].childCount === 1 && scoreObjs[index-1].isUsable) {
           delta = scoreObjs[index - 1].score;
           scoreObjs[index].score += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
-          scoreObjs[index].info.push({
+          scoreObjs[index].factors.push({
             about: 'singleParentRefinement',
             value: delta,
             weight: REFINEMENT_WEIGHTS.isParentOfOnlyChild

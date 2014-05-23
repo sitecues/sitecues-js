@@ -47,10 +47,10 @@ sitecues.def(function (module, callback) {
         console.log(nodes[index]);
         logObject('Traits', traitStack[index]);
         logObject('Judgements', judgementStack[index]);
-        if (scoreObj.info) {
-          scoreObj.info.sort(scoreFactorCompare);  // Display highest impact score factors first
-          logArray('Factors', scoreObj.info.filter(isFactor).map(getScoreFactorString), true);
-          logArray('Non-factors', scoreObj.info.filter(isNonFactor).map(getScoreFactorString));
+        if (scoreObj.factors) {
+          scoreObj.factors.sort(scoreFactorCompare);  // Display highest impact score factors first
+          logArray('Factors', scoreObj.factors.filter(isFactor).map(getScoreFactorString), true);
+          logArray('Non-factors', scoreObj.factors.filter(isNonFactor).map(getScoreFactorString));
         }
         if (scoreObj.siblings && scoreObj.siblings.length) {
           logArray('Siblings ->   for parent: ' + scoreObj.votesForParent +
