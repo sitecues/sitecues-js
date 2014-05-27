@@ -4,7 +4,7 @@
 
   "maxerr"        : 100,
   "indent"        : 2,
-  "laxbreak"      : true,
+  "laxbreak"      : false,
   "laxcomma"      : true,
   "nomen"         : true,
   "onevar"        : false,
@@ -17,6 +17,7 @@
   "immed"         : true,     // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
 
   // Define Global Variables Here   -- copy to both predef and globals sections
+  // because predef section was not working in WebStorm
   
   "predef": [
     "XMLHttpRequest",
@@ -24,10 +25,12 @@
     "exports",
     "CSSPrimitiveValue",
     "CSSStyleDeclaration",
-    "escape"
+    "escape",
+    "XDomainRequest"
   ],
 
   // Globals -- copy to both predef and globals sections
+  // because predef section was not working in WebStorm
 
   "globals": {
     "XMLHttpRequest": true,
@@ -35,7 +38,8 @@
     "exports": true,
     "CSSPrimitiveValue": true,
     "CSSStyleDeclaration": true,
-    "escape": true
+    "escape": true,
+    "XDomainRequest": true
   },
 
   // Enforcing

@@ -18,6 +18,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       // Get the number of pixels tha page has been shifted by the horizontal scrollbar
       // (this calculates the correct scroll bar height even when the height/width of scrollbars
       // are changed in the OS.
+      // This is necessary to offset positioned items in IE when transform scale is used,
+      // but only after the user scrolls down.
       function getVerticalShiftForIEBug() {
         if (!platform.ieVersion.isIE10 && !platform.ieVersion.isIE11) {
           return 0;
@@ -45,17 +47,17 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        * @param  elements [element to position]
        */
       function adjustElement(index, element) {
-        var currZoom = conf.get('zoom'),
+        var zoom = conf.get('zoom'),
             transform = '',
             transformOrigin = '', rect;
         if ($(element).css('position') === 'fixed') {
           if (!platform.browser.isIE) {
-            transform = 'translate(' + window.pageXOffset/currZoom + 'px, ' +
-              window.pageYOffset/currZoom + 'px)';
+            transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
+              window.pageYOffset/zoom + 'px)';
           } else {
             rect = element.getBoundingClientRect();
-            transform = 'scale('+ currZoom +')';
-            transformOrigin =  (-rect.left) + 'px ' + (-rect.top - verticalShift/currZoom) + 'px';
+            transform = 'scale('+ zoom +')';
+            transformOrigin =  (-rect.left) + 'px ' + (-rect.top - verticalShift/zoom) + 'px';
           }
         }
         $(element).css({
@@ -78,9 +80,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        the transforms that are reactions to the scroll events on top of any transforms.
        */
       function refresh() {
-        if (!zoom.resizing) {
-          $(fixedSelector).each(adjustElement);
-        }
+        $(fixedSelector).each(adjustElement);
       }
 
       /**
@@ -133,12 +133,6 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
         refresh();
       }
-
-      /**
-       * [Scrolling the page requires positioning any fixed elements.  We also cache the scroll offsets after
-       * all scroll event callbacks have been executed.]
-       * @param  {[object]} e [jquery event object]
-       */
 
       callback();
     });

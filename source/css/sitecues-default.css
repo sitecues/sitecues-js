@@ -1,5 +1,4 @@
 @media print {
-      #sitecues-BWCG{display:none!important;}  
       #sitecues-panel{display:none!important;}
       #sitecues-badge{display:none!important;}
 }

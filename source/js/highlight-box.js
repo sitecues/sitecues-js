@@ -8,7 +8,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     'util/common','hlb/event-handlers', 'hlb/designer', 'hlb/specificElement', 'hlb/style',
     'background-dimmer', 'ui', 'speech',
     'util/close-button', 'platform',
-  function ($, conf, cursor, positioning, geo,
+  function ($, conf, cursor, mhpos, geo,
             common, eventHandlers, designer, hlbSpecificElement, hlbStyle,
             backgroundDimmer, ui, speech, closeButton, platform) {
 
@@ -167,7 +167,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
       HighlightBox.prototype.fillHLBValues = function(offset, size) {
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
-        this.clientRect = positioning.getSmartBoundingBox(this.item);
+        this.clientRect = mhpos.getSmartBoundingBox(this.item);
         this.boundingBoxes = designer.getBoundingElements(this.item);
         this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles);
         this.savedCss.push(this.computedStyles);
@@ -225,7 +225,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             totalZoom = conf.get('zoom'),
-            center  = positioning.getCenterForActualElement(this.item, totalZoom),
+            center  = mhpos.getCenterForActualElement(this.item, totalZoom),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
         var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, this.highlight, currentStyle, cssUpdate);
@@ -324,7 +324,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           log.info("hlb ready");
           sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
           // Update the dimensions object.
-          _this.clientRect = positioning.getSmartBoundingBox(_this.item);
+          _this.clientRect = mhpos.getSmartBoundingBox(_this.item);
         });
 
         if (this.options.isChrome && this.options.needsCompensation && !hlbStyle.isFloated) {
@@ -350,7 +350,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             clientRect;
         
         try { //Required for FF
-          clientRect = positioning.getSmartBoundingBox(this.item);
+          clientRect = mhpos.getSmartBoundingBox(this.item);
           if (!clientRect) {
             clientRect = geo.getBoundingBox(this.item);
           }

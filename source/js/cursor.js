@@ -6,7 +6,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-sitecues.def('cursor', function (cursor, callback, log) {
+sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
   
@@ -89,12 +89,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
      * [constructStyleTag builds a <style> tag, maintaining the sites original precedence for styles]
      */
     function constructStyleTag () {
-      for (var i = 0; i < linkTagStylesList.length; i += 1) {
+      var i;
+      for (i = 0; i < linkTagStylesList.length; i += 1) {
         if (linkTagStylesList[i]) {
           stylesheetElement.innerHTML += linkTagStylesList[i]; 
         }
       }
-      for (var i = 0; i < styleTagStylesList.length; i += 1) {
+      for (i = 0; i < styleTagStylesList.length; i += 1) {
         if (styleTagStylesList[i]) {
           stylesheetElement.innerHTML += styleTagStylesList[i];
         }
@@ -156,7 +157,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
           }
         }
       }
-    }
+    };
 
     /**
      * [Returns a function that, when executed, generates a CSS cursor property for every supported
@@ -199,11 +200,11 @@ sitecues.def('cursor', function (cursor, callback, log) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
               var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
               try {
-                rule.style.setProperty("cursor", cursorValueURL, 'important');
+                rule.style.setProperty('cursor', cursorValueURL, 'important');
               } catch (e) {
                 try {
                   rule.style.cursor = cursorValueURL;
-                } catch (e) {
+                } catch (ex) {
                 }
               }
             } 
@@ -284,7 +285,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
        
       var zoom = {
         'min': cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
-        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
+        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL
       },
 
       offset,
@@ -407,14 +408,14 @@ sitecues.def('cursor', function (cursor, callback, log) {
           match = matches[i].trim(); //Trim whitespace
           match = match.substr(4);   //remove url(
 
-          if (match.charAt(0) === "\"") {              //If the URL is surrounded by a double quote
+          if (match.charAt(0) === '\"') {              //If the URL is surrounded by a double quote
             match = match.substr(1);                   //remove the first
             match = match.substr(0, match.length - 1); //remove the last
           }
 
           match = match.trim(); //Trim whitespace
 
-          if (match.charAt(0) === "\'") {              //If the URL is surrounded by a single quote
+          if (match.charAt(0) === '\'') {              //If the URL is surrounded by a single quote
             match = match.substr(1);                   //remove the first
             match = match.substr(0, match.length - 1); //remove the last
           }

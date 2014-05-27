@@ -48,7 +48,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
     'speech', 'util/geo', 'platform',
-    function($, conf, picker, traitcache, hlpos, common, speech, geo, platform) {
+    function($, conf, picker, traitcache, mhpos, common, speech, geo, platform) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
 
@@ -290,9 +290,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
 
       // Get the rectangle for the element itself
-      var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' // width="100px" height="100px" x="0px" y="0px" viewBox="0,0,100,100"
-        + getSVGForPath(path, 0, 0, backgroundColor, 1)
-        + '</svg>';
+      var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+                      getSVGForPath(path, 0, 0, backgroundColor, 1) +
+                      '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
       offsetLeft = state.fixedContentRect.left - state.elementRect.left;
@@ -453,21 +453,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Start of vertical line (except for first time)
         var vertCornerDir = (count === 0) ? 1 : (points[count].y > points[count-1].y) ? -1 : 1;
         var horzCornerDir = (points[(count + 1) % points.length].x > points[count].x) ? 1 : -1;
-        svgBuilder += (count ? 'L ' : 'M ')  // Horizontal line to start of next curve
-          + (points[count].x) + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
-        svgBuilder += 'Q '  // Curved corner
-          + points[count].x + ' ' + points[count].y + ' '    // Control point
-          + (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
+        svgBuilder += (count ? 'L ' : 'M ') +  // Horizontal line to start of next curve
+          (points[count].x) + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
+        svgBuilder += 'Q ' +  // Curved corner
+          points[count].x + ' ' + points[count].y + ' ' +    // Control point
+          (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
         ++ count;
 
         // Start of horizontal line
         vertCornerDir = (points[(count + 1) % points.length].y > points[count].y) ? 1 : -1;
         horzCornerDir = (points[count].x > points[count-1].x) ? -1 : 1;
-        svgBuilder += 'L '  // Vertical line to start of next curve
-          + (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
-        svgBuilder += 'Q '  // Curved corner
-          + points[count].x + ' ' + points[count].y + ' '    // Control point
-          + points[count].x + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
+        svgBuilder += 'L ' + // Vertical line to start of next curve
+          (points[count].x + radius * horzCornerDir) + ' ' + points[count].y + ' ';
+        svgBuilder += 'Q ' +  // Curved corner
+          points[count].x + ' ' + points[count].y + ' ' +   // Control point
+          points[count].x + ' ' + (points[count].y + radius * vertCornerDir) + ' ';
         ++count;
       }
       while (count < points.length);
@@ -553,7 +553,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get exact bounds
       //This is a horrible hack, suprisingly fixes a lot (especially (if not only) in firefox)
-      fixedRects = hlpos.getAllBoundingBoxes(element, 0, stretchForSprites); // [elementRect]
+      fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites); // [elementRect]
       //in Firefox only, comment out the line above and uncomment the line below...
       //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
         //fixedRects = [elementRect];
@@ -566,11 +566,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
-      hlpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
+      mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
       state.fixedContentRect = fixedRects[0];
 
       state.elementRect = $.extend({}, elementRect);
-      absoluteRect = hlpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
+      absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
       previousViewRect = $.extend({}, state.viewRect);
       state.highlightBorderWidth = getHighlightBorderWidth();
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS;
@@ -780,8 +780,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.target = target;
 
       // show highlight for picked element
+      function showHighlightAfterShortDelay() {
+        mh.showTimer = 0;
+        show();
+      }
       clearTimeout(mh.showTimer);
-      mh.showTimer = setTimeout(function() { mh.showTimer = 0; show(); }, 15);
+      mh.showTimer = setTimeout(showHighlightAfterShortDelay, 15);
     }
 
     // refresh status of enhancement on page
@@ -968,7 +972,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       hideAndResetState();
       state.picked = $(elem);
       state.target = elem;
-      var rect = hlpos.getAllBoundingBoxes(elem, 0, true)[0];
+      var rect = mhpos.getAllBoundingBoxes(elem, 0, true)[0];
       mh.cursorPos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
       mh.scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
       show();

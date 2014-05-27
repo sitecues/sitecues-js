@@ -6,8 +6,8 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
   'use strict';
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'mouse-highlight/highlight-position', 'util/geo', 'platform',
-    function ($, conf, positioning, geo, platform) {
+  sitecues.use('jquery', 'conf', 'util/geo', 'platform',
+    function ($, conf, geo, platform) {
 
     $.extend( backgroundDimmer, {
         kDimmerId       : 'sitecues-eq360-bgxxxxxxxxxx1'

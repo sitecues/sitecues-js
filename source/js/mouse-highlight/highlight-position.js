@@ -2,7 +2,7 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
+sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   'use strict';
 
   var MIN_RECT_WIDTH = 4;
@@ -11,7 +11,7 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
   sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache', 'util/geo',
                function ($, common, conf, platform, traitcache, geo) {
 
-    hlpos.convertFixedRectsToAbsolute = function(fixedRects) {
+    mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
       var absoluteRects = [];
       var scrollPos = geo.getScrollPosition();
       for (var count = 0; count < fixedRects.length; count ++) {
@@ -40,13 +40,13 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
      * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
      */
-    hlpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
+    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
       var allRects = [];
 
       var $selector = $(selector);
       var clipRect = getAncestorClipRect($selector);
       getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
-      hlpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+      mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
     };
@@ -56,8 +56,8 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
      * Otherwise use element bounds -- this way there is enough room for single-line content and it doesn't need to wrap
      * when it didn't need to wrap before.
      */
-    hlpos.getSmartBoundingBox = function(item) {
-      var contentRect = hlpos.getAllBoundingBoxes(item, 9999)[0];
+    mhpos.getSmartBoundingBox = function(item) {
+      var contentRect = mhpos.getAllBoundingBoxes(item, 9999)[0];
       var lineHeight = getLineHeight(traitcache.getStyle(item));
       var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
       if (isSingleLine) {
@@ -248,7 +248,7 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
 
       if (rect.right < 0 || rect.bottom < 0) {
         var zoom = conf.get('zoom');
-        var absoluteRect = hlpos.convertFixedRectsToAbsolute([rect], zoom)[0];
+        var absoluteRect = mhpos.convertFixedRectsToAbsolute([rect], zoom)[0];
         if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
           // Don't be fooled by items hidden offscreen -- those rects don't count
           return;
@@ -385,14 +385,14 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
         });
         allClipRects.push(clipRect);
       });
-      hlpos.combineIntersectingRects(allClipRects, 9999);
+      mhpos.combineIntersectingRects(allClipRects, 9999);
       return allClipRects[0];
     }
 
     /**
      * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
      */
-    hlpos.combineIntersectingRects = function(rects, extraSpace) {
+    mhpos.combineIntersectingRects = function(rects, extraSpace) {
       function intersects(r1, r2) {
         return !( r2.left - extraSpace > r1.left + r1.width + extraSpace ||
           r2.left + r2.width + extraSpace < r1.left - extraSpace ||
@@ -448,11 +448,11 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
      * |_____________________________|________________|
      * 
      */
-    hlpos.getCenter = function (selector, zoom) {
+    mhpos.getCenter = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
-        var fixedRects = hlpos.getAllBoundingBoxes(this, 9999);
-        var rect = hlpos.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
+        var fixedRects = mhpos.getAllBoundingBoxes(this, 9999);
+        var rect = mhpos.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
         // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
         if (!rect) {
@@ -468,7 +468,7 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
       return processArrayResult(result);
     };
 
-    hlpos.getCenterForActualElement = function (selector, zoom) {
+    mhpos.getCenterForActualElement = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
         var boundingBox = this.getBoundingClientRect();
@@ -497,7 +497,7 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
      * @param  string   position  Set the position of the element, defaults to 'absolute'
      * @return void
      */
-    hlpos.centerOn = function (selector, center, zoom, position) {
+    mhpos.centerOn = function (selector, center, zoom, position) {
       // Ensure a zoom exists.
       zoom = zoom || 1;
       // Use the proper center.
@@ -516,7 +516,7 @@ sitecues.def('mouse-highlight/highlight-position', function (hlpos, callback) {
         // element relative to it's offset parent. These calculations need to factor
         // in zoom.
         var offsetParent = jElement.offsetParent();
-        var offsetParentPosition = hlpos.getOffset(offsetParent);
+        var offsetParentPosition = mhpos.getOffset(offsetParent);
 
         // Determine where we would display the centered and (possibly) zoomed element,
         // and what it's dimensions would be.

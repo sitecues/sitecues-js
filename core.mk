@@ -59,7 +59,7 @@ files=\
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
-        source/js/jquery/effects.js \
+    source/js/jquery/effects.js \
 	source/js/util/close-button.js \
 	source/js/ui.js \
 	source/js/util/common.js \
@@ -85,7 +85,7 @@ files=\
 	source/js/cursor/images/manager.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
-	source/js/fixed-fixer.js \
+	source/js/fixed-position-fixer.js \
 	source/js/hlb/designer.js \
 	source/js/hlb/style.js \
 	source/js/hlb/specificElement.js \

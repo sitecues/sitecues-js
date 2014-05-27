@@ -17,7 +17,7 @@ sitecues.def('ui', function (ui, callback) {
   ui.CONSTANTS = {
     'SITECUES_CSS_ID'      : 'sitecues-default',
     'SITECUES_CSS_DEFAULT' : 
-      '@media print {#sitecues-BWCG{display:none!important;}#sitecues-panel{display:none!important;}#sitecues-badge{display:none!important;}}\n' +
+      '@media print {#sitecues-panel{display:none!important;}#sitecues-badge{display:none!important;}}\n' +
       '.sitecues-badge {z-index: 2147483645;margin: 0px;visibility: visible;position: fixed;width: 150px;top: 5px;-webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */-moz-box-sizing: content-box;/* Firefox, other Gecko */box-sizing: content-box;/* Opera/IE 8+ */}\n' +
       '.sitecues-badge #sitecues-badge-image {height: 23px;}\n' +
       '#sitecues-badge, #sitecues-badge-image {-webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */-moz-box-sizing: content-box;/* Firefox, other Gecko */box-sizing: content-box;/* Opera/IE 8+ */}\n' +

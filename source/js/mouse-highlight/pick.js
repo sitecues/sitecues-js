@@ -30,8 +30,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
                'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge',
                function($, common, conf, traitcache, traits, judge) {
 
-    var pickedItemsCache = {},
-      UNUSABLE_SCORE = -99999,    // A score so low there is no chance of picking the item
+    var pickedItemsCache = {},       // Unique IDs of elements that we picked before. Pick them again unless view changes (zoom or window size)
+      UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
       MAX_ANCESTORS_TO_ANALYZE = 9,  // Maximum ancestors to climb looking for start. Up to 9 would be nicer in a few cases but might be causing perf issues in IE.
       MIN_SCORE_TO_PICK = -100,      // If nothing above this, will pick nothing
       // In order of precedence:
@@ -82,6 +82,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       };
 
     /*
+     * ----------------------- PUBLIC -----------------------
+     *
      * MAIN FUNCTION AND ENTRY POINT
      * Find the best highlightable element, if any, given a target element.
      * Returns JQuery object if anything picked, otherwise null (never returns JQuery object of length 0)
@@ -124,13 +126,16 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       picked = getHeuristicResult(candidates);
 
       // 7. Save results in picked items cache for later reuse
-      if (picked.length) {
-        pickedItemsCache[traitcache.getUniqueId(picked[0])] = 1; // Set to anything, so that it's stored in the map
+      if (picked) {
+        // Set to 1, so that it's stored in the map of previously picked items (could be set to anything)
+        pickedItemsCache[traitcache.getUniqueId(picked)] = 1;
+        return $(picked);
       }
 
-      return picked.length? picked : null;
+      return null;
     };
 
+    /* ----------------------- PRIVATE ----------------------- */
     function isNonEmptyTextNode(node) {
       return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
     }
@@ -284,16 +289,17 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var scoreObjs = judgementStack.map(getScore);
 
       // 2. Parents of only children are strongly influenced by that child
-      refineScoresForParentsOfOneChild(traitStack, scoreObjs);
+      refineScoresForParentsOfSingleChild(traitStack, scoreObjs);
 
       // 3. Get the best candidate
       var bestIndex = getCandidateWithHighestScore(scoreObjs);
 
-      // 4. Log the results if necessary
+      // 4. Log the results if necessary for debugging (used by "debug" customization, customer id = deadbeef)
+      // Use localhost:8000/l/s;id=s-deadbeef/js/sitecues.js
       picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
 
       // 5. Return item, or nothing if score was too low
-      return scoreObjs[bestIndex].score < MIN_SCORE_TO_PICK ? $() : $(candidates[bestIndex]);
+      return scoreObjs[bestIndex].score < MIN_SCORE_TO_PICK ? null : candidates[bestIndex];
     }
 
     // Placeholder used by 'debug' customization
@@ -302,11 +308,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // Get the score for the candidate node at the given index
     function computeScore(judgements, element, index) {
       // 1. Check if usable: if item is not usable mark it as such
+      // TODO give each isUsable() a different name
       if (!isUsable(element, judgements)) {
         return {
           score: UNUSABLE_SCORE,
-          about: 'Ancestor #' + index + '. Unusable/ignored',
-          factors: [],
+          about: 'Ancestor #' + index + '. Unusable/ignored',      // Debug info
           isUsable: false
         };
       }
@@ -315,8 +321,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var factorKey, value, scoreDelta, weight,
         scoreObj = {
           score: 0,
-          factors: [],
-          about: 'Ancestor #' + index,  // Debug
+          factors: [],                  // Debug info
+          about: 'Ancestor #' + index,  // Debug info
           isUsable: true
         };
 
@@ -324,7 +330,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         if (judgementWeights.hasOwnProperty(factorKey)) {
           value = judgements[factorKey];
           weight = judgementWeights[factorKey];
-          scoreDelta = value * weight;  // Numeric or Boolean value: JS treats true=1, false=0
+          scoreDelta = value * weight;  // value is a numeric or boolean value: for booleans, JS treats true=1, false=0
           scoreObj.score += scoreDelta;
           scoreObj.factors.push({
             about: factorKey,
@@ -337,14 +343,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return scoreObj;
     }
 
-    function getCandidateWithHighestScore(scores) {
+    function getCandidateWithHighestScore(scoreObjs) {
       var index,
-          bestScore = scores[0].score,
+          bestScore = scoreObjs[0].score,
           bestScoreIndex = 0;
 
-      for (index = 1; index < scores.length; index ++) {
-        if (scores[index].score > bestScore) {
-          bestScore = scores[index].score;
+      for (index = 1; index < scoreObjs.length; index ++) {
+        if (scoreObjs[index].score > bestScore) {
+          bestScore = scoreObjs[index].score;
           bestScoreIndex = index;
         }
       }
@@ -354,17 +360,19 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     //  ----------- Score refinement section -----------
 
-    // For every single parent, add child's score to us
+    // For every single parent, add child's score to the parent * (singleParentRefinement weight)
     // A parent is likely to be even more right/wrong than its child
     // Therefore the child's goodness reflects on the parent. We add it's score to the parent score.
-    function refineScoresForParentsOfOneChild(traitStack, scoreObjs) {
+    // The benefits of doing this are that if there is a container of child node that has no siblings,
+    // we tend to prefer the container over the child. If the child is bad, we tend to pick neither.
+    function refineScoresForParentsOfSingleChild(traitStack, scoreObjs) {
       var index, delta;
       for (index = 1; index < traitStack.length - 1; index ++ ) {
         if (traitStack[index].childCount === 1 && scoreObjs[index-1].isUsable) {
           delta = scoreObjs[index - 1].score;
           scoreObjs[index].score += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
           scoreObjs[index].factors.push({
-            about: 'singleParentRefinement',
+            about: 'singleParentRefinement',    // Debug info
             value: delta,
             weight: REFINEMENT_WEIGHTS.isParentOfOnlyChild
           });

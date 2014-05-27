@@ -9,14 +9,9 @@ sitecues.def('zoom', function (zoom, callback) {
   zoom.defaultLevel = 1;
   zoom.precision = 0.1;
 
-
-  zoom.toolbarWidth = 0;
-
   // Calculate the zoom range. This calc is used throughout library. Easier to do here only.
   zoom.range = zoom.max - zoom.min;
-  zoom.resizing = false;
 
-  var documentHasScrollbar = false;
   var originalDocumentWidth = document.documentElement.clientWidth; //Save this value to reduce the width of the <html> when zooming;
 
   // get dependencies
@@ -87,10 +82,8 @@ sitecues.def('zoom', function (zoom, callback) {
     * to properly scale, resize, and position the page and its' elements.]
     */
     $(window).resize(function () {
-      zoom.resizing = true;
       originalDocumentWidth = document.documentElement.clientWidth;
-      zoomFn(conf.get('zoom'));
-      zoom.resizing = false;
+      adjustPageStyleForZoomAndWidth(conf.get('zoom'));  // Do not emit zoom event here since zoom is not changing
       sitecues.emit('resize');
     });
 
@@ -102,18 +95,23 @@ sitecues.def('zoom', function (zoom, callback) {
     * ]
     * 
     */
-    var zoomFn = function (value) {
+    function zoomFn(currZoom) {
 
-      if (value === 1) {
+      adjustPageStyleForZoomAndWidth(currZoom);
+      sitecues.emit('zoom', currZoom);   // notify all about zoom change
+    }
+
+    function adjustPageStyleForZoomAndWidth(currZoom) {
+      if (currZoom === 1) {
         // Clear all CSS values
         $('html').css({ width: '', transform: '', transformOrigin: '' });
       }
       else {
-        var newBodyWidth = Math.round(originalDocumentWidth / value);
+        var newBodyWidth = Math.round(originalDocumentWidth / currZoom);
 
         $('html').css({width: newBodyWidth + 'px',
           transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-          transform: 'scale(' + value + ')'
+          transform: 'scale(' + currZoom + ')'
         });
 
         // Un-Blur text in Chrome
@@ -121,14 +119,12 @@ sitecues.def('zoom', function (zoom, callback) {
           renderPage();
         }
       }
-
-      sitecues.emit('zoom', value);   // notify all about zoom change
-    };
+    }
 
     // Get and set are now in 'source/js/conf/user/manager.js'
-    conf.get('zoom', zoomFn);  //This use to be an anonymous function, 
+    conf.get('zoom', zoomFn);  //This use to be an anonymous function,
                                //but we must force a zoom if the browser window is resized
-                               //      
+
     // done
     callback();
 
