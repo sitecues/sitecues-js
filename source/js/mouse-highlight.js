@@ -553,15 +553,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get exact bounds
       //This is a horrible hack, suprisingly fixes a lot (especially (if not only) in firefox)
-      fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites); // [elementRect]
-      //in Firefox only, comment out the line above and uncomment the line below...
-      //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
-        //fixedRects = [elementRect];
+      fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
 
       state.zoom = conf.get('zoom');
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
+        //console.trace();
         pause();
         return false;
       }
@@ -732,9 +730,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
       testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
-      if (!mh.isAppropriateFocus ||
-          isInsideHighlight(target, mouseX, mouseY) ||
-          target === state.target) {
+      if (!mh.isAppropriateFocus || isInsideHighlight(target, mouseX, mouseY)) {
         doExitEarly = true;
       }
       else if (!state.isCreated && mh.scrollPos &&

@@ -12,7 +12,16 @@ sitecues.def('zoom', function (zoom, callback) {
   // Calculate the zoom range. This calc is used throughout library. Easier to do here only.
   zoom.range = zoom.max - zoom.min;
 
-  var originalDocumentWidth = document.documentElement.clientWidth; //Save this value to reduce the width of the <html> when zooming;
+  // Save this value to reduce the width of the <html> when zooming
+  var originalDocumentWidth = getDocumentWidth();
+
+  function getDocumentWidth() {
+    // We used to use document.documentElement.clientWidth, but this caused the page
+    // to continually shrink on resize events.
+    // Check out some different methods for determining viewport size: http://ryanve.com/lab/dimensions/
+    // More information on document.documentElement.clientWidth and browser viewports: http://www.quirksmode.org/mobile/viewports.html
+    return window.outerWidth;
+  }
 
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
@@ -82,8 +91,9 @@ sitecues.def('zoom', function (zoom, callback) {
     * to properly scale, resize, and position the page and its' elements.]
     */
     $(window).resize(function () {
-      originalDocumentWidth = document.documentElement.clientWidth;
-      adjustPageStyleForZoomAndWidth(conf.get('zoom'));  // Do not emit zoom event here since zoom is not changing
+      var zoom = conf.get('zoom');
+      originalDocumentWidth = getDocumentWidth();
+      adjustPageStyleForZoomAndWidth(zoom);  // Do not emit zoom event here since zoom is not changing
       sitecues.emit('resize');
     });
 
@@ -96,7 +106,6 @@ sitecues.def('zoom', function (zoom, callback) {
     * 
     */
     function zoomFn(currZoom) {
-
       adjustPageStyleForZoomAndWidth(currZoom);
       sitecues.emit('zoom', currZoom);   // notify all about zoom change
     }
