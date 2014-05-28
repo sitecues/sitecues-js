@@ -156,7 +156,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function updateColorApproach(style) {
       // Get the approach used for highlighting
-      if ($(state.picked).length > 1 ||
+      if (state.picked.length > 1 ||
          (style[0].backgroundImage !== 'none' && style[0].backgroundRepeat === 'no-repeat')) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
@@ -559,8 +559,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
-        //console.trace();
-        pause();
         return false;
       }
 
