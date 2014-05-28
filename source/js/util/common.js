@@ -492,7 +492,7 @@ sitecues.def('util/common', function (common, callback, log) {
 
     // Get the height of the horizontal scrollbar. Best to cache this information.
     common.getHorizontalScrollbarHeight = function() {
-      var el, height = document.createElement('div');
+      var height, el = document.createElement('div');
       el.style.visbility = 'hidden';
       el.style.overflow = 'scroll';
       document.documentElement.appendChild(el);
