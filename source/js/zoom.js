@@ -63,6 +63,27 @@ sitecues.def('zoom', function (zoom, callback) {
       conf.set('zoom', conf.get('zoom') - zoom.step);
     });
 
+      /**
+     * [renderPage purpose is to render text clearly in browsers (chrome mac only (for now))
+     * that do not repaint the DOM when using CSS Transforms.  This function simply sets a
+     * property, which is hopefully not set on pages sitecues runs on, that forces repaint.
+     * 50ms of time is required, in my opinion, because the browser may not be done Transforming
+     * by the time Javascript is executed without the setTimeout.
+     *
+     * See here: https://equinox.atlassian.net/wiki/display/EN/Known+Issues
+     *
+     * Note: This problem is not consistent across websites.  This function is in response to
+     * behavior experienced on www.nytimes.com]
+     *
+     * Weird: Aaron tried to reverse this and it caused the text on nytimes.com to blur every 7 seconds. WEIRD!!!
+     */
+    var renderPage = function () {
+      document.body.style.webkitBackfaceVisibility = '';
+      setTimeout(function() {
+        document.body.style.webkitBackfaceVisibility = 'hidden';
+      }, 15);
+    };
+
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
     * viewport to properly resize the html elements' width.  We must also re-zoom the page as it handles the logic
@@ -100,6 +121,11 @@ sitecues.def('zoom', function (zoom, callback) {
           transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
           transform: 'scale(' + currZoom + ')'
         });
+
+        // Un-Blur text in Chrome
+        if (platform.browser.isChrome && platform.os.isMac) {
+          renderPage();
+        }
       }
     }
 
