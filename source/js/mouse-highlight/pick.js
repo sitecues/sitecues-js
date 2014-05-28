@@ -312,6 +312,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       if (!isUsable(element, judgements)) {
         return {
           score: UNUSABLE_SCORE,
+          factors: [],                                             // Debug info
           about: 'Ancestor #' + index + '. Unusable/ignored',      // Debug info
           isUsable: false
         };
