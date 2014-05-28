@@ -4,7 +4,7 @@ sitecues.def('badge', function (badge, callback) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', function ($, conf, panel, common, htmlBuild) {
+  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function ($, conf, panel, common, htmlBuild, platform) {
 
     // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
     badge.altBadges = $(conf.get('panelDisplaySelector'));
@@ -55,8 +55,12 @@ sitecues.def('badge', function (badge, callback) {
           });
     }
 
+    function doesBadgeNeedRefreshOnZoom() {
+      return !platform.browser.isIE && isFloatingBadge();
+    }
+
     function refreshBadgeSize() {
-      if (isFloatingBadge()) {
+      if (doesBadgeNeedRefreshOnZoom()) {
         badge.panel.css({
           transformOrigin: '0% 0%',
           transform: 'scale(' + 1 / conf.get('zoom') + ')'
@@ -97,7 +101,9 @@ sitecues.def('badge', function (badge, callback) {
 
     show();
 
-    sitecues.on('zoom', refreshBadgeSize);
+    if (doesBadgeNeedRefreshOnZoom()) {
+      sitecues.on('zoom', refreshBadgeSize);
+    }
 
     if (sitecues.tdd) {
       // todo: maybe export the whole module instead if every single function?
