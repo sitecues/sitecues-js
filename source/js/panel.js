@@ -159,8 +159,9 @@ sitecues.def( 'panel', function (panel, callback) {
       });
 
       $(window).scroll(hide);
+
       if (!platform.browser.isIE) {
-        sitecues.on('zoom', refreshPanel);
+        sitecues.on('zoom', refreshPanel);  // Panel size needs to adjust to zoom in non-IE browsers
       }
     }
 

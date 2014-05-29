@@ -86,9 +86,6 @@ sitecues.def('badge', function (badge, callback) {
 
     panel.parent  = badge.element;
 
-    // Update state.
-    $badge = $('#' + badge.badgeId);
-
     var setDefaultEventOver = function () {
       return sitecues.emit('badge/hover', badge.element);
     };     

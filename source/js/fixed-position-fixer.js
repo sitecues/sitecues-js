@@ -1,6 +1,7 @@
 /**
  * This module adjusts fixed position elements to correctly render
- * for the current zoom and scroll position in the window
+ * for the current zoom and scroll position in the window.
+ * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
 sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
@@ -12,8 +13,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       var isOn = false,
         verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
         lastScrollY              = 0,    // IE specific fix
-        lastScrollDirection      = null, // IE specific fix
-        fixedSelector            = '';  //CSS selectors & properties that specify position:fixed
+        horizScrollbarHeight     = 0, // IE specific fix
+        fixedSelector            = '',  //CSS selectors & properties that specify position:fixed
+        eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
+        lastAdjustedElements     = $();
 
       // Get the number of pixels tha page has been shifted by the horizontal scrollbar
       // (this calculates the correct scroll bar height even when the height/width of scrollbars
@@ -24,20 +27,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         if (!platform.ieVersion.isIE10 && !platform.ieVersion.isIE11) {
           return 0;
         }
-        var newScrollY = window.scrollY || window.pageYOffset;
 
-        if (lastScrollY > newScrollY) {
-          lastScrollDirection = 1; // Down
-        } else if (lastScrollY > newScrollY) {
-          lastScrollDirection = -1; // Up
+        if (!horizScrollbarHeight) {
+          horizScrollbarHeight = common.getHorizontalScrollbarHeight();
         }
 
+        var newScrollY = window.pageYOffset,
+          isLastScrollDown = lastScrollY < newScrollY;
         lastScrollY = newScrollY;
-
-        if (!fixedfixer.horizScrollbarHeight) {
-          fixedfixer.horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-        }
-        return lastScrollDirection === 1 ? fixedfixer.horizScrollbarHeight : 0;
+        return isLastScrollDown ? horizScrollbarHeight : 0;
       }
 
 
@@ -70,7 +68,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        * [When the page scrolls, reposition fixed elements, badge, and panel]
        */
       function onScroll() {
-        fixedfixer.verticalShift = getVerticalShiftForIEBug();
+        verticalShift = getVerticalShiftForIEBug();
         refresh();
       }
 
@@ -80,16 +78,11 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        the transforms that are reactions to the scroll events on top of any transforms.
        */
       function refresh() {
-        $(fixedSelector).each(adjustElement);
+        var elementsToAdjust = $(fixedSelector);
+        // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
+        elementsToAdjust.add(lastAdjustedElements).each(adjustElement);
+        lastAdjustedElements = elementsToAdjust;
       }
-
-      /**
-       * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
-       */
-      sitecues.on('zoom', function (zoom) {
-        lazyInit(zoom);
-        refresh();
-      });
 
       function getFixedPositionSelector() {
         var selectors = [];
@@ -110,13 +103,22 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       sitecues.on('cursor/addingStyles', function () {
         fixedSelector = getFixedPositionSelector();
         if (fixedSelector) {
-          lazyInit();
+          lazyInit(conf.get('zoom'));
         }
+      });
+
+      /**
+       * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
+       */
+      sitecues.on('zoom', function (zoom) {
+        lazyInit(zoom);
+        refresh();
       });
 
       // Initialize only when we really have to, because it's a very, very bad idea to
       // attach handlers to the window scroll event:
-      // http://ejohn.org/blog/learning-from-twitter/
+      // http://ejohn.org/blog/learning-from-twitter
+
       function lazyInit(zoom) {
         var doTurnOn = fixedSelector.length && zoom > 1;
 
@@ -124,11 +126,12 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           return;
         }
         isOn = doTurnOn;
+
         if (doTurnOn) {
-          $(window).scroll(onScroll);
+          $(window).on(eventsToListenTo, onScroll);
         }
         else {
-          $(window).off('scroll', onScroll);
+          $(window).off(eventsToListenTo, onScroll);
         }
 
         refresh();
