@@ -18,7 +18,7 @@ sitecues.def('ui', function (ui, callback) {
     'SITECUES_CSS_ID'      : 'sitecues-default',
     'SITECUES_CSS_DEFAULT' : 
       '@media print {#sitecues-panel{display:none!important;}#sitecues-badge{display:none!important;}}\n' +
-      '.sitecues-badge {z-index: 2147483645;margin: 0px;visibility: visible;position: fixed;width: 150px;top: 5px;-webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */-moz-box-sizing: content-box;/* Firefox, other Gecko */box-sizing: content-box;/* Opera/IE 8+ */}\n' +
+      '.sitecues-badge {z-index: 2147483645;margin: 0px;visibility: visible;position: absolute;width: 150px;top: 5px;-webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */-moz-box-sizing: content-box;/* Firefox, other Gecko */box-sizing: content-box;/* Opera/IE 8+ */}\n' +
       '.sitecues-badge #sitecues-badge-image {height: 23px;}\n' +
       '#sitecues-badge, #sitecues-badge-image {-webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */-moz-box-sizing: content-box;/* Firefox, other Gecko */box-sizing: content-box;/* Opera/IE 8+ */}\n' +
       '#sitecues-badge-image {width: 134px;border: 2px solid #A3A3A3;padding: 4px;background-color: white;-webkit-border-radius: 4px;-moz-border-radius: 4px;border-radius: 4px;-webkit-box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);-moz-box-shadow: 1px 1px 5px 0px rgba(10, 10, 10, .5);}\n' +
