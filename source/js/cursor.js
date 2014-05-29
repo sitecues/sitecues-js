@@ -179,7 +179,6 @@ sitecues.def('cursor', function (cursor, callback) {
           // platform.browser supports css cursor scaling
           if (platform.pixel.ratio > 1 && platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
             cursorTypeURLS[cursorTypes[i]] = generateCursorStyle2x(cursorTypes[i], lastZoom);
-          
           // For all other ratios/un-supported browsers, use a 1x ratio cursor
           } else {
             cursorTypeURLS[cursorTypes[i]] = generateCursorStyle1x(cursorTypes[i], lastZoom);
@@ -198,13 +197,24 @@ sitecues.def('cursor', function (cursor, callback) {
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
+              var cursorValueURL = 'http:' + cursorTypeURLS[cursorTypes[i]];
               try {
-                rule.style.setProperty('cursor', cursorValueURL, 'important');
+                if (platform.browser.is === 'IE') {
+                    //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
+                    // Make sure the image loaded before we use it.    
+                    $.get(cursorValueURL, function() {
+                        console.log('Loading of CUR file completed!');
+                        // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
+                        rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
+                    });
+                } else {
+                    rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
+                }
               } catch (e) {
                 try {
                   rule.style.cursor = cursorValueURL;
                 } catch (ex) {
+                    console.log(ex);
                 }
               }
             } 
@@ -226,9 +236,12 @@ sitecues.def('cursor', function (cursor, callback) {
       
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+        return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+      } else {
+        return view.getImage(type,zoom);
       }
 
-      return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+      
     }
 
     /**
