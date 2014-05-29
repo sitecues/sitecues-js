@@ -13,7 +13,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       var isOn = false,
         verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
         lastScrollY              = 0,    // IE specific fix
-        horizScrollbarHeight     = 0, // IE specific fix
+        horizScrollbarHeight     = null, // IE specific fix
         fixedSelector            = '',  //CSS selectors & properties that specify position:fixed
         eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
         lastAdjustedElements     = $();
@@ -28,7 +28,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           return 0;
         }
 
-        if (!horizScrollbarHeight) {
+        if (horizScrollbarHeight === null) {
           horizScrollbarHeight = common.getHorizontalScrollbarHeight();
         }
 
