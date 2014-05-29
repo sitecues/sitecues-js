@@ -197,12 +197,11 @@ sitecues.def('cursor', function (cursor, callback) {
           for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
               //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              
+              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
               try {
                 if (platform.browser.is === 'IE') {
                     //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
                     // Make sure the image loaded before we use it.
-                    var cursorValueURL = 'http:' + cursorTypeURLS[cursorTypes[i]];
                     $.get(cursorValueURL, function() {
                         console.log('Loading of CUR file completed!');
                         // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
