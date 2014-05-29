@@ -118,11 +118,13 @@ sitecues.def('badge', function (badge, callback, log) {
  
     // BODY
     var $badge = $('#' + badge.badgeId);
+    var isBadgeInDom = $badge && $badge.length > 0;
 
     if (badge.altBadges && (badge.altBadges.length > 0)) {
       badge.panel   = badge.altBadges;
       badge.element = badge.panel;
-    } else if ($badge.length > 0) {
+    } else if (isBadgeInDom) {
+      $badge.css({'visibility': 'visible', 'opacity': 1});
       badge.panel   = $badge;
       badge.element = badge.panel;
     } else {
@@ -131,13 +133,13 @@ sitecues.def('badge', function (badge, callback, log) {
     }
 
     panel.parent  = badge.element;
+    // Update state.
     $badge = $('#' + badge.badgeId);
+    isBadgeInDom  = $badge && $badge.length > 0;
 
-    var isBadgeInDom = $badge && $badge.length > 0;
- 
     // EQ-770: check if badge is created by site provided script or by extension-based one.
     // When Al MacDonald completes his work, we will probably need to modify it according to his mechanism.
-    badge.isBadgeRaplacedByToolbar = isBadgeInDom && $badge.attr(REPLACE_BADGE_ATTR) === 'true';
+    badge.isBadgeRaplacedByToolbar = isBadgeInDom && $('#' + badge.badgeId).attr(REPLACE_BADGE_ATTR) === 'true';
 
     var setDefaultEventOver = function (evt) {
       //evt.stopPropagation();

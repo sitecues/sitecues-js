@@ -1,5 +1,5 @@
 ################################################################################
-# sitecues JavaScript Library Makefile
+# sitecues JavaScript Library Main Makefile
 ################################################################################
 
 ################################################################################
@@ -9,7 +9,7 @@
 # 	Clean the target direcetory, update Node.js dependecies, and build the
 #	JavaScript library.
 ################################################################################
-all: clean deps build
+all: clean build
 
 ################################################################################
 # Command line options.
@@ -161,6 +161,7 @@ endif
 #	Build the compressed file and, optionally, run gjslint.
 ################################################################################
 build: $(_force-deps-refresh) $(_build_lint_dep)
+	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done

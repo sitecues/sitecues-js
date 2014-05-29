@@ -13,7 +13,6 @@ sitecues.def('speech', function (speech, callback, log) {
     'FIRST_SPEECH_ON_PARAM'      : 'firstSpeechOn',
     // Time in millis after which the more descriptive "speech on" cue should replay.
     'FIRST_SPEECH_ON_RESET_MS'   : 7 * 86400000, // 7 days
-    'SITE_TTS_ENABLE_PARAM'      : 'siteTTSEnable',
     // Used to define if "Speech off" cue needs to be said.
     'SPEECH_OFF_PARAM'           : 'speechOff',
     'VERBAL_CUE_SPEECH_ON'       : 'verbalCueSpeechOn',
@@ -25,23 +24,32 @@ sitecues.def('speech', function (speech, callback, log) {
   sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
     function(conf, site, common, $, builder, platform) {
 
+    var indexOfIgnoreCase = function(a, s) {
+      s = s.toLowerCase();
+      for (var i = 0; i < a.length; i++) {
+        if (s === a[i].toLowerCase()) {
+          return i;
+        }
+      }
+      return -1;
+    };
+
     var players = {},
-        // Use the site and user settings, if available, but if neither is
-        // available, we'll fall back to being disabled
-        ttsEnable = !(conf.get('ttsEnable') === undefined && conf.get('siteTTSEnable') === undefined)
-                    && (conf.get('ttsEnable') === undefined || conf.get('ttsEnable'))
-                    && (conf.get('siteTTSEnable') === undefined || conf.get('siteTTSEnable')),
+        // Determine if the user has turned on TTS.
+        ttsOn = !!conf.get('ttsOn'),
        /*
         * This is a flag we can set that will effectively enable TTS, but
         * not interfere with the user state maintained in the ttsEnable
         * variable.  The primary intent here is for use by cue()
        */
         ttsBypass = false,
-        // This is the engine we're using, required, no default
-        ttsEngine = site.get('ttsEngine'),
+        // Flag indicating that this site is enabled for TTS.
+        ttsAvailable = !!site.get('ttsAvailable'),
 
         timesCued = 1,
         maxCued = 3,
+
+        pageLanguage = document.documentElement.lang ? '&l=' + document.documentElement.lang : '',
 
         /**
          * Returns true if the "first speech on" cue should be played.
@@ -66,25 +74,30 @@ sitecues.def('speech', function (speech, callback, log) {
         },
 
         //What audio format will we use? 
-        audioFormat =  (function () {
-
+        //At the moment, mp3 and ogg are sufficient for the browser/OS combinations we support. 
+        audioFormat =  (function() {
+          var possibleAudioFormats = site.get('ttsAudioFormats'),
+              mp3 = indexOfIgnoreCase(possibleAudioFormats, 'mp3') >= 0,
+              ogg = indexOfIgnoreCase(possibleAudioFormats, 'ogg') >= 0;
+              //aac = indexOfIgnoreCase(possibleAudioFormats, 'aac') >= 0
+              //wav = indexOfIgnoreCase(possibleAudioFormats, 'wav') >= 0
           try {
             var a = new Audio();
             //Default to ogg if it's supported, otherwise, mp3
-            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, ''))) {
+            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, '')) && ogg) {
               return 'ogg';
             }
-            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, ''))) {
+            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, '')) && mp3) {
               return 'mp3';
             }
           } catch (e) {
-            if (platform.browser.isChrome || platform.browser.isFirefox) {
+            if ((platform.browser.isChrome || platform.browser.isFirefox) && ogg) {
               return 'ogg';
-            } else {
+            } else if (mp3) {
               return 'mp3';
             }        
           }
-        
+
         }()),
 
         NotSafariAudioPlayer = function(speechKey, text, siteId, secure) {
@@ -94,14 +107,16 @@ sitecues.def('speech', function (speech, callback, log) {
               audioElement,
               playing = false;
               //startTime = (new Date).getTime() / 1000;
-          
           if (speechKey) {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
+            //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
           } else {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-              // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-              + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+            // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+            //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+            //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+            //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
+                            siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
           }
 
           this.init = function () {
@@ -188,12 +203,15 @@ sitecues.def('speech', function (speech, callback, log) {
             }
 
             if (speechKey) {
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
+              //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
             } else {
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-                // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-                + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-                + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+              // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+              //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+              //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+              //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
+                              siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
             }
 
             this.soundSource = undefined;
@@ -221,13 +239,13 @@ sitecues.def('speech', function (speech, callback, log) {
                     that.soundSource.buffer = buffer;
                     sitecues.emit('audioReady');
                   }
-                
+
                 });
-              
+
               };
               
               request.send();
-            
+
             };
 
             this.play = function () {
@@ -260,7 +278,7 @@ sitecues.def('speech', function (speech, callback, log) {
         }()),
 
         AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
-      
+
       /*if (platform.browser.is === 'Safari') {
         console.log('Using Safari Player');
       } else {
@@ -268,18 +286,18 @@ sitecues.def('speech', function (speech, callback, log) {
       }*/
       //end variable declarations
 
-    log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
+    log.info('ttsOn for ' + window.location.host + ': ' + ttsOn);
     
-    if (!ttsEngine) {
+    if (!ttsAvailable) {
       // No engine was set so the whole component is disabled.
-      ttsEnable = false;
+      ttsOn = false;
     }
 
     /*
      * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
      */
     speech.initPlayer = function(hlb, hlbOptions) {
-      if (!ttsEnable && !ttsBypass) {
+      if (!ttsOn && !ttsBypass) {
         log.info('TTS is disabled');
         return null;
       }
@@ -315,7 +333,7 @@ sitecues.def('speech', function (speech, callback, log) {
     speech.factory = function(hlb) {
       var text, player, speechKey;
       // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
-      if (ttsEngine) {
+      if (ttsAvailable) {
         speechKey = $(hlb).data('speechKey');
         if (!speechKey) {
           text = builder.getText(hlb);
@@ -329,7 +347,7 @@ sitecues.def('speech', function (speech, callback, log) {
       } else {
         // No matching plugins, disable TTS
         log.warn('No engine configured!');
-        ttsEnable = false;
+        ttsOn = false;
       }
     };
 
@@ -342,7 +360,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * @return true if something was played, or false if there was an error or nothing to play.
      */
     speech.play = function(hlb, hlbOptions) {
-      if (!ttsEnable && !ttsBypass) {
+      if (!ttsOn && !ttsBypass) {
         log.info('TTS is disabled');
         return false;
       }
@@ -444,12 +462,11 @@ sitecues.def('speech', function (speech, callback, log) {
      * Enables TTS, invokes callback with no args
      */
     speech.enable = function(callback) {
-      if (ttsEngine) {
+      if (ttsAvailable) {
         // An engine is set so we can enable the component
-        ttsEnable = true;
-        conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, true);
+        ttsOn = true;
+        conf.set('ttsOn', ttsOn);
         conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
-
 
          // EQ-996 - As a user, I want multiple chances to learn about the 
          // spacebar command so that I can benefit from One Touch Read 
@@ -480,11 +497,11 @@ sitecues.def('speech', function (speech, callback, log) {
      */
     speech.disable = function(callback) {
       speech.stopAll();
-      conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, false);
       if (shouldPlaySpeechOffCue()) {
         speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_OFF);
       }
-      ttsEnable = false;
+      ttsOn = false;
+      conf.set('ttsOn', ttsOn);
       if (callback) {
         callback();
       }
@@ -559,7 +576,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * Returns if TTS is enabled or not.  Always returns true or false.
      */
     speech.isEnabled = function() {
-      return !!ttsEnable;
+      return !!ttsAvailable && !!ttsOn;
     };
 
     /**

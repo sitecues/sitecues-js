@@ -44,7 +44,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'util/positioning', 'util/common', 'speech', 'geo', 'platform', 'conf/user/server', function($, conf, picker, positioning, common, speech, geo, platform, server) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
-    
+
     mh.enabled = false;
     // this is the initial zoom level, we're only going to use the verbal cue if someone increases it
     mh.initZoom = 0;
@@ -56,16 +56,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * @return {boolean}
      */
     function shouldPlayFirstHighZoomCue (callback) {
-      sitecues.on('server/userDataReturned', function(){
-        var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
-          , timeNow  = (+new Date())
-          , result
-          ;
-        
-        result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+      var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
+        , timeNow  = (+new Date())
+        , result
+        ;
 
-        callback(result);
-      });
+      result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
+
+      callback(result);
     }
 
     /**
@@ -554,7 +552,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       //this doesn't give us the nice mousehighlighting but significantly improves performance (I think)
         //fixedRects = [elementRect];
       
-      state.zoom = positioning.getTotalZoom(element, true);
+      state.zoom = conf.get('zoom');
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
@@ -614,6 +612,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return true;
     }
 
+    
+    
+    // var scrollPickInterval = 30
+    //   , scrollTimeout
+    //   ;
+
+    // mh.scrollInterrupter = function (event) {
+    //   clearTimeout(scrollTimeout);
+
+    //   scrollTimeout = setTimeout(function(){
+    //       mh.update(event);
+    //   }, scrollPickInterval);
+    // };
+
     mh.update = function(event) {
       // break if highlight is disabled
 
@@ -625,15 +637,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           return false;
       }
 
-      // Pick an element but don't slow down scrolling
       mh.pickTimer && clearTimeout(mh.pickTimer);
-      mh.pickTimer  = setTimeout(function() { updateImpl(event) }, 0);
+      mh.pickTimer = setTimeout(function() { updateImpl(event) }, 10);
+
     }
 
-    // var mouseSpeedThreshold = 3
-    //   , lastMouseX = 0
-    //   , lastMouseY = 0
-    //   ;
+    var mouseSpeedThreshold = 10
+      , lastMouseX = 0
+      , lastMouseY = 0
+      ;
 
     function updateImpl(event) {
 
@@ -648,6 +660,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // }
 
       // if (dist(mouseX, mouseY, lastMouseX, lastMouseY) < mouseSpeedThreshold) {
+        // console.log('pick');
         mh.checkPickerAfterUpdate(target, mouseX, mouseY);
       // }
 
@@ -757,6 +770,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           // handle mouse move or scroll on body
         // Necessary to listen to mousewheel event because it bubbles (unlike scroll event)
         // and there is no delay waiting for the user to stop before the event is fired
+          
+          // $(document)
+          //   .on('scroll', mh.scrollCheck)
+          //   .on('mousemove', mh.update)
+          //   .on('mousewheel', mh.scrollInterrupter)
+          //   .on('focusin focusout', testFocus);
+          // $(window)
+          //   .on('focus', testFocus)
+          //   .on('blur', onblurwindow)
+          //   .on('resize', mh.hideAndResetState);
+          // } else {
+          //   // remove mousemove listener from body
+          //   $(document).off('mousewheel', mh.scrollInterrupter)
+          //   .off('mousemove', mh.update)
+          //     .off('focusin focusout', testFocus)
+          //     .off('scroll', mh.scrollCheck);
+          //   $(window)
+          //     .off('focus', testFocus)
+          //     .off('blur', onblurwindow)
+          //     .off('resize', mh.hideAndResetState);
+          // }
+          
+          
           $(document)
             .on('scroll', mh.scrollCheck)
             .on('mousemove mousewheel', mh.update)
@@ -925,6 +961,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.isSticky = !mh.isSticky;
       return mh.isSticky;
     };
+
+    // Initialize the highlight state;
+    mh.updateZoom(conf.get('zoom') || 1);
 
     // done
     callback();

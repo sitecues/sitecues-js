@@ -24,7 +24,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
   picker.kTargetStates = {
       'sometimes': 's',
       'true'     : 't',
-      'false'    : 'f'
+      'false'    : 'f',
+      'ignore'   : 'i'
   };
 
   picker.PICK_ME_FIRST = [];
@@ -37,7 +38,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
      *
      * @param hover The element the mouse is hovering over
      */
+
     picker.find = function find(hover) {
+
       var $el = $(hover);
       // hide previous mh target if now mouseover sitecues toolbar
       var isInBody = false, isInBadge = false;
@@ -69,7 +72,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
       if (!picked || !picked.length) {
         return null; // Normalize
       }
+      
       return picked;
+
     };
 
     function pickMeFirst(parents) {
@@ -92,13 +97,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
       if (!eTarget) {
         // Let's determine, and remember, what this element is.
         eTarget = picker.isTarget(el.get(0));
-        if (eTarget == null) {
-          eTarget = this.kTargetStates['sometimes'];
-        } else if (eTarget) {
-          eTarget = this.kTargetStates['true'];
-        } else { 
-          eTarget = this.kTargetStates['false'];
-        }
         el.data('sitecues-mouse-hl', eTarget);
       }
       if (eTarget === this.kTargetStates['true']) {
@@ -109,6 +107,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
       } else if (eTarget === this.kTargetStates['sometimes']) {
         eScore = picker.getScore(el);
         // The target may or may not be a target, depending on how it scores.
+      } else if (eTarget ===  this.kTargetStates['ignore']) {
+          return false;
       }
       if (eScore && eScore > 0) {
         // The hovered element is a viable choice and no better one has been identified.
@@ -141,6 +141,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
         return false;
       }
       var role = roles.find($el);
+      if (role && role.name == 'ignore') {
+          return this.kTargetStates['ignore'];
+      }
       if (!role || !role.canHighlight) {
         // Element we ignore
         return false;
@@ -162,11 +165,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
       var height = $el.height();
       if (height < 5) {
         // Don't highlight things that have no height
-        return false;
+        return this.kTargetStates['false'];
       }
 
       if (role.alwaysHighlight) {
-        return true;
+        return this.kTargetStates['true'];
       }
 
       var style = styles.getComputed(el);
@@ -174,7 +177,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
         // Don't highlight things that aren't block elements
         return false;
       }
-      return null;
+      return this.kTargetStates['sometimes'];
     }
 
       /*
@@ -214,7 +217,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
             var display = $(this).css('display');
             if (display === 'inline' || display === 'inline-block')
               unhighlightableChild = true;
-            else if (picker.isTarget(this) != false) {
+            else if (picker.isTarget(this) != picker.kTargetStates['false']) {
               highlightableChild = true;
             }
           }
@@ -307,7 +310,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback, log) {
         e = $("body");
       }
       e.children().each(function() {
-        if (picker.isTarget($(this) || picker.find($(this)) == $(this))) {
+        if (picker.isTarget($(this) || picker.find($(this)) == $(this)) !== picker.kTargetStates['false']) {
           // Tell all children that they have a highlightable parent
           $(this).find('*').data('sitecues-parent-hl','1');
           $(this).style("border", "1px solid red", 'important');
