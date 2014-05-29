@@ -208,7 +208,7 @@ sitecues.def('cursor', function (cursor, callback) {
                         rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
                     });
                 } else {
-                    rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
+                    rule.style.setProperty('cursor', cursorValueURL, 'important');
                 }
               } catch (e) {
                 try {
