@@ -40,9 +40,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
-  state,
+  verticalShiftForIEScrollbarBug = 0,
+  horizScrollbarHeight = null,
 
-  horizScrollbarHeight = 0;
+  state;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
@@ -60,9 +61,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     mh.cursorPos = null;
     mh.scrollPos = null;
-    var verticalShiftForIEScrollbarBug = 0;
 
-    /**
+      /**
      * Returns true if the "first high zoom" cue should be played.
      * @return {boolean}
      */
@@ -525,8 +525,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       element = state.picked.get(0);
-      elementRect = $.extend({}, element.getBoundingClientRect()); // Rough bounds
-      elementRect.top += verticalShiftForIEScrollbarBug;
+      elementRect = element.getBoundingClientRect(); // Rough bounds
 
       if (!createOverlay) {   // Just a refresh
         if (!state.elementRect) {
@@ -593,10 +592,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
-            'width' : (state.fixedContentRect.width / state.zoom + 2 * extra) + 'px',
-            'height': (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px'
+            width : (state.fixedContentRect.width / state.zoom + 2 * extra) + 'px',
+            height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px',
           })
-          .css('z-index', getMaxZIndex(ancestorStyles) + 1); // Just below stuff like fixed toolbars
+          .css({
+            zIndex: getMaxZIndex(ancestorStyles) + 1, // Just below stuff like fixed toolbars
+            top: verticalShiftForIEScrollbarBug + 'px'
+          });
 
         state.isCreated = true;
 
@@ -713,7 +715,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return 0; // No horizontal scrollbar -> bug doesn't occur
       }
 
-      if (!horizScrollbarHeight) {
+      if (horizScrollbarHeight === null) {
         horizScrollbarHeight = common.getHorizontalScrollbarHeight();
       }
       return horizScrollbarHeight;
