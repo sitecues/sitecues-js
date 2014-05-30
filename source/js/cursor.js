@@ -213,7 +213,8 @@ sitecues.def('cursor', function (cursor, callback) {
                         cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            $('body').css({'background-image': 'url(' + cursorValueURL + ')'});
+                            $('<div>').attr('id', 'test-3').css({'width': '100px', 'height': '100px', 'background-color': 'yellow'}).insertBefore('body');
+                            $('#test-3').css({'background-image': 'url(' + cursorValueURL + ')'});
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
