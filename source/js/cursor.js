@@ -193,36 +193,39 @@ sitecues.def('cursor', function (cursor, callback) {
         }
 
         cursor.getStyles('cursor', null, function (rule, value) {
+            if (!rule || !value) {
+                return;
+            }
         //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
-          for (var i = 0; i < cursorTypes.length; i += 1) {
+            for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
-              //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-              try {
-                if (platform.browser.is === 'IE') {
-                    //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
-
+                //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+                var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
+                var type = cursorTypes[i];
+                try {
+                    if (platform.browser.is === 'IE') {
+                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
                         $.ajax({
-                        url: cursorValueURL,
-                        crossDomain: true,
-                        beforeSend: function(xhrObj){
-                           xhrObj.setRequestHeader("Accept", "application/octet-stream");
-                        },
-                        type: "GET",
-                        async: true,
-                        cache: true,
-                        success: function(data, status, xhr) {
-                            console.log('Loading of CUR file completed!');
-                            $('html').css('cursor', 'url(' + cursorValueURL + '), '+ cursorTypes[i]);
-                            //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
-                        },
-                        error: function() {
-                            console.log("Unable to fetch cursor image from server");
-                        }
-                      });
-                } else {
-                    rule.style.setProperty('cursor', cursorValueURL, 'important');
-                }
+                            url: cursorValueURL,
+                            crossDomain: true,
+                            beforeSend: function(xhrObj) {
+                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
+                            },
+                            type: "GET",
+                            async: true,
+                            cache: true,
+                            success: function(data, status, xhr) {
+                                console.log('Loading of CUR file completed!');
+                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + (type || 'auto'));
+                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
+                            },
+                            error: function() {
+                                console.log("Unable to fetch cursor image from server");
+                            }
+                        });
+                    } else {
+                        rule.style.setProperty('cursor', cursorValueURL, 'important');
+                    }
               } catch (e) {
                 try {
                   console.log('Catch!');
