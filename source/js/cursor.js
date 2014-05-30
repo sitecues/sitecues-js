@@ -215,9 +215,10 @@ sitecues.def('cursor', function (cursor, callback) {
                         },
                         type: "GET",
                         async: true,
+                        cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                             // console.log(JSON.stringify(data));
+                            // console.log(JSON.stringify(data));
                             // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
                         },
                         error: function() {
