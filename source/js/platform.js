@@ -14,15 +14,12 @@ sitecues.def('platform', function (platformModule, callback) {
       ieVersion = 'NA';
 
   // Determine which browser is being used
-  browser = 'IE';
-           /*
-            agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
+  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
             agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 ? 'IE' :
             agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
             agent.indexOf(' Safari') > 0 ? 'Safari'  :
             agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/') > 0 ? 'Opera'  :
             'Unknown Browser';
-            */
 
   // Set globally accessible browser constants
   platformModule.browser = {
@@ -40,15 +37,13 @@ sitecues.def('platform', function (platformModule, callback) {
   // If IE is being used, determine which version
   if( platformModule.browser.isIE ){
     // Get the current IE version to serve the appropriate fallback message
-    ieVersion = 'IE11';
-                /* agent.indexOf('MSIE 6') >= 0 ? 'IE6' :
+    ieVersion = agent.indexOf('MSIE 6') >= 0 ? 'IE6' :
                 agent.indexOf('MSIE 7') >= 0 ? 'IE7' :
                 agent.indexOf('MSIE 8') >= 0 ? 'IE8' :
                 agent.indexOf('MSIE 9') >= 0 ? 'IE9' :
                 agent.indexOf('MSIE 10') >= 0 ? 'IE10' :
                 agent.indexOf('rv:11') >= 0 ? 'IE11' :
                 'Unknown IE Version';
-                */
   }
 
   // Set globally accessible IE version constants 
