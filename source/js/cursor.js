@@ -254,7 +254,6 @@ sitecues.def('cursor', function (cursor, callback) {
       
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
-        return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
       } else {
         var cursorValueURL = view.getImage(type,zoom);
         $.ajax({
@@ -273,8 +272,8 @@ sitecues.def('cursor', function (cursor, callback) {
                 console.log("Unable to fetch cursor image from server");
             }
         });
-        return cursorValueURL;
-      }   
+        return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+      }
     }
 
     /**
