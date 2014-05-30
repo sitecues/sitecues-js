@@ -211,13 +211,13 @@ sitecues.def('cursor', function (cursor, callback) {
                         url: cursorValueURL,
                         crossDomain: true,
                         beforeSend: function(xhrObj){
-                            // xhrObj.setRequestHeader("Accept", "application/json");
+                            // xhrObj.setRequestHeader("Accept", "application/json"); // application/octet-stream
                         },
                         type: "GET",
                         async: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            console.log(JSON.stringify(data));
+                             // console.log(JSON.stringify(data));
                             // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
                         },
                         error: function() {
