@@ -272,8 +272,8 @@ sitecues.def('cursor', function (cursor, callback) {
                 console.log("Unable to fetch cursor image from server");
             }
         });
-        return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
       }
+      return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
     }
 
     /**
