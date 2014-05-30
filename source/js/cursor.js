@@ -202,6 +202,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 var type = cursorTypes[i];
+                var rule = rule;
                 try {
                     if (platform.browser.is === 'IE') {
                         //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
