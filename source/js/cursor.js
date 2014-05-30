@@ -202,11 +202,31 @@ sitecues.def('cursor', function (cursor, callback) {
                 if (platform.browser.is === 'IE') {
                     //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
                     // Make sure the image loaded before we use it.
-                    $.get(cursorValueURL, function() {
-                        console.log('Loading of CUR file completed!');
-                        // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
-                        rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
-                    });
+//                    $.get('http:' + cursorValueURL, function() {
+//                        console.log('Loading of CUR file completed!');
+//                        // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
+//                        rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
+//                    });
+                        $.ajax({
+                        url: cursorValueURL,
+                        xhrFields: {
+                            withCredentials: true
+                          },
+                          crossDomain: true,
+                          beforeSend: function(xhrObj){
+                            xhrObj.setRequestHeader("Accept","application/json");
+                          },
+                          type: "GET",
+                        async: true,
+                        success: function(data, status, xhr) {
+                            console.log('Loading of CUR file completed!');
+                            $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
+                            // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
+                        },
+                        error: function() {
+                            console.log("Unable to fetch cursor image from server");
+                        }
+                      });
                 } else {
                     rule.style.setProperty('cursor', cursorValueURL, 'important');
                 }
