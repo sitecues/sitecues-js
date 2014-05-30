@@ -7,37 +7,13 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor', 'util/common',
-    function ($, zoom, conf, platform, cursor, common) {
+  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor',
+    function ($, zoom, conf, platform, cursor) {
 
       var isOn = false,
-        verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
-        lastScrollY              = 0,    // IE specific fix
-        horizScrollbarHeight     = null, // IE specific fix
-        fixedSelector            = '',  //CSS selectors & properties that specify position:fixed
+        fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
         lastAdjustedElements     = $();
-
-      // Get the number of pixels tha page has been shifted by the horizontal scrollbar
-      // (this calculates the correct scroll bar height even when the height/width of scrollbars
-      // are changed in the OS.
-      // This is necessary to offset positioned items in IE when transform scale is used,
-      // but only after the user scrolls down.
-      function getVerticalShiftForIEBug() {
-        if (!platform.ieVersion.isIE10 && !platform.ieVersion.isIE11) {
-          return 0;
-        }
-
-        if (horizScrollbarHeight === null) {
-          horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-        }
-
-        var newScrollY = window.pageYOffset,
-          isLastScrollDown = lastScrollY < newScrollY;
-        lastScrollY = newScrollY;
-        return isLastScrollDown ? horizScrollbarHeight : 0;
-      }
-
 
       /**
        * Positions a fixed element as if it respects the viewport rule.
@@ -55,21 +31,13 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           } else {
             rect = element.getBoundingClientRect();
             transform = 'scale('+ zoom +')';
-            transformOrigin =  (-rect.left) + 'px ' + (-rect.top - verticalShift/zoom) + 'px';
+            transformOrigin =  (-rect.left) + 'px ' + (-rect.top) + 'px';
           }
         }
         $(element).css({
           transform: transform,
           transformOrigin: transformOrigin
         });
-      }
-
-      /**
-       * [When the page scrolls, reposition fixed elements, badge, and panel]
-       */
-      function onScroll() {
-        verticalShift = getVerticalShiftForIEBug();
-        refresh();
       }
 
       /*
@@ -128,10 +96,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         isOn = doTurnOn;
 
         if (doTurnOn) {
-          $(window).on(eventsToListenTo, onScroll);
+          $(window).on(eventsToListenTo, refresh);
         }
         else {
-          $(window).off(eventsToListenTo, onScroll);
+          $(window).off(eventsToListenTo, refresh);
         }
 
         refresh();

@@ -20,18 +20,11 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       zoom: null
     };
 
-    // Scrolling does not invalidate the cache
-    var cachedViewPosition = {
-      x: 0,
-      y: 0
-    };
-
     // Call this before using cache if view may have changed
     // Return true if view was out-of-date
     traitcache.checkViewHasChanged = function () {
       var old = $.extend({}, traitcache.cachedViewSize);
       updateCachedViewSize();
-      updateCachedViewPosition();
 
       // Keys guaranteed to be in same order since we always create object here,
       // therefore JSON.stringify() works for equality check
@@ -57,9 +50,22 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       return style;
     };
 
+    // Get rectangle in SCREEN coordinates
+    traitcache.getScreenRect = function (element) {
+      var rect = traitcache.getRect(element);
+      var top = window.pageYOffset;
+      var left = window.pageXOffset;
+      rect.top -= top;
+      rect.bottom -= top;
+      rect.left -= left;
+      rect.right -= left;
+      return rect;
+    };
+
+    // Get rectangle in DOCUMENT coordinates
     traitcache.getRect = function (element) {
       var id = getOrCreateUniqueId(element),
-          rect = rectCache[id];
+          rect = null; // rectCache[id];
       if (!rect) {
         // Copy rect object into our own object so we can modify values
         rect = $.extend({}, element.getBoundingClientRect());
@@ -67,10 +73,12 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         // Add scroll values so that rectangles are not invalid after user scrolls.
         // This effectively makes them absolutely positioned rects vs. fixed.
         // This means we're caching the rectangle relative to the top-left of the document.
-        rect.top += cachedViewPosition.y;
-        rect.bottom += cachedViewPosition.y;
-        rect.left += cachedViewPosition.x;
-        rect.right += cachedViewPosition.x;
+        var top = window.pageYOffset;
+        var left = window.pageXOffset;
+        rect.top += top;
+        rect.bottom += top;
+        rect.left += left;
+        rect.right += left;
 
         // Store results in cache
         rectCache[id] = rect;
@@ -105,11 +113,6 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       cachedViewSize.height = window.innerHeight;
       cachedViewSize.width = window.innerWidth;
       cachedViewSize.zoom = conf.get('zoom');
-    }
-
-    function updateCachedViewPosition() {
-      cachedViewPosition.x = window.pageXOffset;
-      cachedViewPosition.y = window.pageYOffset;
     }
 
     function resetCache() {
