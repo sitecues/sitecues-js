@@ -201,32 +201,32 @@ sitecues.def('cursor', function (cursor, callback) {
             if (value.indexOf(cursorTypes[i]) > -1) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-                var type = cursorTypes[i];
-                var rule = rule;
+//                var type = cursorTypes[i];
+//                var rule = rule;
                 try {
-                    if (platform.browser.is === 'IE') {
-                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
-                        $.ajax({
-                            url: cursorValueURL,
-                            crossDomain: true,
-                            beforeSend: function(xhrObj) {
-                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
-                            },
-                            type: "GET",
-                            async: true,
-                            cache: true,
-                            success: function(data, status, xhr) {
-                                console.log('Loading of CUR file completed!');
-                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + (type || 'auto'));
-                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
-                            },
-                            error: function() {
-                                console.log("Unable to fetch cursor image from server");
-                            }
-                        });
-                    } else {
+//                    if (platform.browser.is === 'IE') {
+//                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
+//                        $.ajax({
+//                            url: cursorValueURL,
+//                            crossDomain: true,
+//                            beforeSend: function(xhrObj) {
+//                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
+//                            },
+//                            type: "GET",
+//                            async: true,
+//                            cache: true,
+//                            success: function(data, status, xhr) {
+//                                console.log('Loading of CUR file completed!');
+//                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + (type || 'auto'));
+//                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
+//                            },
+//                            error: function() {
+//                                console.log("Unable to fetch cursor image from server");
+//                            }
+//                        });
+//                    } else {
                         rule.style.setProperty('cursor', cursorValueURL, 'important');
-                    }
+//                    }
               } catch (e) {
                 try {
                   console.log('Catch!');
@@ -256,10 +256,25 @@ sitecues.def('cursor', function (cursor, callback) {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
         return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
       } else {
-        return view.getImage(type,zoom);
-      }
-
-      
+        var cursorValueURL = view.getImage(type,zoom);
+        $.ajax({
+            url: cursorValueURL,
+            crossDomain: true,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Accept", "application/octet-stream");
+            },
+            type: "GET",
+            async: true,
+            cache: true,
+            success: function(data, status, xhr) {
+                console.log('Loading of CUR file completed!');
+                return cursorValueURL;
+            },
+            error: function() {
+                console.log("Unable to fetch cursor image from server");
+            }
+        });
+      }   
     }
 
     /**
@@ -268,23 +283,25 @@ sitecues.def('cursor', function (cursor, callback) {
      * @param  {[number]} zoom
      * @return {[string]}
      */
-    function generateCursorStyle2x (type, zoom) {
-      var hotspotOffset;
-      
-      if (platform.browser.is !== 'IE') {
-        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
-      }
+        function generateCursorStyle2x(type, zoom) {
+            var hotspotOffset;
 
-      var image = view.getImage(type,zoom);
-      // image-set() will not fallback to just the first url in older browsers. So...
-      // todo: provide fallback for older browsers.
-      var cursorStyle = '-webkit-image-set(' +
-         '    url(' + image + ') 1x,' +
-         '    url(' + image + ') 2x'  +
-         ') ' +(hotspotOffset?hotspotOffset:'')+ ', ' + type;
+            if (platform.browser.is !== 'IE') {
+                hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+            }
 
-      return cursorStyle;
-    }
+            var image = view.getImage(type, zoom);
+            // image-set() will not fallback to just the first url in older browsers. So...
+            // todo: provide fallback for older browsers.
+            var cursorStyle = '-webkit-image-set(' +
+                    '    url(' + image + ') 1x,' +
+                    '    url(' + image + ') 2x' +
+                    ') ' + (hotspotOffset ? hotspotOffset : '') + ', ' + type;
+
+            
+
+            return cursorStyle;
+        }
 
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
