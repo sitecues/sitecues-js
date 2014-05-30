@@ -73,8 +73,8 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         // Add scroll values so that rectangles are not invalid after user scrolls.
         // This effectively makes them absolutely positioned rects vs. fixed.
         // This means we're caching the rectangle relative to the top-left of the document.
-        var top = document.documentElement.scrollTop;
-        var left = document.documentElement.scrollLeft
+        var top = window.pageYOffset;
+        var left = window.pageXOffset;
         rect.top += top;
         rect.bottom += top;
         rect.left += left;

@@ -11,20 +11,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
     function ($, zoom, conf, platform, cursor, common) {
 
       var isOn = false,
-        verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
-        lastScrollY              = 0,    // IE specific fix
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
         lastAdjustedElements     = $();
-
-      // Get the number of pixels tha page has been shifted by the horizontal scrollbar
-      // (this calculates the correct scroll bar height even when the height/width of scrollbars
-      // are changed in the OS.
-      // This is necessary to offset positioned items in IE when transform scale is used,
-      // but only after the user scrolls down.
-      function getVerticalShiftForIEBug() {
-        return platform.browser.isIE ? window.pageYOffset - document.documentElement.scrollTop : 0;
-      }
 
       /**
        * Positions a fixed element as if it respects the viewport rule.
@@ -42,7 +31,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           } else {
             rect = element.getBoundingClientRect();
             transform = 'scale('+ zoom +')';
-            transformOrigin =  (-rect.left) + 'px ' + (-rect.top - verticalShift/zoom) + 'px';
+            transformOrigin =  (-rect.left) + 'px ' + (-rect.top) + 'px';
           }
         }
         $(element).css({
@@ -57,7 +46,6 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        the transforms that are reactions to the scroll events on top of any transforms.
        */
       function refresh() {
-        verticalShift = getVerticalShiftForIEBug();
         var elementsToAdjust = $(fixedSelector);
         // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
         elementsToAdjust.add(lastAdjustedElements).each(adjustElement);

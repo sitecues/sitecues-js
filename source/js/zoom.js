@@ -112,19 +112,49 @@ sitecues.def('zoom', function (zoom, callback) {
     function adjustPageStyleForZoomAndWidth(currZoom) {
       if (currZoom === 1) {
         // Clear all CSS values
-        $('html').css({ width: '', transform: '', transformOrigin: '' });
+        $('html').css({ width: '', transform: '', transformOrigin: '', overflow: '' });
+        return;
       }
-      else {
-        var newBodyWidth = Math.round(originalDocumentWidth / currZoom);
 
-        $('html').css({width: newBodyWidth + 'px',
-          transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-          transform: 'scale(' + currZoom + ')'
-        });
+      if (platform.browser.isIE) {
+        // In IE we control the visibility of scrollbars ourselves, which corrects the dreaded
+        // scrollbar bug in IE, where fixed position content and any use of getBoundingClientRect()
+        // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
+        // but only when the user scrolled down or to the right.
+        // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
+        // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
+        // Step 1: remove the scrollbars before changing zoom.
+        // Step 2 (below): re-add the scrollbar if necessary for size of content
+        document.documentElement.style.overflow = 'hidden';
+      }
+      var newBodyWidth = Math.round(originalDocumentWidth / currZoom);
 
-        // Un-Blur text in Chrome
-        if (platform.browser.isChrome && platform.os.isMac) {
-          renderPage();
+      $('html').css({width: newBodyWidth + 'px',
+        transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
+        transform: 'scale(' + currZoom + ')'
+      });
+
+      // Un-Blur text in Chrome
+      if (platform.browser.isChrome && platform.os.isMac) {
+        renderPage();
+      }
+
+      if (platform.browser.isIE) {
+        // Part 2 of IE horizontal scrollbar fix: re-add scrollbars if necessary
+        // Get the visible content rect (as opposed to element rect which contains whitespace)
+        var rect,
+          range = document.createRange(),
+          winHeight = window.innerHeight,
+          winWidth = window.innerWidth;
+        range.selectNodeContents(document.body);
+        rect = range.getBoundingClientRect();
+        // If the right side of the visible content is beyond the window width,
+        // or the visible content is wider than the window width, show the scrollbars.
+        if (rect.right > winWidth || rect.width > winWidth) {
+          document.documentElement.style.overflowX = 'scroll';
+        }
+        if (rect.bottom > winHeight || rect.height > winHeight) {
+          document.documentElement.style.overflowY = 'scroll';
         }
       }
     }

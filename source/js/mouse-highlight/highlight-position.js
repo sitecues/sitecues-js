@@ -91,17 +91,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // but not for element.getBoundingClientRect()
         return scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset);
       }
-      else if (platform.browser.isIE) {
-        // This must be done for any bounding client rect in these versions of IE
-        var newRect = $.extend({}, rect),
-          vertOffsetCorrection = document.documentElement.scrollTop - window.pageYOffset,
-          horizOffsetCorrection = document.documentElement.scrollLeft - window.pageXOffset;
-        newRect.top += vertOffsetCorrection;
-        newRect.bottom += vertOffsetCorrection;
-        newRect.left += horizOffsetCorrection;
-        newRect.right += horizOffsetCorrection;
-        return newRect;
-      }
       return rect;
     }
 
