@@ -213,8 +213,17 @@ sitecues.def('cursor', function (cursor, callback) {
                         cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            $('<div>').attr('id', 'test-3').css({'width': '100px', 'height': '100px', 'background-color': 'yellow'}).insertBefore('body');
-                            $('#test-3').css({'background-image': 'url(' + cursorValueURL + ')'});
+//                            $('<div>').attr('id', 'test-3').css({'width': '100px', 'height': '100px', 'background-color': 'yellow'}).insertBefore('body');
+//                            $('#test-3').css({'background-image': 'url(' + cursorValueURL + ')'});
+//                            
+                            var p = $('<p>', {'id': 'test2'});
+
+                            p.css({
+                                'width': '100px', 'height': '100px', 'background-color': 'yellow',
+                                'position': 'absolute', 'right': '0px',
+                                'background':'url(http://www.google.com/images/srpr/logo11w.png)',
+                                'cursor': 'url(win_default_2.0.cur), pointer'
+                            });
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
