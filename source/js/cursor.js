@@ -224,6 +224,7 @@ sitecues.def('cursor', function (cursor, callback) {
                                 'background':'url(http://www.google.com/images/srpr/logo11w.png)',
                                 'cursor': 'url(win_default_2.0.cur), pointer'
                             });
+                            $('body').append(p);
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
