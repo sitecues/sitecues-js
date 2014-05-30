@@ -40,9 +40,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
-  verticalShiftForIEScrollbarBug = 0,
-  horizScrollbarHeight = null,
-
   state;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
@@ -338,7 +335,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
 +            possibleFloat !== document.documentElement && possibleFloat !== document) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var floatRect = possibleFloat.getBoundingClientRect();
+            var floatRect = traitcache.getScreenRect(possibleFloat);
             return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
           }
           possibleFloat = possibleFloat.parentNode;
@@ -506,7 +503,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return svg;
     }
 
-
     // Update highlight overlay
     // Return false if no valid rect
     // Only update if createOverlay or position changes
@@ -525,7 +521,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       element = state.picked.get(0);
-      elementRect = element.getBoundingClientRect(); // Rough bounds
+      elementRect = traitcache.getScreenRect(element); // Rough bounds
 
       if (!createOverlay) {   // Just a refresh
         if (!state.elementRect) {
@@ -593,11 +589,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
             width : (state.fixedContentRect.width / state.zoom + 2 * extra) + 'px',
-            height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px',
+            height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px'
           })
           .css({
-            zIndex: getMaxZIndex(ancestorStyles) + 1, // Just below stuff like fixed toolbars
-            top: verticalShiftForIEScrollbarBug + 'px'
+            zIndex: getMaxZIndex(ancestorStyles) + 1 // Just below stuff like fixed toolbars
           });
 
         state.isCreated = true;
@@ -611,8 +606,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Finally update overlay CSS -- multiply by conf.zoom because it's outside the <body>
       $('.' + HIGHLIGHT_OUTLINE_CLASS)
         .style({
-          'top': (state.viewRect.top / state.zoom - extra) + 'px',
-          'left':  (state.viewRect.left / state.zoom - extra) + 'px'
+          top: (state.viewRect.top / state.zoom - extra / state.zoom) + 'px',
+          left:  (state.viewRect.left / state.zoom - extra) + 'px'
         }, '', 'important');
       return true;
     }
@@ -684,7 +679,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       if (isCursorInFixedRects([state.fixedContentRect]) &&
         JSON.stringify(state.elementRect) ===
-        JSON.stringify(state.picked.get(0).getBoundingClientRect())) {
+        JSON.stringify(traitcache.getScreenRect(state.picked.get(0)))) {
         // The picked element's rectangle hasn't changed, and
         // we're still in the same highlighting rectangle
         // Can happen if we're in whitespace
@@ -700,25 +695,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (state.isCreated) {    // If has already shown
         updateOverlayPosition();
       }
-    }
-
-    // Get the number of pixels tha page has been shifted by the horizontal scrollbar
-    // (this calculates the correct scroll bar height even when the height/width of scrollbars
-    // are changed in the OS.
-    // Note: it's a very, very bad idea to attach handlers to the window scroll event:
-    // http://ejohn.org/blog/learning-from-twitter/
-    function getVerticalShiftForIEScrollbarBug(oldScrollY, newScrollY) {
-      if (newScrollY < oldScrollY) {
-        return 0;  // Scrolling up or not scrolling -> bug doesn't occur
-      }
-      if ($(document).width() < $(window).width()) {
-        return 0; // No horizontal scrollbar -> bug doesn't occur
-      }
-
-      if (horizScrollbarHeight === null) {
-        horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-      }
-      return horizScrollbarHeight;
     }
 
     function checkPickerAfterUpdate(target, mouseX, mouseY) {
@@ -741,15 +717,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         mh.scrollPos = { x: scrollX, y: scrollY };
         pickAfterShortWait(target, mouseX, mouseY);
         return;
-      }
-
-      if (platform.ieVersion.isIE10 || platform.ieVersion.isIE11) {
-        if (mh.scrollPos && mh.scrollPos.y !== scrollY) {
-          // IE10 & IE11 report getBoundingClientRect wrong when using transform-zoom and scrolling down,
-          // We need to correct the getBoundingClientRect results if the scroll direction is down.
-          // Only do this when necessary
-          verticalShiftForIEScrollbarBug = getVerticalShiftForIEScrollbarBug(mh.scrollPos.y, scrollY);
-        }
       }
 
       mh.cursorPos = { x: mouseX, y: mouseY };
@@ -840,7 +807,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current active isn't body
       var target = document.activeElement;
       mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
-      if (wasAppropriateFocus && !mh.isAppropriateFocus) {
+      if (wasAppropriateFocus && !mh.isAppropriateFocus && !mh.isSticky) {
         pause();
       }
     }

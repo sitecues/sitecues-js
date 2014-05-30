@@ -13,8 +13,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       var isOn = false,
         verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
         lastScrollY              = 0,    // IE specific fix
-        horizScrollbarHeight     = null, // IE specific fix
-        fixedSelector            = '',  //CSS selectors & properties that specify position:fixed
+        fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
         lastAdjustedElements     = $();
 
@@ -24,20 +23,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       // This is necessary to offset positioned items in IE when transform scale is used,
       // but only after the user scrolls down.
       function getVerticalShiftForIEBug() {
-        if (!platform.ieVersion.isIE10 && !platform.ieVersion.isIE11) {
-          return 0;
-        }
-
-        if (horizScrollbarHeight === null) {
-          horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-        }
-
-        var newScrollY = window.pageYOffset,
-          isLastScrollDown = lastScrollY < newScrollY;
-        lastScrollY = newScrollY;
-        return isLastScrollDown ? horizScrollbarHeight : 0;
+        return platform.browser.isIE ? window.pageYOffset - document.documentElement.scrollTop : 0;
       }
-
 
       /**
        * Positions a fixed element as if it respects the viewport rule.
@@ -64,20 +51,13 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         });
       }
 
-      /**
-       * [When the page scrolls, reposition fixed elements, badge, and panel]
-       */
-      function onScroll() {
-        verticalShift = getVerticalShiftForIEBug();
-        refresh();
-      }
-
       /*
        For every fixed element on the page, we must translate them to their correct positions using
        transforms.  This basically happens on scroll events. We must apply
        the transforms that are reactions to the scroll events on top of any transforms.
        */
       function refresh() {
+        verticalShift = getVerticalShiftForIEBug();
         var elementsToAdjust = $(fixedSelector);
         // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
         elementsToAdjust.add(lastAdjustedElements).each(adjustElement);
@@ -128,10 +108,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         isOn = doTurnOn;
 
         if (doTurnOn) {
-          $(window).on(eventsToListenTo, onScroll);
+          $(window).on(eventsToListenTo, refresh);
         }
         else {
-          $(window).off(eventsToListenTo, onScroll);
+          $(window).off(eventsToListenTo, refresh);
         }
 
         refresh();

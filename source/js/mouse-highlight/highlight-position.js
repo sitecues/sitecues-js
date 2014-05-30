@@ -61,7 +61,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       var lineHeight = getLineHeight(traitcache.getStyle(item));
       var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
       if (isSingleLine) {
-        return item.getBoundingClientRect();// AK: this is quick'n'dirty fix for the case rect is undefined
+        return traitcache.getScreenRect(item);// AK: this is quick'n'dirty fix for the case rect is undefined
       }
       return contentRect || {'left': 0, 'top': 0, 'width': 0, 'height': 0};
     };
@@ -79,16 +79,34 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return newRect;
     }
 
-    function getUserAgentCorrectionsForRect(node, rect) {
-      return platform.browser.isFirefox ?
-        scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset) :
-        rect;
+    function getRangeRect(containerNode) {
+      var range = document.createRange();
+      range.selectNodeContents(containerNode);
+      return getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+    }
+
+    function getUserAgentCorrectionsForRangeRect(rect) {
+      if (platform.browser.isFirefox) {
+        // This must be done for range.getBoundingClientRect(),
+        // but not for element.getBoundingClientRect()
+        return scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset);
+      }
+      else if (platform.browser.isIE) {
+        // This must be done for any bounding client rect in these versions of IE
+        var newRect = $.extend({}, rect),
+          vertOffsetCorrection = document.documentElement.scrollTop - window.pageYOffset,
+          horizOffsetCorrection = document.documentElement.scrollLeft - window.pageXOffset;
+        newRect.top += vertOffsetCorrection;
+        newRect.bottom += vertOffsetCorrection;
+        newRect.left += horizOffsetCorrection;
+        newRect.right += horizOffsetCorrection;
+        return newRect;
+      }
+      return rect;
     }
 
     function getBoundingRectMinusPadding(node) {
-      var range = document.createRange();
-      range.selectNode(node);
-      var rect = range.getBoundingClientRect();
+      var rect = getRangeRect(node);
 
       // If range is created on node w/o text, getBoundingClientRect() returns zero values.
       // This concerns images and other nodes such as paragraphs - with no text inside.
@@ -101,9 +119,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         }
       }
 
-      if (isEmptyRect) {rect = node.getBoundingClientRect && node.getBoundingClientRect();}
-
-      rect = getUserAgentCorrectionsForRect(node, rect);
+      if (isEmptyRect) {rect = node.getBoundingClientRect && traitcache.getScreenRect(node);}
 
       if (node.nodeType !== 1) {
         return rect;
@@ -184,7 +200,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       // Background sprites tend to be to the left side of the element
       var backgroundPos = style['background-position'];
       var left = backgroundPos ? parseFloat(backgroundPos) : 0;
-      var rect = element.getBoundingClientRect();
+      var rect = traitcache.getScreenRect(element);
       rect = {
         left: rect.left,
         top: rect.top,
@@ -227,7 +243,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
 
       // Overflow is visible: add right and bottom sides of overflowing content
-      var rect = element.getBoundingClientRect();
+      var rect = traitcache.getScreenRect(element);
       var newRect = {
         left: rect.left,
         top: rect.top,
@@ -258,12 +274,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       allRects.push(rect);
     }
 
-    function getContentsRect(containerNode) {
-      var range = document.createRange();
-      range.selectNodeContents(containerNode);
-      return getUserAgentCorrectionsForRect(containerNode, range.getBoundingClientRect());
-    }
-
     function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 
       $selector.each(function () {
@@ -279,7 +289,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // reducing the number of nodes we touch.
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
-            var parentContentsRect = getContentsRect(this.parentNode);
+            var parentContentsRect = getRangeRect(this.parentNode);
             addRect(allRects, clipRect, parentContentsRect);
             return false;  // Don't keep iterating over text/inlines in this container
           }
@@ -300,7 +310,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
         // --- Visible border ---
         if (hasVisibleBorder(style)) {
-          addRect(allRects, clipRect, this.getBoundingClientRect()); // Make it all visible, including padding and border
+          addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           return true; // Don't iterate ... although it case of Washington post they position a child outside the box, doh
         }
 
@@ -327,7 +337,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           var isClip = isClipElement(this);
           var newClipRect = clipRect;
           if (isClip) {
-            newClipRect = this.getBoundingClientRect();
+            newClipRect = traitcache.getScreenRect(this);
             if (clipRect) {  // Combine parent clip rect with new clip
               newClipRect = getClippedRect(clipRect, newClipRect);
             }
@@ -379,7 +389,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           }
             
           if (isClipElement(this)) {
-            var newClipRect = this.getBoundingClientRect();
+            var newClipRect = traitcache.getScreenRect(this);
             clipRect = clipRect ? getClippedRect(clipRect, newClipRect) : newClipRect;
           }
         });
@@ -471,7 +481,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     mhpos.getCenterForActualElement = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
-        var boundingBox = this.getBoundingClientRect();
+        var boundingBox = traitcache.getScreenRect(this);
         var scrollPos = geo.getScrollPosition();
         var rect = {
           left: boundingBox.left + scrollPos.left,
@@ -516,7 +526,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // element relative to it's offset parent. These calculations need to factor
         // in zoom.
         var offsetParent = jElement.offsetParent();
-        var offsetParentPosition = mhpos.getOffset(offsetParent);
+        var offsetParentPosition = traitcache.getScreenRect(offsetParent);
 
         // Determine where we would display the centered and (possibly) zoomed element,
         // and what it's dimensions would be.
