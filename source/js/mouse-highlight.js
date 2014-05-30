@@ -45,8 +45,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
-    'speech', 'util/geo', 'platform',
-    function($, conf, picker, traitcache, mhpos, common, speech, geo, platform) {
+    'speech', 'util/geo',
+    function($, conf, picker, traitcache, mhpos, common, speech, geo) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
 

@@ -7,8 +7,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor', 'util/common',
-    function ($, zoom, conf, platform, cursor, common) {
+  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor',
+    function ($, zoom, conf, platform, cursor) {
 
       var isOn = false,
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
