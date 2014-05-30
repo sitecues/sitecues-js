@@ -209,9 +209,6 @@ sitecues.def('cursor', function (cursor, callback) {
 //                    });
                         $.ajax({
                         url: cursorValueURL,
-                        xhrFields: {
-                            withCredentials: true
-                          },
                           crossDomain: true,
                           beforeSend: function(xhrObj){
                             xhrObj.setRequestHeader("Accept","application/json");
@@ -220,7 +217,7 @@ sitecues.def('cursor', function (cursor, callback) {
                         async: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
+                            // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
                             // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
                         },
                         error: function() {
