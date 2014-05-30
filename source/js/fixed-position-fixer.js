@@ -12,7 +12,6 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
       var isOn = false,
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
-        eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
         lastAdjustedElements     = $();
 
       /**
@@ -60,34 +59,41 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         return selectors.join();
       }
 
-      /**
-       * [Listens for events emitted by the cursor module, which indicates that new CSS has
-       * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
-       * fixed positioned elements that are not used on a page when sitecues first loads.
-       * Basically, it gets any styles that declare position:fixed so we can later filter for
-       * any elements that are dynamically fixed.]
-       * @return {[type]} [description]
-       */
-      sitecues.on('cursor/addingStyles', function () {
-        fixedSelector = getFixedPositionSelector();
-        if (fixedSelector) {
-          lazyInit(conf.get('zoom'));
-        }
-      });
+      function initializeModule() {
+        /**
+         * [Listens for events emitted by the cursor module, which indicates that new CSS has
+         * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
+         * fixed positioned elements that are not used on a page when sitecues first loads.
+         * Basically, it gets any styles that declare position:fixed so we can later filter for
+         * any elements that are dynamically fixed.]
+         * @return {[type]} [description]
+         */
+        sitecues.on('cursor/addingStyles', function () {
+          fixedSelector = getFixedPositionSelector();
+          if (fixedSelector) {
+            lazyTurnOn(conf.get('zoom'));
+          }
+        });
 
-      /**
-       * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
-       */
-      sitecues.on('zoom', function (zoom) {
-        lazyInit(zoom);
-        refresh();
-      });
+        /**
+         * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
+         */
+        sitecues.on('zoom', function (zoom) {
+          lazyTurnOn(zoom);
+          refresh();
+        });
+      }
+
+
+      if (!platform.browser.isIE) {
+        initializeModule();
+      }
 
       // Initialize only when we really have to, because it's a very, very bad idea to
       // attach handlers to the window scroll event:
       // http://ejohn.org/blog/learning-from-twitter
 
-      function lazyInit(zoom) {
+      function lazyTurnOn(zoom) {
         var doTurnOn = fixedSelector.length && zoom > 1;
 
         if (doTurnOn === isOn) {
@@ -96,10 +102,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         isOn = doTurnOn;
 
         if (doTurnOn) {
-          $(window).on(eventsToListenTo, refresh);
+          $(window).on('scroll', refresh);
         }
         else {
-          $(window).off(eventsToListenTo, refresh);
+          $(window).off('scroll', refresh);
         }
 
         refresh();
