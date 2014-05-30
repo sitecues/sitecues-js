@@ -9,7 +9,7 @@
 # 	Clean the target direcetory, update Node.js dependecies, and build the
 #	JavaScript library.
 ################################################################################
-all: clean deps build
+all: clean build
 
 ################################################################################
 # Command line options.

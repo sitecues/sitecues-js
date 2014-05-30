@@ -28,9 +28,9 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
     designer.kDefaultTextColor = 'rgb(0, 0, 0)';
 
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'util/positioning', 'util/common', 'ui',
+    sitecues.use('jquery', 'conf', 'util/geo', 'util/common',
 
-        function ($, conf, positioning, common) {
+        function ($, conf, geo, common) {
 
             designer.getHeightExpandedDiffValue = function() {
                 return this.heightExpandedDiffValue;
@@ -114,7 +114,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
                     centerTop  = center.top;
 
                 // Correctly compute the viewport.
-                var viewport = positioning.getViewportDimensions(designer.kMinDistanceFromEdge, conf.get('zoom'));
+                var viewport = geo.getViewportDimensions(designer.kMinDistanceFromEdge);
                 var cssUpdates = {};
                 // The actual dimensions of the box: corrected for text nodes.
                 // We only need it b/c positioning.js logic is based on the visible dimensions.

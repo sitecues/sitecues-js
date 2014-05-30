@@ -4,14 +4,13 @@
 sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
   // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'util/positioning', 'util/common',
-    'hlb/event-handlers', 'hlb/designer', 'hlb/specificElement', 'hlb/style',
+  sitecues.use('jquery', 'conf', 'cursor', 'mouse-highlight/highlight-position', 'util/geo',
+    'util/common','hlb/event-handlers', 'hlb/designer', 'hlb/specificElement', 'hlb/style',
     'background-dimmer', 'ui', 'speech',
-    'util/close-button', 'platform', 'hlb/style',
-  function ($, conf, cursor, positioning, common,
-    eventHandlers, designer, hlbSpecificElement, hlbStyle,
-    backgroundDimmer, ui, speech,
-    closeButton, platform) {
+    'util/close-button', 'platform',
+  function ($, conf, cursor, mhpos, geo,
+            common, eventHandlers, designer, hlbSpecificElement, hlbStyle,
+            backgroundDimmer, ui, speech, closeButton, platform) {
 
     // Constants
 
@@ -127,7 +126,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     var displayCloseButton = function(hlbTarget, totalZoom) {
       var hlbNode = $(hlbTarget);
       var hlbBorderWidth = parseFloat(hlbNode.css('borderWidth')) || 0;
-      var boundingBox = positioning.getBoundingBox(hlbTarget);
+      var boundingBox = geo.getBoundingBox(hlbTarget);
       var left = ((boundingBox.left  + hlbBorderWidth) * totalZoom) + closeButtonInset;
       var top  = ((boundingBox.top   + hlbBorderWidth) * totalZoom) + closeButtonInset;
 
@@ -136,15 +135,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
     var HighlightBox = (function () {
       // Constructor: Initialize HLB.
-      function HighlightBox(target, options) {
-        this.initHLBValues(target, options);
+      function HighlightBox(highlight, options) {
+        this.initHLBValues(highlight, options);
         // Notify about new HLB
         sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
 
         // Temp values.
-        this.computedStyles  = common.getElementComputedStyles(this.item);
+        this.computedStyles  = getComputedStyle(this.item);
         var computedStyles = this.computedStyles; // a bit shorter alias
-        var offset = positioning.getOffset(this.item);
+        var offset = geo.getOffset(this.item);
         var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.$item.width() : computedStyles.width;
         var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
         var size = { width: parseFloat(width), height: parseFloat(height) };
@@ -152,7 +151,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.fillHLBValues(offset, size);
       }
 
-      HighlightBox.prototype.initHLBValues = function(target, options) {
+      HighlightBox.prototype.initHLBValues = function(highlight, options) {
         this.options = $.extend(true,
             {'needsCompensation': true,
                 'isChrome': platform.browser.isChrome,
@@ -161,13 +160,14 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         this.savedCss = [];
         this.savedStyleAttr = {};
         this.origRectDimensions = [];
-        this.item = target; // Need to know when we have box for checking mouse events before closing prematurely
+        this.item = highlight.picked.get(0); // Need to know when we have box for checking mouse events before closing prematurely
+        this.highlight = highlight;
         this.$item = $(this.item);
       };
 
       HighlightBox.prototype.fillHLBValues = function(offset, size) {
         this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
-        this.clientRect = positioning.getSmartBoundingBox(this.item);
+        this.clientRect = mhpos.getSmartBoundingBox(this.item);
         this.boundingBoxes = designer.getBoundingElements(this.item);
         this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles);
         this.savedCss.push(this.computedStyles);
@@ -225,10 +225,10 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
         // Get the current element styles.
         var currentStyle = this.savedCss[this.savedCss.length - 1],
             totalZoom = conf.get('zoom'),
-            center  = positioning.getCenterForActualElement(this.item, totalZoom),
+            center  = mhpos.getCenterForActualElement(this.item, totalZoom),
             cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
 
-        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, currentStyle, cssUpdate);
+        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, this.highlight, currentStyle, cssUpdate);
         // Anything on the module namespace will be available in the customization file.
         _this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
         sitecues.emit('hlb/animation/styles', _this, $.extend(true, {}, _this.options));
@@ -308,14 +308,15 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // todo: use '$.style' instead of '$.css'
         this.$item.css(cssBeforeAnimateStyles);
-        this.$item.animate(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
+        this.$item.effects(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
           // Once the animation completes, set the new state and emit the ready event.
           _this.state = STATES.READY;
 
           // Trigger the background blur effect if there is a highlight box only.
           // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
-          onHighlightBoxReady($(this));
-          backgroundDimmer.dimBackgroundContent(this);
+          onHighlightBoxReady(_this.$item);
+
+          backgroundDimmer.dimBackgroundContent(_this.$item);
           if (_this.options.close_button) {
             displayCloseButton(_this.item, totalZoom);
           }
@@ -323,7 +324,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
           log.info("hlb ready");
           sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
           // Update the dimensions object.
-          _this.clientRect = positioning.getSmartBoundingBox(_this.item);
+          _this.clientRect = mhpos.getSmartBoundingBox(_this.item);
         });
 
         if (this.options.isChrome && this.options.needsCompensation && !hlbStyle.isFloated) {
@@ -349,12 +350,12 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
             clientRect;
         
         try { //Required for FF
-          clientRect = positioning.getSmartBoundingBox(this.item);
+          clientRect = mhpos.getSmartBoundingBox(this.item);
           if (!clientRect) {
-            clientRect = positioning.getBoundingBox(this.item); 
+            clientRect = geo.getBoundingBox(this.item);
           }
         } catch(e) {
-          clientRect = positioning.getBoundingBox(this.item);
+          clientRect = geo.getBoundingBox(this.item);
         }
         var cssBeforeAnimateStyles = hlbStyle.cssBeforeAnimateDeflationStyles(currentStyle);
         var cssAnimateStyles = hlbStyle.getCssAnimateDeflationStyles();
@@ -371,7 +372,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
         // Deflate the highlight box.
         this.$item.css(cssBeforeAnimateStyles);
-        this.$item.animate(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
+        this.$item.effects(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
             // Cleanup all elements inserted by sitecues on the page.
             if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
                 // Remove placeholder wrapper element if the table child highlighted.
@@ -478,19 +479,20 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
 
       return {
         // Return Highlight if need to support a few instances instead.
-        createInstance: function (target, options) {
+        createInstance: function (highlight, options) {
           // Don't return an instance if the target is ineligible.
           // There used to be an isValidTarget function call here,
           // but that logic already exists in mouse-highlight.  We
           // should keep that logic in one place and this component
           // should assume that any target sent to it is valid.
-          return ( target ? new HighlightBox(target, options) : null );
+          return ( highlight.isVisible ? new HighlightBox(highlight, options) : null );
         }
       };
     })();
 
     // Take care on target change event.
-    function onTargetChange(newTarget) {
+    function onTargetChange(e) {
+      var newTarget = e.target;
       if (getState() === STATES.READY) { // if something is ready
         if (!instance.options.suppress_mouse_out) {
           var lastTarget = instance.item;
@@ -519,6 +521,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     function onHighlightBoxClosed(hlb) {
       // Unbind!
       $(hlb).off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
+      $(document).off('mousemove click', onTargetChange);
       $(window).off('keydown', eventHandlers.keyDownHandler);
       // At the current time within the module we need to remove the instance.
       $(hlb).blur();
@@ -537,19 +540,9 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       }
       // Add listener below to correctly handle scroll event(s) if HLB is opened.
       $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
+      $(document).on('mousemove click', onTargetChange);
       $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);
     }
-
-    var clientX, clientY;
-    /**
-     * Handle mousemove event.
-     */
-    $(document).bind('mousemove click', function (e) {
-      clientX = e.clientX;
-      clientY = e.clientY;
-
-      onTargetChange(e.target);
-    });
 
     /**
      * Handle keypress event.
@@ -563,7 +556,7 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       } else if ((currentState === STATES.ON) || ((currentState === STATES.OFF) && hlbOptions.force)) {
         // There is no current HLB and we can create one, so do just that.
         // If the target element is ineligible, the create request may return null.
-        instance = HighlightBox.createInstance(e.dom.hlb_target || e.dom.mouse_highlight, hlbOptions);
+        instance = HighlightBox.createInstance(e.dom.mouse_highlight, hlbOptions);
         if (instance) {
           instance.inflate();
         }

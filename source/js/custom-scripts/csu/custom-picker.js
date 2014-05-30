@@ -7,13 +7,11 @@
 sitecues.def(function (module, callback, log) {
   sitecues.use('custom', function (custom) {
 
-    custom.register('mouse-highlight/picker', function (event) {
+    custom.register('mouse-highlight/pick', function (event) {
       
-      this.PICK_ME_FIRST = [{
-        'url'      : 'calstate.edu',
-        'selector' : '#slider',
-        'enabled'  : true
-      }];
+      this.provideCustomSelectors({
+        prefer: '#slider'
+      });
 
     });
 

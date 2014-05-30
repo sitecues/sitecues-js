@@ -1,8 +1,7 @@
 ################################################################################
-# The EEOC custom build configuration.
+# The Debug custom build configuration.
 ################################################################################
 
-custom-name=eeoc
+custom-name=debug
 custom-files=\
-	source/js/custom-scripts/eeoc/hlb2-clear-none-centercol.js \
-	source/js/custom-scripts/eeoc/custom-picker.js
+	source/js/custom-scripts/debug/pick-debug.js

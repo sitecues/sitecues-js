@@ -1,5 +1,4 @@
 @media print {
-      #sitecues-BWCG{display:none!important;}  
       #sitecues-panel{display:none!important;}
       #sitecues-badge{display:none!important;}
 }
@@ -69,27 +68,6 @@
     user-select: none;
     border:2px solid red;
 }
-
-#sitecues-panel input[type='range'] {
-    position:absolute;
-    -webkit-appearance: none;
-    left: 5px;
-    height: 0px;
-    width: 198px;
-    top: 26px;
-}
-#sitecues-panel input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    background-color: none;
-    background-image: url('../images/panel/slider_marker.png');
-    width: 19px;
-    height: 44px;
-    border-radius: 4px;
-    border: none;
-    /*-webkit-box-shadow: 0 0 4px #555;*/
-    z-index: 1;
-}
-
 
 
 #sitecues-panel .slider-wrap {
@@ -257,6 +235,12 @@
     overflow-y: hidden;
     position: absolute;
     z-index: 2147483643; /* behind the toolbar */
+}
+
+#sitecues-panel.animate {
+    opacity: 1.0;
+    -webkit-transition: opacity 0.75s ease;
+    border: red;
 }
 
 /* Simulate Windows Scrollbars in Webkit */

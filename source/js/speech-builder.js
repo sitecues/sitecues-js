@@ -106,7 +106,7 @@ sitecues.def('speech-builder', function (builder, callback, log) {
       }
 
       // Element
-      styles = common.getElementComputedStyles(node);
+      styles = window.getComputedStyle(node);
 
       if (!isLabel) {   // Hidden node checks, label id checks
         // CSS display: none -- hides entire subtree

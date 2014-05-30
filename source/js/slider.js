@@ -86,15 +86,9 @@ sitecues.def("slider", function (slider, callback, log) {
         letterBig         : { normal: "#FFFFFF", hover: "#FFFFFF"},
       },
 
-      // The default width & height dimensions are overwritten with the DOM containers's dimensions
-      // width: 690,
-      // height: 161,
-
-
-
       // Initialize the slider vars and call draw
       init: function (props) {
-        
+
         this.create();
         this.setdimensions();
         this.bindevents();
@@ -118,7 +112,7 @@ sitecues.def("slider", function (slider, callback, log) {
           '<path class="letterBigBack" fill="'+color.letterBigBack.normal+'"                         d="M539.23,0 L690,0 L690,161 L539.23,161 z" fill="#000000" />"' +
           '<path class="letterSml"     fill="'+color.letterSml.normal+'"                             d="M65.629,128.755 L39.728,128.755 L35.342,145.475 L16.803,145.475 L42.351,72.953 L63.434,72.953 L89.611,145.475 L70.706,145.475 z M61.648,116.091 L52.898,90.768 L44.21,116.091 z" />' +
           '<path class="track"         fill="'+color.track.normal+'" stroke="'+color.track.normal+'" d="M122.85,106.69 L513.778,78.484 L514.03,105.905 L123.101,107.739 z" stroke-width="12" stroke-linejoin="round" />' +
-          '<path class="thumb"         fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,141.0 z" stroke-width="8" stroke-linejoin="round" />' +
+          '<path class="thumb"         fill="'+color.thumb.normal+'" stroke="'+color.thumb.normal+'" d="M-12.044,116.381 L-12.044,57.264 L11.54,57.264 L11.54,116.381 L0.534,141.0 z" opacity="0" stroke-width="8" stroke-linejoin="round" />' +
           '<path class="letterBig"     fill="'+color.letterSml.normal+'"                             d="M633.227,117.08 L590.014,117.08 L582.106,145.0 L551.484,145.0 L594.99,24.213 L629.008,24.213 L672.199,145.0 L640.91,145.0 z M626.008,96.026 L611.553,54.033 L597.186,96.026 z" />' +  
         '</svg>';
 
@@ -154,7 +148,6 @@ sitecues.def("slider", function (slider, callback, log) {
 
       // Build and reference the SVG elements
       create: function () {
-
         this.setcontainerbounds();
 
         // Build the SVG paths and return the HTML string result
@@ -179,11 +172,9 @@ sitecues.def("slider", function (slider, callback, log) {
         };
       },
 
-
-
       // Bind event listeners to DOM elements
       bindevents: function () {
-        
+
         // Alias Slider.color, Slider.svg $document for convenience
         var $document = $(document)
         ,   color     = this.color
@@ -209,15 +200,11 @@ sitecues.def("slider", function (slider, callback, log) {
         // Set the context (this) to be used in the event listener callbacks
         var context = { slider: this };
         
-        // Global mouseup listener
-        $document         .on('mouseup',   context, this.mouseup);
-
         // Track & Thumb Event Listeners
         svg.track         .on('mousedown', context, this.mousedowntrack);
         svg.trackBack     .on('mousedown', context, this.mousedowntrack);
         svg.thumb         .on('mousedown', context, this.mousedowntrack);
-        $document         .on('mousemove', context, this.dragthumb);      
-        
+
         // Letter Event Listeners
         svg.letterSml     .on('mousedown', context, this.mousedownlettersml);
         svg.letterSmlBack .on('mousedown', context, this.mousedownlettersml);
@@ -271,10 +258,13 @@ sitecues.def("slider", function (slider, callback, log) {
       // When the mouse is is pressed over the Track, Thumb and TrackBack
       mousedowntrack: function (e) {
 
-        sitecues.emit('panel/interaction');
-
         // Get the context when called from event mousemove event listener
         var slider = e.data.slider;
+
+        if (slider.mouseDownTrack) {
+          return; // Already tracking mouse movements
+        }
+        sitecues.emit('panel/interaction');
 
         slider.disablebodyselect();
 
@@ -283,6 +273,10 @@ sitecues.def("slider", function (slider, callback, log) {
 
         slider.dragthumb(e);
 
+        // Global listeners
+        $(document)
+          .on('mouseup', e.data, slider.mouseup)
+          .on('mousemove', e.data, slider.dragthumb);
       },
 
       // TODO: These following two functions are very similar, we can pack this down later............
@@ -311,6 +305,9 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
+
+        $(document)
+          .on('mouseup', e.data, slider.mouseup);
 
         // Fire initial zoom update on original mouse down event
         sitecues.emit('zoom/decrease');
@@ -341,6 +338,9 @@ sitecues.def("slider", function (slider, callback, log) {
 
         // Finalize the interval call with the delay setting
         }, slider.letterZoomDelay);
+
+        $(document)
+          .on('mouseup', e.data, slider.mouseup);
 
         // Fire initial zoom update on original mouse down event
         sitecues.emit('zoom/increase');
@@ -373,6 +373,10 @@ sitecues.def("slider", function (slider, callback, log) {
         // Clear mousedown timers on zoom letters
         clearInterval(slider.letterIntervalSml);
         clearInterval(slider.letterIntervalBig);
+
+        $(document)
+          .off('mouseup',   slider.mouseup)
+          .off('mousemove', slider.dragthumb);
 
       },
 
@@ -487,7 +491,9 @@ sitecues.def("slider", function (slider, callback, log) {
 
       // Move the SVG thumb element based on the dimensions of the Slider
       translateThumbSVG: function () {
-        this.svg.thumb.attr('transform', 'translate('+ (this.thumbPos) +')');
+        if (!isNaN(this.thumbPos)) {
+          this.svg.thumb.attr({transform: 'translate(' + this.thumbPos + ')', opacity: 1});
+        }
       },
 
 

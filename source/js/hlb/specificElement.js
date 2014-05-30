@@ -128,7 +128,7 @@ sitecues.def('hlb/specificElement', function (hlbSpecificElement, callback, log)
             if (this.tagName.toLowerCase() === 'table') {
                 // todo: try to set table-layout:fixed to table
                 var closest = itemNode.closest('td');
-                var closestStyle = common.getElementComputedStyles(closest[0]);
+                var closestStyle = closest[0].getComputedStyle();
                 var updateInnerElStyle = {};
                 if (closestStyle) {
                     updateInnerElStyle.width = parseFloat(closestStyle['width'])

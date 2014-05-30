@@ -13,7 +13,6 @@ sitecues.def('speech', function (speech, callback, log) {
     'FIRST_SPEECH_ON_PARAM'      : 'firstSpeechOn',
     // Time in millis after which the more descriptive "speech on" cue should replay.
     'FIRST_SPEECH_ON_RESET_MS'   : 7 * 86400000, // 7 days
-    'SITE_TTS_ENABLE_PARAM'      : 'siteTTSEnable',
     // Used to define if "Speech off" cue needs to be said.
     'SPEECH_OFF_PARAM'           : 'speechOff',
     'VERBAL_CUE_SPEECH_ON'       : 'verbalCueSpeechOn',
@@ -34,15 +33,9 @@ sitecues.def('speech', function (speech, callback, log) {
       return -1;
     };
 
-    var players = {};
-
-    // Use the site and user settings, if available, but if neither is available, we'll fall back to
-    // being disabled
-    var ttsEnable = !(conf.get('ttsEnable') === undefined && conf.get('siteTTSEnable') === undefined)
-                    && (conf.get('ttsEnable') === undefined || conf.get('ttsEnable'))
-                    && (conf.get('siteTTSEnable') === undefined || conf.get('siteTTSEnable'));
-    // WARNING! The above block of code is RFU. (Really Freekin' Ugly) - Alistair (PS: I did not write it, I think.)
-
+    var players = {},
+        // Determine if the user has turned on TTS.
+        ttsOn = !!conf.get('ttsOn'),
        /*
         * This is a flag we can set that will effectively enable TTS, but
         * not interfere with the user state maintained in the ttsEnable
@@ -50,7 +43,7 @@ sitecues.def('speech', function (speech, callback, log) {
        */
     var ttsBypass = false,
         // Flag indicating that this site is enabled for TTS.
-        ttsAvailable = site.get('ttsAvailable'),
+        ttsAvailable = !!site.get('ttsAvailable'),
 
         timesCued = 1,
         maxCued = 3,
@@ -103,7 +96,7 @@ sitecues.def('speech', function (speech, callback, log) {
               return 'mp3';
             }        
           }
-        
+
         }()),
 
         NotSafariAudioPlayer = function(speechKey, text, siteId, secure) {
@@ -245,13 +238,13 @@ sitecues.def('speech', function (speech, callback, log) {
                     that.soundSource.buffer = buffer;
                     sitecues.emit('audioReady');
                   }
-                
+
                 });
-              
+
               };
               
               request.send();
-            
+
             };
 
             this.play = function () {
@@ -292,18 +285,18 @@ sitecues.def('speech', function (speech, callback, log) {
       }*/
       //end variable declarations
 
-    log.warn('siteTTSEnable for ' + window.location.host + ': ' + conf.get('siteTTSEnable'));
+    log.info('ttsOn for ' + window.location.host + ': ' + ttsOn);
     
     if (!ttsAvailable) {
       // No engine was set so the whole component is disabled.
-      ttsEnable = false;
+      ttsOn = false;
     }
 
     /*
      * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
      */
     speech.initPlayer = function(hlb, hlbOptions) {
-      if (!ttsEnable && !ttsBypass) {
+      if (!ttsOn && !ttsBypass) {
         log.info('TTS is disabled');
         return null;
       }
@@ -353,7 +346,7 @@ sitecues.def('speech', function (speech, callback, log) {
       } else {
         // No matching plugins, disable TTS
         log.warn('No engine configured!');
-        ttsEnable = false;
+        ttsOn = false;
       }
     };
 
@@ -366,7 +359,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * @return true if something was played, or false if there was an error or nothing to play.
      */
     speech.play = function(hlb, hlbOptions) {
-      if (!ttsEnable && !ttsBypass) {
+      if (!ttsOn && !ttsBypass) {
         log.info('TTS is disabled');
         return false;
       }
@@ -470,10 +463,9 @@ sitecues.def('speech', function (speech, callback, log) {
     speech.enable = function(callback) {
       if (ttsAvailable) {
         // An engine is set so we can enable the component
-        ttsEnable = true;
-        conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, true);
+        ttsOn = true;
+        conf.set('ttsOn', ttsOn);
         conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
-
 
          // EQ-996 - As a user, I want multiple chances to learn about the 
          // spacebar command so that I can benefit from One Touch Read 
@@ -504,11 +496,11 @@ sitecues.def('speech', function (speech, callback, log) {
      */
     speech.disable = function(callback) {
       speech.stopAll();
-      conf.set(speech.CONSTANTS.SITE_TTS_ENABLE_PARAM, false);
       if (shouldPlaySpeechOffCue()) {
         speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_OFF);
       }
-      ttsEnable = false;
+      ttsOn = false;
+      conf.set('ttsOn', ttsOn);
       if (callback) {
         callback();
       }
@@ -583,8 +575,7 @@ sitecues.def('speech', function (speech, callback, log) {
      * Returns if TTS is enabled or not.  Always returns true or false.
      */
     speech.isEnabled = function() {
-      return !!ttsEnable;
-
+      return !!ttsAvailable && !!ttsOn;
     };
 
     /**

@@ -32,7 +32,7 @@ sitecues.def('hlb/style', function(hlbStyle, callback, log) {
          * @return Object
          */
         // todo: cut the expanded height value!
-        hlbStyle.getCssBeforeAnimateInflationStyles = function(hlb, currentStyle, cssUpdate) {
+        hlbStyle.getCssBeforeAnimateInflationStyles = function(hlb, highlight, currentStyle, cssUpdate) {
             // todo: for floated elements we can use positioning.getCenter():absRect
             var newHeight, newWidth, newOverflowY, newTop, newLeft, maxHeight, compensateShift;
             compensateShift = hlb.compensateShift;
@@ -113,7 +113,7 @@ sitecues.def('hlb/style', function(hlbStyle, callback, log) {
             };
 
             // If there any interesting float we need to do some more adjustments for height/width/top etc.
-            var floatRectHeight = setStyleForInterestingFloatings(this.cssBeforeAnimateInflationStyles, currentStyle);
+            var floatRectHeight = setStyleForInterestingFloats(highlight, this.cssBeforeAnimateInflationStyles, currentStyle);
             vertMargin['margin-bottom'] = (parseFloat(vertMargin['margin-bottom']) || parseFloat(currentStyle['margin-bottom']))
                     - floatRectHeight + 'px';
 
@@ -194,11 +194,11 @@ sitecues.def('hlb/style', function(hlbStyle, callback, log) {
          *  @param currentStyle           Object
          *  @return floatRectHeight The shift height value produces by floating elements.
          */
-        function setStyleForInterestingFloatings(cssBeforeAnimateStyles, currentStyle) {
+        function setStyleForInterestingFloats(highlight, cssBeforeAnimateStyles, currentStyle) {
             var floatRectHeight = 0;
             // This magic values comes from mh.js: floatRectForPoint which calls geo.expandOrContractRect().
             var delta = 14;
-            var floatRects = conf.get('floatRects'); // See mouse-highlight.js
+            var floatRects = highlight.floatRects;
             var floatRectsKeys = Object.keys(floatRects);
 
             for (var index in floatRectsKeys) {
@@ -221,7 +221,7 @@ sitecues.def('hlb/style', function(hlbStyle, callback, log) {
                     // The width is expanded, so height has some extra-space. Let's cut it out!
                     cssBeforeAnimateStyles.height = innerKeys
                             ? clippedSpace / parseFloat(cssBeforeAnimateStyles.width) + 'px'
-                            : conf.get('absoluteRect').height;
+                            : highlight.viewRect.height;
                     // Difference between original height and the new one.
                     var heightDiff = oldHeight - parseFloat(cssBeforeAnimateStyles.height);
                     floatRectHeight = interestingFloatingHeight - heightDiff;
