@@ -219,7 +219,8 @@ sitecues.def('cursor', function (cursor, callback) {
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
                             // console.log(JSON.stringify(data));
-                            rule.style.setProperty('cursor', data);
+                            // url("data:Application/octet-stream,[DATA_GOES_HERE]”);
+                            rule.style.setProperty('cursor', 'url(data:Application/octet-stream,' + data + '), auto');
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
