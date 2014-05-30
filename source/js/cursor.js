@@ -213,7 +213,7 @@ sitecues.def('cursor', function (cursor, callback) {
                         cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            $('html').setProperty('cursor', cursorValueURL, 'important');
+                            $('html').css('cursor', 'url(' + cursorValueURL) + '), auto';
 //                            var p = $('<p>', {'id': 'test2'});
 //
 //                            p.css({
