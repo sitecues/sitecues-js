@@ -201,12 +201,7 @@ sitecues.def('cursor', function (cursor, callback) {
               try {
                 if (platform.browser.is === 'IE') {
                     //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
-                    // Make sure the image loaded before we use it.
-//                    $.get('http:' + cursorValueURL, function() {
-//                        console.log('Loading of CUR file completed!');
-//                        // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
-//                        rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i], 'important');
-//                    });
+
                         $.ajax({
                         url: cursorValueURL,
                         crossDomain: true,
@@ -218,9 +213,7 @@ sitecues.def('cursor', function (cursor, callback) {
                         cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            // console.log(JSON.stringify(data));
-                            // url("data:Application/octet-stream,[DATA_GOES_HERE]”);
-                            rule.style.setProperty('cursor', 'url(data:Application/octet-stream,' + data + '), auto');
+                            $('body').css({'background-image': 'url(' + cursorValueURL + ')'});
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
