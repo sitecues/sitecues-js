@@ -217,10 +217,8 @@ sitecues.def('cursor', function (cursor, callback) {
                         async: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            // $('body').css('cursor', 'url(' +cursorValueURL+ '), auto');
                             console.log(data);
-                            console.log(cursorValueURL);
-                             rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
+                           // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
