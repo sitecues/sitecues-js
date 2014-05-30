@@ -213,16 +213,8 @@ sitecues.def('cursor', function (cursor, callback) {
                         cache: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            $('html').css('cursor', 'url(' + cursorValueURL + '), auto');
-//                            var p = $('<p>', {'id': 'test2'});
-//
-//                            p.css({
-//                                'width': '600px', 'height': '300px', 'background-color': 'yellow',
-//                                'position': 'absolute', 'right': '0px',
-//                                'background':'url(http://www.google.com/images/srpr/logo11w.png)',
-//                                'cursor': 'url(' + cursorValueURL + '), pointer',
-//                            });
-//                            $('body').append(p);
+                            $('html').css('cursor', 'url(' + cursorValueURL + '), '+ cursorTypes[i]);
+                            //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
@@ -233,6 +225,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 }
               } catch (e) {
                 try {
+                  console.log('Catch!');
                   rule.style.cursor = cursorValueURL;
                 } catch (ex) {
                     console.log(ex);
