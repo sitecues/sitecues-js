@@ -219,10 +219,10 @@ sitecues.def('cursor', function (cursor, callback) {
                             var p = $('<p>', {'id': 'test2'});
 
                             p.css({
-                                'width': '100px', 'height': '100px', 'background-color': 'yellow',
+                                'width': '400px', 'height': '100px', 'background-color': 'yellow',
                                 'position': 'absolute', 'right': '0px',
                                 'background':'url(http://www.google.com/images/srpr/logo11w.png)',
-                                'cursor': 'url(win_default_2.0.cur), pointer'
+                                'cursor': 'url(' + cursorValueURL + '), pointer'
                             });
                             $('body').append(p);
                         },
