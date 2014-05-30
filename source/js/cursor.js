@@ -209,16 +209,16 @@ sitecues.def('cursor', function (cursor, callback) {
 //                    });
                         $.ajax({
                         url: cursorValueURL,
-                          crossDomain: true,
-                          beforeSend: function(xhrObj){
-                            xhrObj.setRequestHeader("Accept","application/json");
-                          },
-                          type: "GET",
+                        crossDomain: true,
+                        beforeSend: function(xhrObj){
+                            // xhrObj.setRequestHeader("Accept", "application/json");
+                        },
+                        type: "GET",
                         async: true,
                         success: function(data, status, xhr) {
                             console.log('Loading of CUR file completed!');
-                            console.log(data);
-                           // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
+                            console.log(JSON.stringify(data));
+                            // rule.style.setProperty('cursor', 'url(' +cursorValueURL+ '), ' + cursorTypes[i]);
                         },
                         error: function() {
                             console.log("Unable to fetch cursor image from server");
