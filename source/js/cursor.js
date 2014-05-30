@@ -268,12 +268,12 @@ sitecues.def('cursor', function (cursor, callback) {
             cache: true,
             success: function(data, status, xhr) {
                 console.log('Loading of CUR file completed!');
-                return cursorValueURL;
             },
             error: function() {
                 console.log("Unable to fetch cursor image from server");
             }
         });
+        return cursorValueURL;
       }   
     }
 
