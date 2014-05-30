@@ -214,7 +214,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           alpha;
       viz = Math.min(viz, 2);
       alpha = 0.11 * viz;
-      // return 'rgba(0, 255, 0, 1)'; // Works with any background -- lightens it slightly
       return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
@@ -283,8 +282,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                            hasInterestingBackgroundImage(state.styles);
       backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
-      // var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
-      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
+      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom);
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
@@ -574,11 +572,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
         var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra * state.zoom,
             state.fixedContentRect.top - extra * state.zoom, state.zoom);
-        state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
+        state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - 1);
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
         // Create and position highlight overlay
-        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
+        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth + 1, getTransparentBackgroundColor(),
                     state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null, 1);
         var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3);
         var extraPaddingSVG = getSVGForExtraPadding(extra);
