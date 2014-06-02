@@ -3,9 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-var startTime = (+new Date());
-// console.log('START: '+startTime);
-
 (function () {
   
   'use strict';
@@ -281,9 +278,6 @@ var startTime = (+new Date());
       if (modules.custom && modules.custom.check) {
         modules.custom.check.call(module, name);
       }
-
-      var time = ((+new Date())-startTime)/1000;
-      console.log('MODULE '+name+': '+time);
 
       // Process the next module in the Def_Queue
       _processDefQueue();
@@ -584,36 +578,6 @@ var startTime = (+new Date());
       libraryConfig = window.sitecues.libConfig;
 
       log.info(libraryConfig);
-       /**
-       * EQ-1349
-       * Use temporary workaround for site/picker customizations
-       */
-      if(libraryConfig.sitepicker){
-     
-        if (libraryConfig.sitepicker.eeoc_gov) {
-          log.info('eeoc_gov site/picker is enabled : ' + libraryConfig.sitepicker.eeoc_gov);
-        } else {
-          log.warn('eeoc_gov site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.scotiabank_com) {
-          log.info('scotiabank_com site/picker is enabled : ' + libraryConfig.sitepicker.scotiabank_com);
-        } else {
-          log.warn('scotiabank_com site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.cnib_ca) {
-          log.info('cnib_ca site/picker is enabled : ' + libraryConfig.sitepicker.cnib_ca);
-        } else {
-          log.warn('cnib_ca site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.texasat_net) {
-          log.info('texasat_net site/picker is enabled : ' + libraryConfig.sitepicker.texasat_net);
-        } else {
-          log.warn('texasat_net site/picker is disabled.');
-        }
-      }
 
       if (libraryConfig.hosts) {
 
@@ -648,9 +612,6 @@ var startTime = (+new Date());
   var processLibraryConfiguration = function(cb) {
     // Called after all library configs that require loading are loaded, triggering validation.
     var onLibraryConfigLoadComplete = function() {
-
-      var time = ((+new Date())-startTime)/1000;
-      console.log('FUNC obLibraryConfigLoadComplete: '+time);
 
       libraryConfigLoadCount--;
       if (libraryConfigLoadCount <= 0) {
