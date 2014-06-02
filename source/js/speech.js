@@ -19,6 +19,8 @@ sitecues.def('speech', function (speech, callback, log) {
     'VERBAL_CUE_SPEECH_ON_FIRST' : 'verbalCueSpeechOnFirst',
     'VERBAL_CUE_SPEECH_OFF'      : 'verbalCueSpeechOff'
   };
+
+  var ttsOn = false;
   
   sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
     function(conf, site, common, $, builder, platform) {
@@ -33,9 +35,21 @@ sitecues.def('speech', function (speech, callback, log) {
       return -1;
     };
 
-    var players = {},
-        // Determine if the user has turned on TTS.
-        ttsOn = !!conf.get('ttsOn'),
+// <<<<<<< HEAD
+    var players = {};
+
+    // Use the site and user settings, if available, but if neither is available, we'll fall back to
+    // being disabled
+    var ttsEnable = !(conf.get('ttsEnable') === undefined && conf.get('siteTTSEnable') === undefined)
+                    && (conf.get('ttsEnable') === undefined || conf.get('ttsEnable'))
+                    && (conf.get('siteTTSEnable') === undefined || conf.get('siteTTSEnable'));
+    // WARNING! The above block of code is RFU. (Really Freekin' Ugly) - Alistair (PS: I did not write it, I think.)
+
+// =======
+//     var players = {},
+//         // Determine if the user has turned on TTS.
+//         ttsOn = !!conf.get('ttsOn'),
+// >>>>>>> 4036d67513785c75291ac8485062783b4e0c6ada
        /*
         * This is a flag we can set that will effectively enable TTS, but
         * not interfere with the user state maintained in the ttsEnable
@@ -575,7 +589,12 @@ sitecues.def('speech', function (speech, callback, log) {
      * Returns if TTS is enabled or not.  Always returns true or false.
      */
     speech.isEnabled = function() {
-      return !!ttsAvailable && !!ttsOn;
+// <<<<<<< HEAD
+      return !!ttsEnable;
+
+// =======
+//       return !!ttsAvailable && !!ttsOn;
+// >>>>>>> 4036d67513785c75291ac8485062783b4e0c6ada
     };
 
     /**

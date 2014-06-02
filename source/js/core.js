@@ -3,6 +3,9 @@
  *   The core module of the sitecues library.
  */
 
+var startTime = (+new Date());
+// console.log('START: '+startTime);
+
 (function () {
   
   'use strict';
@@ -278,6 +281,9 @@
       if (modules.custom && modules.custom.check) {
         modules.custom.check.call(module, name);
       }
+
+      var time = ((+new Date())-startTime)/1000;
+      console.log('MODULE '+name+': '+time);
 
       // Process the next module in the Def_Queue
       _processDefQueue();
@@ -642,6 +648,10 @@
   var processLibraryConfiguration = function(cb) {
     // Called after all library configs that require loading are loaded, triggering validation.
     var onLibraryConfigLoadComplete = function() {
+
+      var time = ((+new Date())-startTime)/1000;
+      console.log('FUNC obLibraryConfigLoadComplete: '+time);
+
       libraryConfigLoadCount--;
       if (libraryConfigLoadCount <= 0) {
         validateLibraryConfigs(cb);
