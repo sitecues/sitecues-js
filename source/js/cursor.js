@@ -25,8 +25,8 @@ sitecues.def('cursor', function (cursor, callback) {
       'DEFAULT_TYPE'           : 'default',
       'SITECUES_CSS_ID'        : 'sitecues-css',
       'SITECUES_CSS_DEFAULT'   :
-        'html,*,.sitecues-panel{cursor:auto}\n' +
-        'input,textarea,select,a,a *,button, button *,.sitecues-clickable{cursor:pointer}'
+        'html,.sitecues-panel{cursor:auto}\n' +
+        'input,textarea,select,a,button,.sitecues-clickable{cursor:pointer}'
     };
     /**
      * [Cross browser solution to initiating an XMLHTTPRequest 
@@ -181,18 +181,11 @@ sitecues.def('cursor', function (cursor, callback) {
         cursor.getStyles('cursor', null, function (rule, value) {
         //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
           for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (value.indexOf(cursorTypes[i]) > -1) {
-              //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-              try {
-                rule.style.setProperty('cursor', cursorValueURL, 'important');
-              } catch (e) {
-                try {
-                  rule.style.cursor = cursorValueURL;
-                } catch (ex) {
-                }
-              }
-            } 
+            var type = cursorTypes[i];
+            if (value.indexOf(type) > -1) {
+              var cursorValueURL = cursorTypeURLS[type];
+              rule.style.setProperty('cursor', cursorValueURL, 'important');
+            }
           }        
         });
       
