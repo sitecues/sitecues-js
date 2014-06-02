@@ -152,7 +152,6 @@ endif
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 	@cp -R $(build-dir)/compile/* $(package-dir)
-	@cp -R source/css $(package-dir)
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
