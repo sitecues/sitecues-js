@@ -24,24 +24,9 @@ sitecues.def('cursor', function (cursor, callback) {
       'DEFAULT_MIN_ZOOM_LEVEL' : 1.1,
       'DEFAULT_TYPE'           : 'default',
       'SITECUES_CSS_ID'        : 'sitecues-css',
-      'SITECUES_CSS_DEFAULT'   :         
-        '* {cursor:auto}\n' +
-        'input[type="submit"], input[type="radio"], input[type="button"], input[type="checkbox"], input[type="image"], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n' +
-        'input[type="text"], input[type="email"], input[type="search"] {cursor:text}\n' +
-        'p, textarea {cursor:text}\n' +
-        '#sitecues-panel, .sitecues-badge {cursor:default}\n' +
-        '#sitecues-panel .tts {cursor:pointer}\n' +
-        '#sitecues-close-button {cursor:pointer}\n' +                
-        '.dropdown-menu > .disabled > a:focus {cursor:default}\n' +
-        '.sitecues-slider {cursor:pointer}\n' +
-        '.sitecues-toolbar, .hori {cursor:default}\n' +
-        '.sitecues-slider-thumb {cursor:pointer}\n' +
-        '.sitecues-toolbar .slider-wrap * {cursor:pointer}\n' +
-        '.sitecues-toolbar svg * {cursor:pointer}\n' +
-        '.slider-wrap svg * {cursor:pointer}\n' +
-        '.sitecues-toolbar .tts {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n'
+      'SITECUES_CSS_DEFAULT'   :
+        'html,.sitecues-panel{cursor:auto}\n' +
+        'input,textarea,select,a,button,.sitecues-clickable{cursor:pointer}'
     };
     /**
      * [Cross browser solution to initiating an XMLHTTPRequest 
@@ -196,18 +181,11 @@ sitecues.def('cursor', function (cursor, callback) {
         cursor.getStyles('cursor', null, function (rule, value) {
         //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
           for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (value.indexOf(cursorTypes[i]) > -1) {
-              //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-              try {
-                rule.style.setProperty('cursor', cursorValueURL, 'important');
-              } catch (e) {
-                try {
-                  rule.style.cursor = cursorValueURL;
-                } catch (ex) {
-                }
-              }
-            } 
+            var type = cursorTypes[i];
+            if (value.indexOf(type) > -1) {
+              var cursorValueURL = cursorTypeURLS[type];
+              rule.style.setProperty('cursor', cursorValueURL, 'important');
+            }
           }        
         });
       
