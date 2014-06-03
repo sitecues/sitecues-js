@@ -56,7 +56,9 @@ sitecues.def('status', function (status_module, callback, log) {
         'current_url'     : window.location.href,
         'sitecues_js_url' : (sitecues.getLibraryUrl()).raw,
         'user_agent'      : navigator.userAgent,
-        'tts_status'      : ((speech.isEnabled()) ? 'on' : 'off'),
+        // Removed as this was not being used by the library. Add this back if something breaks.
+        // See: https://equinox.atlassian.net/browse/SC-1623
+        //'tts_status'      : ((speech.isEnabled()) ? 'on' : 'off'),
         'version'         : {
           'sitecues_js'   : sitecues.getVersion(),
           'sitecues_up'   : null,
