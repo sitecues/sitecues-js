@@ -25,6 +25,14 @@ sitecues.def('zoom', function (zoom, callback) {
 
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
+    var zoomConfig = {
+      doManualScrollbars: platform.browser.isIE,
+      repaintOnZoomChange: platform.browser.isChrome
+      // In the future we are likely to go back to using the zoom property again, as it looks
+      // much better in Chrome on Windows (text is crisper, kerning looks right)
+      //useZoomProperty: false //(platform.browser.isChrome && platform.os.isWin)
+    };
+
     // use conf module for sharing
     // current zoom level value
     conf.def('zoom', function (value) {
@@ -45,7 +53,7 @@ sitecues.def('zoom', function (zoom, callback) {
       value = (value / zoom.precision) * zoom.precision;
 
       // value have float value
-      return value.toFixed(1);
+      return parseFloat(value.toFixed(1));
     });
 
     // define default value for zoom if needed
@@ -112,11 +120,12 @@ sitecues.def('zoom', function (zoom, callback) {
     function adjustPageStyleForZoomAndWidth(currZoom) {
       if (currZoom === 1) {
         // Clear all CSS values
-        $('html').css({ width: '', transform: '', transformOrigin: '', overflow: '' });
+        $('html').css({ width: '', transform: '', transformOrigin: '', overflow: '', zoom: '', textRendering: '' });
+        document.body.style.webkitBackfaceVisibility = '';
         return;
       }
 
-      if (platform.browser.isIE) {
+      if (zoomConfig.doManualScrollbars) {
         // In IE we control the visibility of scrollbars ourselves, which corrects the dreaded
         // scrollbar bug in IE, where fixed position content and any use of getBoundingClientRect()
         // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
@@ -127,21 +136,22 @@ sitecues.def('zoom', function (zoom, callback) {
         // Step 2 (below): re-add the scrollbar if necessary for size of content
         document.documentElement.style.overflow = 'hidden';
       }
-      var newBodyWidth = Math.round(originalDocumentWidth / currZoom);
-
-      $('html').css({width: newBodyWidth + 'px',
+      var newCss = {
+        width: Math.round(originalDocumentWidth / currZoom) + 'px',
         transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
         transform: 'scale(' + currZoom + ')'
-      });
+      };
+      newCss.textRendering = 'optimizeLegibility';
+      $('html').css(newCss);
 
       // Un-Blur text in Chrome
-      if (platform.browser.isChrome) {
+      if (zoomConfig.repaintOnZoomChange) {
         forceRepaintToEnsureCrispText();
       }
 
-      if (platform.browser.isIE) {
-        // Part 2 of IE horizontal scrollbar fix: re-add scrollbars if necessary
-        // Get the visible content rect (as opposed to element rect which contains whitespace)
+      // Part 2 of IE horizontal scrollbar fix: re-add scrollbars if necessary
+      // Get the visible content rect (as opposed to element rect which contains whitespace)
+      if (zoomConfig.doManualScrollbars) {
         var rect,
           range = document.createRange(),
           winHeight = window.innerHeight,
@@ -162,7 +172,6 @@ sitecues.def('zoom', function (zoom, callback) {
     // Get and set are now in 'source/js/conf/user/manager.js'
     conf.get('zoom', zoomFn);  //This use to be an anonymous function,
                                //but we must force a zoom if the browser window is resized
-
     // done
     callback();
 
