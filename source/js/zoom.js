@@ -27,7 +27,7 @@ sitecues.def('zoom', function (zoom, callback) {
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
     var zoomConfig = {
       doManualScrollbars: platform.browser.isIE,
-      repaintOnZoomChange: platform.browser.isChrome
+      repaintOnZoomChange: platform.browser.isChrome && platform.os.isWin
       // In the future we are likely to go back to using the zoom property again, as it looks
       // much better in Chrome on Windows (text is crisper, kerning looks right)
       //useZoomProperty: false //(platform.browser.isChrome && platform.os.isWin)
@@ -72,10 +72,10 @@ sitecues.def('zoom', function (zoom, callback) {
     });
 
       /**
-     * [renderPage purpose is to render text clearly in browsers (chrome mac only (for now))
+     * [renderPage purpose is to render text clearly in browsers (chrome windows only (for now))
      * that do not repaint the DOM when using CSS Transforms.  This function simply sets a
      * property, which is hopefully not set on pages sitecues runs on, that forces repaint.
-     * 50ms of time is required, in my opinion, because the browser may not be done Transforming
+     * 15ms of time is required, because the browser may not be done transforming
      * by the time Javascript is executed without the setTimeout.
      *
      * See here: https://equinox.atlassian.net/wiki/display/EN/Known+Issues
