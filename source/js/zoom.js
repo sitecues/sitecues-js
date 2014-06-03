@@ -77,7 +77,7 @@ sitecues.def('zoom', function (zoom, callback) {
      *
      * Weird: Aaron tried to reverse this and it caused the text on nytimes.com to blur every 7 seconds. WEIRD!!!
      */
-    var renderPage = function () {
+    var forceRepaintToEnsureCrispText = function () {
       document.body.style.webkitBackfaceVisibility = '';
       setTimeout(function() {
         document.body.style.webkitBackfaceVisibility = 'hidden';
@@ -135,8 +135,8 @@ sitecues.def('zoom', function (zoom, callback) {
       });
 
       // Un-Blur text in Chrome
-      if (platform.browser.isChrome && platform.os.isMac) {
-        renderPage();
+      if (platform.browser.isChrome) {
+        forceRepaintToEnsureCrispText();
       }
 
       if (platform.browser.isIE) {
