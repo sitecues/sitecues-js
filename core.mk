@@ -53,19 +53,17 @@ files=\
 	source/js/conf/user.js \
 	source/js/conf/site.js \
 	source/js/conf.js \
-	source/js/geo.js \
 	source/js/platform.js \
 	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
 	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
 	source/js/jquery/resize.js \
-        source/js/jquery/effects.js \
+    source/js/jquery/effects.js \
 	source/js/util/close-button.js \
 	source/js/ui.js \
-	source/js/style.js \
 	source/js/util/common.js \
-	source/js/util/positioning.js \
+	source/js/util/geo.js \
 	source/js/html-build.js \
 	source/js/speech-builder.js \
 	source/js/speech.js \
@@ -74,8 +72,11 @@ files=\
 	source/js/panel.js \
 	source/js/badge.js \
 	source/js/focus.js \
-	source/js/mouse-highlight/roles.js \
-	source/js/mouse-highlight/picker.js \
+	source/js/mouse-highlight/traitcache.js \
+	source/js/mouse-highlight/traits.js \
+	source/js/mouse-highlight/judge.js \
+	source/js/mouse-highlight/pick.js \
+	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight.js \
 	source/js/keys.js \
 	source/js/background-dimmer.js \
@@ -84,29 +85,20 @@ files=\
 	source/js/cursor/images/manager.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
-	source/js/fixFixedBadgeAndPanel.js \
+	source/js/fixed-position-fixer.js \
 	source/js/hlb/designer.js \
-  source/js/hlb/style.js \
-  source/js/hlb/specificElement.js \
+	source/js/hlb/style.js \
+	source/js/hlb/specificElement.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \
-	source/js/iframe-modal.js \
-	source/js/invert.js \
 	source/js/util/template.js \
-	source/js/toolbar/bootstrap-dropdown.js \
-	source/js/toolbar/dropdown.js \
-	source/js/toolbar/messenger.js \
-	source/js/toolbar/resizer.js \
-	source/js/toolbar.js \
-	source/js/ui-manager.js \
 	source/js/status.js \
-	source/js/sitepicker.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
-  source/js/metrics/hlb-opened.js \
+	source/js/metrics/hlb-opened.js \
 	source/js/metrics.js \
 
 # Development files (load modules separately).
@@ -160,7 +152,6 @@ endif
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 	@cp -R $(build-dir)/compile/* $(package-dir)
-	@cp -R source/css $(package-dir)
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"

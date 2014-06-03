@@ -2,84 +2,20 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-sitecues.def('util/positioning', function (positioning, callback, log) {
-
-
+sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   'use strict';
-  
-  positioning.kMinRectWidth = 4;
-  positioning.kMinRectHeight = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', 'platform', function ($, common, conf, platform) {
-    positioning.getBoundingClientRect = function (element, clone) {
-      return element.getBoundingClientRect();
-    };
+  var MIN_RECT_WIDTH = 4;
+  var MIN_RECT_HEIGHT = 4;
 
-    /**
-     * Sets the zoom of an element, with the body being the default element.
-     */
-    positioning.setZoom = function (selector, zoom, origin) {
-      // Ensure a zoom exists.
-      var transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%', // default
-          zoomStyle = {'transform-origin': transformCenter};
-      
-      zoom = zoom || 1;
-      selector = (selector ? selector : document.body);
+  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache', 'util/geo',
+               function ($, common, conf, platform, traitcache, geo) {
 
-      $(selector).each(function () {
-          zoomStyle.transform = 'scale(' + zoom + ')';
-          $(this).style(zoomStyle, '', 'important');
-        });
-    };
-
-    /**
-     * Get the mouse event coordinates relative to the document origin.
-     */
-    positioning.getMouseCoords = function (e, zoom) {
-      // Ensure a zoom exists.
-      zoom = zoom || 1;
-      return {
-        left: e.clientX,
-        top:  e.clientY
-      };
-    };
-
-  /**
-   * Return a corrected bounding box given the total zoom for the element and current scroll position
-   */
-    positioning.getCorrectedBoundingBox = function(boundingBox, totalZoom, scrollPosition) {
-      var rect = {
-        left: boundingBox.left + scrollPosition.left,
-        top:  boundingBox.top + scrollPosition.top,
-        width: boundingBox.width,
-        height: boundingBox.height,
-      };
-      rect.right = rect.left + rect.width;
-      rect.bottom = rect.top + rect.height;
-      return rect;
-    };
-
-  /**
-   * Get the elements' bounding box.
-   * DOM function object.getBoundingClientRect() returns a text rectangle object that encloses a group of text rectangles.
-   */
-    positioning.getBoundingBox = function (selector) {
-      // Perform the calculations for all selected elements.
-      var result = [];
-      var scrollPosition = positioning.getScrollPosition();
-      $(selector).each(function () {
-        var totalZoom = conf.get('zoom');
-        var boundingBox = this.getBoundingClientRect();
-        result.push(positioning.getCorrectedBoundingBox(boundingBox, totalZoom, scrollPosition));
-      });
-      return processResult(result);
-    };
-
-    positioning.convertFixedRectsToAbsolute = function(fixedRects, zoom) {
+    mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
       var absoluteRects = [];
-      var scrollPos = positioning.getScrollPosition();
+      var scrollPos = geo.getScrollPosition();
       for (var count = 0; count < fixedRects.length; count ++) {
-        absoluteRects[count] = positioning.getCorrectedBoundingBox(fixedRects[count], zoom, scrollPos);
+        absoluteRects[count] = geo.getCorrectedBoundingBox(fixedRects[count], scrollPos);
       }
       // AK: this is quick'n'dirty fix for the case rect is undefined
       if (absoluteRects.length === 0) {
@@ -104,13 +40,13 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
      * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
      */
-    positioning.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
+    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
       var allRects = [];
 
       var $selector = $(selector);
       var clipRect = getAncestorClipRect($selector);
       getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
-      positioning.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+      mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
     };
@@ -120,84 +56,71 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
      * Otherwise use element bounds -- this way there is enough room for single-line content and it doesn't need to wrap
      * when it didn't need to wrap before.
      */
-    positioning.getSmartBoundingBox = function(item) {
-      var contentRect = positioning.getAllBoundingBoxes(item, 9999)[0];
-      var lineHeight = common.getLineHeight(item);
+    mhpos.getSmartBoundingBox = function(item) {
+      var contentRect = mhpos.getAllBoundingBoxes(item, 9999)[0];
+      var lineHeight = getLineHeight(traitcache.getStyle(item));
       var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
       if (isSingleLine) {
-        return item.getBoundingClientRect();// AK: this is quick'n'dirty fix for the case rect is undefined
+        return traitcache.getScreenRect(item);// AK: this is quick'n'dirty fix for the case rect is undefined
       }
       return contentRect || {'left': 0, 'top': 0, 'width': 0, 'height': 0};
     };
-  var scaleRect = function (rect, scale, offsetX, offsetY) {
-    var newRect = {
-          'width'  : rect.width * scale,
-          'height' : rect.height * scale,
-          'left'   : ((rect.left + offsetX) * scale) - offsetX,
-          'top'    : ((rect.top + offsetY) * scale) - offsetY
-        }
-    newRect.right  = newRect.left + newRect.width;
-    newRect.bottom = newRect.top  + newRect.height;
-    
-    return newRect;
-  }
-  var createBox = function (box) {
-  
-    var element = $('<div></div>').css({
-      'position'        : 'absolute',
-      'left'            : box.left   + 'px',
-      'top'             : box.top    + 'px',
-      'width'           : box.width  + 'px',
-      'height'          : box.height + 'px',
-      'backgroundColor' : 'blue',
-      'opacity'         : '1',
-      'zIndex'          : 99999
-    }).attr('id', 'box')
-    
-    $('html').append(element);
 
-    return element;
-  
-  }
+    function scaleRect(rect, scale, offsetX, offsetY) {
+      var newRect = {
+        width  : rect.width * scale,
+        height : rect.height * scale,
+        left   : ((rect.left + offsetX) * scale) - offsetX,
+        top    : ((rect.top + offsetY) * scale) - offsetY
+      };
+      newRect.right  = newRect.left + newRect.width;
+      newRect.bottom = newRect.top  + newRect.height;
 
-    function getUserAgentCorrectionsForRect(node, rect) {
-      return platform.browser.isFirefox ?
-        scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset) :
-        rect;
+      return newRect;
+    }
+
+    function getRangeRect(containerNode) {
+      var range = document.createRange();
+      range.selectNodeContents(containerNode);
+      return getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+    }
+
+    function getUserAgentCorrectionsForRangeRect(rect) {
+      if (platform.browser.isFirefox) {
+        // This must be done for range.getBoundingClientRect(),
+        // but not for element.getBoundingClientRect()
+        return scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset);
+      }
+      return rect;
     }
 
     function getBoundingRectMinusPadding(node) {
-      var range = document.createRange();
-      range.selectNode(node);
-      var rect = range.getBoundingClientRect();
+      var rect = getRangeRect(node);
 
       // If range is created on node w/o text, getBoundingClientRect() returns zero values.
       // This concerns images and other nodes such as paragraphs - with no text inside.
       var isEmptyRect = true;
 
       for (var prop in rect) {
-       if (rect[prop] !== 0) {
-           isEmptyRect = false;
-           continue;
-       }   
+        if (rect[prop] !== 0) {
+          isEmptyRect = false;
+          continue;
+        }
       }
 
-      if (isEmptyRect) {rect = node.getBoundingClientRect && node.getBoundingClientRect();}
-
-      rect = getUserAgentCorrectionsForRect(node, rect);
+      if (isEmptyRect) {rect = node.getBoundingClientRect && traitcache.getScreenRect(node);}
 
       if (node.nodeType !== 1) {
         return rect;
       }
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
-      // TODO: should we use common.getElementComputedStyles() ?
-      var $node = $(node);
-      var paddingTop = parseFloat($node.css('padding-top'));
-      var paddingLeft = parseFloat($node.css('padding-left'));
-      var paddingBottom = parseFloat($node.css('padding-bottom'));
-      var paddingRight = parseFloat($node.css('padding-right'));
-      rect = {
+      var style = traitcache.getStyle(node);
+      var paddingTop = parseFloat(style.paddingTop);
+      var paddingLeft = parseFloat(style.paddingLeft);
+      var paddingBottom = parseFloat(style.paddingBottom);
+      var paddingRight = parseFloat(style.paddingRight);
+      return {
         top: rect.top + paddingTop,
         left: rect.left + paddingLeft,
         width: rect.width - paddingLeft - paddingRight,
@@ -205,7 +128,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         right: rect.right - paddingRight,
         bottom: rect.bottom - paddingBottom
       };
-      return rect;
     }
 
     function hasVisibleBorder(style) {
@@ -230,7 +152,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
         ems = 1; // Simple bullet
       } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'));
+        var start = parseInt($(element).attr('start'), 10);
         var end = (start || 1) + element.childElementCount - 1;
         ems = 0.9 + 0.5 * end.toString().length;
       }
@@ -243,7 +165,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         return null; // inside, will already have bullet incorporated in bounds
       }
       if (style.display !== 'list-item') {
-        if ($(element).children(':first').css('display') !== 'list-item') {
+        var firstChild = element.firstElementChild;
+        if (!firstChild || traitcache.getStyleProp(firstChild, 'display') !== 'list-item') {
           return null; /// Needs to be list-item or have list-item child
         }
       }
@@ -266,7 +189,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       // Background sprites tend to be to the left side of the element
       var backgroundPos = style['background-position'];
       var left = backgroundPos ? parseFloat(backgroundPos) : 0;
-      var rect = element.getBoundingClientRect();
+      var rect = traitcache.getScreenRect(element);
       rect = {
         left: rect.left,
         top: rect.top,
@@ -276,13 +199,18 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         height: rect.height
       };
       rect.left += left;
-    //  rect.width = positioning.kMinRectWidth - left;   // Don't go all the way to the right -- that's likely to overrun a float
       return rect.width > 0 ? rect : null;
+    }
+
+    function getLineHeight(style) {
+      // Values possible from computed style: normal | <number>px
+      return parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5;
     }
 
     function getOverflowRect(element, style) {
       var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
-      var overflowY = style['overflow-y'] === 'visible' && element.scrollHeight - element.clientHeight >= common.getLineHeight(element);
+      var overflowY = style['overflow-y'] === 'visible' &&
+        element.scrollHeight - element.clientHeight >= getLineHeight(style);
       if (!overflowX && !overflowY) {
         return null;
       }
@@ -292,8 +220,9 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       // Example: google search results with hidden drop down menu
       // For now, we will not support overflow in this case.
       var hasVisibilityHiddenDescendant = false;
+
       $(element).find('*').each(function() {
-        if ($(this).css('visibility') === 'hidden') {
+        if (traitcache.getStyleProp(this, 'visibility') === 'hidden') {
           hasVisibilityHiddenDescendant = true;
           return false;
         }
@@ -303,7 +232,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       }
 
       // Overflow is visible: add right and bottom sides of overflowing content
-      var rect = element.getBoundingClientRect();
+      var rect = traitcache.getScreenRect(element);
       var newRect = {
         left: rect.left,
         top: rect.top,
@@ -318,13 +247,13 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         return;
       }
       var rect = getClippedRect(unclippedRect, clipRect);
-      if (rect.width < positioning.kMinRectWidth || rect.height < positioning.kMinRectHeight) {
+      if (rect.width < MIN_RECT_WIDTH|| rect.height < MIN_RECT_HEIGHT) {
         return; // Not large enough to matter
       }
 
       if (rect.right < 0 || rect.bottom < 0) {
         var zoom = conf.get('zoom');
-        var absoluteRect = positioning.convertFixedRectsToAbsolute([rect], zoom)[0];
+        var absoluteRect = mhpos.convertFixedRectsToAbsolute([rect], zoom)[0];
         if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
           // Don't be fooled by items hidden offscreen -- those rects don't count
           return;
@@ -334,35 +263,29 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
       allRects.push(rect);
     }
 
-    function getContentsRect(containerNode) {
-      var range = document.createRange();
-      range.selectNodeContents(containerNode);
-      return getUserAgentCorrectionsForRect(containerNode, range.getBoundingClientRect());
-    }
-
     function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
 
-      $selector.each(function () {                  
+      $selector.each(function () {
 
         var isElement = this.nodeType === 1;
 
         // --- Leaf nodes ---
         if (!isElement) {
-          if (this.nodeType === 3) { /* Text node */
+          if (this.nodeType === 3 && this.data.trim() !== '') { /* Non-empty text node */
             // Fast path for text containers:
             // We found a child text node, so get the bounds of all children at once via a DOM range.
             // This is much faster than iterating through all of the sibling text/inline nodes, by
             // reducing the number of nodes we touch.
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
-            var parentContentsRect = getContentsRect(this.parentNode);
+            var parentContentsRect = getRangeRect(this.parentNode);
             addRect(allRects, clipRect, parentContentsRect);
             return false;  // Don't keep iterating over text/inlines in this container
           }
           return true;
         }
 
-        var style = common.getElementComputedStyles(this);
+        var style = traitcache.getStyle(this);
 
         // --- Invisible elements ---
         if (style.visibility === 'hidden' || style.visibility === 'collapse') {
@@ -376,8 +299,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // --- Visible border ---
         if (hasVisibleBorder(style)) {
-          addRect(allRects, clipRect, this.getBoundingClientRect()); // Make it all visible, including padding and border
-          return true;
+          addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
+          return true; // Don't iterate ... although it case of Washington post they position a child outside the box, doh
         }
 
         // --- List bullets ---
@@ -388,9 +311,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         if (stretchForSprites) {
           addRect(allRects, clipRect, getSpriteRect(this, style));
         }
-
-
- 
 
         // --- Media elements ---
         if (common.isVisualMedia(this)) {
@@ -406,7 +326,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           var isClip = isClipElement(this);
           var newClipRect = clipRect;
           if (isClip) {
-            newClipRect = this.getBoundingClientRect();
+            newClipRect = traitcache.getScreenRect(this);
             if (clipRect) {  // Combine parent clip rect with new clip
               newClipRect = getClippedRect(clipRect, newClipRect);
             }
@@ -419,8 +339,8 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     }
 
     function isClipElement(element) {
-      // TODO: should we use common.getElementComputedStyles() ?
-      return $(element).css('clip') !== 'auto' || $(element).css('overflow') !== 'visible';
+      var style = traitcache.getStyle(element);
+      return style.clip !== 'auto' || style.overflow !== 'visible';
     }
 
     function getClippedRect(unclippedRect, clipRect) {
@@ -458,32 +378,25 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           }
             
           if (isClipElement(this)) {
-            var newClipRect = this.getBoundingClientRect();
+            var newClipRect = traitcache.getScreenRect(this);
             clipRect = clipRect ? getClippedRect(clipRect, newClipRect) : newClipRect;
           }
         });
         allClipRects.push(clipRect);
       });
-      positioning.combineIntersectingRects(allClipRects, 9999);
+      mhpos.combineIntersectingRects(allClipRects, 9999);
       return allClipRects[0];
     }
 
     /**
-     * Returns the offset of the provided element, with calculations based upon etBoundingClientRect().
+     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
      */
-    positioning.getOffset = function (selector) {
-      var rect = positioning.getBoundingBox(selector);
-      return { left : rect.left, top : rect.top };
-    };
-  /**
-   * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
-   */
-    positioning.combineIntersectingRects = function(rects, extraSpace) {
+    mhpos.combineIntersectingRects = function(rects, extraSpace) {
       function intersects(r1, r2) {
-        return !( r2.left - extraSpace > r1.left + r1.width + extraSpace
-          || r2.left + r2.width + extraSpace < r1.left - extraSpace
-          || r2.top - extraSpace > r1.top + r1.height + extraSpace
-          || r2.top + r2.height + extraSpace < r1.top - extraSpace
+        return !( r2.left - extraSpace > r1.left + r1.width + extraSpace ||
+          r2.left + r2.width + extraSpace < r1.left - extraSpace ||
+          r2.top - extraSpace > r1.top + r1.height + extraSpace ||
+          r2.top + r2.height + extraSpace < r1.top - extraSpace
           );
       }
 
@@ -534,11 +447,11 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
      * |_____________________________|________________|
      * 
      */
-    positioning.getCenter = function (selector, zoom) {
+    mhpos.getCenter = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
-        var fixedRects = positioning.getAllBoundingBoxes(this, 9999);
-        var rect = positioning.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
+        var fixedRects = mhpos.getAllBoundingBoxes(this, 9999);
+        var rect = mhpos.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
 
         // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
         if (!rect) {
@@ -551,19 +464,19 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           top:  (rect.top + (rect.height / 2)) / zoom
         });
       });
-      return processResult(result);
+      return processArrayResult(result);
     };
 
-    positioning.getCenterForActualElement = function (selector, zoom) {
+    mhpos.getCenterForActualElement = function (selector, zoom) {
       var result = [];
       $(selector).each(function () {
-        var boundingBox = this.getBoundingClientRect();
-        var scrollPos = positioning.getScrollPosition();
+        var boundingBox = traitcache.getScreenRect(this);
+        var scrollPos = geo.getScrollPosition();
         var rect = {
           left: boundingBox.left + scrollPos.left,
           top:  boundingBox.top  + scrollPos.top,
           width: boundingBox.width,
-          height: boundingBox.height,
+          height: boundingBox.height
         };
 
         result.push({
@@ -571,48 +484,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           top:  (rect.top + (rect.height / 2)) / zoom
         });
       });
-      return processResult(result);
-    };
-
-    /**
-     * Obtain the scroll position.
-     */
-    positioning.getScrollPosition = function () {
-      return {
-        left: window.pageXOffset,
-        top:  window.pageYOffset
-      };
-    };
-
-    /**
-     * Obtains the viewport dimensions, with an optional inset.
-     */
-    positioning.getViewportDimensions = function (inset) {
-      var zoomFactor = platform.browser.isIE ? 1 : conf.get('zoom');
-      inset = inset || 0;
-      var insetX2 = inset * 2;
-      var scrollPos = this.getScrollPosition();
-      /*
-       * Note that we're using window.innerHeight instead of
-       * document.documentElement.clientHeight because these two numbers
-       * are very different in Firefox, which will report the height of
-       * the body when it is shorter than the window. With Chrome, the
-       * numbers are similar as it seems to use the visual height of the
-       * body. We don't need to do this for width, but we will for
-       * consistency.
-       */
-      var result = {
-        left: scrollPos.left / zoomFactor + inset,
-        top:  scrollPos.top  / zoomFactor + inset,
-        width: document.documentElement.clientWidth   / zoomFactor - insetX2,
-        height: document.documentElement.clientHeight / zoomFactor - insetX2
-      };
-      result.right = result.left + result.width;
-      result.bottom = result.top + result.height;
-      result.centerX = result.left + (result.width / 2);
-      result.centerY = result.top + (result.height / 2);
-
-      return result;
+      return processArrayResult(result);
     };
 
     /**
@@ -624,7 +496,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
      * @param  string   position  Set the position of the element, defaults to 'absolute'
      * @return void
      */
-    positioning.centerOn = function (selector, center, zoom, position) {
+    mhpos.centerOn = function (selector, center, zoom, position) {
       // Ensure a zoom exists.
       zoom = zoom || 1;
       // Use the proper center.
@@ -643,7 +515,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         // element relative to it's offset parent. These calculations need to factor
         // in zoom.
         var offsetParent = jElement.offsetParent();
-        var offsetParentPosition = positioning.getOffset(offsetParent);
+        var offsetParentPosition = traitcache.getScreenRect(offsetParent);
 
         // Determine where we would display the centered and (possibly) zoomed element,
         // and what it's dimensions would be.
@@ -659,7 +531,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // Now, determine if the element will fit in the viewport. If not, place the
         // element in the viewport, but as close the the original center as possible.
-        var viewport = positioning.getViewportDimensions(window._vpi);
+        var viewport = geo.getViewportDimensions(0);
 
         // If we need to change the element's dimensions, so be it. However, explicitly
         // set the dimensions only if needed.
@@ -677,8 +549,6 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
           } else if ((left + width) > viewport.right) {
             centerLeft -= (left + width) - viewport.right;
           }
-
-
         }
 
         // Check the width and horizontal positioning.
@@ -701,18 +571,19 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
 
         // Determine what the left and top CSS values must be to center the
         // (possibly zoomed) element over the determined center.
-        var cssMarginLeft = jElement.css('marginLeft') || 0;
-        var cssMarginTop = jElement.css('marginTop') || 0;
+        var style = traitcache.getStyle(jElement);
+        var cssMarginLeft = style.marginLeft;
+        var cssMarginTop = style.marginTop;
 
-        var cssLeft = (centerLeft
-                       - offsetParentPosition.left
-                       - (width * zoom / 2)
-                       - (parseFloat(cssMarginLeft) * zoom)
+        var cssLeft = (centerLeft -
+                       offsetParentPosition.left -
+                       (width * zoom / 2) -
+                       (parseFloat(cssMarginLeft) * zoom)
                       ) / zoom;
-        var cssTop = (centerTop
-                       - offsetParentPosition.top
-                       - (height * zoom / 2)
-                       - (parseFloat(cssMarginTop) * zoom)
+        var cssTop = (centerTop -
+                       offsetParentPosition.top -
+                       (height * zoom / 2) -
+                       (parseFloat(cssMarginTop) * zoom)
                       ) / zoom;
 
         // Create the CSS needed to place the element where it needs to be, and to zoom it.
@@ -736,7 +607,7 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
         }
 
         // Apply the zoom CSS to the CSS object.
-        positioning.setZoom(zoom, cssUpdates);
+        setZoom(zoom, cssUpdates);
 
         // Update the element's CSS.
         jElement.css(cssUpdates);
@@ -752,14 +623,31 @@ sitecues.def('util/positioning', function (positioning, callback, log) {
     //
     ////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Sets the zoom of an element, with the body being the default element.
+     */
+    function setZoom(selector, zoom, origin) {
+      // Ensure a zoom exists.
+      var transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%', // default
+          zoomStyle = {'transform-origin': transformCenter};
+
+      zoom = zoom || 1;
+      selector = (selector ? selector : document.body);
+
+      $(selector).each(function () {
+          zoomStyle.transform = 'scale(' + zoom + ')';
+          $(this).style(zoomStyle, '', 'important');
+        });
+    }
+
     // Helper method for processing the possibility of N results in an array.
     // If the array is empty, return undefined. If the array has one element,
     // return the single result. Otherwise, return the array of results.
-    function processResult(array) {
-      if (array.length == 0) {
+    function processArrayResult(array) {
+      if (array.length === 0) {
         return undefined;
       }
-      if (array.length == 1) {
+      if (array.length === 1) {
         return array[0];
       }
       return array;

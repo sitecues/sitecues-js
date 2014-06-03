@@ -6,7 +6,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-sitecues.def('cursor', function (cursor, callback, log) {
+sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
   
@@ -24,24 +24,9 @@ sitecues.def('cursor', function (cursor, callback, log) {
       'DEFAULT_MIN_ZOOM_LEVEL' : 1.1,
       'DEFAULT_TYPE'           : 'default',
       'SITECUES_CSS_ID'        : 'sitecues-css',
-      'SITECUES_CSS_DEFAULT'   :         
-        '* {cursor:auto}\n' +
-        'input[type="submit"], input[type="radio"], input[type="button"], input[type="checkbox"], input[type="image"], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n' +
-        'input[type="text"], input[type="email"], input[type="search"] {cursor:text}\n' +
-        'p, textarea {cursor:text}\n' +
-        '#sitecues-panel, .sitecues-badge {cursor:default}\n' +
-        '#sitecues-panel .tts {cursor:pointer}\n' +
-        '#sitecues-close-button {cursor:pointer}\n' +                
-        '.dropdown-menu > .disabled > a:focus {cursor:default}\n' +
-        '.sitecues-slider {cursor:pointer}\n' +
-        '.sitecues-toolbar, .hori {cursor:default}\n' +
-        '.sitecues-slider-thumb {cursor:pointer}\n' +
-        '.sitecues-toolbar .slider-wrap * {cursor:pointer}\n' +
-        '.sitecues-toolbar svg * {cursor:pointer}\n' +
-        '.slider-wrap svg * {cursor:pointer}\n' +
-        '.sitecues-toolbar .tts {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n'
+      'SITECUES_CSS_DEFAULT'   :
+        'html,.sitecues-panel{cursor:auto}\n' +
+        'input,textarea,select,a,button,.sitecues-clickable{cursor:pointer}'
     };
     /**
      * [Cross browser solution to initiating an XMLHTTPRequest 
@@ -89,12 +74,13 @@ sitecues.def('cursor', function (cursor, callback, log) {
      * [constructStyleTag builds a <style> tag, maintaining the sites original precedence for styles]
      */
     function constructStyleTag () {
-      for (var i = 0; i < linkTagStylesList.length; i += 1) {
+      var i;
+      for (i = 0; i < linkTagStylesList.length; i += 1) {
         if (linkTagStylesList[i]) {
           stylesheetElement.innerHTML += linkTagStylesList[i]; 
         }
       }
-      for (var i = 0; i < styleTagStylesList.length; i += 1) {
+      for (i = 0; i < styleTagStylesList.length; i += 1) {
         if (styleTagStylesList[i]) {
           stylesheetElement.innerHTML += styleTagStylesList[i];
         }
@@ -128,38 +114,36 @@ sitecues.def('cursor', function (cursor, callback, log) {
       request.send();
 
     }
+
     /**
      * [This function allows the targeting of styles, such as "cursor", and invokes a callback
      * that gets passed the style and the rule associated with it for any CSS selector]
-     * @param  {[string]}   style
+     * @param  {[string]}   propertyName
+     * @param  {[string]}   matchValue, optional value to match, null to match anything
      * @param  {Function} callback
-     * @return {[undefined]}
      */
-    function changeStyle (style, callback) {
-      var rule;
+    cursor.getStyles = function(propertyName, matchValue, callback) {
+      var rules, rule, cssStyleDeclaration, ruleValue, i;
 
-      if (stylesheetObject) {
-        for(var i = 0, rules = stylesheetObject.cssRules; i < rules.length; i += 1) {
-          rule = rules[i].style;
-          if (rule && rule[style] && rule[style].length) {
+      if (!stylesheetObject || !callback) {
+        return;
+      }
+
+      for (i = 0, rules = stylesheetObject.cssRules; i < rules.length; i++) {
+        rule = rules[i];
+        cssStyleDeclaration = rule.style;
+        if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
+          ruleValue = cssStyleDeclaration[propertyName];
+          if (matchValue ? (ruleValue === matchValue) : (ruleValue !== null)) {
             /**@param rule an object representing some css selector + properties
-
              * @param style is the key for accessing property information
              */
-            if (callback) {
-              callback(rule, style, stylesheetObject.cssRules[i]);
-            }
+            callback(rule, ruleValue);
           }
         }
-        if (lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL) {
-          //if the current zoom level is less than the minimum needed to enable custom cursors, disable the <style>
-          stylesheetObject.disabled = true;
-        } else {
-          //otherwise enable it
-          stylesheetObject.disabled = false;
-        }
       }
-    }
+    };
+
     /**
      * [Returns a function that, when executed, generates a CSS cursor property for every supported
      * cursor type and then changes all cursor properties in a <style> that we create for the current
@@ -187,22 +171,21 @@ sitecues.def('cursor', function (cursor, callback, log) {
           }
 
         }
-        
-        changeStyle('cursor', function (rule, style) {
-        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image 
+
+        if (stylesheetObject) {
+          // TODO we need a better setup/shutdown function for this entire module that lazily instantiates and cleans up after itself
+          // We shouldn't run this code at all unless the user zooms
+          stylesheetObject.disabled = lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL;
+        }
+
+        cursor.getStyles('cursor', null, function (rule, value) {
+        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
           for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (rule && rule[style].indexOf(cursorTypes[i]) > -1) {
-              //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-              var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-              try {
-                rule.setProperty(style, cursorValueURL, 'important');
-              } catch (e) {
-                try {
-                  rule[style] = cursorValueURL;
-                } catch (e) {
-                }
-              }
-            } 
+            var type = cursorTypes[i];
+            if (value.indexOf(type) > -1) {
+              var cursorValueURL = cursorTypeURLS[type];
+              rule.style.setProperty('cursor', cursorValueURL, 'important');
+            }
           }        
         });
       
@@ -280,7 +263,7 @@ sitecues.def('cursor', function (cursor, callback, log) {
        
       var zoom = {
         'min': cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
-        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
+        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL
       },
 
       offset,
@@ -403,14 +386,14 @@ sitecues.def('cursor', function (cursor, callback, log) {
           match = matches[i].trim(); //Trim whitespace
           match = match.substr(4);   //remove url(
 
-          if (match.charAt(0) === "\"") {              //If the URL is surrounded by a double quote
+          if (match.charAt(0) === '\"') {              //If the URL is surrounded by a double quote
             match = match.substr(1);                   //remove the first
             match = match.substr(0, match.length - 1); //remove the last
           }
 
           match = match.trim(); //Trim whitespace
 
-          if (match.charAt(0) === "\'") {              //If the URL is surrounded by a single quote
+          if (match.charAt(0) === '\'') {              //If the URL is surrounded by a single quote
             match = match.substr(1);                   //remove the first
             match = match.substr(0, match.length - 1); //remove the last
           }
@@ -492,8 +475,6 @@ sitecues.def('cursor', function (cursor, callback, log) {
 
     }());
 
-    cursor.changeStyle = changeStyle;    
-    
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
         lastZoom = zoom;

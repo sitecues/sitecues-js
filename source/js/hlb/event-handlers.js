@@ -18,7 +18,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback, log) {
          * Onmousewheel event handler.
          * @param e EventObject
          */
-        eventHandlers.wheelHandler = function(e) {
+    eventHandlers.wheelHandler = function(e) {
            var hlb = e.data.hlb[0];
            // Find out if target is a child of HLB(inner content element).
            var isChild = targetIsChildOfHlb(hlb, e.target);
