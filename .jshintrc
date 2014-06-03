@@ -21,6 +21,7 @@
   
   "predef": [
     "XMLHttpRequest",
+    "XDomainRequest",
     "sitecues",
     "exports",
     "CSSPrimitiveValue",
@@ -34,6 +35,7 @@
 
   "globals": {
     "XMLHttpRequest": true,
+    "XDomainRequest": true,
     "sitecues": true,
     "exports": true,
     "CSSPrimitiveValue": true,
