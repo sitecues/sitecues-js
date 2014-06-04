@@ -148,15 +148,12 @@ sitecues.def('zoom', function (zoom, callback) {
       }
       var newCss = {
         transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-        transform: 'scale(' + currZoom + ')'
+        transform: 'scale(' + currZoom + ')',
+        width: Math.round(originalDocumentWidth / currZoom) + 'px'
       };
       newCss.textRendering = 'optimizeLegibility';
       zoomConfig.$zoomElement.css(newCss);
 
-      clearTimeout(restrictWidthTimeout);
-      restrictWidthTimeout = setTimeout(function() {
-        zoomConfig.$zoomElement.css('width', Math.round(originalDocumentWidth / currZoom) + 'px');
-      });
       // Un-Blur text in Chrome
       if (zoomConfig.repaintOnZoomChange) {
         forceRepaintToEnsureCrispText();
