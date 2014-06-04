@@ -253,7 +253,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
       updateColorApproach(state.styles);
 
-      if (!updateOverlayPosition(true)) {
+      if (!createNewOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
         return false;
       }
@@ -505,7 +505,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Return false if no valid rect
     // Only update if createOverlay or position changes
     // IOW, if createOverlay is false, this will check to see if position changed. If not, will do nothing more.
-    function updateOverlayPosition(createOverlay) {
+    function createNewOverlayPosition(createOverlay) {
 
       var element,
           elementRect,
@@ -691,14 +691,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // This will do a quick check and only redraw if an update looks necessary
       // If it hasn't been created yet, we are waiting for showTimer to fire.
       if (state.isCreated) {    // If has already shown
-        updateOverlayPosition();
+        createNewOverlayPosition();
       }
     }
 
     // Fixed position rectangles are in screen coordinates.
     // If we have scrolled since the highlight was originally created,
     // we will need to update the fixed rect(s).
-    function updateFixedRectsForScrollPosition(scrollX, scrollY) {
+    function correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY) {
       var deltaX = mh.scrollPos.x - scrollX,
         deltaY =  mh.scrollPos.y - scrollY,
         rect = state.fixedContentRect;
@@ -716,7 +716,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           scrollY = window.pageYOffset;
 
       if (state.isCreated) {
-        updateFixedRectsForScrollPosition(scrollX, scrollY);
+        correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY);
       }
 
       // don't show highlight if current document isn't active,
