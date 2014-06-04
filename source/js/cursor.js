@@ -311,7 +311,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 validStyleTags = [];
           
             for (var i = 0; i < allStyleTags.length; i += 1) {
-              if (!allStyleTags[i].media && allStyleTags[i].id.indexOf('sitecues') === -1) {
+              if (!allStyleTags[i].media && (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1)) {
                 validStyleTags.push(allStyleTags[i]);
               }
             }
