@@ -95,16 +95,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function isInterestingBackground(style) {
 
       var matchColorsAlpha,
-          match,
-          matchColorsNoAlpha,
-          mostlyWhite;
+        match,
+        matchColorsNoAlpha,
+        mostlyWhite,
+        bgColor = style.backgroundColor;
 
-      if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') {
+      if (bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)') {
         return false;
       }
-      
+
       matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-      match = matchColorsAlpha.exec(style.backgroundColor);
+      match = matchColorsAlpha.exec(bgColor);
       
       if (match !== null) {
         if (parseFloat(match[4]) < .10) {
@@ -112,7 +113,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         } // Else fall through and analyze rgb colors
       } else { // Background is not in rgba() format, check for rgb() format next
         matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-        match = matchColorsNoAlpha.exec(style.backgroundColor);
+        match = matchColorsNoAlpha.exec(bgColor);
         if (match === null) {
           return true;
         }
@@ -234,7 +235,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getAncestorStyles(fromElement, toElement) {
       var styles = [ traitcache.getStyle(fromElement) ];
       $(fromElement).parentsUntil(toElement).each(function() {
-        styles.push(traitcache.getStyle(fromElement));
+        styles.push(traitcache.getStyle(this));
       });
       return styles;
     }
