@@ -22,16 +22,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       function adjustElement(index, element) {
         var zoom = conf.get('zoom'),
             transform = '',
-            transformOrigin = '', rect;
+            transformOrigin = '';
         if ($(element).css('position') === 'fixed') {
-          if (!platform.browser.isIE) {
-            transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
-              window.pageYOffset/zoom + 'px)';
-          } else {
-            rect = element.getBoundingClientRect();
-            transform = 'scale('+ zoom +')';
-            transformOrigin =  (-rect.left) + 'px ' + (-rect.top) + 'px';
-          }
+          transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
+            window.pageYOffset/zoom + 'px)';
         }
         $(element).css({
           transform: transform,
