@@ -12,9 +12,6 @@ sitecues.def('zoom', function (zoom, callback) {
   // Calculate the zoom range. This calc is used throughout library. Easier to do here only.
   zoom.range = zoom.max - zoom.min;
 
-  // Save this value to reduce the width of the <html> when zooming
-  var originalDocumentWidth = getDocumentWidth();
-
   function getDocumentWidth() {
     // We used to use document.documentElement.clientWidth, but this caused the page
     // to continually shrink on resize events.
@@ -26,12 +23,13 @@ sitecues.def('zoom', function (zoom, callback) {
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
     var zoomConfig = {
-      doManualScrollbars: platform.browser.isIE,
-      repaintOnZoomChange: platform.browser.isChrome && platform.os.isWin
-      // In the future we are likely to go back to using the zoom property again, as it looks
-      // much better in Chrome on Windows (text is crisper, kerning looks right)
-      //useZoomProperty: false //(platform.browser.isChrome && platform.os.isWin)
-    };
+        doManualScrollbars: platform.browser.isIE,
+        repaintOnZoomChange: platform.browser.isChrome,
+        $zoomElement: $(document.documentElement)
+      },
+      originalDocumentWidth = getDocumentWidth(),    // Save this value to reduce the width of the <html> when zooming
+      restrictWidthTimeout,
+      repaintTimeout;
 
     // use conf module for sharing
     // current zoom level value
@@ -85,12 +83,24 @@ sitecues.def('zoom', function (zoom, callback) {
      *
      * Weird: Aaron tried to reverse this and it caused the text on nytimes.com to blur every 7 seconds. WEIRD!!!
      */
-    var forceRepaintToEnsureCrispText = function () {
+    function forceRepaintToEnsureCrispText() {
+      copyBodyBackgroundToAvoidErasure();
       document.body.style.webkitBackfaceVisibility = '';
-      setTimeout(function() {
+      clearTimeout(repaintTimeout);
+      repaintTimeout = setTimeout(function() {
         document.body.style.webkitBackfaceVisibility = 'hidden';
       }, 15);
-    };
+    }
+
+    // Do this before using -webkit-backface-visibility on body because that style
+    // erases the body's background image. This copies the background to the <html> element where it will still work
+    function copyBodyBackgroundToAvoidErasure() {
+      var bodyBackground = $(document.body).css('background-image'),
+        htmlBackground = $('html').css('background-image');
+      if (htmlBackground === 'none' && bodyBackground !== 'none') {
+        document.documentElement.style.background = getComputedStyle(document.body).background;
+      }
+    }
 
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
@@ -120,7 +130,7 @@ sitecues.def('zoom', function (zoom, callback) {
     function adjustPageStyleForZoomAndWidth(currZoom) {
       if (currZoom === 1) {
         // Clear all CSS values
-        $('html').css({ width: '', transform: '', transformOrigin: '', overflow: '', zoom: '', textRendering: '' });
+        zoomConfig.$zoomElement.css({ width: '', transform: '', transformOrigin: '', transition: '', overflow: '', zoom: '', textRendering: '' });
         document.body.style.webkitBackfaceVisibility = '';
         return;
       }
@@ -137,13 +147,16 @@ sitecues.def('zoom', function (zoom, callback) {
         document.documentElement.style.overflow = 'hidden';
       }
       var newCss = {
-        width: Math.round(originalDocumentWidth / currZoom) + 'px',
         transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
         transform: 'scale(' + currZoom + ')'
       };
       newCss.textRendering = 'optimizeLegibility';
-      $('html').css(newCss);
+      zoomConfig.$zoomElement.css(newCss);
 
+      clearTimeout(restrictWidthTimeout);
+      restrictWidthTimeout = setTimeout(function() {
+        zoomConfig.$zoomElement.css('width', Math.round(originalDocumentWidth / currZoom) + 'px');
+      });
       // Un-Blur text in Chrome
       if (zoomConfig.repaintOnZoomChange) {
         forceRepaintToEnsureCrispText();
