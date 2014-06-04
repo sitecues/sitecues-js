@@ -695,11 +695,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
+    // Fixed position rectangles are in screen coordinates.
+    // If we have scrolled since the highlight was originally created,
+    // we will need to update the fixed rect(s).
+    function updateFixedRectsForScrollPosition(scrollX, scrollY) {
+      var deltaX = mh.scrollPos.x - scrollX,
+        deltaY =  mh.scrollPos.y - scrollY,
+        rect = state.fixedContentRect;
+
+      rect.top += deltaY;
+      rect.bottom += deltaY;
+      rect.left += deltaX;
+      rect.right +=deltaX;
+    }
+
     function checkPickerAfterUpdate(target, mouseX, mouseY) {
       var picked,
           doExitEarly = false,
           scrollX = window.pageXOffset,
           scrollY = window.pageYOffset;
+
+      if (state.isCreated) {
+        updateFixedRectsForScrollPosition(scrollX, scrollY);
+      }
 
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
