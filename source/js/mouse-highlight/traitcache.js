@@ -100,18 +100,18 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     };
 
     traitcache.getUniqueId = function(element) {
-      return $(element).data('sc');
-    };
-
-    // ------- PRIVATE -----------
-
-    function getOrCreateUniqueId(element) {
-      var currId = traitcache.getUniqueId(element);
+      var currId = getStoredUniqueId(element);
       if (currId) {
         return currId;
       }
       $(element).data('sc', ++uniqueIdCounter);   // Possibly a memory issue
       return uniqueIdCounter;
+    }
+
+    // ------- PRIVATE -----------
+
+    function getStoredUniqueId(element) {
+      return $(element).data('sc');
     }
 
     // Call before getting traits so that global/document values can be used
@@ -132,8 +132,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     }
 
     if (sitecues.tdd) {
-      exports.getOrCreateUniqueId = getOrCreateUniqueId;
-      exports.getUniqueId = traitcache.getUniqueId;
+      $.extend(exports, traitcache);
     }
   });
 

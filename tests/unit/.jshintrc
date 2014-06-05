@@ -16,7 +16,9 @@
     "afterEach",
     "it",
     "navigator",
-    "module"
+    "module",
+    "jsdom",
+    "jQuery"
   ],
   
   "maxerr"        : 100,

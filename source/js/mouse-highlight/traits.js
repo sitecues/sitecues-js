@@ -4,7 +4,6 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight/traitcache', 'util/common', function($, traitcache, common) {
