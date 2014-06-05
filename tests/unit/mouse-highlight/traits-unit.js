@@ -1,11 +1,7 @@
-/**
- * This file contain unit test(s) for traits.js file: getTraitStack()
- */
-
 //require('./test/bootstrap');
 
-var traitsPath = '../../source/js/mouse-highlight/traits';
-require(traitsPath);
+var modulePath = '../../../source/js/mouse-highlight/traits';
+require(modulePath);
 
 console.log('------------------------');
 // If we want to use the file system
@@ -64,7 +60,7 @@ console.log($(document.documentElement)[0].innerHTML);
 //      });
 //      after(function() {
 //        // Unload module from nodejs's cache
-//        var name = require.resolve(traitsPath);
+//        var name = require.resolve(modulePath);
 //        delete require.cache[name];
 //        console.log('------------------------');
 //      });

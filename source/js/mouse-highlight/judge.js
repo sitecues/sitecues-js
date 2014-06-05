@@ -62,7 +62,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       $.extend(judgements, getSizeJudgements(traits));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
-      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index));
+      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
 
       for (judgementGetter in customJudgements) {
         if (customJudgements.hasOwnProperty(judgementGetter)) {
@@ -343,7 +343,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Judgements based on the DOM, including tags, roles and hierarchical relationships.
     // Note: authors do not always use semantics in a reasonable way. Because of this, we do not
     // weigh the use of grouping tags and roles very highly.
-    function getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index) {
+    function getDOMStructureJudgements(judgements, traits, childJudgements, node, index) {
       var domJudgements = {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
@@ -480,6 +480,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         }
       }
       return traitStack[0];
+    }
+
+    if (sitecues.tdd) {
+      exports.getJudgementStack = judge.getJudgementStack;
     }
   });
 
