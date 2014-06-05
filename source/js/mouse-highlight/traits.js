@@ -22,6 +22,8 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       return traitStack;
     };
 
+    // ---- PRIVATE ----
+
     // Properties that depend only on the node itself, and not other traits in the stack
     function getTraits(node) {
       var viewSize = traitcache.getCachedViewSize(),
@@ -76,8 +78,6 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       return traits;
     }
-
-    // ---- PRIVATE ----
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
     // Returns an array of edges, e.g. ["top", "left"]

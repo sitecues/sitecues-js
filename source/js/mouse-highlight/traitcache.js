@@ -47,13 +47,19 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
     // Can be used in the context of the highlighter, as the picker caches these values (expensive to get from browser)
     traitcache.getStyle = function (element) {
-      var id = getOrCreateUniqueId(element),
+      var id = getStoredUniqueId(element),
         style = styleCache[id];
       if (!style) {
         style = getComputedStyle(element);
         styleCache[id] = style;
       }
       return style;
+    };
+
+    // Convenience method to get one cached style trait
+    traitcache.getStyleProp = function (element, propName) {
+      var styleObj = traitcache.getStyle(element);
+      return styleObj[propName];
     };
 
     // Get rectangle in SCREEN coordinates
@@ -70,7 +76,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
     // Get rectangle in DOCUMENT coordinates
     traitcache.getRect = function (element) {
-      var id = getOrCreateUniqueId(element),
+      var id = traitcache.getUniqueId(element),
         rect = rectCache[id];
       if (!rect) {
         // Copy rect object into our own object so we can modify values
@@ -93,12 +99,6 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       return rect;
     };
 
-    // Convenience method to get one cached style trait
-    traitcache.getStyleProp = function (element, propName) {
-      var styleObj = traitcache.getStyle(element);
-      return styleObj[propName];
-    };
-
     traitcache.getUniqueId = function(element) {
       var currId = getStoredUniqueId(element);
       if (currId) {
@@ -106,7 +106,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       }
       $(element).data('sc', ++uniqueIdCounter);   // Possibly a memory issue
       return uniqueIdCounter;
-    }
+    };
 
     // ------- PRIVATE -----------
 
