@@ -18,7 +18,7 @@
     "navigator",
     "module",
     "jsdom",
-    "jQuery"
+    "jquery"
   ],
   
   "maxerr"        : 100,
