@@ -3,14 +3,10 @@
 var modulePath = '../../../source/js/mouse-highlight/traits';
 require(modulePath);
 
-console.log('------------------------');
 // If we want to use the file system
 // var fs = require('fs');
 
 var $ = jquery;
-
-console.log($('html')[0].innerHTML);
-console.log($(document.documentElement)[0].innerHTML);
 
 //var document = jsdom.jsdom("<html><head></head><body><p id='dude'>hello world</p></body></html>");
 //var window = document.parentWindow;

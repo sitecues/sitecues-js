@@ -69,18 +69,15 @@ describe('traitcache', function() {
   describe('#getStyleProp()', function() {
     it('should return valid style properties for HTML element.', function (done) {
       var divElement = document.createElement('div'),
-        borderTop;
-
-      borderTop = traitcache.getStyleProp(divElement, 'borderTop');
+        borderTop = traitcache.getStyleProp(divElement, 'borderTop');
       expect(borderTop).to.be.equal('3px');
       done();
     });
     it('should return same result when retrieving from cache.', function (done) {
       var divElement = document.createElement('div'),
-        borderTopFromCache;
+        borderTop = traitcache.getStyleProp(divElement, 'borderTop'),
+        borderTopFromCache = traitcache.getStyleProp(divElement, 'borderTop');
 
-      traitcache.getStyleProp(divElement, 'borderTop');
-      borderTopFromCache = traitcache.getStyleProp(divElement, 'borderTop');
       expect(borderTopFromCache).to.be.equal(borderTop); // Second iteration exercises caching mechanism
       done();
     });
