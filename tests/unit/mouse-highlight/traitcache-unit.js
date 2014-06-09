@@ -151,7 +151,6 @@ describe('traitcache', function() {
     // Unload module from nodejs's cache
     var name = require.resolve(modulePath);
     delete require.cache[name];
-    getComputedStyle = null;
   });
 });
 

@@ -1,67 +1,55 @@
 //require('./test/bootstrap');
 
-var modulePath = '../../../source/js/mouse-highlight/traits';
-require(modulePath);
+var modulePath = '../../../source/js/mouse-highlight/traits',
+  traits = require(modulePath),
+  fs = require('fs'),
+  NUMBER_OF_NODES = 5;
 
 // If we want to use the file system
-// var fs = require('fs');
 
-var $ = jquery;
+fs.readFile('./data/html/test-picker.html', 'utf8', function(err, page) {
+  var nodes = [];
+  describe('traits', function() {
+    before(function() {
+      function addToDom(html, callback) {
+        var jsdom = require('jsdom');
+        jsdom.env({
+          html: html,
+          scripts: [],
+          done: function(errors, window) {
+            //console.log('abc ' + jquery(win.document).find('div')[0].innerHTML);
+            callback(window);
+          }
+        });
+      }
 
-//var document = jsdom.jsdom("<html><head></head><body><p id='dude'>hello world</p></body></html>");
-//var window = document.parentWindow;
-//console.log($('#dude').text())
+      var oldhtml = fs.readFileSync('./data/html/test-picker.html');
+      addToDom(oldhtml, function(win) {
+        var node, count = 0;
+        while (count < NUMBER_OF_NODES) {
+          node = jquery(win.document).find('#' + count)[0];
+          nodes[count] = node;
+          ++ count;
+        }
+      });
+    });
+    describe('#getTraitStack', function() {
+      it('should return an array of traits with correct length.', function(done) {
+        var traitStack = traits.getTraitStack(nodes);
+        expect(traitStack.length).to.be.equal(NUMBER_OF_NODES);
+        done();
+      });
+      it('should return the correct |tag| trait for each node.', function(done) {
+        var traitStack = traits.getTraitStack(nodes);
+        expect(traitStack[1]).to.be.equal('p');
+        done();
+      });
+    });
+    after(function() {
+      // Unload module from nodejs's cache
+      var name = require.resolve(modulePath);
+      delete require.cache[name];
+    });
+  });
+});
 
-//
-//jsdom.env(
-//  '<p><a class="the-link" href="https://github.com/tmpvar/jsdom">jsdom\'s Homepage</a></p>',
-//  [],
-//  function (errors, window) {
-//    console.log("contents of a.the-link:", window.$("a.the-link").text());
-//  }
-//);
-
-//jsdom.jsdom('<div class="testing">Hello World</div>');
-//console.log($('.testing').text() + ' abc'); // outputs Hello World
-
-//jsdom.env(
-//  "http://nodejs.org/dist/",
-//  ["http://code.jquery.com/jquery.js"],
-//  function (errors, window) {
-//    console.log("there have been", window.$("a").length, "nodejs releases!");
-//  }
-//);
-
-//jsdom.env(
-//  '<html></html>', [],
-//  function (err, window) {
-////  fs.readFile('./data/html/htmlentities.html', 'utf8', function (err, file) {
-////    page = file;
-////  });
-//    $(window.document.documentElement).append('<body><div class="testing">Hello World</div></body>');
-//    //console.log($(document.documentElement)[0] === $('html')[0]);
-//    console.log(document.getElementsByClassName('testing'));
-//    //console.log($('.testing').text() + 'zz'); // outputs Hello World
-//
-//    // ---------- TESTS -----------
-//    describe('traitcache', function() {
-//
-//      describe('#fffff()', function() {
-//        it('should have some nodes.', function(done) {
-//          //var divElement = document.createElement('div');
-//          var id = 3;
-//          expect(typeof id).to.be.equal('number');
-//          done();
-//        });
-//      });
-//      after(function() {
-//        // Unload module from nodejs's cache
-//        var name = require.resolve(modulePath);
-//        delete require.cache[name];
-//        console.log('------------------------');
-//      });
-//    });
-//  });
-//
-//
-//
