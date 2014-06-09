@@ -3,15 +3,14 @@
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
-require('./../data/modules/conf');
-getComputedStyle = function() {
-      return { 'borderTop': '3px' };
-};
 
 describe('traitcache', function() {
   before(function() {
     // Override getComputedStyle() for tests
-    
+    sinon.stub(window, "getComputedStyle", function() {
+            return {'borderTop': '3px'};
+        }
+    );
   });
   describe('#getUniqueId()', function() {
     it('should provide a unique ID number for a given HTML element.', function (done) {
@@ -54,7 +53,7 @@ describe('traitcache', function() {
         actualStyle, expectedStyle;
 
       actualStyle = traitcache.getStyle(divElement);
-      expectedStyle = getComputedStyle(divElement);
+      expectedStyle = { 'borderTop': '3px' };
       expect(JSON.stringify(actualStyle)).to.be.equal(JSON.stringify(expectedStyle));
       done();
     });

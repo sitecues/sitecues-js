@@ -53,7 +53,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       var id = getStoredUniqueId(element),
         style = styleCache[id];
       if (!style) {
-        style = getComputedStyle(element);
+        style = window.getComputedStyle(element);
         styleCache[id] = style;
       }
       return style;
