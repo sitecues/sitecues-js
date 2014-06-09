@@ -3,11 +3,14 @@
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
+// manually create and restore the sandbox
+var sandbox;
 
 describe('traitcache', function() {
-  before(function() {
+  beforeEach(function() {
     // Override getComputedStyle() for tests
-    sinon.stub(window, "getComputedStyle", function() {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(window, "getComputedStyle", function() {
             return {'borderTop': '3px'};
         }
     );
@@ -147,11 +150,12 @@ describe('traitcache', function() {
       done();
     });
   });
-  after(function() {
-    // Unload module from nodejs's cache
-    var name = require.resolve(modulePath);
-    delete require.cache[name];
+  afterEach(function() {
+    sandbox.restore();
   });
 });
 
+// Unload module from nodejs's cache
+var name = require.resolve(modulePath);
+delete require.cache[name];
 require('../test/discharge');
