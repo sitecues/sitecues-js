@@ -27,19 +27,22 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
     // Call this before using cache if view may have changed
     // Return true if view was out-of-date
-    traitcache.checkViewHasChanged = function () {
+    traitcache.updateCachedView = function () {
+      function hasViewChanged() {
+        // Keys guaranteed to be in same order since we always create object here,
+        // therefore JSON.stringify() works for equality check
+        return (JSON.stringify(old) !== JSON.stringify(cachedViewSize));
+      }
+
       var old = $.extend({}, cachedViewSize);
       updateCachedViewSize();
       updateCachedViewPosition();
-
-      // Keys guaranteed to be in same order since we always create object here,
-      // therefore JSON.stringify() works for equality check
-      if (JSON.stringify(old) !== JSON.stringify(cachedViewSize)) {
+      var hasChanged = hasViewChanged();
+      if (hasChanged) {
         resetCache();
-        return true;
       }
-      return false;
-    };
+      return hasChanged;
+    }
 
     traitcache.getCachedViewSize = function() {
       return cachedViewSize;

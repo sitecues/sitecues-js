@@ -106,7 +106,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 3. Reset pick results cache if view has resized or zoom has changed,
       //    because some picks are dependent on the size of the item relative to the viewport.
-      if (traitcache.checkViewHasChanged()) {
+      if (traitcache.updateCachedView()) {
         resetPickedItemsCache();
       }
 
