@@ -5,11 +5,6 @@ var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
 require('./../data/modules/conf');
 
-// Used by two of the tests
-getComputedStyle = function() {
-  return { borderTop: '3px' };
-};
-
 describe('traitcache', function() {
   describe('#getUniqueId()', function() {
     it('should provide a unique ID number for a given HTML element.', function (done) {
@@ -35,9 +30,9 @@ describe('traitcache', function() {
     });
   });
 
-  describe('#checkViewHasChanged()', function() {
+  describe('#updateCachedView()', function() {
     it('should store the view size parameters.', function (done) {
-      traitcache.checkViewHasChanged();
+      traitcache.updateCachedView();
       var viewSize = traitcache.getCachedViewSize();
       expect(viewSize.height).to.be.equal(window.innerHeight);
       expect(viewSize.width).to.be.equal(window.innerWidth);
@@ -50,6 +45,11 @@ describe('traitcache', function() {
     it('should return computed style for HTML element.', function (done) {
       var divElement = document.createElement('div'),
         actualStyle, expectedStyle;
+
+      // Override getComputedStyle() for test
+      getComputedStyle = function() {
+        return { borderTop: '3px' };
+      };
 
       actualStyle = traitcache.getStyle(divElement);
       expectedStyle = getComputedStyle(divElement);
@@ -69,7 +69,14 @@ describe('traitcache', function() {
   describe('#getStyleProp()', function() {
     it('should return valid style properties for HTML element.', function (done) {
       var divElement = document.createElement('div'),
-        borderTop = traitcache.getStyleProp(divElement, 'borderTop');
+        borderTop;
+
+      // Override getComputedStyle() for test
+      getComputedStyle = function() {
+        return { borderTop: '3px' };
+      };
+
+      borderTop = traitcache.getStyleProp(divElement, 'borderTop');
       expect(borderTop).to.be.equal('3px');
       done();
     });
@@ -94,7 +101,7 @@ describe('traitcache', function() {
       };
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
-      traitcache.checkViewHasChanged(); // Need to do this so getRect() can compute absolute cooordinates
+      traitcache.updateCachedView(); // Initialization necessary
       actualRect = traitcache.getRect(divElement);
       expect(actualRect.left).to.be.equal(FAKE_RECT.left + FAKE_SCROLL_X);
       expect(actualRect.top).to.be.equal(FAKE_RECT.top + FAKE_SCROLL_Y);
@@ -120,7 +127,7 @@ describe('traitcache', function() {
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
 
-      traitcache.checkViewHasChanged(); // Need to do this so getRect() can compute absolute cooordinates
+      traitcache.updateCachedView(); // Necessary initialization
       actualRect = traitcache.getScreenRect(divElement);
       expect(JSON.stringify(actualRect)).to.be.equal(JSON.stringify(FAKE_RECT));
       done();
@@ -137,7 +144,7 @@ describe('traitcache', function() {
       };
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
-      traitcache.checkViewHasChanged(); // Need to do this so getRect() can compute absolute cooordinates
+      traitcache.updateCachedView(); // Necessary initialization
       fetchedRect = traitcache.getScreenRect(divElement);
       fetchedCachedRect = traitcache.getScreenRect(divElement);
       expect(JSON.stringify(fetchedCachedRect)).to.be.equal(JSON.stringify(fetchedRect));
