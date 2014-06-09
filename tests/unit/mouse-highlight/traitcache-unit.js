@@ -4,14 +4,14 @@
 var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
 require('./../data/modules/conf');
-var getComputedStyle;
+getComputedStyle = function() {
+      return { 'borderTop': '3px' };
+};
 
 describe('traitcache', function() {
   before(function() {
     // Override getComputedStyle() for tests
-    getComputedStyle = function() {
-      return { borderTop: '3px' };
-    };
+    
   });
   describe('#getUniqueId()', function() {
     it('should provide a unique ID number for a given HTML element.', function (done) {
