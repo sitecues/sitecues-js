@@ -95,5 +95,10 @@
   "wsh"           : false,    // Windows Scripting Host
   "yui"           : false,    // Yahoo User Interface
   "passfail"      : false,
-  "white"         : false
+  "white"         : false,
+
+  // JS Lint Warnings
+
+  "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
+  "-W008": true      // Leading 0 before decimal point
 }

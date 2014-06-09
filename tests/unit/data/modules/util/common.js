@@ -8,5 +8,6 @@ common = {
   },
   'getElementComputedStyles': function () {
     return true;
-  }
+  },
+  'isVisualMedia': function(element) { return element.localName === 'img' || element.localName === 'canvas'; }
 };

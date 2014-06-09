@@ -18,7 +18,7 @@ describe('test', function() {
 
             var oldhtml = fs.readFileSync('./data/html/test-page.html');
             var newhtml = tweakIt(oldhtml, function(newstuff) {
-              console.log(newstuff); // woohoo! it works!
+              //console.log(newstuff); // woohoo! it works!
             });
         });
         it('should load markup.', function(done) {

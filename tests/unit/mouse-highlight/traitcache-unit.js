@@ -6,17 +6,10 @@ var traitcache = require(modulePath);
 require('./../data/modules/conf');
 
 getComputedStyle = function() {
-  return { borderTop: '3px' }; // TODO fix
+  return { 'borderTop': '3px' };
 };
 
 describe('traitcache', function() {
-  before(function() {
-    // TODO fix
-    // Override getComputedStyle() for tests
-//    getComputedStyle = function() {
-//      return { borderTop: '3px' };
-//    };
-  });
   describe('#getUniqueId()', function() {
     it('should provide a unique ID number for a given HTML element.', function (done) {
       var divElement = document.createElement('div'),
@@ -156,7 +149,6 @@ describe('traitcache', function() {
     // Unload module from nodejs's cache
     var name = require.resolve(modulePath);
     delete require.cache[name];
-    //getComputedStyle = null; // TODO fix
   });
 });
 
