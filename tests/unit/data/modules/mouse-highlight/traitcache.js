@@ -1,6 +1,6 @@
 var FAKE_VIEW_SIZE = {
-  height: 1000,
-  width: 1200,
+  height: 500,
+  width: 1000,
   zoom: 2
 };
 
@@ -10,9 +10,9 @@ var FAKE_VIEW_POSITION = {
 };
 
 var DEFAULT_FAKE_STYLES =
-  'margin-left: 1px; margin-top: 2px; margin-right: 3px; margin-bottom: 4px;' +
-  'border-left-width: 1px; border-top-width: 3px; border-right-width: 5px; border-bottom-width: 7px;' +
-  'padding-left: 4px; padding-top: 2px; padding-right: 3px; padding-bottom: 1px;';
+  'margin-left: 2px; margin-top: 2px; margin-right: 2px; margin-bottom: 2px;' +
+  'border-left-width: 1px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px;' +
+  'padding-left: 3px; padding-top: 3px; padding-right: 3px; padding-bottom: 3px;';
 
 traitcache = {
   'updateCachedView': function () {},
