@@ -11,14 +11,15 @@ describe('test', function() {
                     html: html_in,
                     scripts: [],
                     done: function(errors, window) {
-                        callback(jquery(window.document).find('div')[0].innerHTML);
+                        callback(jquery(window.document).find('div')[0]);
                     }
                 });
             }
 
             var oldhtml = fs.readFileSync('./data/html/test-page.html');
             var newhtml = tweakIt(oldhtml, function(newstuff) {
-              //console.log(newstuff); // woohoo! it works!
+              console.log(newstuff.childNodes.length);
+              console.log(newstuff.tagName);
             });
         });
         it('should load markup.', function(done) {
@@ -34,7 +35,7 @@ fs.readFile('./data/html/test-page.html', 'utf8', function(err, file) {
     describe('test', function() {
         describe('#loadMarkup() - 2', function() {
             it('should load markup.', function(done) {
-                console.log(jquery(page).find('div')[0].innerHTML);
+                // console.log(jquery(page).find('div')[0].tagName);
                 done();
             });
         });
