@@ -20,12 +20,42 @@ describe('traits', function() {
       });
     }
 
+    function fixNode(node) {
+      if (node.nodeType !== 1 /* Element */) {
+        return node;
+      }
+
+      // Fix localName
+      node = jquery.extend({}, node, { localName: node.tagName.toLowerCase() });
+      node.localName = node.tagName.toLowerCase();
+
+      // Fix childCount and childElementCount
+      var childNodes = node.childNodes,
+        index, numChildren, numElementChildren;
+      if (!childNodes) {
+        return;
+      }
+
+      index = 0;
+      numChildren = childNodes.length;
+      numElementChildren = 0;
+
+      node.childCount = numChildren;
+      for (; index < numChildren; index ++) {
+        if (childNodes[index].nodeType === 1 /* Element */) {
+          ++ numElementChildren;
+        }
+      }
+      node.childElementCount = numElementChildren;
+      return node;
+    }
+
     var oldhtml = fs.readFileSync('./data/html/test-picker.html');
     addToDom(oldhtml, function(win) {
       var node, count = 0;
       while (count < NUMBER_OF_NODES) {
         node = jquery(win.document).find('#' + count)[0];
-        nodes[count] = node;
+        nodes[count] = fixNode(node);
         ++ count;
       }
     });
@@ -36,16 +66,16 @@ describe('traits', function() {
       expect(traitStack.length).to.be.equal(NUMBER_OF_NODES);
       done();
     });
-//      it('should return the correct |tag| trait for each node.', function(done) {
-//        var traitStack = traits.getTraitStack(nodes);
-//        expect(traitStack[1].tag).to.be.equal('p');
-//        done();
-//      });
-//      it('should return the correct |childCount| trait for each node.', function(done) {
-//        var traitStack = traits.getTraitStack(nodes);
-//        expect(traitStack[2].childCount).to.be.equal(2);
-//        done();
-//      });
+    it('should return the correct |tag| trait for each node.', function(done) {
+      var traitStack = traits.getTraitStack(nodes);
+      expect(traitStack[1].tag).to.be.equal('p');
+      done();
+    });
+    it('should return the correct |childCount| trait for each node.', function(done) {
+      var traitStack = traits.getTraitStack(nodes);
+      expect(traitStack[2].childCount).to.be.equal(3);
+      done();
+    });
 //      it('should return |isVisualMedia=true| for images.', function(done) {
 //        var traitStack = traits.getTraitStack(nodes);
 //        expect(traitStack[0].isVisualMedia).to.be.equal(true);
