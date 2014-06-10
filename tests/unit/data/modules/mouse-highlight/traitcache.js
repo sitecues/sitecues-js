@@ -53,10 +53,10 @@ traitcache = {
   },
   'getScreenRect': function(element) {
     var rect = {
-      top: parseInt(element.getAttribute('top')),
-      left: parseInt(element.getAttribute('left')),
-      width: parseInt(element.getAttribute('width')),
-      height: parseInt(element.getAttribute('height'))
+      top: parseInt(element.getAttribute('data-top')),
+      left: parseInt(element.getAttribute('data-left')),
+      width: parseInt(element.getAttribute('data-width')),
+      height: parseInt(element.getAttribute('data-height'))
     };
     rect.right = rect.left + rect.width;
     rect.bottom = rect.top + rect.height;
@@ -64,10 +64,10 @@ traitcache = {
   },
   'getRect': function(element) {
     var rect = {
-      top: parseInt(element.getAttribute('top')) + FAKE_VIEW_POSITION.y,
-      left: parseInt(element.getAttribute('left')) + FAKE_VIEW_POSITION.x,
-      width: parseInt(element.getAttribute('width')),
-      height: parseInt(element.getAttribute('height'))
+      top: parseInt(element.getAttribute('data-top')) + FAKE_VIEW_POSITION.y,
+      left: parseInt(element.getAttribute('data-left')) + FAKE_VIEW_POSITION.x,
+      width: parseInt(element.getAttribute('data-width')),
+      height: parseInt(element.getAttribute('data-height'))
     };
     rect.right = rect.left + rect.width;
     rect.bottom = rect.top + rect.height;
