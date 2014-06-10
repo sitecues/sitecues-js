@@ -6,7 +6,7 @@ var judge = require(modulePath);
 
 describe('judge', function() {
   describe('#getJudgementStack()', function() {
-    it('abc.', function (done) {
+    it('.', function (done) {
 //      var traitStack = [ ];
 //      var divElement = document.createElement('div');
       done();

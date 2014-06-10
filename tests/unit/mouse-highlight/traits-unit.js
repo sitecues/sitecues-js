@@ -44,6 +44,16 @@ fs.readFile('./data/html/test-picker.html', 'utf8', function(err, page) {
 //        expect(traitStack[1].tag).to.be.equal('p');
 //        done();
 //      });
+      it('should return the correct |role| trait for each node.', function(done) {
+        var traitStack = traits.getTraitStack(nodes);
+        expect(traitStack[4].role).to.be.equal('region');
+        done();
+      });
+//      it('should return the correct |childCount| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[2].childCount).to.be.equal(2);
+//        done();
+//      });
     });
     after(function() {
       // Unload module from nodejs's cache
