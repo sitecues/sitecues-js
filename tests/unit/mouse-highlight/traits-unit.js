@@ -54,6 +54,46 @@ fs.readFile('./data/html/test-picker.html', 'utf8', function(err, page) {
 //        expect(traitStack[2].childCount).to.be.equal(2);
 //        done();
 //      });
+//      it('should return |isVisualMedia=true| for images.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[0].isVisualMedia).to.be.equal(true);
+//        done();
+//      });
+//      it('should return |isVisualMedia=false| for paragraphs.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].isVisualMedia).to.be.equal(false);
+//        done();
+//      });
+//      it('should return the correct |unzoomedRect| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].unzoomedRect).to.be.equal('p');
+//        done();
+//      });
+//      it('should return the correct |topPadding| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].topPadding).to.be.equal('p');
+//        done();
+//      });
+//      it('should return the correct |leftBorder| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].leftBorder).to.be.equal('p');
+//        done();
+//      });
+//      it('should return the correct |rightMargin| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].rightMargin).to.be.equal('p');
+//        done();
+//      });
+//      it('should return the correct |visualWidth| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].visualWidth).to.be.equal('p');
+//        done();
+//      });
+//      it('should return the correct |percentOfViewportHeight| trait for each node.', function(done) {
+//        var traitStack = traits.getTraitStack(nodes);
+//        expect(traitStack[1].percentOfViewportHeight).to.be.equal('p');
+//        done();
+//      });
     });
     after(function() {
       // Unload module from nodejs's cache
@@ -62,4 +102,5 @@ fs.readFile('./data/html/test-picker.html', 'utf8', function(err, page) {
     });
   });
 });
+
 
