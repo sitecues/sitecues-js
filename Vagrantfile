@@ -27,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = "http://s3.amazonaws.com/vagrant.sitecues.com/boxes/sitecues-js.box"
 
   config.vm.provider :virtualbox do |vb|
-    vb.name = "sitecues-js-vagrant"
+    vb.name = "sitecues-js-vagrant-000"
   end
 
   # Perform
