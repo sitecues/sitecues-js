@@ -20,6 +20,9 @@ describe('traits', function() {
       });
     }
 
+    // jsdom does not correctly set some properties, like localName, childCount, etc. so we fix them here.
+    // TODO see if jsdom updates their code so that we no longer need to do this post-correction
+    // See https://github.com/tmpvar/jsdom/issues/124 and https://equinox.atlassian.net/browse/SC-1771
     function fixNode(node) {
       if (node.nodeType !== 1 /* Element */) {
         return node;
@@ -76,16 +79,16 @@ describe('traits', function() {
       expect(traitStack[2].childCount).to.be.equal(3);
       done();
     });
-//      it('should return |isVisualMedia=true| for images.', function(done) {
-//        var traitStack = traits.getTraitStack(nodes);
-//        expect(traitStack[0].isVisualMedia).to.be.equal(true);
-//        done();
-//      });
-//      it('should return |isVisualMedia=false| for paragraphs.', function(done) {
-//        var traitStack = traits.getTraitStack(nodes);
-//        expect(traitStack[1].isVisualMedia).to.be.equal(false);
-//        done();
-//      });
+      it('should return |isVisualMedia=true| for images.', function(done) {
+        var traitStack = traits.getTraitStack(nodes);
+        expect(traitStack[0].isVisualMedia).to.be.equal(true);
+        done();
+      });
+      it('should return |isVisualMedia=false| for paragraphs.', function(done) {
+        var traitStack = traits.getTraitStack(nodes);
+        expect(traitStack[1].isVisualMedia).to.be.equal(false);
+        done();
+      });
     it('should return the correct |role| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes);
       expect(traitStack[4].role).to.be.equal('region');
