@@ -1,5 +1,3 @@
-//require('./test/bootstrap');
-
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/judge';
 var judge = require(modulePath);

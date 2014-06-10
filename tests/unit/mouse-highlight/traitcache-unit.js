@@ -1,5 +1,3 @@
-//require('./test/bootstrap');
-
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
@@ -10,10 +8,9 @@ describe('traitcache', function() {
   beforeEach(function() {
     // Override getComputedStyle() for tests
     sandbox = sinon.sandbox.create();
-    sandbox.stub(window, "getComputedStyle", function() {
+    sandbox.stub(window, 'getComputedStyle', function() {
             return {'borderTop': '3px'};
-        }
-    );
+          });
   });
   describe('#getUniqueId()', function() {
     it('should provide a unique ID number for a given HTML element.', function (done) {
