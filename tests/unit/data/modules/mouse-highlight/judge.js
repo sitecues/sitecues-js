@@ -1,3 +1,4 @@
+/* global judge: true */
 judge = {
-  getJudgementStack: function(traitStack, nodeStack) { return []; }
+  getJudgementStack: function(/*traitStackUnused, nodeStackUnused*/) { return []; }
 };

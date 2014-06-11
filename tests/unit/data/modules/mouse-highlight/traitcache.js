@@ -1,3 +1,5 @@
+/* global traitcache: true */
+
 var FAKE_VIEW_SIZE = {
   height: 500,
   width: 1000,

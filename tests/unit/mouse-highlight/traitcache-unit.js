@@ -150,9 +150,12 @@ describe('traitcache', function() {
   afterEach(function() {
     sandbox.restore();
   });
+  after(function() {
+    // Unload module from nodejs's cache
+    var name = require.resolve(modulePath);
+    delete require.cache[name];
+    require('../test/discharge');
+  });
 });
 
-// Unload module from nodejs's cache
-var name = require.resolve(modulePath);
-delete require.cache[name];
-require('../test/discharge');
+

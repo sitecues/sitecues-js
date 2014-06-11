@@ -302,9 +302,11 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         }
 
         // Avoid inline blocks
-        if (traits.style.display !== 'inline-block') {
+        if (traits.style.display === 'inline-block') {
           return false;
         }
+
+        return true;
       }
 
       if (isPossibleCell()) {

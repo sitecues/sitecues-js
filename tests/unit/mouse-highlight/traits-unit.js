@@ -53,7 +53,7 @@ describe('traits', function() {
       return node;
     }
 
-    var oldhtml = fs.readFileSync('./data/html/test-picker.html');
+    var oldhtml = fs.readFileSync('./data/html/test-traits.html');
     addToDom(oldhtml, function(win) {
       var node, count = 0;
       while (count < NUMBER_OF_NODES) {
@@ -79,16 +79,16 @@ describe('traits', function() {
       expect(traitStack[2].childCount).to.be.equal(3);
       done();
     });
-      it('should return |isVisualMedia=true| for images.', function(done) {
-        var traitStack = traits.getTraitStack(nodes);
-        expect(traitStack[0].isVisualMedia).to.be.equal(true);
-        done();
-      });
-      it('should return |isVisualMedia=false| for paragraphs.', function(done) {
-        var traitStack = traits.getTraitStack(nodes);
-        expect(traitStack[1].isVisualMedia).to.be.equal(false);
-        done();
-      });
+    it('should return |isVisualMedia=true| for images.', function(done) {
+      var traitStack = traits.getTraitStack(nodes);
+      expect(traitStack[0].isVisualMedia).to.be.equal(true);
+      done();
+    });
+    it('should return |isVisualMedia=false| for paragraphs.', function(done) {
+      var traitStack = traits.getTraitStack(nodes);
+      expect(traitStack[1].isVisualMedia).to.be.equal(false);
+      done();
+    });
     it('should return the correct |role| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes);
       expect(traitStack[4].role).to.be.equal('region');
@@ -130,7 +130,7 @@ describe('traits', function() {
       var traitStack = traits.getTraitStack(nodes),
         VISUAL_WIDTH = 6,
         VIEWPORT_WIDTH = 1000,
-        EXPECTED_PERCENT_OF_VIEWPORT_WIDTH = (VISUAL_WIDTH / VIEWPORT_WIDTH) * 100
+        EXPECTED_PERCENT_OF_VIEWPORT_WIDTH = (VISUAL_WIDTH / VIEWPORT_WIDTH) * 100;
       expect(traitStack[1].percentOfViewportWidth).to.be.equal(EXPECTED_PERCENT_OF_VIEWPORT_WIDTH);
       done();
     });

@@ -11,6 +11,9 @@
     "sitecues",
     "describe",
     "expect",
+    "before",
+    "beforeAll",
+    "beforeEach",
     "after",
     "afterAll",
     "afterEach",
@@ -18,9 +21,34 @@
     "navigator",
     "module",
     "jsdom",
-    "jquery"
+    "jquery",
+    "sinon",
+    "conf",
+    "traits"
   ],
-  
+
+  // Globals -- copy to both predef and globals sections
+
+  "globals": {
+    "sitecues": true,
+    "describe": true,
+    "expect": true,
+    "before": true,
+    "beforeAll": true,
+    "beforeEach": true,
+    "after": true,
+    "afterAll": true,
+    "afterEach": true,
+    "it": true,
+    "navigator": true,
+    "module": true,
+    "jsdom": true,
+    "jquery": true,
+    "sinon": true,
+    "conf": true,
+    "traits": true
+  },
+
   "maxerr"        : 100,
   "indent"        : 2,
   "laxbreak"      : false,
