@@ -182,7 +182,7 @@ sitecues.def('background-dimmer', function (backgroundDimmer, callback, log) {
       var
         // Define the coordinates of the whole document to be dimmed out
         viewport = geo.getViewportDimensions(0)
-        , svgPath = getSVGPath(viewport)
+        , svgPath = getSVGPath(viewport, $(hlb))
         , offsetTop = viewport.top
         , offsetLeft = viewport.left
         ;    
