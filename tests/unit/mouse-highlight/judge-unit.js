@@ -1,11 +1,8 @@
 var modulePath = '../../../source/js/mouse-highlight/judge.js',
   judge = require(modulePath),
   fs = require('fs'),
-  NUMBER_OF_NODES = 5;
-
-// If we want to use the file system
-
-var nodes = [];
+  NUMBER_OF_NODES = 5,
+  nodes = [];
 
 describe('traits', function() {
   before(function() {

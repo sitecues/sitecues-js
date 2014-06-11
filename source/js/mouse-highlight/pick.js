@@ -119,7 +119,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       //    b) previously stored picker results
       picked = getDeterministicResult(candidates);
       if (picked !== null) {
-        return picked;
+        return picked[0] ? picked : null;
       }
 
       // 6. Get result from heuristics
@@ -169,7 +169,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // A deterministic result is a hard rule for picking a specific element,
     // or for picking nothing when the element is an ancestor.
     // Ways a deterministic result can occur:
-    // 1) A customization in highlight.disable="[selector]" or highlight.prefer="[selector]"
+    // 1) A customization via provideCustomSelectors() e.g. { disable:"[selector]", prefer: "[selector]" }
     // 2) HTML attribute @data-sc-pick on the element itself ('prefer' or 'disable') -- see PICK_RULE_FOO constants
     // 3) The value of previous computations saved in the pickRuleCache
     function getDeterministicResult(candidates) {
@@ -194,9 +194,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         else if (pickRule === PICK_RULE_PREFER) {
           picked = $(item);
         }
-        else {
-          return true; // Keep going
-        }
+        // Else keep going
       }
 
       // Check pickRuleCache and @data-sc-pick for values in PICK_RULE_DISABLE or PICK_RULE_PREFER
@@ -217,7 +215,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 2. Customizations in picker.prefer = "[selector]";
       if (customSelectors.prefer) {
-        picked = $candidates.has(customSelectors.prefer).first();
+        picked = $candidates.find(customSelectors.prefer).first();
         if (picked.length) {
           return picked;  // Customization result: pick this item
         }
@@ -400,7 +398,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     sitecues.pickFrom = function(element) {
       return picker.find(element);
     };
+
     // ----------------------------------------
+    if (sitecues.tdd) {
+      $.extend(exports, picker);
+    }
 
     callback();
   });
