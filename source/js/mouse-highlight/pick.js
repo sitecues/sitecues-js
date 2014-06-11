@@ -334,7 +334,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           scoreObj.factors.push({
             about: factorKey,
             value: value,
-            weight: weight
+            weight: weight,
+            impact: scoreDelta
           });
         }
       }

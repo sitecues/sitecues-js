@@ -422,9 +422,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Get the last dividing element
         lastDividingElement = dividingElements.last(),
 
-        // Go up from last dividing element, to find the topmost section-grouping-element
+        // Go up from last dividing element, to find the topmost dividing element.
         // This protects against nested dividing elements confusing us.
-        parentSectionStart = $(lastDividingElement).parentsUntil(container).has(SECTION_START_SELECTOR),
+        parentSectionStart = $(lastDividingElement).parentsUntil(container).filter(SECTION_START_SELECTOR),
 
         // Starting point
         currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
@@ -438,7 +438,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Look at all the siblings before the currentAncestor
         while (sibling && sibling !== currentAncestor) {
-          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling)) {
+          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) && sibling.offsetHeight) {
             return true;  // A non-section-start element exists before the section-start-element, which means we are divided!
           }
           sibling = sibling.nextElementSibling;

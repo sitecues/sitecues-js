@@ -4,7 +4,7 @@ var modulePath = '../../../source/js/mouse-highlight/judge.js',
   NUMBER_OF_NODES = 5,
   nodes = [];
 
-describe('traits', function() {
+describe('judge', function() {
   before(function() {
     function addToDom(html, callback) {
       var jsdom = require('jsdom');
@@ -507,12 +507,20 @@ describe('traits', function() {
 //      expect(judgementStack[2].isSectionStartContainer).to.be.equal(true);
 //      done();
 //    });
-//    it('should return |isDivided| judgement for an element with traits.', function(done) {
+//    it('should return |isDivided=false| judgement for an element without any dividing descendants.', function(done) {
 //      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
 //        judgementStack;
 //
 //      judgementStack = judge.getJudgementStack(traitStack, nodes);
 //      expect(judgementStack[1].isDivided).to.be.equal(false);
+//      done();
+//    });
+//    it('should return |isDivided=true| judgement for an element an <hr> middle child.', function(done) {
+//      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
+//        judgementStack;
+//
+//      judgementStack = judge.getJudgementStack(traitStack, nodes);
+//      expect(judgementStack[2].isDivided).to.be.equal(true);
 //      done();
 //    });
     it('should return |isLargeWidthExpansion=true| judgement for an element much wider than the first non-inline descendant.', function(done) {

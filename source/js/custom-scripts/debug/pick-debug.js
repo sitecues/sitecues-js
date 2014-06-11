@@ -13,14 +13,14 @@ sitecues.def(function (module, callback) {
 
     // -------- Logging section ---------
 
-    function scoreFactorCompare(sf1, sf2) { return Math.abs(sf1.value * sf1.weight) - Math.abs(sf2.value * sf2.weight); }
-    function isFactor(item) { return item.impact > 0; }
-    function isNonFactor(item) { return item.impact <= 0; }
+    function scoreFactorCompare(sf1, sf2) { return Math.abs(sf2.impact) - Math.abs(sf1.impact); }
+    function isFactor(item) { return item.impact !== 0; }
+    function isNonFactor(item) { return item.impact === 0; }
     function getScoreFactorString(sf) {
-      return String('                        ' + sf.about).slice(-30) + ': ' +
-        String('         ' + Math.round(sf.value)).slice(-6) + '   x ' +
-        String('         ' + sf.weight).slice(-6) + '   = ' +
-        String('         ' + Math.round(sf.weight * sf.value)).slice(-6);
+      return String('                             ' + sf.about).slice(-35) + ': ' +
+        String('              ' + Math.round(sf.value)).slice(-11) + '   x ' +
+        String('              ' + sf.weight).slice(-11) + '   = ' +
+        String('              ' + Math.round(sf.weight * sf.value)).slice(-11);
     }
 
     function logHeuristicResult(scoreObjs, bestScoreIndex, traitStack, judgementStack, nodes) {
