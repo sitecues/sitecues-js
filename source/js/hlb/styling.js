@@ -65,6 +65,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'script'          
         ],
 
+        HLBAttributeBlacklist = [
+          'id'
+        ],
+
         // Default css styles for HLB
         defaultHLBStyles  = {
           'position'         : 'absolute',   // Doesn't interfere with document flow
@@ -260,6 +264,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         $hlbElement[0].style[HLBCSSBlacklist[i]] = '';
       }
     }
+
+    function filterAttributes ($hlbElement) {
+      for (var i = 0; i < HLBAttributeBlacklist.length; i += 1) {
+        $hlbElement.removeAttr(HLBAttributeBlacklist[i]);
+      }
+    }
    
     function getEmsToPx(fontSize, ems) {
       var measureDiv = $('<div/>')
@@ -332,6 +342,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       filterStyles($hlbElement);
 
       filterElements($hlbElement);
+
+      filterAttributes($hlbElement);
 
     };
     
