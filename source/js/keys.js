@@ -71,7 +71,7 @@ sitecues.def('keys', function (keys, callback, log) {
 //    'r':      { preventDefault: true, event: 'inverse/toggle'},
 //    'f8':     { event: 'ui/toggle' },
     'space':  {
-      event: 'highlight/animate',
+      event: 'hlb/toggle',
       preventDefault: true,
       requiresMouseHighlightActive: true
     }
