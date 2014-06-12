@@ -178,14 +178,50 @@ sitecues.def('cursor', function (cursor, callback) {
         }
 
         cursor.getStyles('cursor', null, function (rule, value) {
-        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
-          for (var i = 0; i < cursorTypes.length; i += 1) {
-            var type = cursorTypes[i];
-            if (value.indexOf(type) > -1) {
-              var cursorValueURL = cursorTypeURLS[type];
-              rule.style.setProperty('cursor', cursorValueURL, 'important');
+            if (!rule || !value) {
+                return;
             }
-          }        
+            //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
+            for (var i = 0; i < cursorTypes.length; i += 1) {
+            if (value.indexOf(cursorTypes[i]) > -1) {
+                //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+                var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
+                var type = cursorTypes[i];
+                var rule = rule;
+                try {
+                    if (platform.browser.is === 'IE') {
+                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
+                        $.ajax({
+                            url: cursorValueURL,
+                            crossDomain: true,
+                            beforeSend: function(xhrObj) {
+                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
+                            },
+                            type: "GET",
+                            async: true,
+                            cache: true,
+                            success: function(data, status, xhr) {
+                                console.log('Loading of CUR file completed!');
+                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + type);
+                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
+                            },
+                            error: function() {
+                                console.log("Unable to fetch cursor image from server");
+                            }
+                        });
+                    } else {
+                        rule.style.setProperty('cursor', cursorValueURL, 'important');
+                    }
+              } catch (e) {
+                try {
+                  console.log('Catch!');
+                  rule.style.cursor = cursorValueURL;
+                } catch (ex) {
+                    console.log(ex);
+                }
+              }
+            } 
+          }
         });
       
       };
@@ -329,7 +365,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 validStyleTags = [];
           
             for (var i = 0; i < allStyleTags.length; i += 1) {
-              if (!allStyleTags[i].media && (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1)) {
+              if (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1) {
                 validStyleTags.push(allStyleTags[i]);
               }
             }
