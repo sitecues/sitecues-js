@@ -66,7 +66,7 @@ sitecues.def( 'panel', function (panel, callback) {
     
       // Create a Slider Instance for the Panel
       panel.slider = {};
-      panel.slider.wrap = $('<div>').addClass('slider-wrap').appendTo(frame);
+      panel.slider.wrap = $('<div id="sitecues-slider-wrap">').appendTo(frame);
       panel.slider.widget = SliderClass.build({
         width: 340,
         height:80,
@@ -82,8 +82,8 @@ sitecues.def( 'panel', function (panel, callback) {
         }
       });
 
-     // create TTS button and set it up
-      ttsButton = $('<div>').addClass('tts').appendTo(frame);
+      // create TTS button and set it up
+      ttsButton = $('<div id="sitecues-tts" class="sitecues-clickable">').appendTo(frame);
       
       if ( speech.isEnabled() && site.get('ttsAvailable')) {
         ttsButton.data( 'tts-enable', 'enabled' );
@@ -196,7 +196,7 @@ sitecues.def( 'panel', function (panel, callback) {
 
     // Function that will toggle tts on or off.
     function ttsToggle() {
-      var ttsButton = $('#sitecues-panel .tts');
+      var ttsButton = $('#sitecues-tts');
       if(ttsButton.data('tts-enable') === 'disabled' && site.get('ttsAvailable')) {
         // It's disabled, so enable it
         sitecues.emit('speech/enable');
@@ -210,14 +210,14 @@ sitecues.def( 'panel', function (panel, callback) {
 
     // Show TTS is enabled.
     function showTTSbuttonEnabled(ttsButton) {
-      ttsButton = ttsButton || $('#sitecues-panel .tts');
+      ttsButton = ttsButton || $('#sitecues-tts');
       ttsButton.data('tts-enable','enabled');
       ttsButton.removeClass('tts-disabled');
     }
 
     // Show TTS is disabled.
     function showTTSbuttonDisabled (ttsButton) {
-      ttsButton = ttsButton || $('#sitecues-panel .tts');
+      ttsButton = ttsButton || $('#sitecues-tts');
       ttsButton.data('tts-enable','disabled');
       ttsButton.addClass('tts-disabled');
     }

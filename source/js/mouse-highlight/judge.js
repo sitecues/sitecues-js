@@ -14,7 +14,7 @@
 
 sitecues.def('mouse-highlight/judge', function(judge, callback) {
   'use strict';
-  sitecues.use('jquery', 'util/common', function($, common) {
+  sitecues.use('jquery', 'util/common', 'mouse-highlight/traitcache', function($, common, traitcache) {
 
     // ----------- PUBLIC  ----------------
 
@@ -62,7 +62,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       $.extend(judgements, getSizeJudgements(traits));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
-      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index));
+      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
 
       for (judgementGetter in customJudgements) {
         if (customJudgements.hasOwnProperty(judgementGetter)) {
@@ -302,9 +302,11 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         }
 
         // Avoid inline blocks
-        if (traits.style.display !== 'inline-block') {
+        if (traits.style.display === 'inline-block') {
           return false;
         }
+
+        return true;
       }
 
       if (isPossibleCell()) {
@@ -343,7 +345,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Judgements based on the DOM, including tags, roles and hierarchical relationships.
     // Note: authors do not always use semantics in a reasonable way. Because of this, we do not
     // weigh the use of grouping tags and roles very highly.
-    function getDOMStructureJudgements(judgements, traits, childTraits, childJudgements, node, index) {
+    function getDOMStructureJudgements(judgements, traits, childJudgements, node, index) {
       var domJudgements = {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
@@ -420,9 +422,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Get the last dividing element
         lastDividingElement = dividingElements.last(),
 
-        // Go up from last dividing element, to find the topmost section-grouping-element
+        // Go up from last dividing element, to find the topmost dividing element.
         // This protects against nested dividing elements confusing us.
-        parentSectionStart = $(lastDividingElement).parentsUntil(container).has(SECTION_START_SELECTOR),
+        parentSectionStart = $(lastDividingElement).parentsUntil(container).filter(SECTION_START_SELECTOR),
 
         // Starting point
         currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
@@ -436,7 +438,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Look at all the siblings before the currentAncestor
         while (sibling && sibling !== currentAncestor) {
-          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling)) {
+          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) && traitcache.getStyleProp(sibling, 'display') !== 'none') {
             return true;  // A non-section-start element exists before the section-start-element, which means we are divided!
           }
           sibling = sibling.nextElementSibling;
@@ -480,6 +482,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         }
       }
       return traitStack[0];
+    }
+
+    if (sitecues.tdd) {
+      exports.getJudgementStack = judge.getJudgementStack;
     }
   });
 

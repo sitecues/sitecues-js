@@ -21,12 +21,12 @@
   
   "predef": [
     "XMLHttpRequest",
+    "XDomainRequest",
     "sitecues",
     "exports",
     "CSSPrimitiveValue",
     "CSSStyleDeclaration",
-    "escape",
-    "XDomainRequest"
+    "escape"
   ],
 
   // Globals -- copy to both predef and globals sections
@@ -34,12 +34,12 @@
 
   "globals": {
     "XMLHttpRequest": true,
+    "XDomainRequest": true,
     "sitecues": true,
     "exports": true,
     "CSSPrimitiveValue": true,
     "CSSStyleDeclaration": true,
-    "escape": true,
-    "XDomainRequest": true
+    "escape": true
   },
 
   // Enforcing

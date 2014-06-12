@@ -4,7 +4,6 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight/traitcache', 'util/common', function($, traitcache, common) {
@@ -22,6 +21,8 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       return traitStack;
     };
+
+    // ---- PRIVATE ----
 
     // Properties that depend only on the node itself, and not other traits in the stack
     function getTraits(node) {
@@ -77,8 +78,6 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       return traits;
     }
-
-    // ---- PRIVATE ----
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
     // Returns an array of edges, e.g. ["top", "left"]
@@ -146,6 +145,9 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       }
 
       return spacingTraitStack;
+    }
+    if (sitecues.tdd) {
+      $.extend(exports, traits);
     }
   });
 

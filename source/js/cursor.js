@@ -24,24 +24,9 @@ sitecues.def('cursor', function (cursor, callback) {
       'DEFAULT_MIN_ZOOM_LEVEL' : 1.1,
       'DEFAULT_TYPE'           : 'default',
       'SITECUES_CSS_ID'        : 'sitecues-css',
-      'SITECUES_CSS_DEFAULT'   :         
-        '* {cursor:auto}\n' +
-        'input[type="submit"], input[type="radio"], input[type="button"], input[type="checkbox"], input[type="image"], select, label, a *, a, a:link, a:hover, iframe a, button {cursor:pointer}\n' +
-        'input[type="text"], input[type="email"], input[type="search"] {cursor:text}\n' +
-        'p, textarea {cursor:text}\n' +
-        '#sitecues-panel, .sitecues-badge {cursor:default}\n' +
-        '#sitecues-panel .tts {cursor:pointer}\n' +
-        '#sitecues-close-button {cursor:pointer}\n' +                
-        '.dropdown-menu > .disabled > a:focus {cursor:default}\n' +
-        '.sitecues-slider {cursor:pointer}\n' +
-        '.sitecues-toolbar, .hori {cursor:default}\n' +
-        '.sitecues-slider-thumb {cursor:pointer}\n' +
-        '.sitecues-toolbar .slider-wrap * {cursor:pointer}\n' +
-        '.sitecues-toolbar svg * {cursor:pointer}\n' +
-        '.slider-wrap svg * {cursor:pointer}\n' +
-        '.sitecues-toolbar .tts {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-wrap .dropdown-menu > li > a {cursor:pointer}\n' +
-        '.sitecues-toolbar.hori .dropdown-toggle {cursor:pointer}\n'
+      'SITECUES_CSS_DEFAULT'   :
+        'html,.sitecues-panel{cursor:auto}\n' +
+        'input,textarea,select,a,button,.sitecues-clickable{cursor:pointer}'
     };
     /**
      * [Cross browser solution to initiating an XMLHTTPRequest 
@@ -193,49 +178,13 @@ sitecues.def('cursor', function (cursor, callback) {
         }
 
         cursor.getStyles('cursor', null, function (rule, value) {
-            if (!rule || !value) {
-                return;
+        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
+          for (var i = 0; i < cursorTypes.length; i += 1) {
+            var type = cursorTypes[i];
+            if (value.indexOf(type) > -1) {
+              var cursorValueURL = cursorTypeURLS[type];
+              rule.style.setProperty('cursor', cursorValueURL, 'important');
             }
-            //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
-            for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (value.indexOf(cursorTypes[i]) > -1) {
-                //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-                var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-                var type = cursorTypes[i];
-                var rule = rule;
-                try {
-                    if (platform.browser.is === 'IE') {
-                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
-                        $.ajax({
-                            url: cursorValueURL,
-                            crossDomain: true,
-                            beforeSend: function(xhrObj) {
-                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
-                            },
-                            type: "GET",
-                            async: true,
-                            cache: true,
-                            success: function(data, status, xhr) {
-                                console.log('Loading of CUR file completed!');
-                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + type);
-                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
-                            },
-                            error: function() {
-                                console.log("Unable to fetch cursor image from server");
-                            }
-                        });
-                    } else {
-                        rule.style.setProperty('cursor', cursorValueURL, 'important');
-                    }
-              } catch (e) {
-                try {
-                  console.log('Catch!');
-                  rule.style.cursor = cursorValueURL;
-                } catch (ex) {
-                    console.log(ex);
-                }
-              }
-            } 
           }        
         });
       
@@ -380,7 +329,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 validStyleTags = [];
           
             for (var i = 0; i < allStyleTags.length; i += 1) {
-              if (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1) {
+              if (!allStyleTags[i].media && (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1)) {
                 validStyleTags.push(allStyleTags[i]);
               }
             }

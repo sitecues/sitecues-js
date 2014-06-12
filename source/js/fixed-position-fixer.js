@@ -7,37 +7,12 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor', 'util/common',
-    function ($, zoom, conf, platform, cursor, common) {
+  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor',
+    function ($, zoom, conf, platform, cursor) {
 
       var isOn = false,
-        verticalShift            = 0,    // IE specific bug fix for horizontal scrollbars
-        lastScrollY              = 0,    // IE specific fix
-        horizScrollbarHeight     = null, // IE specific fix
-        fixedSelector            = '',  //CSS selectors & properties that specify position:fixed
-        eventsToListenTo         = platform.browser.isIE ? 'scroll mousewheel' : 'scroll',
+        fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         lastAdjustedElements     = $();
-
-      // Get the number of pixels tha page has been shifted by the horizontal scrollbar
-      // (this calculates the correct scroll bar height even when the height/width of scrollbars
-      // are changed in the OS.
-      // This is necessary to offset positioned items in IE when transform scale is used,
-      // but only after the user scrolls down.
-      function getVerticalShiftForIEBug() {
-        if (!platform.ieVersion.isIE10 && !platform.ieVersion.isIE11) {
-          return 0;
-        }
-
-        if (horizScrollbarHeight === null) {
-          horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-        }
-
-        var newScrollY = window.pageYOffset,
-          isLastScrollDown = lastScrollY < newScrollY;
-        lastScrollY = newScrollY;
-        return isLastScrollDown ? horizScrollbarHeight : 0;
-      }
-
 
       /**
        * Positions a fixed element as if it respects the viewport rule.
@@ -47,29 +22,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       function adjustElement(index, element) {
         var zoom = conf.get('zoom'),
             transform = '',
-            transformOrigin = '', rect;
+            transformOrigin = '';
         if ($(element).css('position') === 'fixed') {
-          if (!platform.browser.isIE) {
-            transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
-              window.pageYOffset/zoom + 'px)';
-          } else {
-            rect = element.getBoundingClientRect();
-            transform = 'scale('+ zoom +')';
-            transformOrigin =  (-rect.left) + 'px ' + (-rect.top - verticalShift/zoom) + 'px';
-          }
+          transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
+            window.pageYOffset/zoom + 'px)';
         }
         $(element).css({
           transform: transform,
           transformOrigin: transformOrigin
         });
-      }
-
-      /**
-       * [When the page scrolls, reposition fixed elements, badge, and panel]
-       */
-      function onScroll() {
-        verticalShift = getVerticalShiftForIEBug();
-        refresh();
       }
 
       /*
@@ -92,34 +53,41 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         return selectors.join();
       }
 
-      /**
-       * [Listens for events emitted by the cursor module, which indicates that new CSS has
-       * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
-       * fixed positioned elements that are not used on a page when sitecues first loads.
-       * Basically, it gets any styles that declare position:fixed so we can later filter for
-       * any elements that are dynamically fixed.]
-       * @return {[type]} [description]
-       */
-      sitecues.on('cursor/addingStyles', function () {
-        fixedSelector = getFixedPositionSelector();
-        if (fixedSelector) {
-          lazyInit(conf.get('zoom'));
-        }
-      });
+      function initializeModule() {
+        /**
+         * [Listens for events emitted by the cursor module, which indicates that new CSS has
+         * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
+         * fixed positioned elements that are not used on a page when sitecues first loads.
+         * Basically, it gets any styles that declare position:fixed so we can later filter for
+         * any elements that are dynamically fixed.]
+         * @return {[type]} [description]
+         */
+        sitecues.on('cursor/addingStyles', function () {
+          fixedSelector = getFixedPositionSelector();
+          if (fixedSelector) {
+            lazyTurnOn(conf.get('zoom'));
+          }
+        });
 
-      /**
-       * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
-       */
-      sitecues.on('zoom', function (zoom) {
-        lazyInit(zoom);
-        refresh();
-      });
+        /**
+         * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
+         */
+        sitecues.on('zoom', function (zoom) {
+          lazyTurnOn(zoom);
+          refresh();
+        });
+      }
+
+
+      if (!platform.browser.isIE) {
+        initializeModule();
+      }
 
       // Initialize only when we really have to, because it's a very, very bad idea to
       // attach handlers to the window scroll event:
       // http://ejohn.org/blog/learning-from-twitter
 
-      function lazyInit(zoom) {
+      function lazyTurnOn(zoom) {
         var doTurnOn = fixedSelector.length && zoom > 1;
 
         if (doTurnOn === isOn) {
@@ -128,10 +96,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         isOn = doTurnOn;
 
         if (doTurnOn) {
-          $(window).on(eventsToListenTo, onScroll);
+          $(window).on('scroll', refresh);
         }
         else {
-          $(window).off(eventsToListenTo, onScroll);
+          $(window).off('scroll', refresh);
         }
 
         refresh();

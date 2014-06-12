@@ -8,5 +8,8 @@ common = {
   },
   'getElementComputedStyles': function () {
     return true;
-  }
+  },
+  'isVisualMedia': function(element) { return element.tagName === 'IMG'; },
+
+  'isInSitecuesUI': function(element) { return element.id === 'sitecues-badge'; }
 };

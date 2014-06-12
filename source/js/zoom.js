@@ -12,9 +12,6 @@ sitecues.def('zoom', function (zoom, callback) {
   // Calculate the zoom range. This calc is used throughout library. Easier to do here only.
   zoom.range = zoom.max - zoom.min;
 
-  // Save this value to reduce the width of the <html> when zooming
-  var originalDocumentWidth = getDocumentWidth();
-
   function getDocumentWidth() {
     // We used to use document.documentElement.clientWidth, but this caused the page
     // to continually shrink on resize events.
@@ -25,6 +22,15 @@ sitecues.def('zoom', function (zoom, callback) {
 
   // get dependencies
   sitecues.use('jquery', 'conf', 'util/common', 'platform', function ($, conf, common, platform) {
+    var zoomConfig = {
+        doManualScrollbars: platform.browser.isIE,
+        repaintOnZoomChange: platform.browser.isChrome,
+        $zoomElement: $(document.documentElement)
+      },
+      originalDocumentWidth = getDocumentWidth(),    // Save this value to reduce the width of the <html> when zooming
+      restrictWidthTimeout,
+      repaintTimeout;
+
     // use conf module for sharing
     // current zoom level value
     conf.def('zoom', function (value) {
@@ -45,7 +51,7 @@ sitecues.def('zoom', function (zoom, callback) {
       value = (value / zoom.precision) * zoom.precision;
 
       // value have float value
-      return value.toFixed(1);
+      return parseFloat(value.toFixed(1));
     });
 
     // define default value for zoom if needed
@@ -64,10 +70,10 @@ sitecues.def('zoom', function (zoom, callback) {
     });
 
       /**
-     * [renderPage purpose is to render text clearly in browsers (chrome mac only (for now))
+     * [renderPage purpose is to render text clearly in browsers (chrome windows only (for now))
      * that do not repaint the DOM when using CSS Transforms.  This function simply sets a
      * property, which is hopefully not set on pages sitecues runs on, that forces repaint.
-     * 50ms of time is required, in my opinion, because the browser may not be done Transforming
+     * 15ms of time is required, because the browser may not be done transforming
      * by the time Javascript is executed without the setTimeout.
      *
      * See here: https://equinox.atlassian.net/wiki/display/EN/Known+Issues
@@ -77,12 +83,24 @@ sitecues.def('zoom', function (zoom, callback) {
      *
      * Weird: Aaron tried to reverse this and it caused the text on nytimes.com to blur every 7 seconds. WEIRD!!!
      */
-    var renderPage = function () {
+    function forceRepaintToEnsureCrispText() {
+      copyBodyBackgroundToAvoidErasure();
       document.body.style.webkitBackfaceVisibility = '';
-      setTimeout(function() {
+      clearTimeout(repaintTimeout);
+      repaintTimeout = setTimeout(function() {
         document.body.style.webkitBackfaceVisibility = 'hidden';
       }, 15);
-    };
+    }
+
+    // Do this before using -webkit-backface-visibility on body because that style
+    // erases the body's background image. This copies the background to the <html> element where it will still work
+    function copyBodyBackgroundToAvoidErasure() {
+      var bodyBackground = $(document.body).css('background-image'),
+        htmlBackground = $('html').css('background-image');
+      if (htmlBackground === 'none' && bodyBackground !== 'none') {
+        document.documentElement.style.background = getComputedStyle(document.body).background;
+      }
+    }
 
     /**
     * [Window resizing will change the size of the viewport. In the zoom function we use the original size of the
@@ -112,19 +130,51 @@ sitecues.def('zoom', function (zoom, callback) {
     function adjustPageStyleForZoomAndWidth(currZoom) {
       if (currZoom === 1) {
         // Clear all CSS values
-        $('html').css({ width: '', transform: '', transformOrigin: '' });
+        zoomConfig.$zoomElement.css({ width: '', transform: '', transformOrigin: '', transition: '', overflow: '', zoom: '', textRendering: '' });
+        document.body.style.webkitBackfaceVisibility = '';
+        return;
       }
-      else {
-        var newBodyWidth = Math.round(originalDocumentWidth / currZoom);
 
-        $('html').css({width: newBodyWidth + 'px',
-          transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
-          transform: 'scale(' + currZoom + ')'
-        });
+      if (zoomConfig.doManualScrollbars) {
+        // In IE we control the visibility of scrollbars ourselves, which corrects the dreaded
+        // scrollbar bug in IE, where fixed position content and any use of getBoundingClientRect()
+        // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
+        // but only when the user scrolled down or to the right.
+        // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
+        // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
+        // Step 1: remove the scrollbars before changing zoom.
+        // Step 2 (below): re-add the scrollbar if necessary for size of content
+        document.documentElement.style.overflow = 'hidden';
+      }
+      var newCss = {
+        transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
+        transform: 'scale(' + currZoom + ')',
+        width: Math.round(originalDocumentWidth / currZoom) + 'px'
+      };
+      newCss.textRendering = 'optimizeLegibility';
+      zoomConfig.$zoomElement.css(newCss);
 
-        // Un-Blur text in Chrome
-        if (platform.browser.isChrome && platform.os.isMac) {
-          renderPage();
+      // Un-Blur text in Chrome
+      if (zoomConfig.repaintOnZoomChange) {
+        forceRepaintToEnsureCrispText();
+      }
+
+      // Part 2 of IE horizontal scrollbar fix: re-add scrollbars if necessary
+      // Get the visible content rect (as opposed to element rect which contains whitespace)
+      if (zoomConfig.doManualScrollbars) {
+        var rect,
+          range = document.createRange(),
+          winHeight = window.innerHeight,
+          winWidth = window.innerWidth;
+        range.selectNodeContents(document.body);
+        rect = range.getBoundingClientRect();
+        // If the right side of the visible content is beyond the window width,
+        // or the visible content is wider than the window width, show the scrollbars.
+        if (rect.right > winWidth || rect.width > winWidth) {
+          document.documentElement.style.overflowX = 'scroll';
+        }
+        if (rect.bottom > winHeight || rect.height > winHeight) {
+          document.documentElement.style.overflowY = 'scroll';
         }
       }
     }
@@ -132,7 +182,6 @@ sitecues.def('zoom', function (zoom, callback) {
     // Get and set are now in 'source/js/conf/user/manager.js'
     conf.get('zoom', zoomFn);  //This use to be an anonymous function,
                                //but we must force a zoom if the browser window is resized
-
     // done
     callback();
 

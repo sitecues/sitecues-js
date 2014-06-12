@@ -94,7 +94,6 @@ files=\
 	source/js/hpan.js \
 	source/js/util/template.js \
 	source/js/status.js \
-	source/js/sitepicker.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
@@ -153,7 +152,6 @@ endif
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 	@cp -R $(build-dir)/compile/* $(package-dir)
-	@cp -R source/css $(package-dir)
 	@cp -R source/images $(package-dir)
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"

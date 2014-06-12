@@ -1,1 +1,2 @@
+/* global picker: true */
 picker = {};

@@ -40,16 +40,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
-  verticalShiftForIEScrollbarBug = 0,
-  horizScrollbarHeight = null,
-
   state;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
-    'speech', 'util/geo', 'platform',
-    function($, conf, picker, traitcache, mhpos, common, speech, geo, platform) {
+    'speech', 'util/geo',
+    function($, conf, picker, traitcache, mhpos, common, speech, geo) {
 
     conf.set('mouseHighlightMinZoom', MIN_ZOOM);
 
@@ -98,16 +95,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function isInterestingBackground(style) {
 
       var matchColorsAlpha,
-          match,
-          matchColorsNoAlpha,
-          mostlyWhite;
+        match,
+        matchColorsNoAlpha,
+        mostlyWhite,
+        bgColor = style.backgroundColor;
 
-      if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') {
+      if (bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)') {
         return false;
       }
-      
+
       matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-      match = matchColorsAlpha.exec(style.backgroundColor);
+      match = matchColorsAlpha.exec(bgColor);
       
       if (match !== null) {
         if (parseFloat(match[4]) < .10) {
@@ -115,7 +113,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         } // Else fall through and analyze rgb colors
       } else { // Background is not in rgba() format, check for rgb() format next
         matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-        match = matchColorsNoAlpha.exec(style.backgroundColor);
+        match = matchColorsNoAlpha.exec(bgColor);
         if (match === null) {
           return true;
         }
@@ -217,7 +215,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           alpha;
       viz = Math.min(viz, 2);
       alpha = 0.11 * viz;
-      // return 'rgba(0, 255, 0, 1)'; // Works with any background -- lightens it slightly
       return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
@@ -238,7 +235,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getAncestorStyles(fromElement, toElement) {
       var styles = [ traitcache.getStyle(fromElement) ];
       $(fromElement).parentsUntil(toElement).each(function() {
-        styles.push(traitcache.getStyle(fromElement));
+        styles.push(traitcache.getStyle(this));
       });
       return styles;
     }
@@ -257,7 +254,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
       updateColorApproach(state.styles);
 
-      if (!updateOverlayPosition(true)) {
+      if (!createNewOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
         return false;
       }
@@ -286,8 +283,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                            hasInterestingBackgroundImage(state.styles);
       backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
-      // var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
-      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, conf.get('zoom'));
+      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom);
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
@@ -338,7 +334,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
 +            possibleFloat !== document.documentElement && possibleFloat !== document) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var floatRect = possibleFloat.getBoundingClientRect();
+            var floatRect = traitcache.getScreenRect(possibleFloat);
             return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
           }
           possibleFloat = possibleFloat.parentNode;
@@ -506,12 +502,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return svg;
     }
 
-
     // Update highlight overlay
     // Return false if no valid rect
     // Only update if createOverlay or position changes
     // IOW, if createOverlay is false, this will check to see if position changed. If not, will do nothing more.
-    function updateOverlayPosition(createOverlay) {
+    function createNewOverlayPosition(createOverlay) {
 
       var element,
           elementRect,
@@ -525,7 +520,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       element = state.picked.get(0);
-      elementRect = element.getBoundingClientRect(); // Rough bounds
+      elementRect = traitcache.getScreenRect(element); // Rough bounds
 
       if (!createOverlay) {   // Just a refresh
         if (!state.elementRect) {
@@ -578,11 +573,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
         var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra * state.zoom,
             state.fixedContentRect.top - extra * state.zoom, state.zoom);
-        state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
+        state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - 1);
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
         // Create and position highlight overlay
-        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
+        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth + 1, getTransparentBackgroundColor(),
                     state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null, 1);
         var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3);
         var extraPaddingSVG = getSVGForExtraPadding(extra);
@@ -593,11 +588,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
           .attr({
             width : (state.fixedContentRect.width / state.zoom + 2 * extra) + 'px',
-            height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px',
+            height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px'
           })
           .css({
-            zIndex: getMaxZIndex(ancestorStyles) + 1, // Just below stuff like fixed toolbars
-            top: verticalShiftForIEScrollbarBug + 'px'
+            zIndex: getMaxZIndex(ancestorStyles) + 1 // Just below stuff like fixed toolbars
           });
 
         state.isCreated = true;
@@ -611,8 +605,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Finally update overlay CSS -- multiply by conf.zoom because it's outside the <body>
       $('.' + HIGHLIGHT_OUTLINE_CLASS)
         .style({
-          'top': (state.viewRect.top / state.zoom - extra) + 'px',
-          'left':  (state.viewRect.left / state.zoom - extra) + 'px'
+          top: (state.viewRect.top / state.zoom - extra / state.zoom) + 'px',
+          left:  (state.viewRect.left / state.zoom - extra) + 'px'
         }, '', 'important');
       return true;
     }
@@ -684,7 +678,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       if (isCursorInFixedRects([state.fixedContentRect]) &&
         JSON.stringify(state.elementRect) ===
-        JSON.stringify(state.picked.get(0).getBoundingClientRect())) {
+        JSON.stringify(traitcache.getScreenRect(state.picked.get(0)))) {
         // The picked element's rectangle hasn't changed, and
         // we're still in the same highlighting rectangle
         // Can happen if we're in whitespace
@@ -698,27 +692,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // This will do a quick check and only redraw if an update looks necessary
       // If it hasn't been created yet, we are waiting for showTimer to fire.
       if (state.isCreated) {    // If has already shown
-        updateOverlayPosition();
+        createNewOverlayPosition();
       }
     }
 
-    // Get the number of pixels tha page has been shifted by the horizontal scrollbar
-    // (this calculates the correct scroll bar height even when the height/width of scrollbars
-    // are changed in the OS.
-    // Note: it's a very, very bad idea to attach handlers to the window scroll event:
-    // http://ejohn.org/blog/learning-from-twitter/
-    function getVerticalShiftForIEScrollbarBug(oldScrollY, newScrollY) {
-      if (newScrollY < oldScrollY) {
-        return 0;  // Scrolling up or not scrolling -> bug doesn't occur
-      }
-      if ($(document).width() < $(window).width()) {
-        return 0; // No horizontal scrollbar -> bug doesn't occur
-      }
+    // Fixed position rectangles are in screen coordinates.
+    // If we have scrolled since the highlight was originally created,
+    // we will need to update the fixed rect(s).
+    function correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY) {
+      var deltaX = mh.scrollPos.x - scrollX,
+        deltaY =  mh.scrollPos.y - scrollY,
+        rect = state.fixedContentRect;
 
-      if (horizScrollbarHeight === null) {
-        horizScrollbarHeight = common.getHorizontalScrollbarHeight();
-      }
-      return horizScrollbarHeight;
+      rect.top += deltaY;
+      rect.bottom += deltaY;
+      rect.left += deltaX;
+      rect.right +=deltaX;
     }
 
     function checkPickerAfterUpdate(target, mouseX, mouseY) {
@@ -726,6 +715,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           doExitEarly = false,
           scrollX = window.pageXOffset,
           scrollY = window.pageYOffset;
+
+      if (state.isCreated) {
+        correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY);
+      }
 
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
@@ -741,15 +734,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         mh.scrollPos = { x: scrollX, y: scrollY };
         pickAfterShortWait(target, mouseX, mouseY);
         return;
-      }
-
-      if (platform.ieVersion.isIE10 || platform.ieVersion.isIE11) {
-        if (mh.scrollPos && mh.scrollPos.y !== scrollY) {
-          // IE10 & IE11 report getBoundingClientRect wrong when using transform-zoom and scrolling down,
-          // We need to correct the getBoundingClientRect results if the scroll direction is down.
-          // Only do this when necessary
-          verticalShiftForIEScrollbarBug = getVerticalShiftForIEScrollbarBug(mh.scrollPos.y, scrollY);
-        }
       }
 
       mh.cursorPos = { x: mouseX, y: mouseY };
@@ -840,7 +824,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current active isn't body
       var target = document.activeElement;
       mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
-      if (wasAppropriateFocus && !mh.isAppropriateFocus) {
+      if (wasAppropriateFocus && !mh.isAppropriateFocus && !mh.isSticky) {
         pause();
       }
     }

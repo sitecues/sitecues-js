@@ -18,7 +18,6 @@ sitecues.def('speech', function (speech, callback, log) {
     'VERBAL_CUE_SPEECH_ON'       : 'verbalCueSpeechOn',
     'VERBAL_CUE_SPEECH_ON_FIRST' : 'verbalCueSpeechOnFirst',
     'VERBAL_CUE_SPEECH_OFF'      : 'verbalCueSpeechOff'
-
   };
   
   sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
@@ -45,7 +44,6 @@ sitecues.def('speech', function (speech, callback, log) {
         ttsBypass = false,
         // Flag indicating that this site is enabled for TTS.
         ttsAvailable = !!site.get('ttsAvailable'),
-
         timesCued = 1,
         maxCued = 3,
 

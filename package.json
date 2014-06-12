@@ -21,7 +21,7 @@
     "wd": "0.0.34",
     "empty-port": "0.0.1",
     "jquery" : "1.8.3",
-    "jsdom" : "0.8.9",
+    "jsdom" : "*",
     "xmlhttprequest": "1.6.0",
     "location": "0.0.1",
     "navigator": "1.0.1"

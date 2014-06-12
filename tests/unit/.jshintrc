@@ -11,14 +11,46 @@
     "sitecues",
     "describe",
     "expect",
+    "before",
+    "beforeAll",
+    "beforeEach",
     "after",
     "afterAll",
     "afterEach",
     "it",
     "navigator",
-    "module"
+    "module",
+    "jsdom",
+    "jquery",
+    "domutils",
+    "sinon",
+    "conf",
+    "traits"
   ],
-  
+
+  // Globals -- copy to both predef and globals sections
+
+  "globals": {
+    "sitecues": true,
+    "describe": true,
+    "expect": true,
+    "before": true,
+    "beforeAll": true,
+    "beforeEach": true,
+    "after": true,
+    "afterAll": true,
+    "afterEach": true,
+    "it": true,
+    "navigator": true,
+    "module": true,
+    "jsdom": true,
+    "jquery": true,
+    "domutils": true,
+    "sinon": true,
+    "conf": true,
+    "traits": true
+  },
+
   "maxerr"        : 100,
   "indent"        : 2,
   "laxbreak"      : false,
@@ -93,5 +125,10 @@
   "wsh"           : false,    // Windows Scripting Host
   "yui"           : false,    // Yahoo User Interface
   "passfail"      : false,
-  "white"         : false
+  "white"         : false,
+
+  // JS Lint Warnings
+
+  "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
+  "-W008": true      // Leading 0 before decimal point
 }

@@ -8,39 +8,41 @@
 sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
   'use strict';
   sitecues.use('jquery', 'conf', function($, conf) {
-    var uniqueIdCounter = 0;
-    var styleCache = {};
-    var rectCache = {};
+    var uniqueIdCounter = 0,
+      styleCache = {},
+      rectCache = {},
+
+      cachedViewSize = {  // If any of these view size metrics change, we must invalidate the cache
+        height: null,
+        width: null,
+        zoom: null
+      },
+      // Scrolling does not invalidate the cache
+      cachedViewPosition = {
+        x: 0,
+        y: 0
+      };
 
     // ------- PUBLIC ----------
-    // If any of these view size metrics change, we must invalidate the cache
-    var cachedViewSize = {
-      height: null,
-      width: null,
-      zoom: null
-    };
-
-    // Scrolling does not invalidate the cache
-    var cachedViewPosition = {
-      x: 0,
-      y: 0
-    };
 
     // Call this before using cache if view may have changed
     // Return true if view was out-of-date
-    traitcache.checkViewHasChanged = function () {
-      var old = $.extend({}, traitcache.cachedViewSize);
+    traitcache.updateCachedView = function () {
+      function hasViewChanged() {
+        // Keys guaranteed to be in same order since we always create object here,
+        // therefore JSON.stringify() works for equality check
+        return (JSON.stringify(old) !== JSON.stringify(cachedViewSize));
+      }
+
+      var old = $.extend({}, cachedViewSize);
       updateCachedViewSize();
       updateCachedViewPosition();
-
-      // Keys guaranteed to be in same order since we always create object here,
-      // therefore JSON.stringify() works for equality check
-      if (JSON.stringify(old) !== JSON.stringify(cachedViewSize)) {
+      var hasChanged = hasViewChanged();
+      if (hasChanged) {
         resetCache();
-        return true;
       }
-      return false;
-    };
+      return hasChanged;
+    }
 
     traitcache.getCachedViewSize = function() {
       return cachedViewSize;
@@ -48,35 +50,13 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
     // Can be used in the context of the highlighter, as the picker caches these values (expensive to get from browser)
     traitcache.getStyle = function (element) {
-      var id = getOrCreateUniqueId(element),
+      var id = getStoredUniqueId(element),
         style = styleCache[id];
       if (!style) {
-        style = getComputedStyle(element);
+        style = window.getComputedStyle(element);
         styleCache[id] = style;
       }
       return style;
-    };
-
-    traitcache.getRect = function (element) {
-      var id = getOrCreateUniqueId(element),
-          rect = rectCache[id];
-      if (!rect) {
-        // Copy rect object into our own object so we can modify values
-        rect = $.extend({}, element.getBoundingClientRect());
-
-        // Add scroll values so that rectangles are not invalid after user scrolls.
-        // This effectively makes them absolutely positioned rects vs. fixed.
-        // This means we're caching the rectangle relative to the top-left of the document.
-        rect.top += cachedViewPosition.y;
-        rect.bottom += cachedViewPosition.y;
-        rect.left += cachedViewPosition.x;
-        rect.right += cachedViewPosition.x;
-
-        // Store results in cache
-        rectCache[id] = rect;
-      }
-
-      return rect;
     };
 
     // Convenience method to get one cached style trait
@@ -85,19 +65,56 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       return styleObj[propName];
     };
 
-    traitcache.getUniqueId = function(element) {
-      return $(element).data('sc');
+    // Get rectangle in SCREEN coordinates
+    traitcache.getScreenRect = function (element) {
+      var rect = $.extend({}, traitcache.getRect(element)),
+        top = cachedViewPosition.y,
+        left = cachedViewPosition.x;
+      rect.top -= top;
+      rect.bottom -= top;
+      rect.left -= left;
+      rect.right -= left;
+      return rect;
     };
 
-    // ------- PRIVATE -----------
+    // Get rectangle in DOCUMENT coordinates
+    traitcache.getRect = function (element) {
+      var id = traitcache.getUniqueId(element),
+        rect = rectCache[id];
+      if (!rect) {
+        // Copy rect object into our own object so we can modify values
+        rect = $.extend({}, element.getBoundingClientRect());
 
-    function getOrCreateUniqueId(element) {
-      var currId = traitcache.getUniqueId(element);
+        // Add scroll values so that rectangles are not invalid after user scrolls.
+        // This effectively makes them absolutely positioned rects vs. fixed.
+        // This means we're caching the rectangle relative to the top-left of the document.
+        var top = cachedViewPosition.y,
+          left = cachedViewPosition.x;
+        rect.top += top;
+        rect.bottom += top;
+        rect.left += left;
+        rect.right += left;
+
+        // Store results in cache
+        rectCache[id] = rect;
+      }
+
+      return rect;
+    };
+
+    traitcache.getUniqueId = function(element) {
+      var currId = getStoredUniqueId(element);
       if (currId) {
         return currId;
       }
       $(element).data('sc', ++uniqueIdCounter);   // Possibly a memory issue
       return uniqueIdCounter;
+    };
+
+    // ------- PRIVATE -----------
+
+    function getStoredUniqueId(element) {
+      return $(element).data('sc');
     }
 
     // Call before getting traits so that global/document values can be used
@@ -118,8 +135,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     }
 
     if (sitecues.tdd) {
-      exports.getOrCreateUniqueId = getOrCreateUniqueId;
-      exports.getUniqueId = traitcache.getUniqueId;
+      $.extend(exports, traitcache);
     }
   });
 

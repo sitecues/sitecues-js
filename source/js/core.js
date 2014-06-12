@@ -2,6 +2,7 @@
  * Sitecues: core.js
  *   The core module of the sitecues library.
  */
+
 (function () {
   
   'use strict';
@@ -577,36 +578,6 @@
       libraryConfig = window.sitecues.libConfig;
 
       log.info(libraryConfig);
-       /**
-       * EQ-1349
-       * Use temporary workaround for site/picker customizations
-       */
-      if(libraryConfig.sitepicker){
-     
-        if (libraryConfig.sitepicker.eeoc_gov) {
-          log.info('eeoc_gov site/picker is enabled : ' + libraryConfig.sitepicker.eeoc_gov);
-        } else {
-          log.warn('eeoc_gov site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.scotiabank_com) {
-          log.info('scotiabank_com site/picker is enabled : ' + libraryConfig.sitepicker.scotiabank_com);
-        } else {
-          log.warn('scotiabank_com site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.cnib_ca) {
-          log.info('cnib_ca site/picker is enabled : ' + libraryConfig.sitepicker.cnib_ca);
-        } else {
-          log.warn('cnib_ca site/picker is disabled.');
-        }
-
-        if (libraryConfig.sitepicker.texasat_net) {
-          log.info('texasat_net site/picker is enabled : ' + libraryConfig.sitepicker.texasat_net);
-        } else {
-          log.warn('texasat_net site/picker is disabled.');
-        }
-      }
 
       if (libraryConfig.hosts) {
 
@@ -641,6 +612,7 @@
   var processLibraryConfiguration = function(cb) {
     // Called after all library configs that require loading are loaded, triggering validation.
     var onLibraryConfigLoadComplete = function() {
+
       libraryConfigLoadCount--;
       if (libraryConfigLoadCount <= 0) {
         validateLibraryConfigs(cb);

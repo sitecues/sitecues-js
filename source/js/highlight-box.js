@@ -578,12 +578,16 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
     // Lower the threshold when speech is enabled.
     sitecues.on('speech/enable', function() {
       conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+      
+      // Why do we update the zoom level to the existing zoom level here? Seems like a weird thing to do. - Al
       updateZoomLevel(conf.get('zoom'));
     });
 
     // Revert the threshold when speech is enabled.
     sitecues.on('speech/disable', function() {
       conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+      
+      // Why do we update the zoom level to the existing zoom level here? Seems like a weird thing to do. - Al
       updateZoomLevel(conf.get('zoom'));
     });
 
