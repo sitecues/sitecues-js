@@ -167,12 +167,12 @@ sitecues.def('cursor', function (cursor, callback) {
      */
     var createStyleSheet = (function () {
 
-      var cursorTypes = ['auto', 'crosshair', 'default', 'help', 'pointer', 'text'];
+      var cursorTypes = ['auto', 'default', 'help', /* 'crosshair', 'pointer', 'text' */];
 
       return function () {
 
         var cursorTypeURLS = [];
-        //generate cursor images for every cursor type...      
+        //generate cursor images for every cursor type...
         for(var i = 0; i < cursorTypes.length; i += 1) {
 
           // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the 
@@ -196,37 +196,37 @@ sitecues.def('cursor', function (cursor, callback) {
             if (!rule || !value) {
                 return;
             }
-        //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
+            //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
             for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-//                var type = cursorTypes[i];
-//                var rule = rule;
+                var type = cursorTypes[i];
+                var rule = rule;
                 try {
-//                    if (platform.browser.is === 'IE') {
-//                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
-//                        $.ajax({
-//                            url: cursorValueURL,
-//                            crossDomain: true,
-//                            beforeSend: function(xhrObj) {
-//                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
-//                            },
-//                            type: "GET",
-//                            async: true,
-//                            cache: true,
-//                            success: function(data, status, xhr) {
-//                                console.log('Loading of CUR file completed!');
-//                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + (type || 'auto'));
-//                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
-//                            },
-//                            error: function() {
-//                                console.log("Unable to fetch cursor image from server");
-//                            }
-//                        });
-//                    } else {
+                    if (platform.browser.is === 'IE') {
+                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
+                        $.ajax({
+                            url: cursorValueURL,
+                            crossDomain: true,
+                            beforeSend: function(xhrObj) {
+                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
+                            },
+                            type: "GET",
+                            async: true,
+                            cache: true,
+                            success: function(data, status, xhr) {
+                                console.log('Loading of CUR file completed!');
+                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + type);
+                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
+                            },
+                            error: function() {
+                                console.log("Unable to fetch cursor image from server");
+                            }
+                        });
+                    } else {
                         rule.style.setProperty('cursor', cursorValueURL, 'important');
-//                    }
+                    }
               } catch (e) {
                 try {
                   console.log('Catch!');
