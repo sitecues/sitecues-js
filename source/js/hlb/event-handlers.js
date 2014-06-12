@@ -13,9 +13,8 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
   // shortcut to hasOwnProperty
   var has = Object.prototype.hasOwnProperty;
 
-  sitecues.use('jquery', 'util/common', 'keys', 'platform', function($, common, keys, platform) {
+  sitecues.use('jquery', 'util/common', 'keys', function($, common, keys) {
     
-    var isFirefox = platform.browser.isFirefox;
     /**
      * Onmousewheel event handler.
      * @param e EventObject
