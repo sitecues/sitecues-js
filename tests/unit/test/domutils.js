@@ -5,6 +5,7 @@
 fs = require('fs');
 
 domutils = {
+  // Unfortunately this can't fix the original element, but must return a new one
   fixNode: function (node) {
     if (node.nodeType !== 1 /* Element */) {
       return node;
