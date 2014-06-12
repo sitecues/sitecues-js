@@ -13,7 +13,7 @@ domutils = {
         childNodes = node.childNodes,
         index, numChildren, numElementChildren,
         firstElementChild = null,
-        nextElementSibling = null;
+        nextElementSibling;
       if (node.nodeType !== 1 /* Element */) {
         return;
       }
