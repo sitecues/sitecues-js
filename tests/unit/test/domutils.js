@@ -7,6 +7,7 @@ domutils = {
     // See https://github.com/tmpvar/jsdom/issues/124 and https://equinox.atlassian.net/browse/SC-1771
     // Adds the following properties to an element:
     // localName, childCount, childElementCount, firstElementChild
+    // Note: we can add/modify properties only be using Object.defineProperty() -- setting directly won't work
     function fixNode() {
       var node = this;
       if (node.nodeType !== 1 /* Element */) {
