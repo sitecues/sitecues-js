@@ -8,7 +8,7 @@ require('../test/domutils');
 describe('pick', function() {
   before(function() {
     domutils.loadHtml('./data/html/test-picker.html', function(newWindow) {
-      win = newWindow;
+      win = newWindow;  // We are unable to change original window, so use the new one
     });
   });
   describe('#find()', function() {
