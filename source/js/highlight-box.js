@@ -499,8 +499,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       if ($hlbElement) {
         closeHLB();
       // If a valid element exists and the HLB does not exist
-      } else if (e.dom.mouse_highlight) {
-        createHLB(e.dom.mouse_highlight);
+      } else if (e.dom.mouse_highlight && e.dom.mouse_highlight.picked && e.dom.mouse_highlight.picked[0]) {
+        createHLB(e.dom.mouse_highlight.picked[0]);
       }
 
     }
