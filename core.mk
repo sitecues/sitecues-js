@@ -54,13 +54,9 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
-	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
-	source/js/jquery/resize.js \
-  source/js/jquery/effects.js \
-	source/js/util/close-button.js \
+	source/js/jquery/effects.js \
 	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
