@@ -69,7 +69,6 @@ sitecues.def('keys', function (keys, callback, log) {
     'editor-safe-plus':   { preventDefault: true, event: 'zoom/increase' },
 // Invert and toolbar disabled until further notice.
 //    'r':      { preventDefault: true, event: 'inverse/toggle'},
-//    'f8':     { event: 'ui/toggle' },
     'space':  {
       event: 'hlb/toggle',
       preventDefault: true,

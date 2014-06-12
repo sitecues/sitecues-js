@@ -3,7 +3,6 @@ window.sitecues && sitecues.use(
 	'conf',
 	'jquery',
 	'ui',
-	'ui-manager',
 	'iframe-modal',
 	'zoom',
 	'keys',
@@ -14,7 +13,6 @@ window.sitecues && sitecues.use(
 	'cursor',
 	'speech',
 	'mouse-highlight',
-	'highlight-box',
-	'invert',
+	'highlight-box'
 	'hpan'
 );
