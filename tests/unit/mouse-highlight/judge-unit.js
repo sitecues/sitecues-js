@@ -457,31 +457,30 @@ describe('judge', function() {
       expect(judgementStack[3].isGroupedWithImage).to.be.equal(false);
       done();
     });
-// TODO: re-add these tests once jsdom's element.firstElementChild() functions properly, and add tests for false conditions as well
-//    it('should return |isSectionStartContainer| judgement for an element with a heading in the chain of first child nodes.', function(done) {
-//      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
-//        judgementStack;
-//
-//      judgementStack = judge.getJudgementStack(traitStack, nodes);
-//      expect(judgementStack[2].isSectionStartContainer).to.be.equal(true);
-//      done();
-//    });
-//    it('should return |isDivided=false| judgement for an element without any dividing descendants.', function(done) {
-//      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
-//        judgementStack;
-//
-//      judgementStack = judge.getJudgementStack(traitStack, nodes);
-//      expect(judgementStack[1].isDivided).to.be.equal(false);
-//      done();
-//    });
-//    it('should return |isDivided=true| judgement for an element an <hr> middle child.', function(done) {
-//      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
-//        judgementStack;
-//
-//      judgementStack = judge.getJudgementStack(traitStack, nodes);
-//      expect(judgementStack[2].isDivided).to.be.equal(true);
-//      done();
-//    });
+    it('should return |isSectionStartContainer=true| judgement for an element with a heading in the chain of first child nodes.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+      expect(judgementStack[2].isSectionStartContainer).to.be.equal(true);
+      done();
+    });
+    it('should return |isSectionStartContainer=false| judgement for an element with no heading descendants.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+      expect(judgementStack[1].isSectionStartContainer).to.be.equal(false);
+      done();
+    });
+    it('should return |isDivided=false| judgement for an element without any dividing descendants.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+      expect(judgementStack[1].isDivided).to.be.equal(false);
+      done();
+    });
+    it('should return |isDivided=true| judgement for an element an <hr> middle child.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+      expect(judgementStack[2].isDivided).to.be.equal(true);
+      done();
+    });
     it('should return |isLargeWidthExpansion=true| judgement for an element much wider than the first non-inline descendant.', function(done) {
       var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
         judgementStack;

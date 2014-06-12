@@ -14,7 +14,7 @@
 
 sitecues.def('mouse-highlight/judge', function(judge, callback) {
   'use strict';
-  sitecues.use('jquery', 'util/common', function($, common) {
+  sitecues.use('jquery', 'util/common', 'mouse-highlight/traitcache', function($, common, traitcache) {
 
     // ----------- PUBLIC  ----------------
 
@@ -438,7 +438,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Look at all the siblings before the currentAncestor
         while (sibling && sibling !== currentAncestor) {
-          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) && sibling.offsetHeight) {
+          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) && traitcache.getStyleProp(sibling, 'display') !== 'none') {
             return true;  // A non-section-start element exists before the section-start-element, which means we are divided!
           }
           sibling = sibling.nextElementSibling;

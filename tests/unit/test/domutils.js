@@ -9,21 +9,21 @@ domutils = {
     // localName, childCount, childElementCount, firstElementChild
     // Note: we can add/modify properties only be using Object.defineProperty() -- setting directly won't work
     function fixNode() {
-      var node = this;
+      var node = this,
+        childNodes = node.childNodes,
+        index, numChildren, numElementChildren,
+        firstElementChild = null,
+        nextElementSibling = null;
       if (node.nodeType !== 1 /* Element */) {
         return;
       }
 
+      // ---- Fix localName ----
       Object.defineProperty(node, 'localName', {
         value: node.tagName.toLowerCase()
       });
 
-      // Fix localName
-
-      // Fix childCount and childElementCount
-      var childNodes = node.childNodes,
-        index, numChildren, numElementChildren,
-        firstElementChild = null;
+      // ---- Fix childCount, childElementCount and firstElementChild ----
       if (!childNodes) {
         return;
       }
@@ -53,6 +53,18 @@ domutils = {
         value: firstElementChild
       });
 
+      // ---- Fix nextElementSibling ----
+      nextElementSibling = node.nextSibling;
+      while (nextElementSibling) {
+        if (nextElementSibling.nodeType === 1 /* Element */) {
+          break;
+        }
+        nextElementSibling = nextElementSibling.nextSibling;
+      }
+
+      Object.defineProperty(node, 'nextElementSibling', {
+        value: nextElementSibling
+      });
     }
 
     var jsdom = require('jsdom');
