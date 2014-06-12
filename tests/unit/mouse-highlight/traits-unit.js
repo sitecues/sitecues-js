@@ -1,66 +1,30 @@
 var modulePath = '../../../source/js/mouse-highlight/traits',
   traits = require(modulePath),
-  fs = require('fs'),
-  NUMBER_OF_NODES = 5;
+  NUMBER_OF_NODES = 5,
+  nodes = [],
+  win;
+
+
+require('../test/domutils');
 
 // If we want to use the file system
 
-var nodes = [];
 
 describe('traits', function() {
   before(function() {
-    function addToDom(html, callback) {
-      var jsdom = require('jsdom');
-      jsdom.env({
-        html: html,
-        scripts: [],
-        done: function(errors, window) {
-          callback(window);
-        }
-      });
-    }
-
-    // jsdom does not correctly set some properties, like localName, childCount, etc. so we fix them here.
-    // TODO see if jsdom updates their code so that we no longer need to do this post-correction
-    // See https://github.com/tmpvar/jsdom/issues/124 and https://equinox.atlassian.net/browse/SC-1771
-    function fixNode(node) {
-      if (node.nodeType !== 1 /* Element */) {
-        return node;
-      }
-
-      // Fix localName
-      node = jquery.extend({}, node, { localName: node.tagName.toLowerCase() });
-      node.localName = node.tagName.toLowerCase();
-
-      // Fix childCount and childElementCount
-      var childNodes = node.childNodes,
-        index, numChildren, numElementChildren;
-      if (!childNodes) {
-        return;
-      }
-
-      index = 0;
-      numChildren = childNodes.length;
-      numElementChildren = 0;
-
-      node.childCount = numChildren;
-      for (; index < numChildren; index ++) {
-        if (childNodes[index].nodeType === 1 /* Element */) {
-          ++ numElementChildren;
-        }
-      }
-      node.childElementCount = numElementChildren;
-      return node;
-    }
-
-    var oldhtml = fs.readFileSync('./data/html/test-traits.html');
-    addToDom(oldhtml, function(win) {
+    function serializeNodeStack() {
+      // Get a stack of nodes that we "fix" to have the correct properties
       var node, count = 0;
       while (count < NUMBER_OF_NODES) {
-        node = jquery(win.document).find('#' + count)[0];
-        nodes[count] = fixNode(node);
+        node = win.document.getElementById(count);
+        nodes[count] = domutils.fixNode(node);
         ++ count;
       }
+    }
+
+    domutils.loadHtml('./data/html/test-traits.html', function(newWindow) {
+      win = newWindow;
+      serializeNodeStack();
     });
   });
   describe('#getTraitStack', function() {

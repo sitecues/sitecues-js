@@ -22,6 +22,7 @@
     "module",
     "jsdom",
     "jquery",
+    "domutils",
     "sinon",
     "conf",
     "traits"
@@ -44,6 +45,7 @@
     "module": true,
     "jsdom": true,
     "jquery": true,
+    "domutils": true,
     "sinon": true,
     "conf": true,
     "traits": true
