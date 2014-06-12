@@ -286,8 +286,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       return getEmsToPx(style['font-size'], ems);
     }
 
-
-    function getBulletWidth ($element, elementComputedStyle) {
+   function getBulletWidth ($element, elementComputedStyle) {
       
       //If the HLB is a list AND it has bullets...return their width
       if ($element.is('ul, ol') && elementComputedStyle['list-style-type'] !== 'none') {

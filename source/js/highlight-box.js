@@ -329,6 +329,29 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     }
 
     /**
+     * [turnOnHLBEventListeners turns on HLB event handlers for deflation and scroll]
+     */
+    function turnOnHLBEventListeners () {
+      
+      // Register escape keypress, it will deflate the HLB
+      sitecues.on('key/esc', closeHLB);
+      
+      // Register mousewheel handler to allow scrolling of HLB content
+      $hlbElement.on('mousewheel DOMMouseScroll', {'hlb': $hlbElement}, eventHandlers.wheelHandler);
+      
+      // Register key press handlers (pagedown, pageup, home, end, up, down)
+      $(window).on('keydown', {'hlb': $hlbElement}, eventHandlers.keyDownHandler);
+      
+      // Register mouse mousemove handler for deflating the HLB
+      $(document).on('mousemove', onTargetChange);
+      
+      // Register mousemove handler on the HLB element to turn on the ability to exit the HLB by mouse
+      // This event handler is unique in that it unregisters itself once executed.
+      $hlbElement.on('mousemove', onHLBHover);
+
+    }
+
+    /**
      * [turnOffHLBEventListeners turns off HLB event handlers for deflation and scroll]
      */
     function turnOffHLBEventListeners () {
