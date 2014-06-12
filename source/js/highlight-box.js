@@ -1,600 +1,529 @@
 /**
  * This is the box that appears when the user asks to read the highlighted text in a page.
+ * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-sitecues.def('highlight-box', function (highlightBox, callback, log) {
+sitecues.def('highlight-box', function (highlightBox, callback) {
 
-  // Get dependencies
-  sitecues.use('jquery', 'conf', 'cursor', 'mouse-highlight/highlight-position', 'util/geo',
-    'util/common','hlb/event-handlers', 'hlb/designer', 'hlb/specificElement', 'hlb/style',
-    'background-dimmer', 'ui', 'speech',
-    'util/close-button', 'platform',
-  function ($, conf, cursor, mhpos, geo,
-            common, eventHandlers, designer, hlbSpecificElement, hlbStyle,
-            backgroundDimmer, ui, speech, closeButton, platform) {
+  'use strict';
 
-    // Constants
+  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'util/common',
+  function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, common) {
 
-    // This is the default setting, the value used at runtime will be in conf.
-    var kMinHighlightZoom = 0.99;
-    var kExtraZoom = 1.5;
+    /////////////////////////
+    // PRIVATE VARIABLES
+    ////////////////////////    
 
-    // The states that the HLB can be in.
-    // TODO: Convert to state instances.
-    var STATES = highlightBox.STATES = {
-      // The HLB is off. The zoom level of the page is too low to allow for HLB creation.
-      OFF: {
-        id : 1,
-        name : 'off'
-      },
-
-      // The HLB is on, and ready to create HLBs.
-      ON: {
-        id : 2,
-        name : 'on'
-      },
-
-      // The HLB (instance) has been created and is initializing.
-      CREATE: {
-        id : 4,
-        name : 'create'
-      },
-
-      // The HLB (instance) is in the animation phase of inflating.
-      INFLATING: {
-        id : 8,
-        name : 'inflating'
-      },
-
-      // The HLB (instance) is inflated and ready for interaction.
-      READY: {
-        id : 16,
-        name : 'ready'
-      },
-
-      // The HLB (instance) is in the animation of deflating.
-      DEFLATING: {
-        id : 32,
-        name : 'deflating'
-      },
-
-      // The HLB (instance) is closed.
-      CLOSED: {
-        id : 64,
-        name : 'closed'
-      }
-    };
-
-    // The global HLB state. Toggles between on and off. This state is subordinate to the the instance state.
-    // Initially set to null so that the zoom check will trigger an event.
-    var state = null;
-
-    conf.set('highlightBoxMinZoom', kMinHighlightZoom);
-
-    // Update the zoom level of the page, which effects whether or not the HLB is off or on.
-    var globalZoom;
-
-    var updateZoomLevel = function (zl) {
-      globalZoom = zl;
-      updateState();
-    };
-
-    var updateState = function() {
-      // The HLB is always enabled when TTS is on.
-      var newState = (speech.isEnabled() || (globalZoom >= conf.get('highlightBoxMinZoom')) ? STATES.ON : STATES.OFF);
-      if (newState !== state) {
-      state = newState;
-      sitecues.emit('hlb/' + state.name, highlightBox, {});
-      }
-    };
-
-    // Current highlight box instance, only work with it. There can only be one instance in the system
-    // that is not in the CLOSED state, and that instance will be referenced by 'instance'
-    var instance = null;
-
-    // Returns the state of the highlight box module. If there is no instance, use the global state.
-    var getState = highlightBox.getState = function() {
-      return (instance ? instance.getState() : state);
-    };
-
-    // Returns the state of the highlight box module. If there is no instance, use the global state.
-    var getCurrentTarget = highlightBox.getCurrentTarget = function() {
-      return (instance ? instance.item : null);
-    };
-
-    // todo: take out common things like these below into general sitecues file which is loaded before any other file starts loading.
-    // Add easing function for box open animation, to create bounce-back effect
-    $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301
-      easeOutBack: function (x, t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
-      }
-    });
-
-    // Create the close button shared across HLBs.
-    var hlbCloseButton = closeButton.create(function() {
-      sitecues.emit('highlight/animate', {});
-    });
-
-    sitecues.on('hlb/deflating', function() {
-      hlbCloseButton.disable();
-    });
-
-    // Display the close button.
-    // AK: I have no idea what is the value of closeButtonInset, I just add a random value -
-    // to exclude exception closeButtonInset throws "ReferenceError: closeButtonInset is not defined"
-    var closeButtonInset = 5;
-    var displayCloseButton = function(hlbTarget, totalZoom) {
-      var hlbNode = $(hlbTarget);
-      var hlbBorderWidth = parseFloat(hlbNode.css('borderWidth')) || 0;
-      var boundingBox = geo.getBoundingBox(hlbTarget);
-      var left = ((boundingBox.left  + hlbBorderWidth) * totalZoom) + closeButtonInset;
-      var top  = ((boundingBox.top   + hlbBorderWidth) * totalZoom) + closeButtonInset;
-
-      closeButton.enable(left, top);
-    };
-
-    var HighlightBox = (function () {
-      // Constructor: Initialize HLB.
-      function HighlightBox(highlight, options) {
-        this.initHLBValues(highlight, options);
-        // Notify about new HLB
-        sitecues.emit('hlb/create', this.item, $.extend(true, {}, this.options));
-
-        // Temp values.
-        this.computedStyles  = getComputedStyle(this.item);
-        var computedStyles = this.computedStyles; // a bit shorter alias
-        var offset = geo.getOffset(this.item);
-        var width = (computedStyles.width === 'auto' || computedStyles.width === '') ? this.$item.width() : computedStyles.width;
-        var height = (computedStyles.height === 'auto' || computedStyles.height === '') ? this.$item.height() : computedStyles.height;
-        var size = { width: parseFloat(width), height: parseFloat(height) };
-
-        this.fillHLBValues(offset, size);
-      }
-
-      HighlightBox.prototype.initHLBValues = function(highlight, options) {
-        this.options = $.extend(true,
-            {'needsCompensation': true,
-                'isChrome': platform.browser.isChrome,
-            }, options);
-        this.state = STATES.CREATE;
-        this.savedCss = [];
-        this.savedStyleAttr = {};
-        this.origRectDimensions = [];
-        this.item = highlight.picked.get(0); // Need to know when we have box for checking mouse events before closing prematurely
-        this.highlight = highlight;
-        this.$item = $(this.item);
-      };
-
-      HighlightBox.prototype.fillHLBValues = function(offset, size) {
-        this.origRectDimensions.push($.extend(offset, size)); // Only numeric values, useful for calculations
-        this.clientRect = mhpos.getSmartBoundingBox(this.item);
-        this.boundingBoxes = designer.getBoundingElements(this.item);
-        this.compensateShift = designer.getShift(this.$item, this.boundingBoxes, this.computedStyles);
-        this.savedCss.push(this.computedStyles);
-        this.saveAttrs(['style', 'width', 'height']);
-      };
-
-      /**
-       * List of attributes we save original values for because we might want to redefine them later.
-       * @returns {undefined}
-       */
-      HighlightBox.prototype.saveAttrs = function(attrsList) {
-        var _this = this;
-        $.each(attrsList, function(key, attr) {
-            _this.savedStyleAttr[attr] = _this.$item.attr(attr);
-        });
-      };
-
-      // Constants. NOTE: some of them are duplicated in hlb/designer.js too.
-      HighlightBox.kShowBoxSpeed = 400;
-      HighlightBox.kHideBoxSpeed = 150;
-      HighlightBox.kShowAnimationSchema = 'easeOutBack';
-      HighlightBox.kHideAnimationSchema = 'linear';
-      HighlightBox.isSticky = false;
-      HighlightBox.kPlaceHolderWrapperClass = 'sitecues-eq360-box-placeholder-wrapper';
-
-      /**
-       * Toggle Sticky state of highlight box
-       */
-      sitecues.toggleStickyHLB = function () {
-        HighlightBox.isSticky = !HighlightBox.isSticky;
-        return HighlightBox.isSticky;
-      };
-
-      /**
-       * Get the state of the highlight box.
-       */
-      HighlightBox.prototype.getState = function () {
-        return this.state;
-      };
-
-      /**
-       * Show a highlight reading box when triggered.
-       */
-      HighlightBox.prototype.inflate = function () {
-        // Immediately enter the HLB
-        this.state = STATES.INFLATING;
-        sitecues.emit('hlb/inflating', this.item, $.extend(true, {}, this.options));
-
-        var _this = this;
-
-        /*
-         * *** Calculate cssBeforeAnimateStyles ***
-         */
-
-        // Get the current element styles.
-        var currentStyle = this.savedCss[this.savedCss.length - 1],
-            totalZoom = conf.get('zoom'),
-            center  = mhpos.getCenterForActualElement(this.item, totalZoom),
-            cssUpdate = designer.getNewRectStyle(this.$item, currentStyle, center, kExtraZoom);
-
-        var cssBeforeAnimateStyles = hlbStyle.getCssBeforeAnimateInflationStyles(this, this.highlight, currentStyle, cssUpdate);
-        // Anything on the module namespace will be available in the customization file.
-        _this.cssBeforeAnimateStyles = cssBeforeAnimateStyles;
-        sitecues.emit('hlb/animation/styles', _this, $.extend(true, {}, _this.options));
+    var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
         
-        /*
-         *  *** Calcualte cssAnimateStyles ***
-         */
-
-        // Only animate the most important values so that animation is smoother.
-        var cssAnimateStyles = hlbStyle.getCssAnimateInflationStyles(kExtraZoom);
-
-        // Quick state issue fix! If the HLB is still inflating slightly after
-        // the animation is supposed to end, then close it out.
-        setTimeout(function() {
-          if (getState() === STATES.INFLATING) {
-            log.warn("hlb in bad state. resetting.");
-            // Bad state. This instance is now officially closed.
-            _this.state = STATES.CLOSED;
-            // Call the module method to clean up after close BEFORE calling listeners.
-            onHighlightBoxClosed(_this.item);
-            // Ensure the bg dimmer is gone.
-            // AK: comment out all the dimmer calls by AL request
-            backgroundDimmer.removeDimmer();
-            // Trigger the background blur effect if there is a highlight box only.
-            log.info("hlb closed");
-            sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
-          }
-        }, HighlightBox.kShowBoxSpeed + 100);      
-
-        /*
-         * *** Customizations for specific elements. ***
-         */
-
-        // Change the stacking contexts if necessary.
-        this.savedAncestorCSS = hlbSpecificElement.handleZindexOverflow(this);
+        INFLATION_SPEED   = 400, // Default inflation duration
+        DEFLATION_SPEED   = 150, // Default deflation duration 
         
-        // Preserve ratio for images.
-        if (this.item.tagName.toLowerCase() === 'img') {
-          hlbSpecificElement.preserveImageRatio(cssUpdate, this.clientRect);
-        }
-
-        // Table special behaviour on inner contents needs special care.
-        hlbSpecificElement.handleTableElement(this.$item, currentStyle);
-
-        // Canvas elements are also different.
-        if (common.isCanvasElement(this.$item)) {
-            hlbSpecificElement.handleCanvas();
-        } else {
-            // If website uses width/height attributes let's remove those while HLB is inlated.
-            if (cssBeforeAnimateStyles.height || cssBeforeAnimateStyles.width) {
-              for (var attrName in this.savedStyleAttr) {
-                if (attrName === 'style') {
-                  continue;
-                }
-                if (this.savedStyleAttr[attrName] && this.savedStyleAttr[attrName] !== 0) {
-                  this.$item.removeAttr(attrName);
-                }
-              }
-            }
-        }
-
-        /*
-         * *** Animate HLB (keep in mind $.animate() is non-blocking) ***
-         */
-
-        // Since jQuery animate doesn't understand 'important' then do:
-        // - remove properties having 'important' priority animation is going to override;
-        // - set non-important property with the same value it used to have.
-        var styleObj = this.$item[0].style;
-        for (var prop in cssAnimateStyles) {
-          //first check that both of these objects has the property we are interested in
-          if (cssBeforeAnimateStyles.hasOwnProperty(prop) && cssAnimateStyles.hasOwnProperty(prop)) {
-            styleObj.removeProperty(prop);
-            this.$item[0].style.setProperty(prop, cssBeforeAnimateStyles[prop], null);
-          }
-        }
-
-        // todo: use '$.style' instead of '$.css'
-        this.$item.css(cssBeforeAnimateStyles);
-        this.$item.effects(cssAnimateStyles, HighlightBox.kShowBoxSpeed, HighlightBox.kShowAnimationSchema, function() {
-          // Once the animation completes, set the new state and emit the ready event.
-          _this.state = STATES.READY;
-
-          // Trigger the background blur effect if there is a highlight box only.
-          // > AM: Added call to cloneNode, so highlight knows the coordinates around which to draw the dimmer (SVG Dimmer approach)
-          onHighlightBoxReady(_this.$item);
-
-          backgroundDimmer.dimBackgroundContent(_this.$item);
-          if (_this.options.close_button) {
-            displayCloseButton(_this.item, totalZoom);
-          }
-
-          log.info("hlb ready");
-          sitecues.emit('hlb/ready', _this.item, $.extend(true, {}, _this.options));
-          // Update the dimensions object.
-          _this.clientRect = mhpos.getSmartBoundingBox(_this.item);
-        });
-
-        if (this.options.isChrome && this.options.needsCompensation && !hlbStyle.isFloated) {
-          var roundingsStyle = designer.getRoudingsOnZoom(this.item, this.boundingBoxes, currentStyle, this.compensateShift);
-          this.$item.css(roundingsStyle);
-        }
-
-        return false;
-      };
-
-      /**
-       * Hide the reading box.
-       */
-      HighlightBox.prototype.deflate = function () {
-        if (HighlightBox.isSticky === false) {
-        var _this = this;
-
-        // Update state.
-        this.state = STATES.DEFLATING;
-        sitecues.emit('hlb/deflating', _this.item, $.extend(true, {}, _this.options));
-
-        var currentStyle = this.savedCss[this.savedCss.length - 1],
-            clientRect;
+        CHAR_WIDTH_LIMIT  = 50,  // Amount of characters that fits horizontally in HLB
         
-        try { //Required for FF
-          clientRect = mhpos.getSmartBoundingBox(this.item);
-          if (!clientRect) {
-            clientRect = geo.getBoundingBox(this.item);
-          }
-        } catch(e) {
-          clientRect = geo.getBoundingBox(this.item);
-        }
-        var cssBeforeAnimateStyles = hlbStyle.cssBeforeAnimateDeflationStyles(currentStyle);
-        var cssAnimateStyles = hlbStyle.getCssAnimateDeflationStyles();
+        MOUSE_SAFETY_ZONE = 100, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
 
-        if (!common.isCanvasElement(this.$item)) { 
-//            $.extend(cssAnimateStyles, {
-//                'width': clientRect.width / kExtraZoom,
-//                // Don't change height if there's a background image, otherwise it is destroyed.
-//                'height': !common.isEmptyBgImage(currentStyle['background-image'])
-//                    ? parseFloat(currentStyle.height) + 'px' / kExtraZoom
-//                    : clientRect.height / kExtraZoom + 'px'
-//            });
-        }
+        $originalElement,  // Element selected by the picker for the creation of the HLB
+        $hlbElement,       // Element that is cloned from the originalElement (HLB)
 
-        // Deflate the highlight box.
-        this.$item.css(cssBeforeAnimateStyles);
-        this.$item.effects(cssAnimateStyles, HighlightBox.kHideBoxSpeed , HighlightBox.kHideAnimationSchema, function () {
-            // Cleanup all elements inserted by sitecues on the page.
-            if ($('.' + HighlightBox.kPlaceHolderWrapperClass).length > 0) {
-                // Remove placeholder wrapper element if the table child highlighted.
-                $('.' + HighlightBox.kPlaceHolderWrapperClass)
-                        .children()
-                        .unwrap("<div class='" + HighlightBox.kPlaceHolderWrapperClass + "</div>");
-            }
-
-            // Get the current element styles.
-            var ancestorCSS = _this.savedAncestorCSS;
-            var parents = _this.$item.parentsUntil(document.body);
-            $.each(parents, function() {
-                var css = ancestorCSS.shift();
-                $(this).style({'z-index': css.zIndex,
-                    'overflow-x': css.overflowX,
-                    'overflow-y': css.overflowY,
-                    'overflow': css.overflow});
-            });
-            _this.$item.style('outline', hlbStyle.kBoxNoOutline, 'important');
-
-            backgroundDimmer.removeDimmer();
-            setTimeout(function() {
-                // Animation callback: notify all inputs about zoom out.
-                // We should do this with next tick to allow handlers catch right scale level.
-                notifyZoomInOrOut(_this.$item, false);
-            }, 0);
-
-            // If website used to have width/height attributes let's restore those while HLB is defalted.
-            for (var attrName in _this.savedStyleAttr) {
-                if (attrName === 'style') {
-                    _this.$item.removeAttr('style');
-                }
-                if (!common.isCanvasElement(_this.$item)) {
-                    if (_this.savedStyleAttr[attrName] && _this.savedStyleAttr[attrName] !== 0) {
-                        _this.$item.attr(attrName, _this.savedStyleAttr[attrName]);
-                    }
-                }
-            }
-            // This instance is now officially closed.
-            _this.state = STATES.CLOSED;
-
-            // Call the module method to clean up after close BEFORE calling listeners.
-            onHighlightBoxClosed(_this.item);
-
-            log.info("hlb closed");
-            sitecues.emit('hlb/closed', _this.item, $.extend(true, {}, _this.options));
-        });
-        }
-      };
-
-      /*
-       * Defines which background suits to HLB & sets it: both background image and color.
-       * @param currentStyle Object
-       * @param cssBeforeAnimateStyles Object
-       */
-      HighlightBox.prototype.setBgStyle = function(currentStyle, cssBeforeAnimateStyles) {
-        var oldBgColor = currentStyle['background-color'];
-        var oldBgImage = currentStyle['background-image'];
-        var newBg = designer.getNewBackground(this.$item, oldBgColor, oldBgImage);
-        var newBgColor = newBg.bgColor ? newBg.bgColor : oldBgColor;
+        $hlbWrappingElement, // Element outside the body that contains the HLB and background dimmer
         
-        // If color and background color are not contrast then either set background image or invert background color.
-        if (!common.isEmptyBgImage(oldBgImage)) {
-          cssBeforeAnimateStyles['background-repeat']   = currentStyle['background-repeat'];
-          cssBeforeAnimateStyles['background-image']  = oldBgImage;
-          cssBeforeAnimateStyles['background-position'] = currentStyle['background-position'];
-          //cssBeforeAnimateStyles['background-size']   = this.clientRect.width + 'px ' + this.clientRect.height+ 'px';
-          cssBeforeAnimateStyles['background-color']  = common.getRevertColor(newBgColor);
+        preventDeflationFromMouseout = false, // Boolean that determines if HLB can be deflated.
+
+        isHLBClosing = false, // Boolean that determines if the HLB is currently deflating. 
+        
+        originCSS,    // The HLB element's midpoint for animation
+        translateCSS, // The HLB element's translation for final position
+
+        isSticky = false; // DEBUG: HLB deflation toggler
+
+    //////////////////////////////
+    // PRIVATE FUNCTIONS
+    /////////////////////////////
+    
+    /**
+     * [mapForm updates input values from on set of elements to another]
+     * @param  {[DOM element]} from [HLB or original element]
+     * @param  {[DOM element]} to   [HLB or original element]
+     */
+    function mapForm ($from, $to) {
+
+      // Build an array of input elements from the HLB element / original element and its decendants.
+      var fromInputs = $from.find('input, textarea, select')
+                            .addBack('input, textarea, select')
+                            .toArray(),
           
-          // If we operate with a 'list-item' then most likely that bg-image represents bullets, so, handle then accordingly.
-          if (this.savedCss[0].display === 'list-item' || this.item.tagName.toLowerCase() === 'li') {
-            delete cssBeforeAnimateStyles['background-size'];
-          }
-        }
+          toInputs = $to.find('input, textarea, select')
+                        .addBack('input, textarea, select')
+                        .toArray(),
+
+          $currentFromInput,
+          $currentToInput;
+
+      for (var i = 0; i < fromInputs.length; i += 1) {
         
-        // If background color is not contrast to text color, invert background one.
-        var color = designer.getCurrentTextColor(this.item);
-        var isContrastColors = common.getIsContrastColors(color, newBgColor);
-        // EQ-1011: always use black for images.
-        if (this.item.tagName.toLowerCase() === 'img') {
-          cssBeforeAnimateStyles['background-color'] = '#000';
-          return;
-        }
-        if (!isContrastColors && common.isCanvasElement(this.$item)) {
-          // Favor a white background with dark text when original background was white.
-          if (common.isLightTone(newBgColor)) {
-            newBgColor = 'rgb(255, 255, 255)';
-            cssBeforeAnimateStyles['color'] = common.getRevertColor(color);
-          }
-        }
+        $currentFromInput = $(fromInputs[i]);
+        $currentToInput   = $(toInputs[i]); 
         
-        cssBeforeAnimateStyles['background-color'] = newBgColor;
-        return;
-      };
-
-      /**
-       * Notify all inputs if zoom in or out.
-       * todo: define if we need to leave this code after code transferring to a new event model.
-       */
-      function notifyZoomInOrOut (element, isZoomIn) {
-        var zoomHandler = isZoomIn ? 'zoomin' : 'zoomout';
-        element.triggerHandler(zoomHandler);
-      }
-
-      return {
-        // Return Highlight if need to support a few instances instead.
-        createInstance: function (highlight, options) {
-          // Don't return an instance if the target is ineligible.
-          // There used to be an isValidTarget function call here,
-          // but that logic already exists in mouse-highlight.  We
-          // should keep that logic in one place and this component
-          // should assume that any target sent to it is valid.
-          return ( highlight.isVisible ? new HighlightBox(highlight, options) : null );
-        }
-      };
-    })();
-
-    // Take care on target change event.
-    function onTargetChange(e) {
-      var newTarget = e.target;
-      if (getState() === STATES.READY) { // if something is ready
-        if (!instance.options.suppress_mouse_out) {
-          var lastTarget = instance.item;
-
-          if (lastTarget === newTarget) {
-            return; // Target is not changed.
-          }
-          // Check if new target is a child node of the last target.
-          var isChildNode = false;
-          $.each($(newTarget).parents(), function (index, element) {
-            // Do nothing if the new target is a child node.
-            if (element === lastTarget) {
-              isChildNode = true;
-            }
-          });
-
-          // If mouse hovers over the other element, shut down last target(current HLB).
-          if (!isChildNode) {
-            instance.deflate();
-          }
-        }
+        if ($currentFromInput.prop('type') === 'radio' || $currentFromInput.prop('type') === 'checkbox') {
+          $currentToInput.prop('checked', $currentFromInput.prop('checked'));
+        } else {
+          $currentToInput.val($currentFromInput.val());
+        }      
       }
     }
 
-    // Performs global clean-up when an instance is closed.
-    function onHighlightBoxClosed(hlb) {
-      // Unbind!
-      $(hlb).off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
-      $(document).off('mousemove click', onTargetChange);
-      $(window).off('keydown', eventHandlers.keyDownHandler);
-      // At the current time within the module we need to remove the instance.
-      $(hlb).blur();
-      instance = null;
+    /**
+     * [isHLBScaleGreaterThanOne determines if the $hlbElement is scaled greater than one.  
+     * This is useful for the transitionOutHLB function.]
+     * @return {Boolean} [if true, $hlbElement is scaled > 1]
+     * @example "matrix(1.5, 0, 0, 1.5, 1888.0610961914063, 2053.21875)"
+     * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)" 
+     */
+    function isHLBScaleGreaterThanOne () {
+      return !$hlbElement.css('transform').match('matrix\\(1,');
+    }
+    
+    /**
+     * [onHLBHover is registered as a "mousemove" event handler when the HLB is ready, and unregisters 
+     * itself immediately after the mouse moves within the HLB element.  The purpose of this function 
+     * is to handle the case where the HLB is positioned outside of the mouse coordinates and allows the 
+     * deflation of the HLB by moving the mouse outside of the HLB area as well as enabling scrolling of the HLB.]
+     */
+    function onHLBHover () {
+ 
+      // We only need to know if the mouse has been in the HLB, so remove it once we are certain.
+      $hlbElement.off('mousemove');
+
+      // Any mouse detection within the HLB turns on the ability to exit HLB by moving mouse
+      preventDeflationFromMouseout = false;
+      
+      // Any mouse detection within the HLB turns on the ability to scroll
       eventHandlers.enableWheelScroll();
-    }
 
-    // Handle scroll key events when their target is HLB element or its children.
-    function onHighlightBoxReady(hlb) {
-      // Then handle special keys such as 'pageup', 'pagedown' since they scroll element and window at the same time.
-      // Note: You need to give the div a tabindex so it can receive focus. Otherwise, it will not catch keydown/keyup/keypress event.
-      // Alternatively, we can catch the event on document/widnow level.
-      // http://stackoverflow.com/questions/1717897/jquery-keydown-on-div-not-working-in-firefox
-      if (hlb[0].tagName.toLowerCase() == 'input' || hlb[0].tagName.toLowerCase() == 'textarea') {
-         $(hlb).focus(); 
+    }
+    
+    /**
+     * [onTargetChange is enabled when the HLB is READY.  Deflates the HLB if allowed.]
+     * @param  {[DOM mousemove event]} e [Mousemove event.]
+     */
+    function onTargetChange (e) {
+
+      var newTarget      = e.target,
+          mouseX         = e.clientX,
+          mouseY         = e.clientY,
+          HLBBoundingBox;
+
+      // The mouse has never been within the HLB bounds or debugging is enabled.
+      if (preventDeflationFromMouseout || isSticky) {
+        return;
       }
-      // Add listener below to correctly handle scroll event(s) if HLB is opened.
-      $(hlb).on('mousewheel DOMMouseScroll', {'hlb': hlb}, eventHandlers.wheelHandler);
-      $(document).on('mousemove click', onTargetChange);
-      $(window).on('keydown', {'hlb': hlb}, eventHandlers.keyDownHandler);
+
+      // Mouse is currently hovering over the HLB
+      if ($hlbElement[0] === newTarget) {
+        return;
+      }
+
+      HLBBoundingBox = $hlbElement[0].getBoundingClientRect();
+
+      // If the mouse coordinates are not within the bounds of the HLB + MOUSE_SAFETY_ZONE, then deflate the HLB.
+      if (mouseX < HLBBoundingBox.left   - MOUSE_SAFETY_ZONE || 
+          mouseX > HLBBoundingBox.right  + MOUSE_SAFETY_ZONE ||
+          mouseY < HLBBoundingBox.top    - MOUSE_SAFETY_ZONE || 
+          mouseY > HLBBoundingBox.bottom + MOUSE_SAFETY_ZONE) {
+        
+        closeHLB();
+      
+      }
+
     }
 
     /**
-     * Handle keypress event.
+     * [initializeHLB is the first step in the creation process for the HLB.
+     * This function is responsible for cloning the original element, mapping form data, 
+     * cloning child styles, filtering attributes, styles, and elements, and setting the
+     * HLB with default styles and computed styles.]
+     * @param  {[DOM element]} originalElement [DOM element that is the original element chosen by the picker.]
      */
-    sitecues.on('highlight/animate', function (e) {
-      var currentState = getState();
-      var hlbOptions = e.hlb_options || {};
-      if (currentState === STATES.READY) {
-        // An HLB instance exists and is inflated, so deflate it.
-        instance.deflate();
-      } else if ((currentState === STATES.ON) || ((currentState === STATES.OFF) && hlbOptions.force)) {
-        // There is no current HLB and we can create one, so do just that.
-        // If the target element is ineligible, the create request may return null.
-        instance = HighlightBox.createInstance(e.dom.mouse_highlight, hlbOptions);
-        if (instance) {
-          instance.inflate();
-        }
-      }
-      return false;
-    });
+    function initializeHLB (originalElement) {
+
+      // Create and append to the DOM the wrapping element for HLB and DIMMER elements
+      addHLBWrapper();
+      
+      // Disable document scroll until the HLB deflates
+      eventHandlers.disableWheelScroll();
+      
+      // Clone, style, filter
+      cloneHLB(originalElement);
+
+      // Prevents mouse movement from deflating the HLB until mouse is inside HLB
+      preventDeflationFromMouseout = true;
+      
+      // Listeners: keys.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+      sitecues.emit('hlb/create', $hlbElement);
+
+    }
 
     /**
-     * Handle zoom event.
+     * [sizeHLB computes and sets the height and width of the HLB]
      */
-    sitecues.on('zoom', function (value) {
-      updateZoomLevel(value);
-    });
-
-    sitecues.on('key/esc', function () {
-      instance.deflate();
-    });
-
-    // Lower the threshold when speech is enabled.
-    sitecues.on('speech/enable', function() {
-      conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+    function sizeHLB () {
       
-      // Why do we update the zoom level to the existing zoom level here? Seems like a weird thing to do. - Al
-      updateZoomLevel(conf.get('zoom'));
-    });
+      // Initialize height/width of the HLB
+      hlbPositioning.initializeSize($hlbElement, $originalElement);
 
-    // Revert the threshold when speech is enabled.
-    sitecues.on('speech/disable', function() {
-      conf.set('highlightBoxMinZoom', kMinHighlightZoom);
+      // Constrain the height and width of the HLB to the height and width of the safe area.
+      hlbPositioning.constrainHeightToSafeArea($hlbElement);
+      hlbPositioning.constrainWidthToSafeArea($hlbElement);                                       
+
+      // Limit the width of the HLB to a maximum of CHAR_WIDTH_LIMIT characters.
+      hlbPositioning.limitWidth($originalElement, $hlbElement, CHAR_WIDTH_LIMIT);
       
-      // Why do we update the zoom level to the existing zoom level here? Seems like a weird thing to do. - Al
-      updateZoomLevel(conf.get('zoom'));
-    });
+      // The following attempts to mitigate the vertical scroll bar by 
+      // setting the height of the element to the scroll height of the element.
+      hlbPositioning.mitigateVerticalScroll($hlbElement);
+      
+      // Vertical scroll should only appear when HLB is as tall as the 
+      // safe area height and its scrollHeight is greater than its clientHeight
+      hlbPositioning.addVerticalScroll($hlbElement);
+    }
 
-    // Now that we have initialized the HLB, update the zoom level, emitting the ON or OFF event.
-    updateZoomLevel(conf.get('zoom'));
+    /**
+    * [positionHLB positions the HLB.]
+    */
+    function positionHLB () {
 
-    // Done.
+      var constrainedOffset,  // The minimum distance we must move the HLB for it to fall within the safe zone
+          
+          HLBBoundingBoxAfterZoom = hlbPositioning.scaleRectFromCenter($hlbElement),
+          HLBBoundingBox          = $hlbElement[0].getBoundingClientRect(),
+          
+          // These are used in the positioning calculation.  
+          // They are the differences in height and width before and after the HLB is scaled.
+          expandedWidthOffset     = (HLBBoundingBoxAfterZoom.width  - HLBBoundingBox.width)  / 2,
+          expandedHeightOffset    = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
+          
+          // The difference between the mid points of the hlb element and the original 
+          offset = hlbPositioning.midPointDiff($hlbElement, $originalElement),
+
+          zoom   = conf.get('zoom');
+
+      // Update the dimensions for the HLB which is used for constraint calculations. 
+      // The offset of the original element and cloned element midpoints are used for positioning.
+      HLBBoundingBoxAfterZoom.left   = HLBBoundingBox.left - offset.x - expandedWidthOffset;
+      HLBBoundingBoxAfterZoom.top    = HLBBoundingBox.top  - offset.y - expandedHeightOffset;
+      HLBBoundingBoxAfterZoom.right  = HLBBoundingBoxAfterZoom.left + HLBBoundingBoxAfterZoom.width;
+      HLBBoundingBoxAfterZoom.bottom = HLBBoundingBoxAfterZoom.top  + HLBBoundingBoxAfterZoom.height;
+
+      // Constrain the scaled HLB to the bounds of the "safe area".
+      // This returns how much to shift the box so that it falls within the bounds.
+      // Note: We have already assured that the scaled cloned element WILL fit into the "safe area",
+      // but not that it is currently within the bounds.
+      constrainedOffset = hlbPositioning.constrainPosition(HLBBoundingBoxAfterZoom, hlbPositioning.getSafeZoneBoundingBox());      
+      
+      // Add the difference between the HLB position and the minimum amount of distance 
+      // it must travel to be completely within the bounds of the safe area to the difference 
+      // between the mid points of the hlb element and the original
+      offset.x += constrainedOffset.x;
+      offset.y += constrainedOffset.y;      
+      
+      // translateCSS and originCSS are used during deflation
+      translateCSS = 'translate(' + ( -offset.x / zoom ) + 'px, ' + ( -offset.y / zoom ) + 'px)';
+      
+      // This is important for animating from the center point of the HLB
+      originCSS    = (( -offset.x / zoom )  + HLBBoundingBox.width  / 2 / zoom) + 'px ' + 
+                     (( -offset.y / zoom )  + HLBBoundingBox.height / 2 / zoom) + 'px';
+
+      // Position the HLB without it being scaled (so we can animate the scale).
+      $hlbElement.css({ 'transform': 'scale(1) ' + translateCSS });   
+
+    }
+   
+    /**
+     * [transitionInHLB animates the inflation of the HLB and background dimmer]
+     */
+    function transitionInHLB () {
+
+      // Dim the background!
+      dimmer.dimBackgroundContent($hlbWrappingElement, INFLATION_SPEED);
+      
+      // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
+      $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBReady);
+
+      // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
+      $hlbElement.css({
+        'transition-timing-function' : 'linear',
+        'transition'                 : hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
+        'transform'                  : 'scale(' + hlbPositioning.HLBZoom + ') ' + translateCSS,
+        'transform-origin'           : originCSS
+      });
+
+    }
+    
+    /**
+     * [transitionOutHLB animates and removes the HLB and background dimmer]
+     */
+    function transitionOutHLB () {
+      
+      // Listeners: mouse-highlight.js, invert.js
+      sitecues.emit('hlb/deflating', $hlbElement);
+      
+      // Un-dim the background!
+      dimmer.removeDimmer(DEFLATION_SPEED);
+      
+      // Do we bother animating the deflation?
+
+      // Sometimes, if the user presses the spacebar extremely fast, the HLB is toggled 
+      // to close during the HLB inflation animation (transitionInHLB). Because this is
+      // possible, it is also possible that the value of transform:scale is 1 by the time 
+      // we want to deflate, and thus the transition end event cannot be used as a callback
+      // mechanism (because there is nothing to animate if scale is already 1).  Therefore,
+      // we check to see if the HLB scale is greater than one, and if so, we animate the
+      // deflation, otherwise, we just skip the deflation step
+      if (isHLBScaleGreaterThanOne()) {
+        
+        // After the deflation animation completes, clean up the HLB states and DOM
+        $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBClosed);
+
+        // Animate the deflation by setting the transform scale to 1.
+        $hlbElement.css({
+          'transition-timing-function' : 'linear',
+          'transition'                 : hlbStyling.transitionProperty + DEFLATION_SPEED + 'ms',
+          'transform'                  : 'scale(1) ' + translateCSS,
+          'transform-origin'           : originCSS
+        });
+
+      } else {
+        onHLBClosed();
+      }      
+      
+    }
+
+    /**
+     * [turnOnHLBEventListeners turns on HLB event handlers for deflation and scroll]
+     */
+    function turnOnHLBEventListeners () {
+      
+      // Register escape keypress, it will deflate the HLB
+      sitecues.on('key/esc', closeHLB);
+      
+      // Register mousewheel handler to allow scrolling of HLB content
+      $hlbElement.on('mousewheel DOMMouseScroll', {'hlb': $hlbElement}, eventHandlers.wheelHandler);
+      
+      // Register key press handlers (pagedown, pageup, home, end, up, down)
+      $(window).on('keydown', {'hlb': $hlbElement}, eventHandlers.keyDownHandler);
+      
+      // Register mouse mousemove handler for deflating the HLB
+      $(document).on('mousemove', onTargetChange);
+      
+      // Register mousemove handler on the HLB element to turn on the ability to exit the HLB by mouse
+      // This event handler is unique in that it unregisters itself once executed.
+      $hlbElement.on('mousemove', onHLBHover);
+
+    }
+
+    /**
+     * [turnOffHLBEventListeners turns off HLB event handlers for deflation and scroll]
+     */
+    function turnOffHLBEventListeners () {
+      
+      $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
+
+      // During deflation, turn off the ability to deflate or create a new HLB
+      sitecues.off('key/esc', closeHLB);
+      
+      // Turn off the suppression of scrolling, keypresses
+      $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
+      $(window).off('keydown', eventHandlers.keyDownHandler);
+
+      // Turn off the ability to deflate the HLB with mouse
+      $(document).off('mousemove', onTargetChange);
+    }
+
+    /**
+    * [cloneHLB clones elements and styles from the original element to the HLB element.]
+    * @param  {[DOM element]} originalElement [original element]
+    */
+    function cloneHLB (originalElement) {
+
+      var hlbStyles;
+
+      // The original element
+      $originalElement = $(originalElement);
+
+      // The cloned element (HLB)
+      $hlbElement = $(originalElement.cloneNode(true));
+
+      // Copies form values from original element to HLB
+      mapForm($originalElement, $hlbElement);
+
+      // Clone styles of children of HLB, so layout is preserved
+      hlbStyling.cloneStyles($originalElement, $hlbElement);
+      
+      // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
+      hlbStyling.filter($hlbElement);
+      
+      // Set this variable now that we have filtered, cloned child styles
+      hlbStyles = hlbStyling.getHLBStyles($originalElement);
+
+      // Set the styles for the HLB and append to the wrapping element
+      $hlbElement.css(hlbStyles).appendTo($hlbWrappingElement);
+      
+    }
+
+    /**
+     * [createHLB initializes, positions, and animates the HLB]
+     * @param  {[DOM element]} target [the original element]
+     */
+    function createHLB (originalElement) {
+
+      // clone, style, filter, emit hlb/create, 
+      // prevent mousemove deflation, disable scroll wheel
+      initializeHLB(originalElement);
+
+      // Compute and set HLB dimensions
+      sizeHLB();
+
+      // Compute and set HLB position
+      positionHLB();
+      
+      // setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
+      // of the HLB.  Before we scale, it absolutely must be positioned correctly.  
+      // Note: Interestingly enough, this timeout is unnecessary if we comment out the
+      // background dimmer in transitionInHLB(), because the operation took long enough
+      // for the browser to update/render the DOM.  This is here for safety (until proven otherwise).
+      // If we use a setTimeout, we have to solve the problem of functions being added to the stack before
+      // the timeout completes...its a pain.,
+      transitionInHLB();
+
+    }
+    
+    /**
+     * [closeHLB prepares and deflates the HLB.]
+    */
+    function closeHLB () {
+
+      // Set this to true to prevent toggleHLB();
+      isHLBClosing = true;
+
+      turnOffHLBEventListeners();
+
+      // Make sure inputs from HLB are copied over to the original element
+      mapForm($hlbElement, $originalElement);
+
+      transitionOutHLB();
+
+    }
+
+    /**
+     * [onHLBClosed executes once the HLB is deflated (scale = 1).  This function is 
+     * responsible for setting the state of the application to what it was before
+     * any HLB existed.]
+    */
+    function onHLBClosed () {
+
+      // Listeners: hpan.js, keys.js, mouse-highlight.js, speech.js
+      sitecues.emit('hlb/closed', $hlbElement);
+      
+      // Turn back on the ability to scroll the document
+      eventHandlers.enableWheelScroll();
+      
+      // Finally, remove the wrapper element for the HLB and dimmer
+      removeHLBWrapper();
+
+      // Clean up "module scoped" vars
+      $hlbElement      = undefined;
+      $originalElement = undefined;
+      translateCSS     = undefined;
+      originCSS        = undefined;
+      isHLBClosing     = false;
+      
+    }
+
+    /**
+     * [onHLBReady executes once the HLB is ready (completed inflation animation).  
+     * Adds the appropriate event listeners and emits hlb/ready]
+     */
+    function onHLBReady () {
+
+      // Focus input or textarea
+      if ($hlbElement.is('input, textarea')) {
+        $hlbElement.focus(); 
+      }      
+
+      // Turn on event listeners for the HLB
+      turnOnHLBEventListeners();
+
+      // Let the rest of the application know that the hlb is ready
+      // Listeners: hpan.js, invert.js, keys.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+      sitecues.emit('hlb/ready', $hlbElement);
+    
+    }
+
+    /**
+     * [addHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
+     */
+    function addHLBWrapper () {
+
+      $hlbWrappingElement = $('<div>', 
+        {
+          'id' : SITECUES_HLB_WRAPPER_ID
+        })
+        .css({
+          'padding'  : 0,  
+          'margin'   : 0,
+          'top'      : 0,
+          'left'     : 0,
+          'position' : 'absolute',
+          'overflow' : 'visible'
+        })
+        .insertAfter(document.body);
+    }
+
+    /**
+     * [removeHLBWrapper removes the sitecues HLB and DIMMER wrapper]
+    */
+    function removeHLBWrapper () {
+      $hlbWrappingElement.remove();
+    }
+
+    /**
+     * [toggleHLB creates or closes the HLB]
+     */
+    function toggleHLB (e) {
+
+      // If the HLB is currently deflating, no need to toggle
+      if (isHLBClosing) {
+        return;
+      }
+      // If an HLB exists
+      if ($hlbElement) {
+        closeHLB();
+      // If a valid element exists and the HLB does not exist
+      } else if (e.dom.mouse_highlight) {
+        createHLB(e.dom.mouse_highlight);
+      }
+
+    }
+
+
+    // Picker module emits this event when the spacebar is pressed.
+    sitecues.on('hlb/toggle', toggleHLB);
+
+    //////////////////////////////////
+    // PUBLIC FUNCTIONS
+    //////////////////////////////////
+    
+    /**
+     * [toggleStickyHLB enables/disables HLB deflation]
+     * @return {[Boolean]} [True if deflation is disabled.  False if deflation is enabled.]
+     */
+    sitecues.toggleStickyHLB = function () {
+      isSticky = !isSticky;
+      return isSticky;
+    };
+
     callback();
+  
   });
+
 });
