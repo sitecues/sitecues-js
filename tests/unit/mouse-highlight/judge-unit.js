@@ -1,7 +1,5 @@
 var modulePath = '../../../source/js/mouse-highlight/judge.js',
   judge = require(modulePath),
-  fs = require('fs'),
-  NUMBER_OF_NODES = 5,
   nodes = [],
   win;
 
@@ -9,26 +7,23 @@ require('../test/domutils');
 
 describe('judge', function() {
   before(function() {
-    function serializeNodeStack() {
-      // Get a stack of nodes that we "fix" to have the correct properties
-      var node, count = 0;
-      while (count < NUMBER_OF_NODES) {
-        node = win.document.getElementById(count);
-        nodes[count] = domutils.fixNode(node);
-        ++ count;
+    function serializeNodeStack(start) {
+      while (start !== win.document.body) {
+        nodes.push(start);
+        start = start.parentNode;
       }
     }
 
     domutils.loadHtml('./data/html/test-judgements.html', function(newWindow) {
       win = newWindow;
-      serializeNodeStack();
+      serializeNodeStack(win.document.getElementById('0'));
     });
   });
   describe('#getJudgementStack', function() {
     it('should return an array of judgments with correct length.', function(done) {
       var traitStack = traits.getTraitStack(nodes),  // Mock traits, not real values
         judgementStack = judge.getJudgementStack(traitStack, nodes);
-      expect(judgementStack.length).to.be.equal(NUMBER_OF_NODES);
+      expect(judgementStack.length).to.be.equal(nodes.length);
       done();
     });
     it('should return |isGreatTag=false| judgement for a <p> element.', function(done) {

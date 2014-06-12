@@ -1,6 +1,5 @@
 var modulePath = '../../../source/js/mouse-highlight/traits',
   traits = require(modulePath),
-  NUMBER_OF_NODES = 5,
   nodes = [],
   win;
 
@@ -12,25 +11,22 @@ require('../test/domutils');
 
 describe('traits', function() {
   before(function() {
-    function serializeNodeStack() {
-      // Get a stack of nodes that we "fix" to have the correct properties
-      var node, count = 0;
-      while (count < NUMBER_OF_NODES) {
-        node = win.document.getElementById(count);
-        nodes[count] = domutils.fixNode(node);
-        ++ count;
+    function serializeNodeStack(start) {
+      while (start !== win.document.body) {
+        nodes.push(start);
+        start = start.parentNode;
       }
     }
 
     domutils.loadHtml('./data/html/test-traits.html', function(newWindow) {
       win = newWindow;
-      serializeNodeStack();
+      serializeNodeStack(win.document.getElementById('0'));
     });
   });
   describe('#getTraitStack', function() {
     it('should return an array of traits with correct length.', function(done) {
       var traitStack = traits.getTraitStack(nodes);
-      expect(traitStack.length).to.be.equal(NUMBER_OF_NODES);
+      expect(traitStack.length).to.be.equal(nodes.length);
       done();
     });
     it('should return the correct |tag| trait for each node.', function(done) {

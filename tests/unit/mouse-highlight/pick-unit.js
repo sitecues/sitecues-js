@@ -1,28 +1,14 @@
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/pick',
   pick = require(modulePath),
-  fs = require('fs'),
-  nodes = [],
-  NUMBER_OF_NODES = 5,
   win;
 
 require('../test/domutils');
 
 describe('pick', function() {
   before(function() {
-    function serializeNodeStack() {
-      // Get a stack of nodes that we "fix" to have the correct properties
-      var node, count = 0;
-      while (count < NUMBER_OF_NODES) {
-        node = win.document.getElementById(count.toString());
-        nodes[count] = domutils.fixNode(node);
-        ++ count;
-      }
-    }
-
     domutils.loadHtml('./data/html/test-picker.html', function(newWindow) {
       win = newWindow;
-      serializeNodeStack();
     });
   });
   describe('#find()', function() {
