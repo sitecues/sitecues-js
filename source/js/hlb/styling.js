@@ -65,6 +65,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'script'          
         ],
 
+        // Remove ID from HLB because the speech module sets the ID for TTS to work
         HLBAttributeBlacklist = [
           'id'
         ],
@@ -366,6 +367,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // Set the cssText of the HLB element's children
       for (; i < $originalElementChildren.length; i += 1) {
         $hlbElementChildren[i].style.cssText = getComputedStyle($originalElementChildren[i]).cssText;
+
+        // Do not copy over the width and height because it causes horizontal scrollbars.
+        $hlbElementChildren[i].style.width   = '';
+        $hlbElementChildren[i].style.height  = '';
       }
      
     };
