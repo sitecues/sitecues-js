@@ -17,7 +17,8 @@ sitecues.def('cursor', function (cursor, callback) {
         lastZoom = conf.get('zoom'),
         lastZoomTimeout,
         styleTagStylesList = [], //An ordered list of style tag styles to be applied to the page
-        linkTagStylesList  = []; //An ordered list of external stylesheet styles to be applied to the page.
+        linkTagStylesList  = [], //An ordered list of external stylesheet styles to be applied to the page.
+        URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?';
     
     cursor.CONTANTS = {
       'DEFAULT_ZOOM_LEVEL'     : 1,
@@ -185,14 +186,14 @@ sitecues.def('cursor', function (cursor, callback) {
             for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+                // todo: remove console.log
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 try {
                     if (platform.browser.is === 'IE') {
-                        // todo: take regexp out as a constant  
-                        var urlPattern = /[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
-                        var cursorValueArray = urlPattern.exec(cursorValueURL);
+                        var urlRegexp = new RegExp(URL_REGEXP, 'i');
+                        var cursorValueArray = urlRegexp.exec(cursorValueURL);
                         $.ajax({
-                            url: '//' + cursorValueArray[0],
+                            url: cursorValueArray[0],
                             crossDomain: true,
                             type: "GET",
                             timeout: 30000,
@@ -201,7 +202,6 @@ sitecues.def('cursor', function (cursor, callback) {
                             headers: {"Accept": "application/octet-stream"},
                             success: function(data, status, xhr) {                                
                                 console.log('Loading of CUR file completed!');
-                                cursorValueURL = 'url(' + cursorValueURL + '), ' + type;
                                 rule.style.setProperty('cursor', cursorValueURL, 'important');
                             },
                             error: function(jqXHR, textStatus, errorThrown) {
