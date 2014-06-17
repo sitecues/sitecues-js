@@ -152,7 +152,7 @@ sitecues.def('cursor', function (cursor, callback) {
      */
     var createStyleSheet = (function () {
 
-      var cursorTypes = ['auto', 'default', 'help', /* 'crosshair', 'pointer', 'text' */];
+      var cursorTypes = ['auto', 'default', 'pointer', /* 'crosshair', 'help', 'text' */];
 
       return function () {
 
@@ -186,11 +186,13 @@ sitecues.def('cursor', function (cursor, callback) {
             if (value.indexOf(cursorTypes[i]) > -1) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-                var type = cursorTypes[i];
                 try {
                     if (platform.browser.is === 'IE') {
+                        // todo: take regexp out as a constant  
+                        var urlPattern = /[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/;
+                        var cursorValueArray = urlPattern.exec(cursorValueURL);
                         $.ajax({
-                            url: cursorValueURL,
+                            url: '//' + cursorValueArray[0],
                             crossDomain: true,
                             type: "GET",
                             timeout: 30000,
@@ -233,15 +235,15 @@ sitecues.def('cursor', function (cursor, callback) {
      * @return {[string]}
      */
     function generateCursorStyle1x (type, zoom) {
-      var hotspotOffset, cursorURL;
+      var hotspotOffset = '',
+          image = view.getImage(type, zoom),
+          cursorStyle;
       
       if (platform.browser.is !== 'IE') {
-        hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
-        cursorURL =  'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
-      } else {
-        cursorURL = view.getImage(type,zoom);
+        hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
       }
-      return cursorURL;
+      cursorStyle =  'url(' + image + ')' + hotspotOffset + ', ' + type;
+      return cursorStyle;
     }
     /**
      * [Generates the cursor url for a given type and zoom level for retina displays]
@@ -250,21 +252,19 @@ sitecues.def('cursor', function (cursor, callback) {
      * @return {[string]}
      */
         function generateCursorStyle2x(type, zoom) {
-            var hotspotOffset;
+            var hotspotOffset = '',
+                image = view.getImage(type, zoom),
+                cursorStyle;
 
             if (platform.browser.is !== 'IE') {
-                hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+                hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
             }
-
-            var image = view.getImage(type, zoom);
             // image-set() will not fallback to just the first url in older browsers. So...
             // todo: provide fallback for older browsers.
-            var cursorStyle = '-webkit-image-set(' +
+            cursorStyle = '-webkit-image-set(' +
                     '    url(' + image + ') 1x,' +
                     '    url(' + image + ') 2x' +
-                    ') ' + (hotspotOffset ? hotspotOffset : '') + ', ' + type;
-
-            
+                    ') ' + hotspotOffset + ', ' + type;
 
             return cursorStyle;
         }
