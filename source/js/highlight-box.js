@@ -20,7 +20,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         
         CHAR_WIDTH_LIMIT  = 50,  // Amount of characters that fits horizontally in HLB
         
-        MOUSE_SAFETY_ZONE = 100, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
+        MOUSE_SAFETY_ZONE = 0, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
 
         $originalElement,  // Element selected by the picker for the creation of the HLB
         $hlbElement,       // Element that is cloned from the originalElement (HLB)
@@ -152,6 +152,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      * @param  {[DOM element]} originalElement [DOM element that is the original element chosen by the picker.]
      */
     function initializeHLB (originalElement) {
+
+      sitecues.emit('mh/disable');
 
       // Create and append to the DOM the wrapping element for HLB and DIMMER elements
       addHLBWrapper();
