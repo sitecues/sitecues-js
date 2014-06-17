@@ -183,6 +183,7 @@ sitecues.def('cursor', function (cursor, callback) {
             }
             //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
             for (var i = 0; i < cursorTypes.length; i += 1) {
+            if (value.indexOf(cursorTypes[i]) > -1) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 var type = cursorTypes[i];
@@ -218,7 +219,9 @@ sitecues.def('cursor', function (cursor, callback) {
                 }
               }
             }
+          }
         });
+      
       };
 
     }());
