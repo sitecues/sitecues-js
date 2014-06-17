@@ -187,26 +187,25 @@ sitecues.def('cursor', function (cursor, callback) {
                 //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 var type = cursorTypes[i];
-                var rule = rule;
                 try {
                     if (platform.browser.is === 'IE') {
-                        //var cursorValueURL = 'http://js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/images/cursors/win_default_1.1.cur';
                         $.ajax({
                             url: cursorValueURL,
                             crossDomain: true,
-                            beforeSend: function(xhrObj) {
-                                xhrObj.setRequestHeader("Accept", "application/octet-stream");
-                            },
                             type: "GET",
-                            async: true,
+                            timeout: 30000,
                             cache: true,
+                            data: null,
+                            headers: {"Accept": "application/octet-stream"},
                             success: function(data, status, xhr) {
+                                cursorValueURL = 'url(' + cursorValueURL + '), ' + type;
                                 console.log('Loading of CUR file completed!');
-                                $('html').css('cursor', 'url(' + cursorValueURL + '), ' + type);
-                                //rule.style.setProperty('cursor', 'url(' + cursorValueURL+ '), auto', 'important');
+                                $('html').css('cursor', cursorValueURL);
+                                //rule.style.setProperty('cursor', cursorValueURL, 'important');
                             },
-                            error: function() {
-                                console.log("Unable to fetch cursor image from server");
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                jqXHR.abort();
+                                console.log("[Error] Unable to fetch cursor image from server");
                             }
                         });
                     } else {
@@ -235,32 +234,16 @@ sitecues.def('cursor', function (cursor, callback) {
      * @return {[string]}
      */
     function generateCursorStyle1x (type, zoom) {
-      var hotspotOffset;
+      var hotspotOffset, cursorURL;
       
       if (platform.browser.is !== 'IE') {
         hotspotOffset = ' ' + getCursorHotspotOffset(type, zoom) + '';
+        cursorURL =  'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
       } else {
-        var cursorValueURL = view.getImage(type,zoom);
-        $.ajax({
-            url: cursorValueURL,
-            crossDomain: true,
-            beforeSend: function(xhrObj) {
-                xhrObj.setRequestHeader("Accept", "application/octet-stream");
-            },
-            type: "GET",
-            async: true,
-            cache: true,
-            success: function(data, status, xhr) {
-                console.log('Loading of CUR file completed!');
-            },
-            error: function() {
-                console.log("Unable to fetch cursor image from server");
-            }
-        });
+        cursorURL = view.getImage(type,zoom);
       }
-      return 'url(' + view.getImage(type,zoom) + ')' + ( hotspotOffset?hotspotOffset:'' ) + ', ' + type;
+      return cursorURL;
     }
-
     /**
      * [Generates the cursor url for a given type and zoom level for retina displays]
      * @param  {[string]} type
