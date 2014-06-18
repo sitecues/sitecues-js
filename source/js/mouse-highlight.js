@@ -863,7 +863,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // disable mouse highlight temporarily
     function disable() {
-      console.log('WHAAT');
       $(document).off('mousemove', update);
       $(document).off('mousewheel', onMouseWheel);
       pause();

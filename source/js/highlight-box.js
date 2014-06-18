@@ -91,6 +91,47 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     }
     
     /**
+     * [getOriginalElement checks and retrieves the orignal element that the HLB uses 
+     * from an event object.  Also handles the specific cases where we may want to toggle
+     * the HLB through a public interface during debugging and testing.]
+     * @param  {[DOM event]} e [A modified native DOM event, jQuery element, DOM element]
+     * @return {[DOM element]}   [The DOM element we will clone for the HLB instance]
+     */
+    function getOriginalElement (e) {
+      
+      var originalElement;
+
+      // Check if the element is passed within an event object.
+      // This is how the sitecues application sends the element we
+      // need for the HLB. 
+      if (e.dom && 
+          e.dom.mouse_highlight && 
+          e.dom.mouse_highlight.picked && 
+          e.dom.mouse_highlight.picked[0] !== null) {
+
+        originalElement = e.dom.mouse_highlight.picked[0];
+      
+      // Check if we were passed a jQuery element.  This is useful for
+      // testing purposes because we can take advantage of the public 
+      // event system to sitecues.emit('hlb/toggle', $('#myElement'))
+      } else if (e instanceof $) {
+      
+        originalElement = e[0];
+      
+      // Check if we were passed a DOM element. This is useful for
+      // testing purposes because we can take advantage of the public
+      // event system to sitecues.emit('hlb/toggle', document.getElementById('myElement'))
+      } else if (e instanceof Node || e instanceof HTMLElement) {
+      
+        originalElement = e;
+      
+      }
+
+      return originalElement;
+
+    }
+
+    /**
      * [onHLBHover is registered as a "mousemove" event handler when the HLB is ready, and unregisters 
      * itself immediately after the mouse moves within the HLB element.  The purpose of this function 
      * is to handle the case where the HLB is positioned outside of the mouse coordinates and allows the 
@@ -153,6 +194,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      */
     function initializeHLB (originalElement) {
 
+      // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
+      // so we don't copy over the highlighting styles from the original element.
       sitecues.emit('mh/disable');
 
       // Create and append to the DOM the wrapping element for HLB and DIMMER elements
@@ -500,6 +543,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      */
     function toggleHLB (e) {
 
+      var originalElement = getOriginalElement(e);
+
       // If the HLB is currently deflating, no need to toggle
       if (isHLBClosing) {
         return;
@@ -508,8 +553,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       if ($hlbElement) {
         closeHLB();
       // If a valid element exists and the HLB does not exist
-      } else if (e.dom.mouse_highlight && e.dom.mouse_highlight.picked && e.dom.mouse_highlight.picked[0]) {
-        createHLB(e.dom.mouse_highlight.picked[0]);
+      } else if (originalElement) {
+        createHLB(originalElement);
       }
 
     }
