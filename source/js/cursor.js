@@ -18,6 +18,7 @@ sitecues.def('cursor', function (cursor, callback) {
         lastZoomTimeout,
         styleTagStylesList = [], //An ordered list of style tag styles to be applied to the page
         linkTagStylesList  = [], //An ordered list of external stylesheet styles to be applied to the page.
+        // Regexp is used to match URL in the string given(see below).
         URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?';
     
     cursor.CONTANTS = {
@@ -182,54 +183,80 @@ sitecues.def('cursor', function (cursor, callback) {
             if (!rule || !value) {
                 return;
             }
-            //find the cursor type (auto, crosshair, etc) and replace the style with our generated image
+            // Find the cursor type (auto, pointer, etc) and replace the style with our generated image.
             for (var i = 0; i < cursorTypes.length; i += 1) {
             if (value.indexOf(cursorTypes[i]) > -1) {
-                //rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
+                // rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
                 // todo: remove console.log
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 try {
                     if (platform.browser.is === 'IE') {
-                        var urlRegexp = new RegExp(URL_REGEXP, 'i');
-                        var cursorValueArray = urlRegexp.exec(cursorValueURL);
-                        $.ajax({
-                            url: cursorValueArray[0],
-                            crossDomain: true,
-                            type: "GET",
-                            timeout: 30000,
-                            cache: true,
-                            data: null,
-                            headers: {"Accept": "application/octet-stream"},
-                            success: function(data, status, xhr) {                                
-                                console.log('Loading of CUR file completed!');
-                                rule.style.setProperty('cursor', cursorValueURL, 'important');
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                jqXHR.abort();
-                                console.log("[Error] Unable to fetch cursor image from server");
-                            }
-                        });
+                        preFetchCursorImageForCache(cursorValueURL, setCursorStyleValue(rule, cursorValueURL));
                     } else {
-                        rule.style.setProperty('cursor', cursorValueURL, 'important');
+                        setCursorStyleValue(rule, cursorValueURL)
                     }
               } catch (e) {
                 try {
                   console.log('Catch!');
                   rule.style.cursor = cursorValueURL;
                 } catch (ex) {
+                    // Suppress the exception and go on.
                     console.log(ex);
                 }
               }
             }
           }
         });
-      
       };
-
     }());
-    
+
+    /*
+     * 
+     * @param {Object CSSStyleRule} rule CSSStyleRule
+     * @param {String} cursorValueURL  Example: "url(data:image/svg+xml,%3....)0 8, auto"
+     * @returns {void}
+     */
+    function setCursorStyleValue(rule, cursorValueURL) {
+        rule.style.setProperty('cursor', cursorValueURL, 'important');
+        return;
+    }
+
     /**
-     * [Generates the cursor url for a given type and zoom level for non retina displays]
+     * We want to async load the cursor images before they used, for performance benefit.
+     * For ex., if the image isn't available for some reason then don't wait for it,
+     * go to another operation.
+     * 
+     * @param {String} cursorValueURL  Example: "url(data:image/svg+xml,%3....)0 8, auto"
+     * @param {Function} callback A function called after the ajax request completed
+     * @returns {void}
+     */
+    function preFetchCursorImageForCache(cursorValueURL, callback) {
+        var urlRegexp = new RegExp(URL_REGEXP, 'i');
+        var cursorValueArray = urlRegexp.exec(cursorValueURL);
+        $.ajax({
+            url: cursorValueArray[0],
+            crossDomain: true,
+            type: "GET",
+            timeout: 30000,
+            cache: true,
+            data: null,
+            headers: {"Accept": "application/octet-stream"},
+            success: function(data, status, xhr) {
+                console.log('Loading of CUR file completed!');
+                if (callback) {
+                    callback();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                jqXHR.abort();
+                console.log("[Error] Unable to fetch cursor image from server");
+            }
+        });
+        return;
+    }
+
+    /**
+     * [Generates the cursor url for a given type and zoom level for NON retina displays]
      * @param  {[string]} type
      * @param  {[number]} zoom
      * @return {[string]}
@@ -238,36 +265,39 @@ sitecues.def('cursor', function (cursor, callback) {
       var hotspotOffset = '',
           image = view.getImage(type, zoom),
           cursorStyle;
-      
+
+      // Don't use hotspotOffset in IE because that's part of the .cur file.
       if (platform.browser.is !== 'IE') {
         hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
       }
       cursorStyle =  'url(' + image + ')' + hotspotOffset + ', ' + type;
       return cursorStyle;
     }
+
     /**
      * [Generates the cursor url for a given type and zoom level for retina displays]
      * @param  {[string]} type
      * @param  {[number]} zoom
      * @return {[string]}
      */
-        function generateCursorStyle2x(type, zoom) {
-            var hotspotOffset = '',
-                image = view.getImage(type, zoom),
-                cursorStyle;
+    function generateCursorStyle2x(type, zoom) {
+        var hotspotOffset = '',
+            image = view.getImage(type, zoom),
+            cursorStyle;
 
-            if (platform.browser.is !== 'IE') {
-                hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
-            }
-            // image-set() will not fallback to just the first url in older browsers. So...
-            // todo: provide fallback for older browsers.
-            cursorStyle = '-webkit-image-set(' +
-                    '    url(' + image + ') 1x,' +
-                    '    url(' + image + ') 2x' +
-                    ') ' + hotspotOffset + ', ' + type;
-
-            return cursorStyle;
+        // Don't use hotspotOffset in IE because that's part of the .cur file.
+        if (platform.browser.is !== 'IE') {
+            hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
         }
+        // image-set() will not fallback to just the first url in older browsers. So...
+        // todo: provide fallback for older browsers.
+        cursorStyle = '-webkit-image-set(' +
+                '    url(' + image + ') 1x,' +
+                '    url(' + image + ') 2x' +
+                ') ' + hotspotOffset + ', ' + type;
+
+        return cursorStyle;
+    }
 
     /**
      * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds, 
@@ -301,14 +331,11 @@ sitecues.def('cursor', function (cursor, callback) {
         'min': cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
         'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL
       },
-
       offset,
       result;
-       
+
       zoom.diff = zoom.current - zoom.min;
-       
       offset = imagesManager.offsets[type || cursor.CONTANTS.DEFAULT_TYPE];
-       
       result = '';
        
       if (offset) {
