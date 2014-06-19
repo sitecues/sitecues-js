@@ -51,6 +51,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'transform',
           'webkitTransform',
           'mozTransform',
+          'transition',
+          'webkitTransition',
           'width',
           'height',
           'webkitTextFillColor',
@@ -99,7 +101,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function filterStyles ($hlbElement) {
       for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
+        console.log(HLBCSSBlacklist[i] + ': ' + $hlbElement[0].style[HLBCSSBlacklist[i]]);
         $hlbElement[0].style[HLBCSSBlacklist[i]] = '';
+        console.log(HLBCSSBlacklist[i] + ': ' + $hlbElement[0].style[HLBCSSBlacklist[i]]);
       }
     }
 
