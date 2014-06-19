@@ -53,7 +53,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'mozTransform',
           'width',
           'height',
-          'webkitTextFillColor'
+          'webkitTextFillColor',
+          'min-height',
+          'min-width'
         ],
         
         // What child elements of the HLB do we want to remove after a clone.

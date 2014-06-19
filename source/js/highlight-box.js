@@ -104,7 +104,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       // Check if the element is passed within an event object.
       // This is how the sitecues application sends the element we
       // need for the HLB. 
-      if (e.dom && 
+      if (e &&
+          e.dom && 
           e.dom.mouse_highlight && 
           e.dom.mouse_highlight.picked && 
           e.dom.mouse_highlight.picked[0] !== null) {
