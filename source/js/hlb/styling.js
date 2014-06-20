@@ -217,12 +217,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[DOM element]} $originalElement [The original element chosen by the picker]
      * @return {[String]}                       [CSS background-image property]
      */
-    function getNonEmptyBackgroundImage ($originalElement) {
+    function getNonEmptyBackgroundImage ($originalElement, ancestorCount) {
 
       var newBackgroundImage,
           parents = $originalElement.parents();
 
-      parents.each(function () {
+      parents.each(function (count) {
+        if (count > ancestorCount) {
+          return false;
+        }
         if ($(this).css('backgroundImage') !== 'none') {
           newBackgroundImage = $(this).css('backgroundImage');
           return false;
@@ -291,34 +294,65 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           },
 
           newBackgroundColor,
-          newBackgroundImage;
+          newBackgroundImage,
 
-      // Determine HLB background color.  Default to white background
-      // if no other valid background color is found.
+          // How many ancestors do we move up the chain until we find a background image
+          // to use for the $hlbElements background image.
+          BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 1;
+
+      // If the $hlbElement has a transparent background color, we should find one
+      // by looking up the entire ancestor chain and use the first non-transparent 
+      // color we find.  Otherwise, if the $hlbElement is not an image, we default 
+      // to a white background color.  If it is an image, however, the background 
+      // color is black.
       if (isTransparent(elementComputedStyle.backgroundColor)) {
-        newBackgroundColor = getNonTransparentBackground($originalElement);
-        if (newBackgroundColor) {
-          calculatedHLBStyles['background-color'] = newBackgroundColor;
+        
+        if ($originalElement.is('img')) {
+
+          calculatedHLBStyles['background-color'] = '#000000';
+
         } else {
-          calculatedHLBStyles['background-color'] = '#ffffff';
+
+          newBackgroundColor = getNonTransparentBackground($originalElement);
+        
+          if (newBackgroundColor) {
+        
+            calculatedHLBStyles['background-color'] = newBackgroundColor;
+        
+          } else {
+        
+            calculatedHLBStyles['background-color'] = '#ffffff';
+        
+          }
+          
         }
+      
       }
 
-      // Determine HLB background image.
-      if (elementComputedStyle.backgroundImage === 'none') {
-        newBackgroundImage = getNonEmptyBackgroundImage($originalElement);
+      // If the $hlbElement does not have a background image
+      if (elementComputedStyle.backgroundImage === 'none' &&
+          isTransparent(elementComputedStyle.backgroundColor)) {
+      
+        newBackgroundImage = getNonEmptyBackgroundImage($originalElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
+      
         if (newBackgroundImage) {
+      
           calculatedHLBStyles['background-image'] = newBackgroundImage;
+      
         }
+      
       }
 
-      // If the HLB is an image, the background color is black.
-      if ($originalElement.is('img')) {
-        calculatedHLBStyles['background-color'] = '#000000';
-      }
-
-      // If the HLB display is table, the display is block 
-      // so we are able to restrict height.
+      // If the original elements display type is a table, force a display type of
+      // block because it allows us to set the height.  I believe display table
+      // is mutually exclusive to minimum height/minimum width.
+      // 
+      // http://stackoverflow.com/questions/8739838/displaytable-breaking-set-width-height
+      // 
+      // I found the issue on the eBank site that we maintain.  Make the HLB open a table
+      // and open the developer console and attempt to alter the height/width attributes.
+      // 
+      // TODO: actually prove these beliefs
       if ($originalElement.css('display') === 'table') {
         calculatedHLBStyles.display = 'block';
       }
