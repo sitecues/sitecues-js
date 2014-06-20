@@ -130,6 +130,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         styles.height = '';
       }
       
+      // Thought at one point this fixed something, so I am leaving it until there is nothing
+      // wrong with the HLB so I can quickly uncomment to see its effects.
+      // 
+      // TODO: Determine if this code is necessary.
+      // 
       // if ($child.css('display').indexOf('table') !== -1) {
       //   styles.display = 'inline-block';
       // }
