@@ -6,8 +6,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform',
-  function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform) {
+  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
+  function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea) {
 
     /////////////////////////
     // PRIVATE VARIABLES
@@ -271,7 +271,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       // This returns how much to shift the box so that it falls within the bounds.
       // Note: We have already assured that the scaled cloned element WILL fit into the "safe area",
       // but not that it is currently within the bounds.
-      constrainedOffset = hlbPositioning.constrainPosition(HLBBoundingBoxAfterZoom, hlbPositioning.getSafeZoneBoundingBox());      
+      constrainedOffset = hlbPositioning.constrainPosition(HLBBoundingBoxAfterZoom);      
       
       // Add the difference between the HLB position and the minimum amount of distance 
       // it must travel to be completely within the bounds of the safe area to the difference 
@@ -306,7 +306,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       $hlbElement.css({
         'transition-timing-function' : 'linear',
         'transition'                 : hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
-        'transform'                  : 'scale(' + hlbPositioning.HLBZoom + ') ' + translateCSS,
+        'transform'                  : 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
         'transform-origin'           : originCSS
       });
 

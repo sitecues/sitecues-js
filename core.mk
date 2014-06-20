@@ -81,6 +81,7 @@ files=\
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
+	source/js/hlb/safe-area.js \
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \

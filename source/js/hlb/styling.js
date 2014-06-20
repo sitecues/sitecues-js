@@ -7,8 +7,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
   
   'use strict';
   
-  sitecues.use('jquery', 'platform',
-  function ($, platform) {
+  sitecues.use('jquery', 'platform', 'hlb/safe-area',
+  function ($, platform, hlbSafeArea) {
     
     ///////////////////////////
     // PUBLIC PROPERTIES
@@ -67,7 +67,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // Remove ID from HLB because the speech module sets the ID for TTS to work
         HLBAttributeBlacklist = [
-          'id'
+          'id',
+          'class'
         ],
 
         // Default css styles for HLB
@@ -101,14 +102,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function filterStyles ($hlbElement) {
       for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-        console.log(HLBCSSBlacklist[i] + ': ' + $hlbElement[0].style[HLBCSSBlacklist[i]]);
         $hlbElement[0].style[HLBCSSBlacklist[i]] = '';
-        console.log(HLBCSSBlacklist[i] + ': ' + $hlbElement[0].style[HLBCSSBlacklist[i]]);
       }
     }
 
     /**
-     * [filterAttributes removes html attributes in HLBAttributeBlacklist from the HLB element, but not its children]
+     * [filterAttributes removes html attributes in HLBAttributeBlacklist]
      * @param  {[DOM element]} $hlbElement [HLB element]
     */
     function filterAttributes ($hlbElement) {
@@ -116,15 +115,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         $hlbElement.removeAttr(HLBAttributeBlacklist[i]);
       }
     }
-    
-    /**
-     * [filterHLBChildren filters styles of the children of the HLB element]
-     * @param  {[DOM element]} $child [Child of HLB element]
-     * NOTE: Eventually we may want to abstract this like we do with filtering
-     *       the HLB element.  (Create blacklists for attributes, styles)
-     */
-    function filterHLBChildren ($child) {
-        
+
+    function filterChildStyles ($child, hlbWidthGreaterThanSafeAreaWidth) {
+      
       var styles = {
         'webkitTextFillColor': ''
       };
@@ -136,8 +129,40 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         styles.width  = '';
         styles.height = '';
       }
+      
+      // if ($child.css('display').indexOf('table') !== -1) {
+      //   styles.display = 'inline-block';
+      // }
 
+
+      // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
+      //       Fixes children overlapping children within the HLB.  Comment out the line below to 
+      //       experience this problem. 
+      if (hlbWidthGreaterThanSafeAreaWidth) {
+        styles.display = 'inline-block';
+        styles.position = 'static';
+      }
+      
       $child.css(styles);
+    }
+    
+    /**
+     * [filterHLBChildren filters styles and attributes of the children of the HLB element]
+     * @param  {[DOM element]} $child [Child of HLB element]
+     * NOTE: Eventually we may want to abstract this like we do with filtering
+     *       the HLB element.  (Create blacklists for attributes, styles)
+     */
+    function filterHLBChildren ($child, hlbWidthGreaterThanSafeAreaWidth) {
+      
+      filterChildStyles($child, hlbWidthGreaterThanSafeAreaWidth);
+
+      // Ran into issues with children inheriting styles because of class and id CSS selectors.
+      // Filtering children of these attributes solves the problem.
+      // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
+      //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to 
+      //       experience this problem.  There might be a better way...but I don't have the patience to
+      //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat... 
+     filterAttributes($child);
 
     }
 
@@ -146,7 +171,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
          .appendTo(document.body)
          .css({
         'font-size': fontSize,
-        'width': ems + 'em',
+        'width': ems + 'em', 
         'visibility': 'hidden'
       });
       var px = measureDiv.width();
@@ -230,7 +255,20 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       return newBackgroundColor;
  
     }
+
+    function isOriginalElementWideAsSafeArea ($element) {
     
+      var elementBoundingBox  = $element[0].getBoundingClientRect(),
+          safeZoneBoundingBox = hlbSafeArea.getSafeZoneBoundingBox();
+
+      if (elementBoundingBox.width * hlbSafeArea.HLBZoom >= safeZoneBoundingBox.width) {
+        return true;
+      }
+
+      return false;
+
+    }
+
     //////////////////////////
     // PUBLIC FUNCTIONS
     //////////////////////////
@@ -313,8 +351,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     hlbStyling.cloneStyles = function ($originalElement, $hlbElement) {
 
-      var $originalElementChildren = $originalElement.find('*'),
-          $hlbElementChildren      = $hlbElement.find('*'),
+      var hlbWidthGreaterThanSafeAreaWidth = isOriginalElementWideAsSafeArea($originalElement),
+          $originalElementChildren         = $originalElement.find('*'),
+          $hlbElementChildren              = $hlbElement.find('*'),
           hlbElementChild,
           i = 0;
 
@@ -330,7 +369,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         hlbElementChild.style.cssText = getComputedStyle($originalElementChildren[i]).cssText;
 
         // Filter the unnecessary HLB elements styles.
-        filterHLBChildren($(hlbElementChild));
+        filterHLBChildren($(hlbElementChild), hlbWidthGreaterThanSafeAreaWidth);
 
       }
      

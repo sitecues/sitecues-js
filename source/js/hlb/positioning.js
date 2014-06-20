@@ -8,39 +8,18 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
   
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/styling', 'util/common',
-  function ($, conf, hlbStyling, common) {
+  sitecues.use('jquery', 'conf', 'hlb/styling', 'util/common', 'hlb/safe-area',
+  function ($, conf, hlbStyling, common, hlbSafeArea) {
     
     /////////////////////////
     // PRIVATE VARIABLES
     ////////////////////////
     
-    var documentElement = document.documentElement,
-
-        // Default fraction of viewport hypotenuse that will define the safe area
-        HLB_SAFE_AREA     = 0.05,
-
-        VALID_ELEMENTS_FOR_CONSTRAINED_WIDTH = 'p,h1,h2,h3,h4,h5,h6';
+    var VALID_ELEMENTS_FOR_CONSTRAINED_WIDTH = 'p,h1,h2,h3,h4,h5,h6';
     
     //////////////////////////////
     // PRIVATE FUNCTIONS
     /////////////////////////////
-    
-    /**
-     * [getUnsafePixels returns the amount of pixels from the 
-     * edge of the viewport that defines the safe zone]
-     * @return {[float]} [pixels]
-     */
-    function getUnsafePixels () {
-      
-      var hypontenuse = Math.sqrt(
-                          Math.pow(documentElement.clientWidth,  2) + 
-                          Math.pow(documentElement.clientHeight, 2)
-                        );
-
-      return hypontenuse * HLB_SAFE_AREA;
-
-    }
   
     /**
      * [isEligibleForConstrainedWidth determines if the HLB is eligible for limiting its width to 50 characters]
@@ -81,33 +60,11 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
     function getExtraLeftPadding ($hlbElement) {
       return parseInt($hlbElement.css('paddingLeft')) - hlbStyling.defaultPadding;
     }
-
-    ///////////////////////////
-    // PUBLIC PROPERTIES
-    ///////////////////////////
-   
-    hlbPositioning.HLBZoom  = 1.5;
     
     //////////////////////////
     // PUBLIC FUNCTIONS
     //////////////////////////
     
-    // Returns a rectangle the represents the area in which the HLB is allowed to occupy
-    hlbPositioning.getSafeZoneBoundingBox = function () {
-      
-      var unsafePixels = getUnsafePixels();
-      
-      return {
-        'left'  : unsafePixels,
-        'top'   : unsafePixels,
-        'width' : documentElement.clientWidth  - unsafePixels * 2,
-        'height': documentElement.clientHeight - unsafePixels * 2,
-        'right' : documentElement.clientWidth  - unsafePixels,
-        'bottom': documentElement.clientHeight - unsafePixels
-      };
-    
-    };    
-
     /**
      * [midPointDiff computes the distance between the midpoints of 2 elements]
      * @param  {[jQuery element]} $rectOne [jQuery element]
@@ -159,7 +116,7 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
 
       // If the HLB has a vertical scrollbar and has a height less than the safe zone height
       if (common.hasVertScroll($hlbElement[0]) && 
-          hlbPositioning.scaleRectFromCenter($hlbElement).height < hlbPositioning.getSafeZoneBoundingBox().height) {        
+          hlbPositioning.scaleRectFromCenter($hlbElement).height < hlbSafeArea.getSafeZoneBoundingBox().height) {        
 
         // Set to the scroll height minus 4 (half of the padding)
         // It is necessary to subtract the padding because scrollHeight includes padding.
@@ -179,12 +136,14 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
      * @param  {[object]}      container [the bounding rect]
      * @return {[object]}                [x and y difference]
      */
-    hlbPositioning.constrainPosition = function (element, container) {
-      
+    hlbPositioning.constrainPosition = function (element) {
+        
       var offset = {
         'x' : 0,
         'y' : 0
-      };
+      },
+
+      container = hlbSafeArea.getSafeZoneBoundingBox();
 
       if (element.left < container.left) {
         offset.x -= container.left - element.left;
@@ -210,15 +169,15 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
 
       var zoom           = conf.get('zoom'),
           originalHeight = hlbPositioning.scaleRectFromCenter($hlbElement).height,
-          safeZoneHeight = hlbPositioning.getSafeZoneBoundingBox().height;
+          safeZoneHeight = hlbSafeArea.getSafeZoneBoundingBox().height;
       
       // Would the scaled element's height be greater than the safe area height?
       if (originalHeight > safeZoneHeight) {
       
         // height is now the "safe zone" height, minus the padding/border
         $hlbElement.css({
-          'height': ((safeZoneHeight / hlbPositioning.HLBZoom / zoom) - 
-                     (hlbStyling.defaultBorder + hlbStyling.defaultPadding) * 2) + 'px' 
+          'height': ((safeZoneHeight / hlbSafeArea.HLBZoom / zoom) - 
+                     (hlbStyling.defaultBorder + hlbStyling.defaultPadding) * 2) + 'px'
         });
       
         // Keep aspect ratio if HLB is an image
@@ -242,14 +201,14 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
 
       var zoom          = conf.get('zoom'),
           originalWidth = hlbPositioning.scaleRectFromCenter($hlbElement).width,
-          safeZoneWidth = hlbPositioning.getSafeZoneBoundingBox().width;
+          safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
       
       // Would the scaled element's width be greater than the safe area width?
       if (originalWidth > safeZoneWidth) {
      
         // width is now the "safe zone" width, minus the padding/border
         $hlbElement.css({
-          'width': ((safeZoneWidth / hlbPositioning.HLBZoom / zoom) - 
+          'width': ((safeZoneWidth / hlbSafeArea.HLBZoom / zoom) - 
                     (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlbElement) / 2) * 2) + 'px'
         });
 
@@ -276,10 +235,10 @@ sitecues.def('hlb/positioning', function (hlbPositioning, callback) {
 
       // The bounding box of the cloned element if we were to scale it
       return {
-        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * hlbPositioning.HLBZoom - clonedNodeBoundingBox.width)  / 2),
-        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * hlbPositioning.HLBZoom - clonedNodeBoundingBox.height) / 2),
-        'width' : clonedNodeBoundingBox.width  * hlbPositioning.HLBZoom,
-        'height': clonedNodeBoundingBox.height * hlbPositioning.HLBZoom
+        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width)  / 2),
+        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
+        'width' : clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom,
+        'height': clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom
       };
     };
 
