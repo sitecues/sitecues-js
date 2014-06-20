@@ -11,7 +11,7 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
     // PRIVATE VARIABLES
     /////////////////////////////
 
-    var DIMMER_ID               = 'sitecues-bgdimmer',
+    var DIMMER_ID               = 'sitecues-background-dimmer',
 
         DIMMER_Z_INDEX          = 2147483643,
 

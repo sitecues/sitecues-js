@@ -13,7 +13,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     // PRIVATE VARIABLES
     ////////////////////////    
 
-    var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
+    var SITECUES_HLB_WRAPPER_ID = ' ', // ID for element which wraps HLB and Dimmer elements
+        SITECUES_HLB_ID         = 'sitecues-hlb', // ID for $hlbElement
         
         INFLATION_SPEED   = 400, // Default inflation duration
         DEFLATION_SPEED   = 150, // Default deflation duration 
@@ -421,6 +422,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       // Set the styles for the HLB and append to the wrapping element
       $hlbElement.css(hlbStyles).appendTo($hlbWrappingElement);
       
+      // Set the ID of the hlbElement.
+      $hlbElement[0].id = SITECUES_HLB_ID;
+
     }
 
     /**
