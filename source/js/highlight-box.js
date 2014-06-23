@@ -13,7 +13,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     // PRIVATE VARIABLES
     ////////////////////////    
 
-    var SITECUES_HLB_WRAPPER_ID = ' ', // ID for element which wraps HLB and Dimmer elements
+    var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
         SITECUES_HLB_ID         = 'sitecues-hlb', // ID for $hlbElement
         
         INFLATION_SPEED   = 400, // Default inflation duration
@@ -161,7 +161,10 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       var newTarget      = e.target,
           mouseX         = e.clientX,
           mouseY         = e.clientY,
+          isMouseDown    = e.which === 1,
           HLBBoundingBox;
+
+
 
       // The mouse has never been within the HLB bounds or debugging is enabled.
       if (preventDeflationFromMouseout || isSticky) {
@@ -170,6 +173,11 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
       // Mouse is currently hovering over the HLB
       if ($hlbElement[0] === newTarget) {
+        return;
+      }
+
+      // Is the left mouse button pressed?  The user is click + dragging text to copy.
+      if (isMouseDown) {
         return;
       }
 
