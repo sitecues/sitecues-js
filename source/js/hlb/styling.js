@@ -144,8 +144,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       //       Fixes children overlapping children within the HLB.  Comment out the line below to 
       //       experience this problem. 
       if (hlbWidthGreaterThanSafeAreaWidth) {
-        styles.display = 'inline-block';
-        styles.position = 'static';
+        if ($child.css('display') !== 'list-item') {
+          styles.display = 'inline-block';
+          styles.position = 'static';
+        }
       }
       
       $child.css(styles);
