@@ -39,8 +39,18 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     ///////////////////////////
    
     var HLB_Z_INDEX = 2147483644,
+        
+        // How many ancestors do we move up the chain until we find a background image
+        // to use for the $hlbElements background image.
+        BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 1,
+
+        // Default background color for HLB, if HLB is NOT an image.
+        HLB_DEFAULT_BACKGROUND_COLOR = '#ffffff',
+
+        // Default background color for HLB, if HLB is an image.
+        HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
        
-       // Remove these HLB styles, but NOT from its children.
+        // Remove these HLB styles, but NOT from its children.
         HLBCSSBlacklist   = [
           'padding',
           'margin',
@@ -169,7 +179,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to 
       //       experience this problem.  There might be a better way...but I don't have the patience to
       //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat... 
-     filterAttributes($child);
+      filterAttributes($child);
 
     }
 
@@ -266,6 +276,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
  
     }
 
+    /**
+     * [isOriginalElementWideAsSafeArea determines if the scaled original element is as wide
+     * as the safe area.]
+     * @param  {[DOM element]}  $element [Original DOM element]
+     * @return {Boolean}                 [True if scaled original element is as wide as the safe area]
+     */
     function isOriginalElementWideAsSafeArea ($element) {
     
       var elementBoundingBox  = $element[0].getBoundingClientRect(),
@@ -277,6 +293,115 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       return false;
 
+    }
+
+    /**
+     * [getHLBBackgroundColor 
+         If the $hlbElement has a transparent background color, we should find one
+         by looking up the entire ancestor chain and use the first non-transparent 
+         color we find.  Otherwise, if the $hlbElement is not an image, we default 
+         to a white background color.  If it is an image, however, the background 
+         color is black.]
+     * @param  {[jQuery element]} $originalElement     [The original element chosen by picker]
+     * @param  {[Object]} elementComputedStyle         [The original elements computed styles]
+     * @return {[String]}                              [The HLB background color]
+     */
+    function getHLBBackgroundColor ($originalElement, elementComputedStyle) {
+
+      var newBackgroundColor;
+
+      if (isTransparent(elementComputedStyle.backgroundColor)) {
+        
+        if ($originalElement.is('img')) {
+
+          return HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
+
+        } else {
+
+          newBackgroundColor = getNonTransparentBackground($originalElement);
+        
+          if (newBackgroundColor) {
+        
+            return newBackgroundColor;
+        
+          } else {
+        
+            return HLB_DEFAULT_BACKGROUND_COLOR;
+        
+          }
+          
+        }
+      
+      }
+
+      return elementComputedStyle.backgroundColor;
+
+    }
+
+    /**
+     * [getHLBBackgroundImage determines the background image to be used by the $hlbElement]
+     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker.]
+     * @param  {[Object]} elementComputedStyle     [The original elements computed style]
+     * @return {[String]}                          [The background image that will be used by the $hlbElement]
+     */
+    function getHLBBackgroundImage ($originalElement, elementComputedStyle) {
+
+      var newBackgroundImage;
+
+      if (elementComputedStyle.backgroundImage === 'none' &&
+          isTransparent(elementComputedStyle.backgroundColor)) {
+      
+        newBackgroundImage = getNonEmptyBackgroundImage($originalElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
+      
+        if (newBackgroundImage) {
+      
+          return newBackgroundImage;
+      
+        }
+      
+      }
+
+      return elementComputedStyle.backgroundImage;
+
+    }
+
+    /**
+     * [getHLBLeftPadding is required to visually encapsulate bullet points within the HLB if the
+     * $hlbElement is itself a <ul> or <ol> that uses bullet points.
+     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker.]
+     * @param  {[Object]} elementComputedStyle     [The original elements computed style]
+     * @return {[Integer]}                         [The HLB left-padding]
+     */
+    function getHLBLeftPadding ($originalElement, elementComputedStyle) {
+
+      return hlbStyling.defaultPadding + getBulletWidth($originalElement, elementComputedStyle);
+
+    }
+
+    /**
+     * [getHLBDisplay determines $hlbElement will use for its CSS display]
+     * @param  {[Object]} elementComputedStyle [The original elements computed styles]
+     * @return {[String]}                      [The display the $hlbElement will use]
+     * NOTE:       
+        // If the original elements display type is a table, force a display type of
+        // block because it allows us to set the height.  I believe display table
+        // is mutually exclusive to minimum height/minimum width.
+        // 
+        // http://stackoverflow.com/questions/8739838/displaytable-breaking-set-width-height
+        // 
+        // I found the issue on the eBank site that we maintain.  Make the HLB open a table
+        // and open the developer console and attempt to alter the height/width attributes.
+        // 
+        // TODO: actually prove these beliefs
+     */
+    function getHLBDisplay (elementComputedStyle) {
+      
+      if (elementComputedStyle.display === 'table') {
+        return 'block';
+      }
+      
+      return elementComputedStyle.display;
+    
     }
 
     //////////////////////////
@@ -292,77 +417,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       
       var originalElement      = $originalElement[0],
           elementComputedStyle = getComputedStyle(originalElement),
-          bulletWidth          = getBulletWidth($originalElement, elementComputedStyle),
           
-          // <ul> and <ol> that use bullet points require padding to visually encapsulate
-          // the bullet points within the HLB element 
           calculatedHLBStyles  = {
-            'padding-left' : hlbStyling.defaultPadding + bulletWidth
-          },
-
-          newBackgroundColor,
-          newBackgroundImage,
-
-          // How many ancestors do we move up the chain until we find a background image
-          // to use for the $hlbElements background image.
-          BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 1;
-
-      // If the $hlbElement has a transparent background color, we should find one
-      // by looking up the entire ancestor chain and use the first non-transparent 
-      // color we find.  Otherwise, if the $hlbElement is not an image, we default 
-      // to a white background color.  If it is an image, however, the background 
-      // color is black.
-      if (isTransparent(elementComputedStyle.backgroundColor)) {
-        
-        if ($originalElement.is('img')) {
-
-          calculatedHLBStyles['background-color'] = '#000000';
-
-        } else {
-
-          newBackgroundColor = getNonTransparentBackground($originalElement);
-        
-          if (newBackgroundColor) {
-        
-            calculatedHLBStyles['background-color'] = newBackgroundColor;
-        
-          } else {
-        
-            calculatedHLBStyles['background-color'] = '#ffffff';
-        
-          }
-          
-        }
-      
-      }
-
-      // If the $hlbElement does not have a background image
-      if (elementComputedStyle.backgroundImage === 'none' &&
-          isTransparent(elementComputedStyle.backgroundColor)) {
-      
-        newBackgroundImage = getNonEmptyBackgroundImage($originalElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
-      
-        if (newBackgroundImage) {
-      
-          calculatedHLBStyles['background-image'] = newBackgroundImage;
-      
-        }
-      
-      }
-
-      // If the original elements display type is a table, force a display type of
-      // block because it allows us to set the height.  I believe display table
-      // is mutually exclusive to minimum height/minimum width.
-      // 
-      // http://stackoverflow.com/questions/8739838/displaytable-breaking-set-width-height
-      // 
-      // I found the issue on the eBank site that we maintain.  Make the HLB open a table
-      // and open the developer console and attempt to alter the height/width attributes.
-      // 
-      // TODO: actually prove these beliefs
-      if ($originalElement.css('display') === 'table') {
-        calculatedHLBStyles.display = 'block';
-      }
+            'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
+            'background-color': getHLBBackgroundColor($originalElement, elementComputedStyle),
+            'background-image': getHLBBackgroundImage($originalElement, elementComputedStyle),
+            'display'         : getHLBDisplay(elementComputedStyle)
+          };
 
       return $.extend({}, 
         defaultHLBStyles, 
