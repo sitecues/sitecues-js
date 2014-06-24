@@ -914,7 +914,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     resetState();
 
     // hide mouse highlight once highlight box appears
-    sitecues.on('hlb/create hlb/inflating hlb/ready', disable);
+    sitecues.on('hlb/create hlb/inflating hlb/ready mh/disable', disable);
 
     // hide mouse highlight once highlight box is dismissed
     sitecues.on('hlb/deflating', pause);

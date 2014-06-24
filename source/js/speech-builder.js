@@ -94,7 +94,7 @@ sitecues.def('speech-builder', function (builder, callback, log) {
     }
 
     function appendAccessibleTextFromSubtree(node, isLabel) {
-      var text = '', styles, isHidden, $node = $(node);
+      var text = '', styles, isHidden, $node = $(node), node = $node[0];
 
       if (node.nodeType === 3) {
         // Text node

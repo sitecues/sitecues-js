@@ -13,9 +13,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
       var absoluteRects = [];
-      var scrollPos = geo.getScrollPosition();
+      var scrollPos = getScrollPosition();
       for (var count = 0; count < fixedRects.length; count ++) {
-        absoluteRects[count] = geo.getCorrectedBoundingBox(fixedRects[count], scrollPos);
+        absoluteRects[count] = getCorrectedBoundingBox(fixedRects[count], scrollPos);
       }
       // AK: this is quick'n'dirty fix for the case rect is undefined
       if (absoluteRects.length === 0) {
@@ -49,21 +49,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
-    };
-
-    /**
-     * Use shrink-wrapped box for potentially wrapped content
-     * Otherwise use element bounds -- this way there is enough room for single-line content and it doesn't need to wrap
-     * when it didn't need to wrap before.
-     */
-    mhpos.getSmartBoundingBox = function(item) {
-      var contentRect = mhpos.getAllBoundingBoxes(item, 9999)[0];
-      var lineHeight = getLineHeight(traitcache.getStyle(item));
-      var isSingleLine = contentRect && (contentRect.height < lineHeight * 1.5); // Quickly determined whether not line-wrapped
-      if (isSingleLine) {
-        return traitcache.getScreenRect(item);// AK: this is quick'n'dirty fix for the case rect is undefined
-      }
-      return contentRect || {'left': 0, 'top': 0, 'width': 0, 'height': 0};
     };
 
     function scaleRect(rect, scale, offsetX, offsetY) {
@@ -434,223 +419,30 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         }
       }
     };
-    /**
-     * Returns the center of the provided element.
-     * Note: uses visible dimensions of the element instead of actual ones set by styles.
-     * 
-     * Example of the element that has different actual and visible width:
-     * actual width = visible + not visible width.
-     * _______________________________________________
-     * |                             |////////////////|
-     * | From the makers of ZoomText.|///not visible//|
-     * |        (visible width)      |//////width/////|
-     * |_____________________________|________________|
-     * 
-     */
-    mhpos.getCenter = function (selector, zoom) {
-      var result = [];
-      $(selector).each(function () {
-        var fixedRects = mhpos.getAllBoundingBoxes(this, 9999);
-        var rect = mhpos.convertFixedRectsToAbsolute(fixedRects, zoom)[0];
-
-        // AK: this is quick'n'dirty fix for the case rect is undefined(check convertFixedRectsToAbsolute instead).
-        if (!rect) {
-          rect = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
-
-
-        }
-        result.push({
-          left: (rect.left + (rect.width / 2)) / zoom,
-          top:  (rect.top + (rect.height / 2)) / zoom
-        });
-      });
-      return processArrayResult(result);
-    };
-
-    mhpos.getCenterForActualElement = function (selector, zoom) {
-      var result = [];
-      $(selector).each(function () {
-        var boundingBox = traitcache.getScreenRect(this);
-        var scrollPos = geo.getScrollPosition();
-        var rect = {
-          left: boundingBox.left + scrollPos.left,
-          top:  boundingBox.top  + scrollPos.top,
-          width: boundingBox.width,
-          height: boundingBox.height
-        };
-
-        result.push({
-          left: (rect.left + (rect.width / 2)) / zoom,
-          top:  (rect.top + (rect.height / 2)) / zoom
-        });
-      });
-      return processArrayResult(result);
-    };
 
     /**
-     * Center another element over a provided center, zooming the centered element if needed.
-     * 
-     * @param  string   selector  The selector of the element(s).
-     * @param  center   center    The center point, see getCenter()
-     * @param  int      zoom      The zoom level.
-     * @param  string   position  Set the position of the element, defaults to 'absolute'
-     * @return void
-     */
-    mhpos.centerOn = function (selector, center, zoom, position) {
-      // Ensure a zoom exists.
-      zoom = zoom || 1;
-      // Use the proper center.
-      center = {
-        left: (center.centerX || center.left),
-        top: (center.centerY || center.top)
+    * Return a corrected bounding box given the total zoom for the element and current scroll position
+    */
+    function getCorrectedBoundingBox(boundingBox, scrollPosition) {
+      var rect = {
+        left: boundingBox.left + scrollPosition.left,
+        top:  boundingBox.top + scrollPosition.top,
+        width: boundingBox.width,
+        height: boundingBox.height
       };
-
-      $(selector).each(function () {
-        var jElement = $(this);
-
-        // Obtain the equinox state data for the element.
-        var equinoxData = this.equinoxData || (this.equinoxData = {});
-
-        // As we are not moving the element within the DOM, we need to position the
-        // element relative to it's offset parent. These calculations need to factor
-        // in zoom.
-        var offsetParent = jElement.offsetParent();
-        var offsetParentPosition = traitcache.getScreenRect(offsetParent);
-
-        // Determine where we would display the centered and (possibly) zoomed element,
-        // and what it's dimensions would be.
-        var centerLeft = center.left;
-        var centerTop = center.top;
-
-        // Determine the final dimensions, and their affect on the CSS dimensions.
-        var width = jElement.outerWidth() * zoom;
-        var height = jElement.outerHeight() * zoom;
-
-        var left = centerLeft - (width / 2);
-        var top = centerTop - (height / 2);
-
-        // Now, determine if the element will fit in the viewport. If not, place the
-        // element in the viewport, but as close the the original center as possible.
-        var viewport = geo.getViewportDimensions(0);
-
-        // If we need to change the element's dimensions, so be it. However, explicitly
-        // set the dimensions only if needed.
-        var newWidth, newHeight;
-
-        // Check the width and horizontal positioning.
-        if (width > viewport.width) {
-          // Easiest case: fit to width and horizontal center of viewport.
-          centerLeft = viewport.centerX;
-          newWidth = viewport.width;
-        } else {
-          // The element isn't too wide. However, if the element is out of the view area, move it back in.
-          if (viewport.left > left) {
-            centerLeft += viewport.left - left;
-          } else if ((left + width) > viewport.right) {
-            centerLeft -= (left + width) - viewport.right;
-          }
-        }
-
-        // Check the width and horizontal positioning.
-        if (height > viewport.height) {
-          // Easiest case: fit to height and vertical center of viewport.
-          centerTop = viewport.centerY;
-          newHeight = viewport.height;
-        } else {
-          // The element isn't too tall. However, if the element is out of the view area, move it back in.
-          if (viewport.top > top) {
-            centerTop += viewport.top - top;
-          } else if ((top + height) > viewport.bottom) {
-            centerTop -= (top + height) - viewport.bottom;
-          }
-        }
-
-        // Reduce the dimensions to a non-zoomed value.
-        width = (newWidth || width) / zoom;
-        height = (newHeight || height) / zoom;
-
-        // Determine what the left and top CSS values must be to center the
-        // (possibly zoomed) element over the determined center.
-        var style = traitcache.getStyle(jElement);
-        var cssMarginLeft = style.marginLeft;
-        var cssMarginTop = style.marginTop;
-
-        var cssLeft = (centerLeft -
-                       offsetParentPosition.left -
-                       (width * zoom / 2) -
-                       (parseFloat(cssMarginLeft) * zoom)
-                      ) / zoom;
-        var cssTop = (centerTop -
-                       offsetParentPosition.top -
-                       (height * zoom / 2) -
-                       (parseFloat(cssMarginTop) * zoom)
-                      ) / zoom;
-
-        // Create the CSS needed to place the element where it needs to be, and to zoom it.
-        var cssUpdates = {
-          position: position ? position: 'absolute',
-          left: cssLeft,
-          top: cssTop,
-
-          // Styles applied to aid in testing.
-          opacity: 0.5,
-          zIndex: 2147483640
-        };
-
-        // Only update the dimensions if needed.
-        if (newWidth) {
-          cssUpdates.width = width;
-        }
-
-        if (newHeight) {
-          cssUpdates.height = height;
-        }
-
-        // Apply the zoom CSS to the CSS object.
-        setZoom(zoom, cssUpdates);
-
-        // Update the element's CSS.
-        jElement.css(cssUpdates);
-
-        // Set the zoom state.
-        equinoxData.zoom = zoom;
-      });
-    };
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //
-    //    HELPER METHODS.
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Sets the zoom of an element, with the body being the default element.
-     */
-    function setZoom(selector, zoom, origin) {
-      // Ensure a zoom exists.
-      var transformCenter = origin ? origin.x + ' ' + origin.y : '50% 50%', // default
-          zoomStyle = {'transform-origin': transformCenter};
-
-      zoom = zoom || 1;
-      selector = (selector ? selector : document.body);
-
-      $(selector).each(function () {
-          zoomStyle.transform = 'scale(' + zoom + ')';
-          $(this).style(zoomStyle, '', 'important');
-        });
+      rect.right = rect.left + rect.width;
+      rect.bottom = rect.top + rect.height;
+      return rect;
     }
 
-    // Helper method for processing the possibility of N results in an array.
-    // If the array is empty, return undefined. If the array has one element,
-    // return the single result. Otherwise, return the array of results.
-    function processArrayResult(array) {
-      if (array.length === 0) {
-        return undefined;
-      }
-      if (array.length === 1) {
-        return array[0];
-      }
-      return array;
+    /**
+     * Obtain the scroll position.
+     */
+    function getScrollPosition() {
+      return {
+        left: window.pageXOffset,
+        top:  window.pageYOffset
+      };
     }
 
     // Done.
