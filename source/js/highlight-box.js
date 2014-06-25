@@ -6,7 +6,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/eventHandlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
+  sitecues.use('jquery', 'conf', 'hlb/event_handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
   function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea) {
 
     /////////////////////////
@@ -635,6 +635,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       },
       exports.setPreventDeflationFromMouseout = function (value) {
         preventDeflationFromMouseout = value;
+      },
+      exports.setHLBWrappingElement = function ($wrapper) {
+        $hlbWrappingElement = $wrapper;
       }
     }
 

@@ -85,7 +85,7 @@ files=\
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
-	source/js/hlb/event-handlers.js \
+	source/js/hlb/event_handlers.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \
 	source/js/util/template.js \
