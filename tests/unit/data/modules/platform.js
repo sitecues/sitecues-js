@@ -9,3 +9,5 @@ platform = {
     is: 'Chrome'
   }
 };
+
+console.log('platform.js Loaded.');

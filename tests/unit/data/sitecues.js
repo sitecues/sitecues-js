@@ -44,10 +44,9 @@ var def = function(name, callback, log) {
   return callback(module, cb, log);
 };
 
-use = function() {
+var use = function() {
   var args = [];
   var index = 0;
-
   // Look over the parameters. For ex., 'jquery', 'conf', 'cursor/style' etc.
   while (index < arguments.length - 1) {
     var module;
@@ -58,8 +57,14 @@ use = function() {
     } else {
       // Otherwise, load the module from /data folder and execute it.
       var name = arguments[index].split('/');
+      
       module = require('../data/modules/' + arguments[index]);
-      args.push(eval(name[name.length - 1]));
+      
+      if (name[name.length - 1] === 'event-handlers' || name[name.length - 1] === 'styling' || name[name.length - 1] === 'safe-area') {
+        args.push(name[name.length - 1]);
+      } else {
+        args.push(eval(name[name.length - 1]));
+      }
     }
     index++;
   }

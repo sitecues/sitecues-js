@@ -9503,3 +9503,4 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 module.exports = create('undefined' === typeof window ? undefined : window);
 module.exports.create = create;
 }());
+console.log('jQuery Loaded.');

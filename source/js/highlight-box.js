@@ -6,7 +6,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
+  sitecues.use('jquery', 'conf', 'hlb/eventHandlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
   function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea) {
 
     /////////////////////////
@@ -50,8 +50,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     
     /**
      * [mapForm updates input values from on set of elements to another]
-     * @param  {[DOM element]} from [HLB or original element]
-     * @param  {[DOM element]} to   [HLB or original element]
+     * @param  {[jQuery element]} from [HLB or original element]
+     * @param  {[jQuery element]} to   [HLB or original element]
      */
     function mapForm ($from, $to) {
 
@@ -88,7 +88,18 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)" 
      */
     function isHLBScaleGreaterThanOne () {
-      return !$hlbElement.css('transform').match('matrix\\(1,');
+      
+      // If there isn't any transform, then it isn't scaled.
+      if ($hlbElement.css('transform') === 'none') {
+        return false;
+      }
+
+      if ($hlbElement.css('transform').match('matrix\\(1,')) {
+        return false;
+      }
+
+      return true;
+
     }
     
     /**
@@ -123,7 +134,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       // Check if we were passed a DOM element. This is useful for
       // testing purposes because we can take advantage of the public
       // event system to sitecues.emit('hlb/toggle', document.getElementById('myElement'))
-      } else if (e instanceof Node || e instanceof HTMLElement) {
+      } else if (e instanceof window.Node || e instanceof window.HTMLElement) {
       
         originalElement = e;
       
@@ -168,6 +179,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
       // The mouse has never been within the HLB bounds or debugging is enabled.
       if (preventDeflationFromMouseout || isSticky) {
+        closeHLB();
         return;
       }
 
@@ -528,6 +540,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      * [addHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
      */
     function addHLBWrapper () {
+      console.log('9999999')
 
       $hlbWrappingElement = $('<div>', 
         {
@@ -541,7 +554,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
           'position' : 'absolute',
           'overflow' : 'visible'
         })
-        .insertAfter(document.body);
+        .insertAfter($('body'));
     }
 
     /**
@@ -588,6 +601,42 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       isSticky = !isSticky;
       return isSticky;
     };
+
+
+    if (sitecues.tdd) {
+      exports.mapForm                  = mapForm;
+      exports.isHLBScaleGreaterThanOne = isHLBScaleGreaterThanOne;
+      exports.getOriginalElement       = getOriginalElement;
+      exports.onHLBHover               = onHLBHover;
+      exports.onTargetChange           = onTargetChange;
+      exports.initializeHLB            = initializeHLB;
+      exports.sizeHLB                  = sizeHLB;
+      exports.positionHLB              = positionHLB;
+      exports.transitionInHLB          = transitionInHLB;
+      exports.transitionOutHLB         = transitionOutHLB;
+      exports.turnOnHLBEventListeners  = turnOnHLBEventListeners;
+      exports.turnOffHLBEventListeners = turnOffHLBEventListeners;
+      exports.cloneHLB                 = cloneHLB;
+      exports.createHLB                = createHLB;
+      exports.closeHLB                 = closeHLB;
+      exports.onHLBClosed              = onHLBClosed;
+      exports.onHLBReady               = onHLBReady;
+      exports.addHLBWrapper            = addHLBWrapper;
+      exports.removeHLBWrapper         = removeHLBWrapper;
+      exports.toggleHLB                = toggleHLB;
+      exports.setHLB                   = function ($hlb) {
+        $hlbElement = $hlb;
+      },
+      exports.setOriginalElement       = function ($element) {
+        $originalElement = $element;
+      },
+      exports.getPreventDeflationFromMouseout = function () {
+        return preventDeflationFromMouseout;
+      },
+      exports.setPreventDeflationFromMouseout = function (value) {
+        preventDeflationFromMouseout = value;
+      }
+    }
 
     callback();
   

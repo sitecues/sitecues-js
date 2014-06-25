@@ -12,3 +12,5 @@ conf = {
     return 'test';
   }
 };
+
+console.log('Conf Loaded');
