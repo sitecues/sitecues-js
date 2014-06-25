@@ -569,7 +569,7 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var LIB_CONFIG_NAMES = [ 'hosts', 'sitepicker' ], libraryConfigLoadCount;
+  var LIB_CONFIG_NAMES = [ 'hosts' ], libraryConfigLoadCount;
   // Validation method for library configuration. If valid, initialize sitecues.
   var validateLibraryConfigs = function(cb) {
     var valid = true;

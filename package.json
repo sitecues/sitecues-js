@@ -33,5 +33,9 @@
   "engineStrict": true,
   "main": "source/js/core.js",
   "name": "sitecues",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:ai_squared/sitecues-js.git"
+  }
 }
