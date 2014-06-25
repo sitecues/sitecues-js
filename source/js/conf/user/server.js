@@ -21,6 +21,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
     // JSONP callback called when a save call returns.
 
     var saveTimeoutId;
+    
     var saveCallback = function() {
       saveTimeoutId && clearTimeout(saveTimeoutId);
       SAVING_DATA = false;
@@ -28,6 +29,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
 
     // Saves a key/value pair.
     var saveData = function (key, value) {
+
       // Skip this try if we are in the middle of saving something.
       if (SAVING_DATA) {
         setTimeout(function() {
@@ -50,7 +52,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
           type: 'GET',
           url: saveUrl,
           data: data,
-          async: false,
+          async: true,
           contentType: "application/json",
           dataType: 'jsonp',
           success: function (data) {
