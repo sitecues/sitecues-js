@@ -1,0 +1,70 @@
+<!-- 
+
+  HLB unit testing page.  Every chunk of HTML that is specifically targeted
+  by our unit tests are commented to identify what unit tests require them  
+
+-->
+<html>
+<head>
+  <title>HLB Unit Testing Page</title>
+</head>
+<body>
+    
+    <!-- #mapForm() -->
+    <input id='textInputOne' type='text'/>
+    <input id='textInputTwo' type='text'/>
+    
+    <!-- #mapForm() -->
+    <p id='paragraphOne'>Horrible</p>
+    <p id='paragraphTwo'>Infections</p>
+
+    <!-- #mapForm() -->
+    <form id='formOne' action="">
+      <input id='radioButtonOne' type="radio" name="sex" value="male">Male<br>
+      <input id='radioButtonTwo' type="radio" name="sex" value="female">Female
+    </form>
+    <form id='formTwo' action="">
+      <input id='radioButtonThree' type="radio" name="sex" value="male">Male<br>
+      <input id='radioButtonFour' type="radio" name="sex" value="female">Female
+    </form>
+
+    <!-- #mapForm() -->
+    <form id='formThree'>
+      <input id='checkboxOne' type="checkbox" name="vehicle" value="Bike">I have a bike<br>
+      <input id='checkboxTwo' type="checkbox" name="vehicle" value="Car">I have a car 
+    </form>
+    <form id='formFour'>
+      <input id='checkboxThree' type="checkbox" name="vehicle" value="Bike">I have a bike<br>
+      <input id='checkboxFour' type="checkbox" name="vehicle" value="Car">I have a car 
+    </form>
+
+    <!-- #mapForm() -->
+    <textarea id='textareaOne' rows="4" cols="50">
+      Any text within a textarea will be copied over to the HLB.
+      If the HLB is itself a textarea, or contains one, then the value
+      of that textarea will be copied to the original element once the 
+      HLB closes. 
+    </textarea>
+    <textarea id='textareaTwo' rows="4" cols="50">
+      This text will be replaced by the text of the previous textarea in our unit tests.
+    </textarea>
+
+    <br><br>
+
+    <!-- #mapForm() -->
+    <select id='selectOne'>
+      <option id='optionOne' value="volvo">Volvo</option>
+      <option id='optionTwo' value="saab">Saab</option>
+      <option id='optionThree' value="mercedes">Mercedes</option>
+      <option id='optionFour' selected='selected' value="audi">Audi</option>
+    </select>
+    <select id='selectTwo'>
+      <option id='optionFive' selected='selected' value="volvo">Volvo</option>
+      <option id='optionSix' value="saab">Saab</option>
+      <option id='optionSeven' value="mercedes">Mercedes</option>
+      <option id='optionEight' value="audi">Audi</option>
+    </select>
+
+
+</body>
+</html>
