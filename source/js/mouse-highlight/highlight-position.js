@@ -348,7 +348,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // Ensure right and bottom are set as well
         //unclippedRect.right = unclippedRect.left + unclippedRect.width;
         //unclippedRect.bottom = unclippedRect.top + unclippedRect.height;
-        return unclippedRect;
+        return $.extend({}, unclippedRect); // Convert to non-native object so that properties can be modified if necessary
       }
       var left   = Math.max( unclippedRect.left, clipRect.left);
       var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
