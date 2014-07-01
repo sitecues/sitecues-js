@@ -18,8 +18,8 @@ describe('test', function() {
 
             var oldhtml = fs.readFileSync('./data/html/test-page.html');
             var newhtml = tweakIt(oldhtml, function(newstuff) {
-              console.log(newstuff.childNodes.length);
-              console.log(newstuff.tagName);
+              //console.log(newstuff.childNodes.length);
+              //console.log(newstuff.tagName);
             });
         });
         it('should load markup.', function(done) {
