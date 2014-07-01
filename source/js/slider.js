@@ -501,7 +501,7 @@ sitecues.def("slider", function (slider, callback, log) {
 
     }; // END: SliderClass.prototype
     
-    if (sitecues.tdd) {
+    if (DEV) {
       exports.globalSliderInterface = global_slider;
       exports.SliderClass = SliderClass;
     }

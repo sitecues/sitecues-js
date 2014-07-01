@@ -156,6 +156,15 @@ else
 	phantomjs-service-root:=$(shell cd ../.. && pwd)
 endif
 
+
+################################################################################
+# Remove dead_code and if(DEV) code from js library when dev=true
+################################################################################
+
+ifeq ($(dev), false)
+	export uglifyjs-args+=-c dead_code=true --define DEV=false
+endif
+
 ################################################################################
 # TARGET: build
 #	Build the compressed file and, optionally, run gjslint.

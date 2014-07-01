@@ -20,7 +20,7 @@ sitecues.def('cursor/images/manager', function (imagesManager, callback) {
       imagesManager.urls = osImages.urls;
 
      // Export manager object for unit testing purposes.
-      if (sitecues.tdd) {
+      if (DEV) {
         exports.manager = imagesManager;
       }
 

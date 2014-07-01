@@ -102,7 +102,7 @@ sitecues.def('badge', function (badge, callback) {
       sitecues.on('zoom', refreshBadgeSize);
     }
 
-    if (sitecues.tdd) {
+    if (DEV) {
       // todo: maybe export the whole module instead if every single function?
       exports.badge = badge;
     }

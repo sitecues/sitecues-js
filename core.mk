@@ -101,17 +101,17 @@ files=\
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics.js \
 
-# Development files (load modules separately).
-ifeq ($(dev), true)
-	files=\
-		$(build-dir)/source/js/core.js \
-		source/js/custom.js \
-		$(custom-files) \
-		source/js/use.js \
-		source/js/debug.js \
-
-
-endif
+## Development files (load modules separately).
+#ifeq ($(dev), true)
+#	files=\
+#		$(build-dir)/source/js/core.js \
+#		source/js/custom.js \
+#		$(custom-files) \
+#		source/js/use.js \
+#		source/js/debug.js \
+#
+#
+#endif
 
 ################################################################################
 # TARGET: build

@@ -150,7 +150,7 @@ sitecues.def('status', function (status_module, callback, log) {
 
     sitecues.status = status_module;
 
-    if (sitecues.tdd) {
+    if (DEV) {
       exports.status = status_module;
     }
 

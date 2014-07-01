@@ -546,7 +546,7 @@ sitecues.def('cursor', function (cursor, callback) {
       }
     });
 
-    // if (sitecues.tdd) {
+    // if (DEV) {
     //   exports.cursor = {
     //     "stylesheetObject": stylesheetObject,
     //     "createStyleSheet": createStyleSheet,
