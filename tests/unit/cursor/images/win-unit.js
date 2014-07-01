@@ -7,7 +7,7 @@ require('../../test/bootstrap');
 // Require the module file we want to test.
 var winjs = '../../../../source/js/cursor/images/win.js';
 var module = require(winjs);
-
+var platform = require('../../data/modules/platform');
 var dataURLStart = 'data:image/svg+xml,%';
 
 

@@ -16,7 +16,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     
     // All HLB instances will use these default padding and border values.
     hlbStyling.defaultPadding = 4;
-    hlbStyling.defaultBorder  = 3;
+    hlbStyling.defaultBorder  = 3; 
     
     // Transition property used for hlb animation (-webkit, -moz)
     // This is used to transition the transform property for HLB
@@ -153,12 +153,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
       //       Fixes children overlapping children within the HLB.  Comment out the line below to 
       //       experience this problem. 
-      if (hlbWidthGreaterThanSafeAreaWidth) {
-        if ($child.css('display') !== 'list-item') {
-          styles.display = 'inline-block';
-          styles.position = 'static';
-        }
-      }
+      // if (hlbWidthGreaterThanSafeAreaWidth) {
+      //   if ($child.css('display') !== 'list-item') {
+      //     styles.display = 'inline-block';
+      //     styles.position = 'static';
+      //   }
+      // }
       
       $child.css(styles);
     }
@@ -416,7 +416,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     hlbStyling.getHLBStyles = function ($originalElement) {
       
       var originalElement      = $originalElement[0],
-          elementComputedStyle = getComputedStyle(originalElement),
+          elementComputedStyle = window.getComputedStyle(originalElement),
           
           calculatedHLBStyles  = {
             'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
@@ -460,7 +460,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           i = 0;
 
       // Set the cssText of the HLB element, essentially copying all computed styles.
-      $hlbElement[0].style.cssText = getComputedStyle($originalElement[0]).cssText;
+      $hlbElement[0].style.cssText = window.getComputedStyle($originalElement[0]).cssText;
 
       for (; i < $originalElementChildren.length; i += 1) {
 
@@ -476,6 +476,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
      
     };
+
+    if (sitecues.tdd) {
+      exports.getHLBStyles = hlbStyling.getHLBStyles;
+      exports.filter       = hlbStyling.filter;
+      exports.cloneStyles  = hlbStyling.cloneStyles;
+    }
 
     callback();
   

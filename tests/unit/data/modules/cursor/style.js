@@ -1,1 +1,1 @@
-style= {'detectCursorType': function() {}};
+exports.detectCursorType = function () {};

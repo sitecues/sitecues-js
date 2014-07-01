@@ -16,7 +16,7 @@ var DEFAULT_FAKE_STYLES =
   'border-left-width: 1px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px;' +
   'padding-left: 3px; padding-top: 3px; padding-right: 3px; padding-bottom: 3px;';
 
-traitcache = {
+var traitcache = {
   'updateCachedView': function () {},
   'getCachedViewSize': function() {
     return FAKE_VIEW_SIZE;
@@ -79,3 +79,9 @@ traitcache = {
     return parseInt(element.id);
   }
 };
+
+for (var prop in traitcache) {
+  if (traitcache.hasOwnProperty(prop)) {
+    exports[prop] = traitcache[prop];
+  }
+}

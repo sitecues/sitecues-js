@@ -1,2 +1,1 @@
-/* global picker: true */
-picker = {};
+exports = {};

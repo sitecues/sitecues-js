@@ -10,7 +10,7 @@
 </head>
 <body>
     
-    <!-- #mapForm() -->
+    <!-- #mapForm() #onHLBReady() -->
     <input id='textInputOne' type='text'/>
     <input id='textInputTwo' type='text'/>
     
@@ -38,7 +38,7 @@
       <input id='checkboxFour' type="checkbox" name="vehicle" value="Car">I have a car 
     </form>
 
-    <!-- #mapForm() -->
+    <!-- #mapForm() #onHLBReady() -->
     <textarea id='textareaOne' rows="4" cols="50">
       Any text within a textarea will be copied over to the HLB.
       If the HLB is itself a textarea, or contains one, then the value
@@ -65,6 +65,14 @@
       <option id='optionEight' value="audi">Audi</option>
     </select>
 
+    <div id='hlbWrappingElement'>Useful for mocking the $hlbWrappingElement</div>
 
+    <div id='hlbDimmerElement'>Useful for mocking the $dimmerElement</div>
+    <div id='hlbDimmerElement2'>Useful for mocking the $dimmerElement</div>
+    <div id='scaledElement' style='transform:matrix(1.5, 0, 0, 1.5, 1888.0610961914063, 2053.21875)'>Scaled</div>
+
+    <div id='nonScaledElement' style='transform:none'>Not Scaled</div>
+    <div id='overflowWidth' style='width:10px;height:10px;'>Something something something somethingsomething somethingsomething somethingsomething somethingsomething somethingsomething something something</div>
+    <div id='one'></div>
 </body>
 </html>

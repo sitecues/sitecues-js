@@ -1,2 +1,3 @@
-win = {};
-win.urls = {'windows_default_type': 'testUrl'}
+exports.urls = {
+  'windows_default_type': 'testUrl'
+};

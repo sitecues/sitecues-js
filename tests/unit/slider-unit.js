@@ -5,6 +5,7 @@
 require('./test/libs');
 
 var sliderPath    = '../../source/js/slider';
+var zoom = require('./data/modules/zoom');
 
 // Require the module files we want to test
 var mod = {

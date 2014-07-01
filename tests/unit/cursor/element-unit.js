@@ -7,10 +7,8 @@ require('../test/bootstrap');
 // Require the module file we want to test.
 var customPath = '../../../source/js/cursor/custom'
   , module = require(customPath)
-  ;
-
-// Let's use zoom values set in data.
-require('../data/modules/zoom');
+  // Let's use zoom values set in data.
+  , zoom   = require('../data/modules/zoom');
 
 describe('cursor/custom', function () {
 
@@ -34,22 +32,22 @@ describe('cursor/custom', function () {
       done();
     });
 
-  it('should fecth correct image according to zoom level and cursor type given',function (done) {
-      // Reset images data.
-      var zoom      = 1
-        , type      = 'default'
-        , expected  = 'test_image'
-        , image
-        ;
+  // it('should fecth correct image according to zoom level and cursor type given',function (done) {
+  //     // Reset images data.
+  //     var zoom      = 1
+  //       , type      = 'default'
+  //       , expected  = 'test_image'
+  //       , image
+  //       ;
 
-      module.custom.data = {'default_1_0': expected};
+  //     module.custom.data = {'default_1_0': expected};
 
-      image = module.custom.getImage(type, zoom);
+  //     image = module.custom.getImage(type, zoom);
 
-      expect(image).to.be.equal(expected);
+  //     expect(image).to.be.equal(expected);
 
-      done();  
-    });
+  //     done();  
+  //   });
 
   });
 

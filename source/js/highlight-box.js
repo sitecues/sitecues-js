@@ -6,7 +6,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event_handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
+  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
   function ($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea) {
 
     /////////////////////////
@@ -164,7 +164,8 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     }
     
     /**
-     * [onTargetChange is enabled when the HLB is READY.  Deflates the HLB if allowed.]
+     * [onTargetChange is enabled when the HLB is READY.  
+     * Deflates the HLB if allowed.]
      * @param  {[DOM mousemove event]} e [Mousemove event.]
      */
     function onTargetChange (e) {
@@ -175,11 +176,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
           isMouseDown    = e.which === 1,
           HLBBoundingBox;
 
-
-
-      // The mouse has never been within the HLB bounds or debugging is enabled.
+      // The mouse has never been within the HLB bounds or 
+      // debugging is enabled.
       if (preventDeflationFromMouseout || isSticky) {
-        closeHLB();
         return;
       }
 
@@ -188,19 +187,21 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
         return;
       }
 
-      // Is the left mouse button pressed?  The user is click + dragging text to copy.
+      // Is the left mouse button pressed?  
+      // The user is click + dragging text to copy.
       if (isMouseDown) {
         return;
       }
 
       HLBBoundingBox = $hlbElement[0].getBoundingClientRect();
 
-      // If the mouse coordinates are not within the bounds of the HLB + MOUSE_SAFETY_ZONE, then deflate the HLB.
+      // If the mouse coordinates are not within the bounds of 
+      // the HLB + MOUSE_SAFETY_ZONE, then deflate the HLB.
       if (mouseX < HLBBoundingBox.left   - MOUSE_SAFETY_ZONE || 
           mouseX > HLBBoundingBox.right  + MOUSE_SAFETY_ZONE ||
           mouseY < HLBBoundingBox.top    - MOUSE_SAFETY_ZONE || 
           mouseY > HLBBoundingBox.bottom + MOUSE_SAFETY_ZONE) {
-        
+
         closeHLB();
       
       }
@@ -241,7 +242,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      * [sizeHLB computes and sets the height and width of the HLB]
      */
     function sizeHLB () {
-      
+
       // Initialize height/width of the HLB
       hlbPositioning.initializeSize($hlbElement, $originalElement);
 
@@ -265,8 +266,9 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     * [positionHLB positions the HLB.]
     */
     function positionHLB () {
-
-      var constrainedOffset,  // The minimum distance we must move the HLB for it to fall within the safe zone
+          
+          // The minimum distance we must move the HLB for it to fall within the safe zone
+      var constrainedOffset,
           
           HLBBoundingBoxAfterZoom = hlbPositioning.scaleRectFromCenter($hlbElement),
           HLBBoundingBox          = $hlbElement[0].getBoundingClientRect(),
@@ -540,7 +542,6 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
      * [addHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
      */
     function addHLBWrapper () {
-      console.log('9999999')
 
       $hlbWrappingElement = $('<div>', 
         {
@@ -575,9 +576,12 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       if (isHLBClosing) {
         return;
       }
+      
       // If an HLB exists
       if ($hlbElement) {
+        
         closeHLB();
+      
       // If a valid element exists and the HLB does not exist
       } else if (originalElement) {
         createHLB(originalElement);
@@ -604,6 +608,7 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
 
 
     if (sitecues.tdd) {
+
       exports.mapForm                  = mapForm;
       exports.isHLBScaleGreaterThanOne = isHLBScaleGreaterThanOne;
       exports.getOriginalElement       = getOriginalElement;
@@ -624,21 +629,68 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
       exports.addHLBWrapper            = addHLBWrapper;
       exports.removeHLBWrapper         = removeHLBWrapper;
       exports.toggleHLB                = toggleHLB;
-      exports.setHLB                   = function ($hlb) {
+      exports.eventHandlers            = eventHandlers;
+      exports.dimmer                   = dimmer;
+      
+      exports.setHLB = function ($hlb) {
         $hlbElement = $hlb;
-      },
-      exports.setOriginalElement       = function ($element) {
+      };
+
+      exports.getHLB = function () {
+        return $hlbElement;
+      };
+      
+      exports.setOriginalElement = function ($element) {
         $originalElement = $element;
-      },
+      };
+      
       exports.getPreventDeflationFromMouseout = function () {
         return preventDeflationFromMouseout;
-      },
+      };
+      
       exports.setPreventDeflationFromMouseout = function (value) {
         preventDeflationFromMouseout = value;
-      },
+      };
+      
       exports.setHLBWrappingElement = function ($wrapper) {
         $hlbWrappingElement = $wrapper;
-      }
+      };
+
+      exports.getHLBWrappingElement = function () {
+        return $hlbWrappingElement;
+      };
+
+      exports.$getOriginalElement = function () {
+        return $originalElement;
+      };
+
+      exports.getDefaultHLBId   = function () {
+        return SITECUES_HLB_ID;
+      };
+
+      exports.setIsHLBClosing = function (value) {
+        isHLBClosing = value;
+      };
+
+      exports.getIsHLBClosing = function () {
+        return isHLBClosing;
+      };
+
+      exports.getTranslateCSS = function () {
+        return translateCSS;
+      };
+
+      exports.setTranslateCSS = function (value) {
+        translateCSS = value;
+      };
+      
+      exports.getOriginCSS = function () {
+        return originCSS;
+      };
+      
+      exports.setOriginCSS = function (value) {
+        originCSS = value;
+      };
     }
 
     callback();

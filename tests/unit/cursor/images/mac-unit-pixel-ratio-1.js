@@ -8,7 +8,7 @@ require('../../test/bootstrap');
 // Require the module file we want to test.
 var macjs = '../../../../source/js/cursor/images/mac.js';
 var module = require(macjs);
-
+var platform = require('../../data/modules/platform');
 var dataURLStart = 'data:image/svg+xml,%';
 
 

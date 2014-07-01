@@ -107,6 +107,20 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
       
     };
 
+    if(sitecues.tdd) {
+      exports.onDimmerClick = onDimmerClick;
+      exports.onDimmerReady = onDimmerReady;
+      exports.onDimmerClosed = onDimmerClosed;
+      exports.removeDimmer   = dimmer.removeDimmer;
+      exports.dimBackgroundContent = dimmer.dimBackgroundContent;
+      exports.setDimmerElement = function (value) {
+        $dimmerElement = value;
+      };
+      exports.getDimmerElement = function () {
+        return $dimmerElement;
+      };
+    }
+
     callback();
 
   });

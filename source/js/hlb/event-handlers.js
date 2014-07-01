@@ -7,7 +7,7 @@
  * Note: keydown event is also handled in keys.js
  */
 
-sitecues.def('hlb/event_handlers', function(eventHandlers, callback) {
+sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
   'use strict';
   // shortcut to hasOwnProperty

@@ -22,7 +22,8 @@ sitecues.def('cursor/custom', function (view, callback, log) {
         , name
         , type
         ;
-
+        console.log('ass')
+        console.log(zoomModule)
       this.data = {};
 
       function setData (type) {

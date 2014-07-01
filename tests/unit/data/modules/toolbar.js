@@ -1,1 +1,2 @@
-toolbar = {'disable': function(){}, 'enable': function(){}};
+exports.disable = function () {};
+exports.enable  = function () {};
