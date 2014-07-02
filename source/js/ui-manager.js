@@ -87,14 +87,14 @@ sitecues.def('ui-manager', function (uiManager, callback) {
       if (MODE === MODES.AUTO) {
         // In auto mode, use the users selected UI, or 'badge' if a selection does not exist.
         var userUISelection = conf.get('userUISelection');
-        log.info("User UI selection: " + userUISelection);
+        // log.info("User UI selection: " + userUISelection);
         return nameToInstance(userUISelection, STATES, STATES.BADGE);
       }
       // Convert the mode to the initial state.
       return toState(MODE.name);
     };
     var currentState = determineInitialState();
-    log.info("Initial UI: " + currentState.name);
+    // log.info("Initial UI: " + currentState.name);
 
     /**
      * Switches UI. Right now there are only two, so it just alternates, but if
@@ -102,7 +102,7 @@ sitecues.def('ui-manager', function (uiManager, callback) {
      */
     var toggle = function () {
       if(toggling) {
-        log.info('Toggle call ignored');
+        //log.info('Toggle call ignored');
       }
       toggling = true;
       innerToggle(function() {
@@ -120,7 +120,7 @@ sitecues.def('ui-manager', function (uiManager, callback) {
      * there are more than two this should iterate through them.
      */
     var innerToggle = function (callback) {
-      log.info("Toggling UI from " + currentState.name);
+      //log.info("Toggling UI from " + currentState.name);
       // EQ-770: check if badge is boomarklet one. ONLY for MVP demo purposes.
       // todo: remove when demo paased.
       var $badge = $('#' + badge.badgeId);
@@ -151,16 +151,16 @@ sitecues.def('ui-manager', function (uiManager, callback) {
           });
           break;
       }
-      log.info("UI set to " + currentState.name);
+      //log.info("UI set to " + currentState.name);
     };
 
     $(document).ready(function () {
-      log.info("Initializing UI");
+      //log.info("Initializing UI");
       // console.log('doc ready');
 
       switch (currentState) {
         case STATES.BADGE:
-          log.info("Initial UI State: " + STATES.BADGE.name);
+          //log.info("Initial UI State: " + STATES.BADGE.name);
           // Note that we update the current state first, to deal with
           // button mashing, since the disabling/enabling are most likely
           // going to involve async behavior.
@@ -169,19 +169,19 @@ sitecues.def('ui-manager', function (uiManager, callback) {
           });
           break;
         default: // case STATES.TOOLBAR:
-          log.info("Initial UI State: " + STATES.TOOLBAR.name); 
+          //log.info("Initial UI State: " + STATES.TOOLBAR.name); 
           // Only hide badge if extension-provided script is running.
           badge.isBadgeRaplacedByToolbar && badge.disable();
           // Make sure toolbar appears after badge is hidden.
           setTimeout(function() {
-            log.info('sitecues.getAllModulesLoaded(): ' + window.sitecues.getAllModulesLoaded());
+            //log.info('sitecues.getAllModulesLoaded(): ' + window.sitecues.getAllModulesLoaded());
             if(window.sitecues.getAllModulesLoaded()) {
               // It's already loaded up
               toolbar.enable(true);              
             } else {
-              log.info('Deferring toolbar load until all modules are loaded');
+              //log.info('Deferring toolbar load until all modules are loaded');
               sitecues.on('core/allModulesLoaded', function() {
-                log.info('Enabling toolbar, all modules are loaded');
+                //log.info('Enabling toolbar, all modules are loaded');
                 toolbar.enable(true);
               })
             }

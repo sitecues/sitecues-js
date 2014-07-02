@@ -41,8 +41,8 @@ sitecues.def('conf/site', function (site, callback) {
       url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
       dataType: 'json',
       async: false,
-      success: function() {
-        log.info("Successfully fetched site config from server");
+      success: function(data) {
+        // log.info("Successfully fetched site config from server");
 
         // Reset the site configuration object.
         siteConfig = {};
