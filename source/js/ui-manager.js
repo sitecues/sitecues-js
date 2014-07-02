@@ -3,7 +3,7 @@
  * if any, so we don't have to split and duplicate that logic across the
  * choices.
  */
-sitecues.def('ui-manager', function (uiManager, callback, log) {
+sitecues.def('ui-manager', function (uiManager, callback) {
 
   // Put a reference to the UI Object on the sitecues namespace. This is used to store interfaces for UI objects
   // such as the slider. These interfaces are used in the page object model to test functionality.
