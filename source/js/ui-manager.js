@@ -212,7 +212,7 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
       });
     }
     
-    if (DEV) {
+    if (UNIT) {
       // todo: maybe export the whole module instead if every single function?
       exports.uiManager = uiManager;
       exports.uiManager.toggle = toggle;

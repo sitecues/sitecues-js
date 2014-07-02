@@ -1,11 +1,10 @@
-//  The global DEV is the developer mode for sitecues™ and allows exports to be called
-//  Note: "make build dev=false" removes all code in statements like this:
+//  Note: "make build dev=false" removes all code inside if(UNIT) from the build
 //
-//     if(DEV){
+//     if(UNIT){
 //        exports.something="Chikun";
 //      }
 
-DEV = true; // Chikun says this OK :)
+UNIT = true; // Chikun says this OK :)
 
 
 // Override/mock sitecues object.

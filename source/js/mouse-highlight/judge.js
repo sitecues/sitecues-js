@@ -484,7 +484,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return traitStack[0];
     }
 
-    if (DEV) {
+    if (UNIT) {
       exports.getJudgementStack = judge.getJudgementStack;
     }
   });

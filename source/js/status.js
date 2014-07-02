@@ -149,7 +149,7 @@ sitecues.def('status', function (status_module, callback) {
 
     sitecues.status = status_module;
 
-    if (DEV) {
+    if (UNIT) {
       exports.status = status_module;
     }
 

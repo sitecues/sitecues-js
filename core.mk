@@ -117,7 +117,8 @@ files=\
 # TARGET: build
 ################################################################################
 build:
-	@echo "===== STARTING: Building '$(custom-name)' library"
+	@echo "===== STARTING: Building '$(custom-name)' library ====="
+	@echo
 	@mkdir -p $(build-dir)/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
@@ -125,7 +126,9 @@ build:
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@echo
 	@echo "Creating compressed (gzipped) JavaScript files."
+	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
@@ -136,6 +139,7 @@ build:
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
 #endif
+	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo
 

@@ -86,7 +86,7 @@ sitecues.def('cursor/images/mac', function (osImages, callback) {
 
   });
 
-  if (DEV) {
+  if (UNIT) {
     exports.mac = {
       'urls': osImages.urls
     };

@@ -65,7 +65,7 @@ sitecues.def('cursor/custom', function (view, callback) {
     view.init();
 
     // Export object fro unit-tests.
-    if (DEV) {
+    if (UNIT) {
       exports.custom = view;
     }
 

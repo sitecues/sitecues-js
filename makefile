@@ -162,7 +162,8 @@ endif
 ################################################################################
 
 ifeq ($(dev), false)
-	export uglifyjs-args+=-c dead_code=true --define DEV=false
+	export uglifyjs-args+=-c dead_code=true
+	export uglifyjs-args+=--define DEV=false,UNIT=false
 endif
 
 ################################################################################
