@@ -2,11 +2,11 @@
  * Create and send a metric event when the user opens an HLB.
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
-sitecues.def('metrics/hlb-opened', function(hlbOpened, callback, log) {
+sitecues.def('metrics/hlb-opened', function (hlbOpened, callback) {
     
     var DEFAULT_STATE = {'name': 'hlb-opened'};
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
+    sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil) {
 
         // ============= Objects methods ======================
         hlbOpened = {

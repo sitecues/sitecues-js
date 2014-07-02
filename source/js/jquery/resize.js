@@ -1,5 +1,5 @@
 // This module adds some JQuery-based resize helpers.
-sitecues.def('jquery/resize', function (module, callback, log) {
+sitecues.def('jquery/resize', function (module, callback) {
   sitecues.use('jquery', function (jq) {
 
     // Add an event that fire only at the end of window resizing, not for each

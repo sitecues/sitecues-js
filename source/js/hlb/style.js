@@ -1,7 +1,7 @@
 /**
  * This file contains functions related to HLB styles on inflation/deflation.
  */
-sitecues.def('hlb/style', function(hlbStyle, callback, log) {
+sitecues.def('hlb/style', function (hlbStyle, callback) {
 
     hlbStyle.kBoxZindex = 2147483644;
     hlbStyle.kBoxNoOutline = '0px solid transparent';

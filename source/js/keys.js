@@ -1,4 +1,4 @@
-sitecues.def('keys', function (keys, callback, log) {
+sitecues.def('keys', function (keys, callback) {
   var extra_event_properties = {
     dom: {
       highlight_box: null
@@ -126,8 +126,8 @@ sitecues.def('keys', function (keys, callback, log) {
     // key event hook
     keys.hook = function(event) {
 
-      // private variables
-      var i, l, key, test, parts, result;
+      // private variable
+      var key;
 
       // iterate over key map
       for(key in keys.map) {
@@ -212,7 +212,7 @@ sitecues.def('keys', function (keys, callback, log) {
       keys.map = $.extend(true, {}, origMap, iframeDialogMap);
     } );
 
-    sitecues.on('iframe-modal/closed', function (hlbElement) {
+    sitecues.on('iframe-modal/closed', function () {
       keys.test = prevTest;
       keys.map = prevMap;
     } );

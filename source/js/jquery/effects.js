@@ -1,4 +1,4 @@
-sitecues.def('jquery/effects', function(effects, callback, log) {
+sitecues.def('jquery/effects', function(effects, callback) {
     'use strict';
 
     sitecues.use('jquery', function($) {

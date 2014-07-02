@@ -96,11 +96,6 @@ sitecues.def('highlight-box', function (highlightBox, callback, log) {
       return (instance ? instance.getState() : state);
     };
 
-    // Returns the state of the highlight box module. If there is no instance, use the global state.
-    var getCurrentTarget = highlightBox.getCurrentTarget = function() {
-      return (instance ? instance.item : null);
-    };
-
     // todo: take out common things like these below into general sitecues file which is loaded before any other file starts loading.
     // Add easing function for box open animation, to create bounce-back effect
     $.extend($['easing'], {   // From http://stackoverflow.com/questions/5207301

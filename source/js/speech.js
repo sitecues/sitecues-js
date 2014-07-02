@@ -4,7 +4,7 @@
  * by other parts of the application.
  */
 
-sitecues.def('speech', function (speech, callback, log) {
+sitecues.def('speech', function (speech, callback) {
   
   'use strict';
   
@@ -98,10 +98,9 @@ sitecues.def('speech', function (speech, callback, log) {
 
         }()),
 
-        NotSafariAudioPlayer = function(speechKey, text, siteId, secure) {
+        NotSafariAudioPlayer = function(speechKey, text, siteId) {
           
-          var secureFlag = (secure ? 1 : 0),
-              baseMediaUrl,
+          var baseMediaUrl,
               audioElement,
               playing = false;
               //startTime = (new Date).getTime() / 1000;
@@ -189,10 +188,9 @@ sitecues.def('speech', function (speech, callback, log) {
                         undefined,
               volumeNode;        
           
-          return function(speechKey, text, siteId, secure) {
+          return function(speechKey, text, siteId) {
             
-            var secureFlag = (secure ? 1 : 0),
-                baseMediaUrl;
+            var baseMediaUrl;
                 //startTime = (new Date).getTime() / 1000;
             
             if (!volumeNode) {

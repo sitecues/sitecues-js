@@ -1,4 +1,4 @@
-sitecues.def('cursor/custom', function (view, callback, log) {
+sitecues.def('cursor/custom', function (view, callback) {
   'use strict';
 
   // Cursor types.

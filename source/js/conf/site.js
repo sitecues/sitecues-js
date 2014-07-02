@@ -12,7 +12,7 @@
  *   However, in the future this will be updated so that a customer can not, for example, override the TTS provider
  *   with one that is not available to them.
  */
-sitecues.def('conf/site', function (site, callback, log) {
+sitecues.def('conf/site', function (site, callback) {
 
   var
     // The site configuration.
@@ -25,24 +25,11 @@ sitecues.def('conf/site', function (site, callback, log) {
     , providedSiteConfig = sitecues.getSiteConfig()
     ;
 
-  sitecues.use('jquery', 'conf/user', function($, user) {
+  sitecues.use('jquery', 'conf/user', function($) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
     // but the contents of root object properties can be modified.
     site.get = function(key) {
       return siteConfig[key];
-    };
-
-    // Extend the provided config object with the site provided config.
-    var extendWithProvided = function(config) {
-      for (var key in providedSiteConfig) {
-        if (providedSiteConfig.hasOwnProperty(key)) {
-          config[key] = providedSiteConfig[key];
-        }
-      }
-      return config;
-    };
-
-    site.fetch = function(cb) {
     };
 
     // Initialize the site configuration to the default.
@@ -54,7 +41,7 @@ sitecues.def('conf/site', function (site, callback, log) {
       url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
       dataType: 'json',
       async: false,
-      success: function(data, status, xhr) {
+      success: function() {
         log.info("Successfully fetched site config from server");
 
         // Reset the site configuration object.

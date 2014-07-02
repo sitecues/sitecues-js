@@ -19,7 +19,6 @@
     , libraryUrl         = null             // The parsed library URL object
     , siteConfig         = null             // Site config container
     , modules            = {}               // Modules container
-    , allModulesLoaded   = false
     
     // Each customization that is registered requires a new index by which it is referenced in the
     // future
@@ -210,7 +209,6 @@
   , READY_FOR_DEF_CALLS   = false
   , DEF_QUEUE             = []
   , LOAD_LIST             = []
-  , moduleLoadAttempts    = 0
   ;
 
   // Returns the state of the requested module.
@@ -230,9 +228,6 @@
     // Otherwise, the entry is an object, so the module is ready.
     return MODULE_STATE.READY;
   };
-
-
-  var _deffed = 0;
 
   // define equinox module
   var _def = function (name, constructor) {
@@ -286,8 +281,6 @@
     }, log.newLogger(name));
   };
 
-
-  var deffed = 0;
   // exposed function for defining modules: queues until library is ready.
   def = function (name, constructor) {
 

@@ -1,7 +1,7 @@
 /**
  * This file contains auxilary functions for prepare-and-adjust HLB instance.
  */
-sitecues.def('hlb/designer', function (designer, callback, log) {
+sitecues.def('hlb/designer', function (designer, callback) {
 
     // Chrome returns an rgba color of rgba(0, 0, 0, 0) instead of transparent.
     // http://stackoverflow.com/questions/5663963/chrome-background-color-issue-transparent-not-a-valid-value
@@ -126,7 +126,7 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
 //                                      {'width': Math.min(absRect.width, parseFloat(currentStyle.width)) + 'px'});
                 
                 $(selector).each(function () {
-                    var jElement = $(this);
+                    // var jElement = $(this);
 
                     // Determine the final dimensions, and their affect on the CSS dimensions.
                     // Change the dimensions when needeed.
@@ -490,98 +490,6 @@ sitecues.def('hlb/designer', function (designer, callback, log) {
             return diffWidth;
         }
 
-            /**
-             * 
-             * @param {type} $el
-             * @param {type} currentStyle
-             * @returns {Number|Boolean} False if we don't need to narrow the width;
-             * Number of pixels otherwise.
-             */
-            function getConstrainedWidth($el, currentStyle, viewport) {
-                // If text is non-word-wrappable forget about it.
-                if (!common.isWordWrappableElement($el[0])) {
-                    return false;
-                }
-
-                // Pixel-based solution isn't reliable b/c each font had differences
-                // in terms of char height and width. Let's find out how much space 50-x
-                // chars text takes and use the value as constrained width.
-                var currentWidth = parseFloat(currentStyle.width),
-                    xCharWidth = common.getXCharWidth(currentStyle),
-                    minXCharsQuantity = 50,
-                    maxXCharsQuantity = 65,
-                    widthOf50xChars = xCharWidth * minXCharsQuantity,
-                    widthOf65xChars = xCharWidth * maxXCharsQuantity,
-                    $testNode = createTestNode($el[0]),
-                    maxWidth  = viewport.width,
-                    maxHeight = viewport.height;
-            
-                // Remove testNode once the script finished execution.
-                setTimeout(function() {$testNode.remove();}, 0);
-                if ((currentWidth <= widthOf50xChars) && !common.hasVertScroll($el[0])) {
-                    // All good, no need for constrains.
-                    return false;
-                }
-
-                // If width greater than 50 x-width characters then...
-                if (common.hasVertScroll($el[0])) {
-                     // If vertical scrolling was already necessary, try to add width up max of 65 x-widths
-                     var expandedWidth = _recurseWidthCloseToNChars($testNode, maxXCharsQuantity, widthOf65xChars, currentWidth, maxHeight);
-                     // If it doesn't cause box to go offscren and removes need for vertical scrolling
-                     if (expandedWidth && (expandedWidth < maxWidth)) {
-                         return expandedWidth;
-                     }
-                     // Otherwise, shorten to 50 x-widths
-                     return widthOf50xChars;
-                }
-
-                // Vertical scrolling was not necessary --
-                // shorten lines as close to 50 x-widths as possible,
-                // up to the point where vertical scrolling still is not necessary.
-
-                // Find the best constrained width, if any needed.
-                var constrainedWidth = _recurseWidthCloseToNChars($testNode, minXCharsQuantity, currentWidth, widthOf50xChars, maxHeight);
-                return constrainedWidth;
-            }
-
-            function createTestNode(el) {
-                // Clone an element and check if the vertical scroll appears at any step.
-                // todo: use 'false' instead of 'true'( do not copy events and data)
-                // or, simply remove the attrs, copying the styles before that
-                var testNode = el.cloneNode(true);
-                $(testNode)
-                        // todo: copy-set all of the styles assigned to ID as they may affect the font?
-                        // Having > 1 element with the same ID may cause layout problems.
-                        .attr('id', '')
-                        .css('visibility', 'hidden')
-                        .appendTo('body');
-                return $(testNode);
-            }
-
-            function _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth, maxHeight) {
-                // Exit if the constrained width become equal to the current width.
-                if (Math.round(currentWidth - limitedWidth) === 0) {
-                    return false;
-                }
-                var savedHeight = parseFloat($testNode.css('height'));
-                $testNode.css({'width': limitedWidth + 'px'});
-                if (common.hasVertScroll($testNode[0])) {
-                    // Define the constained width as close to 50 x-widths as possible:
-                    // Add 1/2 of width clipped iteratively.
-                    return _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth + Math.round(currentWidth - limitedWidth) / 2, maxHeight);
-                } else {
-                    var changedHeight = parseFloat($testNode.css('height'));
-                    if (changedHeight >= maxHeight) {
-                        // The new height is greater than viewport's height;
-                        // this will cause vertical scroll finally to appear.
-                        $testNode.css({'height': savedHeight + 'px'});
-                        return _recurseWidthCloseToNChars($testNode, n, currentWidth, limitedWidth + Math.round(currentWidth - limitedWidth) / 2, maxHeight);
-                    }
-                    // No vertical scroll should appear, we are done(finally).
-                    designer.expandedHeight = changedHeight;
-                    return limitedWidth;
-                }
-            };
 
             /**
              * Get new background color of highlight box when it appears.

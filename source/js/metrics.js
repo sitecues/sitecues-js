@@ -1,7 +1,7 @@
 /**
  * Basic metrics.
  */
-sitecues.def('metrics', function(metrics, callback, log) {
+sitecues.def('metrics', function (metrics, callback) {
   /**
    * *Session ID:* A random UUID v4 generated for this library session.
    * *Client time milliseconds:* The epoch time in milliseconds when the event occurred
@@ -36,7 +36,9 @@ sitecues.def('metrics', function(metrics, callback, log) {
   var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b)};
 
   sitecues.use('metrics/util', 'jquery', 'conf', 'conf/site', 'speech', 'zoom', 'ui',
-    function(metricsUtil, $, conf, site, speech, zoom) {
+    
+    function(metricsUtil, $, conf, site, speech) {
+
       var init = function() {
           // Default state.
           metrics.data = $.extend({}, DEFAULT_STATE);

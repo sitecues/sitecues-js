@@ -1,5 +1,5 @@
 // This module includes functionality used in user identification.
-sitecues.def('user', function (user, callback, log) {
+sitecues.def('user', function (user, callback) {
   var userId = null;
 
   user.getId = function() {
@@ -21,7 +21,7 @@ sitecues.def('user', function (user, callback, log) {
         userId = data.userId;
         callback();
       },
-      error: function(xhr, textStatus, errorThrown) {
+      error: function(xhr, textStatus) {
         console.log('===== Unable to get user ID: ' + textStatus);
         callback();
       }

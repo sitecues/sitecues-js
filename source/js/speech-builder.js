@@ -4,7 +4,7 @@
  * Currently the speech dictionary resides here until we can move it to the server.
  */
 
-sitecues.def('speech-builder', function (builder, callback, log) {
+sitecues.def('speech-builder', function (builder, callback) {
   
   'use strict';
   /*
@@ -62,15 +62,6 @@ sitecues.def('speech-builder', function (builder, callback, log) {
       //text = replaceAll(origText, CASE_SENSITIVE_REPLACEMENTS, "");
       //text = replaceAll(middle, CASE_INSENSITIVE_REPLACEMENTS, "i");
       return $.trim(text);
-    }
-
-    function replaceAll(text, replacements, options) {
-      for (var index = 0; index < replacements.length; index++) {
-        var replacement = replacements[index];
-        var regex = new RegExp('\\b' + replacement.word + '\\b', 'g' + options);
-        text= text.replace(regex, replacement.to);
-      }
-      return text;
     }
 
     function textEquivalentIfPresent(node, attrName) {
@@ -152,7 +143,7 @@ sitecues.def('speech-builder', function (builder, callback, log) {
       }
 
       // Recursively add text from children (both elements and text nodes)
-      $node.contents().each(function(index) {
+      $node.contents().each(function() {
         text += appendAccessibleTextFromSubtree(this, isLabel);
       });
 

@@ -129,13 +129,13 @@ build:
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-ifneq ($(dev), true)
+#ifneq ($(dev), true)
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
-endif
+#endif
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo
 

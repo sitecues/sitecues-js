@@ -1,5 +1,5 @@
 // The general, floating close button.
-sitecues.def('util/close-button', function (closeButton, callback, log) {
+sitecues.def('util/close-button', function (closeButton, callback) {
   // Define dependency modules.
   sitecues.use('jquery', function ($) {
 

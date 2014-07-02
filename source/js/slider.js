@@ -1,7 +1,7 @@
-sitecues.def("slider", function (slider, callback, log) {
+sitecues.def("slider", function (slider, callback) {
   'use strict';
 
-  sitecues.use("jquery", "conf", "zoom", "ui", function ($, conf, zoom, ui) {
+  sitecues.use("jquery", "conf", "zoom", "ui", function ($, conf, zoom) {
 
     // #### SLIDER INTERFACE #########################################################################
 
@@ -87,7 +87,7 @@ sitecues.def("slider", function (slider, callback, log) {
       },
 
       // Initialize the slider vars and call draw
-      init: function (props) {
+      init: function () {
 
         this.create();
         this.setdimensions();
@@ -125,7 +125,7 @@ sitecues.def("slider", function (slider, callback, log) {
         // CSS files have been loaded, so scripts execute before DOM dimesions have been set.
           
         // Read the bounds of the container
-        var bounds = this.$container.get(0).getBoundingClientRect();
+        // var bounds = this.$container.get(0).getBoundingClientRect();
 
         // Set the width and height of the Slider's container
         // But don't overwrite values that have been passed if the container has no dimensions

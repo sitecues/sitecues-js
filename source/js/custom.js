@@ -1,7 +1,7 @@
 /**
  * Custom.js - Please make sure this remains the first script after core.js in the build process
  */
-sitecues.def('custom', function (custom, callback, log) {
+sitecues.def('custom', function (custom, callback) {
   
   'use strict';
 

@@ -1,7 +1,7 @@
 /**
  * This file contains functionality that fixes specific elements' styles when necessary.
  */
-sitecues.def('hlb/specificElement', function (hlbSpecificElement, callback, log) {
+sitecues.def('hlb/specificElement', function (hlbSpecificElement, callback) {
 
     // Constants.
     var toClass = {}.toString;
@@ -10,7 +10,7 @@ sitecues.def('hlb/specificElement', function (hlbSpecificElement, callback, log)
     hlbSpecificElement.kBoxZindex = 2147483644;
     
     // Get dependencies
-    sitecues.use('jquery', 'conf', 'hlb/style', 'util/common', 'ui', function ($, conf, hlbStyle, common) {
+    sitecues.use('jquery', 'conf', 'hlb/style', 'ui', function ($, conf, hlbStyle) {
 
     /*
      * Gets table ancestor element's parents.

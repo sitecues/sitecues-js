@@ -1,4 +1,4 @@
-sitecues.def('status', function (status_module, callback, log) {
+sitecues.def('status', function (status_module, callback) {
   
   'use strict';
 
@@ -48,7 +48,6 @@ sitecues.def('status', function (status_module, callback, log) {
       var data = conf.data()
         , ajax_urls
         , setting
-        , popup
         , info
         ;
 
