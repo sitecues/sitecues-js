@@ -153,12 +153,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
       //       Fixes children overlapping children within the HLB.  Comment out the line below to
       //       experience this problem.
-      // if (hlbWidthGreaterThanSafeAreaWidth) {
-      //   if ($child.css('display') !== 'list-item') {
-      //     styles.display = 'inline-block';
-      //     styles.position = 'static';
-      //   }
-      // }
+      if (hlbWidthGreaterThanSafeAreaWidth) {
+        if ($child.css('display') !== 'list-item') {
+          styles.display = 'inline-block';
+          styles.position = 'static';
+        }
+      }
 
       $child.css(styles);
     }
