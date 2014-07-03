@@ -1,0 +1,10 @@
+-A
+-c
+--check-leaks
+-d
+-G
+-R xunit
+--recursive
+-t 10000
+-u bdd
+.

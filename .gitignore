@@ -25,3 +25,7 @@ howards-jokes.js
 # Cursors that should be in the IE version should be copied to the source/images/cursors directory.
 tools/site/generate-cursors/cursor_output/
 /nbproject/private/
+
+# Stops auto-generated reports from being commited, such as unit-test-coverage
+# ============================================================================
+report

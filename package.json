@@ -9,7 +9,7 @@
     "glob": "3.2.1",
     "hogan-express": "0.3.3",
     "hogan.js": "2.0.0",
-    "macchiato": "http://s3.amazonaws.com/npm.sitecues.com/macchiato-0.1.2.tgz",
+    "blanket": "1.1.6",
     "mime": "1.2.9",
     "node.extend": "1.0.7",
     "nopt": "2.1.1",

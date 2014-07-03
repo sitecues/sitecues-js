@@ -6,7 +6,6 @@
 
 UNIT = true; // Chikun says this OK :)
 
-
 // Override/mock sitecues object.
 var blankFunction = function() {};
 // Initialize.
