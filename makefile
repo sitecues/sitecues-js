@@ -274,7 +274,7 @@ test-smoke:
 ################################################################################
 test-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
+	@cd ./tests/unit ; mocha $(testunit-mocha-options)
 
 ################################################################################
 # TARGET: nyan-test
@@ -282,7 +282,7 @@ test-unit:
 ################################################################################
 nyan-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
+	@cd ./tests/unit ; mocha -R nyan
 
 ################################################################################
 # TARGET: nyan-test
