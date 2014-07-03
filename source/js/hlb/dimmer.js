@@ -6,7 +6,7 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
   'use strict';
 
   sitecues.use('jquery', 'conf', 'util/common', function ($, conf, common) {
-    
+
     //////////////////////////////
     // PRIVATE VARIABLES
     /////////////////////////////
@@ -33,7 +33,7 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
     /////////////////////////////
 
     /**
-     * [onDimmerClick toggles the HLB.  This function is bound 
+     * [onDimmerClick toggles the HLB.  This function is bound
      * as a callback for clicking on the background dimmer]
      */
     function onDimmerClick () {
@@ -66,7 +66,7 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
      * @param  {[integer]}        inflationSpeed      [The duration of the opacity transition]
      */
     dimmer.dimBackgroundContent = function ($hlbWrappingElement, inflationSpeed) {
-        
+
       var zoom = conf.get('zoom');
 
       $dimmerElement = $('<div>', {
@@ -82,10 +82,10 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
         'transition': inflationSpeed + 'ms opacity',
         'z-index'   : DIMMER_Z_INDEX
       }).on('click', onDimmerClick);
-      
+
       $hlbWrappingElement.append($dimmerElement);
 
-      // Required for transition to take place.  
+      // Required for transition to take place.
       // Without it, the dimmer has MAX_OPACITY
       // as it is appended to the DOM.
       setTimeout(onDimmerReady, DIMMER_TRANSITION_DELAY);
@@ -101,10 +101,10 @@ sitecues.def('hlb/dimmer', function (dimmer, callback) {
       $dimmerElement[0].addEventListener(common.transitionEndEvent, onDimmerClosed);
 
       $dimmerElement.css({
-        'transition' : deflationSpeed + 'ms opacity', 
+        'transition' : deflationSpeed + 'ms opacity',
         'opacity'    : DIMMER_MIN_OPACITY
       });
-      
+
     };
 
     if(sitecues.tdd) {

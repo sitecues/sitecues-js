@@ -1,7 +1,7 @@
-<!-- 
+<!--
 
   HLB unit testing page.  Every chunk of HTML that is specifically targeted
-  by our unit tests are commented to identify what unit tests require them  
+  by our unit tests are commented to identify what unit tests require them
 
 -->
 <html>
@@ -9,11 +9,11 @@
   <title>HLB Unit Testing Page</title>
 </head>
 <body>
-    
+
     <!-- #mapForm() #onHLBReady() -->
     <input id='textInputOne' type='text'/>
     <input id='textInputTwo' type='text'/>
-    
+
     <!-- #mapForm() -->
     <p id='paragraphOne'>Horrible</p>
     <p id='paragraphTwo'>Infections</p>
@@ -31,19 +31,19 @@
     <!-- #mapForm() -->
     <form id='formThree'>
       <input id='checkboxOne' type="checkbox" name="vehicle" value="Bike">I have a bike<br>
-      <input id='checkboxTwo' type="checkbox" name="vehicle" value="Car">I have a car 
+      <input id='checkboxTwo' type="checkbox" name="vehicle" value="Car">I have a car
     </form>
     <form id='formFour'>
       <input id='checkboxThree' type="checkbox" name="vehicle" value="Bike">I have a bike<br>
-      <input id='checkboxFour' type="checkbox" name="vehicle" value="Car">I have a car 
+      <input id='checkboxFour' type="checkbox" name="vehicle" value="Car">I have a car
     </form>
 
     <!-- #mapForm() #onHLBReady() -->
     <textarea id='textareaOne' rows="4" cols="50">
       Any text within a textarea will be copied over to the HLB.
       If the HLB is itself a textarea, or contains one, then the value
-      of that textarea will be copied to the original element once the 
-      HLB closes. 
+      of that textarea will be copied to the original element once the
+      HLB closes.
     </textarea>
     <textarea id='textareaTwo' rows="4" cols="50">
       This text will be replaced by the text of the previous textarea in our unit tests.
@@ -74,5 +74,7 @@
     <div id='nonScaledElement' style='transform:none'>Not Scaled</div>
     <div id='overflowWidth' style='width:10px;height:10px;'>Something something something somethingsomething somethingsomething somethingsomething somethingsomething somethingsomething something something</div>
     <div id='one'></div>
+    <p style='width:10px;height:10px;' id='paragraph'>Test</p>
+    <p style='width:10px;height:10px;transform:none' id='paragraph2'>test2</p>
 </body>
 </html>

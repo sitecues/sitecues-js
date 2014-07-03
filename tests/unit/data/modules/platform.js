@@ -7,5 +7,3 @@ exports.pixel = {
 exports.browser = {
   is: 'Chrome'
 };
-
-console.log('platform.js Loaded.');

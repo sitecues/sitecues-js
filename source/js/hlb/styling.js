@@ -1,23 +1,23 @@
 /*
-  This module styles the HLB by filtering attributes, styles, dom elements, 
+  This module styles the HLB by filtering attributes, styles, dom elements,
   sets background, sets default styles, computes some styles,
   and cloned child styles from the original element to the HLB.
  */
 sitecues.def('hlb/styling', function (hlbStyling, callback) {
-  
+
   'use strict';
-  
+
   sitecues.use('jquery', 'platform', 'hlb/safe-area',
   function ($, platform, hlbSafeArea) {
-    
+
     ///////////////////////////
     // PUBLIC PROPERTIES
     //////////////////////////
-    
+
     // All HLB instances will use these default padding and border values.
     hlbStyling.defaultPadding = 4;
-    hlbStyling.defaultBorder  = 3; 
-    
+    hlbStyling.defaultBorder  = 3;
+
     // Transition property used for hlb animation (-webkit, -moz)
     // This is used to transition the transform property for HLB
     // inflation/deflation animation
@@ -37,9 +37,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     ///////////////////////////
     // PRIVATE VARIABLES
     ///////////////////////////
-   
+
     var HLB_Z_INDEX = 2147483644,
-        
+
         // How many ancestors do we move up the chain until we find a background image
         // to use for the $hlbElements background image.
         BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 1,
@@ -49,7 +49,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // Default background color for HLB, if HLB is an image.
         HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
-       
+
         // Remove these HLB styles, but NOT from its children.
         HLBCSSBlacklist   = [
           'padding',
@@ -69,10 +69,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'min-height',
           'min-width'
         ],
-        
+
         // What child elements of the HLB do we want to remove after a clone.
         HLBElementBlacklist   = [
-          'script'          
+          'script'
         ],
 
         // Remove ID from HLB because the speech module sets the ID for TTS to work
@@ -93,7 +93,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'border-radius'    : '4px',        // Aesthetic purposes
           'box-sizing'       : 'content-box' // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
         };
-   
+
     //////////////////////////
     // PRIVATE FUNCTIONS
     //////////////////////////
@@ -127,11 +127,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     }
 
     function filterChildStyles ($child, hlbWidthGreaterThanSafeAreaWidth) {
-      
+
       var styles = {
         'webkitTextFillColor': ''
       };
-      
+
       // Do not copy over the width and height because
       // it causes horizontal scrollbars, unless it is an image
       // in which case we preserve the dimensions.
@@ -139,30 +139,30 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         styles.width  = '';
         styles.height = '';
       }
-      
+
       // Thought at one point this fixed something, so I am leaving it until there is nothing
       // wrong with the HLB so I can quickly uncomment to see its effects.
-      // 
+      //
       // TODO: Determine if this code is necessary.
-      // 
+      //
       // if ($child.css('display').indexOf('table') !== -1) {
       //   styles.display = 'inline-block';
       // }
 
 
       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
-      //       Fixes children overlapping children within the HLB.  Comment out the line below to 
-      //       experience this problem. 
+      //       Fixes children overlapping children within the HLB.  Comment out the line below to
+      //       experience this problem.
       // if (hlbWidthGreaterThanSafeAreaWidth) {
       //   if ($child.css('display') !== 'list-item') {
       //     styles.display = 'inline-block';
       //     styles.position = 'static';
       //   }
       // }
-      
+
       $child.css(styles);
     }
-    
+
     /**
      * [filterHLBChildren filters styles and attributes of the children of the HLB element]
      * @param  {[DOM element]} $child [Child of HLB element]
@@ -170,15 +170,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      *       the HLB element.  (Create blacklists for attributes, styles)
      */
     function filterHLBChildren ($child, hlbWidthGreaterThanSafeAreaWidth) {
-      
+
       filterChildStyles($child, hlbWidthGreaterThanSafeAreaWidth);
 
       // Ran into issues with children inheriting styles because of class and id CSS selectors.
       // Filtering children of these attributes solves the problem.
       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
-      //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to 
+      //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to
       //       experience this problem.  There might be a better way...but I don't have the patience to
-      //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat... 
+      //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat...
       filterAttributes($child);
 
     }
@@ -188,14 +188,14 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
          .appendTo(document.body)
          .css({
         'font-size': fontSize,
-        'width': ems + 'em', 
+        'width': ems + 'em',
         'visibility': 'hidden'
       });
       var px = measureDiv.width();
       measureDiv.remove();
       return px;
     }
-   
+
     function computeBulletWidth(element, style, bulletType) {
       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
@@ -209,7 +209,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     }
 
     function getBulletWidth ($element, elementComputedStyle) {
-      
+
       //If the HLB is a list AND it has bullets...return their width
       if ($element.is('ul, ol') && elementComputedStyle['list-style-type'] !== 'none') {
         return computeBulletWidth($element, elementComputedStyle, elementComputedStyle['list-style-type']);
@@ -261,10 +261,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @return {[String]}                       [CSS background-color property]
      */
     function getNonTransparentBackground ($originalElement) {
-      
+
       var newBackgroundColor,
           parents = $originalElement.parents();
-      
+
       parents.each(function () {
         if (!isTransparent($(this).css('backgroundColor'))) {
           newBackgroundColor = $(this).css('backgroundColor');
@@ -273,7 +273,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       });
 
       return newBackgroundColor;
- 
+
     }
 
     /**
@@ -283,7 +283,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @return {Boolean}                 [True if scaled original element is as wide as the safe area]
      */
     function isOriginalElementWideAsSafeArea ($element) {
-    
+
       var elementBoundingBox  = $element[0].getBoundingClientRect(),
           safeZoneBoundingBox = hlbSafeArea.getSafeZoneBoundingBox();
 
@@ -296,11 +296,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     }
 
     /**
-     * [getHLBBackgroundColor 
+     * [getHLBBackgroundColor
          If the $hlbElement has a transparent background color, we should find one
-         by looking up the entire ancestor chain and use the first non-transparent 
-         color we find.  Otherwise, if the $hlbElement is not an image, we default 
-         to a white background color.  If it is an image, however, the background 
+         by looking up the entire ancestor chain and use the first non-transparent
+         color we find.  Otherwise, if the $hlbElement is not an image, we default
+         to a white background color.  If it is an image, however, the background
          color is black.]
      * @param  {[jQuery element]} $originalElement     [The original element chosen by picker]
      * @param  {[Object]} elementComputedStyle         [The original elements computed styles]
@@ -311,7 +311,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       var newBackgroundColor;
 
       if (isTransparent(elementComputedStyle.backgroundColor)) {
-        
+
         if ($originalElement.is('img')) {
 
           return HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
@@ -319,19 +319,19 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         } else {
 
           newBackgroundColor = getNonTransparentBackground($originalElement);
-        
+
           if (newBackgroundColor) {
-        
+
             return newBackgroundColor;
-        
+
           } else {
-        
+
             return HLB_DEFAULT_BACKGROUND_COLOR;
-        
+
           }
-          
+
         }
-      
+
       }
 
       return elementComputedStyle.backgroundColor;
@@ -350,15 +350,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       if (elementComputedStyle.backgroundImage === 'none' &&
           isTransparent(elementComputedStyle.backgroundColor)) {
-      
+
         newBackgroundImage = getNonEmptyBackgroundImage($originalElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
-      
+
         if (newBackgroundImage) {
-      
+
           return newBackgroundImage;
-      
+
         }
-      
+
       }
 
       return elementComputedStyle.backgroundImage;
@@ -382,26 +382,26 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [getHLBDisplay determines $hlbElement will use for its CSS display]
      * @param  {[Object]} elementComputedStyle [The original elements computed styles]
      * @return {[String]}                      [The display the $hlbElement will use]
-     * NOTE:       
+     * NOTE:
         // If the original elements display type is a table, force a display type of
         // block because it allows us to set the height.  I believe display table
         // is mutually exclusive to minimum height/minimum width.
-        // 
+        //
         // http://stackoverflow.com/questions/8739838/displaytable-breaking-set-width-height
-        // 
+        //
         // I found the issue on the eBank site that we maintain.  Make the HLB open a table
         // and open the developer console and attempt to alter the height/width attributes.
-        // 
+        //
         // TODO: actually prove these beliefs
      */
     function getHLBDisplay (elementComputedStyle) {
-      
+
       if (elementComputedStyle.display === 'table') {
         return 'block';
       }
-      
+
       return elementComputedStyle.display;
-    
+
     }
 
     //////////////////////////
@@ -414,10 +414,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @return {[Object]} [CSS style object to be used by jQuery.css()]
      */
     hlbStyling.getHLBStyles = function ($originalElement) {
-      
+
       var originalElement      = $originalElement[0],
           elementComputedStyle = window.getComputedStyle(originalElement),
-          
+
           calculatedHLBStyles  = {
             'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
             'background-color': getHLBBackgroundColor($originalElement, elementComputedStyle),
@@ -425,8 +425,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
             'display'         : getHLBDisplay(elementComputedStyle)
           };
 
-      return $.extend({}, 
-        defaultHLBStyles, 
+      return $.extend({},
+        defaultHLBStyles,
         calculatedHLBStyles
       );
 
@@ -437,7 +437,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[DOM element]} $hlbElement [HLB]
     */
     hlbStyling.filter = function ($hlbElement) {
-      
+
       filterStyles($hlbElement);
 
       filterElements($hlbElement);
@@ -445,7 +445,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       filterAttributes($hlbElement);
 
     };
-    
+
     /**
      * [cloneStyles clones the original elements styles and the styles of all of its children.]
      * @param  {[DOM element]} $originalElement [original element]
@@ -466,15 +466,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // Cache the HLB child.
         hlbElementChild = $hlbElementChildren[i];
-        
-        // Copy the original elements child styles to the HLB elements child. 
+
+        // Copy the original elements child styles to the HLB elements child.
         hlbElementChild.style.cssText = getComputedStyle($originalElementChildren[i]).cssText;
 
         // Filter the unnecessary HLB elements styles.
         filterHLBChildren($(hlbElementChild), hlbWidthGreaterThanSafeAreaWidth);
 
       }
-     
+
     };
 
     if (sitecues.tdd) {
@@ -484,7 +484,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     }
 
     callback();
-  
+
   });
 
 });

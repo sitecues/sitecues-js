@@ -12,18 +12,17 @@ exports.scaleRectFromCenter       = function () {
     'right' : 0,
     'top'   : 0,
     'bottom': 0
-  }
+  };
 };
 exports.constrainPosition         = function () {
   return {
     'x': 0,
     'y': 0
-  }
+  };
 };
 exports.midPointDiff              = function () {
   return {
     'x': 0,
     'y': 0
-  }
+  };
 };
-console.log('hlb/positioning.js Loaded.');

@@ -9,4 +9,3 @@ exports.getSafeZoneBoundingBox = function () {
   };
 };
 exports.HLBZoom = 1.5;
-console.log('hlb/safe-area.js Loaded.');

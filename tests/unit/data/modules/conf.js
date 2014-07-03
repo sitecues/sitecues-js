@@ -10,4 +10,3 @@ exports.set = function () {
 exports.data = function () {
   return 'test';
 };
-console.log('Conf Loaded');

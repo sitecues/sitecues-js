@@ -1,31 +1,35 @@
 // Require the module file we want to test.
 var HLB_SAFE_AREA_MODULE_PATH = '../../../source/js/hlb/safe-area',
-    HLB_PAGE_PATH             = '../pages/hlb.html',
-    
-    hlbSafeArea     = require(HLB_SAFE_AREA_MODULE_PATH),
+    HLB_PAGE_PATH             = './data/html/test-hlb.html',
+
+    hlbSafeArea = require(HLB_SAFE_AREA_MODULE_PATH),
     win;
 
 require('../test/domutils');
 
 describe('hlbSafeArea', function() {
-  
-  before(function() {   
+
+  before(function() {
     domutils.loadHtml(HLB_PAGE_PATH, function(newWindow) {
-      win = newWindow;  // We are unable to change original window, so use the new one
+      win = newWindow;
     });
   });
 
   describe('#getSafeZoneBoundingBox()', function () {
 
-    it('Returns an object', function (done) {
+    it('Returns an object with left, top, height, width, right, and bottom properties', function (done) {
 
-      var expected = 'object', 
-          actual   = typeof hlbSafeArea.getSafeZoneBoundingBox();
+      var result   = hlbSafeArea.getSafeZoneBoundingBox();
 
-      expect(actual).to.be.equal(expected);
+      expect(result.hasOwnProperty('left')).to.be.true;
+      expect(result.hasOwnProperty('right')).to.be.true;
+      expect(result.hasOwnProperty('top')).to.be.true;
+      expect(result.hasOwnProperty('bottom')).to.be.true;
+      expect(result.hasOwnProperty('width')).to.be.true;
+      expect(result.hasOwnProperty('height')).to.be.true;
 
       done();
-    
+
     });
 
   });

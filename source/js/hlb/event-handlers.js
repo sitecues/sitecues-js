@@ -3,7 +3,7 @@
  * The module represents HLB event handlers.
  * For example, we want to onle allow scroll for HLB and its entities when HLB is open.
  * Stop event bubble up to window/document object.
- *  
+ *
  * Note: keydown event is also handled in keys.js
  */
 
@@ -14,33 +14,33 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
   var has = Object.prototype.hasOwnProperty;
 
   sitecues.use('jquery', 'util/common', 'keys', function($, common, keys) {
-    
+
     /**
      * Onmousewheel event handler.
      * @param e EventObject
      */
     eventHandlers.wheelHandler = function(e) {
-       
+
        var hlb = e.data.hlb[0],
            isChild = targetIsChildOfHlb(hlb, e.target);
-       // If the mouse is hovering over a child that does not have a scrollbar. 
+       // If the mouse is hovering over a child that does not have a scrollbar.
        // The function common.hasVertScroll returns true even when elements do not have a vertical scrollbar.
        // Don't scroll target if it is a HLB (not a descendant) and doesn't have scroll bar.
        if (!isChild && !common.hasVertScroll(hlb) ||
-           (common.wheelUp(e) && $(hlb).scrollTop() <= 0) || 
+           (common.wheelUp(e) && $(hlb).scrollTop() <= 0) ||
            (common.wheelDown(e) && $(hlb).scrollTop() + hlb.clientHeight + 1 >= hlb.scrollHeight)) {
          eventHandlers.disableWheelScroll();
          return false;
        }
 
        eventHandlers.enableWheelScroll();
-    };    
+    };
    /**
    * Onkeydown event handler.
    * @param e EventObject
    */
     eventHandlers.keyDownHandler = function(e) {
-      
+
       var hlb = e.data.hlb[0],
           key,
           name,
@@ -106,7 +106,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
       if ((!isUp && $(hlb).scrollTop() + hlb.clientHeight + 6 >=  hlb.scrollHeight) || (isUp &&  $(hlb).scrollTop() <= 0)) {
         common.stopDefaultEventBehavior(e);
         return false;
-      }      
+      }
       // Otherwise, everything's OK, allow default.
       return true;
     };
@@ -142,7 +142,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
     eventHandlers.disableWheelScroll = function() {
 
       $(window).on('DOMMouseScroll mousewheel', wheel);
-    
+
     };
 
     /**
@@ -151,12 +151,12 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
     eventHandlers.enableWheelScroll = function() {
 
       $(window).off('DOMMouseScroll mousewheel', wheel);
-          
+
     };
-    
+
     // Done.
     callback();
-  
+
   });
 
 });
