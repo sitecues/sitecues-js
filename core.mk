@@ -101,18 +101,6 @@ files=\
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics.js \
 
-## Development files (load modules separately).
-#ifeq ($(dev), true)
-#	files=\
-#		$(build-dir)/source/js/core.js \
-#		source/js/custom.js \
-#		$(custom-files) \
-#		source/js/use.js \
-#		source/js/debug.js \
-#
-#
-#endif
-
 ################################################################################
 # TARGET: build
 ################################################################################
@@ -120,8 +108,7 @@ build:
 	@echo "===== STARTING: Building '$(custom-name)' library ====="
 	@echo
 	@mkdir -p $(build-dir)/source/js
-	#sed 's%0.0.0-UNVERSIONED%'$(0.0.0-UNVERSIONED)'%g' source/js/core.js > $(build-dir)/source/js/core.js
-	@cp source/js/core.js $(build-dir)/source/js/core.js
+	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 	@mkdir -p $(build-dir)/etc/js
@@ -161,8 +148,10 @@ endif
 
 	#Make dir for Source-Maps 
 	@mkdir -p $(package-dir)/js/source/
+	@mkdir -p $(package-dir)/js/$(build-dir)/source/js/
 	#Copy files for Source-Maps 
 	@cp -R source/js $(package-dir)/js/source/
+	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
 
 	@cp -R source/images $(package-dir)
 
