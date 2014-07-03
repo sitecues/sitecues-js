@@ -12,6 +12,7 @@
   function intentionalError () {
     asdfghjkl();
   }
+  intentionalError();
 
   var
   // The compiled-in library version.
