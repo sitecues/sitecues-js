@@ -300,7 +300,7 @@ test-coverage:
 	@echo "TEST RUN ID: $(test-run-id)"
 	@mkdir -p ./report
 	@cd ./tests/unit ; mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
-	@echo Coverage report generated in: ../../report/unit-test-coverage.html
+	@echo Coverage report generated in: ./report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services
