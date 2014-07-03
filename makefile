@@ -285,6 +285,14 @@ nyan-unit:
 	@cd ./tests/unit ; mocha -R nyan
 
 ################################################################################
+# TARGET: dot-unit
+################################################################################
+dot-unit:
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; mocha -R dot
+
+
+################################################################################
 # TARGET: nyan-test
 #	Get test coverage output using blanket and mocha for node
 ################################################################################
@@ -292,6 +300,7 @@ test-coverage:
 	@echo "TEST RUN ID: $(test-run-id)"
 	@mkdir -p ./report
 	@cd ./tests/unit ; mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
+	@echo Coverage report generated in: ../../report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services
