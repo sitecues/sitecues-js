@@ -120,8 +120,8 @@ build:
 	@echo "===== STARTING: Building '$(custom-name)' library ====="
 	@echo
 	@mkdir -p $(build-dir)/source/js
-	@echo $(build-dir)/source/js/core.js
-	@sed 's%0.0.0-UNVERSIONED%'$(0.0.0-UNVERSIONED)'%g' source/js/core.js > $(build-dir)/source/js/core.js
+	#sed 's%0.0.0-UNVERSIONED%'$(0.0.0-UNVERSIONED)'%g' source/js/core.js > $(build-dir)/source/js/core.js
+	@cp source/js/core.js $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 	@mkdir -p $(build-dir)/etc/js
