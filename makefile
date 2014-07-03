@@ -33,7 +33,7 @@ https=off
 lint=false
 
 # Whether or not to minify the generated sitecues.js file.
-min=false
+min=true
 
 # Node.js express test server HTTP port.
 port=8000
