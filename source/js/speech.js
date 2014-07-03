@@ -315,10 +315,6 @@ sitecues.def('speech', function (speech, callback) {
 
 
       //log.info('Initializing player for ' + hlbId);
-      
-      if(!player) {
-        //log.warn('Factory failed to create a player');
-      }
 
       players[hlbId] = player;
       
