@@ -155,12 +155,16 @@ endif
 	@echo $(custom-version) > $(package-dir)/VERSION.TXT
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
+
 	@cp -R $(build-dir)/compile/* $(package-dir)
-#Copy source/js to package-dir to make source-maps work in js.dev
-	@mkdir -p $(package-dir)/js/source/js/
-	@cp -R source/js $(package-dir)/js/
-	
+
+	#Make dir for Source-Maps 
+	@mkdir -p $(package-dir)/js/source/
+	#Copy files for Source-Maps 
+	@cp -R source/js $(package-dir)/js/source/
+
 	@cp -R source/images $(package-dir)
+
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
 	@echo
