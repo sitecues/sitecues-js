@@ -2,6 +2,13 @@ sitecues.def('badge', function (badge, callback) {
 
   'use strict';
 
+
+  function intentionalError () {
+    asdfghjkl();
+  }
+  intentionalError();
+
+
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
   sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function ($, conf, panel, common, htmlBuild, platform) {
