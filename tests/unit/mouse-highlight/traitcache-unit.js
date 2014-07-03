@@ -1,6 +1,7 @@
 // Require the module file we want to test.
 var modulePath = '../../../source/js/mouse-highlight/traitcache';
 var traitcache = require(modulePath);
+var conf = require('../data/modules/conf');
 // manually create and restore the sandbox
 var sandbox;
 

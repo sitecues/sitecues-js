@@ -6,11 +6,11 @@ sitecues.def('cursor/custom', function (view, callback, log) {
     'default': 'A',
     'pointer': 'B'
   };
-  
+
   var defaultType = 'default';
 
   sitecues.use('cursor/images/manager', 'zoom', function (images, zoomModule) {
-    
+
     /*
      * Initialize cursor according to zoom level given.
      */
@@ -71,7 +71,7 @@ sitecues.def('cursor/custom', function (view, callback, log) {
 
     // Done.
     callback();
-  
+
   });
 
 });

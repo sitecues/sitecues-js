@@ -17,7 +17,7 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
 
     // Tracks whether or not the user has interacted with the panel this badge session.
     var panelInteractionDetected = false;
-    
+
     // The UI states.
     var STATES = {
       // The badge is displayed.
@@ -169,7 +169,7 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
           });
           break;
         default: // case STATES.TOOLBAR:
-          log.info("Initial UI State: " + STATES.TOOLBAR.name); 
+          log.info("Initial UI State: " + STATES.TOOLBAR.name);
           // Only hide badge if extension-provided script is running.
           badge.isBadgeRaplacedByToolbar && badge.disable();
           // Make sure toolbar appears after badge is hidden.
@@ -177,7 +177,7 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
             log.info('sitecues.getAllModulesLoaded(): ' + window.sitecues.getAllModulesLoaded());
             if(window.sitecues.getAllModulesLoaded()) {
               // It's already loaded up
-              toolbar.enable(true);              
+              toolbar.enable(true);
             } else {
               log.info('Deferring toolbar load until all modules are loaded');
               sitecues.on('core/allModulesLoaded', function() {
@@ -211,7 +211,7 @@ sitecues.def('ui-manager', function (uiManager, callback, log) {
         currentState = STATES.BADGE;
       });
     }
-    
+
     if (DEV) {
       // todo: maybe export the whole module instead if every single function?
       exports.uiManager = uiManager;

@@ -1,5 +1,3 @@
-zoom = {
-    'min': 1,
-    'max': 3,
-    'step': 0.1
-};
+exports.min = 1;
+exports.max = 3;
+exports.step = 0.1;

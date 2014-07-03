@@ -1,3 +1,1 @@
-speech = {
-    isEnabled: function(){ return true; }
-};
+exports.isEnabled = function(){ return true; };

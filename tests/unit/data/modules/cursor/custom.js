@@ -1,1 +1,1 @@
-custom = {'getImage': function() {return 'testUrl'}};
+exports.getImage = function () { return 'testUrl'; };

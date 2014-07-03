@@ -8,16 +8,16 @@ function create(window) {
     window.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     // trick jQuery into thinking CORS is supported (should be in node-XMLHttpRequest)
     window.XMLHttpRequest.prototype.withCredentials = false;
-    
+
     if(window.location == null) {
-      window.location = require('location');  
+      window.location = require('location');
     }
 
     if(window.navigator == null) {
       window.navigator = require('navigator');
     }
   }
-  
+
 
   var location = window.location,
       navigator = window.navigator,

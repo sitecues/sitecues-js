@@ -1,1 +1,1 @@
-badge = {};
+exports = {};

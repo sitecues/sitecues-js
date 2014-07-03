@@ -1,2 +1,1 @@
-mac = {};
-mac.urls = {'mac_default_type': 'testUrl'}
+exports.urls = {'mac_default_type': 'testUrl'};

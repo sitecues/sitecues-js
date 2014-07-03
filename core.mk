@@ -54,13 +54,9 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/jquery/color.js \
 	source/js/jquery/cookie.js \
-	source/js/jquery/transform2d.js \
 	source/js/jquery/style.js \
-	source/js/jquery/resize.js \
-    source/js/jquery/effects.js \
-	source/js/util/close-button.js \
+	source/js/jquery/effects.js \
 	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
@@ -79,16 +75,16 @@ files=\
 	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight.js \
 	source/js/keys.js \
-	source/js/background-dimmer.js \
 	source/js/cursor/images/win.js \
 	source/js/cursor/images/mac.js \
 	source/js/cursor/images/manager.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
-	source/js/hlb/designer.js \
-	source/js/hlb/style.js \
-	source/js/hlb/specificElement.js \
+	source/js/hlb/safe-area.js \
+	source/js/hlb/styling.js \
+	source/js/hlb/positioning.js \
+	source/js/hlb/dimmer.js \
 	source/js/hlb/event-handlers.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \

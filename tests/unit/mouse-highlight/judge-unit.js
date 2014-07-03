@@ -1,8 +1,9 @@
 var modulePath = '../../../source/js/mouse-highlight/judge.js',
   judge = require(modulePath),
   nodes = [],
-  win;
-
+  win,
+  traits = require('../data/modules/mouse-highlight/traits');
+console.log(traits)
 require('../test/domutils');
 
 describe('judge', function() {

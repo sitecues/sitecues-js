@@ -1,14 +1,12 @@
-conf = {
-  'get': function(prop) {
-    if (prop === 'zoom') {
-      return 1.5;  // Needs to be a number
-    }
-    return 'test';
-  },
-  'set': function () {
-    return 'test';
-  },
-  'data': function () {
-    return 'test';
+exports.get = function(prop) {
+  if (prop === 'zoom') {
+    return 1.5;  // Needs to be a number
   }
+  return 'test';
+};
+exports.set = function () {
+  return 'test';
+};
+exports.data = function () {
+  return 'test';
 };

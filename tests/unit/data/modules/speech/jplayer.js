@@ -1,1 +1,1 @@
-jplayer = {};
+exports = {};

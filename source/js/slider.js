@@ -1,7 +1,7 @@
 sitecues.def("slider", function (slider, callback, log) {
   'use strict';
 
-  sitecues.use("jquery", "conf", "zoom", "ui", function ($, conf, zoom, ui) {
+  sitecues.use("jquery", "conf", "zoom", function ($, conf, zoom) {
 
     // #### SLIDER INTERFACE #########################################################################
 
