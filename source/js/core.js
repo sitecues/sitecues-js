@@ -9,6 +9,10 @@
 
   // NOTE: initialization of this module is at the bottom of this page.
 
+  function intentionalError () {
+    asdfghjkl();
+  }
+
   var
   // The compiled-in library version.
     version = '0.0.0-UNVERSIONED'
