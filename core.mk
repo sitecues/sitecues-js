@@ -157,9 +157,10 @@ endif
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 	@cp -R $(build-dir)/compile/* $(package-dir)
 #Copy source/js to package-dir to make source-maps work in js.dev
-	@cp -R source/js $(package-dir)/js/source/js/
+	@mkdir -p $(package-dir)/js/source/js/
+	@cp -R source/js $(package-dir)/js/
+	
 	@cp -R source/images $(package-dir)
-
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
 	@echo
