@@ -14,26 +14,21 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     ////////////////////////
 
     var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
-        SITECUES_HLB_ID         = 'sitecues-hlb', // ID for $hlbElement
+        SITECUES_HLB_ID         = 'sitecues-hlb',         // ID for $hlbElement
 
         INFLATION_SPEED   = 400, // Default inflation duration
         DEFLATION_SPEED   = 150, // Default deflation duration
 
         CHAR_WIDTH_LIMIT  = 50,  // Amount of characters that fits horizontally in HLB
 
-        MOUSE_SAFETY_ZONE = 0, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
+        MOUSE_SAFETY_ZONE = 0,   // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
 
-        $originalElement,  // Element selected by the picker for the creation of the HLB
-        $hlbElement,       // Element that is cloned from the originalElement (HLB)
+        $hlbWrappingElement,     // Element outside the body that contains the HLB and background dimmer
+        $hlbElement,             // Element that is cloned from the originalElement (HLB)
+        $originalElement,        // Element selected by the picker for the creation of the HLB
 
-        $hlbWrappingElement, // Element outside the body that contains the HLB and background dimmer
-
-        preventDeflationFromMouseout = false, // Boolean that determines if HLB can be deflated.
-
-        isHLBClosing = false, // Boolean that determines if the HLB is currently deflating.
-
-        originCSS,    // The HLB element's midpoint for animation
-        translateCSS, // The HLB element's translation for final position
+        originCSS,               // The HLB element's midpoint for animation
+        translateCSS,            // The HLB element's translation for final position
 
         transitionEndEvent = (function () {
           if (platform.browser.isChrome || platform.browser.isSafari) {
@@ -42,14 +37,16 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
           return 'transitionend';
         }()),
 
-        isSticky = false; // DEBUG: HLB deflation toggler
+        preventDeflationFromMouseout = false, // Boolean that determines if HLB can be deflated.
+        isHLBClosing = false,                 // Boolean that determines if the HLB is currently deflating.
+        isSticky     = false;                 // DEBUG: HLB deflation toggler
 
     //////////////////////////////
     // PRIVATE FUNCTIONS
     /////////////////////////////
 
     /**
-     * [mapForm updates input values from on set of elements to another]
+     * [mapForm maps input values from one set of elements to another]
      * @param  {[jQuery element]} from [HLB or original element]
      * @param  {[jQuery element]} to   [HLB or original element]
      */
@@ -103,10 +100,10 @@ sitecues.def('highlight-box', function (highlightBox, callback) {
     }
 
     /**
-     * [getOriginalElement checks and retrieves the orignal element that the HLB uses
+     * [getOriginalElement checks and retrieves the original element that the HLB uses
      * from an event object.  Also handles the specific cases where we may want to toggle
      * the HLB through a public interface during debugging and testing.]
-     * @param  {[DOM event]} e [A modified native DOM event, jQuery element, DOM element]
+     * @param  {[DOM event]}   e [A modified native DOM event, jQuery element, DOM element]
      * @return {[DOM element]}   [The DOM element we will clone for the HLB instance]
      */
     function getOriginalElement (e) {
