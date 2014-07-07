@@ -4,6 +4,7 @@
 .DS_Store
 .pip
 node_modules
+npm-debug.log
 target
 tmp
 var
@@ -25,3 +26,5 @@ howards-jokes.js
 # Cursors that should be in the IE version should be copied to the source/images/cursors directory.
 tools/site/generate-cursors/cursor_output/
 /nbproject/private/
+
+report
