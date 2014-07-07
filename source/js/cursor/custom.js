@@ -1,4 +1,4 @@
-sitecues.def('cursor/custom', function (view, callback, log) {
+sitecues.def('cursor/custom', function (view, callback) {
   'use strict';
 
   // Cursor types.
@@ -65,7 +65,7 @@ sitecues.def('cursor/custom', function (view, callback, log) {
     view.init();
 
     // Export object fro unit-tests.
-    if (DEV) {
+    if (UNIT) {
       exports.custom = view;
     }
 

@@ -1,4 +1,4 @@
-sitecues.def('jquery', function(module, callback, log) {
+sitecues.def('jquery', function(module, callback) {
 
   "use strict";
 

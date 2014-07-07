@@ -1,7 +1,7 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-sitecues.def('util/common', function (common, callback, log) {
+sitecues.def('util/common', function (common, callback) {
   'use strict';
 
    // Define dependency modules.
@@ -170,7 +170,7 @@ sitecues.def('util/common', function (common, callback, log) {
 
     // For now it is just a stub
     // todo: fill in with logic
-    common.isAddedBySitecues = function (el) {
+    common.isAddedBySitecues = function () {
         return false;
     };
 

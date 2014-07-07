@@ -1,4 +1,4 @@
-sitecues.def('hpan', function (hpan, callback, log) {
+sitecues.def('hpan', function (hpan, callback) {
   'use strict';
 
   hpan.isOn = false;

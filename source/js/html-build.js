@@ -1,9 +1,9 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-sitecues.def('html-build', function(htmlBuild, callback, log) {
+sitecues.def('html-build', function(htmlBuild, callback) {
 
-	sitecues.use('jquery', 'conf', 'jquery/style', function($, conf){
+	sitecues.use('jquery', 'conf', 'jquery/style', function($){
 
 		/**
 		 * Returns a new div element with 'reset' styles applied, as a jQuery object.

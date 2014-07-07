@@ -1,5 +1,5 @@
 // focus enhancement (make focus easier to see)
-sitecues.def('focus', function(focus, callback, log) {
+sitecues.def('focus', function(focus, callback) {
 
 	// minimum zoom at which focus
 	// enhancement appears
@@ -58,14 +58,14 @@ sitecues.def('focus', function(focus, callback, log) {
 		}
 
 		// handle element blur
-		focus.blur = function(event){
+		focus.blur = function(){
 			// double-check if focus enhancement
 			// is enabled and show focus element
 			if (focus.enabled) focus.hide();
 		}
 
 		// handle
-		focus.focus = function(event){
+		focus.focus = function(){
 			// double-check if focus enhancement
 			// is enabled and hide focus element
 			if (focus.enabled) focus.show();

@@ -2,7 +2,7 @@
  * This module loads values provided in the 'windows.sitecues.userConfig' object
  * into the user configuration manager.
  */
-sitecues.def('conf/user/provided', function (provided, callback, log) {
+sitecues.def('conf/user/provided', function (provided, callback) {
   'use strict';
 
   // Depends upon the user configuration management module.

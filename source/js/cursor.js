@@ -241,13 +241,13 @@ sitecues.def('cursor', function (cursor, callback) {
             cache: true,
             data: null,
             headers: {"Accept": "application/octet-stream"},
-            success: function(data, status, xhr) {
+            success: function() {
                 console.log('Loading of CUR file completed!');
                 if (callback) {
                     callback();
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function(jqXHR) {
                 jqXHR.abort();
                 console.log("[Error] Unable to fetch cursor image from server");
             }

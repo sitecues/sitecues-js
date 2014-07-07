@@ -97,23 +97,12 @@ files=\
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics.js \
 
-## Development files (load modules separately).
-#ifeq ($(dev), true)
-#	files=\
-#		$(build-dir)/source/js/core.js \
-#		source/js/custom.js \
-#		$(custom-files) \
-#		source/js/use.js \
-#		source/js/debug.js \
-#
-#
-#endif
-
 ################################################################################
 # TARGET: build
 ################################################################################
 build:
-	@echo "===== STARTING: Building '$(custom-name)' library"
+	@echo "===== STARTING: Building '$(custom-name)' library ====="
+	@echo
 	@mkdir -p $(build-dir)/source/js
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 	@mkdir -p $(build-dir)/compile/js
@@ -121,17 +110,20 @@ build:
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@echo
 	@echo "Creating compressed (gzipped) JavaScript files."
+	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-ifneq ($(dev), true)
+#ifneq ($(dev), true)
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
-endif
+#endif
+	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo
 
@@ -147,8 +139,18 @@ endif
 	@echo $(custom-version) > $(package-dir)/VERSION.TXT
 	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
 	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
+
 	@cp -R $(build-dir)/compile/* $(package-dir)
+
+	#Make dir for Source-Maps 
+	@mkdir -p $(package-dir)/js/source/
+	@mkdir -p $(package-dir)/js/$(build-dir)/source/js/
+	#Copy files for Source-Maps 
+	@cp -R source/js $(package-dir)/js/source/
+	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
+
 	@cp -R source/images $(package-dir)
+
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
 	@echo

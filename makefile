@@ -33,7 +33,7 @@ https=off
 lint=false
 
 # Whether or not to minify the generated sitecues.js file.
-min=false
+min=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -162,7 +162,8 @@ endif
 ################################################################################
 
 ifeq ($(dev), false)
-	export uglifyjs-args+=-c dead_code=true --define DEV=false
+	export uglifyjs-args+=-c dead_code=true
+	export uglifyjs-args+=--define DEV=false,UNIT=false
 endif
 
 ################################################################################
@@ -273,7 +274,33 @@ test-smoke:
 ################################################################################
 test-unit:
 	@echo "TEST RUN ID: $(test-run-id)"
-	@cd ./tests/unit ; ../../node_modules/.bin/mocha $(testunit-mocha-options)
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha $(testunit-mocha-options)
+
+################################################################################
+# TARGET: nyan-test
+#	Run unit test with nyan-cat because awesome
+################################################################################
+nyan-unit:
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R nyan
+
+################################################################################
+# TARGET: dot-unit
+################################################################################
+dot-unit:
+	@echo "TEST RUN ID: $(test-run-id)"
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -R dot
+
+
+################################################################################
+# TARGET: nyan-test
+#	Get test coverage output using blanket and mocha for node
+################################################################################
+test-coverage:
+	@echo "TEST RUN ID: $(test-run-id)"
+	@mkdir -p ./report
+	@cd ./tests/unit ; ../../node_modules/mocha/bin/mocha -r blanket -R html-cov > ../../report/unit-test-coverage.html
+	@echo Coverage report generated in: ./report/unit-test-coverage.html
 
 ################################################################################
 # TARGET: stop-all-services

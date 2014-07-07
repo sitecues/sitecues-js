@@ -1,6 +1,6 @@
 // http://stackoverflow.com/questions/2655925/jquery-css-applying-important-styles
 // todo: rename
-sitecues.def('jquery/style', function (style, callback, log) {
+sitecues.def('jquery/style', function (style, callback) {
   'use strict';
   
   var toClass = {}.toString

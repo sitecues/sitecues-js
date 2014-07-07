@@ -27,4 +27,6 @@ howards-jokes.js
 tools/site/generate-cursors/cursor_output/
 /nbproject/private/
 
+# Stops auto-generated reports from being commited, such as unit-test-coverage
+# ============================================================================
 report

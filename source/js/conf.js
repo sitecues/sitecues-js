@@ -5,7 +5,7 @@
  *
  * For site-specific configuration (such as the site ID), refer to the 'conf/site' module.
  */
-sitecues.def('conf', function (conf, callback, log) {
+sitecues.def('conf', function (conf, callback) {
 
   // First, load user configuration.
   sitecues.use('conf/user', function(user) {

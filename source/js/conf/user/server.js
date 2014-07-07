@@ -2,7 +2,7 @@
  * This module is responsible for reading/persisting user configuration to/from the
  * server
  */
-sitecues.def('conf/user/server', function (server, callback, log) {
+sitecues.def('conf/user/server', function (server, callback) {
 
   // URLs for loading/saving data
 	var saveUrl = '//' + sitecues.getLibraryConfig().hosts.up + '/save/' + location.hostname + '?callback=?';
@@ -55,7 +55,7 @@ sitecues.def('conf/user/server', function (server, callback, log) {
           async: true,
           contentType: "application/json",
           dataType: 'jsonp',
-          success: function (data) {
+          success: function () {
             saveCallback();
           },
           error: function (e) {

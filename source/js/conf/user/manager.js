@@ -3,7 +3,7 @@
  * properties represent the state of the user session, and are
  * persisted in the user preferences data store.
  */
-sitecues.def('conf/user/manager', function (manager, callback, log) {
+sitecues.def('conf/user/manager', function (manager, callback) {
 	'use strict';
 
 	// private variables

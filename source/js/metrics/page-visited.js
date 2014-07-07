@@ -3,9 +3,9 @@
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  * (Send it only once when the user goes to a new page)
  */
-sitecues.def('metrics/page-visited', function(pageVisited, callback, log) {
+sitecues.def('metrics/page-visited', function (pageVisited, callback) {
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
+    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil) {
 
         // ============= Objects methods ======================
         pageVisited = {

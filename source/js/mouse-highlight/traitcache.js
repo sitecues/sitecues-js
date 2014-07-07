@@ -134,7 +134,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       rectCache = {};
     }
 
-    if (DEV) {
+    if (UNIT) {
       $.extend(exports, traitcache);
     }
   });

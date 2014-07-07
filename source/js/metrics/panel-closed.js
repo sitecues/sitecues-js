@@ -2,7 +2,7 @@
  * Create and send a metric event when the user opens an HLB.
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
-sitecues.def('metrics/panel-closed', function(panelClosed, callback, log) {
+sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
 
     var DEFAULT_STATE = {
         'name': 'panel-closed',

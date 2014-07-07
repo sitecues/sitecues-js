@@ -28,7 +28,6 @@ sitecues.def('zoom', function (zoom, callback) {
         $zoomElement: $(document.documentElement)
       },
       originalDocumentWidth = getDocumentWidth(),    // Save this value to reduce the width of the <html> when zooming
-      restrictWidthTimeout,
       repaintTimeout;
 
     // use conf module for sharing

@@ -1,116 +1,121 @@
-sitecues.def('badge', function (badge, callback) {
+sitecues.def('badge', function(badge, callback) {
 
-  'use strict';
+    'use strict';
 
-  // use jquery, we can rid off this dependency
-  // if we will start using vanilla js functions
-  sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function ($, conf, panel, common, htmlBuild, platform) {
+    // use jquery, we can rid off this dependency
+    // if we will start using vanilla js functions
+    sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function($, conf, panel, common, htmlBuild, platform) {
 
-    // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
-    badge.altBadges = $(conf.get('panelDisplaySelector'));
-    badge.badgeId   = conf.get('badgeId');
+        // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
+        badge.altBadges = $(conf.get('panelDisplaySelector'));
+        badge.badgeId = conf.get('badgeId');
 
-    if (!badge.badgeId) {
-      // Use the default value
-      badge.badgeId = 'sitecues-badge';
-    }
+        if (!badge.badgeId) {
+            // Use the default value
+            badge.badgeId = 'sitecues-badge';
+        }
 
-    function isFloatingBadge() {
-      return badge.panel.parent().is(document.documentElement);
-    }
+        function isFloatingBadge() {
+            return badge.panel.parent().is(document.documentElement);
+        }
 
-    /**
-   * Creates a markup for new badge and inserts it right into the DOM.
-   * @param function success
-   * @returns void
-   */
-    function create() {
-      badge.panel = htmlBuild.$div()
-              .attr('id', badge.badgeId) // set element id for proper styling
-              .addClass('sitecues-badge')
-              .hide()
-              .appendTo('html');
-      // create badge image inside of panel
-      badge.element = $('<img>')
-       .attr('id', 'sitecues-badge-image')
-       .addClass('sitecues-badge-image')
-       .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
-       .appendTo(badge.panel);
+        /**
+         * Creates a markup for new badge and inserts it right into the DOM.
+         * @param function success
+         * @returns void
+         */
+        function create() {
+            badge.panel = htmlBuild.$div()
+                .attr('id', badge.badgeId) // set element id for proper styling
+            .addClass('sitecues-badge')
+                .hide()
+                .appendTo('html');
+            // create badge image inside of panel
+            badge.element = $('<img>')
+                .attr('id', 'sitecues-badge-image')
+                .addClass('sitecues-badge-image')
+                .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
+                .appendTo(badge.panel);
 
-      refreshBadgeSize();
-    }
+            refreshBadgeSize();
+        }
 
-    /**
-     * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
-     *
-     * @param success Function executed if successful.
-     * @return void
-     */
-    function show() {
-      $(badge.panel)
-        .css('display', 'block')
-        .effects({ opacity : 1.0 }, 750, null,
-          function() {
-            sitecues.emit('badge/show');
-          });
-    }
+        /**
+         * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
+         *
+         * @param success Function executed if successful.
+         * @return void
+         */
+        function show() {
+            $(badge.panel)
+                .css('display', 'block')
+                .effects({
+                        opacity: 1.0
+                    }, 750, null,
+                    function() {
+                        sitecues.emit('badge/show');
+                    });
+        }
 
-    function doesBadgeNeedRefreshOnZoom() {
-      return !platform.browser.isIE && isFloatingBadge();
-    }
+        function doesBadgeNeedRefreshOnZoom() {
+            return !platform.browser.isIE && isFloatingBadge();
+        }
 
-    function refreshBadgeSize() {
-      if (doesBadgeNeedRefreshOnZoom()) {
-        badge.panel.css({
-          transformOrigin: '0% 0%',
-          transform: 'scale(' + 1 / conf.get('zoom') + ')'
-        });
-      }
-    }
+        function refreshBadgeSize() {
+            if (doesBadgeNeedRefreshOnZoom()) {
+                badge.panel.css({
+                    transformOrigin: '0% 0%',
+                    transform: 'scale(' + 1 / conf.get('zoom') + ')'
+                });
+            }
+        }
 
-    // BODY
-    var $badge = $('#' + badge.badgeId);
-    var isBadgeInDom = $badge && $badge.length > 0;
+        // BODY
+        var $badge = $('#' + badge.badgeId);
+        var isBadgeInDom = $badge && $badge.length > 0;
 
-    if (badge.altBadges && (badge.altBadges.length > 0)) {
-      badge.panel   = badge.altBadges;
-      badge.element = badge.panel;
-    } else if (isBadgeInDom) {
-      $badge.css({'visibility': 'visible', 'opacity': 1});
-      badge.panel   = $badge;
-      badge.element = badge.panel;
-    } else {
-      // We have no alternate or pre-existing badges defined, so create a new one.
-      create();
-    }
+        if (badge.altBadges && (badge.altBadges.length > 0)) {
+            badge.panel = badge.altBadges;
+            badge.element = badge.panel;
+        } else if (isBadgeInDom) {
+            $badge.css({
+                'visibility': 'visible',
+                'opacity': 1
+            });
+            badge.panel = $badge;
+            badge.element = badge.panel;
+        } else {
+            // We have no alternate or pre-existing badges defined, so create a new one.
+            create();
+        }
 
-    panel.parent  = badge.element;
+        panel.parent = badge.element;
 
-    var setDefaultEventOver = function () {
-      return sitecues.emit('badge/hover', badge.element);
-    };     
-  
-    var setDefaultEventLeave = function () {
-      return sitecues.emit('badge/leave', badge.element);
-    };  
+        var setDefaultEventOver = function() {
+            return sitecues.emit('badge/hover', badge.element);
+        };
 
-    $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
+        var setDefaultEventLeave = function() {
+            return sitecues.emit('badge/leave', badge.element);
+        };
 
-    show();
+        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
 
-    if (doesBadgeNeedRefreshOnZoom()) {
-      sitecues.on('zoom', refreshBadgeSize);
-    }
+        show();
 
-    if (DEV) {
-      // todo: maybe export the whole module instead if every single function?
-      exports.badge = badge;
-    }
+        if (doesBadgeNeedRefreshOnZoom()) {
+            sitecues.on('zoom', refreshBadgeSize);
+        }
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
-    callback();
-  });
+        if (UNIT) {
+            // todo: maybe export the whole module instead if every single function?
+            exports.badge = badge;
+        }
+
+        // Unless callback() is queued, the module is not registered in global var modules{}
+        // See: https://fecru.ai2.at/cru/EQJS-39#c187
+        //      https://equinox.atlassian.net/browse/EQ-355
+        callback();
+    });
 
 });

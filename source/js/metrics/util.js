@@ -2,7 +2,7 @@
  * This is module for common utilities that might need to be used across all
  * of the different metric modules.
  */
-sitecues.def('metrics/util', function(metricsUtil, callback, log) {
+sitecues.def('metrics/util', function (metricsUtil, callback) {
     'use strict';
 
     var toClass = {}.toString;
@@ -30,11 +30,11 @@ sitecues.def('metrics/util', function(metricsUtil, callback, log) {
                 dataType: "json"
             });
 
-            request.done(function(msg) {
+            request.done(function() {
 //                console.log('Request succeeded', msg);
             });
 
-            request.fail(function(jqXHR, textStatus) {
+            request.fail(function() {
 //                console.log("Request failed: " + textStatus);
             });
         };
