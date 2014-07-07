@@ -61,8 +61,11 @@ files=\
 	source/js/util/common.js \
 	source/js/util/geo.js \
 	source/js/html-build.js \
-	source/js/speech-builder.js \
-	source/js/speech.js \
+	source/js/audio/speech-builder.js \
+	source/js/audio/html5-player.js \
+	source/js/audio/safari-player.js \
+	source/js/audio.js \
+	source/js/audio/audio-cues.js \
 	source/js/zoom.js \
 	source/js/slider.js \
 	source/js/panel.js \

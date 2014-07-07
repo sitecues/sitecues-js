@@ -5,5 +5,8 @@ exports.pixel = {
   }
 };
 exports.browser = {
-  is: 'Chrome'
+  is: 'Chrome',
+  isChrome: true,
+  isIE: false,
+  isSafari: false
 };

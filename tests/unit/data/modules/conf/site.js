@@ -1,8 +1,6 @@
-site = {
-  get: function(key) {
-    var data = {
-      ui_mode: 'auto'
-    };
-    return data[key];
-  }
+exports.get = function(key) {
+  var data = {
+    site_id: '0'
+  };
+  return data[key];
 };

@@ -1,10 +1,9 @@
 sitecues.def( 'panel', function (panel, callback) {
-  
   'use strict';
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'conf/site', 'speech', 'slider', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, site, speech, SliderClass, ui, common, zoom, htmlBuild, platform) {
+  sitecues.use( 'jquery', 'conf', 'audio', 'slider', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, audio, SliderClass, ui, common, zoom, htmlBuild, platform) {
 
     var PANEL_WIDTH = 500;
     var PANEL_HEIGHT = 80;  // To keep aspect ratio, HEIGHT is WIDTH * .16
@@ -85,7 +84,7 @@ sitecues.def( 'panel', function (panel, callback) {
       // create TTS button and set it up
       ttsButton = $('<div id="sitecues-tts" class="sitecues-clickable">').appendTo(frame);
       
-      if ( speech.isEnabled() && site.get('ttsAvailable')) {
+      if ( audio.isSpeechEnabled()) {
         ttsButton.data( 'tts-enable', 'enabled' );
       } else {
         ttsButton.addClass( 'tts-disabled' );
@@ -197,13 +196,13 @@ sitecues.def( 'panel', function (panel, callback) {
     // Function that will toggle tts on or off.
     function ttsToggle() {
       var ttsButton = $('#sitecues-tts');
-      if(ttsButton.data('tts-enable') === 'disabled' && site.get('ttsAvailable')) {
+      if(ttsButton.data('tts-enable') === 'disabled') {
         // It's disabled, so enable it
-        sitecues.emit('speech/enable');
+        audio.setSpeechState(true)
         showTTSbuttonEnabled(ttsButton);
       } else {
         // It's enabled (or unknown), so disable it
-        sitecues.emit('speech/disable');
+        audio.setSpeechState(false);
         showTTSbuttonDisabled(ttsButton);
       }
     }

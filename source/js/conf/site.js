@@ -14,18 +14,17 @@
  */
 sitecues.def('conf/site', function (site, callback) {
 
+  'use strict';
+
   var
-    // The site configuration.
-    defaultSiteConfig = {
-      ttsAvailable : false
-    }
     // The site configuration data object.
-    ,siteConfig
+    siteConfig
     // Keep a reference to the provided site config so that we do not override.
     , providedSiteConfig = sitecues.getSiteConfig()
+    , isFetched = false
     ;
 
-  sitecues.use('jquery', 'conf/user', function($) {
+  sitecues.use('jquery', function($) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
     // but the contents of root object properties can be modified.
     site.get = function(key) {
@@ -33,36 +32,33 @@ sitecues.def('conf/site', function (site, callback) {
     };
 
     // Initialize the site configuration to the default.
-    siteConfig = $.extend(true, {}, defaultSiteConfig, providedSiteConfig);
+    siteConfig = $.extend(true, {}, providedSiteConfig);
 
-    // Trigger the initial fetch.
-    $.ajax({
-      // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
-      url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
-      dataType: 'json',
-      async: false,
-      success: function(data) {
-        // log.info("Successfully fetched site config from server");
-
-        // Reset the site configuration object.
-        siteConfig = {};
-
-        // Copy the fetched key/value pairs into the site configuration.
-        for (var i = 0; i < data.settings.length; i++) {
-          siteConfig[data.settings[i].key] = data.settings[i].value;
-        }
-
-        // Add the provided configuration
-        siteConfig = $.extend(true, siteConfig, providedSiteConfig);
-
-        callback(site);
-      },
-      error: function() {
-        log.error("Unable to fetch site config from server");
-        callback(site);
+    function fetchSiteConfig() {
+      if (isFetched) {
+        return; // Already fetched
       }
-    });
+      // Trigger the initial fetch.
+      $.ajax({
+        // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
+        url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/2/site/' + providedSiteConfig.site_id + '/config',
+        dataType: 'json',
+        success: function (data) {
+          // Copy the fetched key/value pairs into the site configuration.
+          for (var i = 0; i < data.settings.length; i++) {
+            siteConfig[data.settings[i].key] = data.settings[i].value;
+          }
 
+          // Add the provided configuration
+          siteConfig = $.extend(true, siteConfig, providedSiteConfig);
+          isFetched = true;
+        }
+      });
+    }
+
+    sitecues.on('speech/enabled', fetchSiteConfig); // Fetch once we need it
+
+    callback(site);
   });
   
 });
