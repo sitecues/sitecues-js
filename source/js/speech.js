@@ -4,624 +4,624 @@
  * by other parts of the application.
  */
 
-sitecues.def('speech', function (speech, callback) {
-  
-  'use strict';
-  
-  speech.CONSTANTS = {
-    // Tracks if the user has heard the longer, more descriptive "speech on" cue.
-    'FIRST_SPEECH_ON_PARAM'      : 'firstSpeechOn',
-    // Time in millis after which the more descriptive "speech on" cue should replay.
-    'FIRST_SPEECH_ON_RESET_MS'   : 7 * 86400000, // 7 days
-    // Used to define if "Speech off" cue needs to be said.
-    'SPEECH_OFF_PARAM'           : 'speechOff',
-    'VERBAL_CUE_SPEECH_ON'       : 'verbalCueSpeechOn',
-    'VERBAL_CUE_SPEECH_ON_FIRST' : 'verbalCueSpeechOnFirst',
-    'VERBAL_CUE_SPEECH_OFF'      : 'verbalCueSpeechOff'
-  };
-  
-  sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
-    function(conf, site, common, $, builder, platform) {
+sitecues.def('speech', function(speech, callback) {
 
-    var indexOfIgnoreCase = function(a, s) {
-      s = s.toLowerCase();
-      for (var i = 0; i < a.length; i++) {
-        if (s === a[i].toLowerCase()) {
-          return i;
-        }
-      }
-      return -1;
+    'use strict';
+
+    speech.CONSTANTS = {
+        // Tracks if the user has heard the longer, more descriptive "speech on" cue.
+        'FIRST_SPEECH_ON_PARAM': 'firstSpeechOn',
+        // Time in millis after which the more descriptive "speech on" cue should replay.
+        'FIRST_SPEECH_ON_RESET_MS': 7 * 86400000, // 7 days
+        // Used to define if "Speech off" cue needs to be said.
+        'SPEECH_OFF_PARAM': 'speechOff',
+        'VERBAL_CUE_SPEECH_ON': 'verbalCueSpeechOn',
+        'VERBAL_CUE_SPEECH_ON_FIRST': 'verbalCueSpeechOnFirst',
+        'VERBAL_CUE_SPEECH_OFF': 'verbalCueSpeechOff'
     };
 
-    var players = {},
-        // Determine if the user has turned on TTS.
-        ttsOn = !!conf.get('ttsOn'),
-       /*
-        * This is a flag we can set that will effectively enable TTS, but
-        * not interfere with the user state maintained in the ttsEnable
-        * variable.  The primary intent here is for use by cue()
-       */
-        ttsBypass = false,
-        // Flag indicating that this site is enabled for TTS.
-        ttsAvailable = !!site.get('ttsAvailable'),
-        timesCued = 1,
-        maxCued = 3,
+    sitecues.use('conf', 'conf/site', 'util/common', 'jquery', 'speech-builder', 'platform',
+        function(conf, site, common, $, builder, platform) {
 
-        pageLanguage = document.documentElement.lang ? '&l=' + document.documentElement.lang : '',
+            var indexOfIgnoreCase = function(a, s) {
+                s = s.toLowerCase();
+                for (var i = 0; i < a.length; i++) {
+                    if (s === a[i].toLowerCase()) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
 
-        /**
-         * Returns true if the "first speech on" cue should be played.
-         * @return {boolean}
-         */
-        shouldPlayFirstSpeechOnCue = function() {
-          var fso = conf.get(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM);
-          return (!fso || ((fso + speech.CONSTANTS.FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
-        },
-        /**
-         * Returns true if the "speech off" cue should be played.
-         * @return {boolean}
-         */
-        shouldPlaySpeechOffCue = function() {
-          return conf.get(speech.CONSTANTS.SPEECH_OFF_PARAM);
-        },
-        /**
-         * Signals that the "first speech on" cue has played.
-         */
-        playedFirstSpeechOnCue = function() {
-          conf.set(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
-        },
+            var players = {},
+                // Determine if the user has turned on TTS.
+                ttsOn = !! conf.get('ttsOn'),
+                /*
+                 * This is a flag we can set that will effectively enable TTS, but
+                 * not interfere with the user state maintained in the ttsEnable
+                 * variable.  The primary intent here is for use by cue()
+                 */
+                ttsBypass = false,
+                // Flag indicating that this site is enabled for TTS.
+                ttsAvailable = !! site.get('ttsAvailable'),
+                timesCued = 1,
+                maxCued = 3,
 
-        //What audio format will we use? 
-        //At the moment, mp3 and ogg are sufficient for the browser/OS combinations we support. 
-        audioFormat =  (function() {
-          var possibleAudioFormats = site.get('ttsAudioFormats'),
-              mp3 = indexOfIgnoreCase(possibleAudioFormats, 'mp3') >= 0,
-              ogg = indexOfIgnoreCase(possibleAudioFormats, 'ogg') >= 0;
-              //aac = indexOfIgnoreCase(possibleAudioFormats, 'aac') >= 0
-              //wav = indexOfIgnoreCase(possibleAudioFormats, 'wav') >= 0
-          try {
-            var a = new Audio();
-            //Default to ogg if it's supported, otherwise, mp3
-            if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, '')) && ogg) {
-              return 'ogg';
-            }
-            if (!!(a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, '')) && mp3) {
-              return 'mp3';
-            }
-          } catch (e) {
-            if ((platform.browser.isChrome || platform.browser.isFirefox) && ogg) {
-              return 'ogg';
-            } else if (mp3) {
-              return 'mp3';
-            }        
-          }
+                pageLanguage = document.documentElement.lang ? '&l=' + document.documentElement.lang : '',
 
-        }()),
+                /**
+                 * Returns true if the "first speech on" cue should be played.
+                 * @return {boolean}
+                 */
+                shouldPlayFirstSpeechOnCue = function() {
+                    var fso = conf.get(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM);
+                    return (!fso || ((fso + speech.CONSTANTS.FIRST_SPEECH_ON_RESET_MS) < (new Date()).getTime()));
+                },
+                /**
+                 * Returns true if the "speech off" cue should be played.
+                 * @return {boolean}
+                 */
+                shouldPlaySpeechOffCue = function() {
+                    return conf.get(speech.CONSTANTS.SPEECH_OFF_PARAM);
+                },
+                /**
+                 * Signals that the "first speech on" cue has played.
+                 */
+                playedFirstSpeechOnCue = function() {
+                    conf.set(speech.CONSTANTS.FIRST_SPEECH_ON_PARAM, (new Date()).getTime());
+                },
 
-        NotSafariAudioPlayer = function(speechKey, text, siteId) {
-          
-          var baseMediaUrl,
-              audioElement,
-              playing = false;
-              //startTime = (new Date).getTime() / 1000;
-          if (speechKey) {
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
-            //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
-          } else {
-            // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-            //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-            //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-            //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
-            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
+                //What audio format will we use? 
+                //At the moment, mp3 and ogg are sufficient for the browser/OS combinations we support. 
+                audioFormat = (function() {
+                    var possibleAudioFormats = site.get('ttsAudioFormats'),
+                        mp3 = indexOfIgnoreCase(possibleAudioFormats, 'mp3') >= 0,
+                        ogg = indexOfIgnoreCase(possibleAudioFormats, 'ogg') >= 0;
+                    //aac = indexOfIgnoreCase(possibleAudioFormats, 'aac') >= 0
+                    //wav = indexOfIgnoreCase(possibleAudioFormats, 'wav') >= 0
+                    try {
+                        var a = new Audio();
+                        //Default to ogg if it's supported, otherwise, mp3
+                        if ( !! (a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"').replace(/no/, '')) && ogg) {
+                            return 'ogg';
+                        }
+                        if ( !! (a.canPlayType && a.canPlayType('audio/mpeg;').replace(/no/, '')) && mp3) {
+                            return 'mp3';
+                        }
+                    } catch (e) {
+                        if ((platform.browser.isChrome || platform.browser.isFirefox) && ogg) {
+                            return 'ogg';
+                        } else if (mp3) {
+                            return 'mp3';
+                        }
+                    }
+
+                }()),
+
+                NotSafariAudioPlayer = function(speechKey, text, siteId) {
+
+                    var baseMediaUrl,
+                        audioElement,
+                        playing = false;
+                    //startTime = (new Date).getTime() / 1000;
+                    if (speechKey) {
+                        baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat;
+                        //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+                    } else {
+                        // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+                        //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+                        //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+                        //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+                        baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' +
                             siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
-          }
+                    }
 
-          this.init = function () {
+                    this.init = function() {
 
-            if (audioElement) {
-              return; //never create more than one <audio>
-            }
-                       
-            audioElement = new Audio();
-            audioElement.src = baseMediaUrl;  //fetches the resource
-            
-            $(audioElement).on('canplay', function () { //native event for <audio>
-              sitecues.emit('canplay'); //custom event required for unpredictable timing
-            });
+                        if (audioElement) {
+                            return; //never create more than one <audio>
+                        }
 
-          };
+                        audioElement = new Audio();
+                        audioElement.src = baseMediaUrl; //fetches the resource
 
-          this.play = function () {
-            //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
-            if (audioElement) {
-              if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
-                playing = true;
-                //console.log((new Date).getTime() / 1000  - startTime);
-                audioElement.play();
-              } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
-                sitecues.on('canplay', function () {
-                  this.play();  
-                }, this);
-              }
-            }
+                        $(audioElement).on('canplay', function() { //native event for <audio>
+                            sitecues.emit('canplay'); //custom event required for unpredictable timing
+                        });
 
-          };
+                    };
 
-          this.stop = function () {
+                    this.play = function() {
+                        //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
+                        if (audioElement) {
+                            if (audioElement.readyState >= 3 && !playing) { // enough data available to start playing
+                                playing = true;
+                                //console.log((new Date).getTime() / 1000  - startTime);
+                                audioElement.play();
+                            } else { // not enough data to start playing, so listen for the even that is fired when this is not the case
+                                sitecues.on('canplay', function() {
+                                    this.play();
+                                }, this);
+                            }
+                        }
+
+                    };
+
+                    this.stop = function() {
                         //console.log( shouldPlayFirstSpeechOnCue(), shouldPlaySpeechOffCue(), playedFirstSpeechOnCue() )
 
-            sitecues.off('canplay');
-            
-            if (audioElement && audioElement.readyState >= 3) {
-              //audioElement has been initiated and the response has come
-              //back and audio is ready to play.  We want to just pause it
-              //and configure it so that if we want we can start playing the 
-              //audio again without making another request
-              audioElement.pause();
-              audioElement.currentTime = 0;
-              playing = false;
-            
-            } else {
-              //audioElement has been initiated, but the request hasnt completed.
-              //We need to make sure it does not play at all. This happens if the
-              //HLB opens and closes before the request comes back
-              audioElement = undefined;
-            }
-          };
+                        sitecues.off('canplay');
 
-          this.destroy = function () {
-            if (audioElement) {
-              this.stop();
-              audioElement = undefined;             
-            }
-          };
+                        if (audioElement && audioElement.readyState >= 3) {
+                            //audioElement has been initiated and the response has come
+                            //back and audio is ready to play.  We want to just pause it
+                            //and configure it so that if we want we can start playing the 
+                            //audio again without making another request
+                            audioElement.pause();
+                            audioElement.currentTime = 0;
+                            playing = false;
 
-        },
-        
-        //Using an immediately invoking function that returns 
-        //a function to contain all logic needed for playing audio
-        //in Safari in case we want to separate this into its own module.
-        SafariAudioPlayer = (function () {  
-          //Best practice is to use a single audio context per window.
-          var context = typeof AudioContext !== 'undefined' ? new AudioContext() :
+                        } else {
+                            //audioElement has been initiated, but the request hasnt completed.
+                            //We need to make sure it does not play at all. This happens if the
+                            //HLB opens and closes before the request comes back
+                            audioElement = undefined;
+                        }
+                    };
+
+                    this.destroy = function() {
+                        if (audioElement) {
+                            this.stop();
+                            audioElement = undefined;
+                        }
+                    };
+
+                },
+
+                //Using an immediately invoking function that returns 
+                //a function to contain all logic needed for playing audio
+                //in Safari in case we want to separate this into its own module.
+                SafariAudioPlayer = (function() {
+                    //Best practice is to use a single audio context per window.
+                    var context = typeof AudioContext !== 'undefined' ? new AudioContext() :
                         typeof webkitAudioContext !== 'undefined' ? new webkitAudioContext() :
                         undefined,
-              volumeNode;        
-          
-          return function(speechKey, text, siteId) {
-            
-            var baseMediaUrl;
-                //startTime = (new Date).getTime() / 1000;
-            
-            if (!volumeNode) {
-              volumeNode = context.createGainNode();
-              volumeNode.gain.value = 1;
-            }
+                        volumeNode;
 
-            if (speechKey) {
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat; 
-              //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
-            } else {
-              // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
-              //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
-              //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
-              //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
-              baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' + 
-                              siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
-            }
+                    return function(speechKey, text, siteId) {
 
-            this.soundSource = undefined;
+                        var baseMediaUrl;
+                        //startTime = (new Date).getTime() / 1000;
 
-            this.init = function () {
+                        if (!volumeNode) {
+                            volumeNode = context.createGainNode();
+                            volumeNode.gain.value = 1;
+                        }
 
-              var that = this, //required for ajax callback
-                  request = new XMLHttpRequest();
-              //create a buffer containing the binary data that the Web Audio API uses
-              that.soundSource = context.createBufferSource();
-              //Connect the source to the node that controls volume
-              this.soundSource.connect(volumeNode);
-              //Connect the volume node to the output
-              volumeNode.connect(context.destination);
-            
-              request.open('GET', baseMediaUrl, true);
-              
-              request.responseType = 'arraybuffer';
-              // Our asynchronous callback
-              request.onload = function() { 
-                //Asynchronously decodes the audio file data contained in the ArrayBuffer.
-                context.decodeAudioData(request.response, function (buffer) {
-                  
-                  if (that.soundSource && !that.soundSource.buffer) {
-                    that.soundSource.buffer = buffer;
-                    sitecues.emit('audioReady');
-                  }
+                        if (speechKey) {
+                            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/cue/site/' + siteId + '/' + speechKey + '.' + audioFormat;
+                            //baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/cues/ivona/' + speechKey + '.' + audioFormat;
+                        } else {
+                            // baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws
+                            //   // The "p=1" parameter specifies that the WS server should proxy the audio file (proxying is disabled by default).
+                            //   + '/sitecues/api/2/ivona/' + siteId + '/speechfile?p=1&contentType=text/plain&secure=' + secureFlag
+                            //   + '&text=' + encodeURIComponent(text) + '&codecId=' + audioFormat;
+                            baseMediaUrl = '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/tts/site/' +
+                                siteId + '/tts.' + audioFormat + '?t=' + encodeURIComponent(text) + pageLanguage;
+                        }
 
-                });
+                        this.soundSource = undefined;
 
-              };
-              
-              request.send();
+                        this.init = function() {
 
-            };
+                            var that = this, //required for ajax callback
+                                request = new XMLHttpRequest();
+                            //create a buffer containing the binary data that the Web Audio API uses
+                            that.soundSource = context.createBufferSource();
+                            //Connect the source to the node that controls volume
+                            this.soundSource.connect(volumeNode);
+                            //Connect the volume node to the output
+                            volumeNode.connect(context.destination);
 
-            this.play = function () {
+                            request.open('GET', baseMediaUrl, true);
 
-              if (this.soundSource.buffer) {
+                            request.responseType = 'arraybuffer';
+                            // Our asynchronous callback
+                            request.onload = function() {
+                                //Asynchronously decodes the audio file data contained in the ArrayBuffer.
+                                context.decodeAudioData(request.response, function(buffer) {
 
-                //console.log((new Date).getTime() / 1000 - startTime);
-                //Play from beginning of audio file
-                this.soundSource.noteOn(0);
-                
-              } else {
-                sitecues.on('audioReady', this.play, this);
-              }
-            };
+                                    if (that.soundSource && !that.soundSource.buffer) {
+                                        that.soundSource.buffer = buffer;
+                                        sitecues.emit('audioReady');
+                                    }
 
-            this.stop = function () {
-              sitecues.off('audioReady');
-              if (this.soundSource.buffer) {
-                this.soundSource.noteOff(context.currentTime);
-              }
-            };
+                                });
 
-            this.destroy = function () {
-              this.stop();
-              this.soundSource = undefined;
-            };
+                            };
 
-          };
+                            request.send();
 
-        }()),
+                        };
 
-        AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
+                        this.play = function() {
 
-      /*if (platform.browser.is === 'Safari') {
+                            if (this.soundSource.buffer) {
+
+                                //console.log((new Date).getTime() / 1000 - startTime);
+                                //Play from beginning of audio file
+                                this.soundSource.noteOn(0);
+
+                            } else {
+                                sitecues.on('audioReady', this.play, this);
+                            }
+                        };
+
+                        this.stop = function() {
+                            sitecues.off('audioReady');
+                            if (this.soundSource.buffer) {
+                                this.soundSource.noteOff(context.currentTime);
+                            }
+                        };
+
+                        this.destroy = function() {
+                            this.stop();
+                            this.soundSource = undefined;
+                        };
+
+                    };
+
+                }()),
+
+                AudioPlayer = platform.browser.is === 'Safari' ? SafariAudioPlayer : NotSafariAudioPlayer;
+
+            /*if (platform.browser.is === 'Safari') {
         console.log('Using Safari Player');
       } else {
         console.log('Using <audio> Player');
       }*/
-      //end variable declarations
+            //end variable declarations
 
-    // log.info('ttsOn for ' + window.location.host + ': ' + ttsOn);
-    
-    if (!ttsAvailable) {
-      // No engine was set so the whole component is disabled.
-      ttsOn = false;
-    }
+            // log.info('ttsOn for ' + window.location.host + ': ' + ttsOn);
 
-    /*
-     * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
-     */
-    speech.initPlayer = function(hlb, hlbOptions) {
-      if (!ttsOn && !ttsBypass) {
-        //log.info('TTS is disabled');
-        return null;
-      }
-
-      if (hlbOptions && hlbOptions.suppress_tts) {
-        //log.info('HLB disabled TTS for this content');
-        return null;
-      }
-      //TODO While HLB is a singleton, let's clear out any other players
-      speech.destroyAll();
-
-      var hlbId = speech.getHlbId(hlb),
-          player = speech.factory(hlb);
-
-      if(!hlbId) {
-        //log.warn('No hightlightbox ID!');
-        return null;
-      }
-
-
-      //log.info('Initializing player for ' + hlbId);
-
-      players[hlbId] = player;
-      
-      return player;
-    
-    };
-
-    speech.factory = function(hlb) {
-      var text, player, speechKey;
-      // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
-      if (ttsAvailable) {
-        speechKey = $(hlb).data('speechKey');
-        if (!speechKey) {
-          text = builder.getText(hlb);
-          if (!text.length) {
-            return;
-          }
-        }
-        player = new AudioPlayer(speechKey, text, site.get('site_id'), sitecues.getLibraryUrl().secure);
-        player.init();
-        return player;
-      } else {
-        // No matching plugins, disable TTS
-        //log.warn('No engine configured!');
-        ttsOn = false;
-      }
-    };
-
-    /*
-     * Play any piece of text.
-     *
-     * Note: When we start splitting text, that should happen in here
-     * as it may be implementation-specific.
-     *
-     * @return true if something was played, or false if there was an error or nothing to play.
-     */
-    speech.play = function(hlb, hlbOptions) {
-      if (!ttsOn && !ttsBypass) {
-        //log.info('TTS is disabled');
-        return false;
-      }
-
-      if (hlbOptions && hlbOptions.suppress_tts) {
-        //log.info('TTS is disabled');
-        return false;
-      }
-
-      var hlbId = speech.getHlbId(hlb),
-          player = players[hlbId];
-  
-      if (!hlbId) {
-        //log.warn('No hightlightbox ID!');
-        return false;
-      }
-  
-      if (!player) {
-        // A player wasn't initialized, so let's do that now
-        //log.info('Lazy init of player');
-        player = speech.initPlayer(hlb, hlbOptions);
-      }
-      if (player) {
-        player.play();
-      } else {
-        //log.warn('No player with which to play');          
-      }
-      // Stop speech on any key down.
-      $(window).on('keydown', function() {
-        speech.stop(hlb);
-      });
-      
-      return true;
-    
-    };
-
-    /*
-     * Stops the player that is attached to a highlight box.
-     * This is safe to call if the player has not been initialized
-     * or is not playing.
-     */
-    speech.stop = function(hlb) {
-
-      var hlbId = speech.getHlbId(hlb),
-          player = players[hlbId];
-      
-      if (!hlbId) {
-        //log.warn('No hightlightbox ID!');
-        return;
-      }
-      
-      //log.info('Stopping ' + hlbId);
-
-      if (player) {
-        player.stop();
-      } else {
-        log.info(players);
-      }
-      //Remove hanlder of stoping speech on any key down.
-      $(window).off('keydown', function() {
-        speech.stop(hlb);
-      });
-    
-    };
-    /*
-     * Iterates through all of the players and stops them.
-     */
-    speech.stopAll = function() {
-      
-      //log.info('Stopping all players');
-      
-      $.each(players, function(key, value) {
-        if (value) {
-          //setTimeout(value.stop, 5);
-          value.stop();
-        }
-      });
-    
-    };
-
-    /*
-     * Iterates through all of the players and destroys them.
-     */
-    speech.destroyAll = function() {
-      
-      //log.info('Destroying all players');
-      
-      $.each(players, function(key, value) {
-        if (value) {
-          //setTimeout(value.destroy, 5);
-          value.destroy();
-        }
-        players[key] = null;
-      });
-    
-    };
-
-    /*
-     * Enables TTS, invokes callback with no args
-     */
-    speech.enable = function(callback) {
-      if (ttsAvailable) {
-        // An engine is set so we can enable the component
-        ttsOn = true;
-        conf.set('ttsOn', ttsOn);
-        conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
-
-         // EQ-996 - As a user, I want multiple chances to learn about the 
-         // spacebar command so that I can benefit from One Touch Read 
-         //---------------------------------------------------------------------------------------------------//
-         // 1) For the TTS-spacebar hint (currently given when TTS is turned on the first time):
-         // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
-         speech.timesCued = timesCued++;
-
-        if(!shouldPlayFirstSpeechOnCue()) {
-          speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON);
-        } else {
-          speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON_FIRST, function() {
-            if( speech.timesCued == maxCued ){
-              playedFirstSpeechOnCue();
+            if (!ttsAvailable) {
+                // No engine was set so the whole component is disabled.
+                ttsOn = false;
             }
-          });
-        }
-        if (callback) {
-          callback();
-        }
-      }
-      //log.info('tts enabled');
-      sitecues.emit('speech/enabled');
-    };
 
-    /*
-     * Disables TTS and stops all players, invokes callback with no args.
-     */
-    speech.disable = function(callback) {
-      speech.stopAll();
-      if (shouldPlaySpeechOffCue()) {
-        speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_OFF);
-      }
-      ttsOn = false;
-      conf.set('ttsOn', ttsOn);
-      if (callback) {
-        callback();
-      }
-      //log.info('tts disabled');
-      sitecues.emit('speech/disabled');
-    };
+            /*
+             * The module loading is async so we're doing this setup as a callback to when the configured player is actually loaded.
+             */
+            speech.initPlayer = function(hlb, hlbOptions) {
+                if (!ttsOn && !ttsBypass) {
+                    //log.info('TTS is disabled');
+                    return null;
+                }
 
-    /*
-     * Uses a provisional player to say a piece of text, used for visual cues.
-     */
-    speech.say = function(text, callback) {
-      var provHlb = $('<div></div>').hide().appendTo('body').text(text);
-      if (speech.play(provHlb) && callback) {
-        callback();
-      }
-    };
+                if (hlbOptions && hlbOptions.suppress_tts) {
+                    //log.info('HLB disabled TTS for this content');
+                    return null;
+                }
+                //TODO While HLB is a singleton, let's clear out any other players
+                speech.destroyAll();
 
-    /*
-     * Uses a provisional player to say a piece of text by key, used for visual cues.
-     */
-    speech.sayByKey = function(key, callback) {
-      // MONKEY PATCH!!! Our TTS is very HLB-centric at the moment, so how this works is as follows:
-      // Create a div for the audio file, but instead of containing text, add a property to the DOM
-      // object that indicates what the key is. The speech processor will use that key to determine
-      // the audio file, rather than using the text.
-      var provHlb = $('<div></div>').hide().appendTo('body').data('speechKey', key);
-      if (speech.play(provHlb) && callback) {
-        callback();
-      }
-    };
+                var hlbId = speech.getHlbId(hlb),
+                    player = speech.factory(hlb);
 
-    /*
-     * A variant of say() that will work even if speech is disabled.
-     */
-    speech.cue = function(text, callback) {
-      ttsBypass = true;
-      speech.say(text, callback);
-      ttsBypass = false;
-    };
+                if (!hlbId) {
+                    //log.warn('No hightlightbox ID!');
+                    return null;
+                }
 
-    /*
-     * A variant of cue() that plays audio by key rather than supplied text.
-     */
-    speech.cueByKey = function(key, callback) {
-      ttsBypass = true;
-      speech.sayByKey(key, callback);
-      ttsBypass = false;
-    };
 
-    /**
-     * Returns the ID of the object.  If no ID is found, it will set a random one.
-     */
-    speech.getHlbId = function(hlb) {
-      if (!hlb) {
-        //log.info('No hlb!');
-        return;
-      }
-      if (hlb instanceof $) {
-        if(!hlb.attr('id')) {
-          hlb.attr('id', Math.round((Math.random() + new Date().getTime()) * 1000));
-        }
-        return hlb.attr('id');
-      }
-      // Not a jQuery object
-      if (!hlb.id) {
-        hlb.id = Math.round((Math.random() + new Date().getTime() * 1000));
-      }
-      return hlb.id;
-    };
+                //log.info('Initializing player for ' + hlbId);
 
-    /**
-     * Returns if TTS is enabled or not.  Always returns true or false.
-     */
-    speech.isEnabled = function() {
-      return !!ttsAvailable && !!ttsOn;
-    };
+                players[hlbId] = player;
 
-    /**
-     * Toggles speech on or off based on its current state.
-     */
-    speech.toggle = function() {
-      if (speech.isEnabled()) {
-        sitecues.emit('speech/disable');
-      } else {
-        sitecues.emit('speech/enable');
-      }
-    };
-    /*
-     * Enables TTS, if possible.
-     */
-    sitecues.on('speech/enable', speech.enable);
+                return player;
 
-    /*
-     * Enables TTS, if possible.
-     */
-    sitecues.on('speech/toggle', speech.toggle);
+            };
 
-    /*
-     * Disable TTS, terminating all players.
-     */
-    sitecues.on('speech/disable', speech.disable);
+            speech.factory = function(hlb) {
+                var text, player, speechKey;
+                // This isn't optimal, but we're not going to have so many engines that this will get unwieldy anytime soon
+                if (ttsAvailable) {
+                    speechKey = $(hlb).data('speechKey');
+                    if (!speechKey) {
+                        text = builder.getText(hlb);
+                        if (!text.length) {
+                            return;
+                        }
+                    }
+                    player = new AudioPlayer(speechKey, text, site.get('site_id'), sitecues.getLibraryUrl().secure);
+                    player.init();
+                    return player;
+                } else {
+                    // No matching plugins, disable TTS
+                    //log.warn('No engine configured!');
+                    ttsOn = false;
+                }
+            };
 
-    /*
-     * Stop playback of all TTS.
-     */
-    sitecues.on('speech/stop', speech.stopAll);
+            /*
+             * Play any piece of text.
+             *
+             * Note: When we start splitting text, that should happen in here
+             * as it may be implementation-specific.
+             *
+             * @return true if something was played, or false if there was an error or nothing to play.
+             */
+            speech.play = function(hlb, hlbOptions) {
+                if (!ttsOn && !ttsBypass) {
+                    //log.info('TTS is disabled');
+                    return false;
+                }
 
-    /*
-     * A highlight box has been requested.  This will create the player
-     * if necessary, but will not play anything.
-     */
-    sitecues.on('hlb/create', speech.initPlayer);
+                if (hlbOptions && hlbOptions.suppress_tts) {
+                    //log.info('TTS is disabled');
+                    return false;
+                }
 
-    /*
-     * A highlight box is ready to play.  If no player has been initialized,
-     * this will do that first and then begin playing.
-     */
-    sitecues.on('hlb/ready', speech.play);
+                var hlbId = speech.getHlbId(hlb),
+                    player = players[hlbId];
 
-    /*
-     * A highlight box was closed.  Stop/abort/dispose of the player
-     * attached to it.
-     */
-    sitecues.on('hlb/closed', speech.stop);
+                if (!hlbId) {
+                    //log.warn('No hightlightbox ID!');
+                    return false;
+                }
 
-    // end
-    callback();
+                if (!player) {
+                    // A player wasn't initialized, so let's do that now
+                    //log.info('Lazy init of player');
+                    player = speech.initPlayer(hlb, hlbOptions);
+                }
+                if (player) {
+                    player.play();
+                } else {
+                    //log.warn('No player with which to play');          
+                }
+                // Stop speech on any key down.
+                $(window).on('keydown', function() {
+                    speech.stop(hlb);
+                });
 
-  });
+                return true;
+
+            };
+
+            /*
+             * Stops the player that is attached to a highlight box.
+             * This is safe to call if the player has not been initialized
+             * or is not playing.
+             */
+            speech.stop = function(hlb) {
+
+                var hlbId = speech.getHlbId(hlb),
+                    player = players[hlbId];
+
+                if (!hlbId) {
+                    //log.warn('No hightlightbox ID!');
+                    return;
+                }
+
+                //log.info('Stopping ' + hlbId);
+
+                if (player) {
+                    player.stop();
+                } else {
+                    //log.info(players);
+                }
+                //Remove hanlder of stoping speech on any key down.
+                $(window).off('keydown', function() {
+                    speech.stop(hlb);
+                });
+
+            };
+            /*
+             * Iterates through all of the players and stops them.
+             */
+            speech.stopAll = function() {
+
+                //log.info('Stopping all players');
+
+                $.each(players, function(key, value) {
+                    if (value) {
+                        //setTimeout(value.stop, 5);
+                        value.stop();
+                    }
+                });
+
+            };
+
+            /*
+             * Iterates through all of the players and destroys them.
+             */
+            speech.destroyAll = function() {
+
+                //log.info('Destroying all players');
+
+                $.each(players, function(key, value) {
+                    if (value) {
+                        //setTimeout(value.destroy, 5);
+                        value.destroy();
+                    }
+                    players[key] = null;
+                });
+
+            };
+
+            /*
+             * Enables TTS, invokes callback with no args
+             */
+            speech.enable = function(callback) {
+                if (ttsAvailable) {
+                    // An engine is set so we can enable the component
+                    ttsOn = true;
+                    conf.set('ttsOn', ttsOn);
+                    conf.set(speech.CONSTANTS.SPEECH_OFF_PARAM, true);
+
+                    // EQ-996 - As a user, I want multiple chances to learn about the 
+                    // spacebar command so that I can benefit from One Touch Read 
+                    //---------------------------------------------------------------------------------------------------//
+                    // 1) For the TTS-spacebar hint (currently given when TTS is turned on the first time):
+                    // Give the hint max three times, or until the user successfully uses the spacebar once with TTS on.
+                    speech.timesCued = timesCued++;
+
+                    if (!shouldPlayFirstSpeechOnCue()) {
+                        speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON);
+                    } else {
+                        speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_ON_FIRST, function() {
+                            if (speech.timesCued == maxCued) {
+                                playedFirstSpeechOnCue();
+                            }
+                        });
+                    }
+                    if (callback) {
+                        callback();
+                    }
+                }
+                //log.info('tts enabled');
+                sitecues.emit('speech/enabled');
+            };
+
+            /*
+             * Disables TTS and stops all players, invokes callback with no args.
+             */
+            speech.disable = function(callback) {
+                speech.stopAll();
+                if (shouldPlaySpeechOffCue()) {
+                    speech.sayByKey(speech.CONSTANTS.VERBAL_CUE_SPEECH_OFF);
+                }
+                ttsOn = false;
+                conf.set('ttsOn', ttsOn);
+                if (callback) {
+                    callback();
+                }
+                //log.info('tts disabled');
+                sitecues.emit('speech/disabled');
+            };
+
+            /*
+             * Uses a provisional player to say a piece of text, used for visual cues.
+             */
+            speech.say = function(text, callback) {
+                var provHlb = $('<div></div>').hide().appendTo('body').text(text);
+                if (speech.play(provHlb) && callback) {
+                    callback();
+                }
+            };
+
+            /*
+             * Uses a provisional player to say a piece of text by key, used for visual cues.
+             */
+            speech.sayByKey = function(key, callback) {
+                // MONKEY PATCH!!! Our TTS is very HLB-centric at the moment, so how this works is as follows:
+                // Create a div for the audio file, but instead of containing text, add a property to the DOM
+                // object that indicates what the key is. The speech processor will use that key to determine
+                // the audio file, rather than using the text.
+                var provHlb = $('<div></div>').hide().appendTo('body').data('speechKey', key);
+                if (speech.play(provHlb) && callback) {
+                    callback();
+                }
+            };
+
+            /*
+             * A variant of say() that will work even if speech is disabled.
+             */
+            speech.cue = function(text, callback) {
+                ttsBypass = true;
+                speech.say(text, callback);
+                ttsBypass = false;
+            };
+
+            /*
+             * A variant of cue() that plays audio by key rather than supplied text.
+             */
+            speech.cueByKey = function(key, callback) {
+                ttsBypass = true;
+                speech.sayByKey(key, callback);
+                ttsBypass = false;
+            };
+
+            /**
+             * Returns the ID of the object.  If no ID is found, it will set a random one.
+             */
+            speech.getHlbId = function(hlb) {
+                if (!hlb) {
+                    //log.info('No hlb!');
+                    return;
+                }
+                if (hlb instanceof $) {
+                    if (!hlb.attr('id')) {
+                        hlb.attr('id', Math.round((Math.random() + new Date().getTime()) * 1000));
+                    }
+                    return hlb.attr('id');
+                }
+                // Not a jQuery object
+                if (!hlb.id) {
+                    hlb.id = Math.round((Math.random() + new Date().getTime() * 1000));
+                }
+                return hlb.id;
+            };
+
+            /**
+             * Returns if TTS is enabled or not.  Always returns true or false.
+             */
+            speech.isEnabled = function() {
+                return !!ttsAvailable && !! ttsOn;
+            };
+
+            /**
+             * Toggles speech on or off based on its current state.
+             */
+            speech.toggle = function() {
+                if (speech.isEnabled()) {
+                    sitecues.emit('speech/disable');
+                } else {
+                    sitecues.emit('speech/enable');
+                }
+            };
+            /*
+             * Enables TTS, if possible.
+             */
+            sitecues.on('speech/enable', speech.enable);
+
+            /*
+             * Enables TTS, if possible.
+             */
+            sitecues.on('speech/toggle', speech.toggle);
+
+            /*
+             * Disable TTS, terminating all players.
+             */
+            sitecues.on('speech/disable', speech.disable);
+
+            /*
+             * Stop playback of all TTS.
+             */
+            sitecues.on('speech/stop', speech.stopAll);
+
+            /*
+             * A highlight box has been requested.  This will create the player
+             * if necessary, but will not play anything.
+             */
+            sitecues.on('hlb/create', speech.initPlayer);
+
+            /*
+             * A highlight box is ready to play.  If no player has been initialized,
+             * this will do that first and then begin playing.
+             */
+            sitecues.on('hlb/ready', speech.play);
+
+            /*
+             * A highlight box was closed.  Stop/abort/dispose of the player
+             * attached to it.
+             */
+            sitecues.on('hlb/closed', speech.stop);
+
+            // end
+            callback();
+
+        });
 
 });
