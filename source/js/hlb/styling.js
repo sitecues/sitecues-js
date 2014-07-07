@@ -126,6 +126,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
     }
 
+    /**
+     * [getChildStyles computes HLB child element styles]
+     * @param  {[jQuery element]} $child                    [The current HLB element child we are styling]
+     * @param  {[Boolean]} hlbWidthGreaterThanSafeAreaWidth [True if the HLB width >= safe area width]
+     * @param  {[Object]} originalElementsChildStyle        [CSS styles returned from window.getComputedStyle]
+     * @return {[Object]}                                   [Styles to be consumed by jQuery.css]
+     */
     function getChildStyles ($child, hlbWidthGreaterThanSafeAreaWidth, originalElementsChildStyle) {
 
       var styles = {
