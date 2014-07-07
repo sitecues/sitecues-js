@@ -609,7 +609,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             };
 
 
-            if (sitecues.tdd) {
+            if (UNIT) {
 
                 exports.mapForm = mapForm;
                 exports.isHLBScaleGreaterThanOne = isHLBScaleGreaterThanOne;
