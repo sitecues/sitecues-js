@@ -1,13 +1,7 @@
 sitecues.def('mouse-highlight', function (mh, callback) {
   'use strict';
-  // Tracks if the user has heard the "first high zoom" cue.
-  var FIRST_HIGH_ZOOM_PARAM = 'firstHighZoom',
-  // The high zoom threshold.
-  HIGH_ZOOM_THRESHOLD = 1.6,
-  // Time in millis after which the "first high zoom" cue should replay.
-  FIRST_HIGH_ZOOM_RESET_MS = 7 * 86400000, // 7 days
 
-  EXTRA_HIGHLIGHT_PIXELS = 3,
+  var EXTRA_HIGHLIGHT_PIXELS = 3,
 
   INIT_STATE = {
     isVisible: false,
@@ -32,7 +26,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   // minimum zoom level to enable highlight
   // This is the default setting, the value used at runtime will be in conf.
-  MIN_ZOOM = 1.01,
+  MIN_ZOOM = 1,
 
   // class of highlight
   HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
@@ -45,41 +39,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
-    'speech', 'util/geo',
-    function($, conf, picker, traitcache, mhpos, common, speech, geo) {
-
-    conf.set('mouseHighlightMinZoom', MIN_ZOOM);
+    'audio', 'util/geo',
+    function($, conf, picker, traitcache, mhpos, common, audio, geo) {
 
     mh.enabled = false;
-    // this is the initial zoom level, we're only going to use the verbal cue if someone increases it
-    mh.initZoom = 0;
-    // Remember the initial zoom state
-    mh.initZoom = conf.get('zoom');
-
     mh.cursorPos = null;
     mh.scrollPos = null;
-
-      /**
-     * Returns true if the "first high zoom" cue should be played.
-     * @return {boolean}
-     */
-    function shouldPlayFirstHighZoomCue (callback) {
-      var firstZoomTime = parseInt(conf.get(FIRST_HIGH_ZOOM_PARAM))
-        , timeNow  = (+new Date())
-        , result
-        ;
-
-      result =(timeNow - firstZoomTime) > FIRST_HIGH_ZOOM_RESET_MS;
-
-      callback(result);
-    }
-
-    /**
-     * Signals that the "first high zoom" cue has played.
-     */
-    function playedFirstHighZoomCue() {
-      conf.set(FIRST_HIGH_ZOOM_PARAM, (new Date()).getTime());
-    }
 
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
@@ -188,7 +153,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
           vizFactor = (conf.get('zoom') + 0.4) * 0.9;
-      if (speech.isEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
+      if (audio.isSpeechEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
       return vizFactor;
@@ -792,11 +757,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    function updateZoom(zoom) {
-      zoom = parseFloat(zoom);
+    function onSettingsChanged() {
+      var zoom = conf.get('zoom');
       var was = mh.enabled;
           // The mouse highlight is always enabled when TTS is on.
-      mh.enabled = speech.isEnabled() || (zoom >= conf.get('mouseHighlightMinZoom'));
+      mh.enabled = audio.isSpeechEnabled() || zoom > MIN_ZOOM;
       
       if (mh.isSticky && state.picked) {
         // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
@@ -810,12 +775,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       
       if (was !== mh.enabled) {
         refresh();
-      }
-      // If highlighting is enabled, zoom is large enough, zoom is larger
-      // than we started, and we haven't already cued, then play an audio
-      // cue to explain highlighting
-      if (mh.enabled && zoom >= HIGH_ZOOM_THRESHOLD && zoom > mh.initZoom) {
-        verbalCue();
       }
     }
 
@@ -843,22 +802,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         refresh();
         show();
       }
-    }
-
-    /*
-     * Play a verbal cue explaining how mouse highlighting works.
-     *
-     * @TODO If we start using verbal cues elsewhere, we should consider
-     *       moving this to the speech module.
-     */
-    function verbalCue() {
-      shouldPlayFirstHighZoomCue(function (shouldPlay) {
-        if (shouldPlay){
-          speech.cueByKey('verbalCueHighZoom', function () {
-            playedFirstHighZoomCue();
-          });
-        }
-      });
     }
 
     // disable mouse highlight temporarily
@@ -923,19 +866,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     sitecues.on('hlb/closed', reenableIfAppropriate);
 
     // handle zoom changes to toggle enhancement on/off
-    conf.get('zoom', updateZoom);
+    conf.get('zoom', onSettingsChanged);
 
-    // lower the threshold when speech is enabled
-    sitecues.on('speech/enable', function() {
-      conf.set('mouseHighlightMinZoom', MIN_ZOOM);
-      updateZoom(conf.get('zoom'));
-    });
-
-    // revert the threshold when speech is enabled
-    sitecues.on('speech/disable', function() {
-      conf.set('mouseHighlightMinZoom', MIN_ZOOM);
-      updateZoom(conf.get('zoom'));
-    });
+    // darken highlight appearance when speech is enabled
+    sitecues.on('speech/enabled speech/disabled', onSettingsChanged);
 
     testFocus(); // Set initial focus state
 
@@ -959,7 +893,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     };
 
     // Initialize the highlight state;
-    updateZoom(conf.get('zoom') || 1);
+    onSettingsChanged();
 
     // done
     callback();

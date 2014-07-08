@@ -9,6 +9,7 @@ target
 tmp
 var
 .vagrant
+.idea
 
 # Fetch Avatars is used in Gource.
 # ================================

@@ -35,10 +35,8 @@ sitecues.def('metrics', function (metrics, callback) {
   // Taken from here(free puplic license): https://gist.github.com/jed/982883
   var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b)};
 
-  sitecues.use('metrics/util', 'jquery', 'conf', 'conf/site', 'speech', 'zoom', 'ui',
-    
-    function(metricsUtil, $, conf, site, speech) {
-
+  sitecues.use('metrics/util', 'jquery', 'conf', 'conf/site', 'audio', 'ui',
+    function(metricsUtil, $, conf, site, audio) {
       var init = function() {
           // Default state.
           metrics.data = $.extend({}, DEFAULT_STATE);
@@ -53,7 +51,7 @@ sitecues.def('metrics', function (metrics, callback) {
               'tts_state' : !site.get('ttsAvailable')
                            ? TTS_STATES['unavailable']
                            // 1 - for 'enabled', 0 - for 'disabled'
-                           : +speech.isEnabled(),
+                           : +audio.isSpeechEnabled(),
               'browser_user_agent': navigator && navigator.userAgent ? navigator.userAgent : '',
               'client_language': navigator && navigator.language ? navigator.language : ''
           };
@@ -72,8 +70,8 @@ sitecues.def('metrics', function (metrics, callback) {
           metrics.update(data);
       });
 
-      sitecues.on('speech/enable speech/disable', function() {
-          var ttsState = speech.isEnabled() ? TTS_STATES['enabled'] : TTS_STATES['disabled'];
+      sitecues.on('speech/enabled speech/disabled', function() {
+          var ttsState = audio.isSpeechEnabled() ? TTS_STATES['enabled'] : TTS_STATES['disabled'];
           var data = {'tts_state': ttsState};
           metrics.update(data);
       });

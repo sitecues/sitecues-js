@@ -27,3 +27,10 @@ document.getElementsByTagName('body')[0].appendChild(node);
 
 // Load the shim for sitecues global object.
 require('../data/sitecues');
+
+Audio = function() {
+  // Always return false for Safari tests
+  this.canPlayType = function() { return true; }
+};
+
+

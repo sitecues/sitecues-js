@@ -2,7 +2,7 @@ sitecues.def('status', function (status_module, callback) {
   
   'use strict';
 
-  sitecues.use('jquery', 'speech', 'conf', function ( $, speech, conf ) {
+  sitecues.use('jquery', 'audio', 'conf', function ( $, audio, conf ) {
 
     // The default status formatter: simply log all data to the console log.
     function consoleCallback (info) {
@@ -55,9 +55,6 @@ sitecues.def('status', function (status_module, callback) {
         'current_url'     : window.location.href,
         'sitecues_js_url' : (sitecues.getLibraryUrl()).raw,
         'user_agent'      : navigator.userAgent,
-        // Removed as this was not being used by the library. Add this back if something breaks.
-        // See: https://equinox.atlassian.net/browse/SC-1623
-        //'tts_status'      : ((speech.isEnabled()) ? 'on' : 'off'),
         'version'         : {
           'sitecues_js'   : sitecues.getVersion(),
           'sitecues_up'   : null,

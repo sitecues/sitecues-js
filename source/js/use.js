@@ -11,8 +11,8 @@ window.sitecues && sitecues.use(
 	'cursor/images/win',
 	'cursor/images/manager',
 	'cursor',
-	'speech',
+	'audio',
 	'mouse-highlight',
-	'highlight-box'
+	'highlight-box',
 	'hpan'
 );
