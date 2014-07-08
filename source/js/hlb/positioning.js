@@ -280,7 +280,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           zoom = conf.get('zoom');
 
       $hlbElement.css({
-        'width': (originalElementsBoundingBox.width / zoom) + 'px', //Preserve dimensional ratio
+        'width' : (originalElementsBoundingBox.width / zoom)  + 'px', //Preserve dimensional ratio
         'height': (originalElementsBoundingBox.height / zoom) + 'px', //Preserve dimensional ratio
       });
 

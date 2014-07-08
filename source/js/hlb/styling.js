@@ -42,7 +42,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // How many ancestors do we move up the chain until we find a background image
         // to use for the $hlbElements background image.
-        BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 1,
+        BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
 
         // Default background color for HLB, if HLB is NOT an image.
         HLB_DEFAULT_BACKGROUND_COLOR = '#ffffff',
@@ -98,6 +98,29 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     // PRIVATE FUNCTIONS
     //////////////////////////
 
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=137687
+    //
+    /**
+     * [getComputedStyleCssText returns the cssText of an element]
+     * @param  {[DOM element]} element [DOM element]
+     * @return {[String]}              [Computed styles for an DOM element]
+     */
+    function getComputedStyleCssText(element) {
+      var style = window.getComputedStyle(element), cssText;
+
+      if (style.cssText != "") {
+        return style.cssText;
+      }
+
+      cssText = "";
+
+      for (var i = 0; i < style.length; i++) {
+        cssText += style[i] + ": " + style.getPropertyValue(style[i]) + "; ";
+      }
+
+      return cssText;
+    }
+
     /**
      * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
      * @param  {[DOM element]} $hlbElement [HLB element]
@@ -135,8 +158,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function getChildStyles ($child, hlbWidthGreaterThanSafeAreaWidth, originalElementsChildStyle) {
 
+          // Defaut css styles for all HLB children
       var styles = {
-            'webkitTextFillColor': ''
+            'webkitTextFillColor': '',
+            'textDecoration'     : 'none',
+            'bottom'             : 0        //Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
           },
           textDecoration = originalElementsChildStyle.textDecoration;
 
@@ -149,13 +175,22 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       if (textDecoration.indexOf('underline') !== -1) {
+
         styles.textDecoration = 'underline';
+
       } else if (textDecoration.indexOf('overline') !== -1) {
+
         styles.textDecoration = 'overline';
+
       } else if (textDecoration.indexOf('line-through') !== -1) {
+
         styles.textDecoration = 'line-through';
-      } else {
-        styles.textDecoration = 'none';
+
+      }
+
+      // This fixes a problem with the HLB on TexasAT home page when opening the entire "News & Events"
+      if (originalElementsChildStyle.position === 'absolute') {
+        styles.position = 'static';
       }
 
 
@@ -236,7 +271,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function getNonEmptyBackgroundImage ($originalElement, ancestorCount) {
 
-      var newBackgroundImage,
+      var backgroundStyles = {},
           parents = $originalElement.parents();
 
       parents.each(function (count) {
@@ -244,12 +279,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           return false;
         }
         if ($(this).css('backgroundImage') !== 'none') {
-          newBackgroundImage = $(this).css('backgroundImage');
+          backgroundStyles.backgroundImage = $(this).css('backgroundImage');
+          backgroundStyles.backgroundRepeat = $(this).css('backgroundRepeat');
           return false;
         }
       });
 
-      return newBackgroundImage;
+      return backgroundStyles;
 
     }
 
@@ -361,7 +397,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       }
 
-      return elementComputedStyle.backgroundImage;
+      return {
+        'backgroundImage' : elementComputedStyle.backgroundImage,
+        'backgroundRepeat': elementComputedStyle.backgroundRepeat
+      };
 
     }
 
@@ -415,19 +454,19 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     hlbStyling.getHLBStyles = function($originalElement) {
 
-      var originalElement = $originalElement[0],
+      var originalElement      = $originalElement[0],
           elementComputedStyle = window.getComputedStyle(originalElement),
-
-          calculatedHLBStyles = {
-            'padding-left': getHLBLeftPadding($originalElement, elementComputedStyle),
+          backgroundStyles     = getHLBBackgroundImage($originalElement, elementComputedStyle),
+          calculatedHLBStyles  = {
+            'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
             'background-color': getHLBBackgroundColor($originalElement, elementComputedStyle),
-            'background-image': getHLBBackgroundImage($originalElement, elementComputedStyle),
-            'display': getHLBDisplay(elementComputedStyle)
+            'display'         : getHLBDisplay(elementComputedStyle)
           };
 
       return $.extend({},
         defaultHLBStyles,
-        calculatedHLBStyles
+        calculatedHLBStyles,
+        backgroundStyles
       );
 
     };
@@ -454,7 +493,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     hlbStyling.cloneStyles = function($originalElement, $hlbElement) {
 
 
-      var hlbWidthGreaterThanSafeAreaWidth = isOriginalElementWideAsSafeArea($originalElement),
+      var originalElementCSSText           = getComputedStyleCssText($originalElement[0]),
+          hlbWidthGreaterThanSafeAreaWidth = isOriginalElementWideAsSafeArea($originalElement),
           $originalElementChildren         = $originalElement.find('*'),
           $hlbElementChildren              = $hlbElement.find('*'),
           hlbElementChild,
@@ -463,8 +503,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           i = 0;
 
 
-      // Set the cssText of the HLB element, essentially copying all computed styles.
-      $hlbElement[0].style.cssText = window.getComputedStyle($originalElement[0]).cssText;
+      // Set the cssText of the HLB element, copying all computed styles.
+      $hlbElement[0].style.cssText = originalElementCSSText;
 
       for (; i < $originalElementChildren.length; i += 1) {
 
@@ -475,7 +515,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         originalElementsChildStyle = getComputedStyle($originalElementChildren[i]);
 
         // Copy the original elements child styles to the HLB elements child.
-        hlbElementChild.style.cssText = originalElementsChildStyle.cssText;
+        hlbElementChild.style.cssText = getComputedStyleCssText($originalElementChildren[i]);
 
         // Compute styles that are more complicated than copying cssText.
         computedChildStyles = getChildStyles($(hlbElementChild), hlbWidthGreaterThanSafeAreaWidth, originalElementsChildStyle);
@@ -498,8 +538,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     if (UNIT) {
       exports.getHLBStyles = hlbStyling.getHLBStyles;
-      exports.filter = hlbStyling.filter;
-      exports.cloneStyles = hlbStyling.cloneStyles;
+      exports.filter       = hlbStyling.filter;
+      exports.cloneStyles  = hlbStyling.cloneStyles;
     }
 
     callback();
