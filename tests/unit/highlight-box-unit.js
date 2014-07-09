@@ -835,7 +835,8 @@ describe('highlight-box', function() {
     it('Invokes element.addEventListener if $hlbElement has a transform scale > 1 because ' +
        'we rely upon transitionEnd event to remove the HLB from the DOM after transitioning the scale', function (done) {
 
-      var addEventListenerSpy = sinon.spy(win.document.getElementById('scaledElement'), 'addEventListener');
+      var addEventListenerSpy = sinon.spy(win.document.getElementById('scaledElement'), 'addEventListener'),
+          cssStub             = sinon.stub(jquery.fn, 'css', function () {return {'match': function () {}}});
 
       hlb.setHLB(jquery(win.document.getElementById('scaledElement')));
 
@@ -844,6 +845,7 @@ describe('highlight-box', function() {
       expect(addEventListenerSpy.calledOnce).to.be.true;
 
       addEventListenerSpy.restore();
+      cssStub.restore();
 
       done();
 
