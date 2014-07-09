@@ -886,12 +886,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     mh.getHighlight = function() {
-      return {
-        isVisible: state.isVisible,
-        picked: state.picked,
-        viewRect: state.viewRect,
-        floatRects: state.floatRects
-      };
+      return state;
     };
 
     resetState();
