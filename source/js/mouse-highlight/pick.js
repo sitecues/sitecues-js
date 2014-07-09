@@ -46,6 +46,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isGoodTag: 5,
         isGoodRole: 8,
         isGroupedWithImage: 10,
+        isFormControl: 20,
         isDivided: -10,
         hasOwnBackground: 20,
         vertSeparationImpact: 1,
@@ -143,7 +144,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     function hasVisibleChildContent(current) {
       var children, index;
-      if (common.isVisualMedia(current)) {
+
+      if (common.isVisualMedia(current) || common.isFormControl(current)) {
         return true;
       }
 
