@@ -44,7 +44,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       if (hlbElement.clientWidth < hlbElement.scrollWidth) {
 
         $hlbElement.css({
-          'width': (hlbElement.scrollWidth - hlbStyling.defaultPadding) + 'px'
+          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + 'px'
         });
 
         // Again, we can't be positive that the increase in width does not overflow the safe area.

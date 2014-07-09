@@ -458,7 +458,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     hlbStyling.setHLBChildTextColor = function ($hlbElement) {
 
-      var children = $hlbElement.find('*');
+      var children;
+
+      // If the $hlbElement uses a background image then assume text is readable.
+      // TODO: improve this entire mechanism.
+      if ($hlbElement.css('backgroundImage') !== 'none') {
+        return;
+      }
+
+      children = $hlbElement.find('*');
 
       // For every HLB child...
       children.each(function () {

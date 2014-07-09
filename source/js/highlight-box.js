@@ -31,10 +31,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           translateCSS, // The HLB element's translation for final position
 
           transitionEndEvent = (function() {
-              if (platform.browser.isChrome || platform.browser.isSafari) {
-                  return 'webkitTransitionEnd';
-              }
-              return 'transitionend';
+            if (platform.browser.isChrome || platform.browser.isSafari) {
+              return 'webkitTransitionEnd';
+            }
+            return 'transitionend';
           }()),
 
           preventDeflationFromMouseout = false, // Boolean that determines if HLB can be deflated.
