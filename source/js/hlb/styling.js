@@ -47,6 +47,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         // Default background color for HLB, if HLB is NOT an image.
         HLB_DEFAULT_BACKGROUND_COLOR = '#ffffff',
 
+        // Default text color for HLB
+        HLB_DEFAULT_TEXT_COLOR = '#000000',
+
         // Default background color for HLB, if HLB is an image.
         HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
 
@@ -448,20 +451,82 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     //////////////////////////
 
     /**
+     * [setHLBChildTextColor determines and sets a text color for all HLB children so that they are in
+     * contrast with the background colors behind them.]
+     * @param {[jQuery element]} $hlbElement [The HLB element]
+     * NOTE: This function was created to fix a bug found on TexasAT home page navigation (Home, Sitemap, Contact Us)
+     */
+    hlbStyling.setHLBChildTextColor = function ($hlbElement) {
+
+      var children = $hlbElement.find('*');
+
+      // For every HLB child...
+      children.each(function () {
+
+        var textColor       = $(this).css('color'),
+            backgroundColor = $(this).css('backgroundColor'),
+            forceTextColor  = false;
+
+        // If the HLB child has a transparent background, or the background is the same color as the text,
+        // then we have to determine if we need to set the HLB childs text color by traversing the ancestor
+        // chain for.
+        if (isTransparent(backgroundColor) || textColor === backgroundColor) {
+
+          //  Check every ancestor up to and including the HLB element
+          $(this).parentsUntil($hlbElement.parent()).each(function () {
+
+            var parentBackgroundColor = $(this).css('backgroundColor');
+
+            // If we run into a parent who has a non-transparent background color
+            if (!isTransparent(parentBackgroundColor)) {
+
+              // Set the childs text color if the current text color and the first non-transparent
+              // background color are exactly the same.
+              if(textColor === parentBackgroundColor) {
+
+                forceTextColor = true;
+                return false;
+
+              } else {
+                return false;
+              }
+
+            }
+
+          });
+
+          if (forceTextColor) {
+            $(this).css('color', HLB_DEFAULT_TEXT_COLOR);
+          }
+
+        }
+
+      });
+
+    }
+
+    /**
      * [getHLBStyles gets the HLB styles.]
      * @param {[DOM element]} $originalElement [the original element]
      * @return {[Object]} [CSS style object to be used by jQuery.css()]
      */
-    hlbStyling.getHLBStyles = function($originalElement) {
+    hlbStyling.getHLBStyles = function ($originalElement) {
 
       var originalElement      = $originalElement[0],
           elementComputedStyle = window.getComputedStyle(originalElement),
           backgroundStyles     = getHLBBackgroundImage($originalElement, elementComputedStyle),
+          backgroundColor      = getHLBBackgroundColor($originalElement, elementComputedStyle),
           calculatedHLBStyles  = {
             'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
-            'background-color': getHLBBackgroundColor($originalElement, elementComputedStyle),
             'display'         : getHLBDisplay(elementComputedStyle)
           };
+
+          if (backgroundColor === $originalElement.css('color')) {
+            calculatedHLBStyles.color           = HLB_DEFAULT_TEXT_COLOR;
+            calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
+          } else {
+            calculatedHLBStyles.backgroundColor = backgroundColor;
+          }
 
       return $.extend({},
         defaultHLBStyles,
@@ -475,7 +540,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [filter filters elements, attributes, and styles from the HLB]
      * @param  {[DOM element]} $hlbElement [HLB]
      */
-    hlbStyling.filter = function($hlbElement) {
+    hlbStyling.filter = function ($hlbElement) {
 
       filterStyles($hlbElement);
 
@@ -490,7 +555,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[DOM element]} $originalElement [original element]
      * @param  {[DOM element]} $hlbElement [HLB element]
      */
-    hlbStyling.cloneStyles = function($originalElement, $hlbElement) {
+    hlbStyling.cloneStyles = function ($originalElement, $hlbElement) {
 
 
       var originalElementCSSText           = getComputedStyleCssText($originalElement[0]),

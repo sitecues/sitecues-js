@@ -447,6 +447,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Set the styles for the HLB and append to the wrapping element
         $hlbElement.css(hlbStyles).appendTo($hlbWrappingElement);
 
+        // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
+        hlbStyling.setHLBChildTextColor($hlbElement);
+
         // Set the ID of the hlbElement.
         $hlbElement[0].id = SITECUES_HLB_ID;
 
