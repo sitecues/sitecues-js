@@ -8,8 +8,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   var MIN_RECT_WIDTH = 4;
   var MIN_RECT_HEIGHT = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache', 'util/geo',
-               function ($, common, conf, platform, traitcache, geo) {
+  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
+               function ($, common, conf, platform, traitcache) {
 
     mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
       var absoluteRects = [];
