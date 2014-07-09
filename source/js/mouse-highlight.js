@@ -20,8 +20,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     pathFillBackground: [], // In element rect coordinates, used with CSS background
     highlightPaddingWidth: 0,
     highlightBorderWidth: 0,
-    doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
-    doUseOverlayforBgColor: false  // was an overlay used to create the background color?
+    bgColor: '',    // highlight color or null if only outline is being used (as when highlighting media element)
+    doUseOverlayforBgColor: false,  // was an overlay used to create the background color? If not, CSS background will be used.
+    hasNonLightBackgroundColor: false,
+    hasInterestingBackgroundImage: false,
+    hasLightText: false
   },
 
   // minimum zoom level to enable highlight
@@ -57,42 +60,67 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return maxZIndex;
     }
 
-    function isInterestingBackground(style) {
+    /**
+     * Checks if the color value given of a light tone or not.
+     */
+    function isLightTone(colorValue) {
+      var RGBAColor = getRgba(colorValue),
+        // http://en.wikipedia.org/wiki/YIQ
+        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
 
-      var matchColorsAlpha,
-        match,
-        matchColorsNoAlpha,
-        mostlyWhite,
-        bgColor = style.backgroundColor;
-
-      if (bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)') {
-        return false;
-      }
-
-      matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-      match = matchColorsAlpha.exec(bgColor);
-      
-      if (match !== null) {
-        if (parseFloat(match[4]) < .10) {
-          return false; // Mostly transparent, not interesting
-        } // Else fall through and analyze rgb colors
-      } else { // Background is not in rgba() format, check for rgb() format next
-        matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-        match = matchColorsNoAlpha.exec(bgColor);
-        if (match === null) {
-          return true;
-        }
-      }
-      // Check r,g,b values  -- We consider it "non-interesting" if mostly white
-      mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
-      
-      return !mostlyWhite;
+      return yiq >= 128;
     }
 
-    function hasInterestingBackgroundOnAnyOf(styles) {
+    function getElementsContainingText(selector) {
+      return $(selector).find('*').andSelf().filter(function() {
+        var $this = $(this);
+        return $this.children().length === 0 && $.trim($this.text()).length > 0;
+      });
+    }
+
+    function hasLightText(selector) {
+      var textContainers = getElementsContainingText(selector),
+        MAX_ELEMENTS_TO_CHECK = 100,
+        containsLightText = false;
+
+      textContainers.each(function(index) {
+        if (index >= MAX_ELEMENTS_TO_CHECK) {
+          return false;
+        }
+        if (isLightTone(traitcache.getStyleProp(this, 'color'))) {
+          containsLightText = true;
+          return false;
+        }
+      });
+      return containsLightText;
+    }
+
+    /**
+     * Returns an object {r: #, g: #, b: #, a: #}
+     * @param colorString  A color string provided by getComputedStyle()
+     * @returns {rgba object}
+     */
+    function getRgba(colorString) {
+      var MATCH_COLORS_ALPHA = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/,
+        MATCH_COLORS_NO_ALPHA = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/,
+        match = MATCH_COLORS_ALPHA.exec(colorString) || MATCH_COLORS_NO_ALPHA.exec(colorString) || {};
+
+      return {
+        r: parseInt(match[0] || 0),
+        g: parseInt(match[1] || 0),
+        b: parseInt(match[2] || 0),
+        a: parseInt(match[3] || 255)
+      };
+    }
+
+    function isNonLightBackground(style) {
+      return !isLightTone(style.backgroundColor);
+    }
+
+    function hasNonLightBackgroundOnAnyOf(styles) {
 
       for (var count = 0; count < styles.length; count ++) {
-        if (isInterestingBackground(styles[count])) {
+        if (isNonLightBackground(styles[count])) {
           return true;
         }
       }
@@ -118,6 +146,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 
     function updateColorApproach(style) {
+      // Get data on backgrounds and text colors used
+      state.hasNonLightBackgroundColor = hasNonLightBackgroundOnAnyOf(style);
+      state.hasInterestingBackgroundImage = hasInterestingBackgroundImage(style);
+      state.hasLightText = hasLightText(state.target);
+
       // Get the approach used for highlighting
       if (state.picked.length > 1 ||
          (style[0].backgroundImage !== 'none' && style[0].backgroundRepeat === 'no-repeat')) {
@@ -127,7 +160,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         //  cons: does not highlight text the way user expects (washes it out)
         //  when-to-use: for article or cases where multiple items are selected
                 //               when background sprites are used, which we don't want to overwrite with out background
-        state.doUseBgColor = true;
+        state.bgColor = getTransparentBackgroundColor();
         state.doUseOverlayForBgColor = true; // Washes foreground out
       }  else if (common.isVisualMedia(state.picked) ||
         (!common.isEmptyBgImage(style[0].backgroundImage) && style[0].backgroundRepeat === 'repeat')) {
@@ -136,14 +169,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         //  pros: foreground text does not get washed out
         //  cons: no background color
         //  when-to-use: over media or interesting backgrounds
-        state.doUseBgColor = false;
+        state.bgColor = '';
         state.doUseOverlayForBgColor = false;
       } else {
         //  approach #3 -- use css background of highlighted element for background color
         //                use overlay for rounded outline
         //  pros: looks best on text, does not wash out colors
         //  when-to-use: on most elements
-        state.doUseBgColor = true;
+        state.bgColor = getAppropriateBackgroundColor();
         state.doUseOverlayForBgColor = false;
       }
     }
@@ -228,31 +261,38 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.updateElementBgImage();
     }
 
+    // Choose an appropriate background color for the highlight
+    // In most cases we want the opaque background because the background color on the element
+    // can overlap the padding over the outline which uses the same color, and not cause problems
+    // We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
+    function getAppropriateBackgroundColor() {
+
+      if (state.hasNonLightBackgroundColor ||
+          state.hasInterestingBackgroundImage ||
+          state.hasLightText) {
+        // Use transparent background so that the interesting background or light foreground are still visible
+        return getTransparentBackgroundColor();
+      }
+
+      return getOpaqueBackgroundColor();
+    }
+
     mh.updateElementBgImage = function() {
 
       var element = state.picked.get(0),
-          hasInterestingBg,
-          backgroundColor,
           offsetLeft,
           offsetTop;
 
       // Approach #1 or #2 -- no change to background of element
-      if (state.doUseOverlayForBgColor || !state.doUseBgColor) {
+      if (state.doUseOverlayForBgColor || !state.bgColor) {
         return false;
       }
-      // Approach #3 -- change background
-      // In most cases we want the opaque background because the background color on the element
-      // can overlap the padding over the outline which uses the same color, and not cause problems
-      // We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
-      hasInterestingBg = hasInterestingBackgroundOnAnyOf(state.styles) ||
-                           hasInterestingBackgroundImage(state.styles);
-      backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom);
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-                      getSVGForPath(path, 0, 0, backgroundColor, 1) +
+                      getSVGForPath(path, 0, 0, state.bgColor, 1) +
                       '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
@@ -563,7 +603,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         addMouseWheelUpdateListenersIfNecessary();
       }
-      else if (JSON.stringify(previousViewRect) === JSON.stringify(state.viewRect)) {
+      else if (common.equals(previousViewRect, state.viewRect)) {
         return true; // Already created and in correct position, don't update DOM
       }
 
@@ -901,8 +941,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     if (UNIT) {
       mh.state = state;
       mh.INIT_STATE = INIT_STATE;
-      mh.isInterestingBackground = isInterestingBackground;
-      mh.hasInterestingBackgroundOnAnyOf = hasInterestingBackgroundOnAnyOf;
+      mh.isNonLightBackground = isNonLightBackground;
+      mh.hasNonLightBackgroundOnAnyOf = hasNonLightBackgroundOnAnyOf;
       mh.updateColorApproach = updateColorApproach;
       mh.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
       mh.getHighlightBorderWidth = getHighlightBorderWidth;

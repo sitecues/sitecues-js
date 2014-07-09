@@ -7,7 +7,7 @@
  */
 sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
   'use strict';
-  sitecues.use('jquery', 'conf', function($, conf) {
+  sitecues.use('jquery', 'conf', 'util/common', function($, conf, common) {
     var uniqueIdCounter = 0,
       styleCache = {},
       rectCache = {},
@@ -31,7 +31,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       function hasViewChanged() {
         // Keys guaranteed to be in same order since we always create object here,
         // therefore JSON.stringify() works for equality check
-        return (JSON.stringify(old) !== JSON.stringify(cachedViewSize));
+        return !common.equals(old, cachedViewSize);
       }
 
       var old = $.extend({}, cachedViewSize);
