@@ -75,7 +75,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // ** Semantic constants ***
     // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
-    var SECTION_START_SELECTOR = 'h1, h2, h3, h4, h5, h6, header, hr, dt, div[role="separator"],div[role="heading"]',
+    var SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,header hr,dt,div[role="separator"],div[role="heading"]',
       GREAT_TAGS = { blockquote:1, td:1, tr: 1, ul:1, ol: 1, menu:1, section: 1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, img:1, p:1, pre:1, li:1 },
       // These are less likely to be used to layout a cell/box
@@ -86,6 +86,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       tabpanel:1, tree:1, treegrid:1, listbox:1, img:1, heading:1, rowgroup:1, row:1, toolbar:1,
       menu:1, menubar:1, group:1, form:1, navigation:1, main:1 },
       UNUSABLE_ROLES = { presentation:1, separator:1 },
+      FORM_TAGS = { input: 1, textarea: 1, select: 1 },
 
       // ** Layout and geometrical constants ***
       MAX_PERCENT_OF_VIEWPORT_HEIGHT = 250,        // If larger than this, stop processing (saves time)
@@ -350,6 +351,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
+        isFormControl: FORM_TAGS.hasOwnProperty(traits.tag),
         // Being grouped with a single image indicates something is likely good to pick
         isGroupedWithImage: traits.visualHeight > MIN_IMAGE_GROUP_HEIGHT && isCandidateGroupedWithImage(traits, node, index),
         // A child candidate was considered a section start container
