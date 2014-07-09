@@ -97,19 +97,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     /**
      * Returns an object {r: #, g: #, b: #, a: #}
-     * @param colorString  A color string provided by getComputedStyle()
+     * @param colorString  A color string provided by getComputedStyle() in the form of rgb(#, #, #) or rgba(#, #, #, #)
      * @returns {rgba object}
      */
     function getRgba(colorString) {
-      var MATCH_COLORS_ALPHA = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/,
-        MATCH_COLORS_NO_ALPHA = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/,
-        match = MATCH_COLORS_ALPHA.exec(colorString) || MATCH_COLORS_NO_ALPHA.exec(colorString) || {};
+      var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d.]+)?\)/,
+        match = MATCH_COLORS.exec(colorString) || {};
 
       return {
-        r: parseInt(match[0] || 0),
-        g: parseInt(match[1] || 0),
-        b: parseInt(match[2] || 0),
-        a: parseInt(match[3] || 255)
+        r: parseInt(match[1] || 0),
+        g: parseInt(match[2] || 0),
+        b: parseInt(match[3] || 0),
+        a: parseInt(match[4] || 255)
       };
     }
 

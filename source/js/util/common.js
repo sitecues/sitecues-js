@@ -7,9 +7,6 @@ sitecues.def('util/common', function (common, callback) {
    // Define dependency modules.
   sitecues.use('jquery', function ($) {
     
-    var kRegExpRGBString = /\d+(\.\d+)?%?/g
-      , kRegExpHEXValidString = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
-
     /*
      * Check if two Javascript objects are equal.
      * @param {type} obj1
