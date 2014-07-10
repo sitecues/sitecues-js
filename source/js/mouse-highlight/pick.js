@@ -292,16 +292,23 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       // 3. Get the best candidate
       var bestIndex = getCandidateWithHighestScore(scoreObjs);
 
-      // 4. Log the results if necessary for debugging (used by "debug" customization, customer id = deadbeef)
-      // Use localhost:8000/l/s;id=s-deadbeef/js/sitecues.js
-      picker.logResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
+      // 4. Log the results if necessary for debugging
+      if (DEV) {
+        sitecues.use('mouse-highlight/pick-debug', function(pickDebug) {
+          // Use sitecues.togglePickerDebugging() to turn on the logging
+          pickDebug.logHeuristicResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
+        });
+      }
 
       // 5. Return item, or nothing if score was too low
       return scoreObjs[bestIndex].score < MIN_SCORE_TO_PICK ? null : candidates[bestIndex];
     }
 
-    // Placeholder used by 'debug' customization
-    picker.logResults = function() { };
+    if (DEV) {
+      // Placeholder used by 'debug' customization
+      picker.logResults = function () {
+      };
+    }
 
     // Get the score for the candidate node at the given index
     function computeScore(judgements, element, index) {
@@ -331,12 +338,14 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           weight = judgementWeights[factorKey];
           scoreDelta = value * weight;  // value is a numeric or boolean value: for booleans, JS treats true=1, false=0
           scoreObj.score += scoreDelta;
-          scoreObj.factors.push({
-            about: factorKey,
-            value: value,
-            weight: weight,
-            impact: scoreDelta
-          });
+          if (DEV) {
+            scoreObj.factors.push({
+              about: factorKey,
+              value: value,
+              weight: weight,
+              impact: scoreDelta
+            });
+          }
         }
       }
 
@@ -371,11 +380,13 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         if (traitStack[index].childCount === 1 && scoreObjs[index-1].isUsable) {
           delta = scoreObjs[index - 1].score;
           scoreObjs[index].score += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
-          scoreObjs[index].factors.push({
-            about: 'singleParentRefinement',    // Debug info
-            value: delta,
-            weight: REFINEMENT_WEIGHTS.isParentOfOnlyChild
-          });
+          if (DEV) {
+            scoreObjs[index].factors.push({
+              about: 'singleParentRefinement',    // Debug info
+              value: delta,
+              weight: REFINEMENT_WEIGHTS.isParentOfOnlyChild
+            });
+          }
         }
       }
     }
@@ -395,10 +406,12 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       $.extend(judgementWeights, weights);
     };
 
-    // --- For debugging ----------------------
-    sitecues.pickFrom = function(element) {
-      return picker.find(element);
-    };
+    if (DEV) {
+      // --- For debugging ----------------------
+      sitecues.pickFrom = function (element) {
+        return picker.find(element);
+      };
+    }
 
     // ----------------------------------------
     if (SC_UNIT) {
