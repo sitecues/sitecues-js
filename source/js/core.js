@@ -6,7 +6,7 @@
 (function() {
 
     'use strict';
-
+    
     // NOTE: initialization of this module is at the bottom of this page.
 
     var

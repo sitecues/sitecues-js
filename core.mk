@@ -114,18 +114,23 @@ build:
 	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
+
 	@echo "Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-#ifneq ($(dev), true)
+
+	#Copy files for Source-Maps 
+	@cp -R source/js $(build-dir)/js/source/
+
+
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
-#endif
+
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo
