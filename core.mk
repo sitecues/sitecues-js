@@ -122,8 +122,8 @@ build:
 	done)
 
 	#Copy files for Source-Maps 
+	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
-
 
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
