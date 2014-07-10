@@ -3,15 +3,19 @@
  *   The core module of the sitecues library.
  */
 
+// WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
+//DEV=true;
+
 (function() {
 
     'use strict';
     
     // NOTE: initialization of this module is at the bottom of this page.
 
-    var
     // The compiled-in library version.
-    version = '0.0.0-UNVERSIONED'
+
+    // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
+    var version = '0.0.0-UNVERSIONED'
 
     // Private variables
         ,
