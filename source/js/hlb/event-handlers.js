@@ -13,22 +13,41 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
     // shortcut to hasOwnProperty
     var has = Object.prototype.hasOwnProperty;
 
-    sitecues.use('jquery', 'util/common', 'keys', function($, common, keys) {
+    sitecues.use('jquery', 'util/common', 'keys', 'platform', 'conf', function($, common, keys, platform, conf) {
 
+        // The purpose of this distinction is because IE handles scrolling elements differently than the other browsers.
+
+        // Slightly larger than what it actually is, but protects against rounding errors and insufficient testing.
+        var DEFAULT_IE_SCROLL_PIXEL_DELTA = 100,
+            isIE = platform.browser.isIE,
+
+            // Set this to 0 to see how scrolling the HLB in IE will function.
+            scrollOverflow = isIE ? DEFAULT_IE_SCROLL_PIXEL_DELTA : 0;
         /**
          * Onmousewheel event handler.
          * @param e EventObject
          */
         eventHandlers.wheelHandler = function(e) {
 
-            var hlb = e.data.hlb[0],
+            var hlb     = e.data.hlb[0],
                 isChild = targetIsChildOfHlb(hlb, e.target);
+
+
             // If the mouse is hovering over a child that does not have a scrollbar.
             // The function common.hasVertScroll returns true even when elements do not have a vertical scrollbar.
             // Don't scroll target if it is a HLB (not a descendant) and doesn't have scroll bar.
             if (!isChild && !common.hasVertScroll(hlb) ||
-                (common.wheelUp(e) && $(hlb).scrollTop() <= 0) ||
-                (common.wheelDown(e) && $(hlb).scrollTop() + hlb.clientHeight + 1 >= hlb.scrollHeight)) {
+                (common.wheelUp(e) && $(hlb).scrollTop() - (scrollOverflow / conf.get('zoom')) <= 0) ||
+                (common.wheelDown(e) && $(hlb).scrollTop() + hlb.clientHeight + 1 + (scrollOverflow / conf.get('zoom')) >= hlb.scrollHeight)) {
+
+                if (isIE) {
+                    if (common.wheelUp(e)) {
+                        hlb.scrollTop = 0;
+                    } else {
+                        hlb.scrollTop = hlb.scrollHeight;
+                    }
+                }
+
                 eventHandlers.disableWheelScroll();
                 return false;
             }

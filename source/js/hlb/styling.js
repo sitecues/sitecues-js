@@ -70,7 +70,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'height',
           'webkitTextFillColor',
           'min-height',
-          'min-width'
+          'min-width',
+          'msScrollLimitYMax'    // Necessary to scroll the HLB in IE
         ],
 
         // What child elements of the HLB do we want to remove after a clone.

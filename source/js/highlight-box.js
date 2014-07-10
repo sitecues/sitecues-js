@@ -167,11 +167,17 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function onTargetChange(e) {
 
-        var newTarget = e.target,
-            mouseX = e.clientX,
-            mouseY = e.clientY,
-            isMouseDown = e.which === 1,
+        var newTarget   = e.target,
+            mouseX      = e.clientX,
+            mouseY      = e.clientY,
+            isMouseDown,
             HLBBoundingBox;
+
+        if (platform.browser.isIE) {
+          isMouseDown = e.buttons === 1;
+        } else {
+          isMouseDown = e.which === 1;
+        }
 
         // The mouse has never been within the HLB bounds or
         // debugging is enabled.
