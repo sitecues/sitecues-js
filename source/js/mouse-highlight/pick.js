@@ -143,7 +143,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     function hasVisibleChildContent(current) {
       var children, index;
-      if (common.isVisualMedia(current)) {
+
+      if (common.isVisualMedia(current) || common.isFormControl(current)) {
         return true;
       }
 

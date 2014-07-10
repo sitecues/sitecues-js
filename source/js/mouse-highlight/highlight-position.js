@@ -282,8 +282,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         addRect(allRects, clipRect, getOverflowRect(this, style));
 
 
-        // --- Visible border ---
-        if (hasVisibleBorder(style)) {
+        // --- Visible border or form controls ---
+        if (hasVisibleBorder(style) || common.isFormControl(this)) {
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           return true; // Don't iterate ... although it case of Washington post they position a child outside the box, doh
         }

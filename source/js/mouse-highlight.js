@@ -119,11 +119,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function updateColorApproach(style) {
       // Get the approach used for highlighting
-      if (state.picked.length > 1 ||
+      if (state.picked.length > 1 || common.isFormControl(state.picked) ||
          (style[0].backgroundImage !== 'none' && style[0].backgroundRepeat === 'no-repeat')) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
+        //        works with form controls
         //  cons: does not highlight text the way user expects (washes it out)
         //  when-to-use: for article or cases where multiple items are selected
                 //               when background sprites are used, which we don't want to overwrite with out background
@@ -142,6 +143,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         //  approach #3 -- use css background of highlighted element for background color
         //                use overlay for rounded outline
         //  pros: looks best on text, does not wash out colors
+        //  cons: breaks the appearance of native form controls, such as <input type="button">
         //  when-to-use: on most elements
         state.doUseBgColor = true;
         state.doUseOverlayForBgColor = false;
@@ -511,7 +513,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Get exact bounds
-      //This is a horrible hack, suprisingly fixes a lot (especially (if not only) in firefox)
       fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
 
       state.zoom = conf.get('zoom');
