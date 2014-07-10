@@ -5,6 +5,7 @@
 //      }
 
 UNIT = true; // Chikun says this OK :)
+DEV = false;
 
 // Override/mock sitecues object.
 var blankFunction = function() {},

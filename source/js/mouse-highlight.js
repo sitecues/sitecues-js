@@ -883,6 +883,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     };
 
     sitecues.highlight = function(elem) {
+
+      if(DEV){console.log(1);}
+
       hideAndResetState();
       state.picked = $(elem);
       state.target = elem;
