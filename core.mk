@@ -109,7 +109,7 @@ build:
 	@mkdir -p $(build-dir)/source/js
 	
 	@sed 's%//DEV=true;%DEV=true;%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
-	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev.js > $(build-dir)/source/js/core.js
+	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev-true.js > $(build-dir)/source/js/core.js
 
 	@mkdir -p $(build-dir)/compile/js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
