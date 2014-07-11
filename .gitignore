@@ -31,3 +31,5 @@ tools/site/generate-cursors/cursor_output/
 # Stops auto-generated reports from being commited, such as unit-test-coverage
 # ============================================================================
 report
+
+tools/site/load-script/sitecues-load-script.js
