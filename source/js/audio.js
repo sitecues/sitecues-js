@@ -175,7 +175,7 @@ sitecues.def('audio', function (audio, callback) {
       sitecues.emit('speech/enabled');
     }
 
-    if (sitecues.UNIT) {
+    if (SC_UNIT) {
       exports.setSpeechState = audio.setSpeechState;
       exports.isSpeechEnabled = audio.isSpeechEnabled
       exports.playAudioByKey = audio.playAudioByKey;

@@ -401,7 +401,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     };
 
     // ----------------------------------------
-    if (sitecues.UNIT) {
+    if (SC_UNIT) {
       $.extend(exports, picker);
     }
 

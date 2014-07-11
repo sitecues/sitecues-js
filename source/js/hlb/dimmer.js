@@ -107,7 +107,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
         };
 
-        if (sitecues.UNIT) {
+        if (SC_UNIT) {
             exports.onDimmerClick = onDimmerClick;
             exports.onDimmerReady = onDimmerReady;
             exports.onDimmerClosed = onDimmerClosed;

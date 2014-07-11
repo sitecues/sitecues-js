@@ -163,10 +163,10 @@ endif
 
 ifeq ($(dev), false)
 	export uglifyjs-args+=-c dead_code=true
-	export uglifyjs-args+=--define sitecues.DEV=false,sitecues.UNIT=false
+	export uglifyjs-args+=--define SC_DEV=false,SC_UNIT=false
 else
 	export uglifyjs-args+=-c dead_code=true
-	export uglifyjs-args+=--define sitecues.UNIT=false
+	export uglifyjs-args+=--define SC_UNIT=false
 endif
 
 ################################################################################

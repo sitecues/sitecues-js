@@ -150,7 +150,7 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
       }
     }
 
-    if (sitecues.UNIT) {
+    if (SC_UNIT) {
       exports.getText = builder.getText;
     }
 

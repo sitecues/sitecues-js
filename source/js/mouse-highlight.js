@@ -1,4 +1,5 @@
 sitecues.def('mouse-highlight', function (mh, callback) {
+
   'use strict';
 
   var EXTRA_HIGHLIGHT_PIXELS = 3,
@@ -901,7 +902,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // done
     callback();
 
-    if (sitecues.UNIT) {
+    if (SC_UNIT) {
       mh.state = state;
       mh.INIT_STATE = INIT_STATE;
       mh.isInterestingBackground = isInterestingBackground;

@@ -109,7 +109,7 @@ build:
 	@mkdir -p $(build-dir)/source/js
 	
 ifeq ($(dev), true)	
-	@sed 's%//sitecues.DEV=true;%sitecues.DEV=true;%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
+	@sed 's%//SC_DEV=true;%SC_DEV=true;%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev-true.js > $(build-dir)/source/js/core.js
 else
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
