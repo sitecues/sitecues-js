@@ -4,7 +4,7 @@
  */
 
 // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
-//DEV=true;
+//sitecues.DEV=true;
 
 (function() {
 

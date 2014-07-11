@@ -601,7 +601,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     };
 
-    if (UNIT) {
+    if (sitecues.UNIT) {
       exports.getHLBStyles = hlbStyling.getHLBStyles;
       exports.filter       = hlbStyling.filter;
       exports.cloneStyles  = hlbStyling.cloneStyles;

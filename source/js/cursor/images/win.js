@@ -100,7 +100,7 @@ sitecues.def('cursor/images/win', function (osImages, callback) {
 
   });
 
-  if (UNIT) {
+  if (sitecues.UNIT) {
     exports.win = {
       'urls': osImages.urls
     };

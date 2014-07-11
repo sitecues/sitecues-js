@@ -286,7 +286,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     };
 
-    if (UNIT) {
+    if (sitecues.UNIT) {
       exports.isEligibleForConstrainedWidth = isEligibleForConstrainedWidth;
       exports.fixOverflowWidth = fixOverflowWidth;
       exports.getExtraLeftPadding = getExtraLeftPadding;

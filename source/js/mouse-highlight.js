@@ -901,7 +901,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // done
     callback();
 
-    if (UNIT) {
+    if (sitecues.UNIT) {
       mh.state = state;
       mh.INIT_STATE = INIT_STATE;
       mh.isInterestingBackground = isInterestingBackground;

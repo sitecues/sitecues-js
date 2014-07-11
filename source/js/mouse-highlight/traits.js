@@ -147,7 +147,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       return spacingTraitStack;
     }
     
-    if (UNIT) {
+    if (sitecues.UNIT) {
       $.extend(exports, traits);
     }
     
