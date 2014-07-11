@@ -79,7 +79,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         //prefer: "[selector]",
         //ignore: "[selector]",
         //disable: "[selector]"
-      };
+      },
+      isDebuggingOn;
 
     /*
      * ----------------------- PUBLIC -----------------------
@@ -293,10 +294,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var bestIndex = getCandidateWithHighestScore(scoreObjs);
 
       // 4. Log the results if necessary for debugging
-      if (DEV) {
+      if (SC_DEV && isDebuggingOn) {
         sitecues.use('mouse-highlight/pick-debug', function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
-          pickDebug.logHeuristicResults(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
+          pickDebug.logHeuristicResult(scoreObjs, bestIndex, traitStack, judgementStack, candidates);
         });
       }
 
@@ -304,7 +305,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return scoreObjs[bestIndex].score < MIN_SCORE_TO_PICK ? null : candidates[bestIndex];
     }
 
-    if (DEV) {
+    if (SC_DEV) {
       // Placeholder used by 'debug' customization
       picker.logResults = function () {
       };
@@ -338,7 +339,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           weight = judgementWeights[factorKey];
           scoreDelta = value * weight;  // value is a numeric or boolean value: for booleans, JS treats true=1, false=0
           scoreObj.score += scoreDelta;
-          if (DEV) {
+          if (SC_DEV) {
             scoreObj.factors.push({
               about: factorKey,
               value: value,
@@ -380,7 +381,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         if (traitStack[index].childCount === 1 && scoreObjs[index-1].isUsable) {
           delta = scoreObjs[index - 1].score;
           scoreObjs[index].score += delta * REFINEMENT_WEIGHTS.isParentOfOnlyChild;
-          if (DEV) {
+          if (SC_DEV) {
             scoreObjs[index].factors.push({
               about: 'singleParentRefinement',    // Debug info
               value: delta,
@@ -406,10 +407,15 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       $.extend(judgementWeights, weights);
     };
 
-    if (DEV) {
+    if (SC_DEV) {
       // --- For debugging ----------------------
       sitecues.pickFrom = function (element) {
         return picker.find(element);
+      };
+
+      sitecues.togglePickerDebugging = function() {
+        isDebuggingOn = !isDebuggingOn;
+        resetPickedItemsCache();
       };
     }
 

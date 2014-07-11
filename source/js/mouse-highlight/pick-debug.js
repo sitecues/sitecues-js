@@ -1,4 +1,4 @@
-if (DEV) {
+if (SC_DEV) {
 
   /*global console: true */
   /*
@@ -35,7 +35,7 @@ if (DEV) {
           String('              ' + Math.round(sf.weight * sf.value)).slice(-11);
       }
 
-      function logHeuristicResult(scoreObjs, bestScoreIndex, traitStack, judgementStack, nodes) {
+      pickDebug.logHeuristicResult = function(scoreObjs, bestScoreIndex, traitStack, judgementStack, nodes) {
         var index, scoreObj;
         var numUnusableAtTop = 0;
         var startItem = scoreObjs.length - 1;
@@ -128,10 +128,6 @@ if (DEV) {
           console.groupEnd();
         }
       }
-
-      sitecues.togglePickerDebugging = function() {
-        isDebuggingOn = !isDebuggingOn;
-      };
 
       callback();
     });
