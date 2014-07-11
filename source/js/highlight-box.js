@@ -512,9 +512,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function onHLBClosed() {
 
-        // Listeners: hpan.js, keys.js, mouse-highlight.js, speech.js
-        sitecues.emit('hlb/closed', $hlbElement);
-
         // Turn back on the ability to scroll the document
         eventHandlers.enableWheelScroll();
 
@@ -522,11 +519,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         removeHLBWrapper();
 
         // Clean up "module scoped" vars
-        $hlbElement = undefined;
-        $originalElement = undefined;
         translateCSS = undefined;
-        originCSS = undefined;
+        originCSS    = undefined;
         isHLBClosing = false;
+
+        // Listeners: hpan.js, keys.js, mouse-highlight.js, speech.js
+        sitecues.emit('hlb/closed', $hlbElement);
+
+        $originalElement = undefined;
+        $hlbElement      = undefined;
 
       }
 

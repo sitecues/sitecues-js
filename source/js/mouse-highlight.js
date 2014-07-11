@@ -71,7 +71,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
       match = matchColorsAlpha.exec(bgColor);
-      
+
       if (match !== null) {
         if (parseFloat(match[4]) < .10) {
           return false; // Mostly transparent, not interesting
@@ -85,7 +85,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       // Check r,g,b values  -- We consider it "non-interesting" if mostly white
       mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
-      
+
       return !mostlyWhite;
     }
 
@@ -204,7 +204,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       });
       return styles;
     }
-     
+
     function isCursorInFixedRects(fixedRects) {
       return !mh.cursorPos || geo.isPointInAnyRect(mh.cursorPos.x, mh.cursorPos.y, fixedRects);
     }
@@ -274,13 +274,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element.style.backgroundImageOrigin = 'border-box';
       element.style.backgroundClip = 'border-box';
       element.style.backgroundAttachment = 'scroll';
-      
+
       // This following line made the SVG background in IE smaller than the highlighted element.
       // element.style.backgroundSize = state.fixedContentRect.width * conf.get('zoom') + 'px ' + state.fixedContentRect.height * conf.get('zoom') + 'px';
-       
+
       element.style.backgroundImage = newBackgroundImage;
       element.style.backgroundRepeat= 'no-repeat';
-      
+
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
       element.style.backgroundPosition = (offsetLeft / conf.get('zoom')) + 'px '+ (offsetTop / conf.get('zoom')) + 'px';
     };
@@ -434,7 +434,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       while (count < points.length);
 
       svgBuilder += ' Z"' + getSVGStyle(strokeWidth, strokeColor, fillColor) + '/>';
-      
+
       return svgBuilder;
     }
 
@@ -452,7 +452,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         extraLeft = (state.elementRect.left - state.fixedContentRect.left) ,
         extraRight = (state.fixedContentRect.right - state.elementRect.right) ,
         extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) ;
-      
+
       // extra *= conf.get('zoom');
 
       if (extraLeft > 0) {
@@ -762,7 +762,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var was = mh.enabled;
           // The mouse highlight is always enabled when TTS is on.
       mh.enabled = audio.isSpeechEnabled() || zoom > MIN_ZOOM;
-      
+
       if (mh.isSticky && state.picked) {
         // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
         pause();
@@ -770,9 +770,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         show();
         return;
       }
-      
+
       hideAndResetState();
-      
+
       if (was !== mh.enabled) {
         refresh();
       }
@@ -857,7 +857,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     resetState();
 
     // hide mouse highlight once highlight box appears
-    sitecues.on('hlb/create hlb/inflating hlb/ready mh/disable', disable);
+    sitecues.on('hlb/create mh/disable', disable);
 
     // hide mouse highlight once highlight box is dismissed
     sitecues.on('hlb/deflating', pause);
