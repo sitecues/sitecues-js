@@ -1,6 +1,10 @@
 sitecues.def('mouse-highlight', function (mh, callback) {
   'use strict';
 
+  if(sitecues.DEV){
+    console.log(13123123123);
+  }
+
   var EXTRA_HIGHLIGHT_PIXELS = 3,
 
   INIT_STATE = {
