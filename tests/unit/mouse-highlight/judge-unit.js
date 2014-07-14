@@ -546,6 +546,24 @@ describe('judge', function() {
             expect(judgementStack[1].isWideMediaContainer).to.be.equal(false);
             done();
         });
+        it('should return |isFormControl=true| judgement for a form control.', function(done) {
+          var newNodes = nodes.slice(); // Duplicate
+          newNodes[0] = win.document.getElementById('test-input');
+          var traitStack = traits.getTraitStack(newNodes), // Mock traits, not real values
+            judgementStack;
+
+          judgementStack = judge.getJudgementStack(traitStack, newNodes);
+          expect(judgementStack[0].isFormControl).to.be.equal(true);
+          done();
+        });
+        it('should return |isFormControl=false| judgement for a non-form control.', function(done) {
+          var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
+            judgementStack;
+
+          judgementStack = judge.getJudgementStack(traitStack, nodes);
+          expect(judgementStack[0].isFormControl).to.be.equal(false);
+          done();
+        });
     });
     after(function() {
         // Unload module from nodejs's cache

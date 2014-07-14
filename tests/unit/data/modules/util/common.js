@@ -9,3 +9,4 @@ exports.isEmptyBgImage = function (backgroundImageStyle) {
 exports.getElementComputedStyles = function () { return true; };
 exports.isVisualMedia = function(element) { return element.tagName === 'IMG'; };
 exports.isInSitecuesUI = function(element) { return element.id === 'sitecues-badge'; };
+exports.isFormControl = function(element) { return element.tagName === 'INPUT' };

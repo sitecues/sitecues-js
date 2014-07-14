@@ -106,7 +106,7 @@ sitecues.def('util/common', function (common, callback) {
     /*
      * @param {HTMLObject Array} el DOM node (array)
      * @returns {Boolean} True if the element is related to canvas.
-     */  
+     */
     common.isCanvasElement = function (el) {
        return el[0].localName === "canvas" || el.find('canvas').length > 0;
      };
@@ -497,6 +497,10 @@ sitecues.def('util/common', function (common, callback) {
     common.hasVertScroll = function(el) {
       return el.clientHeight < el.scrollHeight;
     };
+
+    if (SC_UNIT) {
+      $.extend(exports, common);
+    }
 
     // Done.
     callback();

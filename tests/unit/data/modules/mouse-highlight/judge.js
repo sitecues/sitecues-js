@@ -6,6 +6,7 @@ exports.getJudgementStack = function(traitStack, nodes) {
       isGoodTag: false,
       isGoodRole: false,
       isGroupedWithImage: isGoodNode,
+      isFormControl: false,
       isDivided: false,
       hasOwnBackground: isGoodNode,
       vertSeparationImpact: 1,

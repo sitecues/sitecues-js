@@ -75,7 +75,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // ** Semantic constants ***
     // For ARIA roles other tags could be used, but this is most likely and more performant than checking all possibilities
-    var SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,header hr,dt,div[role="separator"],div[role="heading"]',
+    var SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,header,hr,dt,div[role="separator"],div[role="heading"]',
       GREAT_TAGS = { blockquote:1, td:1, tr: 1, ul:1, ol: 1, menu:1, section: 1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, img:1, p:1, pre:1, li:1 },
       // These are less likely to be used to layout a cell/box
