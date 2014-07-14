@@ -196,7 +196,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // How visible is the highlight?
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-          vizFactor = (conf.get('zoom') + 0.4) * 0.9;
+          vizFactor = (state.zoom + 0.4) * 0.9;
       if (audio.isSpeechEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
@@ -259,6 +259,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
+      state.zoom = conf.get('zoom');
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
       updateColorApproach(state.picked, state.styles);
 
@@ -333,7 +334,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element.style.backgroundRepeat= 'no-repeat';
       
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      element.style.backgroundPosition = (offsetLeft / conf.get('zoom')) + 'px '+ (offsetTop / conf.get('zoom')) + 'px';
+      element.style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
     };
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
@@ -491,7 +492,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getSVGFillRectMarkup(left, top, width, height, fillColor) {
 
-      return '<rect x="' + left / conf.get('zoom') + '" y="' + top / conf.get('zoom') + '"  width="' + width / conf.get('zoom') + '" height="' + height / conf.get('zoom') + '"' +
+      return '<rect x="' + left / state.zoom + '" y="' + top / state.zoom + '"  width="' + width / state.zoom + '" height="' + height / state.zoom + '"' +
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
@@ -563,8 +564,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get exact bounds
       fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
-
-      state.zoom = conf.get('zoom');
 
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
@@ -809,10 +808,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function onSettingsChanged() {
-      var zoom = conf.get('zoom');
+      state.zoom = conf.get('zoom');
       var was = mh.enabled;
           // The mouse highlight is always enabled when TTS is on.
-      mh.enabled = audio.isSpeechEnabled() || zoom > MIN_ZOOM;
+      mh.enabled = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
 
       if (SC_DEV) {
         if (mh.isSticky && state.picked) {
