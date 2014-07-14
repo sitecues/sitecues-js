@@ -547,8 +547,9 @@ describe('judge', function() {
             done();
         });
         it('should return |isFormControl=true| judgement for a form control.', function(done) {
-          var newNodes = nodes.slice(); // Duplicate
-          newNodes[0] = win.document.getElementById('test-input');
+          var newNodes = nodes.slice(), // Duplicate
+            FORM_CONTROL_ID = 'test-input';
+          newNodes[0] = win.document.getElementById(FORM_CONTROL_ID);
           var traitStack = traits.getTraitStack(newNodes), // Mock traits, not real values
             judgementStack;
 
@@ -557,7 +558,7 @@ describe('judge', function() {
           done();
         });
         it('should return |isFormControl=false| judgement for a non-form control.', function(done) {
-          var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
+          var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
             judgementStack;
 
           judgementStack = judge.getJudgementStack(traitStack, nodes);
