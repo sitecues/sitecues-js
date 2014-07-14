@@ -36,6 +36,14 @@ sitecues.def('util/common', function (common, callback) {
       return $(selector).is(VISUAL_MEDIA_ELEMENTS);
     };
 
+    /**
+     * Checks if the element is a form control
+     */
+    common.isFormControl = function(selector) {
+      var FORM_ELEMENTS = 'input,textarea,select,button';
+      return $(selector).is(FORM_ELEMENTS);
+    };
+
     /*
      * Check if current image value is not empty.
      * @imageValue A string that represents current image value.
