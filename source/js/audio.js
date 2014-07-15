@@ -26,11 +26,16 @@ sitecues.def('audio', function (audio, callback) {
       if (!ttsOn) {
         return;
       }
-      stopSpeech();
+      stopAudio();
       var text = builder.getText(hlb);
       getAudioPlayer().playAudioSrc(getTTSUrl(text));
+
+      enableKeyDownToStopAudio();
+    }
+
+    function enableKeyDownToStopAudio() {
       // Stop speech on any key down.
-      $(window).one('keydown', stopSpeech);
+      $(window).one('keydown', stopAudio);
     }
 
     /*
@@ -38,10 +43,10 @@ sitecues.def('audio', function (audio, callback) {
      * This is safe to call if the player has not been initialized
      * or is not playing.
      */
-    function stopSpeech() {
+    function stopAudio() {
       getAudioPlayer().stop();
       // Remove handler that stops speech on any key down.
-      $(window).off('keydown', stopSpeech);
+      $(window).off('keydown', stopAudio);
     }
 
     function getApiBaseUrl() {
@@ -81,6 +86,9 @@ sitecues.def('audio', function (audio, callback) {
     audio.playAudioByKey = function(key) {
       var url = getAudioKeyUrl(key);
       getAudioPlayer().playAudioSrc(url);
+
+      // Stop speech on any key down.
+      enableKeyDownToStopAudio();
     };
 
     // What audio format will we use?
@@ -168,7 +176,7 @@ sitecues.def('audio', function (audio, callback) {
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    sitecues.on('hlb/closed', stopSpeech);
+    sitecues.on('hlb/closed', stopAudio);
 
     if (conf.get('ttsOn')) {
       ttsOn = true;
