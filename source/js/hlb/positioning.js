@@ -123,7 +123,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         // Set to the scroll height minus 4 (half of the padding)
         // It is necessary to subtract the padding because scrollHeight includes padding.
         $hlbElement.css({
-          'height': ($hlbElement[0].scrollHeight - hlbStyling.defaultPadding) + 'px'
+          'height': ($hlbElement[0].scrollHeight - parseInt($hlbElement.css('paddingBottom'))) + 'px'
         });
 
         // Now that we have set the height of the cloned element to the height of the scroll height...
@@ -288,18 +288,18 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     if (UNIT) {
       exports.isEligibleForConstrainedWidth = isEligibleForConstrainedWidth;
-      exports.fixOverflowWidth = fixOverflowWidth;
-      exports.getExtraLeftPadding = getExtraLeftPadding;
-      exports.midPointDiff = hlbPositioning.midPointDiff;
-      exports.limitWidth = hlbPositioning.limitWidth;
-      exports.mitigateVerticalScroll = hlbPositioning.mitigateVerticalScroll;
-      exports.constrainPosition = hlbPositioning.constrainPosition;
-      exports.constrainHeightToSafeArea = hlbPositioning.constrainHeightToSafeArea;
-      exports.constrainWidthToSafeArea = hlbPositioning.constrainWidthToSafeArea;
-      exports.scaleRectFromCenter = hlbPositioning.scaleRectFromCenter;
-      exports.addVerticalScroll = hlbPositioning.addVerticalScroll;
-      exports.initializeSize = hlbPositioning.initializeSize;
-      exports.hlbPositioning = hlbPositioning;
+      exports.fixOverflowWidth              = fixOverflowWidth;
+      exports.getExtraLeftPadding           = getExtraLeftPadding;
+      exports.midPointDiff                  = hlbPositioning.midPointDiff;
+      exports.limitWidth                    = hlbPositioning.limitWidth;
+      exports.mitigateVerticalScroll        = hlbPositioning.mitigateVerticalScroll;
+      exports.constrainPosition             = hlbPositioning.constrainPosition;
+      exports.constrainHeightToSafeArea     = hlbPositioning.constrainHeightToSafeArea;
+      exports.constrainWidthToSafeArea      = hlbPositioning.constrainWidthToSafeArea;
+      exports.scaleRectFromCenter           = hlbPositioning.scaleRectFromCenter;
+      exports.addVerticalScroll             = hlbPositioning.addVerticalScroll;
+      exports.initializeSize                = hlbPositioning.initializeSize;
+      exports.hlbPositioning                = hlbPositioning;
     }
 
     callback();

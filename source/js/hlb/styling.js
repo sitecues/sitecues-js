@@ -7,8 +7,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'platform', 'hlb/safe-area',
-  function ($, platform, hlbSafeArea) {
+  sitecues.use('jquery', 'platform',
+  function ($, platform) {
 
     ///////////////////////////
     // PUBLIC PROPERTIES
@@ -95,31 +95,33 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'padding'          : hlbStyling.defaultPadding,
           'margin'           : 0,            // Margin isn't necessary and only adds complexity
           'border-radius'    : '4px',        // Aesthetic purposes
-          'box-sizing'       : 'content-box' // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
+          'box-sizing'       : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
+          'visibility'       : 'visible',
+          'opacity'          : 1
         };
 
     //////////////////////////
     // PRIVATE FUNCTIONS
     //////////////////////////
 
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=137687
-    //
+
     /**
      * [getComputedStyleCssText returns the cssText of an element]
      * @param  {[DOM element]} element [DOM element]
      * @return {[String]}              [Computed styles for an DOM element]
+     * NOTE: Fixes bug described here: [https://bugzilla.mozilla.org/show_bug.cgi?id=137687]
      */
     function getComputedStyleCssText(element) {
-      var style = window.getComputedStyle(element), cssText;
 
-      if (style.cssText != "") {
+      var style   = window.getComputedStyle(element),
+          cssText = '';
+
+      if (style.cssText !== '') {
         return style.cssText;
       }
 
-      cssText = "";
-
       for (var i = 0; i < style.length; i++) {
-        cssText += style[i] + ": " + style.getPropertyValue(style[i]) + "; ";
+        cssText += style[i] + ': ' + style.getPropertyValue(style[i]) + '; ';
       }
 
       return cssText;
@@ -160,13 +162,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} originalElementsChildStyle        [CSS styles returned from window.getComputedStyle]
      * @return {[Object]}                                   [Styles to be consumed by jQuery.css]
      */
-    function getChildStyles ($child, hlbWidthGreaterThanSafeAreaWidth, originalElementsChildStyle) {
+    function getChildStyles ($child, originalElementsChildStyle) {
 
           // Defaut css styles for all HLB children
       var styles = {
             'webkitTextFillColor': '',
             'textDecoration'     : 'none',
-            'bottom'             : 0        //Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
+            'bottom'             : 0        // Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
           },
           textDecoration = originalElementsChildStyle.textDecoration;
 
@@ -178,6 +180,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         styles.height = '';
       }
 
+      // NOTE: Copying cssText directly is not sufficient for copying textDecorations.
+      //       ts.dev.sitecues.com/hlb/styling/text-decoration.html
       if (textDecoration.indexOf('underline') !== -1) {
 
         styles.textDecoration = 'underline';
@@ -193,36 +197,21 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       // This fixes a problem with the HLB on TexasAT home page when opening the entire "News & Events"
+      // ALSO...it fixes another problem that used a different fix.  I removed the old fix
+      // and will re-enable it if hlb content overlaps
+      //       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
+      //                Fixes children overlapping children within the HLB.  Comment out the line below to
+      //                experience this problem.
       if (originalElementsChildStyle.position === 'absolute') {
         styles.position = 'static';
-      }
-
-
-      // Thought at one point this fixed something, so I am leaving it until there is nothing
-      // wrong with the HLB so I can quickly uncomment to see its effects.
-      //
-      // TODO: Determine if this code is necessary.
-      //
-      // if ($child.css('display').indexOf('table') !== -1) {
-      //   styles.display = 'inline-block';
-      // }
-
-
-      // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
-      //       Fixes children overlapping children within the HLB.  Comment out the line below to
-      //       experience this problem.
-      if (hlbWidthGreaterThanSafeAreaWidth) {
-        if ($child.css('display') !== 'list-item') {
-          styles.display = 'inline-block';
-          styles.position = 'static';
-        }
+        styles.display  = 'inline-block';
       }
 
       return styles;
 
     }
 
-    function getEmsToPx(fontSize, ems) {
+    function getEmsToPx (fontSize, ems) {
       var measureDiv = $('<div/>')
          .appendTo(document.body)
          .css({
@@ -235,7 +224,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       return px;
     }
 
-    function computeBulletWidth(element, style, bulletType) {
+    function computeBulletWidth (element, style, bulletType) {
       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
         ems = 1; // Simple bullet
@@ -317,25 +306,6 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     }
 
     /**
-     * [isOriginalElementWideAsSafeArea determines if the scaled original element is as wide
-     * as the safe area.]
-     * @param  {[DOM element]}  $element [Original DOM element]
-     * @return {Boolean}                 [True if scaled original element is as wide as the safe area]
-     */
-    function isOriginalElementWideAsSafeArea ($element) {
-
-      var elementBoundingBox  = $element[0].getBoundingClientRect(),
-          safeZoneBoundingBox = hlbSafeArea.getSafeZoneBoundingBox();
-
-      if (elementBoundingBox.width * hlbSafeArea.HLBZoom >= safeZoneBoundingBox.width) {
-        return true;
-      }
-
-      return false;
-
-    }
-
-    /**
      * [getHLBBackgroundColor
          If the $hlbElement has a transparent background color, we should find one
          by looking up the entire ancestor chain and use the first non-transparent
@@ -346,7 +316,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} elementComputedStyle         [The original elements computed styles]
      * @return {[String]}                              [The HLB background color]
      */
-    function getHLBBackgroundColor($originalElement, elementComputedStyle) {
+    function getHLBBackgroundColor ($originalElement, elementComputedStyle) {
 
       var newBackgroundColor;
 
@@ -384,7 +354,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} elementComputedStyle     [The original elements computed style]
      * @return {[String]}                          [The background image that will be used by the $hlbElement]
      */
-    function getHLBBackgroundImage($originalElement, elementComputedStyle) {
+    function getHLBBackgroundImage ($originalElement, elementComputedStyle) {
 
       var newBackgroundImage;
 
@@ -415,7 +385,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} elementComputedStyle     [The original elements computed style]
      * @return {[Integer]}                         [The HLB left-padding]
      */
-    function getHLBLeftPadding($originalElement, elementComputedStyle) {
+    function getHLBLeftPadding ($originalElement, elementComputedStyle) {
 
       return hlbStyling.defaultPadding + getBulletWidth($originalElement, elementComputedStyle);
 
@@ -437,13 +407,71 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         //
         // TODO: actually prove these beliefs
      */
-    function getHLBDisplay(elementComputedStyle) {
+    function getHLBDisplay (elementComputedStyle) {
 
       if (elementComputedStyle.display === 'table') {
         return 'block';
       }
 
       return elementComputedStyle.display;
+
+    }
+
+    /**
+     * [initializeHLBElementStyles initializes the HLB elements styles by directly copying
+     *  the styles from the original element.]
+     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
+     * @param  {[jQuery element]} $hlbElement      [The HLB element]
+     */
+    function initializeHLBElementStyles ($originalElement, $hlbElement) {
+
+      var originalElementCSSText = getComputedStyleCssText($originalElement[0]);
+
+      $hlbElement[0].style.cssText = originalElementCSSText;
+
+    }
+
+    /**
+     * [initializeHLBChildrenStyles initializes the styles of the children of the HLB element]
+     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
+     * @param  {[jQuery element]} $hlbElement      [The HLB element]
+     */
+    function initializeHLBChildrenStyles ($originalElement, $hlbElement) {
+
+      var $originalElementChildren = $originalElement.find('*'),
+          $hlbElementChildren      = $hlbElement.find('*'),
+          hlbElementChild,
+          originalElementsChildStyle,
+          computedChildStyles,
+          i = 0;
+
+      for (; i < $originalElementChildren.length; i += 1) {
+
+        // Cache the HLB child.
+        hlbElementChild = $hlbElementChildren[i];
+
+        // Cache the HLB child computed style
+        originalElementsChildStyle = getComputedStyle($originalElementChildren[i]);
+
+        // Copy the original elements child styles to the HLB elements child.
+        hlbElementChild.style.cssText = getComputedStyleCssText($originalElementChildren[i]);
+
+        // Compute styles that are more complicated than copying cssText.
+        computedChildStyles = getChildStyles($(hlbElementChild), originalElementsChildStyle);
+
+        // Set the childs css.
+        $(hlbElementChild).css(computedChildStyles);
+
+        // Ran into issues with children inheriting styles because of class and id CSS selectors.
+        // Filtering children of these attributes solves the problem.
+        // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
+        //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to
+        //       experience this problem.  There might be a better way...but I don't have the patience to
+        //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat...
+        filterAttributes($(hlbElementChild));
+
+
+      }
 
     }
 
@@ -512,7 +540,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       });
 
-    }
+    };
 
     /**
      * [getHLBStyles gets the HLB styles.]
@@ -526,16 +554,26 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           backgroundStyles     = getHLBBackgroundImage($originalElement, elementComputedStyle),
           backgroundColor      = getHLBBackgroundColor($originalElement, elementComputedStyle),
           calculatedHLBStyles  = {
-            'padding-left'    : getHLBLeftPadding($originalElement, elementComputedStyle),
-            'display'         : getHLBDisplay(elementComputedStyle)
+            'padding-left' : getHLBLeftPadding($originalElement, elementComputedStyle),
+            'display'      : getHLBDisplay(elementComputedStyle)
           };
 
-          if (backgroundColor === $originalElement.css('color')) {
-            calculatedHLBStyles.color           = HLB_DEFAULT_TEXT_COLOR;
-            calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
-          } else {
-            calculatedHLBStyles.backgroundColor = backgroundColor;
-          }
+      // If the background color is the same as the text color, use default text and background colors
+      if (backgroundColor === $originalElement.css('color')) {
+        calculatedHLBStyles.color           = HLB_DEFAULT_TEXT_COLOR;
+        calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
+      } else {
+        calculatedHLBStyles.backgroundColor = backgroundColor;
+      }
+
+      // If the original element uses a background image, preserve original padding.
+      // This was implemented to fix SC-1830
+      if ($originalElement.css('backgroundImage') !== 'none') {
+        calculatedHLBStyles.paddingLeft   = $originalElement.css('paddingLeft');
+        calculatedHLBStyles.paddingTop    = $originalElement.css('paddingTop');
+        calculatedHLBStyles.paddingBottom = $originalElement.css('paddingBottom');
+        calculatedHLBStyles.paddingRight  = $originalElement.css('paddingRight');
+      }
 
       return $.extend({},
         defaultHLBStyles,
@@ -560,60 +598,22 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     };
 
     /**
-     * [cloneStyles clones the original elements styles and the styles of all of its children.]
+     * [initializeStyles clones the original elements styles and the styles of all of its children.]
      * @param  {[DOM element]} $originalElement [original element]
      * @param  {[DOM element]} $hlbElement [HLB element]
      */
-    hlbStyling.cloneStyles = function ($originalElement, $hlbElement) {
+    hlbStyling.initializeStyles = function ($originalElement, $hlbElement) {
 
+      initializeHLBElementStyles($originalElement, $hlbElement);
 
-      var originalElementCSSText           = getComputedStyleCssText($originalElement[0]),
-          hlbWidthGreaterThanSafeAreaWidth = isOriginalElementWideAsSafeArea($originalElement),
-          $originalElementChildren         = $originalElement.find('*'),
-          $hlbElementChildren              = $hlbElement.find('*'),
-          hlbElementChild,
-          originalElementsChildStyle,
-          computedChildStyles,
-          i = 0;
-
-
-      // Set the cssText of the HLB element, copying all computed styles.
-      $hlbElement[0].style.cssText = originalElementCSSText;
-
-      for (; i < $originalElementChildren.length; i += 1) {
-
-        // Cache the HLB child.
-        hlbElementChild = $hlbElementChildren[i];
-
-        // Cache the HLB child computed style
-        originalElementsChildStyle = getComputedStyle($originalElementChildren[i]);
-
-        // Copy the original elements child styles to the HLB elements child.
-        hlbElementChild.style.cssText = getComputedStyleCssText($originalElementChildren[i]);
-
-        // Compute styles that are more complicated than copying cssText.
-        computedChildStyles = getChildStyles($(hlbElementChild), hlbWidthGreaterThanSafeAreaWidth, originalElementsChildStyle);
-
-        // Set the childs css.
-        $(hlbElementChild).css(computedChildStyles);
-
-        // Ran into issues with children inheriting styles because of class and id CSS selectors.
-        // Filtering children of these attributes solves the problem.
-        // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
-        //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to
-        //       experience this problem.  There might be a better way...but I don't have the patience to
-        //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat...
-        filterAttributes($(hlbElementChild));
-
-
-      }
+      initializeHLBChildrenStyles($originalElement, $hlbElement);
 
     };
 
     if (UNIT) {
-      exports.getHLBStyles = hlbStyling.getHLBStyles;
-      exports.filter       = hlbStyling.filter;
-      exports.cloneStyles  = hlbStyling.cloneStyles;
+      exports.getHLBStyles      = hlbStyling.getHLBStyles;
+      exports.filter            = hlbStyling.filter;
+      exports.initializeStyles  = hlbStyling.initializeStyles;
     }
 
     callback();

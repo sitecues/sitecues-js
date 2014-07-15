@@ -37,9 +37,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             return 'transitionend';
           }()),
 
-          preventDeflationFromMouseout = false, // Boolean that determines if HLB can be deflated.
-          isHLBClosing = false, // Boolean that determines if the HLB is currently deflating.
-          isSticky = false; // DEBUG: HLB deflation toggler
+          removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
+          preventDeflationFromMouseout   = false, // Boolean that determines if HLB can be deflated.
+          isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
+          isSticky                       = false; // DEBUG: HLB deflation toggler
 
       //////////////////////////////
       // PRIVATE FUNCTIONS
@@ -100,6 +101,63 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
+       * [isOriginalElementValidForCloning determines if the original element chosen by the picker is a valid element for the HLB]
+       * @param  {[DOM Element]}  originalElement [The element chosen by the picker]
+       * @return {Boolean}                 [True if the element chosen is valid to be an HLB, false if element passed is insufficient to be an HLB]
+       */
+      function isOriginalElementValidForCloning(originalElement) {
+
+        if ($(originalElement).is('li')) {
+          return false;
+        }
+
+        return true;
+
+      }
+
+      /**
+       * [getValidOriginalElement creates and returns a valid element for the HLB]
+       * @param  {[DOM element]} originalElement [The element chosen by the picker]
+       * @return {[DOM element]}                 [The new element create from the element chosen by the picker]
+       */
+      function getValidOriginalElement(originalElement) {
+
+        var temporaryOriginalElement,
+            originalElementBoundingBox,
+            originalElementComputedStyles,
+            zoom = conf.get('zoom');
+
+        // If the element chosen is an <li>, then we must wrap it with a <ul>
+        // We must also append this newly created <ul> to the DOM so the HLB
+        // module can utilize styles and positioning of the "original element"
+        // Basically, we create a new original element.
+        if ($(originalElement).is('li')) {
+
+          // Setting this to true will remove the $originalElement from the DOM before inflation
+          removeTemporaryOriginalElement = true;
+
+          originalElementBoundingBox     = originalElement.getBoundingClientRect();
+          temporaryOriginalElement       = $('<ul>').append(originalElement.cloneNode(true));
+          originalElementComputedStyles  = window.getComputedStyle(originalElement);
+          temporaryOriginalElement.style.cssText = window.getComputedStyle($(originalElement).parent('ul, ol')[0]).cssText;
+
+          $(temporaryOriginalElement).css({
+            'position'   : 'absolute',
+            'left'       : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
+            'top'        : originalElementBoundingBox.top / zoom  + window.pageYOffset / zoom,
+            'opacity'    : 0,
+            'padding'    : 0,
+            'margin'     : 0,
+            'width'      : originalElementComputedStyles.width
+          }).insertAfter('body');
+
+          return $(temporaryOriginalElement)[0];
+
+        }
+
+      }
+
+      /**
        * [getOriginalElement checks and retrieves the original element that the HLB uses
        * from an event object.  Also handles the specific cases where we may want to toggle
        * the HLB through a public interface during debugging and testing.]
@@ -123,7 +181,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           // Check if we were passed a jQuery element.  This is useful for
           // testing purposes because we can take advantage of the public
-          // event system to sitecues.emit('hlb/toggle', $('#myElement'))
+          // event system to sitecues.emit('hlb/toggle', sitecues.$('#myElement'))
         } else if (e instanceof $) {
 
           originalElement = e[0];
@@ -135,6 +193,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           originalElement = e;
 
+        }
+
+        // SC-1629 - Lonely bullets
+        if (!isOriginalElementValidForCloning(originalElement)) {
+          originalElement = getValidOriginalElement(originalElement);
         }
 
         return originalElement;
@@ -173,6 +236,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             isMouseDown,
             HLBBoundingBox;
 
+        // IE is, of course, different than the other browsers in terms of
+        // how we can detect if the left mouse button is held down during
+        // mousemove events.  This specifically fixes SC-1834
         if (platform.browser.isIE) {
           isMouseDown = e.buttons === 1;
         } else {
@@ -200,9 +266,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // If the mouse coordinates are not within the bounds of
         // the HLB + MOUSE_SAFETY_ZONE, then deflate the HLB.
-        if (mouseX < HLBBoundingBox.left - MOUSE_SAFETY_ZONE ||
-            mouseX > HLBBoundingBox.right + MOUSE_SAFETY_ZONE ||
-            mouseY < HLBBoundingBox.top - MOUSE_SAFETY_ZONE ||
+        if (mouseX < HLBBoundingBox.left   - MOUSE_SAFETY_ZONE ||
+            mouseX > HLBBoundingBox.right  + MOUSE_SAFETY_ZONE ||
+            mouseY < HLBBoundingBox.top    - MOUSE_SAFETY_ZONE ||
             mouseY > HLBBoundingBox.bottom + MOUSE_SAFETY_ZONE) {
 
           closeHLB();
@@ -220,10 +286,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function initializeHLB(originalElement) {
 
-        // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
-        // so we don't copy over the highlighting styles from the original element.
-        sitecues.emit('mh/disable');
-
         // Create and append to the DOM the wrapping element for HLB and DIMMER elements
         addHLBWrapper();
 
@@ -236,7 +298,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Prevents mouse movement from deflating the HLB until mouse is inside HLB
         preventDeflationFromMouseout = true;
 
-        // Listeners: keys.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+        // Listeners: keys.js, metrics/hlb-opened.js, speech.js
         sitecues.emit('hlb/create', $hlbElement);
 
       }
@@ -441,8 +503,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Copies form values from original element to HLB
         mapForm($originalElement, $hlbElement);
 
-        // Clone styles of children of HLB, so layout is preserved
-        hlbStyling.cloneStyles($originalElement, $hlbElement);
+        // Clone styles of HLB and children of HLB, so layout is preserved
+        hlbStyling.initializeStyles($originalElement, $hlbElement);
 
         // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
         hlbStyling.filter($hlbElement);
@@ -476,6 +538,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Compute and set HLB position
         positionHLB();
+
+        // Now that we have extracted all the information from the original element,
+        // it is time to ask whether or not a temporary original element has been used
+        // and remove it if true.
+        if (removeTemporaryOriginalElement) {
+          $originalElement.remove();
+          removeTemporaryOriginalElement = false;
+        }
 
         // setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
         // of the HLB.  Before we scale, it absolutely must be positioned correctly.
@@ -560,14 +630,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           'id': SITECUES_HLB_WRAPPER_ID
         })
         .css({
-          'padding': 0,
-          'margin': 0,
-          'top': 0,
-          'left': 0,
+          'padding' : 0,
+          'margin'  : 0,
+          'top'     : 0,
+          'left'    : 0,
           'position': 'absolute',
           'overflow': 'visible'
         })
-        .insertAfter($('body'));
+        .insertAfter('body');
       }
 
       /**
@@ -582,7 +652,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function toggleHLB(e) {
 
-        var originalElement = getOriginalElement(e);
+        var originalElement;
 
         // If the HLB is currently deflating, no need to toggle
         if (isHLBClosing) {
@@ -594,13 +664,28 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           closeHLB();
 
-        // If a valid element exists and the HLB does not exist
-        } else if (originalElement) {
-          createHLB(originalElement);
+        // If the HLB does not exist
+        } else {
+
+          // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
+          // so we don't copy over the highlighting styles from the original element.
+          sitecues.emit('mh/disable');
+
+          originalElement = getOriginalElement(e);
+
+          if (originalElement) {
+
+            createHLB(originalElement);
+
+          } else {
+
+            // Turn on mouse highlighting if no valid element exists.
+            sitecues.emit('mh/enable');
+          }
+
         }
 
       }
-
 
       // Picker module emits this event when the spacebar is pressed.
       sitecues.on('hlb/toggle', toggleHLB);
@@ -621,28 +706,32 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       if (UNIT) {
 
-        exports.mapForm = mapForm;
+        exports.mapForm                  = mapForm;
         exports.isHLBScaleGreaterThanOne = isHLBScaleGreaterThanOne;
-        exports.getOriginalElement = getOriginalElement;
-        exports.onHLBHover = onHLBHover;
-        exports.onTargetChange = onTargetChange;
-        exports.initializeHLB = initializeHLB;
-        exports.sizeHLB = sizeHLB;
-        exports.positionHLB = positionHLB;
-        exports.transitionInHLB = transitionInHLB;
-        exports.transitionOutHLB = transitionOutHLB;
-        exports.turnOnHLBEventListeners = turnOnHLBEventListeners;
+        exports.getOriginalElement       = getOriginalElement;
+        exports.onHLBHover               = onHLBHover;
+        exports.onTargetChange           = onTargetChange;
+        exports.initializeHLB            = initializeHLB;
+        exports.sizeHLB                  = sizeHLB;
+        exports.positionHLB              = positionHLB;
+        exports.transitionInHLB          = transitionInHLB;
+        exports.transitionOutHLB         = transitionOutHLB;
+        exports.turnOnHLBEventListeners  = turnOnHLBEventListeners;
         exports.turnOffHLBEventListeners = turnOffHLBEventListeners;
-        exports.cloneHLB = cloneHLB;
-        exports.createHLB = createHLB;
-        exports.closeHLB = closeHLB;
-        exports.onHLBClosed = onHLBClosed;
-        exports.onHLBReady = onHLBReady;
-        exports.addHLBWrapper = addHLBWrapper;
-        exports.removeHLBWrapper = removeHLBWrapper;
-        exports.toggleHLB = toggleHLB;
-        exports.eventHandlers = eventHandlers;
-        exports.dimmer = dimmer;
+        exports.cloneHLB                 = cloneHLB;
+        exports.createHLB                = createHLB;
+        exports.closeHLB                 = closeHLB;
+        exports.onHLBClosed              = onHLBClosed;
+        exports.onHLBReady               = onHLBReady;
+        exports.addHLBWrapper            = addHLBWrapper;
+        exports.removeHLBWrapper         = removeHLBWrapper;
+        exports.toggleHLB                = toggleHLB;
+        exports.eventHandlers            = eventHandlers;
+        exports.dimmer                   = dimmer;
+
+        exports.isOriginalElementValidForCloning = isOriginalElementValidForCloning;
+        exports.getValidOriginalElement          = getValidOriginalElement;
+
 
         exports.setHLB = function($hlb) {
           $hlbElement = $hlb;
@@ -702,6 +791,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         exports.setOriginCSS = function(value) {
           originCSS = value;
+        };
+
+        exports.getRemoveTemporaryOriginalElement = function () {
+          return removeTemporaryOriginalElement;
+        };
+
+        exports.setRemoveTemporaryOriginalElement = function (value) {
+          removeTemporaryOriginalElement = value;
         };
       }
 

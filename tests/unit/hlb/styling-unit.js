@@ -72,9 +72,9 @@ describe('hlbStyling', function() {
 
   });
 
-  // The cloneStyles() purpose is to clone styles from the original element and all of its children to
+  // The initializeStyles() purpose is to clone styles from the original element and all of its children to
   // the HLB element and all of the HLBs children.
-  describe('#cloneStyles()', function () {
+  describe('#initializeStyles()', function () {
 
     it('Sets cssText of $hlbElement to cssText of $originalElement', function (done) {
 
@@ -83,7 +83,7 @@ describe('hlbStyling', function() {
           expected         = win.getComputedStyle($originalElement[0]).cssText,
           actual;
 
-      hlbStyling.cloneStyles($originalElement, $hlbElement);
+      hlbStyling.initializeStyles($originalElement, $hlbElement);
 
       actual = win.getComputedStyle($hlbElement[0]).cssText;
 

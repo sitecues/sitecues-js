@@ -29,6 +29,55 @@ describe('highlight-box', function() {
     });
   });
 
+  describe('#getValidOriginalElement()', function () {
+
+    it('Sets removeTemporaryOriginalElement to true if the original element is an <li> because the HLB ' +
+       'moduel relies upon this variable to determine if the original ' +
+       'element needs to be removed from the DOM', function (done) {
+        var originalElement = win.document.getElementById('list-item'),
+            appendStub = sinon.stub(jquery.fn, 'append', function () {
+              return {
+                'style':{}
+              }
+            });
+        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.getValidOriginalElement(originalElement);
+        expect(hlb.getRemoveTemporaryOriginalElement()).to.be.true;
+        hlb.setRemoveTemporaryOriginalElement(false);
+        appendStub.restore();
+        done();
+    });
+
+    it('Sets does not set removeTemporaryOriginalElement to true if the original element is a paragraph because the HLB ' +
+       'moduel relies upon this variable to determine if the original ' +
+       'element needs to be removed from the DOM', function (done) {
+        var originalElement = win.document.getElementById('paragraph'),
+            appendStub = sinon.stub(jquery.fn, 'append', function () {
+              return {
+                'style':{}
+              }
+            });
+        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.getValidOriginalElement(originalElement);
+        expect(hlb.getRemoveTemporaryOriginalElement()).to.be.false;
+        hlb.setRemoveTemporaryOriginalElement(false);
+        appendStub.restore();
+        done();
+    });
+
+  });
+
+  // The isOriginalElementValidForCloning() purpose is to determine if the
+  // element chosen by the picker is, by itself, sufficient information and valid
+  // markup for an HLB
+  describe('#isOriginalElementValidForCloning()', function () {
+    it('Returns false if original element is a list item', function (done) {
+      var originalElement = win.document.getElementById('list-item');
+      expect(hlb.isOriginalElementValidForCloning(originalElement)).to.be.false;
+      done();
+    });
+  });
+
   // The mapForm() purpose is to clone a form chosen by the picker to render
   // as a highlight-box, preserving all values set in the original form.
   describe('#mapForm()', function () {
@@ -851,12 +900,17 @@ describe('highlight-box', function() {
 
     });
 
-    it('Invokes onHLBClosed if $hlbElement has no transform set becuase there is no need to transition the HLB to scale(1)', function (done) {
+    it('Invokes onHLBClosed if $hlbElement has no transform set because there is no need to transition the HLB to scale(1)', function (done) {
 
       // NOTE : I couldn't find a way to listen for closeHLB(), because it is private.
       //        For now, listen for the function below to be called because it is called
       //        by onHLBClosed().
-      var onHLBClosedSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+      var onHLBClosedSpy = sinon.spy(eventHandlers, 'enableWheelScroll'),
+          cssStub        = sinon.stub(jquery.fn, 'css', function () {
+            return {
+              'match':function () {return true;}
+            };
+          });
 
       hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
 
@@ -865,6 +919,7 @@ describe('highlight-box', function() {
       expect(onHLBClosedSpy.calledOnce).to.be.true;
 
       onHLBClosedSpy.restore();
+      cssStub.restore();
 
       done();
 
@@ -919,17 +974,17 @@ describe('highlight-box', function() {
 
     });
 
-    it('Invokes hlbStyling.cloneStyles because the HLB module relies upon another module to clone styles.', function (done) {
+    it('Invokes hlbStyling.initializeStyles because the HLB module relies upon another module to initializeStyles styles.', function (done) {
 
       var paragraph      = win.document.getElementById('paragraph'),
           cssStub        = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
-          cloneStylesSpy = sinon.spy(hlbStyling, 'cloneStyles');
+          initializeStylesSpy = sinon.spy(hlbStyling, 'initializeStyles');
 
       hlb.cloneHLB(paragraph);
 
-      expect(cloneStylesSpy.calledOnce).to.be.true;
+      expect(initializeStylesSpy.calledOnce).to.be.true;
 
-      cloneStylesSpy.restore();
+      initializeStylesSpy.restore();
 
       cssStub.restore();
 

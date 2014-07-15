@@ -179,7 +179,7 @@ describe('hlbPositioning', function() {
 
         hlbPositioning.mitigateVerticalScroll($hlbElement);
 
-        expect(cssSpy.calledOnce).to.be.true;
+        expect(cssSpy.called).to.be.true;
 
         hasVertScrollStub.restore();
         cssSpy.restore();
