@@ -75,6 +75,7 @@ files=\
 	source/js/mouse-highlight/traits.js \
 	source/js/mouse-highlight/judge.js \
 	source/js/mouse-highlight/pick.js \
+	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight.js \
 	source/js/keys.js \
@@ -107,25 +108,37 @@ build:
 	@echo "===== STARTING: Building '$(custom-name)' library ====="
 	@echo
 	@mkdir -p $(build-dir)/source/js
+	
+ifeq ($(dev), true)	
+	@sed 's%//SC_DEV=true;%SC_DEV=true;%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
+	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev-true.js > $(build-dir)/source/js/core.js
+else
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
+endif
+
 	@mkdir -p $(build-dir)/compile/js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
+
 	@echo "Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
-#ifneq ($(dev), true)
+
+	#Copy files for Source-Maps 
+	@mkdir -p $(build-dir)/js/source
+	@cp -R source/js $(build-dir)/js/source/
+
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \
 	done)
-#endif
+
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo

@@ -1,10 +1,15 @@
+
+SC_DEV = false;
+
 //  Note: "make build dev=false" removes all code inside if(UNIT) from the build
 //
 //     if(UNIT){
 //        exports.something="Chikun";
 //      }
 
-UNIT = true; // Chikun says this OK :)
+SC_UNIT = true;
+
+
 
 // Override/mock sitecues object.
 var blankFunction = function() {},

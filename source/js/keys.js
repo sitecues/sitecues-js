@@ -153,7 +153,7 @@ sitecues.def('keys', function(keys, callback) {
 
             // prevent default if needed
             if (key.preventDefault) {
-                common.preventDefault(event);
+                event.preventDefault();
                 // Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
                 event.stopImmediatePropagation();
             }

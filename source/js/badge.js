@@ -107,7 +107,7 @@ sitecues.def('badge', function(badge, callback) {
             sitecues.on('zoom', refreshBadgeSize);
         }
 
-        if (UNIT) {
+        if (SC_UNIT) {
             // todo: maybe export the whole module instead if every single function?
             exports.badge = badge;
         }

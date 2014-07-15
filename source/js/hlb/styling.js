@@ -610,9 +610,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     };
 
-    if (UNIT) {
-      exports.getHLBStyles      = hlbStyling.getHLBStyles;
-      exports.filter            = hlbStyling.filter;
+    if (SC_UNIT) {
+      exports.getHLBStyles = hlbStyling.getHLBStyles;
+      exports.filter       = hlbStyling.filter;
       exports.initializeStyles  = hlbStyling.initializeStyles;
     }
 

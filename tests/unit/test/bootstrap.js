@@ -20,6 +20,11 @@ sinon.stub(jquery.fn, 'style', expectedBehaviour);
 // document, window, nodes etc.
 require('../data/w3c');
 
+// Need this for mouse-highlight tests
+document.hasFocus = function() {
+  return false;
+}
+
 // Create & insert a new element we will later use for tests.
 var node = document.createElement("p");
 node.setAttribute("id", "sitecues");

@@ -58,7 +58,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
 
     };
 
-    if (UNIT) {
+    if (SC_UNIT) {
         exports.getSafeZoneBoundingBox = safeArea.getSafeZoneBoundingBox;
         exports.documentElement = documentElement;
     }

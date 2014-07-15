@@ -8,8 +8,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   var MIN_RECT_WIDTH = 4;
   var MIN_RECT_HEIGHT = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache', 'util/geo',
-               function ($, common, conf, platform, traitcache, geo) {
+  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
+               function ($, common, conf, platform, traitcache) {
 
     mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
       var absoluteRects = [];
@@ -282,8 +282,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         addRect(allRects, clipRect, getOverflowRect(this, style));
 
 
-        // --- Visible border ---
-        if (hasVisibleBorder(style)) {
+        // --- Visible border or form controls ---
+        if (hasVisibleBorder(style) || common.isFormControl(this)) {
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           return true; // Don't iterate ... although it case of Washington post they position a child outside the box, doh
         }
