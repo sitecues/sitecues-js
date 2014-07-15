@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<?charles serialisation-version='2.0' ?>
+<rewriteSet-array>
+  <rewriteSet>
+    <active>true</active>
+    <name>sitecues JS initialization</name>
+    <hosts>
+      <locationPatterns>
+        <locationMatch>
+          <location>
+            <host>*.*</host>
+          </location>
+          <enabled>true</enabled>
+        </locationMatch>
+      </locationPatterns>
+    </hosts>
+    <rules>
+      <rewriteRule>
+        <active>true</active>
+        <ruleType>7</ruleType>
+        <matchValue>&lt;script data-provider=&quot;sitecues&quot;(.|\s)+?&lt;/script&gt;</matchValue>
+        <matchHeaderRegex>false</matchHeaderRegex>
+        <matchValueRegex>true</matchValueRegex>
+        <matchRequest>false</matchRequest>
+        <matchResponse>true</matchResponse>
+        <newValue>&lt;!-- REMOVED SITECUES LOAD SCRIPT --&gt;</newValue>
+        <newHeaderRegex>false</newHeaderRegex>
+        <newValueRegex>false</newValueRegex>
+        <matchWholeValue>false</matchWholeValue>
+        <caseSensitive>true</caseSensitive>
+        <replaceType>1</replaceType>
+      </rewriteRule>
+      <rewriteRule>
+        <active>true</active>
+        <ruleType>7</ruleType>
+        <matchValue>(&lt;/[Hh][Ee][Aa][Dd](&gt;|\s))</matchValue>
+        <matchHeaderRegex>false</matchHeaderRegex>
+        <matchValueRegex>true</matchValueRegex>
+        <matchRequest>false</matchRequest>
+        <matchResponse>true</matchResponse>
+        <newValue>&lt;script data-provider=&quot;sitecues-proxy&quot; type=&quot;text/javascript&quot; src=&quot;http://192.168.128.232:8000/tools/load-script/sitecues-load-script.js&quot;&gt;&lt;/script&gt; $1</newValue>
+        <newHeaderRegex>false</newHeaderRegex>
+        <newValueRegex>false</newValueRegex>
+        <matchWholeValue>false</matchWholeValue>
+        <caseSensitive>true</caseSensitive>
+        <replaceType>1</replaceType>
+      </rewriteRule>
+    </rules>
+  </rewriteSet>
+</rewriteSet-array>
