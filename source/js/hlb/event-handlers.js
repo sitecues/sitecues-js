@@ -131,7 +131,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
          * @param e Event Object
          */
         function wheel(e) {
-            common.preventDefault(e);
+            e.preventDefault();
         }
 
         /**

@@ -21,8 +21,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     pathFillBackground: [], // In element rect coordinates, used with CSS background
     highlightPaddingWidth: 0,
     highlightBorderWidth: 0,
-    doUseBgColor: false,   // was highlight color avoided (in case of single media element just use outline)
-    doUseOverlayforBgColor: false  // was an overlay used to create the background color?
+    bgColor: '',    // highlight color or '' if only outline is being used (as when highlighting media element)
+    doUseOverlayforBgColor: false,  // was an overlay used to create the background color? If not, CSS background will be used.
+    hasDarkBackgroundColor: false,
+    isOverBackgroundImage: false,
+    hasLightText: false
   },
 
   // minimum zoom level to enable highlight
@@ -35,7 +38,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
-  state;
+  state,
+
+  showTimer,
+  pickTimer;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
@@ -58,42 +64,66 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return maxZIndex;
     }
 
-    function isInterestingBackground(style) {
+    /**
+     * Checks if the color value given of a light tone or not.
+     */
+    function isLightTone(colorValue) {
+      var RGBAColor = getRgba(colorValue),
+        // http://en.wikipedia.org/wiki/YIQ
+        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
 
-      var matchColorsAlpha,
-        match,
-        matchColorsNoAlpha,
-        mostlyWhite,
-        bgColor = style.backgroundColor;
-
-      if (bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)') {
-        return false;
-      }
-
-      matchColorsAlpha = /rgba\((\d{1,3}), (\d{1,3}), (\d{1,3}), ([\d.]{1,10})\)/;
-      match = matchColorsAlpha.exec(bgColor);
-      
-      if (match !== null) {
-        if (parseFloat(match[4]) < .10) {
-          return false; // Mostly transparent, not interesting
-        } // Else fall through and analyze rgb colors
-      } else { // Background is not in rgba() format, check for rgb() format next
-        matchColorsNoAlpha = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-        match = matchColorsNoAlpha.exec(bgColor);
-        if (match === null) {
-          return true;
-        }
-      }
-      // Check r,g,b values  -- We consider it "non-interesting" if mostly white
-      mostlyWhite = parseInt(match[1]) > 242 && parseInt(match[2]) > 242 && parseInt(match[3]) > 242;
-      
-      return !mostlyWhite;
+      return yiq >= 128;
     }
 
-    function hasInterestingBackgroundOnAnyOf(styles) {
+    function getElementsContainingText(selector) {
+      return $(selector).find('*').andSelf().filter(function() {
+        var $this = $(this);
+        return $this.children().length === 0 && $.trim($this.text()).length > 0;
+      });
+    }
+
+    function hasLightText(selector) {
+      var textContainers = getElementsContainingText(selector),
+        MAX_ELEMENTS_TO_CHECK = 100,
+        containsLightText = false;
+
+      textContainers.each(function(index) {
+        if (index >= MAX_ELEMENTS_TO_CHECK) {
+          return false;
+        }
+        if (isLightTone(traitcache.getStyleProp(this, 'color'))) {
+          containsLightText = true;
+          return false;
+        }
+      });
+      return containsLightText;
+    }
+
+    /**
+     * Returns an object {r: #, g: #, b: #, a: #}
+     * @param colorString  A color string provided by getComputedStyle() in the form of rgb(#, #, #) or rgba(#, #, #, #)
+     * @returns {rgba object}
+     */
+    function getRgba(colorString) {
+      var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
+        match = MATCH_COLORS.exec(colorString) || {};
+
+      return {
+        r: parseInt(match[1] || 0),
+        g: parseInt(match[2] || 0),
+        b: parseInt(match[3] || 0),
+        a: parseFloat(match[4] || 1)
+      };
+    }
+
+    function isDarkBackground(style) {
+      return !isLightTone(style.backgroundColor);
+    }
+
+    function hasDarkBackgroundOnAnyOf(styles) {
 
       for (var count = 0; count < styles.length; count ++) {
-        if (isInterestingBackground(styles[count])) {
+        if (isDarkBackground(styles[count])) {
           return true;
         }
       }
@@ -101,7 +131,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return false;
     }
 
-    function hasInterestingBackgroundImage(styles) {
+    /**
+     * Is the element inside of an ancestor element that has a background image?
+     */
+    function isOverBackgroundImage(styles) {
 
       // TODO: we're only checking 3 up, because we get confused by layout/spacer images
       // We can't always know what size a background image is, without using canvas approach,
@@ -117,28 +150,36 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return false;
     }
 
+    function hasBackgroundSprite(style) {
+      return style[0].backgroundRepeat === 'no-repeat';
+    }
 
-    function updateColorApproach(style) {
+    function updateColorApproach(picked, style) {
+      // Get data on backgrounds and text colors used
+      var hasBackgroundImage = !common.isEmptyBgImage(style[0].backgroundImage);
+      state.isOverBackgroundImage = hasBackgroundImage || isOverBackgroundImage(style);
+      state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style);
+      state.hasLightText = hasLightText(state.target);
+
       // Get the approach used for highlighting
-      if (state.picked.length > 1 || common.isFormControl(state.picked) ||
-         (style[0].backgroundImage !== 'none' && style[0].backgroundRepeat === 'no-repeat')) {
+      if (picked.length > 1 || common.isFormControl(picked) ||
+         (hasBackgroundImage && hasBackgroundSprite(style))) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
         //        works with form controls
         //  cons: does not highlight text the way user expects (washes it out)
         //  when-to-use: for article or cases where multiple items are selected
-                //               when background sprites are used, which we don't want to overwrite with out background
-        state.doUseBgColor = true;
+        //               when background sprites are used, which we don't want to overwrite with out background
+        state.bgColor = getTransparentBackgroundColor();
         state.doUseOverlayForBgColor = true; // Washes foreground out
-      }  else if (common.isVisualMedia(state.picked) ||
-        (!common.isEmptyBgImage(style[0].backgroundImage) && style[0].backgroundRepeat === 'repeat')) {
-        //  approach #2 -- don't change background color
+      } else if (common.isVisualMedia(picked) || hasBackgroundImage) {
+        //  approach #2 -- don't change background color (don't use any color)
         //                 use overlay for rounded outline
         //  pros: foreground text does not get washed out
         //  cons: no background color
-        //  when-to-use: over media or interesting backgrounds
-        state.doUseBgColor = false;
+        //  when-to-use: over media or when existing element has background image
+        state.bgColor = '';
         state.doUseOverlayForBgColor = false;
       } else {
         //  approach #3 -- use css background of highlighted element for background color
@@ -146,7 +187,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         //  pros: looks best on text, does not wash out colors
         //  cons: breaks the appearance of native form controls, such as <input type="button">
         //  when-to-use: on most elements
-        state.doUseBgColor = true;
+        state.bgColor = getAppropriateBackgroundColor();
         state.doUseOverlayForBgColor = false;
       }
     }
@@ -155,7 +196,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // How visible is the highlight?
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-          vizFactor = (conf.get('zoom') + 0.4) * 0.9;
+          vizFactor = (state.zoom + 0.4) * 0.9;
       if (audio.isSpeechEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
@@ -196,7 +237,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           blue = Math.round(254 - 5 * decrement),
           color = 'rgb(' + red + ',' + green + ',' + blue + ')';
       return color;
-      // return 'rgba(255, 0, 0, 1)'; // Works with any background -- lightens it slightly
     }
 
     // Return an array of styles in the ancestor chain, including fromElement, not including toElement
@@ -219,8 +259,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
+      state.zoom = conf.get('zoom');
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
-      updateColorApproach(state.styles);
+      updateColorApproach(state.picked, state.styles);
 
       if (!createNewOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
@@ -231,31 +272,39 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       mh.updateElementBgImage();
     }
 
+    // Choose an appropriate background color for the highlight
+    // In most cases we want the opaque background because the background color on the element
+    // can overlap the padding over the outline which uses the same color, and not cause problems
+    // We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
+    function getAppropriateBackgroundColor() {
+
+      if (state.hasDarkBackgroundColor ||
+          state.isOverBackgroundImage ||
+          state.hasLightText) {
+        // Use transparent background so that the interesting background or light foreground are still visible
+        return getTransparentBackgroundColor();
+      }
+
+      return getOpaqueBackgroundColor();
+    }
+
     mh.updateElementBgImage = function() {
 
       var element = state.picked.get(0),
-          hasInterestingBg,
-          backgroundColor,
           offsetLeft,
           offsetTop;
 
       // Approach #1 or #2 -- no change to background of element
-      if (state.doUseOverlayForBgColor || !state.doUseBgColor) {
+      if (state.doUseOverlayForBgColor || !state.bgColor) {
         return false;
       }
-      // Approach #3 -- change background
-      // In most cases we want the opaque background because the background color on the element
-      // can overlap the padding over the outline which uses the same color, and not cause problems
-      // We need them to overlap because we haven't found a way to 'sew' them together in with pixel-perfect coordinates
-      hasInterestingBg = hasInterestingBackgroundOnAnyOf(state.styles) ||
-                           hasInterestingBackgroundImage(state.styles);
-      backgroundColor = hasInterestingBg ? getTransparentBackgroundColor() : getOpaqueBackgroundColor();
 
+      // Approach #3 --change CSS background of highlighted element
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom);
 
       // Get the rectangle for the element itself
       var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-                      getSVGForPath(path, 0, 0, backgroundColor, 1) +
+                      getSVGForPath(path, 0, 0, state.bgColor, 1) +
                       '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
@@ -285,7 +334,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element.style.backgroundRepeat= 'no-repeat';
       
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      element.style.backgroundPosition = (offsetLeft / conf.get('zoom')) + 'px '+ (offsetTop / conf.get('zoom')) + 'px';
+      element.style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
     };
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
@@ -443,7 +492,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getSVGFillRectMarkup(left, top, width, height, fillColor) {
 
-      return '<rect x="' + left / conf.get('zoom') + '" y="' + top / conf.get('zoom') + '"  width="' + width / conf.get('zoom') + '" height="' + height / conf.get('zoom') + '"' +
+      return '<rect x="' + left / state.zoom + '" y="' + top / state.zoom + '"  width="' + width / state.zoom + '" height="' + height / state.zoom + '"' +
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
@@ -516,8 +565,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Get exact bounds
       fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
 
-      state.zoom = conf.get('zoom');
-
       if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
         // No valid highlighted content rectangles or cursor not inside of them
         return false;
@@ -565,7 +612,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         addMouseWheelUpdateListenersIfNecessary();
       }
-      else if (JSON.stringify(previousViewRect) === JSON.stringify(state.viewRect)) {
+      else if (common.equals(previousViewRect, state.viewRect)) {
         return true; // Already created and in correct position, don't update DOM
       }
 
@@ -614,21 +661,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // break if highlight is disabled
 
       if (!mh.enabled) {
-        return false;
+        return;
       }
 
-      if (mh.isSticky && !event.shiftKey) {
-        return false;
+      if (SC_DEV) {
+        if (mh.isSticky && !event.shiftKey) {
+          return;
+        }
       }
 
       pickAfterShortWait(event.target, event.clientX, event.clientY);
     }
 
     function pickAfterShortWait(target, mouseX, mouseY) {
-      clearTimeout(mh.pickTimer);
-      mh.pickTimer = setTimeout(function () {
+      clearTimeout(pickTimer);
+      pickTimer = setTimeout(function () {
         // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
-        mh.pickTimer = 0;
+        pickTimer = 0;
         checkPickerAfterUpdate(target, mouseX, mouseY);
       }, state.isCreated ? 0 : MOUSE_STOP_MS);
     }
@@ -644,8 +693,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return true;
       }
       if (isCursorInFixedRects([state.fixedContentRect]) &&
-        JSON.stringify(state.elementRect) ===
-        JSON.stringify(traitcache.getScreenRect(state.picked.get(0)))) {
+        common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
         // The picked element's rectangle hasn't changed, and
         // we're still in the same highlighting rectangle
         // Can happen if we're in whitespace
@@ -728,11 +776,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // show highlight for picked element
       function showHighlightAfterShortDelay() {
-        mh.showTimer = 0;
+        showTimer = 0;
         show();
       }
-      clearTimeout(mh.showTimer);
-      mh.showTimer = setTimeout(showHighlightAfterShortDelay, 15);
+      clearTimeout(showTimer);
+      showTimer = setTimeout(showHighlightAfterShortDelay, 15);
     }
 
     // refresh status of enhancement on page
@@ -760,17 +808,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function onSettingsChanged() {
-      var zoom = conf.get('zoom');
+      state.zoom = conf.get('zoom');
       var was = mh.enabled;
           // The mouse highlight is always enabled when TTS is on.
-      mh.enabled = audio.isSpeechEnabled() || zoom > MIN_ZOOM;
-      
-      if (mh.isSticky && state.picked) {
-        // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
-        pause();
-        mh.cursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
-        show();
-        return;
+      mh.enabled = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
+
+      if (SC_DEV) {
+        if (mh.isSticky && state.picked) {
+          // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
+          pause();
+          mh.cursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
+          show();
+          return;
+        }
       }
       
       hideAndResetState();
@@ -828,14 +878,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
-      if (mh.showTimer) {
-        clearTimeout(mh.showTimer);
-        mh.showTimer = 0;
+      if (showTimer) {
+        clearTimeout(showTimer);
+        showTimer = 0;
       }
 
-      if (mh.pickTimer) {
+      if (pickTimer) {
         clearTimeout(mh.pickTimer);
-        mh.pickTimer = 0;
+        pickTimer = 0;
       }
 
       state.isVisible = false;
@@ -848,12 +898,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     mh.getHighlight = function() {
-      return {
-        isVisible: state.isVisible,
-        picked: state.picked,
-        viewRect: state.viewRect,
-        floatRects: state.floatRects
-      };
+      return state;
     };
 
     resetState();
@@ -879,14 +924,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * Toggle Sticky state of highlight
      * When stick mode is on, shift must be pressed to move highlight
      */
-    sitecues.toggleStickyMH = function () {
-      mh.isSticky = !mh.isSticky;
-      return mh.isSticky;
-    };
+    if (SC_DEV) {
+      sitecues.toggleStickyMH = function () {
+        mh.isSticky = !mh.isSticky;
+        return mh.isSticky;
+      };
+    }
 
     sitecues.highlight = function(elem) {
-
-      if(DEV){console.log(1);}
 
       hideAndResetState();
       state.picked = $(elem);
@@ -904,14 +949,31 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     callback();
 
     if (SC_UNIT) {
-      mh.state = state;
-      mh.INIT_STATE = INIT_STATE;
-      mh.isInterestingBackground = isInterestingBackground;
-      mh.hasInterestingBackgroundOnAnyOf = hasInterestingBackgroundOnAnyOf;
-      mh.updateColorApproach = updateColorApproach;
-      mh.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
-      mh.getHighlightBorderWidth = getHighlightBorderWidth;
-      exports.mh = mh;
+      $.extend(exports, mh);
+      exports.picked = state.picked;
+      exports.state = state;
+      exports.INIT_STATE = INIT_STATE;
+      exports.isOverBackgroundImage = isOverBackgroundImage;
+      exports.isDarkBackground = isDarkBackground;
+      exports.hasDarkBackgroundOnAnyOf = hasDarkBackgroundOnAnyOf;
+      exports.hasLightText = hasLightText;
+      exports.getElementsContainingText = getElementsContainingText;
+      exports.getRgba = getRgba;
+      exports.updateColorApproach = updateColorApproach;
+      exports.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
+      exports.getHighlightBorderWidth = getHighlightBorderWidth;
+      exports.show = show;
+      exports.update = update;
+      exports.createNewOverlayPosition = createNewOverlayPosition;
+      exports.pickAfterShortWait = pickAfterShortWait;
+      exports.hideAndResetState = hideAndResetState;
+      exports.reenableIfAppropriate = reenableIfAppropriate;
+      exports.disable = disable;
+      exports.pause = pause;
+      exports.resetState = resetState;
+      exports.getMaxZIndex = getMaxZIndex;
+      exports.showTimer = showTimer;
+      exports.pickTimer = pickTimer;
     }
   });
 
