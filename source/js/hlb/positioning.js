@@ -123,7 +123,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         // Set to the scroll height minus 4 (half of the padding)
         // It is necessary to subtract the padding because scrollHeight includes padding.
         $hlbElement.css({
-          'height': ($hlbElement[0].scrollHeight - parseInt($hlbElement.css('paddingBottom'))) + 'px'
+          'height': $hlbElement[0].scrollHeight - parseInt($hlbElement.css('paddingBottom')) + 'px'
         });
 
         // Now that we have set the height of the cloned element to the height of the scroll height...

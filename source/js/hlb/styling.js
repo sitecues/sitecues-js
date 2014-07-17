@@ -175,6 +175,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // Do not copy over the width and height because
       // it causes horizontal scrollbars, unless it is an image
       // in which case we preserve the dimensions.
+      // TODO: Prove with functional test and test page demonstrating the necessity of this statement below.
       if (!$child.is('img')) {
         styles.width  = '';
         styles.height = '';
@@ -611,9 +612,18 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     };
 
     if (SC_UNIT) {
-      exports.getHLBStyles = hlbStyling.getHLBStyles;
-      exports.filter       = hlbStyling.filter;
-      exports.initializeStyles  = hlbStyling.initializeStyles;
+      exports.getHLBStyles                       = hlbStyling.getHLBStyles;
+      exports.filter                             = hlbStyling.filter;
+      exports.initializeStyles                   = hlbStyling.initializeStyles;
+      exports.getChildStyles                     = getChildStyles;
+      exports.getNonEmptyBackgroundImage         = getNonEmptyBackgroundImage;
+      exports.getNonTransparentBackground        = getNonTransparentBackground;
+      exports.getHLBBackgroundColor              = getHLBBackgroundColor;
+      exports.getHLBBackgroundImage              = getHLBBackgroundImage;
+      exports.initializeHLBChildrenStyles        = initializeHLBChildrenStyles;
+      exports.setHLBChildTextColor               = hlbStyling.setHLBChildTextColor;
+      exports.HLB_DEFAULT_BACKGROUND_COLOR       = HLB_DEFAULT_BACKGROUND_COLOR;
+      exports.HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
     }
 
     callback();

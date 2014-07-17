@@ -910,7 +910,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     sitecues.on('mh/disable', disable);
 
     // hide mouse highlight once highlight box is dismissed
-    sitecues.on('hlb/deflating', pause);
+    //sitecues.on('hlb/deflating', pause);
 
     // enable mouse highlight back once highlight box deflates
     sitecues.on('hlb/closed mh/enable', reenableIfAppropriate);

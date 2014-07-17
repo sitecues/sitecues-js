@@ -31,6 +31,9 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         // 1 pixel, and its parent is scrollable by 99 pixels, and IE default scroll is 90 pixels, then a single scroll
         // action within the current element will scroll it by 1 pixel and scroll the parent element by 89 pixels.  This
         // poses a problem when scrolling the HLB in IE.
+        //
+        // NOTE: Windows settings for mouse scrolling effects this value, and will break the scrolling functionality.
+        //       Perhaps, in the future, we should compute this amount instead of relying on a "magic" number.
 
         DEFAULT_IE_SCROLL_PIXEL_DELTA = 100,
         isIE = platform.browser.isIE,
@@ -85,7 +88,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
      * @param e Event Object
      */
     function wheel(e) {
-      common.preventDefault(e);
+      e.preventDefault();
       e.returnValue = false;
       return false;
     }

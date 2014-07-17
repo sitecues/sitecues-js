@@ -125,6 +125,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         var temporaryOriginalElement,
             originalElementBoundingBox,
             originalElementComputedStyles,
+            originalElementAndChildren,
+            clonedElementAndChildren,
+            clonedElement,
+            parentListComputedStyles,
             zoom = conf.get('zoom');
 
         // If the element chosen is an <li>, then we must wrap it with a <ul>
@@ -133,13 +137,23 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Basically, we create a new original element.
         if ($(originalElement).is('li')) {
 
+          clonedElement = originalElement.cloneNode(true);
+
+          clonedElementAndChildren   = $(clonedElement).find('*').addBack();
+          originalElementAndChildren = $(originalElement).find('*').addBack();
+
+          for (var i = 0; i < originalElementAndChildren.length; i += 1) {
+            clonedElementAndChildren[i].style.cssText = window.getComputedStyle(originalElementAndChildren[i]).cssText;
+          }
+
           // Setting this to true will remove the $originalElement from the DOM before inflation
           removeTemporaryOriginalElement = true;
 
-          originalElementBoundingBox     = originalElement.getBoundingClientRect();
-          temporaryOriginalElement       = $('<ul>').append(originalElement.cloneNode(true));
-          originalElementComputedStyles  = window.getComputedStyle(originalElement);
-          temporaryOriginalElement.style.cssText = window.getComputedStyle($(originalElement).parent('ul, ol')[0]).cssText;
+          originalElementBoundingBox             = originalElement.getBoundingClientRect();
+          temporaryOriginalElement               = $('<ul>').append(clonedElement);
+          originalElementComputedStyles          = window.getComputedStyle(originalElement);
+          parentListComputedStyles               = window.getComputedStyle($(originalElement).parent('ul, ol')[0]).cssText;
+          temporaryOriginalElement.style.cssText = parentListComputedStyles;
 
           $(temporaryOriginalElement).css({
             'position'   : 'absolute',
@@ -148,7 +162,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             'opacity'    : 0,
             'padding'    : 0,
             'margin'     : 0,
-            'width'      : originalElementComputedStyles.width
+            'width'      : originalElementComputedStyles.width,
+            'list-style-type': parentListComputedStyles['list-style-type'] ? parentListComputedStyles['list-style-type'] : 'none'
           }).insertAfter('body');
 
           return $(temporaryOriginalElement)[0];
@@ -193,6 +208,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           originalElement = e;
 
+        }
+
+        if (originalElement) {
+
+          // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
+          // so we don't copy over the highlighting styles from the original element.
+          sitecues.emit('mh/disable');
         }
 
         // SC-1629 - Lonely bullets
@@ -372,7 +394,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // This is important for animating from the center point of the HLB
         originCSS = ((-offset.x / zoom) + HLBBoundingBox.width / 2 / zoom) + 'px ' +
-            ((-offset.y / zoom) + HLBBoundingBox.height / 2 / zoom) + 'px';
+                    ((-offset.y / zoom) + HLBBoundingBox.height / 2 / zoom) + 'px';
 
         // Position the HLB without it being scaled (so we can animate the scale).
         $hlbElement.css({
@@ -386,6 +408,18 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function transitionInHLB() {
 
+        var transitionInCSS = {
+          'transition-timing-function': 'linear',
+          'transition': hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
+          'transform': 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
+          'transform-origin': originCSS
+        };
+
+        // Implemented because Chrome 36 update.
+        if (platform.browser.isChrome) {
+          transitionInCSS['-webkit-transform-origin'] = originCSS;
+        }
+
         // Dim the background!
         dimmer.dimBackgroundContent($hlbWrappingElement, INFLATION_SPEED);
 
@@ -393,12 +427,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         $hlbElement[0].addEventListener(transitionEndEvent, onHLBReady);
 
         // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
-        $hlbElement.css({
-          'transition-timing-function': 'linear',
-          'transition': hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
-          'transform': 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
-          'transform-origin': originCSS
-        });
+        $hlbElement.css(transitionInCSS);
 
       }
 
@@ -667,20 +696,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // If the HLB does not exist
         } else {
 
-          // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
-          // so we don't copy over the highlighting styles from the original element.
-          sitecues.emit('mh/disable');
-
           originalElement = getOriginalElement(e);
 
           if (originalElement) {
 
             createHLB(originalElement);
 
-          } else {
-
-            // Turn on mouse highlighting if no valid element exists.
-            sitecues.emit('mh/enable');
           }
 
         }
