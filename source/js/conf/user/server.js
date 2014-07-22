@@ -59,7 +59,9 @@ sitecues.def('conf/user/server', function (server, callback) {
             saveCallback();
           },
           error: function (e) {
-            log.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
+            if (SC_DEV){
+              console.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
+            }
             saveCallback();
           }
         })
@@ -99,7 +101,9 @@ sitecues.def('conf/user/server', function (server, callback) {
         loadCallback(data);
       },
       error: function (e) {
-        log.warn("Unable to load server config: " + e.message);
+        if (SC_DEV){
+          console.warn("Unable to load server config: " + e.message);
+        }
         loadCallback();
       }
     });
