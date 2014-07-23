@@ -22,7 +22,9 @@ sitecues.def('user', function (user, callback) {
         callback();
       },
       error: function(xhr, textStatus) {
-        console.log('===== Unable to get user ID: ' + textStatus);
+        if (SC_DEV) {
+          console.log('===== Unable to get user ID: ' + textStatus);
+        }
         callback();
       }
     });

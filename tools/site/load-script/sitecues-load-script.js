@@ -13,4 +13,5 @@ sitecues.config = {
   script.type = 'text/javascript';
   script.async = true;
   first.parentNode.insertBefore(script, first);
+
 })();
