@@ -41,6 +41,7 @@ lint=false
 # We no longer use the min=false/true option. The code is always minified by
 # UglifyJS. Souce maps to the un-minified code are also created by UglifyJS in
 # the directory: target/$(build-dir)/js/source/js/
+min=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -159,14 +160,24 @@ endif
 ################################################################################
 
 ifeq ($(dev), false)
-	export uglifyjs-args+=-m
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_DEV=false,SC_UNIT=false
 else
-	export uglifyjs-args+=-m
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_UNIT=false
 endif
+
+
+################################################################################
+# Minify or beautify when min=true
+################################################################################
+ifeq ($(min), true)
+	export uglifyjs-args+=-m
+else
+	export uglifyjs-args+=-b
+endif
+
+
 
 ################################################################################
 # TARGET: build
