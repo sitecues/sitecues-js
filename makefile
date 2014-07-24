@@ -28,7 +28,7 @@ clean-deps=false
 # dev=false:
 #  - SC_DEV  code blocks get REMOVED
 #  - SC_UNIT code blocks get REMOVED
-dev=false
+dev=true
 
 # Whether or not to enable HTTPS on the test server. 
 https=off
