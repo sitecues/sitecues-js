@@ -108,7 +108,7 @@ build:
 	@echo "===== STARTING: Building '$(custom-name)' library ====="
 	@echo
 	@mkdir -p $(build-dir)/source/js
-	
+
 ifeq ($(dev), true)	
 	@sed 's%//SC_DEV=true,%SC_DEV=true,%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev-true.js > $(build-dir)/source/js/core.js
@@ -117,7 +117,16 @@ else
 endif
 
 	@mkdir -p $(build-dir)/compile/js
-	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
+
+ifeq ($(sourcemap), false)
+	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js $(files)
+else
+	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)	
+	#Copy files for Source-Maps 
+	@mkdir -p $(build-dir)/js/source
+	@cp -R source/js $(build-dir)/js/source/
+endif
+
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
@@ -129,9 +138,6 @@ endif
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
 
-	#Copy files for Source-Maps 
-	@mkdir -p $(build-dir)/js/source
-	@cp -R source/js $(build-dir)/js/source/
 
 	@echo "* File sizes$(min-label):"
 	@(cd $(build-dir)/compile/js ; \

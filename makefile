@@ -36,12 +36,14 @@ https=off
 # Whether or not to lint the codebase before the build. 
 lint=false
 
-## MINIFICATION OPTION DEPRECATED ##
-#
-# We no longer use the min=false/true option. The code is always minified by
-# UglifyJS. Souce maps to the un-minified code are also created by UglifyJS in
-# the directory: target/$(build-dir)/js/source/js/
+# The code is minified by UglifyJS. Souce maps to the un-minified code are also
+# created by UglifyJS in the directory: target/$(build-dir)/js/source/js/
+# When min=false, the 
 min=true
+
+# sourcemap=true - creates sourcemap (for sitecues™ devs)
+# sourcemap=false - does not create sourcemap (for CI/prod/deployment)
+sourcemap=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -176,6 +178,10 @@ ifeq ($(min), true)
 else
 	export uglifyjs-args+=-b
 endif
+
+################################################################################
+# Sourcemap: switched off in CI to keep source private, on in dev=true mode
+################################################################################
 
 
 
