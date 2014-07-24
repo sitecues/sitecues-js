@@ -179,11 +179,6 @@ else
 	export uglifyjs-args+=-b
 endif
 
-################################################################################
-# Sourcemap: switched off in CI to keep source private, on in dev=true mode
-################################################################################
-
-
 
 ################################################################################
 # TARGET: build
@@ -197,7 +192,8 @@ build: $(_force-deps-refresh) $(_build_lint_dep)
 
 ################################################################################
 # TARGET: package
-#	Package up the files into a deployable bundle, and create a manifest for local file deployment
+#	Package up the files into a deployable bundle, and create a manifest for local
+# file deployment.
 ################################################################################
 package: build
 ifeq ($(dev), true)
