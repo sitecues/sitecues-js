@@ -16,6 +16,7 @@ sitecues.def('audio/html5-player', function (player, callback) {
    */
   player.playAudioSrc = function(url) {
     player.stop();
+    audioElement.src = ''; // Clean up
     sitecues.$(audioElement).one('canplay', playIt);
     audioElement.src = url;
   };
@@ -31,7 +32,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
   player.stop = function () {
     sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
     audioElement.pause();
-    audioElement.src = ''; // Clean up
   };
 
   callback();
