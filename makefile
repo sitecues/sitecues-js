@@ -24,7 +24,7 @@ clean-deps=false
 # If true, create a 'dev' build, in which files are fetched separately.
 # Otherwise, a 'prod' build is created, in which all files are combined
 # into a single file. 
-dev=false
+dev=true
 
 # Whether or not to enable HTTPS on the test server. 
 https=off
@@ -33,7 +33,7 @@ https=off
 lint=false
 
 # Whether or not to minify the generated sitecues.js file.
-min=true
+min=false
 
 # Node.js express test server HTTP port.
 port=8000
