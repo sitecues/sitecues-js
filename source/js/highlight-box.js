@@ -6,8 +6,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area',
-    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea) {
+  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common',
+    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common) {
 
       /////////////////////////
       // PRIVATE VARIABLES
@@ -30,12 +30,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           originCSS, // The HLB element's midpoint for animation
           translateCSS, // The HLB element's translation for final position
 
-          transitionEndEvent = (function() {
-            if (platform.browser.isChrome || platform.browser.isSafari) {
-              return 'webkitTransitionEnd';
-            }
-            return 'transitionend';
-          }()),
+          $animation, // A reference to the $.animate we use for IE9 inflation and deflation
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that determines if HLB can be deflated.
@@ -101,6 +96,69 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
+       * [getValidListElement if the element chosen is an <li>, then we must wrap it with a <ul>
+          We must also append this newly created <ul> to the DOM so the HLB
+          module can utilize styles and positioning of the "original element"
+          Basically, we create a new original element.]
+       * @param  {[DOM element]} originalElement [The element chosen by the picker]
+       * @return {[DOM element]}                 [The element the HLB will use to create itself]
+       */
+      function getValidListElement(originalElement) {
+
+        var temporaryOriginalElement,
+            originalElementBoundingBox,
+            originalElementComputedStyles,
+            originalElementAndChildren,
+            clonedElementAndChildren,
+            clonedElement,
+            zoom = conf.get('zoom');
+
+        // Clone the original element
+        clonedElement = originalElement.cloneNode(true);
+
+        // Prepare to map all original children CSS to cloned children CSS
+        clonedElementAndChildren   = $(clonedElement).find('*').addBack();
+        originalElementAndChildren = $(originalElement).find('*').addBack();
+
+        // Setting this to true will remove the $originalElement from the DOM before inflation
+        removeTemporaryOriginalElement = true;
+
+        // We must position the cloned element directly over the original element
+        originalElementBoundingBox = originalElement.getBoundingClientRect();
+
+        // Wrap the cloned element with a <ul>
+        temporaryOriginalElement = $('<ul>').append(clonedElement);
+
+        // This value is useful because we want to set the dimensions of the cloned element to the
+        // dimensions of the original element
+        originalElementComputedStyles = window.getComputedStyle(originalElement);
+
+        // It is important to clone the styles of the parent <ul> of the origainl element, because it may
+        // have important styles such as background images, etc.
+        temporaryOriginalElement.style.cssText = hlbStyling.getComputedStyleCssText($(originalElement).parent('ul, ol')[0]);
+
+        // Create, position, and style this element so that it overlaps the element chosen by the picker.
+        $(temporaryOriginalElement).css({
+          'position'       : 'absolute',
+          'left'           : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
+          'top'            : originalElementBoundingBox.top / zoom  + window.pageYOffset / zoom,
+          'opacity'        : 0,
+          'padding'        : 0,
+          'margin'         : 0,
+          'width'          : originalElementComputedStyles.width,
+          'list-style-type': originalElementComputedStyles.listStyleType ? originalElementComputedStyles.listStyleType : 'none'
+        }).insertAfter('body');
+
+        // Map all original children CSS to cloned children CSS
+        for (var i = 0; i < originalElementAndChildren.length; i += 1) {
+          clonedElementAndChildren[i].style.cssText = hlbStyling.getComputedStyleCssText(originalElementAndChildren[i]);
+        }
+
+        return $(temporaryOriginalElement)[0];
+
+      }
+
+      /**
        * [isOriginalElementValidForCloning determines if the original element chosen by the picker is a valid element for the HLB]
        * @param  {[DOM Element]}  originalElement [The element chosen by the picker]
        * @return {Boolean}                 [True if the element chosen is valid to be an HLB, false if element passed is insufficient to be an HLB]
@@ -122,51 +180,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function getValidOriginalElement(originalElement) {
 
-        var temporaryOriginalElement,
-            originalElementBoundingBox,
-            originalElementComputedStyles,
-            originalElementAndChildren,
-            clonedElementAndChildren,
-            clonedElement,
-            parentListComputedStyles,
-            zoom = conf.get('zoom');
-
-        // If the element chosen is an <li>, then we must wrap it with a <ul>
-        // We must also append this newly created <ul> to the DOM so the HLB
-        // module can utilize styles and positioning of the "original element"
-        // Basically, we create a new original element.
         if ($(originalElement).is('li')) {
 
-          clonedElement = originalElement.cloneNode(true);
-
-          clonedElementAndChildren   = $(clonedElement).find('*').addBack();
-          originalElementAndChildren = $(originalElement).find('*').addBack();
-
-          for (var i = 0; i < originalElementAndChildren.length; i += 1) {
-            clonedElementAndChildren[i].style.cssText = window.getComputedStyle(originalElementAndChildren[i]).cssText;
-          }
-
-          // Setting this to true will remove the $originalElement from the DOM before inflation
-          removeTemporaryOriginalElement = true;
-
-          originalElementBoundingBox             = originalElement.getBoundingClientRect();
-          temporaryOriginalElement               = $('<ul>').append(clonedElement);
-          originalElementComputedStyles          = window.getComputedStyle(originalElement);
-          parentListComputedStyles               = window.getComputedStyle($(originalElement).parent('ul, ol')[0]).cssText;
-          temporaryOriginalElement.style.cssText = parentListComputedStyles;
-
-          $(temporaryOriginalElement).css({
-            'position'   : 'absolute',
-            'left'       : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
-            'top'        : originalElementBoundingBox.top / zoom  + window.pageYOffset / zoom,
-            'opacity'    : 0,
-            'padding'    : 0,
-            'margin'     : 0,
-            'width'      : originalElementComputedStyles.width,
-            'list-style-type': parentListComputedStyles['list-style-type'] ? parentListComputedStyles['list-style-type'] : 'none'
-          }).insertAfter('body');
-
-          return $(temporaryOriginalElement)[0];
+          return getValidListElement(originalElement);
 
         }
 
@@ -215,11 +231,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           // Emitting this event disables mouse highlighting, which must be done before we clone the HLB
           // so we don't copy over the highlighting styles from the original element.
           sitecues.emit('mh/disable');
-        }
 
-        // SC-1629 - Lonely bullets
-        if (!isOriginalElementValidForCloning(originalElement)) {
-          originalElement = getValidOriginalElement(originalElement);
+          // SC-1629 - Lonely bullets
+          if (!isOriginalElementValidForCloning(originalElement)) {
+            originalElement = getValidOriginalElement(originalElement);
+          }
+
         }
 
         return originalElement;
@@ -404,15 +421,29 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [transitionInHLB animates the inflation of the HLB and background dimmer]
+       * [hlbSteppingAnimation is a custom step function for the jQuery animate method]
+       * @param  {[Number]} now [The value of the property we are animating]
        */
-      function transitionInHLB() {
+      function hlbSteppingAnimation(now) {
+        if ($hlbElement) {
+          $hlbElement.css('transform', 'scale(' + now + ') ' + translateCSS);
+        }
+      }
 
+      /**
+       * [getTransitionInCSS returns the jquery CSS object needed to animate the HLB open]
+       * @return {[Object]} [The jquery CSS object needed to animate the HLB open]
+       */
+      function getTransitionInCSS() {
+
+        // The order in which these CSS properties are set matters.  For example, if the
+        // transition property is the last property in the transitionInCSS object, then
+        // the transition would never occur. https://equinox.atlassian.net/browse/SC-1856
         var transitionInCSS = {
-          'transition-timing-function': 'linear',
-          'transition': hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
-          'transform': 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
-          'transform-origin': originCSS
+          'transition'                : hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
+          'transition-timing-function': 'ease',
+          'transform'                 : 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
+          'transform-origin'          : originCSS
         };
 
         // Implemented because Chrome 36 update.
@@ -420,14 +451,111 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           transitionInCSS['-webkit-transform-origin'] = originCSS;
         }
 
-        // Dim the background!
-        dimmer.dimBackgroundContent($hlbWrappingElement, INFLATION_SPEED);
+        return transitionInCSS;
+
+      }
+
+      /**
+       * [getTransitionOutCSS returns the jquery CSS object needed to animate the HLB closed]
+       * @return {[Object]} [The jquery CSS object needed to animate the HLB closed]
+       */
+      function getTransitionOutCSS() {
+
+        return {
+          'transition'                : hlbStyling.transitionProperty + DEFLATION_SPEED + 'ms',
+          'transition-timing-function': 'ease',
+          'transform'                 : 'scale(1) ' + translateCSS,
+          'transform-origin'          : originCSS
+        };
+
+      }
+
+      /**
+       * [transitionOutHLBWithCSS animates the HLB closed with CSS transitions]
+       */
+      function transitionOutHLBWithCSS() {
+
+        var transitionOutCSS = getTransitionOutCSS();
+
+        // After the deflation animation completes, clean up the HLB states and DOM
+        $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBClosed);
+
+        // Animate the deflation by setting the transform scale to 1.
+        $hlbElement.css(transitionOutCSS);
+
+      }
+
+      /**
+       * [transitionInHLBWithCSS animates the HLB open with CSS transitions]
+       */
+      function transitionInHLBWithCSS() {
+
+        var transitionInCSS = getTransitionInCSS();
 
         // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
-        $hlbElement[0].addEventListener(transitionEndEvent, onHLBReady);
+        $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBReady);
 
         // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
         $hlbElement.css(transitionInCSS);
+
+      }
+
+      /**
+       * [transitionOutHLBWithJquery animates the HLB closed with jQuery.animate()]
+       */
+      function transitionOutHLBWithJquery() {
+
+        $animation = $({'scale' : $animation.attr('scale')}).animate(
+          {
+            'scale': 1
+          }, {
+            'step'    : hlbSteppingAnimation,
+            'duration': DEFLATION_SPEED,
+            'complete': onHLBClosed
+          }
+        );
+
+      }
+
+      /**
+       * [transitionInHLBWithJquery animates the HLB open with jQuery.animate()]
+       */
+      function transitionInHLBWithJquery() {
+
+        $hlbElement.css({
+          'transform-origin': originCSS,
+          'transform'       : 'scale(1) ' + translateCSS
+        });
+
+        $animation = $({'scale': 1}).animate(
+          {
+            'scale': hlbSafeArea.HLBZoom
+          }, {
+            'step'    : hlbSteppingAnimation,
+            'duration': INFLATION_SPEED,
+            'complete': onHLBReady
+          }
+        );
+
+      }
+
+      /**
+       * [transitionInHLB animates the inflation of the HLB and background dimmer]
+       */
+      function transitionInHLB() {
+
+        // Dim the background!
+        dimmer.dimBackgroundContent($hlbWrappingElement, INFLATION_SPEED);
+
+        if (common.useJqueryAnimate) {
+
+          transitionInHLBWithJquery();
+
+        } else {
+
+          transitionInHLBWithCSS();
+
+        }
 
       }
 
@@ -453,16 +581,19 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // deflation, otherwise, we just skip the deflation step
         if (isHLBScaleGreaterThanOne()) {
 
-          // After the deflation animation completes, clean up the HLB states and DOM
-          $hlbElement[0].addEventListener(transitionEndEvent, onHLBClosed);
+          if (common.useJqueryAnimate) {
 
-          // Animate the deflation by setting the transform scale to 1.
-          $hlbElement.css({
-            'transition-timing-function': 'linear',
-            'transition': hlbStyling.transitionProperty + DEFLATION_SPEED + 'ms',
-            'transform': 'scale(1) ' + translateCSS,
-            'transform-origin': originCSS
-          });
+            if ($animation) {
+              $animation.stop();
+            }
+
+            transitionOutHLBWithJquery();
+
+          } else {
+
+            transitionOutHLBWithCSS();
+
+          }
 
         } else {
           onHLBClosed();
@@ -502,7 +633,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function turnOffHLBEventListeners() {
 
-        $hlbElement[0].removeEventListener(transitionEndEvent, onHLBReady);
+        $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
         // During deflation, turn off the ability to deflate or create a new HLB
         sitecues.off('key/esc', closeHLB);
