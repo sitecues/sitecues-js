@@ -36,7 +36,7 @@ https=off
 # Whether or not to lint the codebase before the build. 
 lint=false
 
-## MINIFICATION OPTION DEPRICATED ##
+## MINIFICATION OPTION DEPRECATED ##
 #
 # We no longer use the min=false/true option. The code is always minified by
 # UglifyJS. Souce maps to the un-minified code are also created by UglifyJS in
