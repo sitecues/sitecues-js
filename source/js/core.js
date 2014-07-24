@@ -4,7 +4,7 @@
  */
 
 // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
-//SC_DEV=true;
+//SC_DEV=true,
 
 (function () {
   
