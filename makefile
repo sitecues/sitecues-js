@@ -21,10 +21,14 @@ custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
 # If true, clean and update the Node.js package dependencies.
 clean-deps=false
 
-# If true, create a 'dev' build, in which files are fetched separately.
-# Otherwise, a 'prod' build is created, in which all files are combined
-# into a single file. 
-dev=true
+# dev=true:
+#  - SC_DEV  code blocks are KEPT
+#  - SC_UNIT code blocks get REMOVED
+#
+# dev=false:
+#  - SC_DEV  code blocks get REMOVED
+#  - SC_UNIT code blocks get REMOVED
+dev=false
 
 # Whether or not to enable HTTPS on the test server. 
 https=off
@@ -32,8 +36,11 @@ https=off
 # Whether or not to lint the codebase before the build. 
 lint=false
 
-# Whether or not to minify the generated sitecues.js file.
-min=false
+## MINIFICATION OPTION DEPRICATED ##
+#
+# We no longer use the min=false/true option. The code is always minified by
+# UglifyJS. Souce maps to the un-minified code are also created by UglifyJS in
+# the directory: target/$(build-dir)/js/source/js/
 
 # Node.js express test server HTTP port.
 port=8000
@@ -113,16 +120,6 @@ else
 	_build_lint_dep:=.no-lint-on-build
 endif
 
-# If the 'min' option is 'false', set uglify-js options that beautify the
-# code. Otherwise set uglify-js options that minify the code. 
-ifeq ($(min), false)
-	export uglifyjs-args+=-b
-	export min-label:=" \(files were not minified\)"
-else
-	export uglifyjs-args+=-m
-	export min-label:=
-endif
-
 ################################################################################
 # Determine if we need to force a deps update.
 ################################################################################
@@ -162,9 +159,11 @@ endif
 ################################################################################
 
 ifeq ($(dev), false)
+	export uglifyjs-args+=-m
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_DEV=false,SC_UNIT=false
 else
+	export uglifyjs-args+=-m
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_UNIT=false
 endif
