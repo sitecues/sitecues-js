@@ -110,17 +110,21 @@ build:
 	@mkdir -p $(build-dir)/source/js
 
 ifeq ($(dev), true)	
+	@echo DEV=TRUE
 	@sed 's%//SC_DEV=true,%SC_DEV=true,%g' source/js/core.js > $(build-dir)/source/js/core-dev-true.js 
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' $(build-dir)/source/js/core-dev-true.js > $(build-dir)/source/js/core.js
 else
+	@echo DEV=FALSE
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
 endif
 
 	@mkdir -p $(build-dir)/compile/js
 
 ifeq ($(sourcemap), false)
+	@echo SOURCEMAP=FALSE
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js $(files)
 else
+	@echo SOURCEMAP=TRUE
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)	
 	#Copy files for Source-Maps 
 	@mkdir -p $(build-dir)/js/source
@@ -164,12 +168,14 @@ endif
 
 	@cp -R $(build-dir)/compile/* $(package-dir)
 
+ifeq ($(sourcemap), true)
 	#Make dir for Source-Maps 
 	@mkdir -p $(package-dir)/js/source/
 	@mkdir -p $(package-dir)/js/$(build-dir)/source/js/
 	#Copy files for Source-Maps 
 	@cp -R source/js $(package-dir)/js/source/
 	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
+endif
 
 	@cp -R source/images $(package-dir)
 
