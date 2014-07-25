@@ -4,12 +4,12 @@
 
 ################################################################################
 # DEFAULT TARGET: all
-# 	(To keep this target as the defauly target, this target must be
+# 	(To keep this target as the defaulty target, this target must be
 #	 declared before all other targets).
 # 	Clean the target direcetory, update Node.js dependecies, and build the
 #	JavaScript library.
 ################################################################################
-all: clean build
+all: clean build debug
 
 ################################################################################
 # Command line options.
@@ -21,31 +21,11 @@ custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
 # If true, clean and update the Node.js package dependencies.
 clean-deps=false
 
-# dev=true:
-#  - SC_DEV  code blocks are KEPT
-#  - SC_UNIT code blocks get REMOVED
-#
-# dev=false:
-#  - SC_DEV  code blocks get REMOVED
-#  - SC_UNIT code blocks get REMOVED
-dev=true
-
 # Whether or not to enable HTTPS on the test server. 
 https=off
 
 # Whether or not to lint the codebase before the build. 
 lint=false
-
-# The code is minified by UglifyJS. Souce maps to the un-minified code are also
-# created by UglifyJS in the directory: target/$(build-dir)/js/source/js/
-# When min=false, the 
-min=true
-
-# sourcemap=true - creates sourcemap (for sitecues™ devs)
-# sourcemap=false - does not create sourcemap (for CI/prod/deployment)
-sourcemap=true
-
-uglify=true
 
 # Node.js express test server HTTP port.
 port=8000
@@ -53,6 +33,7 @@ port=8000
 # Whether or not to run the test server in prod-only mode, in which source
 # file locations will not be checked for async module loads. 
 prod=off
+
 
 # The build version.
 export version=$(default-version)
@@ -159,37 +140,6 @@ else
 endif
 
 
-################################################################################
-# Remove dead_code and if(DEV) code from js library when dev=true
-################################################################################
-
-#                DEV: false,         UGLIFY: false
-ifeq ($(shell [[ $(dev) == false && $(uglify) == true ]]), true)
-	export uglifyjs-args+=-c dead_code=true
-	export uglifyjs-args+=--define SC_DEV=false,SC_UNIT=false
-endif
-
-#                DEV: true,         UGLIFY: true
-ifeq ($(shell [[ $(dev) == true && $(uglify) == true ]]), true)
-	export uglifyjs-args+=-c dead_code=true
-	export uglifyjs-args+=--define SC_UNIT=false
-endif
-
-#UGLIFY: false
-# No args added
-
-
-################################################################################
-# Minify or beautify when min=true
-################################################################################
-ifeq ($(shell [[ $(min) == false && $(uglify) == true ]]), true)
-	export uglifyjs-args+=-b
-endif
-ifeq ($(shell [[ $(min) == true && $(uglify) == true ]]), true)
-	export uglifyjs-args+=-m
-endif
-
-
 
 ################################################################################
 # TARGET: build
@@ -202,12 +152,22 @@ build: $(_force-deps-refresh) $(_build_lint_dep)
 	done
 
 ################################################################################
+# TARGET: debug
+#	Build the debug version
+################################################################################
+debug: $(_force-deps-refresh) $(_build_lint_dep)
+	@echo
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk debug custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
+
+################################################################################
 # TARGET: package
 #	Package up the files into a deployable bundle, and create a manifest for local
 # file deployment.
 ################################################################################
 package: build
-ifeq ($(dev), true)
+ifeq ($(sc_dev), true)
 	$(error Unable to package a development build)
 endif
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
