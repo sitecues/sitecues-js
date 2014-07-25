@@ -120,16 +120,26 @@ endif
 
 	@mkdir -p $(build-dir)/compile/js
 
-ifeq ($(sourcemap), false)
-	@echo SOURCEMAP=FALSE
+ifeq ($(shell [[ $(sourcemap) == false && $(uglify) == true ]]), true)
+	@echo SOURCEMAP=FALSE, UGLIFY=TRUE
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js $(files)
-else
-	@echo SOURCEMAP=TRUE
+endif
+
+ifeq ($(shell [[ $(sourcemap) == true && $(uglify) == true ]]), true)
+	@echo SOURCEMAP=TRUE, UGLIFY=TRUE
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)	
 	#Copy files for Source-Maps 
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 endif
+
+ifeq ($(uglify), false)
+	@echo UGLIFY=FALSE, uglify must be set to true to create sourcemaps
+	echo "SC_UNIT=true,exports={}" > $(build-dir)/compile/js/sitecues.js
+	(awk 'FNR==1{print ""}1' $(files)) >> $(build-dir)/compile/js/sitecues.js
+endif
+
+
 
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js

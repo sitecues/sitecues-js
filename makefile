@@ -45,6 +45,8 @@ min=true
 # sourcemap=false - does not create sourcemap (for CI/prod/deployment)
 sourcemap=true
 
+uglify=true
+
 # Node.js express test server HTTP port.
 port=8000
 
@@ -161,23 +163,32 @@ endif
 # Remove dead_code and if(DEV) code from js library when dev=true
 ################################################################################
 
-ifeq ($(dev), false)
+#                DEV: false,         UGLIFY: false
+ifeq ($(shell [[ $(dev) == false && $(uglify) == true ]]), true)
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_DEV=false,SC_UNIT=false
-else
+endif
+
+#                DEV: true,         UGLIFY: true
+ifeq ($(shell [[ $(dev) == true && $(uglify) == true ]]), true)
 	export uglifyjs-args+=-c dead_code=true
 	export uglifyjs-args+=--define SC_UNIT=false
 endif
+
+#UGLIFY: false
+# No args added
 
 
 ################################################################################
 # Minify or beautify when min=true
 ################################################################################
-ifeq ($(min), true)
-	export uglifyjs-args+=-m
-else
+ifeq ($(shell [[ $(min) == false && $(uglify) == true ]]), true)
 	export uglifyjs-args+=-b
 endif
+ifeq ($(shell [[ $(min) == true && $(uglify) == true ]]), true)
+	export uglifyjs-args+=-m
+endif
+
 
 
 ################################################################################
