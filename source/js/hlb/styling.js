@@ -76,7 +76,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // What child elements of the HLB do we want to remove after a clone.
         HLBElementBlacklist   = [
-          'script'
+          'script',
+          'iframe'
         ],
 
         // Remove ID from HLB because the speech module sets the ID for TTS to work
@@ -103,29 +104,6 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     //////////////////////////
     // PRIVATE FUNCTIONS
     //////////////////////////
-
-
-    /**
-     * [getComputedStyleCssText returns the cssText of an element]
-     * @param  {[DOM element]} element [DOM element]
-     * @return {[String]}              [Computed styles for an DOM element]
-     * NOTE: Fixes bug described here: [https://bugzilla.mozilla.org/show_bug.cgi?id=137687]
-     */
-    function getComputedStyleCssText(element) {
-
-      var style   = window.getComputedStyle(element),
-          cssText = '';
-
-      if (style.cssText !== '') {
-        return style.cssText;
-      }
-
-      for (var i = 0; i < style.length; i++) {
-        cssText += style[i] + ': ' + style.getPropertyValue(style[i]) + '; ';
-      }
-
-      return cssText;
-    }
 
     /**
      * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
@@ -273,8 +251,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           return false;
         }
         if ($(this).css('backgroundImage') !== 'none') {
-          backgroundStyles.backgroundImage = $(this).css('backgroundImage');
-          backgroundStyles.backgroundRepeat = $(this).css('backgroundRepeat');
+          backgroundStyles.backgroundImage      = $(this).css('backgroundImage');
+          backgroundStyles.backgroundRepeat     = $(this).css('backgroundRepeat');
+          backgroundStyles.backgroundAttachment = 'local';
+          backgroundStyles.count                = count;
           return false;
         }
       });
@@ -359,6 +339,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       var newBackgroundImage;
 
+      // If the original element doesnt have a background image and the original element has a transparent background...
       if (elementComputedStyle.backgroundImage === 'none' &&
           isTransparent(elementComputedStyle.backgroundColor)) {
 
@@ -373,8 +354,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       return {
-        'backgroundImage' : elementComputedStyle.backgroundImage,
-        'backgroundRepeat': elementComputedStyle.backgroundRepeat
+        'backgroundImage'     : elementComputedStyle.backgroundImage,
+        'backgroundRepeat'    : elementComputedStyle.backgroundRepeat,
+        'backgroundAttachment': 'local'
       };
 
     }
@@ -426,7 +408,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function initializeHLBElementStyles ($originalElement, $hlbElement) {
 
-      var originalElementCSSText = getComputedStyleCssText($originalElement[0]);
+      var originalElementCSSText = hlbStyling.getComputedStyleCssText($originalElement[0]);
 
       $hlbElement[0].style.cssText = originalElementCSSText;
 
@@ -455,7 +437,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         originalElementsChildStyle = getComputedStyle($originalElementChildren[i]);
 
         // Copy the original elements child styles to the HLB elements child.
-        hlbElementChild.style.cssText = getComputedStyleCssText($originalElementChildren[i]);
+        hlbElementChild.style.cssText = hlbStyling.getComputedStyleCssText($originalElementChildren[i]);
 
         // Compute styles that are more complicated than copying cssText.
         computedChildStyles = getChildStyles($(hlbElementChild), originalElementsChildStyle);
@@ -557,7 +539,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           calculatedHLBStyles  = {
             'padding-left' : getHLBLeftPadding($originalElement, elementComputedStyle),
             'display'      : getHLBDisplay(elementComputedStyle)
-          };
+          },
+          $parent;
 
       // If the background color is the same as the text color, use default text and background colors
       if (backgroundColor === $originalElement.css('color')) {
@@ -570,10 +553,23 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // If the original element uses a background image, preserve original padding.
       // This was implemented to fix SC-1830
       if ($originalElement.css('backgroundImage') !== 'none') {
+
         calculatedHLBStyles.paddingLeft   = $originalElement.css('paddingLeft');
         calculatedHLBStyles.paddingTop    = $originalElement.css('paddingTop');
         calculatedHLBStyles.paddingBottom = $originalElement.css('paddingBottom');
         calculatedHLBStyles.paddingRight  = $originalElement.css('paddingRight');
+
+      } else if (backgroundStyles.count >= 0) {
+
+        $parent = $($(originalElement).parents()[backgroundStyles.count]);
+
+        calculatedHLBStyles.paddingLeft   = $parent.css('paddingLeft');
+        calculatedHLBStyles.paddingTop    = $parent.css('paddingTop');
+        calculatedHLBStyles.paddingBottom = $parent.css('paddingBottom');
+        calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
+
+        delete backgroundStyles.count;
+
       }
 
       return $.extend({},
@@ -609,6 +605,29 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       initializeHLBChildrenStyles($originalElement, $hlbElement);
 
+    };
+
+
+    /**
+     * [getComputedStyleCssText returns the cssText of an element]
+     * @param  {[DOM element]} element [DOM element]
+     * @return {[String]}              [Computed styles for an DOM element]
+     * NOTE: Fixes bug described here: [https://bugzilla.mozilla.org/show_bug.cgi?id=137687]
+     */
+    hlbStyling.getComputedStyleCssText = function (element) {
+
+      var style   = window.getComputedStyle(element),
+          cssText = '';
+
+      if (style.cssText !== '') {
+        return style.cssText;
+      }
+
+      for (var i = 0; i < style.length; i++) {
+        cssText += style[i] + ': ' + style.getPropertyValue(style[i]) + '; ';
+      }
+
+      return cssText;
     };
 
     if (SC_UNIT) {

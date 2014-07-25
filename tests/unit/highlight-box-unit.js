@@ -67,17 +67,6 @@ describe('highlight-box', function() {
 
   });
 
-  // The isOriginalElementValidForCloning() purpose is to determine if the
-  // element chosen by the picker is, by itself, sufficient information and valid
-  // markup for an HLB
-  describe('#isOriginalElementValidForCloning()', function () {
-    it('Returns false if original element is a list item', function (done) {
-      var originalElement = win.document.getElementById('list-item');
-      expect(hlb.isOriginalElementValidForCloning(originalElement)).to.be.false;
-      done();
-    });
-  });
-
   // The mapForm() purpose is to clone a form chosen by the picker to render
   // as a highlight-box, preserving all values set in the original form.
   describe('#mapForm()', function () {

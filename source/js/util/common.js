@@ -5,8 +5,17 @@ sitecues.def('util/common', function (common, callback) {
   'use strict';
 
    // Define dependency modules.
-  sitecues.use('jquery', function ($) {
-    
+  sitecues.use('jquery', 'platform', function ($, platform) {
+
+    common.transitionEndEvent = (function() {
+      if (platform.browser.isChrome || platform.browser.isSafari) {
+        return 'webkitTransitionEnd';
+      }
+      return 'transitionend';
+    }());
+
+    common.useJqueryAnimate = platform.browser.isIE && platform.ieVersion.isIE9;
+
     /*
      * Check if two Javascript objects are equal.
      * TODO check if this is the best implementation for us and write in a clearer way
@@ -30,7 +39,7 @@ sitecues.def('util/common', function (common, callback) {
 
     /**
      * Checks if the element has media contents which can be rendered.
-     */ 
+     */
     common.isVisualMedia = function(selector) {
       var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
       return $(selector).is(VISUAL_MEDIA_ELEMENTS);
@@ -65,7 +74,7 @@ sitecues.def('util/common', function (common, callback) {
       var tag = element.localName
         , contentEditable
         ;
-      
+
       if (!tag) {
         return false;
       }
@@ -115,7 +124,7 @@ sitecues.def('util/common', function (common, callback) {
       return delta > 0;
     };
 
-     /** 
+     /**
      * Defines wheel scroll direction: if wheel is down.
      * @param e Event Object
      */
