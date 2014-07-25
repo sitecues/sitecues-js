@@ -275,7 +275,7 @@ describe('hlbPositioning', function() {
 
     });
 
-    it('Invokes jquery.css once if scaled rect parameter ' +
+    it('Invokes jquery.css if scaled rect parameter ' +
       'is taller than safe zone height and element is not isVisualMedia',
       function (done) {
 
@@ -297,7 +297,7 @@ describe('hlbPositioning', function() {
 
         hlbPositioning.constrainHeightToSafeArea($hlbElement);
 
-        expect(cssSpy.calledOnce).to.be.true;
+        expect(cssSpy.called).to.be.true;
 
         isVisualMediaStub.restore();
         scaleRectFromCenterStub.restore();
@@ -330,7 +330,7 @@ describe('hlbPositioning', function() {
 
         hlbPositioning.constrainHeightToSafeArea($hlbElement);
 
-        expect(cssSpy.calledTwice).to.be.true;
+        expect(cssSpy.called).to.be.true;
 
         isVisualMediaStub.restore();
         scaleRectFromCenterStub.restore();

@@ -181,7 +181,12 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         // height is now the "safe zone" height, minus the padding/border
         $hlbElement.css({
           'height': ((safeZoneHeight / hlbSafeArea.HLBZoom / zoom) -
-              (hlbStyling.defaultBorder + hlbStyling.defaultPadding) * 2) + 'px'
+                     (hlbStyling.defaultBorder +
+                      hlbStyling.defaultBorder +
+                      parseInt($hlbElement.css('paddingTop')) +
+                      parseInt($hlbElement.css('paddingBottom'))
+                     )
+                    ) + 'px'
         });
 
         // Keep aspect ratio if HLB is an image
