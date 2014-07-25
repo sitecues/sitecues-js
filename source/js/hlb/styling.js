@@ -251,9 +251,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           return false;
         }
         if ($(this).css('backgroundImage') !== 'none') {
-          backgroundStyles.backgroundImage  = $(this).css('backgroundImage');
-          backgroundStyles.backgroundRepeat = $(this).css('backgroundRepeat');
-          backgroundStyles.count            = count;
+          backgroundStyles.backgroundImage      = $(this).css('backgroundImage');
+          backgroundStyles.backgroundRepeat     = $(this).css('backgroundRepeat');
+          backgroundStyles.backgroundAttachment = 'local';
+          backgroundStyles.count                = count;
           return false;
         }
       });
@@ -353,8 +354,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       return {
-        'backgroundImage' : elementComputedStyle.backgroundImage,
-        'backgroundRepeat': elementComputedStyle.backgroundRepeat
+        'backgroundImage'     : elementComputedStyle.backgroundImage,
+        'backgroundRepeat'    : elementComputedStyle.backgroundRepeat,
+        'backgroundAttachment': 'local'
       };
 
     }
