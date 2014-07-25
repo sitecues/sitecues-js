@@ -612,6 +612,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.isCreated = true;
 
         addMouseWheelUpdateListenersIfNecessary();
+        $(document).one('mouseleave', hideAndResetState);
       }
       else if (common.equals(previousViewRect, state.viewRect)) {
         return true; // Already created and in correct position, don't update DOM
@@ -893,7 +894,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.isVisible = false;
 
-      $(document).off('mousewheel', onMouseWheel);
+      $(document)
+        .off('mousewheel', onMouseWheel)
+        .off('mouseleave', hideAndResetState);
     }
 
     function resetState() {

@@ -72,11 +72,11 @@ files=\
 	source/js/badge.js \
 	source/js/focus.js \
 	source/js/mouse-highlight/traitcache.js \
+	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight/traits.js \
 	source/js/mouse-highlight/judge.js \
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
-	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight.js \
 	source/js/keys.js \
 	source/js/cursor/images/win.js \

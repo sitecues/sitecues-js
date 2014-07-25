@@ -95,6 +95,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH = 20,    // Smaller than this is bad
       IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH = 85,    // Larger than this is bad
       MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH = 60,    // Media larger than this is bad
+      IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
+      NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
       TINY_ELEMENT_PIXEL_THRESHOLD = 25,           // Anything smaller than this is considered a tiny element (or at least very thin)
       SEPARATION_DIVISOR = 1.5,                    // The number of spacing pixels will be divided by this in separation impact algorithm
       SEPARATION_IMPACT_POWER = 1.4,               // Exponent for visual impact of whitespace
@@ -133,10 +135,14 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // This is helpful because often a group of items will define spacing on one side of each
       // item, rather than both. For example, if each item in a list has a bottom margin,
       // then effectively each item looks like it also has a top margin.
+      // If it's almost as wide as the body, don't let horizontal separation be considered a good thing --
+      // it's probably just abutting the edge of the document.
+      var isAlmostAsWideAsBody = traits.percentOfBodyWidth > IDEAL_MAX_PERCENT_OF_BODY_WIDTH;
       $.extend(visualSeparationJudgements, {
         vertSeparationImpact:
           Math.max(visualSeparationJudgements.topSeparationImpact, visualSeparationJudgements.bottomSeparationImpact),
         horizSeparationImpact:
+          isAlmostAsWideAsBody ? 0 :
           Math.max(visualSeparationJudgements.leftSeparationImpact, visualSeparationJudgements.rightSeparationImpact)
       });
 
@@ -156,7 +162,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         percentOfViewportHeightUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT - traits.percentOfViewportHeight),
         percentOfViewportHeightOverIdealMax: Math.max(0, traits.percentOfViewportHeight - IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT),
         percentOfViewportWidthUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH - traits.percentOfViewportWidth),
-        percentOfViewportWidthOverIdealMax: Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH)
+        percentOfViewportWidthOverIdealMax: Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH),
+        nearBodyWidthFactor: Math.pow(Math.max(0, traits.percentOfBodyWidth - IDEAL_MAX_PERCENT_OF_BODY_WIDTH), NEAR_BODY_WIDTH_IMPACT_POWER)
       };
     }
 
@@ -431,7 +438,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
 
         // Used in while loop
-        sibling;
+        sibling,
+        $sibling;
 
       // Go up from starting point to see if a non-section-start exists before it in the container.
       while (currentAncestor && currentAncestor !== container) {
@@ -439,8 +447,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Look at all the siblings before the currentAncestor
         while (sibling && sibling !== currentAncestor) {
-          if (!$(sibling).is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) && traitcache.getStyleProp(sibling, 'display') !== 'none') {
-            return true;  // A non-section-start element exists before the section-start-element, which means we are divided!
+          $sibling = $(sibling);
+          if (!$sibling.is(SECTION_START_SELECTOR) && !isSectionStartContainer(sibling) &&
+            !$sibling.is(':empty') && traitcache.getStyleProp(sibling, 'display') !== 'none') {
+            return true;  // A visible non-section-start element exists before the section-start-element, which means we are divided!
           }
           sibling = sibling.nextElementSibling;
         }
@@ -451,8 +461,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
     // Magic formula that provides a number for how impactful the margin, padding and border are for a given edge
     function getSeparationImpact(separation, borderWidth) {
-      return Math.min(Math.pow(separation / SEPARATION_DIVISOR, SEPARATION_IMPACT_POWER),
-        MAX_SEPARATION_IMPACT) + borderWidth * BORDER_WIDTH_BONUS;
+      return Math.min(Math.pow(separation / SEPARATION_DIVISOR, SEPARATION_IMPACT_POWER) + borderWidth * BORDER_WIDTH_BONUS,
+        MAX_SEPARATION_IMPACT) ;
     }
 
     function isTransparentColor(color) {

@@ -565,6 +565,24 @@ describe('judge', function() {
           expect(judgementStack[0].isFormControl).to.be.equal(false);
           done();
         });
+        it('should return |nearBodyWidthFactor=0| for a narrow-width element.', function(done) {
+          var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
+            judgementStack;
+
+          traitStack[1].percentOfBodyWidth = 15;
+          judgementStack = judge.getJudgementStack(traitStack, nodes);
+          expect(judgementStack[1].nearBodyWidthFactor).to.be.equal(0);
+          done();
+        });
+        it('should return |nearBodyWidthFactor > 0| for a wide-width element.', function(done) {
+          var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
+            judgementStack;
+
+          traitStack[1].percentOfBodyWidth = 98;
+          judgementStack = judge.getJudgementStack(traitStack, nodes);
+          expect(judgementStack[1].nearBodyWidthFactor > 0).to.be.true;
+          done();
+        });
     });
     after(function() {
         // Unload module from nodejs's cache

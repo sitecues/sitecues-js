@@ -94,6 +94,14 @@ describe('traits', function() {
       expect(traitStack[1].percentOfViewportWidth).to.be.equal(EXPECTED_PERCENT_OF_VIEWPORT_WIDTH);
       done();
     });
+    it('should return the correct |percentOfBodyWidth| trait for each node.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),
+        EXPECTED_PERCENT_OF_BODY_WIDTH = 10;
+      // Body width is hard coded in highlight-position mock as 100, node#1 is 10px wide,
+      // therefore we expect the result to be 10% of the body width.
+      expect(traitStack[1].percentOfBodyWidth).to.be.equal(EXPECTED_PERCENT_OF_BODY_WIDTH);
+      done();
+    });
   });
   after(function() {
     // Unload module from nodejs's cache

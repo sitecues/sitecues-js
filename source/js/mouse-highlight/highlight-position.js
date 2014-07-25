@@ -98,6 +98,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (node.nodeType !== 1) {
         return rect;
       }
+
+      return getRectMinusPadding(node, rect);
+    }
+
+    function getRectMinusPadding(node, rect) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
       var style = traitcache.getStyle(node);
@@ -110,8 +115,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         left: rect.left + paddingLeft,
         width: rect.width - paddingLeft - paddingRight,
         height: rect.height - paddingTop - paddingBottom,
-        right: rect.right - paddingRight,
-        bottom: rect.bottom - paddingBottom
+        right: rect.top + rect.height - paddingRight,   // In case rect.right not set
+        bottom: rect.left + rect.width - paddingBottom  // In case rect.bottom not set
       };
     }
 
@@ -193,6 +198,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     function getOverflowRect(element, style) {
+      if (element === document.body) {
+        return; // The <body> element is generally reporting a different scroll width than client width
+      }
       var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
       var overflowY = style['overflow-y'] === 'visible' &&
         element.scrollHeight - element.clientHeight >= getLineHeight(style);
@@ -204,9 +212,12 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       // Check for descendant with visibility: hidden -- those break our overflow check.
       // Example: google search results with hidden drop down menu
       // For now, we will not support overflow in this case.
-      var hasVisibilityHiddenDescendant = false;
-
-      $(element).find('*').each(function() {
+      var hasVisibilityHiddenDescendant = false,
+        MAX_ELEMENTS_TO_CHECK = 40;
+      $(element).find('*').each(function(index) {
+        if (index > MAX_ELEMENTS_TO_CHECK) {
+          return false;
+        }
         if (traitcache.getStyleProp(this, 'visibility') === 'hidden') {
           hasVisibilityHiddenDescendant = true;
           return false;
@@ -224,7 +235,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         width: overflowX ? element.scrollWidth : rect.width,
         height: overflowY ? element.scrollHeight : rect.height
       };
-      return newRect;
+
+      return getRectMinusPadding(element, newRect);
     }
 
     function addRect(allRects, clipRect, unclippedRect) {

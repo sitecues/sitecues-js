@@ -31,7 +31,8 @@ exports.getJudgementStack = function(traitStack, nodes) {
       isAncestorOfCell: false,
       isWideAncestorOfCell: false,
       isLargeWidthExpansion: false,
-      isWideMediaContainer: false
+      isWideMediaContainer: false,
+      nearBodyWidthFactor: false
     };
   }
   return nodes.map(getJudgement);

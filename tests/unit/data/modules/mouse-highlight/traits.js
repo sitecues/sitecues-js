@@ -32,7 +32,8 @@ exports.getTraitStack = function(nodes) {
     visualWidth: 198,
     visualHeight: 198,
     percentOfViewportHeight: 50,
-    percentOfViewportWidth: 50
+    percentOfViewportWidth: 50,
+    percentOfBodyWidth: 30
   };
   function getTraits(/*nodeUnused*/) {
     return jquery.extend(true, {}, DEFAULT_TRAITS);

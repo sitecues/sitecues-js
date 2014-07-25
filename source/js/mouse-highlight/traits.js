@@ -6,15 +6,25 @@
  */
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight/traitcache', 'util/common', function($, traitcache, common) {
+  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'util/common',
+    function($, traitcache, mhpos, common) {
 
     // ---- PUBLIC ----
 
     traits.getTraitStack = function(nodes) {
-      var traitStack = nodes.map(getTraits);
+      var oldViewSize = viewSize,
+        traitStack,
+        spacingTraitStack;
+
+      viewSize = traitcache.getCachedViewSize();
+      if (!common.equals(viewSize, oldViewSize)) {
+        bodySize = getBodySize();
+      }
+
+      traitStack = nodes.map(getTraits);
 
       // Get cascaded spacing traits and add them to traitStack
-      var spacingTraitStack = getSpacingTraitsStack(traitStack);  // topSpacing, leftSpacing, etc.
+      spacingTraitStack = getSpacingTraitsStack(traitStack);  // topSpacing, leftSpacing, etc.
       traitStack.forEach(function(traits, index) {
         $.extend(traits, spacingTraitStack[index]);
       });
@@ -24,20 +34,20 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
     // ---- PRIVATE ----
 
+    var bodySize, viewSize;
+
     // Properties that depend only on the node itself, and not other traits in the stack
     function getTraits(node) {
-      var viewSize = traitcache.getCachedViewSize(),
-        zoom = viewSize.zoom;
-
       // Basic properties
-      var traits = {
-        style: traitcache.getStyle(node),
-        rect: traitcache.getRect(node),
-        tag: node.localName,
-        role: node.getAttribute('role'),
-        childCount: node.childElementCount,
-        isVisualMedia: common.isVisualMedia(node)
-      };
+      var zoom = viewSize.zoom,
+        traits = {
+          style: traitcache.getStyle(node),
+          rect: traitcache.getRect(node),
+          tag: node.localName,
+          role: node.getAttribute('role'),
+          childCount: node.childElementCount,
+          isVisualMedia: common.isVisualMedia(node)
+        };
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -76,7 +86,15 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         percentOfViewportWidth: 100 * traits.visualWidth / viewSize.width
       });
 
+      var bodyWidth = bodySize.width;
+      traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;
+
       return traits;
+    }
+
+    function getBodySize() {
+      var MERGE_ALL_BOXES_VALUE = 99999;
+      return mhpos.getAllBoundingBoxes(document.body, MERGE_ALL_BOXES_VALUE, false)[0];
     }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
@@ -146,7 +164,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       return spacingTraitStack;
     }
-    
+
     if (SC_UNIT) {
       $.extend(exports, traits);
     }
