@@ -64,6 +64,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return maxZIndex;
     }
 
+    function isZIndexHigher(item1, item2, commonAncestor) {
+      function getZIndex(item) {
+        var styles = getAncestorStyles(item, commonAncestor);
+        return getMaxZIndex(styles);
+      }
+      return getZIndex(item1) > getZIndex(item2);
+    }
+
     /**
      * Checks if the color value given of a light tone or not.
      */
@@ -341,14 +349,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function floatRectForPoint(x, y, expandFloatRectPixels) {
       var possibleFloat = document.elementFromPoint(Math.max(0, x), Math.max(0, y));
       if (possibleFloat && possibleFloat !== state.picked.get(0)) {
-        var pickedAncestors = state.picked.parents();
-        var possibleFloatAncestors = $(possibleFloat).parents();
+        var pickedAncestors = state.picked.parents(),
+          possibleFloatAncestors = $(possibleFloat).parents();
         if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(state.picked)) {
           // If potential float is ancestor of picked, or vice-versa, don't use it.
           // We only use a cousin or sibling float.
           return null;
         }
         var commonAncestor = $(possibleFloat).closest(pickedAncestors);
+        if (isZIndexHigher(possibleFloat, state.picked[0], commonAncestor)) {
+          return null; // Don't draw highlight around an item that is going over the highlight
+        }
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
 +            possibleFloat !== document.documentElement && possibleFloat !== document) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
@@ -362,7 +373,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getIntersectingFloatRects() {
-      var EXTRA = 3; // Make sure we test a point inside where the float would be, not on a margin
+      var EXTRA = 7; // Make sure we test a point inside where the float would be, not on a margin
       var EXPAND_FLOAT_RECT = 7;
       var left = state.fixedContentRect.left;
       var right = state.fixedContentRect.left + state.fixedContentRect.width;
@@ -501,21 +512,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Also for right or bottom overflow
     function getSVGForExtraPadding(extra) {
       var svg = '',
-        color = getTransparentBackgroundColor(),
-        extraLeft = (state.elementRect.left - state.fixedContentRect.left) ,
-        extraRight = (state.fixedContentRect.right - state.elementRect.right) ,
-        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) ;
-
-      // extra *= conf.get('zoom');
+        color = getTransparentBackgroundColor(),  // TODO return to normal -- this is for debugging
+        elementRect = state.picked[0].getBoundingClientRect(),
+        extraLeft = (elementRect.left - state.fixedContentRect.left) ,
+        extraRight = (state.fixedContentRect.right - elementRect.right) ,
+        extraBottom = (state.fixedContentRect.bottom - elementRect.bottom) ;
 
       if (extraLeft > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height ), color);
+        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : extra; // Top-left area where the highlight is not shown
+        svg += getSVGFillRectMarkup(extra, topOffset, extraLeft, state.fixedContentRect.height - topOffset, color);
       }
       if (extraRight > 0) {
-        svg += getSVGFillRectMarkup(state.elementRect.width  + extra, extra, extraRight, (state.fixedContentRect.height ), color);
+        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : extra; // Top-right area where the highlight is not shown
+        svg += getSVGFillRectMarkup(elementRect.width  + extra, topOffset, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, state.elementRect.height  + extra, state.fixedContentRect.width , extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, elementRect.width, extraBottom, color);
       }
       return svg;
     }
@@ -606,7 +618,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             height: (state.fixedContentRect.height / state.zoom + 2 * extra) + 'px'
           })
           .css({
-            zIndex: getMaxZIndex(ancestorStyles) + 1 // Just below stuff like fixed toolbars
+            zIndex: getMaxZIndex(ancestorStyles)  // Just below stuff like fixed toolbars
           });
 
         state.isCreated = true;
@@ -683,6 +695,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }, state.isCreated ? 0 : MOUSE_STOP_MS);
     }
 
+    function isDrawnAroundFloat() {
+      return state.floatRects.topLeft || state.floatRects.topRight;
+    }
+
     // Used for performance shortcut -- if still inside same highlight
     function isInsideHighlight(target) {
       if (!state.isCreated) {
@@ -692,6 +708,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Mouse target is inside
         // Update rect in case of sub-element scrolling -- we get mouse events in that case
         return true;
+      }
+      if (isDrawnAroundFloat()) {
+        return false;  // Don't use cursor in fixed rect optimization which assumes rectangular highlight
       }
       if (isCursorInFixedRects([state.fixedContentRect]) &&
         common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
