@@ -95,7 +95,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       if (isEmptyRect) {rect = node.getBoundingClientRect && traitcache.getScreenRect(node);}
 
-      if (node.nodeType !== 1) {
+      if (node.nodeType !== 1 /* Element */) {
         return rect;
       }
 
@@ -105,11 +105,12 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     function getRectMinusPadding(node, rect) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
-      var style = traitcache.getStyle(node);
-      var paddingTop = parseFloat(style.paddingTop);
-      var paddingLeft = parseFloat(style.paddingLeft);
-      var paddingBottom = parseFloat(style.paddingBottom);
-      var paddingRight = parseFloat(style.paddingRight);
+      var style = traitcache.getStyle(node),
+        paddingTop = parseFloat(style.paddingTop),
+        paddingLeft = parseFloat(style.paddingLeft),
+        paddingBottom = parseFloat(style.paddingBottom),
+        paddingRight = parseFloat(style.paddingRight);
+
       return {
         top: rect.top + paddingTop,
         left: rect.left + paddingLeft,
@@ -126,13 +127,13 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getEmsToPx(fontSize, ems) {
       var measureDiv = $('<div/>')
-         .appendTo(document.body)
-         .css({
-        'font-size': fontSize,
-        'width': ems + 'em',
-        'visibility': 'hidden'
-      });
-      var px = measureDiv.width();
+           .appendTo(document.body)
+           .css({
+          fontSize: fontSize,
+          width: ems + 'em',
+          visibility: 'hidden'
+        }),
+        px = measureDiv.width();
       measureDiv.remove();
       return px;
     }
@@ -140,18 +141,18 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     function getBulletWidth(element, style, bulletType) {
       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
-        ems = 1; // Simple bullet
+        ems = 1.6; // Simple bullet
       } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'), 10);
-        var end = (start || 1) + element.childElementCount - 1;
-        ems = 0.9 + 0.5 * end.toString().length;
+        var start = parseInt($(element).attr('start'), 10),
+          end = (start || 1) + element.childElementCount - 1;
+        ems = (0.9 + 0.5 * end.toString().length);
       }
-      return getEmsToPx(style['font-size'], ems);
+      return getEmsToPx(style.fontSize, ems);
     }
 
     function getBulletRect(element, style) {
-      var bulletType = style['list-style-type'];
-      if ((bulletType === 'none' && style['list-style-image'] === 'none') || style['list-style-position'] !== 'outside') {
+      var bulletType = style.listStyleType;
+      if (bulletType === 'none' && style.listStyleImage === 'none') {
         return null; // inside, will already have bullet incorporated in bounds
       }
       if (style.display !== 'list-item') {
@@ -160,12 +161,15 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           return null; /// Needs to be list-item or have list-item child
         }
       }
-      var bulletWidth = getBulletWidth(element, style, bulletType);
-      var boundingRect = getBoundingRectMinusPadding(element);
+      var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
+        bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
+        getBulletWidth(element, style, bulletType),
+        boundingRect = element.getBoundingClientRect(),
+        paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
       return {
         top: boundingRect.top,
         height: boundingRect.height,
-        left: boundingRect.left - bulletWidth,
+        left: boundingRect.left + paddingLeft - bulletWidth,
         width: bulletWidth
       };
     }
