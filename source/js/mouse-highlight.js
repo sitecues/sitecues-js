@@ -341,14 +341,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function floatRectForPoint(x, y, expandFloatRectPixels) {
       var possibleFloat = document.elementFromPoint(Math.max(0, x), Math.max(0, y));
       if (possibleFloat && possibleFloat !== state.picked.get(0)) {
-        var pickedAncestors = state.picked.parents();
-        var possibleFloatAncestors = $(possibleFloat).parents();
+        var pickedAncestors = state.picked.parents(),
+          possibleFloatAncestors = $(possibleFloat).parents();
         if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(state.picked)) {
           // If potential float is ancestor of picked, or vice-versa, don't use it.
           // We only use a cousin or sibling float.
           return null;
         }
-        var commonAncestor = $(possibleFloat).closest(pickedAncestors);
+        var commonAncestor = $(possibleFloat).closest(pickedAncestors),
+          floatZIndex = getMaxZIndex(getAncestorStyles(possibleFloat, commonAncestor)),
+          targetZIndex = getMaxZIndex(getAncestorStyles(state.picked[0], commonAncestor));
+        if (floatZIndex > targetZIndex) {
+          return null; // Don't draw highlight around an item that is going over the highlight
+        }
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
 +            possibleFloat !== document.documentElement && possibleFloat !== document) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
@@ -362,7 +367,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getIntersectingFloatRects() {
-      var EXTRA = 3; // Make sure we test a point inside where the float would be, not on a margin
+      var EXTRA = 7; // Make sure we test a point inside where the float would be, not on a margin
       var EXPAND_FLOAT_RECT = 7;
       var left = state.fixedContentRect.left;
       var right = state.fixedContentRect.left + state.fixedContentRect.width;
