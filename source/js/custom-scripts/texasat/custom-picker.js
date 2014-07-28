@@ -10,7 +10,8 @@ sitecues.def(function (module, callback) {
   sitecues.use('custom', function (custom) {
     custom.register('mouse-highlight/picker', function (event) {
       this.provideCustomSelectors({
-        ignore: '#right,#rightin'
+        ignore: '#right,#rightin',
+        disable: 'input[type="text"]'
       });
     });
 
