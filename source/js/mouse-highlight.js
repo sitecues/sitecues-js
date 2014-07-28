@@ -506,20 +506,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Also for right or bottom overflow
     function getSVGForExtraPadding(extra) {
       var svg = '',
-        color = getTransparentBackgroundColor(),
-        extraLeft = (state.elementRect.left - state.fixedContentRect.left) ,
-        extraRight = (state.fixedContentRect.right - state.elementRect.right) ,
-        extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) ;
+        color = getTransparentBackgroundColor(),  // TODO return to normal -- this is for debugging
+        elementRect = state.picked[0].getBoundingClientRect(),
+        extraLeft = (elementRect.left - state.fixedContentRect.left) ,
+        extraRight = (state.fixedContentRect.right - elementRect.right) ,
+        extraBottom = (state.fixedContentRect.bottom - elementRect.bottom) ;
 
-
-      if (extraLeft > 0 && !state.floatRects.topLeft) {
-        svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height ), color);
+      if (extraLeft > 0) {
+        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : extra; // Top-left area where the highlight is not shown
+        svg += getSVGFillRectMarkup(extra, topOffset, extraLeft, state.fixedContentRect.height - topOffset, color);
       }
-      if (extraRight > 0 && !state.floatRects.topRight) {
-        svg += getSVGFillRectMarkup(state.elementRect.width  + extra, extra, extraRight, (state.fixedContentRect.height ), color);
+      if (extraRight > 0) {
+        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : extra; // Top-right area where the highlight is not shown
+        svg += getSVGFillRectMarkup(elementRect.width  + extra, topOffset, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, state.elementRect.height  + extra, state.fixedContentRect.width , extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, elementRect.width, extraBottom, color);
       }
       return svg;
     }
