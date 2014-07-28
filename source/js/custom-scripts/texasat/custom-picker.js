@@ -6,8 +6,6 @@
  * 
 */
 
-alert(11111111);
-
 sitecues.def(function (module, callback) {
   sitecues.use('custom', function (custom) {
     custom.register('mouse-highlight/picker', function (event) {
