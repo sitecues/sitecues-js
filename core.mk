@@ -125,7 +125,7 @@ build:
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
-	@echo "Creating compressed (gzipped) JavaScript files."
+	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
@@ -141,12 +141,14 @@ build:
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
 	@echo
-
+	@echo "===== VERSION: $(custom-version)"
+	@echo
+	
 ################################################################################
 # TARGET: debug
 ################################################################################
 debug:
-	@echo "===== STARTING: Debug-Build for '$(custom-name)' library ====="
+	@echo "===== STARTING: Build for '$(custom-name)' library (DEBUG VER) ====="
 	@echo
 
 	@mkdir -p $(build-dir)/source/js
@@ -168,7 +170,7 @@ debug:
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
-	@echo "Creating compressed (gzipped) JavaScript files."
+	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
 		gzip -c $$FILE > $$FILE.gz ; \
@@ -182,7 +184,9 @@ debug:
 	done)
 
 	@echo
-	@echo "===== COMPLETE: Building '$(custom-name)' library"
+	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
+	@echo
+	@echo "===== VERSION: $(custom-version)"
 	@echo
 
 
