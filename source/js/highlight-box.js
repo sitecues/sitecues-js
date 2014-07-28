@@ -715,10 +715,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             isMouseDown,
             HLBBoundingBox;
 
-        // IE is, of course, different than the other browsers in terms of
-        // how we can detect if the left mouse button is held down during
-        // mousemove events.  This specifically fixes SC-1834
-        if (platform.browser.isIE) {
+        // This fixes SC-1834
+        if (platform.browser.isIE || platform.browser.isFirefox) {
           isMouseDown = e.buttons === 1;
         } else {
           isMouseDown = e.which === 1;
