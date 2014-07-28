@@ -9,8 +9,8 @@ describe('traitcache', function() {
   beforeEach(function() {
     // Override getComputedStyle() for tests
     sandbox = sinon.sandbox.create();
-    sandbox.stub(window, 'getComputedStyle', function() {
-            return {'borderTop': '3px'};
+    sandbox.stub(window, 'getComputedStyle', function(element) {
+            return element.tagName === 'DIV' ? {'borderTop': '3px'} : {'borderTop': '5px'};
           });
   });
   describe('#getUniqueId()', function() {
@@ -75,6 +75,17 @@ describe('traitcache', function() {
 
       borderTop = traitcache.getStyleProp(divElement, 'borderTop');
       expect(borderTop).to.be.equal('3px');
+      done();
+    });
+    it('should return correct style property for second HTML element queried.', function (done) {
+      var divElement = document.createElement('div'),
+        pElement = document.createElement('p'),
+        borderTopP;
+
+      traitcache.getStyleProp(divElement, 'borderTop');
+      borderTopP = traitcache.getStyleProp(pElement, 'borderTop');
+
+      expect(borderTopP).to.be.equal('5px');
       done();
     });
     it('should return same result when retrieving from cache.', function (done) {

@@ -48,7 +48,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
     // Can be used in the context of the highlighter, as the picker caches these values (expensive to get from browser)
     traitcache.getStyle = function (element) {
-      var id = getStoredUniqueId(element),
+      var id = traitcache.getUniqueId(element),
         style = styleCache[id];
       if (!style) {
         style = window.getComputedStyle(element);
