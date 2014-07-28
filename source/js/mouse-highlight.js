@@ -511,12 +511,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         extraRight = (state.fixedContentRect.right - state.elementRect.right) ,
         extraBottom = (state.fixedContentRect.bottom - state.elementRect.bottom) ;
 
-      // extra *= conf.get('zoom');
 
-      if (extraLeft > 0) {
+      if (extraLeft > 0 && !state.floatRects.topLeft) {
         svg += getSVGFillRectMarkup(extra, extra, extraLeft, (state.fixedContentRect.height ), color);
       }
-      if (extraRight > 0) {
+      if (extraRight > 0 && !state.floatRects.topRight) {
         svg += getSVGFillRectMarkup(state.elementRect.width  + extra, extra, extraRight, (state.fixedContentRect.height ), color);
       }
       if (extraBottom > 0) {
@@ -688,6 +687,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }, state.isCreated ? 0 : MOUSE_STOP_MS);
     }
 
+    function isDrawnAroundFloat() {
+      return state.floatRects.topLeft || state.floatRects.topRight;
+    }
+
     // Used for performance shortcut -- if still inside same highlight
     function isInsideHighlight(target) {
       if (!state.isCreated) {
@@ -697,6 +700,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Mouse target is inside
         // Update rect in case of sub-element scrolling -- we get mouse events in that case
         return true;
+      }
+      if (isDrawnAroundFloat()) {
+        return false;  // Don't use cursor in fixed rect optimization which assumes rectangular highlight
       }
       if (isCursorInFixedRects([state.fixedContentRect]) &&
         common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
