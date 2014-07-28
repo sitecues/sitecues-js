@@ -1,13 +1,8 @@
-if (SC_DEV) {
+/*global console: true */
 
-  /*global console: true */
-  /*
-   * Customer-Customization File
-   * CustomId    : --- not relevant ---
-   * IssueLink   :
-   * Description : This helps debug the picker
-   *
-   */
+// This helps debug the picker. Use sitecues.togglePickerDebugging() to turn
+// on useful console log messages related to picker heuristics.
+if (SC_DEV) {
   sitecues.def('mouse-highlight/pick-debug', function(pickDebug, callback) {
     'use strict';
     sitecues.use('custom', function (custom) {
