@@ -7,7 +7,13 @@
 */
 
 // Make sure the background covers the area needed
-sitecues.on('zoom', function(zoom) {
-  $('#top_bkg').css('width', (100 * zoom) + '%');
+sitecues.def(function (module, callback) {
+  sitecues.use('jquery', function ($) {
+    sitecues.on('zoom', function (zoom) {
+      $('#top_bkg').css('width', (100 * zoom) + '%');
+    });
+    callback();
+  });
 });
+
 
