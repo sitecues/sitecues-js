@@ -10,6 +10,7 @@ tmp
 var
 .vagrant
 .idea
+sitecues-load-script.js
 
 # Fetch Avatars is used in Gource.
 # ================================
@@ -32,4 +33,4 @@ tools/site/generate-cursors/cursor_output/
 # ============================================================================
 report
 
-tools/site/load-script/sitecues-load-script.js
+
