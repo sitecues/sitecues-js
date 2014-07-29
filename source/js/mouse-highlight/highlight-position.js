@@ -173,9 +173,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       // Background sprites tend to be to the left side of the element
       var backgroundPos = style['background-position'],
-        backgroundLeftPos = backgroundPos ? Math.max(0, parseFloat(backgroundPos)) : 0,
-      // Use positive background positions (used for moving the sprite to the right within the element)
-      // Ignore negative background positions (used for changing which sprite is used within a larger image)
+        backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
+        // Use positive background positions (used for moving the sprite to the right within the element)
+        // Ignore negative background positions (used for changing which sprite is used within a larger image)
         actualLeft = Math.max(0, backgroundLeftPos),
         rect = $.extend({}, traitcache.getScreenRect(element, true));
       rect.left += actualLeft;
