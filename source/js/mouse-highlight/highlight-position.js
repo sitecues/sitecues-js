@@ -163,7 +163,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-        getBulletWidth(element, style, bulletType),
+          getBulletWidth(element, style, bulletType),
         boundingRect = element.getBoundingClientRect(),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
       return {
