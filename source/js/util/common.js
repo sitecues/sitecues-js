@@ -66,6 +66,15 @@ sitecues.def('util/common', function (common, callback) {
       return $(element).is(NON_EDITABLE_SPACEBAR_ELEMENTS) || isEditable(element);
     };
 
+    /**
+     * Is the current element editable for any reason???
+     * @param element
+     * @returns {boolean} True if editable
+     */
+    function isEditable(element) {
+      return document.designMode === 'on' || $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]');
+    }
+
     /*
      * Check if current image value is not empty.
      * @imageValue A string that represents current image value.
@@ -74,15 +83,6 @@ sitecues.def('util/common', function (common, callback) {
     common.isEmptyBgImage = function(imageValue) {
       return this.isEmpty(imageValue) || imageValue === 'none';
     };
-
-    /**
-      * Is the current element editable for any reason???
-      * @param element
-      * @returns {boolean} True if editable
-      */
-    function isEditable(element) {
-      return document.designMode === 'on' || $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]');
-    }
 
     // Return true if the element is part of the sitecues user interface
     // Everything inside the <body> other than the page-inserted badge
