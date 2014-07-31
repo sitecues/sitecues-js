@@ -1,9 +1,9 @@
 var sitecues = window.sitecues || {};
   
 sitecues.config = {
-  //site_id : 's-00000005'  // Default
+  site_id : 's-00000005'  // Default
   //site_id : 's-0000ee0c'  // EEOC
-  site_id : 's-c27fa71d'     // Texas AT
+  //site_id : 's-c27fa71d'     // Texas AT
 };
 
 var SCRIPT_URLS = {
