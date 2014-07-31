@@ -81,28 +81,10 @@ sitecues.def('util/common', function (common, callback) {
       * @returns {boolean} True if editable
       */
     function isEditable(element) {
-      if (element === document.body) {
-        return false;  // Shortcut
-      }
-      var tag = element.localName
-        , contentEditable
-        ;
-
-      if (!tag) {
-        return false;
-      }
-      if (tag === 'input' || tag === 'textarea') {
-        return true;
-      }
-      // Check for rich text editor
-      contentEditable = element.getAttribute('contenteditable');
-      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
-        return true; // In editor
-      }
       if (document.designMode === 'on') {
         return true; // Another kind of editor
       }
-      return false;
+      return $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]')
     }
 
     // Return true if the element is part of the sitecues user interface

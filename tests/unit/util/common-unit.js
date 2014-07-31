@@ -92,10 +92,33 @@ describe('common', function() {
       expect(isSpacebarConsumer).to.be.equal(false);
       done();
     });
-    it('should return true for div with contenteditable', function(done) {
+    it('should return false for div with contenteditable="false"', function(done) {
+      var node = createElement('div'),
+        isSpacebarConsumer  = common.isSpacebarConsumer(node);
+      node.setAttribute('contenteditable', 'false');
+      expect(isSpacebarConsumer).to.be.equal(false);
+      done();
+    });
+    it('should return true for div with contenteditable="true"', function(done) {
       var node = createElement('div'),
         isSpacebarConsumer;
       node.setAttribute('contenteditable', 'true');
+      isSpacebarConsumer = common.isSpacebarConsumer(node);
+      expect(isSpacebarConsumer).to.be.equal(true);
+      done();
+    });
+    it('should return true for div with contenteditable=""', function(done) {
+      var node = createElement('div'),
+        isSpacebarConsumer;
+      node.setAttribute('contenteditable', '');
+      isSpacebarConsumer = common.isSpacebarConsumer(node);
+      expect(isSpacebarConsumer).to.be.equal(true);
+      done();
+    });
+    it('should return true for div with contenteditable=""', function(done) {
+      var node = createElement('div'),
+        isSpacebarConsumer;
+      node.setAttribute('contenteditable', '');
       isSpacebarConsumer = common.isSpacebarConsumer(node);
       expect(isSpacebarConsumer).to.be.equal(true);
       done();
