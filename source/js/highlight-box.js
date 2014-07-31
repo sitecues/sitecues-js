@@ -264,7 +264,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function initializeHLB(originalElement) {
 
         // Create and append to the DOM the wrapping element for HLB and DIMMER elements
-        addHLBWrapper();
+        $hlbWrappingElement = getHLBWrapper();
+
+        if (platform.browser.isIE && ($(originalElement).is('input, textarea') || $(originalElement).find('input, textarea').length)) {
+          $hlbWrappingElement.appendTo('body');
+        } else {
+          $hlbWrappingElement.insertAfter('body');
+        }
 
         // Disable document scroll until the HLB deflates
         eventHandlers.disableWheelScroll();
@@ -811,22 +817,22 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [addHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
+       * [getHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
        */
-      function addHLBWrapper() {
+      function getHLBWrapper() {
 
-        $hlbWrappingElement = $('<div>', {
-          'id': SITECUES_HLB_WRAPPER_ID
-        })
-        .css({
-          'padding' : 0,
-          'margin'  : 0,
-          'top'     : 0,
-          'left'    : 0,
-          'position': 'absolute',
-          'overflow': 'visible'
-        })
-        .insertAfter('body');
+        return $('<div>', {
+                  'id': SITECUES_HLB_WRAPPER_ID
+                })
+                .css({
+                  'padding' : 0,
+                  'margin'  : 0,
+                  'top'     : 0,
+                  'left'    : 0,
+                  'position': 'absolute',
+                  'overflow': 'visible'
+                });
+
       }
 
       /**
@@ -872,7 +878,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.closeHLB                 = closeHLB;
         exports.onHLBClosed              = onHLBClosed;
         exports.onHLBReady               = onHLBReady;
-        exports.addHLBWrapper            = addHLBWrapper;
+        exports.getHLBWrapper            = getHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
         exports.eventHandlers            = eventHandlers;
