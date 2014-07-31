@@ -931,11 +931,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // hide mouse highlight once highlight box appears. SC-1786
     sitecues.on('mh/disable', disable);
 
-    // hide mouse highlight once highlight box is dismissed
-    //sitecues.on('hlb/deflating', pause);
-
     // enable mouse highlight back once highlight box deflates
-    sitecues.on('hlb/closed mh/enable', reenableIfAppropriate);
+    sitecues.on('hlb/closed', reenableIfAppropriate);
 
     // handle zoom changes to toggle enhancement on/off
     conf.get('zoom', onSettingsChanged);
