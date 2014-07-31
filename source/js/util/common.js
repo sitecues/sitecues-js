@@ -81,10 +81,7 @@ sitecues.def('util/common', function (common, callback) {
       * @returns {boolean} True if editable
       */
     function isEditable(element) {
-      if (document.designMode === 'on') {
-        return true; // Another kind of editor
-      }
-      return $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]')
+      return document.designMode === 'on' || $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]');
     }
 
     // Return true if the element is part of the sitecues user interface
