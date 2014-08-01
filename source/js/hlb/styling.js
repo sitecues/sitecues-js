@@ -218,7 +218,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     function getBulletWidth ($element, elementComputedStyle) {
 
       //If the HLB is a list AND it has bullets...return their width
-      if ($element.is('ul, ol') && elementComputedStyle['list-style-type'] !== 'none') {
+      if ($element.is('ul, ol') && elementComputedStyle['list-style-type'] && elementComputedStyle['list-style-type'] !== 'none') {
         return computeBulletWidth($element, elementComputedStyle, elementComputedStyle['list-style-type']);
       }
 
