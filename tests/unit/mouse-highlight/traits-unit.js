@@ -102,6 +102,21 @@ describe('traits', function() {
       expect(traitStack[1].percentOfBodyWidth).to.be.equal(EXPECTED_PERCENT_OF_BODY_WIDTH);
       done();
     });
+    it('should return the correct |normDisplay=block| trait for a <p>.', function(done) {
+      var traitStack = traits.getTraitStack(nodes),
+        EXPECTED_DISPLAY = 'block';
+      expect(traitStack[1].normDisplay).to.be.equal(EXPECTED_DISPLAY);
+      done();
+    });
+    it('should return the correct |normDisplay=inline-block| trait for an <input type="button">.', function(done) {
+      var newNodes = nodes.slice(), // Duplicate
+        FORM_CONTROL_ID = 'test-input';
+      newNodes[0] = win.document.getElementById(FORM_CONTROL_ID);
+      var traitStack = traits.getTraitStack(newNodes),
+        EXPECTED_DISPLAY = 'inline-block';
+      expect(traitStack[0].normDisplay).to.be.equal(EXPECTED_DISPLAY);
+      done();
+    });
   });
   after(function() {
     // Unload module from nodejs's cache

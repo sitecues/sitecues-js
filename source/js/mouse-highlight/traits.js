@@ -49,6 +49,8 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
           isVisualMedia: common.isVisualMedia(node)
         };
 
+      traits.normDisplay = getNormalizedDisplay(traits.style, node);
+
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
         height: traits.rect.height / zoom,
@@ -90,6 +92,15 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;
 
       return traits;
+    }
+
+    // Normalize treatment of CSS display for form controls across browsers.
+    // Firefox says that form controls have an inline style, but really treats them as inline-block.
+    // For example the label of an <input type="button"> will not wrap to the next line like a normal inline does.
+    // Since they act like inline-block let's treat it as one while normalize the display trait across browsers --
+    // this allows the form controls to be picked.
+    function getNormalizedDisplay(style, node) {
+      return (style.display === 'inline' && common.isFormControl(node)) ? 'inline-block' : style.display;
     }
 
     function getBodySize() {

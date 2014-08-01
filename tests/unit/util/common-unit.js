@@ -172,6 +172,124 @@ describe('common', function() {
       done();
     });
   });
+  describe('#isEditable()', function() {
+    it('should return true for textarea', function(done) {
+      var node = createElement('textarea'),
+        isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return true for input with no type', function(done) {
+      var node = createElement('input'),
+        isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return true for input with type=text', function(done) {
+      var node = createElement('input'),
+        isEditable;
+      node.setAttribute('type', 'text');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return true for input with type=url', function(done) {
+      var node = createElement('input'),
+        isEditable;
+      node.setAttribute('type', 'url');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return false for input with type=button', function(done) {
+      var node = createElement('input'),
+        isEditable;
+      node.setAttribute('type', 'button');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return false for input with type=checkbox', function(done) {
+      var node = createElement('input'),
+        isEditable;
+      node.setAttribute('type', 'checkbox');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return false for input with type=radio', function(done) {
+      var node = createElement('input'),
+        isEditable;
+      node.setAttribute('type', 'radio');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return false for button', function(done) {
+      var node = createElement('button'),
+        isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return true for document with designMode', function(done) {
+      Object.defineProperty(document, 'designMode', {
+        value: 'on',
+        writable: true
+      });
+      var node = createElement('div'),
+        isEditable;
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+
+      document.designMode = undefined;
+
+      done();
+    });
+    it('should return false for div without contenteditable', function(done) {
+      var node = createElement('div'),
+        isEditable  = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return false for div with contenteditable="false"', function(done) {
+      var node = createElement('div'),
+        isEditable  = common.isEditable(node);
+      node.setAttribute('contenteditable', 'false');
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+    it('should return true for div with contenteditable="true"', function(done) {
+      var node = createElement('div'),
+        isEditable;
+      node.setAttribute('contenteditable', 'true');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return true for div with contenteditable=""', function(done) {
+      var node = createElement('div'),
+        isEditable;
+      node.setAttribute('contenteditable', '');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return true for div with contenteditable=""', function(done) {
+      var node = createElement('div'),
+        isEditable;
+      node.setAttribute('contenteditable', '');
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(true);
+      done();
+    });
+    it('should return false for text node', function(done) {
+      var node = document.createTextNode('text'),
+        isEditable;
+      isEditable = common.isEditable(node);
+      expect(isEditable).to.be.equal(false);
+      done();
+    });
+  });
   describe('#isFormControl()', function() {
     it('should return false for img', function(done) {
       var node = createElement('img'),
