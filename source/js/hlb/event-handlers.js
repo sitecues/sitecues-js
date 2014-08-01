@@ -157,16 +157,18 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
           isUp,
           doStopScroll,
           isChild,
-          target;
+          target,
+          hlbKeysMap = keys.getHLBKeysMap(),
+          keysTester = keys.getKeysTester();
       // Iterate over hlb key map.
-      for (key in keys.hlbKeysMap) {
-        if (has.call(keys.hlbKeysMap, key)) {
+      for (key in hlbKeysMap) {
+        if (has.call(hlbKeysMap, key)) {
           // Split key definition to parts.
           name = key.split(/\s*\+\s*/)[0];
-          test = keys.test[name];
+          test = keysTester[name];
           if (test && test(e)) {
-            isUp = keys.hlbKeysMap[key].up;
-            doStopScroll = keys.hlbKeysMap[key].stopOuterScroll;
+            isUp = hlbKeysMap[key].up;
+            doStopScroll = hlbKeysMap[key].stopOuterScroll;
             break;
           }
         }
