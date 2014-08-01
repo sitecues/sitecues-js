@@ -28,9 +28,10 @@ sitecues.def('audio', function (audio, callback) {
       }
       stopAudio();
       var text = builder.getText(hlb);
-      getAudioPlayer().playAudioSrc(getTTSUrl(text));
-
-      enableKeyDownToStopAudio();
+      if (text) {
+        getAudioPlayer().playAudioSrc(getTTSUrl(text));
+        enableKeyDownToStopAudio();
+      }
     }
 
     function enableKeyDownToStopAudio() {
@@ -55,7 +56,7 @@ sitecues.def('audio', function (audio, callback) {
 
     function getLanguageParameter() {
       var lang = document.documentElement.lang;
-      return lang ? '&l=' + lang : '';
+      return lang ? 'l=' + lang + '&' : '';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
@@ -65,7 +66,7 @@ sitecues.def('audio', function (audio, callback) {
 
     function getTTSUrl(text) {
       return getApiBaseUrl() + 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
-        '?t=' + encodeURIComponent(text) + getLanguageParameter();
+        '?' + getLanguageParameter() + 't=' + encodeURIComponent(text);
     }
 
       /**
@@ -188,6 +189,7 @@ sitecues.def('audio', function (audio, callback) {
       exports.isSpeechEnabled = audio.isSpeechEnabled
       exports.playAudioByKey = audio.playAudioByKey;
       exports.playHlbContent = playHlbContent;
+      exports.getTTSUrl = getTTSUrl;
     }
 
     callback();
