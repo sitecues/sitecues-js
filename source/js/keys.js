@@ -1,19 +1,18 @@
 sitecues.def('keys', function(keys, callback) {
 
-    var extra_event_properties = {
+
+    var zoomKeysEnabled = true,
+      extra_event_properties = {
         dom: {
             highlight_box: null
         }
-    };
+      },
+      // shortcut to hasOwnProperty
+      has = Object.prototype.hasOwnProperty,
 
-    keys.zoomEnabled = true;
-
-    // shortcut to hasOwnProperty
-    var has = Object.prototype.hasOwnProperty;
-
-    // define keys map used to bind actions to hotkeys
-    // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
-    var origTest = keys.test = {
+      // define keys map used to bind actions to hotkeys
+      // key codes vary across browsers and we need to support the numeric keypad. See http://www.javascripter.net/faq/keycodes.htm
+      origTest = {
         'editor-safe-minus': function(event) {
             return hasCommandModifier(event) &&
                 (event.keyCode === 189 || event.keyCode === 109 || event.keyCode === 173 || event.keyCode === 45);
@@ -30,18 +29,11 @@ sitecues.def('keys', function(keys, callback) {
             return !hasCommandModifier(event) &&
                 (event.keyCode === 187 || event.keyCode === 61 || event.keyCode === 107 || event.keyCode === 43);
         },
-        'r': function(event) {
-            return (event.keyCode === 82 && event.shiftKey && !event.ctrlKey && event.altKey && !event.metaKey);
-        },
-        'f8': function(event) {
-            return event.keyCode === 119 && !hasModifier(event);
-        },
         'space': function(event) {
             return event.keyCode === 32 && !hasModifier(event);
         }
-    };
-
-    keys.hlbKeysTest = {
+      },
+      hlbKeysTest = {
         'esc': function(event) {
             return event.keyCode === 27 && !hasModifier(event);
         },
@@ -64,16 +56,9 @@ sitecues.def('keys', function(keys, callback) {
         'home': function(event) {
             return event.keyCode === 36 && !hasModifier(event);
         }
-    }
-
-    var iframeDialogTest = {
-        'esc': function(event) {
-            return event.keyCode === 27 && !hasModifier(event);
-        }
-    }
-
-    // define keys map used to bind actions to hotkeys
-    var origMap = keys.map = {
+      },
+      // define keys map used to bind actions to hotkeys
+      origMap = {
         'plain-minus': {
             preventDefault: true,
             event: 'zoom/decrease',
@@ -92,16 +77,13 @@ sitecues.def('keys', function(keys, callback) {
             preventDefault: true,
             event: 'zoom/increase'
         },
-        // Invert and toolbar disabled until further notice.
-        //    'r':      { preventDefault: true, event: 'inverse/toggle'},
         'space': {
             event: 'hlb/toggle',
             preventDefault: true,
             requiresMouseHighlightActive: true
         }
-    }
-
-    keys.hlbKeysMap = {
+      },
+      hlbKeysMap = {
         'esc': {
             event: 'key/esc'
         },
@@ -131,25 +113,21 @@ sitecues.def('keys', function(keys, callback) {
             stopOuterScroll: true,
             down: true
         }
+    };
+
+    // Non-shift modifier keys
+    function hasCommandModifier(event) {
+        return event.altKey || event.ctrlKey || event.metaKey;
     }
 
-    var iframeDialogMap = {
-        'esc': {
-            event: 'iframe-modal/hide'
-        }
+    // Any modifer key, including shift
+    function hasModifier(event) {
+        return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
     }
-
-        function hasCommandModifier(event) {
-            return event.altKey || event.ctrlKey || event.metaKey;
-        }
-
-        function hasModifier(event) {
-            return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
-        }
 
     sitecues.use('jquery', 'mouse-highlight', 'util/common', function($, mh, common) {
         // Handle key
-        keys.handle = function(key, event) {
+        function handle(key, event) {
 
             // prevent default if needed
             if (key.preventDefault) {
@@ -162,7 +140,7 @@ sitecues.def('keys', function(keys, callback) {
             if (key.event) {
                 //EQ-1342 (Block +/- keys while HLB open)
                 //If hlb is open and the key event is zoom decrease or zoom increase...dont do anything.
-                if (!keys.zoomEnabled && (key.event === 'zoom/decrease' || key.event === 'zoom/increase')) {
+                if (!zoomKeysEnabled && (key.event === 'zoom/decrease' || key.event === 'zoom/increase')) {
                     return;
                 }
                 sitecues.emit(key.event, event);
@@ -170,21 +148,21 @@ sitecues.def('keys', function(keys, callback) {
         };
 
         // key event hook
-        keys.hook = function(event) {
+        function onKeyDown(event) {
 
             // private variable
             var key;
 
             // iterate over key map
-            for (key in keys.map) {
-                if (has.call(keys.map, key) && keys.test[key](event)) {
-                    if (keys.map[key].preventInEditors) {
+            for (key in origMap) {
+                if (has.call(origMap, key) && origTest[key](event)) {
+                    if (origMap[key].preventInEditors) {
                         // ignore events from elements that need the spacebar
                         if (common.isSpacebarConsumer(event.target)) {
                             return false;
                         }
                     }
-                    if (keys.map[key].requiresMouseHighlightActive) {
+                    if (origMap[key].requiresMouseHighlightActive) {
                         if (!mh.enabled || !mh.isAppropriateFocus) {
                             // Mouse highlight is disabled, revert to default.
                             return false;
@@ -196,72 +174,50 @@ sitecues.def('keys', function(keys, callback) {
                         }
                     }
 
-                    return keys.handle(keys.map[key], $.extend(event, extra_event_properties));
+                    return handle(origMap[key], $.extend(event, extra_event_properties));
                 }
             }
             return true;
         };
 
-        keys.registerTarget = function(target) {
-            if (target && target.addEventListener) {
-                target.addEventListener('keydown', keys.hook, true);
-            }
+        keys.getHLBKeysMap = function() {
+          return hlbKeysMap;
+        };
+
+        keys.getKeysTester = function() {
+          return origTest;
         };
 
         // bind key hook to window
         // 3rd param changes event order: false == bubbling; true = capturing.
-        keys.registerTarget(window);
+        // We use capturing because we want to get the key before anything else does --
+        // this allows us to have the first choice, and we can preventDefault on it so that
+        // nothing else uses it after us.
+        addEventListener('keydown', onKeyDown, true);
 
+        // TODO Is this right architecture? Seems like keys module should possibly be agnostic of HLB,
+        // TODO and that HLB code should call in to keys with it's changes? Anyway this works okay for now,
+        // TODO but we might want to refactor keys at some point. It's a little confusing IMO.
         sitecues.on('hlb/ready', function(hlbElement) {
             extra_event_properties.dom.highlight_box = $(hlbElement);
-            $.extend(keys.test, keys.hlbKeysTest);
-            $.extend(keys.map, keys.hlbKeysMap);
+            $.extend(origTest, hlbKeysTest);
+            $.extend(origMap, hlbKeysMap);
         });
 
         sitecues.on('hlb/create', function() {
-            keys.zoomEnabled = false;
+            zoomKeysEnabled = false;
         });
 
         sitecues.on('hlb/closed', function() {
-            keys.zoomEnabled = true;
+          zoomKeysEnabled = true;
+          for (var key in hlbKeysTest) {
+            delete origTest[key];
+            delete origMap[key];
+          };
         });
 
-        sitecues.on('hlb/closed', function(hlbElement) {
-            delete keys.test['esc'];
-            delete keys.test['up'];
-            delete keys.test['down'];
-            delete keys.test['pageup'];
-            delete keys.test['pagedown'];
-            delete keys.test['end'];
-            delete keys.test['home'];
-
-            delete keys.map['esc'];
-            delete keys.map['up'];
-            delete keys.map['down'];
-            delete keys.map['pageup'];
-            delete keys.map['pagedown'];
-            delete keys.map['end'];
-            delete keys.map['home'];
-
-            $(hlbElement).off('keydown');
-        });
-
-        // Key handling needs some work. We need a stack of key states, so that new states can restore old ones
-        // after they close. For the new dialog, we will keep the last keys map, and restore after.
-
-        var prevTest = null;
-        var prevMap = null;
-        sitecues.on('iframe-modal/open', function() {
-            prevTest = keys.test;
-            keys.test = $.extend(true, {}, origTest, iframeDialogTest);
-            prevMap = keys.map;
-            keys.map = $.extend(true, {}, origMap, iframeDialogMap);
-        });
-
-        sitecues.on('iframe-modal/closed', function() {
-            keys.test = prevTest;
-            keys.map = prevMap;
-        });
+        // TODO Key handling needs some work. We need a stack of key states, so that new states can restore old ones
+        // TODO after they close. For the new dialog, we will keep the last keys map, and restore after.
 
         // done
         callback();
