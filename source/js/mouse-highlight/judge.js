@@ -309,7 +309,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         }
 
         // Avoid inline blocks
-        if (traits.style.display === 'inline-block') {
+        if (traits.normDisplay === 'inline-block') {
           return false;
         }
 
@@ -387,7 +387,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // Don't use inlines unless they are images or other visual media
       // Don't use bad tags or roles
       // Don't use items that are too tall
-      return (traits.style.display !== 'inline' || traits.isVisualMedia) &&
+      return (traits.normDisplay !== 'inline' || traits.isVisualMedia) &&
         !UNUSABLE_ROLES.hasOwnProperty(traits.role) &&
         !UNUSABLE_TAGS.hasOwnProperty(traits.tag) &&
         traits.percentOfViewportHeight < MAX_PERCENT_OF_VIEWPORT_HEIGHT;
@@ -487,7 +487,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     function getTraitsOfFirstNonInlineCandidate(traitStack) {
       var index = 0, displayStyle, length = traitStack.length;
       for (; index < length; index++) {
-        displayStyle = traitStack[index].style.display;
+        displayStyle = traitStack[index].normDisplay;
         if (displayStyle !== 'inline' && displayStyle !== 'inline-block') {
           return traitStack[index];
         }

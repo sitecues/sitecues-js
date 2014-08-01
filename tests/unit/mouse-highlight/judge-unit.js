@@ -486,8 +486,8 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[0].style.display = 'inline';
-            traitStack[1].style.display = 'block';
+            traitStack[0].normDisplay = 'inline';
+            traitStack[1].normDisplay = 'block';
             traitStack[1].visualWidth = 500;
             traitStack[3].visualWidth = 5000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
@@ -498,8 +498,8 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[0].style.display = 'inline';
-            traitStack[1].style.display = 'block';
+            traitStack[0].normDisplay = 'inline';
+            traitStack[1].normDisplay = 'block';
             traitStack[1].visualWidth = 500;
             traitStack[3].visualWidth = 550;
             judgementStack = judge.getJudgementStack(traitStack, nodes);

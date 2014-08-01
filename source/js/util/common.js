@@ -61,9 +61,9 @@ sitecues.def('util/common', function (common, callback) {
      * @returns {*|boolean}
      */
     // Define set of elements that need the spacebar but are not editable
-    var NON_EDITABLE_SPACEBAR_ELEMENTS = 'video,embed,object,iframe,frame,audio,button,select,[tabindex],[onkeypress],[onkeydown]';
+    var NON_EDITABLE_SPACEBAR_ELEMENTS = 'video,embed,object,iframe,frame,audio,button,input,select,[tabindex],[onkeypress],[onkeydown]';
     common.isSpacebarConsumer = function(element) {
-      return $(element).is(NON_EDITABLE_SPACEBAR_ELEMENTS) || isEditable(element);
+      return $(element).is(NON_EDITABLE_SPACEBAR_ELEMENTS) || common.isEditable(element);
     };
 
     /**
@@ -71,8 +71,15 @@ sitecues.def('util/common', function (common, callback) {
      * @param element
      * @returns {boolean} True if editable
      */
-    function isEditable(element) {
-      return document.designMode === 'on' || $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]');
+    var EDITABLE_INPUT_TYPES = [ 'text', 'email', 'password', 'search', 'tel', 'url', 'color', 'date', 'datetime', 'datetime-local',
+      'month','number','time','week' ];
+    common.isEditable = function(element) {
+      if (element.localName === 'input') {
+        var type = element.getAttribute('type');
+        return !type || EDITABLE_INPUT_TYPES.indexOf(type) >= 0;
+      }
+      return document.designMode === 'on' || $(element).is(
+        'textarea,[contenteditable="true"],[contenteditable=""]');
     }
 
     /*

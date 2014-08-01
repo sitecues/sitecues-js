@@ -7,6 +7,7 @@ exports.getTraitStack = function(nodes) {
       backgroundImage: 'none',
       backgroundRepeat: 'none'
     },
+    normDisplay: 'block',
     rect: { left: 0, top: 0, width: 200, height: 200, right: 200, bottom: 200},
     unzoomedRect: { left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100 },
     tag: 'div',

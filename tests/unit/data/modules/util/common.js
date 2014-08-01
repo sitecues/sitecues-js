@@ -24,6 +24,6 @@ exports.equals = function(obj1, obj2) {
 };
 
 exports.isEditable = function(element) {
-  return element.tagName === 'INPUT';
+  return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA';
 }
 exports.useJqueryAnimate = false;

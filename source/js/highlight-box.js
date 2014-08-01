@@ -787,7 +787,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function onHLBReady() {
 
         // Focus input or textarea
-        if ($hlbElement.is('input, textarea')) {
+        if (common.isEditable($hlbElement[0])) {
             $hlbElement.focus();
         }
 
