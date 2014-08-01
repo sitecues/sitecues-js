@@ -244,12 +244,20 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     function getNonEmptyBackgroundImage ($originalElement, ancestorCount) {
 
       var backgroundStyles = {},
-          parents = $originalElement.parents();
+          parents;
+
+      // SC-1872
+      if ($originalElement.data('$originalElement')) {
+        $originalElement = $originalElement.data('$originalElement');
+      }
+
+      parents = $originalElement.parents();
 
       parents.each(function (count) {
         if (count > ancestorCount) {
           return false;
         }
+
         if ($(this).css('backgroundImage') !== 'none') {
           backgroundStyles.backgroundImage      = $(this).css('backgroundImage');
           backgroundStyles.backgroundRepeat     = $(this).css('backgroundRepeat');
@@ -300,6 +308,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     function getHLBBackgroundColor ($originalElement, elementComputedStyle) {
 
       var newBackgroundColor;
+
+      // SC-1872
+      if ($originalElement.data('$originalElement')) {
+        $originalElement = $originalElement.data('$originalElement');
+      }
 
       if (isTransparent(elementComputedStyle.backgroundColor)) {
 

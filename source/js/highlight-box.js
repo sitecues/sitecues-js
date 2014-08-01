@@ -196,7 +196,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           'opacity'        : 0,
           'padding'        : 0,
           'margin'         : 0,
-          'width'          : originalElementComputedStyles.width,
+          'width'          : originalElementBoundingBox.width / zoom,
           'list-style-type': originalElementComputedStyles.listStyleType ? originalElementComputedStyles.listStyleType : 'none'
         }).insertAfter('body');
 
@@ -204,6 +204,16 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         for (var i = 0; i < originalElementAndChildren.length; i += 1) {
           clonedElementAndChildren[i].style.cssText = hlbStyling.getComputedStyleCssText(originalElementAndChildren[i]);
         }
+
+        // We must keep a reference to the actual original element, because determining
+        // the correct background to use requires traversing the DOM from the original element
+        // and not this one, which we create to handle a very specific case.
+
+        // The reason $.data is used is because other modules, which are dependencies of
+        // this module, require this information to function.  The tradeoff of
+        // deferment of massive refactoring for getting the HLB to function seemed
+        // worth it at the time.
+        $(temporaryOriginalElement).data('$originalElement', $(originalElement));
 
         return $(temporaryOriginalElement)[0];
 
