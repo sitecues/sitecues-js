@@ -53,6 +53,28 @@ sitecues.def('util/common', function (common, callback) {
       return $(selector).is(FORM_ELEMENTS);
     };
 
+    /**
+     * Returns true if the element may use spacebar presses for its own purposes when focused.
+     * For example, a video is likely to use spacebar to pause/play the video, and an input
+     * uses the spacebar to insert spaces into the text.
+     * @param selector
+     * @returns {*|boolean}
+     */
+    // Define set of elements that need the spacebar but are not editable
+    var NON_EDITABLE_SPACEBAR_ELEMENTS = 'video,embed,object,iframe,frame,audio,button,select,[tabindex],[onkeypress],[onkeydown]';
+    common.isSpacebarConsumer = function(element) {
+      return $(element).is(NON_EDITABLE_SPACEBAR_ELEMENTS) || isEditable(element);
+    };
+
+    /**
+     * Is the current element editable for any reason???
+     * @param element
+     * @returns {boolean} True if editable
+     */
+    function isEditable(element) {
+      return document.designMode === 'on' || $(element).is('input,textarea,[contenteditable="true"],[contenteditable=""]');
+    }
+
     /*
      * Check if current image value is not empty.
      * @imageValue A string that represents current image value.
@@ -60,39 +82,6 @@ sitecues.def('util/common', function (common, callback) {
      */
     common.isEmptyBgImage = function(imageValue) {
       return this.isEmpty(imageValue) || imageValue === 'none';
-    };
-
-    /**
-      * Is the current element editable for any reason???
-      * @param element
-      * @returns {boolean} True if editable
-      */
-    common.isEditable = function ( element ) {
-      if (element === document.body) {
-        return false;  // Shortcut
-      }
-      var tag = element.localName
-        , contentEditable
-        ;
-
-      if (!tag) {
-        return false;
-      }
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') {
-        return true;
-      }
-      if (element.getAttribute('tabIndex') || element.getAttribute('onkeydown') || element.getAttribute('onkeypress')) {
-        return true; // Be safe, looks like a keyboard-accessible interactive JS widget
-      }
-      // Check for rich text editor
-      contentEditable = element.getAttribute('contenteditable');
-      if (contentEditable && contentEditable.toLowerCase() !== 'false') {
-        return true; // In editor
-      }
-      if (document.designMode === 'on') {
-        return true; // Another kind of editor
-      }
-      return false;
     };
 
     // Return true if the element is part of the sitecues user interface

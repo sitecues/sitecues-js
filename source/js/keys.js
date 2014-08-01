@@ -179,8 +179,8 @@ sitecues.def('keys', function(keys, callback) {
             for (key in keys.map) {
                 if (has.call(keys.map, key) && keys.test[key](event)) {
                     if (keys.map[key].preventInEditors) {
-                        // ignore events from editable elements
-                        if (common.isEditable(event.target)) {
+                        // ignore events from elements that need the spacebar
+                        if (common.isSpacebarConsumer(event.target)) {
                             return false;
                         }
                     }

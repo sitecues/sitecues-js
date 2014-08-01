@@ -857,7 +857,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var wasAppropriateFocus = mh.isAppropriateFocus;
       // don't show highlight if current active isn't body
       var target = document.activeElement;
-      mh.isAppropriateFocus = (!target || !common.isEditable(target)) && document.hasFocus();
+      mh.isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && document.hasFocus();
       if (wasAppropriateFocus && !mh.isAppropriateFocus && !mh.isSticky) {
         pause();
       }
