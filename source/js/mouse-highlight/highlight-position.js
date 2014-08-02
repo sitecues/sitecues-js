@@ -41,10 +41,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
      * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
      */
     mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
-      var allRects = [];
-
-      var $selector = $(selector);
-      var clipRect = getAncestorClipRect($selector);
+      var allRects = [],
+        $selector = $(selector),
+        clipRect = getAncestorClipRect($selector);
       getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
       mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
@@ -288,6 +287,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           return true;
         }
 
+        if (style.position === 'absolute' || style.position === 'fixed') {
+          clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
+        }
+
 
         // --- Overflowing content ---
         addRect(allRects, clipRect, getOverflowRect(this, style));
@@ -296,7 +299,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Visible border or form controls ---
         if (hasVisibleBorder(style) || common.isFormControl(this)) {
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
-          return true; // Don't iterate ... although it case of Washington post they position a child outside the box, doh
+          // Keep iterating: there may be some content outside
         }
 
         // --- List bullets ---
@@ -319,14 +322,13 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          var isClip = isClipElement(this);
-          var newClipRect = clipRect;
+          var isClip = isClipElement(this),
+            newClipRect = clipRect;
           if (isClip) {
             newClipRect = traitcache.getScreenRect(this);
             if (clipRect) {  // Combine parent clip rect with new clip
               newClipRect = getClippedRect(clipRect, newClipRect);
             }
-
           }
           getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect, stretchForSprites);  // Recursion
           return true;

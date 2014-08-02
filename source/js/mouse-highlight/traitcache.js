@@ -28,18 +28,9 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     // Call this before using cache if view may have changed
     // Return true if view was out-of-date
     traitcache.updateCachedView = function () {
-      function hasViewChanged() {
-        return !common.equals(old, cachedViewSize);
-      }
-
-      var old = $.extend({}, cachedViewSize);
       updateCachedViewSize();
       updateCachedViewPosition();
-      var hasChanged = hasViewChanged();
-      if (hasChanged) {
-        resetCache();
-      }
-      return hasChanged;
+      resetCache();
     }
 
     traitcache.getCachedViewSize = function() {

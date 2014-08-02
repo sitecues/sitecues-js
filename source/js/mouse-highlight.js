@@ -257,8 +257,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return styles;
     }
 
-    function isCursorInFixedRects(fixedRects) {
-      return !mh.cursorPos || geo.isPointInAnyRect(mh.cursorPos.x, mh.cursorPos.y, fixedRects);
+    function getFloatRectsArray() {
+      return [ state.floatRects.topLeft, state.floatRects.topRight ];
+    }
+
+    function isCursorInHighlightShape(fixedRects, floatRects) {
+      if (!mh.cursorPos || !geo.isPointInAnyRect(mh.cursorPos.x, mh.cursorPos.y, fixedRects)) {
+        return false;
+      }
+      // The cursor is in the fixed rectangle for the highlight.
+      // Now, we will consider the cursor to be in the highlight as long as it's not in any
+      // parts cut out from the highlight when it is drawn around floats.
+      return !geo.isPointInAnyRect(mh.cursorPos.x, mh.cursorPos.y, floatRects);
     }
 
     // show mouse highlight -- update() from mouse events finally results in show()
@@ -560,7 +570,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             elementRect.top === state.elementRect.top) {
           // Optimization -- reuse old fixed content rect info
           // Show/hide highlight if cursor moves into or out of highlight
-          var isCursorInHighlight = isCursorInFixedRects([state.fixedContentRect]);
+          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
               pause();  // Hide highlight -- cursor has moved out of it
@@ -578,7 +588,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Get exact bounds
       fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
 
-      if (!fixedRects.length || !isCursorInFixedRects(fixedRects)) {
+      if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getFloatRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
         return false;
       }
@@ -696,31 +706,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }, state.isCreated ? 0 : MOUSE_STOP_MS);
     }
 
-    function isDrawnAroundFloat() {
-      return state.floatRects.topLeft || state.floatRects.topRight;
-    }
-
     // Used for performance shortcut -- if still inside same highlight
-    function isInsideHighlight(target) {
+    function isExistingHighlightRelevant() {
       if (!state.isCreated) {
         return false;
       }
-      if ($(target).closest(state.picked).length) {
-        // Mouse target is inside
-        // Update rect in case of sub-element scrolling -- we get mouse events in that case
-        return true;
+      // If the picked element's rectangle has changed, always return false
+      // because we will need to redraw the highlight anyway.
+      if (!common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
+        return false; // Original element has changed size
       }
-      if (isDrawnAroundFloat()) {
-        return false;  // Don't use cursor in fixed rect optimization which assumes rectangular highlight
-      }
-      if (isCursorInFixedRects([state.fixedContentRect]) &&
-        common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
-        // The picked element's rectangle hasn't changed, and
-        // we're still in the same highlighting rectangle
-        // Can happen if we're in whitespace
-        return true;
-      }
-      return false;
+      // Return true we're inside in the existing highlight
+      return isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
     }
 
     function refreshExistingHighlight() {
@@ -759,7 +756,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
       testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
-      if (!mh.isAppropriateFocus || isInsideHighlight(target, mouseX, mouseY)) {
+      if (!mh.isAppropriateFocus || isExistingHighlightRelevant()) {
         doExitEarly = true;
       }
       else if (!state.isCreated && mh.scrollPos &&

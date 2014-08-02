@@ -14,7 +14,7 @@ sitecues.def('util/geo', function(geo, callback) {
 
 		geo.isPointInAnyRect = function(x, y, rects) {
 			for (var count = 0; count < rects.length; count++) {
-				if (isPointInRect(x, y, rects[count])) {
+				if (rects[count] && isPointInRect(x, y, rects[count])) {
 					return true;
 				}
 			}

@@ -109,9 +109,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 3. Reset pick results cache if view has resized or zoom has changed,
       //    because some picks are dependent on the size of the item relative to the viewport.
-      if (traitcache.updateCachedView()) {
-        resetPickedItemsCache();
-      }
+      traitcache.updateCachedView();
+      resetPickedItemsCache();
 
       // 4. Get candidate nodes that could be picked
       ancestors = $.makeArray($(startElement).parentsUntil(document.body));
