@@ -1,35 +1,35 @@
 sitecues.def('status', function (status_module, callback) {
-  
+
   'use strict';
 
   sitecues.use('jquery', 'audio', 'conf', function ( $, audio, conf ) {
 
     // The default status formatter: simply log all data to the console log.
     function consoleCallback (info) {
-     
+
       // We need to have JSON and JSON.stringify if this is to work...
       if (console && console.log && JSON && JSON.stringify) {
-         
+
         // Make sure we are not running from a file (unit testing in node)
         if (window.location.protocol !== 'file:') {
           // Make it clear where to begin copying...
           console.log('\n\n-----BEGIN SITECUES STATUS-----');
-          
+
           // Log with pretty-print
           console.log(JSON.stringify(info, null, '\t'));
-          
+
           // Make it clear where to end copying
           console.log('-----END SITECUES STATUS-----\n\n');
         }
-      
+
         // '...sitecues Status logged as JSON Object.';
 
       // If we don't have JSON or Stringify...
       } else {
-        
+
         // Make sure we are not running from a file (unit testing in node)
         if (window.location.protocol !== 'file:') {
-           
+
            // ...the output will not be quite so pretty
            console.log(info);
 
@@ -40,7 +40,7 @@ sitecues.def('status', function (status_module, callback) {
       }
 
     }
-  
+
 
     status_module = function (callback) {
       callback = callback || consoleCallback;
@@ -74,13 +74,13 @@ sitecues.def('status', function (status_module, callback) {
           info[setting] = data[setting];
         }
       }
-      
+
       // Appends sitecues status to the window in a div (used by Steve for testing)
       function addStatusInfoToDOM(){
         var sitecuesStatusId='sitecues-status-output'
           , div = document.getElementById(sitecuesStatusId)
           ;
-        
+
         if (div) {
           div.innerHTML = '';
         } else {
@@ -95,11 +95,11 @@ sitecues.def('status', function (status_module, callback) {
 
         // Defer the ajax calls so we can respond when both are complete
       function ajaxCheck () {
-        if ( typeof info.version.sitecues_up === 'string' && 
+        if ( typeof info.version.sitecues_up === 'string' &&
              typeof info.version.sitecues_ws === 'string' ) {
-          
-          callback(info);
+
           addStatusInfoToDOM(info);
+          callback(info);
         }
       }
 
@@ -109,26 +109,26 @@ sitecues.def('status', function (status_module, callback) {
         type:     'GET',
         url:      ajax_urls.up,
         success: function(response){
-          
+
           // Set the version based on the AJAX response object
           info.version.sitecues_up = response.version;
           ajaxCheck();
         },
         error: function(){
-          
+
           // Set an error message if the AJAX object did not return
           info.version.sitecues_up = 'Error Fetching Version from Service URL';
           ajaxCheck();
         }
       });
-        
+
       $.ajax({
         cache:    false,
         dataType: 'json',
         type:     'GET',
         url:      ajax_urls.ws,
         success: function(response){
-          
+
           // Set the version based on the AJAX response object
           info.version.sitecues_ws = response.version;
           ajaxCheck();
