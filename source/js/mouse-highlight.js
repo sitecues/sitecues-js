@@ -371,9 +371,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           return null; // Don't draw highlight around an item that is going over the highlight
         }
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
-+            possibleFloat !== document.documentElement && possibleFloat !== document) {
+               possibleFloat !== document.documentElement) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var floatRect = traitcache.getScreenRect(possibleFloat);
+            var COMBINE_ALL_RECTS = 99999,
+              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0];
             return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
           }
           possibleFloat = possibleFloat.parentNode;
@@ -382,18 +383,28 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return null;
     }
 
+    function isPointInRect(x, y, rect) {
+      return x > rect.left && x < rect.right && y > rect.top && y < rect.bottom;
+    }
+
+    // Get rects of floats that intersect with the original highlight rect.
+    // Floats are always aligned with the top of the element they're associated with,
+    // so we don't need to support botLeft or botRight floats
     function getIntersectingFloatRects() {
-      var EXTRA = 7; // Make sure we test a point inside where the float would be, not on a margin
-      var EXPAND_FLOAT_RECT = 7;
-      var left = state.fixedContentRect.left;
-      var right = state.fixedContentRect.left + state.fixedContentRect.width;
-      var top = state.fixedContentRect.top;
+      var EXTRA = 7, // Make sure we test a point inside where the float would be, not on a margin
+        EXPAND_FLOAT_RECT = 7,
+        mhRect = state.fixedContentRect,
+        left = mhRect.left,
+        right = mhRect.left + mhRect.width,
+        top = mhRect.top,
+        topLeftRect = floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
+        topRightRect = floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT)
+
+      // Perform specific sanity checks depending on float position and return the rects if they pass
       return {
-        // Floats are always aligned with the top of the element they're associated with,
-        // so we don't need to support botLeft or botRight floats
-        topLeft: floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
-        topRight: floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT)
-      };
+        topLeft: topLeftRect && isPointInRect(topLeftRect.right, topLeftRect.bottom, mhRect) ? topLeftRect : null,
+        topRight: topRightRect && isPointInRect(topRightRect.left, topRightRect.bottom, mhRect) ? topRightRect : null
+      }
     }
 
     function extendAll(array, newProps) {
