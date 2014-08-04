@@ -398,7 +398,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         right = mhRect.left + mhRect.width,
         top = mhRect.top,
         topLeftRect = floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
-        topRightRect = floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT)
+        topRightRect = floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT);
 
       // Perform specific sanity checks depending on float position and return the rects if they pass
       return {
