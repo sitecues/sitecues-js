@@ -6,15 +6,15 @@ sitecues.def('util/geo', function(geo, callback) {
 
 	sitecues.use('jquery', 'conf', 'platform', function($, conf, platform){
 
-		function isPointInRect(x, y, rect) {
-			var right = rect.left + rect.width;
-			var bottom = rect.top + rect.height;
-			return (x >= rect.left) && (x < right) && (y >= rect.top) && (y <= bottom);
-		}
+		geo.isPointInRect = function(x, y, rect) {
+			var right = rect.left + rect.width,
+			  bottom = rect.top + rect.height;
+			return x >= rect.left && x < right && y >= rect.top && y <= bottom;
+		};
 
 		geo.isPointInAnyRect = function(x, y, rects) {
 			for (var count = 0; count < rects.length; count++) {
-				if (rects[count] && isPointInRect(x, y, rects[count])) {
+				if (rects[count] && geo.isPointInRect(x, y, rects[count])) {
 					return true;
 				}
 			}

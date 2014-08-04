@@ -383,10 +383,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return null;
     }
 
-    function isPointInRect(x, y, rect) {
-      return x > rect.left && x < rect.right && y > rect.top && y < rect.bottom;
-    }
-
     // Get rects of floats that intersect with the original highlight rect.
     // Floats are always aligned with the top of the element they're associated with,
     // so we don't need to support botLeft or botRight floats
@@ -402,8 +398,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Perform specific sanity checks depending on float position and return the rects if they pass
       return {
-        topLeft: topLeftRect && isPointInRect(topLeftRect.right, topLeftRect.bottom, mhRect) ? topLeftRect : null,
-        topRight: topRightRect && isPointInRect(topRightRect.left, topRightRect.bottom, mhRect) ? topRightRect : null
+        topLeft: topLeftRect && geo.isPointInRect(topLeftRect.right, topLeftRect.bottom, mhRect) ? topLeftRect : null,
+        topRight: topRightRect && geo.isPointInRect(topRightRect.left, topRightRect.bottom, mhRect) ? topRightRect : null
       }
     }
 
