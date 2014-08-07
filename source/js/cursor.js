@@ -242,14 +242,14 @@ sitecues.def('cursor', function (cursor, callback) {
             data: null,
             headers: {"Accept": "application/octet-stream"},
             success: function() {
-                console.log('Loading of CUR file completed!');
+                SC_DEV && console.log('Loading of CUR file completed!');
                 if (callback) {
                     callback();
                 }
             },
             error: function(jqXHR) {
                 jqXHR.abort();
-                console.log("[Error] Unable to fetch cursor image from server");
+                SC_DEV && console.log("[Error] Unable to fetch cursor image from server");
             }
         });
         return;
