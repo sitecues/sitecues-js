@@ -73,8 +73,8 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     hlbPositioning.midPointDiff = function($rectOne, $rectTwo) {
 
-      var br1 = $rectOne[0].getBoundingClientRect(),
-          br2 = $rectTwo[0].getBoundingClientRect(),
+      var br1 = $rectOne instanceof $ ? $rectOne[0].getBoundingClientRect() : $rectOne,
+          br2 = $rectTwo instanceof $ ? $rectTwo[0].getBoundingClientRect() : $rectTwo,
           br1x = br1.left + br1.width / 2,
           br1y = br1.top + br1.height / 2,
           br2x = br2.left + br2.width / 2,
@@ -246,9 +246,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       // The bounding box of the cloned element if we were to scale it
       return {
-        'left': clonedNodeBoundingBox.left - ((clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width) / 2),
-        'top': clonedNodeBoundingBox.top - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
-        'width': clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom,
+        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width)  / 2),
+        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
+        'width' : clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom,
         'height': clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom
       };
     };
@@ -277,16 +277,15 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      * [initializeSize sets the height and width of the HLB to the orignal elements bounding
      * box height and width.  Useful for images.]
      * @param  {[jQuery element]} $hlbElement      [The HLB]
-     * @param  {[jQuery element]} $originalElement [The original element]
+     * @param  {[Object]} $initialHLBRect [The highlight rect or the $originalElement  bounding client rect.]
      */
-    hlbPositioning.initializeSize = function($hlbElement, $originalElement) {
+    hlbPositioning.initializeSize = function($hlbElement, initialHLBRect) {
 
-      var originalElementsBoundingBox = $originalElement[0].getBoundingClientRect(),
-          zoom = conf.get('zoom');
+      var zoom = conf.get('zoom');
 
       $hlbElement.css({
-        'width' : (originalElementsBoundingBox.width / zoom)  + 'px', //Preserve dimensional ratio
-        'height': (originalElementsBoundingBox.height / zoom) + 'px', //Preserve dimensional ratio
+        'width' : (initialHLBRect.width  / zoom) + 'px', //Preserve dimensional ratio
+        'height': (initialHLBRect.height / zoom) + 'px', //Preserve dimensional ratio
       });
 
     };
