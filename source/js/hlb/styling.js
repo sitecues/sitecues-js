@@ -238,20 +238,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [getNonEmptyBackgroundImage determines what background image will be used
      * for the HLB element.  It moves up the ancestor chain of the original element
      * and returns the first background image it encounters.]
-     * @param  {[DOM element]} $originalElement [The original element chosen by the picker]
+     * @param  {[DOM element]} $pickedElement [The picked element chosen by the picker]
      * @return {[String]}                       [CSS background-image property]
      */
-    function getNonEmptyBackgroundImage ($originalElement, ancestorCount) {
+    function getNonEmptyBackgroundImage ($pickedElement, ancestorCount) {
 
       var backgroundStyles = {},
-          parents;
-
-      // SC-1872
-      if ($originalElement.data('$originalElement')) {
-        $originalElement = $originalElement.data('$originalElement');
-      }
-
-      parents = $originalElement.parents();
+          parents = $pickedElement.parents();
 
       parents.each(function (count) {
         if (count > ancestorCount) {
@@ -275,13 +268,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [getNonTransparentBackground determines what background color will be used
      * for the HLB element. It moves up the ancestor chain of the original element
      * and returns the first background color it encounters that isn't transparent]
-     * @param  {[DOM element]} $originalElement [The original element chosen by the picker]
+     * @param  {[DOM element]} $pickedElement [The original element chosen by the picker]
      * @return {[String]}                       [CSS background-color property]
      */
-    function getNonTransparentBackground ($originalElement) {
+    function getNonTransparentBackground ($pickedElement) {
 
       var newBackgroundColor,
-          parents = $originalElement.parents();
+          parents = $pickedElement.parents();
 
       parents.each(function () {
         if (!isTransparent($(this).css('backgroundColor'))) {
@@ -305,24 +298,19 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} elementComputedStyle         [The original elements computed styles]
      * @return {[String]}                              [The HLB background color]
      */
-    function getHLBBackgroundColor ($originalElement, elementComputedStyle) {
+    function getHLBBackgroundColor ($pickedElement, elementComputedStyle) {
 
       var newBackgroundColor;
 
-      // SC-1872
-      if ($originalElement.data('$originalElement')) {
-        $originalElement = $originalElement.data('$originalElement');
-      }
-
       if (isTransparent(elementComputedStyle.backgroundColor)) {
 
-        if ($originalElement.is('img')) {
+        if ($pickedElement.is('img')) {
 
           return HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
 
         } else {
 
-          newBackgroundColor = getNonTransparentBackground($originalElement);
+          newBackgroundColor = getNonTransparentBackground($pickedElement);
 
           if (newBackgroundColor) {
 
@@ -344,11 +332,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [getHLBBackgroundImage determines the background image to be used by the $hlbElement]
-     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker.]
+     * @param  {[jQuery element]} $pickedElement   [The picked element chosen by the picker.]
      * @param  {[Object]} elementComputedStyle     [The original elements computed style]
      * @return {[String]}                          [The background image that will be used by the $hlbElement]
      */
-    function getHLBBackgroundImage ($originalElement, elementComputedStyle) {
+    function getHLBBackgroundImage ($pickedElement, elementComputedStyle) {
 
       var newBackgroundImage;
 
@@ -356,7 +344,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       if (elementComputedStyle.backgroundImage === 'none' &&
           isTransparent(elementComputedStyle.backgroundColor)) {
 
-        newBackgroundImage = getNonEmptyBackgroundImage($originalElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
+        newBackgroundImage = getNonEmptyBackgroundImage($pickedElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
 
         if (newBackgroundImage) {
 
@@ -543,12 +531,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param {[DOM element]} $originalElement [the original element]
      * @return {[Object]} [CSS style object to be used by jQuery.css()]
      */
-    hlbStyling.getHLBStyles = function ($originalElement) {
+    hlbStyling.getHLBStyles = function ($pickedElement, $originalElement) {
 
       var originalElement      = $originalElement[0],
           elementComputedStyle = window.getComputedStyle(originalElement),
-          backgroundStyles     = getHLBBackgroundImage($originalElement, elementComputedStyle),
-          backgroundColor      = getHLBBackgroundColor($originalElement, elementComputedStyle),
+          backgroundStyles     = getHLBBackgroundImage($pickedElement, elementComputedStyle),
+          backgroundColor      = getHLBBackgroundColor($pickedElement, elementComputedStyle),
           calculatedHLBStyles  = {
             'padding-left' : getHLBLeftPadding($originalElement, elementComputedStyle),
             'display'      : getHLBDisplay(elementComputedStyle)

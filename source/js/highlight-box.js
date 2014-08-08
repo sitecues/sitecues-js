@@ -431,7 +431,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         hlbStyling.filter($hlbElement);
 
         // Set this variable now that we have filtered, cloned child styles
-        hlbStyles = hlbStyling.getHLBStyles($originalElement);
+        hlbStyles = hlbStyling.getHLBStyles($pickedElement, $originalElement);
 
         // Set the styles for the HLB and append to the wrapping element
         $hlbElement.css(hlbStyles).appendTo($hlbWrappingElement);
