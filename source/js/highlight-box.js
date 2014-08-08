@@ -6,8 +6,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common',
-    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common) {
+  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'hlb/animation',
+    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, hlbAnimation) {
 
       /////////////////////////
       // PRIVATE VARIABLES
@@ -15,9 +15,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID = 'sitecues-hlb', // ID for $hlbElement
-
-          INFLATION_SPEED = 400, // Default inflation duration
-          DEFLATION_SPEED = 150, // Default deflation duration
 
           CHAR_WIDTH_LIMIT = 50, // Amount of characters that fits horizontally in HLB
 
@@ -32,8 +29,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           translateCSS, // The HLB element's translation for final position
 
           initialHLBRect, // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
-
-          $animation, // A reference to the $.animate we use for IE9 inflation and deflation
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that determines if HLB can be deflated.
@@ -52,7 +47,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // If the HLB is currently deflating, no need to toggle
         if (isHLBClosing) {
+
           return;
+
         }
 
         // If an HLB exists
@@ -75,6 +72,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             // Set module scoped variable so the rest of the program has reference.
             $originalElement = getValidOriginalElement($pickedElement);
 
+            // Set module scoped variable so the rest of the program has reference.
             initialHLBRect = getInitialHLBRect(e);
 
             createHLB();
@@ -85,13 +83,21 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       }
 
+      /**
+       * [getInitialHLBRect returns the initial width and height for our HLB when we first create it.
+       * Preferebly we utilize the highlight rectangle calculated by the picker.]
+       * @param  {[DOM event data object]} e [The picker modified DOM event data object]
+       * @return {[Object]}   [Dimensions and position]
+       */
       function getInitialHLBRect(e) {
 
         if (e &&
             e.dom &&
             e.dom.mouse_highlight &&
             e.dom.mouse_highlight.fixedContentRect) {
+
           return e.dom.mouse_highlight.fixedContentRect;
+
         }
 
         return $originalElement[0].getBoundingClientRect();
@@ -237,7 +243,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // for the browser to update/render the DOM.  This is here for safety (until proven otherwise).
         // If we use a setTimeout, we have to solve the problem of functions being added to the stack before
         // the timeout completes...its a pain.,
-        transitionInHLB();
+        hlbAnimation.transitionInHLB({
+          '$hlbElement'        : $hlbElement,
+          '$hlbWrappingElement': $hlbWrappingElement,
+          'originCSS'          : originCSS,
+          'translateCSS'       : translateCSS,
+          'onHLBReady'         : onHLBReady,
+          'transitionProperty' : hlbStyling.transitionProperty
+        });
 
       }
 
@@ -353,188 +366,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [transitionInHLB animates the inflation of the HLB and background dimmer]
-       */
-      function transitionInHLB() {
-
-        // Dim the background!
-        dimmer.dimBackgroundContent($hlbWrappingElement, INFLATION_SPEED);
-
-        if (common.useJqueryAnimate) {
-
-          transitionInHLBWithJquery();
-
-        } else {
-
-          transitionInHLBWithCSS();
-
-        }
-
-      }
-
-      /**
-       * [transitionInHLBWithJquery animates the HLB open with jQuery.animate()]
-       */
-      function transitionInHLBWithJquery() {
-
-        $hlbElement.css({
-          'transform-origin': originCSS,
-          'transform'       : 'scale(1) ' + translateCSS
-        });
-
-        $animation = $({'scale': 1}).animate(
-          {
-            'scale': hlbSafeArea.HLBZoom
-          }, {
-            'step'    : hlbSteppingAnimation,
-            'duration': INFLATION_SPEED,
-            'complete': onHLBReady
-          }
-        );
-
-      }
-
-      /**
-       * [transitionOutHLBWithJquery animates the HLB closed with jQuery.animate()]
-       */
-      function transitionOutHLBWithJquery() {
-
-        $animation = $({'scale' : $animation.attr('scale')}).animate(
-          {
-            'scale': 1
-          }, {
-            'step'    : hlbSteppingAnimation,
-            'duration': DEFLATION_SPEED,
-            'complete': onHLBClosed
-          }
-        );
-
-      }
-
-      /**
-       * [transitionOutHLBWithCSS animates the HLB closed with CSS transitions]
-       */
-      function transitionOutHLBWithCSS() {
-
-        var transitionOutCSS = getTransitionOutCSS();
-
-        // After the deflation animation completes, clean up the HLB states and DOM
-        $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBClosed);
-
-        // Animate the deflation by setting the transform scale to 1.
-        $hlbElement.css(transitionOutCSS);
-
-      }
-
-      /**
-       * [transitionInHLBWithCSS animates the HLB open with CSS transitions]
-       */
-      function transitionInHLBWithCSS() {
-
-        var transitionInCSS = getTransitionInCSS();
-
-        // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
-        $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBReady);
-
-        // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
-        $hlbElement.css(transitionInCSS);
-
-      }
-
-      /**
-       * [hlbSteppingAnimation is a custom step function for the jQuery animate method]
-       * @param  {[Number]} now [The value of the property we are animating]
-       */
-      function hlbSteppingAnimation(now) {
-        if ($hlbElement) {
-          $hlbElement.css('transform', 'scale(' + now + ') ' + translateCSS);
-        }
-      }
-
-      /**
-       * [getTransitionInCSS returns the jquery CSS object needed to animate the HLB open]
-       * @return {[Object]} [The jquery CSS object needed to animate the HLB open]
-       */
-      function getTransitionInCSS() {
-
-        // The order in which these CSS properties are set matters.  For example, if the
-        // transition property is the last property in the transitionInCSS object, then
-        // the transition would never occur. https://equinox.atlassian.net/browse/SC-1856
-        var transitionInCSS = {
-          'transition'                : hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
-          'transition-timing-function': 'ease',
-          'transform'                 : 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
-          'transform-origin'          : originCSS
-        };
-
-        // Implemented because Chrome 36 update.
-        if (platform.browser.isChrome) {
-          transitionInCSS['-webkit-transform-origin'] = originCSS;
-        }
-
-        return transitionInCSS;
-
-      }
-
-      /**
-       * [getTransitionOutCSS returns the jquery CSS object needed to animate the HLB closed]
-       * @return {[Object]} [The jquery CSS object needed to animate the HLB closed]
-       */
-      function getTransitionOutCSS() {
-
-        return {
-          'transition'                : hlbStyling.transitionProperty + DEFLATION_SPEED + 'ms',
-          'transition-timing-function': 'ease',
-          'transform'                 : 'scale(1) ' + translateCSS,
-          'transform-origin'          : originCSS
-        };
-
-      }
-
-      /**
-       * [transitionOutHLB animates and removes the HLB and background dimmer]
-       */
-      function transitionOutHLB() {
-
-        // Listeners: mouse-highlight.js, invert.js
-        sitecues.emit('hlb/deflating', $hlbElement);
-
-        // Un-dim the background!
-        dimmer.removeDimmer(DEFLATION_SPEED);
-
-        // Do we bother animating the deflation?
-
-        // Sometimes, if the user presses the spacebar extremely fast, the HLB is toggled
-        // to close during the HLB inflation animation (transitionInHLB). Because this is
-        // possible, it is also possible that the value of transform:scale is 1 by the time
-        // we want to deflate, and thus the transition end event cannot be used as a callback
-        // mechanism (because there is nothing to animate if scale is already 1).  Therefore,
-        // we check to see if the HLB scale is greater than one, and if so, we animate the
-        // deflation, otherwise, we just skip the deflation step
-        if (isHLBScaleGreaterThanOne()) {
-
-          if (common.useJqueryAnimate) {
-
-            // Stop the previous animation if it exists.
-            if ($animation) {
-              $animation.stop();
-            }
-
-            transitionOutHLBWithJquery();
-
-          } else {
-
-            transitionOutHLBWithCSS();
-
-          }
-
-        } else {
-          onHLBClosed();
-        }
-
-      }
-
-      /**
        * [turnOnHLBEventListeners turns on HLB event handlers for deflation and scroll]
        */
       function turnOnHLBEventListeners() {
@@ -626,7 +457,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Make sure inputs from HLB are copied over to the original element
         mapForm($hlbElement, $originalElement);
 
-        transitionOutHLB();
+        hlbAnimation.transitionOutHLB({
+          '$hlbElement'        : $hlbElement,
+          '$hlbWrappingElement': $hlbWrappingElement,
+          'originCSS'          : originCSS,
+          'translateCSS'       : translateCSS,
+          'onHLBClosed'        : onHLBClosed,
+          'transitionProperty' : hlbStyling.transitionProperty
+        });
 
       }
 
@@ -660,28 +498,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             $currentToInput.val($currentFromInput.val());
           }
         }
-      }
-
-      /**
-       * [isHLBScaleGreaterThanOne determines if the $hlbElement is scaled greater than one.
-       * This is useful for the transitionOutHLB function.]
-       * @return {Boolean} [if true, $hlbElement is scaled > 1]
-       * @example "matrix(1.5, 0, 0, 1.5, 1888.0610961914063, 2053.21875)"
-       * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)"
-       */
-      function isHLBScaleGreaterThanOne() {
-
-        // If there isn't any transform, then it isn't scaled.
-        if ($hlbElement.css('transform') === 'none') {
-          return false;
-        }
-
-        if ($hlbElement.css('transform').match('matrix\\(1,')) {
-          return false;
-        }
-
-        return true;
-
       }
 
       /**
@@ -787,7 +603,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * Adds the appropriate event listeners and emits hlb/ready]
        */
       function onHLBReady() {
-
+console.log('rdy')
         // Focus input or textarea
         if (common.isEditable($hlbElement[0])) {
             $hlbElement.focus();
@@ -855,8 +671,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.initializeHLB            = initializeHLB;
         exports.sizeHLB                  = sizeHLB;
         exports.positionHLB              = positionHLB;
-        exports.transitionInHLB          = transitionInHLB;
-        exports.transitionOutHLB         = transitionOutHLB;
         exports.turnOnHLBEventListeners  = turnOnHLBEventListeners;
         exports.turnOffHLBEventListeners = turnOffHLBEventListeners;
         exports.cloneHLB                 = cloneHLB;

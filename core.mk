@@ -90,6 +90,7 @@ files=\
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
 	source/js/hlb/event-handlers.js \
+	source/js/hlb/animation.js \
 	source/js/highlight-box.js \
 	source/js/hpan.js \
 	source/js/util/template.js \
@@ -116,7 +117,7 @@ build:
 
 	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 
-#Copy files for Source-Maps 
+#Copy files for Source-Maps
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 
@@ -143,7 +144,7 @@ build:
 	@echo
 	@echo "===== VERSION: $(custom-version)"
 	@echo
-	
+
 ################################################################################
 # TARGET: debug
 ################################################################################
@@ -158,7 +159,7 @@ debug:
 	@mkdir -p $(build-dir)/compile/js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 
-#Copy files for Source-Maps 
+#Copy files for Source-Maps
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 
@@ -203,10 +204,10 @@ package:
 
 	@cp -R $(build-dir)/compile/* $(package-dir)
 
-	#Make dir for Source-Maps 
+	#Make dir for Source-Maps
 	@mkdir -p $(package-dir)/js/source/
 	@mkdir -p $(package-dir)/js/$(build-dir)/source/js/
-	#Copy files for Source-Maps 
+	#Copy files for Source-Maps
 	@cp -R source/js $(package-dir)/js/source/
 	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
 
