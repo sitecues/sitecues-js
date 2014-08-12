@@ -191,7 +191,7 @@ sitecues.def('cursor', function (cursor, callback) {
                 var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
                 try {
                     if (platform.browser.is === 'IE') {
-                        preFetchCursorImageForCache(cursorValueURL, setCursorStyleValue(rule, cursorValueURL));
+                        preFetchCursorImageForCache(cursorValueURL, function() { setCursorStyleValue(rule, cursorValueURL); });
                     } else {
                         setCursorStyleValue(rule, cursorValueURL)
                     }
