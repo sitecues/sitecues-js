@@ -218,7 +218,6 @@ sitecues.def('cursor', function (cursor, callback) {
      */
     function setCursorStyleValue(rule, cursorValueURL) {
         rule.style.setProperty('cursor', cursorValueURL, 'important');
-        return;
     }
 
     /**
@@ -252,7 +251,6 @@ sitecues.def('cursor', function (cursor, callback) {
                 SC_DEV && console.log("[Error] Unable to fetch cursor image from server");
             }
         });
-        return;
     }
 
     /**
