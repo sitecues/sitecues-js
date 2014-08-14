@@ -395,15 +395,17 @@ sitecues.def('zoom', function (zoom, callback) {
             return req(fn);
           }
         }
-        setTimeout(fn, 16);
+        return setTimeout(fn, 16);
       }
 
-      function cancelFrame(frameId) {
-        if (!frameId) {
-          return;
+      function cancelFrame(id) {
+        var cancel = window.cancelAnimationFrame || window.msCancelRequestAnimationFrame;
+        if (cancel) {
+          cancel(id);
         }
-        var cancel = cancelAnimationFrame || msCancelRequestAnimationFrame;
-        return cancel(frameId);
+        else {
+          clearTimeout(id);
+        }
       }
 
       function getZoomCssFixes() {
