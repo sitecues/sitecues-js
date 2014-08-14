@@ -37,7 +37,6 @@ sitecues.def('zoom', function (zoom, callback) {
         $body = $(body),
         originalBodyInfo,
         minZoomChangeTimer,  // Keep zooming at least for this long, so that a pressing/clicking A/+/- does a step
-        zoomIntervalTimer,
         zoomAnimator,
         zoomEvent,
         animationNumber = 1,
@@ -159,27 +158,24 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function applyJSAnimation() {
-        function setZoomCss(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
+        function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
           timeElapsed = Date.now() - startZoomTime;
           zoomChange = Math.min(timeElapsed / MS_PER_X_ZOOM, totalZoomChangeRequested);
-          nextZoom = currentZoom + direction * zoomChange;
+          nextZoom = currentZoom + zoomDirection * zoomChange;
           $body.css(getZoomCss(nextZoom));
           if (nextZoom === currentTargetZoom) {
             finishZoomOperation();
           }
-        }
-        function jsZoomStep() {
-          cancelFrame(zoomAnimator);
-          zoomAnimator = requestFrame(setZoomCss);
+          zoomAnimator = requestFrame(jsZoomStep);
         }
 
         var totalZoomChangeRequested = Math.abs(currentTargetZoom - currentZoom),
-          direction = currentTargetZoom > currentZoom ? 1 : -1,
+          zoomDirection = currentTargetZoom > currentZoom ? 1 : -1,
           timeElapsed,
           zoomChange,
           nextZoom;
 
-          zoomIntervalTimer = setInterval(jsZoomStep, 4);
+        zoomAnimator = requestFrame(jsZoomStep);
       }
 
       function beginGlide(targetZoom) {
@@ -321,7 +317,6 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         cancelFrame(zoomAnimator);
         clearTimeout(minZoomChangeTimer);
-        clearInterval(zoomIntervalTimer);
       }
 
       /**
