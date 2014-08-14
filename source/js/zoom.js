@@ -137,7 +137,9 @@ sitecues.def('zoom', function (zoom, callback) {
           if (nextZoom === currentTargetZoom) {
             finishZoomOperation();
           }
-          zoomAnimator = requestFrame(jsZoomStep);
+          else {
+            zoomAnimator = requestFrame(jsZoomStep);
+          }
         }
 
         var totalZoomChangeRequested = Math.abs(currentTargetZoom - currentZoom),
@@ -306,7 +308,10 @@ sitecues.def('zoom', function (zoom, callback) {
           // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
           // Step 1: remove the scrollbars before changing zoom.
           // Step 2 (below): re-add the scrollbar if necessary for size of content
-          document.documentElement.style.overflow = 'hidden';
+          $('html').css({
+            overflowX: 'hidden',
+            overflowY: 'hidden'
+          });
         }
       }
 
@@ -401,17 +406,11 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function clearAllCss() {
-        if (platform.browser.isIE9) {
-          console.log('IE9');
-          return;
-        }
-        console.log('Not IE9');
         // It is a best practice to clean up after ourselves
         // Clear all CSS values
         $body.css({
           transform: '',
           transformOrigin: '',
-          overflow: '',
           width: '',
           perspective: '',
           backfaceVisibility: ''
