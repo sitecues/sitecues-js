@@ -8,4 +8,4 @@ exports.getSafeZoneBoundingBox = function () {
     'bottom': 0
   };
 };
-exports.HLBZoom = 1.5;
+exports.getHLBTransformScale = function() { return 1.5 * 1.5; };

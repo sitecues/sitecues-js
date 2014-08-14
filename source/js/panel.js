@@ -3,7 +3,8 @@ sitecues.def( 'panel', function (panel, callback) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'conf', 'audio', 'slider', 'ui', 'util/common', 'zoom', 'html-build', 'platform', function( $, conf, audio, SliderClass, ui, common, zoom, htmlBuild, platform) {
+  sitecues.use( 'jquery', 'audio', 'slider', 'ui', 'html-build',
+    function( $, audio, SliderClass, ui, htmlBuild) {
 
     var PANEL_WIDTH = 500;
     var PANEL_HEIGHT = 80;  // To keep aspect ratio, HEIGHT is WIDTH * .16
@@ -158,10 +159,6 @@ sitecues.def( 'panel', function (panel, callback) {
       });
 
       $(window).scroll(hide);
-
-      if (!platform.browser.isIE) {
-        sitecues.on('zoom', refreshPanel);  // Panel size needs to adjust to zoom in non-IE browsers
-      }
     }
 
     // Hide panel.
@@ -187,9 +184,6 @@ sitecues.def( 'panel', function (panel, callback) {
         });
 
         $(window).off('scroll');
-        if (!platform.browser.isIE) {
-          sitecues.off('zoom', refreshPanel);
-        }
       }
     }
 
@@ -198,7 +192,7 @@ sitecues.def( 'panel', function (panel, callback) {
       var ttsButton = $('#sitecues-tts');
       if(ttsButton.data('tts-enable') === 'disabled') {
         // It's disabled, so enable it
-        audio.setSpeechState(true)
+        audio.setSpeechState(true);
         showTTSbuttonEnabled(ttsButton);
       } else {
         // It's enabled (or unknown), so disable it
@@ -223,8 +217,6 @@ sitecues.def( 'panel', function (panel, callback) {
 
     function refreshPanel() {
       var badge = $('#sitecues-badge'),
-          zoom = conf.get('zoom'),
-          scaleTransform = platform.browser.isIE ? '' : 'scale(' + 1 / zoom + ') ',
           left,
           top = panel.badgeRect.top + parseFloat(badge.css('padding-top'));
 
@@ -246,8 +238,9 @@ sitecues.def( 'panel', function (panel, callback) {
 
       panel.element.css({
         transformOrigin: panel.useLeft ? '0% 0%' : '100% 0%',
-        transform: scaleTransform + 'translate(' + left + 'px, ' + top + 'px)'
+        transform: 'translate(' + left + 'px, ' + top + 'px)'
       });
+
     }
 
 

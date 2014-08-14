@@ -5,8 +5,7 @@
 sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   'use strict';
 
-  var MIN_RECT_WIDTH = 4;
-  var MIN_RECT_HEIGHT = 4;
+  var MIN_RECT_SIDE = 4;
 
   sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
                function ($, common, conf, platform, traitcache) {
@@ -73,13 +72,26 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (platform.browser.isFirefox) {
         // This must be done for range.getBoundingClientRect(),
         // but not for element.getBoundingClientRect()
-        return scaleRect(rect, conf.get('zoom'), window.pageXOffset, window.pageYOffset);
+        var currZoom = conf.get('zoom'),
+          mozRect = $.extend({}, rect),
+          scaledRect = scaleRect(mozRect, currZoom, window.pageXOffset, window.pageYOffset);
+
+        // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
+        // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
+        // and add in the difference in left coordinates.
+        var bodyRange = document.createRange();
+        bodyRange.selectNode(document.body);
+        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + window.pageXOffset) * currZoom - window.pageXOffset,
+          bodyLeft = traitcache.getScreenRect(document.body).left;
+        scaledRect.left += bodyLeft - bodyRangeLeft;
+
+        return scaledRect;
       }
       return rect;
     }
 
     function getBoundingRectMinusPadding(node) {
-      var rect = getRangeRect(node);
+      var rect = node.getBoundingClientRect();
 
       // If range is created on node w/o text, getBoundingClientRect() returns zero values.
       // This concerns images and other nodes such as paragraphs - with no text inside.
@@ -226,15 +238,22 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
 
       // Overflow is visible: add right and bottom sides of overflowing content
-      var rect = traitcache.getScreenRect(element);
-      var newRect = {
-        left: rect.left,
-        top: rect.top,
-        width: overflowX ? element.scrollWidth : rect.width,
-        height: overflowY ? element.scrollHeight : rect.height
-      };
+      var rect = traitcache.getScreenRect(element),
+        newRect = {
+          left: rect.left,
+          top: rect.top,
+          width: overflowX ? element.scrollWidth : rect.width,
+          height: overflowY ? element.scrollHeight : rect.height
+        };
 
       return getRectMinusPadding(element, newRect);
+    }
+
+    function normalizeRect(rect) {
+      var newRect = $.extend({}, rect);
+      newRect.right = rect.left + rect.width;
+      newRect.bottom = rect.top + rect.height;
+      return newRect;
     }
 
     function addRect(allRects, clipRect, unclippedRect) {
@@ -242,9 +261,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         return;
       }
       var rect = getClippedRect(unclippedRect, clipRect);
-      if (rect.width < MIN_RECT_WIDTH|| rect.height < MIN_RECT_HEIGHT) {
+      if (rect.width < MIN_RECT_SIDE|| rect.height < MIN_RECT_SIDE) {
         return; // Not large enough to matter
       }
+
+      rect = normalizeRect(rect);
 
       if (rect.right < 0 || rect.bottom < 0) {
         var zoom = conf.get('zoom');
@@ -343,10 +364,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getClippedRect(unclippedRect, clipRect) {
       if (!clipRect) {
-        // Ensure right and bottom are set as well
-        //unclippedRect.right = unclippedRect.left + unclippedRect.width;
-        //unclippedRect.bottom = unclippedRect.top + unclippedRect.height;
-        return $.extend({}, unclippedRect); // Convert to non-native object so that properties can be modified if necessary
+        return normalizeRect(unclippedRect); // Convert to non-native object so that properties can be modified if necessary
       }
       var left   = Math.max( unclippedRect.left, clipRect.left);
       var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);

@@ -6,8 +6,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common',
-    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common) {
+  sitecues.use('jquery', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'conf',
+    function($, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, conf) {
 
       /////////////////////////
       // PRIVATE VARIABLES
@@ -161,8 +161,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             originalElementComputedStyles,
             originalElementAndChildren,
             clonedElementAndChildren,
-            clonedElement,
-            zoom = conf.get('zoom');
+            clonedElement;
 
         // Clone the original element
         clonedElement = originalElement.cloneNode(true);
@@ -191,8 +190,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $(temporaryOriginalElement).css({
           'position'       : 'absolute',
-          'left'           : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
-          'top'            : originalElementBoundingBox.top  / zoom + window.pageYOffset / zoom,
+          'left'           : originalElementBoundingBox.left + window.pageXOffset,
+          'top'            : originalElementBoundingBox.top  + window.pageYOffset,
           'opacity'        : 0,
           'padding'        : 0,
           'margin'         : 0,
@@ -311,9 +310,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
             // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement),
-
-            zoom = conf.get('zoom');
+            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement);
 
         // Update the dimensions for the HLB which is used for constraint calculations.
         // The offset of the original element and cloned element midpoints are used for positioning.
@@ -335,11 +332,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         offset.y += constrainedOffset.y;
 
         // translateCSS and originCSS are used during deflation
-        translateCSS = 'translate(' + (-offset.x / zoom) + 'px, ' + (-offset.y / zoom) + 'px)';
+        translateCSS = 'translate(' + (-offset.x ) + 'px, ' + (-offset.y ) + 'px)';
 
         // This is important for animating from the center point of the HLB
-        originCSS = ((-offset.x / zoom) + HLBBoundingBox.width  / 2 / zoom) + 'px ' +
-                    ((-offset.y / zoom) + HLBBoundingBox.height / 2 / zoom) + 'px';
+        originCSS = ((-offset.x) + HLBBoundingBox.width / 2 ) + 'px ' +
+            ((-offset.y) + HLBBoundingBox.height / 2 ) + 'px';
 
         // Position the HLB without it being scaled (so we can animate the scale).
         $hlbElement.css({
@@ -380,7 +377,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         $animation = $({'scale': 1}).animate(
           {
-            'scale': hlbSafeArea.HLBZoom
+            'scale': hlbSafeArea.getHLBTransformScale()
           }, {
             'step'    : hlbSteppingAnimation,
             'duration': INFLATION_SPEED,
@@ -417,7 +414,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // After the deflation animation completes, clean up the HLB states and DOM
         $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBClosed);
 
-        // Animate the deflation by setting the transform scale to 1.
+        // Animate the deflation by setting the transform scale back to the current zoom level.
         $hlbElement.css(transitionOutCSS);
 
       }
@@ -432,7 +429,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
         $hlbElement[0].addEventListener(common.transitionEndEvent, onHLBReady);
 
-        // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
+        // Scale the element up to 1.5 * zoom (hlbPositioning.getHLBTransformScale())
         $hlbElement.css(transitionInCSS);
 
       }
@@ -459,7 +456,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         var transitionInCSS = {
           'transition'                : hlbStyling.transitionProperty + INFLATION_SPEED + 'ms',
           'transition-timing-function': 'ease',
-          'transform'                 : 'scale(' + hlbSafeArea.HLBZoom + ') ' + translateCSS,
+          'transform'                 : 'scale(' + hlbSafeArea.getHLBTransformScale() + ') ' + translateCSS,
           'transform-origin'          : originCSS
         };
 
@@ -481,7 +478,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         return {
           'transition'                : hlbStyling.transitionProperty + DEFLATION_SPEED + 'ms',
           'transition-timing-function': 'ease',
-          'transform'                 : 'scale(1) ' + translateCSS,
+          'transform'                 : 'scale(' + conf.get('zoom') + ') ' + translateCSS,
           'transform-origin'          : originCSS
         };
 

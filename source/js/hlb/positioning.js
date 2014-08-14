@@ -170,9 +170,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      * @param  {[jQuery element]} $hlbElement [HLB element]
      */
     hlbPositioning.constrainHeightToSafeArea = function($hlbElement) {
-
-      var zoom = conf.get('zoom'),
-          originalHeight = hlbPositioning.scaleRectFromCenter($hlbElement).height,
+      var originalHeight = hlbPositioning.scaleRectFromCenter($hlbElement).height,
           safeZoneHeight = hlbSafeArea.getSafeZoneBoundingBox().height;
 
       // Would the scaled element's height be greater than the safe area height?
@@ -180,7 +178,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
         // height is now the "safe zone" height, minus the padding/border
         $hlbElement.css({
-          'height': ((safeZoneHeight / hlbSafeArea.HLBZoom / zoom) -
+          'height': ((safeZoneHeight / hlbSafeArea.getHLBTransformScale()) -
                      (hlbStyling.defaultBorder +
                       hlbStyling.defaultBorder +
                       parseInt($hlbElement.css('paddingTop')) +
@@ -194,7 +192,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
           // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
           $hlbElement.css({
-            'width': (($hlbElement[0].getBoundingClientRect().width / zoom) *
+            'width': ($hlbElement[0].getBoundingClientRect().width *
                 (safeZoneHeight / originalHeight)) + 'px'
           });
 
@@ -209,8 +207,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     hlbPositioning.constrainWidthToSafeArea = function($hlbElement) {
 
-      var zoom = conf.get('zoom'),
-          originalWidth = hlbPositioning.scaleRectFromCenter($hlbElement).width,
+      var originalWidth = hlbPositioning.scaleRectFromCenter($hlbElement).width,
           safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
 
       // Would the scaled element's width be greater than the safe area width?
@@ -218,7 +215,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
         // width is now the "safe zone" width, minus the padding/border
         $hlbElement.css({
-          'width': ((safeZoneWidth / hlbSafeArea.HLBZoom / zoom) -
+          'width': ((safeZoneWidth / hlbSafeArea.getHLBTransformScale()) -
               (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlbElement) / 2) * 2) + 'px'
         });
 
@@ -227,7 +224,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
           // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
           $hlbElement.css({
-            'height': (($hlbElement[0].getBoundingClientRect().height / zoom) *
+            'height': ($hlbElement[0].getBoundingClientRect().height *
                 (safeZoneWidth / originalWidth)) + 'px'
           });
 
@@ -242,14 +239,15 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     hlbPositioning.scaleRectFromCenter = function($hlbElement) {
 
-      var clonedNodeBoundingBox = $hlbElement[0].getBoundingClientRect();
+      var clonedNodeBoundingBox = $hlbElement[0].getBoundingClientRect(),
+        zoomFactor = hlbSafeArea.getHLBTransformScale();
 
       // The bounding box of the cloned element if we were to scale it
       return {
-        'left': clonedNodeBoundingBox.left - ((clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width) / 2),
-        'top': clonedNodeBoundingBox.top - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
-        'width': clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom,
-        'height': clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom
+        'left': clonedNodeBoundingBox.left - ((clonedNodeBoundingBox.width * zoomFactor - clonedNodeBoundingBox.width) / 2),
+        'top': clonedNodeBoundingBox.top - ((clonedNodeBoundingBox.height * zoomFactor - clonedNodeBoundingBox.height) / 2),
+        'width': clonedNodeBoundingBox.width * zoomFactor,
+        'height': clonedNodeBoundingBox.height * zoomFactor
       };
     };
 
@@ -281,12 +279,11 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     hlbPositioning.initializeSize = function($hlbElement, $originalElement) {
 
-      var originalElementsBoundingBox = $originalElement[0].getBoundingClientRect(),
-          zoom = conf.get('zoom');
+      var originalElementsBoundingBox = $originalElement[0].getBoundingClientRect();
 
       $hlbElement.css({
-        'width' : (originalElementsBoundingBox.width / zoom)  + 'px', //Preserve dimensional ratio
-        'height': (originalElementsBoundingBox.height / zoom) + 'px', //Preserve dimensional ratio
+        'width': (originalElementsBoundingBox.width ) + 'px', //Preserve dimensional ratio
+        'height': (originalElementsBoundingBox.height ) + 'px' //Preserve dimensional ratio
       });
 
     };

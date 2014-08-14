@@ -241,14 +241,14 @@ sitecues.def('cursor', function (cursor, callback) {
             data: null,
             headers: {"Accept": "application/octet-stream"},
             success: function() {
-                SC_DEV && console.log('Loading of CUR file completed!');
+                console.log('Loading of CUR file completed!');
                 if (callback) {
                     callback();
                 }
             },
             error: function(jqXHR) {
                 jqXHR.abort();
-                SC_DEV && console.log("[Error] Unable to fetch cursor image from server");
+                console.log("[Error] Unable to fetch cursor image from server");
             }
         });
     }
@@ -535,6 +535,15 @@ sitecues.def('cursor', function (cursor, callback) {
       setTimeout(setStyleSheetObject, 50);
 
     }());
+
+    sitecues.on('zoom/begin', function() {
+      // While zooming, turn off our CSS rules so that the browser doesn't spend
+      // CPU cycles recalculating the custom cursor rules to apply during each frame
+      // This makes a difference in IE -- doesn't seem to help in other browsers.
+      if (platform.browser.isIE) {
+        stylesheetElement.disabled = true;
+      }
+    });
 
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
