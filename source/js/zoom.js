@@ -41,7 +41,7 @@ sitecues.def('zoom', function (zoom, callback) {
         finishedZoom = 1,        // Current zoom as of the last finished operation
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
         animatedZoom,            // Zoom state in the current animation operation
-        startZoomTime,      // If no current zoom operation, this is cleared (0 or undefined)
+        startZoomOpTime,      // If no current zoom operation, this is cleared (0 or undefined)
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -59,7 +59,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         MIN_ZOOM_PER_CLICK = 0.16,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM = 1600, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        ZOOM_PRECISION = 3, // Decimal places
+        ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_STYLESHEET_ID = 'sitecues-zoom';
 
       // ------------------------ PUBLIC -----------------------------
@@ -78,7 +78,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Use to jump the current zoom immediately to the targetZoom requested
       // The use case for this is currently the zoom slider
       zoom.jumpTo = function(targetZoom) {
-        if (!isCurrentlyZooming()) {
+        if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
         }
         else {
@@ -86,7 +86,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         cancelFrame(zoomAnimator);
         if (finishedZoom !== currentTargetZoom) {
-          zoomAnimator = requestFrame(applyInstantZoomUpdate);
+          zoomAnimator = requestFrame(applyInstantZoom);
         }
         finishedZoom = currentTargetZoom;
       };
@@ -123,9 +123,10 @@ sitecues.def('zoom', function (zoom, callback) {
         return parseFloat(value.toFixed(ZOOM_PRECISION));
       }
 
-      function applyJSAnimation() {
-        function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
-          timeElapsed = Date.now() - startZoomTime;
+      // Animate until the currentTargetZoom, used for gliding zoom changes
+      function applyZoomAnimation() {
+        function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomOpTime that can't be compared with Date.now()
+          timeElapsed = Date.now() - startZoomOpTime;
           zoomChange = Math.min(timeElapsed / MS_PER_X_ZOOM, totalZoomChangeRequested);
           animatedZoom = finishedZoom + zoomDirection * zoomChange;
           $body.css(getZoomCss(animatedZoom));
@@ -145,18 +146,20 @@ sitecues.def('zoom', function (zoom, callback) {
         zoomAnimator = requestFrame(jsZoomStep);
       }
 
+      // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
+      // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
       function beginGlide(targetZoom) {
-        if (!isCurrentlyZooming() && targetZoom !== finishedZoom) {
+        if (!isZoomOperationRunning() && targetZoom !== finishedZoom) {
           beginZoomOperation(targetZoom);
           if (!shouldSmoothZoom()) {
             // When no animations -- just be clunky and zoom a bit closer to the target
             var delta = finishedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
             currentTargetZoom = finishedZoom + delta;
-            applyInstantZoomUpdate();
+            applyInstantZoom();
             finishZoomOperation();
           }
           else {
-            applyJSAnimation();
+            applyZoomAnimation();
           }
         }
       }
@@ -164,7 +167,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // When an A button or +/- key is pressed, we always glide at least MIN_ZOOM_PER_CLICK.
       // This provides a consistent amount of zoom change for discrete presses.
       function stopGlideIfEnough() {
-        if (!isCurrentlyZooming()) {
+        if (!isZoomOperationRunning()) {
           return;
         }
         var zoomRemainingBeforeMin = MIN_ZOOM_PER_CLICK - Math.abs(animatedZoom - finishedZoom),
@@ -173,23 +176,31 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer = setTimeout(stopGlideNow, msBeforeZoomFinished);
       }
 
+      // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function stopGlideNow() {
         currentTargetZoom = animatedZoom;
         finishZoomOperation();
       }
 
-      function getRestrictedWidth(currZoom) {
-        // Adjust for current window width
-        var winWidth = window.outerWidth,
-          maxZoomToRestrictWidth = zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440),
-          useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
-        // We used to use document.documentElement.clientWidth, but this caused the page
-        // to continually shrink on resize events.
-        // Check out some different methods for determining viewport size: http://ryanve.com/lab/dimensions/
-        // More information on document.documentElement.clientWidth and browser viewports: http://www.quirksmode.org/mobile/viewports.html
-        return (winWidth / useZoom) + 'px';
+      // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
+      function applyInstantZoom() {
+        currentTargetZoom = getSanitizedZoomValue(currentTargetZoom);
+        $body.css(getZoomCss(currentTargetZoom));
       }
 
+      // Perform the initial zoom on load
+      function initialZoom(targetZoom) {
+        if (shouldSmoothZoom()) {
+          beginGlide(targetZoom);  // Animation is faster for initial load
+        }
+        else {
+          beginZoomOperation(targetZoom);
+          applyInstantZoom();
+          finishZoomOperation();
+        }
+      }
+
+      // Must be called before beginning any type zoom operation, to set up the operation.
       function beginZoomOperation(targetZoom) {
         // Make sure we're ready
         initZoomModule();
@@ -214,16 +225,18 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('zoom/begin');
 
         currentTargetZoom = getSanitizedZoomValue(targetZoom);
-        startZoomTime = Date.now();
+        startZoomOpTime = Date.now();
       }
 
-      function isCurrentlyZooming() {
-        return startZoomTime;
+      // Are we in the middle of a zoom operation?
+      function isZoomOperationRunning() {
+        return startZoomOpTime;
       }
 
+      // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
         finishedZoom = currentTargetZoom;
-        startZoomTime = 0;
+        startZoomOpTime = 0;
 
         if (finishedZoom === 1) {
           clearAllCss();
@@ -247,6 +260,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearZoomCallbacks();
       }
 
+      // Make sure the current zoom operation does not continue
       function clearZoomCallbacks() {
         // Ensure no further changes to zoom from this operation
         cancelFrame(zoomAnimator);
@@ -285,18 +299,18 @@ sitecues.def('zoom', function (zoom, callback) {
         }, 15);
       }
 
+      // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
+      // of knowing when the visible content is large enough to need scrollbars.
+      // This also corrects the dreaded IE scrollbar bug, where fixed position content
+      // and any use of getBoundingClientRect()
+      // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
+      // but only when the user scrolled down or to the right.
+      // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
+      // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
+      // Step 1: remove the scrollbars before changing zoom.
+      // Step 2 (below): re-add the scrollbar if necessary for size of content
       function removeScrollbars() {
         if (shouldManuallyAddScrollbars) {
-          // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
-          // of knowing when the visible content is large enough to need scrollbars.
-          // This also corrects the dreaded IE scrollbar bug, where fixed position content
-          // and any use of getBoundingClientRect()
-          // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
-          // but only when the user scrolled down or to the right.
-          // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
-          // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
-          // Step 1: remove the scrollbars before changing zoom.
-          // Step 2 (below): re-add the scrollbar if necessary for size of content
           $('html').css({
             overflowX: 'hidden',
             overflowY: 'hidden'
@@ -304,8 +318,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      // Re-add scrollbars if necessary (see description for our scrollbar situation in removeScrollbars above)
       function addScrollbars() {
-        // Re-add scrollbars if necessary
         // Get the visible content rect (as opposed to element rect which contains whitespace)
         if (shouldManuallyAddScrollbars) {
           var rect = getBodyInfo(), // TODO check perf
@@ -323,9 +337,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      // Request an animation frame
       function requestFrame(fn) {
-        // Don't use in Firefox until they fix rendering corruption bug with wide windows and retina displays.
-        // The bug shows the contents of the window as 1/4 the size during some moments of the animation
         var req = window.requestAnimationFrame || window.msRequestAnimationFrame;
         if (req) {
           return req(fn);
@@ -333,6 +346,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return setTimeout(fn, 16);
       }
 
+      // Cancel any currently reequested animation frame
       function cancelFrame(id) {
         var cancel = window.cancelAnimationFrame || window.msCancelRequestAnimationFrame;
         if (cancel) {
@@ -343,6 +357,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStylesheetFixes() {
         return shouldFixNativeFormAppearance ?
           // Adding this CSS automagically fixes the form issues in Chrome when zooming
@@ -351,6 +366,7 @@ sitecues.def('zoom', function (zoom, callback) {
           : ''
       }
 
+      // Add useful zoom fixes to the body's @style
       function getZoomBodyCSSFixes() {
         var css = {
           // Allow the content to be horizontally centered, unless it would go
@@ -368,6 +384,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
+      // Apply CSS enhancements we use for zoom, that don't need to be animated
       function applyZoomCSSFixes() {
         // General fixes for all browsers
         $body.css(getZoomBodyCSSFixes());
@@ -382,13 +399,9 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
-      function getFormattedTranslateX(translateX) {
-        return shouldRestrictWidth() ? '' : 'translateX(' + translateX + 'px)';
-      }
-
+      // Get a CSS object for the targetZoom level
       function getZoomCss(targetZoom) {
-        var translateX = getTranslateX(targetZoom),
-          transform = 'scale(' + targetZoom + ') ' + getFormattedTranslateX(translateX),
+        var transform = 'scale(' + targetZoom + ') ' + getFormattedTranslateX(targetZoom),
           css = {
             transform: transform
           };
@@ -399,20 +412,38 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
-      function getTranslateX(currZoom) {
-        var halfOfWindow = window.outerWidth / 2,
-          bodyLeft = originalBodyInfo.left,
-          halfOfBody = (halfOfWindow - bodyLeft) * currZoom,
-          pixelsOffScreenLeft = (halfOfBody - halfOfWindow) + zoomConfig.leftMarginOffset,
-          pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft);
-
-        // Need to shift entire zoom image to the right so that start of body fits on screen
-        return pixelsToShiftRight / currZoom;
+      // Get the desired width of the body for the current level of zoom
+      function getRestrictedWidth(currZoom) {
+        // Adjust for current window width
+        var winWidth = window.outerWidth,
+          maxZoomToRestrictWidth = zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440),
+          useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
+        // We used to use document.documentElement.clientWidth, but this caused the page
+        // to continually shrink on resize events.
+        // Check out some different methods for determining viewport size: http://ryanve.com/lab/dimensions/
+        // More information on document.documentElement.clientWidth and browser viewports: http://www.quirksmode.org/mobile/viewports.html
+        return (winWidth / useZoom) + 'px';
       }
 
+      // Return a formatted string for translateX as required by CSS
+      function getFormattedTranslateX(targetZoom) {
+        if (shouldRestrictWidth()) {
+          return '';  // For responsive designs, we use an transforim-origin of 0% 0%, so we don't need this
+        }
+        var halfOfWindow = window.outerWidth / 2,
+          bodyLeft = originalBodyInfo.left,
+          halfOfBody = (halfOfWindow - bodyLeft) * targetZoom,
+          pixelsOffScreenLeft = (halfOfBody - halfOfWindow) + zoomConfig.leftMarginOffset,
+          pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft),
+          translateX = pixelsToShiftRight / targetZoom;
+
+        // Need to shift entire zoom image to the right so that start of body fits on screen
+        return 'translateX(' + translateX + 'px)';
+      }
+
+      // Clear all CSS values
+      // It is a best practice to clean up after ourselves when the user turns off all zoom (back to 1x)
       function clearAllCss() {
-        // It is a best practice to clean up after ourselves
-        // Clear all CSS values
         $body.css({
           transform: '',
           transformOrigin: '',
@@ -424,24 +455,6 @@ sitecues.def('zoom', function (zoom, callback) {
 
         $('#' + SITECUES_ZOOM_STYLESHEET_ID).remove();
       }
-
-      function applyInstantZoomUpdate() {
-        currentTargetZoom = getSanitizedZoomValue(currentTargetZoom);
-        $body.css(getZoomCss(currentTargetZoom));
-      }
-
-      // Perform the initial zoom on load
-      function initialZoom(targetZoom) {
-        if (shouldSmoothZoom()) {
-          beginGlide(targetZoom);  // Animation is faster for initial load
-        }
-        else {
-          beginZoomOperation(targetZoom);
-          applyInstantZoomUpdate();
-          finishZoomOperation();
-        }
-      }
-
 
       // Is it a responsive page?
       function isResponsiveDesign() {
@@ -486,6 +499,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return bodyInfo;
       }
 
+      // Recursively look at rectangles and add them if they are useful content rectangles
       function getBodyRectImpl(node, sumRect, visibleNodes) {
         var newRect = getAbsoluteRect(node);
         newRect.right = newRect.left + newRect.width;
@@ -499,6 +513,7 @@ sitecues.def('zoom', function (zoom, callback) {
         });
       }
 
+      // Add the rectangle to the sum rect if it is visible and has a left margin > 0
       function addRect(sumRect, newRect) {
         if (newRect.left > 0 && newRect.top >= 0 &&
           newRect.width > 1 && newRect.height > 1) {
