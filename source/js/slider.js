@@ -1,7 +1,7 @@
 sitecues.def("slider", function(slider, callback) {
     'use strict';
 
-    sitecues.use("jquery", "conf", "zoom", function($, conf, zoom) {
+    sitecues.use("jquery", "conf", "zoom", 'platform', function($, conf, zoom, platform) {
 
         // #### SLIDER INTERFACE #########################################################################
 
@@ -68,10 +68,6 @@ sitecues.def("slider", function(slider, callback) {
             originalWidth: 690,
             // Half the width of the SVG thumb element at it's original size
             originalThumbWidth: 84,
-
-            firstPress: true, //used in setInterval to not emit a zoom if its the very first zoom on a mouse press
-            //it is reset to true when there is a mouseup event
-            //set to false after one tick of the interval
             // TODO: Make the color settings object configurable on instantiation using deep object merge
 
             // Color settings object
@@ -113,10 +109,10 @@ sitecues.def("slider", function(slider, callback) {
                 this.setdimensions();
                 this.bindevents();
 
-                // Set to the zoomLevel in conf, or set to zoom.defaultLevel
-                this.zoomLevel = conf.get('zoom') || zoom.defaultLevel;
+                // Set to the zoomLevel in conf, or set to 1
+                this.zoomLevel = conf.get('zoom') || 1;
 
-                // Update the Thumb position based on the conf.zoom or zoom.defaultLevel value
+                // Update the Thumb position based on the conf.zoom or at least 1
                 this.setThumbPositionFromZoomLevel(this.zoomLevel);
                 this.translateThumbSVG();
 
@@ -236,8 +232,8 @@ sitecues.def("slider", function(slider, callback) {
                     // Update the Thumb element's position based on the zoom level now dimensions have changed
                     conf.get('zoom', function(zoomLevel) {
 
-                        // Set to the zoomLevel in conf, or set to zoom.defaultLevel
-                        slider_.zoomLevel = zoomLevel || zoom.defaultLevel;
+                        // Set to the zoomLevel in conf, or set to 1
+                        slider_.zoomLevel = zoomLevel || 1;
 
                         // Only respond to conf zoom updates when mouse not down
                         if (!slider_.mouseDownTrack) {
@@ -262,19 +258,7 @@ sitecues.def("slider", function(slider, callback) {
 
             // Switch off user-select
             disablebodyselect: function() {
-
-                $('html').css({
-                    '-webkit-user-select': 'none',
-                    /* Chrome all / Safari all */
-                    '-moz-user-select': 'none',
-                    /* Firefox all */
-                    '-ms-user-select': 'none',
-                    /* IE 10+ */
-                    /* No support for these yet, use at own risk */
-                    // '-o-user-select': 'none',
-                    // 'user-select': 'none'
-                });
-
+                $('html').css(platform.cssPrefix + 'user-select', 'none');
             },
 
 
@@ -299,8 +283,9 @@ sitecues.def("slider", function(slider, callback) {
 
                 // Global listeners
                 $(document)
-                    .on('mouseup', e.data, slider.mouseup)
-                    .on('mousemove', e.data, slider.dragthumb);
+                  .on('mouseup', e.data, slider.mouseup)
+                $('#sitecues-panel')
+                  .on('mousemove', e.data, slider.dragthumb);
             },
 
             // TODO: These following two functions are very similar, we can pack this down later............
@@ -317,18 +302,6 @@ sitecues.def("slider", function(slider, callback) {
 
                 // Store the state of the mousedown
                 slider.mouseDownLetterSml = true;
-
-                // Set interval while the mouse is pressed over the letter and held down
-                slider.letterIntervalSml = setInterval(function() {
-                    // Call the letterupdate function to adjust zoom, passing it the correct context
-                    if (!slider.firstPress) {
-                        sitecues.emit('zoom/decrease');
-                    }
-
-                    slider.firstPress = false;
-
-                    // Finalize the interval call with the delay setting
-                }, slider.letterZoomDelay);
 
                 $(document)
                     .on('mouseup', e.data, slider.mouseup);
@@ -351,18 +324,6 @@ sitecues.def("slider", function(slider, callback) {
                 // Store the state of the mousedown
                 slider.mouseDownLetterBig = true;
 
-                // Set interval while the mouse is pressed over the letter and held down
-                slider.letterIntervalBig = setInterval(function() {
-                    // Call the letterupdate function to adjust zoom, passing it the correct context
-                    if (!slider.firstPress) {
-                        sitecues.emit('zoom/increase');
-                    }
-
-                    slider.firstPress = false;
-
-                    // Finalize the interval call with the delay setting
-                }, slider.letterZoomDelay);
-
                 $(document)
                     .on('mouseup', e.data, slider.mouseup);
 
@@ -377,34 +338,22 @@ sitecues.def("slider", function(slider, callback) {
                 // Get the context when called from event mousedown event listener
                 var slider = e.data.slider;
 
-                // Update the state of the mousedown on 
+                // Let zooming module now that fast zoom changes will no longer be happening
+                sitecues.emit('zoom/stop-' + (slider.mouseDownTrack ? 'slider' : 'button'));
+
+                // Update the state of the mousedown on
                 slider.mouseDownTrack = false;
                 slider.mouseDownLetterSml = false;
                 slider.mouseDownLetterBig = false;
                 slider.firstPress = true;
 
                 // Switch off user-select on when the mouse is released
-                $('html').css({
-                    '-webkit-user-select': 'text',
-                    /* Chrome all / Safari all */
-                    '-moz-user-select': 'text',
-                    /* Firefox all */
-                    '-ms-user-select': 'text',
-                    /* IE 10+ */
-                    /* No support for these yet, use at own risk */
-                    // '-o-user-select': 'auto',
-                    // 'user-select': 'auto'
-                });
+                $('html').css(platform.cssPrefix + 'user-select', 'text');
 
-
-                // Clear mousedown timers on zoom letters
-                clearInterval(slider.letterIntervalSml);
-                clearInterval(slider.letterIntervalBig);
-
+                $('#sitecues-panel')
+                  .off('mousemove', slider.dragthumb);
                 $(document)
-                    .off('mouseup', slider.mouseup)
-                    .off('mousemove', slider.dragthumb);
-
+                  .off('mouseup', slider.mouseup)
             },
 
 
@@ -412,12 +361,13 @@ sitecues.def("slider", function(slider, callback) {
             // Update the position of the Thumb
             dragthumb: function(e) {
 
+                e.preventDefault();  // Don't drag the slider using browser drag & drop
+
                 // Get the context when called from event mousemove event listener
                 var slider = e.data.slider;
 
                 // If the slider has put the mouse-down inside the Slider Track Back bounds...
                 if (slider.mouseDownTrack) {
-                    //slider.trackBounds = slider.svg.track.get(0).getBoundingClientRect(;
 
                     // Get the position of the mouse relative to the Slider
                     var thumbX = e.clientX - slider.trackBounds.left;
@@ -440,7 +390,7 @@ sitecues.def("slider", function(slider, callback) {
                     slider.translateThumbSVG.call(slider);
 
                     // Set the new zoom level in conf
-                    conf.set('zoom', zoomLevel);
+                    zoom.jumpTo(zoomLevel);
                 }
 
             },

@@ -197,8 +197,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $originalElement.css({
           'position'       : 'absolute',
-          'left'           : pickedElementsBoundingBox.left / zoom + window.pageXOffset / zoom,
-          'top'            : pickedElementsBoundingBox.top  / zoom + window.pageYOffset / zoom,
+          'left'           : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
+          'top'            : originalElementBoundingBox.top  / zoom + window.pageYOffset / zoom,
           'opacity'        : 0,
           'padding'        : 0,
           'margin'         : 0,
@@ -376,7 +376,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
             // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, initialHLBRect),
+            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement),
 
             zoom = conf.get('zoom');
 
@@ -400,11 +400,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         offset.y += constrainedOffset.y;
 
         // translateCSS and originCSS are used during deflation
-        translateCSS = 'translate(' + (-offset.x / zoom) + 'px, ' + (-offset.y / zoom) + 'px)';
+        translateCSS = 'translate(' + (-offset.x ) + 'px, ' + (-offset.y ) + 'px)';
 
         // This is important for animating from the center point of the HLB
-        originCSS = ((-offset.x / zoom) + HLBBoundingBox.width  / 2 / zoom) + 'px ' +
-                    ((-offset.y / zoom) + HLBBoundingBox.height / 2 / zoom) + 'px';
+        originCSS = ((-offset.x) + HLBBoundingBox.width / 2 ) + 'px ' +
+            ((-offset.y) + HLBBoundingBox.height / 2 ) + 'px';
 
         // Position the HLB without it being scaled (so we can animate the scale).
         $hlbElement.css({

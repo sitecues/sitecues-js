@@ -448,7 +448,7 @@ describe('hlbPositioning', function() {
 
     });
 
-    it('Returns an object whose width and height properties are scaled by HLBZoom of the ' +
+    it('Returns an object whose width and height properties are scaled by getHLBTransformScale() of the ' +
        'inputs height and width values',
       function (done) {
 
@@ -470,7 +470,7 @@ describe('hlbPositioning', function() {
 
             result   = hlbPositioning.scaleRectFromCenter($hlbElement),
 
-            expected = (width + height) * hlbSafeArea.HLBZoom,
+            expected = (width + height) * hlbSafeArea.getHLBTransformScale(),
             actual   = result.width + result.height;
 
         expect(actual).to.be.equal(expected);

@@ -4,20 +4,10 @@ sitecues.def('badge', function(badge, callback) {
 
     // use jquery, we can rid off this dependency
     // if we will start using vanilla js functions
-    sitecues.use('jquery', 'conf', 'panel', 'util/common', 'html-build', 'platform', function($, conf, panel, common, htmlBuild, platform) {
+    sitecues.use('jquery', 'panel', 'html-build', function($, panel, htmlBuild) {
 
         // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
-        badge.altBadges = $(conf.get('panelDisplaySelector'));
-        badge.badgeId = conf.get('badgeId');
-
-        if (!badge.badgeId) {
-            // Use the default value
-            badge.badgeId = 'sitecues-badge';
-        }
-
-        function isFloatingBadge() {
-            return badge.panel.parent().is(document.documentElement);
-        }
+        var BADGE_ID = 'sitecues-badge';
 
         /**
          * Creates a markup for new badge and inserts it right into the DOM.
@@ -26,7 +16,7 @@ sitecues.def('badge', function(badge, callback) {
          */
         function create() {
             badge.panel = htmlBuild.$div()
-                .attr('id', badge.badgeId) // set element id for proper styling
+                .attr('id', BADGE_ID) // set element id for proper styling
             .addClass('sitecues-badge')
                 .hide()
                 .appendTo('html');
@@ -36,8 +26,6 @@ sitecues.def('badge', function(badge, callback) {
                 .addClass('sitecues-badge-image')
                 .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
                 .appendTo(badge.panel);
-
-            refreshBadgeSize();
         }
 
         /**
@@ -57,27 +45,11 @@ sitecues.def('badge', function(badge, callback) {
                     });
         }
 
-        function doesBadgeNeedRefreshOnZoom() {
-            return !platform.browser.isIE && isFloatingBadge();
-        }
-
-        function refreshBadgeSize() {
-            if (doesBadgeNeedRefreshOnZoom()) {
-                badge.panel.css({
-                    transformOrigin: '0% 0%',
-                    transform: 'scale(' + 1 / conf.get('zoom') + ')'
-                });
-            }
-        }
-
         // BODY
-        var $badge = $('#' + badge.badgeId);
+        var $badge = $('#' + BADGE_ID);
         var isBadgeInDom = $badge && $badge.length > 0;
 
-        if (badge.altBadges && (badge.altBadges.length > 0)) {
-            badge.panel = badge.altBadges;
-            badge.element = badge.panel;
-        } else if (isBadgeInDom) {
+        if (isBadgeInDom) {
             $badge.css({
                 'visibility': 'visible',
                 'opacity': 1
@@ -102,10 +74,6 @@ sitecues.def('badge', function(badge, callback) {
         $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
 
         show();
-
-        if (doesBadgeNeedRefreshOnZoom()) {
-            sitecues.on('zoom', refreshBadgeSize);
-        }
 
         if (SC_UNIT) {
             // todo: maybe export the whole module instead if every single function?

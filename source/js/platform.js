@@ -30,9 +30,9 @@ sitecues.def('platform', function (platformModule, callback) {
       isChrome    : browser === 'Chrome',
       isOpera     : browser === 'Opera',
       isSafari    : browser === 'Safari',
+      isWebKit    : browser === 'Chrome' || browser === 'Opera' || browser === 'Safari',
       isUnknown   : browser === 'Unknown Browser'
     };
-
 
   // If IE is being used, determine which version
   if( platformModule.browser.isIE ){
@@ -86,6 +86,20 @@ sitecues.def('platform', function (platformModule, callback) {
       Chrome: true
     }
   };
+
+  platformModule.cssPrefix = (function() {
+    if (platformModule.browser.isWebKit) {
+      return '-webkit-';
+    }
+    if (platformModule.browser.isFirefox) {
+      return '-moz-';
+    }
+    if (platformModule.browser.isIE) {
+      return '-ms-';
+    }
+    return '';
+  })();
+
   // Done
   callback();
 });
