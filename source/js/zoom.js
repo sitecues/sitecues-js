@@ -1,9 +1,3 @@
-//  TODO
-//  * Get rid of all jerk-back code
-//  * If JS animation works best everywhere, just use it and get rid of key frames stuff
-//  * Bug bash
-//  * Unit tests & docs
-
 sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
