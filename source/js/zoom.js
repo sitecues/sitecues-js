@@ -1,3 +1,8 @@
+/**
+ * Smooth zoom
+ * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
+ */
+
 sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
@@ -33,8 +38,9 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer,  // Keep zooming at least for this long, so that a pressing/clicking A/+/- does a step
         zoomAnimator,
         zoomEvent,
-        currentZoom = 1,
-        currentTargetZoom = 1,
+        finishedZoom = 1,        // Current zoom as of the last finished operation
+        currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
+        animatedZoom,            // Zoom state in the current animation operation
         startZoomTime,      // If no current zoom operation, this is cleared (0 or undefined)
 
         // Should document scrollbars be calculated by us?
@@ -51,9 +57,9 @@ sitecues.def('zoom', function (zoom, callback) {
         // Native form control CSS fix -- automagically fixes the form appearance issues in Chrome when zooming
         shouldFixNativeFormAppearance =  platform.browser.isChrome && platform.os.isMac,
 
-        MIN_ZOOM_PER_CLICK = 0.16,
-        MS_PER_X_ZOOM = 1600,// For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        ZOOM_PRECISION = 4, // Decimal places
+        MIN_ZOOM_PER_CLICK = 0.16,  // Change zoom at least this amount if user clicks on A button or presses +/-
+        MS_PER_X_ZOOM = 1600, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        ZOOM_PRECISION = 3, // Decimal places
         SITECUES_ZOOM_STYLESHEET_ID = 'sitecues-zoom';
 
       // ------------------------ PUBLIC -----------------------------
@@ -79,10 +85,10 @@ sitecues.def('zoom', function (zoom, callback) {
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
         cancelFrame(zoomAnimator);
-        if (currentZoom !== currentTargetZoom) {
+        if (finishedZoom !== currentTargetZoom) {
           zoomAnimator = requestFrame(applyInstantZoomUpdate);
         }
-        currentZoom = currentTargetZoom;
+        finishedZoom = currentTargetZoom;
       };
 
       // ------------------------ PRIVATE -----------------------------
@@ -99,11 +105,12 @@ sitecues.def('zoom', function (zoom, callback) {
         return zoomConfig.isResponsive;
       }
 
+      // Make sure the zoom value is within the min and max, and does not use more decimal places than we allow
       function getSanitizedZoomValue(value) {
         value = parseFloat(value);
 
         // value is too small
-        if (!value || value < zoom.min){
+        if (!value || value < zoom.min) {
           return zoom.min;
         }
 
@@ -116,18 +123,13 @@ sitecues.def('zoom', function (zoom, callback) {
         return parseFloat(value.toFixed(ZOOM_PRECISION));
       }
 
-      function getActualZoom() {
-        var transform = $body.css('transform');
-        return getSanitizedZoomValue(transform.substring(7));
-      }
-
       function applyJSAnimation() {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
           timeElapsed = Date.now() - startZoomTime;
           zoomChange = Math.min(timeElapsed / MS_PER_X_ZOOM, totalZoomChangeRequested);
-          nextZoom = currentZoom + zoomDirection * zoomChange;
-          $body.css(getZoomCss(nextZoom));
-          if (nextZoom === currentTargetZoom) {
+          animatedZoom = finishedZoom + zoomDirection * zoomChange;
+          $body.css(getZoomCss(animatedZoom));
+          if (animatedZoom === currentTargetZoom) {
             finishZoomOperation();
           }
           else {
@@ -135,22 +137,21 @@ sitecues.def('zoom', function (zoom, callback) {
           }
         }
 
-        var totalZoomChangeRequested = Math.abs(currentTargetZoom - currentZoom),
-          zoomDirection = currentTargetZoom > currentZoom ? 1 : -1,
+        var totalZoomChangeRequested = Math.abs(currentTargetZoom - finishedZoom),
+          zoomDirection = currentTargetZoom > finishedZoom ? 1 : -1,
           timeElapsed,
-          zoomChange,
-          nextZoom;
+          zoomChange;
 
         zoomAnimator = requestFrame(jsZoomStep);
       }
 
       function beginGlide(targetZoom) {
-        if (!isCurrentlyZooming() && targetZoom !== currentZoom) {
+        if (!isCurrentlyZooming() && targetZoom !== finishedZoom) {
           beginZoomOperation(targetZoom);
           if (!shouldSmoothZoom()) {
             // When no animations -- just be clunky and zoom a bit closer to the target
-            var delta = currentZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
-            currentTargetZoom = currentZoom + delta;
+            var delta = finishedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+            currentTargetZoom = finishedZoom + delta;
             applyInstantZoomUpdate();
             finishZoomOperation();
           }
@@ -166,21 +167,14 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!isCurrentlyZooming()) {
           return;
         }
-        var achievedZoom = getActualZoom(),
-          zoomRemainingBeforeMin = MIN_ZOOM_PER_CLICK - Math.abs(achievedZoom - currentZoom),
-          msBeforeZoomFinished = zoomRemainingBeforeMin * MS_PER_X_ZOOM;
+        var zoomRemainingBeforeMin = MIN_ZOOM_PER_CLICK - Math.abs(animatedZoom - finishedZoom),
+          msBeforeZoomFinished = Math.max(0, zoomRemainingBeforeMin * MS_PER_X_ZOOM);
 
-        if (msBeforeZoomFinished <= 0) {
-          currentTargetZoom = achievedZoom;
-          finishZoomOperation();
-        }
-        else {
-          minZoomChangeTimer = setTimeout(stopGlideNow, msBeforeZoomFinished);
-        }
+        minZoomChangeTimer = setTimeout(stopGlideNow, msBeforeZoomFinished);
       }
 
       function stopGlideNow() {
-        currentTargetZoom = getActualZoom();
+        currentTargetZoom = animatedZoom;
         finishZoomOperation();
       }
 
@@ -207,7 +201,7 @@ sitecues.def('zoom', function (zoom, callback) {
         removeScrollbars();
 
         // Add general CSS fixes if we haven't already
-        if (currentZoom === 1) {   // Zooming up from 1 means we don't have any style fixes applied yet
+        if (finishedZoom === 1) {   // Zooming up from 1 means we don't have any style fixes applied yet
           applyZoomCSSFixes();
         }
 
@@ -228,10 +222,10 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function finishZoomOperation() {
-        currentZoom = currentTargetZoom;
+        finishedZoom = currentTargetZoom;
         startZoomTime = 0;
 
-        if (currentZoom === 1) {
+        if (finishedZoom === 1) {
           clearAllCss();
         }
         else {
@@ -247,8 +241,8 @@ sitecues.def('zoom', function (zoom, callback) {
         repaintToEnsureCrispText();
 
         // notify all about zoom change
-        conf.set('zoom', currentZoom);
-        sitecues.emit('zoom', currentZoom);
+        conf.set('zoom', finishedZoom);
+        sitecues.emit('zoom', finishedZoom);
 
         clearZoomCallbacks();
       }
@@ -330,13 +324,11 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function requestFrame(fn) {
-        if (shouldSmoothZoom()) {
-          // Don't use in Firefox until they fix rendering corruption bug with wide windows and retina displays.
-          // The bug shows the contents of the window as 1/4 the size during some moments of the animation
-          var req = window.requestAnimationFrame || window.msRequestAnimationFrame;
-          if (req) {
-            return req(fn);
-          }
+        // Don't use in Firefox until they fix rendering corruption bug with wide windows and retina displays.
+        // The bug shows the contents of the window as 1/4 the size during some moments of the animation
+        var req = window.requestAnimationFrame || window.msRequestAnimationFrame;
+        if (req) {
+          return req(fn);
         }
         return setTimeout(fn, 16);
       }
@@ -570,15 +562,15 @@ sitecues.def('zoom', function (zoom, callback) {
        * sizes of the body and window.
        */
       $(window).resize(function () {
-        if (currentZoom > 1) {
+        if (finishedZoom > 1) {
           $body.css(getZoomCss(1));
           originalBodyInfo = getBodyInfo();
-          $body.css(getZoomCss(currentZoom));
+          $body.css(getZoomCss(finishedZoom));
           removeScrollbars();
           if (shouldRestrictWidth()) {
             // Restrict the width of the body so that it works similar to browser zoom
             // Documents designed to fit the width of the page still will
-            $body.css('width', getRestrictedWidth(currentZoom));
+            $body.css('width', getRestrictedWidth(finishedZoom));
           }
           addScrollbars();
           sitecues.emit('resize');
