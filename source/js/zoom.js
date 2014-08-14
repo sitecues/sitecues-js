@@ -401,6 +401,11 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function clearAllCss() {
+        if (platform.browser.isIE9) {
+          console.log('IE9');
+          return;
+        }
+        console.log('Not IE9');
         // It is a best practice to clean up after ourselves
         // Clear all CSS values
         $body.css({
