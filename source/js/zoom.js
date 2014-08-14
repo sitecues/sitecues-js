@@ -392,10 +392,10 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function requestFrame(fn) {
-        if (shouldSmoothZoom() && !platform.browser.isIE9) {
+        if (shouldSmoothZoom()) {
           // Don't use in Firefox until they fix rendering corruption bug with wide windows and retina displays.
           // The bug shows the contents of the window as 1/4 the size during some moments of the animation
-          var req = requestAnimationFrame || msRequestAnimationFrame;
+          var req = window.requestAnimationFrame || window.msRequestAnimationFrame;
           if (req) {
             return req(fn);
           }
