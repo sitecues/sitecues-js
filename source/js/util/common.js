@@ -14,15 +14,7 @@ sitecues.def('util/common', function (common, callback) {
       return 'transitionend';
     }());
 
-    // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
-    // Very strange behavior, might be worth filing a browser bug repport.
-    common.useJqueryAnimate = (function () {
-
-      return (platform.browser.isIE && platform.ieVersion.isIE9) ||
-              platform.browser.isIE     &&
-              platform.ieVersion.isIE11 &&
-              platform.os.isWin8;
-    }());
+    common.useJqueryAnimate = platform.browser.isIE && platform.browser.version <= 9;
 
     /*
      * Check if two Javascript objects are equal.
@@ -43,6 +35,48 @@ sitecues.def('util/common', function (common, callback) {
      */
     common.isEmpty = function(val) {
       return !val || val.trim() === '';
+    };
+
+    /* ----------------------- PRIVATE ----------------------- */
+    function isNonEmptyTextNode(node) {
+      return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
+    }
+
+    common.hasVisibleChildContent = function(current) {
+      var children,
+        index,
+        MAX_CHILDREN_TO_CHECK = 10,
+        numChildrenToCheck;
+
+      if (common.isVisualMedia(current) || common.isFormControl(current)) {
+        var mediaRect = current.getBoundingClientRect(),
+          MIN_RECT_SIDE = 5;
+        if (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE) {
+          return true;
+        }
+      }
+
+      // Check to see if there are non-empty child text nodes.
+      // If there are, we say we're not over whitespace.
+      children = current.childNodes;
+
+      // Shortcut: could not have text children because all children are elements
+      if (current.childElementCount === children.length) {
+        return false;
+      }
+
+      numChildrenToCheck = Math.min(children.length, MAX_CHILDREN_TO_CHECK);;
+
+      // Longer check: see if any children are non-empty text nodes, one by one
+      for (index = 0; index < numChildrenToCheck; index++) {
+        if (isNonEmptyTextNode(children[index])) {
+          if (current.id === 'content') {
+            console.log(children[index]);
+          }
+          return true;
+        }
+      }
+      return false;
     };
 
     /**

@@ -226,11 +226,11 @@ describe('mouse-highlight', function () {
     });
   });
 
-  describe('#reenableIfAppropriate()', function () {
+  describe('#enableIfAppropriate()', function () {
     it('should invoke mh.show', function (done) {
       mh.enabled = true;
       mh.state.picked = undefined;
-      mh.reenableIfAppropriate();
+      mh.enableIfAppropriate();
       done();
     });
   });
