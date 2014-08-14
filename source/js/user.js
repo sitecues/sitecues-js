@@ -7,7 +7,9 @@ sitecues.def('user', function(user, callback) {
     return userId;
   };
 
-  if (!userId) {
+  if (userId) {
+    callback();
+  } else {
     SC_DEV && console.log('UserID  not found in localStorage, fallback to ajax request.');
     sitecues.use('jquery', function(jquery) {
       jquery.ajax({
@@ -34,5 +36,5 @@ sitecues.def('user', function(user, callback) {
       });
     });
   }
-
+  
 });
