@@ -42,7 +42,6 @@ sitecues.def('zoom', function (zoom, callback) {
         currentZoom = 1,
         currentTargetZoom = 1,
         startZoomTime,      // If no current zoom operation, this is cleared (0 or undefined)
-        animationStyleSheet,
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -61,7 +60,7 @@ sitecues.def('zoom', function (zoom, callback) {
         MIN_ZOOM_PER_CLICK = 0.16,
         MS_PER_X_ZOOM = 1600,// For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         ZOOM_PRECISION = 4, // Decimal places
-        SITECUES_ZOOM = 'sitecues-zoom';
+        SITECUES_ZOOM_STYLESHEET_ID = 'sitecues-zoom';
 
       // ------------------------ PUBLIC -----------------------------
 
@@ -213,8 +212,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // Remove scrollbars -- we will re-add them after zoom if content is large enough
         removeScrollbars();
 
-        // Add general stylesheet fixes if we haven't already
-        applyZoomStyleSheetFixes();
+        // Add general CSS fixes if we haven't already
+        if (currentZoom === 1) {   // Zooming up from 1 means we don't have any style fixes applied yet
+          applyZoomCSSFixes();
+        }
 
         // Make sure all animations are dead
         // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
@@ -364,17 +365,37 @@ sitecues.def('zoom', function (zoom, callback) {
           : ''
       }
 
-      function applyZoomStyleSheetFixes() {
-        if (!animationStyleSheet) {
-          var css = getZoomStylesheetFixes();
-          if (css === '') {
-            return; // Nothing to apply, no need to create style sheet
-          }
-          animationStyleSheet = document.createElement('style');
-          animationStyleSheet.id = SITECUES_ZOOM;
-          $('head').append(animationStyleSheet)
-          animationStyleSheet.innerHTML = css;
+      function getZoomBodyCSSFixes() {
+        var css = {
+          // Allow the content to be horizontally centered, unless it would go
+          // offscreen to the left, in which case start zooming the content from the left-side of the window
+          transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%',
+          // These two properties prevent webKit from having the jump back bug when we pause the animation
+          perspective: 999,
+          backfaceVisibility: 'hidden'
+        };
+
+        if (shouldOptimizeLegibility) {
+          css.textRendering = optimizeLegibility;
         }
+
+        return css;
+      }
+
+      function applyZoomCSSFixes() {
+        // General fixes for all browsers
+        $body.css(getZoomBodyCSSFixes());
+
+        var css = getZoomStylesheetFixes(),
+          animationStyleSheet;
+        if (css === '') {
+          return; // Nothing to apply, no need to create style sheet
+        }
+
+        animationStyleSheet = document.createElement('style');
+        animationStyleSheet.id = SITECUES_ZOOM_STYLESHEET_ID;
+        $('head').append(animationStyleSheet)
+        animationStyleSheet.innerHTML = css;
       }
 
       function getFormattedTranslateX(translateX) {
@@ -413,11 +434,11 @@ sitecues.def('zoom', function (zoom, callback) {
           transformOrigin: '',
           width: '',
           perspective: '',
-          backfaceVisibility: ''
+          backfaceVisibility: '',
+          textRendering: ''
         });
 
-        $(animationStyleSheet).remove();
-        animationStyleSheet = null;
+        $('#' + SITECUES_ZOOM_STYLESHEET_ID).remove();
       }
 
       function applyInstantZoomUpdate() {
@@ -539,21 +560,6 @@ sitecues.def('zoom', function (zoom, callback) {
 
         if (typeof zoomConfig.isResponsive === 'undefined') {
           zoomConfig.isResponsive = isResponsiveDesign();
-        }
-
-        $body
-          // CSS that is shared between various types of animation
-          .css({
-            // Allow the content to be horizontally centered, unless it would go
-            // offscreen to the left, in which case start zooming the content from the left-side of the window
-            transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%',
-            // These two properties prevent webKit from having the jump back bug when we pause the animation
-            perspective: 999,
-            backfaceVisibility: 'hidden'
-          });
-
-        if (shouldOptimizeLegibility) {
-          $body.css('textRendering', 'optimizeLegibility');
         }
 
         if (SC_DEV) {
