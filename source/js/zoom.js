@@ -376,7 +376,7 @@ sitecues.def('zoom', function (zoom, callback) {
         };
 
         if (shouldOptimizeLegibility) {
-          css.textRendering = optimizeLegibility;
+          css.textRendering = 'optimizeLegibility';
         }
 
         return css;
@@ -386,16 +386,14 @@ sitecues.def('zoom', function (zoom, callback) {
         // General fixes for all browsers
         $body.css(getZoomBodyCSSFixes());
 
-        var css = getZoomStylesheetFixes(),
+        var styleSheetText = getZoomStylesheetFixes(),
           animationStyleSheet;
-        if (css === '') {
-          return; // Nothing to apply, no need to create style sheet
+        if (styleSheetText) {
+          animationStyleSheet = document.createElement('style');
+          animationStyleSheet.id = SITECUES_ZOOM_STYLESHEET_ID;
+          $('head').append(animationStyleSheet)
+          animationStyleSheet.innerHTML = styleSheetText;
         }
-
-        animationStyleSheet = document.createElement('style');
-        animationStyleSheet.id = SITECUES_ZOOM_STYLESHEET_ID;
-        $('head').append(animationStyleSheet)
-        animationStyleSheet.innerHTML = css;
       }
 
       function getFormattedTranslateX(translateX) {
