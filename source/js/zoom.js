@@ -91,16 +91,18 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.jumpTo = function(targetZoom) {
         if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
+          zoomAnimator = requestFrame(performContinualZoomUpdates);
         }
         else {
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
-        cancelFrame(zoomAnimator);
-        if (completedZoom !== currentTargetZoom) {
-          zoomAnimator = requestFrame(performInstantZoomOperation);
-        }
-        completedZoom = currentTargetZoom;
       };
+
+      function performContinualZoomUpdates() {
+        zoomAnimator = requestFrame(performContinualZoomUpdates);
+        performInstantZoomOperation();
+        completedZoom = currentTargetZoom;
+      }
 
       // ------------------------ PRIVATE -----------------------------
 
@@ -588,8 +590,8 @@ sitecues.def('zoom', function (zoom, callback) {
           transform: '',
           transformOrigin: '',
           width: '',
-          perspective: '',
           backfaceVisibility: '',
+          perspective: '',
           textRendering: '',
           animation: '',
           animationPlayState: '',
