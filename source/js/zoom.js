@@ -67,7 +67,7 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldFixNativeFormAppearance =  platform.browser.isChrome && platform.os.isMac,
 
         // Constants
-        MIN_ZOOM_PER_CLICK = 0.16,  // Change zoom at least this amount if user clicks on A button or presses +/-
+        MIN_ZOOM_PER_CLICK = 0.3,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM = 1600, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
@@ -131,7 +131,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Should we do our hacky fix for Chrome's animation jerk-back?
       // This is where zooming up from 1 and stopping causes the stoppage of the zoom to jerk backwards at the end
       function shouldFixAnimationJerkBack() {
-        return platform.browser.isChrome && shouldUseKeyFramesAnimation() && completedZoom === 1;
+        return platform.browser.isChrome && shouldUseKeyFramesAnimation();
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -170,12 +170,33 @@ sitecues.def('zoom', function (zoom, callback) {
             performInstantZoomOperation();
             finishZoomOperation();
           }
-          else if (shouldUseKeyFramesAnimation() && !shouldFixAnimationJerkBack()) {
-            SC_DEV && console.log("Begin keyframes zoom");
-            performKeyFramesZoomOperation();
+          else if (shouldUseKeyFramesAnimation()) {
+            if (shouldFixAnimationJerkBack() && targetZoom > completedZoom && completedZoom < 1.3) {
+              // Hack to fix Chrome *most* of the time.
+              // This seems to prime the animation pump. Wow. No idea why this works,
+              // or why it's only needed when the start zoom < 1.1 and we're zooming up.
+              // Been staring at the code too long ... send food.
+              requestFrame(function() {
+                $body.css(getZoomCss(completedZoom + 0.001));
+                requestFrame(function () {
+                  $body.css(getZoomCss(completedZoom + 0.002));
+                  requestFrame(function () {
+                    $body.css(getZoomCss(completedZoom + 0.003));
+                    completedZoom += 0.003;
+                    startZoomTime += 150; // Correct for extra time added
+                    SC_DEV && console.log('Begin keyframes zoom with jerk-back fix hack');
+                    performKeyFramesZoomOperation();
+                  });
+                });
+              });
+            }
+            else {
+              SC_DEV && console.log('Begin keyframes zoom');
+              performKeyFramesZoomOperation();
+            }
           }
           else {
-            SC_DEV && console.log("Begin JS zoom");
+            SC_DEV && console.log('Begin JS zoom');
             performJsAnimateZoomOperation();
           }
         }
@@ -569,7 +590,10 @@ sitecues.def('zoom', function (zoom, callback) {
           width: '',
           perspective: '',
           backfaceVisibility: '',
-          textRendering: ''
+          textRendering: '',
+          animation: '',
+          animationPlayState: '',
+          animationFillMode: ''
         });
 
         zoomStyleSheet.remove();
@@ -683,10 +707,10 @@ sitecues.def('zoom', function (zoom, callback) {
 
         if (SC_DEV) {
           console.log('_______________________________________________________');
-          console.log("Zoom configuration: %o", zoomConfig);
-          console.log("Window width: %o", window.outerWidth);
-          console.log("Visible body rect: %o", originalBodyInfo);
-          console.log("isResponsive?: %o", zoomConfig.isResponsive);
+          console.log('Zoom configuration: %o', zoomConfig);
+          console.log('Window width: %o', window.outerWidth);
+          console.log('Visible body rect: %o', originalBodyInfo);
+          console.log('isResponsive?: %o', zoomConfig.isResponsive);
           console.log('_______________________________________________________');
         }
       }
