@@ -70,7 +70,7 @@ sitecues.def('conf/user/server', function(server, callback) {
 
     function isValidLocalStorageById(lsByUserId) {
       var lsByUserId = lsByUserId? JSON.parse(lsByUserId): getLocalStorageById();
-      return (Object.keys(lsByUserId).length >= 4);
+      return (Object.keys(lsByUserId).length >= 1); // At least one value.
     }
 
     // Saves a key/value pair.
@@ -96,7 +96,7 @@ sitecues.def('conf/user/server', function(server, callback) {
 
         // Load the data from localStorage: User ID namespace.
         lsByUserId = getLocalStorageById(); // String.
-        if (isValidLocalStorageById(lsByUserId)) {
+        if (lsByUserId && isValidLocalStorageById(lsByUserId)) {
           updateLocalStorageById(lsByUserId, key, value);
           saveCallback();
         } else {
@@ -146,7 +146,7 @@ sitecues.def('conf/user/server', function(server, callback) {
 
     // Load the data from localStorage: User ID namespace.
     lsByUserId = getLocalStorageById();
-    if (isValidLocalStorageById(lsByUserId)) {
+    if (lsByUserId && isValidLocalStorageById(lsByUserId)) {
       lsByUserId = JSON.parse(lsByUserId);
       loadCallback(lsByUserId);
     } else {
