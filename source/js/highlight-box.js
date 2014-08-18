@@ -266,7 +266,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create and append to the DOM the wrapping element for HLB and DIMMER elements
         $hlbWrappingElement = getHLBWrapper();
 
-        if (platform.browser.isIE && ($(originalElement).is('input, textarea') || $(originalElement).find('input, textarea').length)) {
+        if (platform.browser.isIE && ($originalElement.is('input, textarea') || $originalElement.find('input, textarea').length)) {
           $hlbWrappingElement.appendTo('body');
         } else {
           $hlbWrappingElement.insertAfter('body');
@@ -651,7 +651,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * Adds the appropriate event listeners and emits hlb/ready]
        */
       function onHLBReady() {
-console.log('rdy')
+
         // Focus input or textarea
         if (common.isEditable($hlbElement[0])) {
             $hlbElement.focus();
