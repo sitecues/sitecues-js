@@ -33,26 +33,6 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     }
 
     /**
-     * [fixOverflowWidth sets the width of the HLB to avoid horizontal scrollbars]
-     * @param  {[jQuery element]} clonedNode [HLB]
-     */
-    function fixOverflowWidth($hlbElement) {
-
-      var hlbElement = $hlbElement[0];
-
-      // If there is a horizontal scroll bar
-      if (hlbElement.clientWidth < hlbElement.scrollWidth) {
-
-        $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + 'px'
-        });
-
-        // Again, we can't be positive that the increase in width does not overflow the safe area.
-        hlbPositioning.constrainWidthToSafeArea($hlbElement);
-      }
-    }
-
-    /**
      * [getExtraLeftPadding returns addition left-padding of the HLB]
      * @param  {[jQuery element]} $hlbElement [HLB element]
      * @return {[integer]}                    [The additional left-padding]
@@ -105,7 +85,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
         // Setting the width requires checking if content does not overflow horizontally
-        fixOverflowWidth($hlbElement);
+        hlbPositioning.fixOverflowWidth($hlbElement);
       }
 
     };
@@ -267,7 +247,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
         // Adding a vertical scroll may sometimes make content overflow the width
-        fixOverflowWidth($hlbElement);
+        hlbPositioning.fixOverflowWidth($hlbElement);
 
       }
 
@@ -290,9 +270,29 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     };
 
+    /**
+     * [fixOverflowWidth sets the width of the HLB to avoid horizontal scrollbars]
+     * @param  {[jQuery element]} clonedNode [HLB]
+     */
+    hlbPositioning.fixOverflowWidth = function($hlbElement) {
+
+      var hlbElement = $hlbElement[0];
+
+      // If there is a horizontal scroll bar
+      if (hlbElement.clientWidth < hlbElement.scrollWidth) {
+
+        $hlbElement.css({
+          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+        });
+
+        // Again, we can't be positive that the increase in width does not overflow the safe area.
+        hlbPositioning.constrainWidthToSafeArea($hlbElement);
+      }
+    };
+
     if (SC_UNIT) {
       exports.isEligibleForConstrainedWidth = isEligibleForConstrainedWidth;
-      exports.fixOverflowWidth              = fixOverflowWidth;
+      exports.fixOverflowWidth              = hlbPositioning.fixOverflowWidth;
       exports.getExtraLeftPadding           = getExtraLeftPadding;
       exports.midPointDiff                  = hlbPositioning.midPointDiff;
       exports.limitWidth                    = hlbPositioning.limitWidth;

@@ -7,6 +7,7 @@ var HLB_MODULE_PATH             = '../../source/js/highlight-box',
     HLB_DIMMER_MODULE_PATH      = './data/modules/hlb/dimmer',
     HLB_STYLING_MODULE_PATH     = './data/modules/hlb/styling',
     HLB_PAGE_PATH               = './data/html/test-hlb.html',
+    HLB_ANIMATION               = './data/modules/hlb/animation',
 
     // Load 'em up.
     hlb             = require(HLB_MODULE_PATH),
@@ -14,6 +15,7 @@ var HLB_MODULE_PATH             = '../../source/js/highlight-box',
     hlbPositioning  = require(HLB_POSITIONING_MODULE_PATH),
     hlbStyling      = require(HLB_STYLING_MODULE_PATH),
     dimmer          = require(HLB_DIMMER_MODULE_PATH),
+    hlbAnimation    = require(HLB_ANIMATION),
 
     // Global window shared by all unit tests in this file.
     win;
@@ -32,36 +34,116 @@ describe('highlight-box', function() {
   describe('#getValidOriginalElement()', function () {
 
     it('Sets removeTemporaryOriginalElement to true if the original element is an <li> because the HLB ' +
-       'moduel relies upon this variable to determine if the original ' +
+       'module relies upon this variable to determine if the original ' +
        'element needs to be removed from the DOM', function (done) {
-        var originalElement = win.document.getElementById('list-item'),
+
+        var $originalElement = jquery(win.document.getElementById('list-item')),
+
             appendStub = sinon.stub(jquery.fn, 'append', function () {
+
+              var result = [];
+
+              result[0] = {'style': {}};
+
+              result['style'] = {};
+
+              result['css'] = function () {
+                                return {
+                                  'insertAfter': function () {}
+                                };
+                              };
+              return result;
+
+            }),
+
+            isStub = sinon.stub(jquery.fn, 'is', function () {
+              return true;
+            }),
+
+            cssStub = sinon.stub(jquery.fn, 'css', function () {
               return {
-                'style':{}
+                'insertAfter':function () {}
               }
+            }),
+
+            findStub = sinon.stub(jquery.fn, 'find', function () {
+              return {
+                'addBack': function () {
+                  return [];
+                }
+              };
             });
+
         hlb.setRemoveTemporaryOriginalElement(false);
-        hlb.getValidOriginalElement(originalElement);
+
+        hlb.getValidOriginalElement($originalElement);
+
         expect(hlb.getRemoveTemporaryOriginalElement()).to.be.true;
+
         hlb.setRemoveTemporaryOriginalElement(false);
+
         appendStub.restore();
+        isStub.restore();
+        cssStub.restore();
+        findStub.restore();
+
         done();
     });
 
     it('Sets does not set removeTemporaryOriginalElement to true if the original element is a paragraph because the HLB ' +
        'moduel relies upon this variable to determine if the original ' +
        'element needs to be removed from the DOM', function (done) {
-        var originalElement = win.document.getElementById('paragraph'),
+
+        var $originalElement = jquery(win.document.getElementById('paragraph')),
+
             appendStub = sinon.stub(jquery.fn, 'append', function () {
+
+              var result = [];
+
+              result[0] = {'style': {}};
+
+              result['style'] = {};
+
+              result['css'] = function () {
+                                return {
+                                  'insertAfter': function () {}
+                                };
+                              };
+              return result;
+
+            }),
+
+            isStub = sinon.stub(jquery.fn, 'is', function () {
+              return false;
+            }),
+
+            cssStub = sinon.stub(jquery.fn, 'css', function () {
               return {
-                'style':{}
+                'insertAfter':function () {}
               }
+            }),
+
+            findStub = sinon.stub(jquery.fn, 'find', function () {
+              return {
+                'addBack': function () {
+                  return [];
+                }
+              };
             });
+
         hlb.setRemoveTemporaryOriginalElement(false);
-        hlb.getValidOriginalElement(originalElement);
+
+        hlb.getValidOriginalElement($originalElement);
+
         expect(hlb.getRemoveTemporaryOriginalElement()).to.be.false;
+
         hlb.setRemoveTemporaryOriginalElement(false);
+
         appendStub.restore();
+        isStub.restore();
+        cssStub.restore();
+        findStub.restore();
+
         done();
     });
 
@@ -212,83 +294,17 @@ describe('highlight-box', function() {
 
   });
 
-  // The isHLBScaleGreaterThanOne() purpose is to test if an element is scaled greater than one,
-  // so we can decide whether or not to transition the HLB scale down to one before removing it
-  // from the DOM.
-  describe('#isHLBScaleGreaterThanOne', function () {
-
-    // Example transform values returned by $(element).css('transform') :
-    //    'none'
-    //    'matrix(2, 0, 0, 2, 0, 0)'  <=  scaled by a factor of 2
-    //    'matrix(1, 0, 0, 1, 0, 0)'  <=  scaled by a factor of 1
-
-    it('Returns false if element does not have any transform set', function (done) {
-
-      var $p = jquery(win.document.getElementById('paragraph')),
-          expected = false,
-          actual;
-
-      $p.css('transform', 'none');
-
-      hlb.setHLB($p);
-
-      actual = hlb.isHLBScaleGreaterThanOne();
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Returns true if element is scaled by a factor of 2', function (done) {
-
-      var $p = jquery(win.document.getElementById('paragraph')),
-          expected = true,
-          actual;
-
-      $p.css('transform', 'matrix(2, 0, 0, 2, 0, 0)');
-
-      hlb.setHLB($p);
-
-      actual = hlb.isHLBScaleGreaterThanOne();
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Returns false if element is scaled by a factor of 1', function (done) {
-
-      var $p = jquery(win.document.getElementById('paragraph')),
-          expected = false,
-          actual;
-
-      $p.css('transform', 'matrix(1, 0, 0, 1, 0, 0)');
-
-      hlb.setHLB($p);
-
-      actual = hlb.isHLBScaleGreaterThanOne();
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-  });
-
   // The getOriginalElement() purpose is to return a DOM element from any valid input it receives.
   // The picker module will, at the time of this writing (June 1, 2014), pass a modified
   // native keypress event to the HLB from which we extract the element.  This function also
   // accepts jQuery collections and DOM elements.
-  describe('#getOriginalElement()', function () {
+  describe('#getPickedElement()', function () {
 
     it('Returns original DOM element if jQuery collection is passed as a parameter', function (done) {
 
       var $p       = jquery(win.document.getElementById('paragraph')),
           expected = win.document.getElementById('paragraph'),
-          actual   = hlb.getOriginalElement($p);
+          actual   = hlb.getPickedElement($p);
 
       expect(actual).to.be.equal(expected);
 
@@ -300,7 +316,7 @@ describe('highlight-box', function() {
 
       var p        = win.document.getElementById('paragraph'),
           expected = p,
-          actual   = hlb.getOriginalElement(p);
+          actual   = hlb.getPickedElement(p);
 
       expect(actual).to.be.equal(expected);
 
@@ -321,7 +337,7 @@ describe('highlight-box', function() {
           },
 
           expected = p,
-          actual   = hlb.getOriginalElement(nativeKeypressEventThatIsModifiedByPickerModule);
+          actual   = hlb.getPickedElement(nativeKeypressEventThatIsModifiedByPickerModule);
 
       expect(actual).to.be.equal(expected);
 
@@ -332,7 +348,7 @@ describe('highlight-box', function() {
     it('Returns undefined if empty object is passed as a parameter', function (done) {
 
       var emptyObject = {},
-          actual      = hlb.getOriginalElement(emptyObject);
+          actual      = hlb.getPickedElement(emptyObject);
 
       expect(actual).to.be.equal(undefined);
 
@@ -352,11 +368,15 @@ describe('highlight-box', function() {
       var expected = false,
           actual;
 
+      hlb.setHLB({'off':function(){}});
+
       hlb.onHLBHover();
 
       actual = hlb.getPreventDeflationFromMouseout();
 
       expect(actual).to.be.equal(expected);
+
+      hlb.setHLB();
 
       done();
 
@@ -504,7 +524,7 @@ describe('highlight-box', function() {
         // NOTE : I couldn't find a way to listen for closeHLB(), because it is private.
         //        For now, listen for the function below to be called because it is called
         //        by closeHLB().
-        closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+        closeHLBSpy = sinon.spy(hlbAnimation, 'transitionOutHLB');
 
         hlb.setHLB(jquery(win.document.getElementById('paragraph')));
         hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
@@ -848,74 +868,6 @@ describe('highlight-box', function() {
 
   });
 
-  // The transitionInHLB() purpose is to dim the background and animate the increased scaling of the HLB.
-  describe('#transitionInHLB', function () {
-
-    it('Invokes dimmer.dimBackgroundContent because the background should dim as the HLB animates open', function (done) {
-
-      var dimBackgroundContentSpy = sinon.spy(dimmer, 'dimBackgroundContent');
-
-      hlb.transitionInHLB();
-
-      expect(dimBackgroundContentSpy.calledOnce).to.be.true;
-
-      dimBackgroundContentSpy.restore();
-
-      done();
-
-    });
-
-  });
-
-  // The transitionOutHLB() purpose is to animate and remove the HLB and background dimmer.
-  describe('#transitionOutHLB', function () {
-
-    it('Invokes element.addEventListener if $hlbElement has a transform scale > 1 because ' +
-       'we rely upon transitionEnd event to remove the HLB from the DOM after transitioning the scale', function (done) {
-
-      var addEventListenerSpy = sinon.spy(win.document.getElementById('scaledElement'), 'addEventListener'),
-          cssStub             = sinon.stub(jquery.fn, 'css', function () {return {'match': function () {}}});
-
-      hlb.setHLB(jquery(win.document.getElementById('scaledElement')));
-
-      hlb.transitionOutHLB();
-
-      expect(addEventListenerSpy.calledOnce).to.be.true;
-
-      addEventListenerSpy.restore();
-      cssStub.restore();
-
-      done();
-
-    });
-
-    it('Invokes onHLBClosed if $hlbElement has no transform set because there is no need to transition the HLB to scale(1)', function (done) {
-
-      // NOTE : I couldn't find a way to listen for closeHLB(), because it is private.
-      //        For now, listen for the function below to be called because it is called
-      //        by onHLBClosed().
-      var onHLBClosedSpy = sinon.spy(eventHandlers, 'enableWheelScroll'),
-          cssStub        = sinon.stub(jquery.fn, 'css', function () {
-            return {
-              'match':function () {return true;}
-            };
-          });
-
-      hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
-
-      hlb.transitionOutHLB();
-
-      expect(onHLBClosedSpy.calledOnce).to.be.true;
-
-      onHLBClosedSpy.restore();
-      cssStub.restore();
-
-      done();
-
-    });
-
-  });
-
   // The cloneHLB() purpose is to clone the element and styles passed by the picker to create a new HLB.
   describe('#cloneHLB', function () {
 
@@ -1041,30 +993,30 @@ describe('highlight-box', function() {
   // The closeHLB() purpose is to close the HLB
   describe('#closeHLB', function () {
 
-    it('Sets isHLBClosing to false because closeHLB() is responsible for closing the HLB, and once finished, sets ' +
-       'this private variable to false so that the HLB can open again.' , function (done) {
+    // it('Sets isHLBClosing to false because closeHLB() is responsible for closing the HLB, and once finished, sets ' +
+    //    'this private variable to false so that the HLB can open again.' , function (done) {
 
-      var expected = false,
-          actual;
+    //   var expected = false,
+    //       actual;
 
-      hlb.setIsHLBClosing(true);
-      hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('nonScaledElement')));
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
+    //   hlb.setIsHLBClosing(true);
+    //   hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
+    //   hlb.setOriginalElement(jquery(win.document.getElementById('nonScaledElement')));
+    //   hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
 
-      hlb.closeHLB();
+    //   hlb.closeHLB();
 
-      actual = hlb.getIsHLBClosing();
+    //   actual = hlb.getIsHLBClosing();
 
-      expect(actual).to.be.equal(expected);
+    //   expect(actual).to.be.equal(expected);
 
-      done();
+    //   done();
 
-    });
+    // });
 
     it('Invokes dimmer.removeDimmer because another module is responsible for doing the work of removing the dimmer.', function (done) {
 
-      var removeDimmerSpy = sinon.spy(dimmer, 'removeDimmer');
+      var removeDimmerSpy = sinon.spy(hlbAnimation, 'transitionOutHLB');
 
       hlb.setIsHLBClosing(true);
       hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
@@ -1205,41 +1157,6 @@ describe('highlight-box', function() {
 
   });
 
-  // The addHLBWrapper() purpose is to add an element to the DOM for the HLB and Dimmer element to be appended to.
-  describe('#addHLBWrapper()', function () {
-
-    it('Sets $hlbWrappingElement to an object so that it ' +
-       'can be referenced by the rest of the HLB module', function (done) {
-
-      var expected = 'object',
-          actual;
-
-      hlb.addHLBWrapper();
-
-      actual = typeof hlb.getHLBWrappingElement();
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Sets $hlbWrappingElement id so that we can reference it by an id', function (done) {
-
-      var expected = 'sitecues-hlb-wrapper',
-          actual;
-
-      hlb.addHLBWrapper();
-
-      actual = hlb.getHLBWrappingElement()[0].id;
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-  });
 
   // The removeHLBWrapper() purpose is to remove, from the DOM, the parent of the HLB and Dimmer element.
   describe('#removeHLBWrapper()', function () {
@@ -1290,56 +1207,13 @@ describe('highlight-box', function() {
 
     });
 
-    it('Sets private variable $hlbElement to undefined if $hlbElement already exists and undefined is passed to toggleHLB.', function (done) {
+    it('Sets private variable isHLBClosing to true if $hlbElement already exists and undefined is passed to toggleHLB.', function (done) {
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph2')));
 
       hlb.toggleHLB(undefined);
 
-      expect(hlb.getHLB()).to.be.undefined;
-
-      done();
-
-    });
-
-    it('Removes dimmer if $hlbElement exists', function (done) {
-
-      var removeDimmerSpy = sinon.spy(dimmer, 'removeDimmer');
-
-      hlb.setOriginalElement(jquery(win.document.getElementById('nonScaledElement')));
-
-      hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
-
-      hlb.toggleHLB();
-
-      expect(removeDimmerSpy.calledOnce).to.be.true;
-
-      removeDimmerSpy.restore();
-
-      done();
-
-    });
-
-    it('Adds dimmer if an element is passed as a parameter and the HLB doesnt exist', function (done) {
-
-      var dimBackgroundContentSpy = sinon.spy(dimmer, 'dimBackgroundContent'),
-          cssMock                 = function () {
-                                      return {
-                                        'appendTo' : function () {
-
-                                        }
-                                      };
-                                    },
-          cssSpy                  = sinon.stub(jquery, 'css', cssMock);
-
-      hlb.setHLB(undefined);
-
-      hlb.toggleHLB(jquery(win.document.getElementById('paragraph')));
-
-      expect(dimBackgroundContentSpy.calledOnce).to.be.true;
-
-      dimBackgroundContentSpy.restore();
-      cssSpy.restore();
+      expect(hlb.getIsHLBClosing()).to.be.true;
 
       done();
 

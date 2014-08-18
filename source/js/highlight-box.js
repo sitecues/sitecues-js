@@ -31,7 +31,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           initialHLBRect, // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
-          preventDeflationFromMouseout   = false, // Boolean that determines if HLB can be deflated.
+          preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
           isSticky                       = false; // DEBUG: HLB deflation toggler
 
@@ -291,6 +291,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function sizeHLB() {
 
+        var fixit,
+            allHLBChildren;
         // Initialize height/width of the HLB
         hlbPositioning.initializeSize($hlbElement, initialHLBRect);
 
@@ -301,13 +303,59 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Limit the width of the HLB to a maximum of CHAR_WIDTH_LIMIT characters.
         hlbPositioning.limitWidth($originalElement, $hlbElement, CHAR_WIDTH_LIMIT);
 
+        hlbPositioning.fixOverflowWidth($hlbElement);
+
+        if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
+
+          allHLBChildren = $hlbElement.find('*');
+
+          fixit = true;
+
+          allHLBChildren.each(function () {
+
+            $(this).css('max-width', getChildWidth(this));
+            $(this).css('height', 'auto');
+
+          });
+
+        }
+
         // The following attempts to mitigate the vertical scroll bar by
         // setting the height of the element to the scroll height of the element.
-        hlbPositioning.mitigateVerticalScroll($hlbElement);
+       hlbPositioning.mitigateVerticalScroll($hlbElement);
 
         // Vertical scroll should only appear when HLB is as tall as the
         // safe area height and its scrollHeight is greater than its clientHeight
-        hlbPositioning.addVerticalScroll($hlbElement);
+       hlbPositioning.addVerticalScroll($hlbElement);
+
+        if (fixit) {
+          if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
+            allHLBChildren.each(function () {
+              $(this).css('height', 'auto');
+              $(this).css('max-width', parseFloat($(this).css('max-width')) -
+                                       ($hlbElement[0].scrollWidth - $hlbElement[0].clientWidth) -
+                                       parseFloat($hlbElement.css('paddingRight')));
+            });
+          }
+        }
+
+      }
+
+      function getChildWidth (child) {
+
+        var sum = 0,
+            zoom = conf.get('zoom');
+
+        $(child).parentsUntil($hlbElement.parent()).addBack().each(function () {
+          sum += parseFloat($(this).css('marginLeft'));
+          sum += parseFloat($(this).css('marginRight'));
+          sum += parseFloat($(this).css('paddingRight'));
+          sum += parseFloat($(this).css('paddingLeft'));
+          sum += parseFloat($(this).css('borderRightWidth'));
+          sum += parseFloat($(this).css('borderLeftWidth'));
+        });
+
+        return ($hlbElement[0].getBoundingClientRect().width / zoom) - sum;
 
       }
 
@@ -664,8 +712,7 @@ console.log('rdy')
       if (SC_UNIT) {
 
         exports.mapForm                  = mapForm;
-        exports.isHLBScaleGreaterThanOne = isHLBScaleGreaterThanOne;
-        exports.getPickedElement       = getPickedElement;
+        exports.getPickedElement         = getPickedElement;
         exports.onHLBHover               = onHLBHover;
         exports.onTargetChange           = onTargetChange;
         exports.initializeHLB            = initializeHLB;
@@ -714,6 +761,10 @@ console.log('rdy')
         };
 
         exports.$getPickedElement = function() {
+          return $pickedElement;
+        };
+
+        exports.$getOriginalElement = function () {
           return $originalElement;
         };
 

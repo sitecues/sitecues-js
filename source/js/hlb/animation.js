@@ -1,7 +1,6 @@
 /*
-  This module styles the HLB by filtering attributes, styles, dom elements,
-  sets background, sets default styles, computes some styles,
-  and cloned child styles from the original element to the HLB.
+  This module animates the HLB.  Depending on the browser, the mechanism
+  of animation is either CSS3 Transitions or jQuery.animate.
  */
 sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
@@ -13,14 +12,14 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
         DEFLATION_SPEED = 150, // Default deflation duration
-        $animation;  // A reference to the $.animate we use for IE9 inflation and deflation
+
+        $animation;            // A reference to the $.animate we use for IE9 inflation and deflation
 
     /**
      * [transitionInHLB animates the inflation of the HLB and background dimmer]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     hlbAnimation.transitionInHLB = function (data) {
-
-      var $hlbElement = data.$hlbElement;
 
       // Dim the background!
       dimmer.dimBackgroundContent(data.$hlbWrappingElement, INFLATION_SPEED);
@@ -39,6 +38,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [transitionOutHLB animates and removes the HLB and background dimmer]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     hlbAnimation.transitionOutHLB = function (data) {
 
@@ -84,10 +84,11 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [transitionInHLBWithJquery animates the HLB open with jQuery.animate()]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     function transitionInHLBWithJquery(data) {
 
-      var $hlbElemen = data.$hlbElement;
+      var $hlbElement = data.$hlbElement;
 
       $hlbElement.css({
         'transform-origin': data.originCSS,
@@ -108,6 +109,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [transitionOutHLBWithJquery animates the HLB closed with jQuery.animate()]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     function transitionOutHLBWithJquery(data) {
 
@@ -131,6 +133,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [transitionOutHLBWithCSS animates the HLB closed with CSS transitions]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     function transitionOutHLBWithCSS(data) {
 
@@ -147,6 +150,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [transitionInHLBWithCSS animates the HLB open with CSS transitions]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     function transitionInHLBWithCSS(data) {
 
@@ -164,6 +168,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     /**
      * [hlbSteppingAnimation is a custom step function for the jQuery animate method]
      * @param  {[Number]} now [The value of the property we are animating]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
     function hlbSteppingAnimation(now, data) {
 
@@ -177,6 +182,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     /**
      * [getTransitionInCSS returns the jquery CSS object needed to animate the HLB open]
+     * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      * @return {[Object]} [The jquery CSS object needed to animate the HLB open]
      */
     function getTransitionInCSS(data) {

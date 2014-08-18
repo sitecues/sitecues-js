@@ -200,8 +200,8 @@ sitecues.def('cursor', function (cursor, callback) {
                   console.log('Catch!');
                   rule.style.cursor = cursorValueURL;
                 } catch (ex) {
-                    // Suppress the exception and go on.
-                    console.log(ex);
+                  // Suppress the exception and go on.
+                  console.log(ex);
                 }
               }
             }
@@ -513,13 +513,15 @@ sitecues.def('cursor', function (cursor, callback) {
             baseUrlObject = sitecues.parseUrl(request.url),
             newText       = request.responseText,
             matches       = extractUrlsForReplacing(extractUniqueUrlsFromMatches(newText.match(relativeRegEx)));
-            console.log('---------------------------------------')
-            console.log(matches);
-          //  console.log(newText)
+
         for (var i = 0; i < matches.length; i += 1) {
           newText = newText.replace(new RegExp(matches[i], 'g'), sitecues.resolveUrl(matches[i], baseUrlObject));
         }
 
+        // EEOC Fix : In a single stylesheet served by EEOC, they had a relative and absolute URL to an image.
+        //            Our algorithm globally replaces relative urls with absolute, so if BOTH exists, problems happen.
+        // Example:   ['www.example.com/image.jpg', '/image.jpg'] => ['//www.example.com//www.example.com/image.jpg', '//www.example.com/image.jpg']
+        // TODO do a test. Give information to client
         newText = newText.replace(new RegExp('//' + baseUrlObject.hostname + '//' + baseUrlObject.hostname, 'g'), '//' + baseUrlObject.hostname);
 
         linkTagStylesList[validSheets.indexOf(request.url)] = newText;

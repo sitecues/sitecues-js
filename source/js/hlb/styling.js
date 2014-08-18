@@ -150,15 +150,6 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           },
           textDecoration = originalElementsChildStyle.textDecoration;
 
-      // Do not copy over the width and height because
-      // it causes horizontal scrollbars, unless it is an image
-      // in which case we preserve the dimensions.
-      // TODO: Prove with functional test and test page demonstrating the necessity of this statement below.
-      if (!$child.is('img')) {
-        styles.width  = '';
-        styles.height = '';
-      }
-
       // NOTE: Copying cssText directly is not sufficient for copying textDecorations.
       //       ts.dev.sitecues.com/hlb/styling/text-decoration.html
       if (textDecoration.indexOf('underline') !== -1) {
