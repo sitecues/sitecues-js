@@ -85,7 +85,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       /**
        * [getInitialHLBRect returns the initial width and height for our HLB when we first create it.
-       * Preferebly we utilize the highlight rectangle calculated by the picker.]
+       * Prefera
+       e.dom &&
+       e.dom.mouse_highlight &&
+       e.dom.mouse_highlight.fixedContentRect) {
+
+          return e.dom.mouse_highlight.fixedContentRect;
+
+        }
+       bly we utilize the highlight rectangle calculated by the picker.]
        * @param  {[DOM event data object]} e [The picker modified DOM event data object]
        * @return {[Object]}   [Dimensions and position]
        */
@@ -185,6 +193,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             $originalElement               = $('<ul>').append(pickedElementsClone),
             zoom                           = conf.get('zoom');
 
+
         // Setting this to true will remove the $originalElement from the DOM before inflation.
         // This is a very special case where the original element is not the same as the picked element.
         // NOTE: This is setting a module scoped variable so the rest of the program as access.
@@ -197,8 +206,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $originalElement.css({
           'position'       : 'absolute',
-          'left'           : originalElementBoundingBox.left / zoom + window.pageXOffset / zoom,
-          'top'            : originalElementBoundingBox.top  / zoom + window.pageYOffset / zoom,
+          'left'           : (pickedElementsBoundingBox.left  + window.pageXOffset) / zoom,
+          'top'            : (pickedElementsBoundingBox.top   + window.pageYOffset) / zoom,
           'opacity'        : 0,
           'padding'        : 0,
           'margin'         : 0,
@@ -376,9 +385,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
             // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement),
-
-            zoom = conf.get('zoom');
+            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement);
 
         // Update the dimensions for the HLB which is used for constraint calculations.
         // The offset of the original element and cloned element midpoints are used for positioning.
@@ -620,7 +627,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [onHLBClosed executes once the HLB is deflated (scale = 1).  This function is
+       * [onHLBClosed executes once the HLB is deflated (scale = current zoom level).  This function is
        * responsible for setting the state of the application to what it was before
        * any HLB existed.]
        */

@@ -224,10 +224,10 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       // The bounding box of the cloned element if we were to scale it
       return {
-        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width)  / 2),
-        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
-        'width' : clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom,
-        'height': clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom
+        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * zoomFactor - clonedNodeBoundingBox.width)  / 2),
+        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * zoomFactor - clonedNodeBoundingBox.height) / 2),
+        'width' : clonedNodeBoundingBox.width  * zoomFactor,
+        'height': clonedNodeBoundingBox.height * zoomFactor
       };
     };
 
@@ -252,18 +252,17 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     };
 
     /**
-     * [initializeSize sets the height and width of the HLB to the orignal elements bounding
+     * [initializeSize sets the height and width of the HLB to the original element's bounding
      * box height and width.  Useful for images.]
      * @param  {[jQuery element]} $hlbElement      [The HLB]
      * @param  {[Object]} $initialHLBRect [The highlight rect or the $originalElement  bounding client rect.]
      */
     hlbPositioning.initializeSize = function($hlbElement, initialHLBRect) {
-
       var zoom = conf.get('zoom');
 
       $hlbElement.css({
-        'width' : (initialHLBRect.width  / zoom) + 'px', //Preserve dimensional ratio
-        'height': (initialHLBRect.height / zoom) + 'px', //Preserve dimensional ratio
+        'width' : (initialHLBRect.width / zoom ) + 'px', //Preserve dimensional ratio
+        'height': (initialHLBRect.height / zoom ) + 'px' //Preserve dimensional ratio
       });
 
     };

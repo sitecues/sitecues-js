@@ -6,9 +6,9 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/safe-area', 'platform',
+  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/safe-area', 'platform', 'conf',
 
-  function (dimmer, common, $, hlbSafeArea, platform) {
+  function (dimmer, common, $, hlbSafeArea, platform, conf) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
         DEFLATION_SPEED = 150, // Default deflation duration
@@ -59,7 +59,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // mechanism (because there is nothing to animate if scale is already 1).  Therefore,
       // we check to see if the HLB scale is greater than one, and if so, we animate the
       // deflation, otherwise, we just skip the deflation step
-      if (isHLBScaleGreaterThanOne($hlbElement)) {
+      if (isHLBScaleGreaterThanZoom($hlbElement)) {
 
         if (common.useJqueryAnimate) {
 
@@ -97,7 +97,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       $animation = $({'scale': 1}).animate(
         {
-          'scale': hlbSafeArea.HLBZoom
+          'scale': hlbSafeArea.getHLBTransformScale()
         }, {
           'step'    : hlbSteppingAnimation,
           'duration': INFLATION_SPEED,
@@ -117,7 +117,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       $animation = $({'scale' : $animation.attr('scale')}).animate(
         {
-          'scale': 1
+          'scale': conf.get('zoom')
         }, {
           'step'    : (function ($hlbElement, data) {
             return function (now) {
@@ -160,7 +160,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
       $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBReady);
 
-      // Scale the element up to 1.5 (hlbPositioning.HLBZoom)
+      // Scale the element up to 1.5 * the current level of zoom [ hlbPositioning.getHLBTransformScale() ]
       $hlbElement.css(transitionInCSS);
 
     }
@@ -193,7 +193,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       var transitionInCSS = {
         'transition'                : data.transitionProperty + INFLATION_SPEED + 'ms',
         'transition-timing-function': 'ease',
-        'transform'                 : 'scale(' + hlbSafeArea.HLBZoom + ') ' + data.translateCSS,
+        'transform'                 : 'scale(' + hlbSafeArea.getHLBTransformScale() + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS
       };
 
@@ -206,25 +206,19 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
     }
     /**
-     * [isHLBScaleGreaterThanOne determines if the $hlbElement is scaled greater than one.
+     * [isHLBScaleGreaterThanZoom determines if the $hlbElement is scaled greater than one.
      * This is useful for the transitionOutHLB function.]
-     * @return {Boolean} [if true, $hlbElement is scaled > 1]
+     * @return {Boolean} [if true, $hlbElement is scaled > zoom]
      * @example "matrix(1.5, 0, 0, 1.5, 1888.0610961914063, 2053.21875)"
      * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)"
      */
-    function isHLBScaleGreaterThanOne($hlbElement) {
+    function isHLBScaleGreaterThanZoom($hlbElement) {
 
       // If there isn't any transform, then it isn't scaled.
-      if ($hlbElement.css('transform') === 'none') {
-        return false;
-      }
+      var transform = $hlbElement.css('transform'),
+        scale = parseFloat(transform.substring(7));
 
-      if ($hlbElement.css('transform').match('matrix\\(1,')) {
-        return false;
-      }
-
-      return true;
-
+      return scale > conf.get('zoom');
     }
     /**
      * [getTransitionOutCSS returns the jquery CSS object needed to animate the HLB closed]
