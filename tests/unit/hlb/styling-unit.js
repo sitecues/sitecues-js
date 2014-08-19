@@ -29,27 +29,27 @@ describe('hlbStyling', function() {
       done();
     });
 
-    it('Returns an object with width and height properties if $child is a non-image element because HLB non-image children should not have computed width inherited.', function (done) {
-      var $child = jquery(win.document.getElementById('paragraph')),
-          originalElementsComputedStyles = {
-            'textDecoration': ''
-          },
-          result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
+    // it('Returns an object with width and height properties if $child is a non-image element because HLB non-image children should not have computed width inherited.', function (done) {
+    //   var $child = jquery(win.document.getElementById('paragraph')),
+    //       originalElementsComputedStyles = {
+    //         'textDecoration': ''
+    //       },
+    //       result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
 
-      expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.true;
-      done();
-    });
+    //   expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.true;
+    //   done();
+    // });
 
-    it('Returns an object without width and height properties if $child is an image element because HLB image children should preserve their original ratio.', function (done) {
-      var $child = jquery('<img>'),
-          originalElementsComputedStyles = {
-            'textDecoration': ''
-          },
-          result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
+    // it('Returns an object without width and height properties if $child is an image element because HLB image children should preserve their original ratio.', function (done) {
+    //   var $child = jquery('<img>'),
+    //       originalElementsComputedStyles = {
+    //         'textDecoration': ''
+    //       },
+    //       result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
 
-      expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.false;
-      done();
-    });
+    //   expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.false;
+    //   done();
+    // });
 
     it('Returns an object with a textDecoration property whose value is "underline" if the original styles for text-decoration includes the string "underline"', function (done) {
       var $child = jquery(win.document.getElementById('paragraph')),
@@ -128,7 +128,7 @@ describe('hlbStyling', function() {
 
       var $originalElement = jquery(win.document.getElementById('overflowWidth')),
           expected         = 'object',
-          actual           = typeof hlbStyling.getHLBStyles($originalElement);
+          actual           = typeof hlbStyling.getHLBStyles($originalElement, $originalElement);
 
       expect(actual).to.be.equal(expected);
 

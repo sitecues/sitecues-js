@@ -33,26 +33,6 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     }
 
     /**
-     * [fixOverflowWidth sets the width of the HLB to avoid horizontal scrollbars]
-     * @param  {[jQuery element]} clonedNode [HLB]
-     */
-    function fixOverflowWidth($hlbElement) {
-
-      var hlbElement = $hlbElement[0];
-
-      // If there is a horizontal scroll bar
-      if (hlbElement.clientWidth < hlbElement.scrollWidth) {
-
-        $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + 'px'
-        });
-
-        // Again, we can't be positive that the increase in width does not overflow the safe area.
-        hlbPositioning.constrainWidthToSafeArea($hlbElement);
-      }
-    }
-
-    /**
      * [getExtraLeftPadding returns addition left-padding of the HLB]
      * @param  {[jQuery element]} $hlbElement [HLB element]
      * @return {[integer]}                    [The additional left-padding]
@@ -73,8 +53,8 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     hlbPositioning.midPointDiff = function($rectOne, $rectTwo) {
 
-      var br1 = $rectOne[0].getBoundingClientRect(),
-          br2 = $rectTwo[0].getBoundingClientRect(),
+      var br1 = $rectOne instanceof $ ? $rectOne[0].getBoundingClientRect() : $rectOne,
+          br2 = $rectTwo instanceof $ ? $rectTwo[0].getBoundingClientRect() : $rectTwo,
           br1x = br1.left + br1.width / 2,
           br1y = br1.top + br1.height / 2,
           br2x = br2.left + br2.width / 2,
@@ -105,7 +85,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
         // Setting the width requires checking if content does not overflow horizontally
-        fixOverflowWidth($hlbElement);
+        hlbPositioning.fixOverflowWidth($hlbElement);
       }
 
     };
@@ -246,9 +226,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       // The bounding box of the cloned element if we were to scale it
       return {
-        'left': clonedNodeBoundingBox.left - ((clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width) / 2),
-        'top': clonedNodeBoundingBox.top - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
-        'width': clonedNodeBoundingBox.width * hlbSafeArea.HLBZoom,
+        'left'  : clonedNodeBoundingBox.left   - ((clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.width)  / 2),
+        'top'   : clonedNodeBoundingBox.top    - ((clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom - clonedNodeBoundingBox.height) / 2),
+        'width' : clonedNodeBoundingBox.width  * hlbSafeArea.HLBZoom,
         'height': clonedNodeBoundingBox.height * hlbSafeArea.HLBZoom
       };
     };
@@ -267,7 +247,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
         // Adding a vertical scroll may sometimes make content overflow the width
-        fixOverflowWidth($hlbElement);
+        hlbPositioning.fixOverflowWidth($hlbElement);
 
       }
 
@@ -277,23 +257,42 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      * [initializeSize sets the height and width of the HLB to the orignal elements bounding
      * box height and width.  Useful for images.]
      * @param  {[jQuery element]} $hlbElement      [The HLB]
-     * @param  {[jQuery element]} $originalElement [The original element]
+     * @param  {[Object]} $initialHLBRect [The highlight rect or the $originalElement  bounding client rect.]
      */
-    hlbPositioning.initializeSize = function($hlbElement, $originalElement) {
+    hlbPositioning.initializeSize = function($hlbElement, initialHLBRect) {
 
-      var originalElementsBoundingBox = $originalElement[0].getBoundingClientRect(),
-          zoom = conf.get('zoom');
+      var zoom = conf.get('zoom');
 
       $hlbElement.css({
-        'width' : (originalElementsBoundingBox.width / zoom)  + 'px', //Preserve dimensional ratio
-        'height': (originalElementsBoundingBox.height / zoom) + 'px', //Preserve dimensional ratio
+        'width' : (initialHLBRect.width  / zoom) + 'px', //Preserve dimensional ratio
+        'height': (initialHLBRect.height / zoom) + 'px', //Preserve dimensional ratio
       });
 
     };
 
+    /**
+     * [fixOverflowWidth sets the width of the HLB to avoid horizontal scrollbars]
+     * @param  {[jQuery element]} clonedNode [HLB]
+     */
+    hlbPositioning.fixOverflowWidth = function($hlbElement) {
+
+      var hlbElement = $hlbElement[0];
+
+      // If there is a horizontal scroll bar
+      if (hlbElement.clientWidth < hlbElement.scrollWidth) {
+
+        $hlbElement.css({
+          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+        });
+
+        // Again, we can't be positive that the increase in width does not overflow the safe area.
+        hlbPositioning.constrainWidthToSafeArea($hlbElement);
+      }
+    };
+
     if (SC_UNIT) {
       exports.isEligibleForConstrainedWidth = isEligibleForConstrainedWidth;
-      exports.fixOverflowWidth              = fixOverflowWidth;
+      exports.fixOverflowWidth              = hlbPositioning.fixOverflowWidth;
       exports.getExtraLeftPadding           = getExtraLeftPadding;
       exports.midPointDiff                  = hlbPositioning.midPointDiff;
       exports.limitWidth                    = hlbPositioning.limitWidth;

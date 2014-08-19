@@ -4,6 +4,7 @@ exports.constrainWidthToSafeArea  = function () {};
 exports.limitWidth                = function () {};
 exports.mitigateVerticalScroll    = function () {};
 exports.addVerticalScroll         = function () {};
+exports.fixOverflowWidth          = function () {};
 exports.scaleRectFromCenter       = function () {
   return {
     'width' : 0,
