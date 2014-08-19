@@ -43,6 +43,7 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	$(build-dir)/source/js/core.js \
 	source/js/jquery.js \
+	source/js/util/localstorage.js \
 	source/js/user.js \
 	source/js/custom.js \
 	$(custom-files) \

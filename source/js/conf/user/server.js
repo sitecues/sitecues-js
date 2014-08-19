@@ -18,7 +18,7 @@ sitecues.def('conf/user/server', function(server, callback) {
 
   // server.initialUserDataReturned = false;
 
-  sitecues.use('conf/user/manager', 'user', 'jquery', function(manager, user, jquery) {
+  sitecues.use('conf/user/manager', 'user', 'util/localstorage', 'jquery', function(manager, user, ls, jquery) {
     // JSONP callback called when a save call returns.
 
     var saveTimeoutId;
@@ -27,51 +27,6 @@ sitecues.def('conf/user/server', function(server, callback) {
       saveTimeoutId && clearTimeout(saveTimeoutId);
       SAVING_DATA = false;
     };
-
-  /**
-   * Set Local Storage data | userID namespace.
-   * @param {Object} data
-   * @returns {void}
-   */
-    function setLocalStorageById(data) {
-      var data = data? JSON.stringify(data): "{}";
-      // Set the initial data under userId namespace.
-      window.localStorage.setItem(user.getId(), data);
-      SC_DEV && console.log('Setting the data in LocalStorage: ' + data);
-    }
-
-  /**
-   * Update LocalStorage data | userID namespace.
-   * @param {String} lsByUserId
-   * @param {String} key
-   * @param {String} value
-   * @returns {void}
-   */
-    function updateLocalStorageById(lsByUserId, key, value) {
-      // Convert from String to Object.
-      lsByUserId = JSON.parse(lsByUserId);
-      // Update value.
-      lsByUserId[key] = value;
-      // Prepare to save in LocalStorage.
-      lsByUserId = JSON.stringify(lsByUserId);
-      window.localStorage.setItem(user.getId(), lsByUserId);
-      SC_DEV && console.log('Updating the data in LocalStorage: ' + lsByUserId);
-    }
-
-    /**
-     * Get LocalStorage data | userID namespace.
-     * @param {type} id
-     * @returns {DOMString}
-     */
-    function getLocalStorageById(id) {
-      var id = id || user.getId();
-      return window.localStorage.getItem(id);
-    }
-
-    function isValidLocalStorageById(lsByUserId) {
-      var lsByUserId = lsByUserId? JSON.parse(lsByUserId): getLocalStorageById();
-      return (Object.keys(lsByUserId).length >= 1); // At least one value.
-    }
 
     // Saves a key/value pair.
     var saveData = function(key, value) {
@@ -95,9 +50,9 @@ sitecues.def('conf/user/server', function(server, callback) {
         }, 500);
 
         // Load the data from localStorage: User ID namespace.
-        lsByUserId = getLocalStorageById(); // String.
-        if (lsByUserId && isValidLocalStorageById(lsByUserId)) {
-          updateLocalStorageById(lsByUserId, key, value);
+        lsByUserId = ls.getUserPreferencesById(); // String.
+        if (lsByUserId) {
+          ls.setUserPreferenceById(key, value);
           saveCallback();
         } else {
           // Save the server data.
@@ -145,9 +100,8 @@ sitecues.def('conf/user/server', function(server, callback) {
     };
 
     // Load the data from localStorage: User ID namespace.
-    lsByUserId = getLocalStorageById();
-    if (lsByUserId && isValidLocalStorageById(lsByUserId)) {
-      lsByUserId = JSON.parse(lsByUserId);
+    lsByUserId = ls.getUserPreferencesById();
+    if (lsByUserId) {
       loadCallback(lsByUserId);
     } else {
       // Load the server data.
@@ -158,7 +112,7 @@ sitecues.def('conf/user/server', function(server, callback) {
         contentType: 'application/json',
         dataType: 'jsonp',
         success: function(data) {
-          setLocalStorageById(data);
+          ls.setUserPreferencesById(data);
           loadCallback(data);
         },
         error: function(e) {
