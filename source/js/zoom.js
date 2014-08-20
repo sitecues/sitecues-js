@@ -57,7 +57,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Should we repaint when zoom is finished (after any animations)?
         // Should always be true in Chrome, because it makes text crisper
+        // Don't use backface repainting method if there is a background-image on the <body>, because it will be erased.
+        // (We still want to use the backface method when we can, because it often produces better results than our
+        // other method, which is to overlay a transparent div and then remove it)
         shouldRepaintOnZoomChange = platform.browser.isChrome,
+        shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $(body).css('backgroundImage') !== 'none',
+        REPAINT_FOR_CRISP_TEXT_MS = 15,
 
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
@@ -468,24 +473,30 @@ sitecues.def('zoom', function (zoom, callback) {
       function repaintToEnsureCrispText() {
         // We used to use backfaceVisibility trick, but it erased backgrounds on the body.
         // This was done as follows:
-        //   $(body).css('backfaceVisibility', '');
-        //   setTimeout(function() { $(body).css('backfaceVisibility', 'hidden') }, 15);
         // Luckily, inserting a shim seems to work now (may not have in previous versions of Chrome when we tried it)
         if (!shouldRepaintOnZoomChange) {
           return;
         }
-        var appendedDiv = $('<div>')
-          .css({
-            position: 'fixed',
-            width: '1px',
-            height: '1px',
-            backgroundColor: 'transparent',
-            pointerEvents: 'none'
-          })
-          .appendTo('html');
-        setTimeout(function () {
-          appendedDiv.remove();
-        }, 15);
+        if (shouldUseBackfaceRepaint) {
+          $(body).css('backfaceVisibility', '');
+          setTimeout(function () {
+            $(body).css('backfaceVisibility', 'hidden')
+          }, REPAINT_FOR_CRISP_TEXT_MS);
+        }
+        else {
+          var appendedDiv = $('<div>')
+            .css({
+              position: 'fixed',
+              width: '1px',
+              height: '1px',
+              backgroundColor: 'transparent',
+              pointerEvents: 'none'
+            })
+            .appendTo('html');
+          setTimeout(function () {
+            appendedDiv.remove();
+          }, REPAINT_FOR_CRISP_TEXT_MS);
+        }
       }
 
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
