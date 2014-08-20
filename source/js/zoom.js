@@ -214,18 +214,20 @@ sitecues.def('zoom', function (zoom, callback) {
           return;
         }
 
-        zoomAnimator = requestFrame(function() {
+        zoomAnimator = requestFrame(function () {
           // Stop the key-frame animation at the current zoom level
           // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
           $body.css({
             animationPlayState: 'paused'
           });
-          zoomAnimator = requestFrame(function() {
-            currentTargetZoom = getActualZoom();
-            $body.css(getZoomCss(currentTargetZoom));
-            finishZoomOperation();
-          });
+          zoomAnimator = requestFrame(onGlideStopped);
         });
+      }
+
+      function onGlideStopped() {
+        currentTargetZoom = getActualZoom();
+        $body.css(getZoomCss(currentTargetZoom));
+        finishZoomOperation();
       }
 
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
@@ -259,7 +261,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // * Keypress (+/-) or A button press, which zoom until the button is let up
       function performKeyFramesZoomOperation() {
         if (doAnimationsDelayHack) {
-          // Wait for Chrome animation style sheet to be ready, so that the animation does not "jerk back"
+          // Wait for Chrome animation style sheet to be ready
           doAnimationsDelayHack = false;
           $body.css('animation'); // Force reflow to finish
           startZoomTime = Date.now();
@@ -281,7 +283,7 @@ sitecues.def('zoom', function (zoom, callback) {
         $body.css(animationCss);
 
         // No zoom/stop received for initial zoom
-        $body.one(ANIMATION_END_EVENTS, finishZoomOperation);
+        $body.one(ANIMATION_END_EVENTS, onGlideStopped);
       }
 
       function setupNextZoomStyleSheet(targetZoom) {
@@ -420,7 +422,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // Ensure no further changes to zoom from this operation
         cancelFrame(zoomAnimator);
         clearTimeout(minZoomChangeTimer);
-        $body.off(ANIMATION_END_EVENTS, finishZoomOperation);
+        $body.off(ANIMATION_END_EVENTS, onGlideStopped);
       }
 
       /**
