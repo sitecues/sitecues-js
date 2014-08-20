@@ -42,6 +42,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // and other style fixes for zoom
         // <style id=SITECUES_ZOOM_ID></style>
         zoomStyleSheet,
+        doAnimationsDelayHack,
 
         // Zoom operation state
         minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
@@ -67,8 +68,8 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldFixNativeFormAppearance =  platform.browser.isChrome && platform.os.isMac,
 
         // Constants
-        MIN_ZOOM_PER_CLICK = 0.3,  // Change zoom at least this amount if user clicks on A button or presses +/-
-        MS_PER_X_ZOOM = 1600, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
+        MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd';
@@ -173,29 +174,8 @@ sitecues.def('zoom', function (zoom, callback) {
             finishZoomOperation();
           }
           else if (shouldUseKeyFramesAnimation()) {
-            if (shouldFixAnimationJerkBack() && targetZoom > completedZoom && completedZoom < 1.3) {
-              // Hack to fix Chrome *most* of the time.
-              // This seems to prime the animation pump. Wow. No idea why this works,
-              // or why it's only needed when the start zoom < 1.1 and we're zooming up.
-              // Been staring at the code too long ... send food.
-              requestFrame(function() {
-                $body.css(getZoomCss(completedZoom + 0.001));
-                requestFrame(function () {
-                  $body.css(getZoomCss(completedZoom + 0.002));
-                  requestFrame(function () {
-                    $body.css(getZoomCss(completedZoom + 0.003));
-                    completedZoom += 0.003;
-                    startZoomTime += 150; // Correct for extra time added
-                    SC_DEV && console.log('Begin keyframes zoom with jerk-back fix hack');
-                    performKeyFramesZoomOperation();
-                  });
-                });
-              });
-            }
-            else {
-              SC_DEV && console.log('Begin keyframes zoom');
-              performKeyFramesZoomOperation();
-            }
+            SC_DEV && console.log('Begin keyframes zoom');
+            performKeyFramesZoomOperation();
           }
           else {
             SC_DEV && console.log('Begin JS zoom');
@@ -220,6 +200,11 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
 
+      function getActualZoom() {
+        var transform = $body.css('transform');
+        return getSanitizedZoomValue(transform.substring(7));
+      }
+      
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
         if (!shouldUseKeyFramesAnimation()) {
@@ -231,24 +216,15 @@ sitecues.def('zoom', function (zoom, callback) {
         zoomAnimator = requestFrame(function() {
           // Stop the key-frame animation at the current zoom level
           // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
-          $body.css('animationPlayState', 'paused'); // Stop the animation
+          $body.css({
+            animationPlayState: 'paused'
+          });
           zoomAnimator = requestFrame(function() {
-            var transform = $body.css('transform');
-            currentTargetZoom = getSanitizedZoomValue(transform.substring(7));
-            onGlideStopped();
+            currentTargetZoom = getActualZoom();
+            $body.css(getZoomCss(currentTargetZoom));
+            finishZoomOperation();
           });
         });
-      }
-
-      function onGlideStopped() {
-        // Turn off key-frame animations
-        // and use explicit zoom CSS to set the zoom the point at which it stopped
-        $body
-          .css(getZoomCss(currentTargetZoom))
-          .css('animation', '')
-          .css('animationPlayState', '');
-
-        finishZoomOperation();
       }
 
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
@@ -281,27 +257,70 @@ sitecues.def('zoom', function (zoom, callback) {
       // * Initial load zoom
       // * Keypress (+/-) or A button press, which zoom until the button is let up
       function performKeyFramesZoomOperation() {
-        currentTargetZoom = getSanitizedZoomValue(currentTargetZoom);
-        var animationName = SITECUES_ZOOM_ID + '-' + Math.round(completedZoom * 1000) + '-' + Math.round(currentTargetZoom * 1000),
-          keyFramesCss = animationName + ' {\n',
-          percent = 0,
-          step = 0,
-          // For better animation performance, use adaptive algorithm for number of keyframe steps:
-          // Bigger zoom jump = more steps
-          numSteps = Math.ceil(Math.abs(currentTargetZoom - completedZoom) * 10),
-          zoomIncrement = (currentTargetZoom - completedZoom) / numSteps,
-          percentIncrement = 100 / numSteps,
-          animationStepZoom = completedZoom,
-          cssPrefix = platform.cssPrefix.slice().replace('-moz-', ''),
-          zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * MS_PER_X_ZOOM,
-          keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+        if (doAnimationsDelayHack) {
+          // Wait for Chrome animation style sheet to be ready
+          doAnimationsDelayHack = false;
+          $body.css('animation');
+          startZoomTime = Date.now();
+          var HACK_DELAY = 150;
+          startZoomTime += HACK_DELAY;
+          setTimeout(performKeyFramesZoomOperation, HACK_DELAY);
+          SC_DEV && console.log('Performing Chome animation delay hack');
+          return;
+        }
+
+        var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * MS_PER_X_ZOOM,
           animationCss = {
-            animation:  animationName + ' ' + zoomSpeedMs + 'ms linear',
+            animation: getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear',
             animationPlayState: 'running',
             animationFillMode: 'forwards'
           };
 
-        for (; step <= numSteps; ++ step) {
+        // Apply the new CSS
+        $body.css(animationCss);
+
+        // No zoom/stop received for initial zoom
+        $body.one(ANIMATION_END_EVENTS, finishZoomOperation);
+      }
+
+      function setupNextZoomStyleSheet(targetZoom) {
+        var css = '';
+        if (shouldUseKeyFramesAnimation()) {
+          if (targetZoom) {
+            css = getAnimationCSS(targetZoom);
+          }
+          else {
+            if (completedZoom > zoom.min) {
+              css += getAnimationCSS(zoom.min);
+            }
+            if (completedZoom < zoom.max) {
+              css += getAnimationCSS(zoom.max);
+            }
+          }
+        }
+
+        applyZoomStyleSheet(css);
+      }
+
+      function getAnimationName(targetZoom) {
+        return SITECUES_ZOOM_ID + '-' + Math.round(completedZoom * 1000) + '-' + Math.round(targetZoom * 1000);
+      }
+
+      function getAnimationCSS(targetZoom) {
+        var animationName = getAnimationName(targetZoom),
+          keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+          keyFramesCss = animationName + ' {\n',
+          percent = 0,
+          step = 0,
+          // For animation performance, use adaptive algorithm for number of keyframe steps:
+          // Bigger zoom jump = more steps
+          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 10),
+          zoomIncrement = (targetZoom - completedZoom) / numSteps,
+          percentIncrement = 100 / numSteps,
+          animationStepZoom = completedZoom,
+          cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
+
+        for (; step <= numSteps; ++step) {
           percent = step === numSteps ? 100 : Math.round(step * percentIncrement);
           var zoomCss = getZoomCss(animationStepZoom),
             zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
@@ -310,13 +329,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         keyFramesCss += '}\n\n';
 
-        applyZoomStyleSheet(keyFramesCssProperty + keyFramesCss);
-
-        // Apply the new CSS
-        $body.css(animationCss);
-
-        // No zoom/stop received for initial zoom
-        $body.one(ANIMATION_END_EVENTS, finishZoomOperation);
+        return keyFramesCssProperty + keyFramesCss;
       }
 
       // Perform the initial zoom on load
@@ -342,18 +355,24 @@ sitecues.def('zoom', function (zoom, callback) {
         // Remove scrollbars -- we will re-add them after zoom if content is large enough
         removeScrollbars();
 
-        // Add general CSS fixes if we haven't already
-        if (completedZoom === 1) {   // Zooming up from 1 means we don't have any style fixes applied yet
-          applyZoomCSSFixes();
+        // Add what we need in <style> if we haven't already
+        if (!zoomStyleSheet) {
+          setupNextZoomStyleSheet(targetZoom);
+          doAnimationsDelayHack = shouldFixAnimationJerkBack();
+        }
+        else {
+          doAnimationsDelayHack = false;
+        }
+
+        // General CSS fixes on body
+        if (completedZoom === 1) {  // Starting at zoom === 1 means these haven't been set yet
+          $body.css(getZoomBodyCSSFixes());
         }
 
         // Make sure all animations are dead
         // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
         $body.css({
-          pointerEvents: 'none',
-          animation: '',
-          animationPlayState: '',
-          animationFillMode: ''
+          pointerEvents: 'none'
         });
 
         sitecues.emit('zoom/begin');
@@ -372,18 +391,11 @@ sitecues.def('zoom', function (zoom, callback) {
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
-        if (completedZoom === 1) {
-          clearAllCss();
-        }
-        else {
-          // Add scrollbars back in where necessary
-          addScrollbars();
-        }
+        // Add scrollbars back in where necessary
+        addScrollbars();
 
         // Restore mouse cursor events and CSS behavior
-        $body.css({
-          pointerEvents: ''
-        });
+        $body.css('pointerEvents', '');
 
         // When zooming is finished, we will restrict the width
         // Un-Blur text in Chrome
@@ -394,6 +406,12 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('zoom', completedZoom);
 
         clearZoomCallbacks();
+
+        glideInputEvent = null;
+
+        // Get next forward/backward glide animations ready.
+        // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
+        setTimeout(setupNextZoomStyleSheet, 0);
       }
 
       // Make sure the current zoom operation does not continue
@@ -459,7 +477,7 @@ sitecues.def('zoom', function (zoom, callback) {
       function addScrollbars() {
         // Get the visible content rect (as opposed to element rect which contains whitespace)
         if (shouldManuallyAddScrollbars) {
-          var rect = getBodyInfo(), // TODO check perf
+          var rect = getBodyInfo(),
             right = Math.max(rect.right, rect.width),
             bottom = Math.max(rect.bottom, rect.height),
             winHeight = window.innerHeight,
@@ -521,14 +539,6 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
-      // Apply CSS enhancements we use for zoom, that don't need to be animated
-      function applyZoomCSSFixes() {
-        // General fixes for all browsers
-        $body.css(getZoomBodyCSSFixes());
-
-        applyZoomStyleSheet();
-      }
-
       function applyZoomStyleSheet(additionalCss) {
         var styleSheetText = (additionalCss || '') + getZoomStyleSheetFixes();
         if (styleSheetText) {
@@ -543,7 +553,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get a CSS object for the targetZoom level
       function getZoomCss(targetZoom) {
-        var transform = 'scale(' + targetZoom + ') ' + getFormattedTranslateX(targetZoom),
+        var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslateX(targetZoom),
           css = {
             transform: transform
           };
@@ -580,26 +590,7 @@ sitecues.def('zoom', function (zoom, callback) {
           translateX = pixelsToShiftRight / targetZoom;
 
         // Need to shift entire zoom image to the right so that start of body fits on screen
-        return 'translateX(' + translateX + 'px)';
-      }
-
-      // Clear all CSS values
-      // It is a best practice to clean up after ourselves when the user turns off all zoom (back to 1x)
-      function clearAllCss() {
-        $body.css({
-          transform: '',
-          transformOrigin: '',
-          width: '',
-          backfaceVisibility: '',
-          perspective: '',
-          textRendering: '',
-          animation: '',
-          animationPlayState: '',
-          animationFillMode: ''
-        });
-
-        zoomStyleSheet.remove();
-        zoomStyleSheet = null;
+        return 'translateX(' + translateX.toFixed(ZOOM_PRECISION) + 'px)';
       }
 
       // Is it a responsive page?
