@@ -393,9 +393,6 @@ sitecues.def('zoom', function (zoom, callback) {
         // Ensure no other operation is running
         clearZoomCallbacks();
 
-        // Remove scrollbars -- we will re-add them after zoom if content is large enough
-        removeScrollbars();
-
         // Add what we need in <style> if we haven't already
         if (!zoomStyleSheet) {
           setupNextZoomStyleSheet(targetZoom);
@@ -432,8 +429,8 @@ sitecues.def('zoom', function (zoom, callback) {
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
-        // Add scrollbars back in where necessary
-        addScrollbars();
+        // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
+        determineScrollbars();
 
         // Restore mouse cursor events and CSS behavior
         $body.css('pointerEvents', '');
@@ -504,39 +501,29 @@ sitecues.def('zoom', function (zoom, callback) {
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
       // of knowing when the visible content is large enough to need scrollbars.
       // This also corrects the dreaded IE scrollbar bug, where fixed position content
-      // and any use of getBoundingClientRect()
-      // was off by the height of the horizontal scrollbar, or the width of the vertical scroll bar,
-      // but only when the user scrolled down or to the right.
+      // and any use of getBoundingClientRect() was off by the height of the horizontal scrollbar, or the
+      // width of the vertical scroll bar, but only when the user scrolled down or to the right.
       // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
       // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
-      // Step 1: remove the scrollbars before changing zoom.
-      // Step 2 (below): re-add the scrollbar if necessary for size of content
-      function removeScrollbars() {
-        if (shouldManuallyAddScrollbars) {
-          $('html').css({
-            overflowX: 'hidden',
-            overflowY: 'hidden'
-          });
+      function determineScrollbars() {
+        if (!shouldManuallyAddScrollbars) {
+          return;
         }
-      }
 
-      // Re-add scrollbars if necessary (see description for our scrollbar situation in removeScrollbars above)
-      function addScrollbars() {
+        // Use scrollbars if necessary for size of content
         // Get the visible content rect (as opposed to element rect which contains whitespace)
-        if (shouldManuallyAddScrollbars) {
-          var rect = getBodyInfo(),
-            right = Math.max(rect.right, rect.width),
-            bottom = Math.max(rect.bottom, rect.height),
-            winHeight = window.innerHeight,
-            winWidth = window.innerWidth;
+        var rect = getBodyInfo(),
+          right = Math.max(rect.right, rect.width),
+          bottom = Math.max(rect.bottom, rect.height),
+          winHeight = window.innerHeight,
+          winWidth = window.innerWidth;
 
-          // If the right side of the visible content is beyond the window width,
-          // or the visible content is wider than the window width, show the scrollbars.
-          $('html').css({
-            overflowX: right > winWidth ? 'scroll' : 'hidden',
-            overflowY: bottom > winHeight ? 'scroll' : 'hidden'
-          });
-        }
+        // If the right side of the visible content is beyond the window width,
+        // or the visible content is wider than the window width, show the scrollbars.
+        $('html').css({
+          overflowX: right > winWidth ? 'scroll' : 'hidden',
+          overflowY: bottom > winHeight ? 'scroll' : 'hidden'
+        });
       }
 
       // Request an animation frame
@@ -767,7 +754,7 @@ sitecues.def('zoom', function (zoom, callback) {
           $body.css(getZoomCss(1));
           originalBodyInfo = getBodyInfo();
           $body.css(getZoomCss(completedZoom));
-          removeScrollbars();
+          determineScrollbars();
           if (shouldRestrictWidth()) {
             // Restrict the width of the body so that it works similar to browser zoom
             // Documents designed to fit the width of the page still will
