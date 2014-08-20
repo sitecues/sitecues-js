@@ -7,10 +7,10 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  // get dependencies
   sitecues.use('jquery', 'conf', 'platform',
     function ($, conf, platform) {
       if (window !== window.top) {
+        // TODO we might want to put in a rule like this for all of sitecues
         return; // Only zoom top level window so that we do not double zoom iframes
       }
       var
@@ -38,11 +38,9 @@ sitecues.def('zoom', function (zoom, callback) {
         $body = $(body),
         originalBodyInfo,        // The info we have on the body, including the rect and mainNode
 
-        // Style sheet we insert in the DOM for keyframe animations
-        // and other style fixes for zoom
-        // <style id=SITECUES_ZOOM_ID></style>
-        zoomStyleSheet,
-        doAnimationsDelayHack,
+        // Key frame animations
+        zoomStyleSheet,                 // <style> element we insert for animations (and additional fixes for zoom)
+        doKeyFramesAnimationDelayHack,  // Set when we need to wait before activating an animation
 
         // Zoom operation state
         minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
@@ -70,13 +68,14 @@ sitecues.def('zoom', function (zoom, callback) {
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        ZOOM_PRECISION = 3, // Decimal places allowed
+        ZOOM_PRECISION = 2, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd';
 
       // ------------------------ PUBLIC -----------------------------
 
       // Values used for zoom math
+      // TODO should these be getters? Doing it via direct access variables is legacy.
       zoom.max = 3;
       zoom.min = 1;
       zoom.step = 0.01;
@@ -117,8 +116,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // ------------------------ PRIVATE -----------------------------
 
+      // Should smooth zoom be used or step zoom?
+      // In dev, we can override as follows:
+      // Shift-key: Script-based smooth zoom
+      // Ctrl-key: CSS-based smooth zoom
       function shouldSmoothZoom() {
-        if (SC_DEV && glideInputEvent && glideInputEvent.shiftKey) {
+        if (SC_DEV && glideInputEvent && (glideInputEvent.shiftKey || glideInputEvent.ctrlKey)) {
           return true; // Dev override -- use animation no matter what
         }
 
@@ -129,6 +132,10 @@ sitecues.def('zoom', function (zoom, callback) {
         return zoomConfig.shouldSmoothZoom;
       }
 
+      // If smooth zoom is used, which kind -- JS or CSS keyframes?
+      // In dev, we can override default behavior as follows:
+      // Shift-key: Script-based
+      // Ctrl-key: CSS-based
       function shouldUseKeyFramesAnimation() {
         if (SC_DEV && glideInputEvent) {
           // In dev, allow overriding of animation type
@@ -183,8 +190,9 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
       // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
-      function beginGlide(targetZoom) {
+      function beginGlide(targetZoom, event) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
+          glideInputEvent = event;
           beginZoomOperation(targetZoom);
           if (!shouldSmoothZoom()) {
             // When no animations -- just be clunky and zoom a bit closer to the target
@@ -221,11 +229,6 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
 
-      function getActualZoom() {
-        var transform = $body.css('transform');
-        return getSanitizedZoomValue(transform.substring(7));
-      }
-      
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
         if (!shouldUseKeyFramesAnimation()) {
@@ -242,6 +245,12 @@ sitecues.def('zoom', function (zoom, callback) {
           });
           zoomAnimator = requestFrame(onGlideStopped);
         });
+      }
+
+      // Get the current zoom value as reported by the layout engine
+      function getActualZoom() {
+        var transform = $body.css('transform');
+        return getSanitizedZoomValue(transform.substring(7));
       }
 
       function onGlideStopped() {
@@ -282,9 +291,9 @@ sitecues.def('zoom', function (zoom, callback) {
       // * Initial load zoom
       // * Keypress (+/-) or A button press, which zoom until the button is let up
       function performKeyFramesZoomOperation() {
-        if (doAnimationsDelayHack) {
+        if (doKeyFramesAnimationDelayHack) {
           // Wait for Chrome animation style sheet to be ready
-          doAnimationsDelayHack = false;
+          doKeyFramesAnimationDelayHack = false;
           $body.css('animation'); // Force reflow to finish
           startZoomTime = Date.now();
           var HACK_DELAY = 150;   // Give Chrome an extra 150ms as a birthday present, to finish whatever it seems to need to do
@@ -383,10 +392,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // Add what we need in <style> if we haven't already
         if (!zoomStyleSheet) {
           setupNextZoomStyleSheet(targetZoom);
-          doAnimationsDelayHack = shouldFixAnimationJerkBack();
+          doKeyFramesAnimationDelayHack = shouldFixAnimationJerkBack();
         }
         else {
-          doAnimationsDelayHack = false;
+          doKeyFramesAnimationDelayHack = false;
         }
 
         // General CSS fixes on body
@@ -564,6 +573,8 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
+      // Replace current zoom stylesheet or insert a new one with the
+      // requested styles plus generic stylesheet fixes for the current configuration.
       function applyZoomStyleSheet(additionalCss) {
         var styleSheetText = (additionalCss || '') + getZoomStyleSheetFixes();
         if (styleSheetText) {
@@ -767,12 +778,10 @@ sitecues.def('zoom', function (zoom, callback) {
       sitecues.on('zoom/stop-button', finishGlideIfEnough);
       sitecues.on('zoom/increase', function(event) {
         // Increase up to max or until zoom/stop requested
-        glideInputEvent = event;
-        beginGlide(zoom.max);
+        beginGlide(zoom.max, event);
       });
       sitecues.on('zoom/decrease', function(event) {
-        glideInputEvent = event;
-        beginGlide(zoom.min);
+        beginGlide(zoom.min, event);
       });
 
       // define default value for zoom if needed
