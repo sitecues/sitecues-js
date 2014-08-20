@@ -50,6 +50,7 @@ sitecues.def('zoom', function (zoom, callback) {
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
         midAnimationZoom,        // Zoom state in the current animation operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
+        isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -73,7 +74,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        ZOOM_PRECISION = 2, // Decimal places allowed
+        ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd';
 
@@ -154,7 +155,11 @@ sitecues.def('zoom', function (zoom, callback) {
 
         return shouldSmoothZoom()
           // IE9 just can't do CSS animate
-          && (!platform.browser.isIE || platform.browser.version > 9);
+          && (!platform.browser.isIE || platform.browser.version > 9)
+          // Chrome has jerk-back bug so we should only do it for initial zoom which has an exact end-of-zoom,
+          // and really needs key frames during the initial zoom which is stressing the browser because
+          // it's part of the critical load path.
+          && (!platform.browser.isChrome || !platform.os.isMac || isInitialLoadZoom);
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -375,6 +380,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Perform the initial zoom on load
       function initialZoom(targetZoom) {
+        isInitialLoadZoom = true;
         beginZoomOperation(targetZoom);
         if (shouldUseKeyFramesAnimation()) {
           performKeyFramesZoomOperation();  // Key Frames animation is faster for initial load
@@ -446,6 +452,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearZoomCallbacks();
 
         glideInputEvent = null;
+        isInitialLoadZoom = false;
 
         // Get next forward/backward glide animations ready.
         // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
