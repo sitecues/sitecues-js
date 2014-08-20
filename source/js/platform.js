@@ -10,8 +10,7 @@ sitecues.def('platform', function (platformModule, callback) {
   var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null',
       platform = navigator.platform.toLowerCase(),
       browser,
-      os, 
-      ieVersion = 'NA';
+      os;
 
   // Determine which browser is being used
   browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
@@ -34,29 +33,25 @@ sitecues.def('platform', function (platformModule, callback) {
       isUnknown   : browser === 'Unknown Browser'
     };
 
-  // If IE is being used, determine which version
-  if( platformModule.browser.isIE ){
-    // Get the current IE version to serve the appropriate fallback message
-    ieVersion = agent.indexOf('MSIE 6') >= 0 ? 'IE6' :
-                agent.indexOf('MSIE 7') >= 0 ? 'IE7' :
-                agent.indexOf('MSIE 8') >= 0 ? 'IE8' :
-                agent.indexOf('MSIE 9') >= 0 ? 'IE9' :
-                agent.indexOf('MSIE 10') >= 0 ? 'IE10' :
-                agent.indexOf('rv:11') >= 0 ? 'IE11' :
-                'Unknown IE Version';
-  }
+  // Set globally accessible version constants
+  platformModule.browser.version = (function() {
+    // If IE is being used, determine which version
+    var charIndex = agent.indexOf('rv:');
+    if (charIndex === -1) {
+      if (platformModule.browser.isIE) {
+        // Use MSIE XX.X
+        charIndex = agent.indexOf('MSIE');
+        if (charIndex > 0) {
+          charIndex += 5;  // MSIE #
+        }
+      }
+    }
+    else {
+      charIndex += 3;   // rv:#
+    }
 
-  // Set globally accessible IE version constants 
-  platformModule.ieVersion = {
-    vNA       : ieVersion === 'NA',
-    isIE6     : ieVersion === 'IE6',
-    isIE7     : ieVersion === 'IE7',
-    isIE8     : ieVersion === 'IE8',
-    isIE9     : ieVersion === 'IE9',
-    isIE10    : ieVersion === 'IE10',
-    isIE11    : ieVersion === 'IE11',
-    isUnknown : ieVersion === 'Unknown IE Version'
-  };       
+    return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
+  })();
 
   // Determine which opperating system is being used
   os = platform.indexOf('mac') >-1 ? 'mac' :

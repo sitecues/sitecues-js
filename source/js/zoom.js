@@ -112,7 +112,17 @@ sitecues.def('zoom', function (zoom, callback) {
           return true; // Dev override -- use animation no matter what
         }
 
+        if (shouldAvoidFirefoxScreenCorruptionBug()) {
+          return false;
+        }
+
         return zoomConfig.shouldSmoothZoom;
+      }
+
+      // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
+      function shouldAvoidFirefoxScreenCorruptionBug() {
+        return platform.browser.isFirefox && platform.browser.version < 33 && platform.os.isMac && devicePixelRatio === 2 &&
+          window.outerWidth > 1024;
       }
 
       function shouldUseKeyFramesAnimation() {
@@ -128,7 +138,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         return shouldSmoothZoom()
           // IE9 just can't do CSS animate
-          && (!platform.browser.isIE || !platform.ieVersion.isIE9);
+          && (!platform.browser.isIE || platform.browser.version > 9);
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -501,7 +511,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (req) {
           return req(fn);
         }
-        return setTimeout(fn, 16);
+        return setTimeout(fn, 16);  // 16ms is about 60fps
       }
 
       // Cancel any currently reequested animation frame

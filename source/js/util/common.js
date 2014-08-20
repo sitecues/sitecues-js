@@ -14,7 +14,7 @@ sitecues.def('util/common', function (common, callback) {
       return 'transitionend';
     }());
 
-    common.useJqueryAnimate = platform.browser.isIE && platform.ieVersion.isIE9;
+    common.useJqueryAnimate = platform.browser.isIE && platform.browser.version <= 9;
 
     /*
      * Check if two Javascript objects are equal.
