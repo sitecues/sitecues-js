@@ -11,7 +11,7 @@ sitecues.def('zoom', function (zoom, callback) {
   sitecues.use('jquery', 'conf', 'platform',
     function ($, conf, platform) {
       if (window !== window.top) {
-        return; // Only zoom top level window -- TODO explain why
+        return; // Only zoom top level window so that we do not double zoom iframes
       }
       var
         // Default zoom configuration
@@ -90,15 +90,25 @@ sitecues.def('zoom', function (zoom, callback) {
       // Use to jump the current zoom immediately to the targetZoom requested
       // The use case for this is currently the zoom slider
       zoom.jumpTo = function(targetZoom) {
+        var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
-          zoomAnimator = requestFrame(performContinualZoomUpdates);
+          if (shouldPerformContinualUpdates) {
+            zoomAnimator = requestFrame(performContinualZoomUpdates);
+          }
         }
         else {
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
+
+        if (!shouldPerformContinualUpdates) {
+          performInstantZoomOperation();
+        }
       };
 
+      // This matches our updates with screen refreshes.
+      // Unfortunately, it causes issues in some older versions of Firefox on Mac + Retina.
+      // TODO should we just get rid of this and performInstantZoomOperation() as in the FF case? Can't see a difference.
       function performContinualZoomUpdates() {
         zoomAnimator = requestFrame(performContinualZoomUpdates);
         performInstantZoomOperation();
@@ -112,17 +122,11 @@ sitecues.def('zoom', function (zoom, callback) {
           return true; // Dev override -- use animation no matter what
         }
 
-        if (shouldAvoidFirefoxScreenCorruptionBug()) {
+        if (shouldFixFirefoxScreenCorruptionBug()) {
           return false;
         }
 
         return zoomConfig.shouldSmoothZoom;
-      }
-
-      // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
-      function shouldAvoidFirefoxScreenCorruptionBug() {
-        return platform.browser.isFirefox && platform.browser.version < 33 && platform.os.isMac && devicePixelRatio === 2 &&
-          window.outerWidth > 1024;
       }
 
       function shouldUseKeyFramesAnimation() {
@@ -145,6 +149,12 @@ sitecues.def('zoom', function (zoom, callback) {
       // This is where zooming up from 1 and stopping causes the stoppage of the zoom to jerk backwards at the end
       function shouldFixAnimationJerkBack() {
         return platform.browser.isChrome && shouldUseKeyFramesAnimation();
+      }
+
+      // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
+      function shouldFixFirefoxScreenCorruptionBug() {
+        return platform.browser.isFirefox && platform.browser.version < 33 && platform.os.isMac && devicePixelRatio === 2 &&
+          window.outerWidth > 1024;
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -179,7 +189,7 @@ sitecues.def('zoom', function (zoom, callback) {
           if (!shouldSmoothZoom()) {
             // When no animations -- just be clunky and zoom a bit closer to the target
             var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
-            currentTargetZoom = completedZoom + delta;
+            currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
             performInstantZoomOperation();
             finishZoomOperation();
           }
@@ -236,7 +246,9 @@ sitecues.def('zoom', function (zoom, callback) {
 
       function onGlideStopped() {
         currentTargetZoom = getActualZoom();
-        $body.css(getZoomCss(currentTargetZoom));
+        $body
+          .css(getZoomCss(currentTargetZoom))
+          .css('animation', '');
         finishZoomOperation();
       }
 
