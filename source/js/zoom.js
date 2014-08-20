@@ -156,10 +156,10 @@ sitecues.def('zoom', function (zoom, callback) {
         return shouldSmoothZoom()
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
-          // Chrome has jerk-back bug so we should only do it for initial zoom which has an exact end-of-zoom,
-          // and really needs key frames during the initial zoom which is stressing the browser because
-          // it's part of the critical load path.
-          && (!platform.browser.isChrome || !platform.os.isMac || isInitialLoadZoom);
+          // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
+          // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
+          // stressing the browser because it's part of the critical load path.
+          && (!platform.browser.isChrome || isInitialLoadZoom || devicePixelRatio !== 2);
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -170,7 +170,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
       function shouldFixFirefoxScreenCorruptionBug() {
-        return platform.browser.isFirefox && platform.browser.version < 33 && platform.os.isMac && devicePixelRatio === 2 &&
+        return platform.browser.isFirefox && platform.browser.version < 33 && devicePixelRatio === 2 &&
           window.outerWidth > 1024;
       }
 
