@@ -159,7 +159,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
           // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
           // stressing the browser because it's part of the critical load path.
-          && (!platform.browser.isChrome || isInitialLoadZoom || devicePixelRatio !== 2);
+          && (!platform.browser.isChrome || isInitialLoadZoom || devicePixelRatio !== 2 || shouldRestrictWidth());
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
