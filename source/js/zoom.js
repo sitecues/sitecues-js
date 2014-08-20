@@ -754,13 +754,12 @@ sitecues.def('zoom', function (zoom, callback) {
           $body.css(getZoomCss(1));
           originalBodyInfo = getBodyInfo();
           $body.css(getZoomCss(completedZoom));
-          determineScrollbars();
           if (shouldRestrictWidth()) {
             // Restrict the width of the body so that it works similar to browser zoom
             // Documents designed to fit the width of the page still will
             $body.css('width', getRestrictedWidth(completedZoom));
           }
-          addScrollbars();
+          determineScrollbars();
           sitecues.emit('resize');
         }
         else {
