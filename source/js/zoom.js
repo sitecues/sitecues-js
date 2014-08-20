@@ -143,7 +143,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
         // Step 1: remove the scrollbars before changing zoom.
         // Step 2 (below): re-add the scrollbar if necessary for size of content
-        document.documentElement.style.overflow = 'hidden';
+        $('html').css({
+          overflowX: 'hidden',
+          overflowY: 'hidden'
+        });
       }
       var newCss = {
         transformOrigin: '0% 0%', // By default the origin for the body is 50%, setting to 0% zooms the page from the top left.
@@ -164,17 +167,20 @@ sitecues.def('zoom', function (zoom, callback) {
         var rect,
           range = document.createRange(),
           winHeight = window.innerHeight,
-          winWidth = window.innerWidth;
+          winWidth = window.innerWidth,
+          doScrollX,
+          doScrollY;
         range.selectNodeContents(document.body);
         rect = range.getBoundingClientRect();
         // If the right side of the visible content is beyond the window width,
         // or the visible content is wider than the window width, show the scrollbars.
-        if (rect.right > winWidth || rect.width > winWidth) {
-          document.documentElement.style.overflowX = 'scroll';
-        }
-        if (rect.bottom > winHeight || rect.height > winHeight) {
-          document.documentElement.style.overflowY = 'scroll';
-        }
+        doScrollX = rect.right > winWidth || rect.width > winWidth;
+        doScrollY = rect.bottom > winHeight || rect.height > winHeight;
+        $('html').css({
+          overflowX: doScrollX ? 'scroll' : 'hidden',
+          overflowY: doScrollY ? 'scroll' : 'hidden'
+        });
+
       }
     }
 
