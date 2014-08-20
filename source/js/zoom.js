@@ -248,7 +248,10 @@ sitecues.def('zoom', function (zoom, callback) {
           $body.css({
             animationPlayState: 'paused'
           });
-          zoomAnimator = requestFrame(onGlideStopped);
+          zoomAnimator = requestFrame(function() {
+            currentTargetZoom = getActualZoom();
+            onGlideStopped();
+          });
         });
       }
 
@@ -259,7 +262,6 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function onGlideStopped() {
-        currentTargetZoom = getActualZoom();
         $body
           .css(getZoomCss(currentTargetZoom))
           .css('animation', '');
