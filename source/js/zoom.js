@@ -184,7 +184,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
-      function getTimeElapsed() {
+      // How many milliseconds have elapsed since the start of the zoom operation?
+      function getZoomOpElapsedTime() {
         return Date.now() - startZoomTime;
       }
 
@@ -194,7 +195,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!isZoomOperationRunning()) {
           return;
         }
-        var timeElapsed = getTimeElapsed(),
+        var timeElapsed = getZoomOpElapsedTime(),
           timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
@@ -235,7 +236,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Animate until the currentTargetZoom, used for gliding zoom changes
       function performJsAnimateZoomOperation() {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
-          zoomChange = Math.min(getTimeElapsed() / MS_PER_X_ZOOM, totalZoomChangeRequested);
+          zoomChange = Math.min(getZoomOpElapsedTime() / MS_PER_X_ZOOM, totalZoomChangeRequested);
           midAnimationZoom = completedZoom + zoomDirection * zoomChange;
           $body.css(getZoomCss(midAnimationZoom));
           if (midAnimationZoom === currentTargetZoom) {
@@ -258,11 +259,11 @@ sitecues.def('zoom', function (zoom, callback) {
       // * Keypress (+/-) or A button press, which zoom until the button is let up
       function performKeyFramesZoomOperation() {
         if (doAnimationsDelayHack) {
-          // Wait for Chrome animation style sheet to be ready
+          // Wait for Chrome animation style sheet to be ready, so that the animation does not "jerk back"
           doAnimationsDelayHack = false;
-          $body.css('animation');
+          $body.css('animation'); // Force reflow to finish
           startZoomTime = Date.now();
-          var HACK_DELAY = 150;
+          var HACK_DELAY = 150;   // Give Chrome an extra 150ms as a birthday present, to finish whatever it seems to need to do
           startZoomTime += HACK_DELAY;
           setTimeout(performKeyFramesZoomOperation, HACK_DELAY);
           SC_DEV && console.log('Performing Chome animation delay hack');
