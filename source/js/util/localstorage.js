@@ -18,11 +18,27 @@
 sitecues.def('util/localstorage', function(ls, callback) {
 
   /*
+   * Run the function everytime we want to work with Local Storage
+   * because settings can be changes while working with sitecues.
+   * @returns {Boolean}
+   */
+  ls.isSupported = function() {
+    try {
+      // Check for support
+      return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+      SC_DEV && console.log('Local Storage is not supported or cannot be used.');
+      return false;
+    }
+  };
+  /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
   ls.getSitecuesLs = function() {
-    return window.localStorage.getItem('sitecues') || ls.setSitecuesLs();
+    if (ls.isSupported()) {
+      return window.localStorage.getItem('sitecues') || ls.setSitecuesLs();
+    }
   };
 
   /*
@@ -30,9 +46,11 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {DOMString}
    */
   ls.setSitecuesLs = function(data) {
-    var data = data || {};
-    window.localStorage.setItem('sitecues', JSON.stringify(data));
-    return ls.getSitecuesLs();
+    if (ls.isSupported()) {
+      var data = data || {};
+      window.localStorage.setItem('sitecues', JSON.stringify(data));
+      return ls.getSitecuesLs();
+    }
   };
 
   /*
@@ -40,7 +58,7 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {DOMString}
    */
   ls.clearSitecuesLs = function() {
-    ls.getSitecuesLs() && window.localStorage.removeItem('sitecues');
+    ls.isSupported() && window.localStorage.removeItem('sitecues');
   };
 
   /*
@@ -48,10 +66,12 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {JSON.parse.j|Array|Object}
    */
   ls.getUserId = function() {
-    var sitecuesLs = ls.getSitecuesLs();
-    if (sitecuesLs) {
-      var internalLs = JSON.parse(sitecuesLs);
-      return internalLs && internalLs['userId'];
+    if (ls.isSupported()) {
+      var sitecuesLs = ls.getSitecuesLs();
+      if (sitecuesLs) {
+        var internalLs = JSON.parse(sitecuesLs);
+        return internalLs && internalLs['userId'];
+      }
     }
   };
 
@@ -60,12 +80,14 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {JSON.parse.j|Array|Object}
    */
   ls.setUserId = function(value) {
-    var value = value || {};
-    var sitecuesLs = ls.getSitecuesLs() || ls.setSitecuesLs();
-    if (sitecuesLs) {
-      var internalLs = JSON.parse(sitecuesLs);
-      internalLs['userId'] = value;
-      ls.setSitecuesLs(internalLs);
+    if (ls.isSupported()) {
+      var value = value || {};
+      var sitecuesLs = ls.getSitecuesLs() || ls.setSitecuesLs();
+      if (sitecuesLs) {
+        var internalLs = JSON.parse(sitecuesLs);
+        internalLs['userId'] = value;
+        ls.setSitecuesLs(internalLs);
+      }
     }
   };
 
@@ -75,13 +97,15 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {void}
    */
   ls.setUserPreferencesById = function(userPrefData) {
-    var userPrefData = userPrefData || "{}";
-    var sitecuesLs = JSON.parse(ls.getSitecuesLs());
-    sitecuesLs[ls.getUserId()] = userPrefData;
+    if (ls.isSupported()) {
+      var userPrefData = userPrefData || "{}";
+      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
+      sitecuesLs[ls.getUserId()] = userPrefData;
 
-    // Set the initial data under userId namespace.
-    ls.setSitecuesLs(sitecuesLs);
-    SC_DEV && console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+      // Set the initial data under userId namespace.
+      ls.setSitecuesLs(sitecuesLs);
+      SC_DEV && console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+    }
   };
 
   /**
@@ -92,14 +116,16 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {void}
    */
   ls.setUserPreferenceById = function(key, value) {
-    var userPrefData = ls.getUserPreferencesById();
-    var sitecuesLs = JSON.parse(ls.getSitecuesLs());
-    // Update value.
-    userPrefData[key] = value;
-    sitecuesLs[ls.getUserId()] = userPrefData;
-    // Save in LocalStorage.
-    ls.setSitecuesLs(sitecuesLs);
-    SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+    if (ls.isSupported()) {
+      var userPrefData = ls.getUserPreferencesById();
+      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
+      // Update value.
+      userPrefData[key] = value;
+      sitecuesLs[ls.getUserId()] = userPrefData;
+      // Save in LocalStorage.
+      ls.setSitecuesLs(sitecuesLs);
+      SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+    }
   };
 
   /**
@@ -107,12 +133,20 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {DOMString}
    */
   ls.getUserPreferencesById = function() {
-    var sitecuesLs = JSON.parse(ls.getSitecuesLs());
-    return sitecuesLs[ls.getUserId()];
+    if (ls.isSupported()) {
+      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
+      return sitecuesLs[ls.getUserId()];
+    }
   };
 
   // Expose getLocalData() for testing purposes.
-  window.sitecues.getLocalData = function() {return JSON.parse(ls.getSitecuesLs())};
+  window.sitecues.getLocalData = function() {
+    if (ls.isSupported()) {
+      return JSON.parse(ls.getSitecuesLs())
+    } else {
+      return "Local Storage isn't supported or cannot be used.";
+    }
+  };
 
   callback();
 
