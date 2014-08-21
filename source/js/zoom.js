@@ -51,6 +51,7 @@ sitecues.def('zoom', function (zoom, callback) {
         midAnimationZoom,        // Zoom state in the current animation operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
         isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
+        nativeZoom,              // Amount of native browserZoom
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -159,7 +160,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
           // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
           // stressing the browser because it's part of the critical load path.
-          && (!platform.browser.isChrome || isInitialLoadZoom || devicePixelRatio !== 2 || shouldRestrictWidth());
+          && (!platform.browser.isChrome || isInitialLoadZoom || !isRetina() || shouldRestrictWidth());
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -170,7 +171,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
       function shouldFixFirefoxScreenCorruptionBug() {
-        return platform.browser.isFirefox && platform.browser.version < 33 && devicePixelRatio === 2 &&
+        return platform.browser.isFirefox && platform.browser.version < 33 && isRetina() &&
           window.outerWidth > 1024;
       }
 
@@ -495,7 +496,7 @@ sitecues.def('zoom', function (zoom, callback) {
               position: 'fixed',
               width: '1px',
               height: '1px',
-              backgroundColor: 'transparent',
+              opacity: '0',
               pointerEvents: 'none'
             })
             .appendTo('html');
@@ -751,6 +752,42 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      // Detect whether the current window is on a Retina display
+      function isRetina() {
+        // Safari doesn't alter devicePixelRatio for native zoom
+        if (platform.browser.isSafari) {
+          return devicePixelRatio === 2;
+        }
+        else if (platform.brower.isChrome) {
+          return Math.round(devicePixelRatio / nativeZoom) === 2;
+        }
+        else if (platform.browser.isFirefox) {
+          // Problem with devicePixelRatio
+          // If we see 2.5 is it DPR of 1 at 250%, or DPR of 2 at 125%?
+          return devicePixelRatio >= 2; // Wrong!
+          return matchMedia && matchMedia("(min-resolution:144dpi)").matches // Wrong! Affected by zoom
+          //Math.round(devicePixelRatio / nativeZoom) === 2;
+        }
+        return false;
+      }
+
+      function detectNativeZoom() {
+        nativeZoom = 1;
+        if (platform.browser.isWebKit) {
+          nativeZoom = window.outerWidth / window.innerWidth;
+        }
+        else if (platform.browser.isIE) {
+          nativeZoom = screen.deviceXDPI / screen.systemXDPI;
+        }
+        else if (platform.browser.isFirefox) {
+          nativeZoom = isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
+        }
+
+        SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
+
+        return nativeZoom;
+      }
+
       /**
        * Recompute the visible body size, and re-zoom the page as that handles the logic
        * to properly scale, resize, and position the page and its elements with respect to the current
@@ -789,6 +826,8 @@ sitecues.def('zoom', function (zoom, callback) {
       sitecues.on('zoom/decrease', function(event) {
         beginGlide(zoom.min, event);
       });
+
+      detectNativeZoom();
 
       // define default value for zoom if needed
       var targetZoom = conf.get('zoom');
