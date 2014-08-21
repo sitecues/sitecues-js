@@ -150,7 +150,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Part 2 of IE horizontal scrollbar fix: re-add scrollbars if necessary
       // Get the visible content rect (as opposed to element rect which contains whitespace)
       if (zoomConfig.doManualScrollbars) {
-        setTimeout(repairScrollbars, 0);
+        setTimeout(repairScrollbars, 50);
       }
     }
 
@@ -161,18 +161,20 @@ sitecues.def('zoom', function (zoom, callback) {
     // By controlling the visibility of the scrollbars ourselves, the bug magically goes away.
     // This is also good because we're better than IE at determining when content is big enough to need scrollbars.
     function repairScrollbars() {
-      var rect,
+      var rangeRect,
+        elemRect,
         range = document.createRange(),
         winHeight = window.innerHeight,
         winWidth = window.innerWidth,
         doScrollX,
         doScrollY;
       range.selectNodeContents(document.body);
-      rect = range.getBoundingClientRect();
+      rangeRect = range.getBoundingClientRect();
+      elemRect = document.body.getBoundingClientRect();
       // If the right side of the visible content is beyond the window width,
       // or the visible content is wider than the window width, show the scrollbars.
-      doScrollX = rect.right > winWidth || rect.width > winWidth;
-      doScrollY = rect.bottom > winHeight || rect.height > winHeight;
+      doScrollX = rangeRect.right > winWidth || rangeRect.width > winWidth || elemRect.right > winWidth;
+      doScrollY = rangeRect.bottom > winHeight || rangeRect.height > winHeight || elemRect.bottom > winHeight;
       $('html').css({
         overflowX: doScrollX ? 'scroll' : 'hidden',
         overflowY: doScrollY ? 'scroll' : 'hidden'
