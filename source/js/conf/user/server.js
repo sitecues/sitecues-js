@@ -54,26 +54,25 @@ sitecues.def('conf/user/server', function(server, callback) {
         if (lsByUserId) {
           ls.setUserPreferenceById(key, value);
           saveCallback();
-        } else {
-          // Save the server data.
-          jquery.ajax({
-            type: 'GET',
-            url: saveUrl,
-            data: data,
-            async: true,
-            contentType: 'application/json',
-            dataType: 'jsonp',
-            success: function(data) {
-              saveCallback(data);
-            },
-            error: function(e) {
-              if (SC_DEV) {
-                console.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
-              }
-              saveCallback();
-            }
-          });
         }
+        // Save the server data.
+        jquery.ajax({
+          type: 'GET',
+          url: saveUrl,
+          data: data,
+          async: true,
+          contentType: 'application/json',
+          dataType: 'jsonp',
+          success: function(data) {
+            saveCallback(data);
+          },
+          error: function(e) {
+            if (SC_DEV) {
+              console.info("Unable to persist server config (" + key + "=" + value + "): " + e.message);
+            }
+            saveCallback();
+          }
+        });
       }
     };
 
@@ -103,26 +102,24 @@ sitecues.def('conf/user/server', function(server, callback) {
     lsByUserId = ls.getUserPreferencesById();
     if (lsByUserId) {
       loadCallback(lsByUserId);
-    } else {
-      // Load the server data.
-      jquery.ajax({
-        type: 'GET',
-        url: loadUrl,
-        async: false,
-        contentType: 'application/json',
-        dataType: 'jsonp',
-        success: function(data) {
-          ls.setUserPreferencesById(data);
-          loadCallback(data);
-        },
-        error: function(e) {
-          if (SC_DEV) {
-            console.warn('Unable to load server config: ' + e.message);
-          }
-          loadCallback();
-        }
-      });
     }
-
+    // Load the server data.
+    jquery.ajax({
+      type: 'GET',
+      url: loadUrl,
+      async: false,
+      contentType: 'application/json',
+      dataType: 'jsonp',
+      success: function(data) {
+        ls.setUserPreferencesById(data);
+        loadCallback(data);
+      },
+      error: function(e) {
+        if (SC_DEV) {
+          console.warn('Unable to load server config: ' + e.message);
+        }
+        loadCallback();
+      }
+    });
   });
 });
