@@ -272,8 +272,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           $hlbWrappingElement.insertAfter('body');
         }
 
+        console.log('initializeHLB');
+
         // Disable document scroll until the HLB deflates
-        eventHandlers.disableWheelScroll();
+        // eventHandlers.disableWheelScroll();
 
         // Clone, style, filter
         cloneHLB();
@@ -421,15 +423,17 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Register escape keypress, it will deflate the HLB
         sitecues.on('key/esc', closeHLB);
 
-        // Register mousewheel handler to allow scrolling of HLB content
-        $hlbElement.on('mousewheel DOMMouseScroll', {
-          'hlb': $hlbElement
-        }, eventHandlers.wheelHandler);
+        console.log('turnOnHLBEventListeners');
 
-        // Register key press handlers (pagedown, pageup, home, end, up, down)
-        $(window).on('keydown', {
-          'hlb': $hlbElement
-        }, eventHandlers.keyDownHandler);
+        // Register mousewheel handler to allow scrolling of HLB content
+        // $hlbElement.on('mousewheel DOMMouseScroll', {
+        //   'hlb': $hlbElement
+        // }, eventHandlers.wheelHandler);
+
+        // // Register key press handlers (pagedown, pageup, home, end, up, down)
+        // $(window).on('keydown', {
+        //   'hlb': $hlbElement
+        // }, eventHandlers.keyDownHandler);
 
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
@@ -445,14 +449,16 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function turnOffHLBEventListeners() {
 
+        console.log('turnOffHLBEventListeners');
+
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
         // During deflation, turn off the ability to deflate or create a new HLB
         sitecues.off('key/esc', closeHLB);
 
         // Turn off the suppression of scrolling, keypresses
-        $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
-        $(window).off('keydown', eventHandlers.keyDownHandler);
+        // $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
+        // $(window).off('keydown', eventHandlers.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);
@@ -563,7 +569,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         preventDeflationFromMouseout = false;
 
         // Any mouse detection within the HLB turns on the ability to scroll
-        eventHandlers.enableWheelScroll();
+        // eventHandlers.enableWheelScroll();
+
+        console.log('onHLBHover');
 
       }
 
@@ -627,7 +635,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function onHLBClosed() {
 
         // Turn back on the ability to scroll the document
-        eventHandlers.enableWheelScroll();
+        // eventHandlers.enableWheelScroll();
+
+        console.log('onHLBClosed');
 
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();

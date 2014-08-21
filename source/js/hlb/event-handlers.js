@@ -140,7 +140,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         return false;
       }
 
-      eventHandlers.enableWheelScroll();
+      // eventHandlers.enableWheelScroll();
 
     };
 
@@ -227,15 +227,15 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
      * DOMMouseScroll : https://developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/DOMMouseScroll (firefox only)
      * mousewheel     : https://developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/mousewheel     (chrome, ie, safari)
      */
-    eventHandlers.disableWheelScroll = function() {
-      $(window).on('DOMMouseScroll mousewheel', wheel);
+    eventHandlers.disableWheelScroll = function () {
+      $(window).on('DOMMouseScroll mousewheel wheel', wheel);
     };
 
     /**
      * Binds wheel scroll event to window and document.
      */
-    eventHandlers.enableWheelScroll = function() {
-      $(window).off('DOMMouseScroll mousewheel', wheel);
+    eventHandlers.enableWheelScroll = function () {
+      $(window).off('DOMMouseScroll mousewheel wheel', wheel);
     };
 
     // Done.
