@@ -798,6 +798,10 @@ sitecues.def('zoom', function (zoom, callback) {
       }
       else if (targetZoom > 1) {
         initialZoom(targetZoom);
+        if (shouldManuallyAddScrollbars && document.readyState !== 'complete') {
+          // Make sure we have all the content for initial adjustment of scrollbars
+          window.addEventListener('load', determineScrollbars);
+        }
       }
 
       callback();
