@@ -63,8 +63,8 @@ sitecues.def('conf/user/server', function(server, callback) {
           async: true,
           contentType: 'application/json',
           dataType: 'jsonp',
-          success: function(data) {
-            saveCallback(data);
+          success: function() {
+            saveCallback();
           },
           error: function(e) {
             if (SC_DEV) {
@@ -102,24 +102,25 @@ sitecues.def('conf/user/server', function(server, callback) {
     lsByUserId = ls.getUserPreferencesById();
     if (lsByUserId) {
       loadCallback(lsByUserId);
-    }
-    // Load the server data.
-    jquery.ajax({
-      type: 'GET',
-      url: loadUrl,
-      async: false,
-      contentType: 'application/json',
-      dataType: 'jsonp',
-      success: function(data) {
-        ls.setUserPreferencesById(data);
-        loadCallback(data);
-      },
-      error: function(e) {
-        if (SC_DEV) {
-          console.warn('Unable to load server config: ' + e.message);
+    } else {
+      // Load the server data.
+      jquery.ajax({
+        type: 'GET',
+        url: loadUrl,
+        async: false,
+        contentType: 'application/json',
+        dataType: 'jsonp',
+        success: function(data) {
+          ls.setUserPreferencesById(data);
+          loadCallback(data);
+        },
+        error: function(e) {
+          if (SC_DEV) {
+            console.warn('Unable to load server config: ' + e.message);
+          }
+          loadCallback();
         }
-        loadCallback();
-      }
-    });
+      });
+    }
   });
 });
