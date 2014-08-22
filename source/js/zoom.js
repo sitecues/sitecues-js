@@ -129,7 +129,7 @@ sitecues.def('zoom', function (zoom, callback) {
     function adjustPageStyleForZoomAndWidth(currZoom) {
       if (currZoom === 1) {
         // Clear all CSS values
-        zoomConfig.$zoomElement.css({ width: '', transform: '', transformOrigin: '', transition: '', overflow: '', zoom: '', textRendering: '' });
+        zoomConfig.$zoomElement.css({ width: '', transform: '', transformOrigin: '', transition: '', overflowX: '', overflowY: '', textRendering: '' });
         document.body.style.webkitBackfaceVisibility = '';
         return;
       }
