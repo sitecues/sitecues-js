@@ -758,15 +758,17 @@ sitecues.def('zoom', function (zoom, callback) {
         if (platform.browser.isSafari) {
           return devicePixelRatio === 2;
         }
-        else if (platform.brower.isChrome) {
+        else if (platform.browser.isChrome) {
           return Math.round(devicePixelRatio / nativeZoom) === 2;
         }
         else if (platform.browser.isFirefox) {
-          // Problem with devicePixelRatio
-          // If we see 2.5 is it DPR of 1 at 250%, or DPR of 2 at 125%?
-          return devicePixelRatio >= 2; // Wrong!
-          return matchMedia && matchMedia("(min-resolution:144dpi)").matches // Wrong! Affected by zoom
-          //Math.round(devicePixelRatio / nativeZoom) === 2;
+          // This is only a guess, unfortunately
+          // The following devicePixelRatios can be either on a retina or not:
+          // 2, 2.4000000953674316, 3
+          // Fortunately, these would correspond to a relatively high level of zoom on a non-Retina display,
+          // so hopefully we're usually right (2x, 2.4x, 3x)
+          // We can check the Firefox zoom metrics to see if they are drastically different from other browsers.
+          return devicePixelRatio >= 2;
         }
         return false;
       }
@@ -780,6 +782,7 @@ sitecues.def('zoom', function (zoom, callback) {
           nativeZoom = screen.deviceXDPI / screen.systemXDPI;
         }
         else if (platform.browser.isFirefox) {
+          // Since isRetina() is not 100% accurate, neither will this be
           nativeZoom = isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
         }
 
