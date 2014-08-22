@@ -81,10 +81,9 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
       // cue to explain highlighting
       if (shouldPlayDescriptiveHighZoomCue(zoom)) {
         audio.playAudioByKey('verbalCueHighZoom');
+        // Signals that the "descriptive high zoom" cue has played.
+        conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, new Date().getTime());
       }
-
-      // Signals that the "descriptive high zoom" cue has played.
-      conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, new Date().getTime());
     }
 
     /*
