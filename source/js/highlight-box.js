@@ -45,7 +45,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         if (mouseInHLB){
 
-          var elem            = $hlbElement ? $hlbElement.get(0) :event.target
+          var elem            = $hlbElement.get(0)
             , scrollHeight    = elem.scrollHeight
             , scrollTop       = elem.scrollTop
             , clientHeight    = elem.clientHeight
@@ -82,35 +82,26 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             preventDefault = true;
           }
 
+          if (event.target !== elem && ! $('#sitecues-hlb').find(event.target).length > 0){
+            preventDefault = true;
+          }
+
           if (preventDefault) {
             event.preventDefault();
             event.returnValue = false;
           }
-
-          // console.log({
-          //   'deltaY': deltaY,
-          //   'scrlTOP': scrollTop,
-          //   'scrlBOT': scrollBottom,
-          //   'scrlHeight': scrollHeight,
-          //   'clntHeight': clientHeight,
-          //   'preventDef': preventDefault,
-          //   'down': scrollingDown,
-          //   'up': scrollingUp,
-          //   'sToTop': scrolledToTop,
-          //   'sToBot': scrolledToBottom
-          // });
           
           // console.log(
           //   'deltaY:', deltaY,
-          //   ',scrlTOP:', scrollTop,
-          //   ',scrlBOT:', scrollBottom,
-          //   ',scrlHeight:', scrollHeight,
-          //   ',clntHeight:', clientHeight,
-          //   ',preventDef:', preventDefault,
-          //   ',down:', scrollingDown,
-          //   ',up:', scrollingUp,
-          //   ',sToTop:', scrolledToTop,
-          //   ',sToBot:', scrolledToBottom
+          //   ', scrlTOP:', scrollTop,
+          //   ', scrlBOT:', scrollBottom,
+          //   ', scrlHeight:', scrollHeight,
+          //   ', clntHeight:', clientHeight,
+          //   ', preventDef:', preventDefault,
+          //   ', down:', scrollingDown,
+          //   ', up:', scrollingUp,
+          //   ', sToTop:', scrolledToTop,
+          //   ', sToBot:', scrolledToBottom
           // );
 
         }
