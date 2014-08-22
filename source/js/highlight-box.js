@@ -117,8 +117,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       }
 
-      // window.addEventListener('wheel', wheelHandler);
-      window.addEventListener('mousewheel', wheelHandler);
+      window.addEventListener( platform.browser.isSafari ? 'mousewheel' : 'wheel', wheelHandler);
 
 
 
