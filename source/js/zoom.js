@@ -180,10 +180,9 @@ sitecues.def('zoom', function (zoom, callback) {
 
     // Get the rect for visible contents in the body, and the main content node
     function getBodyRect() {
-      var bodyRect = { },
-        visibleNodes = [ ];
+      var bodyRect = { };
 
-      getBodyRectImpl(document.body, bodyRect, visibleNodes);
+      getBodyRectImpl(document.body, bodyRect);
 
       bodyRect.width = bodyRect.right - bodyRect.left;
       bodyRect.height = bodyRect.bottom - bodyRect.top;
@@ -192,16 +191,15 @@ sitecues.def('zoom', function (zoom, callback) {
     }
 
     // Recursively look at rectangles and add them if they are useful content rectangles
-    function getBodyRectImpl(node, sumRect, visibleNodes) {
+    function getBodyRectImpl(node, sumRect) {
       var newRect = getAbsoluteRect(node);
       newRect.right = newRect.left + newRect.width;
       newRect.bottom = newRect.top + newRect.height;
       if (addRect(sumRect, newRect)) {
-        visibleNodes.push(node);
         return;  // Valid rectangle added. No need to walk into children.
       }
       $(node).children().each(function() {
-        getBodyRectImpl(this, sumRect, visibleNodes);
+        getBodyRectImpl(this, sumRect);
       });
     }
 
