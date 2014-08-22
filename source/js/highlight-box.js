@@ -41,20 +41,25 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
 
       window.addEventListener('wheel', function (e) {
-        console.log(mouseInHLB);
+
+        // Only worry about stopping the scroll if the mouse is in the HLB
         if (mouseInHLB){
-          console.log(e);
-          // e.preventDefault();
-          // console.log(e);
 
-          var target = e.target;
-
-          var scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
-
-          if ( scrollBottom === 0 || target.scrollTop === 0 ){
-            e.preventDefault();
+          // Determine how many pixels the user can scroll down in the HLB
+          var scrollBottom = e.target.scrollHeight - e.target.scrollTop - e.target.clientHeight;
+          
+          // HLB is scrolled to bottom && try to scroll down
+          if (scrollBottom <= 1 && e.deltaY >= 1) {
+            e.preventDefault(); // Stop the window scrolling
           }
+
+          // HLB is scrolled to top && try to scroll up
+          if (e.target.scrollTop <= 1 && e.deltaY <= 1) {
+            e.preventDefault(); // Stop the window scrolling
+          }
+
         }
+
       });
 
       //////////////////////////////
