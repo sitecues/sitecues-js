@@ -167,8 +167,7 @@ sitecues.def('zoom', function (zoom, callback) {
         winWidth = window.innerWidth,
         doScrollX,
         doScrollY;
-      range.selectNodeContents(document.body);
-      rect = range.getBoundingClientRect();
+      rect = getBodyRect();
       // If the right side of the visible content is beyond the window width,
       // or the visible content is wider than the window width, show the scrollbars.
       doScrollX = rect.right > winWidth || rect.width > winWidth;
@@ -178,6 +177,70 @@ sitecues.def('zoom', function (zoom, callback) {
         overflowY: doScrollY ? 'scroll' : 'hidden'
       });
     }
+
+    // Get the rect for visible contents in the body, and the main content node
+    function getBodyRect() {
+      var bodyRect = { },
+        visibleNodes = [ ];
+
+      getBodyRectImpl(document.body, bodyRect, visibleNodes);
+
+      bodyRect.width = bodyRect.right - bodyRect.left;
+      bodyRect.height = bodyRect.bottom - bodyRect.top;
+
+      return bodyRect;
+    }
+
+    // Recursively look at rectangles and add them if they are useful content rectangles
+    function getBodyRectImpl(node, sumRect, visibleNodes) {
+      var newRect = getAbsoluteRect(node);
+      newRect.right = newRect.left + newRect.width;
+      newRect.bottom = newRect.top + newRect.height;
+      if (addRect(sumRect, newRect)) {
+        visibleNodes.push(node);
+        return;  // Valid rectangle added. No need to walk into children.
+      }
+      $(node).children().each(function() {
+        getBodyRectImpl(this, sumRect, visibleNodes);
+      });
+    }
+
+    // Add the rectangle to the sum rect if it is visible and has a left margin > 0
+    function addRect(sumRect, newRect) {
+      if (newRect.left > 0 && newRect.top >= 0 &&
+        newRect.width > 1 && newRect.height > 1) {
+        if (isNaN(sumRect.left) || newRect.left < sumRect.left) {
+          sumRect.left = newRect.left;
+        }
+        if (isNaN(sumRect.right) || newRect.right > sumRect.right) {
+          sumRect.right = newRect.right;
+        }
+        if (isNaN(sumRect.top) || newRect.top < sumRect.top) {
+          sumRect.top = newRect.top;
+        }
+        if (isNaN(sumRect.bottom) || newRect.bottom > sumRect.bottom) {
+          sumRect.bottom = newRect.bottom;
+        }
+        return true; // Successfully added
+      }
+    }
+
+    // Gets the absolute rect of a node
+    // Does not use getBoundingClientRect because we need size to include overflow
+    function getAbsoluteRect(node) {
+      var clientRect = node.getBoundingClientRect(),
+        width = Math.max(node.scrollWidth, clientRect.width),
+        height = Math.max(node.scrollHeight, clientRect.height);
+      return {
+        left: clientRect.left,
+        top: clientRect.top,
+        width: width,
+        height: height,
+        right: clientRect.left + width,
+        bottom: clientRect.top + height
+      };
+    }
+
 
     // Get and set are now in 'source/js/conf/user/manager.js'
     conf.get('zoom', zoomFn);  //This use to be an anonymous function,
