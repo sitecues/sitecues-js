@@ -7,11 +7,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
   'use strict';
 
   sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'hlb/animation',
+    
     function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, hlbAnimation) {
 
       /////////////////////////
       // PRIVATE VARIABLES
       ////////////////////////
+      ///
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID = 'sitecues-hlb', // ID for $hlbElement
@@ -33,7 +35,27 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
-          isSticky                       = false; // DEBUG: HLB deflation toggler
+          isSticky                       = false,  // DEBUG: HLB deflation toggler
+
+          mouseInHLB = false;
+
+
+      window.addEventListener('wheel', function (e) {
+        console.log(mouseInHLB);
+        if (mouseInHLB){
+          console.log(e);
+          // e.preventDefault();
+          // console.log(e);
+
+          var target = e.target;
+
+          var scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+
+          if ( scrollBottom === 0 || target.scrollTop === 0 ){
+            e.preventDefault();
+          }
+        }
+      });
 
       //////////////////////////////
       // PRIVATE FUNCTIONS
@@ -274,6 +296,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         console.log('initializeHLB');
 
+        mouseInHLB = true;
+
         // Disable document scroll until the HLB deflates
         // eventHandlers.disableWheelScroll();
 
@@ -448,6 +472,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * [turnOffHLBEventListeners turns off HLB event handlers for deflation and scroll]
        */
       function turnOffHLBEventListeners() {
+
+        mouseInHLB = false;
 
         console.log('turnOffHLBEventListeners');
 

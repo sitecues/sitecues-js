@@ -51,7 +51,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
      * @return {[Boolean]}   [True turns off scrolling, false turns it on.]
      */
     function shouldPreventScroll (e) {
-
+      
       var hlb                    = e.data.hlb[0],
           isChild                = targetIsChildOfHlb(hlb, e.target),
           scrollAmountMultiplier = getScrollAmountMultiplier(e),
@@ -64,6 +64,8 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
              (common.wheelUp(e) && $(hlb).scrollTop() - predictedScrollAmount <= 0) ||
              (common.wheelDown(e) && $(hlb).scrollTop() + hlb.clientHeight + 1 + predictedScrollAmount >= hlb.scrollHeight));
     }
+
+    eventHandlers.shouldPreventScroll = shouldPreventScroll;
 
     /**
      * Check is current target is an descentor of hlb element.
@@ -137,10 +139,11 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
         eventHandlers.disableWheelScroll();
         e.returnValue = false;
+        e.preventDefault();
         return false;
       }
 
-      // eventHandlers.enableWheelScroll();
+      eventHandlers.enableWheelScroll();
 
     };
 
