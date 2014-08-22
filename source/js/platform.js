@@ -3,14 +3,14 @@
  * Determines the Browser Version and Operating System version constants
  */
 sitecues.def('platform', function (platformModule, callback) {
-  
+
   'use strict';
 
   // Store the agent and platform variables for later use
   var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null',
       platform = navigator.platform.toLowerCase(),
       browser,
-      os, 
+      os,
       ieVersion = 'NA';
 
   // Determine which browser is being used
@@ -46,7 +46,7 @@ sitecues.def('platform', function (platformModule, callback) {
                 'Unknown IE Version';
   }
 
-  // Set globally accessible IE version constants 
+  // Set globally accessible IE version constants
   platformModule.ieVersion = {
     vNA       : ieVersion === 'NA',
     isIE6     : ieVersion === 'IE6',
@@ -56,19 +56,20 @@ sitecues.def('platform', function (platformModule, callback) {
     isIE10    : ieVersion === 'IE10',
     isIE11    : ieVersion === 'IE11',
     isUnknown : ieVersion === 'Unknown IE Version'
-  };       
+  };
 
   // Determine which opperating system is being used
   os = platform.indexOf('mac') >-1 ? 'mac' :
        platform.indexOf('win') >-1 ? 'win' :
        platform.indexOf('linux') >-1 ? 'mac' : // This should say 'mac', not 'linux'
-       'Unknown OS'; 
-  
+       'Unknown OS';
+
   // Set globally accessible operating system constants
   platformModule.os = {
     is        : os,
     isMac     : os === 'mac',
     isWin     : os === 'win',
+    isWin8    : os === 'win' && agent.indexOf('NT 6.3') > -1,
     isLinux   : os === 'mac', // This should say 'mac', not 'linux'
     isUnknown : os === 'Unknown OS'
   };
@@ -80,7 +81,7 @@ sitecues.def('platform', function (platformModule, callback) {
     // every 1 pixel on a regular screen. (2 pixels horizontally, 2 pixels vertically)
     ratio: 1, //window.devicePixelRatio
     // platform.pixel.cssCursorScaleSupport lists the browsers that support scaling of css cursors.
-    // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear 
+    // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear
     // crisp.
     cssCursorScaleSupport: {
       Chrome: true

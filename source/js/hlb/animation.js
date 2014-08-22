@@ -99,7 +99,11 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
         {
           'scale': hlbSafeArea.HLBZoom
         }, {
-          'step'    : hlbSteppingAnimation,
+          'step'    : (function (data) {
+            return function (now) {
+              hlbSteppingAnimation(now, data);
+            };
+          }(data)),
           'duration': INFLATION_SPEED,
           'complete': data.onHLBReady
         }
@@ -113,17 +117,15 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function transitionOutHLBWithJquery(data) {
 
-      var $hlbElement = data.$hlbElement;
-
       $animation = $({'scale' : $animation.attr('scale')}).animate(
         {
           'scale': 1
         }, {
-          'step'    : (function ($hlbElement, data) {
+          'step'    : (function (data) {
             return function (now) {
               hlbSteppingAnimation(now, data);
             };
-          }($hlbElement, data)),
+          }(data)),
           'duration': DEFLATION_SPEED,
           'complete': data.onHLBClosed
         }

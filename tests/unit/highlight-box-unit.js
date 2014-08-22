@@ -1187,29 +1187,10 @@ describe('highlight-box', function() {
   // The toggleHLB() function is the entry point into opening and closing the HLB.
   describe('#toggleHLB()', function () {
 
-    it('Sets private variable $hlbElement to an object if an element is passed.', function (done) {
-
-      var expected = 'object',
-          actual,
-          cssStub = sinon.stub(jquery, 'css', function () {return { 'appendTo' : function () {} }; });
-
-      hlb.setHLB(undefined);
-
-      hlb.toggleHLB(jquery(win.document.getElementById('paragraph')));
-
-      actual = typeof hlb.getHLB();
-
-      expect(actual).to.be.equal(expected);
-
-      cssStub.restore();
-
-      done();
-
-    });
-
     it('Sets private variable isHLBClosing to true if $hlbElement already exists and undefined is passed to toggleHLB.', function (done) {
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph2')));
+      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph2')));
 
       hlb.toggleHLB(undefined);
 

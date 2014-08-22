@@ -14,7 +14,15 @@ sitecues.def('util/common', function (common, callback) {
       return 'transitionend';
     }());
 
-    common.useJqueryAnimate = platform.browser.isIE && platform.ieVersion.isIE9;
+    // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
+    // Very strange behavior, might be worth filing a browser bug repport.
+    common.useJqueryAnimate = (function () {
+
+      return (platform.browser.isIE && platform.ieVersion.isIE9) ||
+              platform.browser.isIE     &&
+              platform.ieVersion.isIE11 &&
+              platform.os.isWin8;
+    }());
 
     /*
      * Check if two Javascript objects are equal.
