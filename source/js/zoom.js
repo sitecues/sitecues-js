@@ -52,6 +52,7 @@ sitecues.def('zoom', function (zoom, callback) {
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
         isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
         nativeZoom,              // Amount of native browserZoom
+        isRetinaDisplay,         // Is the current display a retina display?
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -112,6 +113,57 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       };
 
+      // Retrieve and store whether the current window is on a Retina display
+      zoom.isRetina = function() {
+        if (typeof isRetinaDisplay !== 'undefined') {
+          return isRetinaDisplay;
+        }
+
+        isRetinaDisplay = false;
+
+        // Safari doesn't alter devicePixelRatio for native zoom
+        if (platform.browser.isSafari) {
+          isRetinaDisplay = devicePixelRatio === 2;
+        }
+        else if (platform.browser.isChrome) {
+          isRetinaDisplay = Math.round(devicePixelRatio / nativeZoom) === 2;
+        }
+        else if (platform.browser.isFirefox) {
+          // This is only a guess, unfortunately
+          // The following devicePixelRatios can be either on a retina or not:
+          // 2, 2.4000000953674316, 3
+          // Fortunately, these would correspond to a relatively high level of zoom on a non-Retina display,
+          // so hopefully we're usually right (2x, 2.4x, 3x)
+          // We can check the Firefox zoom metrics to see if they are drastically different from other browsers.
+          isRetinaDisplay = devicePixelRatio >= 2;
+        }
+        return isRetinaDisplay;
+      }
+
+      // Retrieve and store the amount of native browser zoom
+      zoom.getNativeZoom = function() {
+        if (nativeZoom) {
+          return nativeZoom; // We already know it
+        }
+        nativeZoom = 1;
+        if (platform.browser.isWebKit) {
+          nativeZoom = window.outerWidth / window.innerWidth;
+        }
+        else if (platform.browser.isIE) {
+          nativeZoom = screen.deviceXDPI / screen.systemXDPI;
+        }
+        else if (platform.browser.isFirefox) {
+          // Since isRetina() is not 100% accurate, neither will this be
+          nativeZoom = zoom.isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
+        }
+
+        SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
+
+        return nativeZoom;
+      }
+
+      // ------------------------ PRIVATE -----------------------------
+
       // This matches our updates with screen refreshes.
       // Unfortunately, it causes issues in some older versions of Firefox on Mac + Retina.
       // TODO should we just get rid of this and performInstantZoomOperation() as in the FF case? Can't see a difference.
@@ -120,8 +172,6 @@ sitecues.def('zoom', function (zoom, callback) {
         performInstantZoomOperation();
         completedZoom = currentTargetZoom;
       }
-
-      // ------------------------ PRIVATE -----------------------------
 
       // Should smooth zoom be used or step zoom?
       // In dev, we can override as follows:
@@ -160,7 +210,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
           // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
           // stressing the browser because it's part of the critical load path.
-          && (!platform.browser.isChrome || isInitialLoadZoom || !isRetina() || shouldRestrictWidth());
+          && (!platform.browser.isChrome || isInitialLoadZoom || !zoom.isRetina() || shouldRestrictWidth());
       }
 
       // Should we do our hacky fix for Chrome's animation jerk-back?
@@ -171,7 +221,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
       function shouldFixFirefoxScreenCorruptionBug() {
-        return platform.browser.isFirefox && platform.browser.version < 33 && isRetina() &&
+        return platform.browser.isFirefox && platform.browser.version < 33 && zoom.isRetina() &&
           window.outerWidth > 1024;
       }
 
@@ -752,52 +802,14 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
-      // Detect whether the current window is on a Retina display
-      function isRetina() {
-        // Safari doesn't alter devicePixelRatio for native zoom
-        if (platform.browser.isSafari) {
-          return devicePixelRatio === 2;
-        }
-        else if (platform.browser.isChrome) {
-          return Math.round(devicePixelRatio / nativeZoom) === 2;
-        }
-        else if (platform.browser.isFirefox) {
-          // This is only a guess, unfortunately
-          // The following devicePixelRatios can be either on a retina or not:
-          // 2, 2.4000000953674316, 3
-          // Fortunately, these would correspond to a relatively high level of zoom on a non-Retina display,
-          // so hopefully we're usually right (2x, 2.4x, 3x)
-          // We can check the Firefox zoom metrics to see if they are drastically different from other browsers.
-          return devicePixelRatio >= 2;
-        }
-        return false;
-      }
-
-      function detectNativeZoom() {
-        nativeZoom = 1;
-        if (platform.browser.isWebKit) {
-          nativeZoom = window.outerWidth / window.innerWidth;
-        }
-        else if (platform.browser.isIE) {
-          nativeZoom = screen.deviceXDPI / screen.systemXDPI;
-        }
-        else if (platform.browser.isFirefox) {
-          // Since isRetina() is not 100% accurate, neither will this be
-          nativeZoom = isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
-        }
-
-        // TODO Fire metric without making another call
-        SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
-
-        return nativeZoom;
-      }
-
       /**
        * Recompute the visible body size, and re-zoom the page as that handles the logic
        * to properly scale, resize, and position the page and its elements with respect to the current
        * sizes of the body and window.
        */
       $(window).resize(function () {
+        isRetinaDisplay = undefined; // Invalidate, now that it may have changed
+
         if (completedZoom > 1) {
           $body.css(getZoomCss(1));
           originalBodyInfo = getBodyInfo();
@@ -831,7 +843,7 @@ sitecues.def('zoom', function (zoom, callback) {
         beginGlide(zoom.min, event);
       });
 
-      detectNativeZoom();
+      zoom.getNativeZoom(); // Make sure we have native zoom value available
 
       // define default value for zoom if needed
       var targetZoom = conf.get('zoom');
