@@ -241,8 +241,11 @@ sitecues.def( 'panel', function (panel, callback) {
         left = panel.badgeRect.left;
       }
 
-      left += window.pageXOffset;
-      top += window.pageYOffset;
+      if (!platform.browser.isIE || !platform.browser.ieVersion.isIE9) {
+        // Don't include page offsets in IE9, otherwise the panel opens from the wrong place when panning
+        left += window.pageXOffset;
+        top += window.pageYOffset;
+      }
 
       panel.element.css({
         transformOrigin: panel.useLeft ? '0% 0%' : '100% 0%',
