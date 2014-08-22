@@ -786,6 +786,7 @@ sitecues.def('zoom', function (zoom, callback) {
           nativeZoom = isRetina() ? devicePixelRatio / 2 : devicePixelRatio;
         }
 
+        // TODO Fire metric without making another call
         SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
 
         return nativeZoom;
