@@ -40,27 +40,88 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           mouseInHLB = false;
 
 
-      window.addEventListener('wheel', function (e) {
 
-        // Only worry about stopping the scroll if the mouse is in the HLB
+      function wheelHandler (event) {
+
         if (mouseInHLB){
 
-          // Determine how many pixels the user can scroll down in the HLB
-          var scrollBottom = e.target.scrollHeight - e.target.scrollTop - e.target.clientHeight;
+          var elem            = $hlbElement ? $hlbElement.get(0) :event.target
+            , scrollHeight    = elem.scrollHeight
+            , scrollTop       = elem.scrollTop
+            , clientHeight    = elem.clientHeight
+            , preventDefault  = false
+            , deltaY          = event.deltaY || -event.wheelDeltaY
+            ;
+
+          var scrollBottom      = scrollHeight - scrollTop - clientHeight
+            , scrollingDown     = deltaY > 0
+            , scrollingUp       = deltaY < 0    
+            , scrolledToBottom  = scrollBottom <= 1
+            , scrolledToTop     = elem.scrollTop <= 1
+            ;
           
-          // HLB is scrolled to bottom && try to scroll down
-          if (scrollBottom <= 1 && e.deltaY >= 1) {
-            e.preventDefault(); // Stop the window scrolling
+          if (scrollingDown && deltaY >= scrollBottom){
+            elem.scrollTop = elem.scrollHeight;
+            scrolledToBottom = true;
+            scrolledToTop = false;
+            preventDefault = true;
           }
 
-          // HLB is scrolled to top && try to scroll up
-          if (e.target.scrollTop <= 1 && e.deltaY <= 1) {
-            e.preventDefault(); // Stop the window scrolling
+          if (scrollingUp && scrollTop-(-deltaY) < 0){
+            elem.scrollTop = 0;
+            scrolledToTop = true;
+            scrolledToBottom = false;
+            preventDefault = true;
           }
+
+          if (scrolledToTop && scrollingUp) {
+            preventDefault = true;
+          }
+
+          if (scrolledToBottom && scrollingDown) {
+            preventDefault = true;
+          }
+
+          if (preventDefault) {
+            event.preventDefault();
+            event.returnValue = false;
+          }
+
+          // console.log({
+          //   'deltaY': deltaY,
+          //   'scrlTOP': scrollTop,
+          //   'scrlBOT': scrollBottom,
+          //   'scrlHeight': scrollHeight,
+          //   'clntHeight': clientHeight,
+          //   'preventDef': preventDefault,
+          //   'down': scrollingDown,
+          //   'up': scrollingUp,
+          //   'sToTop': scrolledToTop,
+          //   'sToBot': scrolledToBottom
+          // });
+          
+          // console.log(
+          //   'deltaY:', deltaY,
+          //   ',scrlTOP:', scrollTop,
+          //   ',scrlBOT:', scrollBottom,
+          //   ',scrlHeight:', scrollHeight,
+          //   ',clntHeight:', clientHeight,
+          //   ',preventDef:', preventDefault,
+          //   ',down:', scrollingDown,
+          //   ',up:', scrollingUp,
+          //   ',sToTop:', scrolledToTop,
+          //   ',sToBot:', scrolledToBottom
+          // );
 
         }
 
-      });
+      }
+
+      // window.addEventListener('wheel', wheelHandler);
+      window.addEventListener('mousewheel', wheelHandler);
+
+
+
 
       //////////////////////////////
       // PRIVATE FUNCTIONS
@@ -460,9 +521,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // }, eventHandlers.wheelHandler);
 
         // // Register key press handlers (pagedown, pageup, home, end, up, down)
-        // $(window).on('keydown', {
-        //   'hlb': $hlbElement
-        // }, eventHandlers.keyDownHandler);
+        $(window).on('keydown', {
+          'hlb': $hlbElement
+        }, eventHandlers.keyDownHandler);
 
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
@@ -489,7 +550,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Turn off the suppression of scrolling, keypresses
         // $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
-        // $(window).off('keydown', eventHandlers.keyDownHandler);
+        $(window).off('keydown', eventHandlers.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);
