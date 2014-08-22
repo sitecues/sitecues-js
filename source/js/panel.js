@@ -242,7 +242,7 @@ sitecues.def( 'panel', function (panel, callback) {
       }
 
       if (!platform.browser.isIE) {
-        // Don't include page offsets in IE9, otherwise the panel opens from the wrong place when panning
+        // Don't include page offsets in IE, otherwise the panel opens from the wrong place when panning
         left += window.pageXOffset;
         top += window.pageYOffset;
       }
