@@ -692,6 +692,8 @@ sitecues.def('zoom', function (zoom, callback) {
       function isResponsiveDesign() {
         // We consider it responsive if the main node we discovered inside the body changes width
         // if we change the body's width.
+        // Note: this doesn't work on duxburysystem.com with absolute rect -- it doesn't update quite
+        // fast enough, but putting it on a setTimeout(detection, 0) flashes that smaller width
         var origWidth = originalBodyInfo.mainNode.scrollWidth,
           newWidth,
           isResponsive;
@@ -759,8 +761,6 @@ sitecues.def('zoom', function (zoom, callback) {
         newRect.right = newRect.left + newRect.width;
         newRect.bottom = newRect.top + newRect.height;
         if (willAddRect(newRect, node)) {
-          console.log('%d %o', newRect.left, node);
-
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
