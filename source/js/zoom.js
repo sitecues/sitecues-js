@@ -718,11 +718,11 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Find tallest node
         visibleNodes.forEach(function(node) {
-          var rect = getAbsoluteRect(node);
+          var rect = node.rect
           if (rect.height >= mainNodeRect.height && rect.width > MIN_WIDTH_MAIN_NODE) {
             if (rect.height > mainNodeRect.height || rect.width > mainNodeRect.width) {
               mainNodeRect = rect;
-              mainNode = node;
+              mainNode = node.domNode;
             }
           }
         });
@@ -762,7 +762,7 @@ sitecues.def('zoom', function (zoom, callback) {
           console.log('%d %o', newRect.left, node);
 
           addRect(sumRect, newRect);
-          visibleNodes.push(node);
+          visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
         }
         $(node).children().each(function() {
