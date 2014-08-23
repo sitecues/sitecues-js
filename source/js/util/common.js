@@ -37,6 +37,40 @@ sitecues.def('util/common', function (common, callback) {
       return !val || val.trim() === '';
     };
 
+    /* ----------------------- PRIVATE ----------------------- */
+    function isNonEmptyTextNode(node) {
+      return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
+    }
+
+    common.hasVisibleChildContent = function(current) {
+      var children, index;
+
+      if (common.isVisualMedia(current) || common.isFormControl(current)) {
+        var mediaRect = current.getBoundingClientRect(),
+          MIN_RECT_SIDE = 5;
+        if (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE) {
+          return true;
+        }
+      }
+
+      // Check to see if there are non-empty child text nodes.
+      // If there are, we say we're not over whitespace.
+      children = current.childNodes;
+
+      // Shortcut: could not have text children because all children are elements
+      if (current.childElementCount === children.length) {
+        return false;
+      }
+
+      // Longer check: see if any children are non-empty text nodes, one by one
+      for (index = 0; index < children.length; index++) {
+        if (isNonEmptyTextNode(children[index])) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     /**
      * Checks if the element has media contents which can be rendered.
      */

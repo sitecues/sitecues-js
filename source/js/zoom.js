@@ -7,8 +7,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'platform',
-    function ($, conf, platform) {
+  sitecues.use('jquery', 'conf', 'platform', 'util/common',
+    function ($, conf, platform, common) {
       if (window !== window.top) {
         // TODO we might want to put in a rule like this for all of sitecues
         return; // Only zoom top level window so that we do not double zoom iframes
@@ -78,7 +78,8 @@ sitecues.def('zoom', function (zoom, callback) {
         MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
-        ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd';
+        ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
+        MIN_RECT_SIDE = 4;
 
       // ------------------------ PUBLIC -----------------------------
 
@@ -730,12 +731,37 @@ sitecues.def('zoom', function (zoom, callback) {
         return bodyInfo;
       }
 
+      function willAddRect(newRect, node) {
+        if (node === document.body || newRect.left < 0 || newRect.top < 0 ||
+          newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
+          node.childNodes.length === 0) {
+          return false;
+        }
+
+        if (newRect.left > 0) {
+          return true;
+        }
+
+        // newRect.left === 0
+        // We usually won't these rectangles flush up against the left margin,
+        // but will add them if there are visible children.
+        // If we added them all the time we would often have very large left margins.
+        // This rule helps get left margin right on duxburysystems.com.
+        if ($(node).css('overflow') !== 'visible' || !common.hasVisibleChildContent(node)) {
+          return false; // No visible children
+        }
+        return true;
+      }
+
       // Recursively look at rectangles and add them if they are useful content rectangles
       function getBodyRectImpl(node, sumRect, visibleNodes) {
         var newRect = getAbsoluteRect(node);
         newRect.right = newRect.left + newRect.width;
         newRect.bottom = newRect.top + newRect.height;
-        if (addRect(sumRect, newRect)) {
+        if (willAddRect(newRect, node)) {
+          console.log('%d %o', newRect.left, node);
+
+          addRect(sumRect, newRect);
           visibleNodes.push(node);
           return;  // Valid rectangle added. No need to walk into children.
         }
@@ -746,21 +772,17 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add the rectangle to the sum rect if it is visible and has a left margin > 0
       function addRect(sumRect, newRect) {
-        if (newRect.left > 0 && newRect.top >= 0 &&
-          newRect.width > 1 && newRect.height > 1) {
-          if (isNaN(sumRect.left) || newRect.left < sumRect.left) {
-            sumRect.left = newRect.left;
-          }
-          if (isNaN(sumRect.right) || newRect.right > sumRect.right) {
-            sumRect.right = newRect.right;
-          }
-          if (isNaN(sumRect.top) || newRect.top < sumRect.top) {
-            sumRect.top = newRect.top;
-          }
-          if (isNaN(sumRect.bottom) || newRect.bottom > sumRect.bottom) {
-            sumRect.bottom = newRect.bottom;
-          }
-          return true; // Successfully added
+        if (isNaN(sumRect.left) || newRect.left < sumRect.left) {
+          sumRect.left = newRect.left;
+        }
+        if (isNaN(sumRect.right) || newRect.right > sumRect.right) {
+          sumRect.right = newRect.right;
+        }
+        if (isNaN(sumRect.top) || newRect.top < sumRect.top) {
+          sumRect.top = newRect.top;
+        }
+        if (isNaN(sumRect.bottom) || newRect.bottom > sumRect.bottom) {
+          sumRect.bottom = newRect.bottom;
         }
       }
 
