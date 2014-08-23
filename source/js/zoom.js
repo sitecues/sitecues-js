@@ -690,10 +690,13 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Is it a responsive page?
       function isResponsiveDesign() {
+        if (originalBodyInfo.width == window.outerWidth) {
+          // Handle basic case -- this works for duxburysystems.com, where the visible body content
+          // spans the entire width of the available space
+          return true;
+        }
         // We consider it responsive if the main node we discovered inside the body changes width
         // if we change the body's width.
-        // Note: this doesn't work on duxburysystem.com with absolute rect -- it doesn't update quite
-        // fast enough, but putting it on a setTimeout(detection, 0) flashes that smaller width
         var origWidth = originalBodyInfo.mainNode.scrollWidth,
           newWidth,
           isResponsive;
