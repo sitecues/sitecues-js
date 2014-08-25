@@ -42,7 +42,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       function isLonerElement(element) {
         var isLoner = true;
-        $(element).closest($hlbElement).each(function(ancestor) {
+        $(element).closest($hlbElement).each(function(index, ancestor) {
           isLoner = ancestor.parentNode.childElementCount === 1;
           return isLoner;
         });
