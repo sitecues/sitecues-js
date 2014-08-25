@@ -314,6 +314,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       }
 
+      function getEditableItems() {
+        function isEditable(index, element) {
+          return common.isEditable(element);
+        }
+        return $originalElement.find('input,textarea')
+          .andSelf()
+          .filter(isEditable);
+      }
+
       /**
        * [initializeHLB is the first step in the creation process for the HLB.
        * This function is responsible for cloning the original element, mapping form data,
@@ -326,8 +335,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create and append to the DOM the wrapping element for HLB and DIMMER elements
         $hlbWrappingElement = getHLBWrapper();
 
-        if (platform.browser.isIE && ($originalElement.is('input, textarea') || $originalElement.find('input, textarea').length)) {
-
+        if (platform.browser.isIE && getEditableItems().length) {
           if (SC_DEV && loggingEnabled) {
             console.log('SPECIAL CASE: HLB inside <body>');
           }
@@ -541,7 +549,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         $hlbElement = $($originalElement[0].cloneNode(true));
 
         // Copies form values from original element to HLB
-        mapForm($originalElement, $hlbElement);
+        // Need to do this on a timeout in order to enable Safari input fix hack
+        setTimeout(function() {
+          mapForm($originalElement, $hlbElement);
+        }, 0);
 
         // Clone styles of HLB and children of HLB, so layout is preserved
         hlbStyling.initializeStyles($originalElement, $hlbElement);
@@ -614,6 +625,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           if ($currentFromInput.prop('type') === 'radio' || $currentFromInput.prop('type') === 'checkbox') {
             $currentToInput.prop('checked', $currentFromInput.prop('checked'));
           } else {
+            if (platform.browser.isSafari) {
+              // In Safari, text inputs opening up in HLB show their contents flush to the bottom
+              // instead of vertically centered, unless we tweak the value of the input just after the styles are set
+              $currentToInput.val($currentFromInput.val() + ' ');
+            }
             $currentToInput.val($currentFromInput.val());
           }
         }
