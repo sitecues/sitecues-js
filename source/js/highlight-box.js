@@ -418,6 +418,19 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           }
         }
 
+        // TOOD : The code duplication below is unfortunately necessary to correctly size the HLB.
+        //        The problem was found on 8/24, and a release candidate is super important, so there
+        //        is little time to really identify a better solution (if one exists).
+        // Link : http://www.texasat.net/default.aspx?name=resources.webinars
+
+        // The following attempts to mitigate the vertical scroll bar by
+        // setting the height of the element to the scroll height of the element.
+        hlbPositioning.mitigateVerticalScroll($hlbElement);
+
+        // Vertical scroll should only appear when HLB is as tall as the
+        // safe area height and its scrollHeight is greater than its clientHeight
+        hlbPositioning.addVerticalScroll($hlbElement);
+
       }
 
       function getChildWidth (child) {
