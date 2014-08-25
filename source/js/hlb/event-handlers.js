@@ -39,12 +39,14 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         isIE = platform.browser.isIE,
 
         // Set this to 0 to see how scrolling the HLB in IE will function.
+
         scrollOverflow = isIE ? DEFAULT_IE_SCROLL_PIXEL_DELTA : 0;
 
     /////////////////////////
     // PRIVATE FUNCTIONS
     ////////////////////////
 
+  
     /**
      * [shouldPreventScroll determines if scrolling should be disabled or enabled]
      * @param  {[DOM scroll event]} e [Object representing scrolling data]
@@ -115,37 +117,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
     /////////////////////////
     // PUBLIC METHODS
     ////////////////////////
-
-    /**
-     * Onmousewheel event handler.
-     * @param e EventObject
-     */
-    eventHandlers.wheelHandler = function(e) {
-
-      var hlb = e.data.hlb[0];
-
-      // If the mouse is hovering over a child that does not have a scrollbar.
-      // The  function common.hasVertScroll returns true even when elements do not have a vertical scrollbar.
-      // Don't scroll target if it is a HLB (not a descendant) and doesn't have scroll bar.
-      if (shouldPreventScroll(e)) {
-
-        if (isIE) {
-          if (common.wheelUp(e)) {
-            hlb.scrollTop = 0;
-          } else {
-            hlb.scrollTop = hlb.scrollHeight;
-          }
-        }
-
-        eventHandlers.disableWheelScroll();
-        e.returnValue = false;
-        e.preventDefault();
-        return false;
-      }
-
-      eventHandlers.enableWheelScroll();
-
-    };
+    
 
     /**
      * Onkeydown event handler.
@@ -223,22 +195,6 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
       }
       // Otherwise, everything's OK, allow default.
       return true;
-    };
-
-    /**
-     * Unbinds wheel scroll event from window and document.
-     * DOMMouseScroll : https://developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/DOMMouseScroll (firefox only)
-     * mousewheel     : https://developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/mousewheel     (chrome, ie, safari)
-     */
-    eventHandlers.disableWheelScroll = function () {
-      $(window).on('DOMMouseScroll mousewheel wheel', wheel);
-    };
-
-    /**
-     * Binds wheel scroll event to window and document.
-     */
-    eventHandlers.enableWheelScroll = function () {
-      $(window).off('DOMMouseScroll mousewheel wheel', wheel);
     };
 
     // Done.

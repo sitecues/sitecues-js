@@ -2,6 +2,7 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
+
 sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
@@ -35,11 +36,21 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
-          isSticky                       = false,  // DEBUG: HLB deflation toggler
+          isSticky                       = false, // DEBUG: HLB deflation toggler
 
-          mouseInHLB = false;
+          mouseInHLB                     = false; // Used by wheelhandler to lock window from scrolling
+      
 
 
+      //////////////////////////////
+      // PRIVATE FUNCTIONS
+      /////////////////////////////
+
+
+      /**
+       * [wheelHandler listens to all scroll events in the window and prevents scroll outside of HLB]
+       * @param  {[DOM scroll event]} e [Object representing scrolling data]
+       */
 
       function wheelHandler (event) {
 
@@ -52,6 +63,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             , preventDefault  = false
             , deltaY          = event.deltaY || -event.wheelDeltaY
             ;
+
+          // Exit and prevent default if there is not y-scroll
+          if (isNaN(deltaY) || deltaY >-1 && deltaY <1) {
+            event.preventDefault();
+            event.returnValue = false;
+            return;
+          }
 
           var scrollBottom      = scrollHeight - scrollTop - clientHeight
             , scrollingDown     = deltaY > 0
@@ -82,7 +100,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             preventDefault = true;
           }
 
-          if (event.target !== elem && ! $('#sitecues-hlb').find(event.target).length > 0){
+          if (event.target !== elem && $('#sitecues-hlb').find(event.target).length === 0){
             preventDefault = true;
           }
 
@@ -91,31 +109,27 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             event.returnValue = false;
           }
           
-          // console.log(
-          //   'deltaY:', deltaY,
-          //   ', scrlTOP:', scrollTop,
-          //   ', scrlBOT:', scrollBottom,
-          //   ', scrlHeight:', scrollHeight,
-          //   ', clntHeight:', clientHeight,
-          //   ', preventDef:', preventDefault,
-          //   ', down:', scrollingDown,
-          //   ', up:', scrollingUp,
-          //   ', sToTop:', scrolledToTop,
-          //   ', sToBot:', scrolledToBottom
-          // );
+          if (SC_DEV) {
+            console.log(
+                 'deltaY:', deltaY,
+              ', scrlTOP:', scrollTop,
+              ', scrlBOT:', scrollBottom,
+              ', scrlHeight:', scrollHeight,
+              ', clntHeight:', clientHeight,
+              ', preventDef:', preventDefault,
+              ', down:', scrollingDown,
+              ', up:', scrollingUp,
+              ', sToTop:', scrolledToTop,
+              ', sToBot:', scrolledToBottom
+            );
+          }
 
         }
 
       }
 
-      window.addEventListener( platform.browser.isSafari ? 'mousewheel' : 'wheel', wheelHandler);
 
 
-
-
-      //////////////////////////////
-      // PRIVATE FUNCTIONS
-      /////////////////////////////
 
       /**
        * [toggleHLB closes or creates a new HLB]
@@ -350,8 +364,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           $hlbWrappingElement.insertAfter('body');
         }
 
-        console.log('initializeHLB');
-
         mouseInHLB = true;
 
         // Disable document scroll until the HLB deflates
@@ -503,17 +515,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Register escape keypress, it will deflate the HLB
         sitecues.on('key/esc', closeHLB);
 
-        console.log('turnOnHLBEventListeners');
-
-        // Register mousewheel handler to allow scrolling of HLB content
-        // $hlbElement.on('mousewheel DOMMouseScroll', {
-        //   'hlb': $hlbElement
-        // }, eventHandlers.wheelHandler);
-
         // // Register key press handlers (pagedown, pageup, home, end, up, down)
         $(window).on('keydown', {
           'hlb': $hlbElement
         }, eventHandlers.keyDownHandler);
+
+        // Trap the mousewheel events (wheel for all browsers except Safar, which uses mousehweel)
+        window.addEventListener( platform.browser.isSafari ? 'mousewheel' : 'wheel', wheelHandler);
 
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
@@ -531,7 +539,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         mouseInHLB = false;
 
-        console.log('turnOffHLBEventListeners');
+        // UNTrap the mousewheel events (we don't want the event to even think when the user scrolls without the HLB)
+        window.removeEventListener( platform.browser.isSafari ? 'mousewheel' : 'wheel', wheelHandler);
 
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
@@ -539,7 +548,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         sitecues.off('key/esc', closeHLB);
 
         // Turn off the suppression of scrolling, keypresses
-        // $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
         $(window).off('keydown', eventHandlers.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
@@ -650,11 +658,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Any mouse detection within the HLB turns on the ability to exit HLB by moving mouse
         preventDeflationFromMouseout = false;
 
-        // Any mouse detection within the HLB turns on the ability to scroll
-        // eventHandlers.enableWheelScroll();
-
-        console.log('onHLBHover');
-
       }
 
       /**
@@ -715,11 +718,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * any HLB existed.]
        */
       function onHLBClosed() {
-
-        // Turn back on the ability to scroll the document
-        // eventHandlers.enableWheelScroll();
-
-        console.log('onHLBClosed');
 
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();
