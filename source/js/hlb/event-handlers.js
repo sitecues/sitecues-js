@@ -46,29 +46,6 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
     // PRIVATE FUNCTIONS
     ////////////////////////
 
-  
-    /**
-     * [shouldPreventScroll determines if scrolling should be disabled or enabled]
-     * @param  {[DOM scroll event]} e [Object representing scrolling data]
-     * @return {[Boolean]}   [True turns off scrolling, false turns it on.]
-     */
-    function shouldPreventScroll (e) {
-      
-      var hlb                    = e.data.hlb[0],
-          isChild                = targetIsChildOfHlb(hlb, e.target),
-          scrollAmountMultiplier = getScrollAmountMultiplier(e),
-          zoom                   = conf.get('zoom'),
-
-          // Value will be 0 for non IE browsers.
-          predictedScrollAmount  = scrollOverflow * scrollAmountMultiplier / zoom;
-
-      return (!isChild && !common.hasVertScroll(hlb) ||
-             (common.wheelUp(e) && $(hlb).scrollTop() - predictedScrollAmount <= 0) ||
-             (common.wheelDown(e) && $(hlb).scrollTop() + hlb.clientHeight + 1 + predictedScrollAmount >= hlb.scrollHeight));
-    }
-
-    eventHandlers.shouldPreventScroll = shouldPreventScroll;
-
     /**
      * Check is current target is an descentor of hlb element.
      * @param hlb Html Object
