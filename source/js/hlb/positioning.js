@@ -28,7 +28,47 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      */
     function isEligibleForConstrainedWidth($hlbElement) {
 
-      return $hlbElement.is(VALID_ELEMENTS_FOR_CONSTRAINED_WIDTH);
+      var allowWrapping = true;
+
+      // Return true if there are no other elements in the HLB that will affect the positioning
+      // of this element
+      // hlbElement
+      //   \
+      //    Grandparent
+      //        \
+      //        Parent (no siblings)
+      //          \
+      //           I am a loner! :(
+
+      function isLonerElement(element) {
+        var isLoner = true;
+        $(element).closest($hlbElement).each(function(ancestor) {
+          isLoner = ancestor.parentNode.childElementCount === 1;
+          return isLoner;
+        });
+        return isLoner;
+      }
+
+      // Return true if there is CSS that will cause an elements position to be based on another element's position
+      function hasPositioningCss(css) {
+        return css.position !== 'static' || css.float !== 'none' || css.display !== 'table-cell';
+      }
+
+      // Returns false when an element is not wrappable or, if part of an HLB,
+      // wrapping the HLB would be bad (would break the intended layout, for example).
+      function isWrappable(index, element) {
+        var css = getComputedStyle(element);
+
+        allowWrapping = (css.whiteSpace === 'normal' || css.whiteSpace === 'preWrap') &&
+          (!hasPositioningCss(css) || isLonerElement(element)) &&
+          !common.isVisualMedia(element) && !common.isFormControl(element) && !common.isEditable(element);
+
+        return allowWrapping; // Once false, the each() loop will stop as well
+      }
+
+      $hlbElement.find('*').andSelf().each(isWrappable);
+
+      return allowWrapping;
 
     }
 
