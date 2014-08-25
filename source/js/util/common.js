@@ -43,7 +43,10 @@ sitecues.def('util/common', function (common, callback) {
     }
 
     common.hasVisibleChildContent = function(current) {
-      var children, index;
+      var children,
+        index,
+        MAX_CHILDREN_TO_CHECK = 10,
+        numChildrenToCheck;
 
       if (common.isVisualMedia(current) || common.isFormControl(current)) {
         var mediaRect = current.getBoundingClientRect(),
@@ -62,9 +65,14 @@ sitecues.def('util/common', function (common, callback) {
         return false;
       }
 
+      numChildrenToCheck = Math.min(children.length, MAX_CHILDREN_TO_CHECK);;
+
       // Longer check: see if any children are non-empty text nodes, one by one
-      for (index = 0; index < children.length; index++) {
+      for (index = 0; index < numChildrenToCheck; index++) {
         if (isNonEmptyTextNode(children[index])) {
+          if (current.id === 'content') {
+            console.log(children[index]);
+          }
           return true;
         }
       }
