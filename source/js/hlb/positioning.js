@@ -40,10 +40,15 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       //          \
       //           I am a loner! :(
 
+
+      function hasSiblings(element) {
+        return element.parentNode.childElementCount > 1;
+      }
+
       function isLonerElement(element) {
         var isLoner = true;
-        $(element).closest($hlbElement).each(function(index, ancestor) {
-          isLoner = ancestor.parentNode.childElementCount === 1;
+        $(element).closest($hlbElement).each(function(index, elemToCheckForSiblings) {
+          isLoner = $hlbElement.is(elemToCheckForSiblings) || !hasSiblings(elemToCheckForSiblings);
           return isLoner;
         });
         return isLoner;

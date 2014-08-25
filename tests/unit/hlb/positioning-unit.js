@@ -21,31 +21,31 @@ describe('hlbPositioning', function() {
 
   // The isEligibleForConstrainedWidth() purpose is to determine if the $hlbElement is going to have
   // its width restricted by 50 x-characters
-  describe('#isEligibleForConstrainedWidth()', function () {
+  // describe('#isEligibleForConstrainedWidth()', function () {
 
-    it('Returns true if element passed is a paragraph because paragraphs are valid elements ' +
-       'for limiting the width to 50-X characters.', function (done) {
+  //   it('Returns true if element passed is a paragraph because paragraphs are valid elements ' +
+  //      'for limiting the width to 50-X characters.', function (done) {
 
-        var $hlbElement = jquery('<p>');
+  //       var $hlbElement = jquery('<p>');
 
-        expect(hlbPositioning.isEligibleForConstrainedWidth($hlbElement)).to.be.true;
+  //       expect(hlbPositioning.isEligibleForConstrainedWidth($hlbElement)).to.be.true;
 
-        done();
+  //       done();
 
-    });
+  //   });
 
-    it('Returns false if element passed is a div because divs are invalid elements ' +
-       'for limiting the width to 50-X characters.', function (done) {
+  //   it('Returns false if element passed is a div because divs are invalid elements ' +
+  //      'for limiting the width to 50-X characters.', function (done) {
 
-        var $hlbElement = jquery('<div>');
+  //       var $hlbElement = jquery('<div>');
 
-        expect(hlbPositioning.isEligibleForConstrainedWidth($hlbElement)).to.be.false;
+  //       expect(hlbPositioning.isEligibleForConstrainedWidth($hlbElement)).to.be.false;
 
-        done();
+  //       done();
 
-    });
+  //   });
 
-  });
+  // });
 
   // The fixOverflowWidth() purpose is to set the width of the $hlbElement to something that includes
   // all of its visual content horizontally.
@@ -129,26 +129,26 @@ describe('hlbPositioning', function() {
 
   });
 
-  // The limitWidth() purpsose  is to limit the width of the $hlbElement to 50 x-characters.
-  describe('#limitWidth()', function () {
+  // // The limitWidth() purpsose  is to limit the width of the $hlbElement to 50 x-characters.
+  // describe('#limitWidth()', function () {
 
-    it('Invokes jquery.css if $hlbElement is a paragraph because we rely upon jQuery to limit the width of the ' +
-       '$hlbElement.', function (done) {
+  //   it('Invokes jquery.css if $hlbElement is a paragraph because we rely upon jQuery to limit the width of the ' +
+  //      '$hlbElement.', function (done) {
 
-      var $hlbElement = jquery('<p>'),
-          cssSpy = sinon.spy(jquery.fn, 'css');
+  //     var $hlbElement = jquery('<p>'),
+  //         cssSpy = sinon.spy(jquery.fn, 'css');
 
-      hlbPositioning.limitWidth($hlbElement, $hlbElement, 1);
+  //     hlbPositioning.limitWidth($hlbElement, $hlbElement, 1);
 
-      expect(cssSpy.calledOnce).to.be.true;
+  //     expect(cssSpy.calledOnce).to.be.true;
 
-      cssSpy.restore();
+  //     cssSpy.restore();
 
-      done();
+  //     done();
 
-    });
+  //   });
 
-  });
+  // });
 
   // The mitigateVerticalScroll() purpose is to increase the height of the $hlbElement until the $hlbElement has
   // no vertical scrollbar or it is as tall as the safe-area height (whichever comes first).

@@ -6,9 +6,9 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/safe-area', 'platform',
+  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/safe-area', 'platform', 'conf',
 
-  function (dimmer, common, $, hlbSafeArea, platform) {
+  function (dimmer, common, $, hlbSafeArea, platform, conf) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
         DEFLATION_SPEED = 150, // Default deflation duration
@@ -23,6 +23,19 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       // Dim the background!
       dimmer.dimBackgroundContent(data.$hlbWrappingElement, INFLATION_SPEED);
+
+      if (platform.browser.isFirefox && window.devicePixelRatio > 1 && data.$hlbElement.width() * conf.get('zoom') * hlbSafeArea.HLBZoom >= 1024) {
+
+        data.$hlbElement.css({
+          'transform'       : 'scale(' + hlbSafeArea.HLBZoom + ') ' + data.translateCSS,
+          'transform-origin': data.originCSS
+        });
+
+        data.onHLBReady();
+
+        return;
+
+      }
 
       if (common.useJqueryAnimate) {
 
@@ -60,6 +73,19 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // we check to see if the HLB scale is greater than one, and if so, we animate the
       // deflation, otherwise, we just skip the deflation step
       if (isHLBScaleGreaterThanOne($hlbElement)) {
+
+        if (platform.browser.isFirefox && window.devicePixelRatio > 1 && data.$hlbElement.width() * conf.get('zoom') * 1.5 >= 1024) {
+
+          data.$hlbElement.css({
+            'transform'       : 'scale(1) ' + data.translateCSS,
+            'transform-origin': data.originCSS
+          });
+
+          data.onHLBClosed();
+
+          return;
+
+        }
 
         if (common.useJqueryAnimate) {
 
