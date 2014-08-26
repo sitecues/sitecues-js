@@ -10,7 +10,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   function (dimmer, common, $, hlbSafeArea, platform, conf) {
 
-    var INFLATION_SPEED = 400, // Default inflation duration
+    var INFLATION_SPEED = 4000, // Default inflation duration
         DEFLATION_SPEED = 150, // Default deflation duration
 
         $animation;            // A reference to the $.animate we use for IE9 inflation and deflation

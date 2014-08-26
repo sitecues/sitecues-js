@@ -31,7 +31,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           initialHLBRect, // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
-          preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
+          preventDeflationFromMouseout   = false, // Boolean that determines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
 
           isSticky                       = false; // DEBUG: HLB deflation toggler
@@ -490,7 +490,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
             // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement);
+            offset = hlbPositioning.midPointDiff($hlbElement, $originalElement),
+
+            zoom = conf.get('zoom');
 
         // Update the dimensions for the HLB which is used for constraint calculations.
         // The offset of the original element and cloned element midpoints are used for positioning.
@@ -515,12 +517,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         translateCSS = 'translate(' + (-offset.x ) + 'px, ' + (-offset.y ) + 'px)';
 
         // This is important for animating from the center point of the HLB
-        originCSS = ((-offset.x) + HLBBoundingBox.width / 2 ) + 'px ' +
-            ((-offset.y) + HLBBoundingBox.height / 2 ) + 'px';
+        originCSS = ((-offset.x) + HLBBoundingBox.width / 2 / zoom) + 'px ' +
+            ((-offset.y) + HLBBoundingBox.height / 2 / zoom) + 'px';
 
         // Position the HLB without it being scaled (so we can animate the scale).
         $hlbElement.css({
-          'transform': 'scale(1) ' + translateCSS
+          'transform': 'scale(' + zoom + ') ' + translateCSS
         });
 
       }
