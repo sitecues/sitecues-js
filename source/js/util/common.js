@@ -101,8 +101,11 @@ sitecues.def('util/common', function (common, callback) {
 
     // Return true if the element is part of the sitecues user interface
     // Everything inside the <body> other than the page-inserted badge
-    common.isInSitecuesUI = function(element) {
-      var closest = $(element).closest('body,#sitecues-badge');
+    common.isInSitecuesUI = function(node) {
+      // Check for nodeType of 1, which is an element
+      // If not, use the parent of the node
+      var element = node.nodeType === 1 ? node : node.parentNode,
+        closest = $(element).closest('body,#sitecues-badge');
       return closest.length === 0 || $(closest).attr('id') === 'sitecues-badge';
     };
 
