@@ -15,6 +15,11 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
         $animation;            // A reference to the $.animate we use for IE9 inflation and deflation
 
+    function shouldFixFirefoxAnimationBug($hlbElement) {
+      return platform.browser.isFirefox && platform.browser.version < 33 &&
+        devicePixelRatio > 1.5 && $hlbElement.width() * hlbSafeArea.getHLBTransformScale() >= 1024;
+    }
+
     /**
      * [transitionInHLB animates the inflation of the HLB and background dimmer]
      * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
@@ -24,10 +29,10 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // Dim the background!
       dimmer.dimBackgroundContent(data.$hlbWrappingElement, INFLATION_SPEED);
 
-      if (platform.browser.isFirefox && window.devicePixelRatio > 1 && data.$hlbElement.width() * conf.get('zoom') * hlbSafeArea.HLBZoom >= 1024) {
+      if (shouldFixFirefoxAnimationBug(data.$hlbElement) {
 
         data.$hlbElement.css({
-          'transform'       : 'scale(' + hlbSafeArea.HLBZoom + ') ' + data.translateCSS,
+          'transform'       : 'scale(' + hlbSafeArea.getHLBTransformScale() + ') ' + data.translateCSS,
           'transform-origin': data.originCSS
         });
 
