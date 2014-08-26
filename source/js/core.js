@@ -7,10 +7,6 @@
   
   'use strict';
 
-  if (SC_DEV) {
-    console.log('**** SITECUES RUNNING IN SC_DEV MODE ****')
-  }
-
   // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
   var version = '0.0.0-UNVERSIONED',
 
@@ -57,6 +53,15 @@
     }
   };
 
+  if (SC_DEV) {
+    if (console){
+      var textStyle = 'background: red; color: #FFF; font-weight:bold;';
+      console.log('%c **** SITECUES MODE: SC_DEV **** ', textStyle);
+      console.log('%c **** SITECUES VERSION: '+version+' **** ', textStyle);
+    }
+  }
+
+
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
   exportPublicFields = function () {
@@ -75,7 +80,6 @@
     sitecues.parseUrl = parseUrl;
     sitecues.resolveUrl = resolveUrl;
   };
-
 
 
   //////////////////////////////////////////////////////////////////////////////////////////
