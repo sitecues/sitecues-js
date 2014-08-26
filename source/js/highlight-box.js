@@ -2,16 +2,19 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
+
 sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
   sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'hlb/animation',
+    
     function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, hlbAnimation) {
 
       /////////////////////////
       // PRIVATE VARIABLES
       ////////////////////////
+      ///
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID = 'sitecues-hlb', // ID for $hlbElement
@@ -33,8 +36,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
+          isSticky                       = false, // DEBUG: HLB deflation toggler
 
-          isSticky                       = false; // DEBUG: HLB deflation toggler
+          // Decide which event to use depending on which browser is being used
+          wheelEventName                 = platform.browser.isSafari ? 'mousewheel' : 'wheel';
+      
+
 
       if (SC_DEV) {
 
@@ -46,6 +53,102 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       //////////////////////////////
       // PRIVATE FUNCTIONS
       /////////////////////////////
+
+
+      /**
+       * [wheelHandler listens to all scroll events in the window and prevents scroll outside of HLB]
+       * @param  {[DOM scroll event]} e [Object representing scrolling data]
+       */
+
+      function wheelHandler (event) {
+
+
+        // Get the deltaY value when the user scrolls (how fast the user is scrolling)
+        var deltaY = event.deltaY || -event.wheelDeltaY;
+
+        // Sometimes there is no deltaY number, or a deltaY of "0"
+        // (when the user is scrolling horizontally along X)
+        if (isNaN(deltaY) || deltaY >-1 && deltaY <1) {
+          
+          // We prevent the scroll event for horizontal scrolls
+          return preventScroll(event);
+        }
+
+        /*
+
+          Dimension Calculations:
+
+                     ///////// 
+                   ↑ /       / ↕ Scroll Top
+            Scroll | XXXXXXXXX 
+            Height | X       X ↑
+                   | X  HLB  X | Client Height
+                   | X       X ↓
+                   | XXXXXXXXX 
+                   ↓ /       / ↕ Scroll Bottom
+                     /////////
+
+        */
+
+        // Get the dimensions
+        var elem             = $hlbElement[0]       // The HLB Element
+          , scrollHeight     = elem.scrollHeight    // The total height of the scrollable area
+          , scrollTop        = elem.scrollTop       // Pixel height of invisible area above element (what has been scrolled)
+          , clientHeight     = elem.clientHeight    // The height of the element in the window
+          , scrollBottom     = scrollHeight-scrollTop-clientHeight // The pixels height invisible area below element (what is left to scroll)
+          , scrollingDown    = deltaY > 0           // If the user is scrolling downwards
+          , scrollingUp      = deltaY < 0           // If the user is scrolling upwards
+          , scrolledToBottom = scrollBottom <= 1    // There are now more invisible pixels below the element
+          , scrolledToTop    = elem.scrollTop <= 1  // There are now more invisible pixels above the element
+          ;
+        
+        
+        // Prevent any scrolling if the user is:
+        //   a) Not scrolling on the HLB element directly.
+        //   b) Not scrolling on a decendant of the HLB element.
+        if (!$hlbElement.is(event.target) && !$.contains(elem, event.target))  {
+          preventScroll(event);
+        }
+
+        // If the user is scrolling down, (but has not reached the bottom), and
+        // is trying to scroll down more pixels that there are left to scroll...
+        if (scrollingDown && deltaY >= scrollBottom) {
+          // ...set the scroll to the bottom...
+          elem.scrollTop = elem.scrollHeight;
+          // ...and stop scrolling.
+          preventScroll(event);
+        }
+
+        // If the user tries to scroll down past the bottom...
+        if (scrolledToBottom && scrollingDown) {
+          preventScroll(event); // ...stop scrolling.
+        }
+
+        // If the user is scrolling up, (but has not reached the top), and is
+        // trying to scroll up more pixels that there are left to scroll...
+        if (scrollingUp && scrollTop-(-deltaY) <= 0) {
+          // ...set the scroll to the top...
+          elem.scrollTop = 0;
+          // ...and stop scrolling.
+          preventScroll(event);
+        }
+
+        // If the user tries to scroll down past the bottom...
+        if (scrolledToTop && scrollingUp) {
+          preventScroll(event); // ...stop scrolling.
+        }
+        
+        // Prevent the original scroll event
+        function preventScroll() {
+          event.preventDefault();
+          event.returnValue = false;
+          return false;
+        }
+
+      }
+
+
+
 
       /**
        * [toggleHLB closes or creates a new HLB]
@@ -346,8 +449,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           $hlbWrappingElement.insertAfter('body');
         }
 
-        // Disable document scroll until the HLB deflates
-        eventHandlers.disableWheelScroll();
+        // Trap the mousewheel events (wheel for all browsers except Safar, which uses mousehweel)
+        window.addEventListener(wheelEventName, wheelHandler);
 
         // Clone, style, filter
         cloneHLB();
@@ -526,11 +629,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Register escape keypress, it will deflate the HLB
         sitecues.on('key/esc', closeHLB);
 
-        // Register mousewheel handler to allow scrolling of HLB content
-        $hlbElement.on('mousewheel DOMMouseScroll', {
-          'hlb': $hlbElement
-        }, eventHandlers.wheelHandler);
-
         // Register key press handlers (pagedown, pageup, home, end, up, down)
         $(window).on('keydown', {
           'hlb': $hlbElement
@@ -550,13 +648,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function turnOffHLBEventListeners() {
 
+        // UNTrap the mousewheel events (we don't want the event to even think when the user scrolls without the HLB)
+        window.removeEventListener(wheelEventName, wheelHandler);
+
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
         // During deflation, turn off the ability to deflate or create a new HLB
         sitecues.off('key/esc', closeHLB);
 
         // Turn off the suppression of scrolling, keypresses
-        $hlbElement.off('mousewheel DOMMouseScroll', eventHandlers.wheelHandler);
         $(window).off('keydown', eventHandlers.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
@@ -675,9 +775,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Any mouse detection within the HLB turns on the ability to exit HLB by moving mouse
         preventDeflationFromMouseout = false;
 
-        // Any mouse detection within the HLB turns on the ability to scroll
-        eventHandlers.enableWheelScroll();
-
       }
 
       /**
@@ -738,9 +835,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * any HLB existed.]
        */
       function onHLBClosed() {
-
-        // Turn back on the ability to scroll the document
-        eventHandlers.enableWheelScroll();
 
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();
