@@ -99,8 +99,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Prevent any scrolling if the user is:
         //   a) Not scrolling on the HLB element directly.
         //   b) Not scrolling on a decendant of the HLB element.
-        if (event.target !== elem && $('#sitecues-hlb').find(event.target).length === 0) {
-          preventScroll();
+        if (!$hlbElement.is(event.target) && !$.contains(elem, event.target))  {
+          preventScroll(event);
         }
 
         // If the user is scrolling down, (but has not reached the bottom), and
@@ -136,21 +136,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           event.preventDefault();
           event.returnValue = false;
           return false;
-        }
-
-        if (SC_DEV) {
-          console.log(
-               'deltaY:', deltaY,
-            ', scrlTOP:', scrollTop,
-            ', scrlBOT:', scrollBottom,
-            ', scrlHeight:', scrollHeight,
-            ', clntHeight:', clientHeight,
-            // ', preventDef:', preventDefault,
-            ', down:', scrollingDown,
-            ', up:', scrollingUp,
-            ', sToTop:', scrolledToTop,
-            ', sToBot:', scrolledToBottom
-          );
         }
 
       }
