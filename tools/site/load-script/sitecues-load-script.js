@@ -8,6 +8,7 @@ sitecues.config = {
 
 var SCRIPT_URLS = {
   localHost: '10.0.3.1:8888/l/s;id=__SITEID__/js/sitecues.js',
+  preProduction: 'ec2-54-81-136-235.compute-1.amazonaws.com/l/s;id=__SITEID__/js/sitecues.js',
   production: 'js.sitecues.com/l/s;id=__SITEID__/js/sitecues.js',
   releaseCandidate: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/release-__VERSION__/latest/js/sitecues.js',
   latestDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/latest/js/sitecues.js',
