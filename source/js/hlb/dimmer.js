@@ -5,7 +5,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
   'use strict';
 
-    sitecues.use('jquery', 'conf', 'util/common', function($, conf, common) {
+  sitecues.use('jquery', 'conf', 'util/common', function($, conf, common) {
 
     //////////////////////////////
     // PRIVATE VARIABLES

@@ -6,8 +6,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     // PRIVATE VARIABLES
     ////////////////////////
 
-    var documentElement = window.document.documentElement,
-      HLBZoom = 1.5;  // Amount HLB will scale up from current size
+    var documentElement = window.document.documentElement;
 
 
 
@@ -41,14 +40,6 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     /////////////////////////
     // PUBLIC METHODS
     ////////////////////////
-
-    sitecues.use('conf', function(conf) {
-      // HLB transform scale necessary to provide the HLBExtraZoom size increase.
-      // If zoom is on the body, then scaling needs to account for that since the HLB is outside of the body.
-      safeArea.getHLBTransformScale = function () {
-        return HLBZoom * conf.get('zoom');
-      };
-    });
 
     // Returns a rectangle the represents the area in which the HLB is allowed to occupy
     safeArea.getSafeZoneBoundingBox = function() {
