@@ -27,3 +27,7 @@ exports.midPointDiff              = function () {
     'y': 0
   };
 };
+
+exports.getFinalScale = function() { return 1.5 * 1.5; };
+exports.getStartingScale = function() { return 1.5; };
+exports.getInheritedZoom = function() { return 1; };
