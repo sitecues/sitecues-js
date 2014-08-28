@@ -549,11 +549,11 @@ describe('highlight-box', function() {
   // HLB with default styles and computed styles.
   describe('#initializeHLB', function () {
 
-    it('Invokes eventHandlers.disableWheelScroll because the user should not be able to scroll the document ' +
+    it('Invokes window.addEventListener because the user should not be able to scroll the document ' +
        'while the HLB is open', function (done) {
 
       var paragraph             = win.document.getElementById('paragraph'),
-          disableWheelScrollSpy = sinon.spy(eventHandlers, 'disableWheelScroll'),
+          disableWheelScrollSpy = sinon.spy(window, 'addEventListener'),
           cssStub               = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
 
       hlb.initializeHLB(paragraph);
@@ -1037,21 +1037,6 @@ describe('highlight-box', function() {
 
   // The onHLBClosed purpose is to clean up the DOM and HLB module state of anything related to the HLB.
   describe('#onHLBClosed', function () {
-
-    it('Invokes eventHandlers.enableWheelScroll because we want to allow users to scroll the document ' +
-       'after the HLB closes.', function (done) {
-
-      var enableWheelScrollSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
-
-      hlb.onHLBClosed();
-
-      expect(enableWheelScrollSpy.calledOnce).to.be.true;
-
-      enableWheelScrollSpy.restore();
-
-      done();
-
-    });
 
     it('Sets $hlbElement to undefined because $hlbElement is a private variable that is an HLB element.', function (done) {
 

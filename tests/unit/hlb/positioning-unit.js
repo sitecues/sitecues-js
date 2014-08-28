@@ -470,7 +470,7 @@ describe('hlbPositioning', function() {
 
             result   = hlbPositioning.scaleRectFromCenter($hlbElement),
 
-            expected = (width + height) * hlbPositioning.getFinalScale($hlbElement),
+            expected = (width + height) * hlbPositioning.hlbPositioning.getFinalScale($hlbElement),
             actual   = result.width + result.height;
 
         expect(actual).to.be.equal(expected);
