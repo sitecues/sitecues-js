@@ -3,8 +3,8 @@ sitecues.def( 'panel', function (panel, callback) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'audio', 'slider', 'ui', 'html-build',
-    function( $, audio, SliderClass, ui, htmlBuild) {
+  sitecues.use( 'jquery', 'audio', 'slider', 'ui', 'html-build', 'platform',
+    function( $, audio, SliderClass, ui, htmlBuild, platform) {
 
     var PANEL_WIDTH = 500;
     var PANEL_HEIGHT = 80;  // To keep aspect ratio, HEIGHT is WIDTH * .16
