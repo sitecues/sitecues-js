@@ -817,6 +817,8 @@ sitecues.def('zoom', function (zoom, callback) {
           zoomConfig.isResponsive = isResponsiveDesign();
         }
 
+        $(window).resize(onResize);
+
         if (SC_DEV) {
           console.log('_______________________________________________________');
           console.log('Zoom configuration: %o', zoomConfig);
@@ -832,25 +834,20 @@ sitecues.def('zoom', function (zoom, callback) {
        * to properly scale, resize, and position the page and its elements with respect to the current
        * sizes of the body and window.
        */
-      $(window).resize(function () {
+      function onResize() {
         isRetinaDisplay = undefined; // Invalidate, now that it may have changed
 
-        if (completedZoom > 1) {
-          $body.css(getZoomCss(1));
-          originalBodyInfo = getBodyInfo();
-          $body.css(getZoomCss(completedZoom));
-          if (shouldRestrictWidth()) {
-            // Restrict the width of the body so that it works similar to browser zoom
-            // Documents designed to fit the width of the page still will
-            $body.css('width', getRestrictedWidth(completedZoom));
-          }
-          determineScrollbars();
-          sitecues.emit('resize');
+        $body.css(getZoomCss(1));
+        originalBodyInfo = getBodyInfo();
+        $body.css(getZoomCss(completedZoom));
+        if (shouldRestrictWidth()) {
+          // Restrict the width of the body so that it works similar to browser zoom
+          // Documents designed to fit the width of the page still will
+          $body.css('width', getRestrictedWidth(completedZoom));
         }
-        else {
-          originalBodyInfo = null; // Invalidate our initialized data
-        }
-      });
+        determineScrollbars();
+        sitecues.emit('resize');
+      }
 
       // use conf module for sharing current zoom level value
       conf.def('zoom', function (value) {
