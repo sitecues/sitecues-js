@@ -47,9 +47,8 @@ sitecues.def('badge', function(badge, callback) {
 
         // BODY
         var $badge = $('#' + BADGE_ID);
-        var isBadgeInDom = $badge && $badge.length > 0;
 
-        if (isBadgeInDom) {
+        if ($badge.length) {
             $badge.css({
                 'visibility': 'visible',
                 'opacity': 1

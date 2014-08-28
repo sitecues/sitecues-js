@@ -241,14 +241,14 @@ sitecues.def('cursor', function (cursor, callback) {
             data: null,
             headers: {"Accept": "application/octet-stream"},
             success: function() {
-                console.log('Loading of CUR file completed!');
+                SC_DEV && console.log('Loading of CUR file completed!');
                 if (callback) {
                     callback();
                 }
             },
             error: function(jqXHR) {
                 jqXHR.abort();
-                console.log("[Error] Unable to fetch cursor image from server");
+                SC_DEV && console.log("[Error] Unable to fetch cursor image from server");
             }
         });
     }
@@ -542,14 +542,14 @@ sitecues.def('cursor', function (cursor, callback) {
 
     }());
 
-    sitecues.on('zoom/begin', function() {
-      // While zooming, turn off our CSS rules so that the browser doesn't spend
-      // CPU cycles recalculating the custom cursor rules to apply during each frame
-      // This makes a difference in IE -- doesn't seem to help in other browsers.
-      if (platform.browser.isIE) {
+    if (platform.browser.isIE) {
+      sitecues.on('zoom/begin', function() {
+        // While zooming, turn off our CSS rules so that the browser doesn't spend
+        // CPU cycles recalculating the custom cursor rules to apply during each frame
+        // This makes a difference in IE -- doesn't seem to help in other browsers.
         stylesheetElement.disabled = true;
-      }
-    });
+      });
+    }
 
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {

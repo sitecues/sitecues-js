@@ -20,7 +20,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // and a scale animation >= 1024 pixels wide. Basically, the animation goes haywire
       // and jumps to 1/4 the size and back in an unexpected way.
       return platform.browser.isFirefox && platform.browser.version < 33 &&
-        devicePixelRatio > 1.5 && $hlbElement.width() * hlbPositioning.getHLBTransformScale($hlbElement) >= 1024;
+        devicePixelRatio > 1.5 && $hlbElement.width() * hlbPositioning.getFinalScale($hlbElement) >= 1024;
     }
 
     /**
@@ -37,7 +37,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
         // Render instantly, don't animate (which would activate the Firefox animation bug)
         $hlbElement.css({
-          'transform'       : 'scale(' + hlbPositioning.getHLBTransformScale($hlbElement) + ') ' + data.translateCSS,
+          'transform'       : 'scale(' + hlbPositioning.getFinalScale($hlbElement) + ') ' + data.translateCSS,
           'transform-origin': data.originCSS
         });
 
@@ -84,10 +84,10 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // deflation, otherwise, we just skip the deflation step
       if (isHLBZoomed($hlbElement)) {
 
-        if (platform.browser.isFirefox && window.devicePixelRatio > 1 && data.$hlbElement.width() * conf.get('zoom') * 1.5 >= 1024) {
+        if (shouldFixFirefoxAnimationBug($hlbElement)) {
 
-          data.$hlbElement.css({
-            'transform'       : 'scale(' + hlbPositioning.getHLBTransformScale($hlbElement) + ') ' + data.translateCSS,
+          $hlbElement.css({
+            'transform'       : 'scale(' + hlbPositioning.getStartingScale($hlbElement) + ') ' + data.translateCSS,
             'transform-origin': data.originCSS
           });
 
@@ -124,16 +124,17 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function transitionInHLBWithJquery(data) {
 
-      var $hlbElement = data.$hlbElement;
+      var $hlbElement = data.$hlbElement,
+        startingScale = hlbPositioning.getStartingScale($hlbElement);
 
       $hlbElement.css({
         'transform-origin': data.originCSS,
-        'transform'       : 'scale(1) ' + data.translateCSS
+        'transform'       : 'scale(' + startingScale + ') ' + data.translateCSS
       });
 
-      $animation = $({'scale': 1}).animate(
+      $animation = $({'scale': startingScale}).animate(
         {
-          'scale': hlbPositioning.getHLBTransformScale($hlbElement)
+          'scale': hlbPositioning.getFinalScale($hlbElement)
         }, {
           'step'    : (function (data) {
             return function (now) {
@@ -155,7 +156,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       $animation = $({'scale' : $animation.attr('scale')}).animate(
         {
-          'scale': conf.get('zoom')
+          'scale': hlbPositioning.getStartingScale(data.$hlbElement)
         }, {
           'step'    : (function (data) {
             return function (now) {
@@ -181,7 +182,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // After the deflation animation completes, clean up the HLB states and DOM
       $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBClosed);
 
-      // Animate the deflation by setting the transform scale to 1.
+      // Animate the deflation by setting the transform scale to startingScale.
       $hlbElement.css(transitionOutCSS);
 
     }
@@ -231,7 +232,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       var transitionInCSS = {
         'transition'                : data.transitionProperty + INFLATION_SPEED + 'ms',
         'transition-timing-function': 'ease',
-        'transform'                 : 'scale(' + hlbPositioning.getHLBTransformScale(data.$hlbElement) + ') ' + data.translateCSS,
+        'transform'                 : 'scale(' + hlbPositioning.getFinalScale(data.$hlbElement) + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS
       };
 
@@ -255,10 +256,9 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       // If there isn't any transform, then it isn't scaled.
       var transform = $hlbElement.css('transform'),
-        scale = parseFloat(transform.substring(7)),
-        startingZoom = $hlbElement.closest(document.body).length ? 1 : conf.get('zoom');
+        scale = parseFloat(transform.substring(7));
 
-      return scale > startingZoom;
+      return scale > hlbPositioning.getStartingScale($hlbElement);
     }
 
     /**
@@ -270,7 +270,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       return {
         'transition'                : data.transitionProperty + DEFLATION_SPEED + 'ms',
         'transition-timing-function': 'ease',
-        'transform'                 : 'scale(1) ' + data.translateCSS,
+        'transform'                 : 'scale(' + hlbPositioning.getStartingScale(data.$hlbElement) + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS
       };
 

@@ -125,11 +125,9 @@ sitecues.def('hpan', function (hpan, callback) {
 
     // react on any zoom change
     sitecues.on('zoom', function (value) {
+      $(window).off('resize', refresh);
       if (value > 1) {
         $(window).on('resize', refresh);
-      }
-      else {
-        $(window).off('resize', refresh);
       }
 
       refresh();

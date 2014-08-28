@@ -92,9 +92,19 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     // HLB transform scale necessary to provide the HLBExtraZoom size increase.
     // If zoom is on the body, then scaling needs to account for that since the HLB is outside of the body.
-    hlbPositioning.getHLBTransformScale = function ($hlbElement) {
-      var extraZoomToMatchPageZoom = $hlbElement.closest(document.body).length ? 1 : conf.get('zoom')
-      return HLB_DEFAULT_ZOOM * extraZoomToMatchPageZoom;
+    hlbPositioning.getFinalScale = function ($hlbElement) {
+      return HLB_DEFAULT_ZOOM * hlbPositioning.getStartingScale($hlbElement);
+    };
+
+    // HLB transform scale necessary to show HLB at same size as original highlighted content.
+    hlbPositioning.getStartingScale = function ($hlbElement) {
+      return $hlbElement.closest(document.body).length ? 1 : conf.get('zoom')
+    };
+
+    // Transform scale that affects HLB (was inherited from page zoom)
+    // If the HLB is outside the body, this will be 1 (since the page zoom is on <body>)
+    hlbPositioning.getInheritedZoom = function ($hlbElement) {
+      return $hlbElement.closest(document.body).length ? conf.get('zoom') : 1
     };
 
     /**
@@ -210,7 +220,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
         // height is now the "safe zone" height, minus the padding/border
         $hlbElement.css({
-          'height': ((safeZoneHeight / hlbPositioning.getHLBTransformScale($hlbElement)) -
+          'height': ((safeZoneHeight / hlbPositioning.getFinalScale($hlbElement)) -
                      (hlbStyling.defaultBorder +
                       hlbStyling.defaultBorder +
                       parseInt($hlbElement.css('paddingTop')) +
@@ -224,7 +234,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
           // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
           $hlbElement.css({
-            'width': ($hlbElement[0].getBoundingClientRect().width *
+            'width': ($hlbElement[0].getBoundingClientRect().width / hlbPositioning.getInheritedZoom($hlbElement) *
                 (safeZoneHeight / originalHeight)) + 'px'
           });
 
@@ -240,14 +250,15 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     hlbPositioning.constrainWidthToSafeArea = function($hlbElement) {
 
       var originalWidth = hlbPositioning.scaleRectFromCenter($hlbElement).width,
-          safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
+          safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width,
+          inheritedZoom = hlbPositioning.getInheritedZoom($hlbElement);
 
       // Would the scaled element's width be greater than the safe area width?
       if (originalWidth > safeZoneWidth) {
 
         // width is now the "safe zone" width, minus the padding/border
         $hlbElement.css({
-          'width': ((safeZoneWidth / hlbPositioning.getHLBTransformScale($hlbElement)) -
+          'width': ((safeZoneWidth / inheritedZoom / HLB_DEFAULT_ZOOM) -
               (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlbElement) / 2) * 2) + 'px'
         });
 
@@ -256,7 +267,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
           // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
           $hlbElement.css({
-            'height': ($hlbElement[0].getBoundingClientRect().height *
+            'height': ($hlbElement[0].getBoundingClientRect().height / inheritedZoom *
                 (safeZoneWidth / originalWidth)) + 'px'
           });
 
@@ -272,7 +283,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     hlbPositioning.scaleRectFromCenter = function($hlbElement) {
 
       var clonedNodeBoundingBox = $hlbElement[0].getBoundingClientRect(),
-        zoomFactor = hlbPositioning.getHLBTransformScale($hlbElement);
+          zoomFactor = hlbPositioning.getFinalScale($hlbElement);
 
       // The bounding box of the cloned element if we were to scale it
       return {
