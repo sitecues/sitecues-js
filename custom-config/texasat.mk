@@ -4,5 +4,4 @@
 
 custom-name=texasat
 custom-files=\
-	source/js/custom-scripts/texasat/custom-picker.js \
-    source/js/custom-scripts/texasat/background-width-adjuster.js
+	source/js/custom-scripts/texasat/custom-picker.js
