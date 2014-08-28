@@ -8,15 +8,14 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
 
     var documentElement = window.document.documentElement;
 
-    /////////////////////////
+
+
+  /////////////////////////
     // PUBLIC PROPERTIES
     ////////////////////////
 
     // Default fraction of viewport hypotenuse that will define the safe area
     safeArea.HLB_SAFE_AREA = 0.05;
-
-    // HLB transform scale
-    safeArea.HLBZoom = 1.5;
 
     /////////////////////////
     // PRIVATE FUNCTIONS
@@ -25,16 +24,16 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     /**
      * [getUnsafePixels returns the amount of pixels from the
      * edge of the viewport that defines the safe zone]
-     * @return {[float]} [pixels]
+     * @return {number} [pixels]
      */
     function getUnsafePixels() {
 
-        var hypontenuse = Math.sqrt(
+        var hypotenuse = Math.sqrt(
             Math.pow(documentElement.clientWidth, 2) +
             Math.pow(documentElement.clientHeight, 2)
         );
 
-        return hypontenuse * safeArea.HLB_SAFE_AREA;
+        return hypotenuse * safeArea.HLB_SAFE_AREA;
 
     }
 

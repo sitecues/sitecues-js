@@ -5,12 +5,16 @@
  */
 sitecues.def('metrics/page-visited', function (pageVisited, callback) {
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil) {
+    sitecues.use('metrics/util', 'zoom', function(metricsUtil, zoom) {
 
         // ============= Objects methods ======================
         pageVisited = {
             init: function() {
-                pageVisited.data = {'name': 'page-visited'};
+                pageVisited.data = {
+                  'name': 'page-visited',
+                  'nativeZoom': zoom.getNativeZoom(),
+                  'isRetina': zoom.isRetina()
+                };
             },
             update: function(data) {
                 metricsUtil.update(pageVisited, data);

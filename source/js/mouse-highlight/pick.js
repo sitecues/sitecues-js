@@ -103,7 +103,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 2. Don't pick anything when over whitespace
       //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
-      if (!hasVisibleChildContent(startElement)) {
+      if (!common.hasVisibleChildContent(startElement)) {
         return null;
       }
 
@@ -136,36 +136,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       return null;
     };
-
-    /* ----------------------- PRIVATE ----------------------- */
-    function isNonEmptyTextNode(node) {
-      return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
-    }
-
-    function hasVisibleChildContent(current) {
-      var children, index;
-
-      if (common.isVisualMedia(current) || common.isFormControl(current)) {
-        return true;
-      }
-
-      // Check to see if there are non-empty child text nodes.
-      // If there are, we say we're not over whitespace.
-      children = current.childNodes;
-
-      // Shortcut: could not have text children because all children are elements
-      if (current.childElementCount === children.length) {
-        return false;
-      }
-
-      // Longer check: see if any children are non-empty text nodes, one by one
-      for (index = 0; index < children.length; index++) {
-        if (isNonEmptyTextNode(children[index])) {
-          return true;
-        }
-      }
-      return false;
-    }
 
     // --------- Deterministic results ---------
 

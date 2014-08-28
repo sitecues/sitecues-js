@@ -8,4 +8,3 @@ exports.getSafeZoneBoundingBox = function () {
     'bottom': 0
   };
 };
-exports.HLBZoom = 1.5;

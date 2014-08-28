@@ -21,18 +21,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     // Transition property used for hlb animation (-webkit, -moz)
     // This is used to transition the transform property for HLB
     // inflation/deflation animation
-    hlbStyling.transitionProperty = (function () {
-      if (platform.browser.isChrome || platform.browser.isSafari) {
-        return '-webkit-transform ';
-      }
-      if (platform.browser.isFirefox) {
-        return '-moz-transform ';
-      }
-      if (platform.browser.isIE) {
-        return '-ms-transform ';
-      }
-      return 'transform ';
-    }());
+    hlbStyling.transitionProperty = platform.cssPrefix + 'transform ';
 
     ///////////////////////////
     // PRIVATE VARIABLES

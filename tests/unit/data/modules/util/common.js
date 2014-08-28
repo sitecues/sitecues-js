@@ -27,3 +27,7 @@ exports.isEditable = function(element) {
   return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA';
 }
 exports.useJqueryAnimate = false;
+
+exports.hasVisibleChildContent = function(node) {
+  return true;
+}

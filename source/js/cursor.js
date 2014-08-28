@@ -542,6 +542,15 @@ sitecues.def('cursor', function (cursor, callback) {
 
     }());
 
+    if (platform.browser.isIE) {
+      sitecues.on('zoom/begin', function() {
+        // While zooming, turn off our CSS rules so that the browser doesn't spend
+        // CPU cycles recalculating the custom cursor rules to apply during each frame
+        // This makes a difference in IE -- doesn't seem to help in other browsers.
+        stylesheetElement.disabled = true;
+      });
+    }
+
     sitecues.on('zoom', function (zoom) {
       if (lastZoom !== zoom) {
         lastZoom = zoom;

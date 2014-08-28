@@ -163,8 +163,8 @@ sitecues.def('keys', function(keys, callback) {
                         }
                     }
                     if (origMap[key].requiresMouseHighlightActive) {
-                        if (!mh.enabled || !mh.isAppropriateFocus) {
-                            // Mouse highlight is disabled, revert to default.
+                        if (!mh.isActive()) {
+                            // Mouse highlight is not available, revert to default.
                             return false;
                         } else {
                             //We're going to attach the target dom element to the
@@ -178,7 +178,7 @@ sitecues.def('keys', function(keys, callback) {
                 }
             }
             return true;
-        };
+        }
 
         keys.getHLBKeysMap = function() {
           return hlbKeysMap;

@@ -37,6 +37,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
           isSticky                       = false, // DEBUG: HLB deflation toggler
+          inheritedZoom,                          // Amount of zoom inherited from page's scale transform
 
           // Decide which event to use depending on which browser is being used
           wheelEventName                 = platform.browser.isSafari ? 'mousewheel' : 'wheel';
@@ -345,8 +346,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             pickedElementsClone            = pickedElement.cloneNode(true),
             pickedElementAndChildren       = $pickedElement.find('*').addBack(),
             pickedElementsCloneAndChildren = $(pickedElementsClone).find('*').addBack(),
-            $originalElement               = $('<ul>').append(pickedElementsClone),
-            zoom                           = conf.get('zoom');
+            $originalElement               = $('<ul>').append(pickedElementsClone);
 
         // Setting this to true will remove the $originalElement from the DOM before inflation.
         // This is a very special case where the original element is not the same as the picked element.
@@ -360,12 +360,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $originalElement.css({
           'position'       : 'absolute',
-          'left'           : pickedElementsBoundingBox.left / zoom + window.pageXOffset / zoom,
-          'top'            : pickedElementsBoundingBox.top  / zoom + window.pageYOffset / zoom,
+          'left'           : (pickedElementsBoundingBox.left  + window.pageXOffset) / inheritedZoom,
+          'top'            : (pickedElementsBoundingBox.top   + window.pageYOffset) / inheritedZoom,
           'opacity'        : 0,
           'padding'        : 0,
           'margin'         : 0,
-          'width'          : pickedElementsBoundingBox.width / zoom,
+          'width'          : pickedElementsBoundingBox.width / inheritedZoom,
           'list-style-type': pickedElementsComputedStyles.listStyleType ? pickedElementsComputedStyles.listStyleType : 'none'
         }).insertAfter('body');
 
@@ -444,9 +444,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           }
 
           $hlbWrappingElement.appendTo('body');
+          inheritedZoom = conf.get('zoom');  // Zoom inherited from page
 
         } else {
           $hlbWrappingElement.insertAfter('body');
+          inheritedZoom = 1; // No zoom inherited, because zoom is on <body> and HLB is outside of that
         }
 
         // Trap the mousewheel events (wheel for all browsers except Safar, which uses mousehweel)
@@ -584,9 +586,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
 
             // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, initialHLBRect),
-
-            zoom = conf.get('zoom');
+            offset = hlbPositioning.midPointDiff($hlbElement, initialHLBRect);
 
         // Update the dimensions for the HLB which is used for constraint calculations.
         // The offset of the original element and cloned element midpoints are used for positioning.
@@ -608,15 +608,16 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         offset.y += constrainedOffset.y;
 
         // translateCSS and originCSS are used during deflation
-        translateCSS = 'translate(' + (-offset.x / zoom) + 'px, ' + (-offset.y / zoom) + 'px)';
+        translateCSS = 'translate(' + (-offset.x / inheritedZoom) + 'px, ' + (-offset.y / inheritedZoom) + 'px)';
 
         // This is important for animating from the center point of the HLB
-        originCSS = ((-offset.x / zoom) + HLBBoundingBox.width  / 2 / zoom) + 'px ' +
-                    ((-offset.y / zoom) + HLBBoundingBox.height / 2 / zoom) + 'px';
+        originCSS = ((-offset.x / inheritedZoom) + HLBBoundingBox.width  / 2 / inheritedZoom) + 'px ' +
+                    ((-offset.y / inheritedZoom) + HLBBoundingBox.height / 2 / inheritedZoom) + 'px';
 
         // Position the HLB without it being scaled (so we can animate the scale).
+        var startAnimationZoom = conf.get('zoom') / inheritedZoom;
         $hlbElement.css({
-          'transform': 'scale(1) ' + translateCSS
+          'transform': 'scale(' + startAnimationZoom + ') ' + translateCSS
         });
 
       }
