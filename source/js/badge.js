@@ -7,60 +7,69 @@ sitecues.def('badge', function(badge, callback) {
     sitecues.use('jquery', 'panel', 'html-build', function($, panel, htmlBuild) {
 
         // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
-        var BADGE_ID = 'sitecues-badge';
+        var BADGE_ID = 'sitecues-badge',
+          BADGE_CHECK_INTERVAL = 150,
+          $badge;
 
         /**
-         * Creates a markup for new badge and inserts it right into the DOM.
-         * @param function success
-         * @returns void
+         * Creates a markup for new floating badge and inserts it right into the DOM.
          */
-        function create() {
-            badge.panel = htmlBuild.$div()
+        function createFloatingBadge() {
+          // We have no alternate or pre-existing badges defined, so create a new one.
+          var $badgeContainer =
+              htmlBuild.$div()
                 .attr('id', BADGE_ID) // set element id for proper styling
-            .addClass('sitecues-badge')
+                .addClass('sitecues-badge')
                 .hide()
                 .appendTo('html');
-            // create badge image inside of panel
-            badge.element = $('<img>')
-                .attr('id', 'sitecues-badge-image')
-                .addClass('sitecues-badge-image')
-                .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
-                .appendTo(badge.panel);
+
+          // create badge image inside of panel
+          $badge = $('<img>')
+            .attr('id', 'sitecues-badge-image')
+            .addClass('sitecues-badge-image')
+            .attr('src', sitecues.resolveSitecuesUrl('../images/eq360-badge.png'))
+            .appendTo($badgeContainer);
+
+          setBadgeHooks($badge);
         }
 
-        /**
-         * Shows the badge, if possible.  Uses siteUI and defaultUI settings.
-         *
-         * @param success Function executed if successful.
-         * @return void
-         */
-        function show() {
-            $(badge.panel)
-                .css('display', 'block')
-                .effects({
-                        opacity: 1.0
-                    }, 750, null,
-                    function() {
-                        sitecues.emit('badge/show');
-                    });
+        function setBadgeHooks($badge) {
+          panel.parent = $badge;
+          $badge.hover(setDefaultEventOver, setDefaultEventLeave);
         }
 
-        // BODY
-        var $badge = $('#' + BADGE_ID);
-
-        if ($badge.length) {
-            $badge.css({
-                'visibility': 'visible',
-                'opacity': 1
-            });
-            badge.panel = $badge;
-            badge.element = badge.panel;
-        } else {
-            // We have no alternate or pre-existing badges defined, so create a new one.
-            create();
+        function getBadge() {
+          return $('#' + BADGE_ID);
         }
 
-        panel.parent = badge.element;
+        function findAndInitBadge() {
+          var interval;
+
+          function checkForBadge() {
+            var $badge = getBadge();
+            if ($badge.length) {
+              clearInterval(interval);
+              $badge.css({
+                visibility: 'visible',
+                opacity: 1,
+                transition: 'opacity 0.6s linear'
+              });
+              setBadgeHooks($badge);
+              return true;
+            }
+            if (document.readyState === 'complete') {
+              clearInterval(interval);
+              console.log('sitecues error: no sitecues badge with id="sitecues-badge" found.');
+              if (SC_DEV || $('html').attr('data-sitecues-type') === 'extension') {
+                createFloatingBadge();
+              }
+            }
+          }
+
+          if (!checkForBadge()) {
+            interval = setInterval(checkForBadge, BADGE_CHECK_INTERVAL);
+          }
+        }
 
         var setDefaultEventOver = function() {
             return sitecues.emit('badge/hover', badge.element);
@@ -70,9 +79,7 @@ sitecues.def('badge', function(badge, callback) {
             return sitecues.emit('badge/leave', badge.element);
         };
 
-        $(badge.panel).hover(setDefaultEventOver, setDefaultEventLeave);
-
-        show();
+        findAndInitBadge();
 
         if (SC_UNIT) {
             // todo: maybe export the whole module instead if every single function?
