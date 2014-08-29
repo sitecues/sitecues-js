@@ -61,6 +61,7 @@ sitecues.def('badge', function(badge, callback) {
               console.log('sitecues error: no sitecues badge with id="sitecues-badge" found.');
               if (SC_DEV || $('html').attr('data-sitecues-type') === 'extension') {
                 createFloatingBadge();
+                return true;
               }
             }
           }
