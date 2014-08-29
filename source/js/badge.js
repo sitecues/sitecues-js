@@ -8,7 +8,7 @@ sitecues.def('badge', function(badge, callback) {
 
         // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
         var BADGE_ID = 'sitecues-badge',
-          BADGE_CHECK_INTERVAL = 150,
+          BADGE_CHECK_INTERVAL = 300,
           $badge;
 
         /**
