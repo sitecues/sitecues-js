@@ -20,7 +20,6 @@ sitecues.def('badge', function(badge, callback) {
               htmlBuild.$div()
                 .attr('id', BADGE_ID) // set element id for proper styling
                 .addClass('sitecues-badge')
-                .hide()
                 .appendTo('html');
 
           // create badge image inside of panel
