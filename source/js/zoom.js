@@ -30,7 +30,7 @@ sitecues.def('zoom', function (zoom, callback) {
           maxZoomToRestrictWidthIfResponsive: 1.35,
 
           // Set to 5 on sites where the words get too close to the left window's edge
-          leftMarginOffset: 0
+          leftMarginOffset: 2
         },
 
         // Body-related
