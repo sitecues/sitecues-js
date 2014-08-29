@@ -52,7 +52,7 @@ sitecues.def('badge', function(badge, callback) {
               $badge.css({
                 visibility: 'visible',
                 opacity: 1,
-                transition: 'opacity 0.6s linear'
+                transition: 'opacity 0.6s'
               });
               setBadgeHooks($badge);
               return true;
