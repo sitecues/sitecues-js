@@ -250,15 +250,14 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     hlbPositioning.constrainWidthToSafeArea = function($hlbElement) {
 
       var originalWidth = hlbPositioning.scaleRectFromCenter($hlbElement).width,
-          safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width,
-          inheritedZoom = hlbPositioning.getInheritedZoom($hlbElement);
+          safeZoneWidth = hlbSafeArea.getSafeZoneBoundingBox().width;
 
       // Would the scaled element's width be greater than the safe area width?
       if (originalWidth > safeZoneWidth) {
 
         // width is now the "safe zone" width, minus the padding/border
         $hlbElement.css({
-          'width': ((safeZoneWidth / inheritedZoom / HLB_DEFAULT_ZOOM) -
+          'width': ((safeZoneWidth / hlbPositioning.getFinalScale($hlbElement)) -
               (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlbElement) / 2) * 2) + 'px'
         });
 
@@ -267,7 +266,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
           // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
           $hlbElement.css({
-            'height': ($hlbElement[0].getBoundingClientRect().height / inheritedZoom *
+            'height': ($hlbElement[0].getBoundingClientRect().height / hlbPositioning.getInheritedZoom($hlbElement) *
                 (safeZoneWidth / originalWidth)) + 'px'
           });
 

@@ -2,19 +2,17 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-
 sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
   sitecues.use('jquery', 'conf', 'hlb/event-handlers', 'hlb/dimmer', 'hlb/positioning', 'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'hlb/animation',
-    
+
     function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, hlbAnimation) {
 
       /////////////////////////
       // PRIVATE VARIABLES
       ////////////////////////
-      ///
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID = 'sitecues-hlb', // ID for $hlbElement
@@ -41,7 +39,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           // Decide which event to use depending on which browser is being used
           wheelEventName                 = platform.browser.isSafari ? 'mousewheel' : 'wheel';
-      
+
 
 
       if (SC_DEV) {
@@ -70,7 +68,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Sometimes there is no deltaY number, or a deltaY of "0"
         // (when the user is scrolling horizontally along X)
         if (isNaN(deltaY) || deltaY >-1 && deltaY <1) {
-          
+
           // We prevent the scroll event for horizontal scrolls
           return preventScroll(event);
         }
@@ -79,13 +77,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           Dimension Calculations:
 
-                     ///////// 
+                     /////////
                    ↑ /       / ↕ Scroll Top
-            Scroll | XXXXXXXXX 
+            Scroll | XXXXXXXXX
             Height | X       X ↑
                    | X  HLB  X | Client Height
                    | X       X ↓
-                   | XXXXXXXXX 
+                   | XXXXXXXXX
                    ↓ /       / ↕ Scroll Bottom
                      /////////
 
@@ -102,8 +100,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           , scrolledToBottom = scrollBottom <= 1    // There are now more invisible pixels below the element
           , scrolledToTop    = elem.scrollTop <= 1  // There are now more invisible pixels above the element
           ;
-        
-        
+
+
         // Prevent any scrolling if the user is:
         //   a) Not scrolling on the HLB element directly.
         //   b) Not scrolling on a decendant of the HLB element.
@@ -138,7 +136,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         if (scrolledToTop && scrollingUp) {
           preventScroll(event); // ...stop scrolling.
         }
-        
+
         // Prevent the original scroll event
         function preventScroll() {
           event.preventDefault();
@@ -147,9 +145,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         }
 
       }
-
-
-
 
       /**
        * [toggleHLB closes or creates a new HLB]
@@ -553,8 +548,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       function getChildWidth (child) {
 
-        var sum = 0,
-            zoom = conf.get('zoom');
+        var sum = 0;
 
         $(child).parentsUntil($hlbElement.parent()).addBack().each(function () {
           sum += parseFloat($(this).css('marginLeft'));
@@ -565,7 +559,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           sum += parseFloat($(this).css('borderLeftWidth'));
         });
 
-        return ($hlbElement[0].getBoundingClientRect().width / zoom) - sum;
+        return ($hlbElement[0].getBoundingClientRect().width) - sum;
 
       }
 
@@ -601,7 +595,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // but not that it is currently within the bounds.
         constrainedOffset = hlbPositioning.constrainPosition(HLBBoundingBoxAfterZoom);
 
-        // Add the difference between the HLB position and the minimum amount of distance
+        // Add the difference between the HLB p osition and the minimum amount of distance
         // it must travel to be completely within the bounds of the safe area to the difference
         // between the mid points of the hlb element and the original
         offset.x += constrainedOffset.x;
