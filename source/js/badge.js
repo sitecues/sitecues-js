@@ -59,6 +59,9 @@ sitecues.def('badge', function(badge, callback) {
             if (document.readyState === 'complete') {
               clearInterval(interval);
               console.log('sitecues error: no sitecues badge with id="sitecues-badge" found.');
+              // The floating badge is never meant to be seen by end-users of a website that has sitecues integrated.
+              // Therefore, we don't insert it unless we're in dev mode.
+              // Exception: we also insert the floating badge in production, so that any site can be tested without integration.
               if (SC_DEV || $('html').attr('data-sitecues-type') === 'extension') {
                 createFloatingBadge();
                 return true;
