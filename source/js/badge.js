@@ -44,7 +44,7 @@ sitecues.def('badge', function(badge, callback) {
         function findAndInitBadge() {
           var interval;
 
-          function checkForBadge() {
+          function initAvailableBadge() {
             var $badge = getBadge();
             if ($badge.length) {
               clearInterval(interval);
@@ -57,6 +57,7 @@ sitecues.def('badge', function(badge, callback) {
               return true;
             }
             if (document.readyState === 'complete') {
+              // Create floating badge if appropriate
               clearInterval(interval);
               console.log('sitecues error: no sitecues badge with id="sitecues-badge" found.');
               // The floating badge is never meant to be seen by end-users of a website that has sitecues integrated.
@@ -69,8 +70,8 @@ sitecues.def('badge', function(badge, callback) {
             }
           }
 
-          if (!checkForBadge()) {
-            interval = setInterval(checkForBadge, BADGE_CHECK_INTERVAL);
+          if (!initAvailableBadge()) {
+            interval = setInterval(initAvailableBadge, BADGE_CHECK_INTERVAL);
           }
         }
 
