@@ -2,20 +2,23 @@ var sitecues = window.sitecues || {};
 
 sitecues.config = {
   site_id : 's-00000005'  // Default
+  //site_id : 's-0000000a'  // Lumenvox
   //site_id : 's-0000ee0c'  // EEOC
   //site_id : 's-c27fa71d'     // Texas AT
 };
 
-var SCRIPT_URLS = {
-  localHost: '10.0.3.1:8888/l/s;id=__SITEID__/js/sitecues.js',
-  preProduction: 'ec2-54-81-136-235.compute-1.amazonaws.com/l/s;id=__SITEID__/js/sitecues.js',
-  production: 'js.sitecues.com/l/s;id=__SITEID__/js/sitecues.js',
-  releaseCandidate: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/release-__VERSION__/latest/js/sitecues.js',
-  latestDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/latest/js/sitecues.js',
-  specificDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/__VERSION__-DEV/js/sitecues.js',
-  branch: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/__BRANCHNAME__/latest/js/sitecues.js',
-  researchBranch: 'js.rnd.sitecues.com/l/s;id=__SITEID__/__BRANCHNAME__/js/sitecues.js'
-};
+var ipAddress = '10.0.3.1',
+  SCRIPT_URLS = {
+    localHost: 'localhost/l/s;id=__SITEID__/js/sitecues.js',
+    ipAddress: '__IPADDRESS__:8888/l/s;id=__SITEID__/js/sitecues.js'.replace('__IPADDRESS__', ipAddress),
+    preProduction: 'ec2-54-81-136-235.compute-1.amazonaws.com/l/s;id=__SITEID__/js/sitecues.js',
+    production: 'js.sitecues.com/l/s;id=__SITEID__/js/sitecues.js',
+    releaseCandidate: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/release-__VERSION__/latest/js/sitecues.js',
+    latestDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/latest/js/sitecues.js',
+    specificDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/__VERSION__-DEV/js/sitecues.js',
+    branch: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/__BRANCHNAME__/latest/js/sitecues.js',
+    researchBranch: 'js.rnd.sitecues.com/l/s;id=__SITEID__/__BRANCHNAME__/js/sitecues.js'
+  };
 
 (function () {
   var script = document.createElement('script'),
