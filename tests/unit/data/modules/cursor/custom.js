@@ -1,1 +1,1 @@
-exports.getImage = function () { return 'testUrl'; };
+exports.getUrl = function () { return 'testUrl'; };

@@ -7,8 +7,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'cursor',
-    function ($, zoom, conf, platform, cursor) {
+  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'style-service',
+    function ($, zoom, conf, platform, styleService) {
 
       var isOn = false,
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
@@ -21,16 +21,12 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        */
       function adjustElement(index, element) {
         var zoom = conf.get('zoom'),
-            transform = '',
-            transformOrigin = '';
+            transform = '';
         if ($(element).css('position') === 'fixed') {
           transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
             window.pageYOffset/zoom + 'px)';
         }
-        $(element).css({
-          transform: transform,
-          transformOrigin: transformOrigin
-        });
+        $(element).css('transform', transform);
       }
 
       /*
@@ -45,24 +41,23 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         lastAdjustedElements = elementsToAdjust;
       }
 
+      // Get a CSS selector matching all elements that can be position: fixed
       function getFixedPositionSelector() {
-        var selectors = [];
-        cursor.getStyles('position', 'fixed', function(rule) {
-          selectors.push(rule.selectorText);
-        });
+        var styles = styleService.getAllMatchingStyles('position', 'fixed'),
+          selectors = styles.map(function(style) { return style.rule.selectorText; });
         return selectors.join();
       }
 
+      /**
+       * Listens for events emitted by the cursor module, which indicates that new CSS has
+       * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
+       * fixed positioned elements that are not used on a page when sitecues first loads.
+       * Basically, it gets any styles that declare position:fixed so we can later filter for
+       * any elements that are dynamically fixed.
+       * @return {[type]} [description]
+       */
       function initializeModule() {
-        /**
-         * [Listens for events emitted by the cursor module, which indicates that new CSS has
-         * been added to the <style id='sitecues-css'></style>.  This is necessary to get any
-         * fixed positioned elements that are not used on a page when sitecues first loads.
-         * Basically, it gets any styles that declare position:fixed so we can later filter for
-         * any elements that are dynamically fixed.]
-         * @return {[type]} [description]
-         */
-        sitecues.on('cursor/addingStyles', function () {
+        sitecues.on('style-service/ready', function () {
           fixedSelector = getFixedPositionSelector();
           if (fixedSelector) {
             lazyTurnOn(conf.get('zoom'));
@@ -70,7 +65,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         });
 
         /**
-         * [Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel]
+         * Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel
          */
         sitecues.on('zoom', function (zoom) {
           lazyTurnOn(zoom);
@@ -86,20 +81,17 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       // Initialize only when we really have to, because it's a very, very bad idea to
       // attach handlers to the window scroll event:
       // http://ejohn.org/blog/learning-from-twitter
-
       function lazyTurnOn(zoom) {
-        var doTurnOn = fixedSelector.length && zoom > 1;
+        var doTurnOn = fixedSelector && zoom > 1;
 
-        if (doTurnOn === isOn) {
+        if (!doTurnOn) {
           return;
         }
-        isOn = doTurnOn;
-
-        if (doTurnOn) {
+        // We used to turn the scroll listener off when the user went back to 1x, but nowadays
+        // the sitecues transform stays on the body in that case, in order to avoid the Chrome jerk-back bug on zoom
+        if (!isOn) {
+          isOn = true;
           $(window).on('scroll', refresh);
-        }
-        else {
-          $(window).off('scroll', refresh);
         }
 
         refresh();

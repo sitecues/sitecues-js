@@ -80,9 +80,7 @@ files=\
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight.js \
 	source/js/keys.js \
-	source/js/cursor/images/win.js \
-	source/js/cursor/images/mac.js \
-	source/js/cursor/images/manager.js \
+	source/js/style-service.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
