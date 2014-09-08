@@ -36,7 +36,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
     customCursor.getUrl = function(type, sizeRatio, pixelRatio) {
 
       if (platform.browser.is === 'IE') {
-        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + sizeRatio + '.cur' );
+        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + Math.min(sizeRatio,3) + '.cur' );
       }
 
       var prefix = PREFIX
