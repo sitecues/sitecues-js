@@ -842,6 +842,17 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      function onDocumentReady() {
+        var targetZoom = conf.get('zoom');
+        if (!targetZoom) {
+          // Initialize as soon as panel opens for faster slider responsiveness
+          sitecues.on('panel/show', initZoomModule);
+        }
+        else if (targetZoom > 1) {
+          initialZoom(targetZoom);
+        }
+      }
+
       /**
        * Recompute the visible body size, and re-zoom the page as that handles the logic
        * to properly scale, resize, and position the page and its elements with respect to the current
@@ -880,18 +891,18 @@ sitecues.def('zoom', function (zoom, callback) {
 
       zoom.getNativeZoom(); // Make sure we have native zoom value available
 
-      // define default value for zoom if needed
-      var targetZoom = conf.get('zoom');
-      if (!targetZoom) {
-        // Initialize as soon as panel opens for faster slider responsiveness
-        sitecues.on('panel/show', initZoomModule);
+      // We used to zoom before the document was ready, causing us to examine the body
+      // before much of it was actually there. This patch waits until the document before zooming and examining the body.
+      // In the future, we could try to examine the body every second until it is able to find the info. This would
+      // allow us to zoom sooner -- but it makes sense to keep to the simple approach for now.
+      // Also, it seems that zoom initialization is much faster when it happens outside of the critical path
+      // (after the load). So another advantage of doing this after the document is ready is to not
+      // slow down the page load.
+      if (document.readyState === 'complete') {
+          onDocumentReady();
       }
-      else if (targetZoom > 1) {
-        initialZoom(targetZoom);
-        if (shouldManuallyAddScrollbars && document.readyState !== 'complete') {
-          // Make sure we have all the content for initial adjustment of scrollbars
-          window.addEventListener('load', determineScrollbars);
-        }
+      else {
+        $(document).ready(onDocumentReady);
       }
 
       callback();
