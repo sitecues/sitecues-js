@@ -53,8 +53,7 @@ sitecues.def('style-service', function (styleService, callback) {
     function constructCombinedStyleSheet(linkTagStylesList, styleTags) {
       // Create the sitecues <style> element
       $combinedStylesheet = $('<style>').appendTo('head')
-        .attr('id', SITECUES_CSS_ID)
-        .attr('disabled', '');
+        .attr('id', SITECUES_CSS_ID);
 
       // Add our default styles
       var css = SITECUES_CSS_DEFAULT,
@@ -331,6 +330,7 @@ sitecues.def('style-service', function (styleService, callback) {
         setTimeout(function() {
           isInitComplete = true;
           combinedDOMStylesheetObject = styleService.getDOMStylesheet($combinedStylesheet);
+          combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
           sitecues.emit('style-service/ready');
         }, WAIT_BEFORE_INIT_STYLESHEET);
       }

@@ -120,7 +120,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function setCursorsDisabled(doDisable) {
-      $stylesheet[0].disabled = !!doDisable;
+      cursorStylesheetObject.disabled = !!doDisable;
     }
 
     // Create a stylesheet with only the cursor-related style rules
