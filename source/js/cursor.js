@@ -244,7 +244,7 @@ sitecues.def('cursor', function (cursor, callback) {
     sitecues.on('zoom', function (pageZoom) {
       // SC-1184: between 1-1.3 page zoom there is no cursor enhancement
       // From there it grows slightly faster than the zoom level and ends at around 4x for zoom of 3
-      var newCursorZoom = Math.round(Math.pow(pageZoom - 0.3, 1.4) * 10) / 10; // To nearest tenth
+      var newCursorZoom = Math.round(Math.pow(pageZoom - 0.3, 1.5) * 10) / 10; // To nearest tenth
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheet();
