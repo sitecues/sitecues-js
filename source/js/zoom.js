@@ -139,7 +139,7 @@ sitecues.def('zoom', function (zoom, callback) {
           isRetinaDisplay = devicePixelRatio >= 2;
         }
         return isRetinaDisplay;
-      }
+      };
 
       // Retrieve and store the amount of native browser zoom
       zoom.getNativeZoom = function() {
@@ -161,7 +161,20 @@ sitecues.def('zoom', function (zoom, callback) {
         SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
 
         return nativeZoom;
-      }
+      };
+
+      zoom.getBodyWidth = function() {
+        // If we have restricted the width, use that value
+        var width = parseFloat(body.style.width);
+
+        // Otherwise, use the originally measured visible body width
+        if (!width) {
+          initZoomModule();
+          width = originalBodyInfo.width;
+        }
+        
+        return width * completedZoom;
+      };
 
       // ------------------------ PRIVATE -----------------------------
 
@@ -499,6 +512,8 @@ sitecues.def('zoom', function (zoom, callback) {
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
+        maximizeContentVisibility();
+
         // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
         determineScrollbars();
 
@@ -530,6 +545,20 @@ sitecues.def('zoom', function (zoom, callback) {
         clearTimeout(minZoomChangeTimer);
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
         $(window).off('keyup', finishGlideIfEnough);
+      }
+
+      // Scroll content to maximize the use of screen real estate, showing as much content as possible.
+      // In effect, stretch the bottom-right corner of the visible content down and/or right
+      // to meet the bottom-right corner of the window.
+      function maximizeContentVisibility() {
+        var bodyWidth = zoom.getBodyWidth(), // Get the smart visible width
+          bodyHeight = document.body.scrollHeight,
+          winWidth = window.outerWidth,
+          winHeight = window.outerHeight,
+          hScroll = Math.max(0, winWidth - bodyWidth + window.pageXOffset),
+          vScroll = Math.max(0, winHeight - bodyHeight + window.pageYOffset);
+
+        window.scrollBy(hScroll, vScroll);
       }
 
       /**
@@ -675,8 +704,8 @@ sitecues.def('zoom', function (zoom, callback) {
       // Get the desired width of the body for the current level of zoom
       function getRestrictedWidth(currZoom) {
         // Adjust for current window width
-        var winWidth = window.outerWidth,
-          maxZoomToRestrictWidth = zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440),
+        var winWidth = window.innerWidth,
+          maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440)),
           useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
         // We used to use document.documentElement.clientWidth, but this caused the page
         // to continually shrink on resize events.

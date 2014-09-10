@@ -11,7 +11,7 @@ sitecues.def('hpan', function (hpan, callback) {
     xLastPos;
 
   // get dependencies
-  sitecues.use('conf', 'util/common', 'jquery', function (conf, common, $) {
+  sitecues.use('conf', 'util/common', 'jquery', 'zoom', function (conf, common, $, zoomMod) {
 
     function mousemove(evt) {
 
@@ -23,12 +23,18 @@ sitecues.def('hpan', function (hpan, callback) {
         // Amount of horizontal mouse movement
         movementX = getBackfillMovementX(evt),
 
+        // Right side of body in absolute coordinates
+        bodyWidth = zoomMod.getBodyWidth(),
+
+        // Width of window
+        winWidth = $(window).width(),
+
         // Amount of content that didn't fit in the window
-        ratioContentToWindowWidth = $(document).width() / $(window).width(),
+        ratioContentToWindowWidth = bodyWidth / winWidth,
 
         // Amount of edge to use for panning
         edgePortion = Math.max(Math.min((ratioContentToWindowWidth / 2 - .55), MAX_EDGE_PORTION), MIN_EDGE_PORTION),
-        edgeSize = $(window).width() * edgePortion,
+        edgeSize = winWidth * edgePortion,
 
         // Get direction to pan, or return if mouse too near center of screen to cause panning
         direction;
@@ -36,7 +42,7 @@ sitecues.def('hpan', function (hpan, callback) {
       if (evt.clientX < edgeSize && movementX < 0) {
         direction = -1;
       }
-      else if (evt.clientX > $(window).width() - edgeSize && movementX > 0) {
+      else if (evt.clientX > winWidth - edgeSize && movementX > 0) {
         direction = 1;
       }
       else {
@@ -55,11 +61,17 @@ sitecues.def('hpan', function (hpan, callback) {
         // (sort of a magic formula developed through tinkering, which seems to work nicely)
         extraMovement = Math.max(.5, (ratioContentToWindowWidth - .3) * SPEED_FACTOR * (percentageIntoPanningZone + .5)),
 
-        // Finally, calculate movement size: amount of mouse movement + extraMovement
-        movementSize = Math.min(Math.round(Math.abs(movementX) * extraMovement), MAX_SPEED);
+        // How far can we move until we reach the right edge of the visible content
+        maxMovementUntilRightEdge = bodyWidth - winWidth - window.pageXOffset,
+
+        // Calculate movement size: amount of mouse movement + extraMovement
+        movementSize = Math.min(Math.round(Math.abs(movementX) * extraMovement), MAX_SPEED),
+
+        // Finally, calculate the total movement -- do not allow move past right edge
+        movement = Math.min(direction * movementSize, maxMovementUntilRightEdge);
 
       // Scroll it
-      window.scrollBy(direction * movementSize, 0);
+      window.scrollBy(movement, 0);
     }
 
     function getBackfillMovementX(evt) {
@@ -88,7 +100,7 @@ sitecues.def('hpan', function (hpan, callback) {
 
       // Turn on if zoom is > 1 and content overflows window more than a tiny amount
       var zoom = conf.get('zoom'),
-        doTurnOn = zoom > 1 && $(document).width() / $(window).width() > 1.01 && !isHlbOn && !isPanelOpen;
+        doTurnOn = zoom > 1 && zoomMod.getBodyWidth() / $(window).width() > 1.01 && !isHlbOn && !isPanelOpen;
 
       if (doTurnOn !== isOn) {
         if (doTurnOn) {
@@ -125,9 +137,9 @@ sitecues.def('hpan', function (hpan, callback) {
 
     // react on any zoom change
     sitecues.on('zoom', function (value) {
-      $(window).off('resize', refresh);
+      sitecues.off('resize', refresh);
       if (value > 1) {
-        $(window).on('resize', refresh);
+        sitecues.on('resize', refresh);
       }
 
       refresh();
