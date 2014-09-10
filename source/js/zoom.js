@@ -509,10 +509,13 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
+        var didUnzoom = completedZoom > currentTargetZoom;
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
-        maximizeContentVisibility();
+        if (didUnzoom) {
+          maximizeContentVisibility();
+        }
 
         // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
         determineScrollbars();
@@ -552,7 +555,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // to meet the bottom-right corner of the window.
       function maximizeContentVisibility() {
         var bodyRight = zoom.getBodyWidth() + originalBodyInfo.left * completedZoom, // Get the smart visible width
-          bodyHeight = document.body.scrollHeight,
+          bodyHeight = $(document).height,
           winWidth = window.outerWidth,
           winHeight = window.outerHeight,
           hScroll = Math.max(0, winWidth - bodyRight + window.pageXOffset),
