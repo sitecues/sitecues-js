@@ -34,8 +34,8 @@ sitecues.def('zoom', function (zoom, callback) {
         },
 
         // Body-related
-        body = document.body,
-        $body = $(body),
+        body,
+        $body,
         originalBodyInfo,        // The info we have on the body, including the rect and mainNode
 
         // Key frame animations
@@ -165,7 +165,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       zoom.getBodyWidth = function() {
         // If we have restricted the width, use that value
-        var width = parseFloat(body.style.width);
+        var width = parseFloat(document.body.style.width);
 
         // Otherwise, use the originally measured visible body width
         if (!width) {
@@ -804,6 +804,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Recursively look at rectangles and add them if they are useful content rectangles
       function getBodyRectImpl(node, sumRect, visibleNodes) {
+
         var newRect = getAbsoluteRect(node);
         newRect.right = newRect.left + newRect.width;
         newRect.bottom = newRect.top + newRect.height;
@@ -855,6 +856,8 @@ sitecues.def('zoom', function (zoom, callback) {
           return; //Already initialized
         }
 
+        body = document.body;
+        $body = $(body);
         originalBodyInfo = getBodyInfo();
 
         if (typeof zoomConfig.isResponsive === 'undefined') {
@@ -890,6 +893,9 @@ sitecues.def('zoom', function (zoom, callback) {
        * sizes of the body and window.
        */
       function onResize() {
+        if (!$body) {
+          return;
+        }
         isRetinaDisplay = undefined; // Invalidate, now that it may have changed
 
         $body.css(getZoomCss(1));
