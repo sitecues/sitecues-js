@@ -551,11 +551,11 @@ sitecues.def('zoom', function (zoom, callback) {
       // In effect, stretch the bottom-right corner of the visible content down and/or right
       // to meet the bottom-right corner of the window.
       function maximizeContentVisibility() {
-        var bodyWidth = zoom.getBodyWidth(), // Get the smart visible width
+        var bodyRight = zoom.getBodyWidth() + originalBodyInfo.left * completedZoom, // Get the smart visible width
           bodyHeight = document.body.scrollHeight,
           winWidth = window.outerWidth,
           winHeight = window.outerHeight,
-          hScroll = Math.max(0, winWidth - bodyWidth + window.pageXOffset),
+          hScroll = Math.max(0, winWidth - bodyRight + window.pageXOffset),
           vScroll = Math.max(0, winHeight - bodyHeight + window.pageYOffset);
 
         window.scrollBy(hScroll, vScroll);
