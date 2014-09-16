@@ -37,7 +37,7 @@ sitecues.def('cursor', function (cursor, callback) {
       try {
         rule.style.setProperty('cursor', cursorValueURL, 'important');
       } catch (e) {
-        SC_DEV && console.log('Catch! %o', e);
+        SC_DEV && console.log('Catch setting cursor property: %o', e);
         // rule.style.cursor = cursorValueURL;  // TODO do we still need this?
       }
     }
@@ -60,22 +60,27 @@ sitecues.def('cursor', function (cursor, callback) {
         // Prefetch necessary
         var urlRegexp = new RegExp(URL_REGEXP, 'i'),
           cursorValueArray = urlRegexp.exec(cursorValueURL);
-        $.ajax({
-          url: cursorValueArray[0],
-          crossDomain: true,
-          type: 'GET',
-          timeout: 5000,
-          cache: true,
-          headers: { Accept: 'application/octet-stream'},
-          success: function () {
-            SC_DEV && console.log('Loading of CUR file completed!');
-            setCursorStyle(rule, cursorValueURL);
-          },
-          error: function (jqXHR) {
-            jqXHR.abort();
-            SC_DEV && console.log('[Error] Unable to fetch cursor image from server');
-          }
-        });
+        try {
+          $.ajax({
+            url: cursorValueArray[0],
+            crossDomain: true,
+            type: 'GET',
+            timeout: 5000,
+            cache: true,
+            headers: { Accept: 'application/octet-stream'},
+            success: function () {
+              SC_DEV && console.log('Loading of CUR file completed!');
+              setCursorStyle(rule, cursorValueURL);
+            },
+            error: function (jqXHR) {
+              jqXHR.abort();
+              SC_DEV && console.log('[Error] Unable to fetch cursor image from server');
+            }
+          });
+        }
+        catch (ex) {
+          SC_DEV && console.log("Catch during cursor ajax: %o", ex);
+        }
       }
     }
 
