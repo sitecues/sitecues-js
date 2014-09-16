@@ -67,6 +67,8 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
      */
     dimmer.dimBackgroundContent = function($hlbWrappingElement, inflationSpeed) {
 
+      var useScrollOffset = !$hlbWrappingElement.closest(document.body).length;
+
       $dimmerElement = $('<div>', {
         'id': DIMMER_ID
       });
@@ -75,13 +77,13 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
         $dimmerElement.css({
           'background': '#000000',
-          'opacity': DIMMER_MIN_OPACITY,
-          'left': window.pageXOffset,
-          'top': window.pageYOffset,
-          'position': 'absolute',
-          'width': (documentElement.clientWidth) + 'px',
-          'height': (documentElement.clientHeight) + 'px',
-          'z-index': DIMMER_Z_INDEX
+          'opacity'   : DIMMER_MIN_OPACITY,
+          'left'      : useScrollOffset ? window.pageXOffset : 0,
+          'top'       : useScrollOffset ? window.pageYOffset : 0,
+          'position'  : 'absolute',
+          'width'     : (documentElement.clientWidth)  + 'px',
+          'height'    : (documentElement.clientHeight) + 'px',
+          'z-index'   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 
         $hlbWrappingElement.append($dimmerElement);
@@ -96,16 +98,16 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
       } else {
 
         $dimmerElement.css({
-          'transition': inflationSpeed + 'ms opacity',
+          'transition'                : inflationSpeed + 'ms opacity',
           'transition-timing-function': 'ease',
-          'background': '#000000',
-          'opacity': DIMMER_MIN_OPACITY,
-          'left': window.pageXOffset,
-          'top': window.pageYOffset,
-          'position': 'absolute',
-          'width': documentElement.clientWidth + 'px',
-          'height': documentElement.clientHeight + 'px',
-          'z-index': DIMMER_Z_INDEX
+          'background'                : '#000000',
+          'opacity'                   : DIMMER_MIN_OPACITY,
+          'left'                      : useScrollOffset ? window.pageXOffset : 0,
+          'top'                       : useScrollOffset ? window.pageYOffset : 0,
+          'position'                  : 'absolute',
+          'width'                     : documentElement.clientWidth + 'px',
+          'height'                    : documentElement.clientHeight + 'px',
+          'z-index'                   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 
         $hlbWrappingElement.append($dimmerElement);

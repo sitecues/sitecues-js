@@ -559,7 +559,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           sum += parseFloat($(this).css('borderLeftWidth'));
         });
 
-        return ($hlbElement[0].getBoundingClientRect().width) - sum;
+        return ($hlbElement[0].getBoundingClientRect().width / hlbPositioning.getInheritedZoom($hlbElement)) - sum;
 
       }
 

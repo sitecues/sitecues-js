@@ -14,7 +14,15 @@ sitecues.def('util/common', function (common, callback) {
       return 'transitionend';
     }());
 
-    common.useJqueryAnimate = platform.browser.isIE && platform.browser.version <= 9;
+    // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
+    // Very strange behavior, might be worth filing a browser bug repport.
+    // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
+    common.useJqueryAnimate = (function () {
+
+      return (platform.browser.isIE && platform.browser.version === 9) ||
+             (platform.browser.isIE && platform.os.isWin8);
+
+    }());
 
     /*
      * Check if two Javascript objects are equal.
@@ -24,11 +32,11 @@ sitecues.def('util/common', function (common, callback) {
      * @returns {unresolved}
      */
     common.equals = function(obj1, obj2) {
-        function _equals(obj1, obj2) {
-            return JSON.stringify(obj1) === JSON.stringify($.extend(true, {}, obj1, obj2));
-        }
-        return _equals(obj1, obj2) && _equals(obj2, obj1);
-    }
+      function _equals(obj1, obj2) {
+          return JSON.stringify(obj1) === JSON.stringify($.extend(true, {}, obj1, obj2));
+      }
+      return _equals(obj1, obj2) && _equals(obj2, obj1);
+    };
 
     /**
      * Checks if the value given is empty or not.
