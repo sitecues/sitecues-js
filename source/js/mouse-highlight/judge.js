@@ -59,7 +59,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       var judgementGetter,
         judgements = getVisualSeparationJudgements(traits, parentTraits);
 
-      $.extend(judgements, getSizeJudgements(traits));
+      $.extend(judgements, getSizeJudgements(traits, firstNonInlineTraits));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(judgements, traits, childTraits, childJudgements));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
@@ -149,7 +149,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return visualSeparationJudgements;
     }
 
-    function getSizeJudgements(traits) {
+    function getSizeJudgements(traits, firstNonInlineTraits) {
       return {
         // Avoid picking tiny icons or images of vertical lines
         tinyHeightFactor: Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeight),
@@ -163,7 +163,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         percentOfViewportHeightOverIdealMax: Math.max(0, traits.percentOfViewportHeight - IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT),
         percentOfViewportWidthUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH - traits.percentOfViewportWidth),
         percentOfViewportWidthOverIdealMax: Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH),
-        nearBodyWidthFactor: Math.pow(Math.max(0, traits.percentOfBodyWidth - IDEAL_MAX_PERCENT_OF_BODY_WIDTH), NEAR_BODY_WIDTH_IMPACT_POWER)
+        nearBodyWidthFactor: traits.rect.width < firstNonInlineTraits.rect.width + SIGNIFICANT_EDGE_PIXEL_GROWTH ?
+          0 : // If we're not significantly wider than the first non-inline candidate, don't punish for being wide
+          Math.pow(Math.max(0, traits.percentOfBodyWidth - IDEAL_MAX_PERCENT_OF_BODY_WIDTH), NEAR_BODY_WIDTH_IMPACT_POWER)
       };
     }
 
