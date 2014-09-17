@@ -79,6 +79,7 @@ sitecues.def('keys', function(keys, callback) {
         },
         'space': {
             event: 'hlb/toggle',
+            preventInEditors: true,
             preventDefault: true,
             requiresMouseHighlightActive: true
         }
