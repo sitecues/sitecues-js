@@ -6,21 +6,17 @@
  */
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'util/common',
-    function($, traitcache, mhpos, common) {
+  sitecues.use('jquery', 'mouse-highlight/traitcache', 'zoom', 'util/common',
+    function($, traitcache, zoom, common) {
 
     // ---- PUBLIC ----
 
     traits.getTraitStack = function(nodes) {
-      var oldViewSize = viewSize,
-        traitStack,
+      var traitStack,
         spacingTraitStack;
 
       viewSize = traitcache.getCachedViewSize();
-      if (!common.equals(viewSize, oldViewSize)) {
-        bodySize = getBodySize();
-      }
-
+      bodyWidth = zoom.getBodyWidth();
       traitStack = nodes.map(getTraits);
 
       // Get cascaded spacing traits and add them to traitStack
@@ -34,7 +30,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
     // ---- PRIVATE ----
 
-    var bodySize, viewSize;
+    var bodyWidth, viewSize;
 
     // Properties that depend only on the node itself, and not other traits in the stack
     function getTraits(node) {
@@ -88,8 +84,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         percentOfViewportWidth: 100 * traits.visualWidth / viewSize.width
       });
 
-      var bodyWidth = bodySize.width;
-      traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;
+      traits.percentOfBodyWidth = 100 * traits.unzoomedRect.width / bodyWidth;
 
       return traits;
     }
@@ -101,11 +96,6 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // this allows the form controls to be picked.
     function getNormalizedDisplay(style, node) {
       return (style.display === 'inline' && common.isFormControl(node)) ? 'inline-block' : style.display;
-    }
-
-    function getBodySize() {
-      var MERGE_ALL_BOXES_VALUE = 99999;
-      return mhpos.getAllBoundingBoxes(document.body, MERGE_ALL_BOXES_VALUE, false)[0];
     }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
