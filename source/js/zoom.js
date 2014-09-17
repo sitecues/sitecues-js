@@ -75,7 +75,7 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
         // Native form control CSS fix -- automagically fixes the form appearance issues in Chrome when zooming
-        shouldFixNativeFormAppearance =  platform.browser.isChrome && platform.os.isMac,
+        shouldFixNativeFormAppearance =  platform.browser.isWebKit && platform.os.isMac,
 
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
@@ -680,11 +680,11 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStyleSheetFixes() {
+        var prefix = platform.browser.isChrome ? '-webkit-' : '',
+          background = 'background: ' + prefix + 'gradient(linear, 0% 0%, 0% 100%, color-stop(0%,#fff), color-stop(35%,#f9f9f9), color-stop(100%,#ddd));';
         return shouldFixNativeFormAppearance ?
           // Adding this CSS automagically fixes the form issues in Chrome when zooming
-          'select { border: 1px solid #bbb;' +
-          'background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(35%,#f9f9f9), color-stop(100%,#dddddd)); }\n\n'
-          : ''
+          'select {\nborder: 1px solid #bbb;\n' + background + '\n}\n\n;' : '';
       }
 
       // Add useful zoom fixes to the body's @style
