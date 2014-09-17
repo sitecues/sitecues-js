@@ -42,8 +42,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
       var allRects = [],
         $selector = $(selector),
-        clipRect = getAncestorClipRect($selector);
-      getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
+        clipRects = getAncestorClipRects($selector);
+      getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites);
       mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
@@ -284,11 +284,12 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       allRects.push(rect);
     }
 
-    function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
+    function getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites) {
 
-      $selector.each(function () {
+      $selector.each(function (index) {
 
-        var isElement = this.nodeType === 1;
+        var isElement = this.nodeType === 1,
+          clipRect = Array.isArray(clipRects) ? clipRects[index] : clipRects;
 
         // --- Leaf nodes ---
         if (!isElement) {
@@ -309,18 +310,15 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         var style = traitcache.getStyle(this);
 
         // --- Invisible elements ---
-        if (style.visibility === 'hidden' || style.visibility === 'collapse') {
+        if (style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none') {
           return true;
         }
 
-        if (style.position === 'absolute' || style.position === 'fixed') {
-          clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
-        }
-
+        // -- Clipping rules ---
+        clipRect = getChildClipRect(this, style, clipRect);
 
         // --- Overflowing content ---
         addRect(allRects, clipRect, getOverflowRect(this, style));
-
 
         // --- Visible border or form controls ---
         if (hasVisibleBorder(style) || common.isFormControl(this)) {
@@ -348,33 +346,28 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          var isClip = isClipElement(this),
-            newClipRect = clipRect;
-          if (isClip) {
-            newClipRect = traitcache.getScreenRect(this);
-            if (clipRect) {  // Combine parent clip rect with new clip
-              newClipRect = getClippedRect(clipRect, newClipRect);
-            }
-          }
-          getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect, stretchForSprites);  // Recursion
+          getAllBoundingBoxesExact($(this.childNodes), allRects, clipRect, stretchForSprites);  // Recursion
           return true;
         }
       });
     }
 
-    function isClipElement(element) {
-      var style = traitcache.getStyle(element);
+    function isClipElement(style) {
       return style.clip !== 'auto' || style.overflow !== 'visible';
     }
 
+    // Return the portion of unclippedRect after clipRect gets to clip it
     function getClippedRect(unclippedRect, clipRect) {
       if (!clipRect) {
         return normalizeRect(unclippedRect); // Convert to non-native object so that properties can be modified if necessary
       }
-      var left   = Math.max( unclippedRect.left, clipRect.left);
-      var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
-      var top    = Math.max( unclippedRect.top, clipRect.top );
-      var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
+      if (!unclippedRect) {
+        return normalizeRect(clipRect);
+      }
+      var left = Math.max(unclippedRect.left, clipRect.left),
+        right = Math.min(unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width),
+        top = Math.max(unclippedRect.top, clipRect.top),
+        bottom = Math.min(unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
       return {
         left: left,
         top: top,
@@ -385,28 +378,43 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       };
     }
 
+    // Return the new clip rect for the child, taking into account
+    // the old clip rect and usage of CSS positioning
+    // TODO What if overflow-X is hidden and overflow-y is visible?
+    function getChildClipRect(element, style, clipRect) {
+      if (clipRect && clipRect.willOutOfFlowCancel && (style.position === 'absolute' || style.position === 'fixed')) {
+        clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
+      }
+      if (isClipElement(style)) {
+        clipRect = getClippedRect(clipRect, traitcache.getScreenRect(element));
+        clipRect.willOutOfFlowCancel = true;
+      }
+      if (clipRect) {
+        // Turns to false if we have non-static positioning because
+        // next out of flow descendant doesn't affect the current clip rect
+        clipRect.willOutOfFlowCancel = clipRect.willOutOfFlowCancel &&
+          style.position === 'static';
+      }
+
+      return clipRect;
+    }
+
     // Get clip rectangle from ancestors in the case any of them are clipping us
-    function getAncestorClipRect($selector) {
-      var kMaxAncestorsToCheck = 5;
+    function getAncestorClipRects($selector) {
       var allClipRects = [];
+
       $selector.each(function() {
-        // Get ancestor clip rect -- do up to kMaxAncestorsToCheck ancestors (beyond that, it's unlikely to clip)
-        var ancestors = $selector.parents();
-        var clipRect = null;
-        ancestors.each(function(index) {
-          if (index >= kMaxAncestorsToCheck) {
-            return false;
-          }
-            
-          if (isClipElement(this)) {
-            var newClipRect = traitcache.getScreenRect(this);
-            clipRect = clipRect ? getClippedRect(clipRect, newClipRect) : newClipRect;
-          }
+        var ancestors = $selector.parents().get().reverse(),
+          clipRect,
+          style;
+        $(ancestors).each(function() {
+          style = traitcache.getStyle(this);
+          clipRect = getChildClipRect(this, style, clipRect);
         });
         allClipRects.push(clipRect);
       });
-      mhpos.combineIntersectingRects(allClipRects, 9999);
-      return allClipRects[0];
+
+      return allClipRects;
     }
 
     /**
