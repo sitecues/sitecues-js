@@ -574,15 +574,26 @@ describe('judge', function() {
           expect(judgementStack[1].nearBodyWidthFactor).to.be.equal(0);
           done();
         });
-        it('should return |nearBodyWidthFactor > 0| for a wide-width element.', function(done) {
-          var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
-            judgementStack;
+      it('should return |nearBodyWidthFactor = 0| for a wide-width element when there is no good narrow child to pick.', function(done) {
+        var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
+          judgementStack;
 
-          traitStack[1].percentOfBodyWidth = 98;
-          judgementStack = judge.getJudgementStack(traitStack, nodes);
-          expect(judgementStack[1].nearBodyWidthFactor > 0).to.be.true;
-          done();
-        });
+        traitStack[1].percentOfBodyWidth = 98;
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+        expect(judgementStack[1].nearBodyWidthFactor).to.be.equal(0)
+        done();
+      });
+      it('should return |nearBodyWidthFactor > 0| for a wide-width element.', function(done) {
+        var traitStack = traits.getTraitStack(nodes), // Default node stack has no form input
+          judgementStack;
+
+        traitStack[0].rect.width = 50;
+        traitStack[1].rect.width = 500;
+        traitStack[1].percentOfBodyWidth = 98;
+        judgementStack = judge.getJudgementStack(traitStack, nodes);
+        expect(judgementStack[1].nearBodyWidthFactor > 0).to.be.true;
+        done();
+      });
     });
     after(function() {
         // Unload module from nodejs's cache
