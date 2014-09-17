@@ -20,14 +20,14 @@ sitecues.def('zoom', function (zoom, callback) {
           // Should smooth zoom animations be enabled?
           shouldSmoothZoom: true,
 
-          // Is the web page responsively designed?
-          isResponsive: undefined, // Can override in site preferences
+          // Does the web page use a fluid layout, where content wraps to the width?
+          isFluid: undefined, // Can override in site preferences
 
           // Should the width of the page be restricted as zoom increases?
-          // This is helpful for pages that try to word-wrap or use responsive design
+          // This is helpful for pages that try to word-wrap or use a fluid layout.
           // Eventually use fast page health calculation to automatically determine this
           // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfResponsive: 1.35,
+          maxZoomToRestrictWidthIfFluid: 1.35,
 
           // Set to 5 on sites where the words get too close to the left window's edge
           leftMarginOffset: 2
@@ -250,7 +250,7 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function shouldRestrictWidth() {
-        return zoomConfig.isResponsive;
+        return zoomConfig.isFluid;
       }
 
       // Make sure the zoom value is within the min and max, and does not use more decimal places than we allow
@@ -735,7 +735,7 @@ sitecues.def('zoom', function (zoom, callback) {
       function getRestrictedWidth(currZoom) {
         // Adjust for current window width
         var winWidth = window.innerWidth,
-          maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440)),
+          maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfFluid * (winWidth / 1440)),
           useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
         // We used to use document.documentElement.clientWidth, but this caused the page
         // to continually shrink on resize events.
@@ -747,7 +747,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Return a formatted string for translateX as required by CSS
       function getFormattedTranslateX(targetZoom) {
         if (shouldRestrictWidth()) {
-          return '';  // For responsive designs, we use an transforim-origin of 0% 0%, so we don't need this
+          return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
         var zoomOriginX = Math.max(window.outerWidth, originalBodyInfo.width) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
@@ -760,24 +760,24 @@ sitecues.def('zoom', function (zoom, callback) {
         return 'translateX(' + translateX.toFixed(ZOOM_PRECISION) + 'px)';
       }
 
-      // Is it a responsive page?
-      function isResponsiveDesign() {
+      // Is it a fluid layout?
+      function isFluidLayout() {
         if (originalBodyInfo.width === window.outerWidth) {
           // Handle basic case -- this works for duxburysystems.com, where the visible body content
           // spans the entire width of the available space
           return true;
         }
-        // We consider it responsive if the main node we discovered inside the body changes width
+        // We consider it fluid if the main node we discovered inside the body changes width
         // if we change the body's width.
         var origWidth = originalBodyInfo.mainNode.scrollWidth,
           newWidth,
-          isResponsive;
+          isFluid;
         body.style.width = (window.outerWidth / 5) + 'px';
         newWidth = originalBodyInfo.mainNode.scrollWidth;
-        isResponsive = (origWidth !== newWidth);
+        isFluid = (origWidth !== newWidth);
         body.style.width = '';
 
-        return isResponsive;
+        return isFluid;
       }
 
       // Get the rect for visible contents in the body, and the main content node
@@ -888,8 +888,8 @@ sitecues.def('zoom', function (zoom, callback) {
         $body = $(body);
         originalBodyInfo = getBodyInfo();
 
-        if (typeof zoomConfig.isResponsive === 'undefined') {
-          zoomConfig.isResponsive = isResponsiveDesign();
+        if (typeof zoomConfig.isFluid === 'undefined') {
+          zoomConfig.isFluid = isFluidLayout();
         }
 
         $(window).resize(onResize);
@@ -899,7 +899,7 @@ sitecues.def('zoom', function (zoom, callback) {
           console.log('Zoom configuration: %o', zoomConfig);
           console.log('Window width: %o', window.outerWidth);
           console.log('Visible body rect: %o', originalBodyInfo);
-          console.log('isResponsive?: %o', zoomConfig.isResponsive);
+          console.log('isFluid?: %o', zoomConfig.isFluid);
           console.log('_______________________________________________________');
         }
       }
