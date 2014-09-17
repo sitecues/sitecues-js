@@ -187,12 +187,17 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getSpriteRect(element, style) {
       // Check special case for sprites, often used for fake bullets
-      if (style['background-image'] === 'none' || style['background-repeat'] !== 'no-repeat') {
+      // The following cases are unlikely to be sprites:
+      // - Repeating backgrounds
+      // - Percentage-positioned or centered (computed background-position-x is 50%)
+      var backgroundPos = style.backgroundPosition;
+      if (style.backgroundImage === 'none' || style.backgroundRepeat !== 'no-repeat' ||
+        backgroundPos.indexOf('%') > 0) {
         return null;
       }
 
       // Background sprites tend to be to the left side of the element
-      var backgroundPos = style['background-position'],
+      var
         backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
         // Use positive background positions (used for moving the sprite to the right within the element)
         // Ignore negative background positions (used for changing which sprite is used within a larger image)
