@@ -96,10 +96,10 @@ describe('traits', function() {
     });
     it('should return the correct |percentOfBodyWidth| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes),
-        EXPECTED_PERCENT_OF_BODY_WIDTH = 10;
+        expected = 100 * traitStack[1].unzoomedRect.width / 1500;
       // Body width is hard coded in highlight-position mock as 100, node#1 is 10px wide,
       // therefore we expect the result to be 10% of the body width.
-      expect(traitStack[1].percentOfBodyWidth).to.be.equal(EXPECTED_PERCENT_OF_BODY_WIDTH);
+      expect(traitStack[1].percentOfBodyWidth).to.be.equal(expected);
       done();
     });
     it('should return the correct |normDisplay=block| trait for a <p>.', function(done) {
