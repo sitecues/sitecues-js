@@ -48,11 +48,15 @@ sitecues.def('zoom', function (zoom, callback) {
         glideInputEvent,         // The input event that initiated a zoom glide
         completedZoom = 1,       // Current zoom as of the last finished operation
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
-        midAnimationZoom,        // Zoom state in the current animation operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
         isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
         nativeZoom,              // Amount of native browserZoom
         isRetinaDisplay,         // Is the current display a retina display?
+
+        // Zoom slider change listener
+        glideChangeListener,    // Supports a single listener that is called back as animation proceeds
+        glideChangeTimer,       // Timer used for callbacks
+        GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -172,8 +176,15 @@ sitecues.def('zoom', function (zoom, callback) {
           initZoomModule();
           width = originalBodyInfo.width;
         }
-        
+
         return width * completedZoom;
+      };
+
+      // Add a listener for mid-animation zoom updates.
+      // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
+      // Currently only supports one listener.
+      zoom.setGlideChangeListener = function (listener) {
+        glideChangeListener = listener;
       };
 
       // ------------------------ PRIVATE -----------------------------
@@ -274,8 +285,12 @@ sitecues.def('zoom', function (zoom, callback) {
             currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
             performInstantZoomOperation();
             finishZoomOperation();
+            return;
           }
-          else if (shouldUseKeyFramesAnimation()) {
+          if (glideChangeListener) {
+            glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
+          }
+          if (shouldUseKeyFramesAnimation()) {
             SC_DEV && console.log('Begin keyframes zoom');
             performKeyFramesZoomOperation();
           }
@@ -284,6 +299,22 @@ sitecues.def('zoom', function (zoom, callback) {
             performJsAnimateZoomOperation();
           }
         }
+      }
+
+      // Get what the zoom value would be if we stopped the animation now
+      function getMidAnimationZoom() {
+        var totalZoomChangeRequested = Math.abs(currentTargetZoom - completedZoom),
+          zoomDirection = currentTargetZoom > completedZoom ? 1 : -1,
+          zoomChange = getZoomOpElapsedTime() / MS_PER_X_ZOOM;
+        if (zoomChange > totalZoomChangeRequested) {
+          zoomChange = totalZoomChangeRequested;
+        }
+        return getSanitizedZoomValue(completedZoom + zoomDirection * zoomChange);
+      }
+
+      // Helper for calling back glide change listener
+      function onGlideChange() {
+        glideChangeListener(getMidAnimationZoom());
       }
 
       // How many milliseconds have elapsed since the start of the zoom operation?
@@ -306,7 +337,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
         if (!shouldUseKeyFramesAnimation()) {
-          currentTargetZoom = midAnimationZoom;
+          currentTargetZoom = getMidAnimationZoom();
           finishZoomOperation();
           return;
         }
@@ -345,23 +376,15 @@ sitecues.def('zoom', function (zoom, callback) {
       // Animate until the currentTargetZoom, used for gliding zoom changes
       function performJsAnimateZoomOperation() {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
-          zoomChange = getZoomOpElapsedTime() / MS_PER_X_ZOOM;
-          if (zoomChange > totalZoomChangeRequested) {
-            zoomChange = totalZoomChangeRequested;
-          }
-          midAnimationZoom = getSanitizedZoomValue(completedZoom + zoomDirection * zoomChange);
+          var midAnimationZoom = getMidAnimationZoom();
           $body.css(getZoomCss(midAnimationZoom));
-          if (zoomChange === totalZoomChangeRequested) {
+          if (midAnimationZoom === currentTargetZoom) {
             finishZoomOperation();
           }
           else {
             zoomAnimator = requestFrame(jsZoomStep);
           }
         }
-
-        var totalZoomChangeRequested = Math.abs(currentTargetZoom - completedZoom),
-          zoomDirection = currentTargetZoom > completedZoom ? 1 : -1,
-          zoomChange;
 
         zoomAnimator = requestFrame(jsZoomStep);
       }
@@ -546,6 +569,11 @@ sitecues.def('zoom', function (zoom, callback) {
         // Ensure no further changes to zoom from this operation
         cancelFrame(zoomAnimator);
         clearTimeout(minZoomChangeTimer);
+        if (glideChangeTimer) {
+          glideChangeListener(completedZoom);
+          clearInterval(glideChangeTimer);
+          glideChangeTimer = 0;
+        }
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
         $(window).off('keyup', finishGlideIfEnough);
       }
@@ -721,10 +749,10 @@ sitecues.def('zoom', function (zoom, callback) {
         if (shouldRestrictWidth()) {
           return '';  // For responsive designs, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var halfOfWindow = window.outerWidth / 2,
+        var zoomOriginX = Math.max(window.outerWidth, originalBodyInfo.width) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
-          halfOfBody = (halfOfWindow - bodyLeft) * targetZoom,
-          pixelsOffScreenLeft = (halfOfBody - halfOfWindow) + zoomConfig.leftMarginOffset,
+          halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
+          pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
           pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft),
           translateX = pixelsToShiftRight / targetZoom;
 
@@ -806,8 +834,6 @@ sitecues.def('zoom', function (zoom, callback) {
       function getBodyRectImpl(node, sumRect, visibleNodes) {
 
         var newRect = getAbsoluteRect(node);
-        newRect.right = newRect.left + newRect.width;
-        newRect.bottom = newRect.top + newRect.height;
         if (willAddRect(newRect, node)) {
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
@@ -839,14 +865,16 @@ sitecues.def('zoom', function (zoom, callback) {
       function getAbsoluteRect(node) {
         var clientRect = node.getBoundingClientRect(),
           width = Math.max(node.scrollWidth, clientRect.width),
-          height = Math.max(node.scrollHeight, clientRect.height);
+          height = Math.max(node.scrollHeight, clientRect.height),
+          left = clientRect.left + window.pageXOffset,
+          top = clientRect.top + window.pageYOffset;
         return {
-          left: clientRect.left,
-          top: clientRect.top,
+          left: left,
+          top: top,
           width: width,
           height: height,
-          right: clientRect.left + width,
-          bottom: clientRect.top + height
+          right: left + width,
+          bottom: top + height
         };
       }
 
@@ -898,7 +926,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         isRetinaDisplay = undefined; // Invalidate, now that it may have changed
 
-        $body.css(getZoomCss(1));
+        $body.css({width: '', transform: ''});
         originalBodyInfo = getBodyInfo();
         $body.css(getZoomCss(completedZoom));
         if (shouldRestrictWidth()) {

@@ -226,33 +226,15 @@ sitecues.def("slider", function(slider, callback) {
                 svg.letterBig.on('mousedown', context, this.mousedownletterbig);
                 svg.letterBigBack.on('mousedown', context, this.mousedownletterbig);
 
-                // Pass slider instance to anonfunc to set correct context of slider when called from conf
-                (function(slider_) {
+                zoom.setGlideChangeListener(function(zoomLevel) {
+                  slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
+                  slider.translateThumbSVG.call(slider);
+                });
 
-                    // Update the Thumb element's position based on the zoom level now dimensions have changed
-                    conf.get('zoom', function(zoomLevel) {
-
-                        // Set to the zoomLevel in conf, or set to 1
-                        slider_.zoomLevel = zoomLevel || 1;
-
-                        // Only respond to conf zoom updates when mouse not down
-                        if (!slider_.mouseDownTrack) {
-
-                            // Update the Thumb position
-                            slider_.setThumbPositionFromZoomLevel.call(slider_, slider_.zoomLevel);
-                            slider_.translateThumbSVG.call(slider_);
-
-                        }
-
-                    });
-
-                    // Reize events require a recalculation of dimensions
-                    sitecues.on('resize/end', function() {
-                        slider_.setdimensions.call(slider_);
-                    });
-
-                })(slider);
-
+                // Resize events require a recalculation of dimensions
+                sitecues.on('resize/end', function() {
+                  slider.setdimensions.call(slider);
+                });
             },
 
 
