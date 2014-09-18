@@ -3,7 +3,7 @@
 
 define({
     proxyPort: 9000,
-    proxyUrl: 'http://localhost:9000/',
+    proxyUrl: 'http://127.0.0.1:9000/',
 
     capabilities: {
         'name': 'sitecues tests',
@@ -11,9 +11,11 @@ define({
     },
     environments: [
         // local-style...
-        { browserName: 'phantomjs' },
+        // { browserName: 'phantomjs' },
         { browserName: 'chrome' },
-        { browserName: 'firefox' }
+        // { browserName: 'firefox' },
+        // { browserName: 'safari' }
+        // { browserName: 'internet explorer' }
         // BrowserStack-style...
         // { os: "Windows", os_version: "8.1", browser: "chrome", browser_version: "34.0" }
         // SuaceLabs-style...
@@ -39,7 +41,8 @@ define({
     tunnelOptions: {
         // These options are passed to the tunnel service
         // to configure how it behaves...
-        host: '127.0.0.1:4447'  // custom location or port for the selenium server
+        host: '127.0.0.1:4447'  // custom location to find the selenium server
+        // port: 4447 // custom port number to find the selenium server
     },
 
     // Unit tests, for verifying the return values of functions, etc...
@@ -49,9 +52,9 @@ define({
 
     // Functional tests, for verifying high-level behavior in the browser as a user would...
     functionalSuites: [
-        // 'test/functional/foobar'
+        'test/functional/simple'
     ],
 
-    // The paths that match this regex will NOT be included in code coverage reports...
+    // The paths that match this regex will NOT be included in unit test code coverage reports...
     excludeInstrumentation: /^(?:config|test|node_modules)\//
 });

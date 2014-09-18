@@ -210,10 +210,11 @@ module.exports = function (grunt) {
             // tasks when saving app files during development...
             watch : {
                 files : ['**.*'],          // files to watch for changes
-                tasks : ['lint', 'build']  // tasks to trigger when watched files change
+                tasks : ['lint']  // tasks to trigger when watched files change
             }
         }
     );
+
     // Load the plugin that provides the "clean" task.
     grunt.loadNpmTasks('grunt-contrib-clean');
     // Load the plugin that provides the "jsonlint" task.
