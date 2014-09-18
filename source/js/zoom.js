@@ -745,7 +745,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (shouldRestrictWidth()) {
           return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var zoomOriginX = Math.max(window.outerWidth, originalBodyInfo.width) / 2, // X-coordinate origin of transform
+        var zoomOriginX = Math.max($(window).width(), originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
           halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
           pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
@@ -814,6 +814,7 @@ sitecues.def('zoom', function (zoom, callback) {
         bodyInfo.mainNode = mainNode;
         bodyInfo.leftMostNode = leftMostNode;
         bodyInfo.rightMostNode = rightMostNode;
+        bodyInfo.transformOriginX = body.getBoundingClientRect().width / 2;
 
         return bodyInfo;
       }
