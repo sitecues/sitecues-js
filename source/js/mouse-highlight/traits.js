@@ -73,16 +73,16 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         rightMargin: Math.max(0, parseFloat(traits.style.marginRight))
       });
 
-      // Visible size
+      // Visible size at 1x (what it would be if not zoomed)
       $.extend(traits, {
-        visualWidth: traits.rect.width - traits.leftPadding - traits.rightPadding,
-        visualHeight: traits.rect.height - traits.topPadding - traits.bottomPadding
+        visualWidthAt1x: traits.unzoomedRect.width - traits.leftPadding - traits.rightPadding,
+        visualHeightAt1x: traits.unzoomedRect.height - traits.topPadding - traits.bottomPadding
       });
 
       // Percentage of viewport
       $.extend(traits, {
-        percentOfViewportHeight: 100 * traits.visualHeight / viewSize.height,
-        percentOfViewportWidth: 100 * traits.visualWidth / viewSize.width
+        percentOfViewportHeight: 100 * traits.rect.height / viewSize.height,
+        percentOfViewportWidth: 100 * traits.rect.width / viewSize.width
       });
 
       traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;

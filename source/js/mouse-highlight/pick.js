@@ -58,6 +58,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         nearBodyWidthFactor: -1,
         tinyHeightFactor: -3,
         tinyWidthFactor: -5,
+        isExtremelyTall: UNUSABLE_SCORE,
         isFloatForCellLayout: 20,
         badGrowthTop: -1,
         badGrowthBottom: -1,

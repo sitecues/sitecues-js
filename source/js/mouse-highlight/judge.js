@@ -98,6 +98,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH = 60,    // Media larger than this is bad
       IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
       NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
+      TALL_ELEMENT_PIXEL_THRESHOLD = 999,          // Anything taller than this is considered very tall
       TINY_ELEMENT_PIXEL_THRESHOLD = 25,           // Anything smaller than this is considered a tiny element (or at least very thin)
       SEPARATION_DIVISOR = 1.5,                    // The number of spacing pixels will be divided by this in separation impact algorithm
       SEPARATION_IMPACT_POWER = 1.4,               // Exponent for visual impact of whitespace
@@ -153,10 +154,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     function getSizeJudgements(traits, firstNonInlineTraits) {
       return {
         // Avoid picking tiny icons or images of vertical lines
-        tinyHeightFactor: Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeight),
+        tinyHeightFactor: Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeightAt1x),
 
         // Avoid picking tiny icons or images of horizontal lines
-        tinyWidthFactor: Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualWidth),
+        tinyWidthFactor: Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualWidthAt1x),
+
+        // Avoid picking extremely tall items
+        isExtremelyTall: traits.visualHeightAt1x > TALL_ELEMENT_PIXEL_THRESHOLD,
 
         // We have a concept of percentage of viewport width and height, where under or over the ideal is not good.
         // Avoid picking things that are very small or large, which are awkward in the HLB according to users.
@@ -184,16 +188,16 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Comparison with first non-inline candidate.
         // This is the first element can provide useful size to compare with.
-        totalHorizGrowthFactor: traits.visualWidth / firstNonInlineTraits.visualWidth,
-        totalVertGrowthFactor: traits.visualHeight / firstNonInlineTraits.visualHeight,
+        totalHorizGrowthFactor: traits.visualWidthAt1x / firstNonInlineTraits.visualWidthAt1x,
+        totalVertGrowthFactor: traits.visualHeightAt1x / firstNonInlineTraits.visualHeightAt1x,
 
         // Comparison with the parent
-        parentHorizGrowthFactor: parentTraits.visualWidth / traits.visualWidth,
-        parentVertGrowthFactor: parentTraits.visualHeight / traits.visualHeight,
+        parentHorizGrowthFactor: parentTraits.visualWidthAt1x / traits.visualWidthAt1x,
+        parentVertGrowthFactor: parentTraits.visualHeightAt1x / traits.visualHeightAt1x,
 
         // Comparison with the child
-        childVertGrowthFactor: traits.visualHeight / childTraits.visualHeight,
-        childHorizGrowthFactor: traits.visualWidth / childTraits.visualWidth,
+        childVertGrowthFactor: traits.visualHeightAt1x / childTraits.visualHeightAt1x,
+        childHorizGrowthFactor: traits.visualWidthAt1x / childTraits.visualWidthAt1x,
 
         // Amount of growth in particular direction, in pixels.
         // We use unzoomedRect so that the numbers are not impacted by the amount of zoom.
@@ -337,7 +341,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Do we look like a cell in a column of cells?
         cellLayoutJudgements.isCellInCol = judgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&      // Approx. same width
           judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
-          traits.visualHeight > MIN_COLUMN_CELL_HEIGHT &&
+          traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT &&
           traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
           judgements.vertSeparationImpact > MIN_CELL_VERT_SEPARATION;
 
@@ -362,7 +366,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
         isFormControl: common.isFormControl(node),
         // Being grouped with a single image indicates something is likely good to pick
-        isGroupedWithImage: traits.visualHeight > MIN_IMAGE_GROUP_HEIGHT && isCandidateGroupedWithImage(traits, node, index),
+        isGroupedWithImage: traits.visualHeightAt1x > MIN_IMAGE_GROUP_HEIGHT && isCandidateGroupedWithImage(traits, node, index),
         // A child candidate was considered a section start container
         isAncestorOfSectionStartContainer: childJudgements && (childJudgements.isSectionStartContainer || childJudgements.isAncestorOfSectionStartContainer),
         // A divided group should be avoided. Rather, the subgroups should be picked.
