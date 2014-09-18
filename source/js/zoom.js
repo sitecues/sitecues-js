@@ -231,6 +231,9 @@ sitecues.def('zoom', function (zoom, callback) {
         return shouldSmoothZoom()
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
+          // Safari is herky jerky if animating the width and using key frames
+          // TODO fix initial load zoom with jsZoom -- not doing anything
+          && (!platform.browser.isSafari || !shouldRestrictWidth())
           // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
           // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
           // stressing the browser because it's part of the critical load path.
@@ -479,19 +482,6 @@ sitecues.def('zoom', function (zoom, callback) {
         keyFramesCss += '}\n\n';
 
         return keyFramesCssProperty + keyFramesCss;
-      }
-
-      // Perform the initial zoom on load
-      function initialZoom(targetZoom) {
-        isInitialLoadZoom = true;
-        beginZoomOperation(targetZoom);
-        if (shouldUseKeyFramesAnimation()) {
-          performKeyFramesZoomOperation();  // Key Frames animation is faster for initial load
-        }
-        else {
-          performInstantZoomOperation();
-          finishZoomOperation();
-        }
       }
 
       // Must be called before beginning any type zoom operation, to set up the operation.
@@ -931,7 +921,8 @@ sitecues.def('zoom', function (zoom, callback) {
           sitecues.on('panel/show', initZoomModule);
         }
         else if (targetZoom > 1) {
-          initialZoom(targetZoom);
+          isInitialLoadZoom = true;
+          beginGlide(targetZoom);
         }
       }
 
