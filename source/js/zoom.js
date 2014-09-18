@@ -179,7 +179,11 @@ sitecues.def('zoom', function (zoom, callback) {
        return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
       };
 
-      sitecues.getBodyWidth = zoom.getBodyWidth;
+      zoom.getBodyRight = function() {
+        initZoomModule();
+
+        return originalBodyInfo.rightMostNode.getBoundingClientRect().right + window.pageXOffset;
+      };
 
       // Add a listener for mid-animation zoom updates.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)

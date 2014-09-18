@@ -24,13 +24,13 @@ sitecues.def('hpan', function (hpan, callback) {
         movementX = getBackfillMovementX(evt),
 
         // Right side of body in absolute coordinates
-        bodyWidth = zoomMod.getBodyWidth(),
+        bodyRight = zoomMod.getBodyRight(),
 
         // Width of window
         winWidth = $(window).width(),
 
         // Amount of content that didn't fit in the window
-        ratioContentToWindowWidth = bodyWidth / winWidth,
+        ratioContentToWindowWidth = bodyRight / winWidth,
 
         // Amount of edge to use for panning
         edgePortion = Math.max(Math.min((ratioContentToWindowWidth / 2 - .55), MAX_EDGE_PORTION), MIN_EDGE_PORTION),
@@ -62,7 +62,7 @@ sitecues.def('hpan', function (hpan, callback) {
         extraMovement = Math.max(.5, (ratioContentToWindowWidth - .3) * SPEED_FACTOR * (percentageIntoPanningZone + .5)),
 
         // How far can we move until we reach the right edge of the visible content
-        maxMovementUntilRightEdge = bodyWidth - winWidth - window.pageXOffset,
+        maxMovementUntilRightEdge = bodyRight - winWidth - window.pageXOffset,
 
         // Calculate movement size: amount of mouse movement + extraMovement
         movementSize = Math.min(Math.round(Math.abs(movementX) * extraMovement), MAX_SPEED),
@@ -100,7 +100,7 @@ sitecues.def('hpan', function (hpan, callback) {
 
       // Turn on if zoom is > 1 and content overflows window more than a tiny amount
       var zoom = conf.get('zoom'),
-        doTurnOn = zoom > 1 && zoomMod.getBodyWidth() / $(window).width() > 1.01 && !isHlbOn && !isPanelOpen;
+        doTurnOn = zoom > 1 && zoomMod.getBodyRight() / $(window).width() > 1.01 && !isHlbOn && !isPanelOpen;
 
       if (doTurnOn !== isOn) {
         if (doTurnOn) {
