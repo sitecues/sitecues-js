@@ -76,19 +76,19 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
         // Use the scroll height when the overflow is visible, as it shows the full height
         if (traitcache.getStyleProp(element, 'overflow-y') === 'visible') {
-          rect.height = element.scrollHeight;
+          rect.height = element.scrollHeight * cachedViewSize.zoom;
         }
 
         // Use the scroll width when the overflow is visible, as it shows the full height
         if (traitcache.getStyleProp(element, 'overflow-x') === 'visible') {
-          rect.width = element.scrollWidth;
+          rect.width = element.scrollWidth * cachedViewSize.zoom;
         }
 
         // Add scroll values so that rectangles are not invalid after user scrolls.
         // This effectively makes them absolutely positioned rects vs. fixed.
         // This means we're caching the rectangle relative to the top-left of the document.
         var scrollTop = cachedViewPosition.y,
-          scrollLeft = cachedViewPosition.x
+          scrollLeft = cachedViewPosition.x;
         rect.top += scrollTop;
         rect.left += scrollLeft;
         rect.bottom = rect.top + rect.height;

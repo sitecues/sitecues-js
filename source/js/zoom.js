@@ -167,18 +167,19 @@ sitecues.def('zoom', function (zoom, callback) {
         return nativeZoom;
       };
 
+      // This is the body's currently visible width, with zoom factored in
       zoom.getBodyWidth = function() {
-        // If we have restricted the width, use that value
-        var width = parseFloat(document.body.style.width);
+       // Use the originally measured visible body width
+       initZoomModule();
 
-        // Otherwise, use the originally measured visible body width
-        if (!width) {
-          initZoomModule();
-          width = originalBodyInfo.width;
-        }
+       // If width was restricted
+       var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
 
-        return width * completedZoom;
+        // Multiply be the amount of zoom currently used
+       return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
       };
+
+      sitecues.getBodyWidth = zoom.getBodyWidth;
 
       // Add a listener for mid-animation zoom updates.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
@@ -727,17 +728,22 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
+      // This is the zoom that we will still restrict the width
+      function getZoomForWidthRestriction(currZoom, winWidth) {
+        // Adjust max zoom for width restrictions for current window width
+        // The max zoom for width restriction is set for a specific size of window
+        // We use a maximized window on a MacBook pro retina screen (1440px wide)
+        // The default is to restrict width up to a max of 1.35x zoom
+        // If the user's window is 75% of the 1440px, we multiply the max zoom by .75
+        var maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfFluid * (winWidth / 1440));
+
+        return Math.min(currZoom, maxZoomToRestrictWidth); // Can't be larger than current zoom
+      }
+
       // Get the desired width of the body for the current level of zoom
       function getRestrictedWidth(currZoom) {
-        // Adjust for current window width
-        var winWidth = window.innerWidth,
-          maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfFluid * (winWidth / 1440)),
-          useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
-        // We used to use document.documentElement.clientWidth, but this caused the page
-        // to continually shrink on resize events.
-        // Check out some different methods for determining viewport size: http://ryanve.com/lab/dimensions/
-        // More information on document.documentElement.clientWidth and browser viewports: http://www.quirksmode.org/mobile/viewports.html
-        return (winWidth / useZoom) + 'px';
+        var winWidth = window.innerWidth;
+        return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
       }
 
       // Return a formatted string for translateX as required by CSS
