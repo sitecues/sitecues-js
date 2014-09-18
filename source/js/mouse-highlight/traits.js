@@ -128,8 +128,9 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       // much larger than the visible content.
       // The exact approach is the same as we'd use for the highlight, but here we ask it to not bother with sprites
       // since they generally won't affect the results by much.
-      exactRects = mhpos.getAllBoundingBoxes(element, 9999);
-      return mhpos.convertFixedRectsToAbsolute(exactRects)[0];
+      return fastRect; // Removing for now until I determine performance issue this caused
+//      exactRects = mhpos.getAllBoundingBoxes(element, 9999);
+//      return mhpos.convertFixedRectsToAbsolute(exactRects)[0];
     }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
