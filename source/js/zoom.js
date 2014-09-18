@@ -582,14 +582,20 @@ sitecues.def('zoom', function (zoom, callback) {
       // In effect, stretch the bottom-right corner of the visible content down and/or right
       // to meet the bottom-right corner of the window.
       function maximizeContentVisibility() {
-        var bodyRight = zoom.getBodyWidth() + originalBodyInfo.left * completedZoom, // Get the smart visible width
-          bodyHeight = $(document).height,
-          winWidth = window.outerWidth,
-          winHeight = window.outerHeight,
-          hScroll = Math.max(0, winWidth - bodyRight + window.pageXOffset),
-          vScroll = Math.max(0, winHeight - bodyHeight + window.pageYOffset);
+        var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
+          bodyHeight = $(document).height(),
+          winWidth = $(window).width(),
+          winHeight = $(window).height(),
+          hScrollNow = window.pageXOffset,
+          vScrollNow = window.pageYOffset,
+          // How much do we need to scroll by to pull content to the bottom-right corner
+          hScrollDesired = Math.max(0, winWidth - bodyRight), // Amount to pull right as a postive number
+          vScrollDesired = Math.max(0, winHeight - bodyHeight), // Amount to pull down as a postive number
+          // Don't scroll more than we actually can
+          hScroll = Math.min(hScrollNow, hScrollDesired),
+          vScroll = Math.min(vScrollNow, vScrollDesired);
 
-        window.scrollBy(hScroll, vScroll);
+        window.scrollBy(- hScroll, - vScroll); // Must negate the numbers to get the expected results
       }
 
       /**
@@ -774,7 +780,7 @@ sitecues.def('zoom', function (zoom, callback) {
           isFluid;
         body.style.width = (window.outerWidth / 5) + 'px';
         newWidth = originalBodyInfo.mainNode.scrollWidth;
-        isFluid = (origWidth !== newWidth);
+        isFluid = origWidth !== newWidth;
         body.style.width = '';
 
         return isFluid;
@@ -786,6 +792,10 @@ sitecues.def('zoom', function (zoom, callback) {
           visibleNodes = [ ],
           mainNode,
           mainNodeRect = { width: 0, height: 0 },
+          leftMostNode,
+          leftMostCoord = 9999, // Everything else will be smaller
+          rightMostNode,
+          rightMostCoord = 0,
           MIN_WIDTH_MAIN_NODE = 300;
 
         getBodyRectImpl(body, bodyInfo, visibleNodes);
@@ -795,15 +805,25 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Find tallest node
         visibleNodes.forEach(function(node) {
-          var rect = node.rect
+          var rect = node.rect;
           if (rect.height >= mainNodeRect.height && rect.width > MIN_WIDTH_MAIN_NODE) {
             if (rect.height > mainNodeRect.height || rect.width > mainNodeRect.width) {
               mainNodeRect = rect;
               mainNode = node.domNode;
             }
           }
+          if (rect.left < leftMostCoord) {
+            leftMostNode = node.domNode;
+            leftMostCoord = rect.left;
+          }
+          if (rect.right > rightMostCoord) {
+            rightMostNode = node.domNode;
+            rightMostCoord = rect.right;
+          }
         });
         bodyInfo.mainNode = mainNode;
+        bodyInfo.leftMostNode = leftMostNode;
+        bodyInfo.rightMostNode = rightMostNode;
 
         return bodyInfo;
       }
