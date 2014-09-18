@@ -105,16 +105,16 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // does not appear to be much wider than it really is
     function getRect(element, display) {
       var fastRect = traitcache.getRect(element),
-        exactRects;
+        exactWidth;
 
       // If not display:block -- use fast approach
-      // because other elements are unlikely to have drastically incorrect sizes
+      // because other elements are unlikely to have drastically incorrect widths
       if (display !== 'block') {
         return fastRect;
       }
 
       // If first element child is not display: inline -- use fast approach
-      // because it is still not the case where the size is very likely incorrect
+      // because it is still not the case where the width is very likely incorrect
       var firstElementChild = element.firstElementChild;
       if (firstElementChild) {
         var childDisplay = traitcache.getStyleProp(firstElementChild, 'display');
@@ -123,14 +123,13 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         }
       }
 
-      // We're a block parent of an inline or text -- use the exact approach
+      // We're a block parent of an inline or text -- use the exact approach for width
       // because it's very likely that the element bounds include tons of whitespace and appear to be
       // much larger than the visible content.
       // The exact approach is the same as we'd use for the highlight, but here we ask it to not bother with sprites
       // since they generally won't affect the results by much.
-      return fastRect; // Removing for now until I determine performance issue this caused
-//      exactRects = mhpos.getAllBoundingBoxes(element, 9999);
-//      return mhpos.convertFixedRectsToAbsolute(exactRects)[0];
+      exactWidth = mhpos.getRangeRect(element).width;
+      return $.extend({}, fastRect, { width: exactWidth }); // Replace the width
     }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right

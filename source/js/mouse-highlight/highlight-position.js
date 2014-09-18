@@ -62,11 +62,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return newRect;
     }
 
-    function getRangeRect(containerNode) {
+    mhpos.getRangeRect = function(containerNode) {
       var range = document.createRange();
       range.selectNodeContents(containerNode);
       return getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
-    }
+    };
 
     function getUserAgentCorrectionsForRangeRect(rect) {
       if (platform.browser.isFirefox) {
@@ -300,7 +300,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // reducing the number of nodes we touch.
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
-            var parentContentsRect = getRangeRect(this.parentNode);
+            var parentContentsRect = mhpos.getRangeRect(this.parentNode);
             addRect(allRects, clipRect, parentContentsRect);
             return false;  // Don't keep iterating over text/inlines in this container
           }
