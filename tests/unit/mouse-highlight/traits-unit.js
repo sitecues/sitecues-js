@@ -81,9 +81,9 @@ describe('traits', function() {
       expect(traitStack[2].rightMargin).to.be.equal(3);
       done();
     });
-    it('should return the correct |visualWidth| trait for each node.', function(done) {
+    it('should return the correct |visualWidthAt1x| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes);
-      expect(traitStack[1].visualWidth).to.be.equal(6);
+      expect(traitStack[1].visualWidthAt1x).to.be.equal(6);
       done();
     });
     it('should return the correct |percentOfViewportWidth| trait for each node.', function(done) {

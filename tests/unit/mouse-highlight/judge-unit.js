@@ -145,7 +145,7 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 100;
+            traitStack[1].visualWidthAt1x = 100;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[1].tinyWidthFactor).to.be.equal(0);
             done();
@@ -154,7 +154,7 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 1;
+            traitStack[1].visualWidthAt1x = 1;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[1].tinyWidthFactor > 0).to.be.equal(true);
             done();
@@ -227,11 +227,11 @@ describe('judge', function() {
             traitStack[0].style.display = 'inline';
             traitStack[1].style.display = 'block';
             traitStack[1].style.display = 'block';
-            traitStack[1].visualWidth = 100;
-            traitStack[1].visualHeight = 100;
+            traitStack[1].visualWidthAt1x = 100;
+            traitStack[1].visualHeightAt1x = 100;
             traitStack[4].style.display = 'block';
-            traitStack[4].visualWidth = 1000;
-            traitStack[4].visualHeight = 1000;
+            traitStack[4].visualWidthAt1x = 1000;
+            traitStack[4].visualHeightAt1x = 1000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[4].isLarge2dGrowth).to.be.equal(true);
             done();
@@ -243,11 +243,11 @@ describe('judge', function() {
             traitStack[0].style.display = 'inline';
             traitStack[1].style.display = 'block';
             traitStack[1].style.display = 'block';
-            traitStack[1].visualWidth = 100;
-            traitStack[1].visualHeight = 100;
+            traitStack[1].visualWidthAt1x = 100;
+            traitStack[1].visualHeightAt1x = 100;
             traitStack[4].style.display = 'block';
-            traitStack[4].visualWidth = 1000;
-            traitStack[4].visualHeight = 101;
+            traitStack[4].visualWidthAt1x = 1000;
+            traitStack[4].visualHeightAt1x = 101;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[4].isLarge2dGrowth).to.be.equal(false);
             done();
@@ -259,11 +259,11 @@ describe('judge', function() {
             traitStack[0].style.display = 'inline';
             traitStack[1].style.display = 'block';
             traitStack[1].style.display = 'block';
-            traitStack[1].visualWidth = 100;
-            traitStack[1].visualHeight = 100;
+            traitStack[1].visualWidthAt1x = 100;
+            traitStack[1].visualHeightAt1x = 100;
             traitStack[4].style.display = 'block';
-            traitStack[4].visualWidth = 101;
-            traitStack[4].visualHeight = 1000;
+            traitStack[4].visualWidthAt1x = 101;
+            traitStack[4].visualHeightAt1x = 1000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[4].isLarge2dGrowth).to.be.equal(false);
             done();
@@ -272,10 +272,10 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 100;
-            traitStack[1].visualHeight = 100;
-            traitStack[2].visualWidth = 125;
-            traitStack[2].visualHeight = 100;
+            traitStack[1].visualWidthAt1x = 100;
+            traitStack[1].visualHeightAt1x = 100;
+            traitStack[2].visualWidthAt1x = 125;
+            traitStack[2].visualHeightAt1x = 100;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[2].isModeratelyLargerThanChildInOneDimension).to.be.equal(true);
             done();
@@ -284,10 +284,10 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 100;
-            traitStack[1].visualHeight = 100;
-            traitStack[2].visualWidth = 1000;
-            traitStack[2].visualHeight = 100;
+            traitStack[1].visualWidthAt1x = 100;
+            traitStack[1].visualHeightAt1x = 100;
+            traitStack[2].visualWidthAt1x = 1000;
+            traitStack[2].visualHeightAt1x = 100;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[2].isModeratelyLargerThanChildInOneDimension).to.be.equal(false);
             done();
@@ -297,10 +297,10 @@ describe('judge', function() {
                 judgementStack;
 
             traitStack[1].style.float = 'right';
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
-            traitStack[2].visualWidth = 500;
-            traitStack[2].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
+            traitStack[2].visualWidthAt1x = 500;
+            traitStack[2].visualHeightAt1x = 50;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[1].isFloatForCellLayout).to.be.equal(true);
@@ -310,13 +310,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 5;
             traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidth = 500;
-            traitStack[2].visualHeight = 50;
+            traitStack[2].visualWidthAt1x = 500;
+            traitStack[2].visualHeightAt1x = 50;
             traitStack[2].percentOfViewportWidth = 50;
             traitStack[2].percentOfViewportHeight = 5;
 
@@ -328,13 +328,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 5;
             traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidth = 60;
-            traitStack[2].visualHeight = 50;
+            traitStack[2].visualWidthAt1x = 60;
+            traitStack[2].visualHeightAt1x = 50;
             traitStack[2].percentOfViewportWidth = 6;
             traitStack[2].percentOfViewportHeight = 5;
 
@@ -346,13 +346,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 150;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 150;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 15;
             traitStack[1].topBorder = 5;
-            traitStack[2].visualWidth = 50;
-            traitStack[2].visualHeight = 500;
+            traitStack[2].visualWidthAt1x = 50;
+            traitStack[2].visualHeightAt1x = 500;
             traitStack[2].percentOfViewportWidth = 5;
             traitStack[2].percentOfViewportHeight = 50;
 
@@ -364,13 +364,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 150;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 150;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 15;
             traitStack[1].topBorder = 5;
-            traitStack[2].visualWidth = 50;
-            traitStack[2].visualHeight = 150;
+            traitStack[2].visualWidthAt1x = 50;
+            traitStack[2].visualHeightAt1x = 150;
             traitStack[2].percentOfViewportWidth = 5;
             traitStack[2].percentOfViewportHeight = 15;
 
@@ -382,13 +382,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 5;
             traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidth = 500;
-            traitStack[2].visualHeight = 50;
+            traitStack[2].visualWidthAt1x = 500;
+            traitStack[2].visualHeightAt1x = 50;
             traitStack[2].percentOfViewportWidth = 50;
             traitStack[2].percentOfViewportHeight = 5;
 
@@ -408,13 +408,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 5;
             traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidth = 500;
-            traitStack[2].visualHeight = 50;
+            traitStack[2].visualWidthAt1x = 500;
+            traitStack[2].visualHeightAt1x = 50;
             traitStack[2].percentOfViewportWidth = 50;
             traitStack[2].percentOfViewportHeight = 5;
             traitStack[3].percentOfViewportWidth = 150;
@@ -427,13 +427,13 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidth = 50;
-            traitStack[1].visualHeight = 50;
+            traitStack[1].visualWidthAt1x = 50;
+            traitStack[1].visualHeightAt1x = 50;
             traitStack[1].percentOfViewportWidth = 5;
             traitStack[1].percentOfViewportHeight = 5;
             traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidth = 500;
-            traitStack[2].visualHeight = 50;
+            traitStack[2].visualWidthAt1x = 500;
+            traitStack[2].visualHeightAt1x = 50;
             traitStack[2].percentOfViewportWidth = 50;
             traitStack[2].percentOfViewportHeight = 5;
             traitStack[3].percentOfViewportWidth = 40;
@@ -488,8 +488,8 @@ describe('judge', function() {
 
             traitStack[0].normDisplay = 'inline';
             traitStack[1].normDisplay = 'block';
-            traitStack[1].visualWidth = 500;
-            traitStack[3].visualWidth = 5000;
+            traitStack[1].visualWidthAt1x = 500;
+            traitStack[3].visualWidthAt1x = 5000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isLargeWidthExpansion).to.be.equal(true);
             done();
@@ -500,8 +500,8 @@ describe('judge', function() {
 
             traitStack[0].normDisplay = 'inline';
             traitStack[1].normDisplay = 'block';
-            traitStack[1].visualWidth = 500;
-            traitStack[3].visualWidth = 550;
+            traitStack[1].visualWidthAt1x = 500;
+            traitStack[3].visualWidthAt1x = 550;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isLargeWidthExpansion).to.be.equal(false);
             done();
