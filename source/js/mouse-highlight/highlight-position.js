@@ -37,7 +37,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
      * they will be combined into a single rectangle.
      * @param selector -- what to get bounding boxes
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
-     * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
+     * @param stretchForSprites -- true if it's important to add rects for background sprites
      */
     mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
       var allRects = [],

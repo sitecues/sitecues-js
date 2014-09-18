@@ -6,8 +6,8 @@
  */
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight/traitcache', 'zoom', 'util/common',
-    function($, traitcache, zoom, common) {
+  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom', 'util/common',
+    function($, traitcache, mhpos, zoom, common) {
 
     // ---- PUBLIC ----
 
@@ -38,7 +38,6 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       var zoom = viewSize.zoom,
         traits = {
           style: traitcache.getStyle(node),
-          rect: traitcache.getRect(node),
           tag: node.localName,
           role: node.getAttribute('role'),
           childCount: node.childElementCount,
@@ -46,6 +45,8 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         };
 
       traits.normDisplay = getNormalizedDisplay(traits.style, node);
+
+      traits.rect = getRect(node, traits.normDisplay);
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -84,7 +85,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         percentOfViewportWidth: 100 * traits.visualWidth / viewSize.width
       });
 
-      traits.percentOfBodyWidth = 100 * traits.unzoomedRect.width / bodyWidth;
+      traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;
 
       return traits;
     }
@@ -96,6 +97,39 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // this allows the form controls to be picked.
     function getNormalizedDisplay(style, node) {
       return (style.display === 'inline' && common.isFormControl(node)) ? 'inline-block' : style.display;
+    }
+
+    // Get an element's rectangle
+    // In most cases, we use the fastest approach (cached getBoundingClientRect results)
+    // However, a block parent of an inline or visible text needs the more exact approach, so that the element
+    // does not appear to be much wider than it really is
+    function getRect(element, display) {
+      var fastRect = traitcache.getRect(element),
+        exactRects;
+
+      // If not display:block -- use fast approach
+      // because other elements are unlikely to have drastically incorrect sizes
+      if (display !== 'block') {
+        return fastRect;
+      }
+
+      // If first element child is not display: inline -- use fast approach
+      // because it is still not the case where the size is very likely incorrect
+      var firstElementChild = element.firstElementChild;
+      if (firstElementChild) {
+        var childDisplay = traitcache.getStyleProp(firstElementChild, 'display');
+        if (childDisplay !== 'inline' && childDisplay !== 'inline-block') {
+          return fastRect;
+        }
+      }
+
+      // We're a block parent of an inline or text -- use the exact approach
+      // because it's very likely that the element bounds include tons of whitespace and appear to be
+      // much larger than the visible content.
+      // The exact approach is the same as we'd use for the highlight, but here we ask it to not bother with sprites
+      // since they generally won't affect the results by much.
+      exactRects = mhpos.getAllBoundingBoxes(element, 9999);
+      return mhpos.convertFixedRectsToAbsolute(exactRects)[0];
     }
 
     // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
