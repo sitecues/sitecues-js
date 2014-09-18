@@ -17,6 +17,7 @@ exports.getJudgementStack = function(traitStack, nodes) {
       percentOfViewportWidthOverIdealMax: 0,
       tinyHeightFactor: 0,
       tinyWidthFactor: 0,
+      isExtremelyTall: false,
       isFloatForCellLayout: isGoodNode,
       badGrowthTop: 0,
       badGrowthBottom: 0,

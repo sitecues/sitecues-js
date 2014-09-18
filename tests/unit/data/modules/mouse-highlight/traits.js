@@ -30,8 +30,8 @@ exports.getTraitStack = function(nodes) {
     leftSpacing: 2,
     bottomSpacing: 2,
     rightSpacing: 2,
-    visualWidth: 198,
-    visualHeight: 198,
+    visualWidthAt1x: 198,
+    visualHeightAt1x: 198,
     percentOfViewportHeight: 50,
     percentOfViewportWidth: 50,
     percentOfBodyWidth: 30
