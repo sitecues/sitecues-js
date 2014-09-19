@@ -265,15 +265,16 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (!unclippedRect) {
         return;
       }
-      var rect = getClippedRect(unclippedRect, clipRect);
-      if (rect.width < MIN_RECT_SIDE|| rect.height < MIN_RECT_SIDE) {
+      var rect = getClippedRect(unclippedRect, clipRect),
+        zoom = conf.get('zoom'),
+        minRectSide = MIN_RECT_SIDE * zoom;
+      if (rect.width < minRectSide || rect.height < minRectSide) {
         return; // Not large enough to matter
       }
 
       rect = normalizeRect(rect);
 
       if (rect.right < 0 || rect.bottom < 0) {
-        var zoom = conf.get('zoom');
         var absoluteRect = mhpos.convertFixedRectsToAbsolute([rect], zoom)[0];
         if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
           // Don't be fooled by items hidden offscreen -- those rects don't count
@@ -287,22 +288,37 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     function getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites) {
 
       $selector.each(function (index) {
-
         var isElement = this.nodeType === 1,
           clipRect = Array.isArray(clipRects) ? clipRects[index] : clipRects;
 
         // --- Leaf nodes ---
         if (!isElement) {
           if (this.nodeType === 3 && this.data.trim() !== '') { /* Non-empty text node */
+            // ----------------------------------------------------------------------------------------------------
+            // --- FAST PATH -- REMOVED BECAUSE SOME CHILD ELEMENTS MAY USING CLIPPING! SC-2047 --
             // Fast path for text containers:
             // We found a child text node, so get the bounds of all children at once via a DOM range.
             // This is much faster than iterating through all of the sibling text/inline nodes, by
             // reducing the number of nodes we touch.
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
-            var parentContentsRect = mhpos.getRangeRect(this.parentNode);
-            addRect(allRects, clipRect, parentContentsRect);
-            return false;  // Don't keep iterating over text/inlines in this container
+            //
+            // var parentContentsRect = getRangeRect(this.parentNode);
+            // addRect(allRects, clipRect, parentContentsRect);
+            // return false;  // Don't keep iterating over text/inlines in this container
+            // ----------------------------------------------------------------------------------------------------
+
+            // ----------------------------------------------------------------------------------------------------
+            // -- NORMAL -- NO LONGER NEED TO USE ABOVE 'FAST PATH' METHOD --
+            // Our other performance fixes (such as traitcache, and better picking) have removed the need
+            // for the above old 'fast path' method which fixed slow sites like http://en.wikipedia.org/wiki/Cat
+            // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
+            // hidden and clipped elements.
+            // ----------------------------------------------------------------------------------------------------
+            var range = document.createRange();
+            range.selectNode(this);
+            var rect = getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+            addRect(allRects, clipRect, rect);
           }
           return true;
         }
