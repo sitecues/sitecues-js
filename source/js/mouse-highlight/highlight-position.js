@@ -91,25 +91,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     function getBoundingRectMinusPadding(node) {
-      var rect = node.getBoundingClientRect();
-
-      // If range is created on node w/o text, getBoundingClientRect() returns zero values.
-      // This concerns images and other nodes such as paragraphs - with no text inside.
-      var isEmptyRect = true;
-
-      for (var prop in rect) {
-        if (rect[prop] !== 0) {
-          isEmptyRect = false;
-          continue;
-        }
-      }
-
-      if (isEmptyRect) {rect = node.getBoundingClientRect && traitcache.getScreenRect(node);}
-
-      if (node.nodeType !== 1 /* Element */) {
-        return rect;
-      }
-
+      var rect = traitcache.getScreenRect(node);
       return getRectMinusPadding(node, rect);
     }
 
@@ -216,13 +198,13 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (element === document.body) {
         return; // The <body> element is generally reporting a different scroll width than client width
       }
-      var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
-      var overflowY = style['overflow-y'] === 'visible' &&
-        element.scrollHeight - element.clientHeight >= getLineHeight(style);
+      var overflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
+        overflowY = style.overflowY === 'visible' &&
+          element.scrollHeight - element.clientHeight >= getLineHeight(style);
+
       if (!overflowX && !overflowY) {
-        return null;
+        return;
       }
-    
 
       // Check for descendant with visibility: hidden -- those break our overflow check.
       // Example: google search results with hidden drop down menu
@@ -357,7 +339,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
           return true;
         }
-
 
         // --- Elements with children ---
         if (this.hasChildNodes()) {
