@@ -198,9 +198,15 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (element === document.body) {
         return; // The <body> element is generally reporting a different scroll width than client width
       }
-      var overflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
+      var clientHeight = element.clientHeight;
+      if (!clientHeight) {
+        return; // This is just what parents of inline images in IE do -- we're looking for the cases where clientHeight is at least 1
+      }
+
+      var
+        overflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
         overflowY = style.overflowY === 'visible' &&
-          element.scrollHeight - element.clientHeight >= getLineHeight(style);
+          element.scrollHeight - clientHeight >= getLineHeight(style);
 
       if (!overflowX && !overflowY) {
         return;
