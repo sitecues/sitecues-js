@@ -31,7 +31,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       updateCachedViewSize();
       updateCachedViewPosition();
       resetCache();
-    }
+    };
 
     traitcache.getCachedViewSize = function() {
       return cachedViewSize;

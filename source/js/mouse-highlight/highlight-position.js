@@ -420,7 +420,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       var allClipRects = [];
 
       $selector.each(function() {
-        var ancestors = $selector.parents().get().reverse(),
+        var ancestors = $selector.parentsUntil(document.body).get().reverse(),
           clipRect,
           style;
         $(ancestors).each(function() {
