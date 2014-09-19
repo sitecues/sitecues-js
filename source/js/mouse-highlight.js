@@ -44,7 +44,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   isAppropriateFocus,
   isSticky,
 
-  showTimer,
   pickTimer,
 
   cursorPos,
@@ -733,8 +732,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function refreshExistingHighlight() {
       // Even though highlight is the same, the elements may have moved
       // This will do a quick check and only redraw if an update looks necessary
-      // If it hasn't been created yet, we are waiting for showTimer to fire.
-      if (state.isCreated) {    // If has already shown
+      if (state.isCreated) {    // Safety check -- may not be necessary
         createNewOverlayPosition();
       }
     }
@@ -802,13 +800,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked = $(picked);
       state.target = target;
 
-      // show highlight for picked element
-      function showHighlightAfterShortDelay() {
-        showTimer = 0;
-        show();
-      }
-      clearTimeout(showTimer);
-      showTimer = setTimeout(showHighlightAfterShortDelay, 15);
+      show();
     }
 
     // refresh status of enhancement on page
@@ -905,10 +897,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
-      if (showTimer) {
-        clearTimeout(showTimer);
-        showTimer = 0;
-      }
 
       if (pickTimer) {
         clearTimeout(pickTimer);
@@ -1002,7 +990,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.pause = pause;
       exports.resetState = resetState;
       exports.getMaxZIndex = getMaxZIndex;
-      exports.showTimer = showTimer;
       exports.pickTimer = pickTimer;
     }
   });
