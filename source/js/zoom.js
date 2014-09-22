@@ -58,6 +58,9 @@ sitecues.def('zoom', function (zoom, callback) {
         glideChangeTimer,       // Timer used for callbacks
         GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
 
+        // Metrics info
+        metrics,
+
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
         shouldManuallyAddScrollbars = platform.browser.isIE,
@@ -105,11 +108,13 @@ sitecues.def('zoom', function (zoom, callback) {
         var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
+          metrics.isSlider = true;
           if (shouldPerformContinualUpdates) {
             zoomAnimator = requestFrame(performContinualZoomUpdates);
           }
         }
         else {
+          metrics.isSliderDrag = true;
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
 
@@ -286,6 +291,15 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
           glideInputEvent = event;
           beginZoomOperation(targetZoom);
+          if (event) {
+            if (event.keyCode) {
+              metrics.isKey = true;
+              metrics.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
+            }
+            else {
+              metrics.isAButtonPress = true;
+            }
+          }
           $(window).one('keyup', finishGlideIfEnough);
           if (!shouldSmoothZoom()) {
             // When no animations -- just be clunky and zoom a bit closer to the target
@@ -338,6 +352,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         var timeElapsed = getZoomOpElapsedTime(),
           timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
+
+        metrics.isLongGlide = timeRemaining === 0;
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
@@ -518,6 +534,18 @@ sitecues.def('zoom', function (zoom, callback) {
 
         currentTargetZoom = getSanitizedZoomValue(targetZoom);
         startZoomTime = Date.now();
+
+        // Initialize metrics info, which will be modified by caller
+        metrics = {
+          isSlider: false,                  // Slider in panel
+          isSliderDrag: false,              // True if the user drags the slider (as opposed to clicking in it)
+          isKey: false,                     // + or - key (or with modifier)
+          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
+          isAButtonPress: false,            // Small or large A in panel
+          isLongGlide: false,               // Key or A button held down to glide extra
+          fromZoom: completedZoom           // Old zoom value
+          // toZoom: undefined              // New zoom value, will be set in finishZoom when we know it
+        };
       }
 
       // Are we in the middle of a zoom operation?
@@ -551,7 +579,8 @@ sitecues.def('zoom', function (zoom, callback) {
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
         if (!isInitialLoadZoom) {
-          fireZoomMetricEvent(previousZoom, completedZoom);
+          SC_DEV && console.log(metrics);
+          sitecues.emit('zoom/metric', metrics);
         }
 
         clearZoomCallbacks();
@@ -562,22 +591,6 @@ sitecues.def('zoom', function (zoom, callback) {
         // Get next forward/backward glide animations ready.
         // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
         setTimeout(setupNextZoomStyleSheet, 0);
-      }
-
-      function fireZoomMetricEvent(fromZoom, toZoom) {
-        // For metrics -- don't send metrics data for initial load zooms
-        var zoomInfo = {
-          fromZoom: fromZoom,
-          toZoom: toZoom,
-          isSlider: !glideInputEvent,
-          isAButton: glideInputEvent ? !glideInputEvent.keyCode : false, // "A" button press
-          isKey: glideInputEvent ? glideInputEvent.keyCode > 0 : false   // +/- press
-        };
-        zoomInfo.isBrowserZoomKey = // Browser's zoom shortcut
-          zoomInfo.isKey && (glideInputEvent.ctrlKey || glideInputEvent.metaKey);
-        console.log(glideInputEvent);
-        SC_DEV && console.log(zoomInfo);
-        sitecues.emit('zoom/metric', zoomInfo);
       }
 
       // Make sure the current zoom operation does not continue
