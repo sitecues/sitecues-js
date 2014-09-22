@@ -53,8 +53,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
-    'audio', 'util/geo',
-    function($, conf, picker, traitcache, mhpos, common, audio, geo) {
+    'audio', 'util/geo', 'platform',
+    function($, conf, picker, traitcache, mhpos, common, audio, geo, platform) {
 
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
@@ -811,6 +811,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .on('mousemove', update)
           .on('focusin focusout', testFocus)
           .ready(testFocus);
+        if (platform.browser.isFirefox) {
+          //$(document).on('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+        }
         $(window)
           .on('focus', onFocusWindow)
           .on('blur', onBlurWindow)
@@ -821,6 +824,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .off('mousemove', update)
           .off('mousewheel', onMouseWheel)  // In case it was added elsewhere
           .off('focusin focusout', testFocus);
+        if (platform.browser.isFirefox) {
+          $(document).off('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+        }
         $(window)
           .off('focus', onFocusWindow)
           .off('blur', onBlurWindow)
