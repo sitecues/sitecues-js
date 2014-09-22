@@ -947,7 +947,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     sitecues.on('zoom/begin', disableAndReset);
 
     // darken highlight appearance when speech is enabled
-    sitecues.on('speech/enabled speech/disabled', enableIfAppropriate);
+    conf.get('ttsOn', enableIfAppropriate);
 
     testFocus(); // Set initial focus state
 
