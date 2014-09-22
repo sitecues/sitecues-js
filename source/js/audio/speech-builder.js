@@ -135,7 +135,7 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
         value = node.value;
       }
 
-      if (textEquiv) {
+      if (textEquiv !== null) {
         appendWithWordSeparation(textEquiv, text);
       }
       if (value) {
