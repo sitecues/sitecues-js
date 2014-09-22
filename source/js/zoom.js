@@ -555,8 +555,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
-        var didUnzoom = completedZoom > currentTargetZoom,
-          previousZoom = completedZoom;
+        var didUnzoom = completedZoom > currentTargetZoom;
 
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
