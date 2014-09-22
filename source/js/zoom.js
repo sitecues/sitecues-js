@@ -288,9 +288,12 @@ sitecues.def('zoom', function (zoom, callback) {
           beginZoomOperation(targetZoom);
           $(window).one('keyup', finishGlideIfEnough);
           if (!shouldSmoothZoom()) {
-            // When no animations -- just be clunky and zoom a bit closer to the target
-            var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
-            currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            // Instant zoom
+            if (glideInputEvent) {
+              // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
+              var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+              currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            }
             performInstantZoomOperation();
             finishZoomOperation();
             return;
