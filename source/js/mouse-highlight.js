@@ -763,7 +763,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
-      testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
       if (!isAppropriateFocus || isExistingHighlightRelevant()) {
         doExitEarly = true;
       }
