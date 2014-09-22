@@ -578,7 +578,6 @@ sitecues.def('zoom', function (zoom, callback) {
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
         if (!isInitialLoadZoom) {
-          SC_DEV && console.log(metrics);
           sitecues.emit('zoom/metric', metrics);
         }
 
