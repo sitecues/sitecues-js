@@ -127,7 +127,7 @@ sitecues.def( 'panel', function (panel, callback) {
         // Set/recheck the dimensions of the slider
         var sliderWidget = panel.slider.widget;
         sliderWidget.setdimensions(sliderWidget);
-        sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+        sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget);
         sliderWidget.translateThumbSVG.call(sliderWidget);
       }
 
