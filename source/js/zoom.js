@@ -182,7 +182,7 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.getBodyRight = function() {
         initZoomModule();
 
-        return originalBodyInfo.rightMostNode.getBoundingClientRect().right + window.pageXOffset;
+        return originalBodyInfo.right * completedZoom;
       };
 
       // Add a listener for mid-animation zoom updates.
