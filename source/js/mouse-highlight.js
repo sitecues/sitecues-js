@@ -42,6 +42,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   isEnabled,
   isAppropriateFocus,
+  isWindowFocused = document.hasFocus(),
   isSticky,
 
   pickTimer,
@@ -808,10 +809,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // handle mouse move on body
         $(document)
           .on('mousemove', update)
-          .on('focusin focusout', testFocus);
+          .on('focusin focusout', testFocus)
+          .ready(testFocus);
         $(window)
-          .on('focus', testFocus)
-          .on('blur', onblurwindow)
+          .on('focus', onFocusWindow)
+          .on('blur', onBlurWindow)
           .on('resize', hideAndResetState);
       } else {
         // remove mousemove listener from body
@@ -820,8 +822,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .off('mousewheel', onMouseWheel)  // In case it was added elsewhere
           .off('focusin focusout', testFocus);
         $(window)
-          .off('focus', testFocus)
-          .off('blur', onblurwindow)
+          .off('focus', onFocusWindow)
+          .off('blur', onBlurWindow)
           .off('resize', hideAndResetState);
       }
     }
@@ -856,17 +858,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var wasAppropriateFocus = isAppropriateFocus;
       // don't show highlight if current active isn't body
       var target = document.activeElement;
-      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && document.hasFocus();
+      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowFocused;
       if (wasAppropriateFocus && !isAppropriateFocus && !isSticky) {
         pause();
       }
     }
 
-    function onblurwindow() {
+    function onBlurWindow() {
+      isWindowFocused = false;
       isAppropriateFocus = false;
       if (!isSticky) {
         hideAndResetState();
       }
+    }
+      
+    function onFocusWindow() {
+      isWindowFocused = true;
+      testFocus();
     }
 
     // disable mouse highlight temporarily
