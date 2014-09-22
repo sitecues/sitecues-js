@@ -812,7 +812,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .on('focusin focusout', testFocus)
           .ready(testFocus);
         if (platform.browser.isFirefox) {
-          //$(document).on('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+          $(document).on('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
         }
         $(window)
           .on('focus', onFocusWindow)
