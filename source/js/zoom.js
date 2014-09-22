@@ -527,7 +527,9 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
-        var didUnzoom = completedZoom > currentTargetZoom;
+        var didUnzoom = completedZoom > currentTargetZoom,
+          previousZoom = completedZoom;
+
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
@@ -548,6 +550,9 @@ sitecues.def('zoom', function (zoom, callback) {
         // notify all about zoom change
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
+        if (!isInitialLoadZoom) {
+          fireZoomMetricEvent(previousZoom, completedZoom);
+        }
 
         clearZoomCallbacks();
 
@@ -557,6 +562,22 @@ sitecues.def('zoom', function (zoom, callback) {
         // Get next forward/backward glide animations ready.
         // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
         setTimeout(setupNextZoomStyleSheet, 0);
+      }
+
+      function fireZoomMetricEvent(fromZoom, toZoom) {
+        // For metrics -- don't send metrics data for initial load zooms
+        var zoomInfo = {
+          fromZoom: fromZoom,
+          toZoom: toZoom,
+          isSlider: !glideInputEvent,
+          isAButton: glideInputEvent ? !glideInputEvent.keyCode : false, // "A" button press
+          isKey: glideInputEvent ? glideInputEvent.keyCode > 0 : false   // +/- press
+        };
+        zoomInfo.isBrowserZoomKey = // Browser's zoom shortcut
+          zoomInfo.isKey && (glideInputEvent.ctrlKey || glideInputEvent.metaKey);
+        console.log(glideInputEvent);
+        SC_DEV && console.log(zoomInfo);
+        sitecues.emit('zoom/metric', zoomInfo);
       }
 
       // Make sure the current zoom operation does not continue
