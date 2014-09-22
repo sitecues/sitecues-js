@@ -190,6 +190,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return originalBodyInfo.rightMostNode.getBoundingClientRect().right + window.pageXOffset;
       };
 
+
       // Add a listener for mid-animation zoom updates.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
       // Currently only supports one listener.
@@ -578,6 +579,7 @@ sitecues.def('zoom', function (zoom, callback) {
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
         if (!isInitialLoadZoom) {
+          metrics.toZoom = completedZoom;
           sitecues.emit('zoom/metric', metrics);
         }
 
