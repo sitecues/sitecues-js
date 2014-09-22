@@ -58,6 +58,9 @@ sitecues.def('zoom', function (zoom, callback) {
         glideChangeTimer,       // Timer used for callbacks
         GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
 
+        // Metrics info
+        metrics,
+
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
         shouldManuallyAddScrollbars = platform.browser.isIE,
@@ -105,11 +108,13 @@ sitecues.def('zoom', function (zoom, callback) {
         var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
+          metrics.isSlider = true;
           if (shouldPerformContinualUpdates) {
             zoomAnimator = requestFrame(performContinualZoomUpdates);
           }
         }
         else {
+          metrics.isSliderDrag = true;
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
 
@@ -184,6 +189,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         return originalBodyInfo.right * completedZoom;
       };
+
 
       // Add a listener for mid-animation zoom updates.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
@@ -286,6 +292,15 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
           glideInputEvent = event;
           beginZoomOperation(targetZoom);
+          if (event) {
+            if (event.keyCode) {
+              metrics.isKey = true;
+              metrics.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
+            }
+            else {
+              metrics.isAButtonPress = true;
+            }
+          }
           $(window).one('keyup', finishGlideIfEnough);
           if (!shouldSmoothZoom()) {
             // Instant zoom
@@ -341,6 +356,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         var timeElapsed = getZoomOpElapsedTime(),
           timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
+
+        metrics.isLongGlide = timeRemaining === 0;
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
@@ -521,6 +538,18 @@ sitecues.def('zoom', function (zoom, callback) {
 
         currentTargetZoom = getSanitizedZoomValue(targetZoom);
         startZoomTime = Date.now();
+
+        // Initialize metrics info, which will be modified by caller
+        metrics = {
+          isSlider: false,                  // Slider in panel
+          isSliderDrag: false,              // True if the user drags the slider (as opposed to clicking in it)
+          isKey: false,                     // + or - key (or with modifier)
+          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
+          isAButtonPress: false,            // Small or large A in panel
+          isLongGlide: false,               // Key or A button held down to glide extra
+          fromZoom: completedZoom           // Old zoom value
+          // toZoom: undefined              // New zoom value, will be set in finishZoom when we know it
+        };
       }
 
       // Are we in the middle of a zoom operation?
@@ -531,6 +560,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
         var didUnzoom = completedZoom > currentTargetZoom;
+
         completedZoom = currentTargetZoom;
         startZoomTime = 0;
 
@@ -551,6 +581,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // notify all about zoom change
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
+        if (!isInitialLoadZoom) {
+          metrics.toZoom = completedZoom;
+          sitecues.emit('zoom/metric', metrics);
+        }
 
         clearZoomCallbacks();
 

@@ -286,7 +286,7 @@ sitecues.def("slider", function(slider, callback) {
                     .on('mouseup', e.data, slider.mouseup);
 
                 // Fire initial zoom update on original mouse down event
-                sitecues.emit('zoom/decrease');
+                sitecues.emit('zoom/decrease', e);
 
             },
 
@@ -307,7 +307,7 @@ sitecues.def("slider", function(slider, callback) {
                     .on('mouseup', e.data, slider.mouseup);
 
                 // Fire initial zoom update on original mouse down event
-                sitecues.emit('zoom/increase');
+                sitecues.emit('zoom/increase', e);
 
             },
 
