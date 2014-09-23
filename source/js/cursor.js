@@ -17,14 +17,14 @@ sitecues.def('cursor', function (cursor, callback) {
         // Regexp is used to match URL in the string given(see below).
         URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
         CURSOR_TYPES = ['default', 'pointer' ],
-        CURSOR_SYNONYMS = { default: 'auto' },  // Map cursor: auto -> cursor: default
+        CURSOR_SYNONYMS = { _default: 'auto' },  // Map cursor: auto -> cursor: default
         SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
         $stylesheet,
         cursorStylesheetObject,
         isInitComplete,
         CURSOR_OFFSETS = {
-          default : {x: 0,  y: 5, xStep: 0, yStep: 2.5},
-          pointer : {x: 10, y: 5, xStep: 3.5, yStep: 1.7}
+          _default : {x: 0,  y: 5, xStep: 0, yStep: 2.5},
+          _pointer : {x: 10, y: 5, xStep: 3.5, yStep: 1.7}
         };
 
     /*
@@ -94,7 +94,7 @@ sitecues.def('cursor', function (cursor, callback) {
       if (url.indexOf(cursorType) > -1) {
         return true;
       }
-      var synonym = CURSOR_SYNONYMS[cursorType];
+      var synonym = CURSOR_SYNONYMS['_' + cursorType];
       return synonym && url.indexOf(synonym) > -1;
     }
 
@@ -241,7 +241,7 @@ sitecues.def('cursor', function (cursor, callback) {
       }
 
       var zoomDiff = zl - 1,  // Lowest zoom level is 1, this is the difference from that
-      offset = CURSOR_OFFSETS[type];
+      offset = CURSOR_OFFSETS['_' + type];
 
       return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
     }
