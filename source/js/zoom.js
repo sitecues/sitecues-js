@@ -616,8 +616,8 @@ sitecues.def('zoom', function (zoom, callback) {
       function maximizeContentVisibility() {
         var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
           bodyHeight = $(document).height(),
-          winWidth = $(window).width(),
-          winHeight = $(window).height(),
+          winWidth = window.innerWidth,
+          winHeight = window.innerHeight,
           hScrollNow = window.pageXOffset,
           vScrollNow = window.pageYOffset,
           // How much do we need to scroll by to pull content to the bottom-right corner
@@ -792,7 +792,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (shouldRestrictWidth()) {
           return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var zoomOriginX = Math.max($(window).width(), originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
+        var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
           halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
           pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
