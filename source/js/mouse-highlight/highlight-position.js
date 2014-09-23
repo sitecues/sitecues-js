@@ -69,7 +69,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     };
 
     function getUserAgentCorrectionsForRangeRect(rect) {
-      if (platform.browser.isFirefox) {
+      if (platform.browser.isFirefox && platform.browser.version < 33) {
         // This must be done for range.getBoundingClientRect(),
         // but not for element.getBoundingClientRect()
         var currZoom = conf.get('zoom'),

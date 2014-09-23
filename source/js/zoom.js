@@ -108,13 +108,13 @@ sitecues.def('zoom', function (zoom, callback) {
         var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
           beginZoomOperation(targetZoom);
-          metrics.isSlider = true;
+          metrics.is_slider = true;
           if (shouldPerformContinualUpdates) {
             zoomAnimator = requestFrame(performContinualZoomUpdates);
           }
         }
         else {
-          metrics.isSliderDrag = true;
+          metrics.is_slider_drag = true;
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
 
@@ -187,7 +187,7 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.getBodyRight = function() {
         initZoomModule();
 
-        return originalBodyInfo.rightMostNode.getBoundingClientRect().right + window.pageXOffset;
+        return originalBodyInfo.right * completedZoom;
       };
 
 
@@ -294,18 +294,21 @@ sitecues.def('zoom', function (zoom, callback) {
           beginZoomOperation(targetZoom);
           if (event) {
             if (event.keyCode) {
-              metrics.isKey = true;
-              metrics.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
+              metrics.is_key = true;
+              metrics.is_browser_zoom_key_override = (event.ctrlKey || event.metaKey)
             }
             else {
-              metrics.isAButtonPress = true;
+              metrics.is_button_press = true;
             }
           }
           $(window).one('keyup', finishGlideIfEnough);
           if (!shouldSmoothZoom()) {
-            // When no animations -- just be clunky and zoom a bit closer to the target
-            var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
-            currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            // Instant zoom
+            if (glideInputEvent) {
+              // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
+              var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+              currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            }
             performInstantZoomOperation();
             finishZoomOperation();
             return;
@@ -354,7 +357,7 @@ sitecues.def('zoom', function (zoom, callback) {
         var timeElapsed = getZoomOpElapsedTime(),
           timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
 
-        metrics.isLongGlide = timeRemaining === 0;
+        metrics.is_long_glide = timeRemaining === 0;
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
@@ -538,13 +541,13 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Initialize metrics info, which will be modified by caller
         metrics = {
-          isSlider: false,                  // Slider in panel
-          isSliderDrag: false,              // True if the user drags the slider (as opposed to clicking in it)
-          isKey: false,                     // + or - key (or with modifier)
-          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
-          isAButtonPress: false,            // Small or large A in panel
-          isLongGlide: false,               // Key or A button held down to glide extra
-          fromZoom: completedZoom           // Old zoom value
+          is_slider: false,                  // Slider in panel
+          is_slider_drag: false,              // True if the user drags the slider (as opposed to clicking in it)
+          is_key: false,                     // + or - key (or with modifier)
+          is_browser_zoom_key_override: false,  // User is pressing the browser's zoom key command
+          is_button_press: false,            // Small or large A in panel
+          is_long_glide: false,               // Key or A button held down to glide extra
+          from_zoom: completedZoom           // Old zoom value
           // toZoom: undefined              // New zoom value, will be set in finishZoom when we know it
         };
       }
@@ -579,7 +582,7 @@ sitecues.def('zoom', function (zoom, callback) {
         conf.set('zoom', completedZoom);
         sitecues.emit('zoom', completedZoom);
         if (!isInitialLoadZoom) {
-          metrics.toZoom = completedZoom;
+          metrics.to_zoom = completedZoom;
           sitecues.emit('zoom/metric', metrics);
         }
 

@@ -42,6 +42,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   isEnabled,
   isAppropriateFocus,
+  isWindowFocused = document.hasFocus(),
   isSticky,
 
   pickTimer,
@@ -52,8 +53,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
-    'audio', 'util/geo',
-    function($, conf, picker, traitcache, mhpos, common, audio, geo) {
+    'audio', 'util/geo', 'platform',
+    function($, conf, picker, traitcache, mhpos, common, audio, geo, platform) {
 
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
@@ -763,7 +764,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // don't show highlight if current document isn't active,
       // or current active element isn't appropriate for spacebar command
-      testFocus(); // update in case focus changed but no events (e.g. click in content after Chrome extension popup)
       if (!isAppropriateFocus || isExistingHighlightRelevant()) {
         doExitEarly = true;
       }
@@ -809,10 +809,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // handle mouse move on body
         $(document)
           .on('mousemove', update)
-          .on('focusin focusout', testFocus);
+          .on('focusin focusout', testFocus)
+          .ready(testFocus);
+        if (platform.browser.isFirefox) {
+          $(document).on('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+        }
         $(window)
-          .on('focus', testFocus)
-          .on('blur', onblurwindow)
+          .on('focus', onFocusWindow)
+          .on('blur', onBlurWindow)
           .on('resize', hideAndResetState);
       } else {
         // remove mousemove listener from body
@@ -820,9 +824,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .off('mousemove', update)
           .off('mousewheel', onMouseWheel)  // In case it was added elsewhere
           .off('focusin focusout', testFocus);
+        if (platform.browser.isFirefox) {
+          $(document).off('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+        }
         $(window)
-          .off('focus', testFocus)
-          .off('blur', onblurwindow)
+          .off('focus', onFocusWindow)
+          .off('blur', onBlurWindow)
           .off('resize', hideAndResetState);
       }
     }
@@ -857,17 +864,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var wasAppropriateFocus = isAppropriateFocus;
       // don't show highlight if current active isn't body
       var target = document.activeElement;
-      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && document.hasFocus();
+      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowFocused;
       if (wasAppropriateFocus && !isAppropriateFocus && !isSticky) {
         pause();
       }
     }
 
-    function onblurwindow() {
+    function onBlurWindow() {
+      isWindowFocused = false;
       isAppropriateFocus = false;
       if (!isSticky) {
         hideAndResetState();
       }
+    }
+      
+    function onFocusWindow() {
+      isWindowFocused = true;
+      testFocus();
     }
 
     // disable mouse highlight temporarily
@@ -934,7 +947,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     sitecues.on('zoom/begin', disableAndReset);
 
     // darken highlight appearance when speech is enabled
-    sitecues.on('speech/enabled speech/disabled', enableIfAppropriate);
+    conf.get('ttsOn', enableIfAppropriate);
 
     testFocus(); // Set initial focus state
 

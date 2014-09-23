@@ -12,8 +12,8 @@ sitecues.def('metrics/page-visited', function (pageVisited, callback) {
             init: function() {
                 pageVisited.data = {
                   'name': 'page-visited',
-                  'nativeZoom': zoom.getNativeZoom(),
-                  'isRetina': zoom.isRetina()
+                  'native_zoom': zoom.getNativeZoom(),
+                  'is_retina'  : zoom.isRetina()
                 };
             },
             update: function(data) {

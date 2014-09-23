@@ -1,14 +1,22 @@
 sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
-  var DEFAULT_STATE = {'name': 'zoom-changed'};
+  var DEFAULT_STATE = {
+    "name": "zoom-changed",
+    "is_slider":false,
+    "is_slider_drag":false,
+    "is_key":false,
+    "is_browser_zoom_key_override":false,
+    "is_button_press":false,
+    "is_long_glide":false,
+    "from_zoom":1,
+    "to_zoom":1
+  };
 
-  sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil) {
+  sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil, $) {
 
     // ============= Objects methods ======================
     zoomChanged = {
-      init: function () {
-        zoomChanged.data = DEFAULT_STATE;
-      },
+      init: initZoomChanged,
       update: function (data) {
         metricsUtil.update(zoomChanged, data);
       },
@@ -17,24 +25,27 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
       }
     };
 
+    function initZoomChanged() {
+      zoomChanged.data = $.extend({}, DEFAULT_STATE);
+    }
+
     // ============= Events Handlers ======================
-    // Create an instance on panel show event.
-    sitecues.on('zoom/metric', function (data) {
+
+    // Create an instance on zoom changed event.
+    sitecues.on('zoom', function() {
       if (!zoomChanged['data']) {
         zoomChanged.init();
-      }
+      };
+    });
+
+    sitecues.on('metrics/update', function(metrics) {
+      zoomChanged['data'] && zoomChanged.update(metrics.data);
+    });
+
+    sitecues.on('zoom/metric', function (data) {
       zoomChanged['data'] && zoomChanged.update(data);
       zoomChanged.send();
     });
-//
-//        sitecues.on('metrics/ready metrics/update', function(metrics) {
-//            badgeHovered['data'] && badgeHovered.update(metrics.data);
-//        });
-//
-//        // Clear an instance data on panel hide event.
-//        sitecues.on('panel/hide', function() {
-//            badgeHovered.reset();
-//        });
 
     // Done.
     callback();

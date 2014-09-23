@@ -102,6 +102,11 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         return null;
       }
 
+      // 1.5. If over a map, use associated image element for processing
+      if (startElement.localName === 'area') {
+        startElement = getImageForMapArea(startElement);
+      }
+
       // 2. Don't pick anything when over whitespace
       //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
       if (!common.hasVisibleChildContent(startElement)) {
@@ -137,6 +142,12 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       return null;
     };
+
+    function getImageForMapArea(element) {
+      var mapName = $(element).closest('map').attr('name'),
+        imageSelector = 'img[usemap="#' + mapName + '"]';
+      return mapName ? $(imageSelector)[0] : null;
+    }
 
     // --------- Deterministic results ---------
 
@@ -189,7 +200,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // 2. Customizations in picker.prefer = "[selector]";
       if (customSelectors.prefer) {
-        picked = $candidates.find(customSelectors.prefer).first();
+        picked = $candidates.filter(customSelectors.prefer).first();
         if (picked.length) {
           return picked;  // Customization result: pick this item
         }
