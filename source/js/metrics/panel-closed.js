@@ -31,11 +31,11 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
 
 
         function initPanelClosed() {
-            panelClosed.data = $.extend({}, DEFAULT_STATE);
-            var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
-                $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
-                $letterSmall = $('#sitecues-panel .letterSml, #sitecues-panel .letterSmlBack'),
-                $ttsButton = $('#sitecues-panel .tts');
+          panelClosed.data = $.extend({}, DEFAULT_STATE);
+          var $slider = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
+            $letterBig = $('#sitecues-letterBig, #sitecues-letterBigBack'),
+            $letterSmall = $('#sitecues-letterSml, #sitecues-letterSmlBack'),
+            $ttsButton = $('#sitecues-tts');
 
             $slider.mousedown(function() {
                 panelClosed.data.slider_interacted = 1;
