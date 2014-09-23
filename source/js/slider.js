@@ -99,7 +99,7 @@ sitecues.def("slider", function(slider, callback) {
                 letterBig: {
                     normal: "#FFFFFF",
                     hover: "#FFFFFF"
-                },
+                }
             },
 
             // Initialize the slider vars and call draw
