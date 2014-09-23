@@ -26,15 +26,6 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
       zoomChanged['data'] && zoomChanged.update(data);
       zoomChanged.send();
     });
-//
-//        sitecues.on('metrics/ready metrics/update', function(metrics) {
-//            badgeHovered['data'] && badgeHovered.update(metrics.data);
-//        });
-//
-//        // Clear an instance data on panel hide event.
-//        sitecues.on('panel/hide', function() {
-//            badgeHovered.reset();
-//        });
 
     // Done.
     callback();
