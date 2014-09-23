@@ -1,6 +1,16 @@
 sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
-  var DEFAULT_STATE = {'name': 'zoom-changed'};
+  var DEFAULT_STATE = {
+    "name": "zoom-changed",
+    "isSlider":false,
+    "isSliderDrag":false,
+    "isKey":false,
+    "isBrowserZoomKeyOverride":false,
+    "isAButtonPress":false,
+    "isLongGlide":false,
+    "fromZoom":1,
+    "toZoom":1
+  };
 
   sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil) {
 
@@ -18,13 +28,21 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     };
 
     // ============= Events Handlers ======================
-    // Create an instance on panel show event.
-    sitecues.on('zoom/metric', function (data) {
+
+    // Create an instance on zoom changed event.
+    sitecues.on('zoom', function() {
       if (!zoomChanged['data']) {
         zoomChanged.init();
-      }
+      };
+    })
+
+    sitecues.on('zoom/metric', function (data) {
       zoomChanged['data'] && zoomChanged.update(data);
       zoomChanged.send();
+    });
+
+    sitecues.on('metrics/update', function(metrics) {
+      zoomChanged['data'] && zoomChanged.update(metrics.data);
     });
 
     // Done.
