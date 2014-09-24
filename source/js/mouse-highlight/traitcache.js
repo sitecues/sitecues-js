@@ -26,11 +26,11 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     // ------- PUBLIC ----------
 
     // Call this before using cache if view may have changed
-    // Return true if view was out-of-date
-    traitcache.updateCachedView = function () {
+    traitcache.resetCache = function () {
       updateCachedViewSize();
       updateCachedViewPosition();
-      resetCache();
+      styleCache = {};
+      rectCache = {};
     };
 
     traitcache.getCachedViewSize = function() {
@@ -126,11 +126,6 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     function updateCachedViewPosition() {
       cachedViewPosition.x = window.pageXOffset;
       cachedViewPosition.y = window.pageYOffset;
-    }
-
-    function resetCache() {
-      styleCache = {};
-      rectCache = {};
     }
 
     if (SC_UNIT) {
