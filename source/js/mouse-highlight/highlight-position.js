@@ -114,10 +114,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       };
     }
 
-    function hasVisibleBorder(style) {
-      return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
-    }
-
     function getEmsToPx(fontSize, ems) {
       var measureDiv = $('<div/>')
            .appendTo(document.body)
@@ -325,7 +321,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         addRect(allRects, clipRect, getOverflowRect(this, style));
 
         // --- Visible border or form controls ---
-        if (hasVisibleBorder(style) || common.isFormControl(this)) {
+        if (common.hasVisualBox(this, style, traitcache.getStyle(this.parentNode))) {
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           // Keep iterating: there may be some content outside
         }

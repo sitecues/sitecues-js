@@ -77,6 +77,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       REFINEMENT_WEIGHTS = {
         isParentOfOnlyChild: .25  // Done in separate stage after WEIGHTS used
       },
+      MAX_VISUAL_BOX_CHECK_SIZE = 400,  // We try to highlight even over whitespace if cursor is within a box of this size or less
       customSelectors = { // Inject selectors via customization modules
         //prefer: "[selector]",
         //ignore: "[selector]",
@@ -106,18 +107,18 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         startElement = getImageForMapArea(startElement);
       }
 
-      // 2. Don't pick anything when over whitespace
-      //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
-      if (!common.hasVisibleChildContent(startElement)) {
-        return null;
-      }
-
-      // 3. Reset pick trait cache
+      // 2. Reset trait cache
       traitcache.resetCache();
 
-      // 4. Get candidate nodes that could be picked
+      // 3. Get candidate nodes that could be picked
       ancestors = $.makeArray($(startElement).parentsUntil(document.body));
       candidates = [startElement].concat(ancestors);
+
+      // 4. Don't pick anything when over whitespace
+      //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
+      if (!hasVisibleContent(candidates)) {
+        return null;
+      }
 
       // 5. Get deterministic result
       //    a) from customizations or
@@ -347,6 +348,33 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
           }
         }
       }
+    }
+
+    function hasVisibleContent(candidates) {
+      // First check for direct visible text nodes
+      if (common.hasVisibleContent(candidates[0], traitcache.getStyle(candidates[0]),
+        traitcache.getStyle(candidates[1]))) {
+        return true;
+      }
+
+      // Otherwise, see if we are inside of a box
+      var index = 1,
+        candidate,
+        rect,
+        zoom = conf.get('zoom');
+      for (; index < candidates.length; index ++) {
+        candidate = candidates[index];
+        rect = traitcache.getRect(candidate);
+        if (rect.width / zoom > MAX_VISUAL_BOX_CHECK_SIZE &&
+          rect.height / zoom > MAX_VISUAL_BOX_CHECK_SIZE) {
+          break;  // Don't check any more
+        }
+        if (common.hasVisualBox(candidate, traitcache.getStyle(candidate), traitcache.getStyle(candidate.parentNode))) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     // -------------- Customizations ----------------------

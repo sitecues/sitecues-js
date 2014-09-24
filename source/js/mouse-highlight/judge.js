@@ -130,7 +130,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Check whether a CSS background creates a visual separation from the parent,
         // (for example, it has a different background-color or uses a background-image).
         // Don't include non-repeating sprites (positioned background images) -- these are used for bullets, etc.
-        hasOwnBackground: hasOwnBackground(traits, parentTraits)
+        hasOwnBackground: common.hasOwnBackground(traits.style, parentTraits.style)
       };
 
       // Get effective separation impact vertically and horizontally
@@ -470,21 +470,6 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     function getSeparationImpact(separation, borderWidth) {
       return Math.min(Math.pow(separation / SEPARATION_DIVISOR, SEPARATION_IMPACT_POWER) + borderWidth * BORDER_WIDTH_BONUS,
         MAX_SEPARATION_IMPACT) ;
-    }
-
-    function isTransparentColor(color) {
-      return color === 'transparent' || color.match(/^rgba.*0\)$/);
-    }
-
-    function hasOwnBackground(traits, parentTraits) {
-      // 1. Background colors
-      var bgColor = traits.style.backgroundColor;
-      if (bgColor !== parentTraits.style.backgroundColor && !isTransparentColor(bgColor)) {
-        return true;
-      }
-
-      // 2. Background images (sprites don't count -- often used for things like bullets)
-      return (traits.style.backgroundImage !== 'none' && traits.style.backgroundRepeat !== 'no-repeat');
     }
 
     // Get the traits of the first non-inline element as we go up ancestor chain, because

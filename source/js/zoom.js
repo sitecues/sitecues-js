@@ -835,7 +835,7 @@ sitecues.def('zoom', function (zoom, callback) {
           rightMostCoord = 0,
           MIN_WIDTH_MAIN_NODE = 300;
 
-        getBodyRectImpl(body, bodyInfo, visibleNodes);
+        getBodyRectImpl(body, bodyInfo, visibleNodes, getComputedStyle(body));
 
         bodyInfo.width = bodyInfo.right - bodyInfo.left;
         bodyInfo.height = bodyInfo.bottom - bodyInfo.top;
@@ -866,10 +866,13 @@ sitecues.def('zoom', function (zoom, callback) {
         return bodyInfo;
       }
 
-      function willAddRect(newRect, node) {
+      function willAddRect(newRect, node, style, parentStyle) {
         if (node === document.body || newRect.left < 0 || newRect.top < 0 ||
           newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
-          node.childNodes.length === 0) {
+          node.childNodes.length === 0 ||
+          style.visibility !== 'visible' ||
+          // Watch for text-align: center or -webkit-center -- these items mess us up
+          style.textAlign.indexOf('center') >= 0) {
           return false;
         }
 
@@ -877,35 +880,29 @@ sitecues.def('zoom', function (zoom, callback) {
           return true;
         }
 
-        var style = getComputedStyle(node);
-        if (style.visibility !== 'visible' ||
-          // Watch for text-align: center or -webkit-center -- these items mess us up
-          style.textAlign.indexOf('center') >= 0) {
-          return false;
-        }
-
         // newRect.left === 0
         // We usually won't these rectangles flush up against the left margin,
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if (style.overflow !== 'visible' || !common.hasVisibleChildContent(node)) {
+        if (style.overflow !== 'visible' || !common.hasVisibleContent(node, style, parentStyle)) {
           return false; // No visible children
         }
         return true;
       }
 
       // Recursively look at rectangles and add them if they are useful content rectangles
-      function getBodyRectImpl(node, sumRect, visibleNodes) {
+      function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle) {
 
-        var newRect = getAbsoluteRect(node);
-        if (willAddRect(newRect, node)) {
+        var newRect = getAbsoluteRect(node),
+          style = getComputedStyle(node);
+        if (willAddRect(newRect, node, style, parentStyle)) {
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
         }
         $(node).children().each(function() {
-          getBodyRectImpl(this, sumRect, visibleNodes);
+          getBodyRectImpl(this, sumRect, visibleNodes, style);
         });
       }
 
