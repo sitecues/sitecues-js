@@ -616,8 +616,8 @@ sitecues.def('zoom', function (zoom, callback) {
       function maximizeContentVisibility() {
         var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
           bodyHeight = $(document).height(),
-          winWidth = $(window).width(),
-          winHeight = $(window).height(),
+          winWidth = window.innerWidth,
+          winHeight = window.innerHeight,
           hScrollNow = window.pageXOffset,
           vScrollNow = window.pageYOffset,
           // How much do we need to scroll by to pull content to the bottom-right corner
@@ -792,7 +792,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (shouldRestrictWidth()) {
           return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var zoomOriginX = Math.max($(window).width(), originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
+        var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
           halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
           pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
@@ -877,12 +877,19 @@ sitecues.def('zoom', function (zoom, callback) {
           return true;
         }
 
+        var style = getComputedStyle(node);
+        if (style.visibility !== 'visible' ||
+          // Watch for text-align: center or -webkit-center -- these items mess us up
+          style.textAlign.indexOf('center') >= 0) {
+          return false;
+        }
+
         // newRect.left === 0
         // We usually won't these rectangles flush up against the left margin,
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if ($(node).css('overflow') !== 'visible' || !common.hasVisibleChildContent(node)) {
+        if (style.overflow !== 'visible' || !common.hasVisibleChildContent(node)) {
           return false; // No visible children
         }
         return true;

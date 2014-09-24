@@ -860,11 +860,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
+    function isWindowActive() {
+      return platform.browser.isSafari ? isWindowFocused : document.hasFocus();
+    }
+
     function testFocus() {
       var wasAppropriateFocus = isAppropriateFocus;
       // don't show highlight if current active isn't body
       var target = document.activeElement;
-      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowFocused;
+      isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
       if (wasAppropriateFocus && !isAppropriateFocus && !isSticky) {
         pause();
       }
