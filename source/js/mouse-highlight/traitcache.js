@@ -75,12 +75,14 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         rect = $.extend({}, element.getBoundingClientRect());
 
         // Use the scroll height when the overflow is visible, as it shows the full height
-        if (traitcache.getStyleProp(element, 'overflow-y') === 'visible') {
+        if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
+          !traitcache.getStyleProp(element, 'borderRightWidth')) {
           rect.height = element.scrollHeight * cachedViewSize.zoom;
         }
 
         // Use the scroll width when the overflow is visible, as it shows the full height
-        if (traitcache.getStyleProp(element, 'overflow-x') === 'visible') {
+        if (traitcache.getStyleProp(element, 'overflowX') === 'visible' &&
+          !traitcache.getStyleProp(element, 'borderBottomWidth')) {
           rect.width = element.scrollWidth * cachedViewSize.zoom;
         }
 

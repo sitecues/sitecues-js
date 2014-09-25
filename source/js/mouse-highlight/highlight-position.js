@@ -321,7 +321,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         addRect(allRects, clipRect, getOverflowRect(this, style));
 
         // --- Visible border or form controls ---
-        if (common.hasVisualBox(this, style, traitcache.getStyle(this.parentNode))) {
+        if (common.hasVisualBox(this, style, traitcache.getStyle(this.parentNode)) ||
+          common.isFormControl(this)) {
+          var rect1 = this.getBoundingClientRect(),
+            rect2 = traitcache.getScreenRect(this);
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           // Keep iterating: there may be some content outside
         }
