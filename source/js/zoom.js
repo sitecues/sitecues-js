@@ -718,11 +718,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStyleSheetFixes() {
-        var prefix = platform.browser.isChrome ? '-webkit-' : '',
-          background = 'background: ' + prefix + 'gradient(linear, 0% 0%, 0% 100%, color-stop(0%,#fff), color-stop(35%,#f9f9f9), color-stop(100%,#ddd));';
-        return shouldFixNativeFormAppearance ?
-          // Adding this CSS automagically fixes the form issues in Chrome when zooming
-          'select {\nborder: 1px solid #bbb;\n' + background + '\n}\n\n;' : '';
+        return shouldFixNativeFormAppearance ? 'input,select,button {transform:scale3d(1,1,1);}' : '';
       }
 
       // Add useful zoom fixes to the body's @style
