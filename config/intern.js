@@ -5,10 +5,14 @@ define({
     proxyPort: 9000,
     proxyUrl: 'http://127.0.0.1:9000/',
 
+    // Default Selenium capabilities (can be overridden in each environment object)...
     capabilities: {
+        // To see some examples, visit...
+        // https://code.google.com/p/selenium/wiki/DesiredCapabilities
         'name': 'sitecues tests',
         'selenium-version': '2.41.0'
     },
+    // Where unit and/or functional tests will be run...
     environments: [
         // local-style...
         // { browserName: 'phantomjs' },
@@ -32,17 +36,22 @@ define({
 
     maxConcurrency: 3,  // how many browsers may be open at once
 
-    // This configures the AMD loader...
+    // Options to pass to the AMD module loader...
     loader: {
 
     },
 
-    // tunnel: 'NullTunnel', // imports config for test clouds like BrowserStack
+    // Choose the type of functional test tunnel,
+    // which imports config for test clouds...
+    // tunnel: 'NullTunnel',          // default if none provided
+    // tunnel: 'SauceLabsTunnel',
+    // tunnel: 'BrowserStackTunnel',
+    // tunnel: 'TestingBotTunnel',
+
+    // Options to pass to the functional test tunnel service...
     tunnelOptions: {
-        // These options are passed to the tunnel service
-        // to configure how it behaves...
         host: '127.0.0.1:4447'  // custom location to find the selenium server
-        // port: 4447 // custom port number to find the selenium server
+        // port: 4447  // custom port number to find the selenium server
     },
 
     // Unit tests, for verifying the return values of functions, etc...
@@ -55,6 +64,6 @@ define({
         'test/functional/simple'
     ],
 
-    // The paths that match this regex will NOT be included in unit test code coverage reports...
+    // The paths that match this regex will NOT be included in code coverage reports...
     excludeInstrumentation: /^(?:config|test|node_modules)\//
 });
