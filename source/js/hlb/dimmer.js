@@ -81,8 +81,8 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           'left'      : useScrollOffset ? window.pageXOffset : 0,
           'top'       : useScrollOffset ? window.pageYOffset : 0,
           'position'  : 'absolute',
-          'width'     : (documentElement.clientWidth)  + 'px',
-          'height'    : (documentElement.clientHeight) + 'px',
+          'width'     : window.innerWidth  + 'px',
+          'height'    : window.innerHeight + 'px',
           'z-index'   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 
@@ -105,8 +105,8 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           'left'                      : useScrollOffset ? window.pageXOffset : 0,
           'top'                       : useScrollOffset ? window.pageYOffset : 0,
           'position'                  : 'absolute',
-          'width'                     : documentElement.clientWidth + 'px',
-          'height'                    : documentElement.clientHeight + 'px',
+          'width'                     : window.innerWidth + 'px',
+          'height'                    : window.innerHeight + 'px',
           'z-index'                   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 

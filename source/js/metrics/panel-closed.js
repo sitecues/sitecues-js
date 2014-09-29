@@ -26,7 +26,7 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
             },
             reset: function() {
                 panelClosed.update(DEFAULT_STATE);
-            },
+            }
         };
 
 

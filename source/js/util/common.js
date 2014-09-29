@@ -50,7 +50,34 @@ sitecues.def('util/common', function (common, callback) {
       return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
     }
 
-    common.hasVisibleChildContent = function(current) {
+    // Return true if there is a visual sub-box of content
+    common.hasVisualBox = function(element, style, parentStyle) {
+      if (element === document.documentElement || element === document.body) {
+        return false; // False for entire document because we are looking for sub-boxes of content
+      }
+
+      if (parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth)) {
+        return true;
+      }
+      return common.hasOwnBackground(style, parentStyle);
+    };
+
+    function isTransparentColor(color) {
+      return color === 'transparent' || color.match(/^rgba.*0\)$/);
+    }
+
+    common.hasOwnBackground = function(style, parentStyle) {
+      // 1. Background colors
+      var bgColor = style.backgroundColor;
+      if (bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
+        return true;
+      }
+
+      // 2. Background images (sprites don't count -- often used for things like bullets)
+      return (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat');
+    };
+
+    common.hasVisibleContent = function(current, style, parentStyle) {
       var children,
         index,
         MAX_CHILDREN_TO_CHECK = 10,
@@ -62,6 +89,10 @@ sitecues.def('util/common', function (common, callback) {
         if (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE) {
           return true;
         }
+      }
+
+      if (common.hasVisualBox(current, style, parentStyle)) {
+        return true;
       }
 
       // Check to see if there are non-empty child text nodes.

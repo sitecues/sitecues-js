@@ -30,8 +30,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
                'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge',
                function($, common, conf, traitcache, traits, judge) {
 
-    var pickedItemsCache = {},       // Unique IDs of elements that we picked before. Pick them again unless view changes (zoom or window size)
-      UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
+    var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
       MAX_ANCESTORS_TO_ANALYZE = 9,  // Maximum ancestors to climb looking for start. Up to 9 would be nicer in a few cases but might be causing perf issues in IE.
       MIN_SCORE_TO_PICK = -100,      // If nothing above this, will pick nothing
       // In order of precedence:
@@ -78,6 +77,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       REFINEMENT_WEIGHTS = {
         isParentOfOnlyChild: .25  // Done in separate stage after WEIGHTS used
       },
+      MAX_VISUAL_BOX_CHECK_SIZE = 400,  // We try to highlight even over whitespace if cursor is within a box of this size or less
       customSelectors = { // Inject selectors via customization modules
         //prefer: "[selector]",
         //ignore: "[selector]",
@@ -107,20 +107,18 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         startElement = getImageForMapArea(startElement);
       }
 
-      // 2. Don't pick anything when over whitespace
-      //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
-      if (!common.hasVisibleChildContent(startElement)) {
-        return null;
-      }
+      // 2. Reset trait cache
+      traitcache.resetCache();
 
-      // 3. Reset pick results cache if view has resized or zoom has changed,
-      //    because some picks are dependent on the size of the item relative to the viewport.
-      traitcache.updateCachedView();
-      resetPickedItemsCache();
-
-      // 4. Get candidate nodes that could be picked
+      // 3. Get candidate nodes that could be picked
       ancestors = $.makeArray($(startElement).parentsUntil(document.body));
       candidates = [startElement].concat(ancestors);
+
+      // 4. Don't pick anything when over whitespace
+      //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
+      if (!hasVisibleContent(candidates)) {
+        return null;
+      }
 
       // 5. Get deterministic result
       //    a) from customizations or
@@ -134,13 +132,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       picked = getHeuristicResult(candidates);
 
       // 7. Save results in picked items cache for later reuse
-      if (picked) {
-        // Set to 1, so that it's stored in the map of previously picked items (could be set to anything)
-        pickedItemsCache[traitcache.getUniqueId(picked)] = 1;
-        return $(picked);
-      }
-
-      return null;
+      return picked ? $(picked) : null;
     };
 
     function getImageForMapArea(element) {
@@ -156,7 +148,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // Ways a deterministic result can occur:
     // 1) A customization via provideCustomSelectors() e.g. { disable:"[selector]", prefer: "[selector]" }
     // 2) HTML attribute @data-sc-pick on the element itself ('prefer' or 'disable') -- see PICK_RULE_FOO constants
-    // 3) The value of previous computations saved in the pickRuleCache
     function getDeterministicResult(candidates) {
       // 1. Check customizations
       var picked = getCustomizationResult(candidates);
@@ -164,7 +155,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         return picked;
       }
 
-      // 2. Check pickRuleCache (previously stored results) and @data-sc-pick (markup-specified rule)
+      // 2. Check @data-sc-pick (markup-specified rule)
       return getPickRuleResult(candidates);
     }
 
@@ -172,7 +163,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var picked = null;
 
       function checkPickRuleForElement(item) {
-        var pickRule = getPickRuleForElement(item);
+        var pickRule = $(item).attr('data-sc-pick');
         if (pickRule === PICK_RULE_DISABLE) {
           picked = $(); // Don't pick anything in this chain
         }
@@ -209,23 +200,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return null;  // No customization result
     }
 
-    // The pick rule comes from markup, or from previously stored picker results in the picked items cache
-    // See PICK_RULE_FOO constants for possible values
-    function getPickRuleForElement(item) {
-      var pickRule = $(item).attr('data-sc-pick'); // This attribute can be used to override everything
-      if (!pickRule) {
-        // Check pick rule cache, to see if this item has been previously picked
-        var id = traitcache.getUniqueId(item);
-        if (id && pickedItemsCache[id]) {
-          pickRule = PICK_RULE_PREFER;
-        }
-      }
-      return pickRule;
-    }
-
-    function resetPickedItemsCache() {
-      pickedItemsCache = {};
-    }
 
     // --------- Heuristic results ---------
 
@@ -376,6 +350,33 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       }
     }
 
+    function hasVisibleContent(candidates) {
+      // First check for direct visible text nodes
+      if (common.hasVisibleContent(candidates[0], traitcache.getStyle(candidates[0]),
+        traitcache.getStyle(candidates[1]))) {
+        return true;
+      }
+
+      // Otherwise, see if we are inside of a box
+      var index = 1,
+        candidate,
+        rect,
+        zoom = conf.get('zoom');
+      for (; index < candidates.length; index ++) {
+        candidate = candidates[index];
+        rect = traitcache.getRect(candidate);
+        if (rect.width / zoom > MAX_VISUAL_BOX_CHECK_SIZE &&
+          rect.height / zoom > MAX_VISUAL_BOX_CHECK_SIZE) {
+          break;  // Don't check any more
+        }
+        if (common.hasVisualBox(candidate, traitcache.getStyle(candidate), traitcache.getStyle(candidate.parentNode))) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     // -------------- Customizations ----------------------
     // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
 
@@ -399,7 +400,6 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       sitecues.togglePickerDebugging = function() {
         isDebuggingOn = !isDebuggingOn;
-        resetPickedItemsCache();
       };
     }
 

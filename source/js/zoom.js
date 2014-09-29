@@ -616,8 +616,8 @@ sitecues.def('zoom', function (zoom, callback) {
       function maximizeContentVisibility() {
         var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
           bodyHeight = $(document).height(),
-          winWidth = $(window).width(),
-          winHeight = $(window).height(),
+          winWidth = window.innerWidth,
+          winHeight = window.innerHeight,
           hScrollNow = window.pageXOffset,
           vScrollNow = window.pageYOffset,
           // How much do we need to scroll by to pull content to the bottom-right corner
@@ -718,11 +718,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStyleSheetFixes() {
-        var prefix = platform.browser.isChrome ? '-webkit-' : '',
-          background = 'background: ' + prefix + 'gradient(linear, 0% 0%, 0% 100%, color-stop(0%,#fff), color-stop(35%,#f9f9f9), color-stop(100%,#ddd));';
-        return shouldFixNativeFormAppearance ?
-          // Adding this CSS automagically fixes the form issues in Chrome when zooming
-          'select {\nborder: 1px solid #bbb;\n' + background + '\n}\n\n;' : '';
+        return shouldFixNativeFormAppearance ? 'input,select,button {transform:scale3d(1,1,1);}' : '';
       }
 
       // Add useful zoom fixes to the body's @style
@@ -792,7 +788,7 @@ sitecues.def('zoom', function (zoom, callback) {
         if (shouldRestrictWidth()) {
           return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var zoomOriginX = Math.max($(window).width(), originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
+        var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
           halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
           pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
@@ -835,7 +831,7 @@ sitecues.def('zoom', function (zoom, callback) {
           rightMostCoord = 0,
           MIN_WIDTH_MAIN_NODE = 300;
 
-        getBodyRectImpl(body, bodyInfo, visibleNodes);
+        getBodyRectImpl(body, bodyInfo, visibleNodes, getComputedStyle(body));
 
         bodyInfo.width = bodyInfo.right - bodyInfo.left;
         bodyInfo.height = bodyInfo.bottom - bodyInfo.top;
@@ -866,10 +862,13 @@ sitecues.def('zoom', function (zoom, callback) {
         return bodyInfo;
       }
 
-      function willAddRect(newRect, node) {
+      function willAddRect(newRect, node, style, parentStyle) {
         if (node === document.body || newRect.left < 0 || newRect.top < 0 ||
           newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
-          node.childNodes.length === 0) {
+          node.childNodes.length === 0 ||
+          style.visibility !== 'visible' ||
+          // Watch for text-align: center or -webkit-center -- these items mess us up
+          style.textAlign.indexOf('center') >= 0) {
           return false;
         }
 
@@ -882,23 +881,24 @@ sitecues.def('zoom', function (zoom, callback) {
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if ($(node).css('overflow') !== 'visible' || !common.hasVisibleChildContent(node)) {
+        if (style.overflow !== 'visible' || !common.hasVisibleContent(node, style, parentStyle)) {
           return false; // No visible children
         }
         return true;
       }
 
       // Recursively look at rectangles and add them if they are useful content rectangles
-      function getBodyRectImpl(node, sumRect, visibleNodes) {
+      function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle) {
 
-        var newRect = getAbsoluteRect(node);
-        if (willAddRect(newRect, node)) {
+        var newRect = getAbsoluteRect(node),
+          style = getComputedStyle(node);
+        if (willAddRect(newRect, node, style, parentStyle)) {
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
         }
         $(node).children().each(function() {
-          getBodyRectImpl(this, sumRect, visibleNodes);
+          getBodyRectImpl(this, sumRect, visibleNodes, style);
         });
       }
 

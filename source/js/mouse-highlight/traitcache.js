@@ -26,11 +26,11 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     // ------- PUBLIC ----------
 
     // Call this before using cache if view may have changed
-    // Return true if view was out-of-date
-    traitcache.updateCachedView = function () {
+    traitcache.resetCache = function () {
       updateCachedViewSize();
       updateCachedViewPosition();
-      resetCache();
+      styleCache = {};
+      rectCache = {};
     };
 
     traitcache.getCachedViewSize = function() {
@@ -75,12 +75,14 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         rect = $.extend({}, element.getBoundingClientRect());
 
         // Use the scroll height when the overflow is visible, as it shows the full height
-        if (traitcache.getStyleProp(element, 'overflow-y') === 'visible') {
+        if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
+          !traitcache.getStyleProp(element, 'borderRightWidth')) {
           rect.height = element.scrollHeight * cachedViewSize.zoom;
         }
 
         // Use the scroll width when the overflow is visible, as it shows the full height
-        if (traitcache.getStyleProp(element, 'overflow-x') === 'visible') {
+        if (traitcache.getStyleProp(element, 'overflowX') === 'visible' &&
+          !traitcache.getStyleProp(element, 'borderBottomWidth')) {
           rect.width = element.scrollWidth * cachedViewSize.zoom;
         }
 
@@ -126,11 +128,6 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     function updateCachedViewPosition() {
       cachedViewPosition.x = window.pageXOffset;
       cachedViewPosition.y = window.pageYOffset;
-    }
-
-    function resetCache() {
-      styleCache = {};
-      rectCache = {};
     }
 
     if (SC_UNIT) {

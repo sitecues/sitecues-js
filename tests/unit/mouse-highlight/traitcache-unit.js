@@ -37,9 +37,9 @@ describe('traitcache', function() {
     });
   });
 
-  describe('#updateCachedView()', function() {
+  describe('#resetCache()', function() {
     it('should store the view size parameters.', function (done) {
-      traitcache.updateCachedView();
+      traitcache.resetCache();
       var viewSize = traitcache.getCachedViewSize();
       expect(viewSize.height).to.be.equal(window.innerHeight);
       expect(viewSize.width).to.be.equal(window.innerWidth);
@@ -109,7 +109,7 @@ describe('traitcache', function() {
       };
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
-      traitcache.updateCachedView(); // Initialization necessary
+      traitcache.resetCache(); // Initialization necessary
       actualRect = traitcache.getRect(divElement);
       expect(actualRect.left).to.be.equal(FAKE_RECT.left + FAKE_SCROLL_X);
       expect(actualRect.top).to.be.equal(FAKE_RECT.top + FAKE_SCROLL_Y);
@@ -135,7 +135,7 @@ describe('traitcache', function() {
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
 
-      traitcache.updateCachedView(); // Necessary initialization
+      traitcache.resetCache(); // Necessary initialization
       actualRect = traitcache.getScreenRect(divElement);
       expect(JSON.stringify(actualRect)).to.be.equal(JSON.stringify(FAKE_RECT));
       done();
@@ -152,7 +152,7 @@ describe('traitcache', function() {
       };
       window.pageXOffset = FAKE_SCROLL_X;
       window.pageYOffset = FAKE_SCROLL_Y;
-      traitcache.updateCachedView(); // Necessary initialization
+      traitcache.resetCache(); // Necessary initialization
       fetchedRect = traitcache.getScreenRect(divElement);
       fetchedCachedRect = traitcache.getScreenRect(divElement);
       expect(JSON.stringify(fetchedCachedRect)).to.be.equal(JSON.stringify(fetchedRect));
