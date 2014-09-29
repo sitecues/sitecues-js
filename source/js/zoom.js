@@ -79,7 +79,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
-        MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MS_PER_X_ZOOM_NORMAL = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MS_PER_X_ZOOM_SLIDER = 700,
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
@@ -199,12 +200,21 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // ------------------------ PRIVATE -----------------------------
 
+      // Continual slider updates
       // This matches our updates with screen refreshes.
       // Unfortunately, it causes issues in some older versions of Firefox on Mac + Retina.
       function performContinualZoomUpdates() {
         zoomAnimator = requestFrame(performContinualZoomUpdates);
         performInstantZoomOperation();
         completedZoom = currentTargetZoom;
+      }
+
+      function finishZoomSliderOperation() {
+        if (zoomInput.isSliderDrag || !shouldSmoothZoom) {
+          // Was dragging the slider
+          finishZoomOperation();
+        }
+        // Else is in the middle of gliding to a zoom click -- let it finish
       }
 
       // Should smooth zoom be used or step zoom?
@@ -317,11 +327,15 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+      function getMsPerXZoom() {
+        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_NORMAL;
+      }
+
       // Get what the zoom value would be if we stopped the animation now
       function getMidAnimationZoom() {
         var totalZoomChangeRequested = Math.abs(currentTargetZoom - completedZoom),
           zoomDirection = currentTargetZoom > completedZoom ? 1 : -1,
-          zoomChange = getZoomOpElapsedTime() / MS_PER_X_ZOOM;
+          zoomChange = getZoomOpElapsedTime() / getMsPerXZoom();
         if (zoomChange > totalZoomChangeRequested) {
           zoomChange = totalZoomChangeRequested;
         }
@@ -388,6 +402,9 @@ sitecues.def('zoom', function (zoom, callback) {
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
         $body.css(getZoomCss(currentTargetZoom));
+        if (glideChangeListener) {
+          glideChangeListener(currentTargetZoom);
+        }
       }
 
       // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -428,7 +445,7 @@ sitecues.def('zoom', function (zoom, callback) {
           return;
         }
 
-        var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * MS_PER_X_ZOOM,
+        var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * getMsPerXZoom(),
           animationCss = {
             animation: getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear',
             animationPlayState: 'running',
@@ -569,16 +586,20 @@ sitecues.def('zoom', function (zoom, callback) {
         setTimeout(setupNextZoomStyleSheet, 0);
       }
 
-      // Make sure the current zoom operation does not continue
-      function clearZoomCallbacks() {
-        // Ensure no further changes to zoom from this operation
-        cancelFrame(zoomAnimator);
-        clearTimeout(minZoomChangeTimer);
+      function cancelGlideChangeTimer() {
         if (glideChangeTimer) {
           glideChangeListener(completedZoom);
           clearInterval(glideChangeTimer);
           glideChangeTimer = 0;
         }
+      }
+
+      // Make sure the current zoom operation does not continue
+      function clearZoomCallbacks() {
+        // Ensure no further changes to zoom from this operation
+        cancelFrame(zoomAnimator);
+        clearTimeout(minZoomChangeTimer);
+        cancelGlideChangeTimer();
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
         $(window).off('keyup', finishGlideIfEnough);
       }
@@ -974,7 +995,7 @@ sitecues.def('zoom', function (zoom, callback) {
       });
 
       // Set up listeners for zoom  operations
-      sitecues.on('zoom/stop-slider', finishZoomOperation);
+      sitecues.on('zoom/stop-slider', finishZoomSliderOperation);
       sitecues.on('zoom/stop-button', finishGlideIfEnough);
       sitecues.on('zoom/increase', function(event) {
         // Increase up to max or until zoom/stop requested
