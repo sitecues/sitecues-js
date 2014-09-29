@@ -362,12 +362,6 @@ sitecues.def("slider", function(slider, callback) {
                     // Calculate the zoom based on the mouseX position
                     var zoomLevel = slider.calcZoomLevel.call(slider, thumbX);
 
-                    // Calculate the position of the Thumb relative to the zoom level and SVG elemss
-                    slider.thumbPos = slider.calcThumbPos.call(slider, zoomLevel);
-
-                    // Translate the Thumb SVG element (slide the thumb)
-                    slider.translateThumbSVG.call(slider);
-
                     // Set the new zoom level in conf
                     zoom.jumpTo(zoomLevel);
                 }
