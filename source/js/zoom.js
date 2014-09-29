@@ -58,6 +58,9 @@ sitecues.def('zoom', function (zoom, callback) {
         glideChangeTimer,       // Timer used for callbacks
         GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
 
+        // Metrics info
+        zoomInput,
+
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
         shouldManuallyAddScrollbars = platform.browser.isIE,
@@ -109,12 +112,28 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.jumpTo = function(targetZoom) {
         var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
-          beginZoomOperation(targetZoom);
-          if (shouldPerformContinualUpdates) {
-            zoomAnimator = requestFrame(performContinualZoomUpdates);
+          // 1st call -- we will glide to it, it may be far away from previous zoom value
+          beginZoomOperation(targetZoom); // Get ready for more slider updates
+          zoomInput.isSlider = true;
+          if (shouldPerformContinualUpdates && targetZoom !== completedZoom) {
+            performJsAnimateZoomOperation();
+            if (glideChangeListener) {
+              glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
+            }
           }
         }
         else {
+          if (!zoomInput.isSliderDrag) {
+            // 2nd call -- cancel glide and begin continual updates
+            cancelFrame(zoomAnimator);
+            cancelGlideChangeTimer();
+            zoomInput.isSliderDrag = true;
+            if (shouldPerformContinualUpdates) {
+              zoomAnimator = requestFrame(performContinualZoomUpdates);
+            }
+          }
+          // 3rd and subsequent calls, just update the target zoom value
+          // so that the continual update loop uses the new value
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
 
@@ -174,14 +193,14 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // This is the body's currently visible width, with zoom factored in
       zoom.getBodyWidth = function() {
-       // Use the originally measured visible body width
-       initZoomModule();
+        // Use the originally measured visible body width
+        initZoomModule();
 
-       // If width was restricted
-       var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
+        // If width was restricted
+        var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
 
         // Multiply be the amount of zoom currently used
-       return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
+        return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
       };
 
       zoom.getBodyRight = function() {
@@ -359,7 +378,7 @@ sitecues.def('zoom', function (zoom, callback) {
           return;
         }
         var timeElapsed = getZoomOpElapsedTime(),
-          timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
+          timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * getMsPerXZoom() - timeElapsed);
         isInitialLoadZoom = false;
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
@@ -544,6 +563,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
         currentTargetZoom = getSanitizedZoomValue(targetZoom);
         startZoomTime = Date.now();
+
+        // Initialize metrics info, which will be modified by caller
+        zoomInput = {
+          isSlider    : false,
+          isSliderDrag: false
+        };
       }
 
       // Are we in the middle of a zoom operation?
@@ -614,10 +639,10 @@ sitecues.def('zoom', function (zoom, callback) {
           winHeight = window.innerHeight,
           hScrollNow = window.pageXOffset,
           vScrollNow = window.pageYOffset,
-          // How much do we need to scroll by to pull content to the bottom-right corner
+        // How much do we need to scroll by to pull content to the bottom-right corner
           hScrollDesired = Math.max(0, winWidth - bodyRight), // Amount to pull right as a postive number
           vScrollDesired = Math.max(0, winHeight - bodyHeight), // Amount to pull down as a postive number
-          // Don't scroll more than we actually can
+        // Don't scroll more than we actually can
           hScroll = Math.min(hScrollNow, hScrollDesired),
           vScroll = Math.min(vScrollNow, vScrollDesired);
 
@@ -1015,7 +1040,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // (after the load). So another advantage of doing this after the document is ready is to not
       // slow down the page load.
       if (document.readyState === 'complete') {
-          onDocumentReady();
+        onDocumentReady();
       }
       else {
         $(document).ready(onDocumentReady);
