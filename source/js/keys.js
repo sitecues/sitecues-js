@@ -130,8 +130,8 @@ sitecues.def('keys', function(keys, callback) {
         // Handle key
         function handle(key, event) {
 
-            // Prevent default if needed
-            if (!zoomKeysEnabled && key.preventDefault) {
+            // prevent default if needed
+            if (key.preventDefault) {
                 event.preventDefault();
                 // Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
                 event.stopImmediatePropagation();
