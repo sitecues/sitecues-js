@@ -287,9 +287,9 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       // Should we wait for browser to create compositor layer?
-      function shouldDoAnimationDelay() {
-        var animationProperty = IS_WILL_CHANGE_SUPPORTED ? 'willChange' : 'perspective';
-        return (body.style[animationProperty] === '');   // Animation property not set yet: give browser time to set up compositor layer
+      function shouldPrepareAnimations() {
+        return IS_WILL_CHANGE_SUPPORTED && body.style.willChange === '' &&   // Animation property not set yet: give browser time to set up compositor layer
+          !shouldRestrictWidth();
       }
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
@@ -602,7 +602,7 @@ sitecues.def('zoom', function (zoom, callback) {
           animationReadyCallback && animationReadyCallback();
         }
 
-        if (shouldDoAnimationDelay()) {
+        if (shouldPrepareAnimations()) {
           // Wait for key frames animation style sheet to be applied and for compositor layer to be created
           prepareAnimationOptimizations();
           zoomBeginTimer = setTimeout(beginZoomOperationAfterDelay, ANIMATION_OPTIMIZATION_SETUP_DELAY);
@@ -673,21 +673,12 @@ sitecues.def('zoom', function (zoom, callback) {
           // This is a CSS property that aids performance of animations
           $body.css('willChange', 'transform');
         }
-        else {
-          // Use hacky style of animation optimization -- make the browser think it's 3d
-          $body.css({
-            perspective: 999,
-            backfaceVisibility: 'hidden'
-          });
-        }
       }
 
       function clearAnimationOptimizations() {
         if (!isZoomOperationRunning()) {
           $body.css({
-            willChange: '',
-            perspective: '',
-            backfaceVisibility: ''
+            willChange: ''
           });
           clearTimeout(clearAnimationOptimizationTimer);
           clearAnimationOptimizationTimer = null;
@@ -830,7 +821,8 @@ sitecues.def('zoom', function (zoom, callback) {
         var css = {
           // Allow the content to be horizontally centered, unless it would go
           // offscreen to the left, in which case start zooming the content from the left-side of the window
-          transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%'
+          transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%',
+          perspective: 999
         };
 
         if (shouldOptimizeLegibility) {
@@ -1117,7 +1109,9 @@ sitecues.def('zoom', function (zoom, callback) {
       });
       sitecues.on('panel/show', function() {
         isPanelOpen = true;
-        prepareAnimationOptimizations();
+        if (shouldPrepareAnimations()) {
+          prepareAnimationOptimizations();
+        }
       });
       sitecues.on('panel/hide', function() {
         isPanelOpen = false;
