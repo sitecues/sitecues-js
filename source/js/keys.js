@@ -60,15 +60,21 @@ sitecues.def('keys', function(keys, callback) {
       // define keys map used to bind actions to hotkeys
       origMap = {
         'plain-minus': {
-            event: 'zoom/decrease'
+            preventDefault: true,
+            event: 'zoom/decrease',
+            preventInEditors: true
         },
         'plain-plus': {
-            event: 'zoom/increase'
+            preventDefault: true,
+            event: 'zoom/increase',
+            preventInEditors: true
         },
         'editor-safe-minus': {
+            preventDefault: true,
             event: 'zoom/decrease'
         },
         'editor-safe-plus': {
+            preventDefault: true,
             event: 'zoom/increase'
         },
         'space': {
