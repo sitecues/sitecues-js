@@ -8,7 +8,7 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     "is_browser_zoom_key_override": 0,   // User is pressing the browser's zoom key command -
     "is_button_press": 0,                // Small or large A in panel
     "is_long_glide": 0,                  // Key or A button held down to glide extra        -
-    "to_zoom": 1                       // Old zoom value
+    "from_zoom": 1                       // Old zoom value
   };
 
   sitecues.use('metrics/util', 'jquery', 'conf', 'zoom', function (metricsUtil, $, conf, zoom) {
@@ -78,17 +78,23 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     // Create an instance on zoom changed event and add event listeners.
     zoomChanged.init();
 
-    sitecues.on('zoom/stop-button', function () {
-      zoomChanged.data.is_long_glide = 1;
-    })
-
-    sitecues.on('zoom', function() {
+    var intervalID = setInterval(function() {
       if (readyForMetrics()) {
-        zoomChanged.data.to_zoom = conf.get('zoom');
-        zoomChanged.send();
-        zoomChanged.reset();
+        sitecues.on('zoom/begin', function(zoom) {
+          zoomChanged.data.from_zoom = conf.get('zoom');
+        });
+        // Set handlers on zoom event when zoom metrics are ready.
+        sitecues.on('zoom', function() {
+          zoomChanged.send();
+          zoomChanged.reset();
+        });
+        sitecues.on('zoom/stop-button', function () {
+          zoomChanged.data.is_long_glide = 1;
+        });
+        // Clear interval, we don't need it anymore.
+        clearInterval(intervalID);
       }
-    });
+    }, 100);
 
     sitecues.on('metrics/update', function(metrics) {
       zoomChanged['data'] && zoomChanged.update(metrics.data);
