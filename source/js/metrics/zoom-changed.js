@@ -30,12 +30,20 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     function initZoomChanged() {
       zoomChanged.data = $.extend({}, DEFAULT_STATE);
 
-      var $slider = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
+      var $slider  = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
           $buttons = $('#sitecues-letterBig, #sitecues-letterBigBack, #sitecues-letterSml, #sitecues-letterSmlBack');
 
       $slider.each(sliderMouseDown);
       $buttons.each(buttonsMouseDown);
-      $('body').keypress(bodyKeyPress);
+      $(window).on('keydown', bodyKeyDown);
+
+      sitecues.emit('metrics/zoom-changed/create');
+    }
+
+    function setDataPropertyValue(prop, value) {
+      if (zoomChanged.data.hasOwnProperty(prop)) {
+        zoomChanged.data[prop] = value;
+      }
     }
 
     /**
@@ -44,58 +52,75 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
     function sliderMouseDown(e) {
       this.onmousedown = function() {
-        zoomChanged.data.is_slider_click = 1;
+        setDataPropertyValue('is_slider_click', 1);
         document.onmousemove = function (e) {
-          zoomChanged.data.is_slider_drag = 1;
-          zoomChanged.data.is_slider_click = 0;
+          setDataPropertyValue('is_slider_drag', 1);
+          setDataPropertyValue('is_slider_click', 0);
         };
       };
     };
 
     function buttonsMouseDown() {
       $(this).mousedown(function() {
-        zoomChanged.data.is_button_press = 1;
+        setDataPropertyValue('is_button_press', 1);
       });
     };
 
-    function bodyKeyPress(event) {
-      var code = event.keyCode || event.which;
-      var plus  = code === 187 || code === 61  || code === 107 || code === 43;
-      var minus = code === 189 || code === 109 || code === 173 || code === 45;
+    function bodyKeyDown(event) {
+      // Handle keypress events(for ex., +/-)
+      if (event && event.type === 'keydown') {
+        var code = event.keyCode || event.which;
+        var plus  = code === 187 || code === 61  || code === 107 || code === 43;
+        var minus = code === 189 || code === 109 || code === 173 || code === 45;
 
-      if (plus || minus) {
-        zoomChanged.data.is_key = 1;
-        zoomChanged.data.is_browser_zoom_key_override = (event.ctrlKey || event.metaKey);
-      }
+        if (plus || minus) {
+          setDataPropertyValue('is_key', 1);
+          setDataPropertyValue('is_browser_zoom_key_override', event.ctrlKey || event.metaKey);
+        }
+      };
     }
 
     function readyForMetrics() {
       return !zoom.getIsInitialZoom();
     }
 
-    // ============= sitecues Events Handlers ======================
-
-    // Create an instance on zoom changed event and add event listeners.
-    zoomChanged.init();
-
-    var intervalID = setInterval(function() {
+    function run() {
       if (readyForMetrics()) {
-        sitecues.on('zoom/begin', function(zoom) {
-          zoomChanged.data.from_zoom = conf.get('zoom');
-        });
-        // Set handlers on zoom event when zoom metrics are ready.
-        sitecues.on('zoom', function() {
-          zoomChanged.send();
-          zoomChanged.reset();
-        });
-        sitecues.on('zoom/stop-button', function () {
-          zoomChanged.data.is_long_glide = 1;
-        });
+        // Create an instance on zoom changed event and add event listeners.
+        zoomChanged.init();
+
+        bindSitecuesEvents();
+
         // Clear interval, we don't need it anymore.
         clearInterval(intervalID);
       }
-    }, 100);
+    }
 
+    // Listen to necessary sitecues event and bind the handlers for them.
+    function bindSitecuesEvents() {
+      // Remember the initial zoom value('from_zoom')
+      sitecues.on('zoom/begin', function(zoom) {
+        setDataPropertyValue('from_zoom', conf.get('zoom'));
+      });
+
+      // Is it a long glide?
+      sitecues.on('zoom/stop-button', function () {
+        setDataPropertyValue('is_long_glide', 1);
+      });
+
+      // We are ready to send the metrics to backend.
+      sitecues.on('zoom', function() {
+        zoomChanged.send();
+        zoomChanged.reset();
+      });
+
+    }
+
+    // ============= sitecues Events Handlers ======================
+
+    var intervalID = setInterval(run, 100);
+
+    // Update data from the other modules.
     sitecues.on('metrics/update', function(metrics) {
       zoomChanged['data'] && zoomChanged.update(metrics.data);
     });
