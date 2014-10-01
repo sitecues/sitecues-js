@@ -28,7 +28,11 @@ sitecues.def('conf/site', function (site, callback) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
     // but the contents of root object properties can be modified.
     site.get = function(key) {
-      return siteConfig[key];
+      if (key) {
+        return siteConfig[key];
+      } else {
+        return siteConfig; // return all the data
+      }
     };
 
     // Initialize the site configuration to the default.
