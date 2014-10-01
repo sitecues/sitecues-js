@@ -11,7 +11,7 @@ define(
         with (tdd) {
             suite('HLB Simple', function () {
 
-                test('# HLB Respects Text', function () {
+                test('HLB Respects Text', function () {
                     return this.remote // represents the browser being tested
                         .get(url) // navigate to the desired page
                         .setFindTimeout(12000) // fail test if any find method can't succeed within this quickly
