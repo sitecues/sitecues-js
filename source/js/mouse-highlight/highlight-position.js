@@ -178,9 +178,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
 
       var backgroundPos = style.backgroundPosition;
-      var backgroundPos = style.backgroundPosition;
       if (style.backgroundImage === 'none' || style.backgroundRepeat !== 'no-repeat' ||
-        (parseFloat(backgroundPos) > 0 &&  backgroundPos.indexOf('%') > 0)) {
+        (parseFloat(backgroundPos) > 0 && backgroundPos.indexOf('%') > 0)) {
         return;
       }
 
@@ -189,7 +188,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
         // Use positive background positions (used for moving the sprite to the right within the element)
         // Ignore negative background positions (used for changing which sprite is used within a larger image)
-        actualLeft = Math.max(0, backgroundLeftPos);
+        actualLeft = isNaN(backgroundLeftPos) || backgroundLeftPos < 0 ? 0 : backgroundLeftPos;
       rect.left += actualLeft;
       return rect.width > 0 ? rect : null;
     }

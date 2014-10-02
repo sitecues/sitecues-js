@@ -83,7 +83,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
           !traitcache.getStyleProp(element, 'borderRightWidth')) {
           var scrollHeight = element.scrollHeight;
-          if (scrollHeight > 1) {
+          if (scrollHeight > 1 && scrollHeight > element.clientHeight) {
             rect.height = Math.max(rect.height, scrollHeight * cachedViewSize.zoom);
           }
         }
