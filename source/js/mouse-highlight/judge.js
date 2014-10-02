@@ -555,62 +555,70 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return domJudgements;
     }
 
-      // Is the content divided into 2 or more sections?
-      // IOW, is there a heading/hr in the middle of it rather than just at the start?
-      // This will return true even if there is something before the heading that is not grouped with <header>.
-      function isDividedInHalf(container) {
-        // Find descendants which start a section
-        var dividingElements = $(container).find(SECTION_START_SELECTOR),
+    // Is the content divided into 2 or more sections?
+    // IOW, is there a heading/hr in the middle of it rather than just at the start?
+    // This will return true even if there is something before the heading that is not grouped with <header>.
+    function isDividedInHalf(container) {
+      // Find descendants which start a section
+      var dividingElements = $(container).find(SECTION_START_SELECTOR),
 
-          // Get the last dividing element
-          lastDividingElement = dividingElements.last();
+        // Get the last dividing element
+        lastDividingElement = dividingElements.last();
 
-        if (!lastDividingElement.length) {
-          return false;
-        }
-
-        var
-          // Get the dividing element we want to test
-          // We use the last one that's not at the very end
-          testDividingElement = lastDividingElement.is(container) || $.contains(container, lastDividingElement[0]) ?
-            dividingElements.get(dividingElements.length - 1) : lastDividingElement,
-
-          // Go up from last dividing element, to find the topmost dividing element.
-          // This protects against nested dividing elements confusing us.
-          parentSectionStart = $(testDividingElement).parentsUntil(container,SECTION_START_SELECTOR),
-
-          // Starting point
-          currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
-
-          // Used in while loop
-          sibling,
-          $sibling;
-
-        // Go up from starting point to see if a non-section-start exists before it in the container.
-        while (currentAncestor && currentAncestor !== container) {
-          sibling = currentAncestor.parentNode.firstElementChild;
-
-          // Look at all the siblings before the currentAncestor
-          while (sibling && sibling !== currentAncestor) {
-            $sibling = $(sibling);
-            if (!$sibling.is(SECTION_START_SELECTOR) &&
-              !isSectionStartContainer(sibling) &&
-              !common.isVisualMedia(sibling) &&
-              !$sibling.is(':empty') &&
-              traitcache.getStyleProp(sibling, 'display') !== 'none') {
-              return true;  // A visible non-section-start element exists before the section-start-element, which means we are divided!
-            }
-            sibling = sibling.nextElementSibling;
-          }
-          currentAncestor = currentAncestor.parentNode;
-        }
+      if (!lastDividingElement.length) {
         return false;
       }
 
-      function getLastLeaf(container) {
-        var lastElementChild = container;
-        return lastElementChild ? getLastLeaf(lastElementChild) : container;
+      var
+        // Get the dividing element we want to test
+        // We use the last one that's not at the very end
+        testDividingElement = lastDividingElement.is(container) || $.contains(container, lastDividingElement[0]) ?
+          dividingElements.get(dividingElements.length - 1) : lastDividingElement,
+
+        // Go up from last dividing element, to find the topmost dividing element.
+        // This protects against nested dividing elements confusing us.
+        parentSectionStart = $(testDividingElement).parentsUntil(container,SECTION_START_SELECTOR),
+
+        // Starting point
+        currentAncestor = (parentSectionStart.length ? parentSectionStart : lastDividingElement)[0],
+
+        // Used in while loop
+        sibling,
+        $sibling;
+
+      // Go up from starting point to see if a non-section-start exists before it in the container.
+      while (currentAncestor && currentAncestor !== container) {
+        sibling = currentAncestor.parentNode.firstElementChild;
+
+        // Look at all the siblings before the currentAncestor
+        while (sibling && sibling !== currentAncestor) {
+          $sibling = $(sibling);
+          if (!$sibling.is(SECTION_START_SELECTOR) &&
+            !isSectionStartContainer(sibling) &&
+            !common.isVisualMedia(sibling) &&
+            !$sibling.is(':empty') &&
+            traitcache.getStyleProp(sibling, 'display') !== 'none') {
+            return true;  // A visible non-section-start element exists before the section-start-element, which means we are divided!
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        currentAncestor = currentAncestor.parentNode;
       }
+      return false;
+    }
+
+    function getLastLeaf(container) {
+      var lastElementChild = container;
+      return lastElementChild ? getLastLeaf(lastElementChild) : container;
+    }
+
+    function getNumLeafElements(node) {
+      var leafElements = $(node).find('*').filter(function() {
+        return this.childElementCount === 0;
+      });
+
+      return leafElements.length;
+    }
 
       // Should we even consider this node or not?
     function isUsable(traits) {
@@ -646,14 +654,6 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       }
 
       return getNumLeafElements(node) > 1; // Must be paired with something else
-    }
-
-    function getNumLeafElements(node) {
-      var leafElements = $(node).find('*').filter(function() {
-        return this.childElementCount === 0;
-      });
-
-      return leafElements.length > 1;
     }
 
     // If the element a divider (such as <hr>), return it's thickness, otherwise return 0
