@@ -324,7 +324,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
             rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
             rect.top = Math.max(rect.top, textRangeVerticalClipRect.top);
-            rect.bottom = Math.max(rect.bottom, textRangeVerticalClipRect.bottom);
+            rect.bottom = Math.min(rect.bottom, textRangeVerticalClipRect.bottom);
             rect.height = rect.bottom - rect.top;
 
             addRect(allRects, clipRect, rect);
