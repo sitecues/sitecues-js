@@ -322,7 +322,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // Text must always be clipped to the bounding element, otherwise the top and bottom will
             // encompass the entire line-height, which can contain a lot of whitespace/
             // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
-            rect = getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+            rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
             rect.top = Math.max(rect.top, textRangeVerticalClipRect.top);
             rect.bottom = Math.max(rect.bottom, textRangeVerticalClipRect.bottom);
             rect.height = rect.bottom - rect.top;
