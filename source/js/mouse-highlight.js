@@ -38,6 +38,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
+  // Don't consider the text light unless the yiq is larger than this
+  MIN_YIQ_LIGHT_TEXT = 160,
+
   state,
 
   isEnabled,
@@ -83,7 +86,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // http://en.wikipedia.org/wiki/YIQ
         yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
 
-      return yiq >= 128;
+      return yiq > MIN_YIQ_LIGHT_TEXT;
     }
 
     function getElementsContainingText(selector) {
@@ -125,7 +128,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         b: parseInt(match[3] || 0),
         a: parseFloat(match[4] || 1)
       };
-
     }
 
     function isDarkBackground(style) {
