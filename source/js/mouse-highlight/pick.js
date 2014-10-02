@@ -31,8 +31,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
                function($, common, conf, traitcache, traits, judge) {
 
     var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
-      MAX_ANCESTORS_TO_ANALYZE = 9,  // Maximum ancestors to climb looking for start. Up to 9 would be nicer in a few cases but might be causing perf issues in IE.
-      MIN_SCORE_TO_PICK = -100,      // If nothing above this, will pick nothing
+      MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
+      MIN_SCORE_TO_PICK = -100,        // If nothing above this, will pick nothing
       // In order of precedence:
       PICK_RULE_DISABLE = 'disable', // don't pick this anything -- not this item, any ancestor, or any descendant
       PICK_RULE_PREFER = 'prefer',   // pick this item
@@ -42,14 +42,21 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       // Public in order to allow customizations
       judgementWeights = {
         isGreatTag: 13,
-        isGoodTag: 5,
+        isGoodTag: 3,
         isGoodRole: 8,
+        badParents: -10,
+        verticalList: 15,
+        hasHorizontalListDescendant: -15,
         isGroupedWithImage: 10,
         isFormControl: 20,
-        isDivided: -10,
         hasOwnBackground: 20,
-        vertSeparationImpact: 1,
-        horizSeparationImpact: 1,
+        hasSiblingBackground: 5,
+        hasRaisedZIndex: 20,
+        hasDescendantWithRaisedZIndex: -50,
+        isOutOfFlow: 10,
+        hasDescendantOutOfFlow: -50,
+        vertSeparationImpact: 0.8,
+        horizSeparationImpact: 0.8,
         percentOfViewportHeightUnderIdealMin: -0.5,
         percentOfViewportHeightOverIdealMax: -0.7,
         percentOfViewportWidthUnderIdealMin: -0.5,
@@ -58,17 +65,17 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         tinyHeightFactor: -3,
         tinyWidthFactor: -5,
         isExtremelyTall: UNUSABLE_SCORE,
-        isFloatForCellLayout: 20,
-        badGrowthTop: -1,
-        badGrowthBottom: -1,
-        badGrowthLeft: -1,
-        badGrowthRight: -1,
-        isLarge2dGrowth: -30,
-        isModeratelySmallerThanParentInOneDimension: -8,
-        isModeratelyLargerThanChildInOneDimension: 8,
+        badGrowthTop: -0.5,
+        badGrowthBottom: -0.5,
+        large2dGrowth: -1,
+        isModeratelySmallerThanParentInOneDimension: -20,
+        isModeratelyLargerThanChildInOneDimension: 20,
         isCellInRow: 15,
         isCellInCol: 15,
-        isSectionStartContainer: 10,
+        hasExactWidthSiblingCells: 15,
+        hasSimilarSiblingCells: 15,
+        isSectionStartContainer: 25,
+        isDividedInHalf: -8,
         isAncestorOfCell: -5,
         isWideAncestorOfCell: -10,
         isLargeWidthExpansion: -10,
@@ -83,7 +90,8 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         //ignore: "[selector]",
         //disable: "[selector]"
       },
-      isDebuggingOn;
+      isDebuggingOn,
+      lastPicked;
 
     /*
      * ----------------------- PUBLIC -----------------------
@@ -131,7 +139,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       // 6. Get result from heuristics
       picked = getHeuristicResult(candidates);
 
-      // 7. Save results in picked items cache for later reuse
+      // 7. Save results for next time
+      lastPicked = picked;
+
       return picked ? $(picked) : null;
     };
 
@@ -173,7 +183,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         // Else keep going
       }
 
-      // Check pickRuleCache and @data-sc-pick for values in PICK_RULE_DISABLE or PICK_RULE_PREFER
+      // Check @data-sc-pick for values in PICK_RULE_DISABLE or PICK_RULE_PREFER
       candidates.some(checkPickRuleForElement);
 
       return picked;
@@ -224,7 +234,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     function isUsable(element, judgements) {
       // If no judgements exist, the candidate was already marked as unusable by the judgements system
-      if (!judgements) {
+      if (!judgements.isUsable) {
         return false;
       }
       // Check custom selectors
@@ -273,6 +283,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     function computeScore(judgements, element, index) {
       // 1. Check if usable: if item is not usable mark it as such
       // TODO give each isUsable() a different name
+
       if (!isUsable(element, judgements)) {
         return {
           score: UNUSABLE_SCORE,
@@ -352,24 +363,28 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     function hasVisibleContent(candidates) {
       // First check for direct visible text nodes
-      if (common.hasVisibleContent(candidates[0], traitcache.getStyle(candidates[0]),
-        traitcache.getStyle(candidates[1]))) {
+      if (common.hasVisibleContent(candidates[0])) {
         return true;
       }
 
       // Otherwise, see if we are inside of a box
-      var index = 1,
+      var index = 0,
         candidate,
         rect,
+        style,
         zoom = conf.get('zoom');
       for (; index < candidates.length; index ++) {
         candidate = candidates[index];
+        if (lastPicked && $.contains(candidate, lastPicked)) {
+          break; // Once we've picked a sub-box inside a box, we want to avoid skipping to larger box when over whitespace
+        }
         rect = traitcache.getRect(candidate);
-        if (rect.width / zoom > MAX_VISUAL_BOX_CHECK_SIZE &&
+        style = traitcache.getStyle(candidate);
+        if (rect.width / zoom > MAX_VISUAL_BOX_CHECK_SIZE ||
           rect.height / zoom > MAX_VISUAL_BOX_CHECK_SIZE) {
           break;  // Don't check any more
         }
-        if (common.hasVisualBox(candidate, traitcache.getStyle(candidate), traitcache.getStyle(candidate.parentNode))) {
+        if (common.isVisualRegion(candidate, style, traitcache.getStyle(candidate.parentNode))) {
           return true;
         }
       }

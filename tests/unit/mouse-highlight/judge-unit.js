@@ -35,15 +35,6 @@ describe('judge', function() {
             expect(judgementStack[1].isGreatTag).to.be.equal(false);
             done();
         });
-        it('should return |isGreatTag=true| judgement for a <ul>.', function(done) {
-            var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
-                judgementStack;
-
-            traitStack[1].tag = 'ul';
-            judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isGreatTag).to.be.equal(true);
-            done();
-        });
         it('should return |isGoodTag=true| judgement for a <p>.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
@@ -159,16 +150,21 @@ describe('judge', function() {
             expect(judgementStack[1].tinyWidthFactor > 0).to.be.equal(true);
             done();
         });
-        it('should return |vertSeparationImpact=0| judgement for an element no top or bottom border/spacing.', function(done) {
+        it('should return |vertSeparationImpact=0| judgement for an element no top or bottom border/margin/padding.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
-                judgementStack;
+                judgementStack,
+                index = 0;
 
-            traitStack[1].topBorder = 0;
-            traitStack[1].bottomBorder = 0;
-            traitStack[1].topSpacing = 0;
-            traitStack[1].bottomSpacing = 0;
+            for (; index < 5; index ++ ) {
+              traitStack[index].topBorder = 0;
+              traitStack[index].bottomBorder = 0;
+              traitStack[index].topPadding = 0;
+              traitStack[index].bottomPadding = 0;
+              traitStack[index].topMargin = 0;
+              traitStack[index].bottomMargin = 0;
+            }
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].vertSeparationImpact).to.be.equal(0);
+            expect(judgementStack[0].vertSeparationImpact).to.be.equal(0);
             done();
         });
         it('should return |vertSeparationImpact>0| judgement for an element with a top border.', function(done) {
@@ -183,220 +179,172 @@ describe('judge', function() {
             expect(judgementStack[1].vertSeparationImpact > 0).to.be.equal(true);
             done();
         });
-        it('should return |badGrowthRight=0| judgement for an element with the same right coordinate as its parent.', function(done) {
+        it('should return |badGrowthBottom=0| judgement for an element with the same bottom coordinate as its parent.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].unzoomedRect.right = 100;
-            traitStack[2].unzoomedRect.right = 100; // Parent right-side is same as child's
-            traitStack[1].rightBorder = 1;
+            traitStack[1].unzoomedRect.bottom = 100;
+            traitStack[2].unzoomedRect.bottom = 100; // Parent bottom is same as child's
+            traitStack[1].bottomBorder = 1;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].badGrowthRight).to.be.equal(0);
+            expect(judgementStack[1].badGrowthBottom).to.be.equal(0);
             done();
         });
-        it('should return |badGrowthRight=0| judgement for an element with no right border or spacing.', function(done) {
+        it('should return |badGrowthBottom=0| judgement for an element with no bottom border or spacing.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].unzoomedRect.right = 100;
-            traitStack[2].unzoomedRect.right = 200; // Parent right-side is farther to right than child
-            traitStack[1].rightBorder = 0;
-            traitStack[1].rightSpacing = 0;
+            traitStack[1].unzoomedRect.bottom = 100;
+            traitStack[2].unzoomedRect.bottom = 200; // Parent bottom is farther to right than child
+            traitStack[1].bottomBorder = 0;
+            traitStack[1].bottomSpacing = 0;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].badGrowthRight).to.be.equal(0);
+            expect(judgementStack[1].badGrowthBottom).to.be.equal(0);
             done();
-            it('should return |badGrowthRight>0| judgement for an element with a right border and right side deep inside the parent.', function(done) {
+            it('should return |badGrowthBottomt>0| judgement for an element with a bottom border and right side deep inside the parent.', function(done) {
                 var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                     judgementStack;
 
-                traitStack[1].unzoomedRect.right = 100;
-                traitStack[2].unzoomedRect.right = 999; // Parent right-side is farther to right than child
-                traitStack[1].rightBorder = 1;
+                traitStack[1].unzoomedRect.bottom = 100;
+                traitStack[2].unzoomedRect.bottom = 999; // Parent right-side is farther to right than child
+                traitStack[1].rightBottom = 1;
 
                 judgementStack = judge.getJudgementStack(traitStack, nodes);
-                expect(judgementStack[1].badGrowthRight > 0).to.be.equal(true);
+                expect(judgementStack[1].badGrowthBottom> 0).to.be.equal(true);
                 done();
             });
         });
-        it('should return |isLarge2dGrowth=true| judgement for an element much taller and wider than the deepest descendant with display="block".', function(done) {
+        it('should return |large2dGrowth > 0| judgement for an element much taller and wider than the deepest descendant with display="block".', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
             traitStack[0].style.display = 'inline';
             traitStack[1].style.display = 'block';
             traitStack[1].style.display = 'block';
-            traitStack[1].visualWidthAt1x = 100;
-            traitStack[1].visualHeightAt1x = 100;
+            traitStack[1].fullWidth = 100;
+            traitStack[1].rect.height = 100;
             traitStack[4].style.display = 'block';
-            traitStack[4].visualWidthAt1x = 1000;
-            traitStack[4].visualHeightAt1x = 1000;
+            traitStack[4].fullWidth = 1000;
+            traitStack[4].rect.height = 1000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[4].isLarge2dGrowth).to.be.equal(true);
+            expect(judgementStack[4].large2dGrowth > 0).to.be.equal(true);
             done();
         });
-        it('should return |isLarge2dGrowth=false| judgement for an element not much taller than the deepest descendant with display="block".', function(done) {
+        it('should return |large2dGrowth=0| judgement for an element not much taller than the deepest descendant with display="block".', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[0].style.display = 'inline';
+            traitStack[0].normDisplay = 'inline';
+            traitStack[1].normDisplay = 'block';
+            traitStack[1].fullWidth = 100;
+            traitStack[1].rect.height = 100;
+            traitStack[4].normDisplay = 'block';
+            traitStack[4].fullWidth = 1000;
+            traitStack[4].rect.height = 101;
+            judgementStack = judge.getJudgementStack(traitStack, nodes);
+            expect(judgementStack[4].large2dGrowth).to.be.equal(false);
+            done();
+        });
+        it('should return |large2dGrowth=0| judgement for an element not much wider than the deepest descendant with display="block".', function(done) {
+            var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
+                judgementStack;
+
+            traitStack[0].normDisplay = 'inline';
             traitStack[1].style.display = 'block';
-            traitStack[1].style.display = 'block';
-            traitStack[1].visualWidthAt1x = 100;
-            traitStack[1].visualHeightAt1x = 100;
-            traitStack[4].style.display = 'block';
-            traitStack[4].visualWidthAt1x = 1000;
-            traitStack[4].visualHeightAt1x = 101;
+            traitStack[1].fullWidth = 100;
+            traitStack[1].rect.height = 100;
+            traitStack[4].normDisplay = 'block';
+            traitStack[4].fullWidth = 101;
+            traitStack[4].rect.height = 1000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[4].isLarge2dGrowth).to.be.equal(false);
+            expect(judgementStack[4].large2dGrowth).to.be.equal(false);
             done();
         });
-        it('should return |isLarge2dGrowth=false| judgement for an element not much wider than the deepest descendant with display="block".', function(done) {
+        it('should return |isCellInRow=true| judgement when conditions are right for a floating cell.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[0].style.display = 'inline';
-            traitStack[1].style.display = 'block';
-            traitStack[1].style.display = 'block';
-            traitStack[1].visualWidthAt1x = 100;
-            traitStack[1].visualHeightAt1x = 100;
-            traitStack[4].style.display = 'block';
-            traitStack[4].visualWidthAt1x = 101;
-            traitStack[4].visualHeightAt1x = 1000;
+            traitStack[3].style.float = 'none';
+            traitStack[2].style.float = 'left';
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[4].isLarge2dGrowth).to.be.equal(false);
-            done();
-        });
-        it('should return |isModeratelyLargerThanChildInOneDimension=true| judgement for an element slightly taller than its child.', function(done) {
-            var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
-                judgementStack;
-
-            traitStack[1].visualWidthAt1x = 100;
-            traitStack[1].visualHeightAt1x = 100;
-            traitStack[2].visualWidthAt1x = 125;
-            traitStack[2].visualHeightAt1x = 100;
-            judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[2].isModeratelyLargerThanChildInOneDimension).to.be.equal(true);
-            done();
-        });
-        it('should return |isModeratelyLargerThanChildInOneDimension=true| judgement for an element much taller than its child.', function(done) {
-            var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
-                judgementStack;
-
-            traitStack[1].visualWidthAt1x = 100;
-            traitStack[1].visualHeightAt1x = 100;
-            traitStack[2].visualWidthAt1x = 1000;
-            traitStack[2].visualHeightAt1x = 100;
-            judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[2].isModeratelyLargerThanChildInOneDimension).to.be.equal(false);
-            done();
-        });
-        it('should return |isFloatForCellLayout=true| judgement when conditions are right.', function(done) {
-            var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
-                judgementStack;
-
-            traitStack[1].style.float = 'right';
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[2].visualWidthAt1x = 500;
-            traitStack[2].visualHeightAt1x = 50;
-
-            judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isFloatForCellLayout).to.be.equal(true);
+            expect(judgementStack[2].isCellInRow).to.be.equal(true);
             done();
         });
         it('should return |isCellInRow=true| judgement when conditions are right.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 5;
-            traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidthAt1x = 500;
-            traitStack[2].visualHeightAt1x = 50;
-            traitStack[2].percentOfViewportWidth = 50;
-            traitStack[2].percentOfViewportHeight = 5;
-
+            traitStack[2].percentOfViewportWidth = 15;
+            traitStack[2].leftBorder = 2;
+            traitStack[2].rightBorder = 2;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isCellInRow).to.be.equal(true);
+
+            expect(judgementStack[2].isCellInRow).to.be.equal(true);
             done();
         });
         it('should return |isCellInRow=false| judgement when conditions are wrong.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 5;
-            traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidthAt1x = 60;
-            traitStack[2].visualHeightAt1x = 50;
-            traitStack[2].percentOfViewportWidth = 6;
-            traitStack[2].percentOfViewportHeight = 5;
+            traitStack[2].percentOfViewportWidth = 15;
+            traitStack[2].leftBorder = 0;
+            traitStack[2].rightBorder = 0;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isCellInRow).to.be.equal(false);
+            expect(judgementStack[2].isCellInRow).to.be.equal(false);
             done();
         });
         it('should return |isCellInCol=true| judgement when conditions are right.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 150;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 15;
-            traitStack[1].topBorder = 5;
-            traitStack[2].visualWidthAt1x = 50;
-            traitStack[2].visualHeightAt1x = 500;
-            traitStack[2].percentOfViewportWidth = 5;
-            traitStack[2].percentOfViewportHeight = 50;
+            traitStack[3].fullWidth = traitStack[2].fullWidth;
+            traitStack[3].rect.width = traitStack[2].rect.width;
+            traitStack[3].unzoomedRect.width = traitStack[2].unzoomedRect.width;
+            traitStack[3].visualWidthAt1x = traitStack[2].visualWidthAt1x;
+            traitStack[3].rect.height = 3 * traitStack[2].rect.height;
+            traitStack[3].unzoomedRect.height = 3 * traitStack[2].unzoomedRect.height;
+            traitStack[3].visualHeightAt1x = 3 * traitStack[2].visualHeightAt1x;
+            traitStack[2].percentOfViewportHeight = 15;
+            traitStack[2].topBorder = 2;
+            traitStack[2].bottomBorder = 2;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isCellInCol).to.be.equal(true);
+            expect(judgementStack[2].isCellInCol).to.be.equal(true);
             done();
         });
         it('should return |isCellInCol=false| judgement when conditions are wrong.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 150;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 15;
-            traitStack[1].topBorder = 5;
-            traitStack[2].visualWidthAt1x = 50;
-            traitStack[2].visualHeightAt1x = 150;
-            traitStack[2].percentOfViewportWidth = 5;
-            traitStack[2].percentOfViewportHeight = 15;
+          traitStack[3].fullWidth = 2 * traitStack[2].fullWidth;
+          traitStack[3].rect.width = 2 * traitStack[2].rect.width;
+          traitStack[3].unzoomedRect.width = 2 * traitStack[2].unzoomedRect.width;
+          traitStack[3].visualWidthAt1x = 2* traitStack[2].visualWidthAt1x;
+          traitStack[3].rect.height = 3 * traitStack[2].rect.height;
+          traitStack[3].unzoomedRect.height = 3 * traitStack[2].unzoomedRect.height;
+          traitStack[3].visualHeightAt1x = 3 * traitStack[2].visualHeightAt1x;
+          traitStack[2].percentOfViewportHeight = 15;
 
-            judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isCellInCol).to.be.equal(false);
+          judgementStack = judge.getJudgementStack(traitStack, nodes);
+            expect(judgementStack[2].isCellInCol).to.be.equal(false);
             done();
         });
         it('should return |isAncestorOfCell=true| judgement for the ancestor of an element judged to be a cell.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 5;
-            traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidthAt1x = 500;
-            traitStack[2].visualHeightAt1x = 50;
-            traitStack[2].percentOfViewportWidth = 50;
-            traitStack[2].percentOfViewportHeight = 5;
+            traitStack[2].percentOfViewportWidth = 15;
+            traitStack[2].leftBorder = 2;
+            traitStack[2].rightBorder = 2;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isAncestorOfCell).to.be.equal(true);
             done();
         });
-        it('should return |isAncestorOfCell=true| judgement for an element with no descendant cells.', function(done) {
+        it('should return |isAncestorOfCell=false| judgement for an element with no descendant cells.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
@@ -408,15 +356,10 @@ describe('judge', function() {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 5;
-            traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidthAt1x = 500;
-            traitStack[2].visualHeightAt1x = 50;
+            traitStack[2].percentOfViewportWidth = 15;
+            traitStack[2].leftBorder = 2;
+            traitStack[2].rightBorder = 2;
             traitStack[2].percentOfViewportWidth = 50;
-            traitStack[2].percentOfViewportHeight = 5;
             traitStack[3].percentOfViewportWidth = 150;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
@@ -426,36 +369,31 @@ describe('judge', function() {
         it('should return |isWideAncestorOfCell=false| judgement for a narrow ancestor of an element judged to be a cell.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
-
-            traitStack[1].visualWidthAt1x = 50;
-            traitStack[1].visualHeightAt1x = 50;
-            traitStack[1].percentOfViewportWidth = 5;
-            traitStack[1].percentOfViewportHeight = 5;
-            traitStack[1].rightBorder = 5;
-            traitStack[2].visualWidthAt1x = 500;
-            traitStack[2].visualHeightAt1x = 50;
-            traitStack[2].percentOfViewportWidth = 50;
-            traitStack[2].percentOfViewportHeight = 5;
-            traitStack[3].percentOfViewportWidth = 40;
+          traitStack[2].percentOfViewportWidth = 15;
+          traitStack[2].leftBorder = 2;
+          traitStack[2].rightBorder = 2;
+          traitStack[2].percentOfViewportWidth = 30;
+          traitStack[3].percentOfViewportWidth = 50;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isWideAncestorOfCell).to.be.equal(false);
             done();
         });
-        it('should return |isGroupedWithImage| judgement for an element with an image descendant.', function(done) {
+        it('should return |isGroupedWithImage=true| judgement for an element with an image descendant.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
+            traitStack[1].childCount = 4;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[1].isGroupedWithImage).to.be.equal(true);
             done();
         });
-        it('should return |isGroupedWithImage| judgement for an element with two image descendants.', function(done) {
+        it('should return |isGroupedWithImage=false| judgement for an element with two image descendants.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack;
 
             judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[3].isGroupedWithImage).to.be.equal(false);
+            expect(judgementStack[2].isGroupedWithImage).to.be.equal(false);
             done();
         });
         it('should return |isSectionStartContainer=true| judgement for an element with a heading in the chain of first child nodes.', function(done) {
@@ -470,16 +408,16 @@ describe('judge', function() {
             expect(judgementStack[1].isSectionStartContainer).to.be.equal(false);
             done();
         });
-        it('should return |isDivided=false| judgement for an element without any dividing descendants.', function(done) {
+        it('should return |isDividedInHalf=false| judgement for an element without any dividing descendants.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isDivided).to.be.equal(false);
+            expect(judgementStack[1].isDividedInHalf).to.be.equal(false);
             done();
         });
-        it('should return |isDivided=true| judgement for an element an <hr> middle child.', function(done) {
+        it('should return |isDividedInHalf=true| judgement for an element an <hr> middle child.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[2].isDivided).to.be.equal(true);
+            expect(judgementStack[2].isDividedInHalf).to.be.equal(true);
             done();
         });
         it('should return |isLargeWidthExpansion=true| judgement for an element much wider than the first non-inline descendant.', function(done) {
@@ -488,8 +426,8 @@ describe('judge', function() {
 
             traitStack[0].normDisplay = 'inline';
             traitStack[1].normDisplay = 'block';
-            traitStack[1].visualWidthAt1x = 500;
-            traitStack[3].visualWidthAt1x = 5000;
+            traitStack[1].fullWidth = 500;
+            traitStack[3].fullWidth = 5000;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isLargeWidthExpansion).to.be.equal(true);
             done();
@@ -500,8 +438,8 @@ describe('judge', function() {
 
             traitStack[0].normDisplay = 'inline';
             traitStack[1].normDisplay = 'block';
-            traitStack[1].visualWidthAt1x = 500;
-            traitStack[3].visualWidthAt1x = 550;
+            traitStack[1].fullWidth = 500;
+            traitStack[3].fullWidth = 550;
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[3].isLargeWidthExpansion).to.be.equal(false);
             done();
