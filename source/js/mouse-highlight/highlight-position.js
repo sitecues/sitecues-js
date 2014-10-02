@@ -316,7 +316,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // ----------------------------------------------------------------------------------------------------
             var range = document.createRange(),
               rect,
-              textRangeVerticalClipRect = getBoundingRectMinusPadding(this.parentNode);
+              textRangeVerticalClipRect = traitcache.getScreenRect(this.parentNode);
 
             range.selectNode(this);
             rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
