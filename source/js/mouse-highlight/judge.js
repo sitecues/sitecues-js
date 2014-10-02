@@ -481,7 +481,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         cellLayoutJudgements.isCellInCol = judgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR &&      // Approx. same width
           judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
           traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
-          (hasExactWidthSiblingCells || traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT) &&
+          // Either the parent has other large cells or this cell is large
+          (judgements.parentVertGrowthFactor > 2 * parentTraits.childCount || traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT) &&
           (hasExactWidthSiblingCells || judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
 
         // Do we look like a cell in a row of cells?
