@@ -232,7 +232,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       visualSeparationJudgements.hasRaisedZIndex = !visualSeparationJudgements.hasDescendantWithRaisedZIndex &&
         common.hasRaisedZIndex(childTraits.style, traits.style);
       visualSeparationJudgements.isOutOfFlow = !visualSeparationJudgements.hasDescendantOutOfFlow &&
-        isOutOfFlow(traits, parentTraits);
+        isOutOfFlow(node, traits, parentTraits);
 
       // Get effective separation impact vertically and horizontally
       // This is helpful because often a group of items will define spacing on one side of each
@@ -697,9 +697,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
 
     // Position: absolute/fixed and rect sticks out from parent (not wholly encompassed by it)
-    function isOutOfFlow(traits, parentTraits) {
+    function isOutOfFlow(node, traits, parentTraits) {
       if (traits.style.position !== 'absolute' && traits.style.position !== 'fixed') {
         return false;
+      }
+
+      if (traits.childCount === 0 && $(node).is(':empty')) {
+        return false;  // These empty absolutely positioned elements are strange. Seem to be there to capture clicks only
       }
 
       // Return true if we stick out from parent
