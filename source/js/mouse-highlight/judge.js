@@ -532,7 +532,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Being grouped with a single image indicates something is likely good to pick
         isGroupedWithImage: traits.visualHeightAt1x > MIN_IMAGE_GROUP_HEIGHT &&
           (index < MAX_ANCESTOR_INDEX_IMAGE_GROUP || childJudgements.isGroupedWithImage) &&
-          isCandidateGroupedWithImage(traits, node, index),
+          isGroupedWithImage(traits, node, index),
         // A child candidate was considered a section start container
         isAncestorOfSectionStartContainer: childJudgements && (childJudgements.isSectionStartContainer || childJudgements.isAncestorOfSectionStartContainer),
         // Avoid picking things like hero images or ancestors of them
@@ -550,7 +550,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // unless the parent is about the same size as the child
       domJudgements.isSectionStartContainer = (!domJudgements.isAncestorOfSectionStartContainer ||
         judgements.isRoughlySameSizeAsChild) &&
-        isSectionStartContainer(node);
+        isSectionStartContainer(node) && getNumLeafElements() > 1;
 
       return domJudgements;
     }
@@ -636,20 +636,24 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return traitcache.getRect(listItems[0]).right <= traitcache.getRect(listItems[1]).left ? -1 : 1;
     }
     // Groups of related content often pair an image with text -- this is a noticeable pattern, e.g. on news sites
-    function isCandidateGroupedWithImage(traits, node) {
+    function isGroupedWithImage(traits, node) {
       if (traits.childCount === 0 || traits.childCount > MAX_CHILDREN_IMAGE_GROUP) {
         return false;  // If too many siblings this doesn't fit the pattern
       }
-      var images = node.getElementsByTagName('img'), // Faster than querySelectorAll()
-        leafElements;
+      var images = node.getElementsByTagName('img'); // Faster than querySelectorAll()
       if (images.length  !== 1) {
         return false;  // No images or multiple images: doesn't fit the pattern
       }
-      leafElements = $(node).find('*').filter(function() {
+
+      return getNumLeafElements(node) > 1; // Must be paired with something else
+    }
+
+    function getNumLeafElements(node) {
+      var leafElements = $(node).find('*').filter(function() {
         return this.childElementCount === 0;
       });
 
-      return leafElements.length > 1;  // Paired with something else
+      return leafElements.length > 1;
     }
 
     // If the element a divider (such as <hr>), return it's thickness, otherwise return 0

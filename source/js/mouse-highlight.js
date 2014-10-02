@@ -384,25 +384,33 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     };
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
-      var possibleFloat = common.elementFromPoint(x, y);
-      if (possibleFloat && possibleFloat !== state.picked.get(0)) {
-        var pickedAncestors = state.picked.parents(),
+      var possibleFloat = common.elementFromPoint(x, y),
+        picked = state.picked;
+      if (possibleFloat && possibleFloat !== picked[0]) {
+        var pickedAncestors = picked.parents(),
           possibleFloatAncestors = $(possibleFloat).parents();
-        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(state.picked)) {
+        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(picked)) {
           // If potential float is ancestor of picked, or vice-versa, don't use it.
           // We only use a cousin or sibling float.
           return;
         }
         var commonAncestor = $(possibleFloat).closest(pickedAncestors);
-        if (isDifferentZIndex(possibleFloat, state.picked[0], commonAncestor)) {
+        if (isDifferentZIndex(possibleFloat, picked[0], commonAncestor)) {
           return; // Don't draw highlight around an item that is going over or under the highlight
         }
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
                possibleFloat !== document.documentElement) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
             var COMBINE_ALL_RECTS = 99999,
-              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0];
+              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0],
+              mhRect = state.fixedContentRect,
+              extra = getExtraPixels();
             if (!floatRect) {
+              return;
+            }
+            if (floatRect.left > mhRect.left - extra && floatRect.right <= mhRect.right + extra &&
+              floatRect.top >= mhRect.top - extra && floatRect.bottom <= mhRect.bottom + extra) {
+              // Completely inside highlight rect -- don't bother
               return;
             }
             return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
