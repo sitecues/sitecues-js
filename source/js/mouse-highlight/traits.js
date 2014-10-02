@@ -33,9 +33,10 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
           style: traitcache.getStyle(node),
           tag: node.localName,
           role: node.getAttribute('role'),
-          childCount: node.childElementCount,
-          isVisualMedia: common.isVisualMedia(node)
+          childCount: node.childElementCount
         };
+
+      traits.isVisualMedia = isVisualMedia(traits, node);
 
       traits.normDisplay = getNormalizedDisplay(traits.style, node);
 
@@ -117,6 +118,16 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       // Almost full width, likely that it's a float which provides an incorrect width
       exactWidth = mhpos.getRangeRect(element).width;
       return $.extend({}, fastRect, { width: exactWidth }); // Replace the width
+    }
+
+    function isVisualMedia(traits, node) {
+      var style = traits.style;
+      return common.isVisualMedia(node) ||
+        // Or if one of those <div></div> empty elements just there to show a background image
+        (traits.childCount === 0 && style.backgroundImage !== 'none' &&
+          (style.backgroundRepeat === 'no-repeat' || style.backgroundSize === 'cover'
+            || style.backgroundSize === 'contain') &&
+          $(node).is(':empty'));
     }
 
     if (SC_UNIT) {
