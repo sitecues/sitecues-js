@@ -438,6 +438,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
             parentAreaGrowthSibling2 > maxParentAreaGrowth) {
             return false;
           }
+          if (node.parentNode.getElementsByTagName('img').length === 1) {
+            return false; // Only one image -- this usually means it's an image with a caption
+          }
         }
 
         // Do almost all of the siblings have the same tag name?
