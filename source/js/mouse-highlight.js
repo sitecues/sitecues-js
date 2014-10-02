@@ -454,8 +454,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (topLeftFloatRect) {
         if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
-          topLeftPoints[0].x = topRightFloatRect.right;
-          botLeftPoints[0].x = topRightFloatRect.right;
+          if (topRightFloatRect.right && topRightPoints[0].x) {  // Sanity check
+            topLeftPoints[0].x = topRightFloatRect.right;
+            botLeftPoints[0].x = topRightFloatRect.right;
+          }
         }
         else {
           // Draw around top-left float
@@ -469,10 +471,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (topRightFloatRect) {
         if (!geo.isPointInRect(topRightFloatRect.left, topRightFloatRect.bottom, mhRect)) {
-          topRightPoints[0].x = topRightFloatRect.left;
-          botRightPoints[0].x = topRightFloatRect.left;
+          if (topRightFloatRect.left > topLeftPoints[0].x) { // Sanity check
+            topRightPoints[0].x = topRightFloatRect.left;
+            botRightPoints[0].x = topRightFloatRect.left;
+          }
         }
-        else {
+        else
+        {
           // Draw around top-right float
           topRightPoints = [
             { x: topRightFloatRect.left, y: orig.top },
