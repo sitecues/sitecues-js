@@ -444,7 +444,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         var $parent = $(node).parent(),
           numSiblings = $parent.children().length,
           numSiblingsSameTag = $parent.children(traits.tag).length,
-          numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblings * 0.33));
+          numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblingsSameTag * 0.33));
         if (numSiblingsSameTag < numSiblings - numSiblingsOtherTagAllowed) {
           return false;
         }
@@ -482,7 +482,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
           traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
           // Either the parent has other large cells or this cell is large
-          (judgements.parentVertGrowthFactor > 2 * parentTraits.childCount || traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT) &&
+          (parentTraits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT * parentTraits.childCount) &&
           (hasExactWidthSiblingCells || judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
 
         // Do we look like a cell in a row of cells?
