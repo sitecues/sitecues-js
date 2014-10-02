@@ -175,12 +175,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Get the approach used for highlighting
       if (picked.length > 1 || shouldAvoidBackgroundImage(picked) ||
-         (hasBackgroundImage && hasBackgroundSprite(style))) {
+         (hasBackgroundImage && hasBackgroundSprite(style)) ||
+         state.hasLightText) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
         //        works with form controls
-        //  cons: does not highlight text the way user expects (washes it out)
+        //        visually seamless
+        //  cons: washes dark text out (does not have this problem with light text)
         //  when-to-use: for article or cases where multiple items are selected
         //               when background sprites are used, which we don't want to overwrite with out background
         state.bgColor = getTransparentBackgroundColor();
@@ -653,10 +655,21 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
         // Create and position highlight overlay
-        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
-                    state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null, 1),
-          outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3),
-          extraPaddingSVG = state.bgColor ? getSVGForExtraPadding(extra) : '',
+        var
+          // outlineFillColor:
+          //   If the outline used used for the bg color and a bg color is being used at all
+          // paddingColor:
+          //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
+          //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
+          overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
+          paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
+          paddingSVG = paddingColor ?
+            getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
+          outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
+            overlayBgColor, 3),
+          // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
+          // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
+          extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
           svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
         document.documentElement.appendChild(svgFragment);
