@@ -464,8 +464,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (topLeftFloatRect) {
         if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
-          if (topLeftFloatRect.right < topRightPoints[0].x &&
-            topLeftFloatRect.bottom > topLeftPoints[0].y) {  // Sanity check
+          if (topLeftFloatRect.right > orig.left &&
+            topLeftFloatRect.bottom > orig.bottom) {  // Sanity check
             topLeftPoints[0].x = topLeftFloatRect.right;
             botLeftPoints[0].x = topLeftFloatRect.right;
           }
@@ -482,8 +482,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (topRightFloatRect) {
         if (!geo.isPointInRect(topRightFloatRect.left, topRightFloatRect.bottom, mhRect)) {
-          if (topRightFloatRect.left > topLeftPoints[0].x &&
-            topRightFloatRect.bottom > topRightPoints[0].y) { // Sanity check
+          if (topRightFloatRect.left < orig.right &&
+            topRightFloatRect.bottom > orig.bottom) { // Sanity check
             topRightPoints[0].x = topRightFloatRect.left;
             botRightPoints[0].x = topRightFloatRect.left;
           }
