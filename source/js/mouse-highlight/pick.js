@@ -58,7 +58,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         vertSeparationImpact: 0.8,
         horizSeparationImpact: 0.8,
         percentOfViewportHeightUnderIdealMin: -0.5,
-        percentOfViewportHeightOverIdealMax: -2,
+        percentOfViewportHeightOverIdealMax: -2.5,
         percentOfViewportWidthUnderIdealMin: -0.7,
         percentOfViewportWidthOverIdealMax: -0.5,
         nearBodyWidthFactor: -1,
