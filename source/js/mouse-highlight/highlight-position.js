@@ -127,8 +127,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return px;
     }
 
-    function getBulletWidth(element, style, bulletType) {
-      var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+    function getBulletWidth(element, style) {
+      var bulletType = style.listStyleType,
+        ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
         ems = 1.6; // Simple bullet
       } else if (bulletType === 'decimal') {
@@ -139,20 +140,29 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return getEmsToPx(style.fontSize, ems);
     }
 
+    function hasHiddenBullets(style) {
+      return style.listStyleType === 'none' && style.listStyleImage === 'none';
+    }
+
     function getBulletRect(element, style) {
-      var bulletType = style.listStyleType;
-      if (bulletType === 'none' && style.listStyleImage === 'none') {
-        return null; // inside, will already have bullet incorporated in bounds
-      }
       if (style.display !== 'list-item') {
-        var firstChild = element.firstElementChild;
-        if (!firstChild || traitcache.getStyleProp(firstChild, 'display') !== 'list-item') {
+        var firstChild = element.firstElementChild,
+          firstChildStyle;
+        if (!firstChild) {
+          return;
+        }
+        firstChildStyle = traitcache.getStyle(firstChild);
+        if (firstChildStyle.display !== 'list-item' || hasHiddenBullets(firstChildStyle)) {
           return null; /// Needs to be list-item or have list-item child
         }
       }
+      else if (hasHiddenBullets(style)) {
+        return null; // inside, will already have bullet incorporated in bounds
+      }
+      
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-          getBulletWidth(element, style, bulletType),
+          getBulletWidth(element, style),
         boundingRect = traitcache.getScreenRect(element),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
 

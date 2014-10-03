@@ -550,7 +550,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // unless the parent is about the same size as the child
       domJudgements.isSectionStartContainer = (!domJudgements.isAncestorOfSectionStartContainer ||
         judgements.isRoughlySameSizeAsChild) &&
-        isSectionStartContainer(node) && getNumLeafElements() > 1;
+        isSectionStartContainer(node) && getNumLeafElements(node) > 1;
 
       return domJudgements;
     }
