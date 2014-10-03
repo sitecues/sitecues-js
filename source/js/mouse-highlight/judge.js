@@ -98,7 +98,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       UNUSABLE_ROLES= { presentation:1, separator:1 },
 
       // ** Layout and geometrical constants ***
-      MIN_COLUMN_CELL_HEIGHT = 50,                 // If fewer pixels than this, don't consider it to be a cell in a column
+      MIN_COLUMN_CELL_HEIGHT = 25,                 // If fewer pixels than this, don't consider it to be a cell in a column
+      MIN_AVERAGE_COLUMN_CELL_HEIGHT = 50,         // If fewer pixels than this per item, don't consider it to be a cell in a column
       IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT = 20,   // Smaller than this is bad
       IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT = 60,   // Larger than this is bad
       IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH = 20,    // Smaller than this is bad
@@ -485,7 +486,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
           traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
           // Either the parent has other large cells or this cell is large
-          (parentTraits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT * parentTraits.childCount) &&
+          (parentTraits.visualHeightAt1x > MIN_AVERAGE_COLUMN_CELL_HEIGHT * parentTraits.childCount) &&
+          traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT &&
           (hasExactWidthSiblingCells || judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
 
         // Do we look like a cell in a row of cells?
@@ -526,8 +528,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
         badParents: $(node).parents(BAD_PARENTS_SELECTOR).length,
-        hasHorizontalListDescendant: childJudgements && (childJudgements.verticalList < 0 || childJudgements.hasHorizontalListDescendant),
-        verticalList: !judgements.isAncestorOfCell && getVerticalListScore(node, traits),
+        hasHorizontalListDescendant: childJudgements && (childJudgements.listAndMenuFactor < 0 || childJudgements.hasHorizontalListDescendant),
+        listAndMenuFactor: !judgements.isAncestorOfCell && getListAndMenuFactor(node, traits, judgements),
         isFormControl: common.isFormControl(node),
         // Being grouped with a single image indicates something is likely good to pick
         isGroupedWithImage: traits.visualHeightAt1x > MIN_IMAGE_GROUP_HEIGHT &&
@@ -628,21 +630,40 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         !UNUSABLE_ROLES.hasOwnProperty(traits.role);
     }
 
+    // Menubars are bad
+    // Vertical lists and menus are good
+    // This attempts to provide a scoring factor for all of these similar objects
     // 0 if not a list
     // -1 if a horizontal list
-    // 1 if a vertical list
-    function getVerticalListScore(node, traits) {
+    // +1 if a vertical list
+    // Score is multiplied by 2 if a list of 3 or more links
+    // Score is multiplied by 2 if an absolutely positioned list
+    function getListAndMenuFactor(node, traits, judgements) {
+      var listItems = $(node).find('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
+        links = node.getElementsByTagName('a'),
+        numListItems = listItems.length,
+        numLinks = links.length,
+        isListOfLinks;
+
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
-        return 0;
-      }
-      var listItems = $(node).children('li,[role|="menuitem"]'); // Also matches menuitemradio, menuitemcheckbox
-
-      if (listItems.length <= 1) {
-        return 0;
+        // Still check for horizontal link arrangement
+        return (numLinks > 2 && !isArrangedVertically(links)) ? -1 : 0;
       }
 
-      return traitcache.getRect(listItems[0]).right <= traitcache.getRect(listItems[1]).left ? -1 : 1;
+      if (numListItems < 2) {
+        return 0;
+      }
+
+      isListOfLinks = numListItems > 2 &&
+        numLinks === numListItems; // Same number of links as <li>
+
+      return (isListOfLinks ? 2 : 1) * (judgements.isOutOfFlow ? 2 : 1) * (isArrangedVertically(listItems) ? 1 : -1);
     }
+
+    function isArrangedVertically(items) {
+      return traitcache.getRect(items[0]).right > traitcache.getRect(items[1]).left;
+    }
+
     // Groups of related content often pair an image with text -- this is a noticeable pattern, e.g. on news sites
     function isGroupedWithImage(traits, node) {
       if (traits.childCount === 0 || traits.childCount > MAX_CHILDREN_IMAGE_GROUP) {

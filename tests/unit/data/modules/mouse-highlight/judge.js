@@ -7,7 +7,7 @@ exports.getJudgementStack = function(traitStack, nodes) {
       isGoodTag: false,
       isGoodRole: false,
       badParents: 0,
-      verticalList: 0,
+      listAndMenuFactor: 0,
       hasHorizontalListDescendant: 0,
       isGroupedWithImage: isGoodNode,
       isFormControl: false,
