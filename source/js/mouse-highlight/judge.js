@@ -114,7 +114,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       SEPARATION_DIVISOR = 1.6,                    // The number of spacing pixels will be divided by this in separation impact algorithm
       SEPARATION_IMPACT_POWER = 1.3,               // Exponent for visual impact of whitespace
       MAX_SPACE_SEPARATION_IMPACT = 14,            // The maximum impact of whitespace, for a given edge
-      MAX_BORDER_SEPARATION_IMPACT = 20,           // The maximum impact of a border, for a given edge
+      MAX_BORDER_SEPARATION_IMPACT = 22,           // The maximum impact of a border, for a given edge
       TABLE_CELL_SPACING_BONUS = 7,                // Treat table cells as having 5 extra spaces around them
       BORDER_WIDTH_BONUS = 15,                     // Bonus points for each pixel of border width
       SIGNIFICANT_EDGE_PIXEL_GROWTH = 50,          // Number of pixels of growth on a side that likely means additional content is encompassed on that side
@@ -130,8 +130,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       MAX_ANCESTOR_INDEX_IMAGE_GROUP = 5,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       ROUGHLY_SAME_SIZE_THRESHOLD = 120,           // If parent grows by fewer pixels than this, it is considered roughly the same size as the child
-      LINK_LIST_FACTOR = 2,                        // How much to multiply list score by if it's a list of links
-      OUT_OF_FLOW_LIST_FACTOR = 4,                 // How much to multiply list score by if it's a positioned list (a menu)
+      LINK_LIST_FACTOR = 1.5,                        // How much to multiply list score by if it's a list of links
+      OUT_OF_FLOW_LIST_FACTOR = 5,                 // How much to multiply list score by if it's a positioned list (a menu)
       customJudgements = {};
 
       // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
