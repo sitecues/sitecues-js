@@ -65,7 +65,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // Computed judgements
       $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
-      $.extend(judgements, getSizeJudgements(traits, firstNonInlineTraits, childJudgements));
+      $.extend(judgements, getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
@@ -93,7 +93,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       GOOD_ROLES = {list:1, region:1, complementary:1, dialog:1, alert:1, alertdialog:1, gridcell:1,
       tabpanel:1, tree:1, treegrid:1, listbox:1, img:1, heading:1, rowgroup:1, row:1, toolbar:1,
       menu:1, menubar:1, group:1, form:1, navigation:1, main:1 },
-      ALLOWED_TALL_ELEMENTS = { p: 1, article: 1 },
+      MIN_BR_TAGS_IN_TALL_ARTICLE = 6,
       UNUSABLE_TAGS = { area:1,base:1,basefont:1,bdo:1,br:1,col:1,colgroup:1,font:1,legend:1,link:1,map:1,optgroup:1,option:1,tbody:1,tfoot:1,thead:1,hr:1 },
       UNUSABLE_ROLES= { presentation:1, separator:1 },
 
@@ -253,7 +253,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return visualSeparationJudgements;
     }
 
-    function getSizeJudgements(traits, firstNonInlineTraits, childJudgements) {
+    function getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements) {
       return {
         // Avoid picking tiny icons or images of vertical lines
         tinyHeightFactor: Math.pow(Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeightAt1x), TINY_ELEMENT_IMPACT_POWER),
@@ -263,14 +263,15 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
         // Avoid picking extremely tall items
         isExtremelyTall: (childJudgements && childJudgements.isExtremelyTall) ||
-          (!ALLOWED_TALL_ELEMENTS.hasOwnProperty(traits.tag) &&
-          // Give super tall paragraphs in an article a chance
-          traits.visualHeightAt1x > TALL_ELEMENT_PIXEL_THRESHOLD),
+          (traits.visualHeightAt1x > TALL_ELEMENT_PIXEL_THRESHOLD &&
+           childJudgements && traits !== firstNonInlineTraits &&
+           // Give super tall paragraphs in an article a chance
+           node.getElementsByTagName('br') < MIN_BR_TAGS_IN_TALL_ARTICLE),
 
         // We have a concept of percentage of viewport width and height, where under or over the ideal is not good.
         // Avoid picking things that are very small or large, which are awkward in the HLB according to users.
         percentOfViewportHeightUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT - traits.percentOfViewportHeight),
-        percentOfViewportHeightOverIdealMax: Math.min(100, Math.max(0, traits.percentOfViewportHeight - IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT)),
+        percentOfViewportHeightOverIdealMax: Math.min(60, Math.max(0, traits.percentOfViewportHeight - IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT)),
         percentOfViewportWidthUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH - traits.percentOfViewportWidth),
         percentOfViewportWidthOverIdealMax: Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH),
         nearBodyWidthFactor: traits.rect.width < firstNonInlineTraits.rect.width + SIGNIFICANT_EDGE_PIXEL_GROWTH ?
