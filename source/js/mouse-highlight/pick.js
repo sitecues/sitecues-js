@@ -72,7 +72,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isModeratelyLargerThanChildInOneDimension: 20,
         isCellInRow: 15,
         isCellInCol: 15,
-        hasExactWidthSiblingCells: 15,
+        hasUniformlySizedSiblingCells: 15,
         hasSimilarSiblingCells: 15,
         isSectionStartContainer: 20,
         numElementsDividingContent: -8,

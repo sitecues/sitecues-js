@@ -67,7 +67,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
       $.extend(judgements, getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
-      $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements));
+      $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
 
       for (judgementGetter in customJudgements) {
@@ -101,7 +101,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       MIN_COLUMN_CELL_HEIGHT = 25,                 // If fewer pixels than this, don't consider it to be a cell in a column
       MIN_AVERAGE_COLUMN_CELL_HEIGHT = 50,         // If fewer pixels than this per item, don't consider it to be a cell in a column
       IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT = 20,   // Smaller than this is bad
-      IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT = 60,   // Larger than this is bad
+      IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT = 63,   // Larger than this is bad
       IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH = 20,    // Smaller than this is bad
       IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH = 85,    // Larger than this is bad
       MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH = 60,    // Media larger than this is bad
@@ -390,7 +390,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // By cell, we mean a box-shaped container of related information.
     // We call it a cell because it's generally grouped in rows and/or columns.
     // It is not necessarily a table cell.
-    function getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements) {
+    function getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits) {
       var cellLayoutJudgements = {};
       // Is any descendant of the candidate already a cell?
       // If yes, avoid picking this candidate because it's likely a super container.
@@ -408,7 +408,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       cellLayoutJudgements.isCellInCol = false;
       cellLayoutJudgements.isCellInRow = false;
       cellLayoutJudgements.hasSimilarSiblingCells = false;
-      cellLayoutJudgements.hasExactWidthSiblingCells = false;
+      cellLayoutJudgements.hasUniformlySizedSiblingCells = false;
 
       function isPossibleCell() {
 
@@ -460,22 +460,32 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       }
 
       if (isPossibleCell()) {
-        var hasExactWidthSiblingCells = false,
-          // Do the closest 2 siblings look like similarly-sized cells?
-          nearbySiblings = [
-            $(node).next(),
-            $(node).next().next(),
-            $(node).prev(),
-            $(node).prev().prev()
-          ],
-          siblingsToTry = nearbySiblings.filter(function(sibling) {
-            return sibling.length > 0;
-          });
+        var isComplex = traits !== firstNonInlineTraits,
+          hasExactWidthSiblingCells = true,
+          hasExactHeightSiblingCells = true,
+          siblingsToTry = $(node).children(),
+          numSiblingsToTest = siblingsToTry.length;
         // Look for similar widths because heights can vary when the amount of text varies
-        if (siblingsToTry.length > 1 &&
-          traitcache.getRect(siblingsToTry[0][0]).width === traits.fullWidth &&
-          traitcache.getRect(siblingsToTry[1][0]).width === traits.fullWidth) {
-          hasExactWidthSiblingCells = true;
+        if (numSiblingsToTest < 2) {
+          hasExactWidthSiblingCells = hasExactHeightSiblingCells = false;
+        }
+        else {
+          var MAX_SIBLINGS_TO_TEST = 5;
+          // At least two siblings to test
+          $(siblingsToTry).each(function (index, sibling) {
+            var rect = traitcache.getRect(sibling);
+            if (rect.width !== traits.fullWidth) {
+              hasExactWidthSiblingCells = false;
+              return false;
+            }
+            if (rect.height !== traits.rect.height) {
+              hasExactHeightSiblingCells = false;
+              return false;
+            }
+            if (index > MAX_SIBLINGS_TO_TEST) {
+              return false;
+            }
+          });
         }
 
         // If it is a float, is it a float to create an appearance of cells in a row?
@@ -491,7 +501,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           // Either the parent has other large cells or this cell is large
           (parentTraits.visualHeightAt1x > MIN_AVERAGE_COLUMN_CELL_HEIGHT * parentTraits.childCount) &&
           traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT &&
-          (hasExactWidthSiblingCells || judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
+          ((hasExactHeightSiblingCells && hasExactWidthSiblingCells) || isComplex ||
+            judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
 
         // Do we look like a cell in a row of cells?
         cellLayoutJudgements.isCellInRow =
@@ -513,9 +524,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
                 judgements.parentHorizGrowthFactor > EXTREME_GROWTH_FACTOR))
            );
 
-        if (cellLayoutJudgements.isCellInRow || cellLayoutJudgements.isCellInCol) {
-          cellLayoutJudgements.hasExactWidthSiblingCells = hasExactWidthSiblingCells;
-        }
+        cellLayoutJudgements.hasUniformlySizedSiblingCells =
+          (cellLayoutJudgements.isCellInRow && hasExactHeightSiblingCells) ||
+          (cellLayoutJudgements.isCellInCol && hasExactHeightSiblingCells);
       }
 
       return cellLayoutJudgements;
@@ -656,10 +667,14 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Score is multiplied by OUT_OF_FLOW_LIST_FACTOR if an absolutely positioned list
     function getListAndMenuFactor(node, traits, judgements) {
       var listItems = $(node).find('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
-        links = node.getElementsByTagName('a'),
+        links = $(node).find('li>a,>a'),
         numListItems = listItems.length,
         numLinks = links.length,
         isListOfLinks;
+
+      if (numLinks && numLinks !== numListItems) {
+        return 0;  // Need same number of links as list items, if we have links
+      }
 
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
         // Still check for horizontal link arrangement
@@ -667,7 +682,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       }
 
       if (numListItems < 2) {
-        return 0;
+        return 0;  // Need multiple items
       }
 
       isListOfLinks = numListItems > 2 &&
