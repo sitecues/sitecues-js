@@ -466,8 +466,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
           if (topLeftFloatRect.right < topRightPoints[0].x &&
             topLeftFloatRect.bottom > topLeftPoints[0].y) {  // Sanity check
-            topLeftPoints[0].x = topRightFloatRect.right;
-            botLeftPoints[0].x = topRightFloatRect.right;
+            topLeftPoints[0].x = topLeftFloatRect.right;
+            botLeftPoints[0].x = topLeftFloatRect.right;
           }
         }
         else {

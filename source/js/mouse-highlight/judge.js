@@ -99,11 +99,11 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // ** Layout and geometrical constants ***
       MIN_COLUMN_CELL_HEIGHT = 25,                 // If fewer pixels than this, don't consider it to be a cell in a column
-      MIN_AVERAGE_COLUMN_CELL_HEIGHT = 50,         // If fewer pixels than this per item, don't consider it to be a cell in a column
+      MIN_AVERAGE_COLUMN_CELL_HEIGHT = 65,         // If fewer pixels than this per item, don't consider it to be a cell in a column
       IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT = 20,   // Smaller than this is bad
       IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT = 63,   // Larger than this is bad
       IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH = 20,    // Smaller than this is bad
-      IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH = 85,    // Larger than this is bad
+      IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH = 63,    // Larger than this is bad
       MEDIA_MAX_PERCENT_OF_VIEWPORT_WIDTH = 60,    // Media larger than this is bad
       IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
       NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
@@ -131,7 +131,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       MAX_ANCESTOR_INDEX_IMAGE_GROUP = 5,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       ROUGHLY_SAME_SIZE_THRESHOLD = 120,           // If parent grows by fewer pixels than this, it is considered roughly the same size as the child
       LINK_LIST_FACTOR = 1.5,                        // How much to multiply list score by if it's a list of links
-      OUT_OF_FLOW_LIST_FACTOR = 5,                 // How much to multiply list score by if it's a positioned list (a menu)
+      OUT_OF_FLOW_LIST_FACTOR = 6,                 // How much to multiply list score by if it's a positioned list (a menu)
       customJudgements = {};
 
       // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
@@ -256,6 +256,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     }
 
     function getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements) {
+      var isSignificantlyWiderThanFirstOption = traits.rect.width < firstNonInlineTraits.rect.width + SIGNIFICANT_EDGE_PIXEL_GROWTH;
       return {
         // Avoid picking tiny icons or images of vertical lines
         tinyHeightFactor: Math.pow(Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeightAt1x), TINY_ELEMENT_IMPACT_POWER),
@@ -275,8 +276,9 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         percentOfViewportHeightUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_HEIGHT - traits.percentOfViewportHeight),
         percentOfViewportHeightOverIdealMax: Math.min(60, Math.max(0, traits.percentOfViewportHeight - IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT)),
         percentOfViewportWidthUnderIdealMin: Math.max(0, IDEAL_MIN_PERCENT_OF_VIEWPORT_WIDTH - traits.percentOfViewportWidth),
-        percentOfViewportWidthOverIdealMax: Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH),
-        nearBodyWidthFactor: traits.rect.width < firstNonInlineTraits.rect.width + SIGNIFICANT_EDGE_PIXEL_GROWTH ?
+        // If no good child candidate, don't punish it for being almost as wide as the viewport
+        percentOfViewportWidthOverIdealMax: isSignificantlyWiderThanFirstOption ? Math.max(0, traits.percentOfViewportWidth - IDEAL_MAX_PERCENT_OF_VIEWPORT_WIDTH) : 0,
+        nearBodyWidthFactor: isSignificantlyWiderThanFirstOption ?
           0 : // If we're not significantly wider than the first non-inline candidate, don't punish for being wide
           Math.pow(Math.max(0, traits.percentOfBodyWidth - IDEAL_MAX_PERCENT_OF_BODY_WIDTH), NEAR_BODY_WIDTH_IMPACT_POWER)
       };
