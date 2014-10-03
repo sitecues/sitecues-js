@@ -34,7 +34,7 @@ exports.getJudgementStack = function(traitStack, nodes) {
       isModeratelyLargerThanChildInOneDimension: false,
       isCellInRow: false,
       isCellInCol: false,
-      hasExactWidthSiblingCells: 0,
+      hasUniformlySizedSiblingCells: 0,
       hasSimilarSiblingCells: 0,
       isSectionStartContainer: isGoodNode,
       numElementsDividingContent: false,
