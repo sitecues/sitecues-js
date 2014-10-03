@@ -571,7 +571,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         lastDividingElement = dividingElements.last();
 
       if (!lastDividingElement.length) {
-        return 0;
+        return 0;  // No dividing element
       }
 
       var
@@ -590,6 +590,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Used in while loop
         sibling,
         $sibling;
+
+      if (lastDividingElement.parentsUntil(BAD_PARENTS_SELECTOR).length) {
+        return 0; // Bad parent of dividing element
+      }
 
       // Go up from starting point to see if a non-section-start exists before it in the container.
       while (currentAncestor && currentAncestor !== container) {
