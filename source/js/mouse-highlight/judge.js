@@ -130,6 +130,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       MAX_ANCESTOR_INDEX_IMAGE_GROUP = 5,          // If ancestor index is larger than this, it does not typically fit the pattern of an image group, so don't do the expensive check
       ROUGHLY_SAME_SIZE_THRESHOLD = 120,           // If parent grows by fewer pixels than this, it is considered roughly the same size as the child
+      LINK_LIST_FACTOR = 2,                        // How much to multiply list score by if it's a list of links
+      OUT_OF_FLOW_LIST_FACTOR = 4,                 // How much to multiply list score by if it's a positioned list (a menu)
       customJudgements = {};
 
       // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
@@ -646,8 +648,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // 0 if not a list
     // -1 if a horizontal list
     // +1 if a vertical list
-    // Score is multiplied by 2 if a list of 3 or more links
-    // Score is multiplied by 2 if an absolutely positioned list
+    // Score is multiplied by LINK_LIST_FACTOR if a list of 3 or more links
+    // Score is multiplied by OUT_OF_FLOW_LIST_FACTOR if an absolutely positioned list
     function getListAndMenuFactor(node, traits, judgements) {
       var listItems = $(node).find('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
         links = node.getElementsByTagName('a'),
@@ -667,7 +669,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       isListOfLinks = numListItems > 2 &&
         numLinks === numListItems; // Same number of links as <li>
 
-      return (isListOfLinks ? 2 : 1) * (judgements.isOutOfFlow ? 2 : 1) * (isArrangedVertically(listItems) ? 1 : -1);
+      return (isListOfLinks ? LINK_LIST_FACTOR : 1) * (judgements.isOutOfFlow ? OUT_OF_FLOW_LIST_FACTOR: 1) *
+        (isArrangedVertically(listItems) ? 1 : -1);
     }
 
     function isArrangedVertically(items) {
