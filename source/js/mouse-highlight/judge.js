@@ -108,7 +108,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
       NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
       TALL_ELEMENT_PIXEL_THRESHOLD = 999,          // Anything taller than this is considered very tall
-      TINY_ELEMENT_PIXEL_THRESHOLD = 20,           // Anything smaller than this is considered a tiny element (or at least very thin)
+      TINY_ELEMENT_PIXEL_THRESHOLD = 18,           // Anything smaller than this is considered a tiny element (or at least very thin)
       TINY_ELEMENT_IMPACT_POWER = 1.2,             // Exponential for the affect of smallness
       SEPARATOR_IMAGE_PIXEL_THRESHOLD = 6,         // Maximum thickness for a separator line
       SEPARATION_DIVISOR = 1.6,                    // The number of spacing pixels will be divided by this in separation impact algorithm
@@ -591,7 +591,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         sibling,
         $sibling;
 
-      if (lastDividingElement.parentsUntil(BAD_PARENTS_SELECTOR).length) {
+      if ($(currentAncestor).parents(BAD_PARENTS_SELECTOR).length) {
         return 0; // Bad parent of dividing element
       }
 
