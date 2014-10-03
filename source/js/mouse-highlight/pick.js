@@ -32,7 +32,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
     var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
       MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
-      MIN_SCORE_TO_PICK = -100,        // If nothing above this, will pick nothing
+      MIN_SCORE_TO_PICK = -200,        // If nothing above this, will pick nothing
       // In order of precedence:
       PICK_RULE_DISABLE = 'disable', // don't pick this anything -- not this item, any ancestor, or any descendant
       PICK_RULE_PREFER = 'prefer',   // pick this item
