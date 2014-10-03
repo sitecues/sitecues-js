@@ -545,7 +545,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // A divided group should be avoided. Rather, the subgroups should be picked.
         // Avoid picking the current candidate if it is divided by a heading or separator in the middle, because
         // it is probably an ancestor of smaller useful groups.
-        isDividedInHalf: (childJudgements && childJudgements.isDividedInHalf) || isDividedInHalf(node)
+        numElementsDividingContent: (childJudgements && childJudgements.numElementsDividingContent) || numElementsDividingContent(node)
       };
 
       // A container that begins with a heading or dividing element is likely a good item to pick
@@ -553,7 +553,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // unless the parent is about the same size as the child
       domJudgements.isSectionStartContainer = (!domJudgements.isAncestorOfSectionStartContainer ||
         judgements.isRoughlySameSizeAsChild) &&
-        isSectionStartContainer(node) && getNumLeafElements(node) > 1;
+        isSectionStartContainer(node) && getLeafElements(node).length > 1;
 
       return domJudgements;
     }
@@ -561,7 +561,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Is the content divided into 2 or more sections?
     // IOW, is there a heading/hr in the middle of it rather than just at the start?
     // This will return true even if there is something before the heading that is not grouped with <header>.
-    function isDividedInHalf(container) {
+    function numElementsDividingContent(container) {
       // Find descendants which start a section
       var dividingElements = $(container).find(SECTION_START_SELECTOR),
 
@@ -569,7 +569,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         lastDividingElement = dividingElements.last();
 
       if (!lastDividingElement.length) {
-        return false;
+        return 0;
       }
 
       var
@@ -597,17 +597,28 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         while (sibling && sibling !== currentAncestor) {
           $sibling = $(sibling);
           if (!$sibling.is(SECTION_START_SELECTOR) &&
-            !isSectionStartContainer(sibling) &&
-            !common.isVisualMedia(sibling) &&
             !$sibling.is(':empty') &&
-            traitcache.getStyleProp(sibling, 'display') !== 'none') {
-            return true;  // A visible non-section-start element exists before the section-start-element, which means we are divided!
+            traitcache.getStyleProp(sibling, 'display') !== 'none' &&
+            !isSectionStartContainer(sibling) &&
+            !isVisualMediaSubtree(sibling)) {
+            // A visible non-section-start element exists before the section-start-element, which means we are divided!
+            // Return the number of section start elements
+            return dividingElements.length;
           }
           sibling = sibling.nextElementSibling;
         }
         currentAncestor = currentAncestor.parentNode;
       }
-      return false;
+      return 0;
+    }
+
+    // Return true if visual media or the only contents are visual media
+    function isVisualMediaSubtree(container) {
+      if (common.isVisualMedia(container)) {
+        return true;
+      }
+      var leaves = getLeafElements(container);
+      return leaves.length === 1 && common.isVisualMedia(leaves[0]);
     }
 
     function getLastLeaf(container) {
@@ -615,12 +626,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return lastElementChild ? getLastLeaf(lastElementChild) : container;
     }
 
-    function getNumLeafElements(node) {
-      var leafElements = $(node).find('*').filter(function() {
+    function getLeafElements(node) {
+      return $(node).find('*').filter(function() {
         return this.childElementCount === 0;
       });
-
-      return leafElements.length;
     }
 
       // Should we even consider this node or not?
@@ -675,7 +684,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         return false;  // No images or multiple images: doesn't fit the pattern
       }
 
-      return getNumLeafElements(node) > 1; // Must be paired with something else
+      return getLeafElements(node).length > 1; // Must be paired with something else
     }
 
     // If the element a divider (such as <hr>), return it's thickness, otherwise return 0

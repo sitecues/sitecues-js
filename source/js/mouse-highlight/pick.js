@@ -74,9 +74,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isCellInCol: 15,
         hasExactWidthSiblingCells: 15,
         hasSimilarSiblingCells: 15,
-        isSectionStartContainer: 25,
-        isDividedInHalf: -8,
-        isAncestorOfCell: -5,
+        isSectionStartContainer: 20,
+        numElementsDividingContent: -8,
+        isAncestorOfCell: -10,
         isWideAncestorOfCell: -10,
         isLargeWidthExpansion: -10,
         isWideMediaContainer: UNUSABLE_SCORE

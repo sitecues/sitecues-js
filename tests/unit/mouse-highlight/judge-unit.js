@@ -408,16 +408,16 @@ describe('judge', function() {
             expect(judgementStack[1].isSectionStartContainer).to.be.equal(false);
             done();
         });
-        it('should return |isDividedInHalf=false| judgement for an element without any dividing descendants.', function(done) {
+        it('should return |numElementsDividingContent=0| judgement for an element without any dividing descendants.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[1].isDividedInHalf).to.be.equal(false);
+            expect(judgementStack[1].numElementsDividingContent).to.be.equal(0);
             done();
         });
-        it('should return |isDividedInHalf=true| judgement for an element an <hr> middle child.', function(done) {
+        it('should return |numElementsDividingContent>0| judgement for an element an <hr> middle child.', function(done) {
             var traitStack = traits.getTraitStack(nodes), // Mock traits, not real values
                 judgementStack = judge.getJudgementStack(traitStack, nodes);
-            expect(judgementStack[2].isDividedInHalf).to.be.equal(true);
+            expect(judgementStack[2].numElementsDividingContent).to.be.greaterThan(0);
             done();
         });
         it('should return |isLargeWidthExpansion=true| judgement for an element much wider than the first non-inline descendant.', function(done) {
