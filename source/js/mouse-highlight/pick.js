@@ -106,7 +106,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       var ancestors, candidates, picked;
 
       // 1. Don't pick anything in the sitecues UI
-      if (common.isInSitecuesUI(startElement)) {
+      if (common.isInSitecuesUI(startElement) || $(startElement).is('html,body')) {
         return null;
       }
 
@@ -119,7 +119,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       traitcache.resetCache();
 
       // 3. Get candidate nodes that could be picked
-      ancestors = $.makeArray($(startElement).parentsUntil(document.body));
+      ancestors = $.makeArray($(startElement).parentsUntil('body'));
       candidates = [startElement].concat(ancestors);
 
       // 4. Don't pick anything when over whitespace
