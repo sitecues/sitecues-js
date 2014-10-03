@@ -87,7 +87,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,hgroup,header,dt,div[role="heading"],hr,div[role="separator"]',
       GREAT_TAGS = { blockquote:1, td:1, ol:1, menu:1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, p:1, pre:1, li:1, section:1, tr:1 },
-      BAD_PARENTS_SELECTOR = 'li,p,h1,h2,h3,h4,h5,h6,hgroup,header,button,a',
+      BAD_PARENTS_SELECTOR = 'li,p,h1,h2,h3,h4,h5,h6,hgroup,button,a',
       // These are less likely to be used to layout a cell/box
       UNLIKELY_CELL_TAGS = { a: 1, ol: 1, ul: 1, p: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, hgroup: 1, header:1 },
       GOOD_ROLES = {list:1, region:1, complementary:1, dialog:1, alert:1, alertdialog:1, gridcell:1,
@@ -680,7 +680,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
         // Still check for horizontal link arrangement
-        return (numLinks > 2 && !isArrangedVertically(links)) ? -1 : 0;
+        return (numLinks > 2 && !isArrangedVertically(links)) ? -2 : 0;
       }
 
       if (numListItems < 2) {
@@ -691,7 +691,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         numLinks === numListItems; // Same number of links as <li>
 
       return (isListOfLinks ? LINK_LIST_FACTOR : 1) * (judgements.isOutOfFlow ? OUT_OF_FLOW_LIST_FACTOR: 1) *
-        (isArrangedVertically(listItems) ? 1 : -1);
+        (isArrangedVertically(listItems) ? 1 : -2);
     }
 
     function isArrangedVertically(items) {
