@@ -122,19 +122,19 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           width: ems + 'em',
           visibility: 'hidden'
         }),
-        px = measureDiv.width();
+        px = measureDiv.width() * conf.get('zoom');
       measureDiv.remove();
       return px;
     }
 
-    function getBulletWidth(element, style) {
+    function getBulletWidth(listElement, style) {
       var bulletType = style.listStyleType,
         ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
         ems = 1.6; // Simple bullet
       } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'), 10),
-          end = (start || 1) + element.childElementCount - 1;
+        var start = parseInt($(listElement).attr('start'), 10),
+          end = (start || 1) + listElement.childElementCount - 1;
         ems = (0.9 + 0.5 * end.toString().length);
       }
       return getEmsToPx(style.fontSize, ems);
@@ -145,24 +145,13 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     function getBulletRect(element, style) {
-      if (style.display !== 'list-item') {
-        var firstChild = element.firstElementChild,
-          firstChildStyle;
-        if (!firstChild) {
-          return;
-        }
-        firstChildStyle = traitcache.getStyle(firstChild);
-        if (firstChildStyle.display !== 'list-item' || hasHiddenBullets(firstChildStyle)) {
-          return null; /// Needs to be list-item or have list-item child
-        }
+      if (style.display !== 'list-item' || hasHiddenBullets(style)) {
+        return;
       }
-      else if (hasHiddenBullets(style)) {
-        return null; // inside, will already have bullet incorporated in bounds
-      }
-      
+
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-          getBulletWidth(element, style),
+          getBulletWidth(element.parentNode, style),
         boundingRect = traitcache.getScreenRect(element),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
 
@@ -361,7 +350,18 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
         // -- Out of flow and is not the top element --
         if (!isTop && (style.position === 'absolute' || style.position === 'fixed')) {
-          return;
+          var thisRect = traitcache.getScreenRect(this),
+            parentRect = traitcache.getScreenRect(this.parentNode),
+            FUZZ_FACTOR = 4;
+          // If the child bounds pop out of the parent bounds by more
+          // than FUZZ_FACTOR, it will need to be kept separate and
+          // not included in the current bounds calculation for this subtree
+          if (Math.abs(thisRect.left - parentRect.left) > FUZZ_FACTOR ||
+            Math.abs(thisRect.top - parentRect.top) > FUZZ_FACTOR ||
+            Math.abs(thisRect.right - parentRect.right) > FUZZ_FACTOR ||
+            Math.abs(thisRect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
+            return;
+          }
         }
 
         // --- Overflowing content ---

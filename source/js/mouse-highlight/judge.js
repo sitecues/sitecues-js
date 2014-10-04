@@ -364,7 +364,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
             // Or:
             // Vertical growth: very small to moderate
             // Horizontal growth: very small
-            (growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR  &&
+            (growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
               growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
               growthJudgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR)
           ),
