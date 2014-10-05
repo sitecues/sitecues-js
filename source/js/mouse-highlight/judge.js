@@ -66,7 +66,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // Computed judgements
       $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
       $.extend(judgements, getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements));
-      $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
+      $.extend(judgements, getGrowthJudgements(traits, judgements, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
 
@@ -292,7 +292,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // - A parent candidate to the child candidate
     // - From the current candidate to its child candidate
     // - From the current candidate to first non-inline candidate
-    function getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements) {
+    function getGrowthJudgements(traits, judgements, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements) {
       var growthJudgements = {
         // Ratio of sizes between objects
 
@@ -345,6 +345,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Only need moderate horizontal growth -- things tend to be wider than they are tall.
         // Also, by requiring extreme vertical growth we don't fire as much when the first non-inline was a single line of text.
         large2dGrowth:
+          !judgements.percentOfViewportHeightUnderIdealMin &&
+          !judgements.percentOfViewportWidthUnderIdealMin &&
           growthJudgements.totalHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
             growthJudgements.totalVertGrowthFactor > EXTREME_GROWTH_FACTOR &&
             growthJudgements.totalHorizGrowthFactor * growthJudgements.totalVertGrowthFactor,
@@ -357,17 +359,15 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           // Horizontal growth: very small to moderate
           // Vertical growth: very small
           firstTraits.isVisualMedia &&
-          (
-            (growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
-              growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
-              growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
-            // Or:
-            // Vertical growth: very small to moderate
-            // Horizontal growth: very small
-            (growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
-              growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
-              growthJudgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR)
-          ),
+          (growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
+            growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
+            growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
+          // Or:
+          // Vertical growth: very small to moderate
+          // Horizontal growth: very small
+          (growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
+            growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
+            growthJudgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR),
 
         // Similar rule, used to give the parent a bonus:
         // This is a good thing, we are just encompassing a little more information such as an image or caption.
