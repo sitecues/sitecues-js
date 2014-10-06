@@ -17,10 +17,13 @@ sitecues.def('util/common', function (common, callback) {
     // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
     // Very strange behavior, might be worth filing a browser bug repport.
     // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
+    // UPDATE: (oct  06, 2014) Firefox appears to regress when window.pageYOffset is 0.  Animation of HLB
+    //                         flies out from outside the viewport (top-left)
     common.useJqueryAnimate = (function () {
 
-      return (platform.browser.isIE && platform.browser.version === 9) ||
-             (platform.browser.isIE && platform.os.isWin8);
+      return (platform.browser.isIE      && platform.browser.version === 9) ||
+             (platform.browser.isIE      && platform.os.isWin8)             ||
+             (platform.browser.isFirefox && window.pageYOffset === 0);
 
     }());
 
