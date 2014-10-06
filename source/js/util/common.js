@@ -252,9 +252,21 @@ sitecues.def('util/common', function (common, callback) {
      * not being able to look outside of the view port
      */
     common.elementFromPoint = function(x, y) {
+      var maxX = window.innerWidth - 1,
+        maxY = window.innerHeight - 1;
+
+      if (platform.browser.isIE) {
+        // In IE, this is the best we can do for now, because it causes the document to quickly shift
+        x = Math.min(maxX, Math.max(0, x));
+        y = Math.min(maxY, Math.max(0, y));
+        return document.elementFromPoint(x, y);
+      }
+
+      // ----------------------------------------------------
+      // DON"T DO IT IN IE! Causes document to quickly shift back and forth!
       var
-        translateX = x < 0 ? -x : Math.min((window.innerWidth-1) - x, 0),
-        translateY = y < 0 ? -y : Math.min((window.innerHeight-1) - y, 0),
+        translateX = x < 0 ? -x : Math.min(maxX - x, 0),
+        translateY = y < 0 ? -y : Math.min(maxY - y, 0),
         result;
 
       // 1. Move document over so that point is in the view port
