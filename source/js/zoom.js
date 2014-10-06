@@ -288,8 +288,11 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Should we wait for browser to create compositor layer?
       function shouldPrepareAnimations() {
-        return IS_WILL_CHANGE_SUPPORTED && body.style.willChange === '' &&   // Animation property not set yet: give browser time to set up compositor layer
-          !shouldRestrictWidth();
+        // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
+        var body = body || document.body;
+        return IS_WILL_CHANGE_SUPPORTED
+          && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
+          && !shouldRestrictWidth();
       }
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
@@ -670,6 +673,8 @@ sitecues.def('zoom', function (zoom, callback) {
           return false;
         }
         if (IS_WILL_CHANGE_SUPPORTED) { // Is will-change supported?
+          // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
+          var $body = $body || $('body');
           // This is a CSS property that aids performance of animations
           $body.css('willChange', 'transform');
         }
