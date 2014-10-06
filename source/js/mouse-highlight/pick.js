@@ -103,7 +103,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      * @param hover The element the mouse is hovering over
      */
     picker.find = function find(startElement) {
-      var ancestors, candidates, picked;
+      var allAncestors, validAncestors, candidates, picked;
 
       // 1. Don't pick anything in the sitecues UI
       if (common.isInSitecuesUI(startElement) || $(startElement).is('html,body')) {
@@ -119,8 +119,10 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       traitcache.resetCache();
 
       // 3. Get candidate nodes that could be picked
-      ancestors = $.makeArray($(startElement).parentsUntil('body'));
-      candidates = [startElement].concat(ancestors);
+      // Remove any ancestor that has the #sitecues-badge as a descendant
+      allAncestors = $(startElement).parentsUntil('body');
+      validAncestors = allAncestors.not(allAncestors.has('#sitecues-badge'));
+      candidates = [startElement].concat($.makeArray(validAncestors));
 
       // 4. Don't pick anything when over whitespace
       //    Avoids slow, jumpy highlight, and selecting ridiculously large containers
