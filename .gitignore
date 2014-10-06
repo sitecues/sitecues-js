@@ -20,7 +20,7 @@ fetchavatars.pl
 # None of Howard's jokes should make it into the production code under any circumstances!
 # =======================================================================================
 # Howards jokes include, but are not limited to: Wowwerd dot j.s. dot com . dot net . dot org . dot wordpress slash startup dot schwab.
-howards-jokes.js
+howards-jokes.js.
 
 # Generated cursor output files make it into the repo.
 # ====================================================
