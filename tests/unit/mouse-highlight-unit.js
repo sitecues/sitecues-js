@@ -59,7 +59,7 @@ describe('mouse-highlight', function () {
   describe('#updateColorApproach()', function () {
     it('should have semi-transparent bgColor and doUseOverlayForBgColor=true if multiple items picked', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [1, 2, 3],
+        picked = $('<p>').add($('<p>')),
         styles = [{}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -67,9 +67,9 @@ describe('mouse-highlight', function () {
       expect(state.doUseOverlayForBgColor).to.be.true;
       done();
     });
-    it('should have semi-transparent bgColor doUseOverlayForBgColor=true if form control is picked', function (done) {
+    it('should have semi-transparent bgColor doUseOverlayForBgColor=true if button is picked', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = $('<input>'),
+        picked = $('<button>'),
         styles = [{}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -79,7 +79,7 @@ describe('mouse-highlight', function () {
     });
     it('should have semi-transparent bgColor and doUseOverlayForBgColor=true if picked element has background sprite', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [$('<div>')],
+        picked = $('<div>'),
         styles = [{backgroundImage: 'list-bullet.png', backgroundRepeat: 'no-repeat'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -88,7 +88,7 @@ describe('mouse-highlight', function () {
       done();
     });
     it('should have no bgColor and doUseOverlayForBgColor=false if has a background image', function (done) {
-      var picked = [$('<div>')],
+      var picked = $('<div>'),
         styles = [{'backgroundImage': 'gradient.png'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -129,7 +129,7 @@ describe('mouse-highlight', function () {
     });
     it('should use semi-transparent bgColor and doUseOverlayForBgColor=false if picked element has dark bg color', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [$('<p>')],
+        picked = $('<p>'),
         styles = [{'backgroundColor': 'rgb(30,30,30)'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();

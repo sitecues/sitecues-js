@@ -12,18 +12,11 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // ---- PUBLIC ----
 
     traits.getTraitStack = function(nodes) {
-      var traitStack,
-        spacingTraitStack;
+      var traitStack;
 
       viewSize = traitcache.getCachedViewSize();
       bodyWidth = zoom.getBodyWidth();
       traitStack = nodes.map(getTraits);
-
-      // Get cascaded spacing traits and add them to traitStack
-      spacingTraitStack = getSpacingTraitsStack(traitStack);  // topSpacing, leftSpacing, etc.
-      traitStack.forEach(function(traits, index) {
-        $.extend(traits, spacingTraitStack[index]);
-      });
 
       return traitStack;
     };
@@ -40,13 +33,16 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
           style: traitcache.getStyle(node),
           tag: node.localName,
           role: node.getAttribute('role'),
-          childCount: node.childElementCount,
-          isVisualMedia: common.isVisualMedia(node)
+          childCount: node.childElementCount
         };
+
+      traits.isVisualMedia = isVisualMedia(traits, node);
 
       traits.normDisplay = getNormalizedDisplay(traits.style, node);
 
-      traits.rect = getRect(node, traits.normDisplay);
+      traits.rect = getRect(node, traits);
+
+      traits.fullWidth = traitcache.getRect(node).width; // Full element width, even if visible text content is much less
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -103,9 +99,11 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // In most cases, we use the fastest approach (cached getBoundingClientRect results)
     // However, a block parent of an inline or visible text needs the more exact approach, so that the element
     // does not appear to be much wider than it really is
-    function getRect(element, display) {
+    function getRect(element, traits) {
       var fastRect = traitcache.getRect(element),
-        exactWidth;
+        exactWidth,
+        display = traits.normDisplay,
+        WIDE_ELEMENT_TO_BODY_RATIO = 0.7;
 
       // If not display:block -- use fast approach
       // because other elements are unlikely to have drastically incorrect widths
@@ -113,91 +111,23 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         return fastRect;
       }
 
-      // If first element child is not display: inline -- use fast approach
-      // because it is still not the case where the width is very likely incorrect
-      var firstElementChild = element.firstElementChild;
-      if (firstElementChild) {
-        var childDisplay = traitcache.getStyleProp(firstElementChild, 'display');
-        if (childDisplay !== 'inline' && childDisplay !== 'inline-block') {
-          return fastRect;
-        }
+      if (fastRect.width < bodyWidth * WIDE_ELEMENT_TO_BODY_RATIO) { // Not almost full width
+        return fastRect;
       }
 
-      // We're a block parent of an inline or text -- use the exact approach for width
-      // because it's very likely that the element bounds include tons of whitespace and appear to be
-      // much larger than the visible content.
-      // The exact approach is the same as we'd use for the highlight, but here we ask it to not bother with sprites
-      // since they generally won't affect the results by much.
+      // Almost full width, likely that it's a float which provides an incorrect width
       exactWidth = mhpos.getRangeRect(element).width;
       return $.extend({}, fastRect, { width: exactWidth }); // Replace the width
     }
 
-    // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
-    // Returns an array of edges, e.g. ["top", "left"]
-    function getAdjacentEdges(traitStack, index) {
-      var traits = traitStack[index],
-          parentTraits = traitStack[index + 1],
-          rect = traits.unzoomedRect,
-          parentRect = parentTraits.unzoomedRect,
-          adjacentEdges = [],
-          FUZZ_FACTOR = 1;  // If we're close by this many pixels, consider them adjacent
-
-      if (parentRect.top + parentTraits.topPadding + FUZZ_FACTOR >= rect.top - traits.topMargin) {
-        adjacentEdges.push('top');
-      }
-
-      if (parentRect.left + parentTraits.leftPadding + FUZZ_FACTOR >= rect.left - traits.leftMargin) {
-        adjacentEdges.push('left');
-      }
-
-      if (parentRect.bottom - parentTraits.bottomPadding - FUZZ_FACTOR <= rect.bottom + traits.bottomMargin) {
-        adjacentEdges.push('bottom');
-      }
-
-      if (parentRect.right - parentTraits.rightPadding - FUZZ_FACTOR <= rect.right + traits.rightMargin) {
-        adjacentEdges.push('right');
-      }
-
-      return adjacentEdges;
-    }
-
-    // Get the true amount of spacing around each object.
-    // For the top, left, bottom and rightmost objects in each container,
-    // the parent container's margin/padding for that edge should be added to it
-    // because we want the complete amount of visual spacing on that edge.
-    function getSpacingTraitsStack(traitStack) {
-
-      // Create the spacing properties
-      function getSpacingTraits(item) {
-        return {
-          topSpacing: item.topMargin + item.topPadding,
-          leftSpacing: item.leftMargin + item.leftPadding,
-          bottomSpacing: item.bottomMargin + item.bottomPadding,
-          rightSpacing: item.rightMargin + item.rightPadding
-        };
-      }
-
-      var spacingTraitStack = traitStack.map(getSpacingTraits),
-        index;
-
-      function combineSpacingForAdjacentEdges(edge) {
-        // Edges are adjacent, so use combined separation value for both, on that edge
-        var propName = edge + 'Spacing', // E.g. topSpacing
-          sum = spacingTraitStack[index][propName] + spacingTraitStack[index + 1][propName];
-        spacingTraitStack[index][propName] = sum;
-        spacingTraitStack[index + 1][propName] = sum;
-      }
-
-      // Cascade the spacing of each edge on the parent to its child, as appropriate.
-      // For example, if the element is at the top of the parent, treat both object's top as
-      // having the same aggregated values.
-      // Because we compare each element to its parent, we start with child of the top ancestor.
-      for (index = spacingTraitStack.length - 2; index >= 0; index --) {
-        var adjacentEdges = getAdjacentEdges(traitStack, index);
-        adjacentEdges.forEach(combineSpacingForAdjacentEdges);
-      }
-
-      return spacingTraitStack;
+    function isVisualMedia(traits, node) {
+      var style = traits.style;
+      return common.isVisualMedia(node) ||
+        // Or if one of those <div></div> empty elements just there to show a background image
+        (traits.childCount === 0 && style.backgroundImage !== 'none' &&
+          (style.backgroundRepeat === 'no-repeat' || style.backgroundSize === 'cover'
+            || style.backgroundSize === 'contain') &&
+          $(node).is(':empty'));
     }
 
     if (SC_UNIT) {

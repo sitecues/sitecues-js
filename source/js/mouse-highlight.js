@@ -38,6 +38,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
+  // Don't consider the text light unless the yiq is larger than this
+  MIN_YIQ_LIGHT_TEXT = 160,
+
   state,
 
   isEnabled,
@@ -51,10 +54,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   scrollPos;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
-  sitecues.use('jquery', 'conf', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
+  sitecues.use('jquery', 'conf', 'zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common',
     'audio', 'util/geo', 'platform',
-    function($, conf, picker, traitcache, mhpos, common, audio, geo, platform) {
+    function($, conf, zoomMod, picker, traitcache, mhpos, common, audio, geo, platform) {
 
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
@@ -67,12 +70,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return maxZIndex;
     }
 
-    function isZIndexHigher(item1, item2, commonAncestor) {
+    function isDifferentZIndex(item1, item2, commonAncestor) {
       function getZIndex(item) {
         var styles = getAncestorStyles(item, commonAncestor);
         return getMaxZIndex(styles);
       }
-      return getZIndex(item1) > getZIndex(item2);
+      return getZIndex(item1) !== getZIndex(item2);
     }
 
     /**
@@ -83,7 +86,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // http://en.wikipedia.org/wiki/YIQ
         yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
 
-      return yiq >= 128;
+      return yiq > MIN_YIQ_LIGHT_TEXT;
     }
 
     function getElementsContainingText(selector) {
@@ -125,7 +128,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         b: parseInt(match[3] || 0),
         a: parseFloat(match[4] || 1)
       };
-
     }
 
     function isDarkBackground(style) {
@@ -174,13 +176,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.hasLightText = hasLightText(state.target);
 
       // Get the approach used for highlighting
-      if (picked.length > 1 || common.isFormControl(picked) ||
-         (hasBackgroundImage && hasBackgroundSprite(style))) {
+      if (picked.length > 1 || shouldAvoidBackgroundImage(picked) ||
+         (hasBackgroundImage && hasBackgroundSprite(style)) ||
+         state.hasLightText) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
         //        works with form controls
-        //  cons: does not highlight text the way user expects (washes it out)
+        //        visually seamless
+        //  cons: washes dark text out (does not have this problem with light text)
         //  when-to-use: for article or cases where multiple items are selected
         //               when background sprites are used, which we don't want to overwrite with out background
         state.bgColor = getTransparentBackgroundColor();
@@ -281,7 +285,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false;
       }
 
-      state.zoom = conf.get('zoom');
+      state.zoom = zoomMod.getCompletedZoom();
       state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
       updateColorApproach(state.picked, state.styles);
 
@@ -310,9 +314,27 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return getOpaqueBackgroundColor();
     }
 
+    // Helps with SC-1471, visually seamless highlight rectangle
+    function roundCoordinate(n) {
+      return parseFloat(n.toFixed(4));
+    }
+
+    function roundRectCoordinates(rect) {
+      var newRect = {
+        top: roundCoordinate(rect.top),
+        bottom: roundCoordinate(rect.bottom),
+        left: roundCoordinate(rect.left),
+        right: roundCoordinate(rect.right)
+      }
+      newRect.width = newRect.right - newRect.left;
+      newRect.height= newRect.bottom - newRect.top;
+      return newRect;
+    }
+
     function updateElementBgImage() {
 
-      var element = state.picked.get(0),
+      var element = state.picked[0],
+          style = element.style,
           offsetLeft,
           offsetTop;
 
@@ -322,68 +344,82 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Approach #3 --change CSS background of highlighted element
-      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom);
-
-      // Get the rectangle for the element itself
-      var svgMarkup = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-                      getSVGForPath(path, 0, 0, state.bgColor, 1) +
-                      '</svg>';
+      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom),
+        // Get the rectangle for the element itself
+        svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
+                     getSVGForPath(path, 0, 0, state.bgColor, 1) +
+                     '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
+      // The background is getting clipped before being offset to the left
       offsetLeft = state.fixedContentRect.left - state.elementRect.left;
-      offsetTop = (state.fixedContentRect.top - state.elementRect.top);
+      if (offsetLeft < 0) {
+        // If the background needs to be pulled left, line it up to the right of the outline
+        offsetLeft = Math.max(0, state.fixedContentRect.right - state.elementRect.right);
+      }
+      offsetTop = state.fixedContentRect.top- state.elementRect.top;
+
+      offsetLeft = roundCoordinate(offsetLeft);
+      offsetTop = roundCoordinate(offsetTop);
 
       state.savedCss = {
-        'background-image'      : element.style.backgroundImage,
-        'background-position'   : element.style.backgroundPosition,
-        'background-origin'     : element.style.backgroundOrigin,
-        'background-repeat'     : element.style.backgroundRepeat,
-        'background-clip'       : element.style.backgroundClip,
-        'background-attachment' : element.style.backgroundAttachment,
-        'background-size'       : element.style.backgroundSize
+        'background-image'      : style.backgroundImage,
+        'background-position'   : style.backgroundPosition,
+        'background-origin'     : style.backgroundOrigin,
+        'background-repeat'     : style.backgroundRepeat,
+        'background-clip'       : style.backgroundClip,
+        'background-attachment' : style.backgroundAttachment,
+        'background-size'       : style.backgroundSize
       };
 
       var newBackgroundImage = 'url("data:image/svg+xml,' + escape(svgMarkup) + '")';
 
-      element.style.backgroundImageOrigin = 'border-box';
-      element.style.backgroundClip = 'border-box';
-      element.style.backgroundAttachment = 'scroll';
+      style.backgroundOrigin = 'border-box';
+      style.backgroundClip = 'border-box';
+      style.backgroundAttachment = 'scroll';
 
-      // This following line made the SVG background in IE smaller than the highlighted element.
-      // element.style.backgroundSize = state.fixedContentRect.width * conf.get('zoom') + 'px ' + state.fixedContentRect.height * conf.get('zoom') + 'px';
-
-      element.style.backgroundImage = newBackgroundImage;
-      element.style.backgroundRepeat= 'no-repeat';
+      style.backgroundImage = newBackgroundImage;
+      style.backgroundRepeat= 'no-repeat';
 
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      element.style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
+      style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
     };
 
     function floatRectForPoint(x, y, expandFloatRectPixels) {
-      var possibleFloat = document.elementFromPoint(Math.max(0, x), Math.max(0, y));
-      if (possibleFloat && possibleFloat !== state.picked.get(0)) {
-        var pickedAncestors = state.picked.parents(),
+      var possibleFloat = common.elementFromPoint(x, y),
+        picked = state.picked;
+      if (possibleFloat && possibleFloat !== picked[0]) {
+        var pickedAncestors = picked.parents(),
           possibleFloatAncestors = $(possibleFloat).parents();
-        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(state.picked)) {
+        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(picked)) {
           // If potential float is ancestor of picked, or vice-versa, don't use it.
           // We only use a cousin or sibling float.
-          return null;
+          return;
         }
         var commonAncestor = $(possibleFloat).closest(pickedAncestors);
-        if (isZIndexHigher(possibleFloat, state.picked[0], commonAncestor)) {
-          return null; // Don't draw highlight around an item that is going over the highlight
+        if (isDifferentZIndex(possibleFloat, picked[0], commonAncestor)) {
+          return; // Don't draw highlight around an item that is going over or under the highlight
         }
         while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
                possibleFloat !== document.documentElement) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
             var COMBINE_ALL_RECTS = 99999,
-              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0];
+              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0],
+              mhRect = state.fixedContentRect,
+              extra = getExtraPixels();
+            if (!floatRect) {
+              return;
+            }
+            if (floatRect.left > mhRect.left - extra && floatRect.right <= mhRect.right + extra &&
+              floatRect.top >= mhRect.top - extra && floatRect.bottom <= mhRect.bottom + extra) {
+              // Completely inside highlight rect -- don't bother
+              return;
+            }
             return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
           }
           possibleFloat = possibleFloat.parentNode;
         }
       }
-      return null;
     }
 
     // Get rects of floats that intersect with the original highlight rect.
@@ -401,8 +437,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Perform specific sanity checks depending on float position and return the rects if they pass
       return {
-        topLeft: topLeftRect && geo.isPointInRect(topLeftRect.right, topLeftRect.bottom, mhRect) ? topLeftRect : null,
-        topRight: topRightRect && geo.isPointInRect(topRightRect.left, topRightRect.bottom, mhRect) ? topRightRect : null
+        topLeft: topLeftRect,
+        topRight: topRightRect
       }
     }
 
@@ -415,43 +451,55 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getPolygonPoints(rect) {
       // Build points for highlight polygon
-      var orig = geo.expandOrContractRect(rect, 0);
-      var floats = state.floatRects;
+      var orig = geo.expandOrContractRect(rect, 0),
+        topLeftFloatRect = state.floatRects.topLeft,
+        topRightFloatRect = state.floatRects.topRight,
+        topLeftPoints = [{x: orig.left, y: orig.top }],
+        topRightPoints = [{x: orig.right, y: orig.top }],
+        // Can't create bottom-right float, just use point
+        botRightPoints =  [{ x: orig.right, y: orig.bottom }],
+        // Can't create bottom left float, just use point
+        botLeftPoints = [{ x: orig.left, y: orig.bottom }],
+        mhRect = state.fixedContentRect;
 
-      var topLeftPoints;
-      if (floats.topLeft) {
-        // Draw around top-left float
-        topLeftPoints = [
-          { x: orig.left, y: floats.topLeft.bottom },
-          { x: floats.topLeft.right, y: floats.topLeft.bottom },
-          { x: floats.topLeft.right, y: orig.top}
-        ];
-      }
-      else { // No top-left float, just use top-left point
-        topLeftPoints = [
-          {x: orig.left, y: orig.top }
-        ];
+      if (topLeftFloatRect) {
+        if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
+          if (topLeftFloatRect.right > orig.left &&
+            topLeftFloatRect.bottom > orig.bottom) {  // Sanity check
+            topLeftPoints[0].x = topLeftFloatRect.right;
+            botLeftPoints[0].x = topLeftFloatRect.right;
+          }
+        }
+        else {
+          // Draw around top-left float
+          topLeftPoints = [
+            { x: orig.left, y: topLeftFloatRect.bottom },
+            { x: topLeftFloatRect.right, y: topLeftFloatRect.bottom },
+            { x: topLeftFloatRect.right, y: orig.top}
+          ];
+        }
       }
 
-      var topRightPoints;
-      if (floats.topRight) {
-        // Draw around top-right float
-        topRightPoints = [
-          { x: floats.topRight.left, y: orig.top },
-          { x: floats.topRight.left, y: floats.topRight.bottom },
-          { x: orig.right, y: floats.topRight.bottom }
-        ];
+      if (topRightFloatRect) {
+        if (!geo.isPointInRect(topRightFloatRect.left, topRightFloatRect.bottom, mhRect)) {
+          if (topRightFloatRect.left < orig.right &&
+            topRightFloatRect.bottom > orig.bottom) { // Sanity check
+            topRightPoints[0].x = topRightFloatRect.left;
+            botRightPoints[0].x = topRightFloatRect.left;
+          }
+        }
+        else
+        {
+          // Draw around top-right float
+          topRightPoints = [
+            { x: topRightFloatRect.left, y: orig.top },
+            { x: topRightFloatRect.left, y: topRightFloatRect.bottom },
+            { x: orig.right, y: topRightFloatRect.bottom }
+          ];
+        }
       }
       else { // No top-right float, just use top-right point
-        topRightPoints = [ {x: orig.right, y: orig.top } ];
       }
-
-      // Can't create bottom-right float, just use point
-      var botRightPoints =  [ { x: orig.right, y: orig.bottom } ];
-
-      // Can't create bottom left float, just use point
-      var botLeftPoints = [{ x: orig.left, y: orig.bottom } ];
-
       // growX and growY are set to 1 or -1, depending on which direction coordinates should move when polygon grows
       extendAll(topLeftPoints, { growX: -1, growY: -1 });
       extendAll(topRightPoints, { growX: 1, growY: -1 });
@@ -524,7 +572,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getSVGFillRectMarkup(left, top, width, height, fillColor) {
 
-      return '<rect x="' + left / state.zoom + '" y="' + top / state.zoom + '"  width="' + width / state.zoom + '" height="' + height / state.zoom + '"' +
+      return '<rect x="' + left  + '" y="' + top + '"  width="' + width  + '" height="' + height  + '"' +
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
@@ -532,19 +580,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Also for right or bottom overflow
     function getSVGForExtraPadding(extra) {
       var svg = '',
-        color = getTransparentBackgroundColor(),  // TODO return to normal -- this is for debugging
-        elementRect = state.picked[0].getBoundingClientRect(),
+        color = getTransparentBackgroundColor(),
+        elementRect = roundRectCoordinates(traitcache.getScreenRect(state.picked[0])),
         extraLeft = (elementRect.left - state.fixedContentRect.left) ,
         extraRight = (state.fixedContentRect.right - elementRect.right) ,
         extraBottom = (state.fixedContentRect.bottom - elementRect.bottom) ;
 
       if (extraLeft > 0) {
-        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : extra; // Top-left area where the highlight is not shown
-        svg += getSVGFillRectMarkup(extra, topOffset, extraLeft, state.fixedContentRect.height - topOffset, color);
+        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : 0; // Top-left area where the highlight is not shown
+        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, state.fixedContentRect.height - topOffset, color);
       }
       if (extraRight > 0) {
-        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : extra; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra, topOffset, extraRight, state.fixedContentRect.height - topOffset, color);
+        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : 0; // Top-right area where the highlight is not shown
+        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
         svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, elementRect.width, extraBottom, color);
@@ -604,15 +652,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
-      state.fixedContentRect = fixedRects[0];
+      state.fixedContentRect = roundRectCoordinates(fixedRects[0]);
 
       state.elementRect = $.extend({}, elementRect);
       absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
       previousViewRect = $.extend({}, state.viewRect);
-      state.highlightBorderWidth = getHighlightBorderWidth() * state.zoom;
-      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS * state.zoom;
-      state.viewRect = $.extend({ }, absoluteRect);
-      var extra = (state.highlightPaddingWidth + state.highlightBorderWidth) * state.zoom;
+      state.highlightBorderWidth = roundCoordinate(getHighlightBorderWidth() * state.zoom);
+      state.highlightPaddingWidth = roundCoordinate(state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS * state.zoom);
+      state.viewRect = roundRectCoordinates($.extend({ }, absoluteRect));
+      var extra = getExtraPixels();
 
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
@@ -624,11 +672,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
         // Create and position highlight overlay
-        var paddingSVG = getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor(),
-                    state.doUseOverlayForBgColor ? getTransparentBackgroundColor() : null, 1);
-        var outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(), null, 3);
-        var extraPaddingSVG = getSVGForExtraPadding(extra);
-        var svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
+        var
+          // outlineFillColor:
+          //   If the outline used used for the bg color and a bg color is being used at all
+          // paddingColor:
+          //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
+          //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
+          overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
+          paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
+          paddingSVG = paddingColor ?
+            getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
+          outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
+            overlayBgColor, 3),
+          // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
+          // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
+          extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
+          svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
         document.documentElement.appendChild(svgFragment);
 
@@ -644,19 +703,31 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.isCreated = true;
 
         addMouseWheelUpdateListenersIfNecessary();
-        $(document).one('mouseleave', hideAndResetState);
+        $(document).one('mouseleave', hideAndResetIfNotSticky);
       }
       else if (common.equals(previousViewRect, state.viewRect)) {
         return true; // Already created and in correct position, don't update DOM
       }
 
       // Finally update overlay CSS with zoom corrections
-      $('.' + HIGHLIGHT_OUTLINE_CLASS)
-        .style({
-          top: (state.viewRect.top - extra) + 'px',
-          left:  (state.viewRect.left - extra) + 'px'
-        }, '', 'important');
+      updateHighlightOverlayPosition();
       return true;
+    }
+
+    function shouldAvoidBackgroundImage(picked) {
+      // Don't highlight buttons, etc. because it ruins their native appearance
+      // Fix highlighting on <tr> in WebKit by using overlay for highlight color
+      // See https://bugs.webkit.org/show_bug.cgi?id=9268
+      function isNativeFormControl() {
+        // Return true for form controls that use a native appearance
+        return picked.is(':button,:reset,:submit,:checkbox,:radio,input[type="color"]');
+      }
+      return isNativeFormControl() || (picked.is('tr') && platform.browser.isWebKit);
+    }
+
+    // Number of pixels any edge will go beyond the fixedContentRect -- the highlight's border and padding
+    function getExtraPixels() {
+      return roundCoordinate((state.highlightPaddingWidth + state.highlightBorderWidth) * state.zoom);
     }
 
     function isInScrollableContainer(element) {
@@ -664,7 +735,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       $(element).parentsUntil(document.body).each(function() {
         var style = traitcache.getStyle(this);
         if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-          this.scrollHeight > element.offsetHeight) {
+          this.scrollHeight > this.offsetHeight) {
           canScroll = true;
           return false;
         }
@@ -672,11 +743,52 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return canScroll;
     }
 
-    function onMouseWheel() {
-      refreshExistingHighlight();
-    }
+      function onMouseWheel(event) {
+        if (!state.picked) {
+          return;
+        }
+        var newRect = state.picked[0].getBoundingClientRect(),
+          oldRect = state.elementRect,
+          xDiff = newRect.left - oldRect.left,
+          yDiff = newRect.top - oldRect.top;
 
-    function addMouseWheelUpdateListenersIfNecessary() {
+        if (!xDiff && !yDiff) {
+          return;
+        }
+
+        traitcache.updateCachedViewPosition();
+
+        function correctRect(rect) {
+          if (!rect) {
+            return;
+          }
+          rect.left += xDiff;
+          rect.right += xDiff;
+          rect.top += yDiff;
+          rect.bottom += yDiff;
+        }
+
+        correctRect(state.fixedContentRect);
+        correctRect(state.floatRects.topLeft);
+        correctRect(state.floatRects.topRight);
+        correctRect(state.elementRect);
+        correctRect(state.viewRect);
+
+        updateHighlightOverlayPosition();
+      }
+
+      function updateHighlightOverlayPosition() {
+        var extra = getExtraPixels(),
+          left = state.viewRect.left - extra,
+          top = state.viewRect.top - extra;
+        $('.' + HIGHLIGHT_OUTLINE_CLASS)
+          .style({
+            top: top + 'px',
+            left: left + 'px'
+          }, '', 'important');
+      }
+
+      function addMouseWheelUpdateListenersIfNecessary() {
       // If the highlight is visible and there is a scrollable container, add mousewheel listener for
       // smooth highlight position updates as scrolling occurs.
 
@@ -728,14 +840,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       // Return true we're inside in the existing highlight
       return isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
-    }
-
-    function refreshExistingHighlight() {
-      // Even though highlight is the same, the elements may have moved
-      // This will do a quick check and only redraw if an update looks necessary
-      if (state.isCreated) {    // Safety check -- may not be necessary
-        createNewOverlayPosition();
-      }
     }
 
     // Fixed position rectangles are in screen coordinates.
@@ -835,7 +939,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function enableIfAppropriate() {
-      state.zoom = conf.get('zoom');
+      state.zoom = zoomMod.getCompletedZoom();
       var was = isEnabled;
 
       // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
@@ -877,9 +981,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function onBlurWindow() {
       isWindowFocused = false;
       isAppropriateFocus = false;
-      if (!isSticky) {
-        hideAndResetState();
-      }
+      hideAndResetIfNotSticky();
     }
       
     function onFocusWindow() {
@@ -904,6 +1006,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       resetState();
     }
 
+    function hideAndResetIfNotSticky() {
+      if (!isSticky) {
+        hideAndResetState();
+      }
+    }
+
     // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
     function pause() {
       if (state.picked && state.savedCss) {
@@ -924,7 +1032,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       $(document)
         .off('mousewheel', onMouseWheel)
-        .off('mouseleave', hideAndResetState);
+        .off('mouseleave', hideAndResetIfNotSticky);
     }
 
     function resetState() {

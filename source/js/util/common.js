@@ -17,10 +17,13 @@ sitecues.def('util/common', function (common, callback) {
     // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
     // Very strange behavior, might be worth filing a browser bug repport.
     // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
+    // UPDATE: (oct  06, 2014) Firefox appears to regress when window.pageYOffset is 0.  Animation of HLB
+    //                         flies out from outside the viewport (top-left)
     common.useJqueryAnimate = (function () {
 
-      return (platform.browser.isIE && platform.browser.version === 9) ||
-             (platform.browser.isIE && platform.os.isWin8);
+      return (platform.browser.isIE      && platform.browser.version === 9) ||
+             (platform.browser.isIE      && platform.os.isWin8)             ||
+             (platform.browser.isFirefox && window.pageYOffset === 0);
 
     }());
 
@@ -51,15 +54,25 @@ sitecues.def('util/common', function (common, callback) {
     }
 
     // Return true if there is a visual sub-box of content
-    common.hasVisualBox = function(element, style, parentStyle) {
+    common.isVisualRegion = function(element, style, parentStyle) {
       if (element === document.documentElement || element === document.body) {
         return false; // False for entire document because we are looking for sub-boxes of content
       }
 
-      if (parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth)) {
-        return true;
-      }
-      return common.hasOwnBackground(style, parentStyle);
+      var isVisualRegion =
+        hasBorder(style) ||
+        common.hasRaisedZIndex(style, parentStyle) ||
+        common.hasOwnBackground(style, parentStyle);
+
+      return !!isVisualRegion;
+    };
+
+    function hasBorder(style) {
+      return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
+    };
+
+    common.hasRaisedZIndex = function(style, parentStyle) {
+      return parseFloat(style.zIndex) > parseFloat(parentStyle.zIndex);
     };
 
     function isTransparentColor(color) {
@@ -74,10 +87,11 @@ sitecues.def('util/common', function (common, callback) {
       }
 
       // 2. Background images (sprites don't count -- often used for things like bullets)
-      return (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat');
+      return (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat'
+        && parseFloat(style.backgroundPositionX) === 0 && parseFloat(style.backgroundPositionY) === 0);
     };
 
-    common.hasVisibleContent = function(current, style, parentStyle) {
+    common.hasVisibleContent = function(current) {
       var children,
         index,
         MAX_CHILDREN_TO_CHECK = 10,
@@ -86,13 +100,7 @@ sitecues.def('util/common', function (common, callback) {
       if (common.isVisualMedia(current) || common.isFormControl(current)) {
         var mediaRect = current.getBoundingClientRect(),
           MIN_RECT_SIDE = 5;
-        if (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE) {
-          return true;
-        }
-      }
-
-      if (common.hasVisualBox(current, style, parentStyle)) {
-        return true;
+        return (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE);
       }
 
       // Check to see if there are non-empty child text nodes.
@@ -109,9 +117,6 @@ sitecues.def('util/common', function (common, callback) {
       // Longer check: see if any children are non-empty text nodes, one by one
       for (index = 0; index < numChildrenToCheck; index++) {
         if (isNonEmptyTextNode(children[index])) {
-          if (current.id === 'content') {
-            console.log(children[index]);
-          }
           return true;
         }
       }
@@ -122,7 +127,7 @@ sitecues.def('util/common', function (common, callback) {
      * Checks if the element has media contents which can be rendered.
      */
     common.isVisualMedia = function(selector) {
-      var VISUAL_MEDIA_ELEMENTS = 'img,canvas,video,embed,object,iframe,frame,audio';
+      var VISUAL_MEDIA_ELEMENTS = 'img,picture,canvas,video,embed,object,iframe,frame,audio';
       return $(selector).is(VISUAL_MEDIA_ELEMENTS);
     };
 
@@ -240,7 +245,46 @@ sitecues.def('util/common', function (common, callback) {
               child = child.nextSibling;
       }
       return frag;
-    }
+    };
+
+    /*
+     * A version of elementFromPoint() that uses evil magic to get around
+     * not being able to look outside of the view port
+     */
+    common.elementFromPoint = function(x, y) {
+      var maxX = window.innerWidth - 1,
+        maxY = window.innerHeight - 1;
+
+      if (platform.browser.isIE) {
+        // In IE, this is the best we can do for now, because it causes the document to quickly shift
+        x = Math.min(maxX, Math.max(0, x));
+        y = Math.min(maxY, Math.max(0, y));
+        return document.elementFromPoint(x, y);
+      }
+
+      // ----------------------------------------------------
+      // DON"T DO IT IN IE! Causes document to quickly shift back and forth!
+      var
+        translateX = x < 0 ? -x : Math.min(maxX - x, 0),
+        translateY = y < 0 ? -y : Math.min(maxY - y, 0),
+        result;
+
+      // 1. Move document over so that point is in the view port
+      if (translateX || translateY) {
+        window.scrollBy(-translateX, -translateY);
+        // Alternate technique to move document -- doesn't seem any faster and it's more destructive;
+        // $('html').css('transform', 'translate(' + translateX + 'px,' + translateY + 'px)');
+      }
+
+      // 2. Get results
+      result = document.elementFromPoint(x + translateX, y + translateY);
+
+      // 3. Return document to where it was without anyone noticing
+      window.scrollBy(translateX, translateY); // Probably slower, should test
+      // $('html').css('transform', ''); // Clear alternate technique
+
+      return result;
+    };
 
     /**
      * Defines if the element given contains vertical scroll.
