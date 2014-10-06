@@ -115,6 +115,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     function getEmsToPx(fontSize, ems) {
+      // Create a div to measure the number of px in an em with this font-size
       var measureDiv = $('<div/>')
            .appendTo(document.body)
            .css({
@@ -122,6 +123,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           width: ems + 'em',
           visibility: 'hidden'
         }),
+        // Multiply by zoom because our <div> is not affected by the document's current zoom level
         px = measureDiv.width() * conf.get('zoom');
       measureDiv.remove();
       return px;
@@ -146,6 +148,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getBulletRect(element, style) {
       if (style.display !== 'list-item' || hasHiddenBullets(style)) {
+        // Do not perform the measurement on anything but a list item with visible bullets
         return;
       }
 

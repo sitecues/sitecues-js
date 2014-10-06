@@ -66,7 +66,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       // Computed judgements
       $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
       $.extend(judgements, getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements));
-      $.extend(judgements, getGrowthJudgements(traits, judgements, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
+      $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
       $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
 
@@ -292,7 +292,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // - A parent candidate to the child candidate
     // - From the current candidate to its child candidate
     // - From the current candidate to first non-inline candidate
-    function getGrowthJudgements(traits, judgements, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements) {
+    function getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements) {
       var growthJudgements = {
         // Ratio of sizes between objects
 
@@ -341,12 +341,15 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       $.extend(growthJudgements, {
         // Significantly larger both horizontally and vertically when compared with the first non-inline candidate.
         // This is rarely good. It generally means we're in a group of visual groups.
-        // If we don't have this rule, we tend to pick containers that are used for 2d layout.
+        // If we don't have this rule, we tend to pick very large containers that are used for 2d layout.
+        // Do not do this punishment if the child was very small for picking, because this rule
+        // is all about preferring reasonable child containers over those that are too big.
         // Only need moderate horizontal growth -- things tend to be wider than they are tall.
         // Also, by requiring extreme vertical growth we don't fire as much when the first non-inline was a single line of text.
         large2dGrowth:
-          !judgements.percentOfViewportHeightUnderIdealMin &&
-          !judgements.percentOfViewportWidthUnderIdealMin &&
+          childJudgements &&
+          !childJudgements.percentOfViewportHeightUnderIdealMin &&
+          !childJudgements.percentOfViewportWidthUnderIdealMin &&
           growthJudgements.totalHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
             growthJudgements.totalVertGrowthFactor > EXTREME_GROWTH_FACTOR &&
             growthJudgements.totalHorizGrowthFactor * growthJudgements.totalVertGrowthFactor,
@@ -356,10 +359,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // This rule is used to give the child a penalty.
         // If we don't have this rule we tend to miss attaching supplemental information such as captions.
         isModeratelySmallerThanParentInOneDimension:
-          // Horizontal growth: very small to moderate
-          // Vertical growth: very small
-          firstTraits.isVisualMedia &&
-          (growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
+          // Vertical growth: very small and must be a caption to visual media
+          // Horizontal growth: very small to moderate (no visual media requirement as captions are not done to the side like this)
+          (firstTraits.isVisualMedia &&
+            growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
             growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
             growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
           // Or:
