@@ -23,6 +23,7 @@ sitecues.def('util/common', function (common, callback) {
 
       return (platform.browser.isIE      && platform.browser.version === 9) ||
              (platform.browser.isIE      && platform.os.isWin8)             ||
+             (platform.browser.isSafari  && window.pageYOffset === 0) ||
              (platform.browser.isFirefox && window.pageYOffset === 0);
 
     }());
