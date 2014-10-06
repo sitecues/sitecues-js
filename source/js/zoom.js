@@ -292,7 +292,6 @@ sitecues.def('zoom', function (zoom, callback) {
       // Should we wait for browser to create compositor layer?
       function shouldPrepareAnimations() {
         // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
-        var body = body || document.body;
         return IS_WILL_CHANGE_SUPPORTED
           && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
           && !shouldRestrictWidth();
@@ -677,8 +676,6 @@ sitecues.def('zoom', function (zoom, callback) {
           return false;
         }
         if (IS_WILL_CHANGE_SUPPORTED) { // Is will-change supported?
-          // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
-          var $body = $body || $('body');
           // This is a CSS property that aids performance of animations
           $body.css('willChange', 'transform');
         }
@@ -1087,11 +1084,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       function onDocumentReady() {
         var targetZoom = conf.get('zoom');
-        if (!targetZoom) {
-          // Initialize as soon as panel opens for faster slider responsiveness
-          sitecues.on('panel/show', initZoomModule);
-        }
-        else if (targetZoom > 1) {
+        if (targetZoom > 1) {
           isInitialLoadZoom = true;
           beginGlide(targetZoom);
         }
@@ -1136,6 +1129,7 @@ sitecues.def('zoom', function (zoom, callback) {
         beginGlide(zoom.min, event);
       });
       sitecues.on('panel/show', function() {
+        initZoomModule(); // Lazy init
         isPanelOpen = true;
         if (shouldPrepareAnimations()) {
           prepareAnimationOptimizations();
