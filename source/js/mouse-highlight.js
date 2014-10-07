@@ -238,12 +238,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
           borderWidth = viz - 0.4;
-      if (!DO_SUPPORT_SVG_OVERLAY) {
-        // Use even numbers of pixels so that when we draw half of the outline width it's still a
-        // whole pixel value. We draw half of the outline width on a line because it's drawn on both
-        // sides of the line, which doubles the width.
-        return Math.max(1, Math.round (borderWidth /2 ) * 2);
-      }
       return Math.max(1, borderWidth);
     }
 
@@ -331,6 +325,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Helps with SC-1471, visually seamless highlight rectangle
     function roundCoordinate(n) {
       return parseFloat(n.toFixed(COORDINATE_DECIMAL_PLACES));
+    }
+
+    function roundBorderWidth(n) {
+      if (!DO_SUPPORT_SVG_OVERLAY) {
+        // Use even numbers of pixels so that when we draw half of the outline width it's still a
+        // whole pixel value. We draw half of the outline width on a line because it's drawn on both
+        // sides of the line, which doubles the width.
+        return Math.max(1, Math.round(n / 2) * 2);
+      }
+      return roundCoordinate(n);
     }
 
     function roundRectCoordinates(rect) {
@@ -684,8 +688,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.elementRect = $.extend({}, elementRect);
       absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
       previousViewRect = $.extend({}, state.viewRect);
-      state.highlightBorderWidth = roundCoordinate(getHighlightBorderWidth() * state.zoom);
-      state.highlightPaddingWidth = roundCoordinate(state.doUseOverlayForBgColor ? 0 : EXTRA_HIGHLIGHT_PIXELS * state.zoom);
+      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() * state.zoom);
+      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
+
       state.viewRect = roundRectCoordinates($.extend({ }, absoluteRect));
       var extra = getExtraPixels();
 
