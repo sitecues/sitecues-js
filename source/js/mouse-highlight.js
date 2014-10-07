@@ -231,8 +231,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getHighlightBorderColor() {
       var viz = getHighlightVisibilityFactor(),
-        color = Math.round(Math.max(0, 248 - viz * 80));
-      return 'rgb(' + color + ',' + color + ',' + color +')';
+        color = Math.round(Math.max(0, 200 - viz * 80));
+      return 'rgb(' + color + ',' + color + ',' + (color + 50) +')';
     }
 
     function getHighlightBorderWidth() {
