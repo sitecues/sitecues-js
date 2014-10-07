@@ -1031,7 +1031,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       console.log('****************** enableIfAppropriate? ' + was + ' -> ' + isEnabled);
-      console.trace();
+      !platform.browser.isIE && console.trace();
 
       if (was !== isEnabled) {
         refresh();
@@ -1093,7 +1093,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
     function pause() {
       console.log('**************** pause');
-      console.trace();
+      !platform.browser.isIE && console.trace();
       if (state.picked && state.savedCss) {
         $(state.picked).style(state.savedCss);
         state.savedCss = null;
