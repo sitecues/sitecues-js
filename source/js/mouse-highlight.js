@@ -986,8 +986,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       show();
     }
 
+    var wasEnabledInsideRefresh = false;
     // refresh status of enhancement on page
     function refresh() {
+      if (wasEnabledInsideRefresh == isEnabled) {
+        console.log('@#$#$(@)#*$()@#*$ )SRSLY? Look in refresh() *@&$(&@$(#');
+      }
       if (isEnabled) {
         // handle mouse move on body
         $(document)
@@ -1015,6 +1019,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .off('blur', onBlurWindow)
           .off('resize', hideAndResetState);
       }
+      wasEnabledInsideRefresh = isEnabled;
     }
 
     function enableIfAppropriate() {
@@ -1059,19 +1064,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current active isn't body
       var target = document.activeElement;
       isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
-      if (wasAppropriateFocus && !isAppropriateFocus && !isSticky) {
-        SC_DEV && console.log('*** highlight-debug ***  testFocus: isAppropriateFocus === false')
-        pause();
+      SC_DEV && console.log('*** highlight-debug ***  testFocus() ' + wasAppropriateFocus + ' -> ' + isAppropriateFocus);
+      if (!isSticky) {
+        if (wasAppropriateFocus && !isAppropriateFocus) {
+          SC_DEV && console.log('*** highlight-debug ***  testFocus() -- will pause, isWindowActive? ' + isWindowActive());
+          console.log(target);
+          pause();
+        }
+        else if (!wasAppropriateFocus && isAppropriateFocus) {
+          SC_DEV && console.log('*** highlight-debug ***  testFocus() -- will enableIfAppropriate(), isWindowActive? ' + isWindowActive());
+          enableIfAppropriate();
+        }
       }
     }
 
     function onBlurWindow() {
+      SC_DEV && console.log('*** highlight-debug ***  onBlurWindow');
       isWindowFocused = false;
       isAppropriateFocus = false;
       hideAndResetIfNotSticky();
     }
       
     function onFocusWindow() {
+      SC_DEV && console.log('*** highlight-debug ***  onFocusWindow');
       isWindowFocused = true;
       testFocus();
     }
@@ -1080,8 +1095,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function disable() {
       SC_DEV && console.log('*** highlight-debug ***  disable()')
       pause();
-      isEnabled = false;
-      refresh();
+      if (isEnabled) {
+        isEnabled = false;
+        refresh();
+      }
     }
 
     function disableAndReset() {
