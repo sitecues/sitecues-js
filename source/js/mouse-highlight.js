@@ -59,6 +59,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     'audio', 'util/geo', 'platform',
     function($, conf, zoomMod, picker, traitcache, mhpos, common, audio, geo, platform) {
 
+    // Use SVG overlays in modern browsers, because they have nice, rounded corners.
+    // We don't use them in IE9/10 because pointer-events none doesn't work, so mouseouts occur
+    // when a user mouses over the visual border, causing menus to close.
+    var DO_SUPPORT_SVG_OVERLAY = !platform.browser.isIE || platform.browser.version >= 11,
+      COORDINATE_DECIMAL_PLACES = DO_SUPPORT_SVG_OVERLAY ? 4 : 0;
+
+
     function getMaxZIndex(styles) {
       var maxZIndex = 0;
       for (var count = 0; count < styles.length; count ++) {
@@ -176,9 +183,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.hasLightText = hasLightText(state.target);
 
       // Get the approach used for highlighting
-      if (picked.length > 1 || shouldAvoidBackgroundImage(picked) ||
+      if (DO_SUPPORT_SVG_OVERLAY &&
+        (picked.length > 1 || shouldAvoidBackgroundImage(picked) ||
          (hasBackgroundImage && hasBackgroundSprite(style)) ||
-         state.hasLightText) {
+         state.hasLightText)) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
@@ -210,9 +218,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
 
     // How visible is the highlight?
+    // Currently goes from 1.44 (at 1x) to 3.24 (at 3x)
+    // The smaller the number, the less visible the highlight is
     function getHighlightVisibilityFactor() {
       var MIN_VISIBILITY_FACTOR_WITH_TTS = 2.1,
-          vizFactor = (state.zoom + 0.4) * 0.9;
+          vizFactor = (state.zoom + 0.6) * 0.9;
       if (audio.isSpeechEnabled() && vizFactor < MIN_VISIBILITY_FACTOR_WITH_TTS) {
         vizFactor = MIN_VISIBILITY_FACTOR_WITH_TTS;
       }
@@ -221,14 +231,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getHighlightBorderColor() {
       var viz = getHighlightVisibilityFactor(),
-          opacity = viz - 1.3;
-      opacity = Math.min(1, Math.max(opacity, 0));
-      return 'rgba(0,0,0,' + opacity + ')';
+        color = Math.round(Math.max(0, 248 - viz * 80));
+      return 'rgb(' + color + ',' + color + ',' + color +')';
     }
 
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
           borderWidth = viz - 0.4;
+      if (!DO_SUPPORT_SVG_OVERLAY) {
+        // Use even numbers of pixels so that when we draw half of the outline width it's still a
+        // whole pixel value. We draw half of the outline width on a line because it's drawn on both
+        // sides of the line, which doubles the width.
+        return Math.max(1, Math.round (borderWidth /2 ) * 2);
+      }
       return Math.max(1, borderWidth);
     }
 
@@ -238,7 +253,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // This lightens at higher levels of zoom
       var viz = getHighlightVisibilityFactor(),
           alpha;
-      viz = Math.min(viz, 2);
       alpha = 0.11 * viz;
       return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
@@ -246,7 +260,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getOpaqueBackgroundColor() {
       // Best to use opaque color, because inner overlay doesn't match up perfectly causing overlaps and gaps
       // It lightens at higher levels of zoom
-      var viz = Math.min(getHighlightVisibilityFactor(), 2),
+      var viz = getHighlightVisibilityFactor(),
           decrement = viz * 1.4,
           red = Math.round(255 - decrement),
           green = red,
@@ -316,7 +330,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Helps with SC-1471, visually seamless highlight rectangle
     function roundCoordinate(n) {
-      return parseFloat(n.toFixed(4));
+      return parseFloat(n.toFixed(COORDINATE_DECIMAL_PLACES));
     }
 
     function roundRectCoordinates(rect) {
@@ -329,6 +343,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       newRect.width = newRect.right - newRect.left;
       newRect.height= newRect.bottom - newRect.top;
       return newRect;
+    }
+
+    function roundPolygonCoordinates(points) {
+      var index = 0,
+        numPoints = points.length,
+        point;
+      for (; index < numPoints; index ++) {
+        point = points[index];
+        point.x = roundCoordinate(point.x);
+        point.y = roundCoordinate(point.y);
+      }
     }
 
     function updateElementBgImage() {
@@ -379,7 +404,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundAttachment = 'scroll';
 
       style.backgroundImage = newBackgroundImage;
-      style.backgroundRepeat= 'no-repeat';
+      style.backgroundRepeat = 'no-repeat';
 
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
       style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
@@ -506,7 +531,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       extendAll(botRightPoints, { growX: 1, growY: 1 });
       extendAll(botLeftPoints, { growX: -1, growY: 1 });
 
-      return topLeftPoints.concat(topRightPoints, botRightPoints, botLeftPoints);
+      var allPoints = topLeftPoints.concat(topRightPoints, botRightPoints, botLeftPoints);
+      roundPolygonCoordinates(allPoints);
+      return allPoints;
     }
 
     function getExpandedPath(points, delta) {
@@ -672,37 +699,43 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
 
         // Create and position highlight overlay
-        var
+        if (DO_SUPPORT_SVG_OVERLAY) {
+          // SVG overlays are supported
           // outlineFillColor:
           //   If the outline used used for the bg color and a bg color is being used at all
-          // paddingColor:
-          //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
-          //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
-          overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
-          paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
-          paddingSVG = paddingColor ?
-            getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
-          outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
-            overlayBgColor, 3),
-          // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
-          // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
-          extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
-          svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
+          var overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
+            // paddingColor:
+            //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
+            //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
+            paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
+            paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
+            outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
+              overlayBgColor, 3),
+            // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
+            // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
+            extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
+            svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
-        document.documentElement.appendChild(svgFragment);
+          document.documentElement.appendChild(svgFragment);
+          $('.' + HIGHLIGHT_OUTLINE_CLASS)
+            .attr({
+              width : (state.fixedContentRect.width + 2 * extra) + 'px',
+              height: (state.fixedContentRect.height + 2 * extra) + 'px'
+            });
+        }
+        else {
+          // Use CSS outline with 0px wide/tall elements to draw lines of outline
+          // These will show on screen but will thankfully not take mouse events (pointer-events: none doesn't work in IE)
+          appendPathViaCssOutline(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor());
+          appendPathViaCssOutline(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor());
+        }
 
-        $('.' + HIGHLIGHT_OUTLINE_CLASS)
-          .attr({
-            width : (state.fixedContentRect.width + 2 * extra) + 'px',
-            height: (state.fixedContentRect.height + 2 * extra) + 'px'
-          })
-          .css({
-            zIndex: getMaxZIndex(ancestorStyles)  // Just below stuff like fixed toolbars
-          });
+        $('.' + HIGHLIGHT_OUTLINE_CLASS).css('zIndex', getMaxZIndex(ancestorStyles));
 
         state.isCreated = true;
 
         addMouseWheelUpdateListenersIfNecessary();
+
         $(document).one('mouseleave', hideAndResetIfNotSticky);
       }
       else if (common.equals(previousViewRect, state.viewRect)) {
@@ -712,6 +745,40 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Finally update overlay CSS with zoom corrections
       updateHighlightOverlayPosition();
       return true;
+    }
+
+    // Use CSS outline to draw a rectangle around a <div> with either width: 0 or height: 0.
+    // Because the element has no area, it will not capture mouse events, even in IE9/10.
+    // Beautiful hack? Or bastard of the slums?
+    function appendPathViaCssOutline(pathPoints, lineWidth, color) {
+      var index = 0,
+        cssOutlineWidth = lineWidth / 2,
+        numPoints = pathPoints.length,
+        html,
+        outlineCss = cssOutlineWidth + 'px  solid ' + color,
+        isHorizontal = true,
+        docElement = $('html');
+      for (; index < numPoints; index ++ ) {
+        var currPoint = pathPoints[index],
+          nextPoint = pathPoints[(index + 1) % numPoints],  // At the end, nextPoint is at index 0
+          leftXPoint = currPoint.x < nextPoint.x ? currPoint : nextPoint, // Draw from left to right
+          topYPoint = currPoint.y < nextPoint.y ? currPoint : nextPoint,  // Draw from top to bottom
+          x = leftXPoint.x + (isHorizontal ? cssOutlineWidth  : 0), // Make outline corners line up at right angles
+          y = topYPoint.y,
+          width = isHorizontal ? Math.abs(nextPoint.x - currPoint.x) - lineWidth : 0,
+          height = isHorizontal ? 0 : Math.abs(nextPoint.y - currPoint.y);
+        $('<div>')
+          .css({
+            outline: outlineCss,
+            transform: 'translate(' + x + 'px,' + y + 'px)',
+            width: width + 'px',
+            height: height + 'px'
+          })
+          .addClass(HIGHLIGHT_OUTLINE_CLASS)
+          .appendTo(docElement);
+        isHorizontal = !isHorizontal; // Every other line is horizontal
+      }
+      return;
     }
 
     function shouldAvoidBackgroundImage(picked) {
@@ -781,11 +848,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         var extra = getExtraPixels(),
           left = state.viewRect.left - extra,
           top = state.viewRect.top - extra;
+        // TODO use .style with 'important' if we run into page css collisions
+        // Otherwise, if we don't run into problems with that, we should probably get rid of the style plugin
+        // and save the space.
         $('.' + HIGHLIGHT_OUTLINE_CLASS)
-          .style({
+          .css({
             top: top + 'px',
             left: left + 'px'
-          }, '', 'important');
+          });
       }
 
       function addMouseWheelUpdateListenersIfNecessary() {

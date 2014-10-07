@@ -156,9 +156,9 @@ describe('mouse-highlight', function () {
       expect(mh.getHighlightVisibilityFactor()).to.be.equal(2.1);
       done();
     });
-    it('should return 2.7 if zoom = 2.6', function (done) {
+    it('should return 2.88 if zoom = 2.6', function (done) {
       mh.state.zoom = 2.6;
-      expect(mh.getHighlightVisibilityFactor()).to.be.equal(2.7);
+      expect(parseFloat(mh.getHighlightVisibilityFactor().toFixed(2))).to.be.equal(2.88);
       done();
     });
   });
@@ -171,7 +171,8 @@ describe('mouse-highlight', function () {
     });
     it('should return around 3 if zoom is 3', function (done) {
       mh.state.zoom = 3;
-      expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(3);
+      expect(Math.round(mh.getHighlightBorderWidth())).to
+        .be.equal(3);
       done();
     });
   });
