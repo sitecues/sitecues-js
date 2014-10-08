@@ -47,7 +47,7 @@ sitecues.def('zoom', function (zoom, callback) {
         completedZoom = 1,       // Current zoom as of the last finished operation
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
-        isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
+        isInitialLoadZoom = true, // Is this the initial zoom for page load? (The one based on previous user settings)
         nativeZoom,              // Amount of native browserZoom
         isRetinaDisplay,         // Is the current display a retina display?
 
@@ -1085,8 +1085,11 @@ sitecues.def('zoom', function (zoom, callback) {
       function onDocumentReady() {
         var targetZoom = conf.get('zoom');
         if (targetZoom > 1) {
-          isInitialLoadZoom = true;
           beginGlide(targetZoom);
+        }
+        else {
+          // No initial zoom from settings, first zoom will only be from user input
+          isInitialLoadZoom = false;
         }
       }
 
