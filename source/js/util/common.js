@@ -256,35 +256,10 @@ sitecues.def('util/common', function (common, callback) {
       var maxX = window.innerWidth - 1,
         maxY = window.innerHeight - 1;
 
-      if (platform.browser.isIE) {
-        // In IE, this is the best we can do for now, because it causes the document to quickly shift
-        x = Math.min(maxX, Math.max(0, x));
-        y = Math.min(maxY, Math.max(0, y));
-        return document.elementFromPoint(x, y);
-      }
-
-      // ----------------------------------------------------
-      // DON"T DO IT IN IE! Causes document to quickly shift back and forth!
-      var
-        translateX = x < 0 ? -x : Math.min(maxX - x, 0),
-        translateY = y < 0 ? -y : Math.min(maxY - y, 0),
-        result;
-
-      // 1. Move document over so that point is in the view port
-      if (translateX || translateY) {
-        window.scrollBy(-translateX, -translateY);
-        // Alternate technique to move document -- doesn't seem any faster and it's more destructive;
-        // $('html').css('transform', 'translate(' + translateX + 'px,' + translateY + 'px)');
-      }
-
-      // 2. Get results
-      result = document.elementFromPoint(x + translateX, y + translateY);
-
-      // 3. Return document to where it was without anyone noticing
-      window.scrollBy(translateX, translateY); // Probably slower, should test
-      // $('html').css('transform', ''); // Clear alternate technique
-
-      return result;
+      // In IE, this is the best we can do for now, because it causes the document to quickly shift
+      x = Math.min(maxX, Math.max(0, x));
+      y = Math.min(maxY, Math.max(0, y));
+      return document.elementFromPoint(x, y);
     };
 
     /**
