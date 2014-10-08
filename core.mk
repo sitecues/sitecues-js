@@ -114,11 +114,9 @@ build:
 
 	@mkdir -p $(build-dir)/compile/js
 
-	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
+	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js $(files)
 
 #Copy files for Source-Maps
-	@mkdir -p $(build-dir)/js/source
-	@cp -R source/js $(build-dir)/js/source/
 
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js

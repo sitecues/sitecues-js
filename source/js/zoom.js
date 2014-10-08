@@ -215,6 +215,9 @@ sitecues.def('zoom', function (zoom, callback) {
         return originalBodyInfo.right * completedZoom;
       };
 
+      zoom.getCompletedZoom = function() {
+        return completedZoom;
+      };
 
       // Add a listener for mid-animation zoom updates.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
@@ -288,8 +291,10 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Should we wait for browser to create compositor layer?
       function shouldPrepareAnimations() {
-        return IS_WILL_CHANGE_SUPPORTED && body.style.willChange === '' &&   // Animation property not set yet: give browser time to set up compositor layer
-          !shouldRestrictWidth();
+        // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
+        return IS_WILL_CHANGE_SUPPORTED
+          && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
+          && !shouldRestrictWidth();
       }
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
@@ -328,14 +333,14 @@ sitecues.def('zoom', function (zoom, callback) {
           var input = {};
           if (event) {
             if (event.keyCode) {
-              input.isKey = true;
-              input.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
+              //input.isKey = true;
+              //input.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
               input.shiftKey = event.shiftKey;
               input.ctrlKey = event.ctrlKey;
             }
-            else {
-              input.isAButtonPress = true;
-            }
+//            else {
+//              input.isAButtonPress = true;
+//            }
           }
 
           if (!shouldSmoothZoom()) {
@@ -566,13 +571,14 @@ sitecues.def('zoom', function (zoom, callback) {
       function beginZoomOperation(targetZoom, input, animationReadyCallback) {
         // Initialize zoom input info
         zoomInput = $.extend({
-          isSlider: false,                  // Slider in panel
-          isSliderDrag: false,              // True if the user drags the slider (as opposed to clicking in it)
-          isKey: false,                     // + or - key (or with modifier)
-          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
-          isAButtonPress: false,            // Small or large A in panel
-          isLongGlide: false,                // Key or A button held down to glide extra
-          fromZoom: completedZoom           // Old zoom value
+          // Commented out ones are no longer needed unless we decide to do metrics from within modules
+//          isKey: false,                     // + or - key (or with modifier)
+//          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
+//          isAButtonPress: false,            // Small or large A in panel
+//          fromZoom: completedZoom           // Old zoom value
+          isSlider: false,                    // Slider in panel
+          isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
+          isLongGlide: false                  // Key or A button held down to glide extra
         }, input);
 
         // Make sure we're ready
@@ -922,9 +928,14 @@ sitecues.def('zoom', function (zoom, callback) {
           leftMostCoord = 9999, // Everything else will be smaller
           rightMostNode,
           rightMostCoord = 0,
-          MIN_WIDTH_MAIN_NODE = 300;
+          MIN_WIDTH_MAIN_NODE = 300,
+          bodyStyle = getComputedStyle(body);
 
-        getBodyRectImpl(body, bodyInfo, visibleNodes, getComputedStyle(body));
+        getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle, true);
+
+        if (!visibleNodes.length) {
+          getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle);
+        }
 
         bodyInfo.width = bodyInfo.right - bodyInfo.left;
         bodyInfo.height = bodyInfo.bottom - bodyInfo.top;
@@ -955,16 +966,28 @@ sitecues.def('zoom', function (zoom, callback) {
         return bodyInfo;
       }
 
-      function willAddRect(newRect, node, style, parentStyle) {
-        if (node === document.body || newRect.left < 0 || newRect.top < 0 ||
-          newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
-          node.childNodes.length === 0 ||
-          style.visibility !== 'visible' ||
-          // Watch for text-align: center or -webkit-center -- these items mess us up
-          style.textAlign.indexOf('center') >= 0) {
+      function willAddRect(newRect, node, style, parentStyle, isStrict) {
+        if (node === document.body) {
           return false;
         }
 
+        // Strict checks
+        if (isStrict) {
+          if (node.childNodes.length === 0 ||
+            newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
+            // Watch for text-align: center or -webkit-center -- these items mess us up
+            style.textAlign.indexOf('center') >= 0) {
+            return false;
+          }
+        }
+
+        // Must check
+        if (newRect.left < 0 || newRect.top < 0 ||
+          style.visibility !== 'visible') {
+          return false;
+        }
+
+        // Good heuristic -- when x > 0 it tends to be a useful rect
         if (newRect.left > 0) {
           return true;
         }
@@ -974,24 +997,26 @@ sitecues.def('zoom', function (zoom, callback) {
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if (style.overflow !== 'visible' || !common.hasVisibleContent(node, style, parentStyle)) {
-          return false; // No visible children
+        if (style.overflow !== 'visible' ||
+          (!common.hasVisibleContent(node, style, parentStyle) && !common.isVisualRegion(node, style, parentStyle))) {
+          return false; // No visible content
         }
+        
         return true;
       }
 
       // Recursively look at rectangles and add them if they are useful content rectangles
-      function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle) {
+      function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle, isStrict) {
 
         var newRect = getAbsoluteRect(node),
           style = getComputedStyle(node);
-        if (willAddRect(newRect, node, style, parentStyle)) {
+        if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
         }
         $(node).children().each(function() {
-          getBodyRectImpl(this, sumRect, visibleNodes, style);
+          getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
         });
       }
 
@@ -1059,11 +1084,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       function onDocumentReady() {
         var targetZoom = conf.get('zoom');
-        if (!targetZoom) {
-          // Initialize as soon as panel opens for faster slider responsiveness
-          sitecues.on('panel/show', initZoomModule);
-        }
-        else if (targetZoom > 1) {
+        if (targetZoom > 1) {
           isInitialLoadZoom = true;
           beginGlide(targetZoom);
         }
@@ -1108,6 +1129,7 @@ sitecues.def('zoom', function (zoom, callback) {
         beginGlide(zoom.min, event);
       });
       sitecues.on('panel/show', function() {
+        initZoomModule(); // Lazy init
         isPanelOpen = true;
         if (shouldPrepareAnimations()) {
           prepareAnimationOptimizations();

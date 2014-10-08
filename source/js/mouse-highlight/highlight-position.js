@@ -43,7 +43,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       var allRects = [],
         $selector = $(selector),
         clipRects = getAncestorClipRects($selector);
-      getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites);
+      getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites, true);
       mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
@@ -115,6 +115,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     function getEmsToPx(fontSize, ems) {
+      // Create a div to measure the number of px in an em with this font-size
       var measureDiv = $('<div/>')
            .appendTo(document.body)
            .css({
@@ -122,39 +123,41 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           width: ems + 'em',
           visibility: 'hidden'
         }),
-        px = measureDiv.width();
+        // Multiply by zoom because our <div> is not affected by the document's current zoom level
+        px = measureDiv.width() * conf.get('zoom');
       measureDiv.remove();
       return px;
     }
 
-    function getBulletWidth(element, style, bulletType) {
-      var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+    function getBulletWidth(listElement, style) {
+      var bulletType = style.listStyleType,
+        ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
         ems = 1.6; // Simple bullet
       } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'), 10),
-          end = (start || 1) + element.childElementCount - 1;
+        var start = parseInt($(listElement).attr('start'), 10),
+          end = (start || 1) + listElement.childElementCount - 1;
         ems = (0.9 + 0.5 * end.toString().length);
       }
       return getEmsToPx(style.fontSize, ems);
     }
 
+    function hasHiddenBullets(style) {
+      return style.listStyleType === 'none' && style.listStyleImage === 'none';
+    }
+
     function getBulletRect(element, style) {
-      var bulletType = style.listStyleType;
-      if (bulletType === 'none' && style.listStyleImage === 'none') {
-        return null; // inside, will already have bullet incorporated in bounds
+      if (style.display !== 'list-item' || hasHiddenBullets(style)) {
+        // Do not perform the measurement on anything but a list item with visible bullets
+        return;
       }
-      if (style.display !== 'list-item') {
-        var firstChild = element.firstElementChild;
-        if (!firstChild || traitcache.getStyleProp(firstChild, 'display') !== 'list-item') {
-          return null; /// Needs to be list-item or have list-item child
-        }
-      }
+
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-          getBulletWidth(element, style, bulletType),
-        boundingRect = element.getBoundingClientRect(),
+          getBulletWidth(element.parentNode, style),
+        boundingRect = traitcache.getScreenRect(element),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
+
       return {
         top: boundingRect.top,
         height: boundingRect.height,
@@ -168,10 +171,18 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       // The following cases are unlikely to be sprites:
       // - Repeating backgrounds
       // - Percentage-positioned or centered (computed background-position-x is 50%)
+
+      // Check for elements with only a background-image
+      var rect = $.extend({}, traitcache.getScreenRect(element, true));
+      if ($(element).is(':empty')) {
+        // Empty elements have no other purpose than to show background sprites
+        return rect;
+      }
+
       var backgroundPos = style.backgroundPosition;
       if (style.backgroundImage === 'none' || style.backgroundRepeat !== 'no-repeat' ||
-        backgroundPos.indexOf('%') > 0) {
-        return null;
+        (parseFloat(backgroundPos) > 0 && backgroundPos.indexOf('%') > 0)) {
+        return;
       }
 
       // Background sprites tend to be to the left side of the element
@@ -179,8 +190,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
         // Use positive background positions (used for moving the sprite to the right within the element)
         // Ignore negative background positions (used for changing which sprite is used within a larger image)
-        actualLeft = Math.max(0, backgroundLeftPos),
-        rect = $.extend({}, traitcache.getScreenRect(element, true));
+        actualLeft = isNaN(backgroundLeftPos) || backgroundLeftPos < 0 ? 0 : backgroundLeftPos;
       rect.left += actualLeft;
       return rect.width > 0 ? rect : null;
     }
@@ -208,31 +218,37 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         return;
       }
 
-      // Check for descendant with visibility: hidden -- those break our overflow check.
+      // Check hidden or out-of-flow descendants -- those break our overflow check.
       // Example: google search results with hidden drop down menu
       // For now, we will not support overflow in this case.
-      var hasVisibilityHiddenDescendant = false,
+      var hasHiddenDescendant = false,
         MAX_ELEMENTS_TO_CHECK = 40;
       $(element).find('*').each(function(index) {
         if (index > MAX_ELEMENTS_TO_CHECK) {
           return false;
         }
-        if (traitcache.getStyleProp(this, 'visibility') === 'hidden') {
-          hasVisibilityHiddenDescendant = true;
+        var rect = traitcache.getRect(this),
+          style = traitcache.getStyle(this);
+        if (rect.right < 0 || rect.bottom < 0 ||
+          style.visibility === 'hidden' ||
+          style.position === 'absolute' ||
+          style.position === 'fixed') {
+          hasHiddenDescendant = true;
           return false;
         }
       });
-      if (hasVisibilityHiddenDescendant) {
-        return null;
+      if (hasHiddenDescendant) {
+        return;
       }
 
       // Overflow is visible: add right and bottom sides of overflowing content
       var rect = traitcache.getScreenRect(element),
+        zoom = conf.get('zoom'),
         newRect = {
           left: rect.left,
           top: rect.top,
-          width: overflowX ? element.scrollWidth : rect.width,
-          height: overflowY ? element.scrollHeight : rect.height
+          width: overflowX ? element.scrollWidth * zoom : Math.min(rect.width, MIN_RECT_SIDE),
+          height: overflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
         };
 
       return getRectMinusPadding(element, newRect);
@@ -245,14 +261,14 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return newRect;
     }
 
-    function addRect(allRects, clipRect, unclippedRect) {
+    function addRect(allRects, clipRect, unclippedRect, doLoosenMinSizeRule) {
       if (!unclippedRect) {
         return;
       }
       var rect = getClippedRect(unclippedRect, clipRect),
         zoom = conf.get('zoom'),
         minRectSide = MIN_RECT_SIDE * zoom;
-      if (rect.width < minRectSide || rect.height < minRectSide) {
+      if (!doLoosenMinSizeRule && (rect.width < minRectSide || rect.height < minRectSide)) {
         return; // Not large enough to matter
       }
 
@@ -269,7 +285,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       allRects.push(rect);
     }
 
-    function getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites) {
+    function getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites, isTop) {
 
       $selector.each(function (index) {
         var isElement = this.nodeType === 1,
@@ -299,57 +315,81 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
             // hidden and clipped elements.
             // ----------------------------------------------------------------------------------------------------
-            var range = document.createRange();
+            var range = document.createRange(),
+              rect,
+              textRangeVerticalClipRect = traitcache.getScreenRect(this.parentNode);
+
             range.selectNode(this);
-            var rect = getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+            rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
+
+            // Text must always be clipped to the bounding element, otherwise the top and bottom will
+            // encompass the entire line-height, which can contain a lot of whitespace/
+            // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
+            rect.top = Math.max(rect.top, textRangeVerticalClipRect.top);
+            rect.bottom = Math.min(rect.bottom, textRangeVerticalClipRect.bottom);
+            rect.height = rect.bottom - rect.top;
+
             addRect(allRects, clipRect, rect);
           }
-          return true;
+          return;
         }
 
         var style = traitcache.getStyle(this);
 
         // --- Invisible elements ---
         if (style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none') {
-          return true;
+          return;
         }
 
         // -- Clipping rules ---
         clipRect = getChildClipRect(this, style, clipRect);
 
+        // --- Media elements ---
+        if (common.isVisualMedia(this)) {
+          // Elements with rendered content such as images and videos
+          addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+          return;
+        }
+
+        // -- Out of flow and is not the top element --
+        if (!isTop && (style.position === 'absolute' || style.position === 'fixed')) {
+          var thisRect = traitcache.getScreenRect(this),
+            parentRect = traitcache.getScreenRect(this.parentNode),
+            FUZZ_FACTOR = 4;
+          // If the child bounds pop out of the parent bounds by more
+          // than FUZZ_FACTOR, it will need to be kept separate and
+          // not included in the current bounds calculation for this subtree
+          if (Math.abs(thisRect.left - parentRect.left) > FUZZ_FACTOR ||
+            Math.abs(thisRect.top - parentRect.top) > FUZZ_FACTOR ||
+            Math.abs(thisRect.right - parentRect.right) > FUZZ_FACTOR ||
+            Math.abs(thisRect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
+            return;
+          }
+        }
+
         // --- Overflowing content ---
         addRect(allRects, clipRect, getOverflowRect(this, style));
 
         // --- Visible border or form controls ---
-        if (common.hasVisualBox(this, style, traitcache.getStyle(this.parentNode)) ||
+        if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
           common.isFormControl(this)) {
-          var rect1 = this.getBoundingClientRect(),
-            rect2 = traitcache.getScreenRect(this);
           addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
           // Keep iterating: there may be some content outside
         }
 
         // --- List bullets ---
-        addRect(allRects, clipRect, getBulletRect(this, style));
-
+        addRect(allRects, clipRect, getBulletRect(this, style), true);
 
         // --- Background sprites ---
         if (stretchForSprites) {
           addRect(allRects, clipRect, getSpriteRect(this, style));
         }
 
-        // --- Media elements ---
-        if (common.isVisualMedia(this)) {
-          // Elements with rendered content such as images and videos
-          addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
-          return true;
-        }
-
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
           getAllBoundingBoxesExact($(this.childNodes), allRects, clipRect, stretchForSprites);  // Recursion
-          return true;
+          return;
         }
       });
     }

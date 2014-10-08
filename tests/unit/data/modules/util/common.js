@@ -32,7 +32,7 @@ exports.hasVisibleContent = function(node) {
   return true;
 }
 
-exports.hasVisualBox = function(node, style, parentStyle) {
+exports.isVisualRegion = function(node, style, parentStyle) {
   return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
 }
 
@@ -40,4 +40,8 @@ exports.hasOwnBackground = function(style, parentStyle) {
   var hasOwn = (style.backgroundImage && style.backgroundImage !== 'none') ||
     (style.backgroundColor && parentStyle.backgroundColor !== style.backgroundColor);
   return !!hasOwn;
+}
+
+exports.hasRaisedZIndex = function(style, parentStyle) {
+  return false;
 }

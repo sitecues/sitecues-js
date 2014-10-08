@@ -24,10 +24,11 @@ if (SC_DEV) {
       }
 
       function getScoreFactorString(sf) {
-        return String('                             ' + sf.about).slice(-35) + ': ' +
-          String('              ' + Math.round(sf.value)).slice(-11) + '   x ' +
-          String('              ' + sf.weight).slice(-11) + '   = ' +
-          String('              ' + Math.round(sf.weight * sf.value)).slice(-11);
+        var value = (sf.value * 1) || 0;
+        return String('                                       ' + sf.about).slice(-45) + ': ' +
+               String('                        ' + value.toFixed(1)).slice(-21) + '   x ' +
+               String('                        ' + sf.weight.toFixed(1)).slice(-21) + '   = ' +
+               String('                        ' + (sf.weight * value).toFixed(0)).slice(-21);
       }
 
       pickDebug.logHeuristicResult = function(scoreObjs, bestScoreIndex, traitStack, judgementStack, nodes) {
