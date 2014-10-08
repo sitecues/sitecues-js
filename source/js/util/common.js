@@ -255,7 +255,6 @@ sitecues.def('util/common', function (common, callback) {
       var maxX = window.innerWidth - 1,
         maxY = window.innerHeight - 1;
 
-      // In IE, this is the best we can do for now, because it causes the document to quickly shift
       x = Math.min(maxX, Math.max(0, x));
       y = Math.min(maxY, Math.max(0, y));
       return document.elementFromPoint(x, y);
