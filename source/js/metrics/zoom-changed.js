@@ -33,40 +33,34 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
       var $slider  = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
           $buttons = $('#sitecues-letterBig, #sitecues-letterBigBack, #sitecues-letterSml, #sitecues-letterSmlBack');
 
-      $slider.each(sliderMouseDown);
-      $buttons.each(buttonsMouseDown);
-      $(window).on('keydown', bodyKeyDown);
+      $slider.on('mousedown',  sliderMouseDown);
+      $buttons.on('mousedown', buttonsMouseDown);
+      $(window).on('keydown',  anyKeyDown);
 
       sitecues.emit('metrics/zoom-changed/create');
     }
 
     function setDataPropertyValue(prop, value) {
-      if (zoomChanged.data.hasOwnProperty(prop)) {
         zoomChanged.data[prop] = value;
-      }
     }
 
     /**
      * Window Events Handlers.
      */
 
-    function sliderMouseDown(e) {
-      this.onmousedown = function() {
-        setDataPropertyValue('is_slider_click', 1);
-        document.onmousemove = function (e) {
-          setDataPropertyValue('is_slider_drag', 1);
-          setDataPropertyValue('is_slider_click', 0);
-        };
+    function sliderMouseDown() {
+      setDataPropertyValue('is_slider_click', 1);
+      document.onmousemove = function () {
+        setDataPropertyValue('is_slider_drag', 1);
+        setDataPropertyValue('is_slider_click', 0);
       };
     };
 
     function buttonsMouseDown() {
-      $(this).mousedown(function() {
-        setDataPropertyValue('is_button_press', 1);
-      });
+      setDataPropertyValue('is_button_press', 1);
     };
 
-    function bodyKeyDown(event) {
+    function anyKeyDown(event) {
       // Handle keypress events(for ex., +/-)
       if (event && event.type === 'keydown') {
         var code = event.keyCode || event.which;
@@ -75,7 +69,8 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
         if (plus || minus) {
           setDataPropertyValue('is_key', 1);
-          setDataPropertyValue('is_browser_zoom_key_override', event.ctrlKey || event.metaKey);
+          // + is a simple way to convert boolean to a number: true becomes 1 and false is 0. I'll add a comment to it.
+          setDataPropertyValue('is_browser_zoom_key_override', +(event.ctrlKey || event.metaKey));
         }
       };
     }
@@ -118,7 +113,8 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
     // ============= sitecues Events Handlers ======================
 
-    var intervalID = setInterval(run, 100);
+//    var intervalID = setInterval(run, 100);
+    sitecues.on('zoom/begin', run);
 
     // Update data from the other modules.
     sitecues.on('metrics/update', function(metrics) {
