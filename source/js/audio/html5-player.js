@@ -31,7 +31,11 @@ sitecues.def('audio/html5-player', function (player, callback) {
    */
   player.stop = function () {
     sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
-    audioElement.pause();
+    
+    // We can only pause in IE9 if there is enough data to play
+    if (audioElement.readyState === 4) {
+      audioElement.pause();
+    }
   };
 
   callback();
