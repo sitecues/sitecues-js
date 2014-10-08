@@ -37,8 +37,8 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
             $letterSmall = $('#sitecues-letterSml, #sitecues-letterSmlBack'),
             $ttsButton = $('#sitecues-tts');
 
-            // todo: deligate
-            // better to add event listener for a wrapper and then use event tagret to get the element that fired it
+            // todo: delegate
+            // better to add event listener for a wrapper and then use event target to get the element that fired it
             $slider.mousedown(function() {
                 panelClosed.data.slider_interacted = 1;
             });
