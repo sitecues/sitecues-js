@@ -249,8 +249,7 @@ sitecues.def('util/common', function (common, callback) {
     };
 
     /*
-     * A version of elementFromPoint() that uses evil magic to get around
-     * not being able to look outside of the view port
+     * A version of elementFromPoint() that restricts the point to the viewport
      */
     common.elementFromPoint = function(x, y) {
       var maxX = window.innerWidth - 1,
