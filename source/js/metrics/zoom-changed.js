@@ -79,25 +79,23 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
       return !zoom.getIsInitialZoom();
     }
 
-    function run() {
+    function run(zoom) {
       if (readyForMetrics()) {
         // Create an instance on zoom changed event and add event listeners.
         zoomChanged.init();
 
+        // Remember the initial zoom value('from_zoom')
+        setDataPropertyValue('from_zoom', conf.get('zoom'));
+
         bindSitecuesEvents();
 
         // Clear interval, we don't need it anymore.
-        clearInterval(intervalID);
+        sitecues.off('zoom/begin', run);
       }
     }
 
     // Listen to necessary sitecues event and bind the handlers for them.
     function bindSitecuesEvents() {
-      // Remember the initial zoom value('from_zoom')
-      sitecues.on('zoom/begin', function(zoom) {
-        setDataPropertyValue('from_zoom', conf.get('zoom'));
-      });
-
       // Is it a long glide?
       sitecues.on('zoom/stop-button', function () {
         setDataPropertyValue('is_long_glide', 1);
@@ -108,12 +106,10 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
         zoomChanged.send();
         zoomChanged.reset();
       });
-
     }
 
     // ============= sitecues Events Handlers ======================
 
-//    var intervalID = setInterval(run, 100);
     sitecues.on('zoom/begin', run);
 
     // Update data from the other modules.
