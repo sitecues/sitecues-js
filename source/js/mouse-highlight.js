@@ -288,8 +288,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // show mouse highlight -- update() from mouse events finally results in show()
     function show() {
-      SC_DEV && console.log('*** highlight-debug ***  show()')
-
       // can't find any element to work with
       if (!state.picked) {
         return false;
@@ -664,11 +662,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
-              SC_DEV && console.log('*** highlight-debug ***  createNewOverlayPosition: isCursorInHighlight === false');
               pause();  // Hide highlight -- cursor has moved out of it
             }
             else {
-              SC_DEV && console.log('*** highlight-debug ***  createNewOverlayPosition: isCursorInHighlight === true');
               show(); // Create and show highlight -- cursor has moved into it
             }
           }
@@ -989,9 +985,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     var wasEnabledInsideRefresh = false;
     // refresh status of enhancement on page
     function refresh() {
-      if (wasEnabledInsideRefresh == isEnabled) {
-        console.log('@#$#$(@)#*$()@#*$ )SRSLY? Look in refresh() *@&$(&@$(#');
-      }
       if (isEnabled) {
         // handle mouse move on body
         $(document)
@@ -1030,13 +1023,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       isEnabled = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
 
       if (SC_DEV) {
-        console.log('*** highlight-debug ***  enableIfAppropriate? ' + was + ' -> ' + isEnabled);
-        if (!platform.browser.isIE || platform.browser.version >= 11) {
-          console.trace();
-        }
-      }
-
-      if (SC_DEV) {
         if (isSticky && state.picked) {
           // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
           pause();
@@ -1064,36 +1050,29 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // don't show highlight if current active isn't body
       var target = document.activeElement;
       isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
-      SC_DEV && console.log('*** highlight-debug ***  testFocus() ' + wasAppropriateFocus + ' -> ' + isAppropriateFocus);
       if (!isSticky) {
         if (wasAppropriateFocus && !isAppropriateFocus) {
-          SC_DEV && console.log('*** highlight-debug ***  testFocus() -- will pause, isWindowActive? ' + isWindowActive());
-          console.log(target);
           pause();
         }
         else if (!wasAppropriateFocus && isAppropriateFocus) {
-          SC_DEV && console.log('*** highlight-debug ***  testFocus() -- will enableIfAppropriate(), isWindowActive? ' + isWindowActive());
           enableIfAppropriate();
         }
       }
     }
 
     function onBlurWindow() {
-      SC_DEV && console.log('*** highlight-debug ***  onBlurWindow');
       isWindowFocused = false;
       isAppropriateFocus = false;
       hideAndResetIfNotSticky();
     }
       
     function onFocusWindow() {
-      SC_DEV && console.log('*** highlight-debug ***  onFocusWindow');
       isWindowFocused = true;
       testFocus();
     }
 
     // disable mouse highlight temporarily
     function disable() {
-      SC_DEV && console.log('*** highlight-debug ***  disable()')
       pause();
       if (isEnabled) {
         isEnabled = false;
@@ -1102,19 +1081,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function disableAndReset() {
-      SC_DEV && console.log('*** highlight-debug ***  disableAndReset()')
       disable();
       resetState();
     }
 
     function hideAndResetState() {
-      SC_DEV && console.log('*** highlight-debug ***  hideAndResetState()')
       pause();
       resetState();
     }
 
     function hideAndResetIfNotSticky() {
-      SC_DEV && console.log('*** highlight-debug ***  hideAndResetIfNotSticky()')
       if (!isSticky) {
         hideAndResetState();
       }
@@ -1122,12 +1098,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
     function pause() {
-      if (SC_DEV) {
-        console.log('*** highlight-debug ***  pause()');
-        if (!platform.browser.isIE || platform.browser.version >= 11) {
-          console.trace();
-        }
-      }
       if (state.picked && state.savedCss) {
         $(state.picked).style(state.savedCss);
         state.savedCss = null;
@@ -1150,7 +1120,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function resetState() {
-      SC_DEV && console.log('*** highlight-debug ***  resetState()')
       state = $.extend({}, INIT_STATE); // Copy
     }
 
