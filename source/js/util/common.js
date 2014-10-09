@@ -272,6 +272,11 @@ sitecues.def('util/common', function (common, callback) {
       $.extend(exports, common);
     }
 
+    common.getTransform = function($jquery) {
+      var transform = $jquery.css('transform') || $jquery.css('webkitTransform');
+      return parseFloat(transform.substring(7)) || 1;
+    };
+
     // Done.
     callback();
   });

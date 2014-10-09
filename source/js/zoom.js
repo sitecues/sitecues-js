@@ -462,8 +462,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the current zoom value as reported by the layout engine
       function getActualZoom() {
-        var transform = $body.css('transform');
-        return getSanitizedZoomValue(transform.substring(7));
+        return getSanitizedZoomValue(common.getTransform($body));
       }
 
       function onGlideStopped() {

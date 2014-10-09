@@ -255,9 +255,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     function isHLBZoomed($hlbElement) {
 
       // If there isn't any transform, then it isn't scaled.
-      var transform = $hlbElement.css('transform'),
-        scale = parseFloat(transform.substring(7));
-
+      var scale = common.getTransform($hlbElement);
       return scale > hlbPositioning.getStartingScale($hlbElement);
     }
 
