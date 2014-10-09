@@ -431,6 +431,9 @@ sitecues.def('zoom', function (zoom, callback) {
           timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * getMsPerXZoom() - timeElapsed);
 
         zoomInput.isLongGlide = timeRemaining === 0;
+        if (zoomInput.isLongGlide) {
+          sitecues.emit('zoom/long-glide');
+        }
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
