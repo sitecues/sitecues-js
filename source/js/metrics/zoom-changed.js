@@ -50,10 +50,6 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
     function sliderMouseDown() {
       setDataPropertyValue('is_slider_click', 1);
-      document.onmousemove = function () {
-        setDataPropertyValue('is_slider_drag', 1);
-        setDataPropertyValue('is_slider_click', 0);
-      };
     };
 
     function buttonsMouseDown() {
@@ -97,8 +93,13 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     // Listen to necessary sitecues event and bind the handlers for them.
     function bindSitecuesEvents() {
       // Is it a long glide?
-      sitecues.on('zoom/stop-button', function () {
+      sitecues.on('zoom/long-glide', function () {
         setDataPropertyValue('is_long_glide', 1);
+      });
+
+      sitecues.on('zoom/slider-drag', function () {
+        setDataPropertyValue('is_slider_drag', 1);
+        setDataPropertyValue('is_slider_click', 0);
       });
 
       // We are ready to send the metrics to backend.
