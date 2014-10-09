@@ -15,7 +15,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
     viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
-    floatRects: {}, // Interesting float objects
+    cutoutRects: {}, // Interesting float objects
     pathBorder: [], // In real pixels so that it can live outside of <body>
     pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
     pathFillBackground: [], // In element rect coordinates, used with CSS background
@@ -272,18 +272,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return styles;
     }
 
-    function getFloatRectsArray() {
-      return [ state.floatRects.topLeft, state.floatRects.topRight ];
+    function getCutoutRectsArray() {
+      return [
+        state.cutoutRects.topLeft,
+        state.cutoutRects.topRight,
+        state.cutoutRects.botLeft,
+        state.cutoutRects.botRight
+      ];
     }
 
-    function isCursorInHighlightShape(fixedRects, floatRects) {
+    function isCursorInHighlightShape(fixedRects, cutoutRects) {
       if (!cursorPos || !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects)) {
         return false;
       }
       // The cursor is in the fixed rectangle for the highlight.
       // Now, we will consider the cursor to be in the highlight as long as it's not in any
       // parts cut out from the highlight when it is drawn around floats.
-      return !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, floatRects);
+      return !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, cutoutRects);
     }
 
     // show mouse highlight -- update() from mouse events finally results in show()
@@ -414,61 +419,99 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
     };
 
-    function floatRectForPoint(x, y, expandFloatRectPixels) {
-      var possibleFloat = common.elementFromPoint(x, y),
+    function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {
+      var possibleFloat = common.elementFromPoint(x, y),  // Get from top-left or top-right of highlight
         picked = state.picked;
       if (possibleFloat && possibleFloat !== picked[0]) {
         var pickedAncestors = picked.parents(),
           possibleFloatAncestors = $(possibleFloat).parents();
-        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(picked)) {
-          // If potential float is ancestor of picked, or vice-versa, don't use it.
-          // We only use a cousin or sibling float.
+        if (pickedAncestors.is(possibleFloat)) {
+          // TODO commenting out second part cells in boxes at
+          // http://venturebeat.com/2014/10/01/after-raising-50m-reddit-forces-remote-workers-to-relocate-to-sf-or-get-fired/
+          // If potential float is ancestor of picked don't use it.
+          // However, the picked element could be an ancestor of the float, and we still need to use it.
+          // Example: http://thebillfold.com/2014/09/need-an-action-figure-of-a-dead-loved-one-meet-jeff-staab/
           return;
         }
-        var commonAncestor = $(possibleFloat).closest(pickedAncestors);
+        var commonAncestor = possibleFloatAncestors.is(picked) ? picked : $(possibleFloat).closest(pickedAncestors);
         if (isDifferentZIndex(possibleFloat, picked[0], commonAncestor)) {
           return; // Don't draw highlight around an item that is going over or under the highlight
         }
-        while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
-               possibleFloat !== document.documentElement) {
+        while (!commonAncestor.is(possibleFloat) && !$(possibleFloat).is('body,html')) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
             var COMBINE_ALL_RECTS = 99999,
-              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0],
+              floatRect = roundRectCoordinates(mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0]),
               mhRect = state.fixedContentRect,
               extra = getExtraPixels();
             if (!floatRect) {
               return;
             }
+            var results = {};
             if (floatRect.left > mhRect.left - extra && floatRect.right <= mhRect.right + extra &&
               floatRect.top >= mhRect.top - extra && floatRect.bottom <= mhRect.bottom + extra) {
               // Completely inside highlight rect -- don't bother
-              return;
+              if (mhRect.bottom === floatRect.bottom) {
+                // Float is taller than the rect
+                // and we likely need to bottom-right or bottom-left cut out.
+                // If the float is to the right, we will be cutting out the bottom-left, and
+                // if the float is to the left, we will be cutting out the bottom-right!!!
+                // We can compute this by comparing the bottom if the highlight rect
+                // with and without floats included. If the highlight rect would be taller
+                // when floats are included, then we will make a bottom cutout next to the bottom of the float,
+                // on the other side of the highlight.
+                var mhRectWithoutFloats = mhpos.getAllBoundingBoxes(picked, COMBINE_ALL_RECTS, true, true)[0] || mhRect,
+                  top = mhRectWithoutFloats.bottom + expandFloatRectPixels,
+                  cutoutRect;
+
+                if (top > mhRect.bottom - extra) {
+                  return; // Not a significant cutout
+                }
+
+                cutoutRect = {
+                    top: top,
+                    left: -9999,
+                    bottom: 9999,
+                    right: 9999
+                  };
+
+                if (typeIfFloatRectTaller === 'botRight') {
+                  cutoutRect.left = floatRect.right + expandFloatRectPixels;
+                }
+                else {
+                  cutoutRect.right = floatRect.left - expandFloatRectPixels;
+                }
+                cutoutRect.height = cutoutRect.bottom - cutoutRect.top;
+                cutoutRect.width = cutoutRect.right - cutoutRect.left;
+                results[typeIfFloatRectTaller] = cutoutRect;
+              }
             }
-            return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
+            else {
+              // float is shorter than highlight rect
+              results[typeIfFloatRectShorter] = geo.expandOrContractRect(floatRect, expandFloatRectPixels);
+            }
+            return results;
           }
           possibleFloat = possibleFloat.parentNode;
         }
       }
     }
 
-    // Get rects of floats that intersect with the original highlight rect.
-    // Floats are always aligned with the top of the element they're associated with,
-    // so we don't need to support botLeft or botRight floats
-    function getIntersectingFloatRects() {
+    // Get rects of cutouts caused fy floats intersecting with the original highlight rect.
+    function getCutoutRects() {
       var EXTRA = 7, // Make sure we test a point inside where the float would be, not on a margin
         EXPAND_FLOAT_RECT = 7,
         mhRect = state.fixedContentRect,
         left = mhRect.left,
         right = mhRect.left + mhRect.width,
         top = mhRect.top,
-        topLeftRect = floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
-        topRightRect = floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT);
+        // If there's a left float, rect1 will be top-left, unless the float is taller than
+        // everything else in the highlight, and then it will be bot-right
+        rect1 = getCutoutRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT, 'topLeft', 'botRight'),
+        // If there's a right float, rect2 will be top-right, unless the float is taller than
+        // everything else in the highlight, and then it will be bot-left
+        rect2 = getCutoutRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT, 'topRight', 'botLeft');
 
-      // Perform specific sanity checks depending on float position and return the rects if they pass
-      return {
-        topLeft: topLeftRect,
-        topRight: topRightRect
-      }
+      return $.extend( {}, rect1, rect2);
     }
 
     function extendAll(array, newProps) {
@@ -481,53 +524,70 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getPolygonPoints(rect) {
       // Build points for highlight polygon
       var orig = geo.expandOrContractRect(rect, 0),
-        topLeftFloatRect = state.floatRects.topLeft,
-        topRightFloatRect = state.floatRects.topRight,
+        // Shortcuts
+        topLeftCutout = state.cutoutRects.topLeft,
+        topRightCutout = state.cutoutRects.topRight,
+        botLeftCutout = state.cutoutRects.botLeft,
+        botRightCutout = state.cutoutRects.botRight,
+        // List of points for each corner
+        // We start out with one point, but if a cutout intersects, we will end up with 3 points for that corner
         topLeftPoints = [{x: orig.left, y: orig.top }],
         topRightPoints = [{x: orig.right, y: orig.top }],
-        // Can't create bottom-right float, just use point
         botRightPoints =  [{ x: orig.right, y: orig.bottom }],
-        // Can't create bottom left float, just use point
         botLeftPoints = [{ x: orig.left, y: orig.bottom }],
         mhRect = state.fixedContentRect;
 
-      if (topLeftFloatRect) {
-        if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
-          if (topLeftFloatRect.right > orig.left &&
-            topLeftFloatRect.bottom > orig.bottom) {  // Sanity check
-            topLeftPoints[0].x = topLeftFloatRect.right;
-            botLeftPoints[0].x = topLeftFloatRect.right;
+      if (topLeftCutout) {
+        if (!geo.isPointInRect(topLeftCutout.right, topLeftCutout.bottom, mhRect)) {
+          if (topLeftCutout.right > orig.left &&
+            topLeftCutout.bottom > orig.bottom) {  // Sanity check
+            topLeftPoints[0].x = topLeftCutout.right;
+            botLeftPoints[0].x = topLeftCutout.right;
           }
         }
         else {
           // Draw around top-left float
           topLeftPoints = [
-            { x: orig.left, y: topLeftFloatRect.bottom },
-            { x: topLeftFloatRect.right, y: topLeftFloatRect.bottom },
-            { x: topLeftFloatRect.right, y: orig.top}
+            { x: orig.left, y: topLeftCutout.bottom },
+            { x: topLeftCutout.right, y: topLeftCutout.bottom },
+            { x: topLeftCutout.right, y: orig.top}
           ];
         }
       }
 
-      if (topRightFloatRect) {
-        if (!geo.isPointInRect(topRightFloatRect.left, topRightFloatRect.bottom, mhRect)) {
-          if (topRightFloatRect.left < orig.right &&
-            topRightFloatRect.bottom > orig.bottom) { // Sanity check
-            topRightPoints[0].x = topRightFloatRect.left;
-            botRightPoints[0].x = topRightFloatRect.left;
+      if (topRightCutout) {
+        if (!geo.isPointInRect(topRightCutout.left, topRightCutout.bottom, mhRect)) {
+          if (topRightCutout.left < orig.right &&
+            topRightCutout.bottom > orig.bottom) { // Sanity check
+            topRightPoints[0].x = topRightCutout.left;
+            botRightPoints[0].x = topRightCutout.left;
           }
         }
         else
         {
           // Draw around top-right float
           topRightPoints = [
-            { x: topRightFloatRect.left, y: orig.top },
-            { x: topRightFloatRect.left, y: topRightFloatRect.bottom },
-            { x: orig.right, y: topRightFloatRect.bottom }
+            { x: topRightCutout.left, y: orig.top },
+            { x: topRightCutout.left, y: topRightCutout.bottom },
+            { x: orig.right, y: topRightCutout.bottom }
           ];
         }
       }
-      else { // No top-right float, just use top-right point
+
+      if (botRightCutout) {
+        botRightPoints = [
+          { x: orig.right, y: botRightCutout.top },
+          { x: botRightCutout.left, y: botRightCutout.top },
+          { x: botRightCutout.left, y: orig.bottom }
+        ];
+      }
+
+      if (botLeftCutout) {
+        botLeftPoints  = [
+          { x: botLeftCutout.right, y: orig.bottom },
+          { x: botLeftCutout.right, y: botLeftCutout.top },
+          { x: orig.left, y: botLeftCutout.top }
+        ];
       }
       // growX and growY are set to 1 or -1, depending on which direction coordinates should move when polygon grows
       extendAll(topLeftPoints, { growX: -1, growY: -1 });
@@ -613,16 +673,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var svg = '',
         color = getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(traitcache.getScreenRect(state.picked[0])),
-        extraLeft = (elementRect.left - state.fixedContentRect.left) ,
-        extraRight = (state.fixedContentRect.right - elementRect.right) ,
-        extraBottom = (state.fixedContentRect.bottom - elementRect.bottom) ;
+        extraLeft = elementRect.left - state.fixedContentRect.left,
+        extraRight = state.fixedContentRect.right - elementRect.right,
+        // Don't be fooled by bottom-right cutouts
+        extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
+          state.fixedContentRect.bottom - elementRect.bottom;
 
       if (extraLeft > 0) {
-        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : 0; // Top-left area where the highlight is not shown
+        var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
         svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, state.fixedContentRect.height - topOffset, color);
       }
       if (extraRight > 0) {
-        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : 0; // Top-right area where the highlight is not shown
+        var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : 0; // Top-right area where the highlight is not shown
         svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
@@ -659,7 +721,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             elementRect.top === state.elementRect.top) {
           // Optimization -- reuse old fixed content rect info
           // Show/hide highlight if cursor moves into or out of highlight
-          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
+          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
               pause();  // Hide highlight -- cursor has moved out of it
@@ -677,7 +739,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Get exact bounds
       fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
 
-      if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getFloatRectsArray())) {
+      if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
         return false;
       }
@@ -696,7 +758,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
-        state.floatRects = getIntersectingFloatRects();
+        state.cutoutRects = getCutoutRects();
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
         var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra,
             state.fixedContentRect.top - extra, 1);
@@ -841,8 +903,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
 
         correctRect(state.fixedContentRect);
-        correctRect(state.floatRects.topLeft);
-        correctRect(state.floatRects.topRight);
+        correctRect(state.cutoutRects.topLeft);
+        correctRect(state.cutoutRects.topRight);
         correctRect(state.elementRect);
         correctRect(state.viewRect);
 
@@ -914,7 +976,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false; // Original element has changed size
       }
       // Return true we're inside in the existing highlight
-      return isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
+      return isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
     }
 
     // Fixed position rectangles are in screen coordinates.

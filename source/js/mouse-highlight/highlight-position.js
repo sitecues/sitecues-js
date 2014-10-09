@@ -37,13 +37,13 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
      * they will be combined into a single rectangle.
      * @param selector -- what to get bounding boxes
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
-     * @param stretchForSprites -- true if it's important to add rects for background sprites
+     * @param doStretchForSprites -- true if it's important to add rects for background sprites
      */
-    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
+    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
       var allRects = [],
         $selector = $(selector),
         clipRects = getAncestorClipRects($selector);
-      getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites, true);
+      getAllBoundingBoxesExact($selector, allRects, clipRects, doStretchForSprites, doIgnoreFloats, true);
       mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return allRects;
@@ -285,7 +285,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       allRects.push(rect);
     }
 
-    function getAllBoundingBoxesExact($selector, allRects, clipRects, stretchForSprites, isTop) {
+    function getAllBoundingBoxesExact($selector, allRects, clipRects, doStretchForSprites, doIgnoreFloats, isTop) {
 
       $selector.each(function (index) {
         var isElement = this.nodeType === 1,
@@ -341,6 +341,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           return;
         }
 
+        if (doIgnoreFloats && style.float !== 'none') {
+          return;
+        }
+
         // -- Clipping rules ---
         clipRect = getChildClipRect(this, style, clipRect);
 
@@ -381,14 +385,14 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         addRect(allRects, clipRect, getBulletRect(this, style), true);
 
         // --- Background sprites ---
-        if (stretchForSprites) {
+        if (doStretchForSprites) {
           addRect(allRects, clipRect, getSpriteRect(this, style));
         }
 
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          getAllBoundingBoxesExact($(this.childNodes), allRects, clipRect, stretchForSprites);  // Recursion
+          getAllBoundingBoxesExact($(this.childNodes), allRects, clipRect, doStretchForSprites, doIgnoreFloats);  // Recursion
           return;
         }
       });
