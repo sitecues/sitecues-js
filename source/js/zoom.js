@@ -134,6 +134,7 @@ sitecues.def('zoom', function (zoom, callback) {
             cancelFrame(zoomAnimator);
             cancelGlideChangeTimer();
             zoomInput.isSliderDrag = true;
+            sitecues.emit('zoom/slider-drag');
             if (shouldPerformContinualUpdates) {
               zoomAnimator = requestFrame(performContinualZoomUpdates);
             }
