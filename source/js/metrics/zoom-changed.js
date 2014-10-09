@@ -92,6 +92,11 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
 
     // Listen to necessary sitecues event and bind the handlers for them.
     function bindSitecuesEvents() {
+      sitecues.on('zoom/begin', function() {
+        // Update the initial zoom value('from_zoom')
+        setDataPropertyValue('from_zoom', conf.get('zoom'));
+      })
+
       // Is it a long glide?
       sitecues.on('zoom/long-glide', function () {
         setDataPropertyValue('is_long_glide', 1);
