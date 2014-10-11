@@ -6,76 +6,97 @@ sitecues.def('status', function (status_module, callback) {
 
     // The default status formatter: simply log all data to the console log.
     function consoleCallback (info) {
-
-      // We need to have JSON and JSON.stringify if this is to work...
-      if (console && console.log && JSON && JSON.stringify) {
-
-        // Make sure we are not running from a file (unit testing in node)
-        if (window.location.protocol !== 'file:') {
+      // Make sure we are not running from a file (unit testing in node)...
+      if (location.protocol !== 'file:') {
+        // We only support the native console for now, so make sure it exists...
+        if (console && console.log) {
           // Make it clear where to begin copying...
-          console.log('\n\n-----BEGIN SITECUES STATUS-----');
-
-          // Log with pretty-print
-          console.log(JSON.stringify(info, null, '\t'));
-
+          console.log('\n-----BEGIN SITECUES STATUS-----\n');
+          // Check if we can pretty-print natively...
+          if (JSON && JSON.stringify) {
+            // Log with pretty-print
+            console.log(JSON.stringify(info, null, '    '));
+          }
+          // If we don't have JSON or Stringify...
+          else {
+            // ...the output will not be quite so pretty...
+            console.log(info);
+          }
           // Make it clear where to end copying
-          console.log('-----END SITECUES STATUS-----\n\n');
+          console.log('\n-----END SITECUES STATUS-----\n');
         }
-
-        // '...sitecues Status logged as JSON Object.';
-
-      // If we don't have JSON or Stringify...
-      } else {
-
-        // Make sure we are not running from a file (unit testing in node)
-        if (window.location.protocol !== 'file:') {
-
-           // ...the output will not be quite so pretty
-           console.log(info);
-
-        }
-
-        // '...sitecues Status logged as JavaScript Object.';
-
       }
-
     }
 
-
     status_module = function (callback) {
+
+      var data = conf.data(),
+          coordinates,
+          ajax_urls,
+          setting,
+          state,
+          info;
+
       callback = callback || consoleCallback;
 
-      var data = conf.data()
-        , ajax_urls
-        , setting
-        , info
-        ;
-
       info = {
-        'current_url'     : window.location.href,
-        'sitecues_js_url' : (sitecues.getLibraryUrl()).raw,
+        'time'            : Date.now(),
+        'current_url'     : location.href,
+        'sitecues_js_url' : sitecues.getLibraryUrl().raw,
         'user_agent'      : navigator.userAgent,
         'version'         : {
           'sitecues_js'   : sitecues.getVersion(),
           'sitecues_up'   : null,
           'sitecues_ws'   : null
+        },
+      };
+
+      coordinates = {
+        'document'        : {
+          'clientWidth'   : document.documentElement.clientWidth,
+          'clientHeight'  : document.documentElement.clientHeight,
+          'clientLeft'    : document.documentElement.clientLeft,
+          'clientTop'     : document.documentElement.clientTop
+        },
+        'window'          : {
+          'pageXOffset'   : pageXOffset,
+          'pageYOffset'   : pageYOffset,
+          'innerWidth'    : innerWidth,
+          'innerHeight'   : innerHeight,
+          'outerWidth'    : outerWidth,
+          'outerHeight'   : outerHeight,
+          'screenX'       : screenX,
+          'screenY'       : screenY
+        },
+        'screen'          : {
+          'width'         : screen.width,
+          'height'        : screen.height,
+          'availWidth'    : screen.availWidth,
+          'availHeight'   : screen.availHeight,
+          'availLeft'     : screen.availLeft,
+          'availTop'      : screen.availTop
         }
       };
 
       // Set the ajax URLs
       ajax_urls = {
-        up: ( '//' + ( sitecues.getLibraryConfig() ).hosts.up + '/status' ),
-        ws: ( '//' + ( sitecues.getLibraryConfig() ).hosts.ws + '/sitecues/api/util/status' )
+        up : '//' + sitecues.getLibraryConfig().hosts.up + '/status',
+        ws : '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/util/status'
       };
 
       // Define the info object to be formatted by the log
       for (setting in data) {
-        if (data.hasOwnProperty(setting)){
+        if (data.hasOwnProperty(setting)) {
           info[setting] = data[setting];
         }
       }
+      for (state in coordinates) {
+        if (coordinates.hasOwnProperty(state)) {
+          info[state] = coordinates[state];
+        }
+      }
 
-      // Appends sitecues status to the window in a div (used by Steve for testing)
+      // Appends sitecues status to the document in a div (useful for automated testing)
       function addStatusInfoToDOM(){
         var sitecuesStatusId='sitecues-status-output'
           , div = document.getElementById(sitecuesStatusId)
@@ -83,7 +104,8 @@ sitecues.def('status', function (status_module, callback) {
 
         if (div) {
           div.innerHTML = '';
-        } else {
+        }
+        else {
           div = document.createElement('div');
           div.setAttribute('id', 'sitecues-status-output');
           div.setAttribute('style', 'display:none!important;');
@@ -98,6 +120,7 @@ sitecues.def('status', function (status_module, callback) {
         if ( typeof info.version.sitecues_up === 'string' &&
              typeof info.version.sitecues_ws === 'string' ) {
 
+          sitecues.latestStatus = info;
           addStatusInfoToDOM(info);
           callback(info);
         }
@@ -117,7 +140,7 @@ sitecues.def('status', function (status_module, callback) {
         error: function(){
 
           // Set an error message if the AJAX object did not return
-          info.version.sitecues_up = 'Error Fetching Version from Service URL';
+          info.version.sitecues_up = 'Error fetching UP version from service URL';
           ajaxCheck();
         }
       });
@@ -136,11 +159,10 @@ sitecues.def('status', function (status_module, callback) {
         error: function(){
 
           // Set an error message if the AJAX object did not return
-          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
+          info.version.sitecues_ws = 'Error fetching WS version from service URL';
           ajaxCheck();
         }
       });
-
       return 'Fetching sitecues status...';
     };
 
