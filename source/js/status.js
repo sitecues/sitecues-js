@@ -5,7 +5,7 @@ sitecues.def('status', function (status_module, callback) {
   sitecues.use('jquery', 'audio', 'conf', function ( $, audio, conf ) {
 
     // The default status formatter: simply log all data to the console log.
-    function consoleCallback (info) {
+    function consoleCallback(info) {
       // Make sure we are not running from a file (unit testing in node)...
       if (location.protocol !== 'file:') {
         // We only support the native console for now, so make sure it exists...
@@ -97,7 +97,7 @@ sitecues.def('status', function (status_module, callback) {
       }
 
       // Appends sitecues status to the document in a div (useful for automated testing)
-      function addStatusInfoToDOM(){
+      function addStatusInfoToDOM() {
         var sitecuesStatusId='sitecues-status-output'
           , div = document.getElementById(sitecuesStatusId)
           ;
@@ -116,7 +116,7 @@ sitecues.def('status', function (status_module, callback) {
       }
 
         // Defer the ajax calls so we can respond when both are complete
-      function ajaxCheck () {
+      function ajaxCheck() {
         if ( typeof info.version.sitecues_up === 'string' &&
              typeof info.version.sitecues_ws === 'string' ) {
 
@@ -131,13 +131,13 @@ sitecues.def('status', function (status_module, callback) {
         dataType: 'json',
         type:     'GET',
         url:      ajax_urls.up,
-        success: function(response){
+        success: function (response) {
 
           // Set the version based on the AJAX response object
           info.version.sitecues_up = response.version;
           ajaxCheck();
         },
-        error: function(){
+        error: function () {
 
           // Set an error message if the AJAX object did not return
           info.version.sitecues_up = 'Error fetching UP version from service URL';
@@ -150,13 +150,13 @@ sitecues.def('status', function (status_module, callback) {
         dataType: 'json',
         type:     'GET',
         url:      ajax_urls.ws,
-        success: function(response){
+        success: function (response) {
 
           // Set the version based on the AJAX response object
           info.version.sitecues_ws = response.version;
           ajaxCheck();
         },
-        error: function(){
+        error: function () {
 
           // Set an error message if the AJAX object did not return
           info.version.sitecues_ws = 'Error fetching WS version from service URL';
