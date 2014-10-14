@@ -30,7 +30,8 @@ sitecues.def('status', function (status_module, callback) {
 
     status_module = function (callback) {
 
-      var data = conf.data(),
+      var html = document.documentElement,
+          confData = conf.data(),
           coordinates,
           ajax_urls,
           setting,
@@ -50,13 +51,14 @@ sitecues.def('status', function (status_module, callback) {
           'sitecues_ws'   : null
         },
       };
-
+      // Measurements useful for reproducing bugs, because their state affects
+      // the behavior of our CSS, animations, etc.
       coordinates = {
         'document'        : {
-          'clientWidth'   : document.documentElement.clientWidth,
-          'clientHeight'  : document.documentElement.clientHeight,
-          'clientLeft'    : document.documentElement.clientLeft,
-          'clientTop'     : document.documentElement.clientTop
+          'clientWidth'   : html.clientWidth,
+          'clientHeight'  : html.clientHeight,
+          'clientLeft'    : html.clientLeft,
+          'clientTop'     : html.clientTop
         },
         'window'          : {
           'pageXOffset'   : pageXOffset,
@@ -78,18 +80,19 @@ sitecues.def('status', function (status_module, callback) {
         }
       };
 
-      // Set the ajax URLs
+      // Set the server URLs for retrieving the status of our services (version info, etc.)
       ajax_urls = {
         up : '//' + sitecues.getLibraryConfig().hosts.up + '/status',
         ws : '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/util/status'
       };
 
-      // Define the info object to be formatted by the log
-      for (setting in data) {
-        if (data.hasOwnProperty(setting)) {
-          info[setting] = data[setting];
+      // Add current settings (zoom level, etc) to the log...
+      for (setting in confData) {
+        if (confData.hasOwnProperty(setting)) {
+          info[setting] = confData[setting];
         }
       }
+      // Add all measurements for bug reproduction to the log...
       for (state in coordinates) {
         if (coordinates.hasOwnProperty(state)) {
           info[state] = coordinates[state];
