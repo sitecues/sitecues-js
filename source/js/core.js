@@ -7,10 +7,6 @@
   
   'use strict';
 
-  if (window !== window.top && !sitecues.config.iframe) {
-    return;
-  }
-
   // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
   var version = '0.0.0-UNVERSIONED',
 
@@ -57,14 +53,17 @@
     }
   };
 
-  if (SC_DEV) {
+  function dev_msg (text) {
     if (console){
       var textStyle = 'background: red; color: #FFF; font-weight:bold;';
-      console.log('%c **** SITECUES MODE: SC_DEV **** ', textStyle);
-      console.log('%c **** SITECUES VERSION: '+version+' **** ', textStyle);
+      console.log('%c **** '+text+' **** ', textStyle);
     }
   }
-
+  
+  if (SC_DEV) {
+    dev_msg('SITECUES MODE: SC_DEV');
+    dev_msg('SITECUES VERSION: '+version);
+  }
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
@@ -564,6 +563,21 @@
       log.error('The ' + sitecues.config.script_url + ' parameter is not a string.');
       return false;
     }
+
+    // Stop sitecues from initializing if:
+        // 1) sitecues is running in an IFRAME
+        // 2) sitecues.config.iframe = falsy
+    if (window !== window.top && !window.sitecues.config.iframe) {
+      dev_msg(['SITECUES IFRAME URL: '+window.location]);
+      dev_msg('SITECUES IFRAME MODE: FALSE');
+      dev_msg('SITECUES NOT LOADING (IFRAME)');
+      return;
+    } else {
+      dev_msg('SITECUES IFRAME URL: '+window.location);
+      dev_msg('SITECUES IFRAME MODE: TRUE');
+      dev_msg('SITECUES CONTINUING TO LOAD (IFRAME)');
+    }
+  
 
     return true;
   };
