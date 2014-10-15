@@ -7,6 +7,10 @@
   
   'use strict';
 
+  if (window !== window.top && !sitecues.config.iframe) {
+    return;
+  }
+
   // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
   var version = '0.0.0-UNVERSIONED',
 
