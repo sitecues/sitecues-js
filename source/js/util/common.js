@@ -83,7 +83,7 @@ sitecues.def('util/common', function (common, callback) {
     common.hasOwnBackground = function(style, parentStyle) {
       // 1. Background colors
       var bgColor = style.backgroundColor;
-      if (bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
+      if (parentStyle && bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
         return true;
       }
 
