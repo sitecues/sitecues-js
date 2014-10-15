@@ -2,10 +2,10 @@ sitecues.def('status', function (status_module, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'audio', 'conf', function ( $, audio, conf ) {
+  sitecues.use('jquery', 'audio', 'conf', function ($, audio, conf) {
 
-    // The default status formatter: simply log all data to the console log.
-    function consoleCallback(info) {
+    // The default status formatter: logs all data to the console.
+    function consoleCallback(status) {
       // Make sure we are not running from a file (unit testing in node)...
       if (location.protocol !== 'file:') {
         // We only support the native console for now, so make sure it exists...
@@ -15,12 +15,12 @@ sitecues.def('status', function (status_module, callback) {
           // Check if we can pretty-print natively...
           if (JSON && JSON.stringify) {
             // Log with pretty-print
-            console.log(JSON.stringify(info, null, '    '));
+            console.log(JSON.stringify(status, null, '    '));
           }
           // If we don't have JSON or Stringify...
           else {
             // ...the output will not be quite so pretty...
-            console.log(info);
+            console.log(status);
           }
           // Make it clear where to end copying
           console.log('\n-----END SITECUES STATUS-----\n');
@@ -99,32 +99,30 @@ sitecues.def('status', function (status_module, callback) {
         }
       }
 
-      // Appends sitecues status to the document in a div (useful for automated testing)
-      function addStatusInfoToDOM() {
-        var sitecuesStatusId='sitecues-status-output'
-          , div = document.getElementById(sitecuesStatusId)
-          ;
+      // Appends sitecues status to the document (useful for automated testing)
+      function addStatusToDOM(status) {
+        var id      = 'sitecues-status-output',
+            elem    = document.getElementById(id),
+            content = JSON.stringify(status);
 
-        if (div) {
-          div.innerHTML = '';
-        }
-        else {
-          div = document.createElement('div');
-          div.setAttribute('id', 'sitecues-status-output');
-          div.setAttribute('style', 'display:none!important;');
-          document.getElementsByTagName('html')[0].appendChild(div);
+        if (!elem) {
+          elem = document.createElement('div');
+          elem.setAttribute('id', id);
+          elem.setAttribute('style', 'display:none!important;');
+          document.getElementsByTagName('html')[0].appendChild(elem);
         }
 
-        div.innerHTML = JSON.stringify(info);
+        elem.innerHTML = content;
       }
 
         // Defer the ajax calls so we can respond when both are complete
-      function ajaxCheck() {
-        if ( typeof info.version.sitecues_up === 'string' &&
-             typeof info.version.sitecues_ws === 'string' ) {
+      function readyCheck() {
+        var ready = typeof info.version.sitecues_up === 'string' &&
+                    typeof info.version.sitecues_ws === 'string';
 
+        if (ready) {
           sitecues.latestStatus = info;
-          addStatusInfoToDOM(info);
+          addStatusToDOM(info);
           callback(info);
         }
       }
@@ -135,16 +133,14 @@ sitecues.def('status', function (status_module, callback) {
         type:     'GET',
         url:      ajax_urls.up,
         success: function (response) {
-
           // Set the version based on the AJAX response object
           info.version.sitecues_up = response.version;
-          ajaxCheck();
+          readyCheck();
         },
         error: function () {
-
           // Set an error message if the AJAX object did not return
           info.version.sitecues_up = 'Error fetching UP version from service URL';
-          ajaxCheck();
+          readyCheck();
         }
       });
 
@@ -154,16 +150,14 @@ sitecues.def('status', function (status_module, callback) {
         type:     'GET',
         url:      ajax_urls.ws,
         success: function (response) {
-
           // Set the version based on the AJAX response object
           info.version.sitecues_ws = response.version;
-          ajaxCheck();
+          readyCheck();
         },
         error: function () {
-
           // Set an error message if the AJAX object did not return
           info.version.sitecues_ws = 'Error fetching WS version from service URL';
-          ajaxCheck();
+          readyCheck();
         }
       });
       return 'Fetching sitecues status...';
