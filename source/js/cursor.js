@@ -23,8 +23,8 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         isInitComplete,
         CURSOR_OFFSETS = {
-          _default : {x: 0,  y: 5, xStep: 0, yStep: 2.5},
-          _pointer : {x: 10, y: 5, xStep: 3.5, yStep: 1.7}
+          _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
+          _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
         };
 
     /*
