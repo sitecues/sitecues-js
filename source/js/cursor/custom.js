@@ -26,7 +26,9 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
           '<path d="m108,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>' +
           '<path d="m127,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>'
         }
-      };
+      },
+      MAX_CURSOR_SIZE_DEFAULT = 128,
+      MAX_CURSOR_SIZE_WIN = 110;
 
   sitecues.use('platform', function (platform) {
 
@@ -42,9 +44,10 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + Math.min(sizeRatio,3) + '.cur' );
       }
 
-      var prefix = PREFIX
+      var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
+          prefix = PREFIX
           .replace(/SIZE/g, '' + sizeRatio * pixelRatio)
-          .replace(/SIDE/g, '' + 128 * pixelRatio),
+          .replace(/SIDE/g, '' + maxCursorSize * pixelRatio),
         cursorSvg = prefix + CURSOR_SVG[platform.os.is]['_' + type] + POSTFIX;
 
       return 'data:image/svg+xml,' + escape( cursorSvg );
