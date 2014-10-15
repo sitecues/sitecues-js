@@ -9,14 +9,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
   sitecues.use('jquery', 'conf', 'platform', 'util/common',
     function ($, conf, platform, common) {
-      if (window !== window.top) {
-        // TODO we might want to put in a rule like this for all of sitecues
-        return; // Only zoom top level window so that we do not double zoom iframes
-      }
-      var
-        // Default zoom configuration
-        // Can be customized via zoom.provideCustomConfig()
-        zoomConfig = {
+      
+      // Default zoom configuration
+      
+      // Can be customized via zoom.provideCustomConfig()
+      var zoomConfig = {
+          
           // Should smooth zoom animations be enabled?
           shouldSmoothZoom: true,
 
