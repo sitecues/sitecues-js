@@ -314,7 +314,13 @@
       _def(defObj.name, defObj.constructor);
     } else {
       READY_FOR_DEF_CALLS = true;
+      
       sitecues.emit('core/allModulesLoaded');
+      
+      if( sitecues.ready && typeof sitecues.ready === 'function' ){
+        sitecues.ready.call(sitecues);
+      }
+
     }
   };
 
