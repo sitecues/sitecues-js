@@ -12,20 +12,25 @@ sitecues.def('status', function (status_module, callback) {
         if (console && console.log) {
           // Make it clear where to begin copying...
           console.log('\n-----BEGIN SITECUES STATUS-----\n');
-          // Check if we can pretty-print natively...
-          if (JSON && JSON.stringify) {
-            // Log with pretty-print
-            console.log(JSON.stringify(status, null, '    '));
-          }
-          // If we don't have JSON or Stringify...
-          else {
-            // ...the output will not be quite so pretty...
-            console.log(status);
-          }
-          // Make it clear where to end copying
+          // Log with pretty-print, if possible...
+          console.log(format(status));
+          // Make it clear where to end copying...
           console.log('\n-----END SITECUES STATUS-----\n');
         }
       }
+    }
+
+    // Helper to turn objects into string representations for logging...
+    function format(object) {
+
+        var INDENTATION = '    ',
+            result = object;
+
+        if (JSON && JSON.stringify) {
+          result = JSON.stringify(object, null, INDENTATION);
+        }
+
+        return result;
     }
 
     status_module = function (callback) {
@@ -103,13 +108,13 @@ sitecues.def('status', function (status_module, callback) {
       function addStatusToDOM(status) {
         var id      = 'sitecues-status-output',
             elem    = document.getElementById(id),
-            content = JSON.stringify(status);
+            content = format(status);
 
         if (!elem) {
           elem = document.createElement('div');
           elem.setAttribute('id', id);
           elem.setAttribute('style', 'display:none!important;');
-          document.getElementsByTagName('html')[0].appendChild(elem);
+          html.appendChild(elem);
         }
 
         elem.innerHTML = content;
