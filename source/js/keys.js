@@ -4,10 +4,10 @@ sitecues.def('keys', function(keys, callback) {
       function($, mh, common, hlb) {
 
       var
-        // KEY_TESTS defines navkeys used to bind actions to hotkeys.
+        // KEY_TESTS defines keys used to bind actions to hotkeys.
         // The key tests return true if the correct key was pressed, the current focus
         // is not on an element that needs the key, and the sitecues state is appropriate).
-        // 'Correct key' includes all key possible codes including alternate navkeys on the numeric keypad for +/-
+        // 'Correct key' includes all key possible codes including alternate keys on the numeric keypad for +/-
         // and additional codes resulting from browser differences.
         // See http://www.javascripter.net/faq/keycodes.htm
         //
@@ -72,7 +72,7 @@ sitecues.def('keys', function(keys, callback) {
              return event.keyCode === 27 && hlb.getElement();
           }
         },
-        // define navkeys map used to bind actions to hotkeys
+        // define keys map used to bind actions to hotkeys
         KEY_EVENT_MAP = {
           'space': 'hlb/toggle',
           'minus': 'zoom/decrease',
@@ -80,7 +80,7 @@ sitecues.def('keys', function(keys, callback) {
           'esc': 'hlb/toggle'
         };
 
-      // Non-shift modifier navkeys
+      // Non-shift modifier keys (ctrl, cmd, alt)
       function hasCommandModifier(event) {
         return event.altKey || event.ctrlKey || event.metaKey;
       }
@@ -104,11 +104,13 @@ sitecues.def('keys', function(keys, callback) {
         // Examples:
         // - spacebar in a button
         // - plus or minus key in a tree view or map (for zoom)
-        // Spacebar is probably the most likely, but as we start handling other navkeys such
-        // as arrows, we need to be careful. We could either decide which navkeys that we consume
+        // Spacebar is probably the most likely, but as we start handling other keys such
+        // as arrows, we need to be careful. We could either decide which keys that we consume
         // need stopImmediatePropagation, or just do it always to be safe.
-        // TODO put this back -- after we decide how metrics will learn about navkeys
-        //event.stopImmediatePropagation();
+        // TODO put this back for all keys -- after we decide how metrics will learn about keys
+        if (event.keyCode === 32) {
+          event.stopImmediatePropagation();
+        }
 
         // Emit event defined for key
         sitecues.emit(sitecuesEvent, event);

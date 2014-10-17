@@ -434,7 +434,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Prevents mouse movement from deflating the HLB until mouse is inside HLB
         preventDeflationFromMouseout = true;
 
-        // Listeners: navkeys.js, metrics/hlb-opened.js, speech.js
+        // Listeners: metrics/hlb-opened.js, speech.js
         sitecues.emit('hlb/create', $hlbElement);
 
       }
@@ -812,7 +812,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         originCSS    = undefined;
         isHLBClosing = false;
 
-        // Listeners: hpan.js, navkeys.js, mouse-highlight.js, speech.js
+        // Listeners: hpan.js, mouse-highlight.js, speech.js
         sitecues.emit('hlb/closed', e);
 
         $originalElement = undefined;
@@ -839,7 +839,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         turnOnHLBEventListeners();
 
         // Let the rest of the application know that the hlb is ready
-        // Listeners: hpan.js, invert.js, navkeys.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+        // Listeners: hpan.js, invert.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
         sitecues.emit('hlb/ready', $hlbElement);
 
       }
