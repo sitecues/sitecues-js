@@ -67,7 +67,7 @@ describe('sitecues', function () {
           done();
         });
       });
-      it('should have loaded keys [sitecues] module', function (done) {
+      it('should have loaded navkeys [sitecues] module', function (done) {
         session.browser.eval('phantomjs_context.keys', function (error, value) {
           expect(value).to.have.ownProperty('test');
           expect(value).to.have.ownProperty('hlbKeysTest');

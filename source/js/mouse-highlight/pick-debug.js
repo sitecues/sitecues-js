@@ -107,7 +107,7 @@ if (SC_DEV) {
       function logObject(title, obj, doStartExpanded) {
         var index, key, sortedKeys;
         if (obj) {
-          sortedKeys = Object.keys(obj).sort();
+          sortedKeys = Object.navkeys(obj).sort();
           logTitle(title, doStartExpanded);
           for (index = 0; index < sortedKeys.length; index++) {
             key = sortedKeys[index];

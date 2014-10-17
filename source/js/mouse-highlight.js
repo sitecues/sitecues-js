@@ -5,17 +5,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   var EXTRA_HIGHLIGHT_PIXELS = 3,
 
   INIT_STATE = {
-    isVisible: false,
+    isCreated: false, // Has highlight been created
+    isVisible: false,  // Is highlight visible?
     picked: null,     // JQuery for picked element(s)
     target: null,     // Mouse was last over this element
-    isCreated: false, // Has highlight been created
     styles: [],
     savedCSS: null,   // map of saved CSS for highlighted element
     elementRect: null,
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
     viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
-    cutoutRects: {}, // Interesting float objects
+    cutoutRects: {}, // Object map for possible topLeft, topRight, botLeft, botRight of rectangles cut out of highlight to create L shape
     pathBorder: [], // In real pixels so that it can live outside of <body>
     pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
     pathFillBackground: [], // In element rect coordinates, used with CSS background
@@ -97,7 +97,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getElementsContainingText(selector) {
+      SC_DEV && console.log('*** highlight-debug ***  getElementsContainingText()')
       return $(selector).find('*').andSelf().filter(function() {
+        SC_DEV && console.log('*** highlight-debug ***  getElementsContainingText() #2')
         var $this = $(this);
         return $this.children().length === 0 && $.trim($this.text()).length > 0;
       });
@@ -292,10 +294,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     // show mouse highlight -- update() from mouse events finally results in show()
+    // return true if something was shown
     function show() {
       // can't find any element to work with
       if (!state.picked) {
-        return false;
+        return;
       }
 
       state.zoom = zoomMod.getCompletedZoom();
@@ -304,11 +307,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!createNewOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
-        return false;
+        return;
       }
 
       state.isVisible = true;
       updateElementBgImage();
+
+      return true;
     }
 
     // Choose an appropriate background color for the highlight
@@ -713,9 +718,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element = state.picked.get(0);
       elementRect = traitcache.getScreenRect(element); // Rough bounds
 
-      if (!createOverlay) {   // Just a refresh
+      if (!createOverlay) {   // Just a refreshEventListeners
         if (!state.elementRect) {
-          return false; // No view to refresh
+          return false; // No view to refreshEventListeners
         }
         if (elementRect.left === state.elementRect.left &&
             elementRect.top === state.elementRect.top) {
@@ -724,7 +729,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
-              pause();  // Hide highlight -- cursor has moved out of it
+              hide(true);  // Hide but keep highlight data -- cursor has moved out of it, may move back in
             }
             else {
               show(); // Create and show highlight -- cursor has moved into it
@@ -803,7 +808,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         addMouseWheelUpdateListenersIfNecessary();
 
-        $(document).one('mouseleave', hideAndResetIfNotSticky);
+        $(document).one('mouseleave', onLeaveWindow);
       }
       else if (common.equals(previousViewRect, state.viewRect)) {
         return true; // Already created and in correct position, don't update DOM
@@ -1030,13 +1035,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!picked) {
         if (state.picked) {
-          hideAndResetState();  // Nothing picked anymore
+          hide();  // Nothing picked anymore
         }
         state.target = target;
         return;
       }
 
-      hideAndResetState();
+      hide();
 
       state.picked = $(picked);
       state.target = target;
@@ -1044,9 +1049,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       show();
     }
 
-    var wasEnabledInsideRefresh = false;
-    // refresh status of enhancement on page
-    function refresh() {
+    // refreshEventListeners turns on or off event listeners that enable the highlighter
+    function refreshEventListeners(doEnable) {
+      if (doEnable === isEnabled) {
+        return;
+      }
+      isEnabled = doEnable;
+
       if (isEnabled) {
         // handle mouse move on body
         $(document)
@@ -1059,7 +1068,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(window)
           .on('focus', onFocusWindow)
           .on('blur', onBlurWindow)
-          .on('resize', hideAndResetState);
+          .on('resize', hide);
       } else {
         // remove mousemove listener from body
         $(document)
@@ -1072,34 +1081,32 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(window)
           .off('focus', onFocusWindow)
           .off('blur', onBlurWindow)
-          .off('resize', hideAndResetState);
+          .off('resize', hide);
       }
-      wasEnabledInsideRefresh = isEnabled;
     }
 
-    function enableIfAppropriate() {
+    // Reenable highlight if appropriate
+    // Clear the existing highlight if we don't reenable or if highlight can't be shown
+    // (e.g. because focus is not in the right place, or the mouse cursor isn't inside the highlight)
+    // Mouse event is passed if available.
+    function enableIfAppropriate(mouseEvent) {
       state.zoom = zoomMod.getCompletedZoom();
-      var was = isEnabled;
-
       // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-      isEnabled = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
+      var doEnable = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
 
-      if (SC_DEV) {
-        if (isSticky && state.picked) {
-          // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
-          pause();
-          cursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
-          show();
-          return;
+      refreshEventListeners(doEnable);
+
+      if (!doEnable) {
+        forget();
+      }
+      if (doEnable) {
+        // Don't do cursor-inside-picked-content check, because it may not be after zoom change
+        if (mouseEvent && !isSticky) {
+          cursorPos = { x: mouseEvent.clientX, y: mouseEvent.clientY };
         }
-      }
-
-      if (was !== isEnabled) {
-        refresh();
-      }
-
-      if (isEnabled) {
-        show();
+        if (!show()) {
+          forget(); // Old highlight not appropriate, so hide it
+        }
       }
     }
 
@@ -1114,7 +1121,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
       if (!isSticky) {
         if (wasAppropriateFocus && !isAppropriateFocus) {
-          pause();
+          hide();
         }
         else if (!wasAppropriateFocus && isAppropriateFocus) {
           enableIfAppropriate();
@@ -1122,45 +1129,40 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    function onBlurWindow() {
-      isWindowFocused = false;
-      isAppropriateFocus = false;
-      hideAndResetIfNotSticky();
-    }
-      
     function onFocusWindow() {
       isWindowFocused = true;
       testFocus();
     }
 
-    // disable mouse highlight temporarily
-    function disable() {
-      pause();
-      if (isEnabled) {
-        isEnabled = false;
-        refresh();
-      }
+    function onBlurWindow() {
+      isWindowFocused = false;
+      isAppropriateFocus = false;
+      onLeaveWindow();
     }
-
-    function disableAndReset() {
-      disable();
-      resetState();
-    }
-
-    function hideAndResetState() {
-      pause();
-      resetState();
-    }
-
-    function hideAndResetIfNotSticky() {
+      
+    // When the user blurs ours mouses out of the window, we should
+    // hide and forget the highlight (unless sticky highlight is on)
+    function onLeaveWindow() {
       if (!isSticky) {
-        hideAndResetState();
+        hide();
       }
     }
 
-    // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
-    function pause() {
+    // disableTemporarily -- hide mouse highlight
+    // and remove event listeners so that we don't update the highlight on mouse move
+    // (until they're enabled again, via enableIfAppropriate())
+    function disableTemporarily() {
+      hide(true);
+      refreshEventListeners(false);
+    }
+
+    // Hide mouse highlight temporarily, keep picked data so we can reshow
+    // the same highlight without another mouse move.
+    // It's useful to call on it's own when the cursor goes outside of the highlight
+    // but stays inside the same element.
+    function hide(doRememberHighlight) {
       if (state.picked && state.savedCss) {
+        // Restore the previous CSS on the picked elements (remove highlight bg etc.)
         $(state.picked).style(state.savedCss);
         state.savedCss = null;
         if ($(state.picked).attr('style') === '') {
@@ -1176,33 +1178,34 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.isVisible = false;
 
+      if (!doRememberHighlight) {
+        // Forget highlight state, unless we need to keep it around temporarily
+        forget();
+      }
+
+      // Now that highlight is hidden, we no longer need these
       $(document)
         .off('mousewheel', onMouseWheel)
-        .off('mouseleave', hideAndResetIfNotSticky);
+        .off('mouseleave', onLeaveWindow);
     }
 
-    function resetState() {
-      state = $.extend({}, INIT_STATE); // Copy
+    function forget() {
+      state = $.extend({}, INIT_STATE);
     }
 
-    mh.isActive= function() {
-      return (state.isCreated || isEnabled) && isAppropriateFocus;
-    };
-
+    // Return all of the highlight information provided in the |state| variable
     mh.getHighlight = function() {
       return state;
     };
 
-    resetState();
+    forget();
 
-    // hide mouse highlight once highlight box appears. SC-1786
-    sitecues.on('mh/disable', disable);
+    // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
+    // Also to this until zooming finished so that outline doesn't get out of place during zoom
+    sitecues.on('hlb/init zoom/begin', disableTemporarily);
 
-    // enable mouse highlight back once highlight box deflates
+    // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('hlb/closed zoom', enableIfAppropriate);
-
-    // hide mouse highlight and disable until zooming finished
-    sitecues.on('zoom/begin', disableAndReset);
 
     // darken highlight appearance when speech is enabled
     conf.get('ttsOn', enableIfAppropriate);
@@ -1224,7 +1227,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
        * @param elem
        */
       sitecues.highlight = function(elem) {
-        hideAndResetState();
+        hide();
         state.picked = $(elem);
         state.target = elem;
         var rect = mhpos.getAllBoundingBoxes(elem, 0, true)[0];
@@ -1255,11 +1258,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.update = update;
       exports.createNewOverlayPosition = createNewOverlayPosition;
       exports.pickAfterShortWait = pickAfterShortWait;
-      exports.hideAndResetState = hideAndResetState;
       exports.enableIfAppropriate = enableIfAppropriate;
-      exports.disable = disable;
-      exports.pause = pause;
-      exports.resetState = resetState;
+      exports.disableTemporarily = disableTemporarily;
+      exports.hide = hide;
       exports.getMaxZIndex = getMaxZIndex;
       exports.pickTimer = pickTimer;
     }
