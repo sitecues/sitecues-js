@@ -39,15 +39,31 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
      * @param selector -- what to get bounding boxes
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
      * @param doStretchForSprites -- true if it's important to add rects for background sprites
+     * @return {
+     *   allRects: [],  // Array of rectangles
+     *   hiddenElements: []   // Elements whose contents are not included in the highlight, e.g. have absolutely positioned or hidden subtrees
+     * }
      */
-    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
-      var allRects = [],
+    mhpos.getHighlightPositionInfo = function (selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
+      var
+        accumulatedPositionInfo = {
+          allRects: [],
+          hiddenElements: []
+        },
         $selector = $(selector),
         clipRects = getAncestorClipRects($selector);
-      getAllBoundingBoxesExact($selector, allRects, clipRects, doStretchForSprites, doIgnoreFloats, true);
-      mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
-      return allRects;
+      getHighlightInfoRecursive($selector, accumulatedPositionInfo, clipRects, doStretchForSprites, doIgnoreFloats, true);
+      mhpos.combineIntersectingRects(accumulatedPositionInfo.allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+
+      return accumulatedPositionInfo;
+    };
+
+    // Get a single rectangle that covers the entire area defined by the selector
+    // doIgnoreFloats is optional
+    mhpos.getRect = function (selector, doIgnoreFloats) {
+      var COMBINE_ALL_RECTS = 99999;
+      return mhpos.getHighlightPositionInfo(selector, COMBINE_ALL_RECTS, true, doIgnoreFloats).allRects[0]
     };
 
     function scaleRect(rect, scale, offsetX, offsetY) {
@@ -72,14 +88,15 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // but not for element.getBoundingClientRect()
         var currZoom = conf.get('zoom'),
           mozRect = $.extend({}, rect),
-          scaledRect = scaleRect(mozRect, currZoom, window.pageXOffset, window.pageYOffset);
+          viewPos = traitcache.getCachedViewPosition(),
+          scaledRect = scaleRect(mozRect, currZoom, viewPos.x, viewPos.y);
 
         // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
         // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
         // and add in the difference in left coordinates.
         var bodyRange = document.createRange();
         bodyRange.selectNode(document.body);
-        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + window.pageXOffset) * currZoom - window.pageXOffset,
+        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + viewPos.x) * currZoom - viewPos.x,
           bodyLeft = traitcache.getScreenRect(document.body).left;
         scaledRect.left += bodyLeft - bodyRangeLeft;
 
@@ -88,15 +105,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return rect;
     }
 
-    function getBoundingRectMinusPadding(node) {
-      var rect = traitcache.getScreenRect(node);
-      return getRectMinusPadding(node, rect);
-    }
-
-    function getRectMinusPadding(node, rect) {
+    function getRectMinusPadding(node, style, rect) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
-      var style = traitcache.getStyle(node),
+      var
         paddingTop = parseFloat(style.paddingTop),
         paddingLeft = parseFloat(style.paddingLeft),
         paddingBottom = parseFloat(style.paddingBottom),
@@ -249,7 +261,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           height: overflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
         };
 
-      return getRectMinusPadding(element, newRect);
+      return getRectMinusPadding(element, style, newRect);
     }
 
     function normalizeRect(rect) {
@@ -259,6 +271,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return newRect;
     }
 
+    // Add rectangle to collected list of all rectangles
     function addRect(allRects, clipRect, unclippedRect, doLoosenMinSizeRule) {
       if (!unclippedRect) {
         return;
@@ -271,19 +284,15 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
 
       rect = normalizeRect(rect);
-
-      if (rect.right < 0 || rect.bottom < 0) {
-        var absoluteRect = mhpos.convertFixedRectsToAbsolute([rect], zoom)[0];
-        if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
-          // Don't be fooled by items hidden offscreen -- those rects don't count
-          return;
-        }
-      }
-
       allRects.push(rect);
     }
 
-    function getAllBoundingBoxesExact($selector, allRects, clipRects, doStretchForSprites, doIgnoreFloats, isTop) {
+    function getHighlightInfoRecursive($selector, accumulatedResults, clipRects, doStretchForSprites, doIgnoreFloats, isTop) {
+      var
+        allRects = accumulatedResults.allRects,
+        hiddenElements = accumulatedResults.hiddenElements,
+        viewPos = traitcache.getCachedViewPosition();
+
 
       $selector.each(function (index) {
         var isElement = this.nodeType === 1,
@@ -336,6 +345,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
         // --- Invisible elements ---
         if (style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none') {
+          hiddenElements.push(this);
           return;
         }
 
@@ -343,20 +353,21 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           return;
         }
 
-        // -- Clipping rules ---
-        clipRect = getChildClipRect(this, style, clipRect);
+        var thisRect = traitcache.getScreenRect(this);
 
-        // --- Media elements ---
-        if (common.isVisualMedia(this)) {
-          // Elements with rendered content such as images and videos
-          addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
+        // -- Clipping rules ---
+        clipRect = getChildClipRect(this, style, clipRect, thisRect);
+
+        if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
+          // Hidden off the page
+          // This is a technique used to hide contents offscreen without hiding it from screen readers
+          hiddenElements.push(this);
           return;
         }
 
         // -- Out of flow and is not the top element --
         if (!isTop && (style.position === 'absolute' || style.position === 'fixed')) {
-          var thisRect = traitcache.getScreenRect(this),
-            parentRect = traitcache.getScreenRect(this.parentNode),
+          var parentRect = traitcache.getScreenRect(this.parentNode),
             FUZZ_FACTOR = 4;
           // If the child bounds pop out of the parent bounds by more
           // than FUZZ_FACTOR, it will need to be kept separate and
@@ -365,8 +376,16 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             Math.abs(thisRect.top - parentRect.top) > FUZZ_FACTOR ||
             Math.abs(thisRect.right - parentRect.right) > FUZZ_FACTOR ||
             Math.abs(thisRect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
+            hiddenElements.push(this);
             return;
           }
+        }
+
+        // --- Media elements ---
+        if (common.isVisualMedia(this)) {
+          // Elements with rendered content such as images and videos
+          addRect(allRects, clipRect, getRectMinusPadding(this, style, thisRect));
+          return;
         }
 
         // --- Overflowing content ---
@@ -375,7 +394,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Visible border or form controls ---
         if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
           common.isFormControl(this)) {
-          addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
+          addRect(allRects, clipRect, thisRect); // Make it all visible, including padding and border
           // Keep iterating: there may be some content outside
         }
 
@@ -390,7 +409,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          getAllBoundingBoxesExact($(this.childNodes), allRects, clipRect, doStretchForSprites, doIgnoreFloats);  // Recursion
+          getHighlightInfoRecursive($(this.childNodes), accumulatedResults, clipRect, doStretchForSprites, doIgnoreFloats);  // Recursion
           return;
         }
       });
@@ -425,12 +444,12 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     // Return the new clip rect for the child, taking into account
     // the old clip rect and usage of CSS positioning
     // TODO What if overflow-X is hidden and overflow-y is visible?
-    function getChildClipRect(element, style, clipRect) {
+    function getChildClipRect(element, style, clipRect, elementRect) {
       if (clipRect && clipRect.willOutOfFlowCancel && (style.position === 'absolute' || style.position === 'fixed')) {
         clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
       }
       if (isClipElement(style)) {
-        clipRect = getClippedRect(clipRect, traitcache.getScreenRect(element));
+        clipRect = getClippedRect(clipRect, elementRect);
         clipRect.willOutOfFlowCancel = true;
       }
       if (clipRect) {
@@ -453,7 +472,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           style;
         $(ancestors).each(function() {
           style = traitcache.getStyle(this);
-          clipRect = getChildClipRect(this, style, clipRect);
+          clipRect = getChildClipRect(this, style, clipRect, traitcache.getScreenRect(this));
         });
         allClipRects.push(clipRect);
       });
@@ -507,31 +526,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         }
       }
     };
-
-    /**
-    * Return a corrected bounding box given the total zoom for the element and current scroll position
-    */
-    function getCorrectedBoundingBox(boundingBox, scrollPosition) {
-      var rect = {
-        left: boundingBox.left + scrollPosition.left,
-        top:  boundingBox.top + scrollPosition.top,
-        width: boundingBox.width,
-        height: boundingBox.height
-      };
-      rect.right = rect.left + rect.width;
-      rect.bottom = rect.top + rect.height;
-      return rect;
-    }
-
-    /**
-     * Obtain the scroll position.
-     */
-    function getScrollPosition() {
-      return {
-        left: window.pageXOffset,
-        top:  window.pageYOffset
-      };
-    }
 
     // Done.
     callback();

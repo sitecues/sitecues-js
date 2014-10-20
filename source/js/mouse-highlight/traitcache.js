@@ -38,6 +38,10 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
       cachedViewPosition.y = window.pageYOffset;
     };
 
+    traitcache.getCachedViewPosition = function() {
+      return cachedViewPosition;
+    }
+
     traitcache.getCachedViewSize = function() {
       return cachedViewSize;
     };
