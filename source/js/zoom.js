@@ -84,7 +84,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM_NORMAL = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        MS_PER_X_ZOOM_SLIDER = 500,
+        MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
@@ -237,8 +237,9 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function finishZoomSliderOperation() {
-        if (zoomInput.isSliderDrag || !shouldSmoothZoom) {
-          // Was dragging the slider
+        if (zoomInput.isSliderDrag || !zoomAnimator) {
+          // Slider thumb already at destination -- was not busy animating to
+          // a click elsewhere in the slider bar
           finishZoomOperation();
         }
         // Else is in the middle of gliding to a zoom click -- let it finish --
@@ -249,8 +250,10 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override as follows:
       // Shift-key: Script-based smooth zoom
       // Ctrl-key: CSS-based smooth zoom
-      function shouldSmoothZoom() {
-        if (SC_DEV && (zoomInput.shiftKey || zoomInput.ctrlKey)) {
+      function shouldSmoothZoom(event) {
+        var event = event || {};
+
+        if (SC_DEV && (event.shiftKey || event.ctrlKey)) {
           return true; // Dev override -- use animation no matter what
         }
 
@@ -265,18 +268,19 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override default behavior as follows:
       // Shift-key: Script-based
       // Ctrl-key: CSS-based
-      function shouldUseKeyFramesAnimation() {
+      function shouldUseKeyFramesAnimation(event) {
+        var event = event || {};
         if (SC_DEV) {
           // In dev, allow overriding of animation type
-          if (zoomInput.shiftKey) {
+          if (event.shiftKey) {
             return false; // Use JS-based animation
           }
-          else if (zoomInput.ctrlKey) {
+          else if (event.ctrlKey) {
             return true;
           }
         }
 
-        return shouldSmoothZoom()
+        return shouldSmoothZoom(event)
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
           // Safari is herky jerky if animating the width and using key frames
@@ -329,20 +333,8 @@ sitecues.def('zoom', function (zoom, callback) {
       // If we are zooming with +/- or clicking A/a
       function beginGlide(targetZoom, event) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
-          var input = {};
-          if (event) {
-            if (event.keyCode) {
-              //input.isKey = true;
-              //input.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
-              input.shiftKey = event.shiftKey;
-              input.ctrlKey = event.ctrlKey;
-            }
-//            else {
-//              input.isAButtonPress = true;
-//            }
-          }
-
-          if (!shouldSmoothZoom()) {
+          var input = { event: event };
+          if (!shouldSmoothZoom(event)) {
             beginZoomOperation(targetZoom, input);
             // Instant zoom
             if (event) {
@@ -572,14 +564,10 @@ sitecues.def('zoom', function (zoom, callback) {
       function beginZoomOperation(targetZoom, input, animationReadyCallback) {
         // Initialize zoom input info
         zoomInput = $.extend({
-          // Commented out ones are no longer needed unless we decide to do metrics from within modules
-//          isKey: false,                     // + or - key (or with modifier)
-//          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
-//          isAButtonPress: false,            // Small or large A in panel
-//          fromZoom: completedZoom           // Old zoom value
           isSlider: false,                    // Slider in panel
           isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
-          isLongGlide: false                  // Key or A button held down to glide extra
+          isLongGlide: false,                 // Key or A button held down to glide extra
+          event: {}
         }, input);
 
         // Make sure we're ready
@@ -604,7 +592,7 @@ sitecues.def('zoom', function (zoom, callback) {
             pointerEvents: 'none'
           });
 
-          sitecues.emit('zoom/begin');
+          sitecues.emit('zoom/begin', zoomInput.event);
 
           animationReadyCallback && animationReadyCallback();
         }
