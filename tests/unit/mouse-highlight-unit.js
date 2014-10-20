@@ -169,10 +169,10 @@ describe('mouse-highlight', function () {
       expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(2);
       done();
     });
-    it('should return around 3 if zoom is 3', function (done) {
+    it('should return around 9 if zoom is 3', function (done) {
       mh.state.zoom = 3;
       expect(Math.round(mh.getHighlightBorderWidth())).to
-        .be.equal(3);
+        .be.equal(9);
       done();
     });
   });

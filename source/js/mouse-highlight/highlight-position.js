@@ -10,18 +10,19 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
   sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
                function ($, common, conf, platform, traitcache) {
 
-    mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
-      var absoluteRects = [];
-      var scrollPos = getScrollPosition();
-      for (var count = 0; count < fixedRects.length; count ++) {
-        absoluteRects[count] = getCorrectedBoundingBox(fixedRects[count], scrollPos);
-      }
-      // AK: this is quick'n'dirty fix for the case rect is undefined
-      if (absoluteRects.length === 0) {
-        absoluteRects = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
-      }
-                  
-      return absoluteRects;
+    /**
+    * Return a single absolutely positioned bounding box given the current scroll position
+    */
+    mhpos.convertScreenToBodyCoordinates = function(boundingBox) {
+     var
+       bodyRect = traitcache.getScreenRect(document.body),
+       rect = {
+         left: boundingBox.left -bodyRect.left,
+         top:  boundingBox.top -bodyRect.top,
+         width: boundingBox.width,
+         height: boundingBox.height
+       };
+     return scaleRect(rect, 1/conf.get('zoom'), 0, 0);
     };
 
     /**
@@ -56,10 +57,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         left   : ((rect.left + offsetX) * scale) - offsetX,
         top    : ((rect.top + offsetY) * scale) - offsetY
       };
-      newRect.right  = newRect.left + newRect.width;
-      newRect.bottom = newRect.top  + newRect.height;
-
-      return newRect;
+      return normalizeRect(newRect);
     }
 
     mhpos.getRangeRect = function(containerNode) {
@@ -464,7 +462,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     /**
-     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+     * Combine intersecting rects. If they are within |extraSpace| pixels of each other, merge them.
      */
     mhpos.combineIntersectingRects = function(rects, extraSpace) {
       function intersects(r1, r2) {

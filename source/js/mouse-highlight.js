@@ -97,9 +97,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getElementsContainingText(selector) {
-      SC_DEV && console.log('*** highlight-debug ***  getElementsContainingText()')
       return $(selector).find('*').andSelf().filter(function() {
-        SC_DEV && console.log('*** highlight-debug ***  getElementsContainingText() #2')
         var $this = $(this);
         return $this.children().length === 0 && $.trim($this.text()).length > 0;
       });
@@ -240,7 +238,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
           borderWidth = viz - 0.4;
-      return Math.max(1, borderWidth);
+      return Math.max(1, borderWidth) * state.zoom;
     }
 
     function getTransparentBackgroundColor() {
@@ -706,9 +704,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       var element,
           elementRect,
-          fixedRects,
-          absoluteRect,
-          previousViewRect,
+          overlayRect,
+          previousOverlayRect,
           stretchForSprites = true;
 
       if (!state.picked) {
@@ -753,12 +750,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = roundRectCoordinates(fixedRects[0]);
 
       state.elementRect = $.extend({}, elementRect);
-      absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
-      previousViewRect = $.extend({}, state.viewRect);
-      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() * state.zoom);
+      overlayRect = mhpos.convertScreenToBodyCoordinates(state.fixedContentRect);
+      previousOverlayRect = $.extend({}, state.overlayRect);
+      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth());
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
 
-      state.viewRect = roundRectCoordinates($.extend({ }, absoluteRect));
+      state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
       var extra = getExtraPixels();
 
       if (createOverlay) {
@@ -788,12 +785,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
             svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
-          document.documentElement.appendChild(svgFragment);
-          $('.' + HIGHLIGHT_OUTLINE_CLASS)
-            .attr({
-              width : (state.fixedContentRect.width + 2 * extra) + 'px',
-              height: (state.fixedContentRect.height + 2 * extra) + 'px'
+          document.body.appendChild(svgFragment);
+          var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
+            width = state.fixedContentRect.width + 2 * extra,
+            height = state.fixedContentRect.height + 2 * extra;
+          $svg.attr({
+              width : (width / state.zoom) + 'px',
+              height: (height / state.zoom) + 'px'
             });
+          // Cannot set viewBox via jQuery -- it lowercases the attribute which breaks it
+          // (the "B" in "Box" needs to be uppercase)
+          // See http://stackoverflow.com/questions/10390346/why-is-jquery-auto-lower-casing-attribute-values
+          $svg[0].setAttribute('viewBox', "0 0 " + width + ' ' + height);
         }
         else {
           // Use CSS outline with 0px wide/tall elements to draw lines of outline
@@ -810,7 +813,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         $(document).one('mouseleave', onLeaveWindow);
       }
-      else if (common.equals(previousViewRect, state.viewRect)) {
+      else if (common.equals(previousOverlayRect, state.overlayRect)) {
         return true; // Already created and in correct position, don't update DOM
       }
 
@@ -866,7 +869,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Number of pixels any edge will go beyond the fixedContentRect -- the highlight's border and padding
     function getExtraPixels() {
-      return roundCoordinate((state.highlightPaddingWidth + state.highlightBorderWidth) * state.zoom);
+      return roundCoordinate(state.highlightPaddingWidth + state.highlightBorderWidth);
     }
 
     function isInScrollableContainer(element) {
@@ -911,15 +914,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         correctRect(state.cutoutRects.topLeft);
         correctRect(state.cutoutRects.topRight);
         correctRect(state.elementRect);
-        correctRect(state.viewRect);
+        correctRect(state.overlayRect);
 
         updateHighlightOverlayPosition();
       }
 
       function updateHighlightOverlayPosition() {
-        var extra = getExtraPixels(),
-          left = state.viewRect.left - extra,
-          top = state.viewRect.top - extra;
+        var extra = getExtraPixels() / state.zoom,
+          left = state.overlayRect.left - extra,
+          top = state.overlayRect.top - extra;
         // TODO use .style with 'important' if we run into page css collisions
         // Otherwise, if we don't run into problems with that, we should probably get rid of the style plugin
         // and save the space.
