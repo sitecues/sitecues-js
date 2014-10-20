@@ -7,12 +7,13 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'conf', 'platform', 'style-service',
-    function ($, zoom, conf, platform, styleService) {
+  sitecues.use('jquery', 'zoom', 'platform', 'style-service',
+    function ($, zoomMod, platform, styleService) {
 
       var isOn = false,
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
-        lastAdjustedElements     = $();
+        lastAdjustedElements     = $(),
+        MAX_ZOOM_FIXED_CONTENT = 1.8;
 
       /*
        For every fixed element on the page, we must translate them to their correct positions using
@@ -28,18 +29,35 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
          * @param  elements [element to position]
          */
         function adjustElement(index, element) {
-          var transform = '';
+          var transform = '',
+            transformOrigin = '';
           if ($(element).css('position') === 'fixed') {
             transform = 'translate(' + offsetLeft + 'px, ' + offsetTop + 'px)';
+            if (scaleTransform < 1) {
+              transform += ' scale(' + scaleTransform + ')';
+              transformOrigin = '0% 0%';
+            }
           }
-          $(element).css('transform', transform);
+          $(element).css({
+            transform: transform,
+            transformOrigin: transformOrigin
+          });
         }
 
         var elementsToAdjust = $(fixedSelector),
-          zoom = conf.get('zoom'),
+          // The current amount of zoom applied to the fixed content
+          pageZoom = zoomMod.getCompletedZoom(),
+          // The actual amount of zoom we want for the fixed content.
+          // It can be up to MAX_ZOOM_FIXED_CONTENT
+          fixedItemZoom = Math.min(pageZoom, MAX_ZOOM_FIXED_CONTENT),
+          // Amount to scale to bring fixed position content down to MAX_ZOOM_FIXED_CONTENT
+          // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
+          // Otherwise, will be < 1 in order to reduce the size.
+          scaleTransform = fixedItemZoom / pageZoom,
           bodyRect = document.body.getBoundingClientRect(),
-          offsetLeft = - bodyRect.left / zoom,
-          offsetTop = - bodyRect.top / zoom;
+          // Amount to move the fixed positioned items so that they appear in the correct place
+          offsetLeft = (- bodyRect.left / pageZoom),
+          offsetTop = (- bodyRect.top / pageZoom);
 
         // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
         elementsToAdjust.add(lastAdjustedElements).each(adjustElement);
@@ -65,7 +83,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         sitecues.on('style-service/ready', function () {
           fixedSelector = getFixedPositionSelector();
           if (fixedSelector) {
-            lazyTurnOn(conf.get('zoom'));
+            lazyTurnOn(zoomMod.getCompletedZoom());
           }
         });
 
@@ -75,6 +93,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         sitecues.on('zoom', function (zoom) {
           lazyTurnOn(zoom);
           refresh();
+        });
+
+        sitecues.on('zoom/begin', function () {
+          // Temporarily hide until smooth zooming ends
+          // This is done because during smooth zoom, the fixed toolbars tend
+          // to migrate into the middle of the page, which looks weird.
+          // Better to hide and then reshow them in the right place, until
+          // we come up with a more clever solution.
+          $(fixedSelector).css('transform', 'translate(-9999px,-9999px)');
         });
       }
 
