@@ -14,28 +14,33 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         lastAdjustedElements     = $();
 
-      /**
-       * Positions a fixed element as if it respects the viewport rule.
-       * Also clears the positioning if the element is no longer fixed.
-       * @param  elements [element to position]
-       */
-      function adjustElement(index, element) {
-        var zoom = conf.get('zoom'),
-            transform = '';
-        if ($(element).css('position') === 'fixed') {
-          transform = 'translate(' + window.pageXOffset/zoom + 'px, ' +
-            window.pageYOffset/zoom + 'px)';
-        }
-        $(element).css('transform', transform);
-      }
-
       /*
        For every fixed element on the page, we must translate them to their correct positions using
        transforms.  This basically happens on scroll events. We must apply
        the transforms that are reactions to the scroll events on top of any transforms.
        */
       function refresh() {
-        var elementsToAdjust = $(fixedSelector);
+        /**
+         * Positions a fixed element as if it respects the viewport rule.
+         * Also clears the positioning if the element is no longer fixed.
+         * (It's often the case that toolbars become fixed only after the user scrolls,
+         * and returning to the top of the document returns the toolbar to non-fixed positioning).
+         * @param  elements [element to position]
+         */
+        function adjustElement(index, element) {
+          var transform = '';
+          if ($(element).css('position') === 'fixed') {
+            transform = 'translate(' + offsetLeft + 'px, ' + offsetTop + 'px)';
+          }
+          $(element).css('transform', transform);
+        }
+
+        var elementsToAdjust = $(fixedSelector),
+          zoom = conf.get('zoom'),
+          bodyRect = document.body.getBoundingClientRect(),
+          offsetLeft = - bodyRect.left / zoom,
+          offsetTop = - bodyRect.top / zoom;
+
         // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
         elementsToAdjust.add(lastAdjustedElements).each(adjustElement);
         lastAdjustedElements = elementsToAdjust;

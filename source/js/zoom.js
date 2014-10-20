@@ -199,7 +199,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // This is the body's currently visible width, with zoom factored in
       zoom.getBodyWidth = function() {
        // Use the originally measured visible body width
-       initZoomModule();
+       initBodyInfo();
 
        // If width was restricted
        var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
@@ -209,7 +209,7 @@ sitecues.def('zoom', function (zoom, callback) {
       };
 
       zoom.getBodyRight = function() {
-        initZoomModule();
+        initBodyInfo();
 
         return originalBodyInfo.right * completedZoom;
       };
@@ -1043,8 +1043,8 @@ sitecues.def('zoom', function (zoom, callback) {
         };
       }
 
-      // Lazy init, saves time on page load
-      function initZoomModule() {
+      // Ensure that initial body info is ready
+      function initBodyInfo() {
         if (originalBodyInfo) {
           return; //Already initialized
         }
@@ -1052,6 +1052,11 @@ sitecues.def('zoom', function (zoom, callback) {
         body = document.body;
         $body = $(body);
         originalBodyInfo = getBodyInfo();
+      }
+
+      // Lazy init, saves time on page load
+      function initZoomModule() {
+        initBodyInfo();
 
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();
