@@ -13,6 +13,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     savedCSS: null,   // map of saved CSS for highlighted element
     elementRect: null,
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
+    hiddenElements: [], // Elements whose subtrees are hidden or not part of highlight rectangle (e.g. display: none, hidden off-the-page, out-of-flow)
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
     viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
     cutoutRects: {}, // Object map for possible topLeft, topRight, botLeft, botRight of rectangles cut out of highlight to create L shape
@@ -444,8 +445,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
         while (!commonAncestor.is(possibleFloat) && !$(possibleFloat).is('body,html')) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var COMBINE_ALL_RECTS = 99999,
-              floatRect = roundRectCoordinates(mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0]),
+            var floatRect = roundRectCoordinates(mhpos.getRect(possibleFloat)),
               mhRect = state.fixedContentRect,
               extra = getExtraPixels();
             if (!floatRect) {
@@ -464,7 +464,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
                 // with and without floats included. If the highlight rect would be taller
                 // when floats are included, then we will make a bottom cutout next to the bottom of the float,
                 // on the other side of the highlight.
-                var mhRectWithoutFloats = mhpos.getAllBoundingBoxes(picked, COMBINE_ALL_RECTS, true, true)[0] || mhRect,
+                var mhRectWithoutFloats = mhpos.getRect(picked, true) || mhRect,
                   top = mhRectWithoutFloats.bottom + expandFloatRectPixels,
                   cutoutRect;
 
@@ -742,7 +742,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Get exact bounds
-      fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
+      var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
+        fixedRects = mhPositionInfo.allRects;
+      state.hiddenElements = mhPositionInfo.hiddenElements;
 
       if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
@@ -753,7 +755,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = roundRectCoordinates(fixedRects[0]);
 
       state.elementRect = $.extend({}, elementRect);
-      absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
+      absoluteRect = mhpos.convertFixedRectToAbsolute(state.fixedContentRect);
       previousViewRect = $.extend({}, state.viewRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() * state.zoom);
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
@@ -1230,7 +1232,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         hide();
         state.picked = $(elem);
         state.target = elem;
-        var rect = mhpos.getAllBoundingBoxes(elem, 0, true)[0];
+        var rect = mhpos.getRect(elem);
         cursorPos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
         scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
         show();
