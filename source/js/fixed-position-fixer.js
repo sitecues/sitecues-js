@@ -30,17 +30,21 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
          */
         function adjustElement(index, element) {
           var transform = '',
-            transformOrigin = '';
+            transformOrigin = '',
+            maxWidth = '';
+
           if ($(element).css('position') === 'fixed') {
             transform = 'translate(' + offsetLeft + 'px, ' + offsetTop + 'px)';
             if (scaleTransform < 1) {
               transform += ' scale(' + scaleTransform + ')';
               transformOrigin = '0% 0%';
             }
+            maxWidth = (winWidth / fixedItemZoom) + 'px';
           }
           $(element).css({
             transform: transform,
-            transformOrigin: transformOrigin
+            transformOrigin: transformOrigin,
+            maxWidth: maxWidth
           });
         }
 
@@ -57,7 +61,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           bodyRect = document.body.getBoundingClientRect(),
           // Amount to move the fixed positioned items so that they appear in the correct place
           offsetLeft = (- bodyRect.left / pageZoom),
-          offsetTop = (- bodyRect.top / pageZoom);
+          offsetTop = (- bodyRect.top / pageZoom),
+          // To help restrict the width of toolbars
+          winWidth = window.innerWidth;
 
         // Include last adjusted elements to ensure our adjustment styles are cleared if the element is no longer fixed
         elementsToAdjust.add(lastAdjustedElements).each(adjustElement);
