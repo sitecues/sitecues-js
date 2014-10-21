@@ -83,9 +83,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
-        MS_PER_X_ZOOM_NORMAL = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
-        MS_PER_X_ZOOM_LOAD = 1400, // Slightly faster initial load zoom
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
@@ -379,10 +378,7 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function getMsPerXZoom() {
-        if (isInitialLoadZoom) {
-          return MS_PER_X_ZOOM_LOAD;
-        }
-        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_NORMAL;
+        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_GLIDE;
       }
 
       // Get what the zoom value would be if we stopped the animation now
