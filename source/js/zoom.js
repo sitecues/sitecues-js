@@ -554,8 +554,8 @@ sitecues.def('zoom', function (zoom, callback) {
         for (; step <= numSteps; ++step) {
           timePercent = step === numSteps ? 1 : step * percentIncrement;
           if (isInitialLoadZoom) {
-            // Provide simple quadratic ease-out effect for initial load zoom
-            animationPercent = -timePercent * (timePercent - 2);
+            // Provide simple sinusoidal easing in out effect for initial load zoom
+            animationPercent =   (Math.cos(Math.PI*timePercent) - 1) / -2;
           }
           else {
             animationPercent = timePercent;
