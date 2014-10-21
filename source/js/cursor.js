@@ -260,11 +260,6 @@ sitecues.def('cursor', function (cursor, callback) {
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
       var newCursorZoom = getCursorZoom(pageZoom);
-      if (SC_DEV) {
-        console.log('Page zoom is now: ' + pageZoom);
-        console.log('Cursor size before zoom change: ' + cursorZoom);
-        console.log('Cursor size after zoom change: ' + newCursorZoom);
-      }
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheet();
