@@ -89,6 +89,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         sitecues.on('style-service/ready', function () {
           fixedSelector = getFixedPositionSelector();
           if (fixedSelector) {
+            $(fixedSelector).css('willChange', 'transform');
             lazyTurnOn(zoomMod.getCompletedZoom());
           }
         });
