@@ -85,6 +85,7 @@ sitecues.def('zoom', function (zoom, callback) {
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM_NORMAL = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
+        MS_PER_X_ZOOM_LOAD = 1100, // Slightly faster initial load zoom
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
@@ -378,6 +379,9 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function getMsPerXZoom() {
+        if (isInitialLoadZoom) {
+          return MS_PER_X_ZOOM_LOAD;
+        }
         return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_NORMAL;
       }
 
@@ -538,22 +542,28 @@ sitecues.def('zoom', function (zoom, callback) {
         var animationName = getAnimationName(targetZoom),
           keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
           keyFramesCss = animationName + ' {\n',
-          percent = 0,
+          timePercent = 0,
+          animationPercent,
           step = 0,
           // For animation performance, use adaptive algorithm for number of keyframe steps:
           // Bigger zoom jump = more steps
-          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 10),
-          zoomIncrement = (targetZoom - completedZoom) / numSteps,
-          percentIncrement = 100 / numSteps,
-          animationStepZoom = completedZoom,
+          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 100),
+          percentIncrement = 1 / numSteps,
           cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
 
         for (; step <= numSteps; ++step) {
-          percent = step === numSteps ? 100 : Math.round(step * percentIncrement);
-          var zoomCss = getZoomCss(animationStepZoom),
+          timePercent = step === numSteps ? 1 : step * percentIncrement;
+          if (isInitialLoadZoom) {
+            // Provide simple quadratic ease-out effect for initial load zoom
+            animationPercent = -timePercent * (timePercent - 2);
+          }
+          else {
+            animationPercent = timePercent;
+          }
+          var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent,
+            zoomCss = getZoomCss(midAnimationZoom),
             zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
-          keyFramesCss += percent + '% { ' + zoomCssString + ' }\n';
-          animationStepZoom += zoomIncrement;
+          keyFramesCss += (100 * timePercent) + '% { ' + zoomCssString + ' }\n';
         }
         keyFramesCss += '}\n\n';
 
