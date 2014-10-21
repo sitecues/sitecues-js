@@ -89,7 +89,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         sitecues.on('style-service/ready', function () {
           fixedSelector = getFixedPositionSelector();
           if (fixedSelector) {
-            $(fixedSelector).css('willChange', 'transform');
+            $(fixedSelector).css({
+              willChange: 'transform',
+              perspective: 999
+            });
             lazyTurnOn(zoomMod.getCompletedZoom());
           }
         });
