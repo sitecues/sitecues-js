@@ -324,17 +324,20 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // ----------------------------------------------------------------------------------------------------
             var range = document.createRange(),
               rect,
-              textRangeVerticalClipRect = traitcache.getScreenRect(this.parentNode);
+              textVerticalClipRect;
 
             range.selectNode(this);
             rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
+            textVerticalClipRect = getTextVerticalClipRect(this, rect);
 
-            // Text must always be clipped to the bounding element, otherwise the top and bottom will
-            // encompass the entire line-height, which can contain a lot of whitespace/
-            // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
-            rect.top = Math.max(rect.top, textRangeVerticalClipRect.top);
-            rect.bottom = Math.min(rect.bottom, textRangeVerticalClipRect.bottom);
-            rect.height = rect.bottom - rect.top;
+            if (textVerticalClipRect) {
+              // Clip text to the bounding element, otherwise the top and bottom will
+              // encompass the entire line-height, which can contain a lot of whitespace/
+              // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
+              rect.top = Math.max(rect.top, textVerticalClipRect.top);
+              rect.bottom = Math.min(rect.bottom, textVerticalClipRect.bottom);
+              rect.height = rect.bottom - rect.top;
+            }
 
             addRect(allRects, clipRect, rect);
           }
@@ -478,6 +481,20 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       });
 
       return allClipRects;
+    }
+
+    // A text range is clipped by the vertical bounds of it's parent element
+    // when the line height of the text is larger than the text rect's height --
+    // this avoids extra spacing above and below, especially around headings.
+    function getTextVerticalClipRect(textNode, textRect) {
+      var parent = textNode.parentNode,
+        zoom = conf.get('zoom'),
+        lineHeight = parseFloat(traitcache.getStyleProp(parent, 'lineHeight')) * zoom;
+      if (lineHeight > textRect.height) {
+        // Clip the text vertically to the parent element, because the large
+        // line-height causes the element bounds to be larger than the text
+        return traitcache.getScreenRect(parent);
+      }
     }
 
     /**
