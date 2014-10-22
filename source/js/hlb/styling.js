@@ -43,7 +43,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
 
         // Remove these HLB styles, but NOT from its children.
-        HLBCSSBlacklist   = [
+        HLBCSSBlacklist = [
           'padding',
           'margin',
           'left',
@@ -60,11 +60,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'webkitTextFillColor',
           'min-height',
           'min-width',
-          'msScrollLimitYMax'    // Necessary to scroll the HLB in IE
+          'max-height',
+          'max-width',
+          'msScrollLimitYMax' // Necessary to scroll the HLB in IE
         ],
 
         // What child elements of the HLB do we want to remove after a clone.
-        HLBElementBlacklist   = [
+        HLBElementBlacklist = [
           'script',
           'iframe'
         ],
@@ -78,8 +80,6 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         // Default css styles for HLB
         defaultHLBStyles  = {
           'position'         : 'absolute',   // Doesn't interfere with document flow
-          'left'             : '-1000px',    // Position off screen out of sight
-          'top'              : '-1000px',    // Position off screen out of sight
           'zIndex'           : HLB_Z_INDEX,  // Max z-index for HLB overlay
           'border'           : hlbStyling.defaultBorder + 'px solid black',
           'padding'          : hlbStyling.defaultPadding,
@@ -135,7 +135,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       var styles = {
             'webkitTextFillColor': '',
             'textDecoration'     : 'none',
-            'bottom'             : 0        // Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
+            'bottom'             : 0,      // Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
+            'height'             : 'auto'  // Added to fix cases where text overlapped vertically, like on eeoc
           },
           textDecoration = originalElementsChildStyle.textDecoration;
 
@@ -389,9 +390,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     function initializeHLBElementStyles ($originalElement, $hlbElement) {
 
-      var originalElementCSSText = hlbStyling.getComputedStyleCssText($originalElement[0]);
-
-      $hlbElement[0].style.cssText = originalElementCSSText;
+      $hlbElement[0].style.cssText = hlbStyling.getComputedStyleCssText($originalElement[0]);
 
     }
 
@@ -407,6 +406,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           hlbElementChild,
           originalElementsChildStyle,
           computedChildStyles,
+          removePadding = true,
           i = 0;
 
       for (; i < $originalElementChildren.length; i += 1) {
@@ -419,6 +419,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         // Copy the original elements child styles to the HLB elements child.
         hlbElementChild.style.cssText = hlbStyling.getComputedStyleCssText($originalElementChildren[i]);
+
+        // if (removePadding && $(hlbElementChild).parent().children().length === 1) {
+        //   hlbElementChild.style.paddingLeft = 0;
+        //   hlbElementChild.style.paddingRight = 0;
+        //   hlbElementChild.style.paddingTop = 0;
+        //   hlbElementChild.style.paddingBottom = 0;
+        // } else {
+        //   removePadding = false;
+        // }
 
         // Compute styles that are more complicated than copying cssText.
         computedChildStyles = getChildStyles($(hlbElementChild), originalElementsChildStyle);
@@ -513,13 +522,16 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      */
     hlbStyling.getHLBStyles = function ($pickedElement, $originalElement) {
 
-      var originalElement      = $originalElement[0],
-          elementComputedStyle = window.getComputedStyle(originalElement),
-          backgroundStyles     = getHLBBackgroundImage($pickedElement, elementComputedStyle),
-          backgroundColor      = getHLBBackgroundColor($pickedElement, elementComputedStyle),
-          calculatedHLBStyles  = {
+      var originalElement       = $originalElement[0],
+          originalElementOffset = $originalElement.offset(),
+          elementComputedStyle  = window.getComputedStyle(originalElement),
+          backgroundStyles      = getHLBBackgroundImage($pickedElement, elementComputedStyle),
+          backgroundColor       = getHLBBackgroundColor($pickedElement, elementComputedStyle),
+          calculatedHLBStyles   = {
             'padding-left' : getHLBLeftPadding($originalElement, elementComputedStyle),
-            'display'      : getHLBDisplay(elementComputedStyle)
+            'display'      : getHLBDisplay(elementComputedStyle),
+            'left'         : originalElementOffset.left,
+            'top'          : originalElementOffset.top
           },
           $parent;
 
@@ -533,7 +545,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       // If the original element uses a background image, preserve original padding.
       // This was implemented to fix SC-1830
-      if ($originalElement.css('backgroundImage') !== 'none') {
+      // If the background image repeats, there is no need to preserve the padding.
+      if ($originalElement.css('backgroundImage') !== 'none' && $originalElement.css('backgroundRepeat') !== 'repeat') {
 
         calculatedHLBStyles.paddingLeft   = $originalElement.css('paddingLeft');
         calculatedHLBStyles.paddingTop    = $originalElement.css('paddingTop');
@@ -544,10 +557,16 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
         $parent = $($(originalElement).parents()[backgroundStyles.count]);
 
-        calculatedHLBStyles.paddingLeft   = $parent.css('paddingLeft');
-        calculatedHLBStyles.paddingTop    = $parent.css('paddingTop');
-        calculatedHLBStyles.paddingBottom = $parent.css('paddingBottom');
-        calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
+        // If the background image repeats, there is no need to preserve the padding.
+        if ($parent.css('backgroundRepeat') !== 'repeat') {
+
+          calculatedHLBStyles.paddingLeft   = $parent.css('paddingLeft');
+          calculatedHLBStyles.paddingTop    = $parent.css('paddingTop');
+          calculatedHLBStyles.paddingBottom = $parent.css('paddingBottom');
+          calculatedHLBStyles.paddingRight  = $parent.css('paddingRight');
+
+        }
+
 
         delete backgroundStyles.count;
 
