@@ -13,7 +13,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       var isOn = false,
         fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
         lastAdjustedElements     = $(),
-        MAX_ZOOM_FIXED_CONTENT = 1.8;
+        MAX_ZOOM_FIXED_CONTENT = 1.8,
+        // These browsers need the position of fixed elements to be adjusted on the fly.
+        // Note: we avoid this in Safari on Mac and Chrome on Windows because of general shakiness.
+        //       In those browsers the fixed content just gets scrolled off when the user scrolls down.
+        SHOULD_POSITION_FIXED_ELEMENTS = platform.browser.isFirefox ||
+          (platform.browser.isChrome && platform.os.isMac),
+        // In IE, fixed content stays fixed even with a transform, so the position does not need to be corrected.
+        // However, the fixed elements are not scaled. We therefore need to apply the scale transform directly to the fixed elements.
+        SHOULD_ZOOM_FIXED_ELEMENTS = platform.browser.isIE;
 
       /*
        For every fixed element on the page, we must translate them to their correct positions using
@@ -34,12 +42,14 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           };
 
           if ($(element).css('position') === 'fixed') {
-            css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px)';
-            if (scaleTransform < 1) {
-              css.transform += ' scale(' + scaleTransform + ')';
+            if (SHOULD_POSITION_FIXED_ELEMENTS) {
+              css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px) ';
+            }
+            if (scaleTransform !== 1) {
+              css.transform += 'scale(' + scaleTransform + ')';
             }
             if (didZoomChange) {
-              css.maxWidth = (winWidth / fixedItemZoom) + 'px';
+              css.maxWidth = (winWidth / desiredFixedItemZoom) + 'px';
             }
           }
           else {
@@ -49,15 +59,17 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         }
 
         var elementsToAdjust = $(fixedSelector),
-          // The current amount of zoom applied to the fixed content
+          // The current amount of zoom applied to the page
           pageZoom = zoomMod.getCompletedZoom(),
+          // The current amount of zoom applied to the fixed content
+          appliedFixedItemZoom = SHOULD_ZOOM_FIXED_ELEMENTS ? 1 : pageZoom,
           // The actual amount of zoom we want for the fixed content.
           // It can be up to MAX_ZOOM_FIXED_CONTENT
-          fixedItemZoom = Math.min(pageZoom, MAX_ZOOM_FIXED_CONTENT),
+          desiredFixedItemZoom = Math.min(pageZoom, MAX_ZOOM_FIXED_CONTENT),
           // Amount to scale to bring fixed position content down to MAX_ZOOM_FIXED_CONTENT
           // Will be 1 if the current zoom level is <= MAX_ZOOM_FIXED_CONTENT, because the size doesn't need to change.
           // Otherwise, will be < 1 in order to reduce the size.
-          scaleTransform = fixedItemZoom / pageZoom,
+          scaleTransform = desiredFixedItemZoom / appliedFixedItemZoom,
           bodyRect = document.body.getBoundingClientRect(),
           // Amount to move the fixed positioned items so that they appear in the correct place
           offsetLeft = (- bodyRect.left / pageZoom).toFixed(1),
@@ -116,7 +128,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       }
 
 
-      if (!platform.browser.isIE && !platform.browser.isSafari) {
+      if (SHOULD_POSITION_FIXED_ELEMENTS || SHOULD_ZOOM_FIXED_ELEMENTS) {
         initializeModule();
       }
 
