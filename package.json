@@ -44,12 +44,12 @@
         "grunt-contrib-clean": "0.6.0",
         "grunt-jsonlint": "1.0.4",
         "grunt-contrib-jshint": "0.10.0",
-        "grunt-jscs": "0.6.2",
+        "grunt-jscs": "0.8.0",
         "grunt-jslint": "1.1.12",
-        "selenium-server": "2.38.0",
-        "grunt-selenium-webdriver": "0.2.422",
-        "intern": "2.1.0",
-        "grunt-contrib-uglify": "0.5.0",
+        "selenium-server": "2.43.1",
+        "grunt-selenium-webdriver": "0.2.431",
+        "intern": "2.1.1",
+        "grunt-contrib-uglify": "0.6.0",
         "grunt-contrib-watch": "0.6.1"
     }
 }
