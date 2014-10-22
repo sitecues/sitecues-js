@@ -20,7 +20,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        transforms.  This basically happens on scroll events. We must apply
        the transforms that are reactions to the scroll events on top of any transforms.
        */
-      function refresh() {
+      function refresh(didZoomChange) {
         /**
          * Positions a fixed element as if it respects the viewport rule.
          * Also clears the positioning if the element is no longer fixed.
@@ -29,23 +29,23 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
          * @param  elements [element to position]
          */
         function adjustElement(index, element) {
-          var transform = '',
-            transformOrigin = '',
-            maxWidth = '';
+          var css = {
+            transform: ''
+          };
 
           if ($(element).css('position') === 'fixed') {
-            transform = 'translate(' + offsetLeft + 'px, ' + offsetTop + 'px)';
+            css.transform = 'translate3d(' + offsetLeft + 'px, ' + offsetTop + 'px,0px)';
             if (scaleTransform < 1) {
-              transform += ' scale(' + scaleTransform + ')';
-              transformOrigin = '0% 0%';
+              css.transform += ' scale(' + scaleTransform + ')';
             }
-            maxWidth = (winWidth / fixedItemZoom) + 'px';
+            if (didZoomChange) {
+              css.maxWidth = (winWidth / fixedItemZoom) + 'px';
+            }
           }
-          $(element).css({
-            transform: transform,
-            transformOrigin: transformOrigin,
-            maxWidth: maxWidth
-          });
+          else {
+            css.maxWidth = ''; // Not fixed -- clear width restriction
+          }
+          $(element).css(css);
         }
 
         var elementsToAdjust = $(fixedSelector),
@@ -60,8 +60,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           scaleTransform = fixedItemZoom / pageZoom,
           bodyRect = document.body.getBoundingClientRect(),
           // Amount to move the fixed positioned items so that they appear in the correct place
-          offsetLeft = (- bodyRect.left / pageZoom),
-          offsetTop = (- bodyRect.top / pageZoom),
+          offsetLeft = (- bodyRect.left / pageZoom).toFixed(1),
+          offsetTop = (- bodyRect.top / pageZoom).toFixed(1),
           // To help restrict the width of toolbars
           winWidth = window.innerWidth;
 
@@ -91,7 +91,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           if (fixedSelector) {
             $(fixedSelector).css({
               willChange: 'transform',
-              perspective: 999
+              perspective: 999,
+              transformOrigin: '0% 0%',
+              backfaceVisibility: 'hidden'
             });
             lazyTurnOn(zoomMod.getCompletedZoom());
           }
@@ -100,9 +102,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         /**
          * Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel
          */
-        sitecues.on('zoom', function (zoom) {
+        sitecues.on('zoom resize', function (zoom) {
           lazyTurnOn(zoom);
-          refresh();
+          refresh(true);
         });
 
         sitecues.on('zoom/begin', function () {
