@@ -82,8 +82,11 @@ sitecues.def('util/common', function (common, callback) {
 
     common.hasOwnBackground = function(style, parentStyle) {
       // 1. Background colors
+      if (!style) {
+        return false;
+      }
       var bgColor = style.backgroundColor;
-      if (bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
+      if (parentStyle && bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
         return true;
       }
 
@@ -188,17 +191,6 @@ sitecues.def('util/common', function (common, callback) {
       return closest.length === 0 || $(closest).attr('id') === 'sitecues-badge';
     };
 
-    // Event handlers.
-
-    /**
-     * Prevents default and stops propagation.
-     * @param e Event Object
-     */
-    common.stopDefaultEventBehavior = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
     /**
      * Defines wheel scroll direction: if wheel is up.
      * @param e Event Object
@@ -216,20 +208,6 @@ sitecues.def('util/common', function (common, callback) {
      */
     common.wheelDown = function(e) {
       return !this.wheelUp(e);
-    };
-
-    /**
-     * @param e EventObject
-     * @param el HTMLObject
-     * @param step Number the number of pixels set as scroll interval
-     * @param isUp Boolean True if scroll direction is up
-     */
-    common.smoothlyScroll = function(e, el, step, isUp) {
-      this.stopDefaultEventBehavior(e);
-      step = step || 1;
-      step = isUp? -step : step;
-      el.scrollTop += step;
-      return false;
     };
 
   /**

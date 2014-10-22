@@ -2,7 +2,7 @@
  * This is the module for the cursor enhancement.
  * It works as follows:
  * - enables/disables cursor module if zoom level is above/below certain value appropriately;
- * - takes over cursor style(retrives and sets image) when necessary; 
+ * - takes over cursor style(retrives and sets image) when necessary;
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
@@ -23,8 +23,8 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         isInitComplete,
         CURSOR_OFFSETS = {
-          _default : {x: 0,  y: 5, xStep: 0, yStep: 2.5},
-          _pointer : {x: 10, y: 5, xStep: 3.5, yStep: 1.7}
+          _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
+          _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
         };
 
     /*
@@ -246,10 +246,20 @@ sitecues.def('cursor', function (cursor, callback) {
       return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
     }
 
+    function getCursorZoom(pageZoom) {
+      var zoomDiff = pageZoom - zoomModule.min,
+          CURSOR_ZOOM_MAX = zoomModule.max + 1,
+          CURSOR_ZOOM_MIN = zoomModule.min,
+          CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
+
+      // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
+      return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    }
+
     sitecues.on('zoom', function (pageZoom) {
-      // SC-1184: between 1-1.3 page zoom there is no cursor enhancement
-      // From there it grows slightly faster than the zoom level and ends at around 4x for zoom of 3
-      var newCursorZoom = Math.round(Math.pow(pageZoom - 0.3, 1.5) * 10) / 10; // To nearest tenth
+      // At page zoom level 1.0, the cursor is the default size (same as us being off).
+      // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
+      var newCursorZoom = getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheet();
@@ -263,6 +273,6 @@ sitecues.def('cursor', function (cursor, callback) {
 
 
     callback();
-  
+
   });
 });

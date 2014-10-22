@@ -5,17 +5,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   var EXTRA_HIGHLIGHT_PIXELS = 3,
 
   INIT_STATE = {
-    isVisible: false,
+    isCreated: false, // Has highlight been created
+    isVisible: false,  // Is highlight visible?
     picked: null,     // JQuery for picked element(s)
     target: null,     // Mouse was last over this element
-    isCreated: false, // Has highlight been created
     styles: [],
     savedCSS: null,   // map of saved CSS for highlighted element
     elementRect: null,
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
+    hiddenElements: [], // Elements whose subtrees are hidden or not part of highlight rectangle (e.g. display: none, hidden off-the-page, out-of-flow)
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
     viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
-    floatRects: {}, // Interesting float objects
+    cutoutRects: {}, // Object map for possible topLeft, topRight, botLeft, botRight of rectangles cut out of highlight to create L shape
     pathBorder: [], // In real pixels so that it can live outside of <body>
     pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
     pathFillBackground: [], // In element rect coordinates, used with CSS background
@@ -238,7 +239,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
           borderWidth = viz - 0.4;
-      return Math.max(1, borderWidth);
+      return Math.max(1, borderWidth) * state.zoom;
     }
 
     function getTransparentBackgroundColor() {
@@ -272,25 +273,31 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return styles;
     }
 
-    function getFloatRectsArray() {
-      return [ state.floatRects.topLeft, state.floatRects.topRight ];
+    function getCutoutRectsArray() {
+      return [
+        state.cutoutRects.topLeft,
+        state.cutoutRects.topRight,
+        state.cutoutRects.botLeft,
+        state.cutoutRects.botRight
+      ];
     }
 
-    function isCursorInHighlightShape(fixedRects, floatRects) {
+    function isCursorInHighlightShape(fixedRects, cutoutRects) {
       if (!cursorPos || !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects)) {
         return false;
       }
       // The cursor is in the fixed rectangle for the highlight.
       // Now, we will consider the cursor to be in the highlight as long as it's not in any
       // parts cut out from the highlight when it is drawn around floats.
-      return !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, floatRects);
+      return !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, cutoutRects);
     }
 
     // show mouse highlight -- update() from mouse events finally results in show()
+    // return true if something was shown
     function show() {
       // can't find any element to work with
       if (!state.picked) {
-        return false;
+        return;
       }
 
       state.zoom = zoomMod.getCompletedZoom();
@@ -299,11 +306,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!createNewOverlayPosition(true)) {
         // Did not find visible rectangle to highlight
-        return false;
+        return;
       }
 
       state.isVisible = true;
       updateElementBgImage();
+
+      return true;
     }
 
     // Choose an appropriate background color for the highlight
@@ -414,61 +423,98 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
     };
 
-    function floatRectForPoint(x, y, expandFloatRectPixels) {
-      var possibleFloat = common.elementFromPoint(x, y),
+    function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {
+      var possibleFloat = common.elementFromPoint(x, y),  // Get from top-left or top-right of highlight
         picked = state.picked;
       if (possibleFloat && possibleFloat !== picked[0]) {
         var pickedAncestors = picked.parents(),
           possibleFloatAncestors = $(possibleFloat).parents();
-        if (pickedAncestors.is(possibleFloat) || possibleFloatAncestors.is(picked)) {
-          // If potential float is ancestor of picked, or vice-versa, don't use it.
-          // We only use a cousin or sibling float.
+        if (pickedAncestors.is(possibleFloat)) {
+          // TODO commenting out second part cells in boxes at
+          // http://venturebeat.com/2014/10/01/after-raising-50m-reddit-forces-remote-workers-to-relocate-to-sf-or-get-fired/
+          // If potential float is ancestor of picked don't use it.
+          // However, the picked element could be an ancestor of the float, and we still need to use it.
+          // Example: http://thebillfold.com/2014/09/need-an-action-figure-of-a-dead-loved-one-meet-jeff-staab/
           return;
         }
-        var commonAncestor = $(possibleFloat).closest(pickedAncestors);
+        var commonAncestor = possibleFloatAncestors.is(picked) ? picked : $(possibleFloat).closest(pickedAncestors);
         if (isDifferentZIndex(possibleFloat, picked[0], commonAncestor)) {
           return; // Don't draw highlight around an item that is going over or under the highlight
         }
-        while (possibleFloat !== commonAncestor && possibleFloat !== document.body &&
-               possibleFloat !== document.documentElement) {
+        while (!commonAncestor.is(possibleFloat) && !$(possibleFloat).is('body,html')) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var COMBINE_ALL_RECTS = 99999,
-              floatRect = mhpos.getAllBoundingBoxes(possibleFloat, COMBINE_ALL_RECTS, true)[0],
+            var floatRect = roundRectCoordinates(mhpos.getRect(possibleFloat)),
               mhRect = state.fixedContentRect,
               extra = getExtraPixels();
             if (!floatRect) {
               return;
             }
+            var results = {};
             if (floatRect.left > mhRect.left - extra && floatRect.right <= mhRect.right + extra &&
               floatRect.top >= mhRect.top - extra && floatRect.bottom <= mhRect.bottom + extra) {
               // Completely inside highlight rect -- don't bother
-              return;
+              if (mhRect.bottom === floatRect.bottom) {
+                // Float is taller than the rect
+                // and we likely need to bottom-right or bottom-left cut out.
+                // If the float is to the right, we will be cutting out the bottom-left, and
+                // if the float is to the left, we will be cutting out the bottom-right!!!
+                // We can compute this by comparing the bottom if the highlight rect
+                // with and without floats included. If the highlight rect would be taller
+                // when floats are included, then we will make a bottom cutout next to the bottom of the float,
+                // on the other side of the highlight.
+                var mhRectWithoutFloats = mhpos.getRect(picked, true) || mhRect,
+                  top = mhRectWithoutFloats.bottom + expandFloatRectPixels,
+                  cutoutRect;
+
+                if (top > mhRect.bottom - extra) {
+                  return; // Not a significant cutout
+                }
+
+                cutoutRect = {
+                    top: top,
+                    left: -9999,
+                    bottom: 9999,
+                    right: 9999
+                  };
+
+                if (typeIfFloatRectTaller === 'botRight') {
+                  cutoutRect.left = floatRect.right + expandFloatRectPixels;
+                }
+                else {
+                  cutoutRect.right = floatRect.left - expandFloatRectPixels;
+                }
+                cutoutRect.height = cutoutRect.bottom - cutoutRect.top;
+                cutoutRect.width = cutoutRect.right - cutoutRect.left;
+                results[typeIfFloatRectTaller] = cutoutRect;
+              }
             }
-            return geo.expandOrContractRect(floatRect, expandFloatRectPixels);
+            else {
+              // float is shorter than highlight rect
+              results[typeIfFloatRectShorter] = geo.expandOrContractRect(floatRect, expandFloatRectPixels);
+            }
+            return results;
           }
           possibleFloat = possibleFloat.parentNode;
         }
       }
     }
 
-    // Get rects of floats that intersect with the original highlight rect.
-    // Floats are always aligned with the top of the element they're associated with,
-    // so we don't need to support botLeft or botRight floats
-    function getIntersectingFloatRects() {
+    // Get rects of cutouts caused fy floats intersecting with the original highlight rect.
+    function getCutoutRects() {
       var EXTRA = 7, // Make sure we test a point inside where the float would be, not on a margin
         EXPAND_FLOAT_RECT = 7,
         mhRect = state.fixedContentRect,
         left = mhRect.left,
         right = mhRect.left + mhRect.width,
         top = mhRect.top,
-        topLeftRect = floatRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT),
-        topRightRect = floatRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT);
+        // If there's a left float, rect1 will be top-left, unless the float is taller than
+        // everything else in the highlight, and then it will be bot-right
+        rect1 = getCutoutRectForPoint(left + EXTRA, top + EXTRA, EXPAND_FLOAT_RECT, 'topLeft', 'botRight'),
+        // If there's a right float, rect2 will be top-right, unless the float is taller than
+        // everything else in the highlight, and then it will be bot-left
+        rect2 = getCutoutRectForPoint(right - EXTRA, top + EXTRA, EXPAND_FLOAT_RECT, 'topRight', 'botLeft');
 
-      // Perform specific sanity checks depending on float position and return the rects if they pass
-      return {
-        topLeft: topLeftRect,
-        topRight: topRightRect
-      }
+      return $.extend( {}, rect1, rect2);
     }
 
     function extendAll(array, newProps) {
@@ -481,53 +527,70 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getPolygonPoints(rect) {
       // Build points for highlight polygon
       var orig = geo.expandOrContractRect(rect, 0),
-        topLeftFloatRect = state.floatRects.topLeft,
-        topRightFloatRect = state.floatRects.topRight,
+        // Shortcuts
+        topLeftCutout = state.cutoutRects.topLeft,
+        topRightCutout = state.cutoutRects.topRight,
+        botLeftCutout = state.cutoutRects.botLeft,
+        botRightCutout = state.cutoutRects.botRight,
+        // List of points for each corner
+        // We start out with one point, but if a cutout intersects, we will end up with 3 points for that corner
         topLeftPoints = [{x: orig.left, y: orig.top }],
         topRightPoints = [{x: orig.right, y: orig.top }],
-        // Can't create bottom-right float, just use point
         botRightPoints =  [{ x: orig.right, y: orig.bottom }],
-        // Can't create bottom left float, just use point
         botLeftPoints = [{ x: orig.left, y: orig.bottom }],
         mhRect = state.fixedContentRect;
 
-      if (topLeftFloatRect) {
-        if (!geo.isPointInRect(topLeftFloatRect.right, topLeftFloatRect.bottom, mhRect)) {
-          if (topLeftFloatRect.right > orig.left &&
-            topLeftFloatRect.bottom > orig.bottom) {  // Sanity check
-            topLeftPoints[0].x = topLeftFloatRect.right;
-            botLeftPoints[0].x = topLeftFloatRect.right;
+      if (topLeftCutout) {
+        if (!geo.isPointInRect(topLeftCutout.right, topLeftCutout.bottom, mhRect)) {
+          if (topLeftCutout.right > orig.left &&
+            topLeftCutout.bottom > orig.bottom) {  // Sanity check
+            topLeftPoints[0].x = topLeftCutout.right;
+            botLeftPoints[0].x = topLeftCutout.right;
           }
         }
         else {
           // Draw around top-left float
           topLeftPoints = [
-            { x: orig.left, y: topLeftFloatRect.bottom },
-            { x: topLeftFloatRect.right, y: topLeftFloatRect.bottom },
-            { x: topLeftFloatRect.right, y: orig.top}
+            { x: orig.left, y: topLeftCutout.bottom },
+            { x: topLeftCutout.right, y: topLeftCutout.bottom },
+            { x: topLeftCutout.right, y: orig.top}
           ];
         }
       }
 
-      if (topRightFloatRect) {
-        if (!geo.isPointInRect(topRightFloatRect.left, topRightFloatRect.bottom, mhRect)) {
-          if (topRightFloatRect.left < orig.right &&
-            topRightFloatRect.bottom > orig.bottom) { // Sanity check
-            topRightPoints[0].x = topRightFloatRect.left;
-            botRightPoints[0].x = topRightFloatRect.left;
+      if (topRightCutout) {
+        if (!geo.isPointInRect(topRightCutout.left, topRightCutout.bottom, mhRect)) {
+          if (topRightCutout.left < orig.right &&
+            topRightCutout.bottom > orig.bottom) { // Sanity check
+            topRightPoints[0].x = topRightCutout.left;
+            botRightPoints[0].x = topRightCutout.left;
           }
         }
         else
         {
           // Draw around top-right float
           topRightPoints = [
-            { x: topRightFloatRect.left, y: orig.top },
-            { x: topRightFloatRect.left, y: topRightFloatRect.bottom },
-            { x: orig.right, y: topRightFloatRect.bottom }
+            { x: topRightCutout.left, y: orig.top },
+            { x: topRightCutout.left, y: topRightCutout.bottom },
+            { x: orig.right, y: topRightCutout.bottom }
           ];
         }
       }
-      else { // No top-right float, just use top-right point
+
+      if (botRightCutout) {
+        botRightPoints = [
+          { x: orig.right, y: botRightCutout.top },
+          { x: botRightCutout.left, y: botRightCutout.top },
+          { x: botRightCutout.left, y: orig.bottom }
+        ];
+      }
+
+      if (botLeftCutout) {
+        botLeftPoints  = [
+          { x: botLeftCutout.right, y: orig.bottom },
+          { x: botLeftCutout.right, y: botLeftCutout.top },
+          { x: orig.left, y: botLeftCutout.top }
+        ];
       }
       // growX and growY are set to 1 or -1, depending on which direction coordinates should move when polygon grows
       extendAll(topLeftPoints, { growX: -1, growY: -1 });
@@ -613,16 +676,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var svg = '',
         color = getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(traitcache.getScreenRect(state.picked[0])),
-        extraLeft = (elementRect.left - state.fixedContentRect.left) ,
-        extraRight = (state.fixedContentRect.right - elementRect.right) ,
-        extraBottom = (state.fixedContentRect.bottom - elementRect.bottom) ;
+        extraLeft = elementRect.left - state.fixedContentRect.left,
+        extraRight = state.fixedContentRect.right - elementRect.right,
+        // Don't be fooled by bottom-right cutouts
+        extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
+          state.fixedContentRect.bottom - elementRect.bottom;
 
       if (extraLeft > 0) {
-        var topOffset = state.floatRects.topLeft ? state.floatRects.topLeft.height : 0; // Top-left area where the highlight is not shown
+        var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
         svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, state.fixedContentRect.height - topOffset, color);
       }
       if (extraRight > 0) {
-        var topOffset = state.floatRects.topRight ? state.floatRects.topRight.height : 0; // Top-right area where the highlight is not shown
+        var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : 0; // Top-right area where the highlight is not shown
         svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
@@ -639,9 +704,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       var element,
           elementRect,
-          fixedRects,
-          absoluteRect,
-          previousViewRect,
+          overlayRect,
+          previousOverlayRect,
           stretchForSprites = true;
 
       if (!state.picked) {
@@ -651,18 +715,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       element = state.picked.get(0);
       elementRect = traitcache.getScreenRect(element); // Rough bounds
 
-      if (!createOverlay) {   // Just a refresh
+      if (!createOverlay) {   // Just a refreshEventListeners
         if (!state.elementRect) {
-          return false; // No view to refresh
+          return false; // No view to refreshEventListeners
         }
         if (elementRect.left === state.elementRect.left &&
             elementRect.top === state.elementRect.top) {
           // Optimization -- reuse old fixed content rect info
           // Show/hide highlight if cursor moves into or out of highlight
-          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
+          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
           if (isCursorInHighlight !== state.isVisible) {
             if (!isCursorInHighlight) {
-              pause();  // Hide highlight -- cursor has moved out of it
+              hide(true);  // Hide but keep highlight data -- cursor has moved out of it, may move back in
             }
             else {
               show(); // Create and show highlight -- cursor has moved into it
@@ -675,9 +739,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Get exact bounds
-      fixedRects = mhpos.getAllBoundingBoxes(element, 0, stretchForSprites);
+      var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
+        fixedRects = mhPositionInfo.allRects;
+      state.hiddenElements = mhPositionInfo.hiddenElements;
 
-      if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getFloatRectsArray())) {
+      if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
         return false;
       }
@@ -686,17 +752,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = roundRectCoordinates(fixedRects[0]);
 
       state.elementRect = $.extend({}, elementRect);
-      absoluteRect = mhpos.convertFixedRectsToAbsolute([state.fixedContentRect], state.zoom)[0];
-      previousViewRect = $.extend({}, state.viewRect);
-      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() * state.zoom);
+      overlayRect = mhpos.convertScreenToBodyCoordinates(state.fixedContentRect);
+      previousOverlayRect = $.extend({}, state.overlayRect);
+      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth());
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
 
-      state.viewRect = roundRectCoordinates($.extend({ }, absoluteRect));
+      state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
       var extra = getExtraPixels();
 
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
-        state.floatRects = getIntersectingFloatRects();
+        state.cutoutRects = getCutoutRects();
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
         var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra,
             state.fixedContentRect.top - extra, 1);
@@ -721,12 +787,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
             svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
-          document.documentElement.appendChild(svgFragment);
-          $('.' + HIGHLIGHT_OUTLINE_CLASS)
-            .attr({
-              width : (state.fixedContentRect.width + 2 * extra) + 'px',
-              height: (state.fixedContentRect.height + 2 * extra) + 'px'
+          document.body.appendChild(svgFragment);
+          var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
+            width = state.fixedContentRect.width + 2 * extra,
+            height = state.fixedContentRect.height + 2 * extra;
+          $svg.attr({
+              width : (width / state.zoom) + 'px',
+              height: (height / state.zoom) + 'px'
             });
+          // Cannot set viewBox via jQuery -- it lowercases the attribute which breaks it
+          // (the "B" in "Box" needs to be uppercase)
+          // See http://stackoverflow.com/questions/10390346/why-is-jquery-auto-lower-casing-attribute-values
+          $svg[0].setAttribute('viewBox', "0 0 " + width + ' ' + height);
         }
         else {
           // Use CSS outline with 0px wide/tall elements to draw lines of outline
@@ -741,9 +813,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         addMouseWheelUpdateListenersIfNecessary();
 
-        $(document).one('mouseleave', hideAndResetIfNotSticky);
+        $(document).one('mouseleave', onLeaveWindow);
       }
-      else if (common.equals(previousViewRect, state.viewRect)) {
+      else if (common.equals(previousOverlayRect, state.overlayRect)) {
         return true; // Already created and in correct position, don't update DOM
       }
 
@@ -799,7 +871,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Number of pixels any edge will go beyond the fixedContentRect -- the highlight's border and padding
     function getExtraPixels() {
-      return roundCoordinate((state.highlightPaddingWidth + state.highlightBorderWidth) * state.zoom);
+      return roundCoordinate(state.highlightPaddingWidth + state.highlightBorderWidth);
     }
 
     function isInScrollableContainer(element) {
@@ -841,18 +913,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
 
         correctRect(state.fixedContentRect);
-        correctRect(state.floatRects.topLeft);
-        correctRect(state.floatRects.topRight);
+        correctRect(state.cutoutRects.topLeft);
+        correctRect(state.cutoutRects.topRight);
         correctRect(state.elementRect);
-        correctRect(state.viewRect);
+        correctRect(state.overlayRect);
 
         updateHighlightOverlayPosition();
       }
 
       function updateHighlightOverlayPosition() {
-        var extra = getExtraPixels(),
-          left = state.viewRect.left - extra,
-          top = state.viewRect.top - extra;
+        var extra = getExtraPixels() / state.zoom,
+          left = state.overlayRect.left - extra,
+          top = state.overlayRect.top - extra;
         // TODO use .style with 'important' if we run into page css collisions
         // Otherwise, if we don't run into problems with that, we should probably get rid of the style plugin
         // and save the space.
@@ -914,7 +986,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return false; // Original element has changed size
       }
       // Return true we're inside in the existing highlight
-      return isCursorInHighlightShape([state.fixedContentRect], getFloatRectsArray());
+      return isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
     }
 
     // Fixed position rectangles are in screen coordinates.
@@ -968,13 +1040,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!picked) {
         if (state.picked) {
-          hideAndResetState();  // Nothing picked anymore
+          hide();  // Nothing picked anymore
         }
         state.target = target;
         return;
       }
 
-      hideAndResetState();
+      hide();
 
       state.picked = $(picked);
       state.target = target;
@@ -982,9 +1054,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       show();
     }
 
-    var wasEnabledInsideRefresh = false;
-    // refresh status of enhancement on page
-    function refresh() {
+    // refreshEventListeners turns on or off event listeners that enable the highlighter
+    function refreshEventListeners(doEnable) {
+      if (doEnable === isEnabled) {
+        return;
+      }
+      isEnabled = doEnable;
+
       if (isEnabled) {
         // handle mouse move on body
         $(document)
@@ -997,7 +1073,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(window)
           .on('focus', onFocusWindow)
           .on('blur', onBlurWindow)
-          .on('resize', hideAndResetState);
+          .on('resize', hide);
       } else {
         // remove mousemove listener from body
         $(document)
@@ -1010,34 +1086,32 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(window)
           .off('focus', onFocusWindow)
           .off('blur', onBlurWindow)
-          .off('resize', hideAndResetState);
+          .off('resize', hide);
       }
-      wasEnabledInsideRefresh = isEnabled;
     }
 
-    function enableIfAppropriate() {
+    // Reenable highlight if appropriate
+    // Clear the existing highlight if we don't reenable or if highlight can't be shown
+    // (e.g. because focus is not in the right place, or the mouse cursor isn't inside the highlight)
+    // Mouse event is passed if available.
+    function enableIfAppropriate(mouseEvent) {
       state.zoom = zoomMod.getCompletedZoom();
-      var was = isEnabled;
-
       // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-      isEnabled = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
+      var doEnable = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
 
-      if (SC_DEV) {
-        if (isSticky && state.picked) {
-          // Reshow sticky highlight on same content after zoom change -- don't reset what was picked
-          pause();
-          cursorPos = null; // Don't do cursor-inside-picked-content check, because it may not be after zoom change
-          show();
-          return;
+      refreshEventListeners(doEnable);
+
+      if (!doEnable) {
+        forget();
+      }
+      if (doEnable) {
+        // Don't do cursor-inside-picked-content check, because it may not be after zoom change
+        if (mouseEvent && !isSticky) {
+          cursorPos = { x: mouseEvent.clientX, y: mouseEvent.clientY };
         }
-      }
-
-      if (was !== isEnabled) {
-        refresh();
-      }
-
-      if (isEnabled) {
-        show();
+        if (!show()) {
+          forget(); // Old highlight not appropriate, so hide it
+        }
       }
     }
 
@@ -1052,7 +1126,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
       if (!isSticky) {
         if (wasAppropriateFocus && !isAppropriateFocus) {
-          pause();
+          hide();
         }
         else if (!wasAppropriateFocus && isAppropriateFocus) {
           enableIfAppropriate();
@@ -1060,45 +1134,40 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    function onBlurWindow() {
-      isWindowFocused = false;
-      isAppropriateFocus = false;
-      hideAndResetIfNotSticky();
-    }
-      
     function onFocusWindow() {
       isWindowFocused = true;
       testFocus();
     }
 
-    // disable mouse highlight temporarily
-    function disable() {
-      pause();
-      if (isEnabled) {
-        isEnabled = false;
-        refresh();
-      }
+    function onBlurWindow() {
+      isWindowFocused = false;
+      isAppropriateFocus = false;
+      onLeaveWindow();
     }
-
-    function disableAndReset() {
-      disable();
-      resetState();
-    }
-
-    function hideAndResetState() {
-      pause();
-      resetState();
-    }
-
-    function hideAndResetIfNotSticky() {
+      
+    // When the user blurs ours mouses out of the window, we should
+    // hide and forget the highlight (unless sticky highlight is on)
+    function onLeaveWindow() {
       if (!isSticky) {
-        hideAndResetState();
+        hide();
       }
     }
 
-    // hide mouse highlight temporarily, keep picked data so we can reshow without another mouse move
-    function pause() {
+    // disableTemporarily -- hide mouse highlight
+    // and remove event listeners so that we don't update the highlight on mouse move
+    // (until they're enabled again, via enableIfAppropriate())
+    function disableTemporarily() {
+      hide(true);
+      refreshEventListeners(false);
+    }
+
+    // Hide mouse highlight temporarily, keep picked data so we can reshow
+    // the same highlight without another mouse move.
+    // It's useful to call on it's own when the cursor goes outside of the highlight
+    // but stays inside the same element.
+    function hide(doRememberHighlight) {
       if (state.picked && state.savedCss) {
+        // Restore the previous CSS on the picked elements (remove highlight bg etc.)
         $(state.picked).style(state.savedCss);
         state.savedCss = null;
         if ($(state.picked).attr('style') === '') {
@@ -1114,33 +1183,34 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.isVisible = false;
 
+      if (!doRememberHighlight) {
+        // Forget highlight state, unless we need to keep it around temporarily
+        forget();
+      }
+
+      // Now that highlight is hidden, we no longer need these
       $(document)
         .off('mousewheel', onMouseWheel)
-        .off('mouseleave', hideAndResetIfNotSticky);
+        .off('mouseleave', onLeaveWindow);
     }
 
-    function resetState() {
-      state = $.extend({}, INIT_STATE); // Copy
+    function forget() {
+      state = $.extend({}, INIT_STATE);
     }
 
-    mh.isActive= function() {
-      return (state.isCreated || isEnabled) && isAppropriateFocus;
-    };
-
+    // Return all of the highlight information provided in the |state| variable
     mh.getHighlight = function() {
       return state;
     };
 
-    resetState();
+    forget();
 
-    // hide mouse highlight once highlight box appears. SC-1786
-    sitecues.on('mh/disable', disable);
+    // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
+    // Also to this until zooming finished so that outline doesn't get out of place during zoom
+    sitecues.on('hlb/init zoom/begin', disableTemporarily);
 
-    // enable mouse highlight back once highlight box deflates
+    // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('hlb/closed zoom', enableIfAppropriate);
-
-    // hide mouse highlight and disable until zooming finished
-    sitecues.on('zoom/begin', disableAndReset);
 
     // darken highlight appearance when speech is enabled
     conf.get('ttsOn', enableIfAppropriate);
@@ -1162,10 +1232,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
        * @param elem
        */
       sitecues.highlight = function(elem) {
-        hideAndResetState();
+        hide();
         state.picked = $(elem);
         state.target = elem;
-        var rect = mhpos.getAllBoundingBoxes(elem, 0, true)[0];
+        var rect = mhpos.getRect(elem);
         cursorPos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
         scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
         show();
@@ -1193,11 +1263,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.update = update;
       exports.createNewOverlayPosition = createNewOverlayPosition;
       exports.pickAfterShortWait = pickAfterShortWait;
-      exports.hideAndResetState = hideAndResetState;
       exports.enableIfAppropriate = enableIfAppropriate;
-      exports.disable = disable;
-      exports.pause = pause;
-      exports.resetState = resetState;
+      exports.disableTemporarily = disableTemporarily;
+      exports.hide = hide;
       exports.getMaxZIndex = getMaxZIndex;
       exports.pickTimer = pickTimer;
     }

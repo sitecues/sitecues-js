@@ -79,18 +79,19 @@ files=\
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight.js \
-	source/js/keys.js \
 	source/js/style-service.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
+	source/js/hlb/event-handlers.js \
 	source/js/hlb/safe-area.js \
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
-	source/js/hlb/event-handlers.js \
+	source/js/hlb/navkeys.js \
 	source/js/hlb/animation.js \
 	source/js/highlight-box.js \
+	source/js/keys.js \
 	source/js/hpan.js \
 	source/js/status.js \
 	source/js/metrics/util.js \

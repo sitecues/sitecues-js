@@ -1,7 +1,9 @@
 sitecues.def('cursor/custom', function (customCursor, callback) {
   'use strict';
 
-  var PREFIX = '<svg xmlns="http://www.w3.org/2000/svg" width="SIDE" height="SIDE" viewBox="0,0,SIDE0,SIDE0"><defs><filter id="d" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="2.5" dy="5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="scale(SIZE)" filter="url(#d)">',
+  // Viewbox coordinates are multiplied by 10 so that we can remove coordinates from our decimal places
+  // Also, viewbox left side begins at -10px (-100) so that the left side of the thumb shows up in the hand cursor on Windows
+  var PREFIX = '<svg xmlns="http://www.w3.org/2000/svg" width="SIDE" height="SIDE" viewBox="-100,0,SIDE0,SIDE0"><defs><filter id="d" width="200%" height="200%"><feOffset result="offOut" in="SourceAlpha" dx="2.5" dy="5" /><feGaussianBlur result="blurOut" in="offOut" stdDeviation="5" /><feBlend in="SourceGraphic" in2="blurOut" mode="normal" /></filter></defs><g transform="scale(SIZE)" filter="url(#d)">',
     POSTFIX = '</g><defs/></svg>',
     CURSOR_SVG = {
       // Optimized to 2 decimal places via the SVG optimizer at https://petercollingridge.appspot.com/svg-editor
@@ -26,7 +28,9 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
           '<path d="m108,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>' +
           '<path d="m127,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>'
         }
-      };
+      },
+      MAX_CURSOR_SIZE_DEFAULT = 128,
+      MAX_CURSOR_SIZE_WIN = 110;
 
   sitecues.use('platform', function (platform) {
 
@@ -42,9 +46,10 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + Math.min(sizeRatio,3) + '.cur' );
       }
 
-      var prefix = PREFIX
+      var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
+          prefix = PREFIX
           .replace(/SIZE/g, '' + sizeRatio * pixelRatio)
-          .replace(/SIDE/g, '' + 128 * pixelRatio),
+          .replace(/SIDE/g, '' + maxCursorSize * pixelRatio),
         cursorSvg = prefix + CURSOR_SVG[platform.os.is]['_' + type] + POSTFIX;
 
       return 'data:image/svg+xml,' + escape( cursorSvg );

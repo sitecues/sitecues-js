@@ -17,8 +17,10 @@ var ipAddress = '10.0.3.1',
     latestDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/latest/js/sitecues.js',
     specificDev: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/dev/__VERSION__-DEV/js/sitecues.js',
     branch: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/__BRANCHNAME__/latest/js/sitecues.js',
-    researchBranch: 'js.rnd.sitecues.com/l/s;id=__SITEID__/__BRANCHNAME__/js/sitecues.js'
-  };
+    researchBranch: 'js.rnd.sitecues.com/l/s;id=__SITEID__/__BRANCHNAME__/js/sitecues.js',
+    hotfix: 'js.dev.sitecues.com/l/s;id=__SITEID__/v/hotfix-2.5-001/2.5-HF-1.2-RELEASE/js/sitecues.js'
+
+};
 
 (function () {
   var script = document.createElement('script'),
@@ -34,6 +36,7 @@ var ipAddress = '10.0.3.1',
 //  url += SCRIPT_URLS.specificDev.replace('__VERSION__', '2.0');
 //  url += SCRIPT_URLS.branch.replace('__BRANCHNAME__', 'zoomzoom2');
 //  url += SCRIPT_URLS.researchBranch.replace('__BRANCHNAME__', 'demo');
+//  url += SCRIPT_URLS.hotfix;
 
   // Add site ID
   url = url.replace('__SITEID__', sitecues.config.site_id);

@@ -132,7 +132,7 @@ sitecues.def('style-service', function (styleService, callback) {
       }
 
       function onload(event) {
-        linkTagStylesList[sheetNum] = getStyleSheetTextFromCORSRequest(event.target);
+        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(event.target));
         requestComplete(event);
       }
 
@@ -304,7 +304,7 @@ sitecues.def('style-service', function (styleService, callback) {
       return newText;
     }
 
-    styleService.init = function() {
+    function init() {
       if (hasInitBeenRequested) {
         return;  // Only init once
       }
@@ -416,7 +416,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
     sitecues.on('zoom', function (pageZoom) {
       if (pageZoom > 1) {
-       styleService.init();
+       init();
       }
     });
   });

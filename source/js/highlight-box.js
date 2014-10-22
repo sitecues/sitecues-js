@@ -17,8 +17,24 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
     'hlb/safe-area',
     'util/common',
     'hlb/animation',
+    'mouse-highlight',
+    'util/geo',
+    'hlb/navkeys',
 
-    function($, conf, eventHandlers, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea, common, hlbAnimation) {
+    function(
+      $,
+      conf,
+      eventHandlers,
+      dimmer,
+      hlbPositioning,
+      hlbStyling,
+      platform,
+      hlbSafeArea,
+      common,
+      hlbAnimation,
+      mh,
+      geo,
+      navkeys) {
 
       /////////////////////////
       // PRIVATE VARIABLES
@@ -33,6 +49,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           $originalElement,    // The element which serves as a model or basis for imitations or copies
           $hlbElement,         // Element that is cloned from the originalElement (HLB)
           $hlbWrappingElement, // Eleemnt outside the body that contains the HLB and background dimmer
+
+          // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
+          // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
+          EXTRA_HIGHLIGHT_PADDING = 1,
 
           initialHLBRect,      // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
 
@@ -55,9 +75,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       /**
        * [toggleHLB closes or creates a new HLB]
-       * @param  {[DOM event object]} e [The event object emitted by keypress event. It is, however, modified by the picker module]
        */
-      function toggleHLB(e) {
+      function toggleHLB() {
+
+        var highlight;
 
         // If the HLB is currently deflating, no need to toggle
         if (isHLBClosing) {
@@ -72,56 +93,57 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // If the HLB does not exist
         } else {
 
-          // Set module scoped variable so the rest of the program has reference.
-          $pickedElement = $(getPickedElement(e));
+          highlight = mh.getHighlight();
 
-          // Set module scoped variable so the rest of the program has reference.
-          initialHLBRect = getInitialHLBRect(e);
-
-          // To create a new HLB, we must have an element that is picked and a highlight rect.
-          if ($pickedElement.length && initialHLBRect) {
-
-            if (SC_DEV && loggingEnabled) {
-
-              console.log('%c--------------- CREATE HLB -----------------', 'color:orange; background:purple; font-size: 9pt;');
-
-              if (!$pickedElement[0].id) {
-                $pickedElement[0].id = (Math.random() + '').slice(2);
-              }
-
-              console.log('Picked element %o ID: ' + $pickedElement[0].id, $pickedElement[0]);
-
-            }
-
-            // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
-            // It MUST be called before getValidOriginalElement().
-            sitecues.emit('mh/disable');
-
-            // Set module scoped variable so the rest of the program has reference.
-            $originalElement = getValidOriginalElement($pickedElement);
-
-            // if (SC_DEV && loggingEnabled) {
-            //   console.log('Initial rect width: ' + initialHLBRect.width + ' Initial rect height: ' + initialHLBRect.height);
-            //   $('<div>HLB Initial Rect: ' + initialHLBRect.width + ' X ' + initialHLBRect.height + '</div>').css({
-            //     'position'  : 'absolute',
-            //     'width'     : initialHLBRect.width,
-            //     'height'    : initialHLBRect.height,
-            //     'left'      : initialHLBRect.left + window.pageXOffset,
-            //     'top'       : initialHLBRect.top  + window.pageYOffset,
-            //     'background': 'orange',
-            //     'opacity'   : 0.9,
-            //     'z-index'   : 99999,
-            //     'color'     : '#000000',
-            //     'font-size' : 40,
-            //     'text-align': 'center'
-            //   }).insertAfter('body').on('click', function () {
-            //     $(this).remove();
-            //   });
-            // }
-
-            createHLB();
-
+          // No highlight present -- nothing to open HLB on
+          if (!highlight.isVisible) {
+            return;
           }
+
+          // Highlight is present -- guaranteed to have
+          // at least one picked element and fixedContentRect outlining the highlight
+          $pickedElement = highlight.picked;
+
+          // Set module scoped variable so the rest of the program has reference.
+          initialHLBRect = getInitialHLBRect(highlight);
+
+          // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
+          // It MUST be called before getValidOriginalElement().
+          sitecues.emit('hlb/init');
+
+          // Set module scoped variable so the rest of the program has reference.
+          $originalElement = getValidOriginalElement($pickedElement);
+
+          // if (SC_DEV && loggingEnabled) {
+
+          //   console.log('%c--------------- CREATE HLB -----------------', 'color:orange; background:purple; font-size: 9pt;');
+
+          //   if (!$pickedElement[0].id) {
+          //     $pickedElement[0].id = (Math.random() + '').slice(2);
+          //   }
+
+          //   console.log('Picked element %o ID: ' + $pickedElement[0].id, $pickedElement[0]);
+
+          //   console.log('Initial rect width: ' + initialHLBRect.width + ' Initial rect height: ' + initialHLBRect.height);
+
+          //   $('<div>HLB Initial Rect: ' + initialHLBRect.width + ' X ' + initialHLBRect.height + '</div>').css({
+          //     'position'  : 'absolute',
+          //     'width'     : initialHLBRect.width,
+          //     'height'    : initialHLBRect.height,
+          //     'left'      : initialHLBRect.left + window.pageXOffset,
+          //     'top'       : initialHLBRect.top  + window.pageYOffset,
+          //     'background': 'orange',
+          //     'opacity'   : 0.9,
+          //     'z-index'   : 99999,
+          //     'color'     : '#000000',
+          //     'font-size' : 40,
+          //     'text-align': 'center'
+          //   }).insertAfter('body').on('click', function () {
+          //     $(this).remove();
+          //   });
+          // }
+
+          createHLB();
 
         }
 
@@ -129,76 +151,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       /**
        * [getInitialHLBRect returns the initial width and height for our HLB when we first create it.
-       * We utilize the highlight rectangle calculated by the picker.]
-       * @param  {[DOM event data object]} e [The picker modified DOM event data object]
+       * Preferably we utilize the highlight rectangle calculated by the picker.]
+       * @param  {[object]} highlight [Information about the highlight --
+       *          see https://equinox.atlassian.net/wiki/display/EN/Internal+sitecues+API#InternalsitecuesAPI-Highlight]
        * @return {[Object]}   [Dimensions and position]
        */
-      function getInitialHLBRect(e) {
-
-        var mouseHighlightRect,
-
-            // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
-            // would unnecessarily wrap text.  Seemed to be more prevelant on IE, fixes stuff for EEOC.
-            extraPadding = 2;
-
-        if (e &&
-            e.dom &&
-            e.dom.mouse_highlight &&
-            e.dom.mouse_highlight.fixedContentRect) {
-
-          mouseHighlightRect = e.dom.mouse_highlight.fixedContentRect;
-
-          mouseHighlightRect.width  += extraPadding;
-          mouseHighlightRect.height += extraPadding;
-
-          return mouseHighlightRect;
-
-        }
-
-        return false;
-
-      }
-
-      /*
-       * [getPickedElement checks and retrieves the original element that the HLB uses
-       * from an event object.  Also handles the specific cases where we may want to toggle
-       * the HLB through a public interface during debugging and testing.]
-       * @param  {[DOM event]}   e [A modified native DOM event, jQuery element, DOM element]
-       * @return {[DOM element]}   [The DOM element we will clone for the HLB instance]
-       */
-      function getPickedElement(e) {
-
-        var originalElement;
-
-        // Check if the element is passed within an event object.
-        // This is how the sitecues application sends the element we
-        // need for the HLB.
-        if (e &&
-            e.dom &&
-            e.dom.mouse_highlight &&
-            e.dom.mouse_highlight.picked &&
-            e.dom.mouse_highlight.picked[0] !== null) {
-
-          originalElement = e.dom.mouse_highlight.picked[0];
-
-          // Check if we were passed a jQuery element.  This is useful for
-          // testing purposes because we can take advantage of the public
-          // event system to sitecues.emit('hlb/toggle', sitecues.$('#myElement'))
-        } else if (e instanceof $) {
-
-          originalElement = e[0];
-
-          // Check if we were passed a DOM element. This is useful for
-          // testing purposes because we can take advantage of the public
-          // event system to sitecues.emit('hlb/toggle', document.getElementById('myElement'))
-        } else if (e instanceof window.Node || e instanceof window.HTMLElement) {
-
-          originalElement = e;
-
-        }
-
-        return originalElement;
-
+      function getInitialHLBRect(highlight) {
+        return geo.expandOrContractRect(highlight.fixedContentRect, EXTRA_HIGHLIGHT_PADDING);
       }
 
       /**
@@ -355,7 +314,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         eventHandlers.captureWheelEvents($hlbElement);
 
-        // Listeners: keys.js, metrics/hlb-opened.js, speech.js
+        // Listeners: metrics/hlb-opened.js, speech.js
         sitecues.emit('hlb/create', $hlbElement);
 
       }
@@ -365,13 +324,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function turnOnHLBEventListeners() {
 
-        // Register escape keypress, it will deflate the HLB
-        sitecues.on('key/esc', closeHLB);
-
         // Register key press handlers (pagedown, pageup, home, end, up, down)
         $(window).on('keydown', {
           'hlb': $hlbElement
-        }, eventHandlers.keyDownHandler);
+        }, navkeys.keyDownHandler);
 
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
@@ -392,11 +348,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
-        // During deflation, turn off the ability to deflate or create a new HLB
-        sitecues.off('key/esc', closeHLB);
-
         // Turn off the suppression of scrolling, keypresses
-        $(window).off('keydown', eventHandlers.keyDownHandler);
+        $(window).off('keydown', navkeys.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);
@@ -448,7 +401,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       /**
        * [closeHLB prepares and deflates the HLB.]
        */
-      function closeHLB() {
+      function closeHLB(e) {
 
         // Set this to true to prevent toggleHLB();
         isHLBClosing = true;
@@ -463,7 +416,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           '$hlbWrappingElement': $hlbWrappingElement,
           'originCSS'          : hlbPositioning.getOriginCSS(),
           'translateCSS'       : hlbPositioning.getTranslateCSS(),
-          'onHLBClosed'        : onHLBClosed,
+          'onHLBClosed'        : function() { onHLBClosed(e); },
           'transitionProperty' : hlbStyling.transitionProperty
         });
 
@@ -568,7 +521,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             mouseY < HLBBoundingBox.top    - MOUSE_SAFETY_ZONE ||
             mouseY > HLBBoundingBox.bottom + MOUSE_SAFETY_ZONE) {
 
-          closeHLB();
+          closeHLB(e);
 
         }
 
@@ -579,7 +532,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * responsible for setting the state of the application to what it was before
        * any HLB existed.]
        */
-      function onHLBClosed() {
+      function onHLBClosed(e) {
 
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();
@@ -590,8 +543,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Clean up "module scoped" vars
         isHLBClosing = false;
 
-        // Listeners: hpan.js, keys.js, mouse-highlight.js, speech.js
-        sitecues.emit('hlb/closed', $hlbElement);
+        // Listeners: hpan.js, mouse-highlight.js, speech.js
+        sitecues.emit('hlb/closed', e);
 
         $originalElement = undefined;
         $hlbElement      = undefined;
@@ -617,7 +570,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         turnOnHLBEventListeners();
 
         // Let the rest of the application know that the hlb is ready
-        // Listeners: hpan.js, invert.js, keys.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
+        // Listeners: hpan.js, invert.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
         sitecues.emit('hlb/ready', $hlbElement);
 
       }
@@ -655,6 +608,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       // PUBLIC FUNCTIONS
       //////////////////////////////////
 
+      highlightBox.getElement = function() {
+        return $hlbElement;
+      };
+
       /**
        * [toggleStickyHLB enables/disables HLB deflation]
        * @return {[Boolean]} [True if deflation is disabled.  False if deflation is enabled.]
@@ -669,14 +626,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         sitecues.toggleHLBLogging = function () {
           loggingEnabled = !loggingEnabled;
           return loggingEnabled;
-        }
+        };
       }
 
 
       if (SC_UNIT) {
 
         exports.mapForm                  = mapForm;
-        exports.getPickedElement         = getPickedElement;
         exports.onHLBHover               = onHLBHover;
         exports.onTargetChange           = onTargetChange;
         exports.initializeHLB            = initializeHLB;
@@ -690,7 +646,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.getHLBWrapper            = getHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
-        exports.eventHandlers            = eventHandlers;
+        exports.navkeys                  = navkeys;
         exports.dimmer                   = dimmer;
         exports.getValidOriginalElement  = getValidOriginalElement;
 

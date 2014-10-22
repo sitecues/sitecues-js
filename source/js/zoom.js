@@ -9,14 +9,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
   sitecues.use('jquery', 'conf', 'platform', 'util/common',
     function ($, conf, platform, common) {
-      if (window !== window.top) {
-        // TODO we might want to put in a rule like this for all of sitecues
-        return; // Only zoom top level window so that we do not double zoom iframes
-      }
-      var
-        // Default zoom configuration
-        // Can be customized via zoom.provideCustomConfig()
-        zoomConfig = {
+      
+      // Default zoom configuration
+      
+      // Can be customized via zoom.provideCustomConfig()
+      var zoomConfig = {
+          
           // Should smooth zoom animations be enabled?
           shouldSmoothZoom: true,
 
@@ -85,8 +83,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
-        MS_PER_X_ZOOM_NORMAL = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        MS_PER_X_ZOOM_SLIDER = 500,
+        MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
         ZOOM_PRECISION = 3, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
@@ -201,7 +199,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // This is the body's currently visible width, with zoom factored in
       zoom.getBodyWidth = function() {
        // Use the originally measured visible body width
-       initZoomModule();
+       initBodyInfo();
 
        // If width was restricted
        var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
@@ -211,7 +209,7 @@ sitecues.def('zoom', function (zoom, callback) {
       };
 
       zoom.getBodyRight = function() {
-        initZoomModule();
+        initBodyInfo();
 
         return originalBodyInfo.right * completedZoom;
       };
@@ -239,8 +237,9 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function finishZoomSliderOperation() {
-        if (zoomInput.isSliderDrag || !shouldSmoothZoom) {
-          // Was dragging the slider
+        if (zoomInput.isSliderDrag || !zoomAnimator) {
+          // Slider thumb already at destination -- was not busy animating to
+          // a click elsewhere in the slider bar
           finishZoomOperation();
         }
         // Else is in the middle of gliding to a zoom click -- let it finish --
@@ -251,8 +250,10 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override as follows:
       // Shift-key: Script-based smooth zoom
       // Ctrl-key: CSS-based smooth zoom
-      function shouldSmoothZoom() {
-        if (SC_DEV && (zoomInput.shiftKey || zoomInput.ctrlKey)) {
+      function shouldSmoothZoom(event) {
+        var event = event || {};
+
+        if (SC_DEV && (event.shiftKey || event.ctrlKey)) {
           return true; // Dev override -- use animation no matter what
         }
 
@@ -267,18 +268,19 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override default behavior as follows:
       // Shift-key: Script-based
       // Ctrl-key: CSS-based
-      function shouldUseKeyFramesAnimation() {
+      function shouldUseKeyFramesAnimation(event) {
+        var event = event || {};
         if (SC_DEV) {
           // In dev, allow overriding of animation type
-          if (zoomInput.shiftKey) {
+          if (event.shiftKey) {
             return false; // Use JS-based animation
           }
-          else if (zoomInput.ctrlKey) {
+          else if (event.ctrlKey) {
             return true;
           }
         }
 
-        return shouldSmoothZoom()
+        return shouldSmoothZoom(event)
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
           // Safari is herky jerky if animating the width and using key frames
@@ -331,20 +333,8 @@ sitecues.def('zoom', function (zoom, callback) {
       // If we are zooming with +/- or clicking A/a
       function beginGlide(targetZoom, event) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
-          var input = {};
-          if (event) {
-            if (event.keyCode) {
-              //input.isKey = true;
-              //input.isBrowserZoomKeyOverride = (event.ctrlKey || event.metaKey)
-              input.shiftKey = event.shiftKey;
-              input.ctrlKey = event.ctrlKey;
-            }
-//            else {
-//              input.isAButtonPress = true;
-//            }
-          }
-
-          if (!shouldSmoothZoom()) {
+          var input = { event: event };
+          if (!shouldSmoothZoom(event)) {
             beginZoomOperation(targetZoom, input);
             // Instant zoom
             if (event) {
@@ -388,7 +378,7 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function getMsPerXZoom() {
-        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_NORMAL;
+        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_GLIDE;
       }
 
       // Get what the zoom value would be if we stopped the animation now
@@ -548,22 +538,28 @@ sitecues.def('zoom', function (zoom, callback) {
         var animationName = getAnimationName(targetZoom),
           keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
           keyFramesCss = animationName + ' {\n',
-          percent = 0,
+          timePercent = 0,
+          animationPercent,
           step = 0,
           // For animation performance, use adaptive algorithm for number of keyframe steps:
           // Bigger zoom jump = more steps
-          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 10),
-          zoomIncrement = (targetZoom - completedZoom) / numSteps,
-          percentIncrement = 100 / numSteps,
-          animationStepZoom = completedZoom,
+          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 100),
+          percentIncrement = 1 / numSteps,
           cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
 
         for (; step <= numSteps; ++step) {
-          percent = step === numSteps ? 100 : Math.round(step * percentIncrement);
-          var zoomCss = getZoomCss(animationStepZoom),
+          timePercent = step === numSteps ? 1 : step * percentIncrement;
+          if (isInitialLoadZoom) {
+            // Provide simple sinusoidal easing in out effect for initial load zoom
+            animationPercent =   (Math.cos(Math.PI*timePercent) - 1) / -2;
+          }
+          else {
+            animationPercent = timePercent;
+          }
+          var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent,
+            zoomCss = getZoomCss(midAnimationZoom),
             zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
-          keyFramesCss += percent + '% { ' + zoomCssString + ' }\n';
-          animationStepZoom += zoomIncrement;
+          keyFramesCss += (100 * timePercent) + '% { ' + zoomCssString + ' }\n';
         }
         keyFramesCss += '}\n\n';
 
@@ -574,14 +570,10 @@ sitecues.def('zoom', function (zoom, callback) {
       function beginZoomOperation(targetZoom, input, animationReadyCallback) {
         // Initialize zoom input info
         zoomInput = $.extend({
-          // Commented out ones are no longer needed unless we decide to do metrics from within modules
-//          isKey: false,                     // + or - key (or with modifier)
-//          isBrowserZoomKeyOverride: false,  // User is pressing the browser's zoom key command
-//          isAButtonPress: false,            // Small or large A in panel
-//          fromZoom: completedZoom           // Old zoom value
           isSlider: false,                    // Slider in panel
           isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
-          isLongGlide: false                  // Key or A button held down to glide extra
+          isLongGlide: false,                 // Key or A button held down to glide extra
+          event: {}
         }, input);
 
         // Make sure we're ready
@@ -606,7 +598,7 @@ sitecues.def('zoom', function (zoom, callback) {
             pointerEvents: 'none'
           });
 
-          sitecues.emit('zoom/begin');
+          sitecues.emit('zoom/begin', zoomInput.event);
 
           animationReadyCallback && animationReadyCallback();
         }
@@ -1057,8 +1049,8 @@ sitecues.def('zoom', function (zoom, callback) {
         };
       }
 
-      // Lazy init, saves time on page load
-      function initZoomModule() {
+      // Ensure that initial body info is ready
+      function initBodyInfo() {
         if (originalBodyInfo) {
           return; //Already initialized
         }
@@ -1066,6 +1058,11 @@ sitecues.def('zoom', function (zoom, callback) {
         body = document.body;
         $body = $(body);
         originalBodyInfo = getBodyInfo();
+      }
+
+      // Lazy init, saves time on page load
+      function initZoomModule() {
+        initBodyInfo();
 
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();

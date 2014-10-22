@@ -355,25 +355,25 @@
     };
 
 
-  // Handle keys being released
+  // Handle navkeys being released
   window.addEventListener('keyup', function(e){
     var keyCode = e.keyCode;
     keyStack[keyCode] = false;
   });
 
-  // Handle keys being pressed
+  // Handle navkeys being pressed
   window.addEventListener('keydown', function(e){
     var keyCode = e.keyCode,
         preventDefault = true;
 
     //console.log(keyCode);
     
-    // Track the state of the keys for modifiers
+    // Track the state of the navkeys for modifiers
     keyStack[keyCode] = true;
 
     switch(keyCode){
     
-    // Modifier keys
+    // Modifier navkeys
     case 16:
       break;
     case 18:
@@ -436,7 +436,7 @@
       segMover.focusOnSeg();
       break;
 
-    // If none of the keys were captured... it's OK to resume default key behavior
+    // If none of the navkeys were captured... it's OK to resume default key behavior
     default:
       preventDefault = false;
       break;

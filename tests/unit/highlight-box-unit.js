@@ -2,7 +2,7 @@
 var HLB_MODULE_PATH             = '../../source/js/highlight-box',
 
     // Mocked source files that are highlight-box dependencies.
-    EVENT_HANDLERS_MODULE_PATH  = './data/modules/hlb/event-handlers',
+    HLB_KEYS_MODULE_PATH        = './data/modules/hlb/navkeys',
     HLB_POSITIONING_MODULE_PATH = './data/modules/hlb/positioning',
     HLB_DIMMER_MODULE_PATH      = './data/modules/hlb/dimmer',
     HLB_STYLING_MODULE_PATH     = './data/modules/hlb/styling',
@@ -11,7 +11,7 @@ var HLB_MODULE_PATH             = '../../source/js/highlight-box',
 
     // Load 'em up.
     hlb             = require(HLB_MODULE_PATH),
-    eventHandlers   = require(EVENT_HANDLERS_MODULE_PATH),
+    hlbKeys         = require(HLB_KEYS_MODULE_PATH),
     hlbPositioning  = require(HLB_POSITIONING_MODULE_PATH),
     hlbStyling      = require(HLB_STYLING_MODULE_PATH),
     dimmer          = require(HLB_DIMMER_MODULE_PATH),
@@ -395,7 +395,7 @@ describe('highlight-box', function() {
           // TODO : I couldn't find a way to listen for closeHLB(), because it is private.
           //        For now, listen for the function below to be called because it is called
           //        by closeHLB().
-          closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph')));
       hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
@@ -421,7 +421,7 @@ describe('highlight-box', function() {
           // NOTE : I couldn't find a way to listen for closeHLB(), because it is private.
           //        For now, listen for the function below to be called because it is called
           //        by closeHLB().
-          closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph')));
       hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
@@ -447,7 +447,7 @@ describe('highlight-box', function() {
         var mockedNativeMousemoveEventObject = {
               'target': win.document.getElementById('paragraph')
             },
-            closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+            closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
 
         hlb.setHLB(jquery(win.document.getElementById('paragraph')));
         hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
@@ -470,7 +470,7 @@ describe('highlight-box', function() {
       var mockedNativeMousemoveEventObject = {
             'which': 1
           },
-          closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph')));
       hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
@@ -495,7 +495,7 @@ describe('highlight-box', function() {
               'clientX': 0,
               'clientY': 0
             },
-            closeHLBSpy = sinon.spy(eventHandlers, 'enableWheelScroll');
+            closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
 
         hlb.setHLB(jquery(win.document.getElementById('paragraph')));
         hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
