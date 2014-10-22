@@ -38,7 +38,7 @@
         "location": "0.0.1",
         "navigator": "1.0.1"
     },
-    "devDpendencies": {
+    "devDependencies": {
         "grunt-cli": "0.1.13",
         "grunt": "0.4.5",
         "grunt-contrib-clean": "0.6.0",
