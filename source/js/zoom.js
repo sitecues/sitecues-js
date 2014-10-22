@@ -748,20 +748,20 @@ sitecues.def('zoom', function (zoom, callback) {
             $(body).css('backfaceVisibility', 'hidden')
           }, REPAINT_FOR_CRISP_TEXT_MS);
         }
-        else {
-          var appendedDiv = $('<div>')
-            .css({
-              position: 'fixed',
-              width: '1px',
-              height: '1px',
-              opacity: '0',
-              pointerEvents: 'none'
-            })
-            .appendTo('html');
-          setTimeout(function () {
-            appendedDiv.remove();
-          }, REPAINT_FOR_CRISP_TEXT_MS);
-        }
+        var MAX_ZINDEX = 2147483647,
+          appendedDiv = $('<div>')
+          .css({
+            position: 'fixed',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            zIndex: MAX_ZINDEX,
+            pointerEvents: 'none'
+          })
+          .appendTo('html');
+        setTimeout(function () {
+          appendedDiv.remove();
+        }, REPAINT_FOR_CRISP_TEXT_MS);
       }
 
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
