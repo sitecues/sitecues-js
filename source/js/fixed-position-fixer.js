@@ -91,9 +91,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           if (fixedSelector) {
             $(fixedSelector).css({
               willChange: 'transform',
-              perspective: 999,
-              transformOrigin: '0% 0%',
-              backfaceVisibility: 'hidden'
+              transformOrigin: '0% 0%'
             });
             lazyTurnOn(zoomMod.getCompletedZoom());
           }
@@ -118,7 +116,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       }
 
 
-      if (!platform.browser.isIE) {
+      if (!platform.browser.isIE && !platform.browser.isSafari) {
         initializeModule();
       }
 
