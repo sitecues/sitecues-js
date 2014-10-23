@@ -1101,9 +1101,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       refreshEventListeners(doEnable);
 
-      if (!doEnable) {
-        forget();
-      }
       if (doEnable) {
         // Don't do cursor-inside-picked-content check, because it may not be after zoom change
         if (mouseEvent && !isSticky) {
@@ -1112,6 +1109,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if (!show()) {
           forget(); // Old highlight not appropriate, so hide it
         }
+      }
+      else {
+        forget();
       }
     }
 
