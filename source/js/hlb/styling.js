@@ -87,6 +87,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'border-radius'    : '4px',        // Aesthetic purposes
           'box-sizing'       : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
           'visibility'       : 'visible',
+          'max-width'        : 'none',
+          'max-height'       : 'none',
           'opacity'          : 1
         };
 
