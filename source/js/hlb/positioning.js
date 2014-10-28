@@ -26,21 +26,126 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
     // PRIVATE FUNCTIONS
     //////////////////////////////
 
-    function getChildWidth (child, $hlbElement) {
+    /**
+     * [getChildWidth returns the max-width for any child within the HLB.]
+     * @param  {[DOM element]}    child       [Child element of the HLB]
+     * @param  {[jQuery element]} $hlbElement [The HLB element]
+     * @return {[Float]}                      [Max-width for child element]
+     */
+    function getChildWidth(child, $hlbElement) {
 
-      var sum = 0;
+      var sum               = 0,
+          hlbBoundingRect   = $hlbElement[0].getBoundingClientRect(),
+          childBoundingRect = child.getBoundingClientRect(),
+          inheritedZoom     = hlbPositioning.getInheritedZoom($hlbElement),
+          leftDiff          = childBoundingRect.left > hlbBoundingRect.left ? childBoundingRect.left - hlbBoundingRect.left : 0,
+          leftSum           = 0,
+          rightSum          = 0;
 
       $(child).parentsUntil($hlbElement.parent()).addBack().each(function () {
-        sum += parseFloat($(this).css('marginLeft'));
-        sum += parseFloat($(this).css('marginRight'));
-        sum += parseFloat($(this).css('paddingRight'));
-        sum += parseFloat($(this).css('paddingLeft'));
-        sum += parseFloat($(this).css('borderRightWidth'));
-        sum += parseFloat($(this).css('borderLeftWidth'));
+
+        var $this = $(this);
+
+        // marginRight has been commented out to fix issue on faast.org when HLBing
+        // "About" in the top navigation.  I thought marginRight pushes its content to the left,
+        // but in that case apparently not.  The rule of what marginRight does may be dependent
+        // on other factors which I do not know, but removing it does not appear to break anything
+        // that this function originally fixed.
+        // rightSum += parseFloat($this.css('marginRight'));
+        rightSum += parseFloat($this.css('paddingRight'));
+        rightSum += parseFloat($this.css('borderRightWidth'));
+        leftSum  += parseFloat($this.css('marginLeft'));
+        leftSum  += parseFloat($this.css('paddingLeft'));
+        leftSum  += parseFloat($this.css('borderLeftWidth'));
       });
 
-      return ($hlbElement[0].getBoundingClientRect().width / hlbPositioning.getInheritedZoom($hlbElement)) - sum;
+      sum = leftSum + rightSum;
 
+      if (leftDiff && leftDiff > leftSum) {
+        leftDiff = leftDiff - leftSum;
+      } else {
+        leftDiff = 0;
+      }
+
+      return (hlbBoundingRect.width / inheritedZoom) - sum - leftDiff;
+
+    }
+
+    /**
+     * [limitChildWidth computes and sets the max-width for all HLB child elements if needed.]
+     * @param  {[jQuery Element]} $hlbElement [The HLB element]
+     */
+    function limitChildWidth($hlbElement) {
+
+      var fixit,
+          allHLBChildren,
+          hlbClientWidth,
+          childRect,
+          hlbRect,
+          scrollDiff,
+
+          // document.createRange() is used instead of scrollWidth because of content on http://www.nvblindchildren.org/
+          // If content is pushed outside of the HLB to the left, we must use document.createRange().
+          hlbElementRangeRect = document.createRange(),
+          hlbElementRangeWidth,
+          hlbElementContentRangeWidth,
+          borderLeftAndRight = parseFloat($hlbElement.css('borderWidth')) * 2;
+
+      hlbElementRangeRect.selectNode($hlbElement[0]);
+
+      hlbElementRangeWidth = hlbElementRangeRect.getBoundingClientRect().width - borderLeftAndRight;
+
+      hlbElementRangeRect.selectNodeContents($hlbElement[0]);
+
+      hlbElementContentRangeWidth = hlbElementRangeRect.getBoundingClientRect().width - borderLeftAndRight;
+
+      if ($hlbElement[0].clientWidth < Math.max(hlbElementRangeWidth, hlbElementContentRangeWidth)) {
+
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: HLB child width limiting algorithm.', 'background:orange;');
+        }
+
+        allHLBChildren = $hlbElement.find('*');
+
+        fixit = true;
+
+        allHLBChildren.each(function () {
+
+          $(this).css('max-width', getChildWidth(this, $hlbElement));
+
+        });
+
+      }
+
+      hlbClientWidth = $hlbElement[0].clientWidth;
+
+      // The following attempts to mitigate the vertical scroll bar by
+      // setting the height of the element to the scroll height of the element.
+      mitigateVerticalScroll($hlbElement);
+
+      // Vertical scroll should only appear when HLB is as tall as the
+      // safe area height and its scrollHeight is greater than its clientHeight
+      addVerticalScroll($hlbElement);
+
+      if (fixit && $hlbElement[0].clientWidth < hlbClientWidth) {
+
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: HLB child width limiting algorithm because vertical scrollbar.', 'background:orange;');
+        }
+
+        scrollDiff = hlbClientWidth - $hlbElement[0].clientWidth;
+
+        hlbRect = $hlbElement[0].getBoundingClientRect();
+
+        allHLBChildren.each(function () {
+          // Performing this check because http://www.nvblindchildren.org/give.html top navigation..
+          childRect = this.getBoundingClientRect();
+          if (childRect.left < hlbRect.left || childRect.right + scrollDiff > hlbRect.right) {
+            $(this).css('max-width', parseFloat($(this).css('max-width')) - scrollDiff);
+          }
+        });
+
+      }
     }
 
     /**
@@ -90,6 +195,11 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           (!hasPositioningCss(css) || isLonerElement(element)) &&
           !common.isVisualMedia(element) && !common.isFormControl(element) && !common.isEditable(element);
 
+        // This fixed something on gwmicro, but broke other things.
+        // if (css.display === 'table-cell') {
+        //   allowWrapping = false;
+        // }
+
         return allowWrapping; // Once false, the each() loop will stop as well
       }
 
@@ -97,6 +207,12 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // We use max-width: 50ch to limit the width.  In this particular case, the font-size of the element
       // is 0, which causes the units of width limiting to have no effect because they are multiples of 0.
       if (+$hlbElement.css('fontSize').charAt(0) === 0) {
+        return;
+      }
+
+      // Easiest way to fix issue when HLBing
+      // "Summary Table Voluntary Product Accessibility Template" on http://www.gwmicro.com/Window-Eyes/VPAT/
+      if ($hlbElement.is('table')) {
         return;
       }
 
@@ -310,8 +426,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // to increase in width and height for the purpose of avoiding scrollbars.
       $hlbElement.find('*').each(function () {
         $(this).css({
-          'max-width' : width,
-          'max-height': height
+          'max-width' : width
         });
       });
 
@@ -383,7 +498,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
      * ctsenaterepublicans.com]
      * @param  {[jQuery Element]} $hlbElement [HLB element]
      */
-    function fixNegativeMargins($hlbElement) {
+    function fixNegativeMargins($hlbElement, initialHLBRect) {
 
       var hlbBoundingRect = $hlbElement[0].getBoundingClientRect(),
           hlbLeft         = hlbBoundingRect.left,
@@ -394,34 +509,66 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           paddingTop,
           childLeft,
           childTop,
-          childBoundingRect;
+          hasBackgroundImage,
+          childBoundingRect,
+          originalHLBLeftPadding = parseFloat($hlbElement.css('paddingLeft')),
+          originalHLBTopPadding  = parseFloat($hlbElement.css('paddingTop'));
 
       $hlbElement.find('*').each(function () {
 
         // These elements to not make sense to check because their
         // bounding rects are not consistent with their visual position
-        if (!$(this).is('br, option')) {
+        if (!$(this).is('br, option') &&
+            ($(this).css('marginLeft').indexOf('-') !== -1 ||
+             $(this).css('marginTop').indexOf('-')  !== -1)) {
 
-          childBoundingRect = this.getBoundingClientRect();
-          childLeft         = childBoundingRect.left;
-          childTop          = childBoundingRect.top;
-          paddingLeft       = parseFloat(this.style.paddingLeft);
-          paddingTop        = parseFloat(this.style.paddingTop);
+          childBoundingRect  = this.getBoundingClientRect();
+          childLeft          = childBoundingRect.left;
+          childTop           = childBoundingRect.top;
+          hasBackgroundImage = this.style.backgroundImage !== 'none';
+          paddingLeft        = hasBackgroundImage ? 0 : parseFloat(this.style.paddingLeft);
+          paddingTop         = hasBackgroundImage ? 0 : parseFloat(this.style.paddingTop);
 
           if (childLeft + paddingLeft < hlbLeft && hlbLeft - childLeft - paddingLeft > extraLeft) {
+            if (SC_DEV) {
+              console.log('%cSPECIAL CASE: Negative Margin-Left Fix.',  'background:orange;');
+            }
             extraLeft = hlbLeft - childLeft - paddingLeft;
           }
 
           if (childTop + paddingTop < hlbTop && hlbTop - childTop - paddingTop > extraTop) {
+            if (SC_DEV) {
+              console.log('%cSPECIAL CASE: Negative Margin-Top Fix.',  'background:orange;');
+            }
             extraTop = hlbTop - childTop - paddingTop;
           }
 
         }
+
+        // Negative margin effects boundingClientRect.
+        // Removing padding on www.faast.org/news left column Device Loan Program uses negative left
+        // margin, making the contents of the HLB move to the left, making the HLB have extra empty space
+        // to the right of the HLB.  Ugh...
+        // Subtract width from HLB if they use negative left margin
+        if (extraLeft) {
+
+          if (SC_DEV) {
+            console.log('%cSPECIAL CASE: Reset HLB width to use padding for width...',  'background:orange;');
+          }
+
+          $hlbElement.css({
+           'width' : initialHLBRect.width / conf.get('zoom') - extraLeft
+          });
+
+          fixOverflowWidth($hlbElement);
+        }
+
       });
 
+
       $hlbElement.css({
-        'paddingTop' : parseFloat($hlbElement.css('paddingTop'))  + extraTop  + hlbStyling.defaultPadding + hlbStyling.defaultBorder,
-        'paddingLeft': parseFloat($hlbElement.css('paddingLeft')) + extraLeft + hlbStyling.defaultPadding + hlbStyling.defaultBorder
+        'paddingTop' : extraTop  ? originalHLBTopPadding  + extraTop  + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBTopPadding,
+        'paddingLeft': extraLeft ? originalHLBLeftPadding + extraLeft + hlbStyling.defaultPadding + hlbStyling.defaultBorder : originalHLBLeftPadding
       });
 
     }
@@ -465,10 +612,11 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     hlbPositioning.sizeHLB = function ($hlbElement, $originalElement, initialHLBRect) {
 
-      var fixit,
-          allHLBChildren;
-
       // Initialize height/width of the HLB
+      if (SC_DEV) {
+        console.log('INITIAL: %o',initialHLBRect);
+      }
+
       initializeSize($hlbElement, initialHLBRect);
 
       // Constrain the height and width of the HLB to the height and width of the safe area.
@@ -480,71 +628,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       fixOverflowWidth($hlbElement);
 
-      if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
+      limitChildWidth($hlbElement);
 
-        // if (SC_DEV && loggingEnabled) {
-        //   console.log('%cSPECIAL CASE: HLB child width limiting algorithm.', 'background:orange;');
-        // }
-
-        allHLBChildren = $hlbElement.find('*');
-
-        fixit = true;
-
-        allHLBChildren.each(function () {
-
-          $(this).css('max-width', getChildWidth(this, $hlbElement));
-          $(this).css('height', 'auto');
-
-        });
-
-      }
-
-      // The following attempts to mitigate the vertical scroll bar by
-      // setting the height of the element to the scroll height of the element.
-      mitigateVerticalScroll($hlbElement);
-
-      // Vertical scroll should only appear when HLB is as tall as the
-      // safe area height and its scrollHeight is greater than its clientHeight
-      addVerticalScroll($hlbElement);
-
-      if (fixit) {
-        if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
-          allHLBChildren.each(function () {
-            $(this).css('height', 'auto');
-            $(this).css('max-width', parseFloat($(this).css('max-width')) -
-                                     ($hlbElement[0].scrollWidth - $hlbElement[0].clientWidth) -
-                                     parseFloat($hlbElement.css('paddingRight')));
-          });
-        }
-      }
-
-
-      if (fixit) {
-
-        // TOOD : The code duplication below is unfortunately necessary to correctly size the HLB.
-        //        The problem was found on 8/24, and a release candidate is super important, so there
-        //        is little time to really identify a better solution (if one exists).
-        // Link : http://www.texasat.net/default.aspx?name=resources.webinars
-
-        // The following attempts to mitigate the vertical scroll bar by
-        // setting the height of the element to the scroll height of the element.
-        mitigateVerticalScroll($hlbElement);
-
-        // Vertical scroll should only appear when HLB is as tall as the
-        // safe area height and its scrollHeight is greater than its clientHeight
-        addVerticalScroll($hlbElement);
-
-        if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
-          allHLBChildren.each(function () {
-            $(this).css('height', 'auto');
-            $(this).css('max-width', parseFloat($(this).css('max-width')) -
-                                     ($hlbElement[0].scrollWidth - $hlbElement[0].clientWidth) -
-                                     parseFloat($hlbElement.css('paddingRight')));
-          });
-        }
-      }
-
-      fixNegativeMargins($hlbElement);
+      fixNegativeMargins($hlbElement, initialHLBRect);
 
     };
 

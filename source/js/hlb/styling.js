@@ -1,14 +1,14 @@
-/*
-  This module styles the HLB by filtering attributes, styles, dom elements,
-  sets background, sets default styles, computes some styles,
-  and cloned child styles from the original element to the HLB.
- */
+// */
+//   This module styles the HLB by filtering attributes, styles, dom elements,
+//   sets background, sets default styles, computes some styles,
+//   and cloned child styles from the original element to the HLB.
+//  */
 sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'platform',
-  function ($, platform) {
+  sitecues.use('jquery', 'platform', 'conf',
+  function ($, platform, conf) {
 
     ///////////////////////////
     // PUBLIC PROPERTIES
@@ -87,6 +87,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           'border-radius'    : '4px',        // Aesthetic purposes
           'box-sizing'       : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
           'visibility'       : 'visible',
+          'max-width'        : 'none',
+          'max-height'       : 'none',
           'opacity'          : 1
         };
 
@@ -98,8 +100,51 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
      * @param  {[DOM element]} $hlbElement [HLB element]
      */
-    function filterElements ($hlbElement) {
+    function filterBlacklistedElements ($hlbElement) {
       $hlbElement.find(HLBElementBlacklist.join(',')).remove();
+    }
+
+    /**
+     * [filterHiddenElements removes elements from the HLB that the picker deems unwanted.]
+     * @param  {[jQuery Element]} $hlbElement    [HLB element]
+     * @param  {[jQuery Element]} $pickedElement [Element picked by picker]
+     * @param  {[Array]} hiddenElements [Array of elements to remove]
+     */
+    function filterHiddenElements ($hlbElement, $pickedElement, hiddenElements) {
+
+      var hiddenElementsLength   = hiddenElements.length,
+          hiddenElementsRemoved  = 0,
+          pickedElementIsListItem = $pickedElement.is('li'),
+          $pickedElementChildren = $pickedElement.find('*'),
+          $hlbElementChildren    = pickedElementIsListItem ? $hlbElement.children().find('*') : $hlbElement.find('*'),
+          currentChild           = 0,
+          currentElementToRemove = 0;
+
+      if (SC_DEV) {
+        if ($pickedElementChildren.length !== $hlbElementChildren.length) {
+          console.warn('There is not a 1:1 mapping for filterHiddenElements!');
+        }
+        if (hiddenElementsLength) {
+          console.log('%cSPECIAL CASE: Filtering hidden elements.',  'background:orange;');
+        }
+      }
+
+      // I really dislike nested for loops...
+      if (hiddenElementsLength) {
+        for (; currentChild < $pickedElementChildren.length; currentChild += 1) {
+          for (; currentElementToRemove < hiddenElementsLength; currentElementToRemove += 1) {
+            if ($pickedElementChildren[currentChild] === hiddenElements[currentElementToRemove]) {
+              $hlbElementChildren[currentChild].remove();
+              hiddenElementsRemoved += 1;
+              if (hiddenElementsRemoved === hiddenElementsLength) {
+                return;
+              }
+            }
+          }
+          currentElementToRemove = 0;
+        }
+      }
+
     }
 
     /**
@@ -129,15 +174,20 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} originalElementsChildStyle        [CSS styles returned from window.getComputedStyle]
      * @return {[Object]}                                   [Styles to be consumed by jQuery.css]
      */
-    function getChildStyles ($child, originalElementsChildStyle) {
+    function getChildStyles ($child, originalElementsChildStyle, initialHLBRect) {
 
           // Defaut css styles for all HLB children
-      var styles = {
+      var minHeight = originalElementsChildStyle.height === 'auto' ? initialHLBRect.height : Math.min(parseFloat(originalElementsChildStyle.height), initialHLBRect.height),
+          styles = {
             'webkitTextFillColor': '',
             'textDecoration'     : 'none',
             'bottom'             : 0,      // Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
-            'height'             : 'auto'  // Added to fix cases where text overlapped vertically, like on eeoc
+            'height'             : 'auto', // Added to fix cases where text overlapped vertically, like on eeoc
+            'min-height'         : minHeight, // Addded to fix faast.org footer CONTACT, texasAT footer!
+            'min-width'          : ''
           },
+          fontSize       = parseFloat(originalElementsChildStyle.fontSize),
+          lineHeight     = parseFloat(originalElementsChildStyle.lineHeight),
           textDecoration = originalElementsChildStyle.textDecoration;
 
       // NOTE: Copying cssText directly is not sufficient for copying textDecorations.
@@ -156,6 +206,15 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
       }
 
+      // Implemented to fix http://www.windoweyesforoffice.com/sitecues/index.php when HLBing
+      // Window-Eyes in header.  Applause: #1224073
+      if (fontSize > lineHeight) {
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: Increasing line height.',  'background:orange;');
+        }
+        styles.lineHeight = fontSize + 'px';
+      }
+
       // This fixes a problem with the HLB on TexasAT home page when opening the entire "News & Events"
       // ALSO...it fixes another problem that used a different fix.  I removed the old fix
       // and will re-enable it if hlb content overlaps
@@ -165,6 +224,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       if (originalElementsChildStyle.position === 'absolute') {
         styles.position = 'static';
         styles.display  = 'inline-block';
+      }
+
+      // Implemented to fix very long link that wasn't wrapping in the HLB on www.faast.org/news
+      if ($child.is('a')) {
+        styles.wordWrap = 'break-word';
       }
 
       return styles;
@@ -184,10 +248,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       return px;
     }
 
+    // TODO: Repeated in highlight-position.js
     function computeBulletWidth (element, style, bulletType) {
       var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
       if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
-        ems = 1; // Simple bullet
+        ems = 1.6; // Simple bullet
       } else if (bulletType === 'decimal') {
         var start = parseInt($(element).attr('start'), 10);
         var end = (start || 1) + element.childElementCount - 1;
@@ -382,6 +447,76 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     }
 
+     /**
+     * [shouldRemovePadding determines if children of our HLB have padding that should be
+     * removed because the mouse-highlight clips padding.]
+     * @param  {[jQuery Element]} $child [Child element of the HLB]
+     * @param  {[Object]} initialHLBRect [Mouse-highlight rectangle]
+     * @return {[Boolean]}               [True: Remove Padding. False: Do Nothing]
+     */
+    function shouldRemovePadding ($child, initialHLBRect) {
+
+      var childBoundingClientRect = $child[0].getBoundingClientRect(),
+          childLeftPadding        = parseFloat($child.css('paddingLeft')),
+          childRightPadding       = parseFloat($child.css('paddingRight')),
+          childTopPadding         = parseFloat($child.css('paddingTop')),
+          childBottomPadding      = parseFloat($child.css('paddingBottom'));
+
+      if ($child.is('br, option') || childBoundingClientRect.width === 0) {
+        return;
+      }
+
+      if ((childBoundingClientRect.left   < initialHLBRect.left   && childLeftPadding   > 0) ||
+          (childBoundingClientRect.right  > initialHLBRect.right  && childRightPadding  > 0) ||
+          (childBoundingClientRect.top    < initialHLBRect.top    && childTopPadding    > 0) ||
+          (childBoundingClientRect.bottom > initialHLBRect.bottom && childBottomPadding > 0)
+        ) {
+
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: Removing child padding.',  'background:orange;');
+        }
+        return true;
+      }
+
+    }
+
+    /**
+     * [getChildPadding computes and returns the padding for a child element of the HLB.  Taking into account the
+     * initialHLBRect, clipping padding is something to be done to preserve that HLB size.]
+     * @param  {[jQuery Element]} $child [Child element of the HLB]
+     * @param  {[Object]} initialHLBRect [Mouse-highlight rectangle]
+     * @return {[Object]}                [Padding styles for a child element]
+     */
+    function getChildPadding ($child, initialHLBRect) {
+
+      var childBoundingClientRect = $child[0].getBoundingClientRect(),
+          childLeftPadding        = parseFloat($child.css('paddingLeft')),
+          childRightPadding       = parseFloat($child.css('paddingRight')),
+          childTopPadding         = parseFloat($child.css('paddingTop')),
+          childBottomPadding      = parseFloat($child.css('paddingBottom')),
+          paddingStyles           = {},
+          zoom                    = conf.get('zoom');
+
+      if ((childBoundingClientRect.left < initialHLBRect.left && childLeftPadding > 0)) {
+        paddingStyles.paddingLeft = childLeftPadding - (initialHLBRect.left - childBoundingClientRect.left) / zoom;
+      }
+
+      if (childBoundingClientRect.right > initialHLBRect.right && childRightPadding > 0) {
+        paddingStyles.paddingRight = childRightPadding - (childBoundingClientRect.right - initialHLBRect.right) / zoom;
+      }
+
+      if (childBoundingClientRect.top < initialHLBRect.top && childTopPadding > 0) {
+        paddingStyles.paddingTop = childTopPadding - (initialHLBRect.top - childBoundingClientRect.top) / zoom;
+      }
+
+      if (childBoundingClientRect.bottom > initialHLBRect.bottom && childBottomPadding > 0) {
+        paddingStyles.paddingBottom = childBottomPadding - (childBoundingClientRect.bottom - initialHLBRect.bottom) / zoom;
+      }
+
+      return paddingStyles;
+
+    }
+
     /**
      * [initializeHLBElementStyles initializes the HLB elements styles by directly copying
      *  the styles from the original element.]
@@ -394,57 +529,118 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     }
 
-    /**
-     * [initializeHLBChildrenStyles initializes the styles of the children of the HLB element]
-     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
-     * @param  {[jQuery element]} $hlbElement      [The HLB element]
-     */
-    function initializeHLBChildrenStyles ($originalElement, $hlbElement) {
+     /**
+     * [initializeHLBChildrenStyles initializes the styles of the children of the HLB element.
+     *   Step 1: Copy computed styles of original element children to hlb element children.
+     *   Step 2: Remove padding if element is cropped by the initialHLBRect (mouse highlight rect)
+     *   Step 3: Compute child styles that must override a direct copy of computed styles.
+     *   Step 4: Set child styles.
+     *   Step 5: Filter child attributes.
+     * ]
+      * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
+      * @param  {[jQuery element]} $hlbElement      [The HLB element]
+      */
+
+    function initializeHLBChildrenStyles ($originalElement, $hlbElement, initialHLBRect) {
 
       var $originalElementChildren = $originalElement.find('*'),
           $hlbElementChildren      = $hlbElement.find('*'),
+          $hlbElementChild,
           hlbElementChild,
+          $originalElementChild,
+          originalElementChild,
           originalElementsChildStyle,
           computedChildStyles,
-          removePadding = true,
+          removeMargins = true,
           i = 0;
 
       for (; i < $originalElementChildren.length; i += 1) {
 
         // Cache the HLB child.
-        hlbElementChild = $hlbElementChildren[i];
+        hlbElementChild      = $hlbElementChildren[i];
+        originalElementChild = $originalElementChildren[i];
+
+        $hlbElementChild      = $(hlbElementChild);
+        $originalElementChild = $(originalElementChild);
 
         // Cache the HLB child computed style
-        originalElementsChildStyle = getComputedStyle($originalElementChildren[i]);
+        originalElementsChildStyle = getComputedStyle(originalElementChild);
 
         // Copy the original elements child styles to the HLB elements child.
-        hlbElementChild.style.cssText = hlbStyling.getComputedStyleCssText($originalElementChildren[i]);
+        hlbElementChild.style.cssText = hlbStyling.getComputedStyleCssText(originalElementChild);
 
-        // if (removePadding && $(hlbElementChild).parent().children().length === 1) {
-        //   hlbElementChild.style.paddingLeft = 0;
-        //   hlbElementChild.style.paddingRight = 0;
-        //   hlbElementChild.style.paddingTop = 0;
-        //   hlbElementChild.style.paddingBottom = 0;
-        // } else {
-        //   removePadding = false;
-        // }
+        if (shouldRemovePadding($originalElementChild, initialHLBRect)) {
+          $hlbElementChild.css(getChildPadding($originalElementChild, initialHLBRect));
+        }
 
         // Compute styles that are more complicated than copying cssText.
-        computedChildStyles = getChildStyles($(hlbElementChild), originalElementsChildStyle);
+        computedChildStyles = getChildStyles($hlbElementChild, originalElementsChildStyle, initialHLBRect);
+
+        // Added to fix HLB sizing when selecting last 2 paragraphs on http://www.ticc.com/
+        if (shouldRemoveHorizontalMargins($originalElementChild, $originalElement)) {
+          if (SC_DEV) {
+            console.log('%cSPECIAL CASE: Removing left and right margins.',  'background:orange;');
+          }
+          computedChildStyles.marginLeft  = 0;
+          computedChildStyles.marginRight = 0;
+        } else {
+          removeMargins = false;
+        }
 
         // Set the childs css.
-        $(hlbElementChild).css(computedChildStyles);
+        $hlbElementChild.css(computedChildStyles);
 
         // Ran into issues with children inheriting styles because of class and id CSS selectors.
         // Filtering children of these attributes solves the problem.
-        // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
-        //       Fixes content from overflowing horizontally within the HLB.  Comment out the line below to
-        //       experience this problem.  There might be a better way...but I don't have the patience to
-        //       find a better solution at the moment.  width:auto did nothing... width:100% worked somewhat...
-        filterAttributes($(hlbElementChild));
-
+        filterAttributes($hlbElementChild);
 
       }
+    }
+
+    /**
+     * [shouldRemoveHorizontalMargins determines if left-margin and right-margin can be removed from
+     * a child in the HLB element.]
+     * @param  {[jQuery Element]} $originalElementChild [One of the children of the picked element.]
+     * @param  {[jQuery Element]} $originalElement      [The element that is the model for the HLB (typically same as $pickedElement.]
+     * @return {[Boolean]}
+     */
+    function shouldRemoveHorizontalMargins ($originalElementChild, $originalElement) {
+
+      var $children     = $originalElementChild.parent().children(),
+          $parents      = $originalElementChild.parentsUntil($originalElement),
+          parentCount   = $parents.length,
+          childCount    = $children.length,
+          hasOverlap    = false,
+          boundingRects = [],
+          i             = 0,
+          j             = 0;
+
+      if (childCount === 1) {
+        return true;
+      }
+
+      for (; i < parentCount; i += 1) {
+        if ($parents[i].getBoundingClientRect().left < $originalElementChild[0].getBoundingClientRect().left) {
+          return false;
+        }
+      }
+
+      for (i = 0; i < childCount; i += 1) {
+        boundingRects.push($children[i].getBoundingClientRect());
+      }
+
+      for (i = 0; i < childCount; i += 1) {
+        for (; j < childCount; j += 1) {
+          if (i !== j) {
+            if (!(boundingRects[i].top    >= boundingRects[j].bottom ||
+                  boundingRects[i].bottom <= boundingRects[j].top)) {
+              hasOverlap = true;
+            }
+          }
+        }
+      }
+
+      return !hasOverlap;
 
     }
 
@@ -584,11 +780,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [filter filters elements, attributes, and styles from the HLB]
      * @param  {[DOM element]} $hlbElement [HLB]
      */
-    hlbStyling.filter = function ($hlbElement) {
+    hlbStyling.filter = function ($hlbElement, $pickedElement, hiddenElements) {
 
       filterStyles($hlbElement);
 
-      filterElements($hlbElement);
+      filterHiddenElements($hlbElement, $pickedElement, hiddenElements);
+
+      filterBlacklistedElements($hlbElement);
 
       filterAttributes($hlbElement);
 
@@ -599,11 +797,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[DOM element]} $originalElement [original element]
      * @param  {[DOM element]} $hlbElement [HLB element]
      */
-    hlbStyling.initializeStyles = function ($originalElement, $hlbElement) {
+    hlbStyling.initializeStyles = function ($originalElement, $hlbElement, initialHLBRect) {
 
       initializeHLBElementStyles($originalElement, $hlbElement);
 
-      initializeHLBChildrenStyles($originalElement, $hlbElement);
+      initializeHLBChildrenStyles($originalElement, $hlbElement, initialHLBRect);
 
     };
 
