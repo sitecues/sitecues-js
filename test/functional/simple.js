@@ -19,13 +19,11 @@ define(
                             .pressKeys('\uE025')     // unicode for: hit the + key!
                             .pressKeys('\uE025')
                             .end()                   // get out of the current element context
-                        .findByCssSelector('html')
-                            .click()
-                            .end()
-                        .findById('p1')      // find the first paragraph
-                            .moveMouseTo(undefined, 15, 10)
-                            .click()                 // give it focus so the picker can detect the mouse
-                            .clickMouseButton(1)  // give it focus so the picker can detect the mouse
+                        .sleep(1200)                 // TODO: change to a pollUntil helper, using sitecue.on('zoom', fn) to return true when zoom is done
+                        .findByCssSelector('#p1')    // find the first paragraph
+                            .moveMouseTo()           // scrolls to the element and puts the mouse inside of it
+                            .sleep(1000)             // TODO: change to a pollUntil helper, which returns true when the highlighter has finished its work
+                            .click()                 // TODO: figure out why the HLB contains the wrong text in Firefox if we do not do this
                             .pressKeys('\uE00D')     // hit the spacebar, to open the HLB
                             .end()
                         .setFindTimeout(9000)        // set the find timeout to be more strict
