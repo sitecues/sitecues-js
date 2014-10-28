@@ -18,14 +18,14 @@ define(
                         .findById('sitecues-panel')  // signal that sitecues is loaded and ready
                             .pressKeys('\uE025')     // unicode for: hit the + key!
                             .pressKeys('\uE025')
-                            .pressKeys('\uE025')
-                            .pressKeys('\uE025')
-                            .pressKeys('\uE025')
-                            .pressKeys('\uE025')
                             .end()                   // get out of the current element context
+                        .findByCssSelector('html')
+                            .click()
+                            .end()
                         .findById('p1')      // find the first paragraph
-                            .moveMouseTo()
+                            .moveMouseTo(undefined, 15, 10)
                             .click()                 // give it focus so the picker can detect the mouse
+                            .clickMouseButton(1)  // give it focus so the picker can detect the mouse
                             .pressKeys('\uE00D')     // hit the spacebar, to open the HLB
                             .end()
                         .setFindTimeout(9000)        // set the find timeout to be more strict

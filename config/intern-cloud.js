@@ -37,7 +37,7 @@ define(
             { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
         ];
 
-        // test.maxConcurrency = 10;  // how many browsers may be open at once
+        test.maxConcurrency = 3;   // how many browsers may be open at once
 
         // Options to pass to the AMD module loader...
         // test.loader = {

@@ -19,9 +19,9 @@ define(
             // Places where unit and/or functional tests will be run...
             environments: [
                 // local-style...
-                { browserName: 'phantomjs' },  // command line browser, very fast for tests
-                { browserName: 'chrome' },
-                { browserName: 'firefox' }
+                // { browserName: 'phantomjs' },  // command line browser, very fast for tests
+                { browserName: 'chrome' }
+                // { browserName: 'firefox' }
                 // { browserName: 'safari' }
                 // BrowserStack-style...
                 // { os: 'Windows', os_version: '8.1',       browser: 'chrome',  browser_version: '36.0' },
@@ -35,7 +35,7 @@ define(
                 // { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
             ],
 
-            maxConcurrency: 3,  // how many browsers may be open at once
+            maxConcurrency: 1,  // how many browsers may be open at once
 
             // Options to pass to the AMD module loader...
             loader: {
