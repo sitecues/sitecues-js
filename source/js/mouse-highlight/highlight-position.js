@@ -7,23 +7,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
   var MIN_RECT_SIDE = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
-               function ($, common, conf, platform, traitcache) {
-
-    /**
-    * Return a single absolutely positioned bounding box given the current scroll position
-    */
-    mhpos.convertScreenToBodyCoordinates = function(boundingBox) {
-     var
-       bodyRect = traitcache.getScreenRect(document.body),
-       rect = {
-         left: boundingBox.left -bodyRect.left,
-         top:  boundingBox.top -bodyRect.top,
-         width: boundingBox.width,
-         height: boundingBox.height
-       };
-     return scaleRect(rect, 1/conf.get('zoom'), 0, 0);
-    };
+  sitecues.use('jquery', 'util/common', 'zoom', 'platform', 'mouse-highlight/traitcache',
+               function ($, common, zoomMod, platform, traitcache) {
 
     /**
      * Get the fixed position rectangles for the target's actual rendered content.
@@ -66,6 +51,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return mhpos.getHighlightPositionInfo(selector, COMBINE_ALL_RECTS, true, doIgnoreFloats).allRects[0]
     };
 
+    function getZoom() {
+      return zoomMod.getCompletedZoom();
+    }
+
     function scaleRect(rect, scale, offsetX, offsetY) {
       var newRect = {
         width  : rect.width * scale,
@@ -83,22 +72,24 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     };
 
     function getUserAgentCorrectionsForRangeRect(rect) {
-      if (platform.browser.isFirefox && platform.browser.version < 33) {
+      if (platform.browser.isFirefox) {
         // This must be done for range.getBoundingClientRect(),
         // but not for element.getBoundingClientRect()
-        var currZoom = conf.get('zoom'),
+        var zoomForScale = getZoom(),
           mozRect = $.extend({}, rect),
           viewPos = traitcache.getCachedViewPosition(),
-          scaledRect = scaleRect(mozRect, currZoom, viewPos.x, viewPos.y);
+          scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y);
 
         // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
         // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
         // and add in the difference in left coordinates.
         var bodyRange = document.createRange();
         bodyRange.selectNode(document.body);
-        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + viewPos.x) * currZoom - viewPos.x,
-          bodyLeft = traitcache.getScreenRect(document.body).left;
-        scaledRect.left += bodyLeft - bodyRangeLeft;
+        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + viewPos.x) * zoomForScale - viewPos.x,
+          bodyRangeTop = (bodyRange.getBoundingClientRect().top + viewPos.y) * zoomForScale - viewPos.y,
+          bodyRect = traitcache.getScreenRect(document.body);
+        scaledRect.left += bodyRect.left - bodyRangeLeft;
+        scaledRect.top += bodyRect.top - bodyRangeTop;
 
         return scaledRect;
       }
@@ -134,7 +125,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           visibility: 'hidden'
         }),
         // Multiply by zoom because our <div> is not affected by the document's current zoom level
-        px = measureDiv.width() * conf.get('zoom');
+        px = measureDiv.width() * getZoom();
       measureDiv.remove();
       return px;
     }
@@ -253,7 +244,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       // Overflow is visible: add right and bottom sides of overflowing content
       var rect = traitcache.getScreenRect(element),
-        zoom = conf.get('zoom'),
+        zoom = getZoom(),
         newRect = {
           left: rect.left,
           top: rect.top,
@@ -277,7 +268,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         return;
       }
       var rect = getClippedRect(unclippedRect, clipRect),
-        zoom = conf.get('zoom'),
+        zoom = getZoom(),
         minRectSide = MIN_RECT_SIDE * zoom;
       if (!doLoosenMinSizeRule && (rect.width < minRectSide || rect.height < minRectSide)) {
         return; // Not large enough to matter
@@ -488,7 +479,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     // this avoids extra spacing above and below, especially around headings.
     function getTextVerticalClipRect(textNode, textRect) {
       var parent = textNode.parentNode,
-        zoom = conf.get('zoom'),
+        zoom = getZoom(),
         lineHeight = parseFloat(traitcache.getStyleProp(parent, 'lineHeight')) * zoom;
       if (lineHeight > textRect.height) {
         // Clip the text vertically to the parent element, because the large

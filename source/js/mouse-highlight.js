@@ -705,7 +705,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var element,
           elementRect,
           overlayRect,
-          previousOverlayRect,
           stretchForSprites = true;
 
       if (!state.picked) {
@@ -749,15 +748,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
-      state.fixedContentRect = roundRectCoordinates(fixedRects[0]);
+      var mainFixedRect = fixedRects[0]; // For now just use 1
+      state.fixedContentRect = roundRectCoordinates(mainFixedRect);
 
       state.elementRect = $.extend({}, elementRect);
-      overlayRect = mhpos.convertScreenToBodyCoordinates(state.fixedContentRect);
-      previousOverlayRect = $.extend({}, state.overlayRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth());
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
-
-      state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
       var extra = getExtraPixels();
 
       if (createOverlay) {
@@ -815,12 +811,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
         $(document).one('mouseleave', onLeaveWindow);
       }
-      else if (common.equals(previousOverlayRect, state.overlayRect)) {
-        return true; // Already created and in correct position, don't update DOM
-      }
+
+      var $outline = $('.' + HIGHLIGHT_OUTLINE_CLASS).css({ top: 0, left: 0 });
+      var offsetRect = $outline[0].getBoundingClientRect();
+      overlayRect = {
+        left: (mainFixedRect.left - offsetRect.left) / state.zoom,
+        top: (mainFixedRect.top - offsetRect.top) / state.zoom,
+        width: mainFixedRect.width / state.zoom,
+        height: mainFixedRect.height / state.zoom
+      };
+      overlayRect.right = overlayRect.left + overlayRect.width;
+      overlayRect.bottom = overlayRect.top + overlayRect.height;
+      state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
 
       // Finally update overlay CSS with zoom corrections
       updateHighlightOverlayPosition();
+
       return true;
     }
 

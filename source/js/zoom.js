@@ -85,7 +85,7 @@ sitecues.def('zoom', function (zoom, callback) {
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
-        ZOOM_PRECISION = 3, // Decimal places allowed
+        ZOOM_PRECISION = 7, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
         MIN_RECT_SIDE = 4,
@@ -627,7 +627,7 @@ sitecues.def('zoom', function (zoom, callback) {
       function finishZoomOperation() {
         var didUnzoom = completedZoom > currentTargetZoom;
 
-        completedZoom = currentTargetZoom;
+        completedZoom = common.getTransform($body);
         startZoomTime = 0;
 
         if (didUnzoom) {
@@ -1152,7 +1152,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Also, it seems that zoom initialization is much faster when it happens outside of the critical path
       // (after the load). So another advantage of doing this after the document is ready is to not
       // slow down the page load.
-      if (document.readyState === 'complete') {
+      if (document.readyState !== 'loading') {
         onDocumentReady();
       }
       else {
