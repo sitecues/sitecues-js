@@ -902,11 +902,11 @@ sitecues.def('zoom', function (zoom, callback) {
         }
         // We consider it fluid if the main node we discovered inside the body changes width
         // if we change the body's width.
-        var origWidth = originalBodyInfo.mainNode.scrollWidth,
+        var origWidth = originalBodyInfo.mainNode.clientWidth,
           newWidth,
           isFluid;
-        body.style.width = (window.outerWidth / 5) + 'px';
-        newWidth = originalBodyInfo.mainNode.scrollWidth;
+        body.style.width = (window.innerWidth / 5) + 'px';
+        newWidth = originalBodyInfo.mainNode.clientWidth;
         isFluid = origWidth !== newWidth;
         body.style.width = '';
 
@@ -963,7 +963,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       function willAddRect(newRect, node, style, parentStyle, isStrict) {
         if (node === document.body) {
-          return false;
+          return;
         }
 
         // Strict checks
@@ -972,14 +972,14 @@ sitecues.def('zoom', function (zoom, callback) {
             newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
             // Watch for text-align: center or -webkit-center -- these items mess us up
             style.textAlign.indexOf('center') >= 0) {
-            return false;
+            return;
           }
         }
 
         // Must check
         if (newRect.left < 0 || newRect.top < 0 ||
           style.visibility !== 'visible') {
-          return false;
+          return;
         }
 
         // Good heuristic -- when x > 0 it tends to be a useful rect
@@ -994,7 +994,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // This rule helps get left margin right on duxburysystems.com.
         if (style.overflow !== 'visible' ||
           (!common.hasVisibleContent(node, style, parentStyle) && !common.isVisualRegion(node, style, parentStyle))) {
-          return false; // No visible content
+          return; // No visible content
         }
         
         return true;
@@ -1002,7 +1002,6 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Recursively look at rectangles and add them if they are useful content rectangles
       function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle, isStrict) {
-
         var newRect = getAbsoluteRect(node),
           style = getComputedStyle(node);
         if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
