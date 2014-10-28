@@ -312,13 +312,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * @param  {[DOM element]} originalElement [The element chosen by the picker]
        * @return {[DOM element]}                 [The element the HLB will use to create itself]
        */
-      function getValidListElement($pickedElement) {
+      function getValidListElement($pickedListItemElement) {
 
-        var pickedElement                  = $pickedElement[0],
-            pickedElementsComputedStyles   = window.getComputedStyle(pickedElement),
-            pickedElementsBoundingBox      = pickedElement.getBoundingClientRect(),
-            pickedElementsClone            = pickedElement.cloneNode(true),
-            pickedElementAndChildren       = $pickedElement.find('*').addBack(),
+        var pickedListItemElement          = $pickedListItemElement[0],
+            pickedElementsComputedStyles   = window.getComputedStyle(pickedListItemElement),
+            pickedElementsBoundingBox      = pickedListItemElement.getBoundingClientRect(),
+            pickedElementsClone            = pickedListItemElement.cloneNode(true),
+            pickedElementAndChildren       = $pickedListItemElement.find('*').addBack(),
             pickedElementsCloneAndChildren = $(pickedElementsClone).find('*').addBack(),
             $originalElement               = $('<ul>').append(pickedElementsClone);
 
@@ -329,7 +329,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // It is important to clone the styles of the parent <ul> of the original element, because it may
         // have important styles such as background images, etc.
-        $originalElement[0].style.cssText = hlbStyling.getComputedStyleCssText($pickedElement.parent('ul, ol')[0]);
+        if ($pickedListItemElement.parent('ul,ol').length) {
+          $originalElement[0].style.cssText = hlbStyling.getComputedStyleCssText($pickedListItemElement.parent('ul,ol')[0]);
+        }
 
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $originalElement.css({
