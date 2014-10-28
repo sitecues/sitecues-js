@@ -108,7 +108,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
       NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
       TALL_ELEMENT_PIXEL_THRESHOLD = 999,          // Anything taller than this is considered very tall
-      TINY_ELEMENT_PIXEL_THRESHOLD = 18,           // Anything smaller than this is considered a tiny element (or at least very thin)
+      TINY_ELEMENT_PIXEL_THRESHOLD = 14,           // Anything smaller than this is considered a tiny element (or at least very thin)
       TINY_ELEMENT_IMPACT_POWER = 1.2,             // Exponential for the affect of smallness
       SEPARATOR_IMAGE_PIXEL_THRESHOLD = 6,         // Maximum thickness for a separator line
       SEPARATION_DIVISOR = 1.6,                    // The number of spacing pixels will be divided by this in separation impact algorithm
@@ -471,6 +471,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           hasExactHeightSiblingCells = true,
           siblingsToTry = $(node).children(),
           numSiblingsToTest = siblingsToTry.length;
+
         // Look for similar widths because heights can vary when the amount of text varies
         if (numSiblingsToTest < 2) {
           hasExactWidthSiblingCells = hasExactHeightSiblingCells = false;
@@ -673,18 +674,21 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Score is multiplied by OUT_OF_FLOW_LIST_FACTOR if an absolutely positioned list
     function getListAndMenuFactor(node, traits, judgements) {
       var listItems = $(node).find('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
-        links = $(node).find('li>a,>a'),
+        links = $(node).find('>li>a,>a'),
         numListItems = listItems.length,
         numLinks = links.length,
         isListOfLinks;
 
-      if (numLinks && numLinks !== numListItems) {
-        return 0;  // Need same number of links as list items, if we have links
-      }
-
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
         // Still check for horizontal link arrangement
-        return (numLinks > 2 && !isArrangedVertically(links)) ? -2 : 0;
+        if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5) {
+          return 0; // Only 1-2 links or is not horizontal -- fine either way
+        }
+        // At least 3 horizontal links -- really bad
+        // 3 links = -6
+        // 4 links = -9
+        // 5 links = -12, etc.
+        return -3 * (numLinks -1);
       }
 
       if (numListItems < 2) {
@@ -695,7 +699,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         numLinks === numListItems; // Same number of links as <li>
 
       return (isListOfLinks ? LINK_LIST_FACTOR : 1) * (judgements.isOutOfFlow ? OUT_OF_FLOW_LIST_FACTOR: 1) *
-        (isArrangedVertically(listItems) ? 1 : -2);
+        (isArrangedVertically(listItems) ? 1 : -numListItems);
     }
 
     function isArrangedVertically(items) {

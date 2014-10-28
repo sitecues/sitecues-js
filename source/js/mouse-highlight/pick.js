@@ -46,7 +46,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isGoodRole: 8,
         badParents: -10,
         listAndMenuFactor: 18,
-        hasHorizontalListDescendant: -15,
+        hasHorizontalListDescendant: UNUSABLE_SCORE,
         isGroupedWithImage: 15,
         isFormControl: 20,
         hasOwnBackground: 20,

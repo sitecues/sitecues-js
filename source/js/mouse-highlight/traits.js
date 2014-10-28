@@ -7,7 +7,7 @@
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom', 'util/common',
-    function($, traitcache, mhpos, zoom, common) {
+    function($, traitcache, mhpos, zoomMod, common) {
 
     // ---- PUBLIC ----
 
@@ -15,7 +15,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       var traitStack;
 
       viewSize = traitcache.getCachedViewSize();
-      bodyWidth = zoom.getBodyWidth();
+      bodyWidth = zoomMod.getBodyWidth();
       traitStack = nodes.map(getTraits);
 
       return traitStack;
@@ -38,11 +38,13 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       traits.isVisualMedia = isVisualMedia(traits, node);
 
-      traits.normDisplay = getNormalizedDisplay(traits.style, node);
+      var rect = traitcache.getRect(node);
 
-      traits.rect = getRect(node, traits);
+      traits.normDisplay = getNormalizedDisplay(traits.style, node, rect.height, zoom);
 
-      traits.fullWidth = traitcache.getRect(node).width; // Full element width, even if visible text content is much less
+      traits.rect = getRect(node, traits, rect);
+
+      traits.fullWidth = rect.width; // Full element width, even if visible text content is much less
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -91,17 +93,38 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // For example the label of an <input type="button"> will not wrap to the next line like a normal inline does.
     // Since they act like inline-block let's treat it as one while normalize the display trait across browsers --
     // this allows the form controls to be picked.
-    function getNormalizedDisplay(style, node) {
-      return (style.display === 'inline' && common.isFormControl(node)) ? 'inline-block' : style.display;
+    function getNormalizedDisplay(style, node, height, zoom) {
+      function getApproximateLineHeight() {
+        // See http://meyerweb.com/eric/thoughts/2008/05/06/line-height-abnormal/
+        return (parseFloat(style.lineHeight) || parseFloat(style.fontSize)) * 1.5;
+      }
+
+      var doTreatAsInlineBlock = false;
+      if (style.display === 'inline') {
+        // Treat forms as inline-block across browsers (and thus are pickable).
+        // If we don't do this, some browsers call them "inline" and they would not get picked
+        if (common.isFormControl(node)) {
+          doTreatAsInlineBlock = true;
+        }
+        else {
+          var lineHeight = getApproximateLineHeight() * zoom;
+          if (height < lineHeight && mhpos.getRangeRect(node.parentNode).height < lineHeight) {
+            // Treat single line inlines that are part of another single-line element as inline-block.
+            // This allows them to be picked -- they may be a row of buttons or part of a menubar.
+            doTreatAsInlineBlock = true;
+          }
+        }
+      }
+
+      return doTreatAsInlineBlock ? 'inline-block' : style.display;
     }
 
     // Get an element's rectangle
     // In most cases, we use the fastest approach (cached getBoundingClientRect results)
     // However, a block parent of an inline or visible text needs the more exact approach, so that the element
     // does not appear to be much wider than it really is
-    function getRect(element, traits) {
-      var fastRect = traitcache.getRect(element),
-        exactWidth,
+    function getRect(element, traits, fastRect) {
+      var exactWidth,
         display = traits.normDisplay,
         WIDE_ELEMENT_TO_BODY_RATIO = 0.7;
 
