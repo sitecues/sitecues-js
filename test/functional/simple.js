@@ -6,7 +6,7 @@ define(
     ],
     function (tdd, assert, require) {
 
-        var url = 'http://tools.qa.sitecues.com:9000/site/wrapping.html?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js&scwsid=s-00000005&scuimode=badge&scisv=2';
+        var url = 'http://tools.qa.sitecues.com:9000/site/simple.html?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js&scwsid=s-00000005&scuimode=badge&scisv=2';
 
         with (tdd) {
             suite('HLB Simple', function () {
@@ -23,7 +23,7 @@ define(
                             .pressKeys('\uE025')
                             .pressKeys('\uE025')
                             .end()                   // get out of the current element context
-                        .findByCssSelector('p')      // find the first paragraph
+                        .findById('p1')      // find the first paragraph
                             .moveMouseTo()
                             .click()                 // give it focus so the picker can detect the mouse
                             .pressKeys('\uE00D')     // hit the spacebar, to open the HLB
@@ -34,7 +34,7 @@ define(
                         .then(function (text) {
                             assert.strictEqual(
                                 text,
-                                'This is a normal, but long paragraph. I contain multiple sentences and should be as wide as my container. I should wrap as appropriate for my width, no more and no less.',
+                                '(p1) Dr. Frankenstein\'s grandson, after years of living down the family reputation, inherits granddad\'s castle and repeats the experiments.',
                                 'The HLB should contain the same text as the picked element.'
                             );
                         });
