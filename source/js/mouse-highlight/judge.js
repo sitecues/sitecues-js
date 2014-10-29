@@ -679,9 +679,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         numLinks = links.length,
         isListOfLinks;
 
+      function isMultiLine() {
+        return (parseFloat(traits.style.lineHeight) || parseFloat(traits.style.fontSize)) * 1.5 < traits.visualHeightAt1x;
+      }
+
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
         // Still check for horizontal link arrangement
-        if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5) {
+        if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5 || isMultiLine()) {
           return 0; // Only 1-2 links or is not horizontal -- fine either way
         }
         // At least 3 horizontal links -- really bad
