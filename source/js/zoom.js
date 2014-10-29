@@ -78,9 +78,6 @@ sitecues.def('zoom', function (zoom, callback) {
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
-        // Native form control CSS fix -- automagically fixes the form appearance issues in Chrome when zooming
-        shouldFixNativeFormAppearance =  platform.browser.isWebKit && platform.os.isMac,
-
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
         MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
@@ -543,7 +540,7 @@ sitecues.def('zoom', function (zoom, callback) {
           step = 0,
           // For animation performance, use adaptive algorithm for number of keyframe steps:
           // Bigger zoom jump = more steps
-          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 100),
+          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 20),
           percentIncrement = 1 / numSteps,
           cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
 
@@ -559,7 +556,7 @@ sitecues.def('zoom', function (zoom, callback) {
           var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent,
             zoomCss = getZoomCss(midAnimationZoom),
             zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
-          keyFramesCss += (100 * timePercent) + '% { ' + zoomCssString + ' }\n';
+          keyFramesCss += Math.round(10000 * timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
         }
         keyFramesCss += '}\n\n';
 
@@ -814,7 +811,64 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStyleSheetFixes() {
-        return shouldFixNativeFormAppearance ? 'input,select,button {transform:scale3d(1,1,1);}' : '';
+        if (platform.browser.isIE) {
+          return ''; // IE gets it right!!!
+        }
+
+        // Native form control CSS fixes -- automagically fixes the form appearance issues in WebKit/FF when zooming.
+        // It's especially difficult to get the combobox popup list to display with the right size/location for WebKit/FF
+
+        var
+          // Init variables used by both WebKit and Firefox
+          comboBoxSelector = 'select[size="1"],select:not([size])', // selects dropdowns but not in-page listboxes (select size > 1)
+          scaleCss = 'transform:scale(' + 1/completedZoom +');',
+          vertMargin = (-16 * completedZoom) + 'px ',
+          rightMargin = (-150 * (completedZoom -1)) + 'px ',
+          marginCss = 'margin:' + vertMargin + rightMargin + vertMargin + '0px;',
+          widthCss = 'width:' + (150 * completedZoom) + 'px;',
+          fontSizeCss = 'font-size:' + Math.round(completedZoom * 85) + '% !important';
+
+        // ---------- WebKit ------------
+
+        if (platform.browser.isWebKit) {
+          var borderColorCss = 'border-color:rgb(167,167,167);', // Tweaking the color makes WebKit render non-native version
+            transformOriginCss = 'transform-origin:0% 78%;';
+          return '' +
+            // General form control rules
+            comboBoxSelector + ',input,button {transform:scale3d(1,1,1);}\n' +
+            // <select size="1"> rules
+            comboBoxSelector +
+              '{-webkit-' +
+                scaleCss +
+                borderColorCss +
+                transformOriginCss +
+                marginCss +
+                widthCss +
+                fontSizeCss +
+              '}\n';
+        }
+
+        // ---------- Firefox ------------
+
+        var vertPad = (3 * completedZoom) + 'px ',
+          rightPad = (24 * (completedZoom-1)) + 'px ',
+          leftPad = ((completedZoom - 1)* 6) + 'px;',
+          paddingCss = 'padding:' + vertPad + rightPad + vertPad + leftPad,
+          transformOriginCss = 'transform-origin:-.9% 66.5%;';
+
+        return '' +
+          // <select size="1"> rules
+          comboBoxSelector +
+          '{' +
+            scaleCss +
+            transformOriginCss +
+            paddingCss +
+            marginCss +
+            widthCss +
+            fontSizeCss +
+          '}\n' +
+          // <option> rules
+          comboBoxSelector + '>option{' + fontSizeCss + '}\n';
       }
 
       // Add useful zoom fixes to the body's @style

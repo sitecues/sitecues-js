@@ -878,7 +878,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // See https://bugs.webkit.org/show_bug.cgi?id=9268
       function isNativeFormControl() {
         // Return true for form controls that use a native appearance
-        return picked.is(':button,:reset,:submit,:checkbox,:radio,input[type="color"]');
+        return picked.is(':button,:reset,:submit,:checkbox,:radio,input[type="color"],select[size="1"],select:not([size])');
       }
       return isNativeFormControl() || (picked.is('tr') && platform.browser.isWebKit);
     }
