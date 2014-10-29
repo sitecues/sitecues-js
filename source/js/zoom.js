@@ -25,7 +25,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // This is helpful for pages that try to word-wrap or use a fluid layout.
           // Eventually use fast page health calculation to automatically determine this
           // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfFluid: 1.35,
+          maxZoomToRestrictWidthIfFluid: 1.5,
 
           // Set to 5 on sites where the words get too close to the left window's edge
           leftMarginOffset: 2
