@@ -673,7 +673,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Score is multiplied by LINK_LIST_FACTOR if a list of 3 or more links
     // Score is multiplied by OUT_OF_FLOW_LIST_FACTOR if an absolutely positioned list
     function getListAndMenuFactor(node, traits, judgements) {
-      var listItems = $(node).find('li,[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
+      var listItems = $(node).find('>li,>[role|="menuitem"]'), // Also matches menuitemradio, menuitemcheckbox
         links = $(node).find('>li>a,>a'),
         numListItems = listItems.length,
         numLinks = links.length,
@@ -707,7 +707,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     }
 
     function isArrangedVertically(items) {
-      return traitcache.getRect(items[0]).right > traitcache.getRect(items[1]).left;
+      var rect1 = traitcache.getRect(items[0]),
+        rect2 = traitcache.getRect(items[1]);
+      // If left sides line up we are vertical
+      return rect1.left === rect2.left;
     }
 
     // Groups of related content often pair an image with text -- this is a noticeable pattern, e.g. on news sites
