@@ -75,6 +75,9 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $(body).css('backgroundImage') !== 'none',
         REPAINT_FOR_CRISP_TEXT_MS = 15,
 
+        // Is the will-change CSS property supported?
+        shouldUseWillChangeOptimization,
+
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
@@ -87,7 +90,6 @@ sitecues.def('zoom', function (zoom, callback) {
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
         MIN_RECT_SIDE = 4,
         ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
-        IS_WILL_CHANGE_SUPPORTED = typeof document.body.style.willChange === 'string',
         CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000;  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
 
       // ------------------------ PUBLIC -----------------------------
@@ -292,7 +294,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Should we wait for browser to create compositor layer?
       function shouldPrepareAnimations() {
         // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
-        return IS_WILL_CHANGE_SUPPORTED
+        return shouldUseWillChangeOptimization
           && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
           && !shouldRestrictWidth();
       }
@@ -667,7 +669,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // compositor layers would constantly need updating
           return false;
         }
-        if (IS_WILL_CHANGE_SUPPORTED) { // Is will-change supported?
+        if (shouldUseWillChangeOptimization) { // Is will-change supported?
           // This is a CSS property that aids performance of animations
           $body.css('willChange', 'transform');
         }
@@ -1111,6 +1113,7 @@ sitecues.def('zoom', function (zoom, callback) {
         body = document.body;
         $body = $(body);
         originalBodyInfo = getBodyInfo();
+        shouldUseWillChangeOptimization = typeof document.body.style.willChange === 'string';
       }
 
       // Lazy init, saves time on page load
