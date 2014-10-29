@@ -75,21 +75,23 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (platform.browser.isFirefox) {
         // This must be done for range.getBoundingClientRect(),
         // but not for element.getBoundingClientRect()
-        var zoomForScale = getZoom(),
-          mozRect = $.extend({}, rect),
-          viewPos = traitcache.getCachedViewPosition(),
-          scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y);
-
         // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
         // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
         // and add in the difference in left coordinates.
-        var bodyRange = document.createRange();
+        var mozRect = $.extend({}, rect),
+          viewPos = traitcache.getCachedViewPosition(),
+          bodyRange = document.createRange();
+
         bodyRange.selectNode(document.body);
-        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + viewPos.x) * zoomForScale - viewPos.x,
-          bodyRangeTop = (bodyRange.getBoundingClientRect().top + viewPos.y) * zoomForScale - viewPos.y,
-          bodyRect = traitcache.getScreenRect(document.body);
-        scaledRect.left += bodyRect.left - bodyRangeLeft;
-        scaledRect.top += bodyRect.top - bodyRangeTop;
+        var
+          bodyRangeRect = bodyRange.getBoundingClientRect(),
+          bodyElementRect = traitcache.getScreenRect(document.body),
+          zoomForScale = bodyElementRect.height / bodyRangeRect.height,
+          scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y),
+          bodyRangeLeft = (bodyRangeRect.left + viewPos.x) * zoomForScale - viewPos.x,
+          bodyRangeTop = (bodyRangeRect.top + viewPos.y) * zoomForScale - viewPos.y;
+        scaledRect.left += bodyElementRect.left - bodyRangeLeft;
+        scaledRect.top += bodyElementRect.top - bodyRangeTop;
 
         return scaledRect;
       }

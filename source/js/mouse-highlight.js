@@ -812,8 +812,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(document).one('mouseleave', onLeaveWindow);
       }
 
-      var $outline = $('.' + HIGHLIGHT_OUTLINE_CLASS).css({ top: 0, left: 0 });
-      var offsetRect = $outline[0].getBoundingClientRect();
+      var $outline = $('.' + HIGHLIGHT_OUTLINE_CLASS).css({
+          position: 'absolute',
+          pointerEvents: 'none',
+          top: 0,
+          left: 0
+        }),
+        // For some reason using the <body> works better in FF version <= 32
+        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
+        offsetElement = isOldFirefox ? document.body : $outline[0],
+        offsetRect = offsetElement.getBoundingClientRect();
       overlayRect = {
         left: (mainFixedRect.left - offsetRect.left) / state.zoom,
         top: (mainFixedRect.top - offsetRect.top) / state.zoom,
