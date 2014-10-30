@@ -85,7 +85,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
         // Use the scroll height when the overflow is visible, as it shows the full height
         if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
-          !traitcache.getStyleProp(element, 'borderRightWidth')) {
+          !parseFloat(traitcache.getStyleProp(element, 'borderRightWidth'))) {
           var scrollHeight = element.scrollHeight;
           if (scrollHeight > 1 && scrollHeight > element.clientHeight) {
             rect.height = Math.max(rect.height, scrollHeight * cachedViewSize.zoom);
@@ -94,7 +94,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
         // Use the scroll width when the overflow is visible, as it shows the full height
         if (traitcache.getStyleProp(element, 'overflowX') === 'visible' &&
-          !traitcache.getStyleProp(element, 'borderBottomWidth')) {
+          !parseFloat(traitcache.getStyleProp(element, 'borderBottomWidth'))) {
           rect.width = Math.max(rect.width, element.scrollWidth * cachedViewSize.zoom);
         }
 
@@ -114,6 +114,15 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
       return rect;
     };
+
+    // Hidden for any reason? Includes offscreen or dimensionless, or tiny (if doTreatTinyAsHidden == true)
+    traitcache.isHidden = function(element, doTreatTinyAsHidden) {
+      var rect = traitcache.getRect(element),
+        MIN_RECT_SIDE_TINY = 5,
+        minRectSide = doTreatTinyAsHidden ? MIN_RECT_SIDE_TINY * traitcache.getCachedViewSize().zoom : 1;
+      return (rect.right < 0 || rect.top < 0 || rect.width < minRectSide || rect.height < minRectSide);
+    };
+
 
     traitcache.getUniqueId = function(element) {
       var currId = getStoredUniqueId(element);

@@ -38,13 +38,13 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
 
       traits.isVisualMedia = isVisualMedia(traits, node);
 
-      var rect = traitcache.getRect(node);
+      var fastRect = traitcache.getRect(node);
 
-      traits.normDisplay = getNormalizedDisplay(traits.style, node, rect.height, zoom);
+      traits.normDisplay = getNormalizedDisplay(traits.style, node, fastRect.height, zoom, traits);
 
-      traits.rect = getRect(node, traits, rect);
+      traits.rect = getRect(node, traits, fastRect);
 
-      traits.fullWidth = rect.width; // Full element width, even if visible text content is much less
+      traits.fullWidth = fastRect.width; // Full element width, even if visible text content is much less
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -93,7 +93,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // For example the label of an <input type="button"> will not wrap to the next line like a normal inline does.
     // Since they act like inline-block let's treat it as one while normalize the display trait across browsers --
     // this allows the form controls to be picked.
-    function getNormalizedDisplay(style, node, height, zoom) {
+    function getNormalizedDisplay(style, node, height, zoom, traits) {
       function getApproximateLineHeight() {
         // See http://meyerweb.com/eric/thoughts/2008/05/06/line-height-abnormal/
         return (parseFloat(style.lineHeight) || parseFloat(style.fontSize)) * 1.5;
@@ -104,6 +104,9 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         // Treat forms as inline-block across browsers (and thus are pickable).
         // If we don't do this, some browsers call them "inline" and they would not get picked
         if (common.isFormControl(node)) {
+          doTreatAsInlineBlock = true;
+        }
+        else if (traits.childCount === 1 && common.isVisualMedia(node.firstElementChild)) {
           doTreatAsInlineBlock = true;
         }
         else {
@@ -124,23 +127,20 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // However, a block parent of an inline or visible text needs the more exact approach, so that the element
     // does not appear to be much wider than it really is
     function getRect(element, traits, fastRect) {
-      var exactWidth,
+      var exactRect,
         display = traits.normDisplay,
         WIDE_ELEMENT_TO_BODY_RATIO = 0.7;
 
-      // If not display:block -- use fast approach
-      // because other elements are unlikely to have drastically incorrect widths
-      if (display !== 'block') {
-        return fastRect;
+      // Use exact approach for:
+      // * inline-block, because it lies about height when media is inside
+      // * wide blocks, because they lie about width when there is a float
+      if (display === 'inline-block' ||
+        (display ==='block' && fastRect.width > bodyWidth * WIDE_ELEMENT_TO_BODY_RATIO)) {
+        exactRect = mhpos.getRangeRect(element);
+        return $.extend({}, exactRect); // Replace the width
       }
 
-      if (fastRect.width < bodyWidth * WIDE_ELEMENT_TO_BODY_RATIO) { // Not almost full width
-        return fastRect;
-      }
-
-      // Almost full width, likely that it's a float which provides an incorrect width
-      exactWidth = mhpos.getRangeRect(element).width;
-      return $.extend({}, fastRect, { width: exactWidth }); // Replace the width
+      return fastRect;
     }
 
     function isVisualMedia(traits, node) {

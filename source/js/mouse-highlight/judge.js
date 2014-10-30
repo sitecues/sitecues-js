@@ -65,10 +65,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
 
       // Computed judgements
       $.extend(judgements, getVisualSeparationJudgements(node, traits, parentTraits, childTraits, judgements, childJudgements));
-      $.extend(judgements, getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements));
+      $.extend(judgements, getSizeJudgements(node, judgements, traits, firstNonInlineTraits, childJudgements));
       $.extend(judgements, getGrowthJudgements(traits, childTraits, parentTraits, firstNonInlineTraits, firstTraits, childJudgements));
       $.extend(judgements, getCellLayoutJudgements(node, judgements, traits, parentTraits, childJudgements, firstNonInlineTraits));
-      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, node, index));
+      $.extend(judgements, getDOMStructureJudgements(judgements, traits, childJudgements, childTraits, node, index));
 
       for (judgementGetter in customJudgements) {
         if (customJudgements.hasOwnProperty(judgementGetter)) {
@@ -87,7 +87,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       SECTION_START_SELECTOR = 'h1,h2,h3,h4,h5,h6,hgroup,header,dt,div[role="heading"],hr,div[role="separator"]',
       GREAT_TAGS = { blockquote:1, td:1, ol:1, menu:1 },
       GOOD_TAGS = { a:1, address:1, button:1, code:1, dl:1, fieldset:1, form:1, p:1, pre:1, li:1, section:1, tr:1 },
-      BAD_PARENTS_SELECTOR = 'li,p,h1,h2,h3,h4,h5,h6,hgroup,button,a',
+      BAD_PARENTS_SELECTOR = 'li,p,h1,h2,h3,h4,h5,h6,hgroup,button',
+      HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1,hgroup:1 },  // Because we prefer to select content with the heading
       // These are less likely to be used to layout a cell/box
       UNLIKELY_CELL_TAGS = { a: 1, ol: 1, ul: 1, p: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, hgroup: 1, header:1 },
       GOOD_ROLES = {list:1, region:1, complementary:1, dialog:1, alert:1, alertdialog:1, gridcell:1,
@@ -108,8 +109,10 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       IDEAL_MAX_PERCENT_OF_BODY_WIDTH = 85,        // If this percent or more of body width, it's bad. We don't like picking items almost as wide as body.
       NEAR_BODY_WIDTH_IMPACT_POWER = 2,            // Exponent for impact of being close to body's width
       TALL_ELEMENT_PIXEL_THRESHOLD = 999,          // Anything taller than this is considered very tall
-      TINY_ELEMENT_PIXEL_THRESHOLD = 14,           // Anything smaller than this is considered a tiny element (or at least very thin)
+      TINY_HEIGHT_PIXEL_THRESHOLD = 14,            // Anything shorter than this is considered a tiny element (or at least very thin)
+      TINY_WIDTH_PIXEL_THRESHOLD = 33,             // Anything narrower than this is considered a tiny element (or at least very thin)
       TINY_ELEMENT_IMPACT_POWER = 1.2,             // Exponential for the affect of smallness
+      SIGNIFICANT_IMAGE_PIXELS = 20,               // Number of pixels on a side before an image is significant
       SEPARATOR_IMAGE_PIXEL_THRESHOLD = 6,         // Maximum thickness for a separator line
       SEPARATION_DIVISOR = 1.6,                    // The number of spacing pixels will be divided by this in separation impact algorithm
       SEPARATION_IMPACT_POWER = 1.3,               // Exponent for visual impact of whitespace
@@ -118,13 +121,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       TABLE_CELL_SPACING_BONUS = 7,                // Treat table cells as having 5 extra spaces around them
       BORDER_WIDTH_BONUS = 15,                     // Bonus points for each pixel of border width
       SIGNIFICANT_EDGE_PIXEL_GROWTH = 50,          // Number of pixels of growth on a side that likely means additional content is encompassed on that side
-      SIGNIFICANT_SEPARATION_IMPACT = 11,          // Amount of separation impact on a side that clearly shows a visual separation
+      SIGNIFICANT_SEPARATION_IMPACT = 14,          // Amount of separation impact on a side that clearly shows a visual separation
       EXTREME_GROWTH_FACTOR = 2.5,                 // If parent's height ratio of child is larger than this, we consider it significantly larger than child
-      MODERATE_GROWTH_FACTOR = 1.6,                // An amount of growth that is significant but not huge
+      MODERATE_GROWTH_FACTOR = 1.3,                // An amount of growth that is significant but not huge
       COLUMN_VERT_GROWTH_THRESHOLD = 1.3,          // Sometimes there is a very small cell in a column of only 2 cells. We only require that the column be 30% taller than the cell
       ROW_HORIZ_GROWTH_THRESHOLD = 1.8,            // Because text is horizontal, it is unlikely to have a narrow cell in a row. Generally the row width will be nearly 2x the cell width.
       MAX_CELL_GROUP_GROWTH_PER_SIBLING = 2,       // For each sibling, allow the cell group's area to be this much larger than the cell
-      VERY_SMALL_GROWTH_FACTOR = 1.15,
+      VERY_SMALL_GROWTH_FACTOR = 1.04,
       SMALL_GROWTH_FACTOR = 1.2,
       MIN_IMAGE_GROUP_HEIGHT = 50,                 // Image groups must be taller than this
       MAX_CHILDREN_IMAGE_GROUP = 4,                // If more children than this, it does not typically fit the pattern of an image group, so don't do the expensive check
@@ -255,14 +258,15 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       return visualSeparationJudgements;
     }
 
-    function getSizeJudgements(node, traits, firstNonInlineTraits, childJudgements) {
+    function getSizeJudgements(node, judgements, traits, firstNonInlineTraits, childJudgements) {
       var isSignificantlyWiderThanFirstOption = traits.rect.width < firstNonInlineTraits.rect.width + SIGNIFICANT_EDGE_PIXEL_GROWTH;
       return {
         // Avoid picking tiny icons or images of vertical lines
-        tinyHeightFactor: Math.pow(Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualHeightAt1x), TINY_ELEMENT_IMPACT_POWER),
+        tinyHeightFactor: (traits.isVisualMedia || judgements.hasOwnBackground) &&  // Make sure it's an image or bg image, otherwise we punish lines of text too much
+          Math.pow(Math.max(0, TINY_HEIGHT_PIXEL_THRESHOLD - traits.visualHeightAt1x), TINY_ELEMENT_IMPACT_POWER),
 
         // Avoid picking tiny icons or images of horizontal lines
-        tinyWidthFactor: Math.pow(Math.max(0, TINY_ELEMENT_PIXEL_THRESHOLD - traits.visualWidthAt1x), TINY_ELEMENT_IMPACT_POWER),
+        tinyWidthFactor: Math.pow(Math.max(0, TINY_WIDTH_PIXEL_THRESHOLD - traits.visualWidthAt1x), TINY_ELEMENT_IMPACT_POWER),
 
         // Avoid picking extremely tall items
         isExtremelyTall: (childJudgements && childJudgements.isExtremelyTall) ||
@@ -338,7 +342,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       });
 
       // Judge categories of growth
-      $.extend(growthJudgements, {
+      growthJudgements.large2dGrowth =
         // Significantly larger both horizontally and vertically when compared with the first non-inline candidate.
         // This is rarely good. It generally means we're in a group of visual groups.
         // If we don't have this rule, we tend to pick very large containers that are used for 2d layout.
@@ -346,32 +350,33 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // is all about preferring reasonable child containers over those that are too big.
         // Only need moderate horizontal growth -- things tend to be wider than they are tall.
         // Also, by requiring extreme vertical growth we don't fire as much when the first non-inline was a single line of text.
-        large2dGrowth:
-          childJudgements &&
-          !childJudgements.percentOfViewportHeightUnderIdealMin &&
-          !childJudgements.percentOfViewportWidthUnderIdealMin &&
-          growthJudgements.totalHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
-            growthJudgements.totalVertGrowthFactor > EXTREME_GROWTH_FACTOR &&
-            growthJudgements.totalHorizGrowthFactor * growthJudgements.totalVertGrowthFactor,
+        childJudgements &&
+        !childJudgements.percentOfViewportHeightUnderIdealMin &&
+        !childJudgements.percentOfViewportWidthUnderIdealMin &&
+        growthJudgements.totalHorizGrowthFactor > MODERATE_GROWTH_FACTOR &&
+          growthJudgements.totalVertGrowthFactor > EXTREME_GROWTH_FACTOR &&
+          growthJudgements.totalHorizGrowthFactor * growthJudgements.totalVertGrowthFactor;
 
+      $.extend(growthJudgements, {
         // Moderate one dimensional growth often means the parent is just stretching to cover a little more
         // information. For example, adding a thumbnail or a caption. This is good for the parent and bad for the child.
         // This rule is used to give the child a penalty.
         // If we don't have this rule we tend to miss attaching supplemental information such as captions.
         isModeratelySmallerThanParentInOneDimension:
-          // Vertical growth: very small and must be a caption to visual media
-          // Horizontal growth: very small to moderate (no visual media requirement as captions are not done to the side like this)
-          (firstTraits.isVisualMedia &&
-            growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
-            growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
-            growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
-          // Or:
-          // Vertical growth: very small to moderate
-          // Horizontal growth: very small
-          (traits.normDisplay === 'block' &&
-            growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
-            growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
-            growthJudgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR),
+          !growthJudgements.large2dGrowth && (
+            (
+              (firstTraits.isVisualMedia || traits.normDisplay.indexOf('inline') < 0) &&
+              // A little horizontal growth but none vertically
+              growthJudgements.parentHorizGrowthFactor < MODERATE_GROWTH_FACTOR &&
+              growthJudgements.parentHorizGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
+              growthJudgements.parentVertGrowthFactor < VERY_SMALL_GROWTH_FACTOR) ||
+            // Or:
+            // A little vertical growth but none horizontally
+            (//traits.normDisplay !== 'block' && // Why? Broke captions
+              growthJudgements.parentVertGrowthFactor < MODERATE_GROWTH_FACTOR &&
+              growthJudgements.parentVertGrowthFactor > VERY_SMALL_GROWTH_FACTOR &&
+              growthJudgements.parentHorizGrowthFactor < VERY_SMALL_GROWTH_FACTOR)
+           ),
 
         // Similar rule, used to give the parent a bonus:
         // This is a good thing, we are just encompassing a little more information such as an image or caption.
@@ -506,7 +511,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           judgements.parentVertGrowthFactor > COLUMN_VERT_GROWTH_THRESHOLD &&       // Large vertical growth
           traits.percentOfViewportHeight < IDEAL_MAX_PERCENT_OF_VIEWPORT_HEIGHT &&
           // Either the parent has other large cells or this cell is large
-          (parentTraits.visualHeightAt1x > MIN_AVERAGE_COLUMN_CELL_HEIGHT * parentTraits.childCount) &&
+          (parentTraits.visualHeightAt1x > MIN_AVERAGE_COLUMN_CELL_HEIGHT * Math.min(12, parentTraits.childCount)) &&
           traits.visualHeightAt1x > MIN_COLUMN_CELL_HEIGHT &&
           ((hasExactHeightSiblingCells && hasExactWidthSiblingCells) || isComplex ||
             judgements.vertSeparationImpact > SIGNIFICANT_SEPARATION_IMPACT);
@@ -543,13 +548,16 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
     // Judgements based on the DOM, including tags, roles and hierarchical relationships.
     // Note: authors do not always use semantics in a reasonable way. Because of this, we do not
     // weigh the use of grouping tags and roles very highly.
-    function getDOMStructureJudgements(judgements, traits, childJudgements, node, index) {
+    function getDOMStructureJudgements(judgements, traits, childJudgements, childTraits, node, index) {
       var domJudgements = {
         isGreatTag: GREAT_TAGS.hasOwnProperty(traits.tag),
         isGoodTag: GOOD_TAGS.hasOwnProperty(traits.tag),
         isGoodRole: GOOD_ROLES.hasOwnProperty(traits.role),
+        isHeading: HEADING_TAGS.hasOwnProperty(traits.tag),
         badParents: $(node).parents(BAD_PARENTS_SELECTOR).length,
-        hasHorizontalListDescendant: childJudgements && (childJudgements.listAndMenuFactor < 0 || childJudgements.hasHorizontalListDescendant),
+        horizontalListDescendantWidth: childJudgements ?
+          (childJudgements.listAndMenuFactor < 0 ? childTraits.percentOfBodyWidth : childJudgements.horizontalListDescendantWidth) :
+          0,
         listAndMenuFactor: !judgements.isAncestorOfCell && getListAndMenuFactor(node, traits, judgements),
         isFormControl: common.isFormControl(node),
         // Being grouped with a single image indicates something is likely good to pick
@@ -557,7 +565,8 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           (index < MAX_ANCESTOR_INDEX_IMAGE_GROUP || childJudgements.isGroupedWithImage) &&
           isGroupedWithImage(traits, node, index),
         // A child candidate was considered a section start container
-        isAncestorOfSectionStartContainer: childJudgements && (childJudgements.isSectionStartContainer || childJudgements.isAncestorOfSectionStartContainer),
+        isAncestorOfSectionStartContainer:
+          childJudgements && (childJudgements.isSectionStartContainer || childJudgements.isAncestorOfSectionStartContainer),
         // Avoid picking things like hero images or ancestors of them
         isWideMediaContainer:
           (childJudgements !== null && childJudgements.isWideMediaContainer) ||
@@ -574,6 +583,13 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       domJudgements.isSectionStartContainer = (!domJudgements.isAncestorOfSectionStartContainer ||
         judgements.isRoughlySameSizeAsChild) &&
         isSectionStartContainer(node) && getLeafElements(node).length > 1;
+
+      domJudgements.isHeadingContentPair =
+        domJudgements.isSectionStartContainer &&
+        !domJudgements.isAncestorOfSectionStartContainer &&
+        traits.childCount === 2; // A heading grouped with a single item
+
+      domJudgements.isParentOfOnlyChild = traits.childCount === 1;
 
       return domJudgements;
     }
@@ -622,7 +638,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           $sibling = $(sibling);
           if (!$sibling.is(SECTION_START_SELECTOR) &&
             !$sibling.is(':empty') &&
-            traitcache.getStyleProp(sibling, 'display') !== 'none' &&
+            !traitcache.isHidden(sibling, true) &&
             !isSectionStartContainer(sibling) &&
             !isVisualMediaSubtree(sibling)) {
             // A visible non-section-start element exists before the section-start-element, which means we are divided!
@@ -680,19 +696,17 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         isListOfLinks;
 
       function isMultiLine() {
-        return (parseFloat(traits.style.lineHeight) || parseFloat(traits.style.fontSize)) * 1.5 < traits.visualHeightAt1x;
+        return (parseFloat(traits.style.lineHeight * 1.5) || parseFloat(traits.style.fontSize * 2)) < traits.visualHeightAt1x;
       }
 
       if (traits.tag !== 'ul' && traits.role !== 'menu') {
         // Still check for horizontal link arrangement
-        if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5 || isMultiLine()) {
+        if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5 || isMultiLine() || !isArrangedHorizontally(links)) {
           return 0; // Only 1-2 links or is not horizontal -- fine either way
         }
+        console.log('dude');
         // At least 3 horizontal links -- really bad
-        // 3 links = -6
-        // 4 links = -9
-        // 5 links = -12, etc.
-        return -3 * (numLinks -1);
+        return -numLinks;
       }
 
       if (numListItems < 2) {
@@ -703,14 +717,14 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         numLinks === numListItems; // Same number of links as <li>
 
       return (isListOfLinks ? LINK_LIST_FACTOR : 1) * (judgements.isOutOfFlow ? OUT_OF_FLOW_LIST_FACTOR: 1) *
-        (isArrangedVertically(listItems) ? 1 : -numListItems);
+        (isArrangedHorizontally(listItems) ? -numListItems : 1);
     }
 
-    function isArrangedVertically(items) {
+    function isArrangedHorizontally(items) {
       var rect1 = traitcache.getRect(items[0]),
-        rect2 = traitcache.getRect(items[1]);
+        rect2 = traitcache.getRect(items[items.length - 1]);
       // If left sides line up we are vertical
-      return rect1.left === rect2.left;
+      return rect1.top === rect2.top && rect1.left < rect2.left;
     }
 
     // Groups of related content often pair an image with text -- this is a noticeable pattern, e.g. on news sites
@@ -718,12 +732,19 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       if (traits.childCount === 0 || traits.childCount > MAX_CHILDREN_IMAGE_GROUP) {
         return false;  // If too many siblings this doesn't fit the pattern
       }
-      var images = node.getElementsByTagName('img'); // Faster than querySelectorAll()
-      if (images.length  !== 1) {
-        return false;  // No images or multiple images: doesn't fit the pattern
-      }
+      var images = node.getElementsByTagName('img'), // Faster than querySelectorAll()
+        numGoodImages = 0,
+        minSide = SIGNIFICANT_IMAGE_PIXELS * traitcache.getCachedViewSize().zoom;
 
-      return getLeafElements(node).length > 1; // Must be paired with something else
+      $(images).each(function() {
+        var imageRect = traitcache.getRect(this);
+        // Hidden or separator images don't count
+        if (imageRect.width > minSide && imageRect.height > minSide) {
+          ++numGoodImages;
+        }
+      });
+
+      return numGoodImages === 1 && getLeafElements(node).length > 1; // Must be paired with something else
     }
 
     // If the element a divider (such as <hr>), return it's thickness, otherwise return 0

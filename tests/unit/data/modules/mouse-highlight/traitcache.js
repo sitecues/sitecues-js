@@ -77,6 +77,9 @@ var traitcache = {
   },
   'getUniqueId': function(element) {
     return parseInt(element.id);
+  },
+  'isHidden': function(element) {
+    return false;
   }
 };
 

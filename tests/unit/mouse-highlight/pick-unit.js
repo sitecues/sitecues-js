@@ -12,6 +12,9 @@ describe('pick', function() {
     });
   });
   describe('#find()', function() {
+    beforeEach((function() {
+      pick.reset();
+    }));
     it('Returns element with positive judgements', function (done) {
       var startElement = win.document.getElementById('0'),
         actualPickedElements = pick.find(startElement),

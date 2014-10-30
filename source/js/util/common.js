@@ -46,12 +46,12 @@ sitecues.def('util/common', function (common, callback) {
      * Checks if the value given is empty or not.
      */
     common.isEmpty = function(val) {
-      return !val || val.trim() === '';
+      return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
     };
 
     /* ----------------------- PRIVATE ----------------------- */
     function isNonEmptyTextNode(node) {
-      return node.nodeType === 3 /* Text node */ && node.data.trim() !== '';
+      return node.nodeType === 3 /* Text node */ && !common.isEmpty(node.data);
     }
 
     // Return true if there is a visual sub-box of content
