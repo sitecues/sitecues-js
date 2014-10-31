@@ -710,7 +710,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // to meet the bottom-right corner of the window.
       function maximizeContentVisibility() {
         var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
-          bodyHeight = $(document).height(),
+          bodyHeight = document.body.scrollHeight,
           winWidth = window.innerWidth,
           winHeight = window.innerHeight,
           hScrollNow = window.pageXOffset,

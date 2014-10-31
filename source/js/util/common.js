@@ -255,6 +255,34 @@ sitecues.def('util/common', function (common, callback) {
       return parseFloat(transform.substring(7)) || 1;
     };
 
+    function getEmsToPx(fontSize, ems) {
+      // Create a div to measure the number of px in an em with this font-size
+      var measureDiv = $('<div/>')
+           .appendTo(document.body)
+           .css({
+          fontSize: fontSize,
+          width: ems + 'em',
+          visibility: 'hidden'
+        }),
+        // Multiply by zoom because our <div> is not affected by the document's current zoom level
+        px = measureDiv[0].clientWidth;
+      measureDiv.remove();
+      return px;
+    }
+
+    common.getBulletWidth = function(listElement, style) {
+      var bulletType = style.listStyleType,
+        ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
+      if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
+        ems = 1.6; // Simple bullet
+      } else if (bulletType === 'decimal') {
+        var start = parseInt($(listElement).attr('start'), 10),
+          end = (start || 1) + listElement.childElementCount - 1;
+        ems = (0.9 + 0.5 * end.toString().length);
+      }
+      return getEmsToPx(style.fontSize, ems);
+    };
+
     // Done.
     callback();
   });

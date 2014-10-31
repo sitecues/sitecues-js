@@ -98,7 +98,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getElementsContainingText(selector) {
-      return $(selector).find('*').andSelf().filter(function() {
+      return $(selector).find('*').addBack().filter(function() {
         var $this = $(this);
         return $this.children().length === 0 && $.trim($this.text()).length > 0;
       });
@@ -1182,7 +1182,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function hide(doRememberHighlight) {
       if (state.picked && state.savedCss) {
         // Restore the previous CSS on the picked elements (remove highlight bg etc.)
-        $(state.picked).style(state.savedCss);
+        $(state.picked).css(state.savedCss);
         state.savedCss = null;
         if ($(state.picked).attr('style') === '') {
           $(state.picked).removeAttr('style'); // Full cleanup of attribute

@@ -117,34 +117,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       };
     }
 
-    function getEmsToPx(fontSize, ems) {
-      // Create a div to measure the number of px in an em with this font-size
-      var measureDiv = $('<div/>')
-           .appendTo(document.body)
-           .css({
-          fontSize: fontSize,
-          width: ems + 'em',
-          visibility: 'hidden'
-        }),
-        // Multiply by zoom because our <div> is not affected by the document's current zoom level
-        px = measureDiv.width() * getZoom();
-      measureDiv.remove();
-      return px;
-    }
-
-    function getBulletWidth(listElement, style) {
-      var bulletType = style.listStyleType,
-        ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
-      if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
-        ems = 1.6; // Simple bullet
-      } else if (bulletType === 'decimal') {
-        var start = parseInt($(listElement).attr('start'), 10),
-          end = (start || 1) + listElement.childElementCount - 1;
-        ems = (0.9 + 0.5 * end.toString().length);
-      }
-      return getEmsToPx(style.fontSize, ems);
-    }
-
     function hasHiddenBullets(style) {
       return style.listStyleType === 'none' && style.listStyleImage === 'none';
     }
@@ -157,7 +129,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-          getBulletWidth(element.parentNode, style),
+          common.getBulletWidth(element.parentNode, style),
         boundingRect = traitcache.getScreenRect(element),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
 

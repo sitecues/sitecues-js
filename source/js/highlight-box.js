@@ -398,7 +398,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           return common.isEditable(element);
         }
         return $originalElement.find('input,textarea')
-          .andSelf()
+          .addBack()
           .filter(isEditable);
       }
 

@@ -45,3 +45,5 @@ exports.hasOwnBackground = function(style, parentStyle) {
 exports.hasRaisedZIndex = function(style, parentStyle) {
   return false;
 }
+
+exports.getBulletWidth = function() { return 0; }

@@ -71,7 +71,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         return allowWrapping; // Once false, the each() loop will stop as well
       }
 
-      $hlbElement.find('*').andSelf().each(isWrappable);
+      $hlbElement.find('*').addBack().each(isWrappable);
 
       return allowWrapping;
 
@@ -341,7 +341,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       if (hlbElement.clientWidth < hlbElement.scrollWidth) {
 
         $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+          'width': hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px'
         });
 
         // Again, we can't be positive that the increase in width does not overflow the safe area.

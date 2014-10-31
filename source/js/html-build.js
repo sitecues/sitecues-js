@@ -3,14 +3,14 @@
 */
 sitecues.def('html-build', function(htmlBuild, callback) {
 
-	sitecues.use('jquery', 'conf', 'jquery/style', function($){
+	sitecues.use('jquery', function($){
 
 		/**
 		 * Returns a new div element with 'reset' styles applied, as a jQuery object.
 		 * @return {jQuery object} An empty div with common style resets applied.
 		 */
 		htmlBuild.$div = function() {
-			var div = $('<div />').style({
+			var div = $('<div />').css({
 				'margin': 0,
 				'padding': 0,
 				'border': 0,

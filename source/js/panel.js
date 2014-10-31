@@ -173,7 +173,7 @@ sitecues.def( 'panel', function (panel, callback) {
         // Hide panel.
         panel.element
         .css('display', 'none')
-        .effects({
+        .animate({
           opacity : 0
         },
         'fast',

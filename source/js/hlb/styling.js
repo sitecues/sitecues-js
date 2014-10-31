@@ -7,8 +7,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'platform',
-  function ($, platform) {
+  sitecues.use('jquery', 'platform', 'util/common', 'hlb/positioning',
+  function ($, platform, common, hlbPositioning) {
 
     ///////////////////////////
     // PUBLIC PROPERTIES
@@ -172,36 +172,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     }
 
-    function getEmsToPx (fontSize, ems) {
-      var measureDiv = $('<div/>')
-         .appendTo(document.body)
-         .css({
-        'font-size': fontSize,
-        'width': ems + 'em',
-        'visibility': 'hidden'
-      });
-      var px = measureDiv.width();
-      measureDiv.remove();
-      return px;
-    }
-
-    function computeBulletWidth (element, style, bulletType) {
-      var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
-      if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
-        ems = 1; // Simple bullet
-      } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'), 10);
-        var end = (start || 1) + element.childElementCount - 1;
-        ems = 0.9 + 0.5 * end.toString().length;
-      }
-      return getEmsToPx(style['font-size'], ems);
-    }
-
     function getBulletWidth ($element, elementComputedStyle) {
 
       //If the HLB is a list AND it has bullets...return their width
-      if ($element.is('ul, ol') && elementComputedStyle['list-style-type'] && elementComputedStyle['list-style-type'] !== 'none') {
-        return computeBulletWidth($element, elementComputedStyle, elementComputedStyle['list-style-type']);
+      if (elementComputedStyle.listStyleType !== 'none' || elementComputedStyle.listStyleImage !== 'none') {
+        return common.getBulletWidth($element[0], elementComputedStyle);
       }
 
       return 0;
