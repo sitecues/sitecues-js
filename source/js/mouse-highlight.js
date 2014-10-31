@@ -382,7 +382,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       // Approach #3 --change CSS background of highlighted element
-      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, state.zoom),
+      var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 0, state.zoom),
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
                      getSVGForPath(path, 0, 0, state.bgColor, 1) +
@@ -598,17 +598,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       extendAll(botRightPoints, { growX: 1, growY: 1 });
       extendAll(botLeftPoints, { growX: -1, growY: 1 });
 
-      var allPoints = topLeftPoints.concat(topRightPoints, botRightPoints, botLeftPoints);
-      roundPolygonCoordinates(allPoints);
-      return allPoints;
+      return topLeftPoints.concat(topRightPoints, botRightPoints, botLeftPoints);
     }
 
     function getExpandedPath(points, delta) {
       var newPath = [];
       for (var index = 0; index < points.length; index ++) {
         newPath.push({
-          x: points[index].x + points[index].growX * delta,
-          y: points[index].y + points[index].growY * delta,
+          x: roundCoordinate(points[index].x + points[index].growX * delta),
+          y: roundCoordinate(points[index].y + points[index].growY * delta),
           growX: points[index].growX,
           growY: points[index].growY
         });
@@ -616,12 +614,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return newPath;
     }
 
-    function getAdjustedPath(origPath, offsetX, offsetY, divisor) {
+    // Scale and move a path
+    function getAdjustedPath(origPath, offsetX, offsetY, extra, divisor) {
       var newPath = [];
       $.each(origPath, function() {
         newPath.push($.extend({}, this, {
-          x: (this.x - offsetX) / divisor,
-          y: (this.y - offsetY) / divisor
+          x: (this.x - offsetX) / divisor + extra,
+          y: (this.y - offsetY) / divisor + extra
         }));
       });
       return newPath;
@@ -752,18 +751,24 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = roundRectCoordinates(mainFixedRect);
 
       state.elementRect = $.extend({}, elementRect);
-      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth());
-      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS * state.zoom);
+      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom)
+      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS);
       var extra = getExtraPixels();
 
       if (createOverlay) {
         var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
         state.cutoutRects = getCutoutRects();
         state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
-        var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left - extra,
-            state.fixedContentRect.top - extra, 1);
+        // Get the path for the overlay so that the top-left corner is located at 0,0
+        // The updateHighlightOverlayPosition() code will set the top, left for it
+        // (it can change because of scrollable sub-regions)
+        var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
+            state.fixedContentRect.top, extra, state.zoom);
         state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
         state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
+        roundPolygonCoordinates(state.pathFillBackground);
+        roundPolygonCoordinates(state.pathBorder);
+        roundPolygonCoordinates(state.pathFillBackground);
 
         // Create and position highlight overlay
         if (DO_SUPPORT_SVG_OVERLAY) {
@@ -785,16 +790,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
           document.body.appendChild(svgFragment);
           var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
-            width = state.fixedContentRect.width + 2 * extra,
-            height = state.fixedContentRect.height + 2 * extra;
+            width = state.fixedContentRect.width / state.zoom + 2 * extra,
+            height = state.fixedContentRect.height / state.zoom + 2 * extra;
           $svg.attr({
-              width : (width / state.zoom) + 'px',
-              height: (height / state.zoom) + 'px'
-            });
+            width: width + 'px',
+            height: height + 'px'
+          }).css({
+              position: 'absolute',
+              pointerEvents: 'none'
+          });
           // Cannot set viewBox via jQuery -- it lowercases the attribute which breaks it
           // (the "B" in "Box" needs to be uppercase)
           // See http://stackoverflow.com/questions/10390346/why-is-jquery-auto-lower-casing-attribute-values
-          $svg[0].setAttribute('viewBox', "0 0 " + width + ' ' + height);
+//          $svg[0].setAttribute('viewBox', "0 0 " + width + ' ' + height);
         }
         else {
           // Use CSS outline with 0px wide/tall elements to draw lines of outline
@@ -812,16 +820,18 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(document).one('mouseleave', onLeaveWindow);
       }
 
-      var $outline = $('.' + HIGHLIGHT_OUTLINE_CLASS).css({
-          position: 'absolute',
-          pointerEvents: 'none',
+      var $measureDiv = $('<div>').appendTo(document.body).css({
           top: 0,
-          left: 0
+          left: 0,
+          width: 0,
+          height: 0,
+          position: 'absolute'
         }),
         // For some reason using the <body> works better in FF version <= 32
         isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
-        offsetElement = isOldFirefox ? document.body : $outline[0],
+        offsetElement = isOldFirefox ? document.body : $measureDiv[0],
         offsetRect = offsetElement.getBoundingClientRect();
+      $measureDiv.remove();
       overlayRect = {
         left: (mainFixedRect.left - offsetRect.left) / state.zoom,
         top: (mainFixedRect.top - offsetRect.top) / state.zoom,
@@ -845,10 +855,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var index = 0,
         cssOutlineWidth = lineWidth / 2,
         numPoints = pathPoints.length,
-        html,
-        outlineCss = cssOutlineWidth + 'px  solid ' + color,
+        outlineCss = cssOutlineWidth + 'px solid ' + color,
         isHorizontal = true,
-        docElement = $('html');
+        appendTo = $('body');
       for (; index < numPoints; index ++ ) {
         var currPoint = pathPoints[index],
           nextPoint = pathPoints[(index + 1) % numPoints],  // At the end, nextPoint is at index 0
@@ -863,10 +872,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             outline: outlineCss,
             transform: 'translate(' + x + 'px,' + y + 'px)',
             width: width + 'px',
-            height: height + 'px'
+            height: height + 'px',
+            position: 'absolute'
           })
           .addClass(HIGHLIGHT_OUTLINE_CLASS)
-          .appendTo(docElement);
+          .appendTo(appendTo);
         isHorizontal = !isHorizontal; // Every other line is horizontal
       }
       return;
@@ -936,7 +946,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       function updateHighlightOverlayPosition() {
-        var extra = getExtraPixels() / state.zoom,
+        var extra = getExtraPixels(),
           left = state.overlayRect.left - extra,
           top = state.overlayRect.top - extra;
         // TODO use .style with 'important' if we run into page css collisions
