@@ -704,7 +704,6 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         if (numLinks < 3 || judgements.totalVertGrowthFactor > 1.5 || isMultiLine() || !isArrangedHorizontally(links)) {
           return 0; // Only 1-2 links or is not horizontal -- fine either way
         }
-        console.log('dude');
         // At least 3 horizontal links -- really bad
         return -numLinks;
       }
