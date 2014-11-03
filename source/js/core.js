@@ -53,16 +53,20 @@
     }
   };
 
-  function dev_msg (text) {
-    if (SC_DEV && console){
-      var textStyle = 'background: red; color: #FFF; font-weight:bold;';
-      console.log('%c **** '+text+' **** ', textStyle);
+  function safe_production_msg (text) {
+    if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
+      // Using console.log in IE9 too early can cause "Invalid pointer" errors -- see SC-2237.
+      // To be safe, do not use console.log in core.js in IE.
+      return;
+    }
+    if (console) {
+      console.log('**** '+text+' ****');
     }
   }
 
   if (SC_DEV) {
-    dev_msg('SITECUES MODE: SC_DEV');
-    dev_msg('SITECUES VERSION: '+version);
+    safe_production_msg('SITECUES MODE: SC_DEV');
+    safe_production_msg('SITECUES VERSION: '+version);
   }
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
@@ -568,16 +572,12 @@
         // 1) sitecues is running in an IFRAME
         // 2) sitecues.config.iframe = falsy
     if (window !== window.top && !window.sitecues.config.iframe) {
-      dev_msg(['SITECUES IFRAME URL: '+window.location]);
-      dev_msg('SITECUES IFRAME MODE: FALSE');
-      dev_msg('SITECUES NOT LOADING (IFRAME)');
+      safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+        ' ... email support@sitecues.com for more information.');
       return;
-    } else {
-      dev_msg('SITECUES IFRAME URL: '+window.location);
-      dev_msg('SITECUES IFRAME MODE: TRUE');
-      dev_msg('SITECUES CONTINUING TO LOAD (IFRAME)');
     }
 
+    // Continue loading sitecues
 
     return true;
   };
