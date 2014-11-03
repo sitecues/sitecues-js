@@ -20,7 +20,7 @@ define(
                     return this.remote               // represents the browser being tested
                         .maximizeWindow()            // use a large window, as a hacky fix to some .moveMouseTo() issues in Firefox
                         .get(url)                    // navigate to the desired page
-                        .setFindTimeout(10000)       // fail test if any find method can't succeed this quickly
+                        .setFindTimeout(9000)       // fail test if any find method can't succeed this quickly
                         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
                             .pressKeys('\uE025')     // unicode for: hit the + key!
                             .pressKeys('\uE025')
@@ -29,6 +29,8 @@ define(
                         .findByCssSelector('#p1')    // find the first paragraph
                             .moveMouseTo()           // scrolls to the element and puts the mouse inside of it
                             .sleep(1000)             // TODO: change to a pollUntil helper, which returns true when the highlighter has finished its work
+                            .click()                 // hacky workaround to the fact that .moveMouseTo() isn't always enough
+                            .sleep(1000)
                             .pressKeys('\uE00D')     // hit the spacebar, to open the HLB
                             .end()
                         .setFindTimeout(3000)        // set the find timeout to be more strict
