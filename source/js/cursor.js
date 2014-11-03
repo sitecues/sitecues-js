@@ -10,214 +10,36 @@ sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'cursor/custom', 'cursor/images/manager', 'platform', function ($, conf, view, imagesManager, platform) {
+  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform', 'zoom',
+    function (  $, styleService, conf, customCursor, platform, zoomModule) {
 
-    var stylesheetElement,
-        stylesheetObject,
-        lastZoom = conf.get('zoom'),
-        lastZoomTimeout,
-        styleTagStylesList = [], //An ordered list of style tag styles to be applied to the page
-        linkTagStylesList  = [], //An ordered list of external stylesheet styles to be applied to the page.
+    var cursorZoom,
         // Regexp is used to match URL in the string given(see below).
-        URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?';
-
-    cursor.CONTANTS = {
-      'DEFAULT_ZOOM_LEVEL'     : 1,
-      'DEFAULT_MIN_ZOOM_LEVEL' : 1.1,
-      'DEFAULT_TYPE'           : 'default',
-      'SITECUES_CSS_ID'        : 'sitecues-css',
-      'SITECUES_CSS_DEFAULT'   :
-        'html,.sitecues-panel{cursor:auto}\n' +
-        'input,textarea,select,a,button,.sitecues-clickable{cursor:pointer}'
-    };
-    /**
-     * [Cross browser solution to initiating an XMLHTTPRequest
-     * that supports the Origin HTTP header]
-     * @param  {[string]} method
-     * @param  {[string]} url
-     * @return {[XMLHTTPRequest]}
-     */
-    function createRequest(method, url) {
-      //Credit to Nicholas Zakas
-      var xhr = new XMLHttpRequest();
-
-      if ('withCredentials' in xhr) {
-        xhr.open(method, url, true);
-      } else if (typeof XDomainRequest !== 'undefined') {
-        xhr = new XDomainRequest();
-        xhr.open(method, url);
-      } else {
-        xhr = null;
-      }
-      return xhr;
-    }
-    /**
-     * [Creates an array of all <link> href attribute values]
-     * @return {[array]}
-     */
-    function getStylesheets () {
-
-      var stylesheets = [],
-          linkTags = document.getElementsByTagName('link');
-
-      for(var i = 0; i < linkTags.length; i += 1) {
-        if (linkTags[i].href.indexOf('.css') !== -1 &&    //Make sure it is actually a CSS file
-          !linkTags[i].media &&                           //Ignore all CSS with a media attribute. (print)
-          linkTags[i].href.indexOf('sitecues-') === -1 && //Ignore sitecues CSS
-          linkTags[i].rel !== 'alternate stylesheet') {   //Ignore alternate stylesheets
-          stylesheets.push(linkTags[i].href);
-        }
-      }
-
-      return stylesheets;
-
-    }
-    /**
-     * [constructStyleTag builds a <style> tag, maintaining the sites original precedence for styles]
-     */
-    function constructStyleTag () {
-      var i;
-      for (i = 0; i < linkTagStylesList.length; i += 1) {
-        if (linkTagStylesList[i]) {
-          stylesheetElement.innerHTML += linkTagStylesList[i];
-        }
-      }
-      for (i = 0; i < styleTagStylesList.length; i += 1) {
-        if (styleTagStylesList[i]) {
-          stylesheetElement.innerHTML += styleTagStylesList[i];
-        }
-      }
-    }
-    /**
-     * [Abstracts away creating XMLHTTPRequests that support the
-     * Origin HTTP Header, and also sets up the callback when the
-     * response returns]
-     * @param  {[string]}   method
-     * @param  {[string]}   url
-     * @param  {Function} callback
-     * @return {[undefined]}
-     */
-    function createCORSRequest (method, url, callback) {
-
-      var request = createRequest(method, url);
-
-      request.url = url;
-
-      if (!request) {
-        throw new Error('CORS not supported');
-      }
-      //Only execute the callback if the response status is 200
-      request.onreadystatechange = function () {
-        if (request.readyState === 4 && request.status === 200) {
-          callback(request);
-        }
-      };
-
-      request.send();
-
-    }
-
-    /**
-     * [This function allows the targeting of styles, such as "cursor", and invokes a callback
-     * that gets passed the style and the rule associated with it for any CSS selector]
-     * @param  {[string]}   propertyName
-     * @param  {[string]}   matchValue, optional value to match, null to match anything
-     * @param  {Function} callback
-     */
-    cursor.getStyles = function(propertyName, matchValue, callback) {
-      var rules, rule, cssStyleDeclaration, ruleValue, i;
-
-      if (!stylesheetObject || !callback) {
-        return;
-      }
-
-      for (i = 0, rules = stylesheetObject.cssRules; i < rules.length; i++) {
-        rule = rules[i];
-        cssStyleDeclaration = rule.style;
-        if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
-          ruleValue = cssStyleDeclaration[propertyName];
-          if (matchValue ? (ruleValue === matchValue) : (ruleValue !== null)) {
-            /**@param rule an object representing some css selector + properties
-             * @param style is the key for accessing property information
-             */
-            callback(rule, ruleValue);
-          }
-        }
-      }
-    };
-
-    /**
-     * [Returns a function that, when executed, generates a CSS cursor property for every supported
-     * cursor type and then changes all cursor properties in a <style> that we create for the current
-     * zoom level]
-     * @return {[function]}
-     */
-    var createStyleSheet = (function () {
-
-      var cursorTypes = ['auto', 'default', 'pointer', /* 'crosshair', 'help', 'text' */];
-
-      return function () {
-
-        var cursorTypeURLS = [];
-        //generate cursor images for every cursor type...
-        for(var i = 0; i < cursorTypes.length; i += 1) {
-
-          // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the
-          // platform.browser supports css cursor scaling
-          if (platform.pixel.ratio > 1 && platform.pixel.cssCursorScaleSupport[platform.browser.is]) {
-            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle2x(cursorTypes[i], lastZoom);
-          // For all other ratios/un-supported browsers, use a 1x ratio cursor
-          } else {
-            cursorTypeURLS[cursorTypes[i]] = generateCursorStyle1x(cursorTypes[i], lastZoom);
-          }
-
-        }
-
-        if (stylesheetObject) {
-          // TODO we need a better setup/shutdown function for this entire module that lazily instantiates and cleans up after itself
-          // We shouldn't run this code at all unless the user zooms
-          stylesheetObject.disabled = lastZoom < cursor.CONTANTS.DEFAULT_MIN_ZOOM_LEVEL;
-        }
-
-        cursor.getStyles('cursor', null, function (rule, value) {
-            if (!rule || !value) {
-                return;
-            }
-            // Find the cursor type (auto, pointer, etc) and replace the style with our generated image.
-            for (var i = 0; i < cursorTypes.length; i += 1) {
-            if (value.indexOf(cursorTypes[i]) > -1) {
-                // rule[style] = cursorTypeURLS[cursorTypes[i]]; !important doesnt work here...
-                // todo: remove console.log
-                var cursorValueURL = cursorTypeURLS[cursorTypes[i]];
-                try {
-                    if (platform.browser.is === 'IE') {
-                        preFetchCursorImageForCache(cursorValueURL, function() { setCursorStyleValue(rule, cursorValueURL); });
-                    } else {
-                        setCursorStyleValue(rule, cursorValueURL)
-                    }
-              } catch (e) {
-                try {
-                  console.log('Catch!');
-                  rule.style.cursor = cursorValueURL;
-                } catch (ex) {
-                  // Suppress the exception and go on.
-                  console.log(ex);
-                }
-              }
-            }
-          }
-        });
-      };
-    }());
+        URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
+        CURSOR_TYPES = ['default', 'pointer' ],
+        CURSOR_SYNONYMS = { _default: 'auto' },  // Map cursor: auto -> cursor: default
+        SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
+        $stylesheet,
+        cursorStylesheetObject,
+        isInitComplete,
+        CURSOR_OFFSETS = {
+          _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
+          _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
+        };
 
     /*
-     *
+     * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
      * @param {Object CSSStyleRule} rule CSSStyleRule
-     * @param {String} cursorValueURL  Example: "url(data:image/svg+xml,%3....)0 8, auto"
+     * @param {String} cursorValueURL  Example: 'url(data:image/svg+xml,%3....)0 8, default'
      * @returns {void}
      */
-    function setCursorStyleValue(rule, cursorValueURL) {
+    function setCursorStyle(rule, cursorValueURL) {
+      try {
         rule.style.setProperty('cursor', cursorValueURL, 'important');
+      } catch (e) {
+        SC_DEV && console.log('Catch setting cursor property: %o', e);
+        // rule.style.cursor = cursorValueURL;  // TODO do we still need this?
+      }
     }
 
     /**
@@ -229,344 +51,226 @@ sitecues.def('cursor', function (cursor, callback) {
      * @param {Function} callback A function called after the ajax request completed
      * @returns {void}
      */
-    function preFetchCursorImageForCache(cursorValueURL, callback) {
-        var urlRegexp = new RegExp(URL_REGEXP, 'i');
-        var cursorValueArray = urlRegexp.exec(cursorValueURL);
-        $.ajax({
+    function setCursorStyleWhenReady(rule, cursorValueURL) {
+      if (!platform.browser.isIE) {
+        // Not IE: no prefetch needed
+        setCursorStyle(rule, cursorValueURL);
+      }
+      else {
+        // Prefetch necessary
+        var urlRegexp = new RegExp(URL_REGEXP, 'i'),
+          cursorValueArray = urlRegexp.exec(cursorValueURL);
+        try {
+          $.ajax({
             url: cursorValueArray[0],
             crossDomain: true,
-            type: "GET",
-            timeout: 30000,
+            type: 'GET',
+            timeout: 5000,
             cache: true,
-            data: null,
-            headers: {"Accept": "application/octet-stream"},
-            success: function() {
-                SC_DEV && console.log('Loading of CUR file completed!');
-                if (callback) {
-                    callback();
-                }
+            headers: { Accept: 'application/octet-stream'},
+            success: function () {
+              SC_DEV && console.log('Loading of CUR file completed!');
+              setCursorStyle(rule, cursorValueURL);
             },
-            error: function(jqXHR) {
-                jqXHR.abort();
-                SC_DEV && console.log("[Error] Unable to fetch cursor image from server");
+            error: function (jqXHR) {
+              jqXHR.abort();
+              SC_DEV && console.log('[Error] Unable to fetch cursor image from server');
             }
-        });
-    }
-
-    /**
-     * [Generates the cursor url for a given type and zoom level for NON retina displays]
-     * @param  {[string]} type
-     * @param  {[number]} zoom
-     * @return {[string]}
-     */
-    function generateCursorStyle1x (type, zoom) {
-      var hotspotOffset = '',
-          image = view.getImage(type, zoom),
-          cursorStyle;
-
-      // Don't use hotspotOffset in IE because that's part of the .cur file.
-      if (platform.browser.is !== 'IE') {
-        hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
-      }
-      cursorStyle =  'url(' + image + ')' + hotspotOffset + ', ' + type;
-      return cursorStyle;
-    }
-
-    /**
-     * [Generates the cursor url for a given type and zoom level for retina displays]
-     * @param  {[string]} type
-     * @param  {[number]} zoom
-     * @return {[string]}
-     */
-    function generateCursorStyle2x(type, zoom) {
-        var hotspotOffset = '',
-            image = view.getImage(type, zoom),
-            cursorStyle;
-
-        // Don't use hotspotOffset in IE because that's part of the .cur file.
-        if (platform.browser.is !== 'IE') {
-            hotspotOffset += getCursorHotspotOffset(type, zoom) + '';
+          });
         }
-        // image-set() will not fallback to just the first url in older browsers. So...
-        // todo: provide fallback for older browsers.
-        cursorStyle = '-webkit-image-set(' +
+        catch (ex) {
+          SC_DEV && console.log("Catch during cursor ajax: %o", ex);
+        }
+      }
+    }
+
+    /**
+     * Does the given URL value match the cursor type?
+     * @param cursorType
+     * @param url
+     * @returns {boolean}
+     */
+    function isCursorOfType(cursorType, url) {
+      if (url.indexOf(cursorType) > -1) {
+        return true;
+      }
+      var synonym = CURSOR_SYNONYMS['_' + cursorType];
+      return synonym && url.indexOf(synonym) > -1;
+    }
+
+    /**
+     * Refresh all cursor rules in the sitecues-cursor stylesheet, mapping them to cursorTypeUrls
+     * @param cursorTypeUrls
+     */
+    function refreshCursorStyles(cursorTypeUrls) {
+      var rules = cursorStylesheetObject.cssRules,
+        numRules = rules.length,
+        ruleIndex = 0,
+        cursorTypeIndex,
+        cursorType;
+
+      for (; ruleIndex < numRules; ruleIndex ++) {
+        var rule = rules[ruleIndex],
+          value = rule.style.cursor;
+
+        // Find the cursor type (auto, pointer, etc) and replace the style with our generated image.
+        for (cursorTypeIndex = 0; cursorTypeIndex < CURSOR_TYPES.length; cursorTypeIndex ++) {
+          cursorType = CURSOR_TYPES[cursorTypeIndex];
+          if (isCursorOfType(cursorType, value)) {
+            var cursorValueURL = cursorTypeUrls[cursorType];
+            setCursorStyleWhenReady(rule, cursorValueURL);
+          }
+        }
+      }
+    }
+
+    function setCursorsDisabled(doDisable) {
+      cursorStylesheetObject.disabled = !!doDisable;
+    }
+
+    // Create a stylesheet with only the cursor-related style rules
+    function constructCursorStylesheet() {
+      var cursorStyleSubset = styleService.getAllMatchingStyles('cursor'),
+        cssText = styleService.getStyleText(cursorStyleSubset, 'cursor');
+
+      // Create the sitecues <style id="sitecues-cursor"> element and content
+      $stylesheet = $('<style>').appendTo('head')
+        .attr('id', SITECUES_CURSOR_CSS_ID)
+        .text(cssText);
+
+      // Now set the cursorStyles global to the rules in the cursor style sheet.
+      // The refresh methods will iterate over these styles and modify them
+      cursorStylesheetObject = styleService.getDOMStylesheet($stylesheet);
+
+      if (platform.browser.isIE) {
+        // While zooming, turn off our CSS rules so that the browser doesn't spend
+        // CPU cycles recalculating the custom cursor rules to apply during each frame
+        // This makes a difference in IE -- doesn't seem to help in other browsers.
+        sitecues.on('zoom/begin', setCursorsDisabled);
+      }
+    }
+
+    /**
+     * Generates a CSS cursor property for every supported
+     * cursor type at the current zoom level and then changes
+     * all cursor properties in the <style id="sitecues-cursor">
+     */
+    function refreshStylesheet() {
+      if (cursorZoom <= 1) {
+        if ($stylesheet) {
+          $stylesheet.remove();
+          $stylesheet = null;
+        }
+        return;
+      }
+
+      if (!isInitComplete) {
+        return; // Not ready yet -- will call back when the style-service is ready
+      }
+
+      if (!$stylesheet) {
+        constructCursorStylesheet();
+      }
+
+      var cursorTypeUrls = getCursorTypeUrls();
+      refreshCursorStyles(cursorTypeUrls);
+      setCursorsDisabled(false);
+    }
+
+    /**
+     * Get the cursor URLs to support the current cursorZoom level
+     * @returns {Array} Array of cursor URLS
+     */
+    function getCursorTypeUrls() {
+      var cursorTypeUrls = [],
+        doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
+        // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the
+        // platform.browser supports css cursor scaling
+        cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x,
+        pixelRatio = doUseRetinaCursors ? 2 : 1,
+        i = 0;
+
+      // Generate cursor images for every cursor type...
+      for (; i < CURSOR_TYPES.length; i ++) {
+        // Don't use hotspotOffset in IE because that's part of the .cur file.
+        var type = CURSOR_TYPES[i],
+          hotspotOffset = getCursorHotspotOffset(type, cursorZoom),
+          image = customCursor.getUrl(type, cursorZoom, pixelRatio);
+
+        cursorTypeUrls[CURSOR_TYPES[i]] = cursorGeneratorFn(image, hotspotOffset, type);
+      }
+
+      return cursorTypeUrls;
+    }
+
+    /**
+     * Generates the cursor url for a given type and zoom level for NON retina displays
+     * @param  {string} type
+     * @param  {number} zoom
+     * @return {string}
+     */
+    function generateCursorStyle1x(image, hotspotOffset, type) {
+      return 'url(' + image + ')' + hotspotOffset + ', ' + type;
+    }
+
+    /**
+     * Generates the cursor url for a given type and zoom level for retina displays
+     * @param  {string} type
+     * @param  {number} zoom
+     * @return {string}
+     */
+    function generateCursorStyle2x(image, hotspotOffset, type) {
+        return '-webkit-image-set(' +
                 '    url(' + image + ') 1x,' +
                 '    url(' + image + ') 2x' +
                 ') ' + hotspotOffset + ', ' + type;
-
-        return cursorStyle;
-    }
-
-    /**
-     * [Sets the stylesheetObject variable to the stylesheet interface the DOM provieds,
-     * then sets the zoom, and updates our styles for cursors]
-     */
-    function setStyleSheetObject () {
-      stylesheetObject = (function () {
-        for (var i = 0; i < document.styleSheets.length; i += 1) {
-          if (document.styleSheets[i].ownerNode && document.styleSheets[i].ownerNode.id === cursor.CONTANTS.SITECUES_CSS_ID) {
-            return document.styleSheets[i];
-          }
-        }
-      }());
-      lastZoom = conf.get('zoom');
-      createStyleSheet();
-      sitecues.emit('cursor/addingStyles');
     }
 
     // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
     // The maths below based on experience and doesn't use any kind of specific logic.
-    // We are liely to change it better one when we have final images.
+    // We are likely to change it better one when we have final images.
     // There's no need for specific approach while we constantly change images and code.
     /**
      * Gets custom cursor's hotspot offset.
      * @param zl Number or string, represents zoom level.
-     * @return result A string in format 'x y' which is later used a part of cursor property value.
+     * @return {string} result A string in format 'x y' which is later used a part of cursor property value.
      */
     function getCursorHotspotOffset(type, zl) {
-
-      var zoom = {
-        'min': cursor.CONTANTS.DEFAULT_ZOOM_LEVEL,
-        'current': zl || conf.get('zoom') || cursor.CONTANTS.DEFAULT_ZOOM_LEVEL
-      },
-      offset,
-      result;
-
-      zoom.diff = zoom.current - zoom.min;
-      offset = imagesManager.offsets[type || cursor.CONTANTS.DEFAULT_TYPE];
-      result = '';
-
-      if (offset) {
-        switch (type) {
-        case 'auto':
-        case 'default':
-          result = offset.x + ' ' + Math.round(offset.y + offset.step * zoom.diff);
-          break;
-        case 'pointer':
-          result = Math.round(offset.x + offset.step * zoom.diff) + ' ' + Math.round(offset.y + (offset.step / 2) * zoom.diff);
-          break;
-        default:
-          break;
-        }
-      }
-      return result;
-    }
-    /**
-     * [Initializes our module by getting all <style> and <link> tags, and concatenates their styles
-     * to a <style> we create.  It then will update all cursor styles within that tag]
-     * @return {[undefined]}
-     */
-    (function () {  //initializer
-      /*
-        Basically, we will begin by creating a <style> containing rules found in SITECUES_CSS_DEFAULT.
-        Then, grab any <style> that is not ours, and append our <style> with those contents.
-        Then we grab any <link> href attributes and attempt to download them, if they are successfully
-        downloaded, then we simply concatenate our <style> with the response text.
-        At the end of each successful callback, we update our <style> to reflect the current level of zoom.
-      */
-      var validSheets = getStylesheets(),
-
-          styleTags = (function () {
-
-            var allStyleTags   = document.getElementsByTagName('style'),
-                validStyleTags = [];
-
-            for (var i = 0; i < allStyleTags.length; i += 1) {
-              if (!allStyleTags[i].id || allStyleTags[i].id.indexOf('sitecues') === -1) {
-                validStyleTags.push(allStyleTags[i]);
-              }
-            }
-
-            return validStyleTags;
-
-          }()),
-
-          sheet = document.createElement('style');
-
-      sheet.innerHTML = cursor.CONTANTS.SITECUES_CSS_DEFAULT;
-      sheet.id        = cursor.CONTANTS.SITECUES_CSS_ID;
-
-      document.head.appendChild(sheet);
-
-      stylesheetElement = document.getElementById(cursor.CONTANTS.SITECUES_CSS_ID);
-
-      for(var k = 0; k < styleTags.length; k += 1) {
-        if (styleTags[k].id !== cursor.CONTANTS.SITECUES_CSS_ID) {
-          styleTagStylesList.push(styleTags[k].innerHTML);
-        }
-      }
-      /**
-       * [extractUrlsForReplacing removes the redundancy in the array of URLs]
-       * @param  {[array]} matches [URLs extracted from response text]
-       * @return {[array]}         [URLs extracted from response text minus the redundancy]
-       * @example ['../a/b/styles.css','../a/b/styles.css?#iefix'] => ['../a/b/styles.css']
-       * Above is an example of a redundancy that needs to be addressed before we globally
-       * do a replacement.
-       */
-      function extractUrlsForReplacing (matches) {
-
-        var i = 0,
-            j,
-            match_i,
-            len = matches.length;
-
-        for (; i < len; i += 1) {
-          match_i = matches[i];
-          for (j = 0; j < len; j += 1) {
-            if (i !== j) {
-              if (match_i.indexOf(matches[j]) !== -1) {
-                matches.splice(i, 1);
-                i = i > 0 ? i - 1 : 0;
-                j = j > 0 ? j - 1 : 0;
-                len = matches.length;
-                match_i = matches[i];
-              }
-            }
-          }
-        }
-        return matches;
-      }
-      /**
-       * [extractUniqueUrlsFromMatches extracts the unique URLS from the array returned by matching
-       * CSS file response text with the Regular Expression used in applyCORSRequest.]
-       * @param  {[array]} matches [RegEx matches]
-       * @return {[array]}         [list of URLs]
-       * @example ['url(../images/a.png', 'url(../images/b.png']
-       */
-      function extractUniqueUrlsFromMatches (matches) {
-
-        var urls = [],
-            match;
-
-        if (!matches || !matches.length) {
-          return urls;
-        }
-
-        for (var i = 0; i < matches.length; i += 1) {
-
-          match = matches[i].trim(); //Trim whitespace
-          match = match.substr(4);   //remove url(
-
-          if (match.charAt(0) === '\"') {              //If the URL is surrounded by a double quote
-            match = match.substr(1);                   //remove the first
-            match = match.substr(0, match.length - 1); //remove the last
-          }
-
-          match = match.trim(); //Trim whitespace
-
-          if (match.charAt(0) === '\'') {              //If the URL is surrounded by a single quote
-            match = match.substr(1);                   //remove the first
-            match = match.substr(0, match.length - 1); //remove the last
-          }
-
-          match = match.trim(); //Trim whitespace
-
-          if (urls.indexOf(match) === -1) { //Get rid of duplicates
-            if (match.indexOf('?') !== -1) { //Escape the ?
-              match = match.replace('?', '\\?');
-            }
-            urls.push(match);
-          }
-        }
-
-        return urls;
-      }
-      /**
-       * [applyCORSRequest Makes a xmlhttprequest for CSS resources.  Replaces all
-       * relatively defined style resources with their absolute counterparts. See EQ-1302]
-       * @param  {[xmlhttprequest Object]} request [description]
-       */
-      function applyCORSRequest (request) {
-      /*
-        One of our goals is to extract from a CSS file all relative URLs. This document outlines
-        valid URLs for CSS: http://www.w3.org/TR/CSS21/syndata.html#uri
-
-        The RegEx below will MATCH the following:
-
-          background: url(instant/templates/_default_/images/nyromodal/close.gif);
-          background: url('instant/templates/_default_/images/nyromodal/close.gif');
-          background: url("instant/templates/_default_/images/nyromodal/close.gif");
-          background: url(  instant/templates/_default_/images/nyromodal/close.gif  );
-          background: url(./instant/templates/_default_/images/nyromodal/close.gif);
-          background: url('./instant/templates/_default_/images/nyromodal/close.gif');
-          background: url("./instant/templates/_default_/images/nyromodal/close.gif");
-          background: url(  ./instant/templates/_default_/images/nyromodal/close.gif  );
-          background: url(../instant/templates/_default_/images/nyromodal/close.gif);
-          background: url('../instant/templates/_default_/images/nyromodal/close.gif');
-          background: url("../instant/templates/_default_/images/nyromodal/close.gif");
-          background: url(  ../../instant/templates/_default_/images/nyromodal/close.gif  );
-
-        The RegEx below will IGNORE the following:
-
-          background: url(http://example.ru/templates/_default_/close.gif)
-          background: url(https://instant/templates/_default_/images/nyromodal/close.gif);
-          background: url('http://example.ru/templates/_default_/close.gif')
-          background: url('https://instant/templates/_default_/images/nyromodal/close.gif');
-          background: url("http://example.ru/templates/_default_/close.gif")
-          background: url("https://instant/templates/_default_/images/nyromodal/close.gif");
-          background: url(   http://example.ru/templates/_default_/close.gif   )
-          background: url(   https://instant/templates/_default_/images/nyromodal/close.gif   );
-          background:url(data:jpg;base64,/QL9Av0GaqAAA//2Q==)
-
-       */
-        var relativeRegEx = new RegExp(/url(\((['\" ])*(?!data:|.*https?:\/\/)([^\"'\)]+)['\" ]*)/g),
-            baseUrlObject = sitecues.parseUrl(request.url),
-            newText       = request.responseText,
-            matches       = extractUrlsForReplacing(extractUniqueUrlsFromMatches(newText.match(relativeRegEx)));
-
-        for (var i = 0; i < matches.length; i += 1) {
-          newText = newText.replace(new RegExp(matches[i], 'g'), sitecues.resolveUrl(matches[i], baseUrlObject));
-        }
-
-        // EEOC Fix : In a single stylesheet served by EEOC, they had a relative and absolute URL to an image.
-        //            Our algorithm globally replaces relative urls with absolute, so if BOTH exists, problems happen.
-        // Example:   ['www.example.com/image.jpg', '/image.jpg'] => ['//www.example.com//www.example.com/image.jpg', '//www.example.com/image.jpg']
-        // TODO do a test. Give information to client
-        newText = newText.replace(new RegExp('//' + baseUrlObject.hostname + '//' + baseUrlObject.hostname, 'g'), '//' + baseUrlObject.hostname);
-
-        linkTagStylesList[validSheets.indexOf(request.url)] = newText;
-
-        constructStyleTag(); //Builds the <style> tags and <link> tags
-
-        setTimeout(setStyleSheetObject, 50);
-
+      if (platform.browser.isIE) {  // Don't use in IE -- it will be part of .cur file
+        return '';
       }
 
-      for(var i = 0; i < validSheets.length; i += 1) {
-        createCORSRequest('GET', validSheets[i], applyCORSRequest);
-      }
+      var zoomDiff = zl - 1,  // Lowest zoom level is 1, this is the difference from that
+      offset = CURSOR_OFFSETS['_' + type];
 
-      constructStyleTag(); //Builds the <style> tags
-
-      setTimeout(setStyleSheetObject, 50);
-
-    }());
-
-    if (platform.browser.isIE) {
-      sitecues.on('zoom/begin', function() {
-        // While zooming, turn off our CSS rules so that the browser doesn't spend
-        // CPU cycles recalculating the custom cursor rules to apply during each frame
-        // This makes a difference in IE -- doesn't seem to help in other browsers.
-        stylesheetElement.disabled = true;
-      });
+      return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
     }
 
-    sitecues.on('zoom', function (zoom) {
-      if (lastZoom !== zoom) {
-        lastZoom = zoom;
-        clearTimeout(lastZoomTimeout);
-        lastZoomTimeout = setTimeout(createStyleSheet, 10);
+    function getCursorZoom(pageZoom) {
+      var zoomDiff = pageZoom - zoomModule.min,
+          CURSOR_ZOOM_MAX = zoomModule.max + 1,
+          CURSOR_ZOOM_MIN = zoomModule.min,
+          CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
+
+      // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
+      return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    }
+
+    sitecues.on('zoom', function (pageZoom) {
+      // At page zoom level 1.0, the cursor is the default size (same as us being off).
+      // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
+      var newCursorZoom = getCursorZoom(pageZoom);
+      if (cursorZoom !== newCursorZoom) {
+        cursorZoom = newCursorZoom;
+        refreshStylesheet();
       }
     });
 
-    // if (DEV) {
-    //   exports.cursor = {
-    //     "stylesheetObject": stylesheetObject,
-    //     "createStyleSheet": createStyleSheet,
-    //     "generateCursorStyle1x": generateCursorStyle1x,
-    //     "generateCursorStyle2x": generateCursorStyle2x
-    //   };
-    // }
+    sitecues.on('style-service/ready', function() {
+      isInitComplete = true;
+      refreshStylesheet();
+    });
+
 
     callback();
 

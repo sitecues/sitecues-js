@@ -24,8 +24,7 @@ sitecues.def('ui', function (ui, callback) {
       '#sitecues-panel {opacity: .25;z-index: 2147483646;position: fixed;top: 0; white-space: nowrap;margin: 5px;background-color: #fff;border-radius: 5px;box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);}\n' +
       '#sitecues-slider-wrap {display:block;width:340px;height:80px;}\n' +
       '#sitecues-tts {position: absolute;top: 0;right: 0;width: 136px;height: 76px;background-image: url('+sitecues.resolveSitecuesUrl('../images/tts-icon-1.png')+');background-size: 270px;background-position: 0 0;}\n' +
-      '#sitecues-tts.tts-disabled {background-position: -135px 0;}\n' +
-      '.sitecues-highlight-outline {position: absolute !important;pointer-events: none;}\n'
+      '#sitecues-tts.tts-disabled {background-position: -135px 0;}'
   };
 
   var sheet       = document.createElement('style');

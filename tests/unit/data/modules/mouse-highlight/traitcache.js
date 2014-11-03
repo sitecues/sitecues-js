@@ -17,7 +17,7 @@ var DEFAULT_FAKE_STYLES =
   'padding-left: 3px; padding-top: 3px; padding-right: 3px; padding-bottom: 3px;';
 
 var traitcache = {
-  'updateCachedView': function () {},
+  "resetCache": function () {},
   'getCachedViewSize': function() {
     return FAKE_VIEW_SIZE;
   },
@@ -77,6 +77,9 @@ var traitcache = {
   },
   'getUniqueId': function(element) {
     return parseInt(element.id);
+  },
+  'isHidden': function(element) {
+    return false;
   }
 };
 

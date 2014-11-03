@@ -59,7 +59,7 @@ describe('mouse-highlight', function () {
   describe('#updateColorApproach()', function () {
     it('should have semi-transparent bgColor and doUseOverlayForBgColor=true if multiple items picked', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [1, 2, 3],
+        picked = $('<p>').add($('<p>')),
         styles = [{}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -67,9 +67,9 @@ describe('mouse-highlight', function () {
       expect(state.doUseOverlayForBgColor).to.be.true;
       done();
     });
-    it('should have semi-transparent bgColor doUseOverlayForBgColor=true if form control is picked', function (done) {
+    it('should have semi-transparent bgColor doUseOverlayForBgColor=true if button is picked', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = $('<input>'),
+        picked = $('<button>'),
         styles = [{}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -79,7 +79,7 @@ describe('mouse-highlight', function () {
     });
     it('should have semi-transparent bgColor and doUseOverlayForBgColor=true if picked element has background sprite', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [$('<div>')],
+        picked = $('<div>'),
         styles = [{backgroundImage: 'list-bullet.png', backgroundRepeat: 'no-repeat'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -88,7 +88,7 @@ describe('mouse-highlight', function () {
       done();
     });
     it('should have no bgColor and doUseOverlayForBgColor=false if has a background image', function (done) {
-      var picked = [$('<div>')],
+      var picked = $('<div>'),
         styles = [{'backgroundImage': 'gradient.png'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -129,7 +129,7 @@ describe('mouse-highlight', function () {
     });
     it('should use semi-transparent bgColor and doUseOverlayForBgColor=false if picked element has dark bg color', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
-        picked = [$('<p>')],
+        picked = $('<p>'),
         styles = [{'backgroundColor': 'rgb(30,30,30)'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
@@ -156,9 +156,9 @@ describe('mouse-highlight', function () {
       expect(mh.getHighlightVisibilityFactor()).to.be.equal(2.1);
       done();
     });
-    it('should return 2.7 if zoom = 2.6', function (done) {
+    it('should return 2.88 if zoom = 2.6', function (done) {
       mh.state.zoom = 2.6;
-      expect(mh.getHighlightVisibilityFactor()).to.be.equal(2.7);
+      expect(parseFloat(mh.getHighlightVisibilityFactor().toFixed(2))).to.be.equal(2.88);
       done();
     });
   });
@@ -169,25 +169,26 @@ describe('mouse-highlight', function () {
       expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(2);
       done();
     });
-    it('should return around 3 if zoom is 3', function (done) {
+    it('should return around 9 if zoom is 3', function (done) {
       mh.state.zoom = 3;
-      expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(3);
+      expect(Math.round(mh.getHighlightBorderWidth())).to
+        .be.equal(9);
       done();
     });
   });
 
   describe('#show()', function () {
-    it('should return false if there is no picked element', function (done) {
+    it('should not return true if there is no picked element', function (done) {
       mh.state.picked = undefined;
-      expect(mh.show()).to.be.false;
+      expect(mh.show()).to.not.be.true;
       done();
     });
-    it('should return false if mh.updateOverlayPosition returns false', function (done) {
+    it('should not return true if mh.updateOverlayPosition returns false', function (done) {
       var origMethod = mh.updateOverlayPosition;
       mh.updateOverlayPosition = function () {
         return false;
       };
-      expect(mh.show()).to.be.false;
+      expect(mh.show()).to.not.be.true;
       mh.updateOverlayPosition = origMethod;
       done();
     });
@@ -231,46 +232,6 @@ describe('mouse-highlight', function () {
       mh.enabled = true;
       mh.state.picked = undefined;
       mh.enableIfAppropriate();
-      done();
-    });
-  });
-
-  // TODO why isn't this working?
-  describe('#disable()', function () {
-    it('should invoke mh.pause', function (done) {
-      var spy = sinon.spy(mh, 'pause');
-      mh.disable();
-      //expect(spy.calledOnce).to.be.true; // TODO fix
-      spy.restore();
-      done();
-    });
-  });
-
-  describe('#pause()', function () {
-    it('should set state.savedCss to null if there is a picked element and there is savedCss', function (done) {
-      mh.state.savedCss = {'backgroundColor':'blue'};
-      mh.state.picked = $('<p>');
-      mh.pause();
-      expect(mh.state.savedCss).to.be.equal(null)
-      done();
-    });
-  });
-  describe('#hideAndResetState()', function () {
-    it('should invoke mh.hide and mh.resetState', function (done) {
-      var pauseSpy = sinon.spy(mh, 'pause'),
-        resetStateSpy = sinon.spy(mh, 'resetState');
-      mh.hideAndResetState();
-//      expect(pauseSpy.calledOnce).to.be.true;   // TODO spy not working?
-//      expect(resetStateSpy.calledOnce).to.be.true;   // TODO spy not working?
-      pauseSpy .restore();
-      resetStateSpy.restore();
-      done();
-    });
-  });
-
-  describe('#resetState()', function () {
-    it('should not throw an exception', function (done) {
-      mh.resetState();
       done();
     });
   });

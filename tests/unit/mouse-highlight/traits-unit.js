@@ -81,25 +81,26 @@ describe('traits', function() {
       expect(traitStack[2].rightMargin).to.be.equal(3);
       done();
     });
-    it('should return the correct |visualWidth| trait for each node.', function(done) {
+    it('should return the correct |visualWidthAt1x| trait for each node.', function(done) {
+      // Should be 10 / 2 - 4 padding = 1
       var traitStack = traits.getTraitStack(nodes);
-      expect(traitStack[1].visualWidth).to.be.equal(6);
+      expect(traitStack[1].visualWidthAt1x).to.be.equal(1);
       done();
     });
     it('should return the correct |percentOfViewportWidth| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes),
-        VISUAL_WIDTH = 6,
+        ELEMENT_WIDTH = 10,
         VIEWPORT_WIDTH = 1000,
-        EXPECTED_PERCENT_OF_VIEWPORT_WIDTH = (VISUAL_WIDTH / VIEWPORT_WIDTH) * 100;
+        EXPECTED_PERCENT_OF_VIEWPORT_WIDTH = (ELEMENT_WIDTH / VIEWPORT_WIDTH) * 100;
       expect(traitStack[1].percentOfViewportWidth).to.be.equal(EXPECTED_PERCENT_OF_VIEWPORT_WIDTH);
       done();
     });
     it('should return the correct |percentOfBodyWidth| trait for each node.', function(done) {
       var traitStack = traits.getTraitStack(nodes),
-        EXPECTED_PERCENT_OF_BODY_WIDTH = 10;
+        expected = 100 * traitStack[1].rect.width / 1500;
       // Body width is hard coded in highlight-position mock as 100, node#1 is 10px wide,
       // therefore we expect the result to be 10% of the body width.
-      expect(traitStack[1].percentOfBodyWidth).to.be.equal(EXPECTED_PERCENT_OF_BODY_WIDTH);
+      expect(traitStack[1].percentOfBodyWidth).to.be.equal(expected);
       done();
     });
     it('should return the correct |normDisplay=block| trait for a <p>.', function(done) {

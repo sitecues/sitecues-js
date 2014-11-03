@@ -29,8 +29,8 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     function getUnsafePixels() {
 
         var hypotenuse = Math.sqrt(
-            Math.pow(documentElement.clientWidth, 2) +
-            Math.pow(documentElement.clientHeight, 2)
+            Math.pow(window.innerHeight, 2) +
+            Math.pow(window.innerWidth, 2)
         );
 
         return hypotenuse * safeArea.HLB_SAFE_AREA;
@@ -49,10 +49,10 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
         return {
             'left': unsafePixels,
             'top': unsafePixels,
-            'width': documentElement.clientWidth - unsafePixels * 2,
-            'height': documentElement.clientHeight - unsafePixels * 2,
-            'right': documentElement.clientWidth - unsafePixels,
-            'bottom': documentElement.clientHeight - unsafePixels
+            'width': window.innerWidth - unsafePixels * 2,
+            'height': window.innerHeight - unsafePixels * 2,
+            'right': window.innerWidth - unsafePixels,
+            'bottom': window.innerHeight - unsafePixels
         };
 
     };

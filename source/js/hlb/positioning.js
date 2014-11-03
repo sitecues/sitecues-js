@@ -71,7 +71,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         return allowWrapping; // Once false, the each() loop will stop as well
       }
 
-      $hlbElement.find('*').andSelf().each(isWrappable);
+      $hlbElement.find('*').addBack().each(isWrappable);
 
       return allowWrapping;
 
@@ -220,7 +220,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
         // height is now the "safe zone" height, minus the padding/border
         $hlbElement.css({
-          'height': ((safeZoneHeight / hlbPositioning.getFinalScale($hlbElement)) -
+          'height': ((safeZoneHeight / hlbPositioning.getFinalScale($hlbElement) / hlbPositioning.getInheritedZoom($hlbElement)) -
                      (hlbStyling.defaultBorder +
                       hlbStyling.defaultBorder +
                       parseInt($hlbElement.css('paddingTop')) +
@@ -257,7 +257,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
         // width is now the "safe zone" width, minus the padding/border
         $hlbElement.css({
-          'width': ((safeZoneWidth / hlbPositioning.getFinalScale($hlbElement)) -
+          'width': ((safeZoneWidth / hlbPositioning.getFinalScale($hlbElement) / hlbPositioning.getInheritedZoom($hlbElement)) -
               (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlbElement) / 2) * 2) + 'px'
         });
 
@@ -341,7 +341,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       if (hlbElement.clientWidth < hlbElement.scrollWidth) {
 
         $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+          'width': hlbElement.scrollWidth + hlbStyling.defaultPadding + 'px'
         });
 
         // Again, we can't be positive that the increase in width does not overflow the safe area.

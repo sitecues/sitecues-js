@@ -70,18 +70,10 @@ sitecues.def('platform', function (platformModule, callback) {
   };
 
 
-  platformModule.pixel = {
-    // platform.pixel.ratio checks the pixel-ratio of the browser, for example, retina displays
-    // on OS X use a pixel ratio of 2:1. A MacBook with a Retina display will show 4 pixels for
-    // every 1 pixel on a regular screen. (2 pixels horizontally, 2 pixels vertically)
-    ratio: 1, //window.devicePixelRatio
-    // platform.pixel.cssCursorScaleSupport lists the browsers that support scaling of css cursors.
-    // For a MacBook with Retina display, cursors should be drawn at a 2:1 pixel ratio to appear
-    // crisp.
-    cssCursorScaleSupport: {
-      Chrome: true
-    }
-  };
+  // platformModule.pixel is deprecated
+  // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
+  // When a window moves to another display, it can change
+  platformModule.canUseRetinaCursors = platformModule.browser.isChrome;
 
   platformModule.cssPrefix = (function() {
     if (platformModule.browser.isWebKit) {

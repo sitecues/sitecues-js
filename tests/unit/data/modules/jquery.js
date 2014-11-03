@@ -1679,7 +1679,7 @@ jQuery.extend({
 
 			if ( thisCache ) {
 
-				// Support array or space separated string names for data keys
+				// Support array or space separated string names for data navkeys
 				if ( !jQuery.isArray( name ) ) {
 
 					// try the string as a key before any manipulation
@@ -8113,7 +8113,7 @@ function ajaxConvert( s, response ) {
 		response = s.dataFilter( response, s.dataType );
 	}
 
-	// Create converters map with lowercased keys
+	// Create converters map with lowercased navkeys
 	if ( dataTypes[ 1 ] ) {
 		for ( conv in s.converters ) {
 			converters[ conv.toLowerCase() ] = s.converters[ conv ];
@@ -8769,7 +8769,7 @@ function propFilter( props, specialEasing ) {
 			value = hooks.expand( value );
 			delete props[ name ];
 
-			// not quite $.extend, this wont overwrite keys already present.
+			// not quite $.extend, this wont overwrite navkeys already present.
 			// also - reusing 'index' from above because we have the correct "name"
 			for ( index in value ) {
 				if ( !( index in props ) ) {

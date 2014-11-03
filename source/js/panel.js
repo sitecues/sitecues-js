@@ -63,7 +63,7 @@ sitecues.def( 'panel', function (panel, callback) {
           width: PANEL_WIDTH + 'px',
           height: PANEL_HEIGHT + 'px'
         });
-    
+
       // Create a Slider Instance for the Panel
       panel.slider = {};
       panel.slider.wrap = $('<div id="sitecues-slider-wrap">').appendTo(frame);
@@ -84,7 +84,7 @@ sitecues.def( 'panel', function (panel, callback) {
 
       // create TTS button and set it up
       ttsButton = $('<div id="sitecues-tts" class="sitecues-clickable">').appendTo(frame);
-      
+
       if ( audio.isSpeechEnabled()) {
         ttsButton.data( 'tts-enable', 'enabled' );
       } else {
@@ -109,7 +109,7 @@ sitecues.def( 'panel', function (panel, callback) {
       panel.created = true;
 
       panel.element = frame;
-      
+
       // return panel
       return frame;
     }
@@ -127,7 +127,7 @@ sitecues.def( 'panel', function (panel, callback) {
         // Set/recheck the dimensions of the slider
         var sliderWidget = panel.slider.widget;
         sliderWidget.setdimensions(sliderWidget);
-        sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget, sliderWidget.zoomLevel);
+        sliderWidget.setThumbPositionFromZoomLevel.call(sliderWidget);
         sliderWidget.translateThumbSVG.call(sliderWidget);
       }
 
@@ -173,7 +173,7 @@ sitecues.def( 'panel', function (panel, callback) {
         // Hide panel.
         panel.element
         .css('display', 'none')
-        .effects({
+        .animate({
           opacity : 0
         },
         'fast',
@@ -231,12 +231,6 @@ sitecues.def( 'panel', function (panel, callback) {
       else {
         panel.element.css({left: 0, right: ''});
         left = panel.badgeRect.left;
-      }
-
-      if (!platform.browser.isIE) {
-        // Don't include page offsets in IE, otherwise the panel opens from the wrong place when panning
-        left += window.pageXOffset;
-        top += window.pageYOffset;
       }
 
       panel.element.css({

@@ -6,35 +6,24 @@
  */
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'util/common',
-    function($, traitcache, mhpos, common) {
+  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom', 'util/common',
+    function($, traitcache, mhpos, zoomMod, common) {
 
     // ---- PUBLIC ----
 
     traits.getTraitStack = function(nodes) {
-      var oldViewSize = viewSize,
-        traitStack,
-        spacingTraitStack;
+      var traitStack;
 
       viewSize = traitcache.getCachedViewSize();
-      if (!common.equals(viewSize, oldViewSize)) {
-        bodySize = getBodySize();
-      }
-
+      bodyWidth = zoomMod.getBodyWidth();
       traitStack = nodes.map(getTraits);
-
-      // Get cascaded spacing traits and add them to traitStack
-      spacingTraitStack = getSpacingTraitsStack(traitStack);  // topSpacing, leftSpacing, etc.
-      traitStack.forEach(function(traits, index) {
-        $.extend(traits, spacingTraitStack[index]);
-      });
 
       return traitStack;
     };
 
     // ---- PRIVATE ----
 
-    var bodySize, viewSize;
+    var bodyWidth, viewSize;
 
     // Properties that depend only on the node itself, and not other traits in the stack
     function getTraits(node) {
@@ -42,14 +31,20 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       var zoom = viewSize.zoom,
         traits = {
           style: traitcache.getStyle(node),
-          rect: traitcache.getRect(node),
           tag: node.localName,
           role: node.getAttribute('role'),
-          childCount: node.childElementCount,
-          isVisualMedia: common.isVisualMedia(node)
+          childCount: node.childElementCount
         };
 
-      traits.normDisplay = getNormalizedDisplay(traits.style, node);
+      traits.isVisualMedia = isVisualMedia(traits, node);
+
+      var fastRect = traitcache.getRect(node);
+
+      traits.normDisplay = getNormalizedDisplay(traits.style, node, fastRect.height, zoom, traits);
+
+      traits.rect = getRect(node, traits, fastRect);
+
+      traits.fullWidth = fastRect.width; // Full element width, even if visible text content is much less
 
       traits.unzoomedRect = {
         width: traits.rect.width / zoom,
@@ -76,19 +71,18 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         rightMargin: Math.max(0, parseFloat(traits.style.marginRight))
       });
 
-      // Visible size
+      // Visible size at 1x (what it would be if not zoomed)
       $.extend(traits, {
-        visualWidth: traits.rect.width - traits.leftPadding - traits.rightPadding,
-        visualHeight: traits.rect.height - traits.topPadding - traits.bottomPadding
+        visualWidthAt1x: traits.unzoomedRect.width - traits.leftPadding - traits.rightPadding,
+        visualHeightAt1x: traits.unzoomedRect.height - traits.topPadding - traits.bottomPadding
       });
 
       // Percentage of viewport
       $.extend(traits, {
-        percentOfViewportHeight: 100 * traits.visualHeight / viewSize.height,
-        percentOfViewportWidth: 100 * traits.visualWidth / viewSize.width
+        percentOfViewportHeight: 100 * traits.rect.height / viewSize.height,
+        percentOfViewportWidth: 100 * traits.rect.width / viewSize.width
       });
 
-      var bodyWidth = bodySize.width;
       traits.percentOfBodyWidth = 100 * traits.rect.width / bodyWidth;
 
       return traits;
@@ -99,81 +93,64 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
     // For example the label of an <input type="button"> will not wrap to the next line like a normal inline does.
     // Since they act like inline-block let's treat it as one while normalize the display trait across browsers --
     // this allows the form controls to be picked.
-    function getNormalizedDisplay(style, node) {
-      return (style.display === 'inline' && common.isFormControl(node)) ? 'inline-block' : style.display;
+    function getNormalizedDisplay(style, node, height, zoom, traits) {
+      function getApproximateLineHeight() {
+        // See http://meyerweb.com/eric/thoughts/2008/05/06/line-height-abnormal/
+        return (parseFloat(style.lineHeight) || parseFloat(style.fontSize)) * 1.5;
+      }
+
+      var doTreatAsInlineBlock = false;
+      if (style.display === 'inline') {
+        // Treat forms as inline-block across browsers (and thus are pickable).
+        // If we don't do this, some browsers call them "inline" and they would not get picked
+        if (common.isFormControl(node)) {
+          doTreatAsInlineBlock = true;
+        }
+        else if (traits.childCount === 1 && common.isVisualMedia(node.firstElementChild)) {
+          doTreatAsInlineBlock = true;
+        }
+        else {
+          var lineHeight = getApproximateLineHeight() * zoom;
+          if (height < lineHeight && mhpos.getRangeRect(node.parentNode).height < lineHeight) {
+            // Treat single line inlines that are part of another single-line element as inline-block.
+            // This allows them to be picked -- they may be a row of buttons or part of a menubar.
+            doTreatAsInlineBlock = true;
+          }
+        }
+      }
+
+      return doTreatAsInlineBlock ? 'inline-block' : style.display;
     }
 
-    function getBodySize() {
-      var MERGE_ALL_BOXES_VALUE = 99999;
-      return mhpos.getAllBoundingBoxes(document.body, MERGE_ALL_BOXES_VALUE, false)[0];
+    // Get an element's rectangle
+    // In most cases, we use the fastest approach (cached getBoundingClientRect results)
+    // However, a block parent of an inline or visible text needs the more exact approach, so that the element
+    // does not appear to be much wider than it really is
+    function getRect(element, traits, fastRect) {
+      var exactRect,
+        display = traits.normDisplay,
+        WIDE_ELEMENT_TO_BODY_RATIO = 0.7;
+
+      // Use exact approach for:
+      // * inline-block, because it lies about height when media is inside
+      // * wide blocks, because they lie about width when there is a float
+      if (display === 'inline-block' ||
+        (display ==='block' && fastRect.width > bodyWidth * WIDE_ELEMENT_TO_BODY_RATIO)) {
+        exactRect = mhpos.getRangeRect(element);
+        return $.extend({}, exactRect); // Replace the width
+      }
+
+      return fastRect;
     }
 
-    // Which edges of node are adjacent to parent's edge? E.g. top, left, bottom, right
-    // Returns an array of edges, e.g. ["top", "left"]
-    function getAdjacentEdges(traitStack, index) {
-      var traits = traitStack[index],
-          parentTraits = traitStack[index + 1],
-          rect = traits.unzoomedRect,
-          parentRect = parentTraits.unzoomedRect,
-          adjacentEdges = [],
-          FUZZ_FACTOR = 1;  // If we're close by this many pixels, consider them adjacent
-
-      if (parentRect.top + parentTraits.topPadding + FUZZ_FACTOR >= rect.top - traits.topMargin) {
-        adjacentEdges.push('top');
-      }
-
-      if (parentRect.left + parentTraits.leftPadding + FUZZ_FACTOR >= rect.left - traits.leftMargin) {
-        adjacentEdges.push('left');
-      }
-
-      if (parentRect.bottom - parentTraits.bottomPadding - FUZZ_FACTOR <= rect.bottom + traits.bottomMargin) {
-        adjacentEdges.push('bottom');
-      }
-
-      if (parentRect.right - parentTraits.rightPadding - FUZZ_FACTOR <= rect.right + traits.rightMargin) {
-        adjacentEdges.push('right');
-      }
-
-      return adjacentEdges;
-    }
-
-    // Get the true amount of spacing around each object.
-    // For the top, left, bottom and rightmost objects in each container,
-    // the parent container's margin/padding for that edge should be added to it
-    // because we want the complete amount of visual spacing on that edge.
-    function getSpacingTraitsStack(traitStack) {
-
-      // Create the spacing properties
-      function getSpacingTraits(item) {
-        return {
-          topSpacing: item.topMargin + item.topPadding,
-          leftSpacing: item.leftMargin + item.leftPadding,
-          bottomSpacing: item.bottomMargin + item.bottomPadding,
-          rightSpacing: item.rightMargin + item.rightPadding
-        };
-      }
-
-      var spacingTraitStack = traitStack.map(getSpacingTraits),
-        index;
-
-      function combineSpacingForAdjacentEdges(edge) {
-        // Edges are adjacent, so use combined separation value for both, on that edge
-        var propName = edge + 'Spacing', // E.g. topSpacing
-          sum = spacingTraitStack[index][propName] + spacingTraitStack[index + 1][propName];
-        spacingTraitStack[index][propName] = sum;
-        spacingTraitStack[index + 1][propName] = sum;
-      }
-
-      // Cascade the spacing of each edge on the parent to its child, as appropriate.
-      // For example, if the element is at the top of the parent, treat both object's top as
-      // having the same aggregated values.
-      // Because we compare each element to its parent, we start with child of the top ancestor.
-      for (index = spacingTraitStack.length - 2; index >= 0; index --) {
-        var adjacentEdges = getAdjacentEdges(traitStack, index);
-        adjacentEdges.forEach(combineSpacingForAdjacentEdges);
-      }
-
-      return spacingTraitStack;
+    function isVisualMedia(traits, node) {
+      var style = traits.style;
+      return common.isVisualMedia(node) ||
+        // Or if one of those <div></div> empty elements just there to show a background image
+        (traits.childCount === 0 && style.backgroundImage !== 'none' &&
+          (style.backgroundRepeat === 'no-repeat' || style.backgroundSize === 'cover'
+            || style.backgroundSize === 'contain') &&
+          $(node).is(':empty'));
     }
 
     if (SC_UNIT) {

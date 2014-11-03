@@ -44,7 +44,7 @@ describe("sitecues", function () {
       });    
 
       // Commented this out. We switched the inverse key from 'r' to 'Cmd + LShift + R', We have
-      // no method of testing special keys yet. - Al
+      // no method of testing special navkeys yet. - Al
 
       // it("body should have invert filter", function (done) {
       //   session.browser.elementByTagName('body', function(err, el) {

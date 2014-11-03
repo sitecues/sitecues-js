@@ -1,59 +1,54 @@
 sitecues.def('status', function (status_module, callback) {
-  
+
   'use strict';
 
-  sitecues.use('jquery', 'audio', 'conf', function ( $, audio, conf ) {
+  sitecues.use('jquery', 'audio', 'conf', function ($, audio, conf) {
 
-    // The default status formatter: simply log all data to the console log.
-    function consoleCallback (info) {
-     
-      // We need to have JSON and JSON.stringify if this is to work...
-      if (console && console.log && JSON && JSON.stringify) {
-         
-        // Make sure we are not running from a file (unit testing in node)
-        if (window.location.protocol !== 'file:') {
+    // The default status formatter: logs all data to the console.
+    function consoleCallback(status) {
+      // Make sure we are not running from a file (unit testing in node)...
+      if (location.protocol === 'http:' || location.protocol === 'https:') {
+        // We only support the native console for now, so make sure it exists...
+        if (console && console.log) {
           // Make it clear where to begin copying...
-          console.log('\n\n-----BEGIN SITECUES STATUS-----');
-          
-          // Log with pretty-print
-          console.log(JSON.stringify(info, null, '\t'));
-          
-          // Make it clear where to end copying
-          console.log('-----END SITECUES STATUS-----\n\n');
+          console.log('\n-----BEGIN SITECUES STATUS-----\n');
+          // Log with pretty-print, if possible...
+          console.log(format(status));
+          // Make it clear where to end copying...
+          console.log('\n-----END SITECUES STATUS-----\n');
         }
-      
-        // '...sitecues Status logged as JSON Object.';
-
-      // If we don't have JSON or Stringify...
-      } else {
-        
-        // Make sure we are not running from a file (unit testing in node)
-        if (window.location.protocol !== 'file:') {
-           
-           // ...the output will not be quite so pretty
-           console.log(info);
-
-        }
-
-        // '...sitecues Status logged as JavaScript Object.';
-
       }
-
     }
-  
+
+    // Helper to turn objects into string representations for logging...
+    function format(object) {
+
+        var INDENTATION = '    ',
+            result = object;
+
+        if (JSON && JSON.stringify) {
+          result = JSON.stringify(object, null, INDENTATION);
+        }
+
+        return result;
+    }
 
     status_module = function (callback) {
+
+      var html = document.documentElement,
+          confData = conf.data(),
+          coordinates,
+          ajax_urls,
+          setting,
+          state,
+          info;
+
       callback = callback || consoleCallback;
 
-      var data = conf.data()
-        , ajax_urls
-        , setting
-        , info
-        ;
-
       info = {
-        'current_url'     : window.location.href,
-        'sitecues_js_url' : (sitecues.getLibraryUrl()).raw,
+        'time'            : Date.now(),
+        'current_url'     : location.href,
+        'sitecues_js_url' : sitecues.getLibraryUrl().raw,
         'user_agent'      : navigator.userAgent,
         'version'         : {
           'sitecues_js'   : sitecues.getVersion(),
@@ -61,45 +56,79 @@ sitecues.def('status', function (status_module, callback) {
           'sitecues_ws'   : null
         }
       };
-
-      // Set the ajax URLs
-      ajax_urls = {
-        up: ( '//' + ( sitecues.getLibraryConfig() ).hosts.up + '/status' ),
-        ws: ( '//' + ( sitecues.getLibraryConfig() ).hosts.ws + '/sitecues/api/util/status' )
+      // Measurements useful for reproducing bugs, because their state affects
+      // the behavior of our CSS, animations, etc.
+      coordinates = {
+        'document'        : {
+          'clientWidth'   : html.clientWidth,
+          'clientHeight'  : html.clientHeight,
+          'clientLeft'    : html.clientLeft,
+          'clientTop'     : html.clientTop
+        },
+        'window'          : {
+          'pageXOffset'   : pageXOffset,
+          'pageYOffset'   : pageYOffset,
+          'innerWidth'    : innerWidth,
+          'innerHeight'   : innerHeight,
+          'outerWidth'    : outerWidth,
+          'outerHeight'   : outerHeight,
+          'screenX'       : screenX,
+          'screenY'       : screenY
+        },
+        'screen'          : {
+          'width'         : screen.width,
+          'height'        : screen.height,
+          'availWidth'    : screen.availWidth,
+          'availHeight'   : screen.availHeight,
+          'availLeft'     : screen.availLeft,
+          'availTop'      : screen.availTop
+        }
       };
 
-      // Define the info object to be formatted by the log
-      for (setting in data) {
-        if (data.hasOwnProperty(setting)){
-          info[setting] = data[setting];
+      // Set the server URLs for retrieving the status of our services (version info, etc.)
+      ajax_urls = {
+        up : '//' + sitecues.getLibraryConfig().hosts.up + '/status',
+        ws : '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/util/status'
+      };
+
+      // Add current settings (zoom level, etc) to the log...
+      for (setting in confData) {
+        if (confData.hasOwnProperty(setting)) {
+          info[setting] = confData[setting];
         }
       }
-      
-      // Appends sitecues status to the window in a div (used by Steve for testing)
-      function addStatusInfoToDOM(){
-        var sitecuesStatusId='sitecues-status-output'
-          , div = document.getElementById(sitecuesStatusId)
-          ;
-        
-        if (div) {
-          div.innerHTML = '';
-        } else {
-          div = document.createElement('div');
-          div.setAttribute('id', 'sitecues-status-output');
-          div.setAttribute('style', 'display:none!important;');
-          document.getElementsByTagName('html')[0].appendChild(div);
+      // Add all measurements for bug reproduction to the log...
+      for (state in coordinates) {
+        if (coordinates.hasOwnProperty(state)) {
+          info[state] = coordinates[state];
+        }
+      }
+
+      // Appends sitecues status to the document (useful for automated testing)
+      function addStatusToDOM(status) {
+        var id      = 'sitecues-status-output',
+            elem    = document.getElementById(id),
+            content = format(status);
+
+        if (!elem) {
+          elem = document.createElement('div');
+          elem.setAttribute('id', id);
+          elem.setAttribute('style', 'display:none!important;');
+          html.appendChild(elem);
         }
 
-        div.innerHTML = JSON.stringify(info);
+        elem.innerHTML = content;
       }
 
         // Defer the ajax calls so we can respond when both are complete
-      function ajaxCheck () {
-        if ( typeof info.version.sitecues_up === 'string' && 
-             typeof info.version.sitecues_ws === 'string' ) {
-          
+      function readyCheck() {
+        var ready = typeof info.version.sitecues_up === 'string' &&
+                    typeof info.version.sitecues_ws === 'string';
+
+        if (ready) {
+          sitecues.latestStatus = info;
+          addStatusToDOM(info);
           callback(info);
-          addStatusInfoToDOM(info);
         }
       }
 
@@ -108,39 +137,34 @@ sitecues.def('status', function (status_module, callback) {
         dataType: 'json',
         type:     'GET',
         url:      ajax_urls.up,
-        success: function(response){
-          
+        success: function (response) {
           // Set the version based on the AJAX response object
           info.version.sitecues_up = response.version;
-          ajaxCheck();
+          readyCheck();
         },
-        error: function(){
-          
+        error: function () {
           // Set an error message if the AJAX object did not return
-          info.version.sitecues_up = 'Error Fetching Version from Service URL';
-          ajaxCheck();
+          info.version.sitecues_up = 'Error fetching UP version from service URL';
+          readyCheck();
         }
       });
-        
+
       $.ajax({
         cache:    false,
         dataType: 'json',
         type:     'GET',
         url:      ajax_urls.ws,
-        success: function(response){
-          
+        success: function (response) {
           // Set the version based on the AJAX response object
           info.version.sitecues_ws = response.version;
-          ajaxCheck();
+          readyCheck();
         },
-        error: function(){
-
+        error: function () {
           // Set an error message if the AJAX object did not return
-          info.version.sitecues_ws = 'Error Fetching Version from Service URL';
-          ajaxCheck();
+          info.version.sitecues_ws = 'Error fetching WS version from service URL';
+          readyCheck();
         }
       });
-
       return 'Fetching sitecues status...';
     };
 

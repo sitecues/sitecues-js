@@ -35,7 +35,9 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
           id = ids[idCount];
           target = findElement(id, isMap);
           if (target) {
-            appendText(' ' + appendAccessibleTextFromSubtree(target, true) + ' ');
+            appendText(' ');
+            appendAccessibleTextFromSubtree(target, true);
+            appendText(' ');
           }
         }
       }

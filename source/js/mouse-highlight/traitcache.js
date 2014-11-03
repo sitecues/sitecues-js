@@ -7,7 +7,7 @@
  */
 sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
   'use strict';
-  sitecues.use('jquery', 'conf', 'util/common', function($, conf, common) {
+  sitecues.use('jquery', 'zoom', function($, zoomMod) {
     var uniqueIdCounter = 0,
       styleCache = {},
       rectCache = {},
@@ -26,11 +26,20 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     // ------- PUBLIC ----------
 
     // Call this before using cache if view may have changed
-    // Return true if view was out-of-date
-    traitcache.updateCachedView = function () {
+    traitcache.resetCache = function () {
       updateCachedViewSize();
-      updateCachedViewPosition();
-      resetCache();
+      traitcache.updateCachedViewPosition();
+      styleCache = {};
+      rectCache = {};
+    };
+
+    traitcache.updateCachedViewPosition = function() {
+      cachedViewPosition.x = window.pageXOffset;
+      cachedViewPosition.y = window.pageYOffset;
+    };
+
+    traitcache.getCachedViewPosition = function() {
+      return cachedViewPosition;
     }
 
     traitcache.getCachedViewSize = function() {
@@ -74,15 +83,30 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
         // Copy rect object into our own object so we can modify values
         rect = $.extend({}, element.getBoundingClientRect());
 
+        // Use the scroll height when the overflow is visible, as it shows the full height
+        if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
+          !parseFloat(traitcache.getStyleProp(element, 'borderRightWidth'))) {
+          var scrollHeight = element.scrollHeight;
+          if (scrollHeight > 1 && scrollHeight > element.clientHeight) {
+            rect.height = Math.max(rect.height, scrollHeight * cachedViewSize.zoom);
+          }
+        }
+
+        // Use the scroll width when the overflow is visible, as it shows the full height
+        if (traitcache.getStyleProp(element, 'overflowX') === 'visible' &&
+          !parseFloat(traitcache.getStyleProp(element, 'borderBottomWidth'))) {
+          rect.width = Math.max(rect.width, element.scrollWidth * cachedViewSize.zoom);
+        }
+
         // Add scroll values so that rectangles are not invalid after user scrolls.
         // This effectively makes them absolutely positioned rects vs. fixed.
         // This means we're caching the rectangle relative to the top-left of the document.
-        var top = cachedViewPosition.y,
-          left = cachedViewPosition.x;
-        rect.top += top;
-        rect.bottom += top;
-        rect.left += left;
-        rect.right += left;
+        var scrollTop = cachedViewPosition.y,
+          scrollLeft = cachedViewPosition.x;
+        rect.top += scrollTop;
+        rect.left += scrollLeft;
+        rect.bottom = rect.top + rect.height;
+        rect.right = rect.left + rect.width;
 
         // Store results in cache
         rectCache[id] = rect;
@@ -90,6 +114,15 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
 
       return rect;
     };
+
+    // Hidden for any reason? Includes offscreen or dimensionless, or tiny (if doTreatTinyAsHidden == true)
+    traitcache.isHidden = function(element, doTreatTinyAsHidden) {
+      var rect = traitcache.getRect(element),
+        MIN_RECT_SIDE_TINY = 5,
+        minRectSide = doTreatTinyAsHidden ? MIN_RECT_SIDE_TINY * traitcache.getCachedViewSize().zoom : 1;
+      return (rect.right < 0 || rect.top < 0 || rect.width < minRectSide || rect.height < minRectSide);
+    };
+
 
     traitcache.getUniqueId = function(element) {
       var currId = getStoredUniqueId(element);
@@ -110,17 +143,7 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     function updateCachedViewSize() {
       cachedViewSize.height = window.innerHeight;
       cachedViewSize.width = window.innerWidth;
-      cachedViewSize.zoom = conf.get('zoom');
-    }
-
-    function updateCachedViewPosition() {
-      cachedViewPosition.x = window.pageXOffset;
-      cachedViewPosition.y = window.pageYOffset;
-    }
-
-    function resetCache() {
-      styleCache = {};
-      rectCache = {};
+      cachedViewSize.zoom = zoomMod.getCompletedZoom()
     }
 
     if (SC_UNIT) {

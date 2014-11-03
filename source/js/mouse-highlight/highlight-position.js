@@ -7,22 +7,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
   var MIN_RECT_SIDE = 4;
 
-  sitecues.use('jquery', 'util/common', 'conf', 'platform', 'mouse-highlight/traitcache',
-               function ($, common, conf, platform, traitcache) {
-
-    mhpos.convertFixedRectsToAbsolute = function(fixedRects) {
-      var absoluteRects = [];
-      var scrollPos = getScrollPosition();
-      for (var count = 0; count < fixedRects.length; count ++) {
-        absoluteRects[count] = getCorrectedBoundingBox(fixedRects[count], scrollPos);
-      }
-      // AK: this is quick'n'dirty fix for the case rect is undefined
-      if (absoluteRects.length === 0) {
-        absoluteRects = {'left': 0, 'top': 0, 'width': 0, 'height': 0};
-      }
-                  
-      return absoluteRects;
-    };
+  sitecues.use('jquery', 'util/common', 'zoom', 'platform', 'mouse-highlight/traitcache',
+               function ($, common, zoomMod, platform, traitcache) {
 
     /**
      * Get the fixed position rectangles for the target's actual rendered content.
@@ -37,17 +23,37 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
      * they will be combined into a single rectangle.
      * @param selector -- what to get bounding boxes
      * @param proximityBeforeBoxesMerged -- if two boxes are less than this number of pixels apart, they will be merged into one
-     * @param exact -- true if it's important to iterate over each line of text as a separate rectangle (slower)
+     * @param doStretchForSprites -- true if it's important to add rects for background sprites
+     * @return {
+     *   allRects: [],  // Array of rectangles
+     *   hiddenElements: []   // Elements whose contents are not included in the highlight, e.g. have absolutely positioned or hidden subtrees
+     * }
      */
-    mhpos.getAllBoundingBoxes = function (selector, proximityBeforeBoxesMerged, stretchForSprites) {
-      var allRects = [],
+    mhpos.getHighlightPositionInfo = function (selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
+      var
+        accumulatedPositionInfo = {
+          allRects: [],
+          hiddenElements: []
+        },
         $selector = $(selector),
-        clipRect = getAncestorClipRect($selector);
-      getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites);
-      mhpos.combineIntersectingRects(allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+        clipRects = getAncestorClipRects($selector);
 
-      return allRects;
+      getHighlightInfoRecursive($selector, accumulatedPositionInfo, clipRects, doStretchForSprites, doIgnoreFloats, true);
+      mhpos.combineIntersectingRects(accumulatedPositionInfo.allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+
+      return accumulatedPositionInfo;
     };
+
+    // Get a single rectangle that covers the entire area defined by the selector
+    // doIgnoreFloats is optional
+    mhpos.getRect = function (selector, doIgnoreFloats) {
+      var COMBINE_ALL_RECTS = 99999;
+      return mhpos.getHighlightPositionInfo(selector, COMBINE_ALL_RECTS, true, doIgnoreFloats).allRects[0]
+    };
+
+    function getZoom() {
+      return zoomMod.getCompletedZoom();
+    }
 
     function scaleRect(rect, scale, offsetX, offsetY) {
       var newRect = {
@@ -56,67 +62,46 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         left   : ((rect.left + offsetX) * scale) - offsetX,
         top    : ((rect.top + offsetY) * scale) - offsetY
       };
-      newRect.right  = newRect.left + newRect.width;
-      newRect.bottom = newRect.top  + newRect.height;
-
-      return newRect;
+      return normalizeRect(newRect);
     }
 
-    function getRangeRect(containerNode) {
+    mhpos.getRangeRect = function(containerNode) {
       var range = document.createRange();
       range.selectNodeContents(containerNode);
       return getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
-    }
+    };
 
     function getUserAgentCorrectionsForRangeRect(rect) {
       if (platform.browser.isFirefox) {
         // This must be done for range.getBoundingClientRect(),
         // but not for element.getBoundingClientRect()
-        var currZoom = conf.get('zoom'),
-          mozRect = $.extend({}, rect),
-          scaledRect = scaleRect(mozRect, currZoom, window.pageXOffset, window.pageYOffset);
-
         // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
         // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
         // and add in the difference in left coordinates.
-        var bodyRange = document.createRange();
+        var mozRect = $.extend({}, rect),
+          viewPos = traitcache.getCachedViewPosition(),
+          bodyRange = document.createRange();
+
         bodyRange.selectNode(document.body);
-        var bodyRangeLeft = (bodyRange.getBoundingClientRect().left + window.pageXOffset) * currZoom - window.pageXOffset,
-          bodyLeft = traitcache.getScreenRect(document.body).left;
-        scaledRect.left += bodyLeft - bodyRangeLeft;
+        var
+          bodyRangeRect = bodyRange.getBoundingClientRect(),
+          bodyElementRect = traitcache.getScreenRect(document.body),
+          zoomForScale = bodyElementRect.height / bodyRangeRect.height,
+          scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y),
+          bodyRangeLeft = (bodyRangeRect.left + viewPos.x) * zoomForScale - viewPos.x,
+          bodyRangeTop = (bodyRangeRect.top + viewPos.y) * zoomForScale - viewPos.y;
+        scaledRect.left += bodyElementRect.left - bodyRangeLeft;
+        scaledRect.top += bodyElementRect.top - bodyRangeTop;
 
         return scaledRect;
       }
       return rect;
     }
 
-    function getBoundingRectMinusPadding(node) {
-      var rect = node.getBoundingClientRect();
-
-      // If range is created on node w/o text, getBoundingClientRect() returns zero values.
-      // This concerns images and other nodes such as paragraphs - with no text inside.
-      var isEmptyRect = true;
-
-      for (var prop in rect) {
-        if (rect[prop] !== 0) {
-          isEmptyRect = false;
-          continue;
-        }
-      }
-
-      if (isEmptyRect) {rect = node.getBoundingClientRect && traitcache.getScreenRect(node);}
-
-      if (node.nodeType !== 1 /* Element */) {
-        return rect;
-      }
-
-      return getRectMinusPadding(node, rect);
-    }
-
-    function getRectMinusPadding(node, rect) {
+    function getRectMinusPadding(node, style, rect) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
-      var style = traitcache.getStyle(node),
+      var
         paddingTop = parseFloat(style.paddingTop),
         paddingLeft = parseFloat(style.paddingLeft),
         paddingBottom = parseFloat(style.paddingBottom),
@@ -132,51 +117,22 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       };
     }
 
-    function hasVisibleBorder(style) {
-      return parseFloat(style['border-left-width']) || parseFloat(style['border-top-width']);
-    }
-
-    function getEmsToPx(fontSize, ems) {
-      var measureDiv = $('<div/>')
-           .appendTo(document.body)
-           .css({
-          fontSize: fontSize,
-          width: ems + 'em',
-          visibility: 'hidden'
-        }),
-        px = measureDiv.width();
-      measureDiv.remove();
-      return px;
-    }
-
-    function getBulletWidth(element, style, bulletType) {
-      var ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
-      if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
-        ems = 1.6; // Simple bullet
-      } else if (bulletType === 'decimal') {
-        var start = parseInt($(element).attr('start'), 10),
-          end = (start || 1) + element.childElementCount - 1;
-        ems = (0.9 + 0.5 * end.toString().length);
-      }
-      return getEmsToPx(style.fontSize, ems);
+    function hasHiddenBullets(style) {
+      return style.listStyleType === 'none' && style.listStyleImage === 'none';
     }
 
     function getBulletRect(element, style) {
-      var bulletType = style.listStyleType;
-      if (bulletType === 'none' && style.listStyleImage === 'none') {
-        return null; // inside, will already have bullet incorporated in bounds
+      if (style.display !== 'list-item' || hasHiddenBullets(style)) {
+        // Do not perform the measurement on anything but a list item with visible bullets
+        return;
       }
-      if (style.display !== 'list-item') {
-        var firstChild = element.firstElementChild;
-        if (!firstChild || traitcache.getStyleProp(firstChild, 'display') !== 'list-item') {
-          return null; /// Needs to be list-item or have list-item child
-        }
-      }
+
       var INSIDE_BULLET_PADDING = 5,  // Add this extra space to the left of bullets if list-style-position: inside, otherwise looks crammed
         bulletWidth = style.listStylePosition === 'inside' ? INSIDE_BULLET_PADDING :
-          getBulletWidth(element, style, bulletType),
-        boundingRect = element.getBoundingClientRect(),
+          common.getBulletWidth(element.parentNode, style),
+        boundingRect = traitcache.getScreenRect(element),
         paddingLeft = parseFloat(traitcache.getStyleProp(element, 'paddingLeft'));
+
       return {
         top: boundingRect.top,
         height: boundingRect.height,
@@ -187,17 +143,29 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getSpriteRect(element, style) {
       // Check special case for sprites, often used for fake bullets
-      if (style['background-image'] === 'none' || style['background-repeat'] !== 'no-repeat') {
-        return null;
+      // The following cases are unlikely to be sprites:
+      // - Repeating backgrounds
+      // - Percentage-positioned or centered (computed background-position-x is 50%)
+
+      // Check for elements with only a background-image
+      var rect = $.extend({}, traitcache.getScreenRect(element, true));
+      if ($(element).is(':empty')) {
+        // Empty elements have no other purpose than to show background sprites
+        return rect;
+      }
+
+      var backgroundPos = style.backgroundPosition;
+      if (style.backgroundImage === 'none' || style.backgroundRepeat !== 'no-repeat' ||
+        (parseFloat(backgroundPos) > 0 && backgroundPos.indexOf('%') > 0)) {
+        return;
       }
 
       // Background sprites tend to be to the left side of the element
-      var backgroundPos = style['background-position'],
+      var
         backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
         // Use positive background positions (used for moving the sprite to the right within the element)
         // Ignore negative background positions (used for changing which sprite is used within a larger image)
-        actualLeft = Math.max(0, backgroundLeftPos),
-        rect = $.extend({}, traitcache.getScreenRect(element, true));
+        actualLeft = isNaN(backgroundLeftPos) || backgroundLeftPos < 0 ? 0 : backgroundLeftPos;
       rect.left += actualLeft;
       return rect.width > 0 ? rect : null;
     }
@@ -211,42 +179,54 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       if (element === document.body) {
         return; // The <body> element is generally reporting a different scroll width than client width
       }
-      var overflowX = style['overflow-x'] === 'visible' && element.scrollWidth - element.clientWidth > 1;
-      var overflowY = style['overflow-y'] === 'visible' &&
-        element.scrollHeight - element.clientHeight >= getLineHeight(style);
-      if (!overflowX && !overflowY) {
-        return null;
+      var clientHeight = element.clientHeight;
+      if (!clientHeight) {
+        return; // This is just what parents of inline images in IE do -- we're looking for the cases where clientHeight is at least 1
       }
-    
 
-      // Check for descendant with visibility: hidden -- those break our overflow check.
+      var
+        overflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
+        overflowY = style.overflowY === 'visible' &&
+          element.scrollHeight - clientHeight >= getLineHeight(style);
+
+      if (!overflowX && !overflowY) {
+        return;
+      }
+
+      // Check hidden or out-of-flow descendants -- those break our overflow check.
       // Example: google search results with hidden drop down menu
       // For now, we will not support overflow in this case.
-      var hasVisibilityHiddenDescendant = false,
+      var hasHiddenDescendant = false,
         MAX_ELEMENTS_TO_CHECK = 40;
       $(element).find('*').each(function(index) {
         if (index > MAX_ELEMENTS_TO_CHECK) {
           return false;
         }
-        if (traitcache.getStyleProp(this, 'visibility') === 'hidden') {
-          hasVisibilityHiddenDescendant = true;
+        var rect = traitcache.getRect(this),
+          style = traitcache.getStyle(this);
+        if (rect.right < 0 || rect.bottom < 0 ||
+          style.visibility === 'hidden' ||
+          style.position === 'absolute' ||
+          style.position === 'fixed') {
+          hasHiddenDescendant = true;
           return false;
         }
       });
-      if (hasVisibilityHiddenDescendant) {
-        return null;
+      if (hasHiddenDescendant) {
+        return;
       }
 
       // Overflow is visible: add right and bottom sides of overflowing content
       var rect = traitcache.getScreenRect(element),
+        zoom = getZoom(),
         newRect = {
           left: rect.left,
           top: rect.top,
-          width: overflowX ? element.scrollWidth : rect.width,
-          height: overflowY ? element.scrollHeight : rect.height
+          width: overflowX ? element.scrollWidth * zoom : Math.min(rect.width, MIN_RECT_SIDE),
+          height: overflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
         };
 
-      return getRectMinusPadding(element, newRect);
+      return getRectMinusPadding(element, style, newRect);
     }
 
     function normalizeRect(rect) {
@@ -256,120 +236,169 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return newRect;
     }
 
-    function addRect(allRects, clipRect, unclippedRect) {
+    // Add rectangle to collected list of all rectangles
+    function addRect(allRects, clipRect, unclippedRect, doLoosenMinSizeRule) {
       if (!unclippedRect) {
         return;
       }
-      var rect = getClippedRect(unclippedRect, clipRect);
-      if (rect.width < MIN_RECT_SIDE|| rect.height < MIN_RECT_SIDE) {
+      var rect = getClippedRect(unclippedRect, clipRect),
+        zoom = getZoom(),
+        minRectSide = MIN_RECT_SIDE * zoom;
+      if (!doLoosenMinSizeRule && (rect.width < minRectSide || rect.height < minRectSide)) {
         return; // Not large enough to matter
       }
 
       rect = normalizeRect(rect);
-
-      if (rect.right < 0 || rect.bottom < 0) {
-        var zoom = conf.get('zoom');
-        var absoluteRect = mhpos.convertFixedRectsToAbsolute([rect], zoom)[0];
-        if (absoluteRect.right < 0 || absoluteRect.bottom < 0) {
-          // Don't be fooled by items hidden offscreen -- those rects don't count
-          return;
-        }
-      }
-
       allRects.push(rect);
     }
 
-    function getAllBoundingBoxesExact($selector, allRects, clipRect, stretchForSprites) {
+    function getHighlightInfoRecursive($selector, accumulatedResults, clipRects, doStretchForSprites, doIgnoreFloats, isTop) {
+      var
+        allRects = accumulatedResults.allRects,
+        hiddenElements = accumulatedResults.hiddenElements,
+        viewPos = traitcache.getCachedViewPosition();
 
-      $selector.each(function () {
 
-        var isElement = this.nodeType === 1;
+      $selector.each(function (index) {
+        var isElement = this.nodeType === 1,
+          clipRect = Array.isArray(clipRects) ? clipRects[index] : clipRects;
 
         // --- Leaf nodes ---
         if (!isElement) {
           if (this.nodeType === 3 && this.data.trim() !== '') { /* Non-empty text node */
+            // ----------------------------------------------------------------------------------------------------
+            // --- FAST PATH -- REMOVED BECAUSE SOME CHILD ELEMENTS MAY USING CLIPPING! SC-2047 --
             // Fast path for text containers:
             // We found a child text node, so get the bounds of all children at once via a DOM range.
             // This is much faster than iterating through all of the sibling text/inline nodes, by
             // reducing the number of nodes we touch.
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
-            var parentContentsRect = getRangeRect(this.parentNode);
-            addRect(allRects, clipRect, parentContentsRect);
-            return false;  // Don't keep iterating over text/inlines in this container
+            //
+            // var parentContentsRect = mhpos.getRangeRect(this.parentNode);
+            // addRect(allRects, clipRect, parentContentsRect);
+            // return false;  // Don't keep iterating over text/inlines in this container
+            // ----------------------------------------------------------------------------------------------------
+
+            // ----------------------------------------------------------------------------------------------------
+            // -- NORMAL -- NO LONGER NEED TO USE ABOVE 'FAST PATH' METHOD --
+            // Our other performance fixes (such as traitcache, and better picking) have removed the need
+            // for the above old 'fast path' method which fixed slow sites like http://en.wikipedia.org/wiki/Cat
+            // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
+            // hidden and clipped elements.
+            // ----------------------------------------------------------------------------------------------------
+            var range = document.createRange(),
+              rect,
+              textVerticalClipRect;
+
+            range.selectNode(this);
+            rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
+            textVerticalClipRect = getTextVerticalClipRect(this, rect);
+
+            if (textVerticalClipRect) {
+              // Clip text to the bounding element, otherwise the top and bottom will
+              // encompass the entire line-height, which can contain a lot of whitespace/
+              // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
+              rect.top = Math.max(rect.top, textVerticalClipRect.top);
+              rect.bottom = Math.min(rect.bottom, textVerticalClipRect.bottom);
+              rect.height = rect.bottom - rect.top;
+            }
+
+            addRect(allRects, clipRect, rect);
           }
-          return true;
+          return;
         }
 
         var style = traitcache.getStyle(this);
 
         // --- Invisible elements ---
-        if (style.visibility === 'hidden' || style.visibility === 'collapse') {
-          return true;
+        if (style.visibility === 'hidden' || style.visibility === 'collapse'  || style.display === 'none') {
+          hiddenElements.push(this);
+          return;
         }
 
-        if (style.position === 'absolute' || style.position === 'fixed') {
-          clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
+        if (doIgnoreFloats && style.float !== 'none') {
+          return;
         }
 
+        var thisRect = traitcache.getScreenRect(this);
 
-        // --- Overflowing content ---
-        addRect(allRects, clipRect, getOverflowRect(this, style));
+        // -- Clipping rules ---
+        clipRect = getChildClipRect(this, style, clipRect, thisRect);
 
-
-        // --- Visible border or form controls ---
-        if (hasVisibleBorder(style) || common.isFormControl(this)) {
-          addRect(allRects, clipRect, traitcache.getScreenRect(this)); // Make it all visible, including padding and border
-          // Keep iterating: there may be some content outside
+        if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
+          // Hidden off the page
+          // This is a technique used to hide contents offscreen without hiding it from screen readers
+          hiddenElements.push(this);
+          return;
         }
 
-        // --- List bullets ---
-        addRect(allRects, clipRect, getBulletRect(this, style));
-
-
-        // --- Background sprites ---
-        if (stretchForSprites) {
-          addRect(allRects, clipRect, getSpriteRect(this, style));
+        // -- Out of flow and is not the top element --
+        if (!isTop && (style.position === 'absolute' || style.position === 'fixed')) {
+          var parentRect = traitcache.getScreenRect(this.parentNode),
+            FUZZ_FACTOR = 4;
+          // If the child bounds pop out of the parent bounds by more
+          // than FUZZ_FACTOR, it will need to be kept separate and
+          // not included in the current bounds calculation for this subtree
+          if (Math.abs(thisRect.left - parentRect.left) > FUZZ_FACTOR ||
+            Math.abs(thisRect.top - parentRect.top) > FUZZ_FACTOR ||
+            Math.abs(thisRect.right - parentRect.right) > FUZZ_FACTOR ||
+            Math.abs(thisRect.bottom - parentRect.bottom) > FUZZ_FACTOR) {
+            hiddenElements.push(this);
+            return;
+          }
         }
 
         // --- Media elements ---
         if (common.isVisualMedia(this)) {
           // Elements with rendered content such as images and videos
-          addRect(allRects, clipRect, getBoundingRectMinusPadding(this));
-          return true;
+          addRect(allRects, clipRect, getRectMinusPadding(this, style, thisRect));
+          return;
         }
 
+        // --- Overflowing content ---
+        addRect(allRects, clipRect, getOverflowRect(this, style));
+
+        // --- Visible border or form controls ---
+        if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
+          common.isFormControl(this)) {
+          addRect(allRects, clipRect, thisRect); // Make it all visible, including padding and border
+          // Keep iterating: there may be some content outside
+        }
+
+        // --- List bullets ---
+        addRect(allRects, clipRect, getBulletRect(this, style), true);
+
+        // --- Background sprites ---
+        if (doStretchForSprites) {
+          addRect(allRects, clipRect, getSpriteRect(this, style));
+        }
 
         // --- Elements with children ---
         if (this.hasChildNodes()) {
           // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          var isClip = isClipElement(this),
-            newClipRect = clipRect;
-          if (isClip) {
-            newClipRect = traitcache.getScreenRect(this);
-            if (clipRect) {  // Combine parent clip rect with new clip
-              newClipRect = getClippedRect(clipRect, newClipRect);
-            }
-          }
-          getAllBoundingBoxesExact($(this.childNodes), allRects, newClipRect, stretchForSprites);  // Recursion
-          return true;
+          getHighlightInfoRecursive($(this.childNodes), accumulatedResults, clipRect, doStretchForSprites, doIgnoreFloats);  // Recursion
+          return;
         }
       });
     }
 
-    function isClipElement(element) {
-      var style = traitcache.getStyle(element);
+    function isClipElement(style) {
       return style.clip !== 'auto' || style.overflow !== 'visible';
     }
 
+    // Return the portion of unclippedRect after clipRect gets to clip it
     function getClippedRect(unclippedRect, clipRect) {
       if (!clipRect) {
         return normalizeRect(unclippedRect); // Convert to non-native object so that properties can be modified if necessary
       }
-      var left   = Math.max( unclippedRect.left, clipRect.left);
-      var right  = Math.min( unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width);
-      var top    = Math.max( unclippedRect.top, clipRect.top );
-      var bottom = Math.min( unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
+      if (!unclippedRect) {
+        return normalizeRect(clipRect);
+      }
+      var left = Math.max(unclippedRect.left, clipRect.left),
+        right = Math.min(unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width),
+        top = Math.max(unclippedRect.top, clipRect.top),
+        bottom = Math.min(unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
       return {
         left: left,
         top: top,
@@ -380,32 +409,61 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       };
     }
 
+    // Return the new clip rect for the child, taking into account
+    // the old clip rect and usage of CSS positioning
+    // TODO What if overflow-X is hidden and overflow-y is visible?
+    function getChildClipRect(element, style, clipRect, elementRect) {
+      if (clipRect && clipRect.willOutOfFlowCancel && (style.position === 'absolute' || style.position === 'fixed')) {
+        clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
+      }
+      if (isClipElement(style)) {
+        clipRect = getClippedRect(clipRect, elementRect);
+        clipRect.willOutOfFlowCancel = true;
+      }
+      if (clipRect) {
+        // Turns to false if we have non-static positioning because
+        // next out of flow descendant doesn't affect the current clip rect
+        clipRect.willOutOfFlowCancel = clipRect.willOutOfFlowCancel &&
+          style.position === 'static';
+      }
+
+      return clipRect;
+    }
+
     // Get clip rectangle from ancestors in the case any of them are clipping us
-    function getAncestorClipRect($selector) {
-      var kMaxAncestorsToCheck = 5;
+    function getAncestorClipRects($selector) {
       var allClipRects = [];
+
       $selector.each(function() {
-        // Get ancestor clip rect -- do up to kMaxAncestorsToCheck ancestors (beyond that, it's unlikely to clip)
-        var ancestors = $selector.parents();
-        var clipRect = null;
-        ancestors.each(function(index) {
-          if (index >= kMaxAncestorsToCheck) {
-            return false;
-          }
-            
-          if (isClipElement(this)) {
-            var newClipRect = traitcache.getScreenRect(this);
-            clipRect = clipRect ? getClippedRect(clipRect, newClipRect) : newClipRect;
-          }
+        var ancestors = $selector.parentsUntil(document.body).get().reverse(),
+          clipRect,
+          style;
+        $(ancestors).each(function() {
+          style = traitcache.getStyle(this);
+          clipRect = getChildClipRect(this, style, clipRect, traitcache.getScreenRect(this));
         });
         allClipRects.push(clipRect);
       });
-      mhpos.combineIntersectingRects(allClipRects, 9999);
-      return allClipRects[0];
+
+      return allClipRects;
+    }
+
+    // A text range is clipped by the vertical bounds of it's parent element
+    // when the line height of the text is larger than the text rect's height --
+    // this avoids extra spacing above and below, especially around headings.
+    function getTextVerticalClipRect(textNode, textRect) {
+      var parent = textNode.parentNode,
+        zoom = getZoom(),
+        lineHeight = parseFloat(traitcache.getStyleProp(parent, 'lineHeight')) * zoom;
+      if (lineHeight > textRect.height) {
+        // Clip the text vertically to the parent element, because the large
+        // line-height causes the element bounds to be larger than the text
+        return traitcache.getScreenRect(parent);
+      }
     }
 
     /**
-     * Combine intersecting rects. If they are withing |extraSpace| pixels of each other, merge them.
+     * Combine intersecting rects. If they are within |extraSpace| pixels of each other, merge them.
      */
     mhpos.combineIntersectingRects = function(rects, extraSpace) {
       function intersects(r1, r2) {
@@ -450,31 +508,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         }
       }
     };
-
-    /**
-    * Return a corrected bounding box given the total zoom for the element and current scroll position
-    */
-    function getCorrectedBoundingBox(boundingBox, scrollPosition) {
-      var rect = {
-        left: boundingBox.left + scrollPosition.left,
-        top:  boundingBox.top + scrollPosition.top,
-        width: boundingBox.width,
-        height: boundingBox.height
-      };
-      rect.right = rect.left + rect.width;
-      rect.bottom = rect.top + rect.height;
-      return rect;
-    }
-
-    /**
-     * Obtain the scroll position.
-     */
-    function getScrollPosition() {
-      return {
-        left: window.pageXOffset,
-        top:  window.pageYOffset
-      };
-    }
 
     // Done.
     callback();

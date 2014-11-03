@@ -55,9 +55,6 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/jquery/cookie.js \
-	source/js/jquery/style.js \
-	source/js/jquery/effects.js \
 	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
@@ -79,10 +76,7 @@ files=\
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight.js \
-	source/js/keys.js \
-	source/js/cursor/images/win.js \
-	source/js/cursor/images/mac.js \
-	source/js/cursor/images/manager.js \
+	source/js/style-service.js \
 	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
@@ -90,17 +84,18 @@ files=\
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
-	source/js/hlb/event-handlers.js \
+	source/js/hlb/navkeys.js \
 	source/js/hlb/animation.js \
 	source/js/highlight-box.js \
+	source/js/keys.js \
 	source/js/hpan.js \
-	source/js/util/template.js \
 	source/js/status.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
 	source/js/metrics/hlb-opened.js \
+	source/js/metrics/zoom-changed.js \
 	source/js/metrics.js \
 
 ################################################################################
@@ -116,11 +111,9 @@ build:
 
 	@mkdir -p $(build-dir)/compile/js
 
-	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
+	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js $(files)
 
 #Copy files for Source-Maps
-	@mkdir -p $(build-dir)/js/source
-	@cp -R source/js $(build-dir)/js/source/
 
 	@mkdir -p $(build-dir)/etc/js
 	@cp -r source/js/_config $(build-dir)/etc/js

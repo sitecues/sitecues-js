@@ -99,7 +99,7 @@ sitecues.def("slider", function(slider, callback) {
                 letterBig: {
                     normal: "#FFFFFF",
                     hover: "#FFFFFF"
-                },
+                }
             },
 
             // Initialize the slider vars and call draw
@@ -109,11 +109,8 @@ sitecues.def("slider", function(slider, callback) {
                 this.setdimensions();
                 this.bindevents();
 
-                // Set to the zoomLevel in conf, or set to 1
-                this.zoomLevel = conf.get('zoom') || 1;
-
                 // Update the Thumb position based on the conf.zoom or at least 1
-                this.setThumbPositionFromZoomLevel(this.zoomLevel);
+                this.setThumbPositionFromZoomLevel();
                 this.translateThumbSVG();
 
             },
@@ -226,33 +223,15 @@ sitecues.def("slider", function(slider, callback) {
                 svg.letterBig.on('mousedown', context, this.mousedownletterbig);
                 svg.letterBigBack.on('mousedown', context, this.mousedownletterbig);
 
-                // Pass slider instance to anonfunc to set correct context of slider when called from conf
-                (function(slider_) {
+                zoom.setGlideChangeListener(function(zoomLevel) {
+                  slider.setThumbPositionFromZoomLevel.call(slider, zoomLevel);
+                  slider.translateThumbSVG.call(slider);
+                });
 
-                    // Update the Thumb element's position based on the zoom level now dimensions have changed
-                    conf.get('zoom', function(zoomLevel) {
-
-                        // Set to the zoomLevel in conf, or set to 1
-                        slider_.zoomLevel = zoomLevel || 1;
-
-                        // Only respond to conf zoom updates when mouse not down
-                        if (!slider_.mouseDownTrack) {
-
-                            // Update the Thumb position
-                            slider_.setThumbPositionFromZoomLevel.call(slider_, slider_.zoomLevel);
-                            slider_.translateThumbSVG.call(slider_);
-
-                        }
-
-                    });
-
-                    // Reize events require a recalculation of dimensions
-                    sitecues.on('resize/end', function() {
-                        slider_.setdimensions.call(slider_);
-                    });
-
-                })(slider);
-
+                // Resize events require a recalculation of dimensions
+                sitecues.on('resize/end', function() {
+                  slider.setdimensions.call(slider);
+                });
             },
 
 
@@ -307,7 +286,7 @@ sitecues.def("slider", function(slider, callback) {
                     .on('mouseup', e.data, slider.mouseup);
 
                 // Fire initial zoom update on original mouse down event
-                sitecues.emit('zoom/decrease');
+                sitecues.emit('zoom/decrease', e);
 
             },
 
@@ -328,7 +307,7 @@ sitecues.def("slider", function(slider, callback) {
                     .on('mouseup', e.data, slider.mouseup);
 
                 // Fire initial zoom update on original mouse down event
-                sitecues.emit('zoom/increase');
+                sitecues.emit('zoom/increase', e);
 
             },
 
@@ -383,12 +362,6 @@ sitecues.def("slider", function(slider, callback) {
                     // Calculate the zoom based on the mouseX position
                     var zoomLevel = slider.calcZoomLevel.call(slider, thumbX);
 
-                    // Calculate the position of the Thumb relative to the zoom level and SVG elemss
-                    slider.thumbPos = slider.calcThumbPos.call(slider, zoomLevel);
-
-                    // Translate the Thumb SVG element (slide the thumb)
-                    slider.translateThumbSVG.call(slider);
-
                     // Set the new zoom level in conf
                     zoom.jumpTo(zoomLevel);
                 }
@@ -440,7 +413,7 @@ sitecues.def("slider", function(slider, callback) {
                 slider.trackOffsetLeft = slider.trackBounds.left - slider.containerLeft;
 
                 // Set the internal Thumb Position incase the dimensions changed
-                slider.setThumbPositionFromZoomLevel.call(slider, slider.zoomLevel);
+                slider.setThumbPositionFromZoomLevel.call(slider);
 
                 // Translate the SVG Thumb element based on the new internal Thumb Position
                 slider.translateThumbSVG.call(slider);
@@ -459,10 +432,13 @@ sitecues.def("slider", function(slider, callback) {
             },
 
             // Set the Slider's internal thumb position variable based on the zoom level
+            // zoomLevel is optional argument -- if not provided will use current system zoom level
             setThumbPositionFromZoomLevel: function(zoomLevel) {
 
+                var useZoom = zoomLevel || conf.get('zoom') || 1;
+
                 // Calculate the new position of the Thumb
-                this.thumbPos = this.trackOffsetLeft * this.aspect + this.trackClientWidth * this.aspect / zoom.range * (zoomLevel - zoom.min);
+                this.thumbPos = this.trackOffsetLeft * this.aspect + this.trackClientWidth * this.aspect / zoom.range * (useZoom - zoom.min);
 
             },
 

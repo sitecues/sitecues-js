@@ -9,50 +9,58 @@ sitecues.def('zoom', function (zoom, callback) {
 
   sitecues.use('jquery', 'conf', 'platform', 'util/common',
     function ($, conf, platform, common) {
-      if (window !== window.top) {
-        // TODO we might want to put in a rule like this for all of sitecues
-        return; // Only zoom top level window so that we do not double zoom iframes
-      }
-      var
-        // Default zoom configuration
-        // Can be customized via zoom.provideCustomConfig()
-        zoomConfig = {
+      
+      // Default zoom configuration
+      
+      // Can be customized via zoom.provideCustomConfig()
+      var zoomConfig = {
+          
           // Should smooth zoom animations be enabled?
           shouldSmoothZoom: true,
 
-          // Is the web page responsively designed?
-          isResponsive: undefined, // Can override in site preferences
+          // Does the web page use a fluid layout, where content wraps to the width?
+          isFluid: undefined, // Can override in site preferences
 
           // Should the width of the page be restricted as zoom increases?
-          // This is helpful for pages that try to word-wrap or use responsive design
+          // This is helpful for pages that try to word-wrap or use a fluid layout.
           // Eventually use fast page health calculation to automatically determine this
           // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfResponsive: 1.35,
+          maxZoomToRestrictWidthIfFluid: 1.5,
 
           // Set to 5 on sites where the words get too close to the left window's edge
           leftMarginOffset: 2
         },
 
         // Body-related
-        body = document.body,
-        $body = $(body),
+        body,
+        $body,
         originalBodyInfo,        // The info we have on the body, including the rect and mainNode
 
         // Key frame animations
-        zoomStyleSheet,                 // <style> element we insert for animations (and additional fixes for zoom)
-        doKeyFramesAnimationDelayHack,  // Set when we need to wait before activating an animation
+        $zoomStyleSheet,                 // <style> element we insert for animations (and additional fixes for zoom)
 
         // Zoom operation state
         minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
         zoomAnimator,            // Frame request ID that can be cancelled
-        glideInputEvent,         // The input event that initiated a zoom glide
         completedZoom = 1,       // Current zoom as of the last finished operation
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
-        midAnimationZoom,        // Zoom state in the current animation operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
-        isInitialLoadZoom,       // Is this the initial zoom for page load? (The one based on previous user settings)
+        isInitialLoadZoom = true, // Is this the initial zoom for page load? (The one based on previous user settings)
         nativeZoom,              // Amount of native browserZoom
         isRetinaDisplay,         // Is the current display a retina display?
+
+        // Zoom slider change listener
+        glideChangeListener,    // Supports a single listener that is called back as animation proceeds
+        glideChangeTimer,       // Timer used for callbacks
+        GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
+
+        // Metrics info
+        zoomInput = {},
+
+        // State to help with animation optimizations and will-change
+        zoomBeginTimer, // Timer before zoom can actually begin (waiting for browser to create composite layer)
+        clearAnimationOptimizationTimer,   // Timer to clear will-change when zoom is finished
+        isPanelOpen,   // True if the panel is open
 
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
@@ -67,19 +75,22 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $(body).css('backgroundImage') !== 'none',
         REPAINT_FOR_CRISP_TEXT_MS = 15,
 
+        // Is the will-change CSS property supported?
+        shouldUseWillChangeOptimization,
+
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
-        // Native form control CSS fix -- automagically fixes the form appearance issues in Chrome when zooming
-        shouldFixNativeFormAppearance =  platform.browser.isChrome && platform.os.isMac,
-
         // Constants
         MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
-        MS_PER_X_ZOOM = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
-        ZOOM_PRECISION = 3, // Decimal places allowed
+        MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
+        MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
+        ZOOM_PRECISION = 7, // Decimal places allowed
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
-        MIN_RECT_SIDE = 4;
+        MIN_RECT_SIDE = 4,
+        ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
+        CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000;  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
 
       // ------------------------ PUBLIC -----------------------------
 
@@ -89,6 +100,11 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.min = 1;
       zoom.step = 0.01;
       zoom.range = zoom.max - zoom.min;
+
+      // Is this the zoom that occurs on page load?
+      zoom.getIsInitialZoom = function() {
+        return isInitialLoadZoom;
+      };
 
       // Allow customization of zoom configuration on a per-website basis
       zoom.provideCustomZoomConfig = function(customZoomConfig) {
@@ -100,12 +116,28 @@ sitecues.def('zoom', function (zoom, callback) {
       zoom.jumpTo = function(targetZoom) {
         var shouldPerformContinualUpdates = !shouldFixFirefoxScreenCorruptionBug();
         if (!isZoomOperationRunning()) {
-          beginZoomOperation(targetZoom);
-          if (shouldPerformContinualUpdates) {
-            zoomAnimator = requestFrame(performContinualZoomUpdates);
+          // 1st call -- we will glide to it, it may be far away from previous zoom value
+          beginZoomOperation(targetZoom, {isSlider: true}); // Get ready for more slider updates
+          if (shouldPerformContinualUpdates && targetZoom !== completedZoom) {
+            performJsAnimateZoomOperation();
+            if (glideChangeListener) {
+              glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
+            }
           }
         }
         else {
+          if (!zoomInput.isSliderDrag) {
+            // 2nd call -- cancel glide and begin continual updates
+            cancelFrame(zoomAnimator);
+            cancelGlideChangeTimer();
+            zoomInput.isSliderDrag = true;
+            sitecues.emit('zoom/slider-drag');
+            if (shouldPerformContinualUpdates) {
+              zoomAnimator = requestFrame(performContinualZoomUpdates);
+            }
+          }
+          // 3rd and subsequent calls, just update the target zoom value
+          // so that the continual update loop uses the new value
           currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
         }
 
@@ -139,7 +171,7 @@ sitecues.def('zoom', function (zoom, callback) {
           isRetinaDisplay = devicePixelRatio >= 2;
         }
         return isRetinaDisplay;
-      }
+      };
 
       // Retrieve and store the amount of native browser zoom
       zoom.getNativeZoom = function() {
@@ -161,10 +193,40 @@ sitecues.def('zoom', function (zoom, callback) {
         SC_DEV && console.log('*** Native zoom: ' + nativeZoom);
 
         return nativeZoom;
-      }
+      };
+
+      // This is the body's currently visible width, with zoom factored in
+      zoom.getBodyWidth = function() {
+       // Use the originally measured visible body width
+       initBodyInfo();
+
+       // If width was restricted
+       var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1
+
+        // Multiply be the amount of zoom currently used
+       return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
+      };
+
+      zoom.getBodyRight = function() {
+        initBodyInfo();
+
+        return originalBodyInfo.right * completedZoom;
+      };
+
+      zoom.getCompletedZoom = function() {
+        return completedZoom;
+      };
+
+      // Add a listener for mid-animation zoom updates.
+      // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
+      // Currently only supports one listener.
+      zoom.setGlideChangeListener = function (listener) {
+        glideChangeListener = listener;
+      };
 
       // ------------------------ PRIVATE -----------------------------
 
+      // Continual slider updates
       // This matches our updates with screen refreshes.
       // Unfortunately, it causes issues in some older versions of Firefox on Mac + Retina.
       function performContinualZoomUpdates() {
@@ -173,12 +235,24 @@ sitecues.def('zoom', function (zoom, callback) {
         completedZoom = currentTargetZoom;
       }
 
+      function finishZoomSliderOperation() {
+        if (zoomInput.isSliderDrag || !zoomAnimator) {
+          // Slider thumb already at destination -- was not busy animating to
+          // a click elsewhere in the slider bar
+          finishZoomOperation();
+        }
+        // Else is in the middle of gliding to a zoom click -- let it finish --
+        // the animation's end will cause finishZoomOperation() to be called
+      }
+
       // Should smooth zoom be used or step zoom?
       // In dev, we can override as follows:
       // Shift-key: Script-based smooth zoom
       // Ctrl-key: CSS-based smooth zoom
-      function shouldSmoothZoom() {
-        if (SC_DEV && glideInputEvent && (glideInputEvent.shiftKey || glideInputEvent.ctrlKey)) {
+      function shouldSmoothZoom(event) {
+        var event = event || {};
+
+        if (SC_DEV && (event.shiftKey || event.ctrlKey)) {
           return true; // Dev override -- use animation no matter what
         }
 
@@ -193,30 +267,36 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override default behavior as follows:
       // Shift-key: Script-based
       // Ctrl-key: CSS-based
-      function shouldUseKeyFramesAnimation() {
-        if (SC_DEV && glideInputEvent) {
+      function shouldUseKeyFramesAnimation(event) {
+        var event = event || {};
+        if (SC_DEV) {
           // In dev, allow overriding of animation type
-          if (glideInputEvent.shiftKey) {
+          if (event.shiftKey) {
             return false; // Use JS-based animation
           }
-          else if (glideInputEvent.ctrlKey) {
+          else if (event.ctrlKey) {
             return true;
           }
         }
 
-        return shouldSmoothZoom()
+        return shouldSmoothZoom(event)
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
+          // Safari is herky jerky if animating the width and using key frames
+          // TODO fix initial load zoom with jsZoom -- not doing anything
+          && (!platform.browser.isSafari || !shouldRestrictWidth())
           // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
           // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
           // stressing the browser because it's part of the critical load path.
-          && (!platform.browser.isChrome || isInitialLoadZoom || !zoom.isRetina() || shouldRestrictWidth());
+          && (!platform.browser.isChrome || isInitialLoadZoom || zoomInput.isSlider || !zoom.isRetina() || shouldRestrictWidth());
       }
 
-      // Should we do our hacky fix for Chrome's animation jerk-back?
-      // This is where zooming up from 1 and stopping causes the stoppage of the zoom to jerk backwards at the end
-      function shouldFixAnimationJerkBack() {
-        return platform.browser.isChrome && shouldUseKeyFramesAnimation();
+      // Should we wait for browser to create compositor layer?
+      function shouldPrepareAnimations() {
+        // In case zoom module isn't initialized yet, safely provide 'body' in local scope.
+        return shouldUseWillChangeOptimization
+          && body.style.willChange === '' // Animation property not set yet: give browser time to set up compositor layer
+          && !shouldRestrictWidth();
       }
 
       // Avoid evil Firefox insanity bugs, where zoom animation jumps all over the place on wide window with Retina display
@@ -226,7 +306,7 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function shouldRestrictWidth() {
-        return zoomConfig.isResponsive;
+        return zoomConfig.isFluid;
       }
 
       // Make sure the zoom value is within the min and max, and does not use more decimal places than we allow
@@ -252,17 +332,39 @@ sitecues.def('zoom', function (zoom, callback) {
       // If we are zooming with +/- or clicking A/a
       function beginGlide(targetZoom, event) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
-          glideInputEvent = event;
-          beginZoomOperation(targetZoom);
-          $(window).one('keyup', finishGlideIfEnough);
-          if (!shouldSmoothZoom()) {
-            // When no animations -- just be clunky and zoom a bit closer to the target
-            var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
-            currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+          var input = { event: event };
+          if (!shouldSmoothZoom(event)) {
+            beginZoomOperation(targetZoom, input);
+            // Instant zoom
+            if (event) {
+              // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
+              var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+              currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            }
             performInstantZoomOperation();
             finishZoomOperation();
+            return;
           }
-          else if (shouldUseKeyFramesAnimation()) {
+
+          input.isLongGlide = true; // Default, assume glide will not be cut off early
+          beginZoomOperation(targetZoom, input, beginGlideAnimation);  // Provide callback for when animation can actually start
+          $(window).one('keyup', finishGlideIfEnough);
+        }
+
+        function beginGlideAnimation() {
+          if (glideChangeListener) {
+            glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
+          }
+
+          if (!zoomInput.isLongGlide) {
+            // Button/key was already released, zoom only for long enough to get minimum zoom
+            var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+            currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
+            minZoomChangeTimer = setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
+          }
+
+
+          if (shouldUseKeyFramesAnimation()) {
             SC_DEV && console.log('Begin keyframes zoom');
             performKeyFramesZoomOperation();
           }
@@ -270,7 +372,28 @@ sitecues.def('zoom', function (zoom, callback) {
             SC_DEV && console.log('Begin JS zoom');
             performJsAnimateZoomOperation();
           }
+
         }
+      }
+
+      function getMsPerXZoom() {
+        return zoomInput.isSlider ? MS_PER_X_ZOOM_SLIDER : MS_PER_X_ZOOM_GLIDE;
+      }
+
+      // Get what the zoom value would be if we stopped the animation now
+      function getMidAnimationZoom() {
+        var totalZoomChangeRequested = Math.abs(currentTargetZoom - completedZoom),
+          zoomDirection = currentTargetZoom > completedZoom ? 1 : -1,
+          zoomChange = getZoomOpElapsedTime() / getMsPerXZoom();
+        if (zoomChange > totalZoomChangeRequested) {
+          zoomChange = totalZoomChangeRequested;
+        }
+        return getSanitizedZoomValue(completedZoom + zoomDirection * zoomChange);
+      }
+
+      // Helper for calling back glide change listener
+      function onGlideChange() {
+        glideChangeListener(getMidAnimationZoom());
       }
 
       // How many milliseconds have elapsed since the start of the zoom operation?
@@ -284,8 +407,23 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!isZoomOperationRunning()) {
           return;
         }
+
+        if (!isGlideCurrentlyRunning()) {
+          // Glide has started, but animation hasn't started yet -- we are waiting for
+          // the ANIMATION_OPTIMIZATION_SETUP_DELAY period while the browser sets up for the animation.
+          zoomInput.isLongGlide = false;  // beginGlideAnimation() will see this and setup it's own timer
+          return;
+        }
+
+        // If MIN_ZOOM_PER_CLICK has not been reached, we set a timer to finish the zoom
+        // based on how much time would be needed to achieve MIN_ZOOM_PER_CLICK
         var timeElapsed = getZoomOpElapsedTime(),
-          timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * MS_PER_X_ZOOM - timeElapsed);
+          timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * getMsPerXZoom() - timeElapsed);
+
+        zoomInput.isLongGlide = timeRemaining === 0;
+        if (zoomInput.isLongGlide) {
+          sitecues.emit('zoom/long-glide');
+        }
 
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
@@ -293,7 +431,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
         if (!shouldUseKeyFramesAnimation()) {
-          currentTargetZoom = midAnimationZoom;
+          currentTargetZoom = getMidAnimationZoom();
           finishZoomOperation();
           return;
         }
@@ -313,8 +451,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the current zoom value as reported by the layout engine
       function getActualZoom() {
-        var transform = $body.css('transform');
-        return getSanitizedZoomValue(transform.substring(7));
+        return getSanitizedZoomValue(common.getTransform($body));
       }
 
       function onGlideStopped() {
@@ -327,28 +464,23 @@ sitecues.def('zoom', function (zoom, callback) {
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
         $body.css(getZoomCss(currentTargetZoom));
+        if (glideChangeListener) {
+          glideChangeListener(currentTargetZoom);
+        }
       }
 
       // Animate until the currentTargetZoom, used for gliding zoom changes
       function performJsAnimateZoomOperation() {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
-          zoomChange = getZoomOpElapsedTime() / MS_PER_X_ZOOM;
-          if (zoomChange > totalZoomChangeRequested) {
-            zoomChange = totalZoomChangeRequested;
-          }
-          midAnimationZoom = getSanitizedZoomValue(completedZoom + zoomDirection * zoomChange);
+          var midAnimationZoom = getMidAnimationZoom();
           $body.css(getZoomCss(midAnimationZoom));
-          if (zoomChange === totalZoomChangeRequested) {
+          if (midAnimationZoom === currentTargetZoom) {
             finishZoomOperation();
           }
           else {
             zoomAnimator = requestFrame(jsZoomStep);
           }
         }
-
-        var totalZoomChangeRequested = Math.abs(currentTargetZoom - completedZoom),
-          zoomDirection = currentTargetZoom > completedZoom ? 1 : -1,
-          zoomChange;
 
         zoomAnimator = requestFrame(jsZoomStep);
       }
@@ -357,25 +489,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // * Initial load zoom
       // * Keypress (+/-) or A button press, which zoom until the button is let up
       function performKeyFramesZoomOperation() {
-        if (doKeyFramesAnimationDelayHack) {
-          // Wait for Chrome animation style sheet to be ready
-          // Normally we don't need this hack in order to prevent Chrome's jerk-back bug,
-          // because we set up the next zoom style sheets ahead of time.
-          // However, if a page loads with zoom of 1, we don't want to pollute the page with
-          // the zoom style sheets (best practice is to keep the page clean when sitecues isn't used).
-          // In this case, if the user starts a zoom glide, we need to set up the new zoom
-          // style sheet and have an extra delay before we start zooming. This is the only
-          // case where we need this code.
-          doKeyFramesAnimationDelayHack = false;
-          $body.css('animation'); // Force reflow to finish
-          var HACK_DELAY = 150;   // Give Chrome an extra 150ms as a birthday present, to finish whatever it seems to need to do
-          startZoomTime = Date.now() + HACK_DELAY;
-          setTimeout(performKeyFramesZoomOperation, HACK_DELAY);
-          SC_DEV && console.log('Performing Chome animation delay hack');
-          return;
-        }
-
-        var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * MS_PER_X_ZOOM,
+        var zoomSpeedMs = Math.abs(currentTargetZoom - completedZoom) * getMsPerXZoom(),
           animationCss = {
             animation: getAnimationName(currentTargetZoom)  + ' ' + zoomSpeedMs + 'ms linear',
             animationPlayState: 'running',
@@ -423,70 +537,80 @@ sitecues.def('zoom', function (zoom, callback) {
         var animationName = getAnimationName(targetZoom),
           keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
           keyFramesCss = animationName + ' {\n',
-          percent = 0,
+          timePercent = 0,
+          animationPercent,
           step = 0,
           // For animation performance, use adaptive algorithm for number of keyframe steps:
           // Bigger zoom jump = more steps
-          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 10),
-          zoomIncrement = (targetZoom - completedZoom) / numSteps,
-          percentIncrement = 100 / numSteps,
-          animationStepZoom = completedZoom,
+          numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 20),
+          percentIncrement = 1 / numSteps,
           cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
 
         for (; step <= numSteps; ++step) {
-          percent = step === numSteps ? 100 : Math.round(step * percentIncrement);
-          var zoomCss = getZoomCss(animationStepZoom),
+          timePercent = step === numSteps ? 1 : step * percentIncrement;
+          if (isInitialLoadZoom) {
+            // Provide simple sinusoidal easing in out effect for initial load zoom
+            animationPercent =   (Math.cos(Math.PI*timePercent) - 1) / -2;
+          }
+          else {
+            animationPercent = timePercent;
+          }
+          var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent,
+            zoomCss = getZoomCss(midAnimationZoom),
             zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
-          keyFramesCss += percent + '% { ' + zoomCssString + ' }\n';
-          animationStepZoom += zoomIncrement;
+          keyFramesCss += Math.round(10000 * timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
         }
         keyFramesCss += '}\n\n';
 
         return keyFramesCssProperty + keyFramesCss;
       }
 
-      // Perform the initial zoom on load
-      function initialZoom(targetZoom) {
-        isInitialLoadZoom = true;
-        beginZoomOperation(targetZoom);
-        if (shouldUseKeyFramesAnimation()) {
-          performKeyFramesZoomOperation();  // Key Frames animation is faster for initial load
-        }
-        else {
-          performInstantZoomOperation();
-          finishZoomOperation();
-        }
-      }
-
       // Must be called before beginning any type zoom operation, to set up the operation.
-      function beginZoomOperation(targetZoom) {
+      function beginZoomOperation(targetZoom, input, animationReadyCallback) {
+        // Initialize zoom input info
+        zoomInput = $.extend({
+          isSlider: false,                    // Slider in panel
+          isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
+          isLongGlide: false,                 // Key or A button held down to glide extra
+          event: {}
+        }, input);
+
         // Make sure we're ready
         initZoomModule();
 
         // Ensure no other operation is running
         clearZoomCallbacks();
 
-        // Add what we need in <style> if we haven't already
-        if (!zoomStyleSheet) {
-          setupNextZoomStyleSheet(targetZoom);
-          doKeyFramesAnimationDelayHack = shouldFixAnimationJerkBack();
-        }
-
-        // General CSS fixes on body
-        if (completedZoom === 1) {  // Starting at zoom === 1 means these haven't been set yet
-          $body.css(getZoomBodyCSSFixes());
-        }
-
-        // Make sure all animations are dead
-        // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
-        $body.css({
-          pointerEvents: 'none'
-        });
-
-        sitecues.emit('zoom/begin');
-
         currentTargetZoom = getSanitizedZoomValue(targetZoom);
-        startZoomTime = Date.now();
+
+        // Add what we need in <style> if we haven't already
+        if (!$zoomStyleSheet) {
+          setupNextZoomStyleSheet(currentTargetZoom);
+        }
+
+        function beginZoomOperationAfterDelay() {
+          // Correct the start zoom time with the real starting time
+          startZoomTime = Date.now();
+
+          // Temporarily disable mouse cursor events and CSS behavior, to help with zoom performance
+          $body.css({
+            pointerEvents: 'none'
+          });
+
+          sitecues.emit('zoom/begin', zoomInput.event);
+
+          animationReadyCallback && animationReadyCallback();
+        }
+
+        if (shouldPrepareAnimations()) {
+          // Wait for key frames animation style sheet to be applied and for compositor layer to be created
+          prepareAnimationOptimizations();
+          zoomBeginTimer = setTimeout(beginZoomOperationAfterDelay, ANIMATION_OPTIMIZATION_SETUP_DELAY);
+          startZoomTime = Date.now(); // Will be set to start of animation time after animation begins
+        }
+        else {
+          beginZoomOperationAfterDelay();
+        }
       }
 
       // Are we in the middle of a zoom operation?
@@ -494,10 +618,20 @@ sitecues.def('zoom', function (zoom, callback) {
         return startZoomTime;
       }
 
+      function isGlideCurrentlyRunning() {
+        return glideChangeTimer;
+      }
+
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
-        completedZoom = currentTargetZoom;
+        var didUnzoom = completedZoom > currentTargetZoom;
+
+        completedZoom = common.getTransform($body);
         startZoomTime = 0;
+
+        if (didUnzoom) {
+          maximizeContentVisibility();
+        }
 
         // Remove and re-add scrollbars -- we will re-add them after zoom if content is large enough
         determineScrollbars();
@@ -515,12 +649,48 @@ sitecues.def('zoom', function (zoom, callback) {
 
         clearZoomCallbacks();
 
-        glideInputEvent = null;
         isInitialLoadZoom = false;
+        zoomInput = {};
+
+        // If the panel is not open, clear will-change so that the browser can reclaim animation resources used
+        // (If the panel is open, we wait until it closes to clear this as the slider could be used at any time)
+        if (!isPanelOpen) {
+          clearAnimationOptimizationTimer = setTimeout(clearAnimationOptimizations, CLEAR_ANIMATION_OPTIMIZATION_DELAY);
+        }
 
         // Get next forward/backward glide animations ready.
         // Doing it now helps with performance, because stylesheet will be parsed and ready for next zoom.
         setTimeout(setupNextZoomStyleSheet, 0);
+      }
+
+      function prepareAnimationOptimizations() {
+        if (shouldRestrictWidth()) {
+          // If animating width as well, optimizing the animations will just make them worse, because the
+          // compositor layers would constantly need updating
+          return false;
+        }
+        if (shouldUseWillChangeOptimization) { // Is will-change supported?
+          // This is a CSS property that aids performance of animations
+          $body.css('willChange', 'transform');
+        }
+      }
+
+      function clearAnimationOptimizations() {
+        if (!isZoomOperationRunning()) {
+          $body.css({
+            willChange: ''
+          });
+          clearTimeout(clearAnimationOptimizationTimer);
+          clearAnimationOptimizationTimer = null;
+        }
+      }
+
+      function cancelGlideChangeTimer() {
+        if (glideChangeTimer) {
+          glideChangeListener(completedZoom);
+          clearInterval(glideChangeTimer);
+          glideChangeTimer = 0;
+        }
       }
 
       // Make sure the current zoom operation does not continue
@@ -528,8 +698,31 @@ sitecues.def('zoom', function (zoom, callback) {
         // Ensure no further changes to zoom from this operation
         cancelFrame(zoomAnimator);
         clearTimeout(minZoomChangeTimer);
+        clearTimeout(zoomBeginTimer);
+        clearTimeout(clearAnimationOptimizationTimer);
+        cancelGlideChangeTimer();
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
         $(window).off('keyup', finishGlideIfEnough);
+      }
+
+      // Scroll content to maximize the use of screen real estate, showing as much content as possible.
+      // In effect, stretch the bottom-right corner of the visible content down and/or right
+      // to meet the bottom-right corner of the window.
+      function maximizeContentVisibility() {
+        var bodyRight = originalBodyInfo.rightMostNode.getBoundingClientRect().right, // Actual right coord of visible content
+          bodyHeight = document.body.scrollHeight,
+          winWidth = window.innerWidth,
+          winHeight = window.innerHeight,
+          hScrollNow = window.pageXOffset,
+          vScrollNow = window.pageYOffset,
+          // How much do we need to scroll by to pull content to the bottom-right corner
+          hScrollDesired = Math.max(0, winWidth - bodyRight), // Amount to pull right as a postive number
+          vScrollDesired = Math.max(0, winHeight - bodyHeight), // Amount to pull down as a postive number
+          // Don't scroll more than we actually can
+          hScroll = Math.min(hScrollNow, hScrollDesired),
+          vScroll = Math.min(vScrollNow, vScrollDesired);
+
+        window.scrollBy(- hScroll, - vScroll); // Must negate the numbers to get the expected results
       }
 
       /**
@@ -554,20 +747,20 @@ sitecues.def('zoom', function (zoom, callback) {
             $(body).css('backfaceVisibility', 'hidden')
           }, REPAINT_FOR_CRISP_TEXT_MS);
         }
-        else {
-          var appendedDiv = $('<div>')
-            .css({
-              position: 'fixed',
-              width: '1px',
-              height: '1px',
-              opacity: '0',
-              pointerEvents: 'none'
-            })
-            .appendTo('html');
-          setTimeout(function () {
-            appendedDiv.remove();
-          }, REPAINT_FOR_CRISP_TEXT_MS);
-        }
+        var MAX_ZINDEX = 2147483647,
+          appendedDiv = $('<div>')
+          .css({
+            position: 'fixed',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            zIndex: MAX_ZINDEX,
+            pointerEvents: 'none'
+          })
+          .appendTo('html');
+        setTimeout(function () {
+          appendedDiv.remove();
+        }, REPAINT_FOR_CRISP_TEXT_MS);
       }
 
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
@@ -620,11 +813,64 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Add useful zoom fixes to a stylesheet for the entire document
       function getZoomStyleSheetFixes() {
-        return shouldFixNativeFormAppearance ?
-          // Adding this CSS automagically fixes the form issues in Chrome when zooming
-          'select { border: 1px solid #bbb;' +
-          'background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(35%,#f9f9f9), color-stop(100%,#dddddd)); }\n\n'
-          : ''
+        if (platform.browser.isIE) {
+          return ''; // IE gets it right!!!
+        }
+
+        // Native form control CSS fixes -- automagically fixes the form appearance issues in WebKit/FF when zooming.
+        // It's especially difficult to get the combobox popup list to display with the right size/location for WebKit/FF
+
+        var
+          // Init variables used by both WebKit and Firefox
+          comboBoxSelector = 'select[size="1"],select:not([size])', // selects dropdowns but not in-page listboxes (select size > 1)
+          scaleCss = 'transform:scale(' + 1/completedZoom +');',
+          vertMargin = (-16 * completedZoom) + 'px ',
+          rightMargin = (-150 * (completedZoom -1)) + 'px ',
+          marginCss = 'margin:' + vertMargin + rightMargin + vertMargin + '0px;',
+          widthCss = 'width:' + (150 * completedZoom) + 'px;',
+          fontSizeCss = 'font-size:' + Math.round(completedZoom * 85) + '% !important';
+
+        // ---------- WebKit ------------
+
+        if (platform.browser.isWebKit) {
+          var borderColorCss = 'border-color:rgb(167,167,167);', // Tweaking the color makes WebKit render non-native version
+            transformOriginCss = 'transform-origin:0% 78%;';
+          return '' +
+            // General form control rules
+            comboBoxSelector + ',input,button {transform:scale3d(1,1,1);}\n' +
+            // <select size="1"> rules
+            comboBoxSelector +
+              '{-webkit-' +
+                scaleCss +
+                borderColorCss +
+                transformOriginCss +
+                marginCss +
+                widthCss +
+                fontSizeCss +
+              '}\n';
+        }
+
+        // ---------- Firefox ------------
+
+        var vertPad = (3 * completedZoom) + 'px ',
+          rightPad = (24 * (completedZoom-1)) + 'px ',
+          leftPad = ((completedZoom - 1)* 6) + 'px;',
+          paddingCss = 'padding:' + vertPad + rightPad + vertPad + leftPad,
+          transformOriginCss = 'transform-origin:-.9% 66.5%;';
+
+        return '' +
+          // <select size="1"> rules
+          comboBoxSelector +
+          '{' +
+            scaleCss +
+            transformOriginCss +
+            paddingCss +
+            marginCss +
+            widthCss +
+            fontSizeCss +
+          '}\n' +
+          // <option> rules
+          comboBoxSelector + '>option{' + fontSizeCss + '}\n';
       }
 
       // Add useful zoom fixes to the body's @style
@@ -633,9 +879,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // Allow the content to be horizontally centered, unless it would go
           // offscreen to the left, in which case start zooming the content from the left-side of the window
           transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%',
-          // These two properties prevent webKit from having the jump back bug when we pause the animation
-          perspective: 999,
-          backfaceVisibility: 'hidden'
+          perspective: 999
         };
 
         if (shouldOptimizeLegibility) {
@@ -650,12 +894,11 @@ sitecues.def('zoom', function (zoom, callback) {
       function applyZoomStyleSheet(additionalCss) {
         var styleSheetText = (additionalCss || '') + getZoomStyleSheetFixes();
         if (styleSheetText) {
-          if (!zoomStyleSheet) {
-            zoomStyleSheet = document.createElement('style');
-            zoomStyleSheet.id = SITECUES_ZOOM_ID;
-            $('head').append(zoomStyleSheet);
+          if (!$zoomStyleSheet) {
+            $zoomStyleSheet = $('<style>').appendTo('head')
+              .attr('id', SITECUES_ZOOM_ID);
           }
-          zoomStyleSheet.innerHTML = styleSheetText;
+          $zoomStyleSheet.text(styleSheetText);
         }
       }
 
@@ -672,28 +915,33 @@ sitecues.def('zoom', function (zoom, callback) {
         return css;
       }
 
+      // This is the zoom that we will still restrict the width
+      function getZoomForWidthRestriction(currZoom, winWidth) {
+        // Adjust max zoom for width restrictions for current window width
+        // The max zoom for width restriction is set for a specific size of window
+        // We use a maximized window on a MacBook pro retina screen (1440px wide)
+        // The default is to restrict width up to a max of 1.35x zoom
+        // If the user's window is 75% of the 1440px, we multiply the max zoom by .75
+        var maxZoomToRestrictWidth = Math.max(1, zoomConfig.maxZoomToRestrictWidthIfFluid * (winWidth / 1440));
+
+        return Math.min(currZoom, maxZoomToRestrictWidth); // Can't be larger than current zoom
+      }
+
       // Get the desired width of the body for the current level of zoom
       function getRestrictedWidth(currZoom) {
-        // Adjust for current window width
-        var winWidth = window.outerWidth,
-          maxZoomToRestrictWidth = zoomConfig.maxZoomToRestrictWidthIfResponsive * (winWidth / 1440),
-          useZoom = Math.min(currZoom, maxZoomToRestrictWidth);
-        // We used to use document.documentElement.clientWidth, but this caused the page
-        // to continually shrink on resize events.
-        // Check out some different methods for determining viewport size: http://ryanve.com/lab/dimensions/
-        // More information on document.documentElement.clientWidth and browser viewports: http://www.quirksmode.org/mobile/viewports.html
-        return (winWidth / useZoom) + 'px';
+        var winWidth = window.innerWidth;
+        return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
       }
 
       // Return a formatted string for translateX as required by CSS
       function getFormattedTranslateX(targetZoom) {
         if (shouldRestrictWidth()) {
-          return '';  // For responsive designs, we use an transforim-origin of 0% 0%, so we don't need this
+          return '';  // For fluid layouts, we use an transforim-origin of 0% 0%, so we don't need this
         }
-        var halfOfWindow = window.outerWidth / 2,
+        var zoomOriginX = Math.max(window.innerWidth, originalBodyInfo.transformOriginX) / 2, // X-coordinate origin of transform
           bodyLeft = originalBodyInfo.left,
-          halfOfBody = (halfOfWindow - bodyLeft) * targetZoom,
-          pixelsOffScreenLeft = (halfOfBody - halfOfWindow) + zoomConfig.leftMarginOffset,
+          halfOfBody = (zoomOriginX - bodyLeft) * targetZoom,
+          pixelsOffScreenLeft = (halfOfBody - zoomOriginX) + zoomConfig.leftMarginOffset,
           pixelsToShiftRight = Math.max(0, pixelsOffScreenLeft),
           translateX = pixelsToShiftRight / targetZoom;
 
@@ -701,24 +949,24 @@ sitecues.def('zoom', function (zoom, callback) {
         return 'translateX(' + translateX.toFixed(ZOOM_PRECISION) + 'px)';
       }
 
-      // Is it a responsive page?
-      function isResponsiveDesign() {
+      // Is it a fluid layout?
+      function isFluidLayout() {
         if (originalBodyInfo.width === window.outerWidth) {
           // Handle basic case -- this works for duxburysystems.com, where the visible body content
           // spans the entire width of the available space
           return true;
         }
-        // We consider it responsive if the main node we discovered inside the body changes width
+        // We consider it fluid if the main node we discovered inside the body changes width
         // if we change the body's width.
-        var origWidth = originalBodyInfo.mainNode.scrollWidth,
+        var origWidth = originalBodyInfo.mainNode.clientWidth,
           newWidth,
-          isResponsive;
-        body.style.width = (window.outerWidth / 5) + 'px';
-        newWidth = originalBodyInfo.mainNode.scrollWidth;
-        isResponsive = (origWidth !== newWidth);
+          isFluid;
+        body.style.width = (window.innerWidth / 5) + 'px';
+        newWidth = originalBodyInfo.mainNode.clientWidth;
+        isFluid = origWidth !== newWidth;
         body.style.width = '';
 
-        return isResponsive;
+        return isFluid;
       }
 
       // Get the rect for visible contents in the body, and the main content node
@@ -727,35 +975,70 @@ sitecues.def('zoom', function (zoom, callback) {
           visibleNodes = [ ],
           mainNode,
           mainNodeRect = { width: 0, height: 0 },
-          MIN_WIDTH_MAIN_NODE = 300;
+          leftMostNode,
+          leftMostCoord = 9999, // Everything else will be smaller
+          rightMostNode,
+          rightMostCoord = 0,
+          MIN_WIDTH_MAIN_NODE = 300,
+          bodyStyle = getComputedStyle(body);
 
-        getBodyRectImpl(body, bodyInfo, visibleNodes);
+        getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle, true);
+
+        if (!visibleNodes.length) {
+          getBodyRectImpl(body, bodyInfo, visibleNodes, bodyStyle);
+        }
 
         bodyInfo.width = bodyInfo.right - bodyInfo.left;
         bodyInfo.height = bodyInfo.bottom - bodyInfo.top;
 
         // Find tallest node
         visibleNodes.forEach(function(node) {
-          var rect = node.rect
+          var rect = node.rect;
           if (rect.height >= mainNodeRect.height && rect.width > MIN_WIDTH_MAIN_NODE) {
             if (rect.height > mainNodeRect.height || rect.width > mainNodeRect.width) {
               mainNodeRect = rect;
               mainNode = node.domNode;
             }
           }
+          if (rect.left < leftMostCoord) {
+            leftMostNode = node.domNode;
+            leftMostCoord = rect.left;
+          }
+          if (rect.right > rightMostCoord) {
+            rightMostNode = node.domNode;
+            rightMostCoord = rect.right;
+          }
         });
         bodyInfo.mainNode = mainNode;
+        bodyInfo.leftMostNode = leftMostNode;
+        bodyInfo.rightMostNode = rightMostNode;
+        bodyInfo.transformOriginX = body.getBoundingClientRect().width / 2;
 
         return bodyInfo;
       }
 
-      function willAddRect(newRect, node) {
-        if (node === document.body || newRect.left < 0 || newRect.top < 0 ||
-          newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
-          node.childNodes.length === 0) {
-          return false;
+      function willAddRect(newRect, node, style, parentStyle, isStrict) {
+        if (node === document.body) {
+          return;
         }
 
+        // Strict checks
+        if (isStrict) {
+          if (node.childNodes.length === 0 ||
+            newRect.width < MIN_RECT_SIDE || newRect.height < MIN_RECT_SIDE ||
+            // Watch for text-align: center or -webkit-center -- these items mess us up
+            style.textAlign.indexOf('center') >= 0) {
+            return;
+          }
+        }
+
+        // Must check
+        if (newRect.left < 0 || newRect.top < 0 ||
+          style.visibility !== 'visible') {
+          return;
+        }
+
+        // Good heuristic -- when x > 0 it tends to be a useful rect
         if (newRect.left > 0) {
           return true;
         }
@@ -765,24 +1048,25 @@ sitecues.def('zoom', function (zoom, callback) {
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if ($(node).css('overflow') !== 'visible' || !common.hasVisibleChildContent(node)) {
-          return false; // No visible children
+        if (style.overflow !== 'visible' ||
+          (!common.hasVisibleContent(node, style, parentStyle) && !common.isVisualRegion(node, style, parentStyle))) {
+          return; // No visible content
         }
+        
         return true;
       }
 
       // Recursively look at rectangles and add them if they are useful content rectangles
-      function getBodyRectImpl(node, sumRect, visibleNodes) {
-        var newRect = getAbsoluteRect(node);
-        newRect.right = newRect.left + newRect.width;
-        newRect.bottom = newRect.top + newRect.height;
-        if (willAddRect(newRect, node)) {
+      function getBodyRectImpl(node, sumRect, visibleNodes, parentStyle, isStrict) {
+        var newRect = getAbsoluteRect(node),
+          style = getComputedStyle(node);
+        if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
         }
         $(node).children().each(function() {
-          getBodyRectImpl(this, sumRect, visibleNodes);
+          getBodyRectImpl(this, sumRect, visibleNodes, style, isStrict);
         });
       }
 
@@ -807,38 +1091,61 @@ sitecues.def('zoom', function (zoom, callback) {
       function getAbsoluteRect(node) {
         var clientRect = node.getBoundingClientRect(),
           width = Math.max(node.scrollWidth, clientRect.width),
-          height = Math.max(node.scrollHeight, clientRect.height);
+          height = Math.max(node.scrollHeight, clientRect.height),
+          left = clientRect.left + window.pageXOffset,
+          top = clientRect.top + window.pageYOffset;
         return {
-          left: clientRect.left,
-          top: clientRect.top,
+          left: left,
+          top: top,
           width: width,
           height: height,
-          right: clientRect.left + width,
-          bottom: clientRect.top + height
+          right: left + width,
+          bottom: top + height
         };
       }
 
-      // Lazy init, saves time on page load
-      function initZoomModule() {
+      // Ensure that initial body info is ready
+      function initBodyInfo() {
         if (originalBodyInfo) {
           return; //Already initialized
         }
 
+        body = document.body;
+        $body = $(body);
         originalBodyInfo = getBodyInfo();
+        shouldUseWillChangeOptimization = typeof document.body.style.willChange === 'string';
+      }
 
-        if (typeof zoomConfig.isResponsive === 'undefined') {
-          zoomConfig.isResponsive = isResponsiveDesign();
+      // Lazy init, saves time on page load
+      function initZoomModule() {
+        initBodyInfo();
+
+        if (typeof zoomConfig.isFluid === 'undefined') {
+          zoomConfig.isFluid = isFluidLayout();
         }
 
         $(window).resize(onResize);
+
+        $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
 
         if (SC_DEV) {
           console.log('_______________________________________________________');
           console.log('Zoom configuration: %o', zoomConfig);
           console.log('Window width: %o', window.outerWidth);
           console.log('Visible body rect: %o', originalBodyInfo);
-          console.log('isResponsive?: %o', zoomConfig.isResponsive);
+          console.log('isFluid?: %o', zoomConfig.isFluid);
           console.log('_______________________________________________________');
+        }
+      }
+
+      function onDocumentReady() {
+        var targetZoom = conf.get('zoom');
+        if (targetZoom > 1) {
+          beginGlide(targetZoom);
+        }
+        else {
+          // No initial zoom from settings, first zoom will only be from user input
+          isInitialLoadZoom = false;
         }
       }
 
@@ -848,9 +1155,12 @@ sitecues.def('zoom', function (zoom, callback) {
        * sizes of the body and window.
        */
       function onResize() {
+        if (!$body) {
+          return;
+        }
         isRetinaDisplay = undefined; // Invalidate, now that it may have changed
 
-        $body.css(getZoomCss(1));
+        $body.css({width: '', transform: ''});
         originalBodyInfo = getBodyInfo();
         $body.css(getZoomCss(completedZoom));
         if (shouldRestrictWidth()) {
@@ -868,7 +1178,7 @@ sitecues.def('zoom', function (zoom, callback) {
       });
 
       // Set up listeners for zoom  operations
-      sitecues.on('zoom/stop-slider', finishZoomOperation);
+      sitecues.on('zoom/stop-slider', finishZoomSliderOperation);
       sitecues.on('zoom/stop-button', finishGlideIfEnough);
       sitecues.on('zoom/increase', function(event) {
         // Increase up to max or until zoom/stop requested
@@ -877,21 +1187,32 @@ sitecues.def('zoom', function (zoom, callback) {
       sitecues.on('zoom/decrease', function(event) {
         beginGlide(zoom.min, event);
       });
+      sitecues.on('panel/show', function() {
+        initZoomModule(); // Lazy init
+        isPanelOpen = true;
+        if (shouldPrepareAnimations()) {
+          prepareAnimationOptimizations();
+        }
+      });
+      sitecues.on('panel/hide', function() {
+        isPanelOpen = false;
+        clearAnimationOptimizations(); // Browser can reclaim resources used
+      });
 
       zoom.getNativeZoom(); // Make sure we have native zoom value available
 
-      // define default value for zoom if needed
-      var targetZoom = conf.get('zoom');
-      if (!targetZoom) {
-        // Initialize as soon as panel opens for faster slider responsiveness
-        sitecues.on('panel/show', initZoomModule);
+      // We used to zoom before the document was ready, causing us to examine the body
+      // before much of it was actually there. This patch waits until the document before zooming and examining the body.
+      // In the future, we could try to examine the body every second until it is able to find the info. This would
+      // allow us to zoom sooner -- but it makes sense to keep to the simple approach for now.
+      // Also, it seems that zoom initialization is much faster when it happens outside of the critical path
+      // (after the load). So another advantage of doing this after the document is ready is to not
+      // slow down the page load.
+      if (document.readyState !== 'loading') {
+        onDocumentReady();
       }
-      else if (targetZoom > 1) {
-        initialZoom(targetZoom);
-        if (shouldManuallyAddScrollbars && document.readyState !== 'complete') {
-          // Make sure we have all the content for initial adjustment of scrollbars
-          window.addEventListener('load', determineScrollbars);
-        }
+      else {
+        $(document).ready(onDocumentReady);
       }
 
       callback();

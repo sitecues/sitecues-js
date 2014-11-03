@@ -4,7 +4,7 @@
  */
 
 (function () {
-  
+
   'use strict';
 
   // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
@@ -12,16 +12,16 @@
 
    // Array's prototype
   arr = Array.prototype,
-  
+
   // Library config container
   libraryConfig = null,
-  
+
   // The parsed library URL object
   libraryUrl = null,
-  
+
   // Site config container
   siteConfig = null,
-  
+
   // Modules container
   modules = {},
 
@@ -53,14 +53,21 @@
     }
   };
 
-  if (SC_DEV) {
-    if (console){
-      var textStyle = 'background: red; color: #FFF; font-weight:bold;';
-      console.log('%c **** SITECUES MODE: SC_DEV **** ', textStyle);
-      console.log('%c **** SITECUES VERSION: '+version+' **** ', textStyle);
+  function safe_production_msg (text) {
+    if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
+      // Using console.log in IE9 too early can cause "Invalid pointer" errors -- see SC-2237.
+      // To be safe, do not use console.log in core.js in IE.
+      return;
+    }
+    if (console) {
+      console.log('**** '+text+' ****');
     }
   }
 
+  if (SC_DEV) {
+    safe_production_msg('SITECUES MODE: SC_DEV');
+    safe_production_msg('SITECUES VERSION: '+version);
+  }
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
@@ -314,7 +321,13 @@
       _def(defObj.name, defObj.constructor);
     } else {
       READY_FOR_DEF_CALLS = true;
+
       sitecues.emit('core/allModulesLoaded');
+
+      if (typeof sitecues.ready === 'function') {
+        sitecues.ready.call(sitecues);
+      }
+
     }
   };
 
@@ -361,7 +374,7 @@
     // Parse the query into key/value pairs.
     var start = 0,
       end = 0;
-    
+
     if (queryStr[start] === '?'){
       start++;
     }
@@ -477,7 +490,7 @@
     // enforce async loading
     script.async = true;
 
-    // add callback to track when it will be loaded.  
+    // add callback to track when it will be loaded.
 
     // NOTE: We should not be using script.onreadystatechange here for two
     // reasons: 1, it doesn't mean that the script as loaded (it could change
@@ -555,6 +568,17 @@
       return false;
     }
 
+    // Stop sitecues from initializing if:
+        // 1) sitecues is running in an IFRAME
+        // 2) sitecues.config.iframe = falsy
+    if (window !== window.top && !window.sitecues.config.iframe) {
+      safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+        ' ... email support@sitecues.com for more information.');
+      return;
+    }
+
+    // Continue loading sitecues
+
     return true;
   };
 
@@ -568,7 +592,7 @@
 
   var LIB_CONFIG_NAMES = ['hosts'],
     libraryConfigLoadCount;
-  
+
   // Validation method for library configuration. If valid, initialize sitecues.
   var validateLibraryConfigs = function(cb) {
     var valid = true;
@@ -605,7 +629,7 @@
     if (!valid) {
       log.error('Invalid sitecues library config.');
     }
-    
+
     cb(!valid);
   };
 
@@ -654,7 +678,7 @@
   //////////////////////////////////////////////////////////////////////////////////////////
 
   var initialize = function () {
-    
+
     // If the sitecues global object does not exist, then there is no basic site configuration, nor
     // is there a logger. Simply print an error to the console and abort initialization.
 

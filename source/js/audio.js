@@ -54,19 +54,20 @@ sitecues.def('audio', function (audio, callback) {
       return '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/';
     }
 
+    // Puts in delimiters on both sides of the parameter -- ? before and & after
     function getLanguageParameter() {
       var lang = document.documentElement.lang;
-      return lang ? 'l=' + lang + '&' : '';
+      return '?l=' + (lang || 'en') + '&';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
       return getApiBaseUrl() + 'cue/site/' + site.get('site_id') + '/' +
-        key + '.' + getMediaTypeForPrerecordedAudio();
+        key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
     }
 
     function getTTSUrl(text) {
       return getApiBaseUrl() + 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
-        '?' + getLanguageParameter() + 't=' + encodeURIComponent(text);
+        getLanguageParameter() + 't=' + encodeURIComponent(text);
     }
 
       /**

@@ -1,9 +1,5 @@
-exports.pixel = {
-  ratio:1,
-  cssCursorScaleSupport: {
-    Chrome: true
-  }
-};
+exports.canUseRetinaCursors = true;
+
 exports.browser = {
   is: 'Chrome',
   isChrome: true,

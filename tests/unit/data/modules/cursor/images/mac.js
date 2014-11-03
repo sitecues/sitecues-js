@@ -1,1 +1,0 @@
-exports.urls = {'mac_default_type': 'testUrl'};

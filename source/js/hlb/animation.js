@@ -20,7 +20,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // and a scale animation >= 1024 pixels wide. Basically, the animation goes haywire
       // and jumps to 1/4 the size and back in an unexpected way.
       return platform.browser.isFirefox && platform.browser.version < 33 &&
-        devicePixelRatio > 1.5 && $hlbElement.width() * hlbPositioning.getFinalScale($hlbElement) >= 1024;
+        devicePixelRatio > 1.5 && $hlbElement[0].clientWidth * hlbPositioning.getFinalScale($hlbElement) >= 1024;
     }
 
     /**
@@ -255,9 +255,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     function isHLBZoomed($hlbElement) {
 
       // If there isn't any transform, then it isn't scaled.
-      var transform = $hlbElement.css('transform'),
-        scale = parseFloat(transform.substring(7));
-
+      var scale = common.getTransform($hlbElement);
       return scale > hlbPositioning.getStartingScale($hlbElement);
     }
 

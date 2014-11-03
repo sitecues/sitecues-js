@@ -328,7 +328,7 @@ if (typeof JSON !== 'object') {
                 }
             } else {
 
-// Otherwise, iterate through all of the keys in the object.
+// Otherwise, iterate through all of the navkeys in the object.
 
                 for (k in value) {
                     if (Object.prototype.hasOwnProperty.call(value, k)) {
@@ -360,7 +360,7 @@ if (typeof JSON !== 'object') {
 
 // The stringify method takes a value and an optional replacer, and an optional
 // space parameter, and returns a JSON text. The replacer can be a function
-// that can replace values, or an array of strings that will select the keys.
+// that can replace values, or an array of strings that will select the navkeys.
 // A default replacer method can be provided. Use of the space parameter can
 // produce text that is more easily readable.
 

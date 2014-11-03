@@ -28,6 +28,22 @@ exports.isEditable = function(element) {
 }
 exports.useJqueryAnimate = false;
 
-exports.hasVisibleChildContent = function(node) {
+exports.hasVisibleContent = function(node) {
   return true;
 }
+
+exports.isVisualRegion = function(node, style, parentStyle) {
+  return parseFloat(style.borderRightWidth) || parseFloat(style.borderBottomWidth);
+}
+
+exports.hasOwnBackground = function(style, parentStyle) {
+  var hasOwn = (style.backgroundImage && style.backgroundImage !== 'none') ||
+    (style.backgroundColor && parentStyle.backgroundColor !== style.backgroundColor);
+  return !!hasOwn;
+}
+
+exports.hasRaisedZIndex = function(style, parentStyle) {
+  return false;
+}
+
+exports.getBulletWidth = function() { return 0; }

@@ -24,25 +24,26 @@ if (SC_DEV) {
       }
 
       function getScoreFactorString(sf) {
-        return String('                             ' + sf.about).slice(-35) + ': ' +
-          String('              ' + Math.round(sf.value)).slice(-11) + '   x ' +
-          String('              ' + sf.weight).slice(-11) + '   = ' +
-          String('              ' + Math.round(sf.weight * sf.value)).slice(-11);
+        var value = (sf.value * 1) || 0;
+        return String('                                       ' + sf.about).slice(-45) + ': ' +
+               String('                        ' + value.toFixed(1)).slice(-21) + '   x ' +
+               String('                        ' + sf.weight.toFixed(1)).slice(-21) + '   = ' +
+               String('                        ' + (sf.weight * value).toFixed(0)).slice(-21);
       }
 
-      pickDebug.logHeuristicResult = function(scoreObjs, bestScoreIndex, traitStack, judgementStack, nodes) {
+      pickDebug.logHeuristicResult = function(scoreObjs, bestScoreIndex, nodes) {
         var index, scoreObj;
         var numUnusableAtTop = 0;
         var startItem = scoreObjs.length - 1;
-        judgementStack.some(function (judgements) {
-          if (!judgements) {
+        scoreObjs.some(function (scoreObj) {
+          if (!scoreObj.judgements) {
             ++numUnusableAtTop;
             return false;
           }
           return true;
         });
         if (numUnusableAtTop) {
-          startItem -= numUnusableAtTop - 1;  // Only show last unusable item
+          //startItem -= numUnusableAtTop - 1;  // Only show last unusable item
         }
 
         for (index = startItem; index >= 0; index--) {
@@ -52,17 +53,12 @@ if (SC_DEV) {
           console.group('%c%s    Score = %d', headingStyle, scoreObj.about, scoreObj.score);
 
           console.log(nodes[index]);
-          logObject('Traits', traitStack[index]);
-          logObject('Judgements', judgementStack[index]);
+          logObject('Traits', scoreObj.traits);
+          logObject('Judgements', scoreObj.judgements);
           if (scoreObj.factors) {
             scoreObj.factors.sort(scoreFactorCompare);  // Display highest impact score factors first
             logArray('Factors', scoreObj.factors.filter(isFactor).map(getScoreFactorString), true);
             logArray('Non-factors', scoreObj.factors.filter(isNonFactor).map(getScoreFactorString));
-          }
-          if (scoreObj.siblings && scoreObj.siblings.length) {
-            logArray('Siblings ->   for parent: ' + scoreObj.votesForParent +
-                '      vs for individual siblings: ' + scoreObj.votesAgainstParent,
-              scoreObj.siblings);
           }
         }
         scoreObjs.forEach(function () {
@@ -71,7 +67,13 @@ if (SC_DEV) {
       };
 
       function logItem(item) {
-        console.log(item);
+        if (console.log.toString().indexOf('[native code]') > 0) {
+          console.log(item);
+          return;
+        }
+        // Fallback when they tried to kill off logging
+        console.group(item);
+        console.groupEnd();
       }
 
       function logTitle(title, doStartExpanded) {

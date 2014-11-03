@@ -26,17 +26,19 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
             },
             reset: function() {
                 panelClosed.update(DEFAULT_STATE);
-            },
+            }
         };
 
 
         function initPanelClosed() {
-            panelClosed.data = $.extend({}, DEFAULT_STATE);
-            var $slider = $('#sitecues-panel .track, #sitecues-panel .trackBack, #sitecues-panel .thumb'),
-                $letterBig = $('#sitecues-panel .letterBig, #sitecues-panel .letterBigBack'),
-                $letterSmall = $('#sitecues-panel .letterSml, #sitecues-panel .letterSmlBack'),
-                $ttsButton = $('#sitecues-panel .tts');
+          panelClosed.data = $.extend({}, DEFAULT_STATE);
+          var $slider = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
+            $letterBig = $('#sitecues-letterBig, #sitecues-letterBigBack'),
+            $letterSmall = $('#sitecues-letterSml, #sitecues-letterSmlBack'),
+            $ttsButton = $('#sitecues-tts');
 
+            // todo: delegate
+            // better to add event listener for a wrapper and then use event target to get the element that fired it
             $slider.mousedown(function() {
                 panelClosed.data.slider_interacted = 1;
             });

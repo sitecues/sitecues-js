@@ -8,11 +8,7 @@ exports.getTraitStack = function(nodes) {
       backgroundRepeat: 'none'
     },
     normDisplay: 'block',
-    rect: { left: 0, top: 0, width: 200, height: 200, right: 200, bottom: 200},
-    unzoomedRect: { left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100 },
-    tag: 'div',
     role: null,
-    childCount: 1,
     isVisualMedia: false,
     topPadding: 1,
     leftPadding: 1,
@@ -30,14 +26,35 @@ exports.getTraitStack = function(nodes) {
     leftSpacing: 2,
     bottomSpacing: 2,
     rightSpacing: 2,
-    visualWidth: 198,
-    visualHeight: 198,
     percentOfViewportHeight: 50,
     percentOfViewportWidth: 50,
     percentOfBodyWidth: 30
   };
-  function getTraits(/*nodeUnused*/) {
-    return jquery.extend(true, {}, DEFAULT_TRAITS);
+  function getTraits(node, index) {
+    var traits = jquery.extend(true, {}, DEFAULT_TRAITS, {
+      tag: node.localName,
+      childCount: node.childElementCount,
+      rect: {
+        top: parseInt(node.getAttribute('data-top')),
+        bottom: parseInt(node.getAttribute('data-top')) + parseInt(node.getAttribute('data-height')),
+        left: parseInt(node.getAttribute('data-left')),
+        right: parseInt(node.getAttribute('data-left')) + parseInt(node.getAttribute('data-width')),
+        width: parseInt(node.getAttribute('data-width')),
+        height: parseInt(node.getAttribute('data-height'))
+      },
+      unzoomedRect: {
+        top: parseInt(node.getAttribute('data-top')) / 1.5,
+        bottom: parseInt(node.getAttribute('data-top')) + parseInt(node.getAttribute('data-height')) / 1.5,
+        left: parseInt(node.getAttribute('data-left')) / 1.5,
+        right: parseInt(node.getAttribute('data-left')) + parseInt(node.getAttribute('data-width')) / 1.5,
+        width: parseInt(node.getAttribute('data-width')) / 1.5,
+        height: parseInt(node.getAttribute('data-height')) /1.5
+      },
+      fullWidth: parseInt(node.getAttribute('data-width')),
+      visualWidthAt1x: parseInt(node.getAttribute('data-width')) / 1.5,
+      visualHeightAt1x: parseInt(node.getAttribute('data-height')) /1.5
+    });
+    return traits;
   }
   return nodes.map(getTraits);
 };
