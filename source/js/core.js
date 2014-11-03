@@ -54,7 +54,7 @@
   };
 
   function dev_msg (text) {
-    if (console){
+    if (SC_DEV && console){
       var textStyle = 'background: red; color: #FFF; font-weight:bold;';
       console.log('%c **** '+text+' **** ', textStyle);
     }
