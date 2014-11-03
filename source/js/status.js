@@ -54,7 +54,7 @@ sitecues.def('status', function (status_module, callback) {
           'sitecues_js'   : sitecues.getVersion(),
           'sitecues_up'   : null,
           'sitecues_ws'   : null
-        },
+        }
       };
       // Measurements useful for reproducing bugs, because their state affects
       // the behavior of our CSS, animations, etc.
