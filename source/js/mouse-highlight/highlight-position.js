@@ -86,7 +86,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         var
           bodyRangeRect = bodyRange.getBoundingClientRect(),
           bodyElementRect = traitcache.getScreenRect(document.body),
-          zoomForScale = bodyElementRect.height / bodyRangeRect.height,
+          zoomForScale = bodyElementRect.width / bodyRangeRect.width,
           scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y),
           bodyRangeLeft = (bodyRangeRect.left + viewPos.x) * zoomForScale - viewPos.x,
           bodyRangeTop = (bodyRangeRect.top + viewPos.y) * zoomForScale - viewPos.y;
