@@ -6,7 +6,12 @@ define(
     ],
     function (tdd, assert, require) {
 
-        var url = 'http://tools.qa.sitecues.com:9000/site/simple.html?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js&scwsid=s-00000005&scuimode=badge&scisv=2';
+        var url = 'http://tools.qa.sitecues.com:9000/' +
+                  'site/simple.html' +
+                  '?scjsurl=//js.dev.sitecues.com/l/s;id=s-00000005/v/dev/latest/js/sitecues.js' +
+                  '&scwsid=s-00000005' +
+                  '&scuimode=badge' +
+                  '&scisv=2';
 
         with (tdd) {
             suite('HLB Simple', function () {
