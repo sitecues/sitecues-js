@@ -72,7 +72,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // (We still want to use the backface method when we can, because it often produces better results than our
         // other method, which is to overlay a transparent div and then remove it)
         shouldRepaintOnZoomChange = platform.browser.isChrome,
-        shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $(body).css('backgroundImage') !== 'none',
+        shouldUseBackfaceRepaint = false,
         REPAINT_FOR_CRISP_TEXT_MS = 15,
 
         // Is the will-change CSS property supported?
@@ -1120,6 +1120,8 @@ sitecues.def('zoom', function (zoom, callback) {
       function initZoomModule() {
         initBodyInfo();
 
+        shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $body.css('backgroundImage') !== 'none';
+
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();
         }
@@ -1139,6 +1141,8 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function onDocumentReady() {
+        zoom.getNativeZoom(); // Make sure we have native zoom value available
+
         var targetZoom = conf.get('zoom');
         if (targetZoom > 1) {
           beginGlide(targetZoom);
@@ -1173,9 +1177,7 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       // use conf module for sharing current zoom level value
-      conf.def('zoom', function (value) {
-        return getSanitizedZoomValue(value);
-      });
+      conf.def('zoom', getSanitizedZoomValue);
 
       // Set up listeners for zoom  operations
       sitecues.on('zoom/stop-slider', finishZoomSliderOperation);
@@ -1199,8 +1201,6 @@ sitecues.def('zoom', function (zoom, callback) {
         clearAnimationOptimizations(); // Browser can reclaim resources used
       });
 
-      zoom.getNativeZoom(); // Make sure we have native zoom value available
-
       // We used to zoom before the document was ready, causing us to examine the body
       // before much of it was actually there. This patch waits until the document before zooming and examining the body.
       // In the future, we could try to examine the body every second until it is able to find the info. This would
@@ -1208,12 +1208,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Also, it seems that zoom initialization is much faster when it happens outside of the critical path
       // (after the load). So another advantage of doing this after the document is ready is to not
       // slow down the page load.
-      if (document.readyState !== 'loading') {
-        onDocumentReady();
-      }
-      else {
-        $(document).ready(onDocumentReady);
-      }
+      $(document).ready(onDocumentReady);
 
       callback();
     });
