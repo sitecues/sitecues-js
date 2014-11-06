@@ -6,47 +6,65 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/navkeys', 'hlb/dimmer', 'hlb/positioning',
-    'hlb/styling', 'platform', 'hlb/safe-area', 'util/common', 'hlb/animation', 'mouse-highlight', 'util/geo',
+  sitecues.use(
+    'jquery',
+    'conf',
+    'hlb/event-handlers',
+    'hlb/dimmer',
+    'hlb/positioning',
+    'hlb/styling',
+    'platform',
+    'hlb/safe-area',
+    'util/common',
+    'hlb/animation',
+    'mouse-highlight',
+    'util/geo',
+    'hlb/navkeys',
 
-    function($, conf, navkeys, dimmer, hlbPositioning, hlbStyling, platform, hlbSafeArea,
-             common, hlbAnimation, mh, geo) {
+    function(
+      $,
+      conf,
+      eventHandlers,
+      dimmer,
+      hlbPositioning,
+      hlbStyling,
+      platform,
+      hlbSafeArea,
+      common,
+      hlbAnimation,
+      mh,
+      geo,
+      navkeys) {
 
       /////////////////////////
       // PRIVATE VARIABLES
       ////////////////////////
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
-          SITECUES_HLB_ID = 'sitecues-hlb', // ID for $hlbElement
-
-          CHAR_WIDTH_LIMIT = 50, // Amount of characters that fits horizontally in HLB
+          SITECUES_HLB_ID         = 'sitecues-hlb',         // ID for $hlbElement
 
           MOUSE_SAFETY_ZONE = 0, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
 
+          highlight,
+
+          $pickedElement,      // The element chosen by the picker.
+          $originalElement,    // The element which serves as a model or basis for imitations or copies
+          $hlbElement,         // Element that is cloned from the originalElement (HLB)
+          $hlbWrappingElement, // Element outside the body that contains the HLB and background dimmer
+
           // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
           // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
-          EXTRA_HIGHLIGHT_PADDING = 1,
+          // Value of 2 instead of 1 fixes wrapping text on this page http://www.windoweyesforoffice.com/sitecues/index.php
+          // for all headers...
+          EXTRA_HIGHLIGHT_PADDING = 2, //TODO: compute this, figure out why its needed...
 
-          $hlbWrappingElement, // Element outside the body that contains the HLB and background dimmer
-          $hlbElement, // Element that is cloned from the originalElement (HLB)
-          $originalElement, // The element which serves as a model or basis for imitations or copies
-          $pickedElement, // The element chosen by the picker.
-
-          originCSS, // The HLB element's midpoint for animation
-          translateCSS, // The HLB element's translation for final position
-
-          initialHLBRect, // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
+          initialHLBRect,      // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
           isSticky                       = false, // DEBUG: HLB deflation toggler
-          inheritedZoom,                          // Amount of zoom inherited from page's scale transform
-
-          // Decide which event to use depending on which browser is being used
-          wheelEventName                 = platform.browser.isSafari ? 'mousewheel' : 'wheel';
-
-
+          inheritedZoom;                          // Amount of zoom inherited from page's scale transform
 
       if (SC_DEV) {
 
@@ -58,99 +76,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       //////////////////////////////
       // PRIVATE FUNCTIONS
       /////////////////////////////
-
-
-      /**
-       * [wheelHandler listens to all scroll events in the window and prevents scroll outside of HLB]
-       * @param  {[DOM scroll event]} e [Object representing scrolling data]
-       */
-
-      function wheelHandler (event) {
-
-
-        // Get the deltaY value when the user scrolls (how fast the user is scrolling)
-        var deltaY = event.deltaY || -event.wheelDeltaY;
-
-        // Sometimes there is no deltaY number, or a deltaY of "0"
-        // (when the user is scrolling horizontally along X)
-        if (isNaN(deltaY) || deltaY >-1 && deltaY <1) {
-
-          // We prevent the scroll event for horizontal scrolls
-          return preventScroll(event);
-        }
-
-        /*
-
-          Dimension Calculations:
-
-                     /////////
-                   ↑ /       / ↕ Scroll Top
-            Scroll | XXXXXXXXX
-            Height | X       X ↑
-                   | X  HLB  X | Client Height
-                   | X       X ↓
-                   | XXXXXXXXX
-                   ↓ /       / ↕ Scroll Bottom
-                     /////////
-
-        */
-
-        // Get the dimensions
-        var elem             = $hlbElement[0]       // The HLB Element
-          , scrollHeight     = elem.scrollHeight    // The total height of the scrollable area
-          , scrollTop        = elem.scrollTop       // Pixel height of invisible area above element (what has been scrolled)
-          , clientHeight     = elem.clientHeight    // The height of the element in the window
-          , scrollBottom     = scrollHeight-scrollTop-clientHeight // The pixels height invisible area below element (what is left to scroll)
-          , scrollingDown    = deltaY > 0           // If the user is scrolling downwards
-          , scrollingUp      = deltaY < 0           // If the user is scrolling upwards
-          , scrolledToBottom = scrollBottom <= 1    // There are now more invisible pixels below the element
-          , scrolledToTop    = elem.scrollTop <= 1  // There are now more invisible pixels above the element
-          ;
-
-
-        // Prevent any scrolling if the user is:
-        //   a) Not scrolling on the HLB element directly.
-        //   b) Not scrolling on a decendant of the HLB element.
-        if (!$hlbElement.is(event.target) && !$.contains(elem, event.target))  {
-          preventScroll(event);
-        }
-
-        // If the user is scrolling down, (but has not reached the bottom), and
-        // is trying to scroll down more pixels that there are left to scroll...
-        if (scrollingDown && deltaY >= scrollBottom) {
-          // ...set the scroll to the bottom...
-          elem.scrollTop = elem.scrollHeight;
-          // ...and stop scrolling.
-          preventScroll(event);
-        }
-
-        // If the user tries to scroll down past the bottom...
-        if (scrolledToBottom && scrollingDown) {
-          preventScroll(event); // ...stop scrolling.
-        }
-
-        // If the user is scrolling up, (but has not reached the top), and is
-        // trying to scroll up more pixels that there are left to scroll...
-        if (scrollingUp && scrollTop-(-deltaY) <= 0) {
-          // ...set the scroll to the top...
-          elem.scrollTop = 0;
-          // ...and stop scrolling.
-          preventScroll(event);
-        }
-
-        // If the user tries to scroll down past the bottom...
-        if (scrolledToTop && scrollingUp) {
-          preventScroll(event); // ...stop scrolling.
-        }
-
-        // Prevent the original scroll event
-        function preventScroll() {
-          event.preventDefault();
-          event.returnValue = false;
-          return false;
-        }
-
-      }
 
       /**
        * [toggleHLB closes or creates a new HLB]
@@ -174,7 +99,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function targetHLB(isRetargeting) {
 
         // Set module scoped variable so the rest of the program has reference.
-        var highlight = mh.getHighlight();
+        highlight = mh.getHighlight();
+
         if (!highlight.fixedContentRect) {
           return;  // No highlight present -- nothing to open HLB on
         }
@@ -183,17 +109,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // at least one picked element and fixedContentRect outlining the highlight
         $pickedElement = highlight.picked;
 
-        if (SC_DEV && loggingEnabled) {
-
-          console.log('%c--------------- CREATE HLB -----------------', 'color:orange; background:purple; font-size: 9pt;');
-
-          if (!$pickedElement[0].id) {
-            $pickedElement[0].id = (Math.random() + '').slice(2);
-          }
-
-          console.log('Picked element %o ID: ' + $pickedElement[0].id, $pickedElement[0]);
-
-        }
 
         // Set module scoped variable so the rest of the program has reference.
         initialHLBRect = getInitialHLBRect(highlight);
@@ -204,22 +119,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Set module scoped variable so the rest of the program has reference.
         $originalElement = getValidOriginalElement($pickedElement);
-
-        if (SC_DEV && loggingEnabled) {
-          console.log('Initial rect width: ' + initialHLBRect.width / conf.get('zoom') + ' Initial rect height: ' + initialHLBRect.height / conf.get('zoom'));
-          // $('<div>').css({
-          //   'position': 'absolute',
-          //   'width': initialHLBRect.width / conf.get('zoom'),
-          //   'height': initialHLBRect.height / conf.get('zoom'),
-          //   'left': initialHLBRect.left / conf.get('zoom') + window.pageXOffset,
-          //   'top': initialHLBRect.top / conf.get('zoom') + window.pageYOffset,
-          //   'background': 'green',
-          //   'opacity': .6,
-          //   'z-index': 99999
-          // }).insertAfter('body').on('click', function () {
-          //   $(this).remove();
-          // });
-        }
 
         createHLB(isRetargeting);
       }
@@ -247,121 +146,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         return geo.expandOrContractRect(highlight.fixedContentRect, EXTRA_HIGHLIGHT_PADDING);
       }
 
-      /*
-       * [getPickedElement checks and retrieves the original element that the HLB uses
-       * from an event object.  Also handles the specific cases where we may want to toggle
-       * the HLB through a public interface during debugging and testing.]
-       * @param  {[DOM event]}   e [A modified native DOM event, jQuery element, DOM element]
-       * @return {[DOM element]}   [The DOM element we will clone for the HLB instance]
-       */
-      function getPickedElement(e) {
-
-        var originalElement;
-
-        // Check if the element is passed within an event object.
-        // This is how the sitecues application sends the element we
-        // need for the HLB.
-        if (e &&
-            e.dom &&
-            e.dom.mouse_highlight &&
-            e.dom.mouse_highlight.picked &&
-            e.dom.mouse_highlight.picked[0] !== null) {
-
-          originalElement = e.dom.mouse_highlight.picked[0];
-
-          // Check if we were passed a jQuery element.  This is useful for
-          // testing purposes because we can take advantage of the public
-          // event system to sitecues.emit('hlb/toggle', sitecues.$('#myElement'))
-        } else if (e instanceof $) {
-
-          originalElement = e[0];
-
-          // Check if we were passed a DOM element. This is useful for
-          // testing purposes because we can take advantage of the public
-          // event system to sitecues.emit('hlb/toggle', document.getElementById('myElement'))
-        } else if (e instanceof window.Node || e instanceof window.HTMLElement) {
-
-          originalElement = e;
-
-        }
-
-        return originalElement;
-
-      }
-
-      /**
-       * [getValidOriginalElement creates and returns a valid element for the HLB.
-       *  SC-1629 - Lonely bullets
-       *  It is possible that the picker chooses an element for the HLB that is invalid input, therefore,
-       *  return the valid input for the HLB given the invalid input/valid input from the picker.]
-       * @param  {[DOM element]} pickedElement   [The element chosen by the picker]
-       * @return {[DOM element]}                 [The new element create from the element chosen by the picker]
-       */
-      function getValidOriginalElement($pickedElement) {
-
-        if ($pickedElement.is('li')) {
-
-          if (SC_DEV && loggingEnabled) {
-            console.log('%cSPECIAL CASE: Lonely list item.',  'background:orange;');
-          }
-
-          return getValidListElement($pickedElement);
-
-        }
-
-        return $pickedElement;
-
-      }
-
-      /**
-       * [getValidListElement if the element chosen is an <li>, then we must wrap it with a <ul>
-          We must also append this newly created <ul> to the DOM so the HLB
-          module can utilize styles and positioning of the "original element"
-          Basically, we create a new original element.]
-       * @param  {[DOM element]} originalElement [The element chosen by the picker]
-       * @return {[DOM element]}                 [The element the HLB will use to create itself]
-       */
-      function getValidListElement($pickedListItemElement) {
-
-        var pickedListItemElement          = $pickedListItemElement[0],
-            pickedElementsComputedStyles   = window.getComputedStyle(pickedListItemElement),
-            pickedElementsBoundingBox      = pickedListItemElement.getBoundingClientRect(),
-            pickedElementsClone            = pickedListItemElement.cloneNode(true),
-            pickedElementAndChildren       = $pickedListItemElement.find('*').addBack(),
-            pickedElementsCloneAndChildren = $(pickedElementsClone).find('*').addBack(),
-            $originalElement               = $('<ul>').append(pickedElementsClone);
-
-        // Setting this to true will remove the $originalElement from the DOM before inflation.
-        // This is a very special case where the original element is not the same as the picked element.
-        // NOTE: This is setting a module scoped variable so the rest of the program as access.
-        removeTemporaryOriginalElement = true;
-
-        // It is important to clone the styles of the parent <ul> of the original element, because it may
-        // have important styles such as background images, etc.
-        if ($pickedListItemElement.parent('ul,ol').length) {
-          $originalElement[0].style.cssText = hlbStyling.getComputedStyleCssText($pickedListItemElement.parent('ul,ol')[0]);
-        }
-
-        // Create, position, and style this element so that it overlaps the element chosen by the picker.
-        $originalElement.css({
-          'position'       : 'absolute',
-          'left'           : (pickedElementsBoundingBox.left  + window.pageXOffset) / inheritedZoom,
-          'top'            : (pickedElementsBoundingBox.top   + window.pageYOffset) / inheritedZoom,
-          'opacity'        : 0,
-          'padding'        : 0,
-          'margin'         : 0,
-          'width'          : pickedElementsBoundingBox.width / inheritedZoom,
-          'list-style-type': pickedElementsComputedStyles.listStyleType ? pickedElementsComputedStyles.listStyleType : 'none'
-        }).insertAfter('body');
-
-        // Map all picked elements children CSS to cloned children CSS
-        for (var i = 0; i < pickedElementAndChildren.length; i += 1) {
-          pickedElementsCloneAndChildren[i].style.cssText = hlbStyling.getComputedStyleCssText(pickedElementAndChildren[i]);
-        }
-
-        return $originalElement;
-
-      }
 
       /**
        * [createHLB initializes, positions, and animates the HLB]
@@ -373,9 +157,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // prevent mousemove deflation, disable scroll wheel
         initializeHLB();
 
-        sizeHLB();
+        hlbPositioning.sizeHLB($hlbElement, $originalElement, initialHLBRect);
 
-        positionHLB();
+        hlbPositioning.positionHLB($hlbElement, initialHLBRect, inheritedZoom);
 
         // Now that we have extracted all the information from the original element,
         // it is time to ask whether or not a temporary original element has been used
@@ -388,8 +172,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         var viewData = {
           '$hlbElement'        : $hlbElement,
           '$hlbWrappingElement': $hlbWrappingElement,
-          'originCSS'          : originCSS,
-          'translateCSS'       : translateCSS,
+          'originCSS'          : hlbPositioning.getOriginCSS(),
+          'translateCSS'       : hlbPositioning.getTranslateCSS(),
           'onHLBReady'         : onHLBReady,
           'transitionProperty' : hlbStyling.transitionProperty
         };
@@ -426,6 +210,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         $hlbWrappingElement = getOrCreateHLBWrapper();
 
         if (platform.browser.isIE && getEditableItems().length) {
+
           if (SC_DEV && loggingEnabled) {
             console.log('SPECIAL CASE: HLB inside <body>');
           }
@@ -438,14 +223,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           inheritedZoom = 1; // No zoom inherited, because zoom is on <body> and HLB is outside of that
         }
 
-        // Trap the mousewheel events (wheel for all browsers except Safar, which uses mousehweel)
-        window.addEventListener(wheelEventName, wheelHandler);
+        // Prevents mouse movement from deflating the HLB until mouse is inside HLB
+        preventDeflationFromMouseout = true;
 
         // Clone, style, filter
         cloneHLB();
 
-        // Prevents mouse movement from deflating the HLB until mouse is inside HLB
-        preventDeflationFromMouseout = true;
+        eventHandlers.captureWheelEvents($hlbElement);
 
         // Listeners: metrics/hlb-opened.js, speech.js
         sitecues.emit('hlb/create', $hlbElement);
@@ -453,159 +237,163 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [sizeHLB computes and sets the height and width of the HLB]
+       * [cloneHLB clones elements and styles from the original element to the HLB element.]
        */
-      function sizeHLB() {
+      function cloneHLB() {
 
-        var fixit,
-            allHLBChildren;
+        var hlbStyles;
 
-        // Initialize height/width of the HLB
-        hlbPositioning.initializeSize($hlbElement, initialHLBRect);
+        // The cloned element (HLB)
+        $hlbElement = $($originalElement[0].cloneNode(true));
 
-        // Constrain the height and width of the HLB to the height and width of the safe area.
-        hlbPositioning.constrainHeightToSafeArea($hlbElement);
-        hlbPositioning.constrainWidthToSafeArea($hlbElement);
+        // Copies form values from original element to HLB
+        // Need to do this on a timeout in order to enable Safari input fix hack
+        // Commenting out setTimeout fixes problem on TexasAT
+        // setTimeout(function() {
+        mapForm($originalElement, $hlbElement);
+        // }, 0);
 
-        // Limit the width of the HLB to a maximum of CHAR_WIDTH_LIMIT characters.
-        hlbPositioning.limitWidth($originalElement, $hlbElement, CHAR_WIDTH_LIMIT);
+        // Clone styles of HLB and children of HLB, so layout is preserved
+        hlbStyling.initializeStyles($originalElement, $hlbElement, initialHLBRect);
 
-        hlbPositioning.fixOverflowWidth($hlbElement);
+        // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
+        // Filtering must happen after initializeStyles() because we map all children of the original element
+        // to the children of the HLB.  There is a possibility that filter will remove one of those children making
+        // it much more difficult to map...
+        hlbStyling.filter($hlbElement, $pickedElement, highlight.hiddenElements);
 
-        if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
+        // This step must occur after filtering, because some of the HLB default styles (such as padding),
+        // are filtered as well.  For example, if we want to HLB an element that has 20px of padding, we filter
+        // the padding styles (blacklist) and apply default styles.
+        hlbStyles = hlbStyling.getHLBStyles($pickedElement, $originalElement);
 
-          if (SC_DEV && loggingEnabled) {
-            console.log('%cSPECIAL CASE: HLB child width limiting algorithm.', 'background:orange;');
-          }
+        // Set the styles for the HLB and append to the wrapping element
+        $hlbElement
+          .css(hlbStyles)
+          .appendTo($hlbWrappingElement);
 
-          allHLBChildren = $hlbElement.find('*');
+        // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
+        hlbStyling.setHLBChildTextColor($hlbElement);
 
-          fixit = true;
-
-          allHLBChildren.each(function () {
-
-            $(this).css('max-width', getChildWidth(this));
-            $(this).css('height', 'auto');
-
-          });
-
-        }
-
-        // The following attempts to mitigate the vertical scroll bar by
-        // setting the height of the element to the scroll height of the element.
-        hlbPositioning.mitigateVerticalScroll($hlbElement);
-
-        // Vertical scroll should only appear when HLB is as tall as the
-        // safe area height and its scrollHeight is greater than its clientHeight
-        hlbPositioning.addVerticalScroll($hlbElement);
-
-        if (fixit) {
-          if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
-            allHLBChildren.each(function () {
-              $(this).css('height', 'auto');
-              $(this).css('max-width', parseFloat($(this).css('max-width')) -
-                                       ($hlbElement[0].scrollWidth - $hlbElement[0].clientWidth) -
-                                       parseFloat($hlbElement.css('paddingRight')));
-            });
-          }
-        }
-
-
-        if (fixit) {
-
-          // TOOD : The code duplication below is unfortunately necessary to correctly size the HLB.
-          //        The problem was found on 8/24, and a release candidate is super important, so there
-          //        is little time to really identify a better solution (if one exists).
-          // Link : http://www.texasat.net/default.aspx?name=resources.webinars
-
-          // The following attempts to mitigate the vertical scroll bar by
-          // setting the height of the element to the scroll height of the element.
-          hlbPositioning.mitigateVerticalScroll($hlbElement);
-
-          // Vertical scroll should only appear when HLB is as tall as the
-          // safe area height and its scrollHeight is greater than its clientHeight
-          hlbPositioning.addVerticalScroll($hlbElement);
-
-          if ($hlbElement[0].clientWidth < $hlbElement[0].scrollWidth) {
-            allHLBChildren.each(function () {
-              $(this).css('height', 'auto');
-              $(this).css('max-width', parseFloat($(this).css('max-width')) -
-                                       ($hlbElement[0].scrollWidth - $hlbElement[0].clientWidth) -
-                                       parseFloat($hlbElement.css('paddingRight')));
-            });
-          }
-        }
-
-      }
-
-      function getChildWidth (child) {
-
-        var sum = 0;
-
-        $(child).parentsUntil($hlbElement.parent()).addBack().each(function () {
-          sum += parseFloat($(this).css('marginLeft'));
-          sum += parseFloat($(this).css('marginRight'));
-          sum += parseFloat($(this).css('paddingRight'));
-          sum += parseFloat($(this).css('paddingLeft'));
-          sum += parseFloat($(this).css('borderRightWidth'));
-          sum += parseFloat($(this).css('borderLeftWidth'));
-        });
-
-        return ($hlbElement[0].getBoundingClientRect().width / hlbPositioning.getInheritedZoom($hlbElement)) - sum;
+        // Set the ID of the hlbElement.
+        $hlbElement[0].id = SITECUES_HLB_ID;
 
       }
 
       /**
-       * [positionHLB positions the HLB.]
+       * [getValidOriginalElement creates and returns a valid element for the HLB.
+       *  SC-1629 - Lonely bullets
+       *  It is possible that the picker chooses an element for the HLB that is invalid input, therefore,
+       *  return the valid input for the HLB given the invalid input/valid input from the picker.]
+       * @param  {[DOM element]} pickedElement   [The element chosen by the picker]
+       * @return {[DOM element]}                 [The new element create from the element chosen by the picker]
        */
-      function positionHLB() {
+      function getValidOriginalElement($pickedElement) {
 
-        // The minimum distance we must move the HLB for it to fall within the safe zone
-        var constrainedOffset,
+        if ($pickedElement.is('li')) {
 
-            HLBBoundingBoxAfterZoom = hlbPositioning.scaleRectFromCenter($hlbElement),
-            HLBBoundingBox = $hlbElement[0].getBoundingClientRect(),
+          if (SC_DEV && loggingEnabled) {
+            console.log('%cSPECIAL CASE: Lonely list item.',  'background:orange;');
+          }
 
-            // These are used in the positioning calculation.
-            // They are the differences in height and width before and after the HLB is scaled.
-            expandedWidthOffset  = (HLBBoundingBoxAfterZoom.width  - HLBBoundingBox.width)  / 2,
-            expandedHeightOffset = (HLBBoundingBoxAfterZoom.height - HLBBoundingBox.height) / 2,
+          return getValidListElement($pickedElement);
 
-            // The difference between the mid points of the hlb element and the original
-            offset = hlbPositioning.midPointDiff($hlbElement, initialHLBRect);
+        }
 
-        // Update the dimensions for the HLB which is used for constraint calculations.
-        // The offset of the original element and cloned element midpoints are used for positioning.
-        HLBBoundingBoxAfterZoom.left   = HLBBoundingBox.left - offset.x - expandedWidthOffset;
-        HLBBoundingBoxAfterZoom.top    = HLBBoundingBox.top  - offset.y - expandedHeightOffset;
-        HLBBoundingBoxAfterZoom.right  = HLBBoundingBoxAfterZoom.left + HLBBoundingBoxAfterZoom.width;
-        HLBBoundingBoxAfterZoom.bottom = HLBBoundingBoxAfterZoom.top  + HLBBoundingBoxAfterZoom.height;
+        if ($pickedElement.is('fieldset')) {
 
-        // Constrain the scaled HLB to the bounds of the "safe area".
-        // This returns how much to shift the box so that it falls within the bounds.
-        // Note: We have already assured that the scaled cloned element WILL fit into the "safe area",
-        // but not that it is currently within the bounds.
-        constrainedOffset = hlbPositioning.constrainPosition(HLBBoundingBoxAfterZoom);
+          if (SC_DEV && loggingEnabled) {
+            console.log('%cSPECIAL CASE: Lonely fieldset.',  'background:orange;');
+          }
 
-        // Add the difference between the HLB p osition and the minimum amount of distance
-        // it must travel to be completely within the bounds of the safe area to the difference
-        // between the mid points of the hlb element and the original
-        offset.x += constrainedOffset.x;
-        offset.y += constrainedOffset.y;
+          return getValidFieldsetElement($pickedElement);
 
-        // translateCSS and originCSS are used during deflation
-        translateCSS = 'translate(' + (-offset.x / inheritedZoom) + 'px, ' + (-offset.y / inheritedZoom) + 'px)';
+        }
 
-        // This is important for animating from the center point of the HLB
-        originCSS = ((-offset.x / inheritedZoom) + HLBBoundingBox.width  / 2 / inheritedZoom) + 'px ' +
-                    ((-offset.y / inheritedZoom) + HLBBoundingBox.height / 2 / inheritedZoom) + 'px';
+        return $pickedElement;
 
-        // Position the HLB without it being scaled (so we can animate the scale).
-        var startAnimationZoom = conf.get('zoom') / inheritedZoom;
-        $hlbElement.css({
-          'transform': 'scale(' + startAnimationZoom + ') ' + translateCSS
-        });
+      }
 
+      /**
+       * [getValidListElement if the element chosen is an <li>, then we must wrap it with a <ul>
+          We must also append this newly created <ul> to the DOM so the HLB
+          module can utilize styles and positioning of the "original element"
+          Basically, we create a new original element.]
+       * @param  {[DOM element]} originalElement [The element chosen by the picker]
+       * @return {[DOM element]}                 [The element the HLB will use to create itself]
+       */
+      function getValidListElement($pickedElement) {
+
+        var pickedElement                  = $pickedElement[0],
+            pickedElementsComputedStyles   = window.getComputedStyle(pickedElement),
+            pickedElementsBoundingBox      = pickedElement.getBoundingClientRect(),
+            pickedElementsClone            = pickedElement.cloneNode(true),
+            pickedElementAndChildren       = $pickedElement.find('*').addBack(),
+            pickedElementsCloneAndChildren = $(pickedElementsClone).find('*').addBack(),
+            $originalElement               = $('<ul>').append(pickedElementsClone);
+
+        // Setting this to true will remove the $originalElement from the DOM before inflation.
+        // This is a very special case where the original element is not the same as the picked element.
+        // NOTE: This is setting a module scoped variable so the rest of the program as access.
+        removeTemporaryOriginalElement = true;
+
+        // It is important to clone the styles of the parent <ul> of the original element, because it may
+        // have important styles such as background images, etc.
+        $originalElement[0].style.cssText = hlbStyling.getComputedStyleCssText($pickedElement.parent('ul, ol')[0]);
+
+        // Create, position, and style this element so that it overlaps the element chosen by the picker.
+        $originalElement.css({
+          'position'       : 'absolute',
+          'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
+          'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
+          'opacity'        : 0,
+          'padding'        : 0,
+          'margin'         : 0,
+          'width'          : pickedElementsBoundingBox.width / inheritedZoom,
+          'list-style-type': pickedElementsComputedStyles.listStyleType ? pickedElementsComputedStyles.listStyleType : 'none'
+        }).insertAfter('body');
+
+        // Map all picked elements children CSS to cloned children CSS
+        for (var i = 0; i < pickedElementAndChildren.length; i += 1) {
+          pickedElementsCloneAndChildren[i].style.cssText = hlbStyling.getComputedStyleCssText(pickedElementAndChildren[i]);
+        }
+
+        return $originalElement;
+
+      }
+
+      // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
+      function getValidFieldsetElement($pickedElement) {
+
+        var pickedElement                  = $pickedElement[0],
+            pickedElementsBoundingBox      = pickedElement.getBoundingClientRect(),
+            pickedElementsClone            = pickedElement.cloneNode(true),
+            pickedElementAndChildren       = $pickedElement.find('*').addBack(),
+            pickedElementsCloneAndChildren = $(pickedElementsClone).find('*').addBack(),
+            $originalElement               = $('<div>').append(pickedElementsClone);
+
+        // Setting this to true will remove the $originalElement from the DOM before inflation.
+        // This is a very special case where the original element is not the same as the picked element.
+        // NOTE: This is setting a module scoped variable so the rest of the program as access.
+        removeTemporaryOriginalElement = true;
+
+        // Create, position, and style this element so that it overlaps the element chosen by the picker.
+        $originalElement.css({
+          'position'       : 'absolute',
+          'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
+          'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
+          'opacity'        : 0,
+          'padding'        : 0,
+          'margin'         : 0,
+          'width'          : pickedElementsBoundingBox.width / inheritedZoom
+        }).insertAfter('body');
+
+        // Map all picked elements children CSS to cloned children CSS
+        for (var i = 0; i < pickedElementAndChildren.length; i += 1) {
+          pickedElementsCloneAndChildren[i].style.cssText = hlbStyling.getComputedStyleCssText(pickedElementAndChildren[i]);
+        }
+
+        return $originalElement;
       }
 
       /**
@@ -633,7 +421,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function turnOffHLBEventListeners() {
 
         // UNTrap the mousewheel events (we don't want the event to even think when the user scrolls without the HLB)
-        window.removeEventListener(wheelEventName, wheelHandler);
+        eventHandlers.releaseWheelEvents();
 
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
 
@@ -644,42 +432,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         $(document).off('mousemove', onTargetChange);
       }
 
-      /**
-       * [cloneHLB clones elements and styles from the original element to the HLB element.]
-       * @param  {[DOM element]} originalElement [original element]
-       */
-      function cloneHLB() {
-
-        var hlbStyles;
-
-        // The cloned element (HLB)
-        $hlbElement = $($originalElement[0].cloneNode(true));
-
-        // Copies form values from original element to HLB
-        // Need to do this on a timeout in order to enable Safari input fix hack
-        setTimeout(function() {
-          mapForm($originalElement, $hlbElement);
-        }, 0);
-
-        // Clone styles of HLB and children of HLB, so layout is preserved
-        hlbStyling.initializeStyles($originalElement, $hlbElement);
-
-        // Remove any elements and styles we dont want on the cloned element (such as <script>, id, margin)
-        hlbStyling.filter($hlbElement);
-
-        // Set this variable now that we have filtered, cloned child styles
-        hlbStyles = hlbStyling.getHLBStyles($pickedElement, $originalElement);
-
-        // Set the styles for the HLB and append to the wrapping element
-        $hlbElement.css(hlbStyles).appendTo($hlbWrappingElement);
-
-        // Fixes problem with TexasAT home page when opening the top nav (Home, Sitemap, Contact Us) in HLB
-        hlbStyling.setHLBChildTextColor($hlbElement);
-
-        // Set the ID of the hlbElement.
-        $hlbElement[0].id = SITECUES_HLB_ID;
-
-      }
 
       function hlbFormEntryComplete() {
         // Make sure inputs from HLB are copied over to the original element
@@ -701,8 +453,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         hlbAnimation.transitionOutHLB({
           '$hlbElement'        : $hlbElement,
           '$hlbWrappingElement': $hlbWrappingElement,
-          'originCSS'          : originCSS,
-          'translateCSS'       : translateCSS,
+          'originCSS'          : hlbPositioning.getOriginCSS(),
+          'translateCSS'       : hlbPositioning.getTranslateCSS(),
           'onHLBClosed'        : function() { onHLBClosed(e); },
           'transitionProperty' : hlbStyling.transitionProperty
         });
@@ -824,9 +576,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();
 
+        hlbPositioning.setTranslateCSS(undefined);
+        hlbPositioning.setOriginCSS(undefined);
+
         // Clean up "module scoped" vars
-        translateCSS = undefined;
-        originCSS    = undefined;
         isHLBClosing = false;
 
         // Listeners: hpan.js, mouse-highlight.js, speech.js
@@ -835,6 +588,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         $originalElement = undefined;
         $hlbElement      = undefined;
         $pickedElement   = undefined;
+        highlight        = undefined;
 
         if (SC_DEV && loggingEnabled) {
           console.log('%c--------------- HLB DESTROYED -----------------', 'color:orange; background:purple; font-size: 9pt');
@@ -919,19 +673,16 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         sitecues.toggleHLBLogging = function () {
           loggingEnabled = !loggingEnabled;
           return loggingEnabled;
-        }
+        };
       }
 
 
       if (SC_UNIT) {
 
         exports.mapForm                  = mapForm;
-        exports.getPickedElement         = getPickedElement;
         exports.onHLBHover               = onHLBHover;
         exports.onTargetChange           = onTargetChange;
         exports.initializeHLB            = initializeHLB;
-        exports.sizeHLB                  = sizeHLB;
-        exports.positionHLB              = positionHLB;
         exports.turnOnHLBEventListeners  = turnOnHLBEventListeners;
         exports.turnOffHLBEventListeners = turnOffHLBEventListeners;
         exports.cloneHLB                 = cloneHLB;
@@ -992,22 +743,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         exports.getIsHLBClosing = function() {
           return isHLBClosing;
-        };
-
-        exports.getTranslateCSS = function() {
-          return translateCSS;
-        };
-
-        exports.setTranslateCSS = function(value) {
-          translateCSS = value;
-        };
-
-        exports.getOriginCSS = function() {
-          return originCSS;
-        };
-
-        exports.setOriginCSS = function(value) {
-          originCSS = value;
         };
 
         exports.getRemoveTemporaryOriginalElement = function () {
