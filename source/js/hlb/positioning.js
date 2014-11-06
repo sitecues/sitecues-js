@@ -146,6 +146,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
       }
+
+      fixOverflowWidth($hlbElement);
+
     }
 
     /**
@@ -482,8 +485,13 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // If there is a horizontal scroll bar
       if (hlbElement.clientWidth < hlbElement.scrollWidth) {
 
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: Fix overflow width.',  'background:orange;');
+        }
+
         $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px',
+          'max-width': 'none'
         });
 
         // Again, we can't be positive that the increase in width does not overflow the safe area.
