@@ -146,6 +146,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         });
 
       }
+
+      fixOverflowWidth($hlbElement);
+
     }
 
     /**
@@ -424,11 +427,8 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // when HLBing "News" header.  Because we copy computedStyles, we sometimes get an HLB
       // that has a child that is much wider or taller than the highlight, causing the HLB
       // to increase in width and height for the purpose of avoiding scrollbars.
-      $hlbElement.find('*').each(function () {
-        $(this).css({
-          'max-width' : width
-        });
-      });
+      // TODO: cache decendants because we use it alot
+      $hlbElement.find('*').css('max-width', width);
 
     }
 
@@ -482,8 +482,13 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // If there is a horizontal scroll bar
       if (hlbElement.clientWidth < hlbElement.scrollWidth) {
 
+        if (SC_DEV) {
+          console.log('%cSPECIAL CASE: Fix overflow width.',  'background:orange;');
+        }
+
         $hlbElement.css({
-          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px'
+          'width': $hlbElement.width() + (hlbElement.scrollWidth - hlbElement.clientWidth) + hlbStyling.defaultPadding + 'px',
+          'max-width': 'none'
         });
 
         // Again, we can't be positive that the increase in width does not overflow the safe area.

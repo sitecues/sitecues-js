@@ -6,7 +6,7 @@
  *
  * Note: keydown event is also handled in keys.js
  */
-
+// TODO: Call this module scrolling.js
 sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
   'use strict';

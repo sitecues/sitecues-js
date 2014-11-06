@@ -50,13 +50,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           $pickedElement,      // The element chosen by the picker.
           $originalElement,    // The element which serves as a model or basis for imitations or copies
           $hlbElement,         // Element that is cloned from the originalElement (HLB)
-          $hlbWrappingElement, // Eleemnt outside the body that contains the HLB and background dimmer
+          $hlbWrappingElement, // Element outside the body that contains the HLB and background dimmer
 
           // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
           // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
           // Value of 2 instead of 1 fixes wrapping text on this page http://www.windoweyesforoffice.com/sitecues/index.php
           // for all headers...
-          EXTRA_HIGHLIGHT_PADDING = 2,
+          EXTRA_HIGHLIGHT_PADDING = 2, //TODO: compute this, figure out why its needed...
 
           initialHLBRect,      // The highlight rect, if it exists, otherwise use the $originalElement bounding client rect.
 
