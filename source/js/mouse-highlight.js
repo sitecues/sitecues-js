@@ -1309,26 +1309,26 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         isSticky = !isSticky;
         return isSticky;
       };
-
-      /**
-       * Allow debugging script to directly highlight something
-       * @param elem
-       * @param doUsePicker -- if truthy will find the best item to highlight ... elem or an ancestor of elem
-       *                       if falsey will just highlight elem exactly
-       */
-      sitecues.highlight = function(elem, doUsePicker) {
-        hide();
-        state.picked = doUsePicker ? picker.find(elem) : $(elem);
-        state.target = elem;
-        if (state.picked) {
-          var rect = mhpos.getRect(elem);
-          cursorPos = null;
-          scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
-          show();
-        }
-        return state.picked;
-      };
     }
+
+    /**
+     * Allow debugging script to directly highlight something
+     * @param elem
+     * @param doUsePicker -- if truthy will find the best item to highlight ... elem or an ancestor of elem
+     *                       if falsey will just highlight elem exactly
+     */
+    sitecues.highlight = function(elem, doUsePicker) {
+      hide();
+      state.picked = doUsePicker ? picker.find(elem) : $(elem);
+      state.target = elem;
+      if (state.picked) {
+        var rect = mhpos.getRect(elem);
+        cursorPos = null;
+        scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
+        show();
+      }
+      return state.picked;
+    };
 
     // done
     callback();
