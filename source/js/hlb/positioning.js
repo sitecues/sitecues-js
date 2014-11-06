@@ -43,20 +43,19 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           rightSum          = 0;
 
       $(child).parentsUntil($hlbElement.parent()).addBack().each(function () {
-
-        var $this = $(this);
-
+        var computedStyle = getComputedStyle(this);
         // marginRight has been commented out to fix issue on faast.org when HLBing
         // "About" in the top navigation.  I thought marginRight pushes its content to the left,
         // but in that case apparently not.  The rule of what marginRight does may be dependent
         // on other factors which I do not know, but removing it does not appear to break anything
         // that this function originally fixed.
-        // rightSum += parseFloat($this.css('marginRight'));
-        rightSum += parseFloat($this.css('paddingRight'));
-        rightSum += parseFloat($this.css('borderRightWidth'));
-        leftSum  += parseFloat($this.css('marginLeft'));
-        leftSum  += parseFloat($this.css('paddingLeft'));
-        leftSum  += parseFloat($this.css('borderLeftWidth'));
+        // rightSum += parseFloat(computedStyle.marginRight);
+        rightSum += parseFloat(computedStyle.paddingRight) +
+          parseFloat(computedStyle.borderRightWidth);
+
+        leftSum += parseFloat(computedStyle.marginLeft) +
+          parseFloat(computedStyle.paddingLeft) +
+            parseFloat(computedStyle.borderLeftWidth);
       });
 
       sum = leftSum + rightSum;
@@ -191,7 +190,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       // Returns false when an element is not wrappable or, if part of an HLB,
       // wrapping the HLB would be bad (would break the intended layout, for example).
-      function isWrappable(index, element) {
+      function testAllowWrapping(index, element) {
         var css = getComputedStyle(element);
 
         allowWrapping = (css.whiteSpace === 'normal' || css.whiteSpace === 'preWrap') &&
@@ -219,7 +218,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         return;
       }
 
-      $hlbElement.find('*').andSelf().each(isWrappable);
+      $hlbElement.find('*').andSelf().each(testAllowWrapping);
 
       return allowWrapping;
 
