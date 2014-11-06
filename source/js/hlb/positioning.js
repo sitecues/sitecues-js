@@ -218,7 +218,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         return;
       }
 
-      $hlbElement.find('*').andSelf().each(testAllowWrapping);
+      $hlbElement.find('*').addBack().each(testAllowWrapping);
 
       return allowWrapping;
 
