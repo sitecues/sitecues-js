@@ -190,7 +190,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
       // Returns false when an element is not wrappable or, if part of an HLB,
       // wrapping the HLB would be bad (would break the intended layout, for example).
-      function isWrappable(index, element) {
+      function testAllowWrapping(index, element) {
         var css = getComputedStyle(element);
 
         allowWrapping = (css.whiteSpace === 'normal' || css.whiteSpace === 'preWrap') &&
@@ -218,7 +218,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         return;
       }
 
-      $hlbElement.find('*').andSelf().each(isWrappable);
+      $hlbElement.find('*').andSelf().each(testAllowWrapping);
 
       return allowWrapping;
 
