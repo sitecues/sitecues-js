@@ -1313,12 +1313,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       /**
        * Allow debugging script to directly highlight something
        * @param elem
-       * @param doFind -- if truthy will find the best item to highlight ... elem or an ancestor of elem
-       *                  if falsey will just highlight elem exactly
+       * @param doUsePicker -- if truthy will find the best item to highlight ... elem or an ancestor of elem
+       *                       if falsey will just highlight elem exactly
        */
-      sitecues.highlight = function(elem, doFind) {
+      sitecues.highlight = function(elem, doUsePicker) {
         hide();
-        state.picked = doFind ? picker.find(elem) : $(elem);
+        state.picked = doUsePicker ? picker.find(elem) : $(elem);
         state.target = elem;
         if (state.picked) {
           var rect = mhpos.getRect(elem);
