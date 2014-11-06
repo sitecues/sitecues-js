@@ -57,6 +57,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // Metrics info
         zoomInput = {},
 
+        // Function to call for requesting an animation frame
+        requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
+          function(fn) { return setTimeout(fn, 16) },  // 16ms is about 60fps
+
         // State to help with animation optimizations and will-change
         zoomBeginTimer, // Timer before zoom can actually begin (waiting for browser to create composite layer)
         clearAnimationOptimizationTimer,   // Timer to clear will-change when zoom is finished
@@ -211,6 +215,18 @@ sitecues.def('zoom', function (zoom, callback) {
         initBodyInfo();
 
         return originalBodyInfo.right * completedZoom;
+      };
+
+      zoom.getBodyLeft = function() {
+        initBodyInfo();
+
+        return originalBodyInfo.leftMostNode.getBoundingClientRect().left + window.pageXOffset;
+      };
+
+      zoom.getMainNode = function() {
+        initBodyInfo();
+
+        return originalBodyInfo.mainNode;
       };
 
       zoom.getCompletedZoom = function() {
@@ -791,15 +807,6 @@ sitecues.def('zoom', function (zoom, callback) {
         });
       }
 
-      // Request an animation frame
-      function requestFrame(fn) {
-        var req = window.requestAnimationFrame || window.msRequestAnimationFrame;
-        if (req) {
-          return req(fn);
-        }
-        return setTimeout(fn, 16);  // 16ms is about 60fps
-      }
-
       // Cancel any currently reequested animation frame
       function cancelFrame(id) {
         var cancel = window.cancelAnimationFrame || window.msCancelRequestAnimationFrame;
@@ -1009,7 +1016,8 @@ sitecues.def('zoom', function (zoom, callback) {
             rightMostCoord = rect.right;
           }
         });
-        bodyInfo.mainNode = mainNode;
+
+        bodyInfo.mainNode = mainNode || document.body;
         bodyInfo.leftMostNode = leftMostNode;
         bodyInfo.rightMostNode = rightMostNode;
         bodyInfo.transformOriginX = body.getBoundingClientRect().width / 2;

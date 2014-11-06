@@ -15,7 +15,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
     hiddenElements: [], // Elements whose subtrees are hidden or not part of highlight rectangle (e.g. display: none, hidden off-the-page, out-of-flow)
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
-    viewRect: null,  // Contains the total overlay rect, in absolute coordinates, in real pixels so that it can live outside of <body>
+    absoluteRect: null,  // Total overlay rect in absolute window coordinates in real pixels
+    overlayRect: null,  // Contains the total overlay rect, in absolute body coordinates,  zoomed pixels
     cutoutRects: {}, // Object map for possible topLeft, topRight, botLeft, botRight of rectangles cut out of highlight to create L shape
     pathBorder: [], // In real pixels so that it can live outside of <body>
     pathFillPadding: [], // In real pixels outside <body>, extends CSS background beyond element
@@ -45,6 +46,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   state,
 
   isEnabled,
+  isFollowingMouse = true,
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
@@ -283,7 +285,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function isCursorInHighlightShape(fixedRects, cutoutRects) {
-      if (!cursorPos || !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects)) {
+      if (!cursorPos) {
+        return true; // No cursor -- last pick may have been from keyboard
+      }
+
+      if (!geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects)) {
         return false;
       }
       // The cursor is in the fixed rectangle for the highlight.
@@ -796,13 +802,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             width: width + 'px',
             height: height + 'px'
           }).css({
-              position: 'absolute',
-              pointerEvents: 'none'
+            position: 'absolute',
+            pointerEvents: 'none'
           });
-          // Cannot set viewBox via jQuery -- it lowercases the attribute which breaks it
-          // (the "B" in "Box" needs to be uppercase)
-          // See http://stackoverflow.com/questions/10390346/why-is-jquery-auto-lower-casing-attribute-values
-//          $svg[0].setAttribute('viewBox', "0 0 " + width + ' ' + height);
         }
         else {
           // Use CSS outline with 0px wide/tall elements to draw lines of outline
@@ -832,6 +834,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         offsetElement = isOldFirefox ? document.body : $measureDiv[0],
         offsetRect = offsetElement.getBoundingClientRect();
       $measureDiv.remove();
+
       overlayRect = {
         left: (mainFixedRect.left - offsetRect.left) / state.zoom,
         top: (mainFixedRect.top - offsetRect.top) / state.zoom,
@@ -841,6 +844,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       overlayRect.right = overlayRect.left + overlayRect.width;
       overlayRect.bottom = overlayRect.top + overlayRect.height;
       state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
+
+      // So we can keep track of where highlight is even after panning
+      state.absoluteRect = $.extend({}, mainFixedRect);
+      // Next subtract the current scroll position
+      state.absoluteRect.left += window.pageXOffset;
+      state.absoluteRect.right += window.pageXOffset;
+      state.absoluteRect.top += window.pageYOffset;
+      state.absoluteRect.bottom += window.pageYOffset;
 
       // Finally update overlay CSS with zoom corrections
       updateHighlightOverlayPosition();
@@ -977,7 +988,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function update(event) {
       // break if highlight is disabled
 
-      if (!isEnabled) {
+      if (!isEnabled || !isFollowingMouse) {
         return;
       }
 
@@ -1044,7 +1055,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       else if (!state.isCreated && scrollPos &&
         (scrollY !== scrollPos.y || scrollX !== scrollPos.x ||
-        mouseX !== cursorPos.x || mouseY !== cursorPos.y)) {
+        !cursorPos || mouseX !== cursorPos.x || mouseY !== cursorPos.y)) {
         // Don't update while still scrolling
         cursorPos = { x: mouseX, y: mouseY };
         scrollPos = { x: scrollX, y: scrollY };
@@ -1185,6 +1196,44 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       refreshEventListeners(false);
     }
 
+    function centerHighlight() {
+      traitcache.resetCache();
+      var viewSize = traitcache.getCachedViewSize();
+
+      // Get first visible text and start from there
+      function isAcceptableTextLeaf(node) {
+        // Logic to determine whether to accept, reject or skip node
+        if (common.isEmpty(node.data)) {
+          return NodeFilter.FILTER_REJECT; // Only whitespace or punctuation
+        }
+        var textRect = mhpos.getRangeRect(node);
+        if (textRect.width === 0 || textRect.height === 0 ||
+          textRect.top > viewSize.height || textRect.left > viewSize.width ||
+          textRect.right < 0 || textRect.bottom < 0) {
+          return NodeFilter.FILTER_REJECT; // Hidden
+        }
+
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      // Retrieve some leaf nodes
+      var nodeIterator = document.createNodeIterator(zoomMod.getMainNode(),
+        NodeFilter.SHOW_TEXT,
+        { acceptNode: isAcceptableTextLeaf });
+
+      while (true) {
+        var nextLeaf = nodeIterator.nextNode(),
+          containingElement;
+        if (!nextLeaf) {
+          break;
+        }
+        containingElement = nextLeaf.parentNode;
+        if (containingElement && sitecues.highlight(containingElement, true)) {
+          break;
+        }
+      }
+    }
+
     // Hide mouse highlight temporarily, keep picked data so we can reshow
     // the same highlight without another mouse move.
     // It's useful to call on it's own when the cursor goes outside of the highlight
@@ -1222,6 +1271,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state = $.extend({}, INIT_STATE);
     }
 
+    function setFollowMouse(isOn) {
+      isFollowingMouse = isOn;
+    }
+
     // Return all of the highlight information provided in the |state| variable
     mh.getHighlight = function() {
       return state;
@@ -1231,10 +1284,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
     // Also to this until zooming finished so that outline doesn't get out of place during zoom
-    sitecues.on('hlb/init zoom/begin', disableTemporarily);
+    sitecues.on('hlb/init zoom/begin mh/clear', disableTemporarily);
+
+    // Turn mouse-following on or off
+    sitecues.on('mh/follow-mouse', setFollowMouse);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('hlb/closed zoom', enableIfAppropriate);
+
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('mh/center', centerHighlight);
 
     // darken highlight appearance when speech is enabled
     conf.get('ttsOn', enableIfAppropriate);
@@ -1254,15 +1313,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       /**
        * Allow debugging script to directly highlight something
        * @param elem
+       * @param doFind -- if truthy will find the best item to highlight ... elem or an ancestor of elem
+       *                  if falsey will just highlight elem exactly
        */
-      sitecues.highlight = function(elem) {
+      sitecues.highlight = function(elem, doFind) {
         hide();
-        state.picked = $(elem);
+        state.picked = doFind ? picker.find(elem) : $(elem);
         state.target = elem;
-        var rect = mhpos.getRect(elem);
-        cursorPos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-        scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
-        show();
+        if (state.picked) {
+          var rect = mhpos.getRect(elem);
+          cursorPos = null;
+          scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
+          show();
+        }
+        return state.picked;
       };
     }
 

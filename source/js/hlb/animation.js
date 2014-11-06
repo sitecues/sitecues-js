@@ -6,11 +6,12 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/positioning', 'platform', 'conf',
+  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/positioning', 'platform',
 
-  function (dimmer, common, $, hlbPositioning, platform, conf) {
+  function (dimmer, common, $, hlbPositioning, platform) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
+        INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
         DEFLATION_SPEED = 150, // Default deflation duration
 
         $animation;            // A reference to the $.animate we use for IE9 inflation and deflation
@@ -27,11 +28,12 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      * [transitionInHLB animates the inflation of the HLB and background dimmer]
      * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
-    hlbAnimation.transitionInHLB = function (data) {
+    hlbAnimation.transitionInHLB = function (doShowQuickly, data) {
 
       // Dim the background!
       dimmer.dimBackgroundContent(data.$hlbWrappingElement, INFLATION_SPEED);
-      var $hlbElement = data.$hlbElement;
+      var $hlbElement = data.$hlbElement,
+        speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED;
 
       if (shouldFixFirefoxAnimationBug($hlbElement)) {
 
@@ -49,11 +51,11 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       if (common.useJqueryAnimate) {
 
-        transitionInHLBWithJquery(data);
+        transitionInHLBWithJquery(data, speed);
 
       } else {
 
-        transitionInHLBWithCSS(data);
+        transitionInHLBWithCSS(data, speed);
 
       }
 
@@ -122,7 +124,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      * [transitionInHLBWithJquery animates the HLB open with jQuery.animate()]
      * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
-    function transitionInHLBWithJquery(data) {
+    function transitionInHLBWithJquery(data, speed) {
 
       var $hlbElement = data.$hlbElement,
         startingScale = hlbPositioning.getStartingScale($hlbElement);
@@ -141,7 +143,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
               hlbSteppingAnimation(now, data);
             };
           }(data)),
-          'duration': INFLATION_SPEED,
+          'duration': speed,
           'complete': data.onHLBReady
         }
       );
@@ -191,10 +193,10 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      * [transitionInHLBWithCSS animates the HLB open with CSS transitions]
      * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      */
-    function transitionInHLBWithCSS(data) {
+    function transitionInHLBWithCSS(data, speed) {
 
       var $hlbElement     = data.$hlbElement,
-          transitionInCSS = getTransitionInCSS(data);
+          transitionInCSS = getTransitionInCSS(data, speed);
 
       // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
       $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBReady);
@@ -224,13 +226,13 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
      * @return {[Object]} [The jquery CSS object needed to animate the HLB open]
      */
-    function getTransitionInCSS(data) {
+    function getTransitionInCSS(data, speed) {
 
       // The order in which these CSS properties are set matters.  For example, if the
       // transition property is the last property in the transitionInCSS object, then
       // the transition would never occur. https://equinox.atlassian.net/browse/SC-1856
       var transitionInCSS = {
-        'transition'                : data.transitionProperty + INFLATION_SPEED + 'ms',
+        'transition'                : data.transitionProperty + speed + 'ms',
         'transition-timing-function': 'ease',
         'transform'                 : 'scale(' + hlbPositioning.getFinalScale(data.$hlbElement) + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS

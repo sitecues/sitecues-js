@@ -30,7 +30,8 @@ sitecues.def('audio', function (audio, callback) {
       var text = builder.getText(hlb);
       if (text) {
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
-        enableKeyDownToStopAudio();
+        // Wait a moment, in case it was a keystroke that just got us here
+        setTimeout(enableKeyDownToStopAudio, 0);
       }
     }
 

@@ -69,16 +69,41 @@ sitecues.def('keys', function(keys, callback) {
           },
           'esc': function(event) {
              // Escape key is only valid if there is an HLB to close
-             return event.keyCode === 27 && hlb.getElement();
+             return event.keyCode === 27;
+          },
+          // For arrow keys, allow number pad usage as well (2/4/6/8)
+          'up': function(event) {
+            return (event.keyCode === 38 || event.keyCode === 98) && canMoveHighlight(event);
+          },
+          'down': function(event) {
+            return (event.keyCode === 40 || event.keyCode === 104) && canMoveHighlight(event);
+          },
+          'left': function(event) {
+            return (event.keyCode === 37 || event.keyCode === 100) && canMoveHighlight(event);
+          },
+          'right': function(event) {
+            return (event.keyCode === 39 || event.keyCode === 106) && canMoveHighlight(event);
+          },
+          'heading': function(event) {
+            return event.keyCode === 72 && canMoveHighlight(event);
           }
         },
         // define keys map used to bind actions to hotkeys
         KEY_EVENT_MAP = {
-          'space': 'hlb/toggle',
+          'space': 'key/space',
           'minus': 'zoom/decrease',
           'plus': 'zoom/increase',
-          'esc': 'hlb/toggle'
+          'esc': 'key/esc',
+          'up': 'key/nav',
+          'down': 'key/nav',
+          'left': 'key/nav',
+          'right': 'key/nav',
+          'heading': 'key/nav'
         };
+
+      function canMoveHighlight(event) {
+        return !hasCommandModifier(event) && mh.getHighlight().absoluteRect && !common.isEditable(event.target);
+      }
 
       // Non-shift modifier keys (ctrl, cmd, alt)
       function hasCommandModifier(event) {
@@ -91,7 +116,7 @@ sitecues.def('keys', function(keys, callback) {
       }
 
       // Handle key
-      function handle(sitecuesEvent, event) {
+      function handle(sitecuesEvent, event, keyName) {
         // Prevent default behavior of key. The browser listens to these events
         // and does not execute commands based on the key pressed
         // (such as spacebar to page down, cmd+plus to zoom, arrow key to scroll, shift+arrow to select)
@@ -113,7 +138,7 @@ sitecues.def('keys', function(keys, callback) {
         }
 
         // Emit event defined for key
-        sitecues.emit(sitecuesEvent, event);
+        sitecues.emit(sitecuesEvent, event, keyName);
       };
 
       // key event hook
@@ -124,7 +149,7 @@ sitecues.def('keys', function(keys, callback) {
         // iterate over key map
         for (var key in KEY_EVENT_MAP) {
           if (KEY_EVENT_MAP.hasOwnProperty(key) && KEY_TESTS[key](event)) {
-            handle(KEY_EVENT_MAP[key], event);
+            handle(KEY_EVENT_MAP[key], event, key);
             return false;
           }
         }

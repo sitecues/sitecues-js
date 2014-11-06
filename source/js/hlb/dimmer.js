@@ -54,6 +54,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
      */
     function onDimmerClosed() {
       $dimmerElement.remove();
+      $dimmerElement = null;
     }
 
     //////////////////////////////
@@ -67,7 +68,9 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
      */
     dimmer.dimBackgroundContent = function($hlbWrappingElement, inflationSpeed) {
 
-      var useScrollOffset = !$hlbWrappingElement.closest(document.body).length;
+      if ($dimmerElement) {
+        return; // Background already dimmed
+      }
 
       $dimmerElement = $('<div>', {
         'id': DIMMER_ID
@@ -78,11 +81,11 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
         $dimmerElement.css({
           'background': '#000000',
           'opacity'   : DIMMER_MIN_OPACITY,
-          'left'      : useScrollOffset ? window.pageXOffset : 0,
-          'top'       : useScrollOffset ? window.pageYOffset : 0,
           'position'  : 'absolute',
-          'width'     : window.innerWidth  + 'px',
-          'height'    : window.innerHeight + 'px',
+          'left'      : 0,
+          'top'       : 0,
+          'width'     : documentElement.scrollWidth  + 'px',
+          'height'    : documentElement.scrollHeight + 'px',
           'z-index'   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 
@@ -102,11 +105,11 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           'transition-timing-function': 'ease',
           'background'                : '#000000',
           'opacity'                   : DIMMER_MIN_OPACITY,
-          'left'                      : useScrollOffset ? window.pageXOffset : 0,
-          'top'                       : useScrollOffset ? window.pageYOffset : 0,
           'position'                  : 'absolute',
-          'width'                     : window.innerWidth + 'px',
-          'height'                    : window.innerHeight + 'px',
+          'left'                      : 0,
+          'top'                       : 0,
+          'width'                     : documentElement.scrollWidth  + 'px',
+          'height'                    : documentElement.scrollHeight + 'px',
           'z-index'                   : DIMMER_Z_INDEX
         }).on('click', onDimmerClick);
 
@@ -145,10 +148,13 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           'transition': deflationSpeed + 'ms opacity',
           'opacity': DIMMER_MIN_OPACITY
         });
-
       }
 
     };
+
+    dimmer.getDimmerElement = function() {
+      return $dimmerElement;
+    }
 
     if (SC_UNIT) {
       exports.onDimmerClick = onDimmerClick;
@@ -159,9 +165,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
       exports.setDimmerElement = function(value) {
         $dimmerElement = value;
       };
-      exports.getDimmerElement = function() {
-        return $dimmerElement;
-      };
+      exports.getDimmerElement = dimmer.getDimmerElement;
     }
 
     callback();

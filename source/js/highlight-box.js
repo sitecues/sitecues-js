@@ -159,72 +159,81 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // If the HLB is currently deflating, no need to toggle
         if (isHLBClosing) {
-
           return;
-
         }
 
         // If an HLB exists
         if ($hlbElement) {
-
           closeHLB();
-
         // If the HLB does not exist
         } else {
+          targetHLB();
+        }
+      }
 
-          // Set module scoped variable so the rest of the program has reference.
-          var highlight = mh.getHighlight();
-          if (!highlight.isVisible) {
-            return;  // No highlight present -- nothing to open HLB on
+      function targetHLB(isRetargeting) {
+
+        // Set module scoped variable so the rest of the program has reference.
+        var highlight = mh.getHighlight();
+        if (!highlight.fixedContentRect) {
+          return;  // No highlight present -- nothing to open HLB on
+        }
+
+        // Highlight is present -- guaranteed to have
+        // at least one picked element and fixedContentRect outlining the highlight
+        $pickedElement = highlight.picked;
+
+        if (SC_DEV && loggingEnabled) {
+
+          console.log('%c--------------- CREATE HLB -----------------', 'color:orange; background:purple; font-size: 9pt;');
+
+          if (!$pickedElement[0].id) {
+            $pickedElement[0].id = (Math.random() + '').slice(2);
           }
 
-          // Highlight is present -- guaranteed to have
-          // at least one picked element and fixedContentRect outlining the highlight
-          $pickedElement = highlight.picked;
-
-          if (SC_DEV && loggingEnabled) {
-
-            console.log('%c--------------- CREATE HLB -----------------', 'color:orange; background:purple; font-size: 9pt;');
-
-            if (!$pickedElement[0].id) {
-              $pickedElement[0].id = (Math.random() + '').slice(2);
-            }
-
-            console.log('Picked element %o ID: ' + $pickedElement[0].id, $pickedElement[0]);
-
-          }
-
-          // Set module scoped variable so the rest of the program has reference.
-          initialHLBRect = getInitialHLBRect(highlight);
-
-          // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
-          // It MUST be called before getValidOriginalElement().
-          sitecues.emit('hlb/init');
-
-          // Set module scoped variable so the rest of the program has reference.
-          $originalElement = getValidOriginalElement($pickedElement);
-
-
-          if (SC_DEV && loggingEnabled) {
-            console.log('Initial rect width: ' + initialHLBRect.width / conf.get('zoom') + ' Initial rect height: ' + initialHLBRect.height / conf.get('zoom'));
-            // $('<div>').css({
-            //   'position': 'absolute',
-            //   'width': initialHLBRect.width / conf.get('zoom'),
-            //   'height': initialHLBRect.height / conf.get('zoom'),
-            //   'left': initialHLBRect.left / conf.get('zoom') + window.pageXOffset,
-            //   'top': initialHLBRect.top / conf.get('zoom') + window.pageYOffset,
-            //   'background': 'green',
-            //   'opacity': .6,
-            //   'z-index': 99999
-            // }).insertAfter('body').on('click', function () {
-            //   $(this).remove();
-            // });
-          }
-
-          createHLB();
+          console.log('Picked element %o ID: ' + $pickedElement[0].id, $pickedElement[0]);
 
         }
 
+        // Set module scoped variable so the rest of the program has reference.
+        initialHLBRect = getInitialHLBRect(highlight);
+
+        // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
+        // It MUST be called before getValidOriginalElement().
+        sitecues.emit('mh/clear');
+
+        // Set module scoped variable so the rest of the program has reference.
+        $originalElement = getValidOriginalElement($pickedElement);
+
+        if (SC_DEV && loggingEnabled) {
+          console.log('Initial rect width: ' + initialHLBRect.width / conf.get('zoom') + ' Initial rect height: ' + initialHLBRect.height / conf.get('zoom'));
+          // $('<div>').css({
+          //   'position': 'absolute',
+          //   'width': initialHLBRect.width / conf.get('zoom'),
+          //   'height': initialHLBRect.height / conf.get('zoom'),
+          //   'left': initialHLBRect.left / conf.get('zoom') + window.pageXOffset,
+          //   'top': initialHLBRect.top / conf.get('zoom') + window.pageYOffset,
+          //   'background': 'green',
+          //   'opacity': .6,
+          //   'z-index': 99999
+          // }).insertAfter('body').on('click', function () {
+          //   $(this).remove();
+          // });
+        }
+
+        createHLB(isRetargeting);
+      }
+
+      /**
+       * This is called when the user presses a key that moves the mouse highlight
+       * has changed while the HLB opens
+       */
+      function retargetHLB() {
+        hlbFormEntryComplete(); // Make sure we don't lose any of the form entry from the current HLB
+
+        $hlbElement.remove();
+
+        targetHLB(true);
       }
 
       /**
@@ -356,8 +365,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       /**
        * [createHLB initializes, positions, and animates the HLB]
+       * @param isRetargeting -- true if HLB is moving from one place to another, false if brand new HLB mode
        */
-      function createHLB() {
+      function createHLB(isRetargeting) {
 
         // clone, style, filter, emit hlb/create,
         // prevent mousemove deflation, disable scroll wheel
@@ -375,6 +385,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           removeTemporaryOriginalElement = false;
         }
 
+        var viewData = {
+          '$hlbElement'        : $hlbElement,
+          '$hlbWrappingElement': $hlbWrappingElement,
+          'originCSS'          : originCSS,
+          'translateCSS'       : translateCSS,
+          'onHLBReady'         : onHLBReady,
+          'transitionProperty' : hlbStyling.transitionProperty
+        };
+
         // setTimeout MIGHT be necessary for the browser to complete the rendering and positioning
         // of the HLB.  Before we scale, it absolutely must be positioned correctly.
         // Note: Interestingly enough, this timeout is unnecessary if we comment out the
@@ -382,15 +401,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // for the browser to update/render the DOM.  This is here for safety (until proven otherwise).
         // If we use a setTimeout, we have to solve the problem of functions being added to the stack before
         // the timeout completes...its a pain.
-        hlbAnimation.transitionInHLB({
-          '$hlbElement'        : $hlbElement,
-          '$hlbWrappingElement': $hlbWrappingElement,
-          'originCSS'          : originCSS,
-          'translateCSS'       : translateCSS,
-          'onHLBReady'         : onHLBReady,
-          'transitionProperty' : hlbStyling.transitionProperty
-        });
-
+        hlbAnimation.transitionInHLB(isRetargeting, viewData);
       }
 
       function getEditableItems() {
@@ -412,7 +423,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       function initializeHLB() {
 
         // Create and append to the DOM the wrapping element for HLB and DIMMER elements
-        $hlbWrappingElement = getHLBWrapper();
+        $hlbWrappingElement = getOrCreateHLBWrapper();
 
         if (platform.browser.isIE && getEditableItems().length) {
           if (SC_DEV && loggingEnabled) {
@@ -670,18 +681,22 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       }
 
+      function hlbFormEntryComplete() {
+        // Make sure inputs from HLB are copied over to the original element
+        mapForm($hlbElement, $originalElement);
+      }
+
       /**
        * [closeHLB prepares and deflates the HLB.]
        */
       function closeHLB(e) {
 
+        hlbFormEntryComplete();
+
         // Set this to true to prevent toggleHLB();
         isHLBClosing = true;
 
         turnOffHLBEventListeners();
-
-        // Make sure inputs from HLB are copied over to the original element
-        mapForm($hlbElement, $originalElement);
 
         hlbAnimation.transitionOutHLB({
           '$hlbElement'        : $hlbElement,
@@ -849,9 +864,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       /**
        * [getHLBWrapper adds the sitecues HLB and DIMMER wrapper outside of the body.]
        */
-      function getHLBWrapper() {
+      function getOrCreateHLBWrapper() {
 
-        return $('<div>', {
+        return $hlbWrappingElement ||
+                $('<div>', {
                   'id': SITECUES_HLB_WRAPPER_ID
                 })
                 .css({
@@ -869,11 +885,17 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * [removeHLBWrapper removes the sitecues HLB and DIMMER wrapper]
        */
       function removeHLBWrapper() {
-        $hlbWrappingElement.remove();
+        if ($hlbWrappingElement) {
+          $hlbWrappingElement.remove();
+          $hlbWrappingElement = null;
+        }
       }
 
       // Picker module emits this event when the spacebar is pressed.
       sitecues.on('hlb/toggle', toggleHLB);
+
+      // Arrowkeys module emits this event when the HLB needs to move (dimmer already shown)
+      sitecues.on('hlb/retarget', retargetHLB);
 
       //////////////////////////////////
       // PUBLIC FUNCTIONS
@@ -917,7 +939,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.closeHLB                 = closeHLB;
         exports.onHLBClosed              = onHLBClosed;
         exports.onHLBReady               = onHLBReady;
-        exports.getHLBWrapper            = getHLBWrapper;
+        exports.getOrCreateHLBWrapper    = getOrCreateHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
         exports.navkeys                  = navkeys;

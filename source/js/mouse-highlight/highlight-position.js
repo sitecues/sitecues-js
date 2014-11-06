@@ -98,7 +98,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return rect;
     }
 
-    function getRectMinusPadding(node, style, rect) {
+    function getRectMinusPadding(rect, style) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
       var
@@ -226,7 +226,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           height: overflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
         };
 
-      return getRectMinusPadding(element, style, newRect);
+      return getRectMinusPadding(newRect, style);
     }
 
     function normalizeRect(rect) {
@@ -352,7 +352,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Media elements ---
         if (common.isVisualMedia(this)) {
           // Elements with rendered content such as images and videos
-          addRect(allRects, clipRect, getRectMinusPadding(this, style, thisRect));
+          addRect(allRects, clipRect, getRectMinusPadding(thisRect, style));
           return;
         }
 

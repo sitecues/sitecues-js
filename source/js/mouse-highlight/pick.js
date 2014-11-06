@@ -106,7 +106,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       },
       isDebuggingOn,
       isVoteDebuggingOn,
-      isVotingOn,  // Temporarily off by default so we can see it's effect
+      isVotingOn = true,  // Temporarily off by default so we can see it's effect
       lastPicked;
 
     /*

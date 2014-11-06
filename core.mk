@@ -88,6 +88,7 @@ files=\
 	source/js/hlb/animation.js \
 	source/js/highlight-box.js \
 	source/js/keys.js \
+	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan.js \
 	source/js/status.js \
 	source/js/metrics/util.js \

@@ -33,6 +33,8 @@ sitecues.def('hlb/navkeys', function(navkeys, callback) {
      */
     navkeys.keyDownHandler = function(e) {
 
+      return; // Temporary for teaching HLB to move.
+
       var target = e.target,
           hlb = document.getElementById('sitecues-hlb'),
           keyEntry = SCROLL_KEY_AMOUNTS[e.keyCode],
