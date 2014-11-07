@@ -127,7 +127,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       }
 
       // 1. Don't pick anything in the sitecues UI
-      if (common.isInSitecuesUI(startElement) || $(startElement).is('html,body')) {
+      if (!startElement || common.isInSitecuesUI(startElement) || $(startElement).is('html,body')) {
         return null;
       }
 

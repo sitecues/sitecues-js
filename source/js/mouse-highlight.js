@@ -1179,7 +1179,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       isAppropriateFocus = false;
       onLeaveWindow();
     }
-      
+
     // When the user blurs ours mouses out of the window, we should
     // hide and forget the highlight (unless sticky highlight is on)
     function onLeaveWindow() {
@@ -1317,17 +1317,25 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * @param doUsePicker -- if truthy will find the best item to highlight ... elem or an ancestor of elem
      *                       if falsey will just highlight elem exactly
      */
-    sitecues.highlight = function(elem, doUsePicker) {
-      hide();
-      state.picked = doUsePicker ? picker.find(elem) : $(elem);
-      state.target = elem;
-      if (state.picked) {
-        var rect = mhpos.getRect(elem);
-        cursorPos = null;
-        scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
-        show();
+    sitecues.highlight = function(seed, doUsePicker) {
+
+      var elem;
+
+      if (seed) {
+        elem = $(seed)[0];
+        if (elem) {
+          hide();
+          state.picked = doUsePicker ? picker.find(elem) : $(elem);
+          state.target = elem;
+          if (state.picked) {
+            var rect = mhpos.getRect(elem);
+            cursorPos = null;
+            scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
+            show();
+          }
+        }
+        return state.picked;
       }
-      return state.picked;
     };
 
     // done
