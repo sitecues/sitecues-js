@@ -1321,10 +1321,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       var elem;
 
+      hide();  // calling with no arguments will remove the highlight
       if (seed) {
         elem = $(seed)[0];
         if (elem) {
-          hide();
           state.picked = doUsePicker ? picker.find(elem) : $(elem);
           state.target = elem;
           if (state.picked) {
