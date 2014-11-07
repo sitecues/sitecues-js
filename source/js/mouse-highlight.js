@@ -1313,9 +1313,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     /**
      * Allow debugging script to directly highlight something
-     * @param elem
-     * @param doUsePicker -- if truthy will find the best item to highlight ... elem or an ancestor of elem
-     *                       if falsey will just highlight elem exactly
+     * @param seed        -- desired element to highlight, or a CSS selector for one
+     * @param doUsePicker -- if truthy will find the best item to highlight ... seed or an ancestor of seed
+     *                       if falsey will just highlight seed exactly
      */
     sitecues.highlight = function(seed, doUsePicker) {
 
