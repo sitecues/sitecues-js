@@ -1334,8 +1334,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
             show();
           }
         }
-        return state.picked;
       }
+      return state.picked;
     };
 
     // done
