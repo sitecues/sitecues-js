@@ -19,7 +19,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
     'hlb/animation',
     'mouse-highlight',
     'util/geo',
-    'hlb/navkeys',
 
     function(
       $,
@@ -33,8 +32,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       common,
       hlbAnimation,
       mh,
-      geo,
-      navkeys) {
+      geo) {
 
       /////////////////////////
       // PRIVATE VARIABLES
@@ -401,11 +399,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function turnOnHLBEventListeners() {
 
-        // Register key press handlers (pagedown, pageup, home, end, up, down)
-        $(window).on('keydown', {
-          'hlb': $hlbElement
-        }, navkeys.keyDownHandler);
-
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
 
@@ -424,9 +417,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         eventHandlers.releaseWheelEvents();
 
         $hlbElement[0].removeEventListener(common.transitionEndEvent, onHLBReady);
-
-        // Turn off the suppression of scrolling, keypresses
-        $(window).off('keydown', navkeys.keyDownHandler);
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);
@@ -655,8 +645,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       // PUBLIC FUNCTIONS
       //////////////////////////////////
 
+      // Return the current DOM element for the HLB or falsey value if there is no HLB
       highlightBox.getElement = function() {
-        return $hlbElement;
+        return $hlbElement && $hlbElement[0];
       };
 
       /**
@@ -693,7 +684,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.getOrCreateHLBWrapper    = getOrCreateHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
-        exports.navkeys                  = navkeys;
         exports.dimmer                   = dimmer;
         exports.getValidOriginalElement  = getValidOriginalElement;
 

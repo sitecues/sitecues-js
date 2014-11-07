@@ -10,8 +10,8 @@
 
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer',
-    'mouse-highlight/picker', 'zoom', 'util/geo', function($, mh, hlb, platform, dimmer, picker, zoomMod, geo) {
+  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'mouse-highlight/highlight-position',
+    'mouse-highlight/picker', 'zoom', 'util/geo', function($, mh, hlb, platform, dimmer, mhpos, picker, zoomMod, geo) {
 
     var STEP_SIZE = 24,
       SPREAD_STEP_SIZE = 32,
@@ -29,8 +29,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       MIN_PAN_TRY_MS = 100,
       reenableMouseFollowTimer,
       MH_EXTRA_WIDTH = 10, // Amount to account for padding/border of mouse highlight
+      MIN_SIGNIFICANT_HLB_SCROLL = 3,
       isShowingDebugPoints = false,
-      isMovingHLB,
+      hlbElement,
       // Queue of key navigation commands
       navQueue = [],
       // Method for animation
@@ -71,7 +72,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           onEscape(keyName);
         }
         else {
-          performMovement(nextMove);
+          onMovementCommand(nextMove);
         }
       }
       else {
@@ -81,11 +82,66 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
     }
 
-    function performMovement(nextMove) {
+    function onMovementCommand(nextMove) {
+      // TODO should we use the real line-height as getLineHeight() in highlight-position.js does?
       // Movement commands
-      isMovingHLB = !!hlb.getElement();
+      hlbElement = hlb.getElement();
 
-      if (isMovingHLB) {
+      if (hlbElement && performHLBScroll(nextMove)) {
+        return; // HLB could scroll -- finish
+      }
+
+      performMovement(nextMove);
+    }
+
+    function getHLBLineHeight() {
+      var range = document.createRange();
+      range.selectNodeContents(hlbElement);
+      return range.getClientRects()[0].height / zoomMod.getCompletedZoom(); // TODO * HLBZoom (1.5)?
+    }
+
+    // Scroll HLB and return truthy value if a significant scroll occured
+    function performHLBScroll(nextMove) {
+      var SCROLL_KEYS =  // Map key codes to scroll direction
+        { 'up': { dir: -1, type: 'line' }, /* up */
+          'pageup': { dir: -1, type: 'page' }, /* pageup */
+          'home': { dir: -1, type: 'doc' }, /* home */
+          'down': { dir: 1, type: 'line' }, /* down */
+          'pagedn': { dir: 1, type: 'page' }, /* pagedown */
+          'end': { dir: 1, type: 'doc' }  /* end */
+        },
+        keyEntry = SCROLL_KEYS[nextMove.keyName],
+        currTop = hlbElement.scrollTop,  // Where it's scrolled to now
+        newTop,  // Where we want to scroll to
+        lineHeight;
+
+        if (!keyEntry) {
+          return;  // Not an HLB scroll command
+        }
+
+        switch (keyEntry.type) {
+          case 'page':
+            // Pageup/pagedown default behavior always affect window/document scroll
+            // (simultaneously with element's local scroll).
+            // So prevent default and define new scroll logic.
+            newTop = currTop + hlbElement.offsetHeight * keyEntry.dir;
+            break;
+          case 'line':
+            lineHeight = getHLBLineHeight();
+            newTop = currTop + keyEntry.dir * lineHeight;
+            break;
+          case 'doc':
+            newTop = keyEntry.dir < 0 ? 0 : hlbElement.scrollHeight;
+            break;
+          // default: return; // can't happen
+        }
+
+        hlbElement.scrollTop = Math.max(0, newTop);
+        return (hlbElement.scrollTop - currTop) > MIN_SIGNIFICANT_HLB_SCROLL;
+    }
+
+    function performMovement(nextMove) {
+      if (hlbElement) {
         prepareHLBMovement();
       }
 
@@ -112,7 +168,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           break;
         default:
           SC_DEV && console.log('illegal command');
-          fail();
       }
     }
 
@@ -123,18 +178,22 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     }
 
     function fail() {
+      SC_DEV && console.log('Fail');
       navQueue = [];  // Don't keep trying
       setIsMouseEnabled(true);
 
       // TODO check this case and make sure it works -- the HLB is probably is display: none right now
-      if (hlb.getElement()) {
+      if (hlbElement) {
+        SC_DEV && console.log('Close HLB');
         sitecues.emit('hlb/toggle'); // Nothing found .. close HLB
       }
     }
 
     function succeed() {
+      SC_DEV && console.log('Succeed');
       if (hlb.getElement()) {
         // Open new HLB
+        SC_DEV && console.log('Retarget HLB');
         sitecues.emit('hlb/retarget');
       }
       dequeNextCommand();
@@ -164,8 +223,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         value = isDimmerCatchingMouseEvents ? '' : 'none';
       }
 
-      $(dimmer.getDimmerElement())
-        .css(property, value);
+      $(dimmer.getDimmerElement()).css(property, value);
     }
 
     function moveInDirection(horizDir, vertDir, isShifted) {
@@ -215,7 +273,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // How many rows of points from the original aka how far from the original are we?
         distanceFromOriginal = 0,
         // How fast to pan -- if HLB we want to pan immediately (better UX)
-        pixelsToPanPerMs = isMovingHLB ? PIXELS_TO_PAN_PER_MS_HLB : PIXELS_TO_PAN_PER_MS;
+        pixelsToPanPerMs = hlbElement ? PIXELS_TO_PAN_PER_MS_HLB : PIXELS_TO_PAN_PER_MS;
 
 
       function testPointIfOnscreen(x, y) {
@@ -256,27 +314,24 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         if ($picked &&
           isValidDirectionForNewHighlight(lastPickedRect, $picked, lastPanX, lastPanY, horizDir, vertDir) &&
           sitecues.highlight($picked[0], false)) {
-          if (isMovingHLB) {
-            // Clear the highlight we just made as it's distracting/unnatural when in the background dimmed area
-            sitecues.emit('mh/clear');
-          }
+          clearHighlightIfInDimmer();
           // Pan until highlight is fully visible onscreen (if necessary)
           var pickedRect = mh.getHighlight().fixedContentRect;
 
           if (horizDir < 0 && pickedRect.left < 0) {
             // Pan left far enough so that full width of the highlight is visible
-            targetPanLeft = Math.max(maxPanLeft, lastPanX + pickedRect.left - VISIBLE_SPACE_AROUND_HIGHLIGHT);
+            targetPanLeft = lastPanX + pickedRect.left - VISIBLE_SPACE_AROUND_HIGHLIGHT;
           }
           else if (horizDir > 0 && pickedRect.right > winRight) {
             // Pan right far enough so that full width of the highlight is visible
-            targetPanRight = Math.min(maxPanRight, lastPanX + pickedRect.right - winRight + VISIBLE_SPACE_AROUND_HIGHLIGHT);
+            targetPanRight = lastPanX + pickedRect.right - winRight + VISIBLE_SPACE_AROUND_HIGHLIGHT;
           }
           else if (vertDir < 0 && pickedRect.top < 0) {
             // Pan up far enough so that the full height of the highlight is visible
-            targetPanUp = Math.max(maxPanUp, lastPanY + pickedRect.top - VISIBLE_SPACE_AROUND_HIGHLIGHT);
+            targetPanUp = lastPanY + pickedRect.top - VISIBLE_SPACE_AROUND_HIGHLIGHT;
           }
           else if (vertDir > 0 && pickedRect.bottom > winBottom) {
-            targetPanDown = Math.min(maxPanDown, lastPanY + pickedRect.bottom - winBottom + VISIBLE_SPACE_AROUND_HIGHLIGHT);
+            targetPanDown = lastPanY + pickedRect.bottom - winBottom + VISIBLE_SPACE_AROUND_HIGHLIGHT;
           }
           else {
             // No need to pan -- finish up
@@ -293,6 +348,12 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
 
       function startPanning(isHighlightStillNeeded) {
+        targetPanUp = Math.floor(constrained(targetPanUp, maxPanUp, maxPanDown));
+        targetPanLeft = Math.floor(constrained(targetPanLeft, maxPanLeft, maxPanRight));
+        targetPanRight = Math.floor(constrained(targetPanRight, maxPanLeft, maxPanRight));
+        targetPanDown = Math.floor(constrained(targetPanDown, maxPanUp, maxPanDown));
+        lastPanX = window.pageXOffset;
+        lastPanY = window.pageYOffset;
         doPickNewHighlight = isHighlightStillNeeded;
         startPanTime = Date.now();
         // Turn mousemove-to-highlight off
@@ -300,19 +361,19 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         panInDirection();
       }
 
-      function cannotPanFarther(hPos, vPos) {
-        return (horizDir < 0 && hPos <= targetPanLeft) ||
-        (horizDir > 0 && hPos >= targetPanRight) ||
-        (vertDir < 0 && vPos <= targetPanUp) ||
-        (vertDir> 0 && vPos >= targetPanDown);
+      function isPanningTargetReached(panX, panY) {
+        return (horizDir < 0 && panX <= targetPanLeft) ||
+          (horizDir > 0 && panX >= targetPanRight) ||
+          (vertDir < 0 && panY <= targetPanUp) ||
+          (vertDir > 0 && panY >= targetPanDown);
       }
 
       function panInDirection() {
         // Check if there is anything more to pan to
         var msElapsed = Date.now() - startPanTime,
           pixelsToPan = msElapsed * pixelsToPanPerMs,
-          hPos = Math.floor(constrained(lastPanX + pixelsToPan * horizDir, targetPanLeft, targetPanRight)),
-          vPos = Math.floor(constrained(lastPanY + pixelsToPan * vertDir, targetPanUp, targetPanDown));
+          attemptPanX = Math.floor(constrained(lastPanX + pixelsToPan * horizDir, targetPanLeft, targetPanRight)),
+          attemptPanY = Math.floor(constrained(lastPanY + pixelsToPan * vertDir, targetPanUp, targetPanDown));
 
         // TODO can we find a way to disable the mouse pointer
         // without making scrolling jerkier? The problem is we need pointer-events for checking the highlight
@@ -320,22 +381,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // Unfortunately, fixed position stuff doesn't work with zoom!
         // Perhaps we can do a row of dots
 
-        window.scrollTo(hPos, vPos);
-
-        var currentPanX = window.pageXOffset,
-          currentPanY = window.pageYOffset;
-        if (msElapsed > MIN_PAN_TRY_MS && currentPanX === lastPanX && currentPanY === lastPanY) {
-          SC_DEV && console.log('Did not successfully pan');
-          fail();
-          return;
-        }
-        lastPanX = currentPanX;
-        lastPanY = currentPanY;
-
-        if (isHorizMovement ? (window.pageXOffset !== hPos) : (window.pageYOffset) !== vPos ) {
-          console.log (window.pageXOffset + ' ' + hPos);
-          // Did not successfully pan
-        }
+        window.scrollTo(attemptPanX, attemptPanY);
 
         // If we haven't found anything yet, check the next row of points
         if (doPickNewHighlight && testNextRowOfPointsAt(x, y)) {
@@ -343,8 +389,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           return;
         }
 
-        if (cannotPanFarther(hPos, vPos)) {
-          // THE END HAS BEEN REACHED!
+        if (isPanningTargetReached(attemptPanX, attemptPanY)) {
+          // THE TARGET HAS BEEN REACHED!
           if (doPickNewHighlight) {
             // Was not successful
             fail();
@@ -378,10 +424,10 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           y += panY;
           // Panning too much is crazy. Give up after MAX_PIXELS_TO_PAN pixels.
           // User can keep arrowing in that direction if they want ... but don't autoscroll forever!
-          targetPanUp = Math.max(maxPanUp, lastPanY - MAX_PIXELS_TO_PAN);
-          targetPanLeft = Math.max(maxPanLeft, lastPanX - MAX_PIXELS_TO_PAN);
-          targetPanRight = Math.min(maxPanRight, lastPanX + MAX_PIXELS_TO_PAN);
-          targetPanDown = Math.min(maxPanDown, lastPanY + MAX_PIXELS_TO_PAN);
+          targetPanUp = lastPanY - MAX_PIXELS_TO_PAN;
+          targetPanLeft = lastPanX - MAX_PIXELS_TO_PAN;
+          targetPanRight = lastPanX + MAX_PIXELS_TO_PAN;
+          targetPanDown = lastPanY + MAX_PIXELS_TO_PAN;
           startPanning(true);
           break;
         }
@@ -389,7 +435,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         if (testNextRowOfPointsAt(x, y)) {
           break;
         }
-        console.log('Testing: ' + x + ' ' + y)
       }
     }
 
@@ -494,14 +539,21 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       treeWalker.currentNode = $lastPicked[0];
 
       if (isReverse ? treeWalker.previousNode() : treeWalker.nextNode()) {
-        if (isMovingHLB) {
-          sitecues.emit('mh/clear');
-        }
+        clearHighlightIfInDimmer();
         scrollToHighlight();
         succeed();
       }
       else {
         fail();
+      }
+    }
+
+    // When moving the HLB, clear any highlight we just made
+    // as it's distracting/unnatural when in the background dimmed area.
+    // TODO how about we don't visibly show the highlight in the first place? Makes more sense.
+    function clearHighlightIfInDimmer() {
+      if (hlbElement) {
+        sitecues.emit('mh/clear');
       }
     }
 

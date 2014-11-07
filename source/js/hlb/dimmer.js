@@ -18,15 +18,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
         DIMMER_MIN_OPACITY = 0,
         DIMMER_MAX_OPACITY = 0.65,
 
-        // Initializing the dimmer with 0 opacity and then transitioning the
-        // opacity to .65 requires a delay in between for the animation to occur.
-        // 1ms was too little, worked sometimes and not others.  50ms has always
-        // worked, and I have not noticed any delay.
-        DIMMER_TRANSITION_DELAY = 50,
-
-        documentElement = document.documentElement,
-
-        $dimmerElement;
+        documentElement = document.documentElement;
 
     //////////////////////////////
     // PRIVATE FUNCTIONS
@@ -40,23 +32,6 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
       sitecues.emit('hlb/toggle');
     }
 
-    /**
-     * [onDimmerReady sets the dimmer opacity to DIMMER_MAX_OPACITY]
-     */
-    function onDimmerReady() {
-      $dimmerElement.css({
-        'opacity': DIMMER_MAX_OPACITY
-      });
-    }
-
-    /**
-     * [onDimmerClosed removes the dimmer element from the DOM]
-     */
-    function onDimmerClosed() {
-      $dimmerElement.remove();
-      $dimmerElement = null;
-    }
-
     //////////////////////////////
     // PUBLIC FUNCTIONS
     /////////////////////////////
@@ -68,17 +43,13 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
      */
     dimmer.dimBackgroundContent = function($hlbWrappingElement, inflationSpeed) {
 
-      if ($dimmerElement) {
+      if (dimmer.getDimmerElement()) {
         return; // Background already dimmed
       }
 
-      $dimmerElement = $('<div>', {
-        'id': DIMMER_ID
-      });
-
-      if (common.useJqueryAnimate) {
-
-        $dimmerElement.css({
+      $('<div>')
+        .attr('id', DIMMER_ID)
+        .css({
           'background': '#000000',
           'opacity'   : DIMMER_MIN_OPACITY,
           'position'  : 'absolute',
@@ -87,84 +58,38 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           'width'     : documentElement.scrollWidth  + 'px',
           'height'    : documentElement.scrollHeight + 'px',
           'z-index'   : DIMMER_Z_INDEX
-        }).on('click', onDimmerClick);
-
-        $hlbWrappingElement.append($dimmerElement);
-
-        $dimmerElement.animate(
-          {
-            'opacity': DIMMER_MAX_OPACITY
-          },
-          inflationSpeed
-        );
-
-      } else {
-
-        $dimmerElement.css({
-          'transition'                : inflationSpeed + 'ms opacity',
-          'transition-timing-function': 'ease',
-          'background'                : '#000000',
-          'opacity'                   : DIMMER_MIN_OPACITY,
-          'position'                  : 'absolute',
-          'left'                      : 0,
-          'top'                       : 0,
-          'width'                     : documentElement.scrollWidth  + 'px',
-          'height'                    : documentElement.scrollHeight + 'px',
-          'z-index'                   : DIMMER_Z_INDEX
-        }).on('click', onDimmerClick);
-
-        $hlbWrappingElement.append($dimmerElement);
-
-        // Required for transition to take place.
-        // Without it, the dimmer has MAX_OPACITY
-        // as it is appended to the DOM.
-        setTimeout(onDimmerReady, DIMMER_TRANSITION_DELAY);
-
-      }
-
+        })
+        .on('click', onDimmerClick)
+        .appendTo($hlbWrappingElement)
+        .animate({ opacity : DIMMER_MAX_OPACITY}, inflationSpeed);
     };
 
     /**
-     * [removeDimmer transitions the opacity of the dimmer to DIMMER_MIN_OPACITY]
+     * [undimBackgroundContent transitions the opacity of the dimmer to DIMMER_MIN_OPACITY]
      * @param  {[integer]} deflationSpeed [The duration of the opacity transition]
      */
-    dimmer.removeDimmer = function(deflationSpeed) {
+    dimmer.undimBackgroundContent = function(deflationSpeed) {
 
-      if (common.useJqueryAnimate) {
-
-        $dimmerElement.animate(
-          {
-            'opacity': DIMMER_MIN_OPACITY
-          },
-          deflationSpeed,
-          onDimmerClosed
-        );
-
-      } else {
-
-        $dimmerElement[0].addEventListener(common.transitionEndEvent, onDimmerClosed);
-
-        $dimmerElement.css({
-          'transition': deflationSpeed + 'ms opacity',
-          'opacity': DIMMER_MIN_OPACITY
-        });
-      }
-
+      $(dimmer.getDimmerElement())
+        .animate({ opacity : DIMMER_MIN_OPACITY}, deflationSpeed, onDimmerClosed);
     };
 
+    /**
+     * [onDimmerClosed removes the dimmer element from the DOM]
+     */
+    function onDimmerClosed() {
+      $(dimmer.getDimmerElement()).remove();
+    }
+
     dimmer.getDimmerElement = function() {
-      return $dimmerElement;
+      return document.getElementById(DIMMER_ID);
     }
 
     if (SC_UNIT) {
       exports.onDimmerClick = onDimmerClick;
-      exports.onDimmerReady = onDimmerReady;
       exports.onDimmerClosed = onDimmerClosed;
-      exports.removeDimmer = dimmer.removeDimmer;
+      exports.undimBackgroundContent = dimmer.undimBackgroundContent;
       exports.dimBackgroundContent = dimmer.dimBackgroundContent;
-      exports.setDimmerElement = function(value) {
-        $dimmerElement = value;
-      };
       exports.getDimmerElement = dimmer.getDimmerElement;
     }
 

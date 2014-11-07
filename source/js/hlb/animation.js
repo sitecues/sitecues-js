@@ -73,7 +73,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       sitecues.emit('hlb/deflating', $hlbElement);
 
       // Un-dim the background!
-      dimmer.removeDimmer(DEFLATION_SPEED);
+      dimmer.undimBackgroundContent(DEFLATION_SPEED);
 
       // Do we bother animating the deflation?
 

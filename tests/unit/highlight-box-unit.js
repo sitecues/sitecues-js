@@ -1014,7 +1014,7 @@ describe('highlight-box', function() {
 
     // });
 
-    it('Invokes dimmer.removeDimmer because another module is responsible for doing the work of removing the dimmer.', function (done) {
+    it('Invokes dimmer.undimBackgroundContent because another module is responsible for doing the work of removing the dimmer.', function (done) {
 
       var removeDimmerSpy = sinon.spy(hlbAnimation, 'transitionOutHLB');
 
@@ -1187,7 +1187,7 @@ describe('highlight-box', function() {
 
     it('Does not remove or add a dimmer if isHLBClosing is true', function (done) {
 
-      var removeDimmerSpy = sinon.spy(dimmer, 'removeDimmer'),
+      var removeDimmerSpy = sinon.spy(dimmer, 'undimBackgroundContent'),
           dimBackgroundContentSpy = sinon.spy(dimmer, 'dimBackgroundContent');
 
       hlb.setIsHLBClosing(true);

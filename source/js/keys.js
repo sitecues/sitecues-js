@@ -12,13 +12,47 @@ sitecues.def('keys', function(keys, callback) {
         // See http://www.javascripter.net/faq/keycodes.htm
         //
         // ** A key test should return true if the key is considered fired and valid **
+        //
+        // Note: for movement keys we also support the numeric keypad:
+        // [7 Home ]  [ 8 Up ]  [9 PgUp  ]
+        // [4 Left ]  [ 5    ]  [6 Right ]
+        // [1 End  ]  [ 2 Dn ]  [3 PgDn  ]
+
+        NUMPAD_1 = 97,
+        NUMPAD_2 = 98,
+        NUMPAD_3 = 99,
+        NUMPAD_4 = 100,
+        NUMPAD_5 = 101,
+        NUMPAD_6 = 102,
+        NUMPAD_7 = 103,
+        NUMPAD_8 = 104,
+        NUMPAD_9 = 105,
+        ESCAPE   = 27,
+        SPACE    = 32,
+        PAGE_UP  = 33,
+        PAGE_DN  = 34,
+        END      = 35,
+        HOME     = 36,
+        LEFT     = 37,
+        UP       = 38,
+        RIGHT    = 39,
+        DOWN     = 40,
+        DASH     = 189,
+        NUMPAD_SUBTRACT = 109,
+        MINUS_ALTERNATE_1 = 173,
+        MINUS_ALTERNATE_2 = 45,
+        EQUALS   = 187,
+        NUMPAD_ADD = 107,
+        PLUS_ALTERNATE_1 = 61,
+        PLUS_ALTERNATE_2 = 43,
+        LETTER_H = 72,
 
         KEY_TESTS = {
           'space': function(event) {
             // Space command occurs if:
             return (
               // The key is a space key, *and*
-              event.keyCode === 32 &&
+              event.keyCode === SPACE &&
               // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
               !hasAnyModifier(event) &&
               // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
@@ -27,8 +61,8 @@ sitecues.def('keys', function(keys, callback) {
           },
           'minus': function(event) {
             // Test all of the possible minus keycodes, including drom the numeric keypad
-            if (event.keyCode === 189 || event.keyCode === 109 ||
-              event.keyCode === 173 || event.keyCode === 45) {
+            if (event.keyCode === DASH || event.keyCode === NUMPAD_SUBTRACT ||
+              event.keyCode === MINUS_ALTERNATE_1 || event.keyCode === MINUS_ALTERNATE_2) {
 
               // Minus cannot trigger if there is an HLB
               if (hlb.getElement()) {
@@ -49,7 +83,8 @@ sitecues.def('keys', function(keys, callback) {
           'plus': function(event) {
             // Test all of the possible plus keycodes, including from the numeric keypad.
             // Also tests for equals (=) key, which is effectively an unmodified + key press
-            if (event.keyCode === 187 || event.keyCode === 61 || event.keyCode === 107 || event.keyCode === 43) {
+            if (event.keyCode === EQUALS || event.keyCode === NUMPAD_ADD ||
+              event.keyCode === PLUS_ALTERNATE_1 || event.keyCode === PLUS_ALTERNATE_2) {
 
               // Plus cannot trigger if there is an HLB
                 if (hlb.getElement()) {
@@ -69,23 +104,45 @@ sitecues.def('keys', function(keys, callback) {
           },
           'esc': function(event) {
              // Escape key is only valid if there is an HLB to close
-             return event.keyCode === 27;
+             return event.keyCode === ESCAPE;
           },
           // For arrow keys, allow number pad usage as well (2/4/6/8)
           'up': function(event) {
-            return (event.keyCode === 38 || event.keyCode === 98) && canMoveHighlight(event);
+            return (event.keyCode === UP || event.keyCode === NUMPAD_8) && canMoveHighlight(event);
           },
           'down': function(event) {
-            return (event.keyCode === 40 || event.keyCode === 104) && canMoveHighlight(event);
+            return (event.keyCode === DOWN || event.keyCode === NUMPAD_2) && canMoveHighlight(event);
           },
           'left': function(event) {
-            return (event.keyCode === 37 || event.keyCode === 100) && canMoveHighlight(event);
+            return (event.keyCode === LEFT || event.keyCode === NUMPAD_4) && canMoveHighlight(event);
           },
           'right': function(event) {
-            return (event.keyCode === 39 || event.keyCode === 106) && canMoveHighlight(event);
+            return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
           },
           'heading': function(event) {
-            return event.keyCode === 72 && canMoveHighlight(event);
+            return event.keyCode === LETTER_H && canMoveHighlight(event);
+          },
+          'pageup': function(event) {
+            return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);
+          },
+          'pagedn': function(event) {
+            return (event.keyCode === PAGE_DN || event.keyCode === NUMPAD_3) && canScrollHlb(event);
+          },
+          'home': function(event) {  // Also support cmd+up on Mac
+            if (!canScrollHlb(event)) {
+              return false;
+            }
+            return (event.keyCode === HOME && !hasAnyModifier(event)) ||
+              event.keyCode === NUMPAD_7 ||
+              (event.keyCode === UP && event.metaKey);
+          },
+          'end': function(event) {  // Also support cmd+down on Mac
+            if (!canScrollHlb(event)) {
+              return false;
+            }
+            return (event.keyCode === END && !hasAnyModifier(event)) ||
+              event.keyCode === NUMPAD_1 ||
+              (event.keyCode === DOWN && event.metaKey);
           }
         },
         // define keys map used to bind actions to hotkeys
@@ -93,16 +150,17 @@ sitecues.def('keys', function(keys, callback) {
           'space': 'key/space',
           'minus': 'zoom/decrease',
           'plus': 'zoom/increase',
-          'esc': 'key/esc',
-          'up': 'key/nav',
-          'down': 'key/nav',
-          'left': 'key/nav',
-          'right': 'key/nav',
-          'heading': 'key/nav'
-        };
+          'esc': 'key/esc'
+        },
+
+        KEY_EVENT_DEFAULT = 'key/nav';
 
       function canMoveHighlight(event) {
         return !hasCommandModifier(event) && mh.getHighlight().absoluteRect && !common.isEditable(event.target);
+      }
+
+      function canScrollHlb(event) {
+        return hlb.getElement() && !common.isEditable(event.target);
       }
 
       // Non-shift modifier keys (ctrl, cmd, alt)
@@ -147,9 +205,9 @@ sitecues.def('keys', function(keys, callback) {
           return; // Another script already used this key and set this flag like a good citizen
         }
         // iterate over key map
-        for (var key in KEY_EVENT_MAP) {
-          if (KEY_EVENT_MAP.hasOwnProperty(key) && KEY_TESTS[key](event)) {
-            handle(KEY_EVENT_MAP[key], event, key);
+        for (var key in KEY_TESTS) {
+          if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
+            handle(KEY_EVENT_MAP[key] || KEY_EVENT_DEFAULT, event, key);
             return false;
           }
         }

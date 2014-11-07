@@ -1,4 +1,4 @@
-exports.removeDimmer = function () {};
+exports.undimBackgroundContent = function () {};
 exports.dimBackgroundContent = function () {};
 exports.cloneStyles = function () {};
 exports.filter = function () {};

@@ -85,7 +85,6 @@ files=\
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
-	source/js/hlb/navkeys.js \
 	source/js/hlb/animation.js \
 	source/js/highlight-box.js \
 	source/js/keys.js \
