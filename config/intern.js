@@ -13,13 +13,17 @@ define(
 
             capabilities: {
                 // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
-                'name': 'Intern tests - sitecues.js',  // name of the test run, for logging purposes
+                'name': 'Automated tests - sitecues.js',  // name of the test run, for logging purposes
                 'selenium-version': '2.43.1'           // request a version, which may not always be respected
             },
             // Places where unit and/or functional tests will be run...
             environments: [
                 // local-style...
-                // { browserName: 'phantomjs' },  // command line browser, very fast for tests
+                // {
+                //     browserName: 'phantomjs',  // command line browser, very fast for tests
+                //     // pretend to be Chrome, to avoid fallbacks...
+                //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
+                // },
                 { browserName: 'chrome' }
                 // { browserName: 'firefox' }
                 // { browserName: 'safari' }
