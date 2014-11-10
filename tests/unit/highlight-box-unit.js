@@ -2,20 +2,22 @@
 var HLB_MODULE_PATH             = '../../source/js/highlight-box',
 
     // Mocked source files that are highlight-box dependencies.
-    HLB_KEYS_MODULE_PATH        = './data/modules/hlb/navkeys',
-    HLB_POSITIONING_MODULE_PATH = './data/modules/hlb/positioning',
-    HLB_DIMMER_MODULE_PATH      = './data/modules/hlb/dimmer',
-    HLB_STYLING_MODULE_PATH     = './data/modules/hlb/styling',
-    HLB_PAGE_PATH               = './data/html/test-hlb.html',
-    HLB_ANIMATION               = './data/modules/hlb/animation',
+    HLB_KEYS_MODULE_PATH           = './data/modules/hlb/navkeys',
+    HLB_POSITIONING_MODULE_PATH    = './data/modules/hlb/positioning',
+    HLB_DIMMER_MODULE_PATH         = './data/modules/hlb/dimmer',
+    HLB_STYLING_MODULE_PATH        = './data/modules/hlb/styling',
+    HLB_PAGE_PATH                  = './data/html/test-hlb.html',
+    HLB_ANIMATION                  = './data/modules/hlb/animation',
+    HLB_EVENT_HANDLERS_MODULE_PATH = './data/modules/hlb/event-handlers',
 
     // Load 'em up.
-    hlb             = require(HLB_MODULE_PATH),
-    hlbKeys         = require(HLB_KEYS_MODULE_PATH),
-    hlbPositioning  = require(HLB_POSITIONING_MODULE_PATH),
-    hlbStyling      = require(HLB_STYLING_MODULE_PATH),
-    dimmer          = require(HLB_DIMMER_MODULE_PATH),
-    hlbAnimation    = require(HLB_ANIMATION),
+    hlb              = require(HLB_MODULE_PATH),
+    hlbKeys          = require(HLB_KEYS_MODULE_PATH),
+    hlbPositioning   = require(HLB_POSITIONING_MODULE_PATH),
+    hlbStyling       = require(HLB_STYLING_MODULE_PATH),
+    dimmer           = require(HLB_DIMMER_MODULE_PATH),
+    hlbAnimation     = require(HLB_ANIMATION),
+    hlbEventHandlers = require(HLB_EVENT_HANDLERS_MODULE_PATH),
 
     // Global window shared by all unit tests in this file.
     win;
@@ -294,70 +296,6 @@ describe('highlight-box', function() {
 
   });
 
-  // The getOriginalElement() purpose is to return a DOM element from any valid input it receives.
-  // The picker module will, at the time of this writing (June 1, 2014), pass a modified
-  // native keypress event to the HLB from which we extract the element.  This function also
-  // accepts jQuery collections and DOM elements.
-  describe('#getPickedElement()', function () {
-
-    it('Returns original DOM element if jQuery collection is passed as a parameter', function (done) {
-
-      var $p       = jquery(win.document.getElementById('paragraph')),
-          expected = win.document.getElementById('paragraph'),
-          actual   = hlb.getPickedElement($p);
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Returns original DOM element if original DOM element is passed as a parameter', function (done) {
-
-      var p        = win.document.getElementById('paragraph'),
-          expected = p,
-          actual   = hlb.getPickedElement(p);
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Returns original DOM element if mocked modified native keypress event is passed as a parameter', function (done) {
-
-      var p = win.document.getElementById('paragraph'),
-
-          nativeKeypressEventThatIsModifiedByPickerModule = {
-            'dom': {
-              'mouse_highlight': {
-                'picked': [p]
-              }
-            }
-          },
-
-          expected = p,
-          actual   = hlb.getPickedElement(nativeKeypressEventThatIsModifiedByPickerModule);
-
-      expect(actual).to.be.equal(expected);
-
-      done();
-
-    });
-
-    it('Returns undefined if empty object is passed as a parameter', function (done) {
-
-      var emptyObject = {},
-          actual      = hlb.getPickedElement(emptyObject);
-
-      expect(actual).to.be.equal(undefined);
-
-      done();
-
-    });
-
-  });
-
   // The onHLBHover() purpose is to allow the closing of the HLB by moving the mouse
   // outside the bounding rect of the HLB when the HLB is hovered over.
   describe('#onHLBHover', function () {
@@ -549,13 +487,15 @@ describe('highlight-box', function() {
   // HLB with default styles and computed styles.
   describe('#initializeHLB', function () {
 
-    it('Invokes window.addEventListener because the user should not be able to scroll the document ' +
+    it('Invokes eventHandlers.captureWheelEvents because the user should not be able to scroll the document ' +
        'while the HLB is open', function (done) {
 
       var paragraph             = win.document.getElementById('paragraph'),
-          disableWheelScrollSpy = sinon.spy(window, 'addEventListener'),
-          cssStub               = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
+          disableWheelScrollSpy = sinon.spy(hlbEventHandlers, 'captureWheelEvents'),
+          cssStub               = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
+          insertAfterStub       = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {});
 
+      hlb.setHighlight({});
       hlb.initializeHLB(paragraph);
 
       expect(disableWheelScrollSpy.calledOnce).to.be.true;
@@ -563,6 +503,8 @@ describe('highlight-box', function() {
       disableWheelScrollSpy.restore();
 
       cssStub.restore();
+      insertAfterStub.restore();
+      hlb.setHighlight();
 
       done();
 
@@ -571,13 +513,14 @@ describe('highlight-box', function() {
     it('Sets preventDeflationFromMouseout to true because the HLB should never close by ' +
        'mouse movements until the mouse is inside the HLB', function (done) {
 
-      var paragraph = win.document.getElementById('paragraph'),
-          cssStub   = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
-          expected  = true,
+      var paragraph       = win.document.getElementById('paragraph'),
+          cssStub         = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
+          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
+          expected        = true,
           actual;
 
       hlb.setPreventDeflationFromMouseout(false);
-
+      hlb.setHighlight({});
       hlb.initializeHLB(paragraph);
 
       actual = hlb.getPreventDeflationFromMouseout();
@@ -585,7 +528,8 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
+      insertAfterStub.restore();
+      hlb.setHighlight();
       done();
 
     });
@@ -596,10 +540,11 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           expected  = 'object',
           actual,
+          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
           cssStub = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
 
       hlb.setHLB(undefined);
-
+      hlb.setHighlight({});
       hlb.initializeHLB(paragraph);
 
       actual = typeof hlb.getHLB();
@@ -607,7 +552,8 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
+      insertAfterStub.restore();
+      hlb.setHighlight();
       done();
 
     });
@@ -618,8 +564,9 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           expected  = 'object',
           actual,
+          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
           cssStub = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
-
+      hlb.setHighlight({});
       hlb.setHLBWrappingElement(undefined);
 
       hlb.initializeHLB(paragraph);
@@ -629,239 +576,8 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
-      done();
-
-    });
-
-  });
-
-  // The sizeHLB() purpose is to set the height and width of the $hlbElement
-  // NOTE: All of the functions sizeHLB() calls are public methods of the modules dependency,
-  //       which are all mocked for the unit tests to work.
-  describe('#sizeHLB', function () {
-
-    it('Invokes the initialization step called hlbPositioning.initializeSize() because it sets the ' +
-       'height and width of the HLB to the height and width of the bounding rect of the element passed ' +
-       'to the HLB by the picker', function (done) {
-
-      var initializeSizeSpy = sinon.spy(hlbPositioning, 'initializeSize');
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.sizeHLB();
-
-      expect(initializeSizeSpy.calledOnce).to.be.true;
-
-      initializeSizeSpy.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.constrainHeightToSafeArea because it is responsible for limiting the ' +
-       'height of the HLB to the height of the safe area', function (done) {
-
-      var constrainHeightToSafeAreaSpy = sinon.spy(hlbPositioning, 'constrainHeightToSafeArea');
-
-      hlb.sizeHLB();
-
-      expect(constrainHeightToSafeAreaSpy.calledOnce).to.be.true;
-
-      constrainHeightToSafeAreaSpy.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.constrainWidthToSafeArea because it is responsible for limiting the ' +
-       'width of the HLB to the width of the safe area', function (done) {
-
-      var constrainWidthToSafeAreaSpy = sinon.spy(hlbPositioning, 'constrainWidthToSafeArea');
-
-      hlb.sizeHLB();
-
-      expect(constrainWidthToSafeAreaSpy.calledOnce).to.be.true;
-
-      constrainWidthToSafeAreaSpy.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.limitWidth because it is responsible for limiting the width of certain html tags',
-      function (done) {
-
-        var limitWidthSpy = sinon.spy(hlbPositioning, 'limitWidth');
-
-        hlb.sizeHLB();
-
-        expect(limitWidthSpy.calledOnce).to.be.true;
-
-        limitWidthSpy.restore();
-
-        done();
-
-    });
-
-    it('Invokes hlbPositioning.mitigateVerticalScroll because it is responsible for increasing the height ' +
-       'of the HLB until there is no vertical scroll or the height is equal to the safe zone height, whichever ' +
-       'comes first', function (done) {
-
-      var mitigateVerticalScrollSpy = sinon.spy(hlbPositioning, 'mitigateVerticalScroll');
-
-      hlb.sizeHLB();
-
-      expect(mitigateVerticalScrollSpy.calledOnce).to.be.true;
-
-      mitigateVerticalScrollSpy.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.addVerticalScroll because it is responsible for setting the css styles ' +
-       'for a vertical scrollbar if it is necessary', function (done) {
-
-      var addVerticalScrollSpy = sinon.spy(hlbPositioning, 'addVerticalScroll');
-
-      hlb.sizeHLB();
-
-      expect(addVerticalScrollSpy.calledOnce).to.be.true;
-
-      addVerticalScrollSpy.restore();
-
-      done();
-
-    });
-
-  });
-
-  // The positionHLB() purpose is to position the HLB element so that the midpoint overlaps with the midpoint
-  // of the original element passed by the picker.  If overlapping the midpoints results in the HLB being outside
-  // of the safe area bounding rect, then it is moved the minimum distance to be within its bounds.  This function
-  // caches the results of the translation and transform-origin needed to position the HLB.
-  // NOTE: All the work done in this function is delegated to a module dependency, which we mock, so we can't test
-  //       if they function at this level.
-  describe('#positionHLB', function () {
-
-    it('Invokes hlbPositioning.scaleRectFromCenter because we want to position the scaled HLB, which we must simulate ' +
-       'at this point, which is what hlbPositioning.scaleRectFromCenter does' , function (done) {
-
-      var scaleRectFromCenterStub = sinon.stub(hlbPositioning, 'scaleRectFromCenter', function () {
-            return {
-              'width' : 0,
-              'height': 0,
-              'left'  : 0,
-              'right' : 0,
-              'top'   : 0,
-              'bottom': 0
-            };
-          }),
-          midPointDiffStub = sinon.stub(hlbPositioning, 'midPointDiff', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          }),
-          constrainPositionStub = sinon.stub(hlbPositioning, 'constrainPosition', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          });
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.positionHLB();
-
-      expect(scaleRectFromCenterStub.calledOnce).to.be.true;
-
-      scaleRectFromCenterStub.restore();
-      midPointDiffStub.restore();
-      constrainPositionStub.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.midPointDiff because we want to position the HLB so that the midpoint overlaps ' +
-       'with the midpoint of the original element passed by the picker.  This function returns the difference ' +
-       'between midpoints so we can appropriately translate the HLB to its correct position.', function (done) {
-
-      var scaleRectFromCenterStub = sinon.stub(hlbPositioning, 'scaleRectFromCenter', function () {
-            return {
-              'width': 0,
-              'height': 0,
-              'left': 0,
-              'right': 0,
-              'top': 0,
-              'bottom': 0
-            };
-          }),
-          midPointDiffStub = sinon.stub(hlbPositioning, 'midPointDiff', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          }),
-          constrainPositionStub = sinon.stub(hlbPositioning, 'constrainPosition', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          });
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.positionHLB();
-
-      expect(midPointDiffStub.calledOnce).to.be.true;
-
-      scaleRectFromCenterStub.restore();
-      midPointDiffStub.restore();
-      constrainPositionStub.restore();
-
-      done();
-
-    });
-
-    it('Invokes hlbPositioning.constrainPosition because we want to position the HLB inside the ' +
-       'safe area bounding rect.  This function returns the minimum distance a rectangle must travel ' +
-       'to occupy another rectangle', function (done) {
-
-      var scaleRectFromCenterStub = sinon.stub(hlbPositioning, 'scaleRectFromCenter', function () {
-            return {
-              'width': 0,
-              'height': 0,
-              'left': 0,
-              'right': 0,
-              'top': 0,
-              'bottom': 0
-            };
-          }),
-          midPointDiffStub = sinon.stub(hlbPositioning, 'midPointDiff', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          }),
-          constrainPositionStub = sinon.stub(hlbPositioning, 'constrainPosition', function () {
-            return {
-              'x': 0,
-              'y': 0
-            };
-          });
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.positionHLB();
-
-      expect(constrainPositionStub.calledOnce).to.be.true;
-
-      scaleRectFromCenterStub.restore();
-      midPointDiffStub.restore();
-      constrainPositionStub.restore();
-
+      insertAfterStub.restore();
+      hlb.setHighlight();
       done();
 
     });
@@ -879,6 +595,7 @@ describe('highlight-box', function() {
           expected  = 'object',
           actual;
 
+      hlb.setHighlight({});
       hlb.setHLBWrappingElement(undefined);
 
       hlb.cloneHLB(paragraph);
@@ -888,7 +605,7 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -900,7 +617,7 @@ describe('highlight-box', function() {
           cssStub   = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
           expected  = 'object',
           actual;
-
+      hlb.setHighlight({});
       hlb.setHLB(undefined);
 
       hlb.cloneHLB(paragraph);
@@ -910,7 +627,7 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -920,7 +637,7 @@ describe('highlight-box', function() {
       var paragraph      = win.document.getElementById('paragraph'),
           cssStub        = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
           initializeStylesSpy = sinon.spy(hlbStyling, 'initializeStyles');
-
+      hlb.setHighlight({});
       hlb.cloneHLB(paragraph);
 
       expect(initializeStylesSpy.calledOnce).to.be.true;
@@ -928,7 +645,7 @@ describe('highlight-box', function() {
       initializeStylesSpy.restore();
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -938,7 +655,7 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           cssStub   = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
           filterSpy = sinon.spy(hlbStyling, 'filter');
-
+      hlb.setHighlight({});
       hlb.cloneHLB(paragraph);
 
       expect(filterSpy.calledOnce).to.be.true;
@@ -946,7 +663,7 @@ describe('highlight-box', function() {
       filterSpy.restore();
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -956,7 +673,7 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           cssStub = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
           getHLBStylesSpy = sinon.spy(hlbStyling, 'getHLBStyles');
-
+      hlb.setHighlight({});
       hlb.cloneHLB(paragraph);
 
       expect(getHLBStylesSpy.calledOnce).to.be.true;
@@ -964,7 +681,7 @@ describe('highlight-box', function() {
       getHLBStylesSpy.restore();
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -975,7 +692,7 @@ describe('highlight-box', function() {
           cssStub   = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
           expected  = hlb.getDefaultHLBId(),
           actual;
-
+      hlb.setHighlight({});
       hlb.cloneHLB(paragraph);
 
       actual = hlb.getHLB()[0].id;
@@ -983,7 +700,7 @@ describe('highlight-box', function() {
       expect(actual).to.be.equal(expected);
 
       cssStub.restore();
-
+      hlb.setHighlight();
       done();
 
     });
@@ -1058,30 +775,6 @@ describe('highlight-box', function() {
       hlb.onHLBClosed();
 
       expect(hlb.$getOriginalElement()).to.be.undefined;
-
-      done();
-
-    });
-
-    it('Sets translateCSS to undefined because translateCSS is a private variable that represents the position of the HLB.', function (done) {
-
-      hlb.setTranslateCSS('2');
-
-      hlb.onHLBClosed();
-
-      expect(hlb.getTranslateCSS()).to.be.undefined;
-
-      done();
-
-    });
-
-    it('Sets originCSS to undefined because originCSS is a private variable that represents the transform-origin of the HLB.', function (done) {
-
-      hlb.setOriginCSS('2');
-
-      hlb.onHLBClosed();
-
-      expect(hlb.getOriginCSS()).to.be.undefined;
 
       done();
 

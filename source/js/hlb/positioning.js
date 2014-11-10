@@ -696,17 +696,17 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
     if (SC_UNIT) {
       exports.isEligibleForConstrainedWidth = isEligibleForConstrainedWidth;
-      exports.fixOverflowWidth              = hlbPositioning.fixOverflowWidth;
+      exports.fixOverflowWidth              = fixOverflowWidth;
       exports.getExtraLeftPadding           = getExtraLeftPadding;
-      exports.midPointDiff                  = hlbPositioning.midPointDiff;
-      exports.limitWidth                    = hlbPositioning.limitWidth;
-      exports.mitigateVerticalScroll        = hlbPositioning.mitigateVerticalScroll;
-      exports.constrainPosition             = hlbPositioning.constrainPosition;
-      exports.constrainHeightToSafeArea     = hlbPositioning.constrainHeightToSafeArea;
-      exports.constrainWidthToSafeArea      = hlbPositioning.constrainWidthToSafeArea;
-      exports.scaleRectFromCenter           = hlbPositioning.scaleRectFromCenter;
-      exports.addVerticalScroll             = hlbPositioning.addVerticalScroll;
-      exports.initializeSize                = hlbPositioning.initializeSize;
+      exports.midPointDiff                  = midPointDiff;
+      exports.limitWidth                    = limitWidth;
+      exports.mitigateVerticalScroll        = mitigateVerticalScroll;
+      exports.constrainPosition             = constrainPosition;
+      exports.constrainHeightToSafeArea     = constrainHeightToSafeArea;
+      exports.constrainWidthToSafeArea      = constrainWidthToSafeArea;
+      exports.scaleRectFromCenter           = scaleRectFromCenter;
+      exports.addVerticalScroll             = addVerticalScroll;
+      exports.initializeSize                = initializeSize;
       exports.hlbPositioning                = hlbPositioning;
     }
 

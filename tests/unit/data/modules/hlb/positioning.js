@@ -31,3 +31,7 @@ exports.midPointDiff              = function () {
 exports.getFinalScale = function() { return 1.5 * 1.5; };
 exports.getStartingScale = function() { return 1.5; };
 exports.getInheritedZoom = function() { return 1; };
+exports.getOriginCSS = function () {};
+exports.getTranslateCSS = function () {};
+exports.setOriginCSS = function () {};
+exports.setTranslateCSS = function () {};

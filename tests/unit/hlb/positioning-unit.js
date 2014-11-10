@@ -154,16 +154,16 @@ describe('hlbPositioning', function() {
   // no vertical scrollbar or it is as tall as the safe-area height (whichever comes first).
   describe('#mitigateVerticalScroll()', function () {
 
-    it('Invokes jquery.css if common.hasVertScroll returns true and' +
+    it('Invokes jquery.css if common.hasVertScroll returns true and ' +
        'height of $hlbElement is less than the height of the safe area because ' +
        'we rely upon jQuery to set the height of the HLB element',
       function (done) {
 
-        var $hlbElement             = jquery('<p>'),
+        var $hlbElement             = jquery(win.document.getElementById('overflowWidth')),
             hasVertScrollStub       = sinon.stub(common, 'hasVertScroll', function () {return true;}),
             cssSpy                  = sinon.spy(jquery.fn, 'css'),
 
-            scaleRectFromCenterStub = sinon.stub(hlbPositioning.hlbPositioning, 'scaleRectFromCenter', function () {
+            scaleRectFromCenterStub = sinon.stub(hlbPositioning, 'scaleRectFromCenter', function () {
               return {
                 'height': 0
               };
@@ -175,7 +175,7 @@ describe('hlbPositioning', function() {
               };
             }),
 
-            constrainHeightToSafeAreaStub = sinon.stub(hlbPositioning.hlbPositioning, 'constrainHeightToSafeArea', function () {});
+            constrainHeightToSafeAreaStub = sinon.stub(hlbPositioning, 'constrainHeightToSafeArea', function () {});
 
         hlbPositioning.mitigateVerticalScroll($hlbElement);
 
@@ -282,14 +282,9 @@ describe('hlbPositioning', function() {
         var isVisualMediaStub = sinon.stub(common, 'isVisualMedia', function () {
               return false;
             }),
-            scaleRectFromCenterStub = sinon.stub(hlbPositioning.hlbPositioning, 'scaleRectFromCenter', function () {
-              return {
-                'height': 100
-              };
-            }),
             getSafeZoneBoundingBoxStub = sinon.stub(hlbSafeArea, 'getSafeZoneBoundingBox', function () {
               return {
-                'height': 5
+                'height': -5
               };
             }),
             cssSpy = sinon.spy(jquery.fn, 'css'),
@@ -300,7 +295,6 @@ describe('hlbPositioning', function() {
         expect(cssSpy.called).to.be.true;
 
         isVisualMediaStub.restore();
-        scaleRectFromCenterStub.restore();
         getSafeZoneBoundingBoxStub.restore();
         cssSpy.restore();
 
@@ -312,17 +306,9 @@ describe('hlbPositioning', function() {
       'is taller than safe zone height and element isVisualMedia',
       function (done) {
 
-        var isVisualMediaStub = sinon.stub(common, 'isVisualMedia', function () {
-              return true;
-            }),
-            scaleRectFromCenterStub = sinon.stub(hlbPositioning.hlbPositioning, 'scaleRectFromCenter', function () {
+        var getSafeZoneBoundingBoxStub = sinon.stub(hlbSafeArea, 'getSafeZoneBoundingBox', function () {
               return {
-                'height': 100
-              };
-            }),
-            getSafeZoneBoundingBoxStub = sinon.stub(hlbSafeArea, 'getSafeZoneBoundingBox', function () {
-              return {
-                'height': 5
+                'height': -5
               };
             }),
             cssSpy = sinon.spy(jquery.fn, 'css'),
@@ -332,8 +318,6 @@ describe('hlbPositioning', function() {
 
         expect(cssSpy.called).to.be.true;
 
-        isVisualMediaStub.restore();
-        scaleRectFromCenterStub.restore();
         getSafeZoneBoundingBoxStub.restore();
         cssSpy.restore();
 
@@ -370,14 +354,9 @@ describe('hlbPositioning', function() {
         var isVisualMediaStub = sinon.stub(common, 'isVisualMedia', function () {
               return false;
             }),
-            scaleRectFromCenterStub = sinon.stub(hlbPositioning.hlbPositioning, 'scaleRectFromCenter', function () {
-              return {
-                'width': 100
-              };
-            }),
             getSafeZoneBoundingBoxStub = sinon.stub(hlbSafeArea, 'getSafeZoneBoundingBox', function () {
               return {
-                'width': 5
+                'width': -5
               };
             }),
             cssSpy = sinon.spy(jquery.fn, 'css'),
@@ -388,7 +367,6 @@ describe('hlbPositioning', function() {
         expect(cssSpy.calledTwice).to.be.true;
 
         isVisualMediaStub.restore();
-        scaleRectFromCenterStub.restore();
         getSafeZoneBoundingBoxStub.restore();
         cssSpy.restore();
 
@@ -403,14 +381,9 @@ describe('hlbPositioning', function() {
         var isVisualMediaStub = sinon.stub(common, 'isVisualMedia', function () {
               return true;
             }),
-            scaleRectFromCenterStub = sinon.stub(hlbPositioning.hlbPositioning, 'scaleRectFromCenter', function () {
-              return {
-                'width': 100
-              };
-            }),
             getSafeZoneBoundingBoxStub = sinon.stub(hlbSafeArea, 'getSafeZoneBoundingBox', function () {
               return {
-                'width': 5
+                'width': -5
               };
             }),
             cssSpy = sinon.spy(jquery.fn, 'css'),
@@ -421,7 +394,6 @@ describe('hlbPositioning', function() {
         expect(cssSpy.calledThrice).to.be.true;
 
         isVisualMediaStub.restore();
-        scaleRectFromCenterStub.restore();
         getSafeZoneBoundingBoxStub.restore();
         cssSpy.restore();
 
