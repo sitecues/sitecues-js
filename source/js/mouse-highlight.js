@@ -1249,7 +1249,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Retrieve some leaf nodes
       var nodeIterator = document.createNodeIterator(document.body,
-        NodeFilter.SHOW_TEXT, { acceptNode: isAcceptableTextLeaf });
+        NodeFilter.SHOW_TEXT, { acceptNode: isAcceptableTextLeaf }, false);
       var knownGoodState = state;
       var knownGoodScore = -9;
       var skipElement;

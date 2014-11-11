@@ -107,7 +107,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       isDebuggingOn,
       isVoteDebuggingOn,
       isAutoPickDebuggingOn,
-      isVotingOn = true,  // Temporarily off by default so we can see it's effect
+      isVotingOn = false, // Temporarily off by default until it works in IE9, and so we can see it's effect
       lastPicked;
 
     /*
@@ -393,7 +393,12 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       // Retrieve some leaf nodes
       var nodeIterator = document.createNodeIterator(startElement, NodeFilter.SHOW_TEXT,
-        { acceptNode: isAcceptableTextLeaf });
+        { acceptNode: isAcceptableTextLeaf }, false);
+
+      console.log('dude1');
+      nodeIterator.nextNode();
+      console.log('dude2');
+
       var numLeaves = 0;
       while (numLeaves < MAX_LEAVES_TO_VOTE * 3) {
         var nextTextLeaf = nodeIterator.nextNode();

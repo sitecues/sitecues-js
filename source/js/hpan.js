@@ -104,10 +104,10 @@ sitecues.def('hpan', function (hpan, callback) {
 
       if (doTurnOn !== isOn) {
         if (doTurnOn) {
-          $(document).get(0).addEventListener('mousemove', mousemove, false);
+          document.addEventListener('mousemove', mousemove, false);
         }
         else {
-          $(document).get(0).removeEventListener('mousemove', mousemove, false);
+          document.removeEventListener('mousemove', mousemove, false);
           xLastPos = undefined;
         }
       }

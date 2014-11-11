@@ -114,7 +114,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     function getHLBLineTops(currTop) {
       // Measure height of one line for first visible text node
       var nodeIterator =
-            document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT),
+            document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT, {}, false),
           range = document.createRange(),
           lineTops = [],
           hlbZoom = common.getTransform($(hlbElement));
@@ -628,7 +628,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         treeWalker = document.createTreeWalker(
           document.body,
           NodeFilter.SHOW_ELEMENT,
-          { acceptNode: doesMatchTags });
+          { acceptNode: doesMatchTags }, false);
 
       // Set the starting point (can do with tree walker but doesn't look like the similar node iterator API can do this)
       treeWalker.currentNode = $lastPicked[0];
