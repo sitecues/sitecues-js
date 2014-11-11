@@ -14,47 +14,25 @@ describe('dimmer', function() {
     });
   });
 
-  describe('#onDimmerReady', function () {
 
-    it('Invokes jquery.css because we rely upon jQuery to change the elements opacity.', function (done) {
+  // describe('#onDimmerClosed', function () {
 
-      var $dimmerElement = jquery(win.document.getElementById('hlbDimmerElement')),
-          cssSpy         = sinon.spy($dimmerElement, 'css');
+  //   it('Invokes jquery.remove because we rely upon jQuery to remove element from the DOM.', function (done) {
 
-      dimmer.setDimmerElement($dimmerElement);
+  //     var $dimmerElement = jquery(win.document.getElementById('sitecues-background-dimmer')),
+  //         removeSpy      = sinon.spy($dimmerElement, 'remove');
 
-      dimmer.onDimmerReady();
+  //     dimmer.onDimmerClosed();
 
-      expect(cssSpy.calledOnce).to.be.true;
+  //     expect(removeSpy.calledOnce).to.be.true;
 
-      cssSpy.restore();
+  //     removeSpy.restore();
 
-      done();
+  //     done();
 
-    });
+  //   });
 
-  });
-
-  describe('#onDimmerClosed', function () {
-
-    it('Invokes jquery.remove because we rely upon jQuery to remove element from the DOM.', function (done) {
-
-      var $dimmerElement = jquery(win.document.getElementById('hlbDimmerElement')),
-          removeSpy      = sinon.spy($dimmerElement, 'remove');
-
-      dimmer.setDimmerElement($dimmerElement);
-
-      dimmer.onDimmerClosed();
-
-      expect(removeSpy.calledOnce).to.be.true;
-
-      removeSpy.restore();
-
-      done();
-
-    });
-
-  });
+  // });
 
   describe('#dimBackgroundContent', function () {
 

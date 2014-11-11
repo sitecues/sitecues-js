@@ -767,6 +767,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.setRemoveTemporaryOriginalElement = function (value) {
           removeTemporaryOriginalElement = value;
         };
+
+        exports.setHighlight = function (value) {
+          highlight = value;
+        };
       }
 
       callback();

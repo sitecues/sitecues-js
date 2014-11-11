@@ -22,8 +22,11 @@ describe('hlbStyling', function() {
           originalElementsComputedStyles = {
             'textDecoration': ''
           },
+          initialHLBRect = {
+
+          },
           expected = 0,
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles).bottom;
+          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).bottom;
 
       expect(actual).to.be.equal(expected);
       done();
@@ -56,8 +59,11 @@ describe('hlbStyling', function() {
           originalElementsComputedStyles = {
             'textDecoration': 'underline'
           },
+          initialHLBRect = {
+
+          },
           expected = 'underline',
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles).textDecoration;
+          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).textDecoration;
 
       expect(actual).to.be.equal(expected);
       done();
@@ -69,8 +75,11 @@ describe('hlbStyling', function() {
             'textDecoration': '',
             'position': 'absolute'
           },
+          initialHLBRect = {
+
+          },
           expected = 'inline-block',
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles).display;
+          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).display;
 
       expect(actual).to.be.equal(expected);
       done();
@@ -147,7 +156,7 @@ describe('hlbStyling', function() {
           expected    = '',
           actual;
 
-      hlbStyling.filter($hlbElement);
+      hlbStyling.filter($hlbElement, $hlbElement, []);
 
       actual = $hlbElement.attr('id');
 
@@ -166,7 +175,7 @@ describe('hlbStyling', function() {
 
       $hlbElement[0].style.padding = '100px';
 
-      hlbStyling.filter($hlbElement);
+      hlbStyling.filter($hlbElement, $hlbElement, []);
 
       actual = $hlbElement[0].style.padding;
 
