@@ -113,7 +113,7 @@ sitecues.def('style-service', function (styleService, callback) {
         numSheets = validSheets.length;
 
       function requestComplete(evt) {
-        var request = evt.target || this.target;
+        var request = evt.target || this;
         if (openRequests.length === 0) {
           return; // Already completed all requests
         }
@@ -132,7 +132,7 @@ sitecues.def('style-service', function (styleService, callback) {
       }
 
       function onload(evt) {
-        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(evt.target || this.target));
+        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(evt.target || this));
         requestComplete(evt);
       }
 
