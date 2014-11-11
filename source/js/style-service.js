@@ -112,8 +112,8 @@ sitecues.def('style-service', function (styleService, callback) {
         sheetNum = 0,
         numSheets = validSheets.length;
 
-      function requestComplete(event) {
-        var request = event.target;
+      function requestComplete() {
+        var request = this;
         if (openRequests.length === 0) {
           return; // Already completed all requests
         }
@@ -127,13 +127,13 @@ sitecues.def('style-service', function (styleService, callback) {
         }
         else {
           // TODO remove if we don't see it happening
-          SC_DEV && console.log('Request not found %s %o', request.url, event);
+          SC_DEV && console.log('Request not found %s %o', request.url, request);
         }
       }
 
-      function onload(event) {
-        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(event.target));
-        requestComplete(event);
+      function onload() {
+        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(this.target));
+        requestComplete();
       }
 
       for(; sheetNum < numSheets; ++ sheetNum) {
