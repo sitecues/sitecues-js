@@ -112,8 +112,8 @@ sitecues.def('style-service', function (styleService, callback) {
         sheetNum = 0,
         numSheets = validSheets.length;
 
-      function requestComplete() {
-        var request = this;
+      function requestComplete(evt) {
+        var request = evt.target || this.target;
         if (openRequests.length === 0) {
           return; // Already completed all requests
         }
@@ -131,9 +131,9 @@ sitecues.def('style-service', function (styleService, callback) {
         }
       }
 
-      function onload() {
-        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(this.target));
-        requestComplete();
+      function onload(evt) {
+        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(evt.target || this.target));
+        requestComplete(evt);
       }
 
       for(; sheetNum < numSheets; ++ sheetNum) {
