@@ -15,7 +15,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
    * @param url source of audio to play
    */
   player.playAudioSrc = function(url) {
-    player.stop();
     audioElement.src = ''; // Clean up
     sitecues.$(audioElement).one('canplay', playIt);
     audioElement.src = url;

@@ -45,13 +45,14 @@ sitecues.def('util/common', function (common, callback) {
     /**
      * Checks if the value given is empty or not.
      */
-    common.isEmpty = function(val) {
+    common.isEmpty = function(node) {
+      var val = node.data;
       return !val || /^\W*$/.test(val);  // Only whitespace or punctuation
     };
 
     /* ----------------------- PRIVATE ----------------------- */
     function isNonEmptyTextNode(node) {
-      return node.nodeType === 3 /* Text node */ && !common.isEmpty(node.data);
+      return node.nodeType === 3 /* Text node */ && !common.isEmpty(node);
     }
 
     // Return true if there is a visual sub-box of content
@@ -281,6 +282,47 @@ sitecues.def('util/common', function (common, callback) {
         ems = (0.9 + 0.5 * end.toString().length);
       }
       return getEmsToPx(style.fontSize, ems);
+    };
+
+    // Draw a rectangle that does not capture any mouse events
+    // Implemented via zero-area element and CSS outline
+    // Useful because IE9/10 does not have pointer-events: none
+    // For example, if drawing a horizontal box we draw a line that is 0px high:
+    //
+    //       ---------------
+    //
+    // Then we fill in the outline around it using CSS:
+    //
+    //      OOOOOOOOOOOOOOOOO
+    //      O---------------O
+    //      OOOOOOOOOOOOOOOOO
+    //
+    common.drawRect = function(absRect, color) {
+      var useCss = {
+          position: 'absolute',
+          outlineColor: color,
+          outlineStyle: 'solid'
+        },
+        useOutlineWidth;
+
+      if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
+        useOutlineWidth = absRect.height / 2;
+        useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
+        useCss.height = 0;
+      }
+      else {   // Taller than wide: draw vertical line
+        useOutlineWidth = absRect.width / 2;
+        useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
+        useCss.width = 0;
+      }
+
+      useCss.left = (absRect.left + useOutlineWidth) + 'px';
+      useCss.top = (absRect.top + useOutlineWidth) + 'px';
+      useCss.outlineWidth = useOutlineWidth + 'px';
+
+      return $('<div>')
+        .css(useCss)
+        .appendTo('html');
     };
 
     // Done.

@@ -56,7 +56,7 @@ sitecues.def('conf/site', function (site, callback) {
       });
     }
 
-    sitecues.on('speech/enabled', fetchSiteConfig); // Fetch once we need it
+    sitecues.on('speech/init', fetchSiteConfig); // Fetch once we need it
 
     callback(site);
   });

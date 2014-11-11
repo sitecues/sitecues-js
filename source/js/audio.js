@@ -26,18 +26,22 @@ sitecues.def('audio', function (audio, callback) {
       if (!ttsOn) {
         return;
       }
-      stopAudio();
+      stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+
       var text = builder.getText(hlb);
       if (text) {
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
-        // Wait a moment, in case it was a keystroke that just got us here
-        setTimeout(enableKeyDownToStopAudio, 0);
+        enableKeyDownToStopAudio();
       }
     }
 
     function enableKeyDownToStopAudio() {
       // Stop speech on any key down.
-      $(window).one('keydown', stopAudio);
+      // Wait a moment, in case it was a keystroke that just got us here,
+      // for example down arrow to read next HLB or a hotkey to toggle speech
+      setTimeout(function() {
+        $(window).one('keydown', stopAudio);
+      }, 0);
     }
 
     /*
@@ -75,11 +79,11 @@ sitecues.def('audio', function (audio, callback) {
        * Turn speech on or off
        * @param isOn Whether to turn speech on or off
        */
-    audio.setSpeechState = function(isOn) {
+    function setSpeechState(isOn) {
       if (ttsOn !== isOn) {
         ttsOn = isOn;
         conf.set('ttsOn', ttsOn);
-        sitecues.emit(ttsOn ? 'speech/enabled' : 'speech/disabled');
+        sitecues.emit('speech/did-change', ttsOn);
       }
     }
 
@@ -87,6 +91,8 @@ sitecues.def('audio', function (audio, callback) {
      * Uses a provisional player to play back audio by key, used for audio cues.
      */
     audio.playAudioByKey = function(key) {
+      stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+
       var url = getAudioKeyUrl(key);
       getAudioPlayer().playAudioSrc(url);
 
@@ -161,6 +167,10 @@ sitecues.def('audio', function (audio, callback) {
       return mediaTypeForPrerecordedAudio;
     }
 
+    function toggleSpeech() {
+      setSpeechState(!ttsOn);
+    }
+
     /**
      * Returns if TTS is enabled or not.  Always returns true or false.
      */
@@ -181,13 +191,16 @@ sitecues.def('audio', function (audio, callback) {
      */
     sitecues.on('hlb/closed', stopAudio);
 
+    // User has requested a speech toggle
+    sitecues.on('speech/do-toggle', toggleSpeech);
+
     if (conf.get('ttsOn')) {
       ttsOn = true;
-      sitecues.emit('speech/enabled');
+      sitecues.emit('speech/init');
     }
 
     if (SC_UNIT) {
-      exports.setSpeechState = audio.setSpeechState;
+      exports.setSpeechState = setSpeechState;
       exports.isSpeechEnabled = audio.isSpeechEnabled
       exports.playAudioByKey = audio.playAudioByKey;
       exports.playHlbContent = playHlbContent;

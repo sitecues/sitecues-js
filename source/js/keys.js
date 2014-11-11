@@ -46,6 +46,8 @@ sitecues.def('keys', function(keys, callback) {
         PLUS_ALTERNATE_1 = 61,
         PLUS_ALTERNATE_2 = 43,
         LETTER_H = 72,
+        LETTER_S = 83,
+        SHIFT = 16,
 
         KEY_TESTS = {
           'space': function(event) {
@@ -55,6 +57,8 @@ sitecues.def('keys', function(keys, callback) {
               event.keyCode === SPACE &&
               // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
               !hasAnyModifier(event) &&
+              // HLB is on or highlighting is enabled
+              sitecues.isSitecuesOn() &&
               // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
               !common.isSpacebarConsumer(event.target)
             );
@@ -101,6 +105,9 @@ sitecues.def('keys', function(keys, callback) {
               // (which needs to allow the user to type the plus key)
               return !common.isEditable(event.target);
             }
+          },
+          'speech': function(event) {
+            return event.keyCode === LETTER_S && event.altKey && !common.isEditable(event.target);
           },
           'esc': function(event) {
              // Escape key is only valid if there is an HLB to close
@@ -150,13 +157,15 @@ sitecues.def('keys', function(keys, callback) {
           'space': 'key/space',
           'minus': 'zoom/decrease',
           'plus': 'zoom/increase',
-          'esc': 'key/esc'
+          'esc': 'key/esc',
+          'speech': 'speech/do-toggle'
         },
-
         KEY_EVENT_DEFAULT = 'key/nav';
 
       function canMoveHighlight(event) {
-        return !hasCommandModifier(event) && mh.getHighlight().absoluteRect && !common.isEditable(event.target);
+        return !hasCommandModifier(event) &&    // Plain or shifted keystroke
+          (mh.getHighlight().isVisible || hlb.getElement()) &&    // Visible highlight or HLB
+          !common.isEditable(event.target);   // Not focused in editable area
       }
 
       function canScrollHlb(event) {
@@ -208,9 +217,24 @@ sitecues.def('keys', function(keys, callback) {
         for (var key in KEY_TESTS) {
           if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
             handle(KEY_EVENT_MAP[key] || KEY_EVENT_DEFAULT, event, key);
+            doFollowScroll(true);
             return false;
           }
         }
+
+        processUnusedKey(event);
+      }
+
+      // Let the key fall through to default processing,
+      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting
+      function processUnusedKey(event) {
+        if (event.keyCode !== SHIFT) {
+          doFollowScroll(false);
+        }
+      }
+
+      function doFollowScroll(isFollowMouseEnabled) {
+        sitecues.emit('mh/track-scroll', isFollowMouseEnabled);
       }
 
       // bind key hook to window
@@ -219,6 +243,9 @@ sitecues.def('keys', function(keys, callback) {
       // this allows us to have the first choice, and we can preventDefault on it so that
       // nothing else uses it after us.
       addEventListener('keydown', onKeyDown, true);
+
+      // Will reenable highlight on mouse follow
+      addEventListener('keyup', function() { doFollowScroll(true); });
 
       // done
       callback();

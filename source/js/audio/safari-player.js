@@ -32,7 +32,6 @@ sitecues.def('audio/safari-player', function (player, callback) {
    * @param url source of audio to play
    */
   player.playAudioSrc = function(baseMediaUrl) {
-    player.stop();
     isCancelled = false;
 
     request.open('GET', baseMediaUrl, true);

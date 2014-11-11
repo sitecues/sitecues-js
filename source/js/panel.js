@@ -3,8 +3,8 @@ sitecues.def( 'panel', function (panel, callback) {
 
   // use jquery, we can rid off this dependency
   // if we will start using vanilla js functions
-  sitecues.use( 'jquery', 'audio', 'slider', 'ui', 'html-build', 'platform',
-    function( $, audio, SliderClass, ui, htmlBuild, platform) {
+  sitecues.use( 'jquery', 'audio', 'slider', 'ui', 'html-build', 'conf',
+    function( $, audio, SliderClass, ui, htmlBuild, conf) {
 
     var PANEL_WIDTH = 500;
     var PANEL_HEIGHT = 80;  // To keep aspect ratio, HEIGHT is WIDTH * .16
@@ -93,7 +93,7 @@ sitecues.def( 'panel', function (panel, callback) {
       }
       ttsButton.click(function() {
         sitecues.emit('panel/interaction');
-        ttsToggle();
+        sitecues.emit('speech/do-toggle');
       });
 
       if (panel.parent) {
@@ -188,31 +188,28 @@ sitecues.def( 'panel', function (panel, callback) {
     }
 
     // Function that will toggle tts on or off.
-    function ttsToggle() {
-      var ttsButton = $('#sitecues-tts');
-      if(ttsButton.data('tts-enable') === 'disabled') {
+    function onSpeechChanged(isTTSOn) {
+      if (isTTSOn) {
         // It's disabled, so enable it
-        audio.setSpeechState(true);
-        showTTSbuttonEnabled(ttsButton);
+        showTTSbuttonEnabled();
       } else {
         // It's enabled (or unknown), so disable it
-        audio.setSpeechState(false);
-        showTTSbuttonDisabled(ttsButton);
+        showTTSbuttonDisabled();
       }
     }
 
     // Show TTS is enabled.
-    function showTTSbuttonEnabled(ttsButton) {
-      ttsButton = ttsButton || $('#sitecues-tts');
-      ttsButton.data('tts-enable','enabled');
-      ttsButton.removeClass('tts-disabled');
+    function showTTSbuttonEnabled() {
+      var $ttsButton = $('#sitecues-tts');
+      $ttsButton.data('tts-enable','enabled');
+      $ttsButton.removeClass('tts-disabled');
     }
 
     // Show TTS is disabled.
-    function showTTSbuttonDisabled (ttsButton) {
-      ttsButton = ttsButton || $('#sitecues-tts');
-      ttsButton.data('tts-enable','disabled');
-      ttsButton.addClass('tts-disabled');
+    function showTTSbuttonDisabled() {
+      var $ttsButton = $('#sitecues-tts');
+      $ttsButton.data('tts-enable','disabled');
+      $ttsButton.addClass('tts-disabled');
     }
 
     function refreshPanel() {
@@ -255,8 +252,7 @@ sitecues.def( 'panel', function (panel, callback) {
       setTimeout(hide, panel.hideDelay);
     });
 
-    sitecues.on('speech/enabled',  showTTSbuttonEnabled);
-    sitecues.on('speech/disabled', showTTSbuttonDisabled);
+    conf.get('ttsOn', onSpeechChanged);
 
     create();
 

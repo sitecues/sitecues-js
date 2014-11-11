@@ -52,7 +52,14 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
     /*
      * Play speech on cue if necessary
      */
-    function speechEnabled() {
+    function onSpeechChanged(isEnabled) {
+      if (!isEnabled) {
+        // *** Speech off cue ***
+        audio.playAudioByKey(VERBAL_CUE_SPEECH_OFF);
+        return;
+      }
+
+      // *** Speech on cues ***
       // EQ-996 - As a user, I want multiple chances to learn about the
       // spacebar command so that I can benefit from One Touch Read
       //---------------------------------------------------------------------------------------------------//
@@ -67,15 +74,7 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
       }
     }
 
-
-    /*
-     * Play speech off cue
-     */
-    function speechDisabled() {
-      audio.playAudioByKey(VERBAL_CUE_SPEECH_OFF);
-    }
-
-    function zoomChanged(zoom) {
+    function onZoomChanged(zoom) {
       // If highlighting is enabled, zoom is large enough, zoom is larger
       // than we started, and we haven't already cued, then play an audio
       // cue to explain highlighting
@@ -89,17 +88,12 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
     /*
      * Play speech on cue if necessary
      */
-    sitecues.on('speech/enabled', speechEnabled);
-
-    /*
-     * Play speech off cue if necessary
-     */
-    sitecues.on('speech/disabled', speechDisabled);
+    sitecues.on('speech/did-change', onSpeechChanged);
 
     /*
      * Play cue describing "zoom in more" one-touch-read feature if necessary
      */
-    sitecues.on('zoom', zoomChanged);
+    sitecues.on('zoom', onZoomChanged);
 
     callback();
   });

@@ -30,31 +30,30 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     hasLightText: false
   },
 
-  // minimum zoom level to enable highlight
-  // This is the default setting, the value used at runtime will be in conf.
-  MIN_ZOOM = 1,
-
   // class of highlight
   HIGHLIGHT_OUTLINE_CLASS = 'sitecues-highlight-outline',
 
   // How many ms does mouse need to stop for before we highlight?
   MOUSE_STOP_MS = 30,
 
+  // How many ms does scrolling need to stop for before we highlight?
+  SCROLL_STOP_MS = 140,
+
   // Don't consider the text light unless the yiq is larger than this
   MIN_YIQ_LIGHT_TEXT = 160,
 
   state,
 
-  isEnabled,
-  isFollowingMouse = true,
+  isTrackingMouse, // Are we currently tracking the mouse?
+  canTrackScroll = true,  // Is scroll tracking allowable? Turned off during panning from keyboard navigation
+  willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
 
-  pickTimer,
+  pickFromMouseTimer,
 
-  cursorPos,
-  scrollPos;
+  cursorPos;
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
@@ -285,11 +284,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function isCursorInHighlightShape(fixedRects, cutoutRects) {
-      if (!cursorPos) {
+      if (!cursorPos.doCheckCursorInHighlight) {
         return true; // No cursor -- last pick may have been from keyboard
       }
 
-      if (!geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects)) {
+      var extraPixels = getExtraPixels() * state.zoom;
+      if (!geo.isPointInAnyRect(cursorPos.x, cursorPos.y, fixedRects, extraPixels)) {
         return false;
       }
       // The cursor is in the fixed rectangle for the highlight.
@@ -298,27 +298,59 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return !geo.isPointInAnyRect(cursorPos.x, cursorPos.y, cutoutRects);
     }
 
-    // show mouse highlight -- update() from mouse events finally results in show()
+    // Update mouse highlight view and show unless doKeepHidden is truthy
     // return true if something was shown
-    function show() {
+    function updateView(doKeepHidden) {
       // can't find any element to work with
       if (!state.picked) {
         return;
       }
 
+      // Update state to ensure it is current
       state.zoom = zoomMod.getCompletedZoom();
-      state.styles = getAncestorStyles(state.picked.get(0), document.documentElement);
+      state.styles = getAncestorStyles(state.picked[0], document.documentElement);
+
       updateColorApproach(state.picked, state.styles);
 
-      if (!createNewOverlayPosition(true)) {
+      if (!computeOverlay(true)) {
         // Did not find visible rectangle to highlight
         return;
       }
 
-      state.isVisible = true;
+      // Show the actual overlay
+      if (!doKeepHidden) {
+        show();
+      }
+      return true;
+    }
+
+    function show() {
+      // Create and position highlight overlay
+      if (DO_SUPPORT_SVG_OVERLAY) {
+        appendOverlayPathViaSVG();
+      }
+      else {
+        // Use CSS outline with 0px wide/tall elements to draw lines of outline
+        // These will show on screen but will thankfully not take mouse events (pointer-events: none doesn't work in IE)
+        appendOverlayPathViaCssOutline(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor());
+        appendOverlayPathViaCssOutline(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor());
+      }
+
+      // Position overlay just on top of the highlighted element (and underneath fixed toolbars)
+      updateHighlightOverlayZIndex();
+
+      // Position the overlays correctly so they are over the highlighted content
+      updateHighlightOverlayPosition();
+
+      // Change background image for highlighted elements if necessary
       updateElementBgImage();
 
-      return true;
+      // Add event listeners to keep overlay view up-to-date
+      addMouseWheelUpdateListenersIfNecessary();
+      $(document).one('mouseleave', onLeaveWindow);
+
+      // Update state
+      state.isVisible = true;
     }
 
     // Choose an appropriate background color for the highlight
@@ -702,10 +734,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     // Update highlight overlay
-    // Return false if no valid rect
-    // Only update if createOverlay or position changes
-    // IOW, if createOverlay is false, this will check to see if position changed. If not, will do nothing more.
-    function createNewOverlayPosition(createOverlay) {
+    // @return falsey if no valid overlay can be created
+    function computeOverlay() {
 
       var element,
           elementRect,
@@ -713,34 +743,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           stretchForSprites = true;
 
       if (!state.picked) {
-        return false;
+        return;
       }
 
-      element = state.picked.get(0);
+      element = state.picked[0];
       elementRect = traitcache.getScreenRect(element); // Rough bounds
-
-      if (!createOverlay) {   // Just a refreshEventListeners
-        if (!state.elementRect) {
-          return false; // No view to refreshEventListeners
-        }
-        if (elementRect.left === state.elementRect.left &&
-            elementRect.top === state.elementRect.top) {
-          // Optimization -- reuse old fixed content rect info
-          // Show/hide highlight if cursor moves into or out of highlight
-          var isCursorInHighlight = isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
-          if (isCursorInHighlight !== state.isVisible) {
-            if (!isCursorInHighlight) {
-              hide(true);  // Hide but keep highlight data -- cursor has moved out of it, may move back in
-            }
-            else {
-              show(); // Create and show highlight -- cursor has moved into it
-            }
-          }
-          return isCursorInHighlight;
-        }
-
-        stretchForSprites = state.doUseOverlayForBgColor; // For highlight refreshes, do not consider our bg a sprite
-      }
 
       // Get exact bounds
       var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
@@ -749,7 +756,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
-        return false;
+        return;
       }
 
       mhpos.combineIntersectingRects(fixedRects, 99999); // Merge all boxes
@@ -757,70 +764,24 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.fixedContentRect = roundRectCoordinates(mainFixedRect);
 
       state.elementRect = $.extend({}, elementRect);
-      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom)
+      state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom);
       state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS);
       var extra = getExtraPixels();
 
-      if (createOverlay) {
-        var ancestorStyles = getAncestorStyles(state.target, element).concat(state.styles);
-        state.cutoutRects = getCutoutRects();
-        state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
-        // Get the path for the overlay so that the top-left corner is located at 0,0
-        // The updateHighlightOverlayPosition() code will set the top, left for it
-        // (it can change because of scrollable sub-regions)
-        var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
-            state.fixedContentRect.top, extra, state.zoom);
-        state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
-        state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
-        roundPolygonCoordinates(state.pathFillBackground);
-        roundPolygonCoordinates(state.pathBorder);
-        roundPolygonCoordinates(state.pathFillBackground);
+      state.cutoutRects = getCutoutRects();
+      state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
+      // Get the path for the overlay so that the top-left corner is located at 0,0
+      // The updateHighlightOverlayPosition() code will set the top, left for it
+      // (it can change because of scrollable sub-regions)
+      var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
+          state.fixedContentRect.top, extra, state.zoom);
+      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
+      state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
+      roundPolygonCoordinates(state.pathFillBackground);
+      roundPolygonCoordinates(state.pathBorder);
+      roundPolygonCoordinates(state.pathFillBackground);
 
-        // Create and position highlight overlay
-        if (DO_SUPPORT_SVG_OVERLAY) {
-          // SVG overlays are supported
-          // outlineFillColor:
-          //   If the outline used used for the bg color and a bg color is being used at all
-          var overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
-            // paddingColor:
-            //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
-            //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
-            paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
-            paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
-            outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
-              overlayBgColor, 3),
-            // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
-            // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
-            extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
-            svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
-
-          document.body.appendChild(svgFragment);
-          var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
-            width = state.fixedContentRect.width / state.zoom + 2 * extra,
-            height = state.fixedContentRect.height / state.zoom + 2 * extra;
-          $svg.attr({
-            width: width + 'px',
-            height: height + 'px'
-          }).css({
-            position: 'absolute',
-            pointerEvents: 'none'
-          });
-        }
-        else {
-          // Use CSS outline with 0px wide/tall elements to draw lines of outline
-          // These will show on screen but will thankfully not take mouse events (pointer-events: none doesn't work in IE)
-          appendPathViaCssOutline(state.pathFillPadding, state.highlightPaddingWidth, getTransparentBackgroundColor());
-          appendPathViaCssOutline(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor());
-        }
-
-        $('.' + HIGHLIGHT_OUTLINE_CLASS).css('zIndex', getMaxZIndex(ancestorStyles));
-
-        state.isCreated = true;
-
-        addMouseWheelUpdateListenersIfNecessary();
-
-        $(document).one('mouseleave', onLeaveWindow);
-      }
+      state.isCreated = true;
 
       var $measureDiv = $('<div>').appendTo(document.body).css({
           top: 0,
@@ -859,10 +820,42 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return true;
     }
 
+    function appendOverlayPathViaSVG() {
+
+      // SVG overlays are supported
+      // outlineFillColor:
+      //   If the outline used used for the bg color and a bg color is being used at all
+      var overlayBgColor = state.doUseOverlayForBgColor ? state.bgColor : null,
+        // paddingColor:
+        //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
+        //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
+        paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
+        paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
+        outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
+          overlayBgColor, 3),
+        // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
+        // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
+        extra = getExtraPixels(),
+        extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
+        svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
+
+      document.body.appendChild(svgFragment);
+      var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
+        width = state.fixedContentRect.width / state.zoom + 2 * extra,
+        height = state.fixedContentRect.height / state.zoom + 2 * extra;
+      $svg.attr({
+        width: width + 'px',
+        height: height + 'px'
+      }).css({
+        position: 'absolute',
+        pointerEvents: 'none'
+      });
+    }
+
     // Use CSS outline to draw a rectangle around a <div> with either width: 0 or height: 0.
     // Because the element has no area, it will not capture mouse events, even in IE9/10.
     // Beautiful hack? Or bastard of the slums?
-    function appendPathViaCssOutline(pathPoints, lineWidth, color) {
+    function appendOverlayPathViaCssOutline(pathPoints, lineWidth, color) {
       var index = 0,
         cssOutlineWidth = lineWidth / 2,
         numPoints = pathPoints.length,
@@ -922,7 +915,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return canScroll;
     }
 
-      function onMouseWheel(event) {
+      function onMouseWheel() {
         if (!state.picked) {
           return;
         }
@@ -952,8 +945,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         correctRect(state.cutoutRects.topRight);
         correctRect(state.elementRect);
         correctRect(state.overlayRect);
+      }
 
-        updateHighlightOverlayPosition();
+      function updateHighlightOverlayZIndex() {
+        var ancestorStyles = getAncestorStyles(state.target, state.picked[0]).concat(state.styles);
+        $('.' + HIGHLIGHT_OUTLINE_CLASS)
+          .css('zIndex', getMaxZIndex(ancestorStyles));
       }
 
       function updateHighlightOverlayPosition() {
@@ -985,29 +982,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    function update(event) {
-      // break if highlight is disabled
-
-      if (!isEnabled || !isFollowingMouse) {
-        return;
-      }
-
-      if (SC_DEV) {
-        if (isSticky && !event.shiftKey) {
-          return;
-        }
-      }
-
-      pickAfterShortWait(event.target, event.clientX, event.clientY);
-    }
-
-    function pickAfterShortWait(target, mouseX, mouseY) {
-      clearTimeout(pickTimer);
-      pickTimer = setTimeout(function () {
-        // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
-        pickTimer = 0;
-        checkPickerAfterUpdate(target, mouseX, mouseY);
-      }, state.isCreated ? 0 : MOUSE_STOP_MS);
+    function isScrollEvent(event) {
+      return cursorPos &&
+        event.screenX === cursorPos.screenX && event.screenY === cursorPos.screenY;
     }
 
     // Used for performance shortcut -- if still inside same highlight
@@ -1017,7 +994,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       // If the picked element's rectangle has changed, always return false
       // because we will need to redraw the highlight anyway.
-      if (!common.equals(state.elementRect, traitcache.getScreenRect(state.picked.get(0)))) {
+      if (!common.equals(state.elementRect, traitcache.getScreenRect(state.picked[0]))) {
         return false; // Original element has changed size
       }
       // Return true we're inside in the existing highlight
@@ -1027,10 +1004,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // Fixed position rectangles are in screen coordinates.
     // If we have scrolled since the highlight was originally created,
     // we will need to update the fixed rect(s).
-    function correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY) {
-      var deltaX = scrollPos.x - scrollX,
-        deltaY =  scrollPos.y - scrollY,
-        rect = state.fixedContentRect;
+    function correctFixedRectangleCoordinatesForExistingHighlight(deltaX, deltaY) {
+      var rect = state.fixedContentRect;
 
       rect.top += deltaY;
       rect.bottom += deltaY;
@@ -1038,37 +1013,61 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       rect.right +=deltaX;
     }
 
-    function checkPickerAfterUpdate(target, mouseX, mouseY) {
-      var picked,
-          doExitEarly = false,
-          scrollX = window.pageXOffset,
-          scrollY = window.pageYOffset;
+    function onMouseMove(event) {
+      if (SC_DEV) {
+        if (isSticky && !event.shiftKey) {
+          return;
+        }
+      }
+
+      pickFromMouseAfterDelay(event);
+    }
+
+    // We run the picker if the mouse position hasn't changed for a while, meaning
+    // that the mouse has paused over content
+    function pickFromMouseAfterDelay(event) {
+      clearTimeout(pickFromMouseTimer);
+
+      var wasScrollEvent = isScrollEvent(event);
+
+      // Are we responding to scroll events?
+      if (!willRespondToScroll) {
+        if (wasScrollEvent) {
+          return;
+        }
+        willRespondToScroll = true; // A real mouse move -- now we will respond to scrolls
+      }
+
+      if (!isAppropriateFocus) {
+        return;
+      }
 
       if (state.isCreated) {
-        correctFixedRectangleCoordinatesForExistingHighlight(scrollX, scrollY);
+        // Already had a highlight
+        var lastScrollX = cursorPos.scrollX;
+        var lastScrollY = cursorPos.scrollY;
+        cursorPos = getCursorPos(event);
+        correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
+
+        if (isExistingHighlightRelevant()) {
+          return; // No highlighting || highlight is already good -- nothing to do
+        }
+        // Highlight was inappropriate -- cursor wasn't in it
+        hide();
       }
 
-      // don't show highlight if current document isn't active,
-      // or current active element isn't appropriate for spacebar command
-      if (!isAppropriateFocus || isExistingHighlightRelevant()) {
-        doExitEarly = true;
-      }
-      else if (!state.isCreated && scrollPos &&
-        (scrollY !== scrollPos.y || scrollX !== scrollPos.x ||
-        !cursorPos || mouseX !== cursorPos.x || mouseY !== cursorPos.y)) {
-        // Don't update while still scrolling
-        cursorPos = { x: mouseX, y: mouseY };
-        scrollPos = { x: scrollX, y: scrollY };
-        pickAfterShortWait(target, mouseX, mouseY);
-        return;
-      }
+      pickFromMouseTimer = setTimeout(function () {
+        // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
+        pickFromMouseTimer = 0;
+        pickFromMouse(event);
+      }, wasScrollEvent ? SCROLL_STOP_MS : MOUSE_STOP_MS);
+    }
 
-      cursorPos = { x: mouseX, y: mouseY };
-      scrollPos = { x: scrollX, y: scrollY };
+    function pickFromMouse(event) {
+      var target = event.target,
+          picked;
 
-      if (doExitEarly) {
-        return;
-      }
+      cursorPos = getCursorPos(event);
 
       // save picked element
       picked = picker.find(target);
@@ -1086,24 +1085,28 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked = $(picked);
       state.target = target;
 
-      show();
+      updateView();
     }
 
     // refreshEventListeners turns on or off event listeners that enable the highlighter
-    function refreshEventListeners(doEnable) {
-      if (doEnable === isEnabled) {
-        return;
-      }
-      isEnabled = doEnable;
+    // return true if highlight visibility should be restored
+    function refreshEventListeners() {
+      // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
+      var doTrackMouse = sitecues.isSitecuesOn();
 
-      if (isEnabled) {
+      if (doTrackMouse === isTrackingMouse) {
+        return isTrackingMouse;
+      }
+      isTrackingMouse = doTrackMouse;
+
+      if (isTrackingMouse) {
         // handle mouse move on body
         $(document)
-          .on('mousemove', update)
+          .on('mousemove', onMouseMove)
           .on('focusin focusout', testFocus)
           .ready(testFocus);
         if (platform.browser.isFirefox) {
-          $(document).on('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+          $(document).on('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
         }
         $(window)
           .on('focus', onFocusWindow)
@@ -1112,41 +1115,55 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       } else {
         // remove mousemove listener from body
         $(document)
-          .off('mousemove', update)
+          .off('mousemove', onMouseMove)
           .off('mousewheel', onMouseWheel)  // In case it was added elsewhere
           .off('focusin focusout', testFocus);
         if (platform.browser.isFirefox) {
-          $(document).off('mouseover', update); // Mitigate lack of mousemove events when scroll finishes
+          $(document).off('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
         }
         $(window)
           .off('focus', onFocusWindow)
           .off('blur', onBlurWindow)
           .off('resize', hide);
       }
+
+      return isTrackingMouse;
+    }
+
+    function getCursorPos(event) {
+      return {
+        x: event.clientX,
+        y: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+        scrollX: window.pageXOffset,
+        scrollY: window.pageYOffset,
+        doCheckCursorInHighlight: true
+      };
     }
 
     // Reenable highlight if appropriate
     // Clear the existing highlight if we don't reenable or if highlight can't be shown
     // (e.g. because focus is not in the right place, or the mouse cursor isn't inside the highlight)
     // Mouse event is passed if available.
-    function enableIfAppropriate(mouseEvent) {
-      state.zoom = zoomMod.getCompletedZoom();
-      // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-      var doEnable = audio.isSpeechEnabled() || state.zoom > MIN_ZOOM;
-
-      refreshEventListeners(doEnable);
-
-      if (doEnable) {
+    function resumeAppropriately(mouseEvent) {
+      if (refreshEventListeners()) {
         // Don't do cursor-inside-picked-content check, because it may not be after zoom change
-        if (mouseEvent && !isSticky) {
-          cursorPos = { x: mouseEvent.clientX, y: mouseEvent.clientY };
+        if (mouseEvent) {
+          cursorPos = getCursorPos(mouseEvent);
         }
-        if (!show()) {
+        if (!updateView()) {
           forget(); // Old highlight not appropriate, so hide it
         }
       }
       else {
         forget();
+      }
+    }
+
+    function onSpeechChanged() {
+      if (!refreshEventListeners()) {
+        hide(true);
       }
     }
 
@@ -1164,7 +1181,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           hide();
         }
         else if (!wasAppropriateFocus && isAppropriateFocus) {
-          enableIfAppropriate();
+          resumeAppropriately();
         }
       }
     }
@@ -1188,38 +1205,75 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
-    // disableTemporarily -- hide mouse highlight
+    // pause() -- temporarily hide mouse highlight
     // and remove event listeners so that we don't update the highlight on mouse move
-    // (until they're enabled again, via enableIfAppropriate())
-    function disableTemporarily() {
+    // (until they're enabled again, via resume())
+    function pause() {
       hide(true);
       refreshEventListeners(false);
     }
 
-    function centerHighlight() {
+    function tryExistingHighlight() {
+      var REQUIRED_RATIO_HIGHLIGHT_ONSCREEN = 0.5,
+        prevHighlightRect = state.absoluteRect;
+      if (!prevHighlightRect) {
+        return;
+      }
+      var scrollX = window.pageXOffset,
+        scrollY = window.pageYOffset,
+        screenWidth = window.innerWidth,
+        screenHeight = window.innerHeight,
+        left = Math.max(prevHighlightRect.left, scrollX),
+        right = Math.min(prevHighlightRect.right, scrollX + screenWidth),
+        top = Math.max(prevHighlightRect.top, scrollY),
+        bottom = Math.min(prevHighlightRect.bottom, scrollY + screenHeight),
+        onScreenWidth = right - left,
+        onScreenHeight = bottom - top,
+        onScreenHighlightArea = onScreenWidth * onScreenHeight,
+        totalHighlightArea = prevHighlightRect.width * prevHighlightRect.height,
+        visibleRatio = onScreenHighlightArea / totalHighlightArea;
+
+      if (visibleRatio < REQUIRED_RATIO_HIGHLIGHT_ONSCREEN) {
+        return;  // Not enough of highlight is onscreen
+      }
+
+      return updateView();
+    }
+
+    function autoPick() {
+      // First try for existing hidden highlight
+      // If it would still be onscreen, use it
+      if (tryExistingHighlight()) {
+        return;
+      }
+
+      // Retrieve some leaf nodes
+      var nodeIterator = document.createNodeIterator(document.body,
+        NodeFilter.SHOW_TEXT, { acceptNode: isAcceptableTextLeaf });
+      var knownGoodState = state;
+      var knownGoodScore = -9;
+      var skipElement;
+      var bodyWidth = zoomMod.getBodyWidth();
+      var bodyHeight = document.body.scrollHeight;
+
       traitcache.resetCache();
       var viewSize = traitcache.getCachedViewSize();
 
       // Get first visible text and start from there
       function isAcceptableTextLeaf(node) {
         // Logic to determine whether to accept, reject or skip node
-        if (common.isEmpty(node.data)) {
+        if (common.isEmpty(node)) {
           return NodeFilter.FILTER_REJECT; // Only whitespace or punctuation
         }
-        var textRect = mhpos.getRangeRect(node);
-        if (textRect.width === 0 || textRect.height === 0 ||
-          textRect.top > viewSize.height || textRect.left > viewSize.width ||
-          textRect.right < 0 || textRect.bottom < 0) {
+        var rect = traitcache.getScreenRect(node.parentNode);
+        if (rect.width === 0 || rect.height === 0 ||
+          rect.top > viewSize.height || rect.left > viewSize.width ||
+          rect.right < 0 || rect.bottom < 0) {
           return NodeFilter.FILTER_REJECT; // Hidden
         }
 
         return NodeFilter.FILTER_ACCEPT;
       }
-
-      // Retrieve some leaf nodes
-      var nodeIterator = document.createNodeIterator(zoomMod.getMainNode(),
-        NodeFilter.SHOW_TEXT,
-        { acceptNode: isAcceptableTextLeaf });
 
       while (true) {
         var nextLeaf = nodeIterator.nextNode(),
@@ -1227,11 +1281,30 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if (!nextLeaf) {
           break;
         }
+        if (skipElement && $.contains(skipElement, nextLeaf)) {
+          continue; // We've already check this content
+        }
         containingElement = nextLeaf.parentNode;
-        if (containingElement && sitecues.highlight(containingElement, true)) {
-          break;
+        if (containingElement &&
+          sitecues.highlight(containingElement, true, true, true)) {
+          skipElement = state.picked[0]; // Don't try anything else in this container
+          var scoreInfo = picker.getAutoPickScore(state.picked, state.fixedContentRect, state.absoluteRect, bodyWidth, bodyHeight),
+            score = scoreInfo.score;
+          if (score > knownGoodScore) {
+            knownGoodState = $.extend({}, state);
+            knownGoodScore = score;
+          }
+          if (scoreInfo.skip) {
+            skipElement = scoreInfo.skip;
+          }
+          else if (state.fixedContentRect.bottom > window.innerHeight) {
+            break;
+          }
+          // else try for something better
         }
       }
+
+      sitecues.highlight(knownGoodState.target, true);
     }
 
     // Hide mouse highlight temporarily, keep picked data so we can reshow
@@ -1249,9 +1322,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
 
-      if (pickTimer) {
-        clearTimeout(pickTimer);
-        pickTimer = 0;
+      if (pickFromMouseTimer) {
+        clearTimeout(pickFromMouseTimer);
+        pickFromMouseTimer = 0;
       }
 
       state.isVisible = false;
@@ -1271,8 +1344,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state = $.extend({}, INIT_STATE);
     }
 
-    function setFollowMouse(isOn) {
-      isFollowingMouse = isOn;
+    function setScrollTracking(isOn) {
+      canTrackScroll = isOn;
+      willRespondToScroll = false;
     }
 
     // Return all of the highlight information provided in the |state| variable
@@ -1280,23 +1354,30 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return state;
     };
 
+    sitecues.isSitecuesOn = function() {
+      return audio.isSpeechEnabled() || zoomMod.getCompletedZoom() > 1;
+    };
+
     forget();
 
     // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
     // Also to this until zooming finished so that outline doesn't get out of place during zoom
-    sitecues.on('hlb/init zoom/begin mh/clear', disableTemporarily);
-
-    // Turn mouse-following on or off
-    sitecues.on('mh/follow-mouse', setFollowMouse);
+    sitecues.on('zoom/begin mh/pause', pause);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('hlb/closed zoom', enableIfAppropriate);
+    sitecues.on('hlb/closed zoom', resumeAppropriately);
+
+    // Turn mouse-tracking on or off
+    sitecues.on('mh/track-scroll', setScrollTracking);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('mh/center', centerHighlight);
+    sitecues.on('mh/autopick', autoPick);
 
-    // darken highlight appearance when speech is enabled
-    conf.get('ttsOn', enableIfAppropriate);
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('mh/hide', hide);
+
+    // Darken highlight appearance when speech is enabled
+    conf.get('ttsOn', onSpeechChanged);
 
     testFocus(); // Set initial focus state
 
@@ -1309,36 +1390,38 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         isSticky = !isSticky;
         return isSticky;
       };
+
+      sitecues.getHighlight = mh.getHighlight;
     }
 
     /**
-     * Allow debugging script to directly highlight something
+     * Show highlight on the specified seed element or hide if if nothing specified
      * @param seed        -- desired element to highlight, or a CSS selector for one
      * @param doUsePicker -- if truthy will find the best item to highlight ... seed or an ancestor of seed
      *                       if falsey will just highlight seed exactly
+     * @param doKeepHidden -- if truthy will compute highlight but now display it
      */
-    sitecues.highlight = function(seed, doUsePicker) {
-
-      var elem;
+    sitecues.highlight = function(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
 
       hide();  // calling with no arguments will remove the highlight
       if (seed) {
-        elem = $(seed)[0];
+        var elem = $(seed)[0];
         if (elem) {
-          state.picked = doUsePicker ? picker.find(elem) : $(elem);
+          state.picked = doUsePicker ? picker.find(elem, doSuppressVoting) : $(elem);
           state.target = elem;
           if (state.picked) {
-            var rect = mhpos.getRect(elem);
-            cursorPos = null;
-            scrollPos = { x: window.pageXOffset, y: window.pageYOffset };
-            show();
+            cursorPos.doCheckCursorInHighlight = false;
+            cursorPos.scrollX = window.pageXOffset;
+            cursorPos.scrollY = window.pageYOffset;
+            if (updateView(doKeepHidden)) {
+              return state.picked;
+            }
           }
         }
       }
-      return state.picked;
     };
 
-    // done
+      // done
     callback();
 
     if (SC_UNIT) {
@@ -1356,14 +1439,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
       exports.getHighlightBorderWidth = getHighlightBorderWidth;
       exports.show = show;
-      exports.update = update;
-      exports.createNewOverlayPosition = createNewOverlayPosition;
-      exports.pickAfterShortWait = pickAfterShortWait;
-      exports.enableIfAppropriate = enableIfAppropriate;
-      exports.disableTemporarily = disableTemporarily;
+      exports.onMouseMove = onMouseMove;
+      exports.computeOverlay = computeOverlay;
+      exports.pickFromMouseAfterDelay = pickFromMouseAfterDelay;
+      exports.resumeAppropriately = resumeAppropriately;
+      exports.pause = pause;
       exports.hide = hide;
       exports.getMaxZIndex = getMaxZIndex;
-      exports.pickTimer = pickTimer;
+      exports.pickTimer = pickFromMouseTimer;
     }
   });
 

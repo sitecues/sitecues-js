@@ -61,10 +61,9 @@ sitecues.def('metrics', function (metrics, callback) {
           metrics.update(data);
       });
 
-      sitecues.on('speech/enabled speech/disabled', function() {
-          // + is a simple way to convert boolean to a number: true becomes 1 and false is 0. I'll add a comment to it.
-          var ttsState = +audio.isSpeechEnabled();
-          var data = {'tts_state': ttsState};
+      sitecues.on('tts/did-change', function(isOn) {
+          // + is a simple way to convert boolean to a number: true becomes 1 and false is 0.
+          var data = {'tts_state': +isOn };
           metrics.update(data);
       });
 

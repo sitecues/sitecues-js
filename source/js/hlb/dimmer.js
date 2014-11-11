@@ -21,18 +21,6 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
         documentElement = document.documentElement;
 
     //////////////////////////////
-    // PRIVATE FUNCTIONS
-    /////////////////////////////
-
-    /**
-     * [onDimmerClick toggles the HLB.  This function is bound
-     * as a callback for clicking on the background dimmer]
-     */
-    function onDimmerClick() {
-      sitecues.emit('hlb/toggle');
-    }
-
-    //////////////////////////////
     // PUBLIC FUNCTIONS
     /////////////////////////////
 
@@ -47,21 +35,21 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
         return; // Background already dimmed
       }
 
-      $('<div>')
+      var rect = {
+          left: 0,
+          top: 0,
+          width: documentElement.scrollWidth,
+          height: documentElement.scrollHeight
+        },
+        $dimmerElement = common.drawRect(rect, '#000');
+
+      $dimmerElement
         .attr('id', DIMMER_ID)
         .css({
-          'background': '#000000',
-          'opacity'   : DIMMER_MIN_OPACITY,
-          'position'  : 'absolute',
-          'left'      : 0,
-          'top'       : 0,
-          'width'     : documentElement.scrollWidth  + 'px',
-          'height'    : documentElement.scrollHeight + 'px',
-          'z-index'   : DIMMER_Z_INDEX
+          zIndex: DIMMER_Z_INDEX,
+          opacity: DIMMER_MIN_OPACITY
         })
-        .on('click', onDimmerClick)
-        .appendTo($hlbWrappingElement)
-        .animate({ opacity : DIMMER_MAX_OPACITY}, inflationSpeed);
+        .animate({ opacity : DIMMER_MAX_OPACITY }, inflationSpeed);
     };
 
     /**
@@ -86,7 +74,6 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
     }
 
     if (SC_UNIT) {
-      exports.onDimmerClick = onDimmerClick;
       exports.onDimmerClosed = onDimmerClosed;
       exports.undimBackgroundContent = dimmer.undimBackgroundContent;
       exports.dimBackgroundContent = dimmer.dimBackgroundContent;

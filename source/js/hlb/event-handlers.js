@@ -23,7 +23,9 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         //  Wheel event callback, must be scoped at the module level because
         //  we create this event callback every time the HLB opens because
         //  the callback requires a reference to the HLB element...s
-        wheelEventCallback;
+        wheelEventCallback,
+
+      isCapturing;
 
     /**
      * [releaseWheelEvents disables the capturing of wheel events.  This is called once the HLB is closed.]
@@ -32,6 +34,8 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
       window.removeEventListener(wheelEventName, wheelEventCallback);
 
+      isCapturing = false;
+
     };
 
     /**
@@ -39,6 +43,12 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
      * @param  {[jQuery Element]} $hlbElement [The HLB element]
      */
     eventHandlers.captureWheelEvents = function ($hlbElement) {
+
+      if (isCapturing) {
+        return; // Already capturing
+      }
+
+      isCapturing = true;
 
       /**
        * [wheelHandler listens to all scroll events in the window and prevents scroll outside of HLB]

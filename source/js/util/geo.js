@@ -6,15 +6,20 @@ sitecues.def('util/geo', function(geo, callback) {
 
 	sitecues.use('jquery', 'conf', 'platform', function($, conf, platform){
 
-		geo.isPointInRect = function(x, y, rect) {
+    // Is the point inside the rectangle or within proximity pixels
+    // @param proximity (optional) Number of pixels of extra proximity allowed
+		geo.isPointInRect = function(x, y, rect, proximity) {
+      proximity = proximity || 0;
 			var right = rect.left + rect.width,
 			  bottom = rect.top + rect.height;
-			return x >= rect.left && x < right && y >= rect.top && y <= bottom;
+			return x >= rect.left - proximity && x < right + proximity && y >= rect.top - proximity && y <= bottom + proximity;
 		};
 
-		geo.isPointInAnyRect = function(x, y, rects) {
+    // Is the point inside any of the supplied rectangles or within proximity pixels
+    // @param proximity (optional) Number of pixels of extra proximity allowed
+		geo.isPointInAnyRect = function(x, y, rects, proximity) {
 			for (var count = 0; count < rects.length; count++) {
-				if (rects[count] && geo.isPointInRect(x, y, rects[count])) {
+				if (rects[count] && geo.isPointInRect(x, y, rects[count], proximity)) {
 					return true;
 				}
 			}

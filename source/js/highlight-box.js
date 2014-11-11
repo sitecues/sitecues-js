@@ -60,6 +60,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
           removeTemporaryOriginalElement = false, // In some scenarios, we must create our own original element and must remove it from the DOM
           preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
+          isListeningToMouseEvents       = false, // Are event listeners currently attached
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
           isSticky                       = false, // DEBUG: HLB deflation toggler
           inheritedZoom;                          // Amount of zoom inherited from page's scale transform
@@ -113,7 +114,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
         // It MUST be called before getValidOriginalElement().
-        sitecues.emit('mh/clear');
+        sitecues.emit('mh/pause');
 
         // Set module scoped variable so the rest of the program has reference.
         $originalElement = getValidOriginalElement($pickedElement);
@@ -398,6 +399,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * [turnOnHLBEventListeners turns on HLB event handlers for deflation and scroll]
        */
       function turnOnHLBEventListeners() {
+        if (isListeningToMouseEvents) {
+          return; // Don't add twice in case of hlb retargeting
+        }
+
+        isListeningToMouseEvents = true;
 
         // Register mouse mousemove handler for deflating the HLB
         $(document).on('mousemove', onTargetChange);
@@ -406,6 +412,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // This event handler is unique in that it unregisters itself once executed.
         $hlbElement.on('mousemove', onHLBHover);
 
+        // Register mouse mousemove handler for deflating the HLB
+        $('body').on('click', onClick);
       }
 
       /**
@@ -420,6 +428,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);
+
+        // Register mouse mousemove handler for deflating the HLB
+        $('body').off('click', onClick);
+
+        isListeningToMouseEvents = false;
       }
 
 
@@ -502,6 +515,18 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Any mouse detection within the HLB turns on the ability to exit HLB by moving mouse
         preventDeflationFromMouseout = false;
 
+      }
+
+      function isElementOutsideHlb(element) {
+        return !$hlbElement.is(element) || !$.contains($hlbElement[0], element);
+      }
+
+      function onClick(e) {
+        if ($hlbElement && isElementOutsideHlb(e.target)) {
+          // If click is outside of HLB, close it
+          // (Need to doublecheck this because HLB can sometimes be inside of <body>)
+          sitecues.emit('hlb/toggle');
+        }
       }
 
       /**

@@ -106,6 +106,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       },
       isDebuggingOn,
       isVoteDebuggingOn,
+      isAutoPickDebuggingOn,
       isVotingOn = true,  // Temporarily off by default so we can see it's effect
       lastPicked;
 
@@ -118,7 +119,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
      *
      * @param hover The element the mouse is hovering over
      */
-    picker.find = function find(startElement) {
+    picker.find = function find(startElement, doSuppressVoting) {
       var candidates, picked;
 
       function processResult(result) {
@@ -158,7 +159,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       }
 
       // 6. Get result from heuristics taking into account votes from leaves of content
-      picked = getHeuristicResult(candidates);
+      picked = getHeuristicResult(candidates, isVotingOn && !doSuppressVoting);
 
       // 7. Save results for next time
       lastPicked = picked;
@@ -260,7 +261,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // --------- Heuristic results ---------
 
     // Allow leaf voting to modify results, thus improving overall consistency
-    function getHeuristicResult(candidates) {
+    function getHeuristicResult(candidates, doAllowVoting) {
       function processResult(pickedIndex) {
         // Log the results if necessary for debugging
         if (SC_DEV && isDebuggingOn) {
@@ -283,7 +284,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       }
 
       // 2. Get the second best candidate
-      while (isVotingOn) {
+      while (doAllowVoting) {
         var minSecondBestScore = scoreObjs[bestIndex].score - SECOND_BEST_IS_VIABLE_THRESHOLD;
         var secondBestIndex = getCandidateWithHighestScore(scoreObjs, minSecondBestScore, bestIndex);
 
@@ -379,7 +380,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
 
       function isAcceptableTextLeaf(node) {
         // Logic to determine whether to accept, reject or skip node
-        if (common.isEmpty(node.data)) {
+        if (common.isEmpty(node)) {
           return NodeFilter.FILTER_REJECT; // Only whitespace or punctuation
         }
         var element = node.parentNode;
@@ -625,6 +626,92 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       return false;
     }
 
+    // This gives us a score for how good what we want to auto pick is.
+    // Auto picking is where we highlight something useful onscreen after the user presses space with no highlight.
+    // The candidate passed in is guaranteed to be at least partly onscreen
+    picker.getAutoPickScore = function(picked, fixedRect, absoluteRect, bodyWidth, bodyHeight) {
+      var MIN_TOP_COORDINATE_PREFERRED = 100;
+      var MIN_SIGNIFICANT_TEXT_LENGTH = 25;
+      var topRole = picked.parents('[role]').last().attr('role');
+      var winHeight = window.innerHeight;
+
+      // 1. Get basic scoring info
+      var scoreInfo = {
+        isAtTopOfScreen: fixedRect.top < MIN_TOP_COORDINATE_PREFERRED,
+        isAtTopOfDoc: absoluteRect.top < MIN_TOP_COORDINATE_PREFERRED,
+        isOnTopHalfOfScreen: fixedRect >= MIN_TOP_COORDINATE_PREFERRED &&
+          fixedRect.top < winHeight * 0.6,
+        isPartlyBelowBottom: fixedRect.bottom > winHeight,
+        isMostlyBelowBottom: fixedRect.top + fixedRect.height / 2 > winHeight,
+        hasSignificantText: picked.text().length > MIN_SIGNIFICANT_TEXT_LENGTH,
+        headingScore: (function() {
+          // Prefer something with a heading (h1 excellent, h2 very good, h3 okay)
+          var headings = picked.find('h1,h2,:header').addBack();
+          return (headings.filter('h1').length > 0) * 3 ||
+            (headings.filter('h2').length > 0) * 2 ||
+            headings.length > 0;
+        }()),
+        isInMainContent: topRole === 'main',
+        hasBadAriaRole: !!topRole && topRole !== 'main',
+        isInTallAndNarrowContainer: 0,
+        isInTallAndWideContainer: 0,
+      };
+
+      var isWide, isTall;
+
+      // 2. Use a size heuristic
+      var portionOfBodyWidth,
+        portionOfBodyHeight,
+        ancestor = picked[0],
+        ancestorRect,
+        isInWideContainer = 0,
+        isInTallContainer = 0;
+      while (ancestor !== document.body) {
+        ancestorRect = traitcache.getScreenRect(ancestor);
+        portionOfBodyWidth = ancestorRect.width / bodyWidth;
+        portionOfBodyHeight = ancestorRect.height / bodyHeight;
+
+        if (portionOfBodyWidth < 0.3 && ancestorRect.height > ancestorRect.width * 2) {
+          // We're in a tall container -- probably a sidebar
+          isInWideContainer = 0;
+          scoreInfo.isInTallAndNarrowContainer = 1;
+          scoreInfo.skip = ancestor; // Skip past the rest of this
+          break;
+        }
+
+        if (portionOfBodyWidth > 0.5 && portionOfBodyWidth < 0.95) {
+          isWide = 1; // Majority of <body>'s width (but not the entire thing)
+        }
+        if (portionOfBodyHeight > 0.75 && portionOfBodyHeight < 0.95) {
+          isTall = 1;
+        }
+
+        ancestor = ancestor.parentNode;
+      }
+
+      scoreInfo.isInTallAndWideContainer = isInWideContainer && isInTallContainer;
+
+      scoreInfo.score =
+        !scoreInfo.isAtTopOfScreen +
+        !scoreInfo.isAtTopOfDoc +
+        scoreInfo.isOnTopHalfOfScreen +
+        scoreInfo.isPartlyBelowBottom * -2 +
+        scoreInfo.isMostlyBelowBottom * -2 +
+        scoreInfo.headingScore +
+        scoreInfo.hasSignificantText * 2 +
+        scoreInfo.isInMainContent * 2 +
+        scoreInfo.hasBadAriaRole * -3 +
+        scoreInfo.isInTallAndNarrowContainer * -4 +
+        scoreInfo.isInTallAndWideContainer * 2;
+
+      if (SC_DEV && isAutoPickDebuggingOn) {
+        console.log('%d: %o', scoreInfo.score, picked[0]);
+        console.log('   %O %s', scoreInfo, picked.text().substr(0,30).trim());
+      }
+
+      return scoreInfo;
+    };
+
     // -------------- Customizations ----------------------
     // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
 
@@ -654,6 +741,9 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       };
       sitecues.togglePickerVoting = function() {
         console.log('Picker voting: ' + (isVotingOn = !isVotingOn));
+      };
+      sitecues.toggleAutoPickDebugging= function() {
+        console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
       };
     }
 

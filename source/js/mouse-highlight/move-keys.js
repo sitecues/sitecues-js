@@ -1,44 +1,46 @@
-// TODO
-// Unit tests
-// Better original pick start
-// Bug -- hold down arrow key, gets jerky -- not sure what we should do here
-// Tab keys, enter
-// IE HLB dimmer must be outline or will catch pointer events
-// HLB transition
-// HLB work with arrow keys to scroll inside HLB
-// Mouse out of HLB after reached with keys not working
-
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'mouse-highlight/highlight-position',
-    'mouse-highlight/picker', 'zoom', 'util/geo', function($, mh, hlb, platform, dimmer, mhpos, picker, zoomMod, geo) {
+  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
+    'mouse-highlight/picker', 'zoom', 'util/geo', function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo) {
 
-    var STEP_SIZE = 24,
+    var STEP_SIZE_VERT = 18,
+      STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
       SPREAD_STEP_SIZE = 32,
       // How quickly do we fan out in our point testing?
       // If this is too large, we will go diagonally too often. Too small and we miss stuff that's not quite in line
       SPREAD_SLOPE = 0.1,
       MAX_SPREAD = 200,
-      PIXELS_TO_PAN_PER_MS = 0.2,
-      PIXELS_TO_PAN_PER_MS_HLB = 2,
+      PIXELS_TO_PAN_PER_MS_HIGHLIGHT = 0.3,
+      PIXELS_TO_PAN_PER_MS_HLB_SEARCH = 2,
+      PIXELS_TO_SCROLL_PER_MS_HLB = 0.10,
+      // For highlight moves, it's hard to track a quickly moving highlight with your eyes
+      // This is the delay before the first repeat
+      HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS = 400,
+      // For highlight moves, prevent one keystroke from acting like two
+      // This is the delay before additional repeats
+      HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS = 250,
+      // Helps us know whether it's the first repeat and therefore how much to delay
+      isKeyRepeating,
+      repeatDelayTimer,
       MAX_PIXELS_TO_PAN = 999,
       VISIBLE_SPACE_AROUND_HIGHLIGHT = 50,
       HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
       SCROLL_EXTRA_PIXELS = 100,
-      REENABLE_MOUSE_FOLLOW_MS = 2000,
-      MIN_PAN_TRY_MS = 100,
-      reenableMouseFollowTimer,
       MH_EXTRA_WIDTH = 10, // Amount to account for padding/border of mouse highlight
-      MIN_SIGNIFICANT_HLB_SCROLL = 3,
       isShowingDebugPoints = false,
       hlbElement,
+      isKeyStillDown,
+      lastMoveCommand,
+      $lastPicked,
       // Queue of key navigation commands
       navQueue = [],
+      // Approximate amount of time for one animation frame
+      ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
       // Method for animation
       requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
         function (fn) {
-          return setTimeout(fn, 16)
-        };  // 16ms is about 60fps
+          return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
+        };
 
     // Move the highlight in the direction requested
     // We start with a point in the middle of the highlight
@@ -46,23 +48,38 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     // are outside of the current highlight and we can pick something from that point.
     // Whenever the point gets close to the edge, we pan/scroll to bring up new content until we cant anymore.
     function onNavCommand(event, keyName) {
+      if (isKeyStillDown) {
+        return;
+      }
+
       if (SC_DEV) {
         $('.sc-debug-dots').remove();  // Remove last debugging dots
       }
 
       navQueue.push({keyName: keyName, isShifted: event.shiftKey });
 
+      clearKeyRepeat();
+      isKeyStillDown = true; // Assume it's down until it's let up
+
       if (navQueue.length === 1) {
+        // Key was just pressed
         dequeNextCommand();
       }
       // else will wait until current move is finished
     }
 
-    // Execute the next navigagtion command off the front of the queue
+    function clearKeyRepeat() {
+      isKeyRepeating = false;
+      isKeyStillDown = false;
+      clearTimeout(repeatDelayTimer);
+    }
+
+    // Execute the next navigation command off the front of the queue
     function dequeNextCommand() {
-      var nextMove = navQueue.shift();
-      if (nextMove) {
-        var keyName = nextMove.keyName;
+      var nextCommand = navQueue.shift();
+      if (nextCommand) {
+        lastMoveCommand = null;
+        var keyName = nextCommand.keyName;
 
         // Non-movement commands
         if (keyName === 'space') {
@@ -72,18 +89,16 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           onEscape(keyName);
         }
         else {
-          onMovementCommand(nextMove);
+          lastMoveCommand = nextCommand;
+          onMovementCommand(nextCommand);
         }
       }
       else {
-        // TODO why do we need this hack? It seems to be necessary to avoid having the highlight jump to an invisible mouse
-        clearTimeout(reenableMouseFollowTimer);
-        reenableMouseFollowTimer = setTimeout(function() { setIsMouseEnabled(true); }, REENABLE_MOUSE_FOLLOW_MS);
+        setIsScrollTrackingEnabled(true);
       }
     }
 
     function onMovementCommand(nextMove) {
-      // TODO should we use the real line-height as getLineHeight() in highlight-position.js does?
       // Movement commands
       hlbElement = hlb.getElement();
 
@@ -94,10 +109,55 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       performMovement(nextMove);
     }
 
-    function getHLBLineHeight() {
-      var range = document.createRange();
-      range.selectNodeContents(hlbElement);
-      return range.getClientRects()[0].height / zoomMod.getCompletedZoom(); // TODO * HLBZoom (1.5)?
+    // TODO Use bottoms of lines when scrolling down, so that the bottom of a line
+    // matches with the bottom of the HLB
+    function getHLBLineTops(currTop) {
+      // Measure height of one line for first visible text node
+      var nodeIterator =
+            document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT),
+          range = document.createRange(),
+          lineTops = [],
+          hlbZoom = common.getTransform($(hlbElement));
+
+      while (true) {
+        var textNode = nodeIterator.nextNode(),
+          rawClientRects,
+          index = 0;
+
+        if (!textNode) {
+          break;
+        }
+        range.selectNode(textNode);
+        rawClientRects = range.getClientRects();
+        for (; index < rawClientRects.length; index ++) {
+          // Add each rectangle with a top greater than the last
+          var numLines = lineTops.length,
+            lineTop = Math.floor(rawClientRects[index].top / hlbZoom) + currTop;
+          if (numLines === 0 || lineTop > lineTops[numLines - 1]) {
+            lineTops[numLines] = lineTop;
+          }
+        }
+      }
+
+      return lineTops;
+    }
+
+    function getLineInRange(origTop, direction, seekStart, seekEnd) {
+      var minSeek = Math.min(seekStart, seekEnd),
+        maxSeek = Math.max(seekStart, seekEnd),
+        lineTops = getHLBLineTops(origTop),
+        currTop,
+        numLines = lineTops.length,
+        index = direction < 0 ? numLines - 1 : 0;
+
+      for (; index >= 0 && index < numLines; index += direction) {
+        currTop = lineTops[index];
+        if (currTop >= minSeek && currTop < maxSeek) {
+          return currTop;
+        }
+      }
+      // No line top found -- go as far as allowed
+      return seekEnd;
     }
 
     // Scroll HLB and return truthy value if a significant scroll occured
@@ -111,41 +171,83 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           'end': { dir: 1, type: 'doc' }  /* end */
         },
         keyEntry = SCROLL_KEYS[nextMove.keyName],
-        currTop = hlbElement.scrollTop,  // Where it's scrolled to now
-        newTop,  // Where we want to scroll to
-        lineHeight;
+        origTop = hlbElement.scrollTop,  // Where it's scrolled to now
+        lastTop = origTop,
+        targetTop,  // Where we want to scroll to
+        hlbHeight = hlbElement.offsetHeight,
+        maxTop = Math.max(0, hlbElement.scrollHeight - hlbHeight),
+        startScrollTime,
+        MIN_SCOLL = 5,
+        MAX_SCROLL = 50,
+        direction;
 
-        if (!keyEntry) {
-          return;  // Not an HLB scroll command
+      if (!keyEntry) {
+        return;  // Not an HLB scroll command
+      }
+
+      direction = keyEntry.dir;
+
+      switch (keyEntry.type) {
+        case 'page':
+          // Pageup/pagedown default behavior always affect window/document scroll
+          // (simultaneously with element's local scroll).
+          // So prevent default and define new scroll logic.
+
+          targetTop = getLineInRange(origTop, direction, origTop + hlbHeight * 0.8 * direction, direction < 0 ? 0 : maxTop);
+          break;
+
+        case 'line':
+          targetTop = getLineInRange(origTop, direction, origTop + MIN_SCOLL * direction, origTop + MAX_SCROLL * direction);
+          break;
+        case 'doc':
+          hlbElement.scrollTop = direction < 0 ? 0 : maxTop;
+          dequeNextCommand();
+          return true;  // Don't scroll smoothly
+        // default: return; // can't happen
+      }
+
+      function smoothScroll() {
+        var msElapsed = Date.now() - startScrollTime + ONE_ANIMATION_FRAME_MS,
+          // How many pixels to scroll from the original start
+          pixelsToScroll = msElapsed * PIXELS_TO_SCROLL_PER_MS_HLB,
+          // Value to scroll to for this animation frame
+          midAnimationTop = Math.floor(lastTop + direction * pixelsToScroll),
+          isTargetReached;
+
+        if (lastTop !== midAnimationTop) {
+          hlbElement.scrollTop = midAnimationTop;
+          if (direction < 0 ? (midAnimationTop <= targetTop) : (midAnimationTop >= targetTop)) {
+            isTargetReached = true;
+          }
         }
 
-        switch (keyEntry.type) {
-          case 'page':
-            // Pageup/pagedown default behavior always affect window/document scroll
-            // (simultaneously with element's local scroll).
-            // So prevent default and define new scroll logic.
-            newTop = currTop + hlbElement.offsetHeight * keyEntry.dir;
-            break;
-          case 'line':
-            lineHeight = getHLBLineHeight();
-            newTop = currTop + keyEntry.dir * lineHeight;
-            break;
-          case 'doc':
-            newTop = keyEntry.dir < 0 ? 0 : hlbElement.scrollHeight;
-            break;
-          // default: return; // can't happen
+        // Didn't move or target reached
+        if (isTargetReached) {
+          // Finished
+          var hasMoreToScroll = direction > 0 ? midAnimationTop < maxTop - MIN_SCOLL : midAnimationTop > MIN_SCOLL;
+          if (isKeyStillDown) {
+            performHLBScroll(nextMove);  // Repeat for scrolling, but not for moving HLB
+          }
         }
+        else {
+          requestFrame(smoothScroll);
+        }
+      }
 
-        hlbElement.scrollTop = Math.max(0, newTop);
-        return (hlbElement.scrollTop - currTop) > MIN_SIGNIFICANT_HLB_SCROLL;
+      // Sanity constraints on scrolling request
+      targetTop = Math.round(constrained(targetTop, 0, maxTop));
+
+      if (Math.abs(targetTop - origTop) > MIN_SCOLL) {
+        startScrollTime = Date.now();
+        smoothScroll();
+        return true;      // Returns true if needed scrolling, so that HLB is not moved
+      }
     }
 
     function performMovement(nextMove) {
       if (hlbElement) {
         prepareHLBMovement();
       }
-
-      setIsMouseEnabled(false);
 
       var type = nextMove.keyName,
         isShifted = nextMove.isShifted;
@@ -167,67 +269,55 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           moveByTagName(HEADING_TAGS, isShifted);
           break;
         default:
-          SC_DEV && console.log('illegal command');
+          SC_DEV && console.log('Illegal command');
       }
     }
 
     // Will move HLB instead of highlight
     function prepareHLBMovement() {
       // Hide HLB so it doesn't interfere with getElementFromPoint
-      $(hlb.getElement()).css('display', 'none');
+      hlbElement.style.display = 'none'
     }
 
     function fail() {
       SC_DEV && console.log('Fail');
       navQueue = [];  // Don't keep trying
-      setIsMouseEnabled(true);
+      setIsScrollTrackingEnabled(true);
 
-      // TODO check this case and make sure it works -- the HLB is probably is display: none right now
       if (hlbElement) {
         SC_DEV && console.log('Close HLB');
-        sitecues.emit('hlb/toggle'); // Nothing found .. close HLB
+        sitecues.emit('hlb/toggle'); // Nothing found .. close HLB and enable highlight on last known item
       }
     }
 
-    function succeed() {
+    function succeed(doAllowRepeat) {
       SC_DEV && console.log('Succeed');
       if (hlb.getElement()) {
         // Open new HLB
         SC_DEV && console.log('Retarget HLB');
         sitecues.emit('hlb/retarget');
       }
+      else if (doAllowRepeat && isKeyStillDown && lastMoveCommand) {
+        // For movement, we need a delay between commands, otherwise it can happen too fast
+        var isFirstRepeat = !isKeyRepeating,
+          repeatDelay = isFirstRepeat ? HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS : HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS;
+        // Repeat last command if key is still pressed down
+        isKeyRepeating = true;
+        repeatDelayTimer = setTimeout(function() {
+          onMovementCommand(lastMoveCommand);
+        }, repeatDelay);
+        return;
+      }
+
       dequeNextCommand();
     }
 
-    function setIsMouseEnabled(isMouseEnabled) {
-      clearTimeout(reenableMouseFollowTimer);
-
-      // Pointer-events are not supported in IE 9/10
-      // but at least we can make sure the mouse-highlight doesn't follow the invisible mouse during panning
-      sitecues.emit('mh/follow-mouse', isMouseEnabled);
-
-      // Reenable dimmer element
-      setIsDimmerCatchingMouseEvents(isMouseEnabled);
-    }
-
-    function setIsDimmerCatchingMouseEvents(isDimmerCatchingMouseEvents) {
-      var isLegacyIE = platform.browser.isIE && platform.browser.version < 11;
-      var property, value;
-      if (isLegacyIE) {
-        // TODO make dimmer an outline so this works in IE9/10, or don't allow HLB movement in IE9/10
-        property = 'display';
-        value = isDimmerCatchingMouseEvents ? 'block' : 'none';
-      }
-      else {
-        property = 'pointerEvents';
-        value = isDimmerCatchingMouseEvents ? '' : 'none';
-      }
-
-      $(dimmer.getDimmerElement()).css(property, value);
+    // Don't allow the mouse highlight to follow scroll events from keyboard panning
+    function setIsScrollTrackingEnabled(doTrackScroll) {
+      sitecues.emit('mh/track-scroll', doTrackScroll);
     }
 
     function moveInDirection(horizDir, vertDir, isShifted) {
-      isShowingDebugPoints = SC_DEV && isShifted; // Show debugging dots if shift is pressed
 
       var
         highlight = mh.getHighlight(),
@@ -253,7 +343,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         targetPanDown,
 
         // *** Highlight state ***
-        $lastPicked = highlight.picked,
         lastPickedRect = getHighlightRect(highlight, lastPanX, lastPanY),
         doPickNewHighlight,
 
@@ -273,8 +362,10 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // How many rows of points from the original aka how far from the original are we?
         distanceFromOriginal = 0,
         // How fast to pan -- if HLB we want to pan immediately (better UX)
-        pixelsToPanPerMs = hlbElement ? PIXELS_TO_PAN_PER_MS_HLB : PIXELS_TO_PAN_PER_MS;
+        pixelsToPanPerMs = hlbElement ? PIXELS_TO_PAN_PER_MS_HLB_SEARCH : PIXELS_TO_PAN_PER_MS_HIGHLIGHT;
 
+      isShowingDebugPoints = SC_DEV && isShifted; // Show debugging dots if shift is pressed
+      $lastPicked = highlight.picked;
 
       function testPointIfOnscreen(x, y) {
         if (x < 0 || y < 0 || x > winRight || y > winBottom) {
@@ -289,8 +380,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         var
           // Can we pick something from the center dot?
           $picked = testPoint(x, y, $lastPicked, 'red'),
+          stepSize = isHorizMovement ? STEP_SIZE_HORIZ : STEP_SIZE_VERT,
           // How far from center dot will we check?
-          spreadEnd = constrained(distanceFromOriginal * STEP_SIZE * SPREAD_SLOPE, minSpread, MAX_SPREAD),
+          spreadEnd = constrained(distanceFromOriginal * stepSize * SPREAD_SLOPE, minSpread, MAX_SPREAD),
           // These are to enable the cross-hatch pattern that allows fewer points to be more effective
           toggleExtraX = 0,
           toggleExtraY = 0,
@@ -313,8 +405,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
         if ($picked &&
           isValidDirectionForNewHighlight(lastPickedRect, $picked, lastPanX, lastPanY, horizDir, vertDir) &&
-          sitecues.highlight($picked[0], false)) {
-          clearHighlightIfInDimmer();
+          tryHighlight($picked)) {
           // Pan until highlight is fully visible onscreen (if necessary)
           var pickedRect = mh.getHighlight().fixedContentRect;
 
@@ -335,7 +426,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           }
           else {
             // No need to pan -- finish up
-            succeed();
+            succeed(!hlbElement);
             return true;
           }
 
@@ -348,6 +439,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
 
       function startPanning(isHighlightStillNeeded) {
+        setIsScrollTrackingEnabled(false);
+
         targetPanUp = Math.floor(constrained(targetPanUp, maxPanUp, maxPanDown));
         targetPanLeft = Math.floor(constrained(targetPanLeft, maxPanLeft, maxPanRight));
         targetPanRight = Math.floor(constrained(targetPanRight, maxPanLeft, maxPanRight));
@@ -397,13 +490,10 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           }
           else {
             // Successful -- already had a highlight
-            succeed();
+            succeed(!hlbElement);
           }
           return;
         }
-
-        // TODO safety check to avoid infinite loop
-        // E.g. if last position was reached and the scroll position didn't change
 
         // Continue panning
         requestFrame(panInDirection);
@@ -411,8 +501,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Go quickly through visible possibilities
       while (true) {
-        x += horizDir * STEP_SIZE;
-        y += vertDir * STEP_SIZE;
+        x += horizDir * STEP_SIZE_HORIZ;
+        y += vertDir * STEP_SIZE_VERT;
         var panX = x < 0 ? -x : Math.min(winRight - x, 0),
           panY = y < 0 ? -y : Math.min(winBottom - y, 0);
 
@@ -502,6 +592,11 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       return $picked;
     }
 
+    function tryHighlight($picked) {
+      var doKeepHighlightHidden = !!hlbElement;
+      return sitecues.highlight($picked, false, false, doKeepHighlightHidden);
+    }
+
     function moveByTagName(acceptableTagsMap, isReverse) {
       function doesMatchTags(element) {
         if (!acceptableTagsMap[element.localName]) {
@@ -521,7 +616,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           return NodeFilter.FILTER_REJECT;
         }
 
-        if (!sitecues.highlight($picked, false)) {
+        if (!tryHighlight($picked)) {
           return NodeFilter.FILTER_REJECT; // Couldn't highlight
         }
 
@@ -539,21 +634,11 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       treeWalker.currentNode = $lastPicked[0];
 
       if (isReverse ? treeWalker.previousNode() : treeWalker.nextNode()) {
-        clearHighlightIfInDimmer();
         scrollToHighlight();
         succeed();
       }
       else {
         fail();
-      }
-    }
-
-    // When moving the HLB, clear any highlight we just made
-    // as it's distracting/unnatural when in the background dimmed area.
-    // TODO how about we don't visibly show the highlight in the first place? Makes more sense.
-    function clearHighlightIfInDimmer() {
-      if (hlbElement) {
-        sitecues.emit('mh/clear');
       }
     }
 
@@ -591,16 +676,24 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
       else {
         // No highlight -- make one
-        sitecues.emit('mh/center');
+        sitecues.emit('mh/autopick');
       }
     }
+
+    $(window).on('keyup', function() {
+      clearTimeout(repeatDelayTimer);
+      isKeyStillDown = false;
+      isKeyRepeating = false;
+    });
 
     function onEscape() {
       if (hlb.getElement()) {
         sitecues.emit('hlb/toggle');
       }
       else {
-        sitecues.emit('mh/clear');
+        // TODO next arrow key is still moving highlight
+        // Probably the invisible mouse cursor is messing us up as well
+        sitecues.emit('mh/hide', true);
         navQueue = []; // No highlight -- can't process any more nav keys in the queue
       }
     }
