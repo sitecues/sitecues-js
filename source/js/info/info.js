@@ -2,7 +2,7 @@ sitecues.def('info', function(info, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', function($, site, dimmer) {
+  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', function($, site, dimmer, platform) {
 
     var $iframe = $(),
       $closeButton = $(),
@@ -25,10 +25,30 @@ sitecues.def('info', function(info, callback) {
         opacity: 1,
         transform: 'scale(1)'
       },
+      BUTTON_SIZE = 60,
+      CLOSE_BUTTON_CSS = {
+        cursor: 'pointer',
+        color: '#ccc',
+        border: '3px solid #ccc',
+        borderRadius: '48px',
+        background: '#222',
+        fontSize: '54px',
+        fontFamily: 'Verdana',
+        display: 'block',
+        lineHeight: '0px',
+        position: 'fixed',
+        zIndex: 2147483646,
+        margin: '8px',
+        width: BUTTON_SIZE + 'px',
+        height: BUTTON_SIZE + 'px',
+        opacity: 0,
+        transition: 'opacity 200ms'
+      },
       INITIAL_DELAY = 100,
       INFLATION_SPEED = 1000,
       DIMMER_SPEED = 500,
-      addCloseButtonTimer;
+      addCloseButtonTimer,
+      IFRAME_BORDER_WIDTH = 8;
 
     function showModal(pageName) {
 
@@ -62,8 +82,14 @@ sitecues.def('info', function(info, callback) {
       dimmer.dimBackgroundContent(DIMMER_SPEED);
 
       setTimeout(function() {
-        $iframe.focus();
         $iframe.css(ENLARGED_CSS);
+        var iframeEl = $iframe[0];
+        if (iframeEl.contentWindow) {
+          iframeEl.contentWindow.focus();
+        }
+        else {
+          iframeEl.focus();
+        }
       }, INITIAL_DELAY); // Waiting helps animation performance
 
       addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
@@ -85,21 +111,15 @@ sitecues.def('info', function(info, callback) {
     function addCloseButton() {
       var closeButtonUrl = sitecues.resolveSitecuesUrl('../images/close.png'),
         helpRect = $iframe[0].getBoundingClientRect(),
-        BUTTON_SIZE = 64;
+        offsetLeft = platform.browser.isIE ? -30 : -17, // Deal with big scrollbars on Windows
+        offsetTop = platform.browser.isIE ? -6 : -1;
 
-      $closeButton = $('<img>')
-        .attr({
-          src: closeButtonUrl,
-          alt: 'close sitecues help'
-        })
+      $closeButton =
+          $('<div><span style="position:relative;left:14px;top:23px">x</span></div>')
+        .css(CLOSE_BUTTON_CSS)
         .css({
-          position: 'fixed',
-          left: (helpRect.right - BUTTON_SIZE / 2 - 8) + 'px',  // Subtracts border width as well
-          top: (helpRect.top - BUTTON_SIZE / 2 - 4) + 'px',
-          zIndex: 2147483646,
-          width: BUTTON_SIZE + 'px',
-          opacity: 0,
-          transition: 'opacity 200ms'
+          left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
+          top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
         })
         .appendTo('html')
         .one('click', close);
@@ -111,7 +131,10 @@ sitecues.def('info', function(info, callback) {
 
     function removeCloseButton() {
       $closeButton.remove();
-      clearTimeout(addCloseButtonTimer);
+      if (addCloseButtonTimer) {
+        clearTimeout(addCloseButtonTimer);
+      }
+      addCloseButtonTimer = 0;
     }
 
     function close() {

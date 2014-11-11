@@ -95,6 +95,7 @@
     #sitecues-badge {
         height: 24px;
         width: auto;
+        border: 0
     }
 </style>
 </head>
@@ -168,8 +169,12 @@
     <li><kbd>Alt+S</kbd> to turn speech on or off</li>
     <li><kbd>Escape</kbd> to close One-Touch Read or to clear highlighting</li>
 </ul>
-
 </body>
+<script>
+    try {
+        document.body.focus();
+    } catch(ex) {};
+</script>
 </html>
 
 
