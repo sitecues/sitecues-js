@@ -143,6 +143,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     }
 
     function getLineInRange(origTop, direction, seekStart, seekEnd) {
+      if (platform.browser.isIE) {
+        return direction > 0 ? seekEnd : seekStart;
+      }
       var minSeek = Math.min(seekStart, seekEnd),
         maxSeek = Math.max(seekStart, seekEnd),
         lineTops = getHLBLineTops(origTop),
