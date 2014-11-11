@@ -111,7 +111,7 @@ sitecues.def('keys', function(keys, callback) {
           },
           'esc': function(event) {
              // Escape key is only valid if there is an HLB to close
-             return event.keyCode === ESCAPE;
+             return event.keyCode === ESCAPE && (mh.getHighlight().isVisible || hlb.getElement());
           },
           // For arrow keys, allow number pad usage as well (2/4/6/8)
           'up': function(event) {
@@ -200,7 +200,7 @@ sitecues.def('keys', function(keys, callback) {
         // as arrows, we need to be careful. We could either decide which keys that we consume
         // need stopImmediatePropagation, or just do it always to be safe.
         // TODO put this back for all keys -- after we decide how metrics will learn about keys
-        if (event.keyCode === 32) {
+        if (event.keyCode === 32 || event.keyCode === 27) {
           event.stopImmediatePropagation();
         }
 

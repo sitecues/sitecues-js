@@ -90,6 +90,7 @@ files=\
 	source/js/keys.js \
 	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan.js \
+	source/js/info/info.js \
 	source/js/status.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
@@ -207,6 +208,7 @@ package:
 	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
 
 	@cp -R source/images $(package-dir)
+	@cp -R source/html $(package-dir)
 
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"

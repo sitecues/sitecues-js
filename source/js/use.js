@@ -12,5 +12,6 @@ window.sitecues && sitecues.use(
 	'audio',
 	'mouse-highlight',
 	'highlight-box',
-	'hpan'
+	'hpan',
+  'info'
 );

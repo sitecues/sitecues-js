@@ -20,6 +20,7 @@ sitecues.def('ui', function (ui, callback) {
       '@media print {#sitecues-panel{display:none!important;}#sitecues-badge{display:none!important;}}\n' +
       '.sitecues-badge {z-index: 2147483645;margin: 0;visibility: visible;position: absolute;width: 150px;top: 5px;box-sizing: content-box;}\n' +
       '#sitecues-badge, #sitecues-badge-image {box-sizing: content-box;}\n' +
+      '#sitecues-badge:focus { outline: box-shadow: 0px 0px 3pt 2pt rgba(82,168,236,.8); }\n' +
       '#sitecues-badge-image {height: 23px;width: 134px;border: 2px solid #A3A3A3;padding: 4px;background-color: white;border-radius: 4px;-webkit-box-shadow:  1px 1px 5px 0 rgba(10, 10, 10, .5);box-shadow:  1px 1px 5px 0px rgba(10, 10, 10, .5);-moz-box-shadow: 1px 1px 5px 0px rgba(10, 10, 10, .5);}\n' +
       '#sitecues-panel {opacity: .25;z-index: 2147483646;position: fixed;top: 0; white-space: nowrap;margin: 5px;background-color: #fff;border-radius: 5px;box-shadow: 2px 2px 10px 2px rgba(119, 119, 119, 0.75);}\n' +
       '#sitecues-slider-wrap {display:block;width:340px;height:80px;}\n' +

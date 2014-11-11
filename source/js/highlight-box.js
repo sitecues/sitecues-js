@@ -10,7 +10,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
     'jquery',
     'conf',
     'hlb/event-handlers',
-    'hlb/dimmer',
     'hlb/positioning',
     'hlb/styling',
     'platform',
@@ -24,7 +23,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       $,
       conf,
       eventHandlers,
-      dimmer,
       hlbPositioning,
       hlbStyling,
       platform,
@@ -709,7 +707,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.getOrCreateHLBWrapper    = getOrCreateHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
-        exports.dimmer                   = dimmer;
         exports.getValidOriginalElement  = getValidOriginalElement;
 
         exports.setHLB = function($hlb) {

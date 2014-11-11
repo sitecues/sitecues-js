@@ -29,7 +29,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
      * @param  {[jQuery element]} $hlbWrappingElement [The element that wraps the HLB element and dimmer element]
      * @param  {[integer]}        inflationSpeed      [The duration of the opacity transition]
      */
-    dimmer.dimBackgroundContent = function($hlbWrappingElement, inflationSpeed) {
+    dimmer.dimBackgroundContent = function(inflationSpeed) {
 
       if (dimmer.getDimmerElement()) {
         return; // Background already dimmed

@@ -19,13 +19,13 @@ sitecues.def('zoom', function (zoom, callback) {
           shouldSmoothZoom: true,
 
           // Does the web page use a fluid layout, where content wraps to the width?
-          isFluid: undefined, // Can override in site preferences
+          isFluid: window.sitecues.config.isFluid, // Can override in site preferences
 
           // Should the width of the page be restricted as zoom increases?
           // This is helpful for pages that try to word-wrap or use a fluid layout.
           // Eventually use fast page health calculation to automatically determine this
           // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfFluid: 1.5,
+          maxZoomToRestrictWidthIfFluid: window.sitecues.config.maxRewrapZoom || 1.5,
 
           // Set to 5 on sites where the words get too close to the left window's edge
           leftMarginOffset: 2

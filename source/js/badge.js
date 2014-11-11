@@ -34,7 +34,15 @@ sitecues.def('badge', function(badge, callback) {
 
         function setBadgeHooks($badge) {
           panel.parent = $badge;
-          $badge.hover(setDefaultEventOver, setDefaultEventLeave);
+          $badge
+            .hover(setDefaultEventOver, setDefaultEventLeave)
+            .on('keydown', onBadgeKey);
+        }
+
+        function onBadgeKey(evt) {
+          if (evt.keyCode === 13 || evt.keyCode === 32) {  // Enter or space key
+            sitecues.emit('info/help');
+          }
         }
 
         function getBadge() {
@@ -48,11 +56,20 @@ sitecues.def('badge', function(badge, callback) {
             var $badge = getBadge();
             if ($badge.length) {
               clearInterval(interval);
-              $badge.css({
-                visibility: 'visible',
-                opacity: 1,
-                transition: 'opacity 0.6s linear'
-              });
+              $badge
+                .css({
+                  visibility: 'visible',
+                  opacity: 1,
+                  transition: 'opacity 0.6s linear'
+                });
+              if ($badge.closest('a').length === 0) {
+                // Add accessibility if it's not already done
+                $badge.attr({
+                  tabindex: 0,
+                  role: 'button',
+                  alt: 'sitecues zoom and speech tools: press Enter for more information'
+                });
+              }
               setBadgeHooks($badge);
               return true;
             }
