@@ -107,7 +107,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       isDebuggingOn,
       isVoteDebuggingOn,
       isAutoPickDebuggingOn,
-      isVotingOn = false, // Temporarily off by default until it works in IE9, and so we can see it's effect
+      isVotingOn = true, // Temporarily off by default until it works in IE9, and so we can see it's effect
       lastPicked;
 
     /*
@@ -381,27 +381,38 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       function isAcceptableTextLeaf(node) {
         // Logic to determine whether to accept, reject or skip node
         if (common.isEmpty(node)) {
-          return NodeFilter.FILTER_REJECT; // Only whitespace or punctuation
+          return; // Only whitespace or punctuation
         }
         var element = node.parentNode;
         if (element === avoidSubtree || $.contains(avoidSubtree, element)) {
-          return NodeFilter.FILTER_REJECT; // Already looked at this one for original best pick
+          return; // Already looked at this one for original best pick
         }
 
-        return NodeFilter.FILTER_ACCEPT;
+        return true;
       }
 
       // Retrieve some leaf nodes
       var nodeIterator = document.createNodeIterator(startElement, NodeFilter.SHOW_TEXT,
-        { acceptNode: isAcceptableTextLeaf }, false);
+        null, false);
 
-      console.log('dude1');
-      nodeIterator.nextNode();
-      console.log('dude2');
+      function nextNode() {
+        var node;
+        while (true) {
+          node = nodeIterator.nextNode();
+          if (!node) {
+            return null;
+          }
+          else if (isAcceptableTextLeaf(node)) {
+            return node;
+          }
+        }
+      }
+
+      nextNode();
 
       var numLeaves = 0;
       while (numLeaves < MAX_LEAVES_TO_VOTE * 3) {
-        var nextTextLeaf = nodeIterator.nextNode();
+        var nextTextLeaf = nextNode();
         if (!nextTextLeaf) {
           break;
         }
