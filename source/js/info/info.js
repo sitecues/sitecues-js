@@ -47,8 +47,7 @@ sitecues.def('info', function(info, callback) {
       INITIAL_DELAY = 100,
       INFLATION_SPEED = 1000,
       DIMMER_SPEED = 500,
-      addCloseButtonTimer,
-      IFRAME_BORDER_WIDTH = 8;
+      addCloseButtonTimer;
 
     function showModal(pageName) {
 
