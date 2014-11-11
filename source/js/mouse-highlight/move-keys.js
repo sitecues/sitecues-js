@@ -114,7 +114,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     function getHLBLineTops(currTop) {
       // Measure height of one line for first visible text node
       var nodeIterator =
-            document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT, {}, false),
+            document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT, null, false),
           range = document.createRange(),
           lineTops = [],
           hlbZoom = common.getTransform($(hlbElement));
@@ -143,9 +143,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     }
 
     function getLineInRange(origTop, direction, seekStart, seekEnd) {
-      if (platform.browser.isIE) {
-        return direction > 0 ? seekEnd : seekStart;
-      }
       var minSeek = Math.min(seekStart, seekEnd),
         maxSeek = Math.max(seekStart, seekEnd),
         lineTops = getHLBLineTops(origTop),
@@ -178,9 +175,10 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         lastTop = origTop,
         targetTop,  // Where we want to scroll to
         hlbHeight = hlbElement.offsetHeight,
-        maxTop = Math.max(0, hlbElement.scrollHeight - hlbHeight),
+        FUZZ_FACTOR = 5, // Make sure we can scroll far enough in all browsers
+        maxTop = Math.max(0, hlbElement.scrollHeight - hlbHeight + FUZZ_FACTOR),
         startScrollTime,
-        MIN_SCOLL = 5,
+        MIN_SCROLL = 5,
         MAX_SCROLL = 50,
         direction;
 
@@ -200,7 +198,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           break;
 
         case 'line':
-          targetTop = getLineInRange(origTop, direction, origTop + MIN_SCOLL * direction, origTop + MAX_SCROLL * direction);
+          targetTop = getLineInRange(origTop, direction, origTop + MIN_SCROLL * direction, origTop + MAX_SCROLL * direction);
           break;
         case 'doc':
           hlbElement.scrollTop = direction < 0 ? 0 : maxTop;
@@ -227,7 +225,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // Didn't move or target reached
         if (isTargetReached) {
           // Finished
-          var hasMoreToScroll = direction > 0 ? midAnimationTop < maxTop - MIN_SCOLL : midAnimationTop > MIN_SCOLL;
+          var hasMoreToScroll = direction > 0 ? midAnimationTop < maxTop - MIN_SCROLL : midAnimationTop > MIN_SCROLL;
           if (isKeyStillDown) {
             performHLBScroll(nextMove);  // Repeat for scrolling, but not for moving HLB
           }
@@ -240,7 +238,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       // Sanity constraints on scrolling request
       targetTop = Math.round(constrained(targetTop, 0, maxTop));
 
-      if (Math.abs(targetTop - origTop) > MIN_SCOLL) {
+      if (Math.abs(targetTop - origTop) > MIN_SCROLL) {
         startScrollTime = Date.now();
         smoothScroll();
         return true;      // Returns true if needed scrolling, so that HLB is not moved
@@ -603,45 +601,47 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     function moveByTagName(acceptableTagsMap, isReverse) {
       function doesMatchTags(element) {
         if (!acceptableTagsMap[element.localName]) {
-          return NodeFilter.FILTER_SKIP; // Still consider children
+          return;
         }
         if (!isValidTarget(element, $lastPicked)) {
-          return NodeFilter.FILTER_REJECT;
+          return;
         }
 
         if (! $lastPicked.text().trim()) {
-          return NodeFilter.FILTER_REJECT; // No text
+          return; // No text
         }
 
         var $picked = $(element);
 
         if (!$picked || !isValidTarget($picked[0], $lastPicked)) {
-          return NodeFilter.FILTER_REJECT;
+          return;
         }
 
         if (!tryHighlight($picked)) {
-          return NodeFilter.FILTER_REJECT; // Couldn't highlight
+          return; // Couldn't highlight
         }
 
         // Successful highlight
-        return NodeFilter.FILTER_ACCEPT;
+        return true;
       }
 
       var $lastPicked = mh.getHighlight().picked,
-        treeWalker = document.createTreeWalker(
-          document.body,
-          NodeFilter.SHOW_ELEMENT,
-          { acceptNode: doesMatchTags }, false);
+        treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false);
 
       // Set the starting point (can do with tree walker but doesn't look like the similar node iterator API can do this)
       treeWalker.currentNode = $lastPicked[0];
 
-      if (isReverse ? treeWalker.previousNode() : treeWalker.nextNode()) {
-        scrollToHighlight();
-        succeed();
-      }
-      else {
-        fail();
+      while (true) {
+        var newNode = isReverse ? treeWalker.previousNode() : treeWalker.nextNode();
+        if (!newNode) {
+          fail();
+          break;
+        }
+        else if (doesMatchTags(newNode)) {
+          scrollToHighlight();
+          succeed();
+          break;
+        }
       }
     }
 

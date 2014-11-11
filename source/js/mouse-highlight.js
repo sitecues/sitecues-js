@@ -1249,7 +1249,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Retrieve some leaf nodes
       var nodeIterator = document.createNodeIterator(document.body,
-        NodeFilter.SHOW_TEXT, { acceptNode: isAcceptableTextLeaf }, false);
+        NodeFilter.SHOW_TEXT, null, false);
       var knownGoodState = state;
       var knownGoodScore = -9;
       var skipElement;
@@ -1280,6 +1280,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           containingElement;
         if (!nextLeaf) {
           break;
+        }
+        if (!isAcceptableTextLeaf(nextLeaf)) {
+          continue;
         }
         if (skipElement && $.contains(skipElement, nextLeaf)) {
           continue; // We've already check this content
