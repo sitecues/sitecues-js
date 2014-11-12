@@ -20,7 +20,7 @@ sitecues.def('badge', function(badge, callback) {
               htmlBuild.$div()
                 .attr('id', BADGE_ID) // set element id for proper styling
                 .addClass('sitecues-badge')
-                .appendTo('html');
+                .insertBefore('body');
 
           // create badge image inside of panel
           $badge = $('<img>')
@@ -32,11 +32,25 @@ sitecues.def('badge', function(badge, callback) {
           setBadgeHooks($badge);
         }
 
+        function addAccessibility($badge) {
+          if ($badge.closest('a').length === 0) {
+            // Add accessibility if it's not already done
+            var $badgeImage = $badge.is('img') ? $badge : $badge.find('img');
+            $badgeImage
+              .attr({
+                tabindex: 0,
+                role: 'button',
+                alt: 'sitecues zoom and speech tools: press Enter for more information'
+              })
+              .on('keydown', onBadgeKey);
+          }
+        }
+
         function setBadgeHooks($badge) {
           panel.parent = $badge;
-          $badge
-            .hover(setDefaultEventOver, setDefaultEventLeave)
-            .on('keydown', onBadgeKey);
+          $badge.hover(setDefaultEventOver, setDefaultEventLeave);
+
+          addAccessibility($badge);
         }
 
         function onBadgeKey(evt) {
@@ -62,14 +76,6 @@ sitecues.def('badge', function(badge, callback) {
                   opacity: 1,
                   transition: 'opacity 0.6s linear'
                 });
-              if ($badge.closest('a').length === 0) {
-                // Add accessibility if it's not already done
-                $badge.attr({
-                  tabindex: 0,
-                  role: 'button',
-                  alt: 'sitecues zoom and speech tools: press Enter for more information'
-                });
-              }
               setBadgeHooks($badge);
               return true;
             }
