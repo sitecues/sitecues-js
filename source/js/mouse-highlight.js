@@ -1263,16 +1263,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       function isAcceptableTextLeaf(node) {
         // Logic to determine whether to accept, reject or skip node
         if (common.isEmpty(node)) {
-          return NodeFilter.FILTER_REJECT; // Only whitespace or punctuation
+          return; // Only whitespace or punctuation
         }
         var rect = traitcache.getScreenRect(node.parentNode);
         if (rect.width === 0 || rect.height === 0 ||
           rect.top > viewSize.height || rect.left > viewSize.width ||
           rect.right < 0 || rect.bottom < 0) {
-          return NodeFilter.FILTER_REJECT; // Hidden
+          return; // Hidden
         }
 
-        return NodeFilter.FILTER_ACCEPT;
+        return true;
       }
 
       while (true) {
