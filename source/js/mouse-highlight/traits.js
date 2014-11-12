@@ -111,7 +111,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
         }
         else {
           var lineHeight = getApproximateLineHeight() * zoom;
-          if (height < lineHeight && mhpos.getRangeRect(node.parentNode).height < lineHeight) {
+          if (height < lineHeight && mhpos.getContentsRangeRect(node.parentNode).height < lineHeight) {
             // Treat single line inlines that are part of another single-line element as inline-block.
             // This allows them to be picked -- they may be a row of buttons or part of a menubar.
             doTreatAsInlineBlock = true;
@@ -136,7 +136,7 @@ sitecues.def('mouse-highlight/traits', function(traits, callback) {
       // * wide blocks, because they lie about width when there is a float
       if (display === 'inline-block' ||
         (display ==='block' && fastRect.width > bodyWidth * WIDE_ELEMENT_TO_BODY_RATIO)) {
-        exactRect = mhpos.getRangeRect(element);
+        exactRect = mhpos.getContentsRangeRect(element);
         return $.extend({}, exactRect); // Replace the width
       }
 

@@ -55,50 +55,62 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return zoomMod.getCompletedZoom();
     }
 
-    function scaleRect(rect, scale, offsetX, offsetY) {
-      var newRect = {
-        width  : rect.width * scale,
-        height : rect.height * scale,
-        left   : ((rect.left + offsetX) * scale) - offsetX,
-        top    : ((rect.top + offsetY) * scale) - offsetY
-      };
-      return normalizeRect(newRect);
-    }
+    // Get the rect for the contents of a node (text node or contents inside element node)
+    // @param node -- an element that contains visible content, or a text node
+    mhpos.getContentsRangeRect = function(node) {
+      var range = document.createRange(),
+        parent,
+        // ********** IE, Chrome, Safari and FF >= 34 are fine **********
+        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 34;
 
-    mhpos.getRangeRect = function(containerNode) {
-      var range = document.createRange();
-      range.selectNodeContents(containerNode);
-      return getUserAgentCorrectionsForRangeRect(range.getBoundingClientRect());
+      if (node.nodeType === 1) {
+        // Case 1: element -- get the rect for the element's descendant contents
+        parent = node;
+        range.selectNodeContents(node);
+      }
+      else {
+        // Case 2: text node -- get the rect for the text
+        parent = node.parentNode;
+        range.selectNode(node);
+      }
+
+      var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
+
+      return isOldFirefox ?
+        getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect) :
+        contentsRangeRect;
     };
 
-    function getUserAgentCorrectionsForRangeRect(rect) {
-      if (platform.browser.isFirefox) {
-        // This must be done for range.getBoundingClientRect(),
-        // but not for element.getBoundingClientRect()
-        // The Firefox range.getBoundingClientRect() doesn't adjust for translateX and transformOrigin used
-        // on the body. The most accurate thing we can do here is compare rects from the two approaches on an element
-        // and add in the difference in left coordinates.
-        var mozRect = $.extend({}, rect),
-          viewPos = traitcache.getCachedViewPosition(),
-          bodyRange = document.createRange();
+    function getFirefoxCorrectionsToRangeRect(parent, origRangeRect) {
+      // ********** Firefox has bugs with range rects in some versions **********
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+      // This must be done for range.getBoundingClientRect(),
+      // but not for element.getBoundingClientRect()
+      // The Firefox range.getBoundingClientRect() doesn't adjust for CSS transform.
 
-        bodyRange.selectNode(document.body);
-        var
-          bodyRangeRect = bodyRange.getBoundingClientRect(),
-          bodyElementRect = traitcache.getScreenRect(document.body),
-          zoomForScale = bodyElementRect.width / bodyRangeRect.width,
-          scaledRect = scaleRect(mozRect, zoomForScale, viewPos.x, viewPos.y),
-          bodyRangeLeft = (bodyRangeRect.left + viewPos.x) * zoomForScale - viewPos.x,
-          bodyRangeTop = (bodyRangeRect.top + viewPos.y) * zoomForScale - viewPos.y;
-        scaledRect.left += bodyElementRect.left - bodyRangeLeft;
-        scaledRect.top += bodyElementRect.top - bodyRangeTop;
+      var parentRange = document.createRange();
+      parentRange.selectNode(parent);
 
-        return scaledRect;
-      }
-      return rect;
-    }
+      var currZoom = zoomMod.getCompletedZoom(),
+        parentRangeRect = parentRange.getBoundingClientRect(),
+        parentElementRect = parent.getBoundingClientRect(),
+        // Additional content offsets from top,left of parentElementRect
+        contentLeftOffset = (origRangeRect.left - parentRangeRect.left) * currZoom,
+        contentTopOffset = (origRangeRect.top - parentRangeRect.top) * currZoom,
+        correctedRect = {
+          // 1. Multiply the width and height by the scale
+          width: origRangeRect.width * currZoom,
+          height: origRangeRect.height * currZoom,
+          // 2. Use the element's top,left, and use ranges to see what the delta is between
+          // the element's range rect and the content range rect. Add the delta * currZoom
+          left: parentElementRect.left + contentLeftOffset,
+          top: parentElementRect.top + contentTopOffset
+        };
 
-    function getRectMinusPadding(rect, style) {
+     return normalizeRect(correctedRect);
+   }
+
+   function getRectMinusPadding(rect, style) {
       // Reduce by padding amount -- useful for images such as Google Logo
       // which have a ginormous amount of padding on one side
       var
@@ -275,7 +287,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // Note: this would not work if any of the children were display: block, because
             // the returned rectangle would be the larger element rect, rather for just the visible content.
             //
-            // var parentContentsRect = mhpos.getRangeRect(this.parentNode);
+            // var parentContentsRect = mhpos.getContentsRangeRect(this.parentNode);
             // addRect(allRects, clipRect, parentContentsRect);
             // return false;  // Don't keep iterating over text/inlines in this container
             // ----------------------------------------------------------------------------------------------------
@@ -287,13 +299,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
             // hidden and clipped elements.
             // ----------------------------------------------------------------------------------------------------
-            var range = document.createRange(),
-              rect,
-              textVerticalClipRect;
-
-            range.selectNode(this);
-            rect = getUserAgentCorrectionsForRangeRect($.extend({}, range.getBoundingClientRect()));
-            textVerticalClipRect = getTextVerticalClipRect(this, rect);
+            var rect = mhpos.getContentsRangeRect(this),
+              textVerticalClipRect = getTextVerticalClipRect(this, rect);
 
             if (textVerticalClipRect) {
               // Clip text to the bounding element, otherwise the top and bottom will
