@@ -41,37 +41,33 @@ var pathJoin = function() {
 // Determine the project root, so that paths may be correctly resolved.
 var projectRoot = path.normalize(path.resolve(pathJoin(path.dirname(module.filename), '..')));
 
-// We may run this as root to bind to ports 80/443,so determine who the owner of this script is, and chown all
+// We may run this as root to bind to ports 80/443, so determine who the owner of this script is, and chown all
 // created dirs and files to that owner.
-var mkdirs, chown;
-(function(){
-  var
-    fileStat = fs.statSync(__filename),
-    uid = fileStat.uid,
-    gid = fileStat.gid;
+function chown(file) {
+  var fileStat = fs.statSync(__filename),
+      uid      = fileStat.uid,
+      gid      = fileStat.gid;
 
-  // Changes ownership of the file to the proper user.
-  chown = function(file) {
-    fs.chownSync(file, uid, gid);
-  };
+  fs.chownSync(file, uid, gid);
+}
 
-  // Helper method for making directories, while also chown'ing the new directories to the proper user.
-  mkdirs = function(dir) {
-    // Find the first existing dir.
-    dir = path.resolve(dir);
-    var firstExisting = '' + dir;
-    while (!fs.existsSync(firstExisting)) {
-      firstExisting = path.dirname(firstExisting);
-    }
+// Helper method for making directories, while also chown'ing the new directories to the proper user.
+function mkdirs(dir) {
+  // Find the first existing dir.
+  dir = path.resolve(dir);
+  var firstExisting = '' + dir;
+  while (!fs.existsSync(firstExisting)) {
+    firstExisting = path.dirname(firstExisting);
+  }
 
-    fs.mkdirsSync(dir);
+  fs.mkdirsSync(dir);
 
-    while (dir != firstExisting) {
-      chown(dir);
-      dir = path.dirname(dir);
-    }
-  };
-})();
+  while (dir != firstExisting) {
+    chown(dir);
+    dir = path.dirname(dir);
+  }
+}
+
 
 // Initialize the express application
 app = express();
@@ -85,10 +81,9 @@ express.static.mime.define({
 });
 
 // Process the command line args.
-var
-  useHttps = strToBool(process.argv[3]),
-  prodMode = strToBool(process.argv[4]),
-  portFile = null;
+var useHttps = strToBool(process.argv[3]),
+    prodMode = strToBool(process.argv[4]),
+    portFile = null;
 
 // The fifth argument is the port file destination.
 if (process.argv.length > 5) {
@@ -110,7 +105,7 @@ app.on('listen', function(e){
 // Set up the handling of the per-siteID URLs of the format /l/s;id=s-XXXXXXXX/*
 (function(){
   // Creates a build data instance
-  var createBuildData = function(buildName) {
+  function createBuildData(buildName) {
     var buildData = {
       name: buildName,
       searchPath: []
@@ -171,20 +166,20 @@ app.on('listen', function(e){
 
   // Set a listener for the per-site-ID libraries.
   app.get('/l/s;id=:siteId/*', function (req, res, next) {
-    var
-      siteId = req.params.siteId,
-      buildData = siteIdToBuildDataMap[siteId] || commonBuildData,
-      searchPath = buildData.searchPath,
-      assetPath = req.params[0],
-      filePath = null,
-      found = false;
+    var siteId     = req.params.siteId,
+        buildData  = siteIdToBuildDataMap[siteId] || commonBuildData,
+        searchPath = buildData.searchPath,
+        assetPath  = req.params[0],
+        filePath   = null,
+        found      = false;
 
     // Quick test to see if the requestor is trying to access files outside of the scope of this server
     // by using '..' notation.
     var testPath = path.normalize(pathJoin(projectRoot, req.params[0].split('/')));
     if ((testPath.length < projectRoot.length) || (testPath.substr(0, projectRoot.length) != projectRoot)) {
       res.send(403, 'Forbidden: ' + req.path);
-    } else {
+    }
+    else {
       // Look in each path for this build to see if the file is found.
       for (var i = 0; i < searchPath.length; i++) {
         var pathData = searchPath[i], assetPathComps = null;
@@ -196,7 +191,8 @@ app.on('listen', function(e){
             assetPathComps = assetPath.substr(pathData.urlPrefix.length).split('/');
           }
         // otherwise, this path is always a possible candidate.
-        } else {
+        }
+        else {
           assetPathComps = assetPath.split('/');
         }
 
@@ -216,7 +212,8 @@ app.on('listen', function(e){
       // If found, return the file. Otherwise, we have exhausted the paths, and have a 404.
       if (found) {
         res.sendfile(filePath);
-      } else {
+      }
+      else {
         res.send(404, 'File not found: ' + req.path);
       }
     }
@@ -229,29 +226,33 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 // Allow dynamic insertion of the JavaScript library in the site files
 (function(){
   // The previous include template.
-  var inlineJsV1File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV1.html'));
-  var createInlineV1JsTemplate = function() {
+  var inlineJsV1File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV1.html')),
+      inlineJsV2File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV2.html'));
+
+  function createInlineV1JsTemplate() {
     try {
       var templateContent = fs.readFileSync(inlineJsV1File, { encoding: 'UTF-8' });
       return hogan.compile(templateContent);
-    } catch (t) {
+    }
+    catch (t) {
       console.log("Unable to create inline JavaScript template (" + t.message + ")");
       return null;
     }
-  };
-  var getInlineV1JsTemplate = createInlineV1JsTemplate;
+  }
 
   // The current include template.
-  var inlineJsV2File = path.resolve(pathJoin(projectRoot, 'tests', 'views', 'inlineV2.html'));
-  var createInlineV2JsTemplate = function() {
+  function createInlineV2JsTemplate() {
     try {
       var templateContent = fs.readFileSync(inlineJsV2File, { encoding: 'UTF-8' });
       return hogan.compile(templateContent);
-    } catch (t) {
+    }
+    catch (t) {
       console.log("Unable to create inline JavaScript template (" + t.message + ")");
       return null;
     }
-  };
+  }
+
+  var getInlineV1JsTemplate = createInlineV1JsTemplate;
   var getInlineV2JsTemplate = createInlineV2JsTemplate;
 
   // Process the inline JS file templates.
@@ -301,7 +302,8 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
     // See if the user is trying to access files outside of the site directory by using '..' notation.
     if ((filePath.length < siteRoot.length) || (filePath.substr(0, siteRoot.length) != siteRoot)) {
       res.send(403, 'Forbidden: ' + req.path);
-    } else {
+    }
+    else {
       if (fs.existsSync(filePath)) {
         var stats = fs.statSync(filePath);
         exists = true;
@@ -326,31 +328,31 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
           res.writeHead(200, {"Content-Type": mime.lookup(filePath)});
           res.write(content);
           res.end();
-        } else {
+        }
+        else {
           res.sendfile(filePath);
         }
-      } else {
+      }
+      else {
         res.send(404, 'File not found: ' + req.path);
       }
     }
   });
 })();
 
-// Set the default (/) search paths.
-(function(){
-  // Set listeners for all
-  app.use('/js/source', express.static(pathJoin(projectRoot, 'source')));
-  app.use('/js/target', express.static(pathJoin(projectRoot, 'target')));
+// Set listeners for all default (/) search paths.
+app.use('/js/source', express.static(pathJoin(projectRoot, 'source')));
+app.use('/js/target', express.static(pathJoin(projectRoot, 'target')));
 
-  // In prod mode, skip the 'source' directory.
-  if (!prodMode) {
-    app.use(express.static(pathJoin(projectRoot, 'source')));
-  }
+// In prod mode, skip the 'source' directory.
+if (!prodMode) {
+  app.use(express.static(pathJoin(projectRoot, 'source')));
+}
 
-  // The common assets,
-  app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'compile')));
-  app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'etc')));
-})();
+// The common assets,
+app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'compile')));
+app.use(express.static(pathJoin(projectRoot, 'target', 'common', 'etc')));
+
 
 // Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
