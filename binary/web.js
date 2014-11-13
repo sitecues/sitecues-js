@@ -1,22 +1,18 @@
 #!/usr/bin/env node
 
 // Dependencies
-var
-  fs = require('fs-extra'),
-  path = require('path'),
-  mime = require('mime'),
-  https = require('https'),
-  hogan = require('hogan.js'),
-  express = require('express');
+var fs      = require('fs-extra'),
+    mime    = require('mime'),
+    path    = require('path'),
+    https   = require('https'),
+    hogan   = require('hogan.js'),
+    express = require('express');
 
 // Boolean deserialization helper function.
-var strToBool;
-(function(){
+function strToBool(str) {
   var trueValues = ['yes', 'on', 'true'];
-  strToBool = function(str) {
-    return (trueValues.indexOf(str && str.toLowerCase()) >=0);
-  }
-})();
+  return trueValues.indexOf(str && str.toLowerCase()) >= 0;
+}
 
 // Path join helper function that takes both strings and arrays.
 var pathJoin = function() {
@@ -91,7 +87,7 @@ express.static.mime.define({
 // Process the command line args.
 var
   useHttps = strToBool(process.argv[3]),
-	prodMode = strToBool(process.argv[4]),
+  prodMode = strToBool(process.argv[4]),
   portFile = null;
 
 // The fifth argument is the port file destination.
@@ -288,8 +284,8 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 
       data = {
         markup: templateFunction().render({
-          scjsurl:	req.query.scjsurl,
-          scwsid:		req.query.scwsid || 's-00000001',
+          scjsurl:  req.query.scjsurl,
+          scwsid:   req.query.scwsid || 's-00000001',
           siteConfigProps: siteConfigProps
         })
       }
@@ -359,7 +355,7 @@ app.use('/tools', express.static(pathJoin(projectRoot, 'tools', 'site')));
 // Start the HTTP listener
 port = process.env.PORT || process.argv[2] || 8000;
 app.listen(port, function() {
-	console.log('Listening at "http://localhost:' + port + '/"');
+  console.log('Listening at "http://localhost:' + port + '/"');
 });
 
 // If needed, create the ports file with the proper ports
@@ -375,11 +371,11 @@ if (useHttps){
     fs.writeFileSync(portFile, ' -Dswdda.testSite.httpsPort=443 -Dswdda.sitecuesUrl.httpsPort=443', {flag:'a'});
   }
 
-	// Start the HTTPS server on port 443. 
-	https.createServer({
-		key:	fs.readFileSync('binary/cert/localhost.key'),
-		cert:	fs.readFileSync('binary/cert/localhost.cert')
-	}, app).listen(443, function(){
-		console.log('Listening at "https://localhost:443/"');
-	});
+  // Start the HTTPS server on port 443. 
+  https.createServer({
+    key:  fs.readFileSync('binary/cert/localhost.key'),
+    cert: fs.readFileSync('binary/cert/localhost.cert')
+  }, app).listen(443, function(){
+    console.log('Listening at "https://localhost:443/"');
+  });
 }
