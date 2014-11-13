@@ -175,16 +175,14 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} originalElementsChildStyle        [CSS styles returned from window.getComputedStyle]
      * @return {[Object]}                                   [Styles to be consumed by jQuery.css]
      */
-    function getChildStyles ($child, originalElementsChildStyle, initialHLBRect) {
+    function getChildStyles ($child, originalElementsChildStyle) {
 
           // Defaut css styles for all HLB children
-      var minHeight = originalElementsChildStyle.height === 'auto' ? initialHLBRect.height : Math.min(parseFloat(originalElementsChildStyle.height), initialHLBRect.height),
-          styles = {
+      var styles = {
             'webkitTextFillColor': '',
             'textDecoration'     : 'none',
             'bottom'             : 0,      // Added because bug found on TexasAT, first LI (About TATN) of ".horizontal rootGroup"
             'height'             : 'auto', // Added to fix cases where text overlapped vertically, like on eeoc
-            'min-height'         : minHeight, // Addded to fix faast.org footer CONTACT, texasAT footer!
             'min-width'          : ''
           },
           fontSize       = parseFloat(originalElementsChildStyle.fontSize),
@@ -549,7 +547,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         }
 
         // Compute styles that are more complicated than copying cssText.
-        computedChildStyles = getChildStyles($hlbElementChild, originalElementsChildStyle, initialHLBRect);
+        computedChildStyles = getChildStyles($hlbElementChild, originalElementsChildStyle);
 
         // Added to fix HLB sizing when selecting last 2 paragraphs on http://www.ticc.com/
         if (shouldRemoveHorizontalMargins($originalElementChild, $originalElement)) {
