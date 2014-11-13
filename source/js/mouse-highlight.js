@@ -408,7 +408,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         'background-repeat'     : style.backgroundRepeat,
         'background-clip'       : style.backgroundClip,
         'background-attachment' : style.backgroundAttachment,
-        'background-size'       : style.backgroundSize
+        'background-size'       : style.backgroundSize,
+        'background-color'      : style.backgroundColor
       };
 
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
@@ -424,6 +425,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundOrigin = 'border-box,' + origStyle.backgroundOrigin;
       style.backgroundClip = 'border-box,' + origStyle.backgroundClip;
       style.background = compositeBg;
+      style.backgroundColor = origStyle.backgroundColor;
     };
 
     function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {
