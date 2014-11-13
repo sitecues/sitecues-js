@@ -179,7 +179,7 @@ sitecues.def('util/common', function (common, callback) {
      * @return true if image value contains some not-empty value.
      */
     common.isEmptyBgImage = function(imageValue) {
-      return this.isEmpty(imageValue) || imageValue === 'none';
+      return !imageValue || imageValue === 'none';
     };
 
     // Return true if the element is part of the sitecues user interface

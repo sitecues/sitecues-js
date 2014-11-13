@@ -161,8 +161,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       // Check for elements with only a background-image
       var rect = $.extend({}, traitcache.getScreenRect(element, true));
-      if ($(element).is(':empty')) {
+      if ($(element).is(':empty') || style.textIndent !== '0px') {
         // Empty elements have no other purpose than to show background sprites
+        // Also, background image elements with text-indent are used to make accessible images
+        // (the text is offscreen -- screen readers see it but the eye doesn't)
         return rect;
       }
 
@@ -177,9 +179,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         backgroundLeftPos = backgroundPos ? parseFloat(backgroundPos) : 0,
         // Use positive background positions (used for moving the sprite to the right within the element)
         // Ignore negative background positions (used for changing which sprite is used within a larger image)
-        actualLeft = isNaN(backgroundLeftPos) || backgroundLeftPos < 0 ? 0 : backgroundLeftPos;
+        actualLeft = isNaN(backgroundLeftPos) || backgroundLeftPos < 0 ? 0 : backgroundLeftPos,
+        currZoom = getZoom();
       rect.left += actualLeft;
-      return rect.width > 0 ? rect : null;
+      rect.width = parseFloat(style.paddingLeft) * currZoom;
+      return rect.width > MIN_RECT_SIDE * currZoom ? rect : null;
     }
 
     function getLineHeight(style) {

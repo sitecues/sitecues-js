@@ -26,7 +26,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     bgColor: '',    // highlight color or '' if only outline is being used (as when highlighting media element)
     doUseOverlayforBgColor: false,  // was an overlay used to create the background color? If not, CSS background will be used.
     hasDarkBackgroundColor: false,
-    isOverBackgroundImage: false,
     hasLightText: false
   },
 
@@ -154,41 +153,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return false;
     }
 
-    /**
-     * Is the element inside of an ancestor element that has a background image?
-     */
-    function isOverBackgroundImage(styles) {
-
-      // TODO: we're only checking 3 up, because we get confused by layout/spacer images
-      // We can't always know what size a background image is, without using canvas approach,
-      // and then there are security limitations, unless we use CORS.
-      // In other words, this is complicated.
-      var numAncestorsToCheck = Math.min(3, styles.length);
-      for (var count = 0; count < numAncestorsToCheck; count ++) {
-        if (!common.isEmptyBgImage(styles[count].backgroundImage)) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    function hasBackgroundSprite(style) {
-      return style[0].backgroundRepeat === 'no-repeat';
-    }
-
     function updateColorApproach(picked, style) {
       // Get data on backgrounds and text colors used
-      var hasBackgroundImage = !common.isEmptyBgImage(style[0].backgroundImage);
-      state.isOverBackgroundImage = hasBackgroundImage || isOverBackgroundImage(style);
       state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style);
       state.hasLightText = hasLightText(state.target);
 
       // Get the approach used for highlighting
       if (DO_SUPPORT_SVG_OVERLAY &&
-        (picked.length > 1 || shouldAvoidBackgroundImage(picked) ||
-         (hasBackgroundImage && hasBackgroundSprite(style)) ||
-         state.hasLightText)) {
+        (picked.length > 1 || shouldAvoidBackgroundImage(picked) || state.hasLightText)) {
         //  approach #1 -- use overlay for background color
         //                 use overlay for rounded outline
         //  pros: one single rectangle instead of potentially many
@@ -199,16 +171,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         //               when background sprites are used, which we don't want to overwrite with out background
         state.bgColor = getTransparentBackgroundColor();
         state.doUseOverlayForBgColor = true; // Washes foreground out
-      } else if (common.isVisualMedia(picked) || hasBackgroundImage) {
-        //  approach #2 -- don't change background color (don't use any color)
-        //                 use overlay for rounded outline
-        //  pros: foreground text does not get washed out
-        //  cons: no background color
-        //  when-to-use: over media or when existing element has background image
-        state.bgColor = '';
-        state.doUseOverlayForBgColor = false;
       } else {
-        //  approach #3 -- use css background of highlighted element for background color
+        //  approach #2 -- use css background of highlighted element for background color
         //                use overlay for rounded outline
         //  pros: looks best on text, does not wash out colors
         //  cons: breaks the appearance of native form controls, such as <input type="button">
@@ -360,7 +324,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getAppropriateBackgroundColor() {
 
       if (state.hasDarkBackgroundColor ||
-          state.isOverBackgroundImage ||
           state.hasLightText) {
         // Use transparent background so that the interesting background or light foreground are still visible
         return getTransparentBackgroundColor();
@@ -414,12 +377,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           offsetLeft,
           offsetTop;
 
-      // Approach #1 or #2 -- no change to background of element
-      if (state.doUseOverlayForBgColor || !state.bgColor) {
+      // Approach #1 -- no change to background of element
+      if (state.doUseOverlayForBgColor) {
         return false;
       }
 
-      // Approach #3 --change CSS background of highlighted element
+      // Approach #2 --change CSS background of highlighted element
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 0, state.zoom),
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
@@ -448,17 +411,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         'background-size'       : style.backgroundSize
       };
 
-      var newBackgroundImage = 'url("data:image/svg+xml,' + escape(svgMarkup) + '")';
-
-      style.backgroundOrigin = 'border-box';
-      style.backgroundClip = 'border-box';
-      style.backgroundAttachment = 'scroll';
-
-      style.backgroundImage = newBackgroundImage;
-      style.backgroundRepeat = 'no-repeat';
-
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      style.backgroundPosition = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px';
+      var newBgPos = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
+        newBg ='url("data:image/svg+xml,' + encodeURI(svgMarkup) + '") no-repeat ' + newBgPos + ' scroll',
+        origStyle = traitcache.getStyle(element),
+        origBg = origStyle.background,
+        // Remove color and other properties from the original background string, if they don't go into the shorthand background property
+        origBgShorthandProperties = origBg.substring(origBg.indexOf(')') + 1, origBg.lastIndexOf('/') ),
+        // Put new background behind old one if it exists -- all browsers in our matrix support multiple backgrounds
+        compositeBg = newBg + ',' + origBgShorthandProperties;
+
+      style.backgroundOrigin = 'border-box,' + origStyle.backgroundOrigin;
+      style.backgroundClip = 'border-box,' + origStyle.backgroundClip;
+      style.background = compositeBg;
     };
 
     function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {
@@ -1432,7 +1397,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.picked = state.picked;
       exports.state = state;
       exports.INIT_STATE = INIT_STATE;
-      exports.isOverBackgroundImage = isOverBackgroundImage;
       exports.isDarkBackground = isDarkBackground;
       exports.hasDarkBackgroundOnAnyOf = hasDarkBackgroundOnAnyOf;
       exports.hasLightText = hasLightText;
