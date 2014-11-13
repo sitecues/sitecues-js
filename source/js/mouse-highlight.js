@@ -1007,12 +1007,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         return;
       }
 
-      if (state.isCreated) {
-        // Already had a highlight
-        var lastScrollX = cursorPos.scrollX;
-        var lastScrollY = cursorPos.scrollY;
-        cursorPos = getCursorPos(event);
-        correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
+      if (state.isCreated && cursorPos && cursorPos.doCheckCursorInHighlight) {
+        // We have an old highlight and mouse moved.
+        // What to do about the old highlight? Keep or hide? Depends on whether mouse is still in it
+        if (!cursorPos || isScrollEvent(event)) {
+          // Already had a highlight
+          var lastScrollX = cursorPos.scrollX;
+          var lastScrollY = cursorPos.scrollY;
+          cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
+          correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
+        }
+        else {
+          cursorPos = getCursorPos(event);
+        }
 
         if (isExistingHighlightRelevant()) {
           return; // No highlighting || highlight is already good -- nothing to do
@@ -1095,14 +1102,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return isTrackingMouse;
     }
 
-    function getCursorPos(event) {
+    function getCursorPos(event, scrollX, scrollY) {
       return {
         x: event.clientX,
         y: event.clientY,
         screenX: event.screenX,
         screenY: event.screenY,
-        scrollX: window.pageXOffset,
-        scrollY: window.pageYOffset,
+        scrollX: scrollX || window.pageXOffset,
+        scrollY: scrollY || window.pageYOffset,
         doCheckCursorInHighlight: true
       };
     }
