@@ -55,6 +55,15 @@ sitecues.def('conf/user/server', function(server, callback) {
           ls.setUserPreferenceById(key, value);
           saveCallback();
         }
+
+        if (SC_LOCAL) {
+          // Cannot save to server when we have no access to it
+          // Putting this condition in allows us to paste sitecues into the console
+          // and test it on sites that have a content security policy
+          saveCallback();
+          return;
+        }
+
         // Save the server data.
         jquery.ajax({
           type: 'GET',
@@ -103,6 +112,15 @@ sitecues.def('conf/user/server', function(server, callback) {
     if (lsByUserId) {
       loadCallback(lsByUserId);
     } else {
+      if (SC_LOCAL) {
+        // Cannot save to server when we have no access to it
+        // Putting this condition in allows us to paste sitecues into the console
+        // and test it on sites that have a content security policy
+        ls.setUserPreferencesById({});
+        loadCallback();
+        return;
+      }
+
       // Load the server data.
       jquery.ajax({
         type: 'GET',

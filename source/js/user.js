@@ -12,6 +12,15 @@ sitecues.def('user', function(user, callback) {
     if (userId) {
       callback();
     } else {
+      if (SC_LOCAL) {
+        // Cannot save to server when we have no access to it
+        // Putting this condition in allows us to paste sitecues into the console
+        // and test it on sites that have a content security policy
+        ls.clearSitecuesLs();
+        ls.setUserId('localuser');
+        callback();
+        return;
+      }
       SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
       sitecues.use('jquery', function(jquery) {
         jquery.ajax({

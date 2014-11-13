@@ -709,6 +709,19 @@
     if (!processBasicSiteConfiguration()) {
       log.error('Unable to load basic site configuration. Library can not initialize.')
     } else {
+      if (SC_LOCAL) {
+        console.log('Running sitecues in local mode.')
+        // Use these as defaults if we can't access hosts.js because of
+        // Content Security Policy. Having this backup default allows us to paste
+        // sitecues into the console of sites with a CSP.
+        window.sitecues.libConfig = {
+          hosts: {
+            up : "up.dev.sitecues.com",  // Should not be used in local mode
+            ws: "ws.dev.sitecues.com"  // Used for audio only
+          }
+        };
+      }
+
       processLibraryConfiguration(function(err) {
         if (err) {
           log.error('Unable to load library configuration. Library can not initialize.')

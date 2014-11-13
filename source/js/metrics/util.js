@@ -11,10 +11,18 @@ sitecues.def('metrics/util', function (metricsUtil, callback) {
     sitecues.use('conf/site', 'jquery', 'ui', 'user', function(site, $) {
 
         metricsUtil.send = function(instance) {
+          if (SC_LOCAL) {
+            // Cannot save to server when we have no access to it
+            // Putting this condition in allows us to paste sitecues into the console
+            // and test it on sites that have a content security policy
+            return;
+          }
+
             // Send data in JSON format to backend using end point.
             var siteId =  site.get('site_id');
             // Update timestamp before send.
             metricsUtil.update(instance, {'client_time_ms': +new Date});
+
             var request = $.ajax({
                 xhrFields: {
                   withCredentials: true

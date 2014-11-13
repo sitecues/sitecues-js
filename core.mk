@@ -24,6 +24,13 @@ else
 	custom-suffix-upper=-$(shell echo $(custom-name) | $(to-upper))
 endif
 
+ifeq ($(sc-local), true)
+	# Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
+	extra-debug-flags="SC_LOCAL=true,"
+else
+	extra-debug-flags="SC_LOCAL=false,"
+endif
+
 # Make a build-specific version.
 custom-version=$(version)$(custom-suffix-upper)
 
@@ -113,7 +120,7 @@ build:
 
 	@mkdir -p $(build-dir)/compile/js
 
-	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false -o $(build-dir)/compile/js/sitecues.js $(files)
+	@uglifyjs -m -c dead_code=true --define SC_DEV=false,SC_UNIT=false,SC_LOCAL=false -o $(build-dir)/compile/js/sitecues.js $(files)
 
 #Copy files for Source-Maps
 
@@ -159,7 +166,7 @@ debug:
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 
-	@echo "SC_DEV=true,SC_UNIT=true,exports={}," > $(build-dir)/compile/js/sitecues.js
+	@echo "SC_DEV=true,SC_UNIT=true,"$(extra-debug-flags)"exports={}," > $(build-dir)/compile/js/sitecues.js
 	@(awk 'FNR==1{print ""}1' $(files)) >> $(build-dir)/compile/js/sitecues.js
 
 	@mkdir -p $(build-dir)/etc/js
@@ -185,8 +192,6 @@ debug:
 	@echo
 	@echo "===== VERSION: $(custom-version)"
 	@echo
-
-
 
 ################################################################################
 # TARGET: package

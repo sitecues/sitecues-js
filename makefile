@@ -308,3 +308,12 @@ stop-all-services: stop-testsite
 .no-clean-deps:
 	@echo "Cleaning dependencies disabled."
 
+################################################################################
+# TARGET: local -- allows sitecues to be used locally or pasted into a console
+################################################################################
+local: $(_force-deps-refresh) $(_build_lint_dep)
+	@echo
+	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
+		$(MAKE) --no-print-directory -f core.mk debug sc-local=true custom-config-name=$$_CUSTOM_CONF_NAME ; \
+	done
+
