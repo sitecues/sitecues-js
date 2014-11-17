@@ -38,6 +38,14 @@ sitecues.def('conf/site', function (site, callback) {
       if (isFetched) {
         return; // Already fetched
       }
+
+      if (SC_LOCAL) {
+        // Cannot save to server when we have no access to it
+        // Putting this condition in allows us to paste sitecues into the console
+        // and test it on sites that have a content security policy
+        return;
+      }
+
       // Trigger the initial fetch.
       $.ajax({
         // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
