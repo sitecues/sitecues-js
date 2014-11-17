@@ -1069,6 +1069,7 @@ sitecues.def('zoom', function (zoom, callback) {
         var newRect = getAbsoluteRect(node),
           style = getComputedStyle(node);
         if (willAddRect(newRect, node, style, parentStyle, isStrict)) {
+          console.log(node);
           addRect(sumRect, newRect);
           visibleNodes.push({ domNode: node, rect: newRect });
           return;  // Valid rectangle added. No need to walk into children.
