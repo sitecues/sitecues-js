@@ -62,6 +62,7 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
+	source/js/labs.js \
 	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \

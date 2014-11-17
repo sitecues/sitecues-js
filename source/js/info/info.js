@@ -49,7 +49,7 @@ sitecues.def('info', function(info, callback) {
       DIMMER_SPEED = 500,
       addCloseButtonTimer;
 
-    function showModal(pageName) {
+    function showModal(pageName, anchor) {
 
       function addParam(name, value) {
         return name + '=' + encodeURIComponent(value) + '&'
@@ -62,7 +62,8 @@ sitecues.def('info', function(info, callback) {
           addParam('sc_url', sitecuesJsUrl) +
           addParam('site_id', site.get('site_id')) +
           addParam('site_url', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
-          addParam('prefs', window.localStorage.sitecues);
+          addParam('prefs', window.localStorage.sitecues) +
+          anchor;
 
       $iframe = $('<iframe>')
         .attr('src', pageUrl)
@@ -157,11 +158,14 @@ sitecues.def('info', function(info, callback) {
     }
 
 
-    function showHelp() {
-      showModal('help')
+    // jumpTo can be to a named anchor or id in the document, e.g. #keyboard
+    function showHelp(jumpToAnchor) {
+      showModal('help', jumpToAnchor || '');
     }
 
     sitecues.on('info/help', showHelp);
+
+    sitecues.showHelp = showHelp;
 
     callback();
   });

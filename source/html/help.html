@@ -41,7 +41,6 @@
     // send a message to the parent window if escape is pressed
     window.addEventListener('keydown', function(evt) {
         if (evt.keyCode === 27) {
-            console.log(siteUrl);
             window.top.postMessage('sc-close-iframe', siteUrl);
         }
     });
@@ -168,6 +167,7 @@
     <li>Press <kbd>Spacebar</kbd> a second time to One-Touch Read the highlighted area.</li>
     <li><kbd>Alt+S</kbd> to turn speech on or off</li>
     <li><kbd>Escape</kbd> to close One-Touch Read or to clear highlighting</li>
+    <li><kbd>H</kbd> / <kbd>Shift+H</kbd> to move forwards/backwards by heading</li>
 </ul>
 </body>
 <script>

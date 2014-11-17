@@ -1,7 +1,8 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
-    'mouse-highlight/picker', 'zoom', 'util/geo', function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo) {
+    'mouse-highlight/picker', 'zoom', 'util/geo', 'labs',
+    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, labs) {
 
     var STEP_SIZE_VERT = 18,
       STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -40,7 +41,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
         function (fn) {
           return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
-        };
+        },
+      isNavigationEnabled = labs.isEnabled('arrowKeyNav');
 
     // Move the highlight in the direction requested
     // We start with a point in the middle of the highlight
@@ -106,7 +108,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         return; // HLB could scroll -- finish
       }
 
-      performMovement(nextMove);
+      isNavigationEnabled && performMovement(nextMove);
     }
 
     // TODO Use bottoms of lines when scrolling down, so that the bottom of a line
@@ -677,7 +679,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // Has an HLB or a highlight -- toggle HLB
         sitecues.emit('hlb/toggle');
       }
-      else {
+      else if (isNavigationEnabled) {
         // No highlight -- make one
         sitecues.emit('mh/autopick');
       }

@@ -4,7 +4,7 @@ sitecues.def('badge', function(badge, callback) {
 
     // use jquery, we can rid off this dependency
     // if we will start using vanilla js functions
-    sitecues.use('jquery', 'panel', 'html-build', function($, panel, htmlBuild) {
+    sitecues.use('jquery', 'panel', 'html-build', 'labs', function($, panel, htmlBuild, labs) {
 
         // This property is used when a site wants to use an existing element as a badge, rather than the standard sitecues one.
         var BADGE_ID = 'sitecues-badge',
@@ -50,7 +50,9 @@ sitecues.def('badge', function(badge, callback) {
           panel.parent = $badge;
           $badge.hover(setDefaultEventOver, setDefaultEventLeave);
 
-          addAccessibility($badge);
+          if (labs.isEnabled('arrowKeyNav')) {
+            addAccessibility($badge);
+          }
         }
 
         function onBadgeKey(evt) {

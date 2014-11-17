@@ -416,11 +416,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var newBgPos = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
         newBg ='url("data:image/svg+xml,' + encodeURI(svgMarkup) + '") no-repeat ' + newBgPos + ' scroll',
         origStyle = traitcache.getStyle(element),
-        origBg = origStyle.background,
         // Remove color and other properties from the original background string, if they don't go into the shorthand background property
-        origBgShorthandProperties = origBg.substring(origBg.indexOf(')') + 1, origBg.lastIndexOf('/') ),
+        origBgShorthandProperties = origStyle.backgroundImage !== 'none' &&
+          ',' + origStyle.backgroundImage + ' ' + origStyle.backgroundRepeat + ' ' +
+            origStyle.backgroundAttachment + ' ' + origStyle.backgroundPosition,
         // Put new background behind old one if it exists -- all browsers in our matrix support multiple backgrounds
-        compositeBg = newBg + ',' + origBgShorthandProperties;
+        compositeBg = newBg + origBgShorthandProperties;
 
       style.backgroundOrigin = 'border-box,' + origStyle.backgroundOrigin;
       style.backgroundClip = 'border-box,' + origStyle.backgroundClip;
