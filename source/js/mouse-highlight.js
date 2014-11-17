@@ -418,9 +418,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         origStyle = traitcache.getStyle(element),
         origBg = origStyle.background,
         // Remove color and other properties from the original background string, if they don't go into the shorthand background property
-        origBgShorthandProperties = origBg.substring(origBg.indexOf(')') + 1, origBg.lastIndexOf('/') ),
+        origBgShorthandProperties = origStyle.backgroundImage !== 'none' &&
+          ',' + origBg.substring(origBg.indexOf(')') + 1, origBg.lastIndexOf('/') ),
         // Put new background behind old one if it exists -- all browsers in our matrix support multiple backgrounds
-        compositeBg = newBg + ',' + origBgShorthandProperties;
+        compositeBg = newBg + origBgShorthandProperties;
 
       style.backgroundOrigin = 'border-box,' + origStyle.backgroundOrigin;
       style.backgroundClip = 'border-box,' + origStyle.backgroundClip;
