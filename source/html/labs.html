@@ -7,7 +7,8 @@
     sitecues.config = {
       iframe: 1,
       isFluid: 1,
-      maxRewrapZoom: 3
+      maxRewrapZoom: 3,
+      site_id: 's-e8f9c7ca'
     };
 
     sitecues.ready = onSitecuesReady;
@@ -50,10 +51,6 @@
   <script data-provider="sitecues" type="text/javascript">
     // DO NOT MODIFY THIS SCRIPT WITHOUT ASSISTANCE FROM SITECUES
     var sitecues = window.sitecues || {};
-
-    sitecues.config = {
-      site_id: 's-e8f9c7ca'
-    };
 
     (function () {
       var script = document.createElement('script'),
@@ -277,7 +274,7 @@
   // Badge
   var badgeContainer = document.getElementById('sitecues-badge-container');
   var badgeImage = document.createElement('img');
-  badgeImage.src = 'http://js.sitecues.com/images/s-e8f9c7ca/sitecues-badge.png';
+  badgeImage.src = 'http://js.sitecues.com/images/' + sitecues.config.site_id + '/sitecues-badge.png';
   badgeImage.id = 'sitecues-badge';
   badgeImage.setAttribute('alt', 'Press enter for sitecues keyboard help');
   badgeContainer.appendChild(badgeImage);
