@@ -88,7 +88,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           hlbElementRangeRect = document.createRange(),
           hlbElementRangeWidth,
           hlbElementContentRangeWidth,
-          borderLeftAndRight = parseFloat($hlbElement.css('borderWidth')) * 2;
+          borderLeftAndRight = parseFloat($hlbElement[0].style.borderWidth) * 2;
 
       hlbElementRangeRect.selectNode($hlbElement[0]);
 
@@ -276,8 +276,6 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           'max-width': characterWidthLimit + 'ch'
         });
 
-        // Setting the width requires checking if content does not overflow horizontally
-        fixOverflowWidth($hlbElement);
       }
 
     }
@@ -630,9 +628,9 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       // Limit the width of the HLB to a maximum of CHAR_WIDTH_LIMIT characters.
       limitWidth($originalElement, $hlbElement, CHAR_WIDTH_LIMIT);
 
-      fixOverflowWidth($hlbElement);
-
       limitChildWidth($hlbElement);
+
+      fixOverflowWidth($hlbElement);
 
       fixNegativeMargins($hlbElement, initialHLBRect);
 
