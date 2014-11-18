@@ -88,7 +88,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
           hlbElementRangeRect = document.createRange(),
           hlbElementRangeWidth,
           hlbElementContentRangeWidth,
-          borderLeftAndRight = parseFloat($hlbElement[0].style.borderWidth) * 2;
+          borderLeftAndRight = (parseFloat($hlbElement.css('borderWidth')) || 0) * 2;
 
       hlbElementRangeRect.selectNode($hlbElement[0]);
 
