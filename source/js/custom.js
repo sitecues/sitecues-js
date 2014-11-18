@@ -1,5 +1,6 @@
 /**
  * Custom.js - Please make sure this remains the first script after core.js in the build process
+ * This is used for custom builds on a per-website/customer basis. See custom-scripts/
  */
 sitecues.def('custom', function (custom, callback) {
   
