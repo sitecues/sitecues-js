@@ -77,31 +77,13 @@ describe('mouse-highlight', function () {
       expect(state.doUseOverlayForBgColor).to.be.true;
       done();
     });
-    it('should have semi-transparent bgColor and doUseOverlayForBgColor=true if picked element has background sprite', function (done) {
+    it('should have semi-transparent bgColor and doUseOverlayForBgColor=false if picked element has background sprite', function (done) {
       var COLOR_WITH_ALPHA_PREFIX = 'rgba(',
         picked = $('<div>'),
         styles = [{backgroundImage: 'list-bullet.png', backgroundRepeat: 'no-repeat'}];
       mh.updateColorApproach(picked, styles);
       var state = mh.getHighlight();
       expect(state.bgColor.indexOf(COLOR_WITH_ALPHA_PREFIX) === 0 ).to.be.true;
-      expect(state.doUseOverlayForBgColor).to.be.true;
-      done();
-    });
-    it('should have no bgColor and doUseOverlayForBgColor=false if has a background image', function (done) {
-      var picked = $('<div>'),
-        styles = [{'backgroundImage': 'gradient.png'}];
-      mh.updateColorApproach(picked, styles);
-      var state = mh.getHighlight();
-      expect(state.bgColor).to.be.equal('');
-      expect(state.doUseOverlayForBgColor).to.be.false;
-      done();
-    });
-    it('should have no bgColor and doUseOverlayForBgColor=false if image is picked', function (done) {
-      var picked = $('<img>'),
-        styles = [{}];
-      mh.updateColorApproach(picked, styles);
-      var state = mh.getHighlight();
-      expect(state.bgColor).to.be.equal('');
       expect(state.doUseOverlayForBgColor).to.be.false;
       done();
     });
@@ -177,61 +159,11 @@ describe('mouse-highlight', function () {
     });
   });
 
-  describe('#show()', function () {
-    it('should not return true if there is no picked element', function (done) {
-      mh.state.picked = undefined;
-      expect(mh.show()).to.not.be.true;
-      done();
-    });
-    it('should not return true if mh.updateOverlayPosition returns false', function (done) {
-      var origMethod = mh.updateOverlayPosition;
-      mh.updateOverlayPosition = function () {
-        return false;
-      };
-      expect(mh.show()).to.not.be.true;
-      mh.updateOverlayPosition = origMethod;
-      done();
-    });
-  });
-
-  describe('#createNewOverlayPosition()', function () {
-    it('should return false if state.picked is null', function (done) {
-      mh.state.picked = null;
-      expect(mh.createNewOverlayPosition()).to.be.false;
-      done();
-    });
-    it('should return false if state.elementRect is false', function (done) {
-      mh.state.picked = $('<p>');
-      mh.state.elementRect = null;
-      expect(mh.createNewOverlayPosition(false)).to.be.false;
-      done();
-    });
-  });
-
-  // TODO why isn't spy working?
-  describe('#update()', function () {
-    it('should not call pickAfterShortWait() if mh.enabled is false', function (done) {
-      mh.enabled = false;
-      var pickSpy = sinon.spy(mh, 'pickAfterShortWait')
-      mh.update({});
-      //expect(pickSpy.calledOnce).to.be.false;
-      pickSpy.restore();
-      done();
-    });
-    it('should call pickAfterShortWait()', function (done) {
-      var pickSpy = sinon.spy(mh, 'pickAfterShortWait')
-      mh.update({});
-      //expect(pickSpy.calledOnce).to.be.true;
-      pickSpy.restore();
-      done();
-    });
-  });
-
-  describe('#enableIfAppropriate()', function () {
+  describe('#resumeAppropriately()', function () {
     it('should invoke mh.show', function (done) {
       mh.enabled = true;
       mh.state.picked = undefined;
-      mh.enableIfAppropriate();
+      mh.resumeAppropriately();
       done();
     });
   });

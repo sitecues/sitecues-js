@@ -47,3 +47,5 @@ exports.hasRaisedZIndex = function(style, parentStyle) {
 }
 
 exports.getBulletWidth = function() { return 0; }
+
+exports.drawRect = function() { }

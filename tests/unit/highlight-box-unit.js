@@ -2,7 +2,6 @@
 var HLB_MODULE_PATH             = '../../source/js/highlight-box',
 
     // Mocked source files that are highlight-box dependencies.
-    HLB_KEYS_MODULE_PATH           = './data/modules/hlb/navkeys',
     HLB_POSITIONING_MODULE_PATH    = './data/modules/hlb/positioning',
     HLB_DIMMER_MODULE_PATH         = './data/modules/hlb/dimmer',
     HLB_STYLING_MODULE_PATH        = './data/modules/hlb/styling',
@@ -12,7 +11,6 @@ var HLB_MODULE_PATH             = '../../source/js/highlight-box',
 
     // Load 'em up.
     hlb              = require(HLB_MODULE_PATH),
-    hlbKeys          = require(HLB_KEYS_MODULE_PATH),
     hlbPositioning   = require(HLB_POSITIONING_MODULE_PATH),
     hlbStyling       = require(HLB_STYLING_MODULE_PATH),
     dimmer           = require(HLB_DIMMER_MODULE_PATH),
@@ -324,132 +322,6 @@ describe('highlight-box', function() {
 
   // The onTargetChange() is a mouse move callback whose purpose is to close the HLB if the state of the HLB allows it.
   describe('#onTargetChange', function () {
-
-    it('Does not invoke closeHLB() if preventDeflationFromMouseout is true because we do not want to ' +
-       'close the HLB if the mouse was never within the bounding rect of the HLB', function (done) {
-
-      var emptyObject = {},
-
-          // TODO : I couldn't find a way to listen for closeHLB(), because it is private.
-          //        For now, listen for the function below to be called because it is called
-          //        by closeHLB().
-          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
-      hlb.setPreventDeflationFromMouseout(true);
-
-      hlb.onTargetChange(emptyObject);
-
-      expect(closeHLBSpy.calledOnce).to.be.false;
-
-      closeHLBSpy.restore();
-
-      done();
-
-    });
-
-    it('Does not invoke closeHLB() if isSticky is true because isSticky is togglable by a public method '  +
-       'on the sitecues object, and we want to be able to set this to true to force the HLB to stay open ' +
-       'for debugging and development purposes.', function (done) {
-
-      var emptyObject = {},
-
-          // NOTE : I couldn't find a way to listen for closeHLB(), because it is private.
-          //        For now, listen for the function below to be called because it is called
-          //        by closeHLB().
-          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
-      hlb.setPreventDeflationFromMouseout(false);
-
-      sitecues.toggleStickyHLB();
-
-      hlb.onTargetChange(emptyObject);
-
-      expect(closeHLBSpy.calledOnce).to.be.false;
-
-      closeHLBSpy.restore();
-      sitecues.toggleStickyHLB();
-
-      done();
-
-    });
-
-    it('Does not invoke closeHLB() if the HLB element is passed as a parameter because we do not want to close ' +
-       'the HLB if the user mouses over the HLB', function (done) {
-
-        var mockedNativeMousemoveEventObject = {
-              'target': win.document.getElementById('paragraph')
-            },
-            closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
-
-        hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-        hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-        hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
-        hlb.setPreventDeflationFromMouseout(false);
-
-        hlb.onTargetChange(mockedNativeMousemoveEventObject);
-
-        expect(closeHLBSpy.calledOnce).to.be.false;
-
-        closeHLBSpy.restore();
-
-        done();
-
-    });
-
-    it('Does not invoke closeHLB() if the mouse button is pressed because we want the user ' +
-       'to be able to click and drag text for copy and pasting', function (done) {
-
-      var mockedNativeMousemoveEventObject = {
-            'which': 1
-          },
-          closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
-
-      hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
-      hlb.setPreventDeflationFromMouseout(false);
-
-      hlb.onTargetChange(mockedNativeMousemoveEventObject);
-
-      expect(closeHLBSpy.calledOnce).to.be.false;
-
-      closeHLBSpy.restore();
-
-      done();
-
-    });
-
-    it('Does not invoke closeHLB() if the current mouse coordinates are within the bounding ' +
-       'client rect of the HLB because we do not want mouse movement inside the HLB to close the HLB',
-      function (done) {
-
-        var mockedNativeMousemoveEventObject = {
-              'clientX': 0,
-              'clientY': 0
-            },
-            closeHLBSpy = sinon.spy(hlbKeys, 'enableWheelScroll');
-
-        hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-        hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-        hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
-        hlb.setPreventDeflationFromMouseout(false);
-
-        hlb.onTargetChange(mockedNativeMousemoveEventObject);
-
-        expect(closeHLBSpy.calledOnce).to.be.false;
-
-        closeHLBSpy.restore();
-
-        done();
-
-    });
-
     it('Invokes closeHLB() if the current mouse coordinates are outside the bounding client rect of the HLB because ' +
        'the HLB should close if the user moves outside the bounding rect of the HLB if the user has already had their ' +
        'mouse within the coordinates of the HLB bounding rect', function (done) {
