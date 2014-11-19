@@ -23,10 +23,12 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @returns {Boolean}
    */
   ls.isSupported = function() {
+    var testKey = 'test', storage = window.sessionStorage;
     try {
-      // Check for support
-      return 'localStorage' in window && window['localStorage'] !== null;
-    } catch (e) {
+      storage.setItem(testKey, '1');
+      storage.removeItem(testKey);
+      return true;
+    } catch (error) {
       SC_DEV && console.log('Local Storage is not supported or cannot be used.');
       return false;
     }
