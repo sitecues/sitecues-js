@@ -248,9 +248,12 @@ sitecues.def('cursor', function (cursor, callback) {
 
     function getCursorZoom(pageZoom) {
       var zoomDiff = pageZoom - zoomModule.min,
-          CURSOR_ZOOM_MAX = zoomModule.max + 1,
-          CURSOR_ZOOM_MIN = zoomModule.min,
-          CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
+      // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
+      // when on Windows OS, otherwise the cursor intermittently can become a large black square.
+      // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
+      CURSOR_ZOOM_MAX = platform.os.isWin? 3.5 : 4,
+      CURSOR_ZOOM_MIN = 1,
+      CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 
       // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
       return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
