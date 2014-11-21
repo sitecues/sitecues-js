@@ -72,6 +72,7 @@ files=\
 	source/js/audio/safari-player.js \
 	source/js/audio.js \
 	source/js/audio/audio-cues.js \
+	source/js/zoom-forms.js \
 	source/js/zoom.js \
 	source/js/slider.js \
 	source/js/panel.js \

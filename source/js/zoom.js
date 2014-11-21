@@ -7,8 +7,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'platform', 'util/common',
-    function ($, conf, platform, common) {
+  sitecues.use('jquery', 'conf', 'platform', 'util/common', 'zoom-forms',
+    function ($, conf, platform, common, zoomForms) {
       
       // Default zoom configuration
       
@@ -655,6 +655,8 @@ sitecues.def('zoom', function (zoom, callback) {
         // Restore mouse cursor events and CSS behavior
         $body.css('pointerEvents', '');
 
+        zoomForms.applyZoomFixes(completedZoom);
+
         // When zooming is finished, we will restrict the width
         // Un-Blur text in Chrome
         repaintToEnsureCrispText();
@@ -818,68 +820,6 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
-      // Add useful zoom fixes to a stylesheet for the entire document
-      function getZoomStyleSheetFixes() {
-        if (platform.browser.isIE) {
-          return ''; // IE gets it right!!!
-        }
-
-        // Native form control CSS fixes -- automagically fixes the form appearance issues in WebKit/FF when zooming.
-        // It's especially difficult to get the combobox popup list to display with the right size/location for WebKit/FF
-
-        var
-          // Init variables used by both WebKit and Firefox
-          comboBoxSelector = 'select[size="1"],select:not([size])', // selects dropdowns but not in-page listboxes (select size > 1)
-          scaleCss = 'transform:scale(' + 1/completedZoom +');',
-          vertMargin = (-16 * completedZoom) + 'px ',
-          rightMargin = (-150 * (completedZoom -1)) + 'px ',
-          marginCss = 'margin:' + vertMargin + rightMargin + vertMargin + '0px;',
-          widthCss = 'width:' + (150 * completedZoom) + 'px;',
-          fontSizeCss = 'font-size:' + Math.round(completedZoom * 85) + '% !important';
-
-        // ---------- WebKit ------------
-
-        if (platform.browser.isWebKit) {
-          var borderColorCss = 'border-color:rgb(167,167,167);', // Tweaking the color makes WebKit render non-native version
-            transformOriginCss = 'transform-origin:0% 78%;';
-          return '' +
-            // General form control rules
-            comboBoxSelector + ',input,button {transform:scale3d(1,1,1);}\n' +
-            // <select size="1"> rules
-            comboBoxSelector +
-              '{-webkit-' +
-                scaleCss +
-                borderColorCss +
-                transformOriginCss +
-                marginCss +
-                widthCss +
-                fontSizeCss +
-              '}\n';
-        }
-
-        // ---------- Firefox ------------
-
-        var vertPad = (3 * completedZoom) + 'px ',
-          rightPad = (24 * (completedZoom-1)) + 'px ',
-          leftPad = ((completedZoom - 1)* 6) + 'px;',
-          paddingCss = 'padding:' + vertPad + rightPad + vertPad + leftPad,
-          transformOriginCss = 'transform-origin:-.9% 66.5%;';
-
-        return '' +
-          // <select size="1"> rules
-          comboBoxSelector +
-          '{' +
-            scaleCss +
-            transformOriginCss +
-            paddingCss +
-            marginCss +
-            widthCss +
-            fontSizeCss +
-          '}\n' +
-          // <option> rules
-          comboBoxSelector + '>option{' + fontSizeCss + '}\n';
-      }
-
       // Add useful zoom fixes to the body's @style
       function getZoomBodyCSSFixes() {
         var css = {
@@ -899,7 +839,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Replace current zoom stylesheet or insert a new one with the
       // requested styles plus generic stylesheet fixes for the current configuration.
       function applyZoomStyleSheet(additionalCss) {
-        var styleSheetText = (additionalCss || '') + getZoomStyleSheetFixes();
+        var styleSheetText = additionalCss || '';
         if (styleSheetText) {
           if (!$zoomStyleSheet) {
             $zoomStyleSheet = $('<style>').appendTo('head')

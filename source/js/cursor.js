@@ -248,8 +248,8 @@ sitecues.def('cursor', function (cursor, callback) {
 
     function getCursorZoom(pageZoom) {
       var zoomDiff = pageZoom - zoomModule.min,
-          CURSOR_ZOOM_MAX = zoomModule.max + 1,
-          CURSOR_ZOOM_MIN = zoomModule.min,
+          CURSOR_ZOOM_MAX = platform.os.isWin ? 3.5 : 4,
+          CURSOR_ZOOM_MIN = 1,
           CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 
       // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
