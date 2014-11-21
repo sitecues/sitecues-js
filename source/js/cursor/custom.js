@@ -30,7 +30,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         }
       },
       MAX_CURSOR_SIZE_DEFAULT = 128,
-      MAX_CURSOR_SIZE_WIN = 110;
+      MAX_CURSOR_SIZE_WIN = 71;
 
   sitecues.use('platform', function (platform) {
 
