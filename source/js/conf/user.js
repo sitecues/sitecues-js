@@ -19,13 +19,9 @@ sitecues.def('conf/user', function (userPrefs, callback) {
     // Second, load the persisted user configuration from the user preferences server.
     sitecues.use('conf/user/server', function() { // server
 
-      // Thirds, load the user configuration provided in the page. These are (usually) provided as overrides
-      // in testing, and have precedence over any other user configuration.
-      sitecues.use('conf/user/provided', function() { // provided
+      // Finally, set the manager as the interface module for user setting.
+      callback(manager);
 
-        // Finally, set the manager as the interface module for user setting.
-        callback(manager);
-      });
     });
   });
 });
