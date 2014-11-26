@@ -43,7 +43,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
     customCursor.getUrl = function(type, sizeRatio, pixelRatio) {
 
       if (platform.browser.is === 'IE') {
-        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + Math.min(sizeRatio,3) + '.cur' );
+        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getIECursorSize(sizeRatio) + '.cur' );
       }
 
       var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
@@ -54,6 +54,11 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
 
       return 'data:image/svg+xml,' + escape( cursorSvg );
     };
+
+    function getIECursorSize(sizeRatio) {
+      var roundedToTenths = Math.round(sizeRatio * 10) / 10;
+      return Math.min(roundedToTenths, 3);
+    }
 
     // Done.
     callback();
