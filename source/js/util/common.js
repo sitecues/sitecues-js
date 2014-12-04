@@ -7,13 +7,6 @@ sitecues.def('util/common', function (common, callback) {
    // Define dependency modules.
   sitecues.use('jquery', 'platform', function ($, platform) {
 
-    common.transitionEndEvent = (function() {
-      if (platform.browser.isChrome || platform.browser.isSafari) {
-        return 'webkitTransitionEnd';
-      }
-      return 'transitionend';
-    }());
-
     // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
     // Very strange behavior, might be worth filing a browser bug repport.
     // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
@@ -27,6 +20,8 @@ sitecues.def('util/common', function (common, callback) {
              (platform.browser.isFirefox && window.pageYOffset === 0);
 
     }());
+
+    common.transitionEndEvent = platform.browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
 
     /*
      * Check if two Javascript objects are equal.
