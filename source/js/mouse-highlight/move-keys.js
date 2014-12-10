@@ -1,8 +1,8 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
-    'mouse-highlight/picker', 'zoom', 'util/geo', 'labs',
-    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, labs) {
+    'mouse-highlight/picker', 'zoom', 'util/geo', 'labs', 'fixed-fixer',
+    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, labs, fixedFixer) {
 
     var STEP_SIZE_VERT = 18,
       STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -248,9 +248,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     }
 
     function performMovement(nextMove) {
-      if (hlbElement) {
-        prepareHLBMovement();
-      }
+      prepareMovement();
 
       var type = nextMove.keyName,
         isShifted = nextMove.isShifted;
@@ -276,16 +274,21 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
     }
 
-    // Will move HLB instead of highlight
-    function prepareHLBMovement() {
-      // Hide HLB so it doesn't interfere with getElementFromPoint
-      hlbElement.style.display = 'none'
+    // Prepare movement by hiding existing HLB and fixed position content so they do not interfere with elementFromPoint()
+    function prepareMovement() {
+      // Hide current HLB so it doesn't interfere with getElementFromPoint
+      if (hlbElement) {
+        hlbElement.style.display = 'none'
+      }
+      fixedFixer.setAllowMouseEvents(false);
     }
 
     function fail() {
       SC_DEV && console.log('Fail');
       navQueue = [];  // Don't keep trying
       setIsScrollTrackingEnabled(true);
+
+      fixedFixer.setAllowMouseEvents(true);
 
       if (hlbElement) {
         SC_DEV && console.log('Close HLB');
@@ -295,6 +298,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
     function succeed(doAllowRepeat) {
       SC_DEV && console.log('Succeed');
+
+      fixedFixer.setAllowMouseEvents(true);
+
       if (hlb.getElement()) {
         // Open new HLB
         SC_DEV && console.log('Retarget HLB');

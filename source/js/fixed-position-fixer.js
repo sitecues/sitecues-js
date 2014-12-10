@@ -11,7 +11,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
     function ($, zoomMod, platform, styleService) {
 
       var isOn = false,
-        fixedSelector            = '',   //CSS selectors & properties that specify position:fixed
+        fixedSelector            = null,   //CSS selectors & properties that specify position:fixed
         lastAdjustedElements     = $(),
         MAX_ZOOM_FIXED_CONTENT = 1.8,
         // These browsers need the position of fixed elements to be adjusted on the fly.
@@ -84,10 +84,24 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
       // Get a CSS selector matching all elements that can be position: fixed
       function getFixedPositionSelector() {
+        if (fixedSelector !== null) {
+          return fixedSelector;  // Return cached selector if it already exists
+        }
         var styles = styleService.getAllMatchingStyles('position', 'fixed'),
           selectors = styles.map(function(style) { return style.rule.selectorText; });
-        return selectors.join();
+        fixedSelector = selectors.join();
+        return fixedSelector;
       }
+
+      // Show or hide fixed position elements
+      fixedfixer.setAllowMouseEvents = function(doAllowMouse) {
+        var selector = getFixedPositionSelector(),
+          supportsPointerEventsCss = !platform.browser.isIE || platform.browser.version > 10,
+          applyCssProp = supportsPointerEventsCss ? 'pointerEvents' : 'none',
+          applyCssValue = doAllowMouse ? '' : 'none';
+
+        $(selector).css(applyCssProp, applyCssValue);
+      };
 
       /**
        * Listens for events emitted by the cursor module, which indicates that new CSS has
@@ -99,9 +113,9 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
        */
       function initializeModule() {
         sitecues.on('style-service/ready', function () {
-          fixedSelector = getFixedPositionSelector();
-          if (fixedSelector) {
-            $(fixedSelector).css({
+          var selector = getFixedPositionSelector();
+          if (selector) {
+            $(selector).css({
               willChange: 'transform',
               transformOrigin: '0% 0%'
             });
