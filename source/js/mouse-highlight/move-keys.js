@@ -362,8 +362,10 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // *** Spread state for dots as we go farther out (how it fans out) ****
         // The minimum size of a row (spread is how far from the center do to venture on that row)
         minSpread = Math.max((isHorizMovement ? lastPickedRect.height : lastPickedRect.width) / 2, SPREAD_STEP_SIZE + 1),
-        // How many rows of points from the original aka how far from the original are we?
+        // How many pixels from the original screen coordinate ar we?
         distanceFromOriginal = 0,
+        // How many rows of points from the original aka how far from the original are we?
+        numberOfDotRowsChecked = 0,
         // How fast to pan -- if HLB we want to pan immediately (better UX)
         pixelsToPanPerMs = hlbElement ? PIXELS_TO_PAN_PER_MS_HLB_SEARCH : PIXELS_TO_PAN_PER_MS_HIGHLIGHT;
 
@@ -377,19 +379,17 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         return testPoint(x, y, $lastPicked, 'blue');
       }
 
-      function testNextRowOfPointsAt(x, y) {
-        ++distanceFromOriginal;
+      function testNextRowOfPointsAt(x, y, distance) {
+        ++ numberOfDotRowsChecked;
 
         var
           // Can we pick something from the center dot?
           $picked = testPoint(x, y, $lastPicked, 'red'),
-          stepSize = isHorizMovement ? STEP_SIZE_HORIZ : STEP_SIZE_VERT,
           // How far from center dot will we check?
-          spreadEnd = constrained(distanceFromOriginal * stepSize * SPREAD_SLOPE, minSpread, MAX_SPREAD),
+          spreadEnd = constrained(distance * SPREAD_SLOPE, minSpread, MAX_SPREAD),
           // These are to enable the cross-hatch pattern that allows fewer points to be more effective
-          toggleExtraX = 0,
           toggleExtraY = 0,
-          spreadStart = isHorizMovement ? (SPREAD_STEP_SIZE * ((distanceFromOriginal % 2) ? .7 : 1.2)) : SPREAD_STEP_SIZE;
+          spreadStart = isHorizMovement ? (SPREAD_STEP_SIZE * ((numberOfDotRowsChecked % 2) ? .7 : 1.2)) : SPREAD_STEP_SIZE;
 
         // Each iteration of this loop will test another dot on the current row of dots
         // spread out from the red center dot
@@ -402,8 +402,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           // Test dots in orthogonal directions from base direction of movement
           // Spreading out in a fan shape in the direction of travel
           $picked =
-            testPointIfOnscreen(x - isVertMovement * spreadDistance + toggleExtraX, y - isHorizMovement * spreadDistance + toggleExtraY) ||
-            testPointIfOnscreen(x + isVertMovement * spreadDistance + toggleExtraX, y + isHorizMovement * spreadDistance + toggleExtraY);
+            testPointIfOnscreen(x - isVertMovement * spreadDistance, y - isHorizMovement * spreadDistance + toggleExtraY) ||
+            testPointIfOnscreen(x + isVertMovement * spreadDistance, y + isHorizMovement * spreadDistance + toggleExtraY);
         }
 
         if ($picked &&
@@ -480,7 +480,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         window.scrollTo(attemptPanX, attemptPanY);
 
         // If we haven't found anything yet, check the next row of points
-        if (doPickNewHighlight && testNextRowOfPointsAt(x, y)) {
+        if (doPickNewHighlight && testNextRowOfPointsAt(x, y, distanceFromOriginal + pixelsToPan)) {
           // FOUND SOMETHING!
           return;
         }
@@ -525,7 +525,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           break;
         }
 
-        if (testNextRowOfPointsAt(x, y)) {
+        distanceFromOriginal += isHorizMovement ? STEP_SIZE_HORIZ : STEP_SIZE_VERT;
+        if (testNextRowOfPointsAt(x, y, distanceFromOriginal)) {
           break;
         }
       }
