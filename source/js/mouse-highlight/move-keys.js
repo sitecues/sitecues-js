@@ -42,7 +42,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         function (fn) {
           return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
         },
-      isNavigationEnabled = labs.isEnabled('arrowKeyNav');
+      isNavigationEnabled = true; // labs.isEnabled('arrowKeyNav');
 
     // Move the highlight in the direction requested
     // We start with a point in the middle of the highlight
