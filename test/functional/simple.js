@@ -600,36 +600,44 @@
                 //             assert.isNull(data, 'HLB no longer exists.');
                 //         });
                 // });
-                // test('HLB Respects Text', function () {
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .pressKeys(keys.ADD)
-                //             .end()                   // get out of the current element context
-                //         .sleep(2200)                 // TODO: change to a pollUntil helper, using sitecue.on('zoom', fn) to return true when zoom is done
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys(keys.SPACE)     // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //         .getVisibleText()
-                //         .then(function (text) {
-                //             assert.strictEqual(
-                //                 text,
-                //                 '(p1) Dr. Frankenstein\'s grandson, after years of living down the family ' +
-                //                 'reputation, inherits granddad\'s castle and repeats the experiments.',
-                //                 'The HLB should contain the same text as the picked element.'
-                //             );
-                //         });
-                // });
+                test('HLB Respects Text', function () {
+
+                    var selector = 'p',
+                        originalText;
+
+                    return this.remote               // represents the browser being tested
+                        .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
+                        .get(url)                    // navigate to the desired page
+                        .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
+                        .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
+                            .pressKeys(keys.ADD)     // unicode for: hit the + key!
+                            .pressKeys(keys.ADD)
+                            .end()                   // get out of the current element context
+                        .sleep(2200)                 // TODO: change to a pollUntil helper, using sitecue.on('zoom', fn) to return true when zoom is done
+                        .execute(                    // run the given code in the remote browser
+                            function (selector) {    
+                                sitecues.highlight(selector);
+                            },
+                            [selector]                 // list of arguments passed to the remote code
+                        )
+                        .findByCssSelector(selector)
+                            .getVisibleText()
+                            .then(function (text) {
+                                originalText = text;
+                            })
+                            .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
+                            .end()
+                        .setFindTimeout(2000)        // set the find timeout to be more strict
+                        .findById('sitecues-hlb')    // get the HLB!
+                            .getVisibleText()
+                            .then(function (text) {
+                                assert.strictEqual(
+                                    text,
+                                    originalText,
+                                    'The HLB must contain the same text as the picked element'
+                                );
+                            });
+                });
 
                 /////////////////////////////// ------- test boundary -------
 
