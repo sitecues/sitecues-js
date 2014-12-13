@@ -2,10 +2,19 @@
 // Other files can use this as an AMD module.
 
 define(
-    [], // dependencies
-    function () {
+    [   // dependencies...
+        'test/all'
+    ],
+    function (testSuites) {
 
-        var proxyPort = 9000;
+        var build = 'UNKNOWN',
+            proxyPort = 9000,
+            testDir = 'test/';
+
+        // make sure we are in Node and not a browser...
+        if (typeof process !== 'undefined' && process.env) {
+            build = process.env.BUILD || process.env.COMMIT || process.env.TRAVIS_COMMIT;
+        }
 
         return {
             proxyPort: proxyPort,
@@ -14,7 +23,8 @@ define(
             capabilities: {
                 // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
                 'name': 'Automated tests - sitecues.js',  // name of the test run, for logging purposes
-                'selenium-version': '2.43.1'           // request a version, which may not always be respected
+                'selenium-version': '2.43.1',             // request a version, which may not always be respected
+                'build': build                            // useful to log success history tied to code changes
             },
             // Places where unit and/or functional tests will be run...
             environments: [
@@ -41,33 +51,42 @@ define(
 
             maxConcurrency: 1,  // how many browsers may be open at once
 
+            // Specify which AMD module loader to use...
+            // useLoader: {
+
+            // }
             // Options to pass to the AMD module loader...
             loader: {
-
+                packages: [
+                    { name: 'unit', location: testDir + 'unit' },
+                    { name: 'functional', location: testDir + 'functional' }
+                ]
             },
 
             // Each cloud testing service has their own weird quirks and different APIs,
             // so load up the necessary configuration to talk to them...
             tunnel: 'NullTunnel',         // no tunnel (default, if none provided)
-            // tunnel: 'TestingBotTunnel';   // TestingBot
-            // tunnel: 'SauceLabsTunnel';    // SauceLabs
-            // tunnel: 'BrowserStackTunnel'; // BrowserStack
+            // tunnel: 'BrowserStackTunnel', // BrowserStack
+            // tunnel: 'SauceLabsTunnel',    // SauceLabs
+            // tunnel: 'TestingBotTunnel',   // TestingBot
             tunnelOptions: {
                 host: '127.0.0.1:4447'  // custom location to find the selenium server
                 // verbose: true           // more logging, only supported by BrowserStack
             },
 
             // These are unit tests, which check the APIs of our application...
-            suites: [
-                // 'test/unit/foobar'
-            ],
+            suites: testSuites.unit,
             // These are functional tests, which check the user-facing behavior of our application...
-            functionalSuites: [
-                'test/functional/simple'
-            ],
+            functionalSuites: testSuites.functional,
+
+            // Any test IDs ("suite name - test name") which do NOT match this regex will be skipped...
+            grep: /.*/,
 
             // The paths that match this regex will NOT be included in code coverage reports...
             excludeInstrumentation: /^(?:config|test|node_modules)\//
-        }
+
+            // Output test results using these mechanisms...
+            // reporters: ['console']
+        };
     }
 );
