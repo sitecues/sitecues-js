@@ -1,16 +1,17 @@
-*.iml
-*.ipr
-*.iws
+config/.env
 .DS_Store
-.pip
 node_modules
 npm-debug.log
 target
 tmp
 var
+sitecues-load-script.js
+*.iml
+*.ipr
+*.iws
+.pip
 .vagrant
 .idea
-sitecues-load-script.js
 
 # Fetch Avatars is used in Gource.
 # ================================
@@ -29,8 +30,6 @@ howards-jokes.js.
 tools/site/generate-cursors/cursor_output/
 /nbproject/private/
 
-# Stops auto-generated reports from being commited, such as unit-test-coverage
-# ============================================================================
+# Stops auto-generated reports from being commited, such as unit-test-coverage.
+# =============================================================================
 report
-
-
