@@ -24,7 +24,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       isKeyRepeating,
       repeatDelayTimer,
       MAX_PIXELS_TO_PAN = 999,
-      VISIBLE_SPACE_AROUND_HIGHLIGHT = 50,
       HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
       SCROLL_EXTRA_PIXELS = 100,
       MH_EXTRA_WIDTH = 10, // Amount to account for padding/border of mouse highlight
@@ -42,7 +41,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         function (fn) {
           return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
         },
-      isNavigationEnabled = true; // labs.isEnabled('arrowKeyNav');
+      isNavigationEnabled = true, // labs.isEnabled('arrowKeyNav'),
+      SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
     // Move the highlight in the direction requested
     // We start with a point in the middle of the highlight
@@ -338,21 +338,26 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // ** Panning state **
         // Starting pan time and location
         startPanTime,
-        lastPanX = window.pageXOffset,
-        lastPanY = window.pageYOffset,
         // Farthest panning could possibly go
         maxPanUp = 0,
         maxPanLeft = zoomMod.getBodyLeft(),
         maxPanRight = zoomMod.getBodyRight() - winRight,
-        maxPanDown = document.body.scrollHeight - winBottom,
+        maxPanDown = document.documentElement.scrollHeight - winBottom,
         // Target end point for panning
         targetPanLeft,
         targetPanRight,
         targetPanUp,
         targetPanDown,
+        lastPanX,
+        lastPanY;
 
+      updateLastPanXY();
+
+      var
         // *** Highlight state ***
-        lastPickedRect = getHighlightRect(highlight, lastPanX, lastPanY),
+        origPanX = lastPanX,
+        origPanY = lastPanY,
+        origPickedRect = getHighlightRect(highlight, origPanX, origPanY),
         doPickNewHighlight,
 
         // *** Current position and direction of dot movement ***
@@ -360,14 +365,14 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         isVertMovement = !isHorizMovement,
         // x start point will be at the left edge, middle or right edge
         // depending on whether horizDir is -1, 0 or 1
-        x = Math.floor(constrained(lastPickedRect.left + (1 + horizDir) * lastPickedRect.width / 2, 0, winRight)),
+        x = Math.floor(constrained(origPickedRect.left + (1 + horizDir) * origPickedRect.width / 2, 0, winRight)),
         // y start point will be at the top edge, middle or bottom edge
         // depending on whether vertDir is -1, 0 or 1
-        y = Math.floor(constrained(lastPickedRect.top + (1 + vertDir) * lastPickedRect.height / 2, 0, winBottom)),
+        y = Math.floor(constrained(origPickedRect.top + (1 + vertDir) * origPickedRect.height / 2, 0, winBottom)),
 
         // *** Spread state for dots as we go farther out (how it fans out) ****
         // The minimum size of a row (spread is how far from the center do to venture on that row)
-        minSpread = Math.max((isHorizMovement ? lastPickedRect.height : lastPickedRect.width) / 2, SPREAD_STEP_SIZE + 1),
+        minSpread = Math.max((isHorizMovement ? origPickedRect.height : origPickedRect.width) / 2, SPREAD_STEP_SIZE + 1),
         // How many pixels from the original screen coordinate ar we?
         distanceFromOriginal = 0,
         // How many rows of points from the original aka how far from the original are we?
@@ -412,26 +417,32 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
             testPointIfOnscreen(x + isVertMovement * spreadDistance, y + isHorizMovement * spreadDistance + toggleExtraY);
         }
 
-        if ($picked &&
-          isValidDirectionForNewHighlight(lastPickedRect, $picked, lastPanX, lastPanY, horizDir, vertDir) &&
+        if (!$picked) {
+          return;
+        }
+
+        updateLastPanXY();
+
+        if (isValidDirectionForNewHighlight(origPickedRect, $picked, origPanX, origPanY, lastPanX, lastPanY, horizDir, vertDir) &&
           tryHighlight($picked)) {
+
           // Pan until highlight is fully visible onscreen (if necessary)
           var pickedRect = mh.getHighlight().fixedContentRect;
 
-          if (horizDir < 0 && pickedRect.left < 0) {
+          if (horizDir < 0 && pickedRect.left < SAFE_ZONE) {
             // Pan left far enough so that full width of the highlight is visible
-            targetPanLeft = lastPanX + pickedRect.left - VISIBLE_SPACE_AROUND_HIGHLIGHT;
+            targetPanLeft = lastPanX + pickedRect.left - SAFE_ZONE;
           }
-          else if (horizDir > 0 && pickedRect.right > winRight) {
+          else if (horizDir > 0 && pickedRect.right > winRight - SAFE_ZONE) {
             // Pan right far enough so that full width of the highlight is visible
-            targetPanRight = lastPanX + pickedRect.right - winRight + VISIBLE_SPACE_AROUND_HIGHLIGHT;
+            targetPanRight = lastPanX + pickedRect.right - winRight + SAFE_ZONE;
           }
-          else if (vertDir < 0 && pickedRect.top < 0) {
+          else if (vertDir < 0 && pickedRect.top < SAFE_ZONE) {
             // Pan up far enough so that the full height of the highlight is visible
-            targetPanUp = lastPanY + pickedRect.top - VISIBLE_SPACE_AROUND_HIGHLIGHT;
+            targetPanUp = lastPanY + pickedRect.top - SAFE_ZONE;
           }
-          else if (vertDir > 0 && pickedRect.bottom > winBottom) {
-            targetPanDown = lastPanY + pickedRect.bottom - winBottom + VISIBLE_SPACE_AROUND_HIGHLIGHT;
+          else if (vertDir > 0 && pickedRect.bottom > winBottom - SAFE_ZONE) {
+            targetPanDown = lastPanY + pickedRect.bottom - winBottom + SAFE_ZONE;
           }
           else {
             // No need to pan -- finish up
@@ -443,8 +454,11 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           startPanning(false);
           return true;
         }
+      }
 
-        return false; // Nothing picked yet
+      function updateLastPanXY() {
+        lastPanX = window.pageXOffset;
+        lastPanY = window.pageYOffset;
       }
 
       function startPanning(isHighlightStillNeeded) {
@@ -454,8 +468,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         targetPanLeft = Math.floor(constrained(targetPanLeft, maxPanLeft, maxPanRight));
         targetPanRight = Math.floor(constrained(targetPanRight, maxPanLeft, maxPanRight));
         targetPanDown = Math.floor(constrained(targetPanDown, maxPanUp, maxPanDown));
-        lastPanX = window.pageXOffset;
-        lastPanY = window.pageYOffset;
         doPickNewHighlight = isHighlightStillNeeded;
         startPanTime = Date.now();
         // Turn mousemove-to-highlight off
@@ -486,7 +498,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         window.scrollTo(attemptPanX, attemptPanY);
 
         // If we haven't found anything yet, check the next row of points
-        if (doPickNewHighlight && testNextRowOfPointsAt(x, y, distanceFromOriginal + pixelsToPan)) {
+        if (doPickNewHighlight &&
+          testNextRowOfPointsAt(x - horizDir, y, distanceFromOriginal + pixelsToPan)) {
           // FOUND SOMETHING!
           return;
         }
@@ -510,10 +523,26 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Go quickly through visible possibilities
       while (true) {
-        x += horizDir * STEP_SIZE_HORIZ;
-        y += vertDir * STEP_SIZE_VERT;
-        var panX = x < 0 ? -x : Math.min(winRight - x, 0),
-          panY = y < 0 ? -y : Math.min(winBottom - y, 0);
+        var panX = 0,
+          panY = 0;
+        if (horizDir) {
+          x += horizDir * STEP_SIZE_HORIZ;
+          if (x < SAFE_ZONE) {
+            panX = SAFE_ZONE - x;
+          }
+          else if (x > winRight - SAFE_ZONE) {
+            panX = winRight - SAFE_ZONE - x;
+          }
+        }
+        else {
+          y += vertDir * STEP_SIZE_VERT;
+          if (y < SAFE_ZONE) {
+            panY = SAFE_ZONE - y;
+          }
+          else if (y > winBottom - SAFE_ZONE) {
+            panY = winBottom - SAFE_ZONE - y;
+          }
+        }
 
         if (panX || panY) {
           // NO HIGHLIGHT FOUND ON VISIBLE SCREEN (Haven't panned yet though ...)
@@ -540,26 +569,24 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
     // Ensure that the entire newly picked item's rect is in the correct direction
     // It may not be if the spread picks an object that covers a a large area
-    function isValidDirectionForNewHighlight(lastPickedRect, $picked, lastPanX, lastPanY, horizDir, vertDir) {
+    function isValidDirectionForNewHighlight(origPickedRect, $picked, origPanX, origPanY, panX, panY, horizDir, vertDir) {
       var newRect = $picked[0].getBoundingClientRect(),
-        FUZZ_FACTOR = 9,
-        panX = window.pageXOffset,
-        panY = window.pageYOffset;
-      if (horizDir === 1) {
+        FUZZ_FACTOR = 9;
+      if (horizDir > 0) {
         // Correct move to the right?
-        return newRect.left + panX + FUZZ_FACTOR > lastPickedRect.right + lastPanX;
+        return newRect.left + panX + FUZZ_FACTOR > origPickedRect.right + origPanX;
       }
-      if (horizDir === -1) {
+      if (horizDir < 0) {
         // Correct move to the left?
-        return newRect.right + panX - FUZZ_FACTOR < lastPickedRect.left + lastPanX;
+        return newRect.right + panX - FUZZ_FACTOR < origPickedRect.left + origPanX;
       }
-      if (vertDir === 1) {
+      if (vertDir > 0) {
         // Correct move down?
-        return newRect.top + panY + FUZZ_FACTOR > lastPickedRect.bottom + lastPanY;
+        return newRect.top + panY + FUZZ_FACTOR > origPickedRect.bottom + origPanY;
       }
 
       // Correct move up?
-      return newRect.bottom + panY - FUZZ_FACTOR < lastPickedRect.top + lastPanY;
+      return newRect.bottom + panY - FUZZ_FACTOR < origPickedRect.top + origPanY;
     }
 
     // The current target that we might want to pick/highlight
