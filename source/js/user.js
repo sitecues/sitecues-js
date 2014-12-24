@@ -18,6 +18,7 @@ sitecues.def('user', function(user, callback) {
         // and test it on sites that have a content security policy
         ls.clearSitecuesLs();
         ls.setUserId('localuser');
+        SC_DEV && console.log('Use localuser because we have no access to it.');
         callback();
         return;
       }
