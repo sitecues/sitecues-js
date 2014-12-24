@@ -1,11 +1,13 @@
 {
     "name": "sitecues",
     "version": "0.0.1",
+    "description": "A web app to enable sites with zoom and speech.",
     "repository": {
         "type": "git",
         "url": "git@bitbucket.org:ai_squared/sitecues-js.git"
     },
     "main": "source/js/core.js",
+    "private": true,
     "engineStrict": true,
     "engines": {
         "node": "~0.10.32",
@@ -50,5 +52,11 @@
         "intern": "2.2.2",
         "grunt-contrib-uglify": "0.6.0",
         "grunt-contrib-watch": "0.6.1"
-    }
+    },
+    "keywords": [
+        "Ai Squared",
+        "sitecues",
+        "zoom",
+        "speech"
+    ]
 }
