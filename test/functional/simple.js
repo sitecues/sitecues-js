@@ -615,7 +615,7 @@
                             .end()                   // get out of the current element context
                         .sleep(2200)                 // TODO: change to a pollUntil helper, using sitecue.on('zoom', fn) to return true when zoom is done
                         .execute(                    // run the given code in the remote browser
-                            function (selector) {    
+                            function (selector) {
                                 sitecues.highlight(selector);
                             },
                             [selector]                 // list of arguments passed to the remote code

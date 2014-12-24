@@ -1,4 +1,3 @@
-config/.env
 .DS_Store
 node_modules
 npm-debug.log
@@ -12,6 +11,12 @@ sitecues-load-script.js
 .pip
 .vagrant
 .idea
+
+
+# User-local environment template.
+# ================================
+# This file is sourced during testing. It contains logins for cloud services and is considered private.
+config/.env
 
 # Fetch Avatars is used in Gource.
 # ================================
