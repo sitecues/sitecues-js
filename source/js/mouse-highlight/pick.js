@@ -670,7 +670,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isInMainContent: topRole === 'main',
         hasBadAriaRole: !!topRole && topRole !== 'main',
         isInTallAndNarrowContainer: 0,
-        isInTallAndWideContainer: 0,
+        isInTallAndWideContainer: 0
       };
 
       var isWide, isTall;
