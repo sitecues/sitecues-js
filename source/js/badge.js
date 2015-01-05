@@ -50,9 +50,7 @@ sitecues.def('badge', function(badge, callback) {
           panel.parent = $badge;
           $badge.hover(setDefaultEventOver, setDefaultEventLeave);
 
-          if (labs.isEnabled('arrowKeyNav')) {
-            addAccessibility($badge);
-          }
+          addAccessibility($badge);
         }
 
         function onBadgeKey(evt) {

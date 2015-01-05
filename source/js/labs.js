@@ -2,6 +2,8 @@
  * This is the "labs" experimental featurs module
  * It manages and provides settings for experimental features.
  * Turn turn on/off experimental features visit sitecues.com/html/labs.html
+ *
+ * NOTE: currently we are not using/building this
  */
 
 sitecues.def('labs', function (labs, callback) {
