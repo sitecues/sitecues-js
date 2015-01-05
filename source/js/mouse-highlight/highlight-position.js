@@ -76,10 +76,27 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
 
-      return isOldFirefox ?
-        getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect) :
-        contentsRangeRect;
+      if (platform.browser.isIE) {
+        return getIECorrectionsToRangeRect(contentsRangeRect);
+      }
+
+      if (isOldFirefox) {
+        return getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect);
+      }
+
+      return contentsRangeRect;
     };
+
+    function getIECorrectionsToRangeRect(origRangeRect) {
+      // Factor in IE native browser zoom
+      var nativeZoom = screen.deviceXDPI / screen.logicalXDPI
+      origRangeRect.top /= nativeZoom;
+      origRangeRect.left /= nativeZoom;
+      origRangeRect.width /= nativeZoom;
+      origRangeRect.height /= nativeZoom;
+
+      return normalizeRect(origRangeRect);
+    }
 
     function getFirefoxCorrectionsToRangeRect(parent, origRangeRect) {
       // ********** Firefox has bugs with range rects in some versions **********
