@@ -131,11 +131,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       // I really dislike nested for loops...
+      // TODO it's not just about hidden children -- could be any descendant (e.g. grandchild)
+      // TODO let's not add them in the first place
       if (hiddenElementsLength) {
         for (; currentChild < $pickedElementChildren.length; currentChild += 1) {
           for (; currentElementToRemove < hiddenElementsLength; currentElementToRemove += 1) {
             if ($pickedElementChildren[currentChild] === hiddenElements[currentElementToRemove]) {
-              $hlbElementChildren[currentChild].remove();
+              $($hlbElementChildren[currentChild]).remove();
               hiddenElementsRemoved += 1;
               if (hiddenElementsRemoved === hiddenElementsLength) {
                 return;
