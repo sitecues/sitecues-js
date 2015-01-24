@@ -5,7 +5,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'util/common', function($, conf, common) {
+  sitecues.use('jquery', 'conf', 'util/common', 'platform', function($, conf, common, platform) {
 
     //////////////////////////////
     // PRIVATE VARIABLES
@@ -17,6 +17,8 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
         DIMMER_MIN_OPACITY = 0,
         DIMMER_MAX_OPACITY = 0.65,
+
+        isOldIE = platform.browser.isIE && platform.browser.version < 11,
 
         documentElement = document.documentElement;
 
@@ -35,11 +37,12 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
         return; // Background already dimmed
       }
 
-      var rect = {
+      var multiplySize = isOldIE ? 2 : 1, // Fixes bug with white line in the middle of the outline
+        rect = {
           left: 0,
           top: 0,
-          width: documentElement.scrollWidth,
-          height: documentElement.scrollHeight
+          width: documentElement.scrollWidth * multiplySize ,
+          height: documentElement.scrollHeight * multiplySize
         },
         $dimmerElement = common.drawRect(rect, '#000');
 

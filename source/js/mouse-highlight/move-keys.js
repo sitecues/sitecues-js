@@ -1,8 +1,8 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
   sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
-    'mouse-highlight/picker', 'zoom', 'util/geo', 'labs', 'fixed-fixer',
-    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, labs, fixedFixer) {
+    'mouse-highlight/picker', 'zoom', 'util/geo', 'fixed-fixer',
+    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, fixedFixer) {
 
     var STEP_SIZE_VERT = 18,
       STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -41,7 +41,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         function (fn) {
           return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
         },
-      isNavigationEnabled = true, // labs.isEnabled('arrowKeyNav'),
+      isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
       SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
     // Move the highlight in the direction requested

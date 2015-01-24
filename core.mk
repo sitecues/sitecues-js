@@ -61,7 +61,6 @@ files=\
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/labs.js \
 	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
@@ -137,7 +136,7 @@ build:
 	done)
 
 
-	@echo "* File sizes$(min-label):"
+	@echo "* File sizes$(min-bsbel):"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -lh $$FILE | awk '{print($$5);}')\n" $$FILE ; \

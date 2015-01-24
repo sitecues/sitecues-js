@@ -417,9 +417,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var newBgPos = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
         newBg ='url("data:image/svg+xml,' + encodeURI(svgMarkup) + '") no-repeat ' + newBgPos + ' scroll',
         origStyle = traitcache.getStyle(element),
+        // Use .slice() to make a copy so that original string is not changed
         origBgColor = origStyle.backgroundColor.slice(),
         origBgOrigin = origStyle.backgroundOrigin.slice(),
         origBgClip = origStyle.backgroundClip.slice(),
+        origBgSize = origStyle.backgroundSize.slice(),
         // Remove color and other properties from the original background string, if they don't go into the shorthand background property
         origBgShorthandProperties = origStyle.backgroundImage === 'none' ? '' :
           ',' + origStyle.backgroundImage + ' ' + origStyle.backgroundRepeat + ' ' +
@@ -431,6 +433,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundOrigin = 'border-box,' + origBgOrigin;
       style.backgroundClip = 'border-box,' + origBgClip;
       style.backgroundColor = origBgColor;
+      style.backgroundSize = 'auto auto,' + origBgSize;
     };
 
     function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {

@@ -177,7 +177,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return isRetinaDisplay;
       };
 
-      // Retrieve and store the amount of native browser zoom
+      // Retrieve and store the user's intentional amount of native browser zoom
       zoom.getNativeZoom = function() {
         if (nativeZoom) {
           return nativeZoom; // We already know it
@@ -187,7 +187,11 @@ sitecues.def('zoom', function (zoom, callback) {
           nativeZoom = window.outerWidth / window.innerWidth;
         }
         else if (platform.browser.isIE) {
-          nativeZoom = screen.deviceXDPI / screen.systemXDPI;
+          // Note: on some systems the default zoom is > 100%. This happens on our Windows 7 + IE10 Dell Latitude laptop
+          // See http://superuser.com/questions/593162/how-do-i-change-the-ctrl0-zoom-level-in-ie10
+          // This means the actual zoom may be 125% but the user's intentional zoom is only 100%
+          // To get the user's actual zoom use screen.deviceXDPI / screen.logicalXDPI
+          nativeZoom = screen.deviceXDPI / screen.systemXDPI; // User's intentional zoom
         }
         else if (platform.browser.isFirefox) {
           // Since isRetina() is not 100% accurate, neither will this be
