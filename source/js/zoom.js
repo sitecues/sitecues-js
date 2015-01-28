@@ -829,8 +829,7 @@ sitecues.def('zoom', function (zoom, callback) {
         var css = {
           // Allow the content to be horizontally centered, unless it would go
           // offscreen to the left, in which case start zooming the content from the left-side of the window
-          transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%',
-          perspective: 999
+          transformOrigin: shouldRestrictWidth() ? '0% 0%' : '50% 0%'
         };
 
         if (shouldOptimizeLegibility) {
