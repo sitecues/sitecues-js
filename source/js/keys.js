@@ -127,7 +127,7 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
           },
           'heading': function(event) {
-            return event.keyCode === LETTER_H && canMoveHighlight(event);
+            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !hasCommandModifier(event);
           },
           'pageup': function(event) {
             return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);

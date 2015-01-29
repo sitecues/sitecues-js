@@ -52,7 +52,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   pickFromMouseTimer,
 
-  cursorPos;
+  cursorPos = {};
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',

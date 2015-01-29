@@ -592,6 +592,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
     // The current target that we might want to pick/highlight
     // is not an ancestor of the last picked item, or vice-versa
     function isValidTarget(target, $lastPicked) {
+      if (!$lastPicked) {
+        return !!target; // Nothing previously picked -- any non-null target is valid
+      }
       return target &&
         !$lastPicked.is(target) &&
         !$.contains(target, $lastPicked[0]) &&
@@ -640,50 +643,60 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           return;
         }
         if (!isValidTarget(element, $lastPicked)) {
-          return;
-        }
-
-        if (! $lastPicked.text().trim()) {
-          return; // No text
+          return; // The suggested element to pick is not valid
         }
 
         var $picked = $(element);
-
-        if (!$picked || !isValidTarget($picked[0], $lastPicked)) {
-          return;
+        if (!$picked.text().trim()) {
+          return; // Not valid because there is no text in the element
         }
 
+        element.scrollIntoView(true);
         if (!tryHighlight($picked)) {
-          return; // Couldn't highlight
+          return; // Couldn't highlight (element offscreen, invisible, etc.)
         }
 
+        if (!isValidTarget(mh.getHighlight().picked[0], $lastPicked)) {
+          return;  // The actually picked element from the suggested target is not valid
+        }
         // Successful highlight
         return true;
+      }
+
+      function searchDocument() {
+        while (true) {
+          var newNode = isReverse ? treeWalker.previousNode() : treeWalker.nextNode();
+          if (!newNode) {
+            return false;
+          }
+          if (doesMatchTags(newNode)) {
+            return true;
+          }
+        }
       }
 
       var $lastPicked = mh.getHighlight().picked,
         treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false);
 
       // Set the starting point (can do with tree walker but doesn't look like the similar node iterator API can do this)
-      treeWalker.currentNode = $lastPicked[0];
+      if ($lastPicked) {
+        treeWalker.currentNode = $lastPicked[0];
+      }
 
-      while (true) {
-        var newNode = isReverse ? treeWalker.previousNode() : treeWalker.nextNode();
-        if (!newNode) {
+      if (!searchDocument()) {
+        // Search one more time, from beginning instead of mid-point.
+        // Wraps to beginning/end of document depending on direction.
+        // This doesn't happen often so code here is optimized for size rather than speed.
+        treeWalker.currentNode = isReverse ? treeWalker.currentNode = $('body').find('*').last()[0] : document.body;
+        if (!searchDocument()) {
           fail();
-          break;
-        }
-        else if (doesMatchTags(newNode)) {
-          scrollToHighlight();
-          succeed();
-          break;
+          return;
         }
       }
-    }
 
-    function scrollToHighlight() {
-      var highlightRect = mh.getHighlight().absoluteRect;
-      window.scrollTo(highlightRect.left - SCROLL_EXTRA_PIXELS, highlightRect.top - SCROLL_EXTRA_PIXELS);
+      // Adjust final scroll position so that highlight that it's not jammed against the top/left of window unless it needs to
+      window.scrollBy(-100, -100);
+      succeed();
     }
 
     function constrained(value, min, max) {
