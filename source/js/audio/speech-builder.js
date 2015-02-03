@@ -15,6 +15,9 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
     builder.getText = function(subtreeRootNode) {
       textBuffer = '';
       appendAccessibleTextFromSubtree(subtreeRootNode);
+      // Replace multiple whitespace chars with a single space so that GET request is not too large
+      textBuffer = textBuffer.replace( /\s\s+/g, ' ');
+      // Remove any space at beginning or end of string
       return $.trim(textBuffer);
     };
 
