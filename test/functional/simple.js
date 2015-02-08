@@ -1,4 +1,10 @@
-    define(
+// Wondering which commands you can run?
+// See: http://theintern.github.io/leadfoot/Command.html
+
+// Wondering which key constants there are?
+// See: http://theintern.github.io/leadfoot/keys.js.html#line14
+
+define(
     [
         'intern!tdd',                      // the testing interface - defines how we register suites and tests
         'intern/chai!assert',              // helps throw errors to fail tests, based on conditions
@@ -17,20 +23,23 @@
 
         with (tdd) {
             suite('HLB Simple', function () {
-
-                before(  // code to run when the suite starts, before tests
+                // Code to run when the suite starts, before tests...
+                before(
                     function () {
                     }
                 )
-                beforeEach( // code to run before each test, including the first one
+                // Code to run before each test, including the first one...
+                beforeEach(
                     function () {
                     }
                 )
-                afterEach( // code to run after each test, including the last one
+                // Code to run after each test, including the last one...
+                afterEach(
                     function () {
                     }
                 );
-                after(  // code to run after all tests, before the suite exits
+                // Code to run after all tests, before the suite exits...
+                after(
                     function () {
                     }
                 );
@@ -80,6 +89,9 @@
                 //                 assert.strictEqual(data, 3);
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB is positioned absolutely.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -125,6 +137,9 @@
                 //                 assert.strictEqual(data, 'absolute');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB is inside viewport.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -184,6 +199,9 @@
                 //                 );
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB is a <ul> if picked element is a <li>.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -229,6 +247,9 @@
                 //                 assert(data === 'UL', 'HLB must be <ul> if picked element is <li>');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB copies <textarea> value.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -276,6 +297,9 @@
                 //                 assert(data === 'Yipee!', 'HLB copies <textarea> value');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB copies <input type="checkbox"> value.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -323,6 +347,9 @@
                 //                 assert.isTrue(data, 'HLBed checked checkbox is checked');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB has no class.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -369,6 +396,9 @@
                 //                 assert.isFalse(data, 'HLB element does not have a class');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB has zindex of 2147483644.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -414,6 +444,9 @@
                 //                 assert(data === '2147483644', 'HLB element has zIndex of 2147483644');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB has content-box style for box-sizing CSS property.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -459,6 +492,9 @@
                 //                 assert(data === 'content-box', 'HLB element has content-box style');
                 //             });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB closes when mouse moves out of HLB.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -506,6 +542,9 @@
                 //             assert.isNull(data, 'HLB no longer exists.');
                 //         });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB closes when escape key is pressed.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -553,6 +592,9 @@
                 //             assert.isNull(data, 'HLB no longer exists.');
                 //         });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 // test('HLB closes when space key is pressed.', function () {
 
                 //     return this.remote               // represents the browser being tested
@@ -600,6 +642,9 @@
                 //             assert.isNull(data, 'HLB no longer exists.');
                 //         });
                 // });
+
+                /////////////////////////////// ------- test boundary -------
+
                 test('HLB Respects Text', function () {
 
                     var selector = 'p',
@@ -610,15 +655,18 @@
                         .get(url)                    // navigate to the desired page
                         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
                         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                            .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                            .pressKeys(keys.ADD)
+                            .pressKeys(keys.EQUALS)  // unicode for: hit the + key!
                             .end()                   // get out of the current element context
-                        .sleep(2200)                 // TODO: change to a pollUntil helper, using sitecue.on('zoom', fn) to return true when zoom is done
-                        .execute(                    // run the given code in the remote browser
+                        .executeAsync(               // run an async callback in the remote browser
+                            function (done) {
+                                sitecues.on('zoom', done);  // use our event system to know when zoom is done
+                            }
+                        )
+                        .execute(                    // run a callback in the remote browser
                             function (selector) {
                                 sitecues.highlight(selector);
                             },
-                            [selector]                 // list of arguments passed to the remote code
+                            [selector]               // list of arguments to pass to the remote code
                         )
                         .findByCssSelector(selector)
                             .getVisibleText()
