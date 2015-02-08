@@ -654,6 +654,7 @@ define(
                         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
                         .get(url)                    // navigate to the desired page
                         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
+                        .setExecuteAsyncTimeout(300) // max ms for things like animations
                         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
                             .pressKeys(keys.EQUALS)  // unicode for: hit the + key!
                             .end()                   // get out of the current element context
