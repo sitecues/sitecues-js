@@ -252,7 +252,8 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @return {Boolean}       [True if transparent, false otherwise]
      */
     function isTransparent (style) {
-      return style === 'rgba(0, 0, 0, 0)' || style === 'transparent';
+      return (style.indexOf('rgba') !== -1 && (style.indexOf('.') !== -1 || style.charAt(style.length - 2) === '0')) ||
+              style === 'transparent';
     }
 
     /**
