@@ -40,6 +40,7 @@ sitecues.def('zoom', function (zoom, callback) {
         $zoomStyleSheet,                 // <style> element we insert for animations (and additional fixes for zoom)
 
         // Zoom operation state
+        isInitialized,           // Is the zoom module already initialized?
         minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
         zoomAnimator,            // Frame request ID that can be cancelled
         completedZoom = 1,       // Current zoom as of the last finished operation
@@ -1069,6 +1070,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Lazy init, saves time on page load
       function initZoomModule() {
+        if (isInitialized) {
+          return;
+        }
+
+        isInitialized = true;
+
         initBodyInfo();
 
         shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $body.css('backgroundImage') !== 'none';
