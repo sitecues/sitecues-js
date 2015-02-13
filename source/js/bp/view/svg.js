@@ -37,11 +37,11 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </clipPath> \
   <path id="scp-rating-star-def" d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/> \
   <filter id="scp-shadowblur"> \
-    <feGaussianBlur in="SourceGraphic" stdDeviation="5" /> \
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4" /> \
   </filter> \
 </defs> \
 <g id="scp-main" aria-label="sitecues main panel">\
-  <use id="scp-shadow" xlink:href="#scp-outline-def" x="5" y="5" class="scp-large-only" fill="rgba(0,0,0,.2)" opacity="0" filter="url(#scp-shadowblur)"/>\
+  <use id="scp-shadow" xlink:href="#scp-outline-def" x="4" y="4" fill="none" stroke-width="4" filter="url(#scp-shadowblur)"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="white"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button scp-target"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb" class="scp-target">\
