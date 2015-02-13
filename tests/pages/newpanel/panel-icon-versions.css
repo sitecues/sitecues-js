@@ -1,0 +1,11 @@
+/* Button choice -- similar to color palettes! */
+/* This probably goes away -- we just couldn't make up our minds about some of the buttons at first */
+
+.scp-settings1, .scp-settings2, .scp-about1, .scp-about2, .scp-about3 { opacity: 0; }
+
+.scp-btn-choice-settings1 .scp-settings1 { opacity: 1; }
+.scp-btn-choice-settings2 .scp-settings2 { opacity: 1; }
+.scp-btn-choice-about1 .scp-about1 { opacity: 1; }
+.scp-btn-choice-about2 .scp-about2 { opacity: 1; }
+.scp-btn-choice-about3 .scp-about3 { opacity: 1; }
+

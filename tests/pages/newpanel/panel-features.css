@@ -1,0 +1,221 @@
+/* Feature panel styling (these are the panels you get to from the "more" panel) */
+/* --------------------- */
+
+/* 
+   Semantics
+   ---------
+
+  * Classes
+   * On #scp-container:
+      General -- used if any feature panel is turned on:
+        .scp-feature
+      Specific -- added for specific feature panels:
+        .scp-tips-feature 
+        .scp-settings-feature
+        .scp-feedback-feature
+        .scp-about-feature
+
+    * Inner classes:
+      General -- contains specific feature content
+        .scp-feature-content
+      Specific:
+        .scp-tips-content
+        .scp-settings-content
+        .scp-feedback-content
+        .scp-about-content
+      Cards (used for tips and settings)
+        .scp-cards (contains all cards)
+        .scp-card (individual card, to be shown one at a time)
+
+  IDs used:
+    Launch button container: #scp-feature-nav-buttons
+    Launch buttons: #scp-tips-buttons, #scp-settings-button, #scp-feedback-button, #scp-about-button
+*/
+
+#scp-feature-nav-buttons > [role="button"] {
+  transition: opacity .5s;
+  -webkit-transition: opacity .5s;
+  -ms-transition: opacity .5s;  
+}
+
+.scp-feature #scp-feature-nav-buttons > [role="button"] { 
+  opacity: 0; 
+  pointer-events: none;
+}
+
+.scp-tips-feature #scp-tips-button,
+.scp-settings-feature #scp-settings-button,
+.scp-feedback-feature #scp-feedback-button,
+.scp-about-feature #scp-about-button
+{ opacity: 1 !important; } 
+
+/******* About *******/
+
+.scp-about-feature #scp-about-button > g {
+  transition: transform 2s !important;
+  -webkit-transition: -webkit-transform 2s !important;
+  -ms-transition: -ms-transform 2s !important;
+  transform: translateX(-500px) scale(1) !important;
+  -webkit-transform: translateX(-500px) scale(1) !important;
+  -ms-transform: translateX(-500px) scale(1) !important;
+}
+
+.scp-about-feature #scp-about-button > g g {
+  transition: transform 2s;
+  -webkit-transition: -webkit-transform 2s;
+  -ms-transition: -ms-transform 2s;
+  transform-origin: 53px 53px;
+  -webkit-transform-origin: 53px 53px;
+  -ms-transform-origin: 53px 53px;
+  transform: rotate(-120deg) !important;
+  -webkit-transform: rotate(-120deg) !important;
+  -ms-transform: rotate(-120deg) !important;
+}
+
+#scp-logo-text {
+  transition: opacity 2s;
+  -webkit-transition: opacity 2s;
+  -ms-transition: opacity 2s;
+}
+
+.scp-about-feature #scp-logo-text {
+  opacity: 1;
+}
+
+.scp-about-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 2s;
+  -webkit-transition: opacity 2s;
+  -ms-transition: opacity 2s;
+}
+
+.scp-about-feature .scp-about-content {
+  transition-delay: 2s; 
+  opacity: 1;
+  display: block;
+}
+
+/******* General *******/
+
+.scp-feature #scp-feature-nav-buttons > [role="button"] > g { 
+  /* First child group is used to move / translate(X,Y) the button */ 
+  transition: transform 1s;
+  -webkit-transition: -webkit-transform 1s;
+  -ms-transition: -ms-transform 1s;
+}
+
+.scp-feedback-content,
+.scp-tips-content,
+.scp-settings-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 1s;
+  -webkit-transition: opacity 1s !important;
+  -ms-transition: opacity 1s;
+}
+
+.scp-feedback-feature .scp-feedback-content,
+.scp-tips-feature .scp-tips-content,
+.scp-settings-feature .scp-settings-content {
+  opacity: 1;
+  display: block;
+}
+
+/******* Tips *******/
+
+.scp-feedback-feature #scp-feedback-button > g {
+  transform: translateX(218px) scale(1) !important;
+  -webkit-transform: translateX(218px) scale(1) !important;
+  -ms-transform: translateX(218px) scale(1) !important;  
+}
+
+/******* Settings *******/
+
+.scp-settings-feature #scp-settings-button > g {
+  transform: translateX(-200px) scale(1) !important;
+  -webkit-transform: translateX(-200px) scale(1) !important;
+  -ms-transform: translateX(-200px) scale(1) !important;  
+}
+
+/***** Cards, used for tips and settings ******/
+
+#scp-prev-card, #scp-next-card {
+  font-size: 44px !important;
+}
+
+.scp-cards {
+  position: relative;
+  font-family: Arial;
+  top: 2px;
+  left: 130px;
+  width: 340px;
+}
+
+.scp-card {
+  opacity: 0;
+  transition: opacity .7s;
+  -webkit-transition: opacity .7s;
+  -ms-transition: opacity .7s;
+  position: absolute;
+  pointer-events: none;
+}
+
+.scp-card[data-active="true"] {
+  transition: opacity 1.7s;
+  -webkit-transition: opacity 1.7s;
+  -ms-transition: opacity 1.7s;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.scp-card > h1 {
+  font-size: 32px;
+  padding-bottom: 12px; /* Move underline down */
+  border-bottom: 1px solid #989898;  /* Normal underline doesn't allow spacing */
+  width: 320px;
+}
+
+.scp-card > p {
+  margin-top: 3px;
+  font-size: 19px;
+}
+
+/***** Buttons ******/
+
+/* Temporary until we have nicer buttons */
+#scp-container button {
+  font-size: 16px;
+  margin-right: 17px;
+  margin-left: -1px;
+  padding: 3px 7px;
+  color: white;
+  text-align: center;
+  background: #447AC4;
+  border: 3px solid #447AC4;
+  border-radius: 4px;
+}
+
+#scp-container .sitecues-button-big {
+  padding: 10px 30px;
+  font-size: 22px;
+  margin-right: 22px;
+  border: 3px solid #447AC4;
+  border-radius: 4px;
+}
+
+#scp-feature-nav-buttons g[role="button"] > * {
+  transition: transform .4s;
+  -webkit-transition: -webkit-transform .4s;
+  -ms-transition: -ms-transform .4s;
+  transform-origin: 50px 50px;
+  -webkit-transform-origin: 50px 50px;
+  -ms-transform-origin: 50px 50px;
+}
+
+/* Expand on hover */
+#scp-feature-nav-buttons g[role="button"]:hover:not([data-hasfocus]) > * {
+  transform: scale(1.2);
+  -webkit-transform: scale(1.2);
+  -ms-transform: scale(1.2);
+}
