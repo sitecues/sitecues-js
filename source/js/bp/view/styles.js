@@ -240,11 +240,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-shadow': {
-          'transition': 'opacity .2s',
+          'transition': 'opacity 1s',
           'opacity': 0
         },
 
-        '.scp-large #scp-shadow': {
+        '.scp-large.scp-can-filter #scp-shadow': {
           'opacity': 1
         },
 
