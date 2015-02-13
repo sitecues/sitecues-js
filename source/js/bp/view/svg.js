@@ -41,7 +41,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </filter> \
 </defs> \
 <g id="scp-main" aria-label="sitecues main panel">\
-  <path id="scp-shadow" d="M808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11m808 0V-187" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/> \
+  <path id="scp-shadow" d="M808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11m808 0V0" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/> \
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="white"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button scp-target"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb" class="scp-target">\
