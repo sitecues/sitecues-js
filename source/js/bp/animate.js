@@ -234,6 +234,10 @@ sitecues.def('bp/animate', function(animate, callback) {
             completedZoom       = zoomMod.getCompletedZoom(),
             paddingTop          = parseFloat(badgeComputedStyles.paddingTop),
             paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),
+
+            // SC-2313 horizOffset exists because badge position has a slight horizontal offset in non-IE browsers.. not exactly
+            //         sure why its inversely proportional to zoom level..
+            horizOffset         = helper.isIE ? 0 : (BP_CONST.BADGE_HORIZONTAL_OFFSET * (completedZoom - zoomMod.min) / zoomMod.range),
             top,
             left;
 
@@ -241,7 +245,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         if (isPageBadge) {
 
           top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + window.pageYOffset;
-          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset;
+          left = badgeRect.left + (paddingLeft * completedZoom) + horizOffset + window.pageXOffset;
 
         // Floating badge
         } else {

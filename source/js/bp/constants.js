@@ -177,6 +177,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   // Amount of pixels of whitespace at the top of the badge
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
+  constants.BADGE_HORIZONTAL_OFFSET = 2;
 
   constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
   constants.BP_CURSOR_STYLESHEET_ID = 'sitecues-badge-panel-cursor-css';
