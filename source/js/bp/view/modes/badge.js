@@ -92,55 +92,42 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     // Transfer necessary styles from the <img> to the <div>
     function convertExistingBadge() {
 
+      // Transfer styles from placeholder <img> to <div>
+      // Remove those styles from placeholder <img>
+      function transferStylesFromExistingBadge (styles) {
+        var len = styles.length,
+            i   = 0;
+        for (; i < len; i++) {
+          div.style[styles[i]] = getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
+          badgeElement.style[styles[i]] = 0;
+        }
+      }
+
       var div                 = document.createElement('div'),
           badgeImgBoundingBox = badgeElement.getBoundingClientRect(),
           badgeComputedStyles = window.getComputedStyle(badgeElement),
-          paddingTop          = getNumberFromString(badgeComputedStyles.paddingTop),
-          paddingBottom       = getNumberFromString(badgeComputedStyles.paddingBottom),
-          paddingLeft         = getNumberFromString(badgeComputedStyles.paddingLeft),
-          paddingRight        = getNumberFromString(badgeComputedStyles.paddingRight),
-          marginTop           = getNumberFromString(badgeComputedStyles.marginTop),
-          marginBottom        = getNumberFromString(badgeComputedStyles.marginBottom),
-          marginLeft          = getNumberFromString(badgeComputedStyles.marginLeft),
-          marginRight         = getNumberFromString(badgeComputedStyles.marginRight),
-          top                 = getNumberFromString(badgeComputedStyles.top),
-          left                = getNumberFromString(badgeComputedStyles.left),
-          floatStyle          = badgeComputedStyles.float;
+          stylesToTransfer    = [
+            'marginTop',
+            'marginBottom',
+            'marginLeft',
+            'marginRight',
+            'paddingTop',
+            'paddingBottom',
+            'paddingLeft',
+            'paddingRight',
+            'top',
+            'left'
+          ];
 
-      div.style.display       = 'inline-block';
+      transferStylesFromExistingBadge(stylesToTransfer);
 
-      div.style.height        = badgeImgBoundingBox.height - (paddingTop  + paddingBottom) + 'px';
-      div.style.width         = badgeImgBoundingBox.width  - (paddingLeft + paddingRight)  + 'px';
-
-      div.style.paddingTop    = paddingTop    + 'px';
-      div.style.paddingBottom = paddingBottom + 'px';
-      div.style.paddingLeft   = paddingLeft   + 'px';
-      div.style.paddingRight  = paddingRight  + 'px';
-
-      div.style.marginTop     = marginTop    + 'px';
-      div.style.marginBottom  = marginBottom + 'px';
-      div.style.marginLeft    = marginLeft   + 'px';
-      div.style.marginRight   = marginRight  + 'px';
-
-      div.style.top           = top  + 'px';
-      div.style.left          = left + 'px';
-
-      div.style.float         = floatStyle;
+      // Set other styles that cannot be abstracted into a helper function.
+      div.style.display = 'inline-block';
+      div.style.height  = badgeImgBoundingBox.height - (badgeComputedStyles.paddingTop  + badgeComputedStyles.paddingBottom) + 'px';
+      div.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
+      div.style.float   = badgeComputedStyles.float;
 
       badgeElement.parentElement.insertBefore(div, badgeElement);
-
-      badgeElement.style.paddingTop    = 0;
-      badgeElement.style.paddingBottom = 0;
-      badgeElement.style.paddingLeft   = 0;
-      badgeElement.style.paddingRight  = 0;
-
-      badgeElement.style.marginTop     = 0;
-      badgeElement.style.marginBottom  = 0;
-      badgeElement.style.marginLeft    = 0;
-      badgeElement.style.marginRight   = 0;
-
-      badgeElement.style.top           = 0;
-      badgeElement.style.left          = 0;
 
       div.appendChild(badgeElement);
 
