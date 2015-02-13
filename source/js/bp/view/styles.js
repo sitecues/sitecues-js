@@ -245,7 +245,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-large #scp-shadow': {
-          'opacity': .2
+          'opacity': 1
         },
 
         /************ Small vs. large  *************/
