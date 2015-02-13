@@ -25,19 +25,15 @@ sitecues.def('bp/helper', function (helper, callback) {
       }
     };
 
-    helper.isWebkit = function () {
-      return platform.browser.isWebkit;
-    };
+    helper.isWebkit = platform.browser.isWebkit;
 
-    helper.isMoz = function () {
-      return platform.browser.isMos;
-    };
+    helper.isMoz = platform.browser.isMos;
 
-    helper.isIE9 = function () {
-      return platform.browser.isIE && platform.browser.version === 9;
-    };
+    helper.isIE  = platform.browser.isIE;
 
-    helper.transformProperty = helper.isIE9() ? 'msTransform' : 'transform';
+    helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
+
+    helper.transformProperty = helper.isIE9 ? 'msTransform' : 'transform';
 
     helper.getCurrentSVGElementTransforms = function () {
 
