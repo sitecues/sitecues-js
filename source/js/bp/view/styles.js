@@ -239,6 +239,15 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-weight': 'bold'
         },
 
+        '#scp-shadow': {
+          'transition': 'opacity .2s',
+          'opacity': 0
+        },
+
+        '.scp-large #scp-shadow': {
+          'opacity': .2
+        },
+
         /************ Small vs. large  *************/
 
         '.scp-large > #scp-svg': {
@@ -435,7 +444,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
-        },
+        }
       };
 
     function provideCustomPalette (palette) {
