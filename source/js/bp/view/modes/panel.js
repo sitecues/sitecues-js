@@ -132,12 +132,20 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-keyboard';
         }
 
-        if (zoomMod.getCompletedZoom() < minPageZoomXLCursor) {
-          classBuilder += ' scp-xl-cursor'; // Enable panel's extra large cursor if cursor isn't already larger
+        if (state.get('isUsingXLCursor')) {
+          classBuilder += ' scp-xl-cursor';
         }
 
         return classBuilder + ' ' + getFeatureClass();
       };
+
+      function determineXLCursorUsage() {
+        var willUseXLCursor = zoomMod.getCompletedZoom() < minPageZoomXLCursor;
+        if (state.get('isUsingXLCursor') !== willUseXLCursor) {
+          state.set('isUsingXLCursor', willUseXLCursor);
+          sitecues.emit('bp/do-update');
+        }
+      }
 
       /*
        A feature panel is a special panel that is triggered from the secondary panel. It can be one of four things right now:
@@ -199,6 +207,8 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // Don't listen to events on the window when the BP is collapsing
         unbindTemporaryMouseHandlers();
       });
+
+      sitecues.on('zoom', determineXLCursorUsage);
 
       // Unless callback() is queued, the module is not registered in global var modules{}
       // See: https://fecru.ai2.at/cru/EQJS-39#c187

@@ -119,11 +119,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Cursor rules to use when cursor is less than minimum cursor size
         // The .scp-xl-cursor class is only set when the cursor wouldn't already be at least this size
         '.scp-xl-cursor #scp-main': {
-          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE)
+          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
         },
 
         '.scp-xl-cursor .scp-target': {
-          'cursor': customCursor.getCursorCss('pointer', MIN_CURSOR_SIZE)
+          'cursor': customCursor.getCursorCss('pointer', MIN_CURSOR_SIZE) + ' !important'
         }
       },
 

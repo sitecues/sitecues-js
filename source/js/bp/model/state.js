@@ -10,6 +10,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
+    isUsingXLCursor         : true,  // Artificially inflate cursor while in panel to make sure it is of a minimum size
     featurePanelName        : null,  // Either null, or 'settings' | 'about' | 'tips' | 'feedback'
     focusIndex              : 0,     // When tabbing, where in the cycle are we?
     paletteName             : 'b',   // Currently either 'b' for basic or 'r' for red
