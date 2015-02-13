@@ -56,7 +56,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     /*
      Default bounding box object.
      */
-    var badgeElement;
+    var badgeElement,
+        getNumberFromString = helper.getNumberFromString;
     /*
      *** Privates ***
      */
@@ -94,10 +95,17 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       var div                 = document.createElement('div'),
           badgeImgBoundingBox = badgeElement.getBoundingClientRect(),
           badgeComputedStyles = window.getComputedStyle(badgeElement),
-          paddingTop          = parseInt(badgeComputedStyles.paddingTop),
-          paddingBottom       = parseInt(badgeComputedStyles.paddingBottom),
-          paddingLeft         = parseInt(badgeComputedStyles.paddingLeft),
-          paddingRight        = parseInt(badgeComputedStyles.paddingRight);
+          paddingTop          = getNumberFromString(badgeComputedStyles.paddingTop),
+          paddingBottom       = getNumberFromString(badgeComputedStyles.paddingBottom),
+          paddingLeft         = getNumberFromString(badgeComputedStyles.paddingLeft),
+          paddingRight        = getNumberFromString(badgeComputedStyles.paddingRight),
+          marginTop           = getNumberFromString(badgeComputedStyles.marginTop),
+          marginBottom        = getNumberFromString(badgeComputedStyles.marginBottom),
+          marginLeft          = getNumberFromString(badgeComputedStyles.marginLeft),
+          marginRight         = getNumberFromString(badgeComputedStyles.marginRight),
+          top                 = getNumberFromString(badgeComputedStyles.top),
+          left                = getNumberFromString(badgeComputedStyles.left),
+          floatStyle          = badgeComputedStyles.float;
 
       div.style.display       = 'inline-block';
 
@@ -109,12 +117,30 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       div.style.paddingLeft   = paddingLeft   + 'px';
       div.style.paddingRight  = paddingRight  + 'px';
 
+      div.style.marginTop     = marginTop    + 'px';
+      div.style.marginBottom  = marginBottom + 'px';
+      div.style.marginLeft    = marginLeft   + 'px';
+      div.style.marginRight   = marginRight  + 'px';
+
+      div.style.top           = top  + 'px';
+      div.style.left          = left + 'px';
+
+      div.style.float         = floatStyle;
+
       badgeElement.parentElement.insertBefore(div, badgeElement);
 
       badgeElement.style.paddingTop    = 0;
       badgeElement.style.paddingBottom = 0;
       badgeElement.style.paddingLeft   = 0;
       badgeElement.style.paddingRight  = 0;
+
+      badgeElement.style.marginTop     = 0;
+      badgeElement.style.marginBottom  = 0;
+      badgeElement.style.marginLeft    = 0;
+      badgeElement.style.marginRight   = 0;
+
+      badgeElement.style.top           = 0;
+      badgeElement.style.left          = 0;
 
       div.appendChild(badgeElement);
 
