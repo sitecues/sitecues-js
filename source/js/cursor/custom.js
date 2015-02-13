@@ -33,7 +33,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
       MAX_CURSOR_SIZE_WIN = 71,
       CURSOR_OFFSETS = {
         _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
-        _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
+        _pointer : {x: 12, y: 5, xStep: 3.6, yStep: 1.7}
       };
 
   sitecues.use('platform', 'zoom', function (platform, zoomModule) {
