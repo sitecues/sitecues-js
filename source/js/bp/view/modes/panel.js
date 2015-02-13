@@ -119,6 +119,9 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           // *** scp-ready ***
           // The panel is fully enlarged and ready to accept mouse input
           classBuilder += ' scp-ready';
+          if (state.get('isUsingXLCursor')) {
+            classBuilder += ' scp-xl-cursor';
+          }
         }
 
         // *** scp-large ***
@@ -130,10 +133,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           // *** scp-keyboard ***
           // Keyboard mode is enabled and therefore current focus outline must be visible
           classBuilder += ' scp-keyboard';
-        }
-
-        if (state.get('isUsingXLCursor')) {
-          classBuilder += ' scp-xl-cursor';
         }
 
         return classBuilder + ' ' + getFeatureClass();
