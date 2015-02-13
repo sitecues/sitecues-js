@@ -77,8 +77,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     };
 
     bpc.processBadgeActivationKeys = function(evt) {
-      if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
+      if (state.isBadge() &&
+        (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE)) {
         sitecues.emit('info/help'); // SC-2329 -- just show help for now
+        evt.preventDefault();
         // TODO Return to using the following:
         // bpc.changeModeToPanel();
       }
