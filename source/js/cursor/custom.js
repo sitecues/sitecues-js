@@ -30,9 +30,13 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         }
       },
       MAX_CURSOR_SIZE_DEFAULT = 128,
-      MAX_CURSOR_SIZE_WIN = 71;
+      MAX_CURSOR_SIZE_WIN = 71,
+      CURSOR_OFFSETS = {
+        _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
+        _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
+      };
 
-  sitecues.use('platform', function (platform) {
+  sitecues.use('platform', 'zoom', function (platform, zoomModule) {
 
     /**
      * Get a URL for the cursor given the current platform
@@ -40,7 +44,18 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
      * @param sizeRatio a number > 1 (e.g. 2 = 2x)
      * @param pixelRatio = 1 for normal, 2 for retina cursor
      */
-    customCursor.getUrl = function(type, sizeRatio, pixelRatio) {
+    customCursor.getCursorCss = function(type, sizeRatio) {
+      var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
+        pixelRatio = doUseRetinaCursors ? 2 : 1,
+        cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
+
+      var url = getUrl(type, sizeRatio, pixelRatio),
+        hotspotOffset = getCursorHotspotOffset(type, sizeRatio);
+
+      return cursorGeneratorFn(url, hotspotOffset, type);
+    };
+
+    function getUrl(type, sizeRatio, pixelRatio) {
 
       if (platform.browser.is === 'IE') {
         return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getIECursorSize(sizeRatio) + '.cur' );
@@ -53,12 +68,69 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         cursorSvg = prefix + CURSOR_SVG[platform.os.is]['_' + type] + POSTFIX;
 
       return 'data:image/svg+xml,' + escape( cursorSvg );
-    };
+    }
+
+    /**
+     * Generates the cursor url for a given type and zoom level for NON retina displays
+     * @param  {string} type
+     * @param  {number} zoom
+     * @return {string}
+     */
+    function generateCursorStyle1x(image, hotspotOffset, type) {
+      return 'url(' + image + ')' + hotspotOffset + ', ' + type;
+    }
+
+    // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
+    // The maths below based on experience and doesn't use any kind of specific logic.
+    // We are likely to change it better one when we have final images.
+    // There's no need for specific approach while we constantly change images and code.
+    /**
+     * Gets custom cursor's hotspot offset.
+     * @param zl Number or string, represents zoom level.
+     * @return {string} result A string in format 'x y' which is later used a part of cursor property value.
+     */
+    function getCursorHotspotOffset(type, zl) {
+      if (platform.browser.isIE) {  // Don't use in IE -- it will be part of .cur file
+        return '';
+      }
+
+      var zoomDiff = zl - 1,  // Lowest zoom level is 1, this is the difference from that
+        offset = CURSOR_OFFSETS['_' + type];
+
+      return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
+    }
+
+    /**
+     * Generates the cursor url for a given type and zoom level for retina displays
+     * @param  {string} type
+     * @param  {number} zoom
+     * @return {string}
+     */
+    function generateCursorStyle2x(image, hotspotOffset, type) {
+      return '-webkit-image-set(' +
+        '    url(' + image + ') 1x,' +
+        '    url(' + image + ') 2x' +
+        ') ' + hotspotOffset + ', ' + type;
+    }
 
     function getIECursorSize(sizeRatio) {
       var roundedToTenths = Math.round(sizeRatio * 10) / 10;
       return Math.min(roundedToTenths, 3);
     }
+
+    customCursor.getCursorZoom = function(pageZoom) {
+      var zoomDiff = pageZoom - zoomModule.min,
+      // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
+      // when on Windows OS, otherwise the cursor intermittently can become a large black square.
+      // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
+        CURSOR_ZOOM_MAX = platform.os.isWin? 3.5 : 4,
+        CURSOR_ZOOM_MIN = 1,
+        CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
+
+      // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
+      return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    };
+
 
     // Done.
     callback();

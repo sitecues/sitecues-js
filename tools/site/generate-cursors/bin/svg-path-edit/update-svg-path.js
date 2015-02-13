@@ -345,7 +345,7 @@
 
 
 
-  // A stack containing boolean keydown states
+  // A stack containing boolean keydown modes
   var keyStack = {},
 
     keyDownIs = {

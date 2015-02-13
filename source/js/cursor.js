@@ -21,11 +21,7 @@ sitecues.def('cursor', function (cursor, callback) {
         SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
         $stylesheet,
         cursorStylesheetObject,
-        isInitComplete,
-        CURSOR_OFFSETS = {
-          _default : {x: 10,  y: 5, xStep: 0, yStep: 2.5},
-          _pointer : {x: 20, y: 5, xStep: 3.5, yStep: 1.7}
-        };
+        isInitComplete;
 
     /*
      * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -186,7 +182,6 @@ sitecues.def('cursor', function (cursor, callback) {
         doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
         // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the
         // platform.browser supports css cursor scaling
-        cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x,
         pixelRatio = doUseRetinaCursors ? 2 : 1,
         i = 0;
 
@@ -194,75 +189,18 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          hotspotOffset = getCursorHotspotOffset(type, cursorZoom),
-          image = customCursor.getUrl(type, cursorZoom, pixelRatio);
+          css = customCursor.getCursorCss(type, cursorZoom, pixelRatio);
 
-        cursorTypeUrls[CURSOR_TYPES[i]] = cursorGeneratorFn(image, hotspotOffset, type);
+        cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
 
       return cursorTypeUrls;
     }
 
-    /**
-     * Generates the cursor url for a given type and zoom level for NON retina displays
-     * @param  {string} type
-     * @param  {number} zoom
-     * @return {string}
-     */
-    function generateCursorStyle1x(image, hotspotOffset, type) {
-      return 'url(' + image + ')' + hotspotOffset + ', ' + type;
-    }
-
-    /**
-     * Generates the cursor url for a given type and zoom level for retina displays
-     * @param  {string} type
-     * @param  {number} zoom
-     * @return {string}
-     */
-    function generateCursorStyle2x(image, hotspotOffset, type) {
-        return '-webkit-image-set(' +
-                '    url(' + image + ') 1x,' +
-                '    url(' + image + ') 2x' +
-                ') ' + hotspotOffset + ', ' + type;
-    }
-
-    // EQ-723: Cursor URLs have offset for their hotspots. Let's add the coordinates, using CSS 3 feature.
-    // The maths below based on experience and doesn't use any kind of specific logic.
-    // We are likely to change it better one when we have final images.
-    // There's no need for specific approach while we constantly change images and code.
-    /**
-     * Gets custom cursor's hotspot offset.
-     * @param zl Number or string, represents zoom level.
-     * @return {string} result A string in format 'x y' which is later used a part of cursor property value.
-     */
-    function getCursorHotspotOffset(type, zl) {
-      if (platform.browser.isIE) {  // Don't use in IE -- it will be part of .cur file
-        return '';
-      }
-
-      var zoomDiff = zl - 1,  // Lowest zoom level is 1, this is the difference from that
-      offset = CURSOR_OFFSETS['_' + type];
-
-      return (offset.x + offset.xStep * zoomDiff).toFixed(0) + ' ' + (offset.y + offset.yStep * zoomDiff).toFixed(0);
-    }
-
-    function getCursorZoom(pageZoom) {
-      var zoomDiff = pageZoom - zoomModule.min,
-      // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
-      // when on Windows OS, otherwise the cursor intermittently can become a large black square.
-      // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
-      CURSOR_ZOOM_MAX = platform.os.isWin? 3.5 : 4,
-      CURSOR_ZOOM_MIN = 1,
-      CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
-
-      // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
-      return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
-    }
-
     sitecues.on('zoom', function (pageZoom) {
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-      var newCursorZoom = getCursorZoom(pageZoom);
+      var newCursorZoom = customCursor.getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheet();

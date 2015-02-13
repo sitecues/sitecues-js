@@ -66,9 +66,7 @@ describe('speech-builder', function() {
       var div = document.createElement('div');
       div.innerHTML = '<span data-display="inline">This is an <b data-display="none">Absolutely Amazing</b> test!</span>';
       var actualText = builder.getText(div);
-      console.log('\nqqq1' + actualText);
       expect(actualText).to.be.equal('This is an test!');
-      console.log('\nqqq2' + actualText);
       done();
     });
     it('Should append @alt text', function (done) {

@@ -51,7 +51,7 @@ sitecues.def('zoom', function (zoom, callback) {
         isRetinaDisplay,         // Is the current display a retina display?
 
         // Zoom slider change listener
-        glideChangeListener,    // Supports a single listener that is called back as animation proceeds
+        thumbChangeListener,    // Supports a single listener that is called back as animation proceeds
         glideChangeTimer,       // Timer used for callbacks
         GLIDE_CHANGE_INTERVAL_MS = 30,  // How often to call back with a new zoom value
 
@@ -125,12 +125,11 @@ sitecues.def('zoom', function (zoom, callback) {
           beginZoomOperation(targetZoom, {isSlider: true}); // Get ready for more slider updates
           if (shouldPerformContinualUpdates && targetZoom !== completedZoom) {
             performJsAnimateZoomOperation();
-            if (glideChangeListener) {
+            if (thumbChangeListener) {
               glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
             }
           }
-        }
-        else {
+        } else {
           if (!zoomInput.isSliderDrag) {
             // 2nd call -- cancel glide and begin continual updates
             cancelFrame(zoomAnimator);
@@ -149,6 +148,21 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!shouldPerformContinualUpdates) {
           performInstantZoomOperation();
         }
+      };
+
+      function resetZoom() {
+        if (completedZoom > 1) {
+          beginZoomOperation(1, {});
+          performInstantZoomOperation();
+          finishZoomOperation();
+        }
+      }
+
+      // Change the zoom by the given amount -- useful for
+      // increase/decrease caused by keypress on a focused zoom slider
+      zoom.changeZoomBy = function(delta) {
+        zoom.jumpTo(completedZoom + delta);
+        sitecues.emit('zoom/stop');  // Discrete slider update is finished
       };
 
       // Retrieve and store whether the current window is on a Retina display
@@ -238,12 +252,18 @@ sitecues.def('zoom', function (zoom, callback) {
         return completedZoom;
       };
 
-      // Add a listener for mid-animation zoom updates.
+      // Allow one listener for all zoom updates, even mid-animation.
       // These occur when the user holds down A, a, +, - (as opposed to conf.set and the 'zoom' event which occur at the end)
       // Currently only supports one listener.
-      zoom.setGlideChangeListener = function (listener) {
-        glideChangeListener = listener;
+      // It has to be fast, otherwise it will affect zoom performance.
+      zoom.setThumbChangeListener = function (listener) {
+        thumbChangeListener = listener;
       };
+
+      // Has the zoom setting ever been touched by the user at all
+      zoom.hasZoomEverBeenSet = function() {
+        return conf.get('zoom') >= 1;
+      }
 
       // ------------------------ PRIVATE -----------------------------
 
@@ -373,10 +393,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }
 
         function beginGlideAnimation() {
-          if (glideChangeListener) {
-            glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
-          }
-
+          glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
           if (!zoomInput.isLongGlide) {
             // Button/key was already released, zoom only for long enough to get minimum zoom
             var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
@@ -414,7 +431,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Helper for calling back glide change listener
       function onGlideChange() {
-        glideChangeListener(getMidAnimationZoom());
+        thumbChangeListener && thumbChangeListener(getMidAnimationZoom());
       }
 
       // How many milliseconds have elapsed since the start of the zoom operation?
@@ -425,10 +442,6 @@ sitecues.def('zoom', function (zoom, callback) {
       // When an A button or +/- key is pressed, we always glide at least MIN_ZOOM_PER_CLICK.
       // This provides a consistent amount of zoom change for discrete presses.
       function finishGlideIfEnough() {
-        if (!isZoomOperationRunning()) {
-          return;
-        }
-
         if (!isGlideCurrentlyRunning()) {
           // Glide has started, but animation hasn't started yet -- we are waiting for
           // the ANIMATION_OPTIMIZATION_SETUP_DELAY period while the browser sets up for the animation.
@@ -470,6 +483,17 @@ sitecues.def('zoom', function (zoom, callback) {
         });
       }
 
+      function zoomStopRequested() {
+        if (isZoomOperationRunning()) {
+          if (zoomInput.isSlider) {
+            finishZoomSliderOperation();
+          }
+          else {   // "A" button or +/- keypress
+            finishGlideIfEnough();
+          }
+        }
+      }
+
       // Get the current zoom value as reported by the layout engine
       function getActualZoom() {
         return getSanitizedZoomValue(common.getTransform($body));
@@ -485,9 +509,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
         $body.css(getZoomCss(currentTargetZoom));
-        if (glideChangeListener) {
-          glideChangeListener(currentTargetZoom);
-        }
+        thumbChangeListener && thumbChangeListener(currentTargetZoom);
       }
 
       // Animate until the currentTargetZoom, used for gliding zoom changes
@@ -628,8 +650,7 @@ sitecues.def('zoom', function (zoom, callback) {
           prepareAnimationOptimizations();
           zoomBeginTimer = setTimeout(beginZoomOperationAfterDelay, ANIMATION_OPTIMIZATION_SETUP_DELAY);
           startZoomTime = Date.now(); // Will be set to start of animation time after animation begins
-        }
-        else {
+        } else {
           beginZoomOperationAfterDelay();
         }
       }
@@ -709,8 +730,8 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function cancelGlideChangeTimer() {
+        thumbChangeListener && thumbChangeListener(completedZoom);
         if (glideChangeTimer) {
-          glideChangeListener(completedZoom);
           clearInterval(glideChangeTimer);
           glideChangeTimer = 0;
         }
@@ -725,7 +746,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearTimeout(clearAnimationOptimizationTimer);
         cancelGlideChangeTimer();
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
-        $(window).off('keyup', finishGlideIfEnough);
+        $(window).off('keyup', zoomStopRequested);
       }
 
       // Scroll content to maximize the use of screen real estate, showing as much content as possible.
@@ -1088,6 +1109,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
         $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
 
+        sitecues.on('sitecues/do-reset zoom/do-reset', resetZoom);
+
         if (SC_DEV) {
           console.log('_______________________________________________________');
           console.log('Zoom configuration: %o', zoomConfig);
@@ -1098,14 +1121,14 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
-      function onDocumentReady() {
+      function performInitialLoadZoom() {
         zoom.getNativeZoom(); // Make sure we have native zoom value available
 
         var targetZoom = conf.get('zoom');
         if (targetZoom > 1) {
+          // Wait till badge is inserted and perform initial load zoom from settings
           beginGlide(targetZoom);
-        }
-        else {
+        } else {
           // No initial zoom from settings, first zoom will only be from user input
           isInitialLoadZoom = false;
         }
@@ -1134,12 +1157,11 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('resize');
       }
 
-      // use conf module for sharing current zoom level value
+      // Use conf module for sharing current zoom level value
       conf.def('zoom', getSanitizedZoomValue);
 
       // Set up listeners for zoom  operations
-      sitecues.on('zoom/stop-slider', finishZoomSliderOperation);
-      sitecues.on('zoom/stop-button', finishGlideIfEnough);
+      sitecues.on('zoom/stop', zoomStopRequested);
       sitecues.on('zoom/increase', function(event) {
         // Increase up to max or until zoom/stop requested
         beginGlide(zoom.max, event);
@@ -1159,14 +1181,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearAnimationOptimizations(); // Browser can reclaim resources used
       });
 
-      // We used to zoom before the document was ready, causing us to examine the body
-      // before much of it was actually there. This patch waits until the document before zooming and examining the body.
-      // In the future, we could try to examine the body every second until it is able to find the info. This would
-      // allow us to zoom sooner -- but it makes sense to keep to the simple approach for now.
-      // Also, it seems that zoom initialization is much faster when it happens outside of the critical path
-      // (after the load). So another advantage of doing this after the document is ready is to not
-      // slow down the page load.
-      $(document).ready(onDocumentReady);
+      sitecues.on('bp/did-complete', performInitialLoadZoom);
 
       callback();
     });

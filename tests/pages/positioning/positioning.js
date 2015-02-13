@@ -226,7 +226,7 @@ $(document).ready(function() {
 
 				'<div id="spot" style="z-index: 2147483646; position: absolute; left: 0; top: 0; width: 10px; height: 10px; background-color: rgb(0, 0, 0); opacity: 0.5;"></div>',
 				'<div id="hl" style="visibility: hidden; z-index: 2147483646; position: absolute; left: 0; top: 0; width: 100px; height: 100px; background-color: none; opacity: 0.75; border: 5px ridge #FFFF00;"></div>'
-			)[0].style.setProperty('cursor', 'crosshair', 'important');
+			)[0].style.set('cursor', 'crosshair', 'important');
 			window.positionDisplay = $('#positionDisplay');
 			window.positionDisplayOrig = $('#positionDisplayOrig');
 			window.positionDisplaySpot = $('#positionDisplaySpot');
@@ -264,7 +264,7 @@ $(document).ready(function() {
 			window.s = JSON.stringify;
 			window.p = toPositionObj;			
 			window.st = window.scrollTo;
-			window.sz = window.setZoom;
+			window.sz = window.jumpTo;
 			window.gz = window.getZoom;
 			window.gtz = window.getTotalZoom;
 			window.spot = window.setSpotOffset;

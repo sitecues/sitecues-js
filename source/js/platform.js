@@ -30,6 +30,7 @@ sitecues.def('platform', function (platformModule, callback) {
       isOpera     : browser === 'Opera',
       isSafari    : browser === 'Safari',
       isWebKit    : browser === 'Chrome' || browser === 'Opera' || browser === 'Safari',
+      isMoz        : browser === 'Firefox',
       isUnknown   : browser === 'Unknown Browser'
     };
 

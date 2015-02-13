@@ -14,8 +14,8 @@ sitecues.def('audio', function (audio, callback) {
   
   'use strict';
   
-  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform',
-    function(conf, site, $, builder, platform) {
+  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'util/localization',
+    function(conf, site, $, builder, platform, locale) {
 
     var ttsOn = false,
       audioPlayer,
@@ -61,8 +61,7 @@ sitecues.def('audio', function (audio, callback) {
 
     // Puts in delimiters on both sides of the parameter -- ? before and & after
     function getLanguageParameter() {
-      var lang = document.documentElement.lang;
-      return '?l=' + (lang || 'en') + '&';
+      return '?l=' + (locale.getWebsiteLangStringName()) + '&';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
@@ -79,13 +78,17 @@ sitecues.def('audio', function (audio, callback) {
        * Turn speech on or off
        * @param isOn Whether to turn speech on or off
        */
-    function setSpeechState(isOn) {
+    function setSpeechState(isOn, doSuppressAudioCue) {
       if (ttsOn !== isOn) {
         ttsOn = isOn;
         conf.set('ttsOn', ttsOn);
-        sitecues.emit('speech/did-change', ttsOn);
+        sitecues.emit('speech/did-change', ttsOn, doSuppressAudioCue);
       }
     }
+
+    audio.toggleSpeech = function() {
+      setSpeechState(!ttsOn);
+    };
 
     /*
      * Uses a provisional player to play back audio by key, used for audio cues.
@@ -98,6 +101,14 @@ sitecues.def('audio', function (audio, callback) {
 
       // Stop speech on any key down.
       enableKeyDownToStopAudio();
+    };
+
+    audio.playEarcon = function(earconName) {
+      stopAudio();
+
+      var url = sitecues.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());
+
+      getAudioPlayer().playAudioSrc(url);
     };
 
     // What audio format will we use?
@@ -167,10 +178,6 @@ sitecues.def('audio', function (audio, callback) {
       return mediaTypeForPrerecordedAudio;
     }
 
-    function toggleSpeech() {
-      setSpeechState(!ttsOn);
-    }
-
     /**
      * Returns if TTS is enabled or not.  Always returns true or false.
      */
@@ -192,16 +199,21 @@ sitecues.def('audio', function (audio, callback) {
     sitecues.on('hlb/closed', stopAudio);
 
     // User has requested a speech toggle
-    sitecues.on('speech/do-toggle', toggleSpeech);
+    sitecues.on('speech/do-toggle', audio.toggleSpeech);
+
+    sitecues.on('sitecues/do-reset', function() {
+      stopAudio();
+      setSpeechState(false, true);
+    });
 
     if (conf.get('ttsOn')) {
       ttsOn = true;
-      sitecues.emit('speech/init');
+      sitecues.emit('speech/did-change', true);
     }
 
     if (SC_UNIT) {
       exports.setSpeechState = setSpeechState;
-      exports.isSpeechEnabled = audio.isSpeechEnabled
+      exports.isSpeechEnabled = audio.isSpeechEnabled;
       exports.playAudioByKey = audio.playAudioByKey;
       exports.playHlbContent = playHlbContent;
       exports.getTTSUrl = getTTSUrl;

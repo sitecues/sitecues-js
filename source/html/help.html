@@ -45,6 +45,15 @@
             window.top.postMessage('sc-close-iframe', siteUrl);
         }
     });
+
+    function checkBadgeKey(evt) {
+      if (evt.keyCode === 13 || evt.keyCode === 32) {
+        document.location.hash = '#keyboard';
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+        return true;
+      }
+    }
 </script>
 
 <style>
@@ -85,33 +94,25 @@
         margin-right: 50px;
     }
 
-    #sitecues-badge-container {
+    #sitecues-badge {
+        display: inline-block;
+        width: 136px;
+        height: 24px;
         float: right;
         padding-top: 10px;
         padding-left: 10px;
         padding-right: 10px;
         margin-right: 46px;
     }
-    #sitecues-badge {
-        height: 24px;
-        width: auto;
-        border: 0
-    }
 </style>
 </head>
 
 <body>
 <!-- Badge -->
-<a id="sitecues-badge-container" href="#keyboard">
-</a>
+<span id="sitecues-badge" href="#keyboard">
+</span>
 <script>
-    // Badge
-    var badgeContainer = document.getElementById('sitecues-badge-container');
-    var badgeImage = document.createElement('img');
-    badgeImage.src = 'http://js.sitecues.com/images/' + siteId + '/sitecues-badge.png';
-    badgeImage.id = 'sitecues-badge';
-    badgeImage.setAttribute('alt', 'Press enter for sitecues keyboard help');
-    badgeContainer.appendChild(badgeImage);
+  document.getElementById('sitecues-badge').addEventListener('keydown', checkBadgeKey);
 </script>
 
 <!-- Content -->
@@ -171,6 +172,8 @@
   <li>Press <kbd>Alt+S</kbd> to turn speech on or off</li>
   <li>Now, the One-Touch command (<kbd>Spacebar</kbd>) will also read text.</li>
 </ul>
+<h3>Quitting sitecues</h3>
+<p>To quit sitecues, either turn off both zoom and speech, or press <kbd>Alt+0</kbd>.</p>
 </body>
 <script>
     try {

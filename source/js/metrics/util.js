@@ -8,7 +8,7 @@ sitecues.def('metrics/util', function (metricsUtil, callback) {
     var toClass = {}.toString;
 
     // Define dependency modules.
-    sitecues.use('conf/site', 'jquery', 'ui', 'user', function(site, $) {
+    sitecues.use('conf/site', 'jquery', 'user', function(site, $) {
 
         metricsUtil.send = function(instance) {
           if (SC_LOCAL) {

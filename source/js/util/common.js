@@ -182,9 +182,9 @@ sitecues.def('util/common', function (common, callback) {
     common.isInSitecuesUI = function(node) {
       // Check for nodeType of 1, which is an element
       // If not, use the parent of the node
-      var element = node.nodeType === 1 ? node : node.parentNode,
-        closest = $(element).closest('body,#sitecues-badge');
-      return closest.length === 0 || $(closest).attr('id') === 'sitecues-badge';
+      var element = node.nodeType === 1 ? node : node.parentNode;
+      return ! $.contains(document.body, element) || // Is not in the <body>
+        $(element).closest('#sitecues-badge,#scp-bp-container').length;
     };
 
     /**

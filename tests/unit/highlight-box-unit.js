@@ -667,7 +667,7 @@ describe('highlight-box', function() {
 
   });
 
-  // The onHLBReady() purpose is to set and emit the proper states when the HLB is finished transitioning in to be used
+  // The onHLBReady() purpose is to set and emit the proper modes when the HLB is finished transitioning in to be used
   // and read by a user.
   describe('#onHLBReady', function () {
 

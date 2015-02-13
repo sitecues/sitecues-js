@@ -181,7 +181,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       var $hlbElement      = data.$hlbElement,
           transitionOutCSS = getTransitionOutCSS(data);
 
-      // After the deflation animation completes, clean up the HLB states and DOM
+      // After the deflation animation completes, clean up the HLB modes and DOM
       $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBClosed);
 
       // Animate the deflation by setting the transform scale to startingScale.

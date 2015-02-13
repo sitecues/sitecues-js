@@ -18,6 +18,7 @@ sitecues.def('keys', function(keys, callback) {
         // [4 Left ]  [ 5    ]  [6 Right ]
         // [1 End  ]  [ 2 Dn ]  [3 PgDn  ]
 
+        NUMPAD_0 = 48,
         NUMPAD_1 = 97,
         NUMPAD_2 = 98,
         NUMPAD_3 = 99,
@@ -106,6 +107,12 @@ sitecues.def('keys', function(keys, callback) {
               return !common.isEditable(event.target);
             }
           },
+          'reset': function(event) {   // Alt+0 resets all of sitecues
+            return event.keyCode === NUMPAD_0 && event.altKey;
+          },
+          'zoom1x': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only
+            return event.keyCode == NUMPAD_0 && (!common.isEditable(event.target) || hasCommandModifier(event));
+          },
           'speech': function(event) {
             return event.keyCode === LETTER_S && event.altKey && !common.isEditable(event.target);
           },
@@ -157,6 +164,8 @@ sitecues.def('keys', function(keys, callback) {
           'space': 'key/space',
           'minus': 'zoom/decrease',
           'plus': 'zoom/increase',
+          'reset': 'sitecues/do-reset',
+          'zoom1x': 'zoom/do-reset',
           'esc': 'key/esc',
           'speech': 'speech/do-toggle'
         },

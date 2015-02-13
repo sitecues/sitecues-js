@@ -50,17 +50,6 @@ sitecues.def('conf/user/manager', function (manager, callback) {
 		};
 	};
 
-	manager.typeCheck = function(data, key){
-		var value = data[key];
-			
-		// NOTE: This logic should be in the zoom module. Not conf. To be updated.
-		if (key === 'zoom') {
-			value = parseFloat(value || 1);
-		}
-
-		return value;
-	};
-
 	// get configuration value
 	manager.get = function(key, callback){
 
@@ -69,7 +58,7 @@ sitecues.def('conf/user/manager', function (manager, callback) {
 
 		// handle sync getting of value
 		if (callback === undefined) {
-			return manager.typeCheck(data, key);
+			return data[key];
 		}
 
 		// create new list if needed
@@ -82,7 +71,7 @@ sitecues.def('conf/user/manager', function (manager, callback) {
 
 		if (key in data) {
 			// call back if there is value for key
-			callback(manager.typeCheck(data, key));
+			callback(data[key]);
 		}
 
 		// chain
