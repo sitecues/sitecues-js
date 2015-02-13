@@ -16,11 +16,11 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <defs>\
   <g id="scp-small-A-def"> \
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14l0 0zm1 38l-9 -23h0l-8 23h16l0 0z"/> \
-    <rect opacity="0" width="62" height="64"/>\
+    <rect opacity="0" x="-22" y="-35" width="102" height="134"/>\
   </g> \
   <g id="scp-large-A-def"> \
     <path d="m54 0l33 89h-20l-7 -20h-33l-7 20h-20l34 -89h20l0 0zm1 55l-11 -32h0l-12 33h23l0 0z"/> \
-    <rect opacity="0" width="90" height="92"/>\
+    <rect opacity="0" x="-22" y="-20" width="140" height="132"/>\
   </g> \
   <path id="scp-zoom-slider-bar-def" d="m278 3v27c0 2 -1 3 -3 3h-273c-2 0 -3 -1 -3 -3v-6c0 -1 1 -2 2 -3l273 -22c1 0 3 1 3 3l0 0z"/> \
   <path id="scp-zoom-slider-thumb-def" d="m11 64l-10 -15c0 0 0 -1 -1 -1l0 -40c0 -2 3 -7 5 -7h15c1 0 5 5 5 7v40v0c0 0 0 1 -1 1l-10 15c0 0 -2 2 -4 0l0 0z" /> \
