@@ -25,7 +25,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       repeatDelayTimer,
       MAX_PIXELS_TO_PAN = 999,
       HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
-      SCROLL_EXTRA_PIXELS = 100,
+      DO_SHOW_DEBUG_POINTS = SC_DEV && false,
       MH_EXTRA_WIDTH = 10, // Amount to account for padding/border of mouse highlight
       isShowingDebugPoints = false,
       hlbElement,
@@ -296,10 +296,14 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
     }
 
-    function succeed(doAllowRepeat) {
+    function succeed(doAllowRepeat, doSpeakText) {
       SC_DEV && console.log('Succeed');
 
       fixedFixer.setAllowMouseEvents(true);
+
+      if (doSpeakText) {
+        sitecues.emit('mh/do-speak', mh.getHighlight().picked);
+      }
 
       if (hlb.getElement()) {
         // Open new HLB
@@ -380,7 +384,8 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         // How fast to pan -- if HLB we want to pan immediately (better UX)
         pixelsToPanPerMs = hlbElement ? PIXELS_TO_PAN_PER_MS_HLB_SEARCH : PIXELS_TO_PAN_PER_MS_HIGHLIGHT;
 
-      isShowingDebugPoints = SC_DEV && isShifted; // Show debugging dots if shift is pressed
+      isShowingDebugPoints = DO_SHOW_DEBUG_POINTS && isShifted; // Show debugging dots if shift is pressed
+      var doSpeakText = !isShowingDebugPoints && isShifted;
       $lastPicked = highlight.picked;
 
       function testPointIfOnscreen(x, y) {
@@ -446,7 +451,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           }
           else {
             // No need to pan -- finish up
-            succeed(!hlbElement);
+            succeed(!hlbElement, doSpeakText);
             return true;
           }
 
@@ -512,7 +517,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           }
           else {
             // Successful -- already had a highlight
-            succeed(!hlbElement);
+            succeed(!hlbElement, doSpeakText);
           }
           return;
         }

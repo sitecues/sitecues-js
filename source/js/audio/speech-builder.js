@@ -12,9 +12,15 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
 
     var textBuffer = '';
 
-    builder.getText = function(subtreeRootNode) {
+    builder.getText = function(selector) {
       textBuffer = '';
-      appendAccessibleTextFromSubtree(subtreeRootNode);
+      $(selector).each(function() {
+        if (textBuffer !== '') {
+          appendBlockSeparator();
+        }
+        appendAccessibleTextFromSubtree(this);
+      });
+
       // Replace multiple whitespace chars with a single space so that GET request is not too large
       textBuffer = textBuffer.replace( /\s\s+/g, ' ');
       // Remove any space at beginning or end of string

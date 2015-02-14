@@ -22,13 +22,23 @@ sitecues.def('audio', function (audio, callback) {
       mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
       mediaTypeForPrerecordedAudio;
 
-    function playHlbContent(hlb) {
+    function playHlbContent(content) {
       if (!ttsOn) {
         return;
       }
       stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+      speakContent(content);
+    }
 
-      var text = builder.getText(hlb);
+    function playHighlight(content) {
+      stopAudio();
+      // Play audio highlight earcon if highlight moved with shift key and speech being fetched
+      audio.playEarcon('audio-highlight');
+      speakContent(content);
+    }
+
+    function speakContent(content) {
+      var text = builder.getText(content);
       if (text) {
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
         enableKeyDownToStopAudio();
@@ -191,6 +201,11 @@ sitecues.def('audio', function (audio, callback) {
      * if necessary, but will not play anything.
      */
     sitecues.on('hlb/create', playHlbContent);
+
+    /**
+     * A request to read the current highlight
+     */
+    sitecues.on('mh/do-speak', playHighlight);
 
     /*
      * A highlight box was closed.  Stop/abort/dispose of the player

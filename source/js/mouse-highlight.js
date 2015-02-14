@@ -1067,6 +1067,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked = $(picked);
       state.target = target;
 
+      if (event.shiftKey) {
+        // When shift held down, emit command to speak the newly highlighted text
+        sitecues.emit('mh/do-speak', picked);
+      }
+
       updateView();
     }
 
