@@ -60,6 +60,10 @@ sitecues.def('audio/safari-player', function (player, callback) {
     allRequests.push(request);
   };
 
+  player.isBusy = function() {
+    return allRequests.length > 0;
+  };
+
   /**
    * Stop any currently playing audio and abort the request
    */

@@ -58,7 +58,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         $('.sc-debug-dots').remove();  // Remove last debugging dots
       }
 
-      navQueue.push({keyName: keyName, isShifted: event.shiftKey });
+      navQueue.push({keyName: keyName, altKey: event.altKey, shiftKey: event.shiftKey });
 
       clearKeyRepeat();
       isKeyStillDown = true; // Assume it's down until it's let up
@@ -251,23 +251,24 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       prepareMovement();
 
       var type = nextMove.keyName,
-        isShifted = nextMove.isShifted;
+        altKey = nextMove.altKey,
+        shiftKey = nextMove.shiftKey;
 
       switch (type) {
         case 'up':
-          moveInDirection(0, -1, isShifted);
+          moveInDirection(0, -1, shiftKey);
           break;
         case 'down':
-          moveInDirection(0, 1, isShifted);
+          moveInDirection(0, 1, shiftKey);
           break;
         case 'left':
-          moveInDirection(-1, 0, isShifted);
+          moveInDirection(-1, 0, shiftKey);
           break;
         case 'right':
-          moveInDirection(1, 0, isShifted);
+          moveInDirection(1, 0, shiftKey);
           break;
         case 'heading':
-          moveByTagName(HEADING_TAGS, isShifted);
+          moveByTagName(HEADING_TAGS, altKey, shiftKey);
           break;
         default:
           SC_DEV && console.log('Illegal command');
@@ -642,7 +643,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       return sitecues.highlight($picked, false, false, doKeepHighlightHidden);
     }
 
-    function moveByTagName(acceptableTagsMap, isReverse) {
+    function moveByTagName(acceptableTagsMap, isReverse, doSpeak) {
       function doesMatchTags(element) {
         if (!acceptableTagsMap[element.localName]) {
           return;
@@ -701,7 +702,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Adjust final scroll position so that highlight that it's not jammed against the top/left of window unless it needs to
       window.scrollBy(-100, -100);
-      succeed();
+      succeed(false, doSpeak);
     }
 
     function constrained(value, min, max) {

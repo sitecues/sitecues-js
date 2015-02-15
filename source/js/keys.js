@@ -49,6 +49,7 @@ sitecues.def('keys', function(keys, callback) {
         LETTER_H = 72,
         LETTER_S = 83,
         SHIFT = 16,
+        isOnlyShift,
 
         KEY_TESTS = {
           'space': function(event) {
@@ -134,7 +135,7 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
           },
           'heading': function(event) {
-            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !hasCommandModifier(event);
+            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !event.ctrlKey && !event.metaKey;
           },
           'pageup': function(event) {
             return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);
@@ -222,6 +223,8 @@ sitecues.def('keys', function(keys, callback) {
         if (event.defaultPrevented) {
           return; // Another script already used this key and set this flag like a good citizen
         }
+        setOnlyShift(event.keyCode === SHIFT);
+
         // iterate over key map
         for (var key in KEY_TESTS) {
           if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
@@ -234,10 +237,25 @@ sitecues.def('keys', function(keys, callback) {
         processUnusedKey(event);
       }
 
+      function onKeyUp(event) {
+        doFollowScroll(true);
+        if (event.keyCode === SHIFT) {
+          if (isOnlyShift) {
+            sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
+          }
+        }
+      }
+
+      // Track to find out whether the shift key is pressed by itself
+      function setOnlyShift(isShift) {
+        isOnlyShift = isShift;
+      }
+
       // Let the key fall through to default processing,
-      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting
+      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
+      // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
       function processUnusedKey(event) {
-        if (event.keyCode !== SHIFT) {
+        if (event.keyCode === SHIFT) {
           doFollowScroll(false);
         }
       }
@@ -254,7 +272,7 @@ sitecues.def('keys', function(keys, callback) {
       addEventListener('keydown', onKeyDown, true);
 
       // Will reenable highlight on mouse follow
-      addEventListener('keyup', function() { doFollowScroll(true); });
+      addEventListener('keyup', onKeyUp, true);
 
       // done
       callback();
