@@ -85,7 +85,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
         // Non-movement commands
         if (keyName === 'space') {
-          onSpace();
+          onSpace(nextCommand.shiftKey);
         }
         else if (keyName === 'esc') {
           onEscape(keyName);
@@ -297,13 +297,17 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       }
     }
 
+    function speakHighlight() {
+      sitecues.emit('mh/do-speak', mh.getHighlight().picked);
+    }
+
     function succeed(doAllowRepeat, doSpeakText) {
       SC_DEV && console.log('Succeed');
 
       fixedFixer.setAllowMouseEvents(true);
 
       if (doSpeakText) {
-        sitecues.emit('mh/do-speak', mh.getHighlight().picked);
+        speakHighlight();
       }
 
       if (hlb.getElement()) {
@@ -727,7 +731,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       return outlineRect;
     }
 
-    function onSpace() {
+    function onSpace(doSpeakText) {
       if (hlb.getElement() || mh.getHighlight().isVisible) {
         // Has an HLB or a highlight -- toggle HLB
         sitecues.emit('hlb/toggle');
@@ -735,6 +739,9 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       else if (isNavigationEnabled) {
         // No highlight -- make one
         sitecues.emit('mh/autopick');
+      }
+      if (doSpeakText) {
+        speakHighlight();
       }
     }
 

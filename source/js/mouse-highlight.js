@@ -1227,7 +1227,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return updateView();
     }
 
-    function autoPick() {
+    function autoPick(doSpeech) {
       // First try for existing hidden highlight
       // If it would still be onscreen, use it
       if (tryExistingHighlight()) {

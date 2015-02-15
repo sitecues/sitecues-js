@@ -58,7 +58,7 @@ sitecues.def('keys', function(keys, callback) {
               // The key is a space key, *and*
               event.keyCode === SPACE &&
               // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
-              !hasAnyModifier(event) &&
+              !hasCommandModifier(event) &&
               // HLB is on or highlighting is enabled
               sitecues.isSitecuesOn() &&
               // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
