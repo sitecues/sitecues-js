@@ -67,6 +67,9 @@ sitecues.def('zoom', function (zoom, callback) {
         clearAnimationOptimizationTimer,   // Timer to clear will-change when zoom is finished
         isPanelOpen,   // True if the panel is open
 
+        // State to help determine when pinch/unpinch ends (ctrl+wheel events)
+        unpinchEndTimer,
+
         // Should document scrollbars be calculated by us?
         // Should always be true for IE, because it fixes major positioning bugs
         shouldManuallyAddScrollbars = platform.browser.isIE,
@@ -78,7 +81,6 @@ sitecues.def('zoom', function (zoom, callback) {
         // other method, which is to overlay a transparent div and then remove it)
         shouldRepaintOnZoomChange = platform.browser.isChrome,
         shouldUseBackfaceRepaint = false,
-        REPAINT_FOR_CRISP_TEXT_MS = 15,
 
         // Is the will-change CSS property supported?
         shouldUseWillChangeOptimization,
@@ -95,7 +97,10 @@ sitecues.def('zoom', function (zoom, callback) {
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
         MIN_RECT_SIDE = 4,
         ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
-        CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000;  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
+        CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000,  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
+        REPAINT_FOR_CRISP_TEXT_DELAY = 15,
+        UNPINCH_END_DELAY = 150,
+        UNPINCH_POWER = .015; // How much the unpinch delta affects zoom
 
       // ------------------------ PUBLIC -----------------------------
 
@@ -789,7 +794,7 @@ sitecues.def('zoom', function (zoom, callback) {
           $(body).css('backfaceVisibility', '');
           setTimeout(function () {
             $(body).css('backfaceVisibility', 'hidden')
-          }, REPAINT_FOR_CRISP_TEXT_MS);
+          }, REPAINT_FOR_CRISP_TEXT_DELAY);
         }
         var MAX_ZINDEX = 2147483647,
           appendedDiv = $('<div>')
@@ -804,7 +809,7 @@ sitecues.def('zoom', function (zoom, callback) {
           .appendTo('html');
         setTimeout(function () {
           appendedDiv.remove();
-        }, REPAINT_FOR_CRISP_TEXT_MS);
+        }, REPAINT_FOR_CRISP_TEXT_DELAY);
       }
 
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
@@ -1157,8 +1162,25 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('resize');
       }
 
+      // We capture ctrl+wheel events because those are actually pinch/unpinch events
+      function onMouseWheel(event) {
+        if (!event.ctrlKey) {
+          return;  // Not an unpinch event
+        }
+
+        var delta = -event.deltaY * UNPINCH_POWER;
+        var targetZoom = isZoomOperationRunning() ? currentTargetZoom + delta : completedZoom + delta;
+
+        clearTimeout(unpinchEndTimer);
+        unpinchEndTimer = setTimeout(finishZoomOperation, UNPINCH_END_DELAY);
+        zoom.jumpTo(targetZoom);
+        event.preventDefault();
+      }
+
       // Use conf module for sharing current zoom level value
       conf.def('zoom', getSanitizedZoomValue);
+
+      addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
 
       // Set up listeners for zoom  operations
       sitecues.on('zoom/stop', zoomStopRequested);
