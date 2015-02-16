@@ -104,6 +104,8 @@
         padding-right: 10px;
         margin-right: 46px;
     }
+
+    #pinch-entry { display: none; }
 </style>
 </head>
 
@@ -182,6 +184,11 @@
   <li><kbd>Shift</kbd> by itself to read the current highlight</li>
 </ul>
 <p>Using shift to speak works whether or not speech is turned on in the sitecues panel.</p>
+<h2>Other Cool Shortcuts</h2>
+<p>You can zoom the page with your mouse.
+  Try holding down <kbd>Control</kbd> key while rolling your mousewheel.
+  <span id="pinch-entry">You can even pinch/unpinch on a trackpad (Chrome on Mac only).</span>
+</p>
 <h2>Quitting sitecues</h2>
 <p>To quit sitecues, either turn off both zoom and speech, or press <kbd>Alt+0</kbd>.</p>
 </body>
@@ -189,6 +196,14 @@
     try {
         document.body.focus();
     } catch(ex) {};
+
+    function isPinchZoomSupported() {
+      return navigator.userAgent.indexOf('Chrome') > 0 && navigator.platform.toLowerCase().indexOf('mac') >= 0;
+    }
+
+    if (isPinchZoomSupported()) {
+      document.getElementById('pinch-entry').style.display = 'inline';
+    }
 </script>
 </html>
 
