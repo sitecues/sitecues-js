@@ -212,7 +212,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '146px',
           'height': '24px',
           'padding': '5px',
-          'background-color': 'white'
+          'background-color': 'white',
+          'z-index': '9999999'
+        },
+
+        '.scp-default-badge #scp-opaque-badge-bg': {
+          'opacity': 1    // Make sure page contents don't show through the floating badge
         },
 
         '.scp-default-badge[aria-expanded="false"]': {
