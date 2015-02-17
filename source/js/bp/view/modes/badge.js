@@ -114,9 +114,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
             'paddingTop',
             'paddingBottom',
             'paddingLeft',
-            'paddingRight',
-            'top',
-            'left'
+            'paddingRight'
           ];
 
       transferStylesFromExistingBadge(stylesToTransfer);
