@@ -159,7 +159,7 @@ sitecues.def('bp/placement', function(placement, callback) {
       badgeRect.height -= paddingTop  + getPadding('Bottom');
 
       // Adjust for top whitespace in SVG badge (it's there because it turns into an outline on expansion)
-      badgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET / zoomMod.getCompletedZoom();
+      badgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
 
       // Set left and top for positioning.
       // Set width and height for focus outline.
@@ -168,7 +168,7 @@ sitecues.def('bp/placement', function(placement, callback) {
       bpElement.style.top  = 0;
       bpElement.style.left = 0;
 
-      bpElement.style[helper.transformProperty] = 'translate(' + badgeRect.left + 'px,' + badgeRect.top + 'px)';
+      bpElement.style[helper.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
 
       fitSVGtoBadgeRect(badgeRect, appliedZoom);
 
