@@ -14,7 +14,8 @@ sitecues.def('bp/animate', function(animate, callback) {
                            function (fn) {
                              clearTimeout(fn);
                            },
-          animationEasingFn = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
+          expandEasingFn = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
+          collapseEasingFn = function (t) { return t; },  // Linear just looks better for collapse animation
           animationStartTime,
           animationId,
           lastTransitionTo            = BP_CONST.BADGE_MODE,
@@ -239,8 +240,10 @@ sitecues.def('bp/animate', function(animate, callback) {
         // Badge implemented by customer
         if (isPageBadge) {
 
-          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + window.pageYOffset;
-          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset;
+          var FUDGE_FACTOR = -0.5; // This makes it work, and not jerk to a new spot at the end, not sure why
+
+          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
+          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
 
         // Floating badge
         } else {
@@ -481,6 +484,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         function animationTick () {
 
           var timeSinceFirstAnimationTick = Date.now() - animationStartTime,
+              animationEasingFn           = isPanelRequested ? expandEasingFn : collapseEasingFn,
               normalizedAnimationTime     = Math.min(1, animationEasingFn(timeSinceFirstAnimationTick / fullAnimationDuration)),
               currentMode                 = isPanelRequested ? normalizedAnimationTime : 1 - normalizedAnimationTime;
 

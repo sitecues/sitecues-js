@@ -128,7 +128,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Other
   constants.EXPAND_ANIMATION_DURATION_MS  = 1500;   // Time it takes to expand from badge to panel -- no hovers during this time
-  constants.SHRINK_ANIMATION_DURATION_MS  = 1500;  // Time it takes to shrink panel to badge -- no hovers during this time
+  constants.SHRINK_ANIMATION_DURATION_MS  = 750;  // Time it takes to shrink panel to badge -- no hovers during this time
   constants.NO_INPUT_TIMEOUT     = 7000;  // Show more button if no activity for this amount of time
 
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
