@@ -12,7 +12,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   'use strict';
 
   bpSVG.html = '\
-<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1804 440" id="scp-svg">\
+<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 815 200" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def"> \
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14l0 0zm1 38l-9 -23h0l-8 23h16l0 0z"/> \

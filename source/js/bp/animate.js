@@ -27,7 +27,8 @@ sitecues.def('bp/animate', function(animate, callback) {
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
-          CRISP_FACTOR = 1,
+          START_CRISP_FACTOR = 2,
+          END_CRISP_FACTOR = 4,
           transformElementId = BP_CONST.BP_CONTAINER_ID;
 
 
@@ -492,7 +493,7 @@ sitecues.def('bp/animate', function(animate, callback) {
               normalizedAnimationTime     = Math.min(1, animationEasingFn(timeSinceFirstAnimationTick / fullAnimationDuration)),
               currentMode                 = isPanelRequested ? normalizedAnimationTime : 1 - normalizedAnimationTime,
               isAnimationEnding           = normalizedAnimationTime === 1,
-              crispFactor = isAnimationEnding ? CRISP_FACTOR : 1;
+              crispFactor = isAnimationEnding ? END_CRISP_FACTOR : START_CRISP_FACTOR;
 
           state.set('currentMode', currentMode);
 
@@ -513,7 +514,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           setSVGElementTransforms(startingSVGElementTransforms, svgElementTransformDifference, normalizedAnimationTime);
 
           if (isAnimationEnding) {
-            setSize(getCurrentSize(), crispFactor);
+            setSize(getCurrentSize(), END_CRISP_FACTOR / START_CRISP_FACTOR);
             endAnimation();
             return;
           }
@@ -544,7 +545,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
         }
 
-        setSize(startingSize, 1);
+        setSize(startingSize, START_CRISP_FACTOR);
 
         SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
 

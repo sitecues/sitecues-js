@@ -119,7 +119,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Cursor rules to use when cursor is less than minimum cursor size
         // The .scp-xl-cursor class is only set when the cursor wouldn't already be at least this size
         '.scp-xl-cursor #scp-main': {
-          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
+          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important',
         },
 
         '.scp-xl-cursor .scp-target': {
@@ -454,6 +454,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
+        },
+
+        '.scp-large': {
+          'pointer-events': 'none'
+        },
+
+        '.scp-ready': {
+          'pointer-events': 'auto'
         }
       };
 
