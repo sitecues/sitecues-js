@@ -26,7 +26,9 @@ sitecues.def('bp/animate', function(animate, callback) {
           // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
-          byId                        = helper.byId;
+          byId                        = helper.byId,
+          CRISP_FACTOR = 1,
+          transformElementId = BP_CONST.BP_CONTAINER_ID;
 
 
       /**
@@ -357,7 +359,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function getCurrentTransformPosition () {
 
-        var transform = byId(BP_CONST.BP_CONTAINER_ID).style[helper.transformProperty],
+        var transform = byId(transformElementId).style[helper.transformProperty],
             position  = {},
             transformValues;
 
@@ -390,21 +392,23 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
-      function setSize (width, height) {
+      function setSize (size, crispFactor) {
 
         var svgStyle = byId(BP_CONST.SVG_ID).style;
 
         // Height and Width
-        svgStyle.width  = width  + 'px';
-        svgStyle.height = height + 'px';
+        svgStyle.width  = (size.width * crispFactor) + 'px';
+        svgStyle.height = (size.height * crispFactor) + 'px';
 
       }
 
       function setTransform (left, top, transformScale) {
 
-        var bpContainerStyle = byId(BP_CONST.BP_CONTAINER_ID).style;
+//        var bpContainerStyle = byId(BP_CONST.BP_CONTAINER_ID).style;
+//        bpContainerStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ')';
 
-        bpContainerStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + transformScale;
+        var transformStyle = byId(transformElementId).style;
+        transformStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + transformScale;
 
       }
 
@@ -486,23 +490,30 @@ sitecues.def('bp/animate', function(animate, callback) {
           var timeSinceFirstAnimationTick = Date.now() - animationStartTime,
               animationEasingFn           = isPanelRequested ? expandEasingFn : collapseEasingFn,
               normalizedAnimationTime     = Math.min(1, animationEasingFn(timeSinceFirstAnimationTick / fullAnimationDuration)),
-              currentMode                 = isPanelRequested ? normalizedAnimationTime : 1 - normalizedAnimationTime;
+              currentMode                 = isPanelRequested ? normalizedAnimationTime : 1 - normalizedAnimationTime,
+              isAnimationEnding           = normalizedAnimationTime === 1,
+              crispFactor = isAnimationEnding ? CRISP_FACTOR : 1;
 
           state.set('currentMode', currentMode);
 
-          var transformScale = 'scale(' +
-            ((startingSize.width  + sizeDifference.width  * normalizedAnimationTime ) / startingSize.width) + ',' +
-            ((startingSize.height + sizeDifference.height * normalizedAnimationTime ) / startingSize.height) + ')';
+          // Don't set width and height of <svg>, but instead use scale transform
+          // To quote from http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
+          // To achieve silky smooth animations you need to avoid work, and the best way to do that is to only change properties
+          // that affect compositing -- transform and opacity.
+          var transformScaleX = ((startingSize.width  + sizeDifference.width  * normalizedAnimationTime ) / startingSize.width / crispFactor),
+            transformScaleY = ((startingSize.height + sizeDifference.height * normalizedAnimationTime ) / startingSize.height / crispFactor),
+            transformScale = 'scale(' + transformScaleX + ',' + transformScaleY + ')';
 
           setTransform(
-            startingPosition.left + positionDifference.left * normalizedAnimationTime,
-            startingPosition.top  + positionDifference.top  * normalizedAnimationTime,
+            (startingPosition.left + positionDifference.left * normalizedAnimationTime) ,
+            (startingPosition.top  + positionDifference.top  * normalizedAnimationTime) ,
             transformScale
           );
 
           setSVGElementTransforms(startingSVGElementTransforms, svgElementTransformDifference, normalizedAnimationTime);
 
-          if (normalizedAnimationTime === 1) {
+          if (isAnimationEnding) {
+            setSize(getCurrentSize(), crispFactor);
             endAnimation();
             return;
           }
@@ -532,6 +543,8 @@ sitecues.def('bp/animate', function(animate, callback) {
         } else {
           animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
         }
+
+        setSize(startingSize, 1);
 
         SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
 
