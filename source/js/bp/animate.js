@@ -400,11 +400,11 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
-      function setTransformPosition (left, top) {
+      function setTransform (left, top, transformScale) {
 
         var bpContainerStyle = byId(BP_CONST.BP_CONTAINER_ID).style;
 
-        bpContainerStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ')';
+        bpContainerStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + transformScale;
 
       }
 
@@ -490,14 +490,14 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           state.set('currentMode', currentMode);
 
-          setSize(
-            startingSize.width  + sizeDifference.width  * normalizedAnimationTime,
-            startingSize.height + sizeDifference.height * normalizedAnimationTime
-          );
+          var transformScale = 'scale(' +
+            ((startingSize.width  + sizeDifference.width  * normalizedAnimationTime ) / startingSize.width) + ',' +
+            ((startingSize.height + sizeDifference.height * normalizedAnimationTime ) / startingSize.height) + ')';
 
-          setTransformPosition(
+          setTransform(
             startingPosition.left + positionDifference.left * normalizedAnimationTime,
-            startingPosition.top  + positionDifference.top  * normalizedAnimationTime
+            startingPosition.top  + positionDifference.top  * normalizedAnimationTime,
+            transformScale
           );
 
           setSVGElementTransforms(startingSVGElementTransforms, svgElementTransformDifference, normalizedAnimationTime);
