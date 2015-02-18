@@ -27,7 +27,7 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isWebkit = platform.browser.isWebkit;
 
-    helper.isMoz = platform.browser.isMos;
+    helper.isMoz = platform.browser.isMoz;
 
     helper.isIE  = platform.browser.isIE;
 
