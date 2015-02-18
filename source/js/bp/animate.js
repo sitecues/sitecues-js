@@ -503,7 +503,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           // that affect compositing -- transform and opacity.
           var transformScaleX = ((startingSize.width  + sizeDifference.width  * normalizedAnimationTime ) / startingSize.width / crispFactor),
             transformScaleY = ((startingSize.height + sizeDifference.height * normalizedAnimationTime ) / startingSize.height / crispFactor),
-            transformScale = 'scale(' + transformScaleX + ',' + transformScaleY + ')';
+            transformScale = 'scale(' + transformScaleX + ')';
 
           setTransform(
             (startingPosition.left + positionDifference.left * normalizedAnimationTime) ,
