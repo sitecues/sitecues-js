@@ -5,7 +5,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     var
       isAnimationDebuggingOn = false,
 
-      doWebKitPrefix = helper.isWebkit,
+      doWebKitPrefix = helper.isSafari,
       doMsPrefix = helper.isMoz,
 
       idDelimiter = '#',
@@ -185,13 +185,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'position': 'absolute',
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
-          'transform-origin': '0% 0%',  // TODO needed?
+          'transform-origin': '0% 0%',
           'will-change': 'transform',
           'outline': 0 // don't show default dotted focus outline
-        },
-
-        '#scp-svg': {
-          'transform-origin': '0% 0%'  // TODO needed?
         },
 
         // The new badge is hidden until sitecues is loaded
