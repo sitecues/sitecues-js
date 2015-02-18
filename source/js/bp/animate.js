@@ -28,7 +28,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
           START_CRISP_FACTOR = 1.5,
-          END_CRISP_FACTOR = 4,
+          END_CRISP_FACTOR = 10,
           transformElementId = BP_CONST.BP_CONTAINER_ID;
 
 
