@@ -186,6 +186,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',  // TODO needed?
+          'will-change': 'transform',
           'outline': 0 // don't show default dotted focus outline
         },
 
