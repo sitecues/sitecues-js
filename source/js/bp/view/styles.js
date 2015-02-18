@@ -234,16 +234,22 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'fill .2s, opacity .2s'
         },
 
+        // TODO text needs to fade in at the end
+        'text': {
+          'display': 'none',
+          'transition': 'opacity 1s',
+          'font-family': 'Arial',
+          'font-size': '29px',
+          'font-weight': 'bold',
+          'opacity': 0
+        },
+
         /* Text label animation for main panel labels */
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
-        '.scp-large text': {
-          'transition': 'opacity 1s',
-          // Add the extra 100ms so that text fades in after expansion animation completes.
-          'transition-delay': BP_CONST.EXPAND_ANIMATION_DURATION_MS + 100 + 'ms',
-          'font-family': 'Arial',
-          'font-size': '29px',
-          'font-weight': 'bold'
+        '.scp-ready text': {
+          'display': 'block',
+          'opacity': 1
         },
 
         '#scp-shadow': {
