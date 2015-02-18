@@ -27,7 +27,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
-          START_CRISP_FACTOR = 2,
+          START_CRISP_FACTOR = 1,
           END_CRISP_FACTOR = 4,
           transformElementId = BP_CONST.BP_CONTAINER_ID;
 
