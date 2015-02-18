@@ -220,10 +220,11 @@ sitecues.def('keys', function(keys, callback) {
 
       // key event hook
       function onKeyDown(event) {
+        setOnlyShift(event.keyCode === SHIFT);
+
         if (event.defaultPrevented) {
           return; // Another script already used this key and set this flag like a good citizen
         }
-        setOnlyShift(event.keyCode === SHIFT);
 
         // iterate over key map
         for (var key in KEY_TESTS) {
@@ -249,6 +250,7 @@ sitecues.def('keys', function(keys, callback) {
       // Track to find out whether the shift key is pressed by itself
       function setOnlyShift(isShift) {
         isOnlyShift = isShift;
+        sitecues.emit('key/only-shift', isShift);
       }
 
       // Let the key fall through to default processing,
