@@ -14,8 +14,8 @@ sitecues.def('bp/animate', function(animate, callback) {
                            function (fn) {
                              clearTimeout(fn);
                            },
-          expandEasingFn = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
-          collapseEasingFn = function (t) { return t; },  // Linear just looks better for collapse animation
+          expandEasingFn   = function (t) { return (--t)*t*t+1;}, // https://gist.github.com/gre/1650294
+          collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
           animationStartTime,
           animationId,
           lastTransitionTo            = BP_CONST.BADGE_MODE,
@@ -27,9 +27,8 @@ sitecues.def('bp/animate', function(animate, callback) {
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
-          START_CRISP_FACTOR = 1.5,
-          END_CRISP_FACTOR = 10,
-          transformElementId = BP_CONST.BP_CONTAINER_ID;
+          START_CRISP_FACTOR          = 1.5,
+          transformElementId          = BP_CONST.BP_CONTAINER_ID;
 
 
       /**
@@ -231,7 +230,8 @@ sitecues.def('bp/animate', function(animate, callback) {
        */
       function getTargetBadgePosition () {
 
-        var isPageBadge         = state.get('isPageBadge'),
+        var FUDGE_FACTOR        = -0.5, // This makes it  not jerk to a new spot, not sure why
+            isPageBadge         = state.get('isPageBadge'),
             badgeElement        = byId(BP_CONST.BADGE_ID),
             badgeComputedStyles = window.getComputedStyle(badgeElement),
             badgeRect           = badgeElement.getBoundingClientRect(),
@@ -240,10 +240,9 @@ sitecues.def('bp/animate', function(animate, callback) {
             paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),
             top,
             left;
+
         // Badge implemented by customer
         if (isPageBadge) {
-
-          var FUDGE_FACTOR = -0.5; // This makes it work, and not jerk to a new spot at the end, not sure why
 
           top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
           left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
@@ -362,7 +361,9 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         var transform = byId(transformElementId).style[helper.transformProperty],
             position  = {},
-            transformValues;
+            transformValues,
+            translateLeft,
+            translateTop;
 
         if (transform === 'none' || transform === '') {
 
@@ -372,9 +373,11 @@ sitecues.def('bp/animate', function(animate, callback) {
         } else {
 
           transformValues = transform.split(',');
+          translateLeft   = transformValues[0];
+          translateTop    = transformValues[1].split('scale')[0];
 
-          position.left   = helper.getNumberFromString(transformValues[0]);
-          position.top    = helper.getNumberFromString(transformValues[1]);
+          position.left   = helper.getNumberFromString(translateLeft);
+          position.top    = helper.getNumberFromString(translateTop);
 
         }
 
@@ -384,13 +387,29 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function getCurrentSize () {
 
-        var svgStyle = byId(BP_CONST.SVG_ID).style;
+        var svgRect = byId(BP_CONST.SVG_ID).getBoundingClientRect();
 
         return {
-          'width' : parseFloat(svgStyle.width),
-          'height': parseFloat(svgStyle.height)
+          'width' : svgRect.width,
+          'height': svgRect.height
         };
 
+      }
+
+      function getCurrentScale () {
+
+        var transformStyle = byId(transformElementId).style[helper.transformProperty],
+            transformValues;
+
+        if (transformStyle.indexOf('scale') !== -1) {
+
+          transformValues = transformStyle.split('scale');
+
+          return helper.getNumberFromString(transformValues[1]);
+
+        }
+
+        return 1;
       }
 
       function setSize (size, crispFactor) {
@@ -405,11 +424,9 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function setTransform (left, top, transformScale) {
 
-//        var bpContainerStyle = byId(BP_CONST.BP_CONTAINER_ID).style;
-//        bpContainerStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ')';
-
         var transformStyle = byId(transformElementId).style;
-        transformStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + transformScale;
+
+        transformStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
 
       }
 
@@ -492,8 +509,7 @@ sitecues.def('bp/animate', function(animate, callback) {
               animationEasingFn           = isPanelRequested ? expandEasingFn : collapseEasingFn,
               normalizedAnimationTime     = Math.min(1, animationEasingFn(timeSinceFirstAnimationTick / fullAnimationDuration)),
               currentMode                 = isPanelRequested ? normalizedAnimationTime : 1 - normalizedAnimationTime,
-              isAnimationEnding           = normalizedAnimationTime === 1,
-              crispFactor = isAnimationEnding ? END_CRISP_FACTOR : START_CRISP_FACTOR;
+              isAnimationEnding           = normalizedAnimationTime === 1;
 
           state.set('currentMode', currentMode);
 
@@ -501,21 +517,28 @@ sitecues.def('bp/animate', function(animate, callback) {
           // To quote from http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
           // To achieve silky smooth animations you need to avoid work, and the best way to do that is to only change properties
           // that affect compositing -- transform and opacity.
-          var transformScaleX = ((startingSize.width  + sizeDifference.width  * normalizedAnimationTime ) / startingSize.width / crispFactor),
-            transformScaleY = ((startingSize.height + sizeDifference.height * normalizedAnimationTime ) / startingSize.height / crispFactor),
-            transformScale = 'scale(' + transformScaleX + ')';
-
+console.log(byId(transformElementId).style[helper.transformProperty]);
           setTransform(
-            (startingPosition.left + positionDifference.left * normalizedAnimationTime) ,
-            (startingPosition.top  + positionDifference.top  * normalizedAnimationTime) ,
-            transformScale
+            (startingPosition.left + positionDifference.left * normalizedAnimationTime),
+            (startingPosition.top  + positionDifference.top  * normalizedAnimationTime),
+            startingScale          + scaleDifference         * normalizedAnimationTime
           );
 
           setSVGElementTransforms(startingSVGElementTransforms, svgElementTransformDifference, normalizedAnimationTime);
 
           if (isAnimationEnding) {
-            setSize(getCurrentSize(), END_CRISP_FACTOR / START_CRISP_FACTOR);
+
+            // Remove scale and set correct size.
+            setSize(getCurrentSize(), 1);
+
+            setTransform(
+              (startingPosition.left + positionDifference.left * normalizedAnimationTime),
+              (startingPosition.top  + positionDifference.top  * normalizedAnimationTime),
+              1
+            );
+
             endAnimation();
+
             return;
           }
 
@@ -523,19 +546,33 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         }
 
-        var startingPosition              = getCurrentTransformPosition(),
+        function getTargetScale () {
+          if (isPanelRequested) {
+            return (startingSize.width + sizeDifference.width ) / startingSize.width / START_CRISP_FACTOR;
+          } else if (state.isPanel()) {
+            return (startingSize.width + sizeDifference.width ) / startingSize.width;
+          } else {
+            return 1 / START_CRISP_FACTOR;
+          }
+        }
+
+        var isPanelRequested              = state.isPanelRequested(),
+
+            startingPosition              = getCurrentTransformPosition(),
             startingSize                  = getCurrentSize(),
             startingSVGElementTransforms  = helper.getCurrentSVGElementTransforms(),
+            startingScale,
 
             endingPosition                = getTargetTransformPosition(),
             endingSize                    = getTargetSize(),
             endingSVGElementTransforms    = getTargetSVGElementTransforms(),
+            endingScale,
 
             positionDifference            = getDifferenceObject(startingPosition, endingPosition),
             sizeDifference                = getDifferenceObject(startingSize, endingSize),
             svgElementTransformDifference = getDifferenceObject(startingSVGElementTransforms, endingSVGElementTransforms),
+            scaleDifference,
 
-            isPanelRequested              = state.isPanelRequested(),
             fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS;
 
         // The animation start time will be NOW minus how long the previous animation duration.
@@ -545,8 +582,20 @@ sitecues.def('bp/animate', function(animate, callback) {
           animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
         }
 
-        setSize(startingSize, START_CRISP_FACTOR);
+        if (isPanelRequested && state.isBadge()) {
+          setSize(startingSize, START_CRISP_FACTOR);
+          setTransform(
+            startingPosition.left,
+            startingPosition.top,
+            1 / START_CRISP_FACTOR
+          );
+        }
 
+        startingScale   = getCurrentScale();
+        endingScale     = getTargetScale();
+        scaleDifference = endingScale - startingScale;
+console.log('startingScale: ' + startingScale);
+console.log('endingScale  :' + endingScale);
         SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
 
         animationId = requestFrameFn(animationTick);
