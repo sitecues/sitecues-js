@@ -26,9 +26,9 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
     sc.moveThumb = function(evt) {
 
       var
-        sliderThumbRect = helper.byId(BP_CONST.ZOOM_SLIDER_THUMB_ID).getBoundingClientRect(),
-        sliderRect      = helper.byId(BP_CONST.ZOOM_SLIDER_BAR_ID).getBoundingClientRect(),
-        panelLeft       = helper.byId(BP_CONST.BP_CONTAINER_ID).getBoundingClientRect().left,
+        sliderThumbRect = helper.getRectById(BP_CONST.ZOOM_SLIDER_THUMB_ID),
+        sliderRect      = helper.getRectById(BP_CONST.ZOOM_SLIDER_BAR_ID),
+        panelLeft       = helper.getRectById(BP_CONST.BP_CONTAINER_ID).left,
 
         // TODO Need comments what the browser differences are
         sliderLeft      = helper.isWebkit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,

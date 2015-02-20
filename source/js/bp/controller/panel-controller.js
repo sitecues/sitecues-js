@@ -149,14 +149,14 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     }
 
     function isMouseOutsideRect(evt, elem, minDistance) {
-      var rect = elem.getBoundingClientRect();
+      var rect = helper.getRect(elem);
       return evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance ||
         evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance;
     }
 
     function isMouseOutsidePanel(evt, distance) {
       var elem = helper.byId(state.isMorePanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
-//      var moreButtonRect = document.getElementById(MORE_BUTTON_CONTAINER_ID).getBoundingClientRect(); // More button hanging off
+//      var moreButtonRect = helper.getRectById(MORE_BUTTON_CONTAINER_ID); // More button hanging off
       return isMouseOutsideRect(evt, elem, distance) /* && isMouseOutsideRect(evt, moreButtonRect, 0) */;
     }
 

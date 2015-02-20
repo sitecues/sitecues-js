@@ -12,6 +12,34 @@ sitecues.def('bp/helper', function (helper, callback) {
     };
 
     /**
+     * getRect returns the bounding client rect for the given element.
+     * It copies the values because this gets around Safari issue with where values otherwise appear undefined.
+     * @param element
+     * @returns {Object} rectangle
+     */
+    helper.getRect = function(element) {
+      var rect = element.getBoundingClientRect();
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height
+      };
+    };
+
+    /**
+     * getRectById returns the bounding client rect for the given ID.
+     * It copies the values because this gets around Safari issue with where values otherwise appear undefined.
+     * @param id
+     * @returns {Object} rectangle
+     */
+    helper.getRectById = function(id) {
+      return helper.getRect(helper.byId(id));
+    };
+
+    /**
      *** Setters ***
      */
 
@@ -27,13 +55,15 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isWebkit = platform.browser.isWebkit;
 
+    helper.isSafari = platform.browser.isSafari;
+
     helper.isMoz = platform.browser.isMoz;
 
     helper.isIE  = platform.browser.isIE;
 
     helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
 
-    helper.transformProperty = helper.isIE9 ? 'msTransform' : 'transform';
+    helper.transformProperty = helper.isIE9 ? 'msTransform' : (helper.isSafari ? 'webkitTransform' : 'transform');
 
     helper.getCurrentSVGElementTransforms = function () {
 

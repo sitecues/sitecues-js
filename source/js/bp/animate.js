@@ -90,10 +90,10 @@ sitecues.def('bp/animate', function(animate, callback) {
        */
       function getPossibleOutlineRects (targetDimensions) {
 
-        var currentSVGWidth       = byId(BP_CONST.SVG_ID).getBoundingClientRect().width,
+        var currentSVGWidth       = helper.getRectById(BP_CONST.SVG_ID).width,
             targetSVGWidth        = targetDimensions.width,
             increaseFactor        = targetSVGWidth / currentSVGWidth,
-            currentOutlineRect    = byId(BP_CONST.MAIN_OUTLINE_ID).getBoundingClientRect(),
+            currentOutlineRect    = helper.getRectById(BP_CONST.MAIN_OUTLINE_BORDER_ID),
 
             possibleOutlineRects  = {
               '25%0%'   : getScaledRect(currentOutlineRect, 0.25 * (1 - state.get('currentMode')), 0, increaseFactor),
@@ -196,8 +196,8 @@ sitecues.def('bp/animate', function(animate, callback) {
             isPanelRequested    = state.isPanelRequested(),
             svgElement          = byId(BP_CONST.SVG_ID),
             badgeElement        = byId(BP_CONST.BADGE_ID),
-            svgRect             = svgElement.getBoundingClientRect(),
-            badgeRect           = badgeElement.getBoundingClientRect(),
+            svgRect             = helper.getRect(svgElement),
+            badgeRect           = helper.getRect(badgeElement),
             badgeComputedStyles = window.getComputedStyle(badgeElement),
             extraWidth          = (parseFloat(badgeComputedStyles.paddingLeft) + parseFloat(badgeComputedStyles.paddingRight)) * zoomMult,
             badgeRectWidth      = badgeRect.width - extraWidth,
@@ -231,7 +231,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         var isPageBadge         = state.get('isPageBadge'),
             badgeElement        = byId(BP_CONST.BADGE_ID),
             badgeComputedStyles = window.getComputedStyle(badgeElement),
-            badgeRect           = badgeElement.getBoundingClientRect(),
+            badgeRect           = helper.getRect(badgeElement),
             completedZoom       = zoomMod.getCompletedZoom(),
             paddingTop          = parseFloat(badgeComputedStyles.paddingTop),
             paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),

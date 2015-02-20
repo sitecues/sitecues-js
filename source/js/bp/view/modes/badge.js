@@ -104,7 +104,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       }
 
       var div                 = document.createElement('div'),
-          badgeImgBoundingBox = badgeElement.getBoundingClientRect(),
+          badgeImgBoundingBox = helper.getRect(badgeElement),
           badgeComputedStyles = window.getComputedStyle(badgeElement),
           stylesToTransfer    = [
             'marginTop',

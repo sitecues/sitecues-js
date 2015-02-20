@@ -69,8 +69,8 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
 
       // Show focus outline
       var EXTRA_FOCUS_PADDING = 5,
-          clientFocusRect     = focusedItem.getBoundingClientRect(),
-          clientPanelRect     = panelContainer.getBoundingClientRect(),  // Focus rect is positioned relative to this
+          clientFocusRect     = helper.getRect(focusedItem),
+          clientPanelRect     = helper.getRect(panelContainer),  // Focus rect is positioned relative to this
           focusOutlineStyle   = document.getElementById(BP_CONST.OUTLINE_ID).style;
 
       focusOutlineStyle.width  = (clientFocusRect.width  + EXTRA_FOCUS_PADDING) + 'px';

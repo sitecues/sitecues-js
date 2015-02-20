@@ -123,7 +123,7 @@ sitecues.def('bp/placement', function(placement, callback) {
       }
 
       // Current badge rectangle in screen coordinates
-      var badgeRect   = copyRect(badgeElement.getBoundingClientRect()),
+      var badgeRect   = helper.getRect(badgeElement),
           isBPInBadge = currentBPParent === BADGE_PARENT,
 
           // Is the badge in the body?
@@ -140,7 +140,10 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       if (isBPInBadge) {
 
-        // Will be positioned relative to "#sitecues-badge">
+        // Not a floating badge and in body (inside of #sitecues-badge)
+        // Since it's already inside of the #sitecues-badge, which is in the right place on the page,
+        // and we only need transform translate to move it from there for padding and vertical offset.
+        // By being a child of #sitecues-badge, it will automatically be positioned within that.
         badgeRect.left = 0;
         badgeRect.top  = 0;
 
@@ -211,24 +214,13 @@ sitecues.def('bp/placement', function(placement, callback) {
         svgStyle.width  = badgeRectWidth + 'px';
         svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
 
-        ratioOfSVGToVisibleBadgeSize = badgeRect.height /  helper.byId(BP_CONST.WAVE_3_ID).getBoundingClientRect().height;
+        ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
 
         state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
 
       }
 
       return ratioOfSVGToVisibleBadgeSize;
-    }
-
-    function copyRect(rect) {
-      return {
-        'left'  : rect.left,
-        'right' : rect.right,
-        'bottom': rect.bottom,
-        'top'   : rect.top,
-        'width' : rect.width,
-        'height': rect.height
-      };
     }
 
     /**
