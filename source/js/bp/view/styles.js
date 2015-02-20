@@ -462,11 +462,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#6B9AE0'
         },
 
-        '.scp-large': {
+        '.scp-large, .scp-large *': {
           'pointer-events': 'none'
         },
 
-        '.scp-ready': {
+        '.scp-ready, .scp-ready *': {
           'pointer-events': 'auto'
         }
       };

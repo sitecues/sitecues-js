@@ -117,6 +117,7 @@ sitecues.def('bp/placement', function(placement, callback) {
         return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
       }
 
+
       // Used for setting the bpContainer left, top, width, and height
       function setBPProperty(prop) {
         bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
