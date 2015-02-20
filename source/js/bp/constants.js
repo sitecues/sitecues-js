@@ -171,8 +171,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SMALL_SLIDER_WIDTH = 160;
 
   // Minimum panel size
-  constants.MINIMUM_PANEL_WIDTH = 1312;
-  constants.MINIMUM_PANEL_HEIGHT = 320;
+  constants.MINIMUM_PANEL_WIDTH = 656;
+  constants.MINIMUM_PANEL_HEIGHT = 160;
 
   // Amount of pixels of whitespace at the top of the badge
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)

@@ -5,7 +5,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     var
       isAnimationDebuggingOn = false,
 
-      doWebKitPrefix = helper.isWebkit,
+      doWebKitPrefix = helper.isSafari,
       doMsPrefix = helper.isMoz,
 
       idDelimiter = '#',
@@ -119,7 +119,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Cursor rules to use when cursor is less than minimum cursor size
         // The .scp-xl-cursor class is only set when the cursor wouldn't already be at least this size
         '.scp-xl-cursor #scp-main': {
-          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
+          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important',
         },
 
         '.scp-xl-cursor .scp-target': {
@@ -185,6 +185,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'position': 'absolute',
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
+          'transform-origin': '0% 0%',
+          'will-change': 'transform',
           'outline': 0 // don't show default dotted focus outline
         },
 
@@ -232,16 +234,25 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'fill .2s, opacity .2s'
         },
 
+        // TODO text needs to fade in at the end
+        'text': {
+          'display': 'none',
+          'transition': 'opacity 1s',
+          'font-family': 'Arial',
+          'font-size': '29px',
+          'font-weight': 'bold',
+          'opacity': 0
+        },
+
         /* Text label animation for main panel labels */
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
-        '.scp-large text': {
-          'transition': 'opacity 1s',
-          // Add the extra 100ms so that text fades in after expansion animation completes.
-          'transition-delay': BP_CONST.EXPAND_ANIMATION_DURATION_MS + 100 + 'ms',
-          'font-family': 'Arial',
-          'font-size': '29px',
-          'font-weight': 'bold'
+        '.scp-ready text': {
+          'display': 'block',
+        },
+
+        '.fade-in-text text': {
+          'opacity': 1
         },
 
         '#scp-shadow': {
@@ -449,6 +460,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
+        },
+
+        '.scp-large': {
+          'pointer-events': 'none'
+        },
+
+        '.scp-ready': {
+          'pointer-events': 'auto'
         }
       };
 

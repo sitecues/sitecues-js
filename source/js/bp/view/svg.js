@@ -12,7 +12,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   'use strict';
 
   bpSVG.html = '\
-<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1804 440" id="scp-svg">\
+<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 815 200" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def"> \
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14l0 0zm1 38l-9 -23h0l-8 23h16l0 0z"/> \
@@ -43,7 +43,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0" />\
 <g id="scp-main" aria-label="sitecues main panel">\
   <path id="scp-shadow" d="M808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11m808 0V0" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/> \
-  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="white"/>\
+  <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-large-only" opacity="0" />\
+  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="none"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button scp-target"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb" class="scp-target">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
@@ -61,8 +62,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g id="scp-bottom" class="scp-large-only" opacity="0">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text id="scp-zoom-label" class="scp-large-only" opacity="0" x="25" y="178">{{zoom}}<tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
-    <text id="scp-speech-label" class="scp-large-only" opacity="0" x="583" y="178">{{speech}}<tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
+    <text id="scp-zoom-label" x="25" y="178">{{zoom}}<tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
+    <text id="scp-speech-label" x="583" y="178">{{speech}}<tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\

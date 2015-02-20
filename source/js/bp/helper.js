@@ -115,7 +115,7 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.getNumberFromString = function (str) {
       return +(str.replace(/[^0-9\.\-]+/g, ''));
-    }
+    };
 
     callback();
   });
