@@ -26,12 +26,22 @@ sitecues.def('bp/animate', function(animate, callback) {
           // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
-          byId                        = helper.byId,
           START_CRISP_FACTOR          = helper.isChrome ? 1.5 : 1,
           transitioningFrom           = BP_CONST.BADGE_MODE,
           panelScaleFromBadge,
           badgeScaleFromPanel,
-          transformElementId          = BP_CONST.BP_CONTAINER_ID;
+          transformElementId          = BP_CONST.BP_CONTAINER_ID,
+          elementMap = {};
+
+      // Cache elementById results because we use it in each frame and it shows up while profiling
+      function byId(id) {
+        var result = elementMap[id];
+        if (!result) {
+          result = helper.byId(id);
+          elementMap[id] = result;
+        }
+        return result;
+      }
 
       /**
        * getDifferenceObject builds and returns an object that represents the differences

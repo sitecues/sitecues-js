@@ -70,42 +70,33 @@ sitecues.def('bp/helper', function (helper, callback) {
     helper.getCurrentSVGElementTransforms = function () {
 
       var result      = {},
-          byId        = helper.byId,
-          sliderBarId = BP_CONST.ZOOM_SLIDER_BAR_ID,
-          smallAId    = BP_CONST.SMALL_A_ID,
-          largeAId    = BP_CONST.LARGE_A_ID,
-          speechId    = BP_CONST.SPEECH_ID,
-          vertId      = BP_CONST.VERT_DIVIDER_ID,
-          thumbId     = BP_CONST.ZOOM_SLIDER_THUMB_ID,
+        byId        = helper.byId;
 
-          // translate(19) scale(.65, 1) -> ['translate(19)' , '(.65, 1)']
-          sliderBarTransforms = byId(sliderBarId).getAttribute('transform').split('scale'),
-          splitter            = sliderBarTransforms[1].indexOf(',') >= 0 ? ',' : ' ', // IE fix
-          sliderBarScale      = sliderBarTransforms[1].split(splitter),
-          sliderBarScaleX     = sliderBarScale[0],
-          sliderBarScaleY     = sliderBarScale.length > 1 ? sliderBarScale[1] : sliderBarScaleX;
+      function mapTranslate(id) {
+        result[id] = {
+          'translateX': helper.getNumberFromString(helper.byId(id).getAttribute('transform'))
+        }
+      }
 
-      result[smallAId]    = {
-        'translateX': helper.getNumberFromString(byId(smallAId).getAttribute('transform'))
-      };
+      // Everything except slider
+      mapTranslate(BP_CONST.SMALL_A_ID);
+      mapTranslate(BP_CONST.LARGE_A_ID);
+      mapTranslate(BP_CONST.SPEECH_ID);
+      mapTranslate(BP_CONST.VERT_DIVIDER_ID);
+      mapTranslate(BP_CONST.ZOOM_SLIDER_THUMB_ID);
 
-      result[largeAId]    = {
-        'translateX': helper.getNumberFromString(byId(largeAId).getAttribute('transform'))
-      };
+      // Slider bar is special because it stretches
 
-      result[speechId]    = {
-        'translateX': helper.getNumberFromString(byId(speechId).getAttribute('transform'))
-      };
+      var
+        sliderBar   = byId(BP_CONST.ZOOM_SLIDER_BAR_ID),
+        // translate(19) scale(.65, 1) -> ['translate(19)' , '(.65, 1)']
+        sliderBarTransforms = sliderBar.getAttribute('transform').split('scale'),
+        splitter            = sliderBarTransforms[1].indexOf(',') >= 0 ? ',' : ' ', // IE fix
+        sliderBarScale      = sliderBarTransforms[1].split(splitter),
+        sliderBarScaleX     = sliderBarScale[0],
+        sliderBarScaleY     = sliderBarScale.length > 1 ? sliderBarScale[1] : sliderBarScaleX;
 
-      result[vertId]      = {
-        'translateX': helper.getNumberFromString(byId(vertId).getAttribute('transform'))
-      };
-
-      result[thumbId]     = {
-        'translateX': helper.getNumberFromString(byId(thumbId).getAttribute('transform'))
-      };
-
-      result[sliderBarId] = {
+      result[BP_CONST.ZOOM_SLIDER_BAR_ID] = {
         'translateX': helper.getNumberFromString(sliderBarTransforms[0]),
         'scaleX'    : helper.getNumberFromString(sliderBarScaleX),
         'scaleY'    : helper.getNumberFromString(sliderBarScaleY)
