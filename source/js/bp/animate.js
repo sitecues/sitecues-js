@@ -658,6 +658,10 @@ sitecues.def('bp/animate', function(animate, callback) {
       }
 
       sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+      sitecues.on('zoom/begin', function () {
+        animationStartTime = 0;
+      });
+
 
     });
 
