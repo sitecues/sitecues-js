@@ -57,6 +57,13 @@ sitecues.def('bp', function (bp, callback) {
 
       updateClasses();
 
+      // Required to fade in text, because text is display:none and it is impossible
+      // to transition any property AND set display:block with a single operation... so
+      // setTimeout saves the day.
+      if (state.isPanel()) {
+        bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
+      }
+
       animate.initAnimation(isFirstTime);
 
     }

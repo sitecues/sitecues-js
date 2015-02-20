@@ -125,13 +125,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         baseController.showFocus();
       }
       sitecues.emit('bp/do-update');
-
-      // Required to fade in text, because text is display:none and it is impossible
-      // to transition any property AND set display:block with a single operation... so
-      // setTimeout saves the day.
-      setTimeout(function () {
-        bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
-      }, 0);
     };
 
     /*
