@@ -61,7 +61,9 @@ sitecues.def('bp', function (bp, callback) {
       // to transition any property AND set display:block with a single operation... so
       // setTimeout saves the day.
       if (state.isPanel()) {
-        bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
+        setTimeout(function () {
+          bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
+        }, 0);
       }
 
       animate.initAnimation(isFirstTime);
