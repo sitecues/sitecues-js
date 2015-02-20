@@ -28,6 +28,8 @@ sitecues.def('bp/animate', function(animate, callback) {
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
           START_CRISP_FACTOR          = 1.5,
+          transitioningFrom           = BP_CONST.BADGE_MODE,
+          panelScaleFromBadge,
           transformElementId          = BP_CONST.BP_CONTAINER_ID;
 
 
@@ -517,11 +519,10 @@ sitecues.def('bp/animate', function(animate, callback) {
           // To quote from http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
           // To achieve silky smooth animations you need to avoid work, and the best way to do that is to only change properties
           // that affect compositing -- transform and opacity.
-console.log(byId(transformElementId).style[helper.transformProperty]);
           setTransform(
             (startingPosition.left + positionDifference.left * normalizedAnimationTime),
             (startingPosition.top  + positionDifference.top  * normalizedAnimationTime),
-            startingScale          + scaleDifference         * normalizedAnimationTime
+            (startingScale         + scaleDifference         * normalizedAnimationTime)
           );
 
           setSVGElementTransforms(startingSVGElementTransforms, svgElementTransformDifference, normalizedAnimationTime);
@@ -547,13 +548,30 @@ console.log(byId(transformElementId).style[helper.transformProperty]);
         }
 
         function getTargetScale () {
+
           if (isPanelRequested) {
-            return (startingSize.width + sizeDifference.width ) / startingSize.width / START_CRISP_FACTOR;
+
+            if (transitioningFrom === BP_CONST.PANEL_MODE) {
+              return 1;
+            }
+
+            if (state.isBadge()) {
+              panelScaleFromBadge = endingSize.width / startingSize.width / START_CRISP_FACTOR;
+              return panelScaleFromBadge;
+            }
+
+            return panelScaleFromBadge;
+
           } else if (state.isPanel()) {
-            return (startingSize.width + sizeDifference.width ) / startingSize.width;
+
+            return endingSize.width / startingSize.width;
+
           } else {
+
             return 1 / START_CRISP_FACTOR;
+
           }
+
         }
 
         var isPanelRequested              = state.isPanelRequested(),
@@ -569,18 +587,10 @@ console.log(byId(transformElementId).style[helper.transformProperty]);
             endingScale,
 
             positionDifference            = getDifferenceObject(startingPosition, endingPosition),
-            sizeDifference                = getDifferenceObject(startingSize, endingSize),
             svgElementTransformDifference = getDifferenceObject(startingSVGElementTransforms, endingSVGElementTransforms),
             scaleDifference,
 
             fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS;
-
-        // The animation start time will be NOW minus how long the previous animation duration.
-        if (isPanelRequested) {
-          animationStartTime = Date.now() - state.get('currentMode') * fullAnimationDuration;
-        } else {
-          animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
-        }
 
         if (isPanelRequested && state.isBadge()) {
           setSize(startingSize, START_CRISP_FACTOR);
@@ -594,8 +604,15 @@ console.log(byId(transformElementId).style[helper.transformProperty]);
         startingScale   = getCurrentScale();
         endingScale     = getTargetScale();
         scaleDifference = endingScale - startingScale;
-console.log('startingScale: ' + startingScale);
-console.log('endingScale  :' + endingScale);
+
+
+        // The animation start time will be NOW minus how long the previous animation duration.
+        if (isPanelRequested) {
+          animationStartTime = Date.now() - state.get('currentMode') * fullAnimationDuration;
+        } else {
+          animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
+        }
+
         SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
 
         animationId = requestFrameFn(animationTick);
@@ -613,8 +630,10 @@ console.log('endingScale  :' + endingScale);
         byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', isPanelRequested);
 
         if (isPanelRequested) {
+          transitioningFrom = BP_CONST.PANEL_MODE;
           panelController.panelReady();
         } else {
+          transitioningFrom = BP_CONST.BADGE_MODE;
           panelController.panelShrunk();
         }
 
