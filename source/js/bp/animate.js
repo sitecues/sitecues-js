@@ -30,6 +30,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           START_CRISP_FACTOR          = 1.5,
           transitioningFrom           = BP_CONST.BADGE_MODE,
           panelScaleFromBadge,
+          badgeScaleFromPanel,
           transformElementId          = BP_CONST.BP_CONTAINER_ID;
 
 
@@ -563,10 +564,14 @@ sitecues.def('bp/animate', function(animate, callback) {
             return panelScaleFromBadge;
 
           } else if (state.isPanel()) {
-
-            return endingSize.width / startingSize.width;
+            badgeScaleFromPanel = endingSize.width / startingSize.width;
+            return badgeScaleFromPanel;
 
           } else {
+
+            if (transitioningFrom === BP_CONST.PANEL_MODE) {
+              return badgeScaleFromPanel;
+            }
 
             return 1 / START_CRISP_FACTOR;
 
@@ -604,7 +609,6 @@ sitecues.def('bp/animate', function(animate, callback) {
         startingScale   = getCurrentScale();
         endingScale     = getTargetScale();
         scaleDifference = endingScale - startingScale;
-
 
         // The animation start time will be NOW minus how long the previous animation duration.
         if (isPanelRequested) {
