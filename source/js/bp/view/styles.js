@@ -533,7 +533,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
                   if (doWebKitPrefix) {
                     attribute = '-webkit-' + attribute;
                     value = value.replace('transform', '-webkit-transform');
-                  } else if (doMsPrefix) {
+                  } else if (doMsPrefix && attribute !== 'transition') {
                     attribute = '-ms-' + attribute;
                   }
                 }
