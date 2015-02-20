@@ -249,6 +249,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
         '.scp-ready text': {
           'display': 'block',
+        },
+
+        '.fade-in-text text': {
           'opacity': 1
         },
 
