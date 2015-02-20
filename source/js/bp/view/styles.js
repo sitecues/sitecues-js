@@ -515,6 +515,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     function toCSS(jsonObject) {
 
       var styles = '';
+      var isTransformPrefixNeeded = document.body.style.transform === undefined;
 
       for (var selector in jsonObject) {
         if (jsonObject.hasOwnProperty(selector)) {
@@ -522,16 +523,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           for (var attribute in jsonObject[selector]) {
             if (jsonObject[selector].hasOwnProperty(attribute)) {
               var value = jsonObject[selector][attribute];
-              if (attribute === 'transform' || attribute === 'transition') {
-                // TEMPORARY DEBUGGING CODE
-                if (SC_DEV && isAnimationDebuggingOn && attribute === 'transition') {
-                  value = value.replace('.', '');
-                }
-                if (doWebKitPrefix) {
-                  attribute = '-webkit-' + attribute;
-                  value = value.replace('transform', '-webkit-transform');
-                } else if (doMsPrefix) {
-                  attribute = '-ms-' + attribute;
+              if (isTransformPrefixNeeded) {
+                if (attribute === 'transform' || attribute === 'transition' ||
+                  attribute === 'transform-origin') {
+                  // TEMPORARY DEBUGGING CODE
+                  if (SC_DEV && isAnimationDebuggingOn && attribute === 'transition') {
+                    value = value.replace('.', ''); // Slow down transition
+                  }
+                  if (doWebKitPrefix) {
+                    attribute = '-webkit-' + attribute;
+                    value = value.replace('transform', '-webkit-transform');
+                  } else if (doMsPrefix) {
+                    attribute = '-ms-' + attribute;
+                  }
                 }
               }
               styles += '  ' + attribute + ': ' + value + ';\n';

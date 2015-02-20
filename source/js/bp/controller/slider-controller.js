@@ -31,7 +31,7 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
         panelLeft       = helper.getRectById(BP_CONST.BP_CONTAINER_ID).left,
 
         // TODO Need comments what the browser differences are
-        sliderLeft      = helper.isWebkit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,
+        sliderLeft      = helper.isWebKit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,
         sliderWidth     = sliderRect.width - sliderThumbRect.width,
         newPercent      = (evt.clientX - sliderLeft) / sliderWidth,
         newValue        = (newPercent * zoomMod.range) + zoomMod.min;

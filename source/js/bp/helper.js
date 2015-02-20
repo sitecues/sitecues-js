@@ -53,9 +53,11 @@ sitecues.def('bp/helper', function (helper, callback) {
       }
     };
 
-    helper.isWebkit = platform.browser.isWebkit;
+    helper.isWebKit = platform.browser.isWebKit;
 
     helper.isSafari = platform.browser.isSafari;
+
+    helper.isChrome = platform.browser.isChrome;
 
     helper.isMoz = platform.browser.isMoz;
 
@@ -63,7 +65,7 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
 
-    helper.transformProperty = helper.isIE9 ? 'msTransform' : (helper.isSafari ? 'webkitTransform' : 'transform');
+    helper.transformProperty = helper.isIE9 ? 'msTransform' : (helper.isWebKit ? 'webkitTransform' : 'transform');
 
     helper.getCurrentSVGElementTransforms = function () {
 

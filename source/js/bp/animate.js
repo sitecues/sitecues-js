@@ -27,12 +27,11 @@ sitecues.def('bp/animate', function(animate, callback) {
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           byId                        = helper.byId,
-          START_CRISP_FACTOR          = 1.5,
+          START_CRISP_FACTOR          = helper.isChrome ? 1.5 : 1,
           transitioningFrom           = BP_CONST.BADGE_MODE,
           panelScaleFromBadge,
           badgeScaleFromPanel,
           transformElementId          = BP_CONST.BP_CONTAINER_ID;
-
 
       /**
        * getDifferenceObject builds and returns an object that represents the differences
