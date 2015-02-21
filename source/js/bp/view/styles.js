@@ -119,7 +119,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Cursor rules to use when cursor is less than minimum cursor size
         // The .scp-xl-cursor class is only set when the cursor wouldn't already be at least this size
         '.scp-xl-cursor #scp-main': {
-          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important',
+          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
         },
 
         '.scp-xl-cursor .scp-target': {
@@ -248,7 +248,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
         '.scp-ready text': {
-          'display': 'block',
+          'display': 'block'
         },
 
         '.fade-in-text text': {
