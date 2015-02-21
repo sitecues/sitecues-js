@@ -107,7 +107,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         var currentSVGWidth       = helper.getRectById(BP_CONST.SVG_ID).width,
             targetSVGWidth        = targetDimensions.width,
             increaseFactor        = targetSVGWidth / currentSVGWidth,
-            currentOutlineRect    = helper.getRectById(BP_CONST.MAIN_OUTLINE_BORDER_ID),
+            currentOutlineRect    = helper.getRectById(BP_CONST.MAIN_OUTLINE_ID),
 
             possibleOutlineRects  = {
               '25%0%'   : getScaledRect(currentOutlineRect, 0.25 * (1 - state.get('currentMode')), 0, increaseFactor),
