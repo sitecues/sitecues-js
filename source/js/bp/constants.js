@@ -75,7 +75,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.TRANSFORMS.BADGE[constants.SPEECH_ID]       = {translateX:-100};
 
   constants.TRANSFORMS.PANEL[constants.ZOOM_SLIDER_THUMB_ID] = {translateX:44};
-  constants.TRANSFORMS.BADGE[constants.ZOOM_SLIDER_THUMB_ID] = {translateX:14};
+  constants.TRANSFORMS.BADGE[constants.ZOOM_SLIDER_THUMB_ID] = {translateX:8};
 
   constants.TRANSFORMS.PANEL[constants.ZOOM_SLIDER_BAR_ID] = {
     translateX: 27,
