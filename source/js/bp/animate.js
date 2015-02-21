@@ -112,6 +112,7 @@ sitecues.def('bp/animate', function(animate, callback) {
             possibleOutlineRects  = {
               '25%0%'   : getScaledRect(currentOutlineRect, 0.25 * (1 - state.get('currentMode')), 0, increaseFactor),
               'topLeft' : getScaledRect(currentOutlineRect, 0, 0, increaseFactor),
+              '75%0%'   : getScaledRect(currentOutlineRect, 0.75 * (1 - state.get('currentMode')), 0, increaseFactor),
               'topRight': getScaledRect(currentOutlineRect, 1, 0, increaseFactor),
               'botRight': getScaledRect(currentOutlineRect, 0, 1, increaseFactor),
               'botLeft' : getScaledRect(currentOutlineRect, 1, 1, increaseFactor)
