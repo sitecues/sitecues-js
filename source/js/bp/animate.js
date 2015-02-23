@@ -18,16 +18,20 @@ sitecues.def('bp/animate', function(animate, callback) {
           collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
           animationStartTime,
           animationId,
-          transitioningFrom           = BP_CONST.BADGE_MODE,
-          lastTransitionTo            = BP_CONST.BADGE_MODE,
           MINIMUM_DISTANCE_FROM_EDGE  = 20,
+
+          // What we're transitioning from and to
+          // Note that if you exit/enter the panel in the middle of animation you can
+          // end up transitioning as badge -> badge, or panel -> panel
+          currentlyTransitioningFrom          = BP_CONST.BADGE_MODE,
+          currentlyTransitioningTo            = null,  // Not currently transitioning to anything
+
 
           // The minimum amount we want to increase the badge size
           // when transitioning to the panel.  Basically, the panel
           // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
-          START_CRISP_FACTOR          = helper.isChrome ? 1.5 : 1,
           panelScaleFromBadge,
           badgeScaleFromPanel,
           transformElementId          = BP_CONST.BP_CONTAINER_ID;
@@ -483,13 +487,15 @@ sitecues.def('bp/animate', function(animate, callback) {
           return;
         }
 
-        if (lastTransitionTo === state.get('transitionTo')) {
+        if (currentlyTransitioningTo === state.get('transitionTo')) {
+          // Already where we've been requested to be
+          // This prevents us from starting a new animation of the same kind when we've already started one
           return;
         }
 
         if (state.isExpanding() || state.isShrinking()) {
 
-          lastTransitionTo = state.get('transitionTo');
+          // There is room to animate, not already at the size limit of where we're transitioning to
 
           SC_DEV && console.log('PERFORM BP2 ANIMATION');
           SC_DEV && console.log('        currentMode : ' + state.get('currentMode'));
@@ -498,6 +504,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           performAnimation();
         }
 
+        currentlyTransitioningTo = state.get('transitionTo');
       };
 
       /**
@@ -564,7 +571,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           if (isPanelRequested) {
 
-            if (transitioningFrom === BP_CONST.PANEL_MODE) {
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
               return 1;
             }
 
@@ -581,7 +588,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           } else {
 
-            if (transitioningFrom === BP_CONST.PANEL_MODE) {
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
               return badgeScaleFromPanel;
             }
 
@@ -649,13 +656,14 @@ sitecues.def('bp/animate', function(animate, callback) {
         byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', isPanelRequested);
 
         if (isPanelRequested) {
-          transitioningFrom = BP_CONST.PANEL_MODE;
+          currentlyTransitioningFrom = BP_CONST.PANEL_MODE;
           panelController.panelReady();
         } else {
-          transitioningFrom = BP_CONST.BADGE_MODE;
+          currentlyTransitioningFrom = BP_CONST.BADGE_MODE;
           panelController.panelShrunk();
         }
 
+        currentlyTransitioningTo = null;
       }
 
       function cancelAnimation() {
