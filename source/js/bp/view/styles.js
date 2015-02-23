@@ -461,14 +461,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
         },
-
-        '.scp-large, .scp-large *': {
-          'pointer-events': 'none'
-        },
-
-        '.scp-ready, .scp-ready *': {
-          'pointer-events': 'auto'
-        }
       };
 
     function provideCustomPalette (palette) {
