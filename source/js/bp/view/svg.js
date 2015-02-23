@@ -16,11 +16,11 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\
-    <rect opacity="0" x="-22" y="-35" width="102" height="134"/>\
+    <rect class="scp-hidden-target" x="-22" y="-35" width="102" height="134"/>\
   </g>\
   <g id="scp-large-A-def">\
     <path d="m54 0l33 89h-20l-7 -20h-33l-7 20h-20l34 -89h20zm1 55l-11 -32h0l-12 33h23z"/>\
-    <rect opacity="0" x="-22" y="-20" width="140" height="132"/>\
+    <rect class="scp-hidden-target" x="-22" y="-20" width="140" height="132"/>\
   </g>\
   <path id="scp-zoom-slider-bar-def" d="m278 3v27c0 2 -1 3 -3 3h-273c-2 0 -3 -1 -3 -3v-6c0 -1 1 -2 2 -3l273 -22c1 0 3 1 3 3z"/>\
   <path id="scp-zoom-slider-thumb-def" d="m11,64l-10,-15v-41c0,-2 3,-7 5,-7h15c1,0 5,5 5,7v41l-10,15c0,0 -2.5,2 -5,0"/>\
@@ -45,20 +45,20 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
   <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-large-only" opacity="0"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="none"/>\
-  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button scp-target"/>\
-  <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb" class="scp-target">\
+  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>\
+  <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
-    <rect id="scp-zoom-slider-target" opacity="0" x="80" y="44" width="280" height="67"/>\
+    <rect id="scp-zoom-slider-target" class="scp-hidden-target" x="80" y="44" width="280" height="67"/>\
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-target" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="60"/>\
-  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button scp-target"/>\
+  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>\
   <line id="scp-vert-divider" class="scp-large-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
   <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="Speech"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
     <use id="scp-head" xlink:href="#scp-head-def" x="530" y="11"/>\
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
-    <rect id="scp-speech-target" opacity="0" x="530" y="5" width="193" height="115" class="scp-target"/>\
+    <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target"/>\
   </g>\
   <g id="scp-bottom" class="scp-large-only" opacity="0">\
     <use xlink:href="#scp-bottom-def"/>\

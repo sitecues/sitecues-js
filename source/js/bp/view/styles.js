@@ -122,7 +122,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
         },
 
-        '.scp-xl-cursor .scp-target': {
+        '.scp-xl-cursor .scp-target, .scp-xl-cursor .scp-hidden-target': {
           'cursor': customCursor.getCursorCss('pointer', MIN_CURSOR_SIZE) + ' !important'
         }
       },
@@ -162,6 +162,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          .scp-more-only   // Only display in more panel
          .scp-feature-content // Only display in feature panel (reachable for more panel)
          .scp-target: both a click target and good for showing keyboard focus rectangles
+         .scp-hidden-target: a click target that is hidden (e.g. a rect that covers more area than the visible part of the target)
 
 
          ARIA roles:
@@ -260,7 +261,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 0
         },
 
-        '.scp-large.scp-can-filter #scp-shadow': {
+        '.scp-large.scp-ie9-false #scp-shadow': {
           'opacity': 1
         },
 
@@ -313,6 +314,16 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-more #scp-more': {
           'transition': 'transform .8s'
+        },
+
+        /******** Mouse targets must be hidden but still able to handle events *************/
+
+        '.scp-hidden-target': {
+          'opacity': 0
+        },
+
+        '.scp-ie9-true .scp-hidden-target': {
+          'opacity': .001    // Can't be seen but still gets click events
         },
 
         /*************** Close button **********************/
@@ -460,7 +471,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
-        },
+        }
       };
 
     function provideCustomPalette (palette) {

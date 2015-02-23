@@ -2,8 +2,8 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
   sitecues.use('bp', 'bp/view/elements/slider', 'bp/constants', 'bp/controller/base-controller',
     'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    'cursor/custom', 'zoom', 'platform',
-    function(bp, slider, BP_CONST, baseController, panelController, bpController, state, helper, customCursor, zoomMod, platform) {
+    'cursor/custom', 'zoom',
+    function(bp, slider, BP_CONST, baseController, panelController, bpController, state, helper, customCursor, zoomMod) {
 
       var minPageZoomXLCursor = customCursor.getCursorZoom(BP_CONST.MIN_CURSOR_SIZE);
 
@@ -119,10 +119,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           if (state.get('isUsingXLCursor')) {
             classBuilder += ' scp-xl-cursor';
           }
-        }
-
-        if (!platform.browser.isIE9) {
-          classBuilder += ' scp-can-filter';
         }
 
         // *** scp-large ***

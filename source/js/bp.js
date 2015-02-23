@@ -22,8 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'util/localization', 'bp/animate',
-    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController, baseController, placement, slider, locale, animate) {
+    'util/localization', 'bp/animate', 'platform',
+    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
+              baseController, placement, slider, locale, animate, platform) {
 
     /*
      *** Public methods ***
@@ -75,8 +76,10 @@ sitecues.def('bp', function (bp, callback) {
     // Space delimited list of classes to set for view
     function updateClasses() {
 
-      bpContainer.setAttribute('class', (state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses()) + getPaletteClass());
-
+      var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
+      classBuilder += getPaletteClass();
+      classBuilder += ' scp-ie9-' + !!platform.browser.isIE9;
+      bpContainer.setAttribute('class', classBuilder);
     }
 
     function getPaletteClass() {
