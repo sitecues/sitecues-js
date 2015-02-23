@@ -159,8 +159,6 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       badgeRect.left   += paddingLeft;
       badgeRect.top    += paddingTop;
-      badgeRect.width  -= paddingLeft + getPadding('Right');
-      badgeRect.height -= paddingTop  + getPadding('Bottom');
 
       // Adjust for top whitespace in SVG badge (it's there because it turns into an outline on expansion)
       badgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
