@@ -202,17 +202,20 @@ sitecues.def('bp/animate', function(animate, callback) {
        */
       function getTargetSize () {
 
-        var isPanelRequested    = state.isPanelRequested(),
+        var zoomMult            = state.get('isPageBadge') ? zoomMod.getCompletedZoom() : 1,
+            isPanelRequested    = state.isPanelRequested(),
             svgElement          = byId(BP_CONST.SVG_ID),
             badgeElement        = byId(BP_CONST.BADGE_ID),
             svgRect             = helper.getRect(svgElement),
             badgeRect           = helper.getRect(badgeElement),
-
+            badgeComputedStyles = window.getComputedStyle(badgeElement),
+            extraWidth          = (parseFloat(badgeComputedStyles.paddingLeft) + parseFloat(badgeComputedStyles.paddingRight)) * zoomMult,
+            badgeRectWidth      = badgeRect.width - extraWidth,
             viewBoxRect         = svgElement.viewBox.baseVal,
             svgAspectRatio      = viewBoxRect.width / viewBoxRect.height,
 
             // BADGE SIZE
-            newBadgeWidth       = badgeRect.width * state.get('ratioOfSVGToVisibleBadgeSize'),
+            newBadgeWidth       = badgeRectWidth * state.get('ratioOfSVGToVisibleBadgeSize'),
             newBadgeHeight      = newBadgeWidth / svgAspectRatio,
 
             // PANEL SIZE
@@ -228,7 +231,6 @@ sitecues.def('bp/animate', function(animate, callback) {
         };
 
       }
-
       /**
        * [getTargetBadgePosition computes and returns the desired badge position]
        * @return {Object} [top and left]
