@@ -53,6 +53,8 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         focusedItem.removeAttribute('data-hasfocus');
       }
 
+      helper.byId(BP_CONST.OUTLINE_ID).style.display = 'none';
+
       state.set('focusIndex', -1);
     };
 
@@ -71,8 +73,9 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       var EXTRA_FOCUS_PADDING = 5,
           clientFocusRect     = helper.getRect(focusedItem),
           clientPanelRect     = helper.getRect(panelContainer),  // Focus rect is positioned relative to this
-          focusOutlineStyle   = document.getElementById(BP_CONST.OUTLINE_ID).style;
+          focusOutlineStyle   = helper.byId(BP_CONST.OUTLINE_ID).style;
 
+      focusOutlineStyle.display = 'block';
       focusOutlineStyle.width  = (clientFocusRect.width  + EXTRA_FOCUS_PADDING) + 'px';
       focusOutlineStyle.height = (clientFocusRect.height + EXTRA_FOCUS_PADDING) + 'px';
 

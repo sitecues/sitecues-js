@@ -12,7 +12,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isUsingXLCursor         : true,  // Artificially inflate cursor while in panel to make sure it is of a minimum size
     featurePanelName        : null,  // Either null, or 'settings' | 'about' | 'tips' | 'feedback'
-    focusIndex              : 0,     // When tabbing, where in the cycle are we?
+    focusIndex              : -1,     // When tabbing, where in the cycle are we?
     paletteName             : 'b',   // Currently either 'b' for basic or 'r' for red
     settingsIconVersion     : 1,     // Which settings icon to use?
     aboutIconVersion        : 1,     // Which about icon to use?
