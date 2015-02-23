@@ -70,13 +70,13 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
       // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
       function bindTemporaryHandlers() {
         // Pressing tab or shift tab when panel is open switches it to keyboard mode
-        window.addEventListener('keydown',   bpController.processKeydown);
+        window.addEventListener('keydown',   bpController.processKeydown, true);
         window.addEventListener('mousemove', panelController.winMouseMove);
         window.addEventListener('mousedown', panelController.winMouseDown);
       }
 
       function unbindTemporaryMouseHandlers() {
-        window.removeEventListener('keydown',   bpController.processKeydown);
+        window.removeEventListener('keydown',   bpController.processKeydown, true);
         window.removeEventListener('mousemove', panelController.winMouseMove);
         window.removeEventListener('mousedown', panelController.winMouseDown);
       }
