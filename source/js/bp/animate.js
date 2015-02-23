@@ -18,6 +18,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           collapseEasingFn = function (t) { return t; },          // Linear looks better for collapse animation
           animationStartTime,
           animationId,
+          transitioningFrom           = BP_CONST.BADGE_MODE,
           lastTransitionTo            = BP_CONST.BADGE_MODE,
           MINIMUM_DISTANCE_FROM_EDGE  = 20,
 
@@ -27,7 +28,6 @@ sitecues.def('bp/animate', function(animate, callback) {
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           START_CRISP_FACTOR          = helper.isChrome ? 1.5 : 1,
-          transitioningFrom           = BP_CONST.BADGE_MODE,
           panelScaleFromBadge,
           badgeScaleFromPanel,
           transformElementId          = BP_CONST.BP_CONTAINER_ID,
@@ -207,20 +207,17 @@ sitecues.def('bp/animate', function(animate, callback) {
        */
       function getTargetSize () {
 
-        var zoomMult            = state.get('isPageBadge') ? zoomMod.getCompletedZoom() : 1,
-            isPanelRequested    = state.isPanelRequested(),
+        var isPanelRequested    = state.isPanelRequested(),
             svgElement          = byId(BP_CONST.SVG_ID),
             badgeElement        = byId(BP_CONST.BADGE_ID),
             svgRect             = helper.getRect(svgElement),
             badgeRect           = helper.getRect(badgeElement),
-            badgeComputedStyles = window.getComputedStyle(badgeElement),
-            extraWidth          = (parseFloat(badgeComputedStyles.paddingLeft) + parseFloat(badgeComputedStyles.paddingRight)) * zoomMult,
-            badgeRectWidth      = badgeRect.width - extraWidth,
+
             viewBoxRect         = svgElement.viewBox.baseVal,
             svgAspectRatio      = viewBoxRect.width / viewBoxRect.height,
 
             // BADGE SIZE
-            newBadgeWidth       = badgeRectWidth * state.get('ratioOfSVGToVisibleBadgeSize'),
+            newBadgeWidth       = badgeRect.width * state.get('ratioOfSVGToVisibleBadgeSize'),
             newBadgeHeight      = newBadgeWidth / svgAspectRatio,
 
             // PANEL SIZE
@@ -257,8 +254,8 @@ sitecues.def('bp/animate', function(animate, callback) {
         // Badge implemented by customer
         if (isPageBadge) {
 
-          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
-          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
+          top  = badgeRect.top  - (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
+          left = badgeRect.left - (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
 
         // Floating badge
         } else {

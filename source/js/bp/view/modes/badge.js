@@ -114,8 +114,15 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
             'paddingTop',
             'paddingBottom',
             'paddingLeft',
-            'paddingRight'
+            'paddingRight',
+
           ];
+
+      // Added to fix issue on ruhglobal.com
+      if (badgeElement.style.position === 'relative') {
+        stylesToTransfer.push('top');
+        stylesToTransfer.push('left');
+      }
 
       transferStylesFromExistingBadge(stylesToTransfer);
 
