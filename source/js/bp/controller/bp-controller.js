@@ -21,9 +21,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     DELTA_KEYS[BP_CONST.KEY_CODES.HOME]  = -9999;
     DELTA_KEYS[BP_CONST.KEY_CODES.END]   = 9999;
     DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
-    DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = -1;
+    DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
     DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
-    DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = 1;
+    DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
 
     // TODO: rename
     bpc.processKeydown = function (evt) {
