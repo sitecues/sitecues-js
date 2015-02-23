@@ -118,7 +118,7 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       var mouseTarget = getMouseTargetForTTS();
 
       // todo: move this to ttsController
-      sitecues.on('bp/did-expand', function() {
+      sitecues.on('bp/will-expand', function() {
         // Do not use this listener when the panel is shrunk because it confused the Window-Eyes browse mode
         // (when Enter key was pressed on badge, it toggled speech)
         mouseTarget.addEventListener('click', audio.toggleSpeech);

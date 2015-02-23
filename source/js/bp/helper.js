@@ -7,8 +7,15 @@ sitecues.def('bp/helper', function (helper, callback) {
      *** Getters ***
      */
 
-    helper.byId = function (ID) {
-      return document.getElementById(ID);
+    var elementByIdCache = {};
+
+    helper.byId = function (id) {
+      var result = elementByIdCache[id];
+      if (!result) {
+        result = document.getElementById(id);
+        elementByIdCache[id] = result;
+      }
+      return result;
     };
 
     /**

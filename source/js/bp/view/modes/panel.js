@@ -24,9 +24,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         setPanelExpandedState();
         resetUITimers();
 
-        // Adds event listener for toggling speech
-        sitecues.emit('bp/did-expand');
-
         sitecues.emit('bp/do-update');
       }
 

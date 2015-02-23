@@ -26,21 +26,14 @@ sitecues.def('bp/animate', function(animate, callback) {
           // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
-          START_CRISP_FACTOR          = helper.isChrome ? 1.5 : 1,
           transitioningFrom           = BP_CONST.BADGE_MODE,
           panelScaleFromBadge,
           badgeScaleFromPanel,
-          transformElementId          = BP_CONST.BP_CONTAINER_ID,
-          elementMap = {};
+          transformElementId          = BP_CONST.BP_CONTAINER_ID;
 
       // Cache elementById results because we use it in each frame and it shows up while profiling
       function byId(id) {
-        var result = elementMap[id];
-        if (!result) {
-          result = helper.byId(id);
-          elementMap[id] = result;
-        }
-        return result;
+        return helper.byId(id);
       }
 
       /**
@@ -558,6 +551,16 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         }
 
+        // Chrome is affected by the size of the source of what's scaled
+        // It ends up being faster when the source is smaller, but less crisp
+        function getStartCrispFactor() {
+          if (!helper.isChrome) {
+            return 1;  // Don't need to play games with crisping other than in Chrome
+          }
+
+          return zoomMod.isRetina() ? 1.5 : 3;
+        }
+
         function getTargetScale () {
 
           if (isPanelRequested) {
@@ -567,7 +570,7 @@ sitecues.def('bp/animate', function(animate, callback) {
             }
 
             if (state.isBadge()) {
-              panelScaleFromBadge = endingSize.width / startingSize.width / START_CRISP_FACTOR;
+              panelScaleFromBadge = endingSize.width / startingSize.width / getStartCrispFactor();
               return panelScaleFromBadge;
             }
 
@@ -583,7 +586,7 @@ sitecues.def('bp/animate', function(animate, callback) {
               return badgeScaleFromPanel;
             }
 
-            return 1 / START_CRISP_FACTOR;
+            return 1 / getStartCrispFactor();
 
           }
 
@@ -605,14 +608,17 @@ sitecues.def('bp/animate', function(animate, callback) {
             svgElementTransformDifference = getDifferenceObject(startingSVGElementTransforms, endingSVGElementTransforms),
             scaleDifference,
 
-            fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS;
+            fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS,
+
+            startCrispFactor;
 
         if (isPanelRequested && state.isBadge()) {
-          setSize(startingSize, START_CRISP_FACTOR);
+          startCrispFactor = getStartCrispFactor();
+          setSize(startingSize, startCrispFactor);
           setTransform(
             startingPosition.left,
             startingPosition.top,
-            1 / START_CRISP_FACTOR
+            1 / startCrispFactor
           );
         }
 
