@@ -571,6 +571,8 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         function getTargetScale () {
 
+          // TODO this function needs better comments, describing the cases here
+
           if (isPanelRequested) {
 
             if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
