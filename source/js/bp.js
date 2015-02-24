@@ -169,7 +169,7 @@ sitecues.def('bp', function (bp, callback) {
 
     function bindPermanentListeners(badgeElement) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
-      helper.byId(BP_CONST.MOUSEOVER_TARGET).addEventListener('click', bpController.changeModeToPanel);
+      badgeElement.addEventListener('click', bpController.clickToOpenPanel);
       bpContainer.addEventListener('blur', baseController.clearPanelFocus);
       helper.byId(BP_CONST.MOUSEOVER_TARGET).addEventListener('mouseover', bpController.changeModeToPanel);
       // todo: bring it back or remove if necessary

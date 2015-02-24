@@ -76,6 +76,20 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
     };
 
+    // When a click happens on the badge, it can be from one of two things:
+    // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
+    // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
+    //   so that clicks around the panel don't accidentally open it.
+    bpc.clickToOpenPanel = function(event) {
+      var mainRect = document.getElementById('scp-main').getBoundingClientRect();
+      var badge = document.getElementById('sitecues-badge');
+      if (event.clientX < badge.offsetLeft + mainRect.width &&
+        event.clientY < badge.offsetTop + mainRect.height) {
+        // Click is in visible area -- go ahead and open the panel
+        bpc.changeModeToPanel();
+      }
+    };
+
     bpc.processBadgeActivationKeys = function(evt) {
       if (state.isBadge() &&
         (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE)) {
