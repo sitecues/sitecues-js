@@ -571,7 +571,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         function getTargetScale () {
 
-          var sizeDifferenceFactor = endingSize.width / startingSize.width;
+          var largeToSmallRatio = endingSize.width / startingSize.width;
 
           // ANIMATE TO PANEL
           if (isPanelRequested) {
@@ -581,10 +581,10 @@ sitecues.def('bp/animate', function(animate, callback) {
             // If we are animating to a panel and the current state is a badge (not in between),
             // then we scale by the difference in size divided by the starting crisp factor.
             //
-            // Cache the result of this calculation
+            // Cache the result of this calculation until we animate from a badge to panel again.
             if (state.isBadge()) {
 
-              panelScaleFromBadge = sizeDifferenceFactor / getStartCrispFactor();
+              panelScaleFromBadge = largeToSmallRatio / getStartCrispFactor();
 
               return panelScaleFromBadge;
 
@@ -617,7 +617,7 @@ sitecues.def('bp/animate', function(animate, callback) {
             // Cache the result of this calculation
             if (state.isPanel()) {
 
-              badgeScaleFromPanel = sizeDifferenceFactor;
+              badgeScaleFromPanel = largeToSmallRatio;
 
               return badgeScaleFromPanel;
 
@@ -635,7 +635,7 @@ sitecues.def('bp/animate', function(animate, callback) {
             //
             //  If we are animating to a badge and the previous state
             //  was a badge.
-            return getCurrentScale() * sizeDifferenceFactor;
+            return getCurrentScale() * largeToSmallRatio;
 
           }
 
