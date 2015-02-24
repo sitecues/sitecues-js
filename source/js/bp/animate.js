@@ -509,6 +509,101 @@ sitecues.def('bp/animate', function(animate, callback) {
         currentlyTransitioningTo = state.get('transitionTo');
       };
 
+      function getTargetScale (largeToSmallRatio, crispFactor) {
+
+        //  Crisping is only applied when the last completed
+        //  state (BADGE or PANEL) is a BADGE.
+        //  Specifically: currentlyTransitioningFrom = BP_CONST.BADGE_MODE
+
+        var isPanelRequested = state.isPanelRequested(),
+
+            // 6 possible scaling scenarios
+
+            // Badge -> Panel is always crisp
+            BADGE_TO_PANEL           = 0,
+            TWEEN_TO_PANEL_CRISPED   = 1,
+            TWEEN_TO_PANEL_UNCRISPED = 2,
+
+            // Panel -> Badge is never crisp
+            PANEL_TO_BADGE           = 3,
+            TWEEN_TO_BADGE_CRISPED   = 4,
+            TWEEN_TO_BADGE_UNCRISPED = 5,
+
+            scalingFunction;
+
+        if (isPanelRequested) {
+
+          if (state.isBadge()) {
+
+            scalingFunction = BADGE_TO_PANEL;
+
+          } else {
+
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
+              scalingFunction = TWEEN_TO_PANEL_UNCRISPED;
+            }
+
+            if (currentlyTransitioningFrom === BP_CONST.BADGE_MODE) {
+              scalingFunction = TWEEN_TO_PANEL_CRISPED;
+            }
+
+          }
+
+        } else {
+
+          if (state.isPanel()) {
+
+            scalingFunction = PANEL_TO_BADGE;
+
+          } else {
+
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
+              scalingFunction = TWEEN_TO_BADGE_UNCRISPED;
+            }
+
+            if (currentlyTransitioningFrom === BP_CONST.BADGE_MODE) {
+              scalingFunction = TWEEN_TO_BADGE_CRISPED;
+            }
+
+          }
+
+
+        }
+
+        switch (scalingFunction) {
+
+          case BADGE_TO_PANEL:
+
+            panelScaleFromBadge = largeToSmallRatio / crispFactor;
+
+            return panelScaleFromBadge;
+
+          case TWEEN_TO_PANEL_CRISPED:
+
+            return panelScaleFromBadge;
+
+          case TWEEN_TO_PANEL_UNCRISPED:
+
+            return 1;
+
+          case PANEL_TO_BADGE:
+
+            badgeScaleFromPanel = largeToSmallRatio;
+
+            return  badgeScaleFromPanel;
+
+          case TWEEN_TO_BADGE_CRISPED:
+
+            return getCurrentScale() * largeToSmallRatio;
+
+          case TWEEN_TO_BADGE_UNCRISPED:
+
+            return badgeScaleFromPanel;
+
+        }
+
+      }
+
       /**
        * performAnimation begins the animation. We must animate the following:
        *   - position
@@ -569,78 +664,6 @@ sitecues.def('bp/animate', function(animate, callback) {
           return zoomMod.isRetina() ? 1.5 : 3;
         }
 
-        function getTargetScale () {
-
-          var largeToSmallRatio = endingSize.width / startingSize.width;
-
-          // ANIMATE TO PANEL
-          if (isPanelRequested) {
-
-            //        ---      IS CURRENTLY A BADGE         -----
-            //
-            // If we are animating to a panel and the current state is a badge (not in between),
-            // then we scale by the difference in size divided by the starting crisp factor.
-            //
-            // Cache the result of this calculation until we animate from a badge to panel again.
-            if (state.isBadge()) {
-
-              panelScaleFromBadge = largeToSmallRatio / getStartCrispFactor();
-
-              return panelScaleFromBadge;
-
-            }
-
-            //        ---      WAS A PANEL                  -----
-            //
-            // Once the badge is fully animated, we scale the BP_CONTAINER
-            // to 1. Therefore, if we are animating to the panel from the panel,
-            // our target scale is 1.
-            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
-              return 1;
-            }
-
-            //        ---       WAS A BADGE         -----
-            //
-            // Use the cached result from a badge -> panel animation because the
-            // target scale should not change.
-            return panelScaleFromBadge;
-
-          } else {
-
-          // ANIMATE TO BADGE
-
-            //        ---      IS CURRENTLY A PANEL         -----
-            //
-            // If we are animating to a badge and the current state is a panel (not in between),
-            // then we scale by the difference in size.
-            //
-            // Cache the result of this calculation
-            if (state.isPanel()) {
-
-              badgeScaleFromPanel = largeToSmallRatio;
-
-              return badgeScaleFromPanel;
-
-            }
-
-            //        ---      WAS A PANEL      -----
-            //
-            // Use the cached result from a panel -> badge animation because
-            // the target scale should not change.
-            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
-              return badgeScaleFromPanel;
-            }
-
-            //        ---      WAS A BADGE     -----
-            //
-            //  If we are animating to a badge and the previous state
-            //  was a badge.
-            return getCurrentScale() * largeToSmallRatio;
-
-          }
-
-        }
-
         var isPanelRequested              = state.isPanelRequested(),
 
             startingPosition              = getCurrentTransformPosition(),
@@ -676,7 +699,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         }
 
         startingScale   = getCurrentScale();
-        endingScale     = getTargetScale();
+        endingScale     = getTargetScale(endingSize.width / startingSize.width, startCrispFactor);
         scaleDifference = endingScale - startingScale;
 
         // The animation start time will be NOW minus how long the previous animation duration.
