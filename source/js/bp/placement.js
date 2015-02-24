@@ -76,6 +76,9 @@ sitecues.def('bp/placement', function(placement, callback) {
     // Also, position and size the bpContainer and set height and width of the SVG
     function switchToBadgeParent() {
 
+      // Remove transform/translate so that badge is fully returned to origin state
+      bpElement.style[helper.transformProperty] = '';
+
       badgeElement.appendChild(bpElement);
 
       SC_DEV && console.log('BP reparented as badge child');
