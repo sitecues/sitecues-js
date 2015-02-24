@@ -255,8 +255,8 @@ sitecues.def('bp/animate', function(animate, callback) {
         // Badge implemented by customer
         if (isPageBadge) {
 
-          top  = badgeRect.top  - (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
-          left = badgeRect.left - (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
+          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
+          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
 
         // Floating badge
         } else {
@@ -509,6 +509,101 @@ sitecues.def('bp/animate', function(animate, callback) {
         currentlyTransitioningTo = state.get('transitionTo');
       };
 
+      function getTargetScale (largeToSmallRatio, crispFactor) {
+
+        //  Crisping is only applied when the last completed
+        //  state (BADGE or PANEL) is a BADGE.
+        //  Specifically: currentlyTransitioningFrom = BP_CONST.BADGE_MODE
+
+        var isPanelRequested = state.isPanelRequested(),
+
+            // 6 possible scaling scenarios
+
+            // Badge -> Panel is always crisp
+            BADGE_TO_PANEL           = 0,
+            TWEEN_TO_PANEL_CRISPED   = 1,
+            TWEEN_TO_PANEL_UNCRISPED = 2,
+
+            // Panel -> Badge is never crisp
+            PANEL_TO_BADGE           = 3,
+            TWEEN_TO_BADGE_CRISPED   = 4,
+            TWEEN_TO_BADGE_UNCRISPED = 5,
+
+            scalingFunction;
+
+        if (isPanelRequested) {
+
+          if (state.isBadge()) {
+
+            scalingFunction = BADGE_TO_PANEL;
+
+          } else {
+
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
+              scalingFunction = TWEEN_TO_PANEL_UNCRISPED;
+            }
+
+            if (currentlyTransitioningFrom === BP_CONST.BADGE_MODE) {
+              scalingFunction = TWEEN_TO_PANEL_CRISPED;
+            }
+
+          }
+
+        } else {
+
+          if (state.isPanel()) {
+
+            scalingFunction = PANEL_TO_BADGE;
+
+          } else {
+
+            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
+              scalingFunction = TWEEN_TO_BADGE_UNCRISPED;
+            }
+
+            if (currentlyTransitioningFrom === BP_CONST.BADGE_MODE) {
+              scalingFunction = TWEEN_TO_BADGE_CRISPED;
+            }
+
+          }
+
+
+        }
+
+        switch (scalingFunction) {
+
+          case BADGE_TO_PANEL:
+
+            panelScaleFromBadge = largeToSmallRatio / crispFactor;
+
+            return panelScaleFromBadge;
+
+          case TWEEN_TO_PANEL_CRISPED:
+
+            return panelScaleFromBadge;
+
+          case TWEEN_TO_PANEL_UNCRISPED:
+
+            return 1;
+
+          case PANEL_TO_BADGE:
+
+            badgeScaleFromPanel = largeToSmallRatio;
+
+            return  badgeScaleFromPanel;
+
+          case TWEEN_TO_BADGE_CRISPED:
+
+            return getCurrentScale() * largeToSmallRatio;
+
+          case TWEEN_TO_BADGE_UNCRISPED:
+
+            return badgeScaleFromPanel;
+
+        }
+
+      }
+
       /**
        * performAnimation begins the animation. We must animate the following:
        *   - position
@@ -569,39 +664,6 @@ sitecues.def('bp/animate', function(animate, callback) {
           return zoomMod.isRetina() ? 1.5 : 3;
         }
 
-        function getTargetScale () {
-
-          // TODO this function needs better comments, describing the cases here
-
-          if (isPanelRequested) {
-
-            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
-              return 1;
-            }
-
-            if (state.isBadge()) {
-              panelScaleFromBadge = endingSize.width / startingSize.width / getStartCrispFactor();
-              return panelScaleFromBadge;
-            }
-
-            return panelScaleFromBadge;
-
-          } else if (state.isPanel()) {
-            badgeScaleFromPanel = endingSize.width / startingSize.width;
-            return badgeScaleFromPanel;
-
-          } else {
-
-            if (currentlyTransitioningFrom === BP_CONST.PANEL_MODE) {
-              return badgeScaleFromPanel;
-            }
-
-            return 1 / getStartCrispFactor();
-
-          }
-
-        }
-
         var isPanelRequested              = state.isPanelRequested(),
 
             startingPosition              = getCurrentTransformPosition(),
@@ -623,17 +685,21 @@ sitecues.def('bp/animate', function(animate, callback) {
             startCrispFactor;
 
         if (isPanelRequested && state.isBadge()) {
+
           startCrispFactor = getStartCrispFactor();
+
           setSize(startingSize, startCrispFactor);
+
           setTransform(
             startingPosition.left,
             startingPosition.top,
             1 / startCrispFactor
           );
+
         }
 
         startingScale   = getCurrentScale();
-        endingScale     = getTargetScale();
+        endingScale     = getTargetScale(endingSize.width / startingSize.width, startCrispFactor);
         scaleDifference = endingScale - startingScale;
 
         // The animation start time will be NOW minus how long the previous animation duration.
