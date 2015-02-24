@@ -1,0 +1,2 @@
+See
+https://equinox.atlassian.net/wiki/display/PROD/Morphable+Badge-Panel+Manual+Tests

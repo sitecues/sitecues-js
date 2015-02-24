@@ -59,14 +59,14 @@ describe('speech-builder', function() {
       var div = document.createElement('div');
       div.innerHTML = '<span data-display="inline">This is an <b data-display="inline" data-visibility="collapse">Absolutely Amazing</b> test!</span>';
       var actualText = builder.getText(div);
-      expect(actualText).to.be.equal('This is an  test!');
+      expect(actualText).to.be.equal('This is an test!');
       done();
     });
     it('Should ignore display: none content', function (done) {
       var div = document.createElement('div');
       div.innerHTML = '<span data-display="inline">This is an <b data-display="none">Absolutely Amazing</b> test!</span>';
       var actualText = builder.getText(div);
-      expect(actualText).to.be.equal('This is an  test!');
+      expect(actualText).to.be.equal('This is an test!');
       done();
     });
     it('Should append @alt text', function (done) {

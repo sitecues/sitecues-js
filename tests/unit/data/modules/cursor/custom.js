@@ -1,1 +1,1 @@
-exports.getUrl = function () { return 'testUrl'; };
+exports.getCursorCss = function () { return 'testUrl'; };

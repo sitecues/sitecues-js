@@ -1,10 +1,10 @@
 /*
  * Basically, it stores userId and user preferences.
- * 
+ *
  * Namespace: "sitecues", "sitecues":"userId".
- * 
+ *
  * Example of the current Local Storage string:
- * 
+ *
  * sitecues: {
  * "userId":"51eb744d-ef35-42ec-b44d-be2afcbf9e83",
  * "51eb744d-ef35-42ec-b44d-be2afcbf9e83":
@@ -126,7 +126,7 @@ sitecues.def('util/localstorage', function(ls, callback) {
       sitecuesLs[ls.getUserId()] = userPrefData;
       // Save in LocalStorage.
       ls.setSitecuesLs(sitecuesLs);
-      SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
+      //SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
     }
   };
 

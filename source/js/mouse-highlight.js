@@ -46,13 +46,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   isTrackingMouse, // Are we currently tracking the mouse?
   canTrackScroll = true,  // Is scroll tracking allowable? Turned off during panning from keyboard navigation
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
+  isOnlyShift, // Is shift down by itself?
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
 
   pickFromMouseTimer,
 
-  cursorPos;
+  cursorPos = {};
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
   sitecues.use('jquery', 'conf', 'zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
@@ -1067,6 +1068,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked = $(picked);
       state.target = target;
 
+      if (event.shiftKey && isOnlyShift) {
+        // When shift held down, emit command to speak the newly highlighted text
+        sitecues.emit('mh/do-speak', picked);
+      }
+
       updateView();
     }
 
@@ -1222,7 +1228,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return updateView();
     }
 
-    function autoPick() {
+    function autoPick(doSpeech) {
       // First try for existing hidden highlight
       // If it would still be onscreen, use it
       if (tryExistingHighlight()) {
@@ -1334,6 +1340,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       willRespondToScroll = false;
     }
 
+    function setOnlyShift(isShift) {
+      isOnlyShift = isShift;
+    }
+
     // Return all of the highlight information provided in the |state| variable
     mh.getHighlight = function() {
       return state;
@@ -1354,6 +1364,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Turn mouse-tracking on or off
     sitecues.on('mh/track-scroll', setScrollTracking);
+
+    // Turn mouse-tracking on or off
+    sitecues.on('key/only-shift', setOnlyShift);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('mh/autopick', autoPick);

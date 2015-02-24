@@ -11,8 +11,8 @@ sitecues.def('audio/safari-player', function (player, callback) {
   var context,
     volumeNode,
     soundSource,
-    request,
-    isCancelled;
+    isCancelled,
+    allRequests = [];
 
   player.init = function() {
     // Create a reusable audio context object
@@ -22,9 +22,6 @@ sitecues.def('audio/safari-player', function (player, callback) {
     volumeNode = context.createGain();
     volumeNode.gain.value = 1;
     volumeNode.connect(context.destination);
-
-    // Create a reusable request object
-    request = new XMLHttpRequest();
   };
 
   /**
@@ -34,6 +31,8 @@ sitecues.def('audio/safari-player', function (player, callback) {
   player.playAudioSrc = function(baseMediaUrl) {
     isCancelled = false;
 
+    // Create a reusable request object
+    var request = new XMLHttpRequest();
     request.open('GET', baseMediaUrl, true);
     request.responseType = 'arraybuffer';
     // Our asynchronous callback
@@ -52,10 +51,17 @@ sitecues.def('audio/safari-player', function (player, callback) {
         soundSource.connect(volumeNode);
         soundSource.buffer = buffer;
         soundSource.noteOn(0);
+
+        allRequests.splice(allRequests.indexOf(request), 1);
       });
     };
 
     request.send();
+    allRequests.push(request);
+  };
+
+  player.isBusy = function() {
+    return allRequests.length > 0;
   };
 
   /**
@@ -66,7 +72,10 @@ sitecues.def('audio/safari-player', function (player, callback) {
       return;  // Make sure we don't try to stop twice
     }
     isCancelled = true; // Make sure we don't play after stopped
-    request.abort();
+    allRequests.forEach(function(request) {
+      request.abort();
+    });
+    allRequests = [];
     if (soundSource) {  // Sanity check
       soundSource.noteOff(context.currentTime);
       soundSource = null;

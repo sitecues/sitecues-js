@@ -18,6 +18,7 @@ sitecues.def('keys', function(keys, callback) {
         // [4 Left ]  [ 5    ]  [6 Right ]
         // [1 End  ]  [ 2 Dn ]  [3 PgDn  ]
 
+        NUMPAD_0 = 48,
         NUMPAD_1 = 97,
         NUMPAD_2 = 98,
         NUMPAD_3 = 99,
@@ -48,6 +49,7 @@ sitecues.def('keys', function(keys, callback) {
         LETTER_H = 72,
         LETTER_S = 83,
         SHIFT = 16,
+        isOnlyShift,
 
         KEY_TESTS = {
           'space': function(event) {
@@ -56,7 +58,7 @@ sitecues.def('keys', function(keys, callback) {
               // The key is a space key, *and*
               event.keyCode === SPACE &&
               // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
-              !hasAnyModifier(event) &&
+              !hasCommandModifier(event) &&
               // HLB is on or highlighting is enabled
               sitecues.isSitecuesOn() &&
               // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
@@ -106,6 +108,12 @@ sitecues.def('keys', function(keys, callback) {
               return !common.isEditable(event.target);
             }
           },
+          'reset': function(event) {   // Alt+0 resets all of sitecues
+            return event.keyCode === NUMPAD_0 && event.altKey;
+          },
+          'zoom1x': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only
+            return event.keyCode == NUMPAD_0 && (!common.isEditable(event.target) || hasCommandModifier(event));
+          },
           'speech': function(event) {
             return event.keyCode === LETTER_S && event.altKey && !common.isEditable(event.target);
           },
@@ -127,7 +135,7 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
           },
           'heading': function(event) {
-            return event.keyCode === LETTER_H && canMoveHighlight(event);
+            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !event.ctrlKey && !event.metaKey;
           },
           'pageup': function(event) {
             return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);
@@ -157,6 +165,8 @@ sitecues.def('keys', function(keys, callback) {
           'space': 'key/space',
           'minus': 'zoom/decrease',
           'plus': 'zoom/increase',
+          'reset': 'sitecues/do-reset',
+          'zoom1x': 'zoom/do-reset',
           'esc': 'key/esc',
           'speech': 'speech/do-toggle'
         },
@@ -210,9 +220,12 @@ sitecues.def('keys', function(keys, callback) {
 
       // key event hook
       function onKeyDown(event) {
+        setOnlyShift(event.keyCode === SHIFT);
+
         if (event.defaultPrevented) {
           return; // Another script already used this key and set this flag like a good citizen
         }
+
         // iterate over key map
         for (var key in KEY_TESTS) {
           if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
@@ -225,10 +238,26 @@ sitecues.def('keys', function(keys, callback) {
         processUnusedKey(event);
       }
 
+      function onKeyUp(event) {
+        doFollowScroll(true);
+        if (event.keyCode === SHIFT) {
+          if (isOnlyShift) {
+            sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
+          }
+        }
+      }
+
+      // Track to find out whether the shift key is pressed by itself
+      function setOnlyShift(isShift) {
+        isOnlyShift = isShift;
+        sitecues.emit('key/only-shift', isShift);
+      }
+
       // Let the key fall through to default processing,
-      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting
+      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
+      // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
       function processUnusedKey(event) {
-        if (event.keyCode !== SHIFT) {
+        if (event.keyCode === SHIFT) {
           doFollowScroll(false);
         }
       }
@@ -245,7 +274,7 @@ sitecues.def('keys', function(keys, callback) {
       addEventListener('keydown', onKeyDown, true);
 
       // Will reenable highlight on mouse follow
-      addEventListener('keyup', function() { doFollowScroll(true); });
+      addEventListener('keyup', onKeyUp, true);
 
       // done
       callback();

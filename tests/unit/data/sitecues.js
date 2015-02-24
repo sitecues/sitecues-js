@@ -75,9 +75,9 @@ sitecues = {
 
     'emit': blankFunction,
 
-    'ui': {
-        'sliders': []
-    },
+    //'ui': {
+    //    'sliders': []
+    //},
 
     'getLibraryConfig': function() {
         return {

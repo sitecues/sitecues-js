@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="panel.js"></script>
+<script src="panel-input.js"></script>
+<script src="panel-zoom-slider.js"></script>
+<link rel="stylesheet" href="panel-base.css"/>
+<link rel="stylesheet" href="panel-more-button.css"/>
+<link rel="stylesheet" href="panel-palette.css"/>
+<link rel="stylesheet" href="panel-icon-versions.css"/>
+<link rel="stylesheet" href="panel-features.css"/>
+</head>
+<body style="font-family: Arial">
+<h1 style="font-size: 18px">Test of new badge</h1>
+<a href="#">Link #1</a> &nbsp; &nbsp; 
+<span role="button" id="sitecues-badge" tabindex="0" aria-label="Loading sitecues zoom and speech tools"><img alt="launch badge" src="" style="width: 120px; height: 20px; visibility: hidden;"/></span>
+<div id="scp-container" tabindex="-1" style="display: inline-block; position: relative;" role="dialog" aria-busy="true">
+<svg id="scp-close-button" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 100 100" role="presentation">
+  <!-- Needs to float above without getting clipped --> 
+  <g id="scp-close-button-group" role="button" aria-label="Close panel and return to web page">
+    <circle fill="#989898" cx="56.5" cy="56.5" r="32"/>
+    <path fill="#FFFFFF" d="M46 73c-2 2-4 2-6 0l0 0c-2-2-2-4 0-6L67 40c2-2 4-2 6 0l0 0c2 2 2 4 0 6.1L46 73zM40 47c-2-2-2-4 0-6l0 0c2-2 4-2 6 0l26 26c2 2 2 4 0 6l0 0c-2 2-4.4 2-6 0L40 47z"/>
+    <rect id="scp-close-target" class="scp-target" opacity="0" x="20" y="20" width="73" height="73"/>
+  </g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1804 440" id="scp-svg" role="dialog">
+<defs>
+  <g id="scp-small-A-def">
+    <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14l0 0zm1 38l-9 -23h0l-8 23h16l0 0z"/>
+    <rect opacity="0" width="62" height="64"/>
+  </g>
+  <g id="scp-large-A-def">
+    <path d="m54 0l33 89h-20l-7 -20h-33l-7 20h-20l34 -89h20l0 0zm1 55l-11 -32h0l-12 33h23l0 0z"/>
+    <rect opacity="0" width="90" height="92"/>
+  </g>
+  <path id="scp-zoom-slider-bar-def" d="m278 3v27c0 2 -1 3 -3 3h-273c-2 0 -3 -1 -3 -3v-6c0 -1 1 -2 2 -3l273 -22c1 0 3 1 3 3l0 0z"/>
+  <path id="scp-zoom-slider-thumb-def" d="m11 64l-10 -15c0 0 0 -1 -1 -1l0 -40c0 -2 3 -7 5 -7h15c1 0 5 5 5 7v40v0c0 0 0 1 -1 1l-10 15c0 0 -2 2 -4 0l0 0z"/>
+  <path id="scp-head-def" d="m76 45c0 1 2 4 -2 5c-1 0 -2 .5 -4 .5c-1 0 -2 1 -1 2c0 1 0 2 -2 3c1 0 2 0 2 1c0 1 -1 1 -1 3c0 1 3 5 2 8c-0 3 -10 2 -20 2c0 0 -3 11 10 13c7 1 14 7 14 16h-74c0 -5 0 -12 8 -14c0 0 14 -5 14 -14c1 -13 -9 -17 -11 -27c-5 -21 6 -39 29 -39c8 0 13 2 15 4c10 5 12 16 12 22c0 3 -2 6 .5 8c8 6 8 6 9 7l0 0z"/>
+  <path id="scp-wave1-def" d="m105 26c0 0 26 25 1 52c-3 3 -9 2 -11 1l-0 0c-2 -1 -4 -4 -2 -6l0 0c-0 0 17 -18 0 -41c-1 -2 0 -5 2 -6c2 -1 8 -2 11 1l-0 0z"/>
+  <path id="scp-wave2-def" d="m134 14c37 41 0 74 0 74c-3 3 -9 2 -11 1l0 0c-2 -1 -4 -4 -2 -6c27 -35 0 -64 0 -64l-0 -0c-1 -2 0 -5 2 -6c2 -1 9 -1 11 1l0 0z"/>
+  <path id="scp-wave3-def" d="m167 2c-0 0 48 47 -0 97c-3 3 -9 2 -11 1l0 0c-2 -1 -3 -5 -2 -6c36 -47 0 -87 0 -87c-1 -2 0 -5 2 -6c2 -1 9 -2 11 1l0 0z"/>
+  <g id="scp-bottom-def"> 
+    <rect x="0" y="133" width="808" height="1" fill="#C0BFBF"/>
+    <path d="M807,186c0,6-5,11-11,11H12C6,196,1,192,1,187v-42 c0-6,0-11,0-11h807c0,0,0,5,0,11V186" fill="#F0EFEF"/>
+  </g>
+  <clipPath id="scp-outline-clip-def">
+    <path id="scp-outline-def" d="M808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V187" stroke="#989898" stroke-width="1.5"/>
+  </clipPath>
+  <path id="scp-rating-star-def" d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>
+</defs>
+<g id="scp-main" aria-label="sitecues main panel">
+  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="white"/>
+  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>
+  <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">
+    <use xlink:href="#scp-zoom-slider-bar-def" y="60"/>
+    <rect id="scp-zoom-slider-target" class="scp-target" opacity="0" x="-6" y="44" width="290" height="67"/>
+  </g>
+  <use id="scp-zoom-slider-thumb" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="70"/>
+  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="-1" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>
+  <line id="scp-vert-divider" class="scp-large-only" opacity="0" stroke="#8C8C8C" stroke-width="2" x1="0" y1="31" x2="0" y2="99"/>
+  <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="Speech"> <!-- ARIA Toggle button not working well with NVDA screen reader -->
+    <use id="scp-head" xlink:href="#scp-head-def" y="11"/>
+    <rect id="scpspeechtargetnohyphenbecausebreakssmilmouseover" opacity="0" x="-10" y="5" width="218" height="115" class="scp-target"/>
+    <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" y="11" x="-2">
+      <animate id="scpanimwave1" attributeName="opacity" values=".2;.4;.6;.8;.8;.6;.4;.2;.2;.2" dur="1s" repeatCount="2" restart="whenNotActive" begin="scpspeechtargetnohyphenbecausebreakssmilmouseover.mouseover"/>
+      <animate attributeName="opacity" values=".2;.25;.30;.30;.30" dur="1s" restart="whenNotActive" begin="scpanimwave1.end" fill="freeze"/>
+    </use>
+    <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" y="11">
+      <animate id="scpanimwave2" attributeName="opacity" values=".2;.2;.4;.6;.8;.8;.6;.4;.2;.2" dur="1s" repeatCount="2" restart="whenNotActive" begin="scpspeechtargetnohyphenbecausebreakssmilmouseover.mouseover"/>
+      <animate attributeName="opacity" values=".2;.24;.28;.32;.38" dur="1s" restart="whenNotActive" begin="scpanimwave2.end" fill="freeze"/>
+    </use>
+    <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11">
+      <animate id="scpanimwave3" attributeName="opacity" values=".2;.2;.2;.4;.6;.8;.8;.6;.4;.2" dur="1s" repeatCount="2" restart="whenNotActive" begin="scpspeechtargetnohyphenbecausebreakssmilmouseover.mouseover"/>
+      <animate attributeName="opacity" values=".2;.26;.32;.38;.44" dur="1s" restart="whenNotActive" begin="scpanimwave3.end" fill="freeze"/>
+    </use>
+  </g>
+  <g id="scp-bottom" class="scp-large-only" opacity="0">
+    <use xlink:href="#scp-bottom-def"/>
+    <text id="scp-zoom-label" class="scp-large-only" opacity="0" x="25" y="178">Zoom <tspan id="scp-zoom-value">Off</tspan></text>
+    <text id="scp-speech-label" class="scp-large-only" opacity="0" x="583" y="178">Speech <tspan id="scp-speech-state">Off</tspan></text>
+    <rect opacity="0" x="0" y="195" width="808" height="64"/>
+  </g>
+</g>
+<g id="scp-more" class="scp-large-only scp-more-only" aria-label="More features" opacity="0" clip-path="url(#scp-outline-clip-def)" 
+   style="transform: translateY(-198px); -webkit-transform: translateY(-198px); -ms-transform: translateY(-198px)">
+  <use id="scp-more-outline" xlink:href="#scp-outline-def" fill="white"/>
+  <g id="scp-bottom-more">   <!-- Need an extra bottom so that it can slide down over the main panel gottom -->
+    <use xlink:href="#scp-bottom-def"/>
+    <text id="scp-tips-label" role="link" data-feature="tips" x="45" y="178">Tips</text>
+    <text id="scp-settings-label" role="link" data-feature="settings" x="240" y="178">Adjust</text>
+    <text id="scp-feedback-label" role="link" data-feature="feedback" x="468" y="178">Rate us</text>
+    <text id="scp-about-label" role="link" data-feature="about" x="685" y="178">About</text>
+  </g>
+  <g class="scp-feature-content">
+    <g class="scp-tips-content scp-settings-content">
+      <text id="scp-prev-card" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">
+         &#9668;
+      </text>
+      <text id="scp-next-card" role="button" aria-label="Next" x="735" y="74">
+         &#9658;
+      </text>
+    </g>
+    <g class="scp-tips-content" clip-path="url(#scp-outline-clip-def)">
+      <foreignObject>
+        <div class="scp-cards">
+          <div class="scp-card">
+            <h1>Welcome</h1>
+            <p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</p>
+            <p>Use the arrow buttons at the top right of this panel to read more tips.</p>
+          </div>
+          <div class="scp-card">
+            <h1>Zoom the web page</h1>
+            <p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</p>
+            <p>The more you zoom, the easier everything is to see &mdash; even the mouse.</p>
+          </div>
+          <div class="scp-card">
+            <h1>Zoom in on a part</h1>
+            <p>You can zoom in even more on parts of this web page.</p>
+            <p>Just move your mouse to an area you're interested in, and press the spacebar.</p>
+          </div>
+          <div class="scp-card">
+            <h1>Listen to it</h1>
+            <p>First &mdash; click the speech button on.</p>
+            <p>Next &mdash; move your mouse to to something and press the spacebar.</p>
+            <p>Now listen as it's read aloud.</p>
+          </div>
+          <div class="scp-card">
+            <h1>Get more help</h1>
+            <p>Get started with sitecues in the<br>
+            <br><button class="sitecues-button-big">Quick Start Guide</button></p>
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g class="scp-settings-content" clip-path="url(#scp-outline-clip-def)">
+      <foreignObject>
+        <div class="scp-cards">
+          <div class="scp-card">
+            <h1>Settings</h1>
+            <p>Get more out of sitecues zoom and speech tools by adjusting the settings.</p>
+            <p>Use the arrow buttons at the top right of this panel to find all the provided settings.</p>
+          </div>
+          <div class="scp-card">
+            <h1>Choose a voice</h1>
+            <p>Who should read your text aloud?</p>
+            <p><button>Sarah</button><button>Rebecca</button><button>Henry</button></p>
+          </div>
+          <div class="scp-card">
+            <h1>Voice speed</h1>
+            <p>How fast should sitecues read?</p>
+            <p><span role="button" class="scp-range-label">Slower</span><input type="range" aria-label="Speech rate"/><span role="button" class="scp-range-label">Faster</span></p>
+          </div>
+          <div class="scp-card">
+            <h1>Lens Size</h1>
+            <p>How much extra should the spacebar zoom content?</p>
+            <p><button>None</button><button>Small</button><button>Medium</button><button>Large</button></p>
+          </div>
+          <div class="scp-card">
+            <h1>Colors</h1>
+            <p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</p>
+          </div>
+        </div>
+      </foreignObject>
+    </g>
+    <g class="scp-feedback-content">
+      <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>
+      <g id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">
+        <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>
+        <use xlink:href="#scp-rating-star-def" x="104" y="254" role="button" aria-label="2 star rating"/>
+        <use xlink:href="#scp-rating-star-def" x="166" y="254" role="button" aria-label="3 star rating"/>
+        <use xlink:href="#scp-rating-star-def" x="228" y="254" role="button" aria-label="4 star rating"/>
+        <use xlink:href="#scp-rating-star-def" x="290" y="254" role="button" aria-label="5 star rating"/>
+      </g>
+      <g id="scp-feedback-send-button" role="button">
+        <rect x="615" width="150" y="260" height="50" fill="#6B9AE0" rx="20" ry="20"/>
+        <text x="654" y="295" font-family="Arial" fill="white">Send</text>
+      </g>
+    </g>
+    <g class="scp-about-content"> 
+      <!-- <image x="193" y="65" width="410" height="420" xlink:href="./brought-to-you-by.png"/> -->
+      <foreignObject x="140" y="105" width="700" height="200" transform="scale(1.5)">
+         <button class="sitecues-button-big">Quick Start Guide</button>
+      </foreignObject>
+    </g>
+  </g>
+  <g id="scp-feature-nav-buttons">
+    <g id="scp-tips-button" role="button" data-feature="tips" aria-labelledby="scp-tips-label" transform="translate(25,14)">
+      <circle cx="50" cy="54" r="52" fill="#548ECE"/>
+      <path fill="#FFFFFF" d="m73.1 39.9c0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4 -.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2h0c12.3 0 22.2 10 22.2 22.2l0 0 0 0 0 0zM64.2 75.4c0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2c1.2 0 2.2 1 2.2 2.2zM62 79.8c1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2l0 0zM42 86.5h17.8c0 2.5-2 4.5-4.5 4.5h-8.9c-2.5 0-4.5-2-4.5-4.5l0 0 0 0z"/>      
+      <path fill="none" stroke="#FFFFFF" stroke-width="3.3" stroke-miterlimit="10" d="m50.9 17.7c12.3 0 22.2 10 22.2 22.2 0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4M50.9 68.8h-0.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2"/>
+      <rect class="scp-target" x="-8" y="-5" height="120" width="120" fill="transparent" role="presentation"/>
+    </g>
+    <g id="scp-settings-button" role="button" data-feature="settings" aria-labelledby="scp-settings-label" transform="translate(235,14)">
+      <!-- TODO: break out icon options or settle on a single option -->
+      <g class="scp-settings1">
+        <path fill="#7B7B7B" d="M17 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6.2c-1.3 0-2.3 1-2.3 2.3V99zM78.4 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8zM47.7 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8z"/>
+        <path fill="#548ECE" d="M33.3 55.5c0 1.3-1 2.3-2.3 2.3H13.9c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V55.5zM64 27c0 1.3-1 2.3-2.3 2.3H44.6c-1.3 0-2.3-1-2.3-2.3v-5.2c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V27.2zM95.5 73.4c0 1.3-1 2.3-2.3 2.3H76.1c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V73.4z"/>
+      </g>
+      <!-- We may just remove this if it proves unpopular: -->
+      <path class="scp-settings2" fill-rule="evenodd" clip-rule="evenodd" fill="#548ECE" d="M31,53c0-12,10-22,22-22c12,0,22,10,22,22c0,12-10,22-22,22C41,76,31,66,31,53z M9,44c-3,0-6,3-6,6v6c0,3,3,6,6,6h9c1,3,2,6,4,9l-6,6
+c-2,2-2,6,0,9l4,4c2,2,6,2,9,0l6-6c3,2,6,3,9,4v9c0,3,3,6,6,6h6c3,0,6-3,6-6v-9c3-1,6-2,9-4l6,6c2,2,6,2,9,0l4-4c2-2,2-6,0-9l-6-6c2-3,3-6,4-9h9c3,0,6-3,6-6v-6c0-3-3-6-6-6h-9c-1-3-2-6-4-9l6-6c2-2,2-6,0-9l-4-4c-2-2-6-2-9,0l-6,6c-3-2-6-3-9-4V9c0-3-3-6-6-6h-6c-3,0-6,3-6,6v9c-3,1-6,2-9,4l-6-6c-2-2-6-2-9,0l-5,5c-2,2-2,6,0,9l6,6c-2,3-3,6-4,9H9z M44,53c0,5,4,9,9,9c5,0,9-4,9-9c0-5-4-9-9-9C48,44,44,48,44,53z"/>
+      <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation"/>
+    </g>
+    <g id="scp-feedback-button" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label" transform="translate(465,14)">
+      <g>
+        <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>
+        <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />
+      </g>
+    </g>
+    <g id="scp-about-button" role="button" data-feature="about" aria-labelledby="scp-about-label" transform="translate(675,14)">
+      <g class="scp-about1">
+        <g><g><g> <!-- Extra <g>'s help get rotation animation right -->
+          <path fill="black" d="M70.8 42.5h-11.2c-1 0-3.4 3.9-3.4 5.2L56.3 63 6.5 69.1H6.5c-1.6-5-2.5-10.3-2.5-15.8 0-27.9 22.6-50.4 50.4-50.4 21.2 0 39.4 13 46.8 31.7h0c5 11.2 0 22.2-10.9 24.1l-16.1 2 0-13.1C74.2 46.4 71.8 42.5 70.8 42.5zM63.8 89.8c1.6 1.9 2.8 0 2.8 0l7.1-11.1c0.2-.3 .4-.6 .4-1v0 -4h26.4 0c-7.8 17.8-25.5 30.3-46.2 30.3 -20.7 0-38.4-12.4-46.2-30.3v0h48.1v4.3c0 .3 .2 .6 .4 .9L63.8 89.8z"/>
+        </g></g></g>
+        <image id="scp-logo-text" xlink:href="./sitecues-logo-text.png" x="130" y="5" width="330" height="110" opacity="0"/>
+      </g>
+      <!-- Not optimized yet, use precision of one decimal place: -->
+      <!-- We may just remove this if it proves unpopular: -->  
+      <path class="scp-about2" fill="#548ECE" d="M71.9 93l-1.4 5.7c-4.2 1.7-7.5 2.9-10 3.8 -2.5 .9-5.4 1.3-8.7 1.3 -5.1 0-9-1.2-11.8-3.7 -2.8-2.5-4.2-5.6-4.2-9.4 0-1.5 .1-3 .3-4.5 .2-1.5 .5-3.3 1-5.2l5.2-18.5c0.5-1.8 .9-3.5 1.2-5 .3-1.6 .5-3 .5-4.3 0-2.4-.5-4-1.5-5 -1-.9-2.8-1.4-5.6-1.4 -1.4 0-2.7 .2-4.2 .6 -1.4 .4-2.6 .8-3.7 1.2l1.4-5.7c3.4-1.4 6.7-2.6 9.9-3.6 3.1-1 6.1-1.5 8.9-1.5 5 0 8.9 1.2 11.7 3.6 2.7 2.4 4.1 5.6 4.1 9.5 0 .8-.1 2.2-.3 4.3s-.5 3.9-1 5.6L58.4 79.1c-.4 1.5-.8 3.2-1.1 5.1 -.3 1.9-.5 3.3-.5 4.3 0 2.5 .5 4.1 1.6 5 1.1 .9 3 1.3 5.7 1.3 1.3 0 2.7-.2 4.3-.7C70 93.8 71.2 93.4 71.9 93zM73.2 15.5c0 3.2-1.2 6-3.6 8.2 -2.4 2.3-5.4 3.4-8.8 3.4s-6.4-1.1-8.8-3.4c-2.5-2.3-3.7-5-3.7-8.2 0-3.2 1.2-6 3.7-8.3 2.5-2.3 5.4-3.4 8.8-3.4s6.4 1.1 8.8 3.4C72 9.6 73.2 12.3 73.2 15.5z"/>
+      <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />
+    </g>
+  </g>
+</g>
+<use xlink:href="#scp-outline-def" class="scp-large-only" fill="none" opacity="0"/> <!-- Over both panels, so that panel sliding down keeps top line -->
+<g id="scp-more-button-container">
+  <g id="scp-more-button-group" role="button" aria-label="View more options">
+    <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="410" cy="198" r="31"/>
+    <rect id="scp-more-button-transparent-target" fill="transparent" x="371" y="159" width="78" height="78"  class="scp-target" role="presentation"/>
+    <path id="scp-more-arrow" fill="#777777" d="m430.5,196c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>
+  </g>
+</g>
+<div class="scp-feature-content" style="position:fixed; top: 78px; left: 119px;">
+  <!-- Hacked to lay on top because otherwise Chrome has terrible bugs. A textarea inside svg <foreignObject> is just not working well. -->
+  <div class="scp-feedback-content">
+     <textarea style="font-size: 22px; font-family: Arial; width: 430px; height: 112px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>
+  </div>
+</div>
+</svg>
+</div>
+&nbsp; &nbsp; &nbsp; <a href="#">Link #2</a>
+</html>

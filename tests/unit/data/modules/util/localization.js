@@ -1,0 +1,1 @@
+exports.getWebsiteLangStringName=function() {return document.documentElement.lang || 'en';};

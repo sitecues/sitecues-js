@@ -214,7 +214,7 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // Module states management:
+  // Module modes management:
   var MODULE_STATE = {
     NONE         : 1, // A 'def' or 'use' call has never been made for the module.
     LOADING      : 2, // A 'use' call has been made for a module, and a load request has been started.

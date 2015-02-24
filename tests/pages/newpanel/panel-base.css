@@ -1,0 +1,228 @@
+/**
+  General CSS rules for panel
+  
+  Basic structure of panel:
+    <div #scp-container>
+       <div #scp-close-button>
+       <div .scp-feature-content>
+       <svg #scp-svg>
+          <defs>
+          <g #scp-main>
+             #scp-zoom-slider
+             #scp-speech›
+             ...
+          <g #scp-more>     // Secondary panel that slides down
+             <g .scp-feature-content>
+                <g .scp-feature-tips-content> etc.
+                    .cards
+                      .card
+                      .card
+                      ...
+  
+  Classes important for CSS:
+    - On #scp-container
+      .scp-small: Badge mode
+      .scp-shrinking: Still shrinking into badge mode
+      .scp-large: Panel mode (or in transtion to panel)
+      .scp-ready: Fully expanded panel mode
+      .scp-animate: Enable CSS animations (e.g. do not enable when first showing badge)
+      .scp-keyboard: Keyboard mode
+      .scp-brighten: show bright colors (not blending into page);
+    - Elsewhere:
+      .scp-large-only  // Only display in large mode
+      .scp-more-only   // Only display in more panel
+      .scp-feature-content // Only display in feature panel (reachable for more panel)
+      .scp-target: both a click target and good for showing keyboard focus rectangles
+
+
+  ARIA roles: 
+    - dialog, button, checkbox (speech button), slider, link, presentation (means don't expose to screen reader)
+  ARIA states: 
+    - Used for CSS: aria-checked, aria-busy (for panel loading), aria-disabled
+    - Not used for CSS: aria-activedescendant (focused item ID), aria-valuenow, aria-valuemin, aria-valuemax, aria-label, aria-labelledby
+  Data attributes: data-hasfocus, data-hadfocusonce (so dynamically shown items like close button remain onscreen), data-active (active feature card)
+*/
+
+#scp-svg {
+   position: fixed;
+   opacity: 0;  /* Don't show yet until positioned */
+}
+
+/***************** Loading  ****************/
+
+/* Will need to be done with img which can show in older browsers */
+#scp-container[aria-busy="true"] > #scp-main > *, #scp-container[aria-busy="true"] .scp-wave { fill: #b0b0b0 !important; } 
+
+/********** Transform animation speed **********/
+
+.scp-large #scp-main > *, .scp-realsettings #scp-main > *, #scp-container[aria-busy="false"] .scp-wave { 
+  transition: transform 1.5s, fill .2s; 
+  -webkit-transition: -webkit-transform 1.5s, fill .2s; 
+  -ms-transition: -ms-transform 1.5s, fill .2s;
+}
+
+.scp-animate > #scp-svg { transition: width 1.5s, height 1.5s; -webkit-transition: width 1.5s, height 1.5s; -ms-transition: width 1.5s, height 1.5s;  }
+
+/* Text label animation for main panel labels */
+/* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
+/* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
+.scp-large text { 
+    transition: opacity 1s;
+    transition-delay: 1.6s; 
+    font-family: Arial;
+    font-size: 29px;
+    font-weight: bold;
+}
+
+/************ Small vs. large  *************/
+
+.scp-small > #scp-svg { 
+  width: 394px; 
+  height: 96px;
+  opacity: 1 !important;
+}
+
+#scp-container[aria-busy="true"] { pointer-events: none; }
+
+.scp-large > #scp-svg {
+  width: 1312px !important;
+  height: 320px !important;
+  opacity: 1 !important;
+}
+
+.scp-large .scp-large-only { opacity: 1 !important; }
+.scp-more .scp-more-only { opacity: 1 !important; }
+
+/* IE9 note: ms-transform: translate doesn't seem to be working here even though does in basic tests */
+.scp-small #scp-small-A { transform: translateX(0px);   -ms-transform: translateX(0px);   -webkit-transform: translateX(0px); }
+.scp-small #scp-large-A { transform: translateX(273px); -ms-transform: translateX(273px); -webkit-transform: translateX(273px); }
+.scp-small #scp-vert-divider { transform: translateX(393px); -ms-transform: translateX(393px); -webkit-transform: translateX(393px); }
+.scp-small #scp-speech  { transform: translateX(420px); -ms-transform: translateX(420px); -webkit-transform: translateX(420px); }
+.scp-small #scp-zoom-slider-bar { 
+  transform: translateX(70px) scale(.7,1); 
+  -ms-transform: translateX(70px) scale(.7,1);
+  -webkit-transform: translateX(70px) scale(.7,1);
+}
+
+.scp-ready #scp-zoom-slider-thumb {   /* Use when dragging slider, looks more performant */
+  transition: transform 0s !important;
+  -ms-transition: transform 0s !important;
+  -webkit-transition: -webkit-transform 0s !important; 
+}
+
+.scp-ready #scp-zoom-slider-thumb.scp-zoom-slider-slow { /* Use when incrementing slider, looks prettier */
+  transition: transform .2s !important;
+  -ms-transition: transform .2s !important;
+  -webkit-transition: -webkit-transform .2s !important; 
+}
+
+.scp-large #scp-small-A { transform: translateX(27px);  -ms-transform: translateX(27px);  -webkit-transform: translateX(27px); }
+.scp-large #scp-large-A { transform: translateX(397px); -ms-transform: translateX(397px); -webkit-transform: translateX(397px); }
+.scp-large #scp-speech  { transform: translateX(585px); -ms-transform: translateX(585px); -webkit-transform: translateX(585px); }
+.scp-large #scp-vert-divider { transform: translateX(537px); -ms-transform: translateX(537px); -webkit-transform: translateX(537px); }
+.scp-large #scp-zoom-slider-bar {    /* Slider smaller in badge  */
+  transform: translateX(100px) scale(1) !important;
+  -ms-transform: translateX(100px) scale(1) !important; 
+  -webkit-transform: translateX(100px) scale(1) !important; 
+}
+
+.scp-large #scp-zoom-slider-thumb-container {
+  transition: transform .1s !important;
+  -webkit-transition: -webkit-transform .1s !important; 
+  -ms-transition: transform .1s !important;
+}
+
+/**************** Waves ************************/
+
+.scp-realsettings .scp-wave {
+  /* No jarring/abrupt changes */
+  transition: fill .3s;
+  -webkit-transition: fill .3s;
+  -ms-transition: fill .3s;
+}
+
+/* Waves use gray off state if not hovering and showing real settings (not first time badge) */
+.scp-realsettings #scp-speech[aria-checked='false']:not(:hover) .scp-wave {
+  /* First time we're small we always show on state because it's more inviting. However, going from small to large the first time, we're going from fake on to real off. Transition gently, don't draw attention to that. */
+  fill: #B0B0B0 !important; /* Gray */
+  opacity: 1 !important;
+}
+
+/* Waves use gray speech off state if recently turned off (avoid animation right after clicking) */
+#scp-speech[aria-checked='false'].scp-recently-toggled .scp-wave {
+  fill: #B0B0B0 !important; /* Gray */
+  opacity: 1 !important;
+}
+
+#scp-container:not(.scp-ready) #scp-speech { pointer-events: none;}  /* No wave animation while growing */
+
+/* Waves always fully visible at small size */
+.scp-small #scp-speech .scp-wave {
+  opacity: 1 !important;
+}
+
+/* Waves for speech on appearance */
+#scp-speech[aria-checked='true'] .scp-wave {
+  opacity: 1 !important;
+}
+
+/******************* More **********************/
+#scp-more {
+  transition: transform .8s;
+  -ms-transition: transform .8s;
+  -webkit-transition: -webkit-transform .8s; 
+}
+
+.scp-more #scp-more {
+  transform: translateY(0) !important;
+  -webkit-transform: translateY(0) !important;
+  -ms-transform: translateY(0) !important;
+  transition: transform .8s;
+  -ms-transition: transform .8s;
+  -webkit-transition: -webkit-transform .8s; 
+}
+
+/*************** Close button **********************/
+
+#scp-close-button {
+  visibility: hidden;
+  position: absolute; 
+  width: 70px;
+  height: 70px;
+}
+.scp-ready.scp-keyboard #scp-close-button {
+  visibility: visible;
+  z-index: 99999999;
+}
+
+/*************** Range *************************/
+
+#scp-container input[type="range"] { margin: 0px 15px;}
+
+
+/*************** Disabled **********************/
+
+#scp-svg [aria-disabled="true"] {
+  fill: #aaaaaa; /* Grayed out */
+  pointer-events: none;
+}
+
+/*************** Cursors ***********************/
+
+.scp-target, #scp-zoom-slider-thumb, #scp-container [role="button"], #scp-container [role="checkbox"], #scp-container [role="slider"], #scp-container [role="link"], #scp-container button, #scp-container input { 
+  /* Hand cursor */
+  cursor: url('data:image/svg+xml,<svg%20version%3D"1.1"%20xmlns%3D"http%3A//www.w3.org/2000/svg"%20xmlns%3Axlink%3D"http%3A//www.w3.org/1999/xlink"%20x%3D"0px"%20y%3D"0px"%20width%3D"128px"%20height%3D"128px"%20viewBox%3D"0%2C0%2C128%2C128"><defs><filter%20id%3D"d"%20x%3D"0"%20y%3D"0"%20width%3D"200%25"%20height%3D"200%25"><feOffset%20result%3D"offOut"%20in%3D"SourceAlpha"%20dx%3D".25"%20dy%3D".5"%20/><feGaussianBlur%20result%3D"blurOut"%20in%3D"offOut"%20stdDeviation%3D".5"%20/><feBlend%20in%3D"SourceGraphic"%20in2%3D"blurOut"%20mode%3D"normal"%20/></filter></defs><g%20transform%3D"scale%281.5%2C1.5%29"%20filter%3D"url%28%23d%29"><path%20fill%3D"%23000000"%20d%3D"M5.102%2C1.33%20C4.84%2C1.395%204.492%2C1.627%204.356%2C1.829%20C3.913%2C2.479%203.873%2C3.754%204.231%2C5.721%20C4.361%2C6.442%204.694%2C7.984%204.765%2C8.211%20C4.785%2C8.276%204.689%2C8.216%204.502%2C8.045%20C3.852%2C7.47%203.358%2C7.223%202.814%2C7.223%20C2.184%2C7.218%201.644%2C7.586%201.342%2C8.231%20C1.196%2C8.533%201.18%2C8.614%201.185%2C9.023%20C1.191%2C9.769%201.407%2C10.182%202.632%2C11.735%20C3.202%2C12.46%203.398%2C12.758%203.928%2C13.701%20C4.059%2C13.933%204.382%2C14.296%205.198%2C15.102%20L6.292%2C16.191%20L6.307%2C16.816%20L6.322%2C17.441%20L8.162%2C17.456%20L9.997%2C17.467%20L10.582%2C16.887%20L11.162%2C16.307%20L11.741%2C16.887%20L12.321%2C17.467%20L13.229%2C17.456%20L14.136%2C17.441%20L14.161%2C16.433%20L14.187%2C15.425%20L14.373%2C15.097%20C14.474%2C14.916%2014.756%2C14.497%2015.003%2C14.164%20C15.25%2C13.832%2015.598%2C13.343%2015.78%2C13.081%20C16.495%2C12.052%2016.49%2C12.083%2016.47%2C9.385%20C16.455%2C7.278%2016.455%2C7.258%2016.339%2C7.041%20C16.173%2C6.724%2015.915%2C6.466%2015.613%2C6.295%20C15.381%2C6.169%2015.296%2C6.149%2014.938%2C6.149%20C14.575%2C6.149%2014.494%2C6.169%2014.212%2C6.315%20C14.035%2C6.406%2013.889%2C6.472%2013.889%2C6.466%20C13.884%2C6.457%2013.819%2C6.32%2013.738%2C6.164%20C13.566%2C5.816%2013.289%2C5.554%2012.906%2C5.373%20C12.664%2C5.262%2012.558%2C5.242%2012.145%2C5.242%20C11.605%2C5.242%2011.353%2C5.327%2011.026%2C5.615%20C10.854%2C5.766%2010.839%2C5.766%2010.809%2C5.675%20C10.754%2C5.494%2010.244%2C5.075%209.937%2C4.959%20C9.518%2C4.798%209.029%2C4.808%208.652%2C4.98%20C8.495%2C5.05%208.283%2C5.171%208.188%2C5.247%20C8.072%2C5.332%208.011%2C5.357%208.011%2C5.312%20C8.011%2C5.176%207.86%2C4.229%207.784%2C3.881%20C7.502%2C2.615%206.983%2C1.758%206.312%2C1.451%20C6%2C1.31%205.42%2C1.249%205.102%2C1.33%20z"%20/><path%20fill%3D"%23FFFFFF"%20d%3D"M0%2C-0%20M6.03%2C2.222%20C6.327%2C2.393%206.61%2C2.837%206.796%2C3.422%20C6.988%2C4.017%207.028%2C4.264%207.179%2C5.6%20C7.25%2C6.214%207.341%2C6.905%207.381%2C7.127%20C7.593%2C8.226%207.845%2C8.604%208.153%2C8.276%20C8.253%2C8.171%208.268%2C8.075%208.313%2C7.273%20C8.339%2C6.789%208.384%2C6.336%208.41%2C6.27%20C8.505%2C6.018%208.858%2C5.826%209.246%2C5.826%20C9.509%2C5.821%209.917%2C6.013%2010.093%2C6.22%20C10.224%2C6.376%2010.229%2C6.412%2010.229%2C6.92%20C10.229%2C7.596%2010.305%2C8.13%2010.416%2C8.251%20C10.476%2C8.322%2010.557%2C8.342%2010.698%2C8.332%20C11.021%2C8.307%2011.066%2C8.196%2011.147%2C7.283%20L11.212%2C6.507%20L11.424%2C6.346%20C11.722%2C6.119%2012.11%2C6.038%2012.533%2C6.109%20C13.092%2C6.205%2013.163%2C6.336%2013.254%2C7.384%20C13.335%2C8.286%2013.4%2C8.443%2013.713%2C8.443%20C13.909%2C8.443%2014.05%2C8.246%2014.187%2C7.808%20C14.383%2C7.167%2014.686%2C6.946%2015.18%2C7.087%20C15.416%2C7.147%2015.553%2C7.318%2015.618%2C7.641%20C15.689%2C7.959%2015.689%2C10.177%2015.623%2C11.044%20C15.578%2C11.654%2015.563%2C11.72%2015.366%2C12.102%20C15.18%2C12.481%2014.59%2C13.312%2013.904%2C14.164%20C13.748%2C14.361%2013.597%2C14.563%2013.566%2C14.623%20C13.521%2C14.714%2013.405%2C16.035%2013.405%2C16.493%20L13.405%2C16.66%20L12.962%2C16.66%20L12.513%2C16.66%20L11.893%2C15.979%20C11.55%2C15.606%2011.258%2C15.299%2011.242%2C15.299%20C11.223%2C15.299%2010.905%2C15.606%2010.532%2C15.979%20L9.851%2C16.66%20L8.505%2C16.66%20L7.154%2C16.66%20L7.154%2C16.211%20L7.154%2C15.763%20L6.741%2C15.395%20C6.509%2C15.188%206.121%2C14.85%205.879%2C14.649%20C5.289%2C14.155%204.977%2C13.786%204.497%2C13.03%20C4.281%2C12.682%203.706%2C11.831%203.222%2C11.14%20C2.022%2C9.416%201.962%2C9.315%201.962%2C9.113%20C1.962%2C8.649%202.466%2C8.09%202.884%2C8.09%20C3.439%2C8.09%204.523%2C8.937%205.113%2C9.839%20C5.491%2C10.409%205.632%2C10.494%205.944%2C10.333%20C6.06%2C10.273%206.095%2C10.212%206.126%2C10.021%20C6.171%2C9.698%206.04%2C8.932%205.763%2C7.934%20C5.092%2C5.524%204.83%2C4.264%204.83%2C3.467%20C4.825%2C2.469%205.027%2C2.091%205.551%2C2.091%20C5.738%2C2.091%205.874%2C2.126%206.03%2C2.222%20z"/><path%20fill%3D"%23000000"%20d%3D"M8.742%2C10.251%20L8.742%2C10.251%20C8.941%2C10.251%209.102%2C10.406%209.102%2C10.597%20L9.102%2C13.994%20C9.102%2C14.185%208.941%2C14.34%208.742%2C14.34%20L8.742%2C14.34%20C8.543%2C14.34%208.381%2C14.185%208.381%2C13.994%20L8.381%2C10.597%20C8.381%2C10.406%208.543%2C10.251%208.742%2C10.251%20z"%20/><path%20fill%3D"%23000000"%20d%3D"M10.8%2C10.251%20L10.8%2C10.251%20C10.998%2C10.251%2011.16%2C10.406%2011.16%2C10.597%20L11.16%2C13.994%20C11.16%2C14.185%2010.998%2C14.34%2010.8%2C14.34%20L10.8%2C14.34%20C10.601%2C14.34%2010.439%2C14.185%2010.439%2C13.994%20L10.439%2C10.597%20C10.439%2C10.406%2010.601%2C10.251%2010.8%2C10.251%20z"%20/><path%20fill%3D"%23000000"%20d%3D"M12.694%2C10.251%20L12.694%2C10.251%20C12.893%2C10.251%2013.055%2C10.406%2013.055%2C10.597%20L13.055%2C13.994%20C13.055%2C14.185%2012.893%2C14.34%2012.694%2C14.34%20L12.694%2C14.34%20C12.495%2C14.34%2012.334%2C14.185%2012.334%2C13.994%20L12.334%2C10.597%20C12.334%2C10.406%2012.495%2C10.251%2012.694%2C10.251%20z"%20/></g><defs/></svg>') 9 0, pointer !important;
+}
+
+#scp-container, #scp-container textarea, #scp-container [aria-disabled="true"] {
+  cursor: url('data:image/svg+xml,<svg%20version%3D"1.1"%20xmlns%3D"http%3A//www.w3.org/2000/svg"%20xmlns%3Axlink%3D"http%3A//www.w3.org/1999/xlink"%20x%3D"0px"%20y%3D"0px"%20width%3D"128px"%20height%3D"128px"%20viewBox%3D"0%2C0%2C128%2C128"><defs><filter%20id%3D"f1"%20x%3D"0"%20y%3D"0"%20width%3D"200%25"%20height%3D"200%25"><feOffset%20result%3D"offOut"%20in%3D"SourceAlpha"%20dx%3D".25"%20dy%3D".5"%20/><feGaussianBlur%20result%3D"blurOut"%20in%3D"offOut"%20stdDeviation%3D"1"%20/><feBlend%20in%3D"SourceGraphic"%20in2%3D"blurOut"%20mode%3D"normal"%20/></filter></defs><g%20transform%3D"scale%281.5%2C1.5%29"%20filter%3D"url%28%23f1%29"><path%20fill%3D"%23FFF"%20d%3D"M1.016%2C0.422%20L1.031%2C16.781%20L4.312%2C13.281%20L6.446%2C18.479%20L10.344%2C17.031%20L8.062%2C11.875%20L12.496%2C11.871%20L1.016%2C0.422%20z"%20/><path%20fill%3D"%23000"%20d%3D"M1.938%2C2.875%20L2.031%2C14.188%20L4.531%2C11.625%20L6.969%2C17.312%20L9.031%2C16.562%20L6.688%2C10.938%20L10%2C10.938"/></g></svg>'), pointer !important;
+}
+
+
+/*************** Focus **************************/
+
+/* Don't show focus on the container itself, because it's the aria-activedescendant="[id]" item that has focus.
+   We use <rect class="scp-target"> elements to show the focus rectangle (after painfully exploring other options that were not cross-browser) */
+#scp-container:focus {outline: 0;}   
+
+  

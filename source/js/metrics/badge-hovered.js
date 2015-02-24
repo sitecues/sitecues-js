@@ -6,7 +6,7 @@ sitecues.def('metrics/badge-hovered', function (badgeHovered, callback) {
 
     var DEFAULT_STATE = {'name': 'badge-hovered'};
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil) {
+    sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
 
         // ============= Objects methods ======================
         badgeHovered = {

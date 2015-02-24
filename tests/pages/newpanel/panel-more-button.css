@@ -1,0 +1,63 @@
+/* This was split out because we couldn't make up our mind on a more button, */
+/* but we are now satisfied with what we have and it can be combined with other CSS */
+
+#scp-more-button-group {
+  opacity: 0;  
+}
+
+.scp-ready #scp-more-button-group:not([data-hasfocus]) {
+  transition: opacity .8s, transform .8s;
+  -ms-transition: opacity .8s, transform .8s;
+  -webkit-transition: opacity .8s, -webkit-transform .8s;
+  transform: scale(.3);
+  -webkit-transform: scale(.3);
+  -ms-transform: scale(.3);
+}
+
+#scp-more-button-group {
+  transform-origin: 410px 200px;
+  -webkit-transform-origin: 410px 200px;
+  -ms-transform-origin: 410px 200px;
+}
+
+.scp-ready #scp-more-button-group.scp-show {
+  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  -ms-transform: scale(1.1);
+}
+
+#scp-more-arrow {
+  transition: transform .8s, fill .2s;
+  -ms-transition: transform .8s, fill .2s;
+  -webkit-transition: -webkit-transform .8s, fill .2s;
+  transform-origin: 410px 200px;
+  -webkit-transform-origin: 410px 200px;
+  -ms-transform-origin: 410px 200px;
+  transform: scale(.85);
+  -webkit-transform: scale(.85);
+  -ms-transform: scale(.85);
+}
+  
+.scp-ready.scp-more #scp-more-arrow {
+  transform: rotate(-180deg) scale(.85);
+  -webkit-transform: rotate(-180deg) scale(.85);
+  -ms-transform: rotate(-180deg) scale(.85);
+}
+
+.scp-ready #scp-more-button-group:hover:not([data-hasfocus]) {
+  transform: scale(1.35);
+  -webkit-transform: scale(1.35);
+  -ms-transform: scale(1.35);
+}
+
+.scp-ready #scp-more-button-group.scp-show,
+.scp-ready #scp-more-button-group:hover {
+  opacity: 1;
+}
+
+#scp-more-button {
+  transition: stroke .2s;
+  -ms-transition: stroke .2s;
+  -webkit-transition: stroke .2s;
+}
+

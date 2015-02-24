@@ -50,31 +50,46 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	$(build-dir)/source/js/core.js \
 	source/js/jquery.js \
+	source/js/locale/en.js \
+	source/js/locale/pl.js \
+	source/js/util/localization.js \
 	source/js/util/localstorage.js \
 	source/js/user.js \
 	source/js/custom.js \
 	$(custom-files) \
-	source/js/load.js \
 	source/js/conf/user/manager.js \
 	source/js/conf/user/server.js \
 	source/js/conf/user.js \
 	source/js/conf/site.js \
 	source/js/conf.js \
 	source/js/platform.js \
-	source/js/ui.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
-	source/js/html-build.js \
 	source/js/audio/speech-builder.js \
 	source/js/audio/html5-player.js \
 	source/js/audio/safari-player.js \
 	source/js/audio.js \
 	source/js/audio/audio-cues.js \
+	source/js/audio/earcons.js \
 	source/js/zoom-forms.js \
 	source/js/zoom.js \
-	source/js/slider.js \
-	source/js/panel.js \
-	source/js/badge.js \
+	source/js/bp/model/state.js \
+	source/js/bp/constants.js \
+	source/js/bp/helper.js \
+	source/js/bp/controller/base-controller.js \
+	source/js/bp/controller/slider-controller.js \
+	source/js/bp/controller/panel-controller.js \
+	source/js/bp/animate.js \
+	source/js/bp/view/elements/slider.js \
+	source/js/bp/controller/bp-controller.js \
+	source/js/bp/view/svg.js \
+	source/js/cursor/custom.js \
+	source/js/bp/view/modes/panel.js \
+	source/js/bp/view/styles.js \
+	source/js/bp/view/modes/badge.js \
+	source/js/bp/view/elements/tts-button.js \
+	source/js/bp/placement.js \
+	source/js/bp.js \
 	source/js/focus.js \
 	source/js/mouse-highlight/traitcache.js \
 	source/js/mouse-highlight/highlight-position.js \
@@ -84,7 +99,6 @@ files=\
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight.js \
 	source/js/style-service.js \
-	source/js/cursor/custom.js \
 	source/js/cursor.js \
 	source/js/fixed-position-fixer.js \
 	source/js/hlb/event-handlers.js \
@@ -213,6 +227,7 @@ package:
 	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
 
 	@cp -R source/images $(package-dir)
+	@cp -R source/earcons $(package-dir)
 	@cp -R source/html $(package-dir)
 
 	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)

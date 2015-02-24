@@ -13,7 +13,7 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
     };
 
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function(metricsUtil, $) {
+    sitecues.use('metrics/util', 'jquery', function(metricsUtil, $) {
 
         // ============= Objects methods ======================
         panelClosed = {

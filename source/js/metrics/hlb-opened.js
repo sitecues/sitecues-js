@@ -6,7 +6,7 @@ sitecues.def('metrics/hlb-opened', function (hlbOpened, callback) {
     
     var DEFAULT_STATE = {'name': 'hlb-opened'};
 
-    sitecues.use('metrics/util', 'jquery', 'ui', function (metricsUtil) {
+    sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
 
         // ============= Objects methods ======================
         hlbOpened = {

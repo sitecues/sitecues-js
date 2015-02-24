@@ -1,0 +1,68 @@
+/* Implement color palettes for panel */
+/* Currently just two choices - B (basic) or R (red) */
+
+#scp-head, .scp-A-button {fill: black;} /* Default foreground color */
+#scp-zoom-slider-bar { fill: #383838; }
+
+/* Show focus rectangle that's inside focused group */
+#scp-container g[data-hasfocus] .scp-target {
+  stroke-width: 8.5px;
+  stroke: rgb(82,168,236);
+  stroke-linejoin: round;
+  opacity: .7;  
+  fill: transparent;
+}
+
+/* Link hover */
+#scp-svg text[role="link"]:hover { fill: #447AC4 !important; }
+
+.scp-range-label {
+  color: black;
+}
+.scp-range-label:hover {
+  color: #6B9AE0;
+}
+  
+/*-- Palette B = Basic Blue -------------------------------------------------------------------------------------*/
+/* Not enabled or active */
+.scp-paletteb #scp-wave3
+  { fill: #15489E; }
+.scp-paletteb #scp-wave2,
+.scp-paletteb #scp-zoom-slider-thumb
+  { fill: #3D65B0; }
+.scp-paletteb #scp-wave1
+  { fill: #5D85C4; }
+
+/* Enabled or active */
+.scp-paletteb.scp-brighten #scp-wave3,
+.scp-paletteb.scp-brighten #scp-zoom-slider-thumb,
+.scp-ready.scp-paletteb .scp-A-button:hover           /* Letter A buttons match slider thumb when hovered */
+  { fill: #447AC4; }    /* 62, 122, 196 */
+.scp-paletteb.scp-brighten #scp-wave2,
+.scp-ready.scp-paletteb #scp-zoom-slider-thumb:hover
+  { fill: #6B9AE0; }    /* 61, 101, 176 */
+.scp-paletteb.scp-brighten #scp-wave1
+  { fill: #80A9F8; }    /* 128, 169, 248 */
+
+/*-- Palette R = Red ---------------------------------------------------------------------------------*/
+
+/* Not enabled or active */
+.scp-paletter #scp-wave3
+  { fill: rgb(209,13,36); }
+.scp-paletter #scp-wave2,
+.scp-paletter #scp-zoom-slider-thumb
+  { fill: rgb(229,73,106); }
+.scp-paletter #scp-wave1
+  { fill: rgb(249,143,166); }
+
+/* Enabled or active */
+.scp-paletter.scp-brighten #scp-wave3,
+.scp-paletter.scp-brighten #scp-zoom-slider-thumb,
+.scp-ready.scp-paletter .scp-A-button:hover           /* Letter A buttons match slider thumb when hovered */
+  { fill: rgb(209,13,36); }
+.scp-paletter.scp-brighten #scp-wave2,
+.scp-ready.scp-paletter #scp-zoom-slider-thumb:hover
+  { fill: rgb(229,73,106); }
+.scp-paletter.scp-brighten #scp-wave1
+  { fill: rgb(249,143,166); }
+

@@ -64,7 +64,7 @@ sitecues.def('conf/site', function (site, callback) {
       });
     }
 
-    sitecues.on('speech/init', fetchSiteConfig); // Fetch once we need it
+    sitecues.on('speech/did-change zoom/begin', fetchSiteConfig); // Fetch once we need it
 
     callback(site);
   });

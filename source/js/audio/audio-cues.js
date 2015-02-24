@@ -1,7 +1,6 @@
 /**
- * This is the "main" speech library.  It manages all of the events
- * and requests and should be the only speech component referenced
- * by other parts of the application.
+ * This is the audio cue library.  It listens to sitecues events and plays appropriate verbal cues.
+ * Not to be confused with earcons, which are just sounds.
  */
 
 sitecues.def('audio/audio-cues', function (audioCues, callback) {
@@ -52,14 +51,17 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
     /*
      * Play speech on cue if necessary
      */
-    function onSpeechChanged(isEnabled) {
+    function playSpeechCue(isEnabled, doSuppressAudioCue) {
+      if (doSuppressAudioCue) {
+        return;
+      }
+
       if (!isEnabled) {
         // *** Speech off cue ***
         audio.playAudioByKey(VERBAL_CUE_SPEECH_OFF);
         return;
       }
 
-      // *** Speech on cues ***
       // EQ-996 - As a user, I want multiple chances to learn about the
       // spacebar command so that I can benefit from One Touch Read
       //---------------------------------------------------------------------------------------------------//
@@ -88,7 +90,7 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
     /*
      * Play speech on cue if necessary
      */
-    sitecues.on('speech/did-change', onSpeechChanged);
+    sitecues.on('speech/did-change', playSpeechCue);
 
     /*
      * Play cue describing "zoom in more" one-touch-read feature if necessary

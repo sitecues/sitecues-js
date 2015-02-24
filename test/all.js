@@ -14,16 +14,20 @@ define(
         prependDir('functional', functionalSuites);
 
         function prependDir(dir, list) {
-            if (list && typeof list === 'object' && list.length > 0) {
-                for (i = 0, len = list.length; i < len; i = i + 1) {
+
+            var len;
+
+            if (list && typeof list === 'object' && (len = list.length) > 0) {
+                for (i = 0; i < len; i = i + 1) {
                     list[i] = dir + '/' + list[i];
                 }
             }
+
             return list;
         }
 
         return {
-            unit : unitSuites,
+            unit       : unitSuites,
             functional : functionalSuites
         };
     }

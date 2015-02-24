@@ -51,9 +51,6 @@ sitecues.def('zoom-forms', function (zoomForms, callback) {
         $(COMBOBOX_SELECTOR).each(function() {
           var $combobox = $(this);
           clearComboboxCssFixes($combobox);
-          if (completedZoom === 1) {
-            return; // Nothing to fix
-          }
 
           var desiredRect = this.getBoundingClientRect();
 

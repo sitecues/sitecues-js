@@ -74,11 +74,11 @@ describe('audio', function() {
       });
       it('should return the correct url with language set', function(done) {
         Object.defineProperty(document.documentElement, 'lang', {
-          value: 'es',
+          value: 'pl',
           writable: true
         });
         var actualUrl = audio.getTTSUrl('x y'),
-          expectedUrl = '//def/sitecues/api/tts/site/99/tts.aac?l=es&t=x%20y';
+          expectedUrl = '//def/sitecues/api/tts/site/99/tts.aac?l=pl&t=x%20y';
         expect(actualUrl).to.be.equals(expectedUrl);
         Object.defineProperty(document.documentElement, 'lang', {
           value: undefined,

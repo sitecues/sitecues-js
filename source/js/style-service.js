@@ -11,8 +11,8 @@ sitecues.def('style-service', function (styleService, callback) {
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
       SITECUES_CSS_ID = 'sitecues-combined-css',
-      SITECUES_CSS_DEFAULT = 'html,.sitecues-panel{cursor:auto}\n' +
-        'input,textarea,select,a,button,.sitecues-clickable,label[for]{cursor:pointer}\n',
+      SITECUES_CSS_DEFAULT = 'html,#scp-bp-panel * {cursor:auto}\n' +
+        'input,textarea,select,a,button,.scp-target,.scp-hidden-target,label[for]{cursor:pointer}\n',
       WAIT_BEFORE_INIT_STYLESHEET = 50,
       hasInitBeenRequested,   // Have we even begun the init sequence?
       isInitComplete;      // Init sequence is complete
