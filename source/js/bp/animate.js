@@ -574,6 +574,9 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           case BADGE_TO_PANEL:
 
+            // Value is calculated as follows:
+            // We cache this value to use again because XXXX
+
             panelScaleFromBadge = largeToSmallRatio / crispFactor;
 
             return panelScaleFromBadge;
@@ -594,9 +597,14 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           case TWEEN_TO_BADGE_CRISPED:
 
+            // Do not use the cached badgeScaleFromPanel value because XXX
+            // Use YYY because XXX
+
             return getCurrentScale() * largeToSmallRatio;
 
           case TWEEN_TO_BADGE_UNCRISPED:
+
+            // Use the cached badgeScaleFromPanel value from PANEL_TO_BADGE case because XXXX
 
             return badgeScaleFromPanel;
 
