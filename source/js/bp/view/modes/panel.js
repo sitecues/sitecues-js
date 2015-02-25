@@ -1,11 +1,8 @@
 sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
-  sitecues.use('bp', 'bp/view/elements/slider', 'bp/constants', 'bp/controller/base-controller',
+  sitecues.use('bp', 'bp/constants', 'bp/controller/base-controller',
     'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    'cursor/custom', 'zoom',
-    function(bp, slider, BP_CONST, baseController, panelController, bpController, state, helper, customCursor, zoomMod) {
-
-      var minPageZoomXLCursor = customCursor.getCursorZoom(BP_CONST.MIN_CURSOR_SIZE);
+    function(bp, BP_CONST, baseController, panelController, bpController, state, helper) {
 
       /*
        Show panel according to settings.
@@ -116,9 +113,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           // *** scp-ready ***
           // The panel is fully enlarged and ready to accept mouse input
           classBuilder += ' scp-ready';
-          if (state.get('isUsingXLCursor')) {
-            classBuilder += ' scp-xl-cursor';
-          }
         }
 
         // *** scp-large ***
@@ -134,14 +128,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
 
         return classBuilder + ' ' + getFeatureClass();
       };
-
-      function determineXLCursorUsage() {
-        var willUseXLCursor = zoomMod.getCompletedZoom() < minPageZoomXLCursor;
-        if (state.get('isUsingXLCursor') !== willUseXLCursor) {
-          state.set('isUsingXLCursor', willUseXLCursor);
-          sitecues.emit('bp/do-update');
-        }
-      }
 
       /*
        A feature panel is a special panel that is triggered from the secondary panel. It can be one of four things right now:
@@ -203,8 +189,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // Don't listen to events on the window when the BP is collapsing
         unbindTemporaryMouseHandlers();
       });
-
-      sitecues.on('zoom', determineXLCursorUsage);
 
       // Unless callback() is queued, the module is not registered in global var modules{}
       // See: https://fecru.ai2.at/cru/EQJS-39#c187

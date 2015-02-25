@@ -10,18 +10,22 @@ sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform', 'zoom',
-    function (  $, styleService, conf, customCursor, platform, zoomModule) {
+  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform',
+    function (  $, styleService, conf, customCursor, platform) {
 
-    var cursorZoom,
+    var cursorZoom = 1,
         // Regexp is used to match URL in the string given(see below).
         URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
         CURSOR_TYPES = ['default', 'pointer' ],
         CURSOR_SYNONYMS = { _default: 'auto' },  // Map cursor: auto -> cursor: default
         SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
+        SITECUES_BP_CURSOR_CSS_ID = 'sitecues-bp-cursor',
+        MIN_BP_CURSOR_SIZE = 1.6,
         $stylesheet,
+        $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
         cursorStylesheetObject,
-        isInitComplete;
+        bpCursorStylesheetObject,
+        isStyleServiceReady;
 
     /*
      * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -34,7 +38,6 @@ sitecues.def('cursor', function (cursor, callback) {
         rule.style.setProperty('cursor', cursorValueURL, 'important');
       } catch (e) {
         SC_DEV && console.log('Catch setting cursor property: %o', e);
-        // rule.style.cursor = cursorValueURL;  // TODO do we still need this?
       }
     }
 
@@ -98,8 +101,8 @@ sitecues.def('cursor', function (cursor, callback) {
      * Refresh all cursor rules in the sitecues-cursor stylesheet, mapping them to cursorTypeUrls
      * @param cursorTypeUrls
      */
-    function refreshCursorStyles(cursorTypeUrls) {
-      var rules = cursorStylesheetObject.cssRules,
+    function refreshCursorStyles(styleSheet, cursorTypeUrls) {
+      var rules = styleSheet.cssRules,
         numRules = rules.length,
         ruleIndex = 0,
         cursorTypeIndex,
@@ -124,15 +127,19 @@ sitecues.def('cursor', function (cursor, callback) {
       cursorStylesheetObject.disabled = !!doDisable;
     }
 
+    function createStyleSheet(id, cssText) {
+      return $('<style>').appendTo('head')
+        .attr('id', id)
+        .text(cssText);
+    }
+
     // Create a stylesheet with only the cursor-related style rules
     function constructCursorStylesheet() {
       var cursorStyleSubset = styleService.getAllMatchingStyles('cursor'),
         cssText = styleService.getStyleText(cursorStyleSubset, 'cursor');
 
       // Create the sitecues <style id="sitecues-cursor"> element and content
-      $stylesheet = $('<style>').appendTo('head')
-        .attr('id', SITECUES_CURSOR_CSS_ID)
-        .text(cssText);
+      $stylesheet = createStyleSheet(SITECUES_CURSOR_CSS_ID, cssText);
 
       // Now set the cursorStyles global to the rules in the cursor style sheet.
       // The refresh methods will iterate over these styles and modify them
@@ -146,50 +153,63 @@ sitecues.def('cursor', function (cursor, callback) {
       }
     }
 
+    // Stylesheet just for BP cursors
+    // The cursors have a minimum size, and are never disabled during smooth zoom for performance
+    function constructBPCursorStylesheet() {
+      var cssText =
+        '#scp-main {cursor: default;}\n' +
+        '.scp-target,.scp-hidden-target {cursor:pointer};';
+
+      $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
+      bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);
+
+      refreshStylesheets();
+
+    }
+
     /**
      * Generates a CSS cursor property for every supported
      * cursor type at the current zoom level and then changes
      * all cursor properties in the <style id="sitecues-cursor">
      */
-    function refreshStylesheet() {
+    function refreshStylesheets() {
       if (cursorZoom <= 1) {
         if ($stylesheet) {
           $stylesheet.remove();
           $stylesheet = null;
         }
-        return;
       }
-
-      if (!isInitComplete) {
-        return; // Not ready yet -- will call back when the style-service is ready
-      }
-
-      if (!$stylesheet) {
+      else if (!$stylesheet && isStyleServiceReady) {
         constructCursorStylesheet();
       }
 
-      var cursorTypeUrls = getCursorTypeUrls();
-      refreshCursorStyles(cursorTypeUrls);
-      setCursorsDisabled(false);
+      // Get cursor URLs for current zoom levels
+      var cursorTypeUrls = getCursorTypeUrls(cursorZoom),
+        bpCursorTypeUrls = cursorZoom < MIN_BP_CURSOR_SIZE ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
+
+      // Refresh document cursor stylesheet if we're using one
+      if ($stylesheet) {
+        refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
+        setCursorsDisabled(false);
+      }
+
+      // Refresh BP cursor stylesheet
+      refreshCursorStyles(bpCursorStylesheetObject, bpCursorTypeUrls);
     }
 
     /**
      * Get the cursor URLs to support the current cursorZoom level
      * @returns {Array} Array of cursor URLS
      */
-    function getCursorTypeUrls() {
+    function getCursorTypeUrls(size) {
       var cursorTypeUrls = [],
-        doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
-        // Use 2x pixel cursor if the browser's pixel ratio is higher than 1 and the
-        // platform.browser supports css cursor scaling
-        pixelRatio = doUseRetinaCursors ? 2 : 1,
         i = 0;
 
       // Generate cursor images for every cursor type...
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = customCursor.getCursorCss(type, cursorZoom, pixelRatio);
+          css = customCursor.getCursorCss(type, size);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -203,15 +223,16 @@ sitecues.def('cursor', function (cursor, callback) {
       var newCursorZoom = customCursor.getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
-        refreshStylesheet();
+        refreshStylesheets();
       }
     });
 
     sitecues.on('style-service/ready', function() {
-      isInitComplete = true;
-      refreshStylesheet();
+      isStyleServiceReady = true;
+      refreshStylesheets();
     });
 
+    constructBPCursorStylesheet();
 
     callback();
 

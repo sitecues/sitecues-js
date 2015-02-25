@@ -115,18 +115,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
       MIN_CURSOR_SIZE = 1.5,
 
-      CURSOR_CSS = {
-        // Cursor rules to use when cursor is less than minimum cursor size
-        // The .scp-xl-cursor class is only set when the cursor wouldn't already be at least this size
-        '.scp-xl-cursor #scp-main': {
-          'cursor': customCursor.getCursorCss('default', MIN_CURSOR_SIZE) + ' !important'
-        },
-
-        '.scp-xl-cursor .scp-target, .scp-xl-cursor .scp-hidden-target': {
-          'cursor': customCursor.getCursorCss('pointer', MIN_CURSOR_SIZE) + ' !important'
-        }
-      },
-
       BASE_CSS = {
         /**
          General CSS rules for panel
@@ -560,7 +548,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     }
 
     createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
-    createStyleSheet(BP_CONST.BP_CURSOR_STYLESHEET_ID, CURSOR_CSS);
     createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
 
     if (typeof sitecues.config.palette === 'object') {

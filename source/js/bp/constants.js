@@ -179,11 +179,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BADGE_VERTICAL_OFFSET = 2;
 
   constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
-  constants.BP_CURSOR_STYLESHEET_ID = 'sitecues-badge-panel-cursor-css';
   constants.PALETTE_STYLESHEET_ID = 'sitecues-badge-panel-palette-css';
-
-  // Minimum size of cursor in panel
-  constants.MIN_CURSOR_SIZE = 1.5;
 
   // Wave animation (on hover over TTS button)
   constants.ANIMATE_WAVES_OPACITY = [
