@@ -283,9 +283,12 @@ sitecues.def('zoom', function (zoom, callback) {
 
       function finishZoomSliderOperation() {
         if (zoomInput.isSliderDrag || !zoomAnimator) {
-          // Slider thumb already at destination -- was not busy animating to
-          // a click elsewhere in the slider bar
-          finishZoomOperation();
+          // Make sure we freeze at target zoom -- this helps crispen it in Chrome, not actually sure why
+          cancelFrame(zoomAnimator);
+          zoomAnimator = requestFrame(function() {
+            performInstantZoomOperation();
+            finishZoomOperation();
+          });
         }
         // Else is in the middle of gliding to a zoom click -- let it finish --
         // the animation's end will cause finishZoomOperation() to be called

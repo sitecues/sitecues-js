@@ -175,7 +175,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',
-          'will-change': 'transform',
+//          'will-change': 'transform',   // Removing helps Chrome not get blurry on sitecues.com after zoom
           'outline': 0 // don't show default dotted focus outline
         },
 
