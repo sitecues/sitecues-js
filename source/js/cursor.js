@@ -138,10 +138,10 @@ sitecues.def('cursor', function (cursor, callback) {
       // The refresh methods will iterate over these styles and modify them
       cursorStylesheetObject = styleService.getDOMStylesheet($stylesheet);
 
-      if (platform.browser.isIE) {
+      if (platform.browser.isIE && platform.browser.version < 11) {
         // While zooming, turn off our CSS rules so that the browser doesn't spend
         // CPU cycles recalculating the custom cursor rules to apply during each frame
-        // This makes a difference in IE -- doesn't seem to help in other browsers.
+        // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
         sitecues.on('zoom/begin', setCursorsDisabled);
       }
     }
