@@ -188,7 +188,7 @@ sitecues.def('cursor', function (cursor, callback) {
         bpCursorTypeUrls = cursorZoom < MIN_BP_CURSOR_SIZE ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
 
       // Refresh document cursor stylesheet if we're using one
-      if ($stylesheet) {
+      if (cursorStylesheetObject && cursorStylesheetObject.rules) {
         refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
         setCursorsDisabled(false);
       }

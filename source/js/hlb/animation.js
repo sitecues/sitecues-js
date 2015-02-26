@@ -31,7 +31,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     hlbAnimation.transitionInHLB = function (doShowQuickly, data) {
 
       // Dim the background!
-      dimmer.dimBackgroundContent(INFLATION_SPEED);
+      dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlbElement.parent());
       var $hlbElement = data.$hlbElement,
         speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED;
 

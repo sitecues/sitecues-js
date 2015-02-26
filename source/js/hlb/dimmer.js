@@ -27,11 +27,11 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
     /////////////////////////////
 
     /**
-     * [dimBackgroundContent creates the background dimmer element, positions it, and transitions opacity]
-     * @param  {[jQuery element]} $hlbWrappingElement [The element that wraps the HLB element and dimmer element]
-     * @param  {[integer]}        inflationSpeed      [The duration of the opacity transition]
+     * dimBackgroundContent creates the background dimmer element, positions it, and transitions opacity
+     * @param  {number}        inflationSpeed      The duration of the opacity transition
+     * @param  {Object} (optional) $parentOfDimmer  A selector describing the node that should parent the dimmer
      */
-    dimmer.dimBackgroundContent = function(inflationSpeed) {
+    dimmer.dimBackgroundContent = function(inflationSpeed, $parentOfDimmer) {
 
       if (dimmer.getDimmerElement()) {
         return; // Background already dimmed
@@ -44,7 +44,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
           width: documentElement.scrollWidth * multiplySize ,
           height: documentElement.scrollHeight * multiplySize
         },
-        $dimmerElement = common.drawRect(rect, '#000');
+        $dimmerElement = common.drawRect(rect, '#000', $parentOfDimmer);
 
       $dimmerElement
         .attr('id', DIMMER_ID)

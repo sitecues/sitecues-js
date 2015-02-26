@@ -292,7 +292,7 @@ sitecues.def('util/common', function (common, callback) {
     //      O---------------O
     //      OOOOOOOOOOOOOOOOO
     //
-    common.drawRect = function(absRect, color) {
+    common.drawRect = function(absRect, color, optionalParent) {
       var useCss = {
           position: 'absolute',
           outlineColor: color,
@@ -317,7 +317,7 @@ sitecues.def('util/common', function (common, callback) {
 
       return $('<div>')
         .css(useCss)
-        .appendTo('html');
+        .appendTo(optionalParent || 'html');
     };
 
     // Done.

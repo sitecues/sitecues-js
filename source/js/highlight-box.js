@@ -515,12 +515,12 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       }
 
-      function isElementOutsideHlb(element) {
-        return !$hlbElement.is(element) || !$.contains($hlbElement[0], element);
+      function isElementInsideHlb(element) {
+        return $hlbElement.is(element) || $.contains($hlbElement[0], element);
       }
 
       function onClick(e) {
-        if ($hlbElement && isElementOutsideHlb(e.target)) {
+        if ($hlbElement && !isElementInsideHlb(e.target)) {
           // If click is outside of HLB, close it
           // (Need to doublecheck this because HLB can sometimes be inside of <body>)
           sitecues.emit('hlb/toggle');
