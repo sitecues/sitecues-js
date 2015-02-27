@@ -6,7 +6,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       isAnimationDebuggingOn = false,
 
       doWebKitPrefix = helper.isSafari,
-      doMsPrefix = helper.isMoz,
+      doMsPrefix = helper.isIE9,
 
       idDelimiter = '#',
       classDelimiter = '.',

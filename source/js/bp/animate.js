@@ -34,7 +34,8 @@ sitecues.def('bp/animate', function(animate, callback) {
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           panelScaleFromBadge,
           badgeScaleFromPanel,
-          transformElementId          = BP_CONST.BP_CONTAINER_ID;
+          transformElementId          = BP_CONST.BP_CONTAINER_ID,
+          currentScrollPos            = { x: undefined, y: undefined};
 
       // Cache elementById results because we use it in each frame and it shows up while profiling
       function byId(id) {
@@ -497,6 +498,9 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         if (state.isExpanding() || state.isShrinking()) {
 
+          // We don't care about keeping the panel position "fixed" if it is not a panel.
+          window.removeEventListener('scroll', movePanelWithScroll);
+
           // There is room to animate, not already at the size limit of where we're transitioning to
 
           SC_DEV && console.log('PERFORM BP2 ANIMATION');
@@ -509,22 +513,15 @@ sitecues.def('bp/animate', function(animate, callback) {
         currentlyTransitioningTo = state.get('transitionTo');
       };
 
-      function getTargetScale (largeToSmallRatio, crispFactor) {
-
-        //  Crisping is only applied when the last completed
-        //  state (BADGE or PANEL) is a BADGE.
-        //  Specifically: currentlyTransitioningFrom = BP_CONST.BADGE_MODE
+      //  https://equinox.atlassian.net/wiki/display/EN/BP2%3A+Implementation+Details
+      function getTargetScale (endingSizeToStartingSizeRatio, crispFactor) {
 
         var isPanelRequested = state.isPanelRequested(),
 
-            // 6 possible scaling scenarios
-
-            // Badge -> Panel is always crisp
             BADGE_TO_PANEL           = 0,
             TWEEN_TO_PANEL_CRISPED   = 1,
             TWEEN_TO_PANEL_UNCRISPED = 2,
 
-            // Panel -> Badge is never crisp
             PANEL_TO_BADGE           = 3,
             TWEEN_TO_BADGE_CRISPED   = 4,
             TWEEN_TO_BADGE_UNCRISPED = 5,
@@ -574,10 +571,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           case BADGE_TO_PANEL:
 
-            // Value is calculated as follows:
-            // We cache this value to use again because XXXX
-
-            panelScaleFromBadge = largeToSmallRatio / crispFactor;
+            panelScaleFromBadge = endingSizeToStartingSizeRatio / crispFactor;
 
             return panelScaleFromBadge;
 
@@ -591,20 +585,15 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           case PANEL_TO_BADGE:
 
-            badgeScaleFromPanel = largeToSmallRatio;
+            badgeScaleFromPanel = endingSizeToStartingSizeRatio;
 
             return  badgeScaleFromPanel;
 
           case TWEEN_TO_BADGE_CRISPED:
 
-            // Do not use the cached badgeScaleFromPanel value because XXX
-            // Use YYY because XXX
-
-            return getCurrentScale() * largeToSmallRatio;
+            return getCurrentScale() * endingSizeToStartingSizeRatio;
 
           case TWEEN_TO_BADGE_UNCRISPED:
-
-            // Use the cached badgeScaleFromPanel value from PANEL_TO_BADGE case because XXXX
 
             return badgeScaleFromPanel;
 
@@ -734,8 +723,16 @@ sitecues.def('bp/animate', function(animate, callback) {
         byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', isPanelRequested);
 
         if (isPanelRequested) {
+
+          currentScrollPos.x = window.pageXOffset;
+          currentScrollPos.y = window.pageYOffset;
+
+          window.addEventListener('scroll', movePanelWithScroll);
+
           currentlyTransitioningFrom = BP_CONST.PANEL_MODE;
+
           panelController.panelReady();
+
         } else {
           currentlyTransitioningFrom = BP_CONST.BADGE_MODE;
           panelController.panelShrunk();
@@ -749,7 +746,25 @@ sitecues.def('bp/animate', function(animate, callback) {
         cancelFrameFn(animationId);
       }
 
+      function movePanelWithScroll () {
+
+        var currentTransformPos = getCurrentTransformPosition(),
+            scrollX             = window.pageXOffset,
+            scrollY             = window.pageYOffset;
+
+        setTransform(
+          currentTransformPos.left - (currentScrollPos.x - scrollX),
+          currentTransformPos.top  - (currentScrollPos.y - scrollY),
+          1
+        );
+
+        currentScrollPos.x = scrollX;
+        currentScrollPos.y = scrollY;
+
+      }
+
       sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+
       sitecues.on('zoom/begin', function () {
         animationStartTime = 0;
       });
