@@ -35,7 +35,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           panelScaleFromBadge,
           badgeScaleFromPanel,
           transformElementId          = BP_CONST.BP_CONTAINER_ID,
-          currentScrollPos            = { x: undefined, y: undefined};
+          currentScrollPos            = {};
 
       // Cache elementById results because we use it in each frame and it shows up while profiling
       function byId(id) {
