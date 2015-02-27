@@ -1078,9 +1078,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // refreshEventListeners turns on or off event listeners that enable the highlighter
     // return true if highlight visibility should be restored
-    function refreshEventListeners() {
+    function refreshEventListeners(doForceOff) {
       // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-      var doTrackMouse = sitecues.isSitecuesOn();
+      var doTrackMouse = sitecues.isSitecuesOn() && !doForceOff;
 
       if (doTrackMouse === isTrackingMouse) {
         return isTrackingMouse;
@@ -1198,7 +1198,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // (until they're enabled again, via resume())
     function pause() {
       hide(true);
-      refreshEventListeners(false);
+      refreshEventListeners(true);
     }
 
     function tryExistingHighlight() {
