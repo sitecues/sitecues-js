@@ -232,7 +232,6 @@ sitecues.def('bp/placement', function(placement, callback) {
         ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
 
         state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
-
       }
 
       return ratioOfSVGToVisibleBadgeSize;

@@ -82,7 +82,9 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       setZoomLabel(zoomText);
     }
 
-    function addMouseListeners() {
+    function addListeners() {
+      zoomMod.setThumbChangeListener(slider.updateThumbPosition);
+
       // Zoom controls
       var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),
           sliderThumb  = helper.byId(BP_CONST.ZOOM_SLIDER_THUMB_ID),
@@ -95,8 +97,6 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       largeA.addEventListener('mousedown', sliderController.handleAButtonsPress);
     }
 
-    zoomMod.setThumbChangeListener(slider.updateThumbPosition);
-
     // A zoom operation has been completed
     // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
     sitecues.on('zoom bp/did-complete', updateZoomValueView);
@@ -106,7 +106,7 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
     sitecues.on('zoom/begin', doUseRealSettings);
 
     // Add mouse listeners once BP is ready
-    sitecues.on('bp/did-complete', addMouseListeners);
+    sitecues.on('bp/did-complete', addListeners);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
