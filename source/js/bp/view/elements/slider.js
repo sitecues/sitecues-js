@@ -70,7 +70,8 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       // We do this when zoom is finished so that the screen reader is not trying to read every
       // new value during an animation which would be way too verbose
       var sliderElement = helper.byId(BP_CONST.ZOOM_SLIDER_BAR_ID),
-          zoomText      = currZoom > 1 ? currZoom.toFixed(1) + 'x' : locale.translate(BP_CONST.ZOOM_STATE_LABELS.OFF.toLowerCase());
+          roundedZoom = Math.floor((currZoom + 0.0999) * 10) / 10,
+          zoomText      = currZoom > 1 ? roundedZoom.toFixed(1) + 'x' : locale.translate(BP_CONST.ZOOM_STATE_LABELS.OFF.toLowerCase());
 
       sliderElement.setAttribute('aria-valuenow', currZoom ? currZoom.toFixed(1) : 1);
 

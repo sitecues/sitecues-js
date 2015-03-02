@@ -59,7 +59,7 @@ sitecues.def('zoom', function (zoom, callback) {
         zoomInput = {},
 
         // Function to call for requesting an animation frame
-        requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
+        requestFrame = //window.requestAnimationFrame || window.msRequestAnimationFrame ||
           function(fn) { return setTimeout(fn, 16) },  // 16ms is about 60fps
 
         // State to help with animation optimizations and will-change
