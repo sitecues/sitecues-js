@@ -33,7 +33,7 @@ sitecues.def('zoom-forms', function (zoomForms, callback) {
       // Add useful zoom fixes for forms that render incorrectly with CSS transform
       zoomForms.applyZoomFixes = function(currZoom) {
         // **** Buttons ****
-        if (platform.browser.isWebKit) {
+        if (platform.browser.isChrome) {
           // In WebKit, buttons are weird
           // http://i.imgur.com/CgrMo.gif
           $('input,button').css('transform', 'scale3d(1,1,1)');
