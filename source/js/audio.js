@@ -58,7 +58,7 @@ sitecues.def('audio', function (audio, callback) {
       // for example down arrow to read next HLB or a hotkey to toggle speech
       setTimeout(function() {
         $(window).one('keydown', stopAudio);
-      }, 0);
+      }, 1);
     }
 
     /*
