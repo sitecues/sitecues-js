@@ -31,20 +31,15 @@ sitecues.def('audio', function (audio, callback) {
     }
 
     function playHighlight(content, doAvoidInterruptions) {
-      console.log('playHighlight#1');
       if (doAvoidInterruptions && getAudioPlayer().isBusy()) {
         return; // Already reading the highlight
       }
-      console.log('playHighlight#2');
       if (!content) {
         return; // Nothing to read
       }
-      console.log('playHighlight#3');
       stopAudio();
-      console.log('playHighlight#4');
       // Play audio highlight earcon if highlight moved with shift key and speech being fetched
-      audio.playEarcon('audio-highlight');
-      console.log('playHighlight#5');
+//      audio.playEarcon('audio-highlight');
       speakContent(content);
     }
 
@@ -52,7 +47,7 @@ sitecues.def('audio', function (audio, callback) {
       var text = builder.getText(content);
       console.log('speakContent#1');
       if (text) {
-        console.log('speakContent#2 ' + text);
+        console.log('speakContent ' + text);
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
         enableKeyDownToStopAudio();
       }
