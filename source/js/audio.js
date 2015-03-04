@@ -57,7 +57,7 @@ sitecues.def('audio', function (audio, callback) {
       // Wait a moment, in case it was a keystroke that just got us here,
       // for example down arrow to read next HLB or a hotkey to toggle speech
       setTimeout(function() {
-        $(window).one('keydown', stopAudio);
+        $(window).one('keypress', stopAudio);
       }, 1);
     }
 
@@ -69,7 +69,7 @@ sitecues.def('audio', function (audio, callback) {
     function stopAudio() {
       getAudioPlayer().stop();
       // Remove handler that stops speech on any key down.
-      $(window).off('keydown', stopAudio);
+      $(window).off('keypress', stopAudio);
     }
 
     function getApiBaseUrl() {

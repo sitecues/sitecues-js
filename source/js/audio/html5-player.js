@@ -29,7 +29,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
   }
 
   function onEnded(event) {
-    console.log('ended');
     var audioElement = event.target;
     audioElements.splice(audioElements.indexOf(audioElement), 1);
   }
