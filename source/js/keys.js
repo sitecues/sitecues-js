@@ -249,8 +249,10 @@ sitecues.def('keys', function(keys, callback) {
 
       // Track to find out whether the shift key is pressed by itself
       function setOnlyShift(isShift) {
-        isOnlyShift = isShift;
-        sitecues.emit('key/only-shift', isShift);
+        if (isOnlyShift !== isShift) {
+          isOnlyShift = isShift;
+          sitecues.emit('key/only-shift', isShift);
+        }
       }
 
       // Let the key fall through to default processing,

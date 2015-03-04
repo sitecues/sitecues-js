@@ -1068,6 +1068,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked = $(picked);
       state.target = target;
 
+      console.log(event.shiftKey + ' ' + isOnlyShift);
       if (event.shiftKey && isOnlyShift) {
         // When shift held down, emit command to speak the newly highlighted text
         sitecues.emit('mh/do-speak', picked);
@@ -1342,6 +1343,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function setOnlyShift(isShift) {
       isOnlyShift = isShift;
+      console.log('setOnlyShift ' + isOnlyShift);
     }
 
     // Return all of the highlight information provided in the |state| variable
