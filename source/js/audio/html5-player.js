@@ -23,12 +23,14 @@ sitecues.def('audio/html5-player', function (player, callback) {
   };
 
   function playIt(event) {
+    console.log('playIt');
     var audioElement = event.target;
     sitecues.$(audioElement).one('ended', onEnded);
     audioElement.play();
   }
 
   function onEnded(event) {
+    console.log('ended');
     var audioElement = event.target;
     audioElements.splice(audioElements.indexOf(audioElement), 1);
   }
@@ -41,6 +43,7 @@ sitecues.def('audio/html5-player', function (player, callback) {
    * Stop any currently playing audio and abort the request
    */
   player.stop = function () {
+    console.log('stop');
     audioElements.forEach(function(audioElement) {
       sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
       sitecues.$(audioElement).off('ended');

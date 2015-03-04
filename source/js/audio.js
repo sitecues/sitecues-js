@@ -39,13 +39,12 @@ sitecues.def('audio', function (audio, callback) {
       }
       stopAudio();
       // Play audio highlight earcon if highlight moved with shift key and speech being fetched
-//      audio.playEarcon('audio-highlight');
+      audio.playEarcon('audio-highlight');
       speakContent(content);
     }
 
     function speakContent(content) {
       var text = builder.getText(content);
-      console.log('speakContent#1');
       if (text) {
         console.log('speakContent ' + text);
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
