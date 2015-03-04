@@ -115,21 +115,24 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       */
     function init() {
 
-      var mouseTarget = getMouseTargetForTTS();
+      var mouseTarget1 = getMouseTargetForTTS(),
+        mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
 
       // todo: move this to ttsController
       sitecues.on('bp/will-expand', function() {
         // Do not use this listener when the panel is shrunk because it confused the Window-Eyes browse mode
         // (when Enter key was pressed on badge, it toggled speech)
-        mouseTarget.addEventListener('click', audio.toggleSpeech);
+        mouseTarget1.addEventListener('click', audio.toggleSpeech);
+        mouseTarget2.addEventListener('click', audio.toggleSpeech);
       });
 
       sitecues.on('bp/will-shrink', function() {
-        mouseTarget.removeEventListener('click', audio.toggleSpeech);
+        mouseTarget1.removeEventListener('click', audio.toggleSpeech);
+        mouseTarget2.removeEventListener('click', audio.toggleSpeech);
       });
 
-      mouseTarget.addEventListener('mouseover', beginHoverEffects);
-      mouseTarget.addEventListener('mouseout', endHoverEffects);
+      mouseTarget1.addEventListener('mouseover', beginHoverEffects);
+      mouseTarget1.addEventListener('mouseout', endHoverEffects);
 
       updateTTSStateView(audio.isSpeechEnabled());
 

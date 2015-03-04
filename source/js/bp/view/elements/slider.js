@@ -90,12 +90,14 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),
           sliderThumb  = helper.byId(BP_CONST.ZOOM_SLIDER_THUMB_ID),
           smallA       = helper.byId(BP_CONST.SMALL_A_ID),
-          largeA       = helper.byId(BP_CONST.LARGE_A_ID);
+          largeA       = helper.byId(BP_CONST.LARGE_A_ID),
+          zoomLabel    = helper.byId(BP_CONST.ZOOM_LABEL_ID);
 
       sliderTarget.addEventListener('mousedown', sliderController.addSliderListeners);
       sliderThumb.addEventListener('mousedown', sliderController.addSliderListeners);
       smallA.addEventListener('mousedown', sliderController.handleAButtonsPress);
       largeA.addEventListener('mousedown', sliderController.handleAButtonsPress);
+      zoomLabel.addEventListener('mousedown', sliderController.handleAButtonsPress);
     }
 
     // A zoom operation has been completed
