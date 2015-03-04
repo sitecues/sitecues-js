@@ -220,7 +220,6 @@ sitecues.def('keys', function(keys, callback) {
 
       // key event hook
       function onKeyDown(event) {
-        setOnlyShift(event.keyCode === SHIFT);
 
         if (event.defaultPrevented) {
           return; // Another script already used this key and set this flag like a good citizen
@@ -235,7 +234,14 @@ sitecues.def('keys', function(keys, callback) {
           }
         }
 
-        processUnusedKey(event);
+        // All other keys will fall through to default processing
+
+        // Shift key gets additional processing first
+        processShiftKeyDown(event);
+
+        // Don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
+        // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
+        doFollowScroll(false);
       }
 
       function onKeyUp(event) {
@@ -243,6 +249,7 @@ sitecues.def('keys', function(keys, callback) {
         if (event.keyCode === SHIFT) {
           if (isOnlyShift) {
             sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
+            isOnlyShift = false;
           }
         }
       }
@@ -253,13 +260,15 @@ sitecues.def('keys', function(keys, callback) {
         sitecues.emit('key/only-shift', isShift);
       }
 
-      // Let the key fall through to default processing,
-      // but don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
-      // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
-      function processUnusedKey(event) {
-        if (event.keyCode === SHIFT) {
-          doFollowScroll(false);
+      // If shift key, process
+      function processShiftKeyDown(event) {
+        var isShift = event.keyCode === SHIFT;
+        if (isShift) {
+          if (!isOnlyShift) {  // Not a key repeat
+            sitecues.emit('audio/stop');
+          }
         }
+        setOnlyShift(isShift);
       }
 
       function doFollowScroll(isFollowMouseEnabled) {

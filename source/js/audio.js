@@ -56,8 +56,17 @@ sitecues.def('audio', function (audio, callback) {
       // Wait a moment, in case it was a keystroke that just got us here,
       // for example down arrow to read next HLB or a hotkey to toggle speech
       setTimeout(function() {
-        $(window).one('keypress', stopAudio);
+        $(window).on('keydown', stopAudioIfNotShift);
       }, 0);
+    }
+
+    // Shift is 'speak it' button. We don't want it to stop speech when held down and repeating
+    function stopAudioIfNotShift(event) {
+      var SHIFT = 16;
+      if (!event || event.keyCode !== SHIFT) {
+        stopAudio();
+        return;
+      }
     }
 
     /*
@@ -68,7 +77,7 @@ sitecues.def('audio', function (audio, callback) {
     function stopAudio() {
       getAudioPlayer().stop();
       // Remove handler that stops speech on any key down.
-      $(window).off('keypress', stopAudio);
+      $(window).off('keydown', stopAudioIfNotShift);
     }
 
     function getApiBaseUrl() {
@@ -217,7 +226,7 @@ sitecues.def('audio', function (audio, callback) {
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    sitecues.on('hlb/closed', stopAudio);
+    sitecues.on('hlb/closed audio/stop', stopAudio);
 
     // User has requested a speech toggle
     sitecues.on('speech/do-toggle', audio.toggleSpeech);
