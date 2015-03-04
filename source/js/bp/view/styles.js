@@ -230,7 +230,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-family': 'Arial',
           'font-size': '29px',
           'font-weight': 'bold',
-          'opacity': 0
+          'opacity': 0,
+          'user-select': 'none',
+          '-webkit-user-select': 'none',
+          '-moz-user-select': 'none',
+          '-ms-user-select': 'none'
         },
 
         /* Text label animation for main panel labels */
