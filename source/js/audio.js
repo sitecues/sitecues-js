@@ -46,7 +46,6 @@ sitecues.def('audio', function (audio, callback) {
     function speakContent(content) {
       var text = builder.getText(content);
       if (text) {
-        console.log('speakContent ' + text);
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
         enableKeyDownToStopAudio();
       }
@@ -58,7 +57,7 @@ sitecues.def('audio', function (audio, callback) {
       // for example down arrow to read next HLB or a hotkey to toggle speech
       setTimeout(function() {
         $(window).one('keypress', stopAudio);
-      }, 1);
+      }, 0);
     }
 
     /*

@@ -41,7 +41,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
    * Stop any currently playing audio and abort the request
    */
   player.stop = function () {
-    console.trace();
     audioElements.forEach(function(audioElement) {
       sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
       sitecues.$(audioElement).off('ended');
