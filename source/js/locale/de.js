@@ -1,5 +1,5 @@
 /*
-Temporary file for English wording.
+Temporary file for German wording.
 todo: remove it when we use API.
  */
 sitecues.def('locale/de', function(german, callback) {
