@@ -9,10 +9,12 @@ sitecues.def('locale/en', function(english, callback) {
   // - lower case
   // - use underscore to concatenate words
   english.dictionary = {
-    "zoom": "Zoom ",
-    "speech": "Speech ",
-    "on" : "On",
-    "off": "Off"
+    'zoom': 'Zoom',
+    'zoomoff': 'Zoom Off',
+    'x': 'x',
+    'speech': 'Speech',
+    'on' : 'On',
+    'off': 'Off'
   };
 
   callback();

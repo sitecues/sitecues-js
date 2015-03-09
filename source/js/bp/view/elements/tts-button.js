@@ -23,7 +23,7 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
     function setTTSLabel(text) {
 
       var label         = getTTSLabelElement(),
-          localizedText = locale.translate(text.toLowerCase());
+          localizedText = locale.translate(text);
 
       label.data = localizedText;
 

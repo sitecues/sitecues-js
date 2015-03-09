@@ -7,10 +7,12 @@ sitecues.def('locale/pl', function(polish, callback) {
   'use strict';
 
   polish.dictionary = {
-    "zoom": "Powiększenie ",
-    "speech": "Głos ",
-    "on" : "Wł.",
-    "off": "Wył"
+    'zoom': 'Powiększenie',
+    'zoomoff': 'Powiększenie Wył',
+    'x': 'x',
+    'speech': 'Głos',
+    'on' : 'Wł.',
+    'off': 'Wył'
   };
 
   callback();

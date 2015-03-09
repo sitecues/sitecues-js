@@ -113,13 +113,13 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Labels
   constants.ZOOM_STATE_LABELS = {
-    'ON' : 'On',
-    'OFF': 'Off'
+    'OFF': 'zoomoff',
+    'X': 'x'
   };
 
   constants.SPEECH_STATE_LABELS = {
-    'ON' : 'On',
-    'OFF': 'Off'
+    'ON' : 'on',
+    'OFF': 'off'
   };
 
   // Zoom

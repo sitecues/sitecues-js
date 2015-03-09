@@ -62,18 +62,30 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       state.set('isRealSettings', true);
     }
 
-      /*
-        Display new zoom value.
-       */
+    function getLocalizedZoomValue(currZoom) {
+      if (currZoom === 1) {
+        // Zoom off
+        return locale.translate(BP_CONST.ZOOM_STATE_LABELS.OFF);
+      }
+
+      // 1.3x, etc.
+      var translationForXInZoom = locale.translate(BP_CONST.ZOOM_STATE_LABELS.X);
+      return locale.translateNumber(currZoom, 2) + translationForXInZoom;
+    }
+
+    /*
+      Display new zoom value.
+     */
     function updateZoomValueView(currZoom) {
       // 1. Set aria-valuenow for screen readers
       // We do this when zoom is finished so that the screen reader is not trying to read every
       // new value during an animation which would be way too verbose
       var sliderElement = helper.byId(BP_CONST.ZOOM_SLIDER_BAR_ID),
-          roundedZoom = Math.floor((currZoom + 0.0999) * 10) / 10,
-          zoomText      = currZoom > 1 ? roundedZoom.toFixed(1) + 'x' : locale.translate(BP_CONST.ZOOM_STATE_LABELS.OFF.toLowerCase());
+          roundedZoom = currZoom ? Math.floor((currZoom + 0.0999) * 10) / 10 : 1,
+          zoomText      = getLocalizedZoomValue(roundedZoom);
 
-      sliderElement.setAttribute('aria-valuenow', currZoom ? currZoom.toFixed(1) : 1);
+      sliderElement.setAttribute('aria-valuenow', roundedZoom ? roundedZoom.toString() : 1);
+      sliderElement.setAttribute('aria-valuetext', zoomText);
 
       // 2. Update the zoom label, which follows pattern "1.3x" (or just "Zoom off" for 1x)
       function setZoomLabel(text) {

@@ -1,3 +1,7 @@
+// TODO make it simpler to add new locales
+// TODO Locales should probably be loaded dynamically
+// TODO sub-locales should provide things like 'colour' vs 'color'
+
 /*
  */
 sitecues.def('util/localization', function(locale, callback) {
@@ -6,9 +10,10 @@ sitecues.def('util/localization', function(locale, callback) {
   var translations;
   var locales = {
     'english': 'en',
-    'polish': 'pl'
+    'polish': 'pl',
+    'german': 'de'
   };
-  var modules = [locales['english'], locales['polish']];
+  var modules = [locales['english'], locales['polish'], locales['german']];
 
   locale.default = locales.english;
 
@@ -17,7 +22,7 @@ sitecues.def('util/localization', function(locale, callback) {
    * @returns String Example: 'ru_US'
    */
   locale.getWebsiteLangStringName = function() {
-    return document.documentElement.lang || locale.default;
+    return document.documentElement.lang.split('-')[0] || locale.default;
   };
 
   /**
@@ -41,18 +46,32 @@ sitecues.def('util/localization', function(locale, callback) {
 
   };
 
+  /**
+   * Translate a number
+   * @param number  Number to translate
+   * @param numDigits (optional)
+   */
+  locale.translateNumber = function(number, numDigits) {
+    var lang = locale.getWebsiteLangStringName();
+    return number.toLocaleString(lang, numDigits ? {minimumSignificantDigits: numDigits } : undefined);
+  };
+
   // todo: fetch from the server via CORS Ajax
   function getTranslationFile() {
     var lang = locale.getWebsiteLangStringName();
     var moduleName = 'locale/';
     switch(lang) {
+      case locales.german:
+        moduleName += modules[2]; // e.g. 'locale/german'
+        locale.current = locales.german;
+        break;
       case locales.polish:
         moduleName += modules[1]; // e.g. 'locale/polish'
         locale.current = locales.polish;
         break;
       default:
         moduleName += modules[0]; // e.g. 'locale/english'
-        locales.current = locales.english;
+        locale.current = locales.english;
         break;
     }
 
