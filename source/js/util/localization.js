@@ -53,7 +53,7 @@ sitecues.def('util/localization', function(locale, callback) {
    */
   locale.translateNumber = function(number, numDigits) {
     var lang = locale.getWebsiteLangStringName();
-    return number.toLocaleString(lang, numDigits ? {minimumSignificantDigits: numDigits } : undefined);
+    return number.toLocaleString(lang, numDigits && {minimumSignificantDigits: numDigits });
   };
 
   // todo: fetch from the server via CORS Ajax
