@@ -179,6 +179,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'outline': 0 // don't show default dotted focus outline
         },
 
+        '#scp-svg': {
+          'max-width': 'none'
+        },
+
         // The new badge is hidden until sitecues is loaded
         // The old badge is visible until sitecues is loaded
         '#scp-bp-container.scp-loading,#sitecues-badge[aria-busy="false"]>img': {
