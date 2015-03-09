@@ -34,8 +34,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           panelScaleFromBadge,
           badgeScaleFromPanel,
-          transformElementId          = BP_CONST.BP_CONTAINER_ID,
-          currentScrollPos            = {};
+          transformElementId          = BP_CONST.BP_CONTAINER_ID;
 
       // Cache elementById results because we use it in each frame and it shows up while profiling
       function byId(id) {
@@ -256,8 +255,8 @@ sitecues.def('bp/animate', function(animate, callback) {
         // Badge implemented by customer
         if (isPageBadge) {
 
-          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR + window.pageYOffset;
-          left = badgeRect.left + (paddingLeft * completedZoom) + window.pageXOffset + FUDGE_FACTOR;
+          top  = badgeRect.top  + (paddingTop  * completedZoom) - BP_CONST.BADGE_VERTICAL_OFFSET + FUDGE_FACTOR;
+          left = badgeRect.left + (paddingLeft * completedZoom) + FUDGE_FACTOR;
 
         // Floating badge
         } else {
@@ -302,9 +301,6 @@ sitecues.def('bp/animate', function(animate, callback) {
           SC_DEV && console.log('Panel position forced into viewport.');
           resultRect = moveRectIntoViewport(outlineRects.topLeft);
         }
-
-        resultRect.left += window.pageXOffset;
-        resultRect.top  += window.pageYOffset;
 
         return resultRect;
 
@@ -497,9 +493,6 @@ sitecues.def('bp/animate', function(animate, callback) {
         }
 
         if (state.isExpanding() || state.isShrinking()) {
-
-          // We don't care about keeping the panel position "fixed" if it is not a panel.
-          window.removeEventListener('scroll', movePanelWithScroll);
 
           // There is room to animate, not already at the size limit of where we're transitioning to
 
@@ -724,11 +717,6 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         if (isPanelRequested) {
 
-          currentScrollPos.x = window.pageXOffset;
-          currentScrollPos.y = window.pageYOffset;
-
-          window.addEventListener('scroll', movePanelWithScroll);
-
           currentlyTransitioningFrom = BP_CONST.PANEL_MODE;
 
           panelController.panelReady();
@@ -744,23 +732,6 @@ sitecues.def('bp/animate', function(animate, callback) {
       function cancelAnimation() {
         SC_DEV && console.log('---- - canceling BP2 animation.  ----');
         cancelFrameFn(animationId);
-      }
-
-      function movePanelWithScroll () {
-
-        var currentTransformPos = getCurrentTransformPosition(),
-            scrollX             = window.pageXOffset,
-            scrollY             = window.pageYOffset;
-
-        setTransform(
-          currentTransformPos.left - (currentScrollPos.x - scrollX),
-          currentTransformPos.top  - (currentScrollPos.y - scrollY),
-          1
-        );
-
-        currentScrollPos.x = scrollX;
-        currentScrollPos.y = scrollY;
-
       }
 
       sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);

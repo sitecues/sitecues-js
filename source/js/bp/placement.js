@@ -160,13 +160,6 @@ sitecues.def('bp/placement', function(placement, callback) {
         badgeRect.left = 0;
         badgeRect.top  = 0;
 
-      } else {
-
-        // Will be positioned relative to document
-        // This code changed from using the documentElement.getBoundingClientRect
-        // for IE9 compatibility.
-        badgeRect.left += window.pageXOffset;
-        badgeRect.top  += window.pageYOffset;
       }
 
       badgeRect.left   += paddingLeft;
@@ -185,7 +178,6 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       bpElement.style.top  = 0;
       bpElement.style.left = 0;
-
       bpElement.style[helper.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
 
       fitSVGtoBadgeRect(badgeRect, appliedZoom);
