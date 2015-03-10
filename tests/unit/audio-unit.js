@@ -68,7 +68,7 @@ describe('audio', function() {
     describe('#getTTSUrl()', function() {
       it('should return the correct url with language not set', function(done) {
         var actualUrl = audio.getTTSUrl('x y'),
-          expectedUrl = '//def/sitecues/api/tts/site/99/tts.aac?l=en&t=x%20y';
+          expectedUrl = '//def/sitecues/api/tts/site/99/tts.aac?l=en-US&t=x%20y';
         expect(actualUrl).to.be.equals(expectedUrl);
         done();
       });
