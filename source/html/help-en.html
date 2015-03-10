@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+    function getParam(index, name) {
+        return decodeURIComponent(params[index].split(name + '=')[1]);
+    }
+    var params = location.search.substring(1).split('&'),
+            scriptUrl = getParam(0, 'sc_url'),
+            siteId = getParam(1, 'site_id'),
+            siteUrl = getParam(2, 'site_url'),
+            prefs = getParam(3, 'prefs');
+
+    // Site config
+    window.sitecues = {};
+    sitecues.config = {
+        site_id : siteId,
+        iframe  : 1,
+        isFluid : 1,
+        maxRewrapZoom: 3
+    };
+
+    // User prefs
+    window.localStorage.sitecues = prefs;
+</script>
+<script data-provider="sitecues" type="text/javascript">
+    var sitecues = window.sitecues || {};
+
+    (function(){
+        var script = document.createElement('script'),
+                first = document.getElementsByTagName('script')[0];
+        sitecues.config.script_url=scriptUrl;
+        script.src=sitecues.config.script_url;
+        script.type = 'text/javascript';
+        script.async = true;
+        first.parentNode.insertBefore(script, first);
+    })();
+</script>
+
+<script>
+    // send a message to the parent window if escape is pressed
+    window.addEventListener('keydown', function(evt) {
+        if (evt.keyCode === 27) {
+            window.top.postMessage('sc-close-iframe', siteUrl);
+        }
+    });
+
+    function checkBadgeKey(evt) {
+      if (evt.keyCode === 13 || evt.keyCode === 32) {
+        document.location.hash = '#keyboard';
+        evt.preventDefault();
+        evt.stopImmediatePropagation();
+        return true;
+      }
+    }
+</script>
+
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 0 20px;
+    }
+
+    kbd {
+        font-family: Monaco, monospace;
+        display: inline-block;
+    }
+
+    h1, h2 {
+        border-bottom: 1px dotted gray;
+        padding: 3px;
+        width: 99%;
+    }
+
+    kbd {
+        background-color: green;
+        padding-left: 1.5ch;
+        padding-right: 1.5ch;
+        font-size: 90%;
+        color: white;
+    }
+
+    ul {
+        list-style-type: square;
+    }
+
+    li {
+        padding: 3px 0px;
+    }
+
+    p, ul, h3 {
+        margin-left: 50px;
+        margin-right: 50px;
+    }
+
+    #sitecues-badge {
+        display: inline-block;
+        width: 136px;
+        height: 24px;
+        float: right;
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-right: 46px;
+    }
+
+    #pinch-entry { display: none; }
+</style>
+</head>
+
+<body>
+<!-- Badge -->
+<span id="sitecues-badge" href="#keyboard">
+</span>
+<script>
+  document.getElementById('sitecues-badge').addEventListener('keydown', checkBadgeKey);
+</script>
+
+<!-- Content -->
+<h1>sitecues Zoom and Speech: Help and Tips</h1>
+
+<p>sitecues makes it easier to see, hear and use this website.</p>
+<p>
+  Zoom the entire web page or the parts that most interest you. You can even listen to sitecues speak the text aloud.</p>
+
+<h2>Page Zoom</h2>
+
+<p>With the mouse, hover over the sitecues icon and use the slider to zoom in and out.</p>
+
+<p>You can also simply press <kbd>+</kbd> or <kbd>-</kbd> to zoom with the keyboard &mdash; please see the
+  <a href="#keyboard">full list of keyboard tips below</a>.</p>
+
+<h2>One-Touch Read</h2>
+
+<p>
+  The One-Touch Read feature zooms in on your selected content &mdash; and can also read it to you aloud.
+  One-Touch Read is enabled once sitecues zoom or speech is turned on.
+</p>
+
+<h3>Zoom part of a web page</h3>
+
+<ul>
+    <li>Start by moving your mouse to something you want to read. It should be highlighted (if it isn't, make sure zoom or speech have been enabled in sitecues).</li>
+    <li>Press the spacebar to zoom the highlighted area.</li>
+</ul>
+
+<h3>Listen to part of a web page</h3>
+
+<p>First, turn on speech:</p>
+<ul>
+    <li>With the mouse, hover over the sitecues icon and click on the speech button</li>
+    <li>Highlight text that you want to read then press the spacebar</li>
+</ul>
+
+<h2><a name="keyboard">Keyboard Commands</a></h2>
+
+<h3>Zooming the page</h3>
+<ul>
+    <li><kbd>+</kbd> to zoom in</li>
+    <li><kbd>-</kbd> to zoom out</li>
+    <li>Hold these keys down longer to zoom or unzoom for longer</li>
+</ul>
+<h3>One-Touch Zoom</h3>
+<ul>
+    <li>If nothing is highlighted yet, press <kbd>Spacebar</kbd> to highlight something near the center of the screen.</li>
+    <li>Move the highlight around with the <kbd>Up</kbd> / <kbd>Down</kbd> / <kbd>Left</kbd> / <kbd>Right</kbd> arrow keys.</li>
+    <li>Press <kbd>Spacebar</kbd> again to zoom the highlighted area (One-Touch Read).</li>
+    <li>Next press <kbd>Escape</kbd> to close One-Touch Read. Pressing Escape a second time will clear highlighting.</li>
+    <li>Navigate quickly with <kbd>H</kbd> / <kbd>Alt+H</kbd> to move forwards/backwards by heading.</li>
+</ul>
+<h3>One-Touch Read (Speech)</h3>
+<ul>
+  <li>Press <kbd>Alt+S</kbd> to turn speech on or off</li>
+  <li>Now, the One-Touch command (<kbd>Spacebar</kbd>) will also read text.</li>
+</ul>
+<h2>Exploring with Speech</h2>
+<p>Pressing the <kbd>Shift</kbd> key while moving the highlight tells sitecues to read highlighted areas.
+  There are several ways to use it:</p>
+<ul>
+  <li><kbd>Shift+arrow</kbd> to move and read in the given direction</li>
+  <li><kbd>Shift+H</kbd> to move to the next heading and read it</li>
+  <li><kbd>Shift</kbd> while moving the mouse to read whatever the mouse moves over</li>
+  <li><kbd>Shift</kbd> by itself to read the current highlight</li>
+</ul>
+<p>Using shift to speak works whether or not speech is turned on in the sitecues panel.</p>
+<h2>Other Cool Shortcuts</h2>
+<p>You can zoom the page with your mouse.
+  Try holding down <kbd>Control</kbd> key while rolling your mousewheel.
+  <span id="pinch-entry">You can even pinch/unpinch on a trackpad (Chrome on Mac only).</span>
+</p>
+<h2>Quitting sitecues</h2>
+<p>To quit sitecues, either turn off both zoom and speech, or press <kbd>Alt+0</kbd>.</p>
+</body>
+<script>
+    try {
+        document.body.focus();
+    } catch(ex) {};
+
+    function isPinchZoomSupported() {
+      return navigator.userAgent.indexOf('Chrome') > 0 && navigator.platform.toLowerCase().indexOf('mac') >= 0;
+    }
+
+    if (isPinchZoomSupported()) {
+      document.getElementById('pinch-entry').style.display = 'inline';
+    }
+</script>
+</html>
+
+
+

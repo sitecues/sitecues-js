@@ -2,7 +2,8 @@ sitecues.def('info', function(info, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', function($, site, dimmer, platform) {
+  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'util/localization',
+    function($, site, dimmer, platform, locale) {
 
     var $iframe = $(),
       $closeButton = $(),
@@ -56,9 +57,10 @@ sitecues.def('info', function(info, callback) {
       }
 
       var
+        localizedPageName = pageName + '-' + locale.getWebsiteLangStringName(),
         sitecuesJsUrl = window.sitecues.config.script_url,
         hostUrl = window.location,
-        pageUrl = sitecues.resolveSitecuesUrl('../html/' + pageName + '.html?') +
+        pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +
           addParam('sc_url', sitecuesJsUrl) +
           addParam('site_id', site.get('site_id')) +
           addParam('site_url', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
