@@ -50,8 +50,8 @@
 
 sitecues.def('bp/view/modes/badge', function (badge, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper',
-    function (BP_CONST, state, helper) {
+  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper',
+    function (BP_CONST, state, locale, helper) {
 
     /*
      Default bounding box object.
@@ -80,6 +80,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       document.documentElement.insertBefore(badgeElement, document.documentElement.childNodes[0]);
 
       helper.setAttributes(badgeElement, BP_CONST.DEFAULT_BADGE_ATTRS);
+      badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
 
       state.set('isPageBadge', false);
 

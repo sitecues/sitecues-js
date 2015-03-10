@@ -41,19 +41,19 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </filter>\
 </defs>\
 <rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
-<g id="scp-main" aria-label="sitecues main panel">\
+<g id="scp-main" aria-label="{{sitecues_main_panel}}">\
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
   <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-large-only" opacity="0"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="none"/>\
-  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>\
+  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
     <rect id="scp-zoom-slider-target" class="scp-hidden-target" x="80" y="44" width="280" height="67"/>\
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-target" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="60"/>\
-  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>\
+  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="{{zoom_in}}" class="scp-A-button"/>\
   <line id="scp-vert-divider" class="scp-large-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
-  <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="Speech"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
+  <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="{{speech}}"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
     <use id="scp-head" xlink:href="#scp-head-def" x="530" y="11"/>\
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\

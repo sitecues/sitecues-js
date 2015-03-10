@@ -55,7 +55,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
 
-  constants.DEFAULT_BADGE_CLASS       = 'scp-default-badge';
+  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
   constants.TRANSFORMS = {
     'PANEL': {},
@@ -102,7 +102,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BADGE_ATTRS = {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
-    'ARIA-LABEL': 'sitecues zoom and speech tools',
     'ARIA-BUSY' : 'false'
   };
 
@@ -120,6 +119,10 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SPEECH_STATE_LABELS = {
     'ON' : 'on',
     'OFF': 'off'
+  };
+
+  constants.STRINGS = {
+    'BADGE_LABEL': 'badge_label'
   };
 
   // Zoom
