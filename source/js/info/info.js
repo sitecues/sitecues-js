@@ -48,9 +48,14 @@ sitecues.def('info', function(info, callback) {
       INITIAL_DELAY = 100,
       INFLATION_SPEED = 1000,
       DIMMER_SPEED = 500,
-      addCloseButtonTimer;
+      addCloseButtonTimer,
+      isModalOpen = false;
 
     function showModal(pageName, anchor) {
+
+      if (isModalOpen) {
+        return;
+      }
 
       function addParam(name, value) {
         return name + '=' + encodeURIComponent(value) + '&'
@@ -67,6 +72,8 @@ sitecues.def('info', function(info, callback) {
           addParam('prefs', window.localStorage.sitecues) +
           anchor;
 
+      sitecues.emit('bp/do-shrink');
+
       $iframe = $('<iframe>')
         .attr('src', pageUrl)
         .css(INITIAL_CSS)
@@ -78,7 +85,7 @@ sitecues.def('info', function(info, callback) {
         .on('DOMMouseScroll mousewheel', preventScroll);
 
       // Prevent panning in background content
-      $('body')
+      $('body,#sc-bp-container')
         .css('pointerEvents', 'none');
 
       dimmer.dimBackgroundContent(DIMMER_SPEED);
@@ -95,6 +102,8 @@ sitecues.def('info', function(info, callback) {
       }, INITIAL_DELAY); // Waiting helps animation performance
 
       addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
+
+      isModalOpen = true;
     }
 
     function preventScroll(evt) {
@@ -123,7 +132,7 @@ sitecues.def('info', function(info, callback) {
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
           top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
         })
-        .appendTo('html')
+        .appendTo('body,#sc-bp-container')
         .one('click', close);
 
       addCloseButtonTimer = setTimeout(function() {
@@ -144,6 +153,7 @@ sitecues.def('info', function(info, callback) {
       setTimeout(function() {
         $iframe.remove();
         $iframe = $();
+        isModalOpen = false;
       }, INFLATION_SPEED);
 
       $(window)
@@ -157,6 +167,7 @@ sitecues.def('info', function(info, callback) {
       dimmer.undimBackgroundContent(DIMMER_SPEED);
 
       removeCloseButton();
+
     }
 
 

@@ -66,6 +66,7 @@ files=\
 	source/js/platform.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
+	source/js/util/transform.js \
 	source/js/audio/speech-builder.js \
 	source/js/audio/html5-player.js \
 	source/js/audio/safari-player.js \
@@ -74,6 +75,7 @@ files=\
 	source/js/audio/earcons.js \
 	source/js/zoom-forms.js \
 	source/js/zoom.js \
+	source/js/animate.js \
 	source/js/bp/model/state.js \
 	source/js/bp/constants.js \
 	source/js/bp/helper.js \
@@ -89,6 +91,7 @@ files=\
 	source/js/bp/view/styles.js \
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
+	source/js/bp/view/elements/more-button.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
 	source/js/focus.js \

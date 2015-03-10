@@ -19,7 +19,8 @@ sitecues.def('locale/pl', function(polish, callback) {
     'zoom_off': 'Powiększenie Wył',
     'speech': 'Głos',
     'on' : 'Wł.',
-    'off': 'Wył'
+    'off': 'Wył',
+    'help': 'Pomoc'
   };
 
   callback();

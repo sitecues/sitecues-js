@@ -6,6 +6,8 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
   sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
     function (BP_CONST, baseController, sliderController, state, slider, helper) {
 
+      var MIN_DISTANCE = 75; // Min distance before shrink
+
       // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
       pc.wasInFeaturePanel  = false;
       pc.lastFocus = null;
@@ -21,7 +23,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     // TODO: rename
     pc.winMouseMove = function(evt) {
 
-      var MIN_DISTANCE = 75; // Min distance before shrink
 
       // Firefox/IE:
       //          evt.buttons is 0 when no mousebutton is held down.
@@ -51,7 +52,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       // Once mouse used, no longer need this protection against accidental closure
       pc.wasInFeaturePanel = false;
 
-      if (isMouseOutsidePanel(evt, 0)) {
+      if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
         pc.shrinkPanel();
       }
     };
@@ -119,11 +120,14 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     };
 
     pc.panelReady = function() {
-      var bpContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
+
       state.set('currentMode', BP_CONST.PANEL_MODE);
+
       if (state.get('isKeyboardMode')) {
         baseController.showFocus();
       }
+
+      sitecues.emit('bp/did-expand');
       sitecues.emit('bp/do-update');
     };
 
@@ -160,6 +164,8 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 //      var moreButtonRect = helper.getRectById(MORE_BUTTON_CONTAINER_ID); // More button hanging off
       return isMouseOutsideRect(evt, elem, distance) /* && isMouseOutsideRect(evt, moreButtonRect, 0) */;
     }
+
+    sitecues.on('bp/do-shrink', pc.shrinkPanel);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

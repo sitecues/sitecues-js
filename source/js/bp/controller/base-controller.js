@@ -9,8 +9,8 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     main.tabbable = {
       'main': [
         'zoom-slider-bar',
-        'speech'
-        //'more-button-group',
+        'speech',
+        'more-button-group',
         //'close-button-group'
       ],
       'more': [
@@ -76,8 +76,8 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
           focusOutlineStyle   = helper.byId(BP_CONST.OUTLINE_ID).style;
 
       focusOutlineStyle.display = 'block';
-      focusOutlineStyle.width  = (clientFocusRect.width  + EXTRA_FOCUS_PADDING) + 'px';
-      focusOutlineStyle.height = (clientFocusRect.height + EXTRA_FOCUS_PADDING) + 'px';
+      focusOutlineStyle.width  = (clientFocusRect.width) + 'px';
+      focusOutlineStyle.height = (clientFocusRect.height) + 'px';
 
       focusOutlineStyle.top  = (clientFocusRect.top  - EXTRA_FOCUS_PADDING - clientPanelRect.top)  + 'px';
       focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';

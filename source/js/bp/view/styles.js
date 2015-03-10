@@ -310,12 +310,22 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         /******************* More **********************/
+
         '#scp-more': {
-          'transition': 'transform .8s'
+          'opacity'   : 1
         },
 
-        '.scp-more #scp-more': {
-          'transition': 'transform .8s'
+        '#scp-more-button-container': {
+          'opacity': 0,
+          'transform-origin': '50% 50%'
+        },
+
+        '.origin-center': {
+          'transform-origin': '50% 50%'
+        },
+
+        '.scp-transition-opacity' : {
+          'transition': 'opacity 0.8s'
         },
 
         /******** Mouse targets must be hidden but still able to handle events *************/
