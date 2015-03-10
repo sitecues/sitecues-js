@@ -15,6 +15,7 @@ sitecues.def('locale/de', function(german, callback) {
     'zoom_in': 'Grösser',
     'zoom_out': 'Kleiner',
 
+    // Visible labels
     'pre_zoom': '',  // Nothing before number, everything after via 'x' label
     'post_zoom': ' fach Zoom',
     'zoom_off': 'Zoom Aus',
