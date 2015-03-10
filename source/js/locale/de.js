@@ -9,6 +9,12 @@ sitecues.def('locale/de', function(german, callback) {
   // - lower case
   // - use underscore to concatenate words
   german.dictionary = {
+    // ARIA labels
+    'sitecues_main_panel': 'sitecues dialog',
+    'badge_label': 'sitecues Vergrößerungs und Sprachausgabe Steuerung',
+    'zoom_in': 'Grösser',
+    'zoom_out': 'Kleiner',
+
     'pre_zoom': '',  // Nothing before number, everything after via 'x' label
     'post_zoom': ' fach Zoom',
     'zoom_off': 'Zoom Aus',
