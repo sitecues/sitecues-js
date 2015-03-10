@@ -48,6 +48,14 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
       return !lastDescriptiveZoomCueTime || (+new Date()) - lastDescriptiveZoomCueTime > CUE_RESET_MS;
     }
 
+    function resetCuesIfShiftPressed(domEvent) {
+      if (domEvent.shiftKey) {
+        // Alt+shift+0 doesn't just reset zoom and speech, it also resets audio cues
+        conf.set(DESCRIPTIVE_SPEECH_ON_PARAM, 0);
+        conf.set(DESCRIPTIVE_HIGH_ZOOM_PARAM, 0);
+      }
+    }
+
     /*
      * Play speech on cue if necessary
      */
@@ -96,6 +104,8 @@ sitecues.def('audio/audio-cues', function (audioCues, callback) {
      * Play cue describing "zoom in more" one-touch-read feature if necessary
      */
     sitecues.on('zoom', onZoomChanged);
+
+    sitecues.on('sitecues/do-reset', resetCuesIfShiftPressed);
 
     callback();
   });
