@@ -54,6 +54,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MAIN_OUTLINE_ID          = 'scp-main-outline';
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
+  constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
@@ -87,6 +88,8 @@ sitecues.def('bp/constants', function (constants, callback) {
     scaleX    : 0.65,
     scaleY    : 1
   };
+
+  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {scale:1.35};
 
   // Elements that are only shown when panel is expanded
   // Attributes

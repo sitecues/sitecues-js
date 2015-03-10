@@ -256,6 +256,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
+        '.pointer': {
+          'cursor': 'pointer'
+        },
+
         '#scp-shadow': {
           'transition': 'opacity 1s',
           'opacity': 0
@@ -312,12 +316,22 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         /******************* More **********************/
+
         '#scp-more': {
-          'transition': 'transform .8s'
+          'opacity'   : 1
         },
 
-        '.scp-more #scp-more': {
-          'transition': 'transform .8s'
+        '#scp-more-button-container': {
+          'opacity': 0,
+          'transform-origin': '50% 50%',
+        },
+
+        '.origin-center': {
+          'transform-origin': '50% 50%'
+        },
+
+        '.transition-opacity' : {
+          'transition': 'opacity 0.8s'
         },
 
         /******** Mouse targets must be hidden but still able to handle events *************/

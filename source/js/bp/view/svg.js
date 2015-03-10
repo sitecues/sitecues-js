@@ -12,7 +12,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   'use strict';
 
   bpSVG.html = '\
-<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 818 205" id="scp-svg">\
+<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 868 255" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\
@@ -68,6 +68,13 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
 </g>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-large-only" fill="none" opacity="0"/>\
+<g id="scp-more-button-container" class="transition-opacity" transform="translate(410,198)">\
+  <g id="scp-more-button-group" role="button" aria-label="Help">\
+    <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
+    <rect id="scp-more-button-transparent-target" fill="transparent" x="-39" y="-39" width="78" height="78"  class="scp-target pointer" role="presentation"/>\
+    <path class="scp-target" transform="scale(4)" fill="#777777" stroke="#777777"  stroke-width="0.5" d="M0,-4c-.85 0-1.48.26-1.88.66-.4.4-.54.9-.59 1.28l1 .13c.04-.25.12-.5.31-.69.19-.19.49-.38 1.16-.38.66 0 1.02.16 1.22.34.2.18.28.4.28.66 0 .83-.34 1.06-.84 1.5-.5.44-1.16 1.08-1.16 2.25v.25h1v-.25c0-.83.31-1.06.81-1.5.5-.44 1.19-1.08 1.19-2.25 0-.48-.17-1.02-.59-1.41-.43-.39-1.07-.59-1.91-.59zm-.5 7v1h1v-1h-1z"/>\
+  </g>\
+</g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 <div id="scp-focus-outline" role="presentation"/>\
