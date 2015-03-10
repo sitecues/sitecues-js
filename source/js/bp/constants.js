@@ -112,8 +112,9 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Labels
   constants.ZOOM_STATE_LABELS = {
-    'OFF': 'zoomoff',
-    'X': 'x'
+    'ZOOM_OFF': 'zoom_off',
+    'PRE_ZOOM': 'pre_zoom',
+    'POST_ZOOM': 'post_zoom'
   };
 
   constants.SPEECH_STATE_LABELS = {

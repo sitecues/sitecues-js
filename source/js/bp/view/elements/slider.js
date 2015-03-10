@@ -65,12 +65,13 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
     function getLocalizedZoomValue(currZoom) {
       if (currZoom === 1) {
         // Zoom off
-        return locale.translate(BP_CONST.ZOOM_STATE_LABELS.OFF);
+        return locale.translate(BP_CONST.ZOOM_STATE_LABELS.ZOOM_OFF);
       }
 
       // 1.3x, etc.
-      var translationForXInZoom = locale.translate(BP_CONST.ZOOM_STATE_LABELS.X);
-      return locale.translateNumber(currZoom, 2) + translationForXInZoom;
+      var preZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.PRE_ZOOM),
+        postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
+      return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
     }
 
     /*

@@ -7,9 +7,9 @@ sitecues.def('locale/pl', function(polish, callback) {
   'use strict';
 
   polish.dictionary = {
-    'zoom': 'Powiększenie',
-    'zoomoff': 'Powiększenie Wył',
-    'x': 'x',
+    'pre_zoom': 'Powiększenie ',
+    'post_zoom': 'x',
+    'zoom_off': 'Powiększenie Wył',
     'speech': 'Głos',
     'on' : 'Wł.',
     'off': 'Wył'
