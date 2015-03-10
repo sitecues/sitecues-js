@@ -25,6 +25,9 @@ sitecues.def('util/localization', function(locale, callback) {
     return document.documentElement.lang.split('-')[0] || locale.default;
   };
 
+  locale.getFullWebsiteLangStringName = function() {
+    return document.documentElement.lang;
+  };
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
