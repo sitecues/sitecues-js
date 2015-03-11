@@ -194,7 +194,9 @@ sitecues.def('cursor', function (cursor, callback) {
       }
 
       // Refresh BP cursor stylesheet
-      refreshCursorStyles(bpCursorStylesheetObject, bpCursorTypeUrls);
+      if (bpCursorStylesheetObject) {
+        refreshCursorStyles(bpCursorStylesheetObject, bpCursorTypeUrls);
+      }
     }
 
     /**
