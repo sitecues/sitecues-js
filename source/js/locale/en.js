@@ -12,8 +12,8 @@ sitecues.def('locale/en', function(english, callback) {
     // ARIA labels
     'sitecues_main_panel': 'sitecues main panel',
     'badge_label': 'sitecues zoom and speech tools',
-    'zoom_in': 'zoom out',
-    'zoom_out': 'zoom in',
+    'zoom_in': 'zoom in',
+    'zoom_out': 'zoom out',
 
     // Visible labels
     'pre_zoom': 'Zoom ',
