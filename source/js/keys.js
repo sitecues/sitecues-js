@@ -49,7 +49,8 @@ sitecues.def('keys', function(keys, callback) {
         LETTER_H = 72,
         LETTER_S = 83,
         SHIFT = 16,
-        isOnlyShift,
+        isShiftKeyDown,
+        isAnyNonShiftKeyDown,
 
         KEY_TESTS = {
           'space': function(event) {
@@ -221,6 +222,9 @@ sitecues.def('keys', function(keys, callback) {
       // key event hook
       function onKeyDown(event) {
 
+        // Shift key gets additional processing before other keys
+        preProcessKeyDown(event);
+
         if (event.defaultPrevented) {
           return; // Another script already used this key and set this flag like a good citizen
         }
@@ -236,9 +240,6 @@ sitecues.def('keys', function(keys, callback) {
 
         // All other keys will fall through to default processing
 
-        // Shift key gets additional processing first
-        processShiftKeyDown(event);
-
         // Don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
         // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
         doFollowScroll(false);
@@ -247,28 +248,43 @@ sitecues.def('keys', function(keys, callback) {
       function onKeyUp(event) {
         doFollowScroll(true);
         if (event.keyCode === SHIFT) {
-          if (isOnlyShift) {
+          if (isOnlyShift()) {
             sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
-            isOnlyShift = false;
           }
         }
+
+        isShiftKeyDown = false;
+        // Once the shift key is up, we clear the any key down flag.
+        // This is a simple approach that handles all except very weird key behavior
+        // such as shift up down up all while another key is pressed.
+        isAnyNonShiftKeyDown = false;
+
+        emitOnlyShiftStatus();
       }
 
       // Track to find out whether the shift key is pressed by itself
-      function setOnlyShift(isShift) {
-        isOnlyShift = isShift;
-        sitecues.emit('key/only-shift', isShift);
+      function emitOnlyShiftStatus() {
+        sitecues.emit('key/only-shift', isOnlyShift());
       }
 
-      // If shift key, process
-      function processShiftKeyDown(event) {
+      function isOnlyShift() {
+        return isShiftKeyDown && !isAnyNonShiftKeyDown;
+      }
+
+      // If shift key down, process it
+      function preProcessKeyDown(event) {
         var isShift = event.keyCode === SHIFT;
-        if (isShift) {
-          if (!isOnlyShift) {  // Not a key repeat
-            sitecues.emit('audio/stop');
-          }
+        if (!isShift || !isShiftKeyDown) {
+          // Key down stops speech/audio
+          // Exception is repeated shift key, which also starts speech when shift is held down
+          sitecues.emit('audio/do-stop');
         }
-        setOnlyShift(isShift);
+
+        if (!isShift) {
+          isAnyNonShiftKeyDown = true;
+        }
+        isShiftKeyDown = isShift;
+        emitOnlyShiftStatus();
       }
 
       function doFollowScroll(isFollowMouseEnabled) {

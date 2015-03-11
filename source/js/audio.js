@@ -47,26 +47,21 @@ sitecues.def('audio', function (audio, callback) {
       var text = builder.getText(content);
       if (text) {
         getAudioPlayer().playAudioSrc(getTTSUrl(text));
-        enableKeyDownToStopAudio();
+        addStopAudioHandlers();
       }
     }
 
-    function enableKeyDownToStopAudio() {
+    function addStopAudioHandlers() {
       // Stop speech on any key down.
       // Wait a moment, in case it was a keystroke that just got us here,
       // for example down arrow to read next HLB or a hotkey to toggle speech
-      setTimeout(function() {
-        $(window).on('keydown', stopAudioIfNotShift);
-      }, 0);
+      removeBlurHandler();
+      $(window).one('blur', stopAudio)
     }
 
-    // Shift is 'speak it' button. We don't want it to stop speech when held down and repeating
-    function stopAudioIfNotShift(event) {
-      var SHIFT = 16;
-      if (!event || event.keyCode !== SHIFT) {
-        stopAudio();
-        return;
-      }
+      // Remove handler that stops speech on any key down.
+    function removeBlurHandler() {
+      $(window).off('blur', stopAudio);
     }
 
     /*
@@ -76,8 +71,7 @@ sitecues.def('audio', function (audio, callback) {
      */
     function stopAudio() {
       getAudioPlayer().stop();
-      // Remove handler that stops speech on any key down.
-      $(window).off('keydown', stopAudioIfNotShift);
+      removeBlurHandler();
     }
 
     function getApiBaseUrl() {
@@ -119,13 +113,13 @@ sitecues.def('audio', function (audio, callback) {
      * Uses a provisional player to play back audio by key, used for audio cues.
      */
     audio.playAudioByKey = function(key) {
-      stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+      stopAudio();  // Stop any currently playing audio
 
       var url = getAudioKeyUrl(key);
       getAudioPlayer().playAudioSrc(url);
 
       // Stop speech on any key down.
-      enableKeyDownToStopAudio();
+      addStopAudioHandlers();
     };
 
     audio.playEarcon = function(earconName) {
@@ -226,7 +220,7 @@ sitecues.def('audio', function (audio, callback) {
      * A highlight box was closed.  Stop/abort/dispose of the player
      * attached to it.
      */
-    sitecues.on('hlb/closed audio/stop', stopAudio);
+    sitecues.on('hlb/closed audio/do-stop', stopAudio);
 
     // User has requested a speech toggle
     sitecues.on('speech/do-toggle', audio.toggleSpeech);
