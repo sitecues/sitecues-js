@@ -20,7 +20,7 @@ sitecues.def('cursor', function (cursor, callback) {
         CURSOR_SYNONYMS = { _default: 'auto' },  // Map cursor: auto -> cursor: default
         SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
         SITECUES_BP_CURSOR_CSS_ID = 'sitecues-bp-cursor',
-        MIN_BP_CURSOR_SIZE = 1.6,
+        MIN_BP_CURSOR_SIZE = 1.9,
         $stylesheet,
         $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
         cursorStylesheetObject,
