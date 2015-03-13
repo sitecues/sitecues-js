@@ -264,12 +264,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /************ Small vs. large  *************/
 
         '.scp-large > #scp-svg': {
-          'opacity': '1 !important',
-          'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
+          'opacity': '1 !important'
         },
 
-        '.scp-ready > #scp-svg': {
-          'pointer-events': 'auto'   // Rest of fix for SC-2542: once fully expanded, process mouse events again
+        '.scp-large:not(.scp-ready) > #scp-svg': {
+          'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
         '.scp-large .scp-large-only': {
