@@ -1,2 +1,2 @@
-exports.getWebsiteLangStringName=function() {return document.documentElement.lang || 'en';};
-exports.getFullWebsiteLangStringName=function() {return document.documentElement.lang || 'en-US';};
+exports.getShortWebsiteLang=function() {return document.documentElement.lang || 'en';};
+exports.getFullWebsiteLang=function() {return document.documentElement.lang || 'en-US';};

@@ -80,7 +80,7 @@ sitecues.def('audio', function (audio, callback) {
 
     // Puts in delimiters on both sides of the parameter -- ? before and & after
     function getLanguageParameter() {
-      return '?l=' + (locale.getFullWebsiteLangStringName()) + '&';
+      return '?l=' + (locale.getFullWebsiteLang()) + '&';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?

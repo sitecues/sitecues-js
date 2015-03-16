@@ -44,7 +44,7 @@ sitecues.def('metrics', function (metrics, callback) {
               'zoom_level': conf.get('zoom') || 1,
               'tts_state' : +audio.isSpeechEnabled(),
               'browser_user_agent': navigator && navigator.userAgent ? navigator.userAgent : '',
-              'client_language': locale.getWebsiteLangStringName()
+              'client_language': locale.getShortWebsiteLang()
           };
           metrics.update(data);
           sitecues.emit('metrics/ready', metrics);

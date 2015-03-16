@@ -57,7 +57,7 @@ sitecues.def('info', function(info, callback) {
       }
 
       var
-        localizedPageName = pageName + '-' + locale.getWebsiteLangStringName(),
+        localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
         sitecuesJsUrl = window.sitecues.config.script_url,
         hostUrl = window.location,
         pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +

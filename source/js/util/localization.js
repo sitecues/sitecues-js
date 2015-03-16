@@ -17,27 +17,56 @@ sitecues.def('util/localization', function(locale, callback) {
 
   locale.default = locales.english;
 
+  // Get the language but not the regional differences
+  // For example, return just 'en' but not 'en-US'.
+  function getBaseLanguage(lang) {
+    return lang.split('-')[0];
+  }
+
+  function getWebsiteLang() {
+    var docElem = document.documentElement;
+    var lang = docElem.lang;
+    if (!lang) {
+      lang = docElem.getAttribute('xml:lang');
+    }
+
+    return lang;
+  }
+
   /**
    * Represents website language.
-   * @returns String Example: 'ru_US'
+   * @returns String Example: 'en-US'
    */
-  locale.getWebsiteLangStringName = function() {
-    return document.documentElement.lang.split('-')[0] || locale.default;
+  locale.getShortWebsiteLang = function() {
+    var websiteLanguage = getWebsiteLang();
+    return websiteLanguage ? getBaseLanguage(websiteLanguage) : locale.default;
   };
 
-  locale.getFullWebsiteLangStringName = function() {
-    return document.documentElement.lang;
+  locale.getFullWebsiteLang = function() {
+    var browserLang = navigator.language,
+      websiteLang = getWebsiteLang() || locale.default;
+    if (websiteLang && browserLang && browserLang.indexOf('-') > 0) {
+      if (getBaseLanguage(websiteLang) === getBaseLanguage(browserLang)) {
+        // If document is in the same language as the browser, then
+        // we should prefer to use the browser's locale.
+        // This helps make sure UK users get a UK accent on all English sites, for example.
+        return browserLang;
+      }
+      return websiteLang;
+    }
+
+    return websiteLang;
   };
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
    */
   locale.getBrowserLangStringName = function() {
-     return (navigator && navigator.language) ? navigator.language : locale.default;
+     return (navigator && navigator.language) || locale.default;
   };
 
   locale.translate = function(key) {
-    var lang = locale.getWebsiteLangStringName();
+    var lang = locale.getShortWebsiteLang();
     try {
       return translations[key];
     } catch (e) {
@@ -55,14 +84,14 @@ sitecues.def('util/localization', function(locale, callback) {
    * @param numDigits (optional)
    */
   locale.translateNumber = function(number, numDigits) {
-    var lang = locale.getWebsiteLangStringName();
+    var lang = locale.getShortWebsiteLang();
     var translated = number.toLocaleString(lang);
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   };
 
   // todo: fetch from the server via CORS Ajax
   function getTranslationFile() {
-    var lang = locale.getWebsiteLangStringName();
+    var lang = locale.getShortWebsiteLang();
     var moduleName = 'locale/';
     switch(lang) {
       case locales.german:
