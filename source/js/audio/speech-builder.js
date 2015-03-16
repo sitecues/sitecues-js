@@ -86,7 +86,11 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
     }
 
     function appendAccessibleTextFromSubtree(node, isLabel) {
-      var text = '', styles, isHidden, $node = $(node);
+      var text = '',
+        styles,
+        isHidden,
+        $node = $(node),
+        doWalkChildren = true;
 
       node = $node[0];
 
@@ -138,7 +142,12 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
       if (common.isVisualMedia(node) || $node.is('input[type="image"]')) {
         textEquiv = textEquiv || node.getAttribute('alt') || node.getAttribute('title') || '';
       }
-      else if ($node.is('input,select,textarea,button')) {
+      else if ($node.is('select')) {
+        textEquiv = node.getAttribute("title") || '';
+        value = $node.children(':selected').text();
+        doWalkChildren = false; // Otherwise will read all the <option> elements
+      }
+      else if ($node.is('input,textarea,button')) {
         // value, placeholder and title on these form controls
         textEquiv = textEquiv || node.getAttribute("placeholder") || node.getAttribute("title") || '';
         value = node.value;
@@ -151,10 +160,12 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
         appendWithWordSeparation(value, text);
       }
 
-      // Recursively add text from children (both elements and text nodes)
-      $node.contents().each(function() {
-        appendAccessibleTextFromSubtree(this, isLabel);
-      });
+      if (doWalkChildren) {
+        // Recursively add text from children (both elements and text nodes)
+        $node.contents().each(function () {
+          appendAccessibleTextFromSubtree(this, isLabel);
+        });
+      }
 
       if (styles.display !== 'inline') {
         appendBlockSeparator(text); // Add characters to break up paragraphs (after block)
