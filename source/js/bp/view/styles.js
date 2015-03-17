@@ -1,6 +1,6 @@
 sitecues.def('bp/view/styles', function (styling, callback) {
   'use strict';
-  sitecues.use('bp/helper', 'bp/constants', 'cursor/custom', function (helper, BP_CONST, customCursor) {
+  sitecues.use('bp/helper', 'bp/constants', function (helper, BP_CONST) {
 
     var
       isAnimationDebuggingOn = false,
@@ -112,8 +112,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'verticalDivider': VERTICAL_DIVIDER
         }
       },
-
-      MIN_CURSOR_SIZE = 1.5,
 
       BASE_CSS = {
         /**
