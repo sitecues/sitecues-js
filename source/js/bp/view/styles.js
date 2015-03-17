@@ -167,9 +167,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
+        '#sitecues-badge #scp-bp-container': {
+          'position': 'absolute'
+        },
+
         // Fade in the badge when it appears
         '#scp-bp-container': {
-          'position': 'absolute',
+          'position': 'fixed',
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',

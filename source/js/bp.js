@@ -58,7 +58,6 @@ sitecues.def('bp', function (bp, callback) {
 
       updateClasses();
 
-
       animate.initAnimation(isFirstTime);
 
       // Required to fade in text, because text is display:none and it is impossible
