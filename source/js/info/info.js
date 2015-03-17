@@ -49,11 +49,11 @@ sitecues.def('info', function(info, callback) {
       INFLATION_SPEED = 1000,
       DIMMER_SPEED = 500,
       addCloseButtonTimer,
-      modalOpen = false;
+      isModalOpen = false;
 
     function showModal(pageName, anchor) {
 
-      if (modalOpen) {
+      if (isModalOpen) {
         return;
       }
 
@@ -101,7 +101,7 @@ sitecues.def('info', function(info, callback) {
 
       addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
 
-      modalOpen = true;
+      isModalOpen = true;
     }
 
     function preventScroll(evt) {
@@ -151,6 +151,7 @@ sitecues.def('info', function(info, callback) {
       setTimeout(function() {
         $iframe.remove();
         $iframe = $();
+        isModalOpen = false;
       }, INFLATION_SPEED);
 
       $(window)
@@ -165,7 +166,6 @@ sitecues.def('info', function(info, callback) {
 
       removeCloseButton();
 
-      modalOpen = false;
     }
 
 
