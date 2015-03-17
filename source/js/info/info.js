@@ -48,9 +48,14 @@ sitecues.def('info', function(info, callback) {
       INITIAL_DELAY = 100,
       INFLATION_SPEED = 1000,
       DIMMER_SPEED = 500,
-      addCloseButtonTimer;
+      addCloseButtonTimer,
+      modalOpen = false;
 
     function showModal(pageName, anchor) {
+
+      if (modalOpen) {
+        return;
+      }
 
       function addParam(name, value) {
         return name + '=' + encodeURIComponent(value) + '&'
@@ -95,6 +100,8 @@ sitecues.def('info', function(info, callback) {
       }, INITIAL_DELAY); // Waiting helps animation performance
 
       addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
+
+      modalOpen = true;
     }
 
     function preventScroll(evt) {
@@ -157,6 +164,8 @@ sitecues.def('info', function(info, callback) {
       dimmer.undimBackgroundContent(DIMMER_SPEED);
 
       removeCloseButton();
+
+      modalOpen = false;
     }
 
 

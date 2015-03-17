@@ -201,6 +201,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
           state.set('featurePanelName', feature);
         }
       }
+      if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
+        sitecues.emit('info/help');
+      }
       // else if (item.id === 'scp-prev-card') {
       //   switchCard(-1);
       // }
