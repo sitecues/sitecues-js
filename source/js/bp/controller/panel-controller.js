@@ -165,6 +165,8 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       return isMouseOutsideRect(evt, elem, distance) /* && isMouseOutsideRect(evt, moreButtonRect, 0) */;
     }
 
+    sitecues.on('bp/do-shrink', pc.shrinkPanel);
+
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
     //      https://equinox.atlassian.net/browse/EQ-355

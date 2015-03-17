@@ -72,6 +72,8 @@ sitecues.def('info', function(info, callback) {
           addParam('prefs', window.localStorage.sitecues) +
           anchor;
 
+      sitecues.emit('bp/do-shrink');
+
       $iframe = $('<iframe>')
         .attr('src', pageUrl)
         .css(INITIAL_CSS)
