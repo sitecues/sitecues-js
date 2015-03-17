@@ -72,7 +72,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <g id="scp-more-button-group" role="button" aria-label="Help">\
     <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
     <rect id="scp-more-button-transparent-target" fill="transparent" x="-39" y="-39" width="78" height="78"  class="scp-target" role="presentation"/>\
-    <path class="scp-target" transform="scale(4)" fill="#777" stroke="#777"  stroke-width="0.5" d="M0,-4c-.85 0-1.48.26-1.88.66-.4.4-.54.9-.59 1.28l1 .13c.04-.25.12-.5.31-.69.19-.19.49-.38 1.16-.38.66 0 1.02.16 1.22.34.2.18.28.4.28.66 0 .83-.34 1.06-.84 1.5-.5.44-1.16 1.08-1.16 2.25v.25h1v-.25c0-.83.31-1.06.81-1.5.5-.44 1.19-1.08 1.19-2.25 0-.48-.17-1.02-.59-1.41-.43-.39-1.07-.59-1.91-.59zm-.5 7v1h1v-1h-1z"/>\
+    <path class="scp-target" fill="#777" stroke="#777" stroke-width=".5" d="M0,-16c-3.4 0-6 1-7.5 2.6-1.6 1.6-2.2 3.6-2.4 5.12l4 .5c.2-1 .5-2 1.2-2.8 .8-.8 2-1.5 4.6-1.5 2.6 0 4.1 .5 4.0 1.4 .8 .72 1.12 1.6 1.1 2.6 0 3.3-1.4 4.2-3.4 6-2 1.8-4.6 4.3-4.6 9v1h4v-1c0-3.3 1.2-4.2 3.2-6 2-1.8 4.8-4.3 4.8-9 0-2-.7-4.1-2.4-5.6-1.7-1.6-4.3-2.4-7.6-2.4zm-2.8 28v4h4v-4h-4z"/>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
