@@ -85,7 +85,7 @@ sitecues.def('info', function(info, callback) {
         .on('DOMMouseScroll mousewheel', preventScroll);
 
       // Prevent panning in background content
-      $('body')
+      $('body,#sc-bp-container')
         .css('pointerEvents', 'none');
 
       dimmer.dimBackgroundContent(DIMMER_SPEED);
@@ -132,7 +132,7 @@ sitecues.def('info', function(info, callback) {
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
           top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
         })
-        .appendTo('html')
+        .appendTo('body,#sc-bp-container')
         .one('click', close);
 
       addCloseButtonTimer = setTimeout(function() {
