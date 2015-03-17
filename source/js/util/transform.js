@@ -2,6 +2,8 @@ sitecues.def('util/transform', function (transform, callback) {
 
   'use strict';
 
+  // Skips past non-numeric characters and get the next number as type 'number'
+  // It will include a negative sign and decimal point if it exists in the string
   function getNumberFromString (str) {
     return +(str.replace(/[^0-9\.\-]+/g, ''));
   }
@@ -14,7 +16,7 @@ sitecues.def('util/transform', function (transform, callback) {
         translateTop,
         splitter;
 
-    if (!transform || transform === 'none' || transform === '' || transform.indexOf('translate') === -1) {
+    if (!transform || transform.indexOf('translate') === -1) {
 
       position.left = 0;
       position.top  = 0;
