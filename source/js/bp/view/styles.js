@@ -256,10 +256,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        '.pointer': {
-          'cursor': 'pointer'
-        },
-
         '#scp-shadow': {
           'transition': 'opacity 1s',
           'opacity': 0
