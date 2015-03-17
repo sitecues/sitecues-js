@@ -75,28 +75,23 @@ sitecues = {
 
     'emit': blankFunction,
 
-    //'ui': {
-    //    'sliders': []
-    //},
+    'getApiUrl': function(restOfUrl) {
+      return '//def/sitecues/api/' + restOfUrl;
+    },
 
-    'getLibraryConfig': function() {
-        return {
-            'hosts': {
-                'up': 'abc',
-                'ws': 'def'
-            }
-        };
+    'getPrefsUrl': function(restOfUrl) {
+      return '//abc/' + restOfUrl;
     },
 
     'getLibraryUrl': function() {
-        return {
-            'raw': true
-        };
+      return {
+        'raw': true
+      }
     },
 
-    'getVersion': function() {
+  'getVersion': function() {
         return '0.0.0-UNIT';
-    },
+    }
 
 };
 

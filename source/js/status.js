@@ -87,8 +87,8 @@ sitecues.def('status', function (status_module, callback) {
 
       // Set the server URLs for retrieving the status of our services (version info, etc.)
       ajax_urls = {
-        up : '//' + sitecues.getLibraryConfig().hosts.up + '/status',
-        ws : '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/util/status'
+        up : sitecues.getPrefsUrl('status'),
+        ws : sitecues.getApiUrl('util/status')
       };
 
       // Add current settings (zoom level, etc) to the log...

@@ -74,23 +74,21 @@ sitecues.def('audio', function (audio, callback) {
       removeBlurHandler();
     }
 
-    function getApiBaseUrl() {
-      return '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/';
-    }
-
     // Puts in delimiters on both sides of the parameter -- ? before and & after
     function getLanguageParameter() {
       return '?l=' + (locale.getFullWebsiteLang()) + '&';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
-      return getApiBaseUrl() + 'cue/site/' + site.get('site_id') + '/' +
+      var restOfUrl = 'cue/site/' + site.get('site_id') + '/' +
         key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
+      return sitecues.getApiUrl(restOfUrl);
     }
 
     function getTTSUrl(text) {
-      return getApiBaseUrl() + 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
+      var restOfUrl = 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
         getLanguageParameter() + 't=' + encodeURIComponent(text);
+      return sitecues.getApiUrl(restOfUrl);
     }
 
       /**

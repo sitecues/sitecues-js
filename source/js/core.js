@@ -38,7 +38,8 @@
   exportPublicFields, resolveUrl, parseUrlQuery, parseUrl,
 
   // Public Functions (these should be registered in the exportPublicFields() function)
-  getVersion, getLibraryConfig, getLibraryUrl, getSiteConfig, on, off, emit, def, use, resolveSitecuesUrl, loadScript, load,
+  getVersion, getLibraryUrl, getPrefsUrl, getApiUrl, getSiteConfig, on, off, emit, def, use,
+  resolveSitecuesUrl, loadScript, load,
 
   // Define place-holder for Logger
   log = {
@@ -73,7 +74,8 @@
   // we risk overwriting the methods of the live library.
   exportPublicFields = function () {
     sitecues.getVersion = getVersion;
-    sitecues.getLibraryConfig = getLibraryConfig;
+    sitecues.getApiUrl = getApiUrl;
+    sitecues.getPrefsUrl = getPrefsUrl;
     sitecues.getLibraryUrl = getLibraryUrl;
     sitecues.getSiteConfig = getSiteConfig;
     sitecues.on = on;
@@ -99,8 +101,12 @@
     return version;
   };
 
-  getLibraryConfig = function() {
-    return libraryConfig;
+  getApiUrl = function(restOfUrl) {
+    return 'https://' + libraryConfig.hosts.ws + '/sitecues/api/' + restOfUrl;
+  };
+
+  getPrefsUrl = function(restOfUrl) {
+    return 'https://' + libraryConfig.hosts.up + '/' + restOfUrl;
   };
 
   getLibraryUrl = function() {

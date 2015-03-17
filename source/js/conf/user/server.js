@@ -6,8 +6,9 @@ sitecues.def('conf/user/server', function(server, callback) {
 
   // URLs for loading/saving data
   var lsByUserId;
-  var saveUrl = '//' + sitecues.getLibraryConfig().hosts.up + '/save/' + location.hostname + '?callback=?';
-  var loadUrl = '//' + sitecues.getLibraryConfig().hosts.up + '/load/' + location.hostname + '?callback=?';
+  var params = '/' + location.hostname + '?callback=?';
+  var saveUrl = sitecues.getPrefsUrl('save') + params;
+  var loadUrl = sitecues.getPrefsUrl('load') + params;
 
   // UGH!!! The preferences server has a race condition that can clobber data! And ...
   // Redis has no transactions (at least it is web-scale). So, THIS code must ensure

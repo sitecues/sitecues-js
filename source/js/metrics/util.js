@@ -32,7 +32,7 @@ sitecues.def('metrics/util', function (metricsUtil, callback) {
                     xhrObj.setRequestHeader("Content-Type","application/json");
                     xhrObj.setRequestHeader("Accept","application/json");
                 },
-                url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/metrics/site/' + siteId + '/notify.json',
+                url: sitecues.getApiUrl('metrics/site/' + siteId + '/notify.json'),
                 type: "POST",
                 data: instance && JSON.stringify(instance.data),
                 dataType: "json"

@@ -32,7 +32,7 @@ sitecues.def('user', function(user, callback) {
           beforeSend: function(xhrObj) {
             xhrObj.setRequestHeader("Accept", "application/json");
           },
-          url: '//' + sitecues.getLibraryConfig().hosts.ws + '/sitecues/api/user/id/get.json',
+          url: sitecues.getApiUrl('user/id/get.json'),
           type: 'GET',
           success: function(data) {
             userId = data.userId;
