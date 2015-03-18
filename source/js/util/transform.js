@@ -1,3 +1,11 @@
+/**
+ * This file contains helper methods for dealing with the string that is returned
+ * when using Element.style.transform or Element.getAttribute('transform')
+ *
+ * TODO: Have a single method that returns an object with properties that map to the
+ * values we would ever care about when dealing with transform styles.
+ */
+
 sitecues.def('util/transform', function (transform, callback) {
 
   'use strict';

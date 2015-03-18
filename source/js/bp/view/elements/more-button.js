@@ -1,3 +1,9 @@
+/**
+ *  This file contains logic for the "?" button placement and functionality that opens up the
+ *  help / info page to provide sitecues users with a document to learn how to use the tool, including
+ *  keyboard commands.
+ */
+
 sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'zoom', 'audio', 'animate', 'util/transform', function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
