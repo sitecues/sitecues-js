@@ -361,6 +361,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#sitecues-badge:focus': {
           'outline': 0,
           'box-shadow': '0px 0px 3px 3px rgba(82, 168, 236, 0.8)'
+        },
+        '#sitecues-badge[aria-expanded="true"]:focus': {
+          'box-shadow': 'none'
         }
       },
 
