@@ -86,7 +86,7 @@ sitecues.def('info', function(info, callback) {
 
       // Prevent panning in background content
 
-      enableParentWindowPointerEvents(false);
+      enableWebPagePointerEvents(false);
 
 
       dimmer.dimBackgroundContent(DIMMER_SPEED);
@@ -149,7 +149,7 @@ sitecues.def('info', function(info, callback) {
       addCloseButtonTimer = 0;
     }
 
-    function enableParentWindowPointerEvents(doEnable) {
+    function enableWebPagePointerEvents(doEnable) {
       $('body,#scp-bp-container')
         .css('pointerEvents', doEnable ? '' : 'none');
     }
@@ -166,7 +166,7 @@ sitecues.def('info', function(info, callback) {
         .off('focus', close)
         .off('message', checkCloseMessage)
         .off('DOMMouseScroll mousewheel', preventScroll);
-      enableParentWindowPointerEvents(true);
+      enableWebPagePointerEvents(true);
       $('#sitecues-badge').focus();
 
       dimmer.undimBackgroundContent(DIMMER_SPEED);
