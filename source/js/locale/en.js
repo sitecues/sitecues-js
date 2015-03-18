@@ -14,6 +14,7 @@ sitecues.def('locale/en', function(english, callback) {
     'badge_label': 'sitecues zoom and speech tools',
     'zoom_in': 'zoom in',
     'zoom_out': 'zoom out',
+    'help': 'Help',
 
     // Visible labels
     'pre_zoom': 'Zoom ',
@@ -21,8 +22,7 @@ sitecues.def('locale/en', function(english, callback) {
     'zoom_off': 'Zoom Off',
     'speech': 'Speech',
     'on' : 'On',
-    'off': 'Off',
-    'help': 'Help'
+    'off': 'Off'
   };
 
   callback();

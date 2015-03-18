@@ -12,6 +12,7 @@ sitecues.def('locale/pl', function(polish, callback) {
     'badge_label': 'narzędzia powiększania i mowy sitecues',
     'zoom_in': 'powiększ',
     'zoom_out': 'pomniejsz',
+    'help': 'Pomoc',
 
     // Visible labels
     'pre_zoom': 'Powiększenie ',
@@ -19,8 +20,7 @@ sitecues.def('locale/pl', function(polish, callback) {
     'zoom_off': 'Powiększenie Wył',
     'speech': 'Głos',
     'on' : 'Wł.',
-    'off': 'Wył',
-    'help': 'Pomoc'
+    'off': 'Wył'
   };
 
   callback();

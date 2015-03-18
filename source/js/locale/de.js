@@ -14,6 +14,7 @@ sitecues.def('locale/de', function(german, callback) {
     'badge_label': 'sitecues Vergrößerungs und Sprachausgabe Steuerung',
     'zoom_in': 'Grösser',
     'zoom_out': 'Kleiner',
+    'help': 'Hilfe',
 
     // Visible labels
     'pre_zoom': '',  // Nothing before number, everything after via 'x' label
@@ -21,8 +22,7 @@ sitecues.def('locale/de', function(german, callback) {
     'zoom_off': 'Zoom Aus',
     'speech': 'Sprache',
     'on' : 'Ein',
-    'off': 'Aus',
-    'help': 'Hilfe'
+    'off': 'Aus'
   };
 
   callback();
