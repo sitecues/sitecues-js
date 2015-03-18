@@ -85,8 +85,7 @@ sitecues.def('info', function(info, callback) {
         .on('DOMMouseScroll mousewheel', preventScroll);
 
       // Prevent panning in background content
-      $('body,#sc-bp-container')
-        .css('pointerEvents', 'none');
+      enableParentWindowPointerEvents(false);
 
       dimmer.dimBackgroundContent(DIMMER_SPEED);
 
@@ -148,6 +147,11 @@ sitecues.def('info', function(info, callback) {
       addCloseButtonTimer = 0;
     }
 
+    function enableParentWindowPointerEvents(doEnable) {
+      $('body,#scp-bp-container')
+        .css('pointerEvents', doEnable ? '' : 'none');
+    }
+
     function close() {
       $iframe.css(INITIAL_CSS);
       setTimeout(function() {
@@ -160,8 +164,7 @@ sitecues.def('info', function(info, callback) {
         .off('focus', close)
         .off('message', checkCloseMessage)
         .off('DOMMouseScroll mousewheel', preventScroll);
-      $('body,#sc-bp-container')
-        .css('pointerEvents', '');
+      enableParentWindowPointerEvents(true);
       $('#sitecues-badge').focus();
 
       dimmer.undimBackgroundContent(DIMMER_SPEED);
