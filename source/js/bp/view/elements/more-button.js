@@ -73,7 +73,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function showHelpButton () {
-      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).setAttribute('class', 'transition-opacity');
+      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).setAttribute('class', 'scp-transition-opacity');
       helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).style.opacity = 1;
       helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
       alwaysShowButton = true;
