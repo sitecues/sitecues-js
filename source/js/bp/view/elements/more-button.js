@@ -81,9 +81,13 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     function hideHelpButton () {
 
-      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).setAttribute('class', '');
+      var moreButton       = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+          currentTranslate = transform.getTranslate(moreButton.getAttribute('transform'));
+
+      moreButton.setAttribute('class', '');
+      moreButton.style.opacity = 0;
+
       helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
-      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).style.opacity = 0;
 
       if (mouseEnterAnimation) {
         mouseEnterAnimation.cancel();
@@ -92,6 +96,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       if (mouseLeaveAnimation) {
         mouseLeaveAnimation.cancel();
       }
+
+      mouseLeaveAnimation = animate.create(moreButton, {
+        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
+      }, {
+        'duration': 1,
+        'useAttribute': true,
+        'animationFn': 'linear'
+      });
 
       clearTimeout(userInputTimeoutId);
     }

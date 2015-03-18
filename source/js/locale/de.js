@@ -21,7 +21,8 @@ sitecues.def('locale/de', function(german, callback) {
     'zoom_off': 'Zoom Aus',
     'speech': 'Sprache',
     'on' : 'Ein',
-    'off': 'Aus'
+    'off': 'Aus',
+    'help': 'Hilfe'
   };
 
   callback();
