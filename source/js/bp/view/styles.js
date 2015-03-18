@@ -326,7 +326,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transform-origin': '50% 50%'
         },
 
-        '.transition-opacity' : {
+        '.scp-transition-opacity' : {
           'transition': 'opacity 0.8s'
         },
 
