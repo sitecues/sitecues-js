@@ -132,7 +132,7 @@ sitecues.def('info', function(info, callback) {
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
           top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
         })
-        .appendTo('body,#sc-bp-container')
+        .appendTo('body')
         .one('click', close);
 
       addCloseButtonTimer = setTimeout(function() {
@@ -160,7 +160,7 @@ sitecues.def('info', function(info, callback) {
         .off('focus', close)
         .off('message', checkCloseMessage)
         .off('DOMMouseScroll mousewheel', preventScroll);
-      $('body')
+      $('body,#sc-bp-container')
         .css('pointerEvents', '');
       $('#sitecues-badge').focus();
 
