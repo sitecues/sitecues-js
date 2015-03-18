@@ -131,7 +131,7 @@ sitecues.def('info', function(info, callback) {
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
           top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
         })
-        .appendTo('body')
+        .appendTo('html')
         .one('click', close);
 
       addCloseButtonTimer = setTimeout(function() {
