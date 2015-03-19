@@ -58,7 +58,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
         $('.sc-debug-dots').remove();  // Remove last debugging dots
       }
 
-      navQueue.push({keyName: keyName, altKey: event.altKey, shiftKey: event.shiftKey });
+      navQueue.push({keyName: keyName, shiftKey: event.shiftKey });
 
       clearKeyRepeat();
       isKeyStillDown = true; // Assume it's down until it's let up
@@ -251,7 +251,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       prepareMovement();
 
       var type = nextMove.keyName,
-        altKey = nextMove.altKey,
         shiftKey = nextMove.shiftKey;
 
       switch (type) {
@@ -268,7 +267,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
           moveInDirection(1, 0, shiftKey);
           break;
         case 'heading':
-          moveByTagName(HEADING_TAGS, altKey, shiftKey);
+          moveByTagName(HEADING_TAGS, shiftKey);
           break;
         default:
           SC_DEV && console.log('Illegal command');
@@ -647,7 +646,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
       return sitecues.highlight($picked, false, false, doKeepHighlightHidden);
     }
 
-    function moveByTagName(acceptableTagsMap, isReverse, doSpeak) {
+    function moveByTagName(acceptableTagsMap, isReverse) {
       function doesMatchTags(element) {
         if (!acceptableTagsMap[element.localName]) {
           return;
@@ -706,7 +705,6 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Adjust final scroll position so that highlight that it's not jammed against the top/left of window unless it needs to
       window.scrollBy(-100, -100);
-      succeed(false, doSpeak);
     }
 
     function constrained(value, min, max) {

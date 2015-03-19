@@ -102,6 +102,9 @@ sitecues.def('cursor', function (cursor, callback) {
      * @param cursorTypeUrls
      */
     function refreshCursorStyles(styleSheet, cursorTypeUrls) {
+      if (!styleSheet || !styleSheet.cssRules) {
+        return;
+      }
       var rules = styleSheet.cssRules,
         numRules = rules.length,
         ruleIndex = 0,
@@ -188,7 +191,7 @@ sitecues.def('cursor', function (cursor, callback) {
         bpCursorTypeUrls = cursorZoom < MIN_BP_CURSOR_SIZE ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
 
       // Refresh document cursor stylesheet if we're using one
-      if (cursorStylesheetObject && cursorStylesheetObject.cssRules) {
+      if (cursorStylesheetObject) {
         refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
         setCursorsDisabled(false);
       }

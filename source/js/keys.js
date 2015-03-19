@@ -47,7 +47,7 @@ sitecues.def('keys', function(keys, callback) {
         PLUS_ALTERNATE_1 = 61,
         PLUS_ALTERNATE_2 = 43,
         LETTER_H = 72,
-        LETTER_S = 83,
+        QUOTE = 222,
         SHIFT = 16,
         isShiftKeyDown,
         isAnyNonShiftKeyDown,
@@ -116,7 +116,7 @@ sitecues.def('keys', function(keys, callback) {
             return event.keyCode == NUMPAD_0 && (!common.isEditable(event.target) || hasCommandModifier(event));
           },
           'speech': function(event) {
-            return event.keyCode === LETTER_S && event.altKey && !common.isEditable(event.target);
+            return event.keyCode === QUOTE && event.altKey && !common.isEditable(event.target);
           },
           'esc': function(event) {
              // Escape key is only valid if there is an HLB to close
@@ -136,7 +136,7 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
           },
           'heading': function(event) {
-            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !event.ctrlKey && !event.metaKey;
+            return event.keyCode === LETTER_H && !common.isEditable(event.target) && !event.altKey && !event.ctrlKey && !event.metaKey;
           },
           'pageup': function(event) {
             return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);
