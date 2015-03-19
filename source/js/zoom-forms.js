@@ -55,7 +55,7 @@ sitecues.def('zoom-forms', function (zoomForms, callback) {
           var desiredRect = this.getBoundingClientRect();
 
           // 1. Init combobox zoom fix data
-          if (!this.style.width) {  // We only init the data the first time we encounter the combobox
+          if (!$combobox.data('sc-sizing')) {  // We only init the data the first time we encounter the combobox
             initComboboxSizingData($combobox, desiredRect, completedZoom);
           }
 
