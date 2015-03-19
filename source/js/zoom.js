@@ -80,7 +80,6 @@ sitecues.def('zoom', function (zoom, callback) {
         // (We still want to use the backface method when we can, because it often produces better results than our
         // other method, which is to overlay a transparent div and then remove it)
         shouldRepaintOnZoomChange = platform.browser.isChrome,
-        shouldUseBackfaceRepaint = false,
 
         // Is the will-change CSS property supported?
         shouldUseWillChangeOptimization,
@@ -98,7 +97,8 @@ sitecues.def('zoom', function (zoom, callback) {
         MIN_RECT_SIDE = 4,
         ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
         CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000,  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
-        REPAINT_FOR_CRISP_TEXT_DELAY = 15,
+        REPAINT_FOR_CRISP_TEXT_DELAY = 15,          // This is conjured out of thin air. Just seems to work.
+        CRISPING_ATTRIBUTE = 'data-sc-crisp',
         UNPINCH_END_DELAY = 150,
         UNPINCH_POWER = .015; // How much the unpinch delta affects zoom
 
@@ -554,6 +554,14 @@ sitecues.def('zoom', function (zoom, callback) {
         $body.one(ANIMATION_END_EVENTS, onGlideStopped);
       }
 
+      // This is used to repaint the DOM after a zoom in WebKit to ensure crisp text
+      function getCssCrispingFixes() {
+        if (shouldRepaintOnZoomChange) {
+          return '\n[' + CRISPING_ATTRIBUTE + '] * { backface-visibility: hidden; }\n';
+        }
+        return '';
+      }
+
       // Create <style> for keyframes animations
       // For initial zoom, call with the targetZoom
       // Otherwise, it will create a reverse (zoom-out) and forward (zoom-in) style sheet
@@ -575,6 +583,8 @@ sitecues.def('zoom', function (zoom, callback) {
             }
           }
         }
+
+        css += getCssCrispingFixes();
 
         applyZoomStyleSheet(css);
       }
@@ -793,12 +803,11 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!shouldRepaintOnZoomChange) {
           return;
         }
-        if (shouldUseBackfaceRepaint) {
-          $(body).css('backfaceVisibility', '');
-          setTimeout(function () {
-            $(body).css('backfaceVisibility', 'hidden')
-          }, REPAINT_FOR_CRISP_TEXT_DELAY);
-        }
+        body.setAttribute(CRISPING_ATTRIBUTE, '');
+        setTimeout(function() {
+          body.removeAttribute(CRISPING_ATTRIBUTE);
+        }, REPAINT_FOR_CRISP_TEXT_DELAY);
+
         var MAX_ZINDEX = 2147483647,
           appendedDiv = $('<div>')
           .css({
@@ -1029,11 +1038,10 @@ sitecues.def('zoom', function (zoom, callback) {
         // but will add them if there are visible children.
         // If we added them all the time we would often have very large left margins.
         // This rule helps get left margin right on duxburysystems.com.
-        if (style.overflow !== 'visible' ||
-          (!common.hasVisibleContent(node, style, parentStyle) && !common.isVisualRegion(node, style, parentStyle))) {
+        if (style.overflow !== 'visible' || !common.hasVisibleContent(node, style, parentStyle)) {
           return; // No visible content
         }
-        
+
         return true;
       }
 
@@ -1106,8 +1114,6 @@ sitecues.def('zoom', function (zoom, callback) {
         isInitialized = true;
 
         initBodyInfo();
-
-        shouldUseBackfaceRepaint = shouldRepaintOnZoomChange && $body.css('backgroundImage') !== 'none';
 
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();
