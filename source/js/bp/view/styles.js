@@ -328,6 +328,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'opacity 0.8s'
         },
 
+        '.scp-transition-opacity-fast' : {
+          'transition': 'opacity 0.4s'
+        },
+
         /******** Mouse targets must be hidden but still able to handle events *************/
 
         '.scp-hidden-target': {

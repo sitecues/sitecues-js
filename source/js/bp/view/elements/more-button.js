@@ -79,8 +79,27 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function showHelpButton () {
-      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).setAttribute('class', 'scp-transition-opacity');
-      helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).style.opacity = 1;
+
+      var btnContainer           = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+          currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
+          opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
+
+      // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
+      if (!alwaysShowButton) {
+
+        btnContainer.setAttribute('transform', 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + 0.5 + ')');
+
+        animate.create(btnContainer, {
+          'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
+        }, {
+          'duration': BUTTON_ENTER_ANIMATION_DURATION,
+          'useAttribute': true
+        });
+
+      }
+
+      btnContainer.setAttribute('class', opacityTransitionClass);
+      btnContainer.style.opacity = 1;
       helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
       alwaysShowButton = true;
     }
