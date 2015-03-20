@@ -130,7 +130,7 @@ sitecues.def('bp', function (bp, callback) {
 
         // Just return the normal palette if we have reached the <html>
         if (currentParent === document.documentElement) {
-          return 'scp-palette' + BP_CONST.PALETTE_NAME_MAP.normal;
+          return BP_CONST.PALETTE_NAME_MAP.normal;
         }
 
         // Only care about non-transparent backgrounds
@@ -150,7 +150,7 @@ sitecues.def('bp', function (bp, callback) {
     function getPaletteClass() {
       // Set the colors
       if (state.get('isAdaptivePalette')) {
-        return getAdaptivePalette();
+        return 'scp-palette' + getAdaptivePalette();
       }
       return 'scp-palette' + state.get('paletteName');
     }
