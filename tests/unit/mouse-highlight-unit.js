@@ -10,8 +10,8 @@ var modulePath = '../../source/js/mouse-highlight',
 describe('mouse-highlight', function () {
 
   describe('#hasDarkBackgroundOnAnyOf()', function () {
-    it('should return false if the background is mostly transparent (alpha level < 10%)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgba(255, 255, 255, 0.01)'}])).to.be.true;
+    it('should return falsey value if the background is mostly transparent (alpha level < 10%)', function (done) {
+      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgba(255, 255, 255, 0.01)'}])).to.not.be.false;
       done();
     });
     it('should return false if the background is white and mostly opaque (alpha level > 90%)', function (done) {
@@ -31,7 +31,7 @@ describe('mouse-highlight', function () {
       done();
     });
     it('should return true if the parent background is not mostly white (rgb levels < 242/255)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(255, 255, 255)'}, {'backgroundColor': 'rgb(100, 125, 100)'}])).to.be.true;
+      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(255, 255, 255, .3)'}, {'backgroundColor': 'rgb(100, 125, 100)'}])).to.be.true;
       done();
     });
   });
@@ -148,13 +148,13 @@ describe('mouse-highlight', function () {
   describe('#getHighlightBorderWidth()', function () {
     it('should return around 2 if zoom is 1 and speech is on', function (done) {
       mh.state.zoom = 1;
-      expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(2);
+      expect(Math.round(mh.getHighlightBorderWidth())).to.be.equal(3);
       done();
     });
-    it('should return around 9 if zoom is 3', function (done) {
+    it('should return around 14 if zoom is 3', function (done) {
       mh.state.zoom = 3;
       expect(Math.round(mh.getHighlightBorderWidth())).to
-        .be.equal(9);
+        .be.equal(14);
       done();
     });
   });

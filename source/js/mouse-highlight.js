@@ -220,7 +220,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
-          borderWidth = viz + .5 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
+          borderWidth = viz + .33 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
       return Math.max(1, borderWidth) * state.zoom;
     }
 
