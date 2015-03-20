@@ -2,7 +2,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   'use strict';
 
-  var EXTRA_HIGHLIGHT_PIXELS = 3,
+  var EXTRA_HIGHLIGHT_PIXELS = 3, // Amount of space around highlighted object before to separate border
 
   INIT_STATE = {
     isCreated: false, // Has highlight been created
@@ -40,6 +40,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   // Don't consider the text light unless the yiq is larger than this
   MIN_YIQ_LIGHT_TEXT = 160,
+
+  // Extra border width in pixels if background is dark and light bg color is being used
+  EXTRA_DARK_BG_BORDER_WIDTH = 1,
+
+  // Border color when on dark background
+  DARK_BG_BORDER_COLOR = 'rgb(65, 60, 145)',
 
   state,
 
@@ -139,19 +145,23 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       };
     }
 
-    function isDarkBackground(style) {
-      return !isLightTone(style.backgroundColor);
+    function getAlpha(color) {
+      return getRgba(color)['a'];
+    }
+
+    function isDarkBackground(bgColor) {
+      return !isLightTone(bgColor);
     }
 
     function hasDarkBackgroundOnAnyOf(styles) {
 
       for (var count = 0; count < styles.length; count ++) {
-        if (isDarkBackground(styles[count])) {
-          return true;
+        var bgColor = styles[count].backgroundColor,
+          isMostlyOpaque = getAlpha(bgColor) > 0.8;
+        if (isMostlyOpaque) {
+          return isDarkBackground(bgColor);
         }
       }
-
-      return false;
     }
 
     function updateColorApproach(picked, style) {
@@ -197,14 +207,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getHighlightBorderColor() {
+
+      if (state.hasDarkBackgroundColor) {
+        return DARK_BG_BORDER_COLOR;
+      }
+
       var viz = getHighlightVisibilityFactor(),
-        color = Math.round(Math.max(0, 200 - viz * 80));
+        colorMultiplier = -80,
+        color = Math.round(Math.max(0, 200 + viz * colorMultiplier));
       return 'rgb(' + color + ',' + color + ',' + (color + 30) +')';
     }
 
     function getHighlightBorderWidth() {
       var viz = getHighlightVisibilityFactor(),
-          borderWidth = viz - 0.4;
+          borderWidth = viz + .5 + (state.hasDarkBackgroundColor ? EXTRA_DARK_BG_BORDER_WIDTH : 0);
       return Math.max(1, borderWidth) * state.zoom;
     }
 
@@ -215,7 +231,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var maxViz = state.hasDarkBackgroundColor || state.hasLightText ? 1 : 9,
         viz = Math.min(getHighlightVisibilityFactor(), maxViz),
         alpha;
-      alpha = 0.11 * viz;
+      alpha = 0.12 * viz;
       return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
@@ -741,7 +757,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.elementRect = $.extend({}, elementRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom);
-      state.highlightPaddingWidth = state.doUseOverlayForBgColor ? 0 : roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS);
+      state.highlightPaddingWidth = roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS);
       var extra = getExtraPixels();
 
       state.cutoutRects = getCutoutRects();

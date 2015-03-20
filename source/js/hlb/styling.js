@@ -20,7 +20,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     hlbStyling.defaultBorder  = 3;
 
     // Transition property used for hlb animation (-webkit, -moz)
-    // This is used to transition the transform property for HLB
+    // Th is used to transition the transform property for HLB
     // inflation/deflation animation
     hlbStyling.transitionProperty = platform.cssPrefix + 'transform ';
 
@@ -96,6 +96,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     //////////////////////////
     // PRIVATE FUNCTIONS
     //////////////////////////
+
+    function isBlack (style) {
+      if (style === '#000' || style === '#000000' || style === 'rgb(0, 0, 0)') {
+        return true;
+      }
+    }
 
     /**
      * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
@@ -713,6 +719,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
       } else {
         calculatedHLBStyles.backgroundColor = backgroundColor;
+      }
+
+      // A black HLB background should use a white border
+      if (isBlack(calculatedHLBStyles.backgroundColor)) {
+        calculatedHLBStyles.border = hlbStyling.defaultBorder + 'px solid #fff';
       }
 
       // If the original element uses a background image, preserve original padding.
