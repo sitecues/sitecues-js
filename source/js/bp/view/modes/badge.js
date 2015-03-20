@@ -57,7 +57,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      Default bounding box object.
      */
     var badgeElement,
-        getNumberFromString = helper.getNumberFromString;
+        getNumberFromString = helper.getNumberFromString,
+        lastBgColor;
     /*
      *** Privates ***
      */
@@ -147,18 +148,55 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       badgeElement.parentElement.id = BP_CONST.BADGE_ID;
     }
 
-    function doesSitecuesConfigPaletteNameExist () {
-      return typeof sitecues.config.palette === 'string';
+    function checkBackgroundColorChange() {
+      var newBgColor = getBackgroundColor();
+
+      if (newBgColor !== lastBgColor) {
+        lastBgColor = newBgColor;
+        sitecues.emit('bp/do-update');
+        SC_DEV && console.log('Updating adaptive badge palette');
+      }
     }
 
-    function shouldUseReverseBlue (badge) {
-      return ((badge.localName === 'img' && badge.src.indexOf('reverse-blue') !== -1) ||
-             (doesSitecuesConfigPaletteNameExist() && sitecues.config.palette.indexOf('reverse-blue') !== -1));
+    function onPossiblePaletteChange() {
+      setTimeout(checkBackgroundColorChange, 0);
     }
 
-    function shouldUseReverseYellow (badge) {
-      return ((badge.localName === 'img' && badge.src.indexOf('reverse-yellow') !== -1) ||
-             (doesSitecuesConfigPaletteNameExist() && sitecues.config.palette.indexOf('reverse-yellow') !== -1));
+    function getBackgroundColor() {
+      return getComputedStyle(document.body)['backgroundColor'];
+    }
+
+    function addPaletteListener() {
+      document.body.addEventListener('click', onPossiblePaletteChange);
+      document.body.addEventListener('keydown', onPossiblePaletteChange);
+      lastBgColor = getBackgroundColor();
+    }
+
+    function setCustomPalette (badgeElement) {
+
+      var paletteName = getBadgePalette(badgeElement);
+      if (paletteName === BP_CONST.PALETTE_NAME_MAP['adaptive']) {
+        state.set('isAdaptivePalette', true);
+        addPaletteListener();
+      }
+
+      state.set('paletteName', paletteName);
+
+    }
+
+    function getBadgePalette(badge) {
+      var paletteName = badge.localName === 'img' ? badge.src : sitecues.config.palette || '',
+        fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
+        index = 0;
+
+      for (; index < fullNames.length; index ++) {
+        var fullName = fullNames[index];
+        if (paletteName.indexOf(fullName) >= 0) {
+          return BP_CONST.PALETTE_NAME_MAP[fullName];
+        }
+      }
+
+      return '';
     }
 
     /**
@@ -209,21 +247,6 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       return badgeElement;
 
     };
-
-    function setCustomPalette (badgeElement) {
-
-      // TODO: Perhaps a palette engine would be more suitable.
-      if (shouldUseReverseBlue(badgeElement)) {
-        state.set('paletteName', 'w');
-        return;
-      }
-
-      if (shouldUseReverseYellow(badgeElement)) {
-        state.set('paletteName', 'y');
-        return;
-      }
-
-    }
 
     // Make sure the badge has non-static positioning to make it easy to place
     // the position: absolute sc-bp-container inside of it

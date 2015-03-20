@@ -188,6 +188,14 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BASE_STYLESHEET_ID    = 'sitecues-badge-panel-base-css';
   constants.PALETTE_STYLESHEET_ID = 'sitecues-badge-panel-palette-css';
 
+  // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
+  constants.PALETTE_NAME_MAP = {
+    'normal': 'n',
+    'adaptive': '*',
+    'reverse-blue': '-rb',
+    'reverse-yellow': '-ry'
+  };
+
   // Wave animation (on hover over TTS button)
   constants.ANIMATE_WAVES_OPACITY = [
     [.2,.4,.6,.8,.8,.6,.4,.2,.2,.2,.2,.4,.6,.8,.8,.6,.4,.2,.2,.2],  // Wave 1

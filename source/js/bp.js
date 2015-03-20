@@ -31,7 +31,8 @@ sitecues.def('bp', function (bp, callback) {
      */
 
     // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
-    var bpContainer;
+    var bpContainer,
+        MIN_YIQ_LIGHT_TEXT = 160;
 
     /**
      *** Start point ***
@@ -81,8 +82,76 @@ sitecues.def('bp', function (bp, callback) {
       bpContainer.setAttribute('class', classBuilder);
     }
 
+    // TODO : This code is copied from the mouse-highlight module, put then in a
+    //        common module that does not use jQuery.
+    /**
+     * Returns an object {r: #, g: #, b: #, a: #}
+     * @param colorString  A color string provided by getComputedStyle() in the form of rgb(#, #, #) or rgba(#, #, #, #)
+     * @returns {rgba object}
+     */
+    function getRgba(colorString) {
+
+      var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
+          match        = MATCH_COLORS.exec(colorString) || {};
+
+      return {
+        r: parseInt(match[1]   || 0),
+        g: parseInt(match[2]   || 0),
+        b: parseInt(match[3]   || 0),
+        a: parseFloat(match[4] || 1)
+      };
+    }
+
+    function isLightTone(colorValue) {
+
+      var RGBAColor = getRgba(colorValue),
+        // http://en.wikipedia.org/wiki/YIQ
+        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
+
+      return yiq > MIN_YIQ_LIGHT_TEXT;
+    }
+
+    function getAlpha(color) {
+      return getRgba(color).a;
+    }
+
+    // Starting at the sitecues-badge element, keep moving up ancestors until we find a non-transparent
+    // background.  Analyze the color, and determine the best suited color palette for the badge.
+    function getAdaptivePalette() {
+
+      var badgeElement = helper.byId(BP_CONST.BADGE_ID),
+          currentParent,
+          currentBackgroundColor;
+
+      while (true) {
+
+        currentParent          = currentParent ? currentParent.parentElement : badgeElement.parentElement;
+        currentBackgroundColor = window.getComputedStyle(currentParent).backgroundColor;
+
+        // Just return the normal palette if we have reached the <html>
+        if (currentParent === document.documentElement) {
+          return 'scp-palette' + BP_CONST.PALETTE_NAME_MAP.normal;
+        }
+
+        // Only care about non-transparent backgrounds
+        if (getAlpha(currentBackgroundColor) > 0.5) {
+
+          if (isLightTone(currentBackgroundColor)) {
+            return BP_CONST.PALETTE_NAME_MAP.normal;
+          } else {
+            return BP_CONST.PALETTE_NAME_MAP['reverse-blue'];
+          }
+
+        }
+      }
+
+    }
+
     function getPaletteClass() {
       // Set the colors
+      if (state.get('isAdaptivePalette')) {
+        return getAdaptivePalette();
+      }
       return 'scp-palette' + state.get('paletteName');
     }
 

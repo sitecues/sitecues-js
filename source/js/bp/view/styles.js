@@ -433,58 +433,61 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#447AC4'
         },
 
-        '.scp-palettew #scp-wave1': {
+        // .scp-palette-rb = reverse-blue
+        // .scp-palette-ry = reverse-yellow
+
+        '.scp-palette-rb #scp-wave1': {
           'fill': '#80A9F8'
         },
 
-        '.scp-palettew #scp-wave2': {
+        '.scp-palette-rb #scp-wave2': {
           'fill': '#6B9AE0'
         },
 
-        '.scp-palettew #scp-wave3': {
+        '.scp-palette-rb #scp-wave3': {
           'fill': '#447AC4'
         },
 
-        '.scp-palettew #scp-zoom-slider-thumb': {
+        '.scp-palette-rb #scp-zoom-slider-thumb': {
           'fill': '#447AC4'
         },
 
-        '.scp-palettew .scp-A-button, .scp-palettew #scp-head, .scp-palettew #scp-zoom-slider-bar': {
+        '.scp-palette-rb .scp-A-button, .scp-palette-rb #scp-head, .scp-palette-rb #scp-zoom-slider-bar': {
           'fill': '#fff'
         },
 
-        '.scp-large.scp-palettew .scp-A-button, .scp-large.scp-palettew #scp-head, .scp-large.scp-palettew #scp-zoom-slider-bar': {
+        '.scp-large.scp-palette-rb .scp-A-button, .scp-large.scp-palette-rb #scp-head, .scp-large.scp-palette-rb #scp-zoom-slider-bar': {
           'fill': '#000'
         },
 
-        '.scp-ready.scp-palettew .scp-A-button:hover': {
+        '.scp-ready.scp-palette-rb .scp-A-button:hover': {
           'fill': '#447AC4'
         },
 
-        '.scp-ready.scp-palettew #scp-zoom-slider-thumb:hover': {
+        '.scp-ready.scp-palette-rb #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
         },
-        '.scp-small.scp-palettey #scp-wave1': {
+        '.scp-small.scp-palette-ry #scp-wave1': {
           'fill': '#FFE460'
         },
 
-        '.scp-small.scp-palettey #scp-wave2': {
+        '.scp-small.scp-palette-ry #scp-wave2': {
           'fill': '#FFCC00'
         },
 
-        '.scp-small.scp-palettey #scp-wave3': {
+        '.scp-small.scp-palette-ry #scp-wave3': {
           'fill': '#FDAC00'
         },
 
-        '.scp-small.scp-palettey #scp-zoom-slider-thumb': {
+        '.scp-small.scp-palette-ry #scp-zoom-slider-thumb': {
           'fill': '#FFCD00'
         },
 
-        '.scp-palettey .scp-A-button, .scp-palettey #scp-head, .scp-palettey #scp-zoom-slider-bar': {
+        '.scp-palette-ry .scp-A-button, .scp-palette-ry #scp-head, .scp-palette-ry #scp-zoom-slider-bar': {
           'fill': '#fff'
         },
 
-        '.scp-large.scp-palettey .scp-A-button, .scp-large.scp-palettey #scp-head, .scp-large.scp-palettey #scp-zoom-slider-bar': {
+        '.scp-large.scp-palette-ry .scp-A-button, .scp-large.scp-palette-ry #scp-head, .scp-large.scp-palette-ry #scp-zoom-slider-bar': {
           'fill': '#000'
         },
 
