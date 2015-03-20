@@ -47,6 +47,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         }
 
         state.set('isKeyboardMode', true);
+        sitecues.emit('bp/do-show-help-button');
         sitecues.emit('bp/do-update');
         setTabCycles(evt);
         processFocusedItem(evt);
@@ -97,6 +98,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         evt.preventDefault();
         // TODO Return to using the following:
         bpc.changeModeToPanel();
+
+        sitecues.emit('bp/do-show-help-button');
       }
     };
 
@@ -146,11 +149,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       if(!item) {
         return;
-      }
-
-      // todo: clarify what does this piece of code do?
-      if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        baseController.showMoreButton();
       }
 
       baseController.showFocus();

@@ -19,7 +19,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         prepareKeyboardFocus();
         bindTemporaryHandlers();
         setPanelExpandedState();
-        resetUITimers();
 
         sitecues.emit('bp/do-update');
       }
@@ -54,8 +53,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           state.set('isKeyboardMode', true);
           state.set('focusIndex', 0);
 
-          // Always show hidden controls when opened in keyboard mode
-          baseController.showMoreButton();
         }
 
         // Take the focus whether or not we're in focus mode,
@@ -82,12 +79,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         state.set('transitionTo', BP_CONST.PANEL_MODE);
         state.set('isRealSettings', true);    // Always use real settings once expanded
         state.set('featurePanelName', null);  // We're not in a feature panel
-      }
-
-      function resetUITimers() {
-        // Timer used to show "more" button after period of no input
-        baseController.resetNoInputTimer(true);
-
       }
 
       /**
