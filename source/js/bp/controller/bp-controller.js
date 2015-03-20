@@ -47,7 +47,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         }
 
         state.set('isKeyboardMode', true);
-        sitecues.emit('bp/do-show-help-button');
         sitecues.emit('bp/do-update');
         setTabCycles(evt);
         processFocusedItem(evt);

@@ -71,6 +71,10 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         return;
       }
 
+      if (focusedItem.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
+        sitecues.emit('bp/do-show-help-button', true);
+      }
+
       panelContainer.setAttribute('aria-activedescendant', focusedItem.id);
       focusedItem.setAttribute('data-hasfocus', 'true');     // Has focus now
       focusedItem.setAttribute('data-hadfocusonce', 'true'); // Has been focused before
