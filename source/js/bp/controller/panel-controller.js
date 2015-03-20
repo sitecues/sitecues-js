@@ -14,7 +14,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     // TODO: rename
     pc.panelMouseDown = function() {
-      baseController.resetNoInputTimer();
       baseController.clearPanelFocus();
       state.set('isKeyboardMode', false);
       sitecues.emit('bp/do-update');
@@ -74,8 +73,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         bp/will-shrink removes click handler for toggling speech
        */
       sitecues.emit('bp/will-shrink');
-
-      baseController.resetNoInputTimer(false);
 
       state.set('transitionTo', BP_CONST.BADGE_MODE);
       state.set('featurePanelName', '');

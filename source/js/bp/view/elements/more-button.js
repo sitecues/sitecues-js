@@ -62,10 +62,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function initMorePanel () {
+
       addMouseListeners();
-      if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
-        alwaysShowButton = true;
-      }
+
+      // Commented out because having the "?" always in the panel makes it look bloated.
+
+      // if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
+      //   alwaysShowButton = true;
+      // }
     }
 
     function addMouseListeners () {
@@ -78,14 +82,20 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     }
 
-    function showHelpButton () {
+    function showHelpButton (useInstantTransition) {
 
       var btnContainer           = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
           currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
-          opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
+          opacityTransitionClass;
+
+          if (useInstantTransition) {
+            opacityTransitionClass = 'scp-transition-opacity-instant';
+          } else {
+            opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
+          }
 
       // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
-      if (!alwaysShowButton) {
+      if (!alwaysShowButton && !useInstantTransition) {
 
         btnContainer.setAttribute('transform', 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + 0.5 + ')');
 
@@ -99,6 +109,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       }
 
       btnContainer.setAttribute('class', opacityTransitionClass);
+
       btnContainer.style.opacity = 1;
       helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
       alwaysShowButton = true;
@@ -154,6 +165,8 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         }
       }, NO_INPUT_TIMEOUT);
     });
+
+    sitecues.on('bp/do-show-help-button', showHelpButton);
 
 
     sitecues.on('bp/will-shrink', hideHelpButton);
