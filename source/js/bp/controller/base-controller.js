@@ -4,8 +4,6 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper',
     function (BP_CONST, state, helper) {
 
-    var noInputTimerId = 0;
-
     main.tabbable = {
       'main': [
         'zoom-slider-bar',
@@ -21,27 +19,6 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         'more-button-group',
         'close-button-group'
       ]
-    };
-
-    /*
-     Timers
-     */
-    main.resetNoInputTimer = function(restart) {
-
-      // If no input for a period of time, the more button appears. On mousedown we reset the timer for this.
-      clearTimeout(noInputTimerId);
-
-      if (!state.get('isMoreButtonVisible') && restart) {
-        noInputTimerId = setTimeout(noInputOccurred, BP_CONST.NO_INPUT_TIMEOUT);
-      }
-
-    };
-
-    main.showMoreButton = function() {
-      if (state.isPanel()) {
-        // helper.byId(MORE_BUTTON_GROUP_ID).setAttribute('class', SHOW_ID);
-        state.set('isMoreButtonVisible', true);
-      }
     };
 
     // Clear the visual focus rectangle and current focus state
@@ -100,17 +77,6 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
 
       renderFocusOutline(focusedItem, panelContainer);
     };
-
-      /*
-      Private methods
-       */
-
-    function noInputOccurred() {
-      clearTimeout(noInputTimerId);
-      helper.byId(BP_CONST.SVG_ID).removeEventListener('mousedown', main.resetNoInputTimer); // No longer needed
-      main.showMoreButton();
-    }
-
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

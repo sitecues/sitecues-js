@@ -62,10 +62,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function initMorePanel () {
+
       addMouseListeners();
-      if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
-        alwaysShowButton = true;
-      }
+
+      // Commented out because having the "?" always in the panel makes it look bloated.
+
+      // if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
+      //   alwaysShowButton = true;
+      // }
     }
 
     function addMouseListeners () {
@@ -154,6 +158,8 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         }
       }, NO_INPUT_TIMEOUT);
     });
+
+    sitecues.on('bp/do-show-help-button', showHelpButton);
 
 
     sitecues.on('bp/will-shrink', hideHelpButton);
