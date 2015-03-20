@@ -98,7 +98,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         // TODO Return to using the following:
         bpc.changeModeToPanel();
 
-        sitecues.emit('bp/do-show-help-button');
       }
     };
 
