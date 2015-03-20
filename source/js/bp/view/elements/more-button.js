@@ -88,14 +88,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
           currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
           opacityTransitionClass;
 
-          if (useInstantTransition) {
+          if (useInstantTransition === true) {
             opacityTransitionClass = 'scp-transition-opacity-instant';
           } else {
             opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
           }
 
       // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
-      if (!alwaysShowButton && !useInstantTransition) {
+      if (!alwaysShowButton && useInstantTransition !== true) {
 
         btnContainer.setAttribute('transform', 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + 0.5 + ')');
 
