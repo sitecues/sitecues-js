@@ -704,7 +704,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getSVGForExtraPadding(extra) {
       var svg = '',
         color = getTransparentBackgroundColor(),
-        elementRect = roundRectCoordinates(traitcache.getScreenRect(state.picked[0])),
+        elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
         extraLeft = elementRect.left - state.fixedContentRect.left,
         extraRight = state.fixedContentRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
@@ -720,7 +720,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, state.fixedContentRect.height - topOffset, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, elementRect.width, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, state.fixedContentRect.width, extraBottom, color);
       }
       return svg;
     }
