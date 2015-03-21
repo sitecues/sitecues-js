@@ -97,7 +97,7 @@ sitecues.def('zoom', function (zoom, callback) {
         MIN_RECT_SIDE = 4,
         ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
         CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000,  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
-        REPAINT_FOR_CRISP_TEXT_DELAY = 15,          // This is conjured out of thin air. Just seems to work.
+        REPAINT_FOR_CRISP_TEXT_DELAY = 0,          // This is conjured out of thin air. Just seems to work.
         CRISPING_ATTRIBUTE = 'data-sc-crisp',
         UNPINCH_END_DELAY = 150,
         UNPINCH_POWER = .015; // How much the unpinch delta affects zoom
@@ -650,6 +650,10 @@ sitecues.def('zoom', function (zoom, callback) {
         }
 
         function beginZoomOperationAfterDelay() {
+          if (shouldRepaintOnZoomChange) {
+            body.removeAttribute(CRISPING_ATTRIBUTE);
+          }
+
           // Correct the start zoom time with the real starting time
           startZoomTime = Date.now();
 
@@ -804,9 +808,6 @@ sitecues.def('zoom', function (zoom, callback) {
           return;
         }
         body.setAttribute(CRISPING_ATTRIBUTE, '');
-        setTimeout(function() {
-          body.removeAttribute(CRISPING_ATTRIBUTE);
-        }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
         var MAX_ZINDEX = 2147483647,
           appendedDiv = $('<div>')
