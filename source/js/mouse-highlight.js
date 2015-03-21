@@ -767,7 +767,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // (it can change because of scrollable sub-regions)
       var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
           state.fixedContentRect.top, extra, state.zoom);
-      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
+      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - 1); // Fudge factor of 1 to remove white gaps
       state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
       roundPolygonCoordinates(state.pathFillBackground);
       roundPolygonCoordinates(state.pathBorder);

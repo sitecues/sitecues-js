@@ -61,9 +61,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       var range = document.createRange(),
         parent,
         // ********** IE, Chrome, Safari and FF >= 34 are fine **********
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 34;
+        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 34,
+        isElement = node.nodeType === 1;
 
-      if (node.nodeType === 1) {
+      if (isElement) {
         // Case 1: element -- get the rect for the element's descendant contents
         parent = node;
         range.selectNodeContents(node);
@@ -77,11 +78,24 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
 
       if (platform.browser.isIE) {
-        return getIECorrectionsToRangeRect(contentsRangeRect);
+        contentsRangeRect = getIECorrectionsToRangeRect(contentsRangeRect);
       }
 
       if (isOldFirefox) {
-        return getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect);
+        contentsRangeRect = getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect);
+      }
+
+      if (!isElement) {
+        var textVerticalClipRect = getTextVerticalClipping(node, contentsRangeRect, range);
+
+        if (textVerticalClipRect) {
+          // Clip text to the bounding element, otherwise the top and bottom will
+          // encompass the entire line-height, which can contain a lot of whitespace/
+          // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
+          contentsRangeRect.top = Math.max(contentsRangeRect.top, textVerticalClipRect.top);
+          contentsRangeRect.bottom = Math.min(contentsRangeRect.bottom, textVerticalClipRect.bottom);
+          contentsRangeRect.height = contentsRangeRect.bottom - contentsRangeRect.top;
+        }
       }
 
       return contentsRangeRect;
@@ -218,11 +232,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       }
 
       var
-        overflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
-        overflowY = style.overflowY === 'visible' &&
+        hasOverflowX = style.overflowX === 'visible' && element.scrollWidth - element.clientWidth > 1,
+        hasOverflowY = style.overflowY === 'visible' &&
           element.scrollHeight - clientHeight >= getLineHeight(style);
 
-      if (!overflowX && !overflowY) {
+      if (!hasOverflowX && !hasOverflowY) {
         return;
       }
 
@@ -255,8 +269,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         newRect = {
           left: rect.left,
           top: rect.top,
-          width: overflowX ? element.scrollWidth * zoom : Math.min(rect.width, MIN_RECT_SIDE),
-          height: overflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
+          width: hasOverflowX ? element.scrollWidth * zoom : Math.min(rect.width, MIN_RECT_SIDE),
+          height: hasOverflowY ? element.scrollHeight * zoom : Math.min(rect.height, MIN_RECT_SIDE)
         };
 
       return getRectMinusPadding(newRect, style);
@@ -320,19 +334,12 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
             // hidden and clipped elements.
             // ----------------------------------------------------------------------------------------------------
-            var rect = mhpos.getContentsRangeRect(this),
-              textVerticalClipRect = getTextVerticalClipRect(this, rect);
-
-            if (textVerticalClipRect) {
-              // Clip text to the bounding element, otherwise the top and bottom will
-              // encompass the entire line-height, which can contain a lot of whitespace/
-              // We only use this technique to clip the top and bottom -- left and right do not need this treatment.
-              rect.top = Math.max(rect.top, textVerticalClipRect.top);
-              rect.bottom = Math.min(rect.bottom, textVerticalClipRect.bottom);
-              rect.height = rect.bottom - rect.top;
-            }
+            var rect = mhpos.getContentsRangeRect(this);
 
             addRect(allRects, clipRect, rect);
+
+            // --- Overflowing content ---
+            addRect(allRects, clipRect, getOverflowRect(this.parentNode, traitcache.getStyle(this.parentNode)));
           }
           return;
         }
@@ -383,9 +390,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           addRect(allRects, clipRect, getRectMinusPadding(thisRect, style));
           return;
         }
-
-        // --- Overflowing content ---
-        addRect(allRects, clipRect, getOverflowRect(this, style));
 
         // --- Visible border or form controls ---
         if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
@@ -479,14 +483,33 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     // A text range is clipped by the vertical bounds of it's parent element
     // when the line height of the text is larger than the text rect's height --
     // this avoids extra spacing above and below, especially around headings.
-    function getTextVerticalClipRect(textNode, textRect) {
+    // Return either nothing for no clip, or an object with a top: and bottom: to clip to
+    function getTextVerticalClipping(textNode, textRect, range) {
       var parent = textNode.parentNode,
         zoom = getZoom(),
-        lineHeight = parseFloat(traitcache.getStyleProp(parent, 'lineHeight')) * zoom;
-      if (lineHeight > textRect.height) {
+        lineHeight = parseFloat(traitcache.getStyleProp(parent, 'lineHeight')) * zoom,
+        numLines = range.getClientRects().length,
+        // TODO Can we clip always? Unfortunately we did not document the counter-case. Maybe we can always do it.
+        shouldClip = lineHeight * (numLines + 0.7) > textRect.height,
+        clipInfo;
+
+      if (shouldClip) {
         // Clip the text vertically to the parent element, because the large
         // line-height causes the element bounds to be larger than the text
-        return traitcache.getScreenRect(parent);
+        clipInfo = traitcache.getScreenRect(parent);
+        while (traitcache.getStyleProp(parent, 'display') === 'inline') {
+          parent = parent.parentNode;
+          if (parent) {
+            var parentRect = parent.getBoundingClientRect();
+            if (parentRect.top > clipInfo.top) {
+              clipInfo.top = parentRect.top;
+            }
+            if (parentRect.bottom < clipInfo.bottom) {
+              clipInfo.bottom = parentRect.bottom;
+            }
+          }
+        }
+        return clipInfo;
       }
     }
 
