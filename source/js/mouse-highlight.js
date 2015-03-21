@@ -833,8 +833,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       document.body.appendChild(svgFragment);
       var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
-        width = state.fixedContentRect.width / state.zoom + 2 * extra,
-        height = state.fixedContentRect.height / state.zoom + 2 * extra;
+        width = state.fixedContentRect.width / state.zoom + 2 * extra + 1,  // Extra pixel ensures right side not cut off
+        height = state.fixedContentRect.height / state.zoom + 2 * extra + 1;  // Extra pixel ensures bottom not cut off
       $svg.attr({
         width: width + 'px',
         height: height + 'px'
