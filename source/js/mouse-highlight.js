@@ -231,7 +231,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var maxViz = state.hasDarkBackgroundColor || state.hasLightText ? 1 : 9,
         viz = Math.min(getHighlightVisibilityFactor(), maxViz),
         alpha;
-      alpha = 0.12 * viz;
+      alpha = 0.11 * viz;
       return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
