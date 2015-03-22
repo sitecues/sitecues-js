@@ -11,6 +11,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     target: null,     // Mouse was last over this element
     styles: [],
     savedCSS: null,   // map of saved CSS for highlighted element
+    savedBgColors: null, // map of descendant elements to saved background colors
     elementRect: null,
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
     hiddenElements: [], // Elements whose subtrees are hidden or not part of highlight rectangle (e.g. display: none, hidden off-the-page, out-of-flow)
@@ -149,7 +150,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return getRgba(color)['a'];
     }
 
-    function isDarkBackground(bgColor) {
+    function isDarkTone(bgColor) {
       return !isLightTone(bgColor);
     }
 
@@ -159,7 +160,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         var bgColor = styles[count].backgroundColor,
           isMostlyOpaque = getAlpha(bgColor) > 0.8;
         if (isMostlyOpaque) {
-          return isDarkBackground(bgColor);
+          return isDarkTone(bgColor);
         }
       }
     }
@@ -192,7 +193,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         state.doUseOverlayForBgColor = false;
       }
     }
-
 
     // How visible is the highlight?
     // Currently goes from 1.44 (at 1x) to 3.24 (at 3x)
@@ -327,6 +327,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Change background image for highlighted elements if necessary
       updateElementBgImage();
 
+      // Remove conflicting backgrounds on descendants
+      removeConflictingDescendantBackgrounds();
+
       // Add event listeners to keep overlay view up-to-date
       addMouseWheelUpdateListenersIfNecessary();
       $(document).one('mouseleave', onLeaveWindow);
@@ -451,7 +454,32 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundClip = 'border-box,' + origBgClip;
       style.backgroundColor = origBgColor;
       style.backgroundSize = 'auto auto,' + origBgSize;
-    };
+    }
+
+    // Check all descendants for redundant background colors that will
+    // carve chunks out of the highlight color.
+    // For example, a theme on perkins.org that sets white backgrounds on many elements.
+    // When we highlight an ancestor of one of those elements, we need to temporarily set
+    // the background to transparent so that the highlight color can show through
+    function removeConflictingDescendantBackgrounds() {
+      if (state.doUseOverlayForBgColor) {
+        return; // Not necessary in this case, as the highlight color is over the top of descendants
+      }
+      if (state.savedBgColors !== null) {
+        return; // Already computed
+      }
+      state.savedBgColors = [];
+      state.picked.find('*').each(function() {
+        var style = traitcache.getStyle(this),
+          bgColor = style.backgroundColor;
+        if (getRgba(bgColor)['a'] === 1 && isDarkTone(bgColor) !== !state.hasDarkBackgroundColor) {
+          state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
+          var prevStyle = this.getAttribute('style') || '';
+          // Needed to do this as !important because of Perkins.org theme which also used !important
+          this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+        }
+      });
+    }
 
     function getCutoutRectForPoint(x, y, expandFloatRectPixels, typeIfFloatRectShorter, typeIfFloatRectTaller) {
       var possibleFloat = common.elementFromPoint(x, y),  // Get from top-left or top-right of highlight
@@ -1332,6 +1360,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Restore the previous CSS on the picked elements (remove highlight bg etc.)
         $(state.picked).css(state.savedCss);
         state.savedCss = null;
+        state.savedBgColors.forEach(function(savedBg) {
+          savedBg.elem.style.backgroundColor = savedBg.color;
+        });
+        state.savedBgColors = [];
+
         if ($(state.picked).attr('style') === '') {
           $(state.picked).removeAttr('style'); // Full cleanup of attribute
         }
@@ -1452,7 +1485,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.picked = state.picked;
       exports.state = state;
       exports.INIT_STATE = INIT_STATE;
-      exports.isDarkBackground = isDarkBackground;
+      exports.isDarkBackground = isDarkTone;
       exports.hasDarkBackgroundOnAnyOf = hasDarkBackgroundOnAnyOf;
       exports.hasLightText = hasLightText;
       exports.getElementsContainingText = getElementsContainingText;
