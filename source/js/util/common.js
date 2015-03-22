@@ -82,7 +82,8 @@ sitecues.def('util/common', function (common, callback) {
         return false;
       }
       var bgColor = style.backgroundColor;
-      if (parentStyle && bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor)) {
+      if (parentStyle && bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor) &&
+        !isTransparentColor(parentStyle.backgroundColor)) {
         return true;
       }
 
