@@ -722,42 +722,51 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getSVGFillRectMarkup(left, top, width, height, fillColor) {
-
-      return '<rect x="' + left  + '" y="' + top + '"  width="' + width  + '" height="' + height  + '"' +
+      var zoom = state.zoom;
+      return '<rect x="' + (left/zoom)  + '" y="' + (top/zoom) + '"  width="' + (width/zoom)  + '" height="' + (height/zoom)  + '"' +
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
     // For list bullet area, when it is inside margin instead of padding, and thus couldn't be covered with bg image
     // Also for right or bottom overflow
     function getSVGForExtraPadding(extra) {
-      var svg = '',
+
+      var highlightBgScreenRect = state.fixedContentRect, // Scaled by zoom
+        svg = '',
         color = getTransparentBackgroundColor(),
-        elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect());
+        elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
+        innerHighlightWidth = highlightBgScreenRect.width;
 
       // Fudge factors for common gaps on bottom, right
       // TODO figure out why these help -- we shouldn't need them
+      elementRect.top += .5;
+      elementRect.left += .5;
       elementRect.bottom -= .5;
-      elementRect.height -= .5;
       elementRect.right -= .5;
-      elementRect.width -= .5;
+      elementRect.height -= 1;
+      elementRect.width -= 1;
 
       var
-        extraLeft = elementRect.left - state.fixedContentRect.left,
-        extraRight = state.fixedContentRect.right - elementRect.right,
+        extraLeft = elementRect.left - highlightBgScreenRect.left,
+        extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
         extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
-          state.fixedContentRect.bottom - elementRect.bottom;
+          highlightBgScreenRect.bottom - elementRect.bottom,
+        extraTop = elementRect.top - highlightBgScreenRect.top;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
-        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, state.fixedContentRect.height - topOffset, color);
+        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, highlightBgScreenRect.height - topOffset, color);
       }
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : 0; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, state.fixedContentRect.height - topOffset, color);
+        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, highlightBgScreenRect.height - topOffset, color);
+      }
+      if (extraTop > 0) {
+        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, state.fixedContentRect.width, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra + extraTop, innerHighlightWidth, extraBottom, color);
       }
       return svg;
     }
@@ -798,12 +807,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var extra = getExtraPixels();
 
       state.cutoutRects = getCutoutRects();
-      state.pathFillBackground = getPolygonPoints(state.fixedContentRect);
+      var basePolygonPath = getPolygonPoints(state.fixedContentRect);
       // Get the path for the overlay so that the top-left corner is located at 0,0
       // The updateHighlightOverlayPosition() code will set the top, left for it
       // (it can change because of scrollable sub-regions)
-      var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
+      var adjustedPath = getAdjustedPath(basePolygonPath, state.fixedContentRect.left,
           state.fixedContentRect.top, extra, state.zoom);
+      state.pathFillBackground = basePolygonPath; // Helps fill gaps
       state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2); // Fudge factor of .5 to remove white gaps
       state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
       roundPolygonCoordinates(state.pathFillBackground);
