@@ -135,6 +135,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * @returns {rgba object}
      */
     function getRgba(colorString) {
+      // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
+      if (colorString === 'transparent') {
+        return {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 0
+        };
+      }
       var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
         match = MATCH_COLORS.exec(colorString) || {};
 
