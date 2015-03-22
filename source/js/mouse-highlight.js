@@ -230,9 +230,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // This lightens at higher levels of zoom
       var maxViz = state.hasDarkBackgroundColor || state.hasLightText ? 1 : 9,
         viz = Math.min(getHighlightVisibilityFactor(), maxViz),
-        alpha;
-      alpha = 0.11 * viz;
-      return 'rgba(245, 245, 205, ' + alpha + ')'; // Works with any background -- lightens it slightly
+        alpha = 0.11 * viz;
+      return 'rgba(240, 240, 180, ' + alpha + ')'; // Works with any background -- lightens it slightly
     }
 
     function getOpaqueBackgroundColor() {
@@ -735,16 +734,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg = '',
         color = getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
-        innerHighlightWidth = highlightBgScreenRect.width;
+        innerHighlightWidth = highlightBgScreenRect.width + 2 * extra;
 
-      // Fudge factors for common gaps on bottom, right
-      // TODO figure out why these help -- we shouldn't need them
-      elementRect.top += .5;
-      elementRect.left += .5;
-      elementRect.bottom -= .5;
-      elementRect.right -= .5;
-      elementRect.height -= 1;
-      elementRect.width -= 1;
+//      // Fudge factors for common gaps on bottom, right
+//      // TODO figure out why these help -- we shouldn't need them
+//      elementRect.top += .5;
+//      elementRect.left += .5;
+//      elementRect.bottom -= .5;
+//      elementRect.right -= .5;
+//      elementRect.height -= 1;
+//      elementRect.width -= 1;
 
       var
         extraLeft = elementRect.left - highlightBgScreenRect.left,
@@ -763,10 +762,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, highlightBgScreenRect.height - topOffset, color);
       }
       if (extraTop > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
+        svg += getSVGFillRectMarkup(extra + state.zoom, extra, innerHighlightWidth, extraTop, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra + extraTop, innerHighlightWidth, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra + state.zoom, elementRect.height  + extra + extraTop, innerHighlightWidth, extraBottom, color);
       }
       return svg;
     }
