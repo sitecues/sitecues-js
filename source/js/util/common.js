@@ -59,7 +59,7 @@ sitecues.def('util/common', function (common, callback) {
       var isVisualRegion =
         hasBorder(style) ||
         common.hasRaisedZIndex(style, parentStyle) ||
-        common.hasOwnBackground(style, parentStyle);
+        common.hasOwnBackground(element, style, parentStyle);
 
       return !!isVisualRegion;
     };
@@ -76,20 +76,32 @@ sitecues.def('util/common', function (common, callback) {
       return color === 'transparent' || color.match(/^rgba.*0\)$/);
     }
 
-    common.hasOwnBackground = function(style, parentStyle) {
-      // 1. Background colors
+    common.hasOwnBackground = function(elem, style, parentStyle) {
       if (!style) {
         return false;
       }
-      var bgColor = style.backgroundColor;
-      if (parentStyle && bgColor !== parentStyle.backgroundColor && !isTransparentColor(bgColor) &&
-        !isTransparentColor(parentStyle.backgroundColor)) {
+
+      // 1. Background images (sprites don't count -- often used for things like bullets)
+      if (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat'
+        && parseFloat(style.backgroundPositionX) === 0 && parseFloat(style.backgroundPositionY) === 0) {
         return true;
       }
 
-      // 2. Background images (sprites don't count -- often used for things like bullets)
-      return (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat'
-        && parseFloat(style.backgroundPositionX) === 0 && parseFloat(style.backgroundPositionY) === 0);
+      // 2. Background colors
+      var bgColor = style.backgroundColor;
+      if (parentStyle && !isTransparentColor(bgColor)) {
+        var parent = elem.parentNode;
+        while (isTransparentColor(parentStyle.backgroundColor)) {
+          if (parent === document.documentElement) {
+            // Only transparent colors above = treated as white
+            // Therefore current opaque bg is only treated as different if it's not white
+            return bgColor !== 'rgb(255, 255, 255)';
+          }
+          parent = parent.parentNode;
+          parentStyle = getComputedStyle(parent);
+        }
+        return parentStyle.backgroundColor !== bgColor;
+      }
     };
 
     common.hasVisibleContent = function(current) {

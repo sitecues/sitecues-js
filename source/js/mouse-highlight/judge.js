@@ -229,7 +229,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
         // Check whether a CSS background creates a visual separation from the parent,
         // (for example, it has a different background-color or uses a background-image).
         // Don't include non-repeating sprites (positioned background images) -- these are used for bullets, etc.
-        hasOwnBackground: !!common.hasOwnBackground(traits.style, parentTraits.style),
+        hasOwnBackground: !!common.hasOwnBackground(node, traits.style, parentTraits.style),
         hasSiblingBackground: hasSiblingBackground(node, parentTraits.style, traits.tag),
         hasDescendantWithRaisedZIndex: childJudgements && (childJudgements.hasRaisedZIndex || childJudgements.hasDescendantWithRaisedZIndex),
         hasDescendantOutOfFlow: childJudgements && (childJudgements.isOutOfFlow || childJudgements.hasDescendantOutOfFlow)
@@ -816,7 +816,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
       var sibling = element.previousElementSibling || element.nextElementSibling;
       return !!(
         sibling && $(sibling).is(tag + ':not(:empty)') &&
-        common.hasOwnBackground(traitcache.getStyle(sibling), parentStyle));
+        common.hasOwnBackground(sibling, traitcache.getStyle(sibling), parentStyle));
     }
 
     // Get the traits of the first non-inline element as we go up ancestor chain, because

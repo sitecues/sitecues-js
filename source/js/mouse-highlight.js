@@ -704,7 +704,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function getSVGForExtraPadding(extra) {
       var svg = '',
         color = getTransparentBackgroundColor(),
-        elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
+        elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect());
+
+      // Fudge factors for common gaps on bottom, right
+      // TODO figure out why these help -- we shouldn't need them
+      elementRect.bottom -= .5;
+      elementRect.height -= .5;
+      elementRect.right -= .5;
+      elementRect.width -= .5;
+
+      var
         extraLeft = elementRect.left - state.fixedContentRect.left,
         extraRight = state.fixedContentRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
@@ -767,7 +776,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // (it can change because of scrollable sub-regions)
       var adjustedPath = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left,
           state.fixedContentRect.top, extra, state.zoom);
-      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - 1); // Fudge factor of 1 to remove white gaps
+      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2); // Fudge factor of .5 to remove white gaps
       state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
       roundPolygonCoordinates(state.pathFillBackground);
       roundPolygonCoordinates(state.pathBorder);
