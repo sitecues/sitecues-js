@@ -121,13 +121,13 @@ describe('mouse-highlight', function () {
     });
   });
 
-  describe('#getElementsContainingText()', function () {
+  describe('#getElementsContainingOwnText()', function () {
     it('should return a jquery element of length 1 if there is one element with descendant text', function (done) {
-      expect(mh.getElementsContainingText($('<h1><span>Text</span></h1>')).length).to.be.equal(1);
+      expect(mh.getElementsContainingOwnText($('<h1><span>Text</span></h1>')).length).to.be.equal(1);
       done();
     });
     it('should return an empty jquery object if there is no descendant text', function (done) {
-      expect(mh.getElementsContainingText($('<h1><img></h1>')).length).to.be.equal(0);
+      expect(mh.getElementsContainingOwnText($('<h1><img></h1>')).length).to.be.equal(0);
       done();
     });
   });
