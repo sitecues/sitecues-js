@@ -96,7 +96,7 @@ sitecues.def('bp', function (bp, callback) {
           r: 0,
           g: 0,
           b: 0,
-          a: 0
+          a:
         };
       }
       var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
@@ -157,7 +157,7 @@ sitecues.def('bp', function (bp, callback) {
 
     function getPaletteClass() {
       // Set the colors
-      if (true /**state.get('isAdaptivePalette')**/) {
+      if (state.get('isAdaptivePalette')) {
         return 'scp-palette' + getAdaptivePalette();
       }
       return 'scp-palette' + state.get('paletteName');
