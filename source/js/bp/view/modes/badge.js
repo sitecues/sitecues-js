@@ -163,7 +163,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     }
 
     function getBackgroundColor() {
-      return getComputedStyle(document.body)['backgroundColor'];
+      return getComputedStyle(document.body).backgroundColor;
     }
 
     function addPaletteListener() {
@@ -175,7 +175,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     function setCustomPalette (badgeElement) {
 
       var paletteName = getBadgePalette(badgeElement);
-      if (paletteName === BP_CONST.PALETTE_NAME_MAP['adaptive']) {
+      if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
         state.set('isAdaptivePalette', true);
         addPaletteListener();
       }

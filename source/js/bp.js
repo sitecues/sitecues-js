@@ -90,14 +90,22 @@ sitecues.def('bp', function (bp, callback) {
      * @returns {rgba object}
      */
     function getRgba(colorString) {
-
+      // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
+      if (colorString === 'transparent') {
+        return {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 0
+        };
+      }
       var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
-          match        = MATCH_COLORS.exec(colorString) || {};
+        match = MATCH_COLORS.exec(colorString) || {};
 
       return {
-        r: parseInt(match[1]   || 0),
-        g: parseInt(match[2]   || 0),
-        b: parseInt(match[3]   || 0),
+        r: parseInt(match[1] || 0),
+        g: parseInt(match[2] || 0),
+        b: parseInt(match[3] || 0),
         a: parseFloat(match[4] || 1)
       };
     }
@@ -149,7 +157,7 @@ sitecues.def('bp', function (bp, callback) {
 
     function getPaletteClass() {
       // Set the colors
-      if (state.get('isAdaptivePalette')) {
+      if (true /**state.get('isAdaptivePalette')**/) {
         return 'scp-palette' + getAdaptivePalette();
       }
       return 'scp-palette' + state.get('paletteName');
