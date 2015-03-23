@@ -96,7 +96,7 @@ sitecues.def('bp', function (bp, callback) {
           r: 0,
           g: 0,
           b: 0,
-          a:
+          a: 0
         };
       }
       var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
