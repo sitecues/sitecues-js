@@ -167,8 +167,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Change the zoom by the given amount -- useful for
       // increase/decrease caused by keypress on a focused zoom slider
       zoom.changeZoomBy = function(delta) {
-        zoom.jumpTo(completedZoom + delta);
-        sitecues.emit('zoom/stop');  // Discrete slider update is finished
+        beginGlide(completedZoom + delta);
       };
 
       // Retrieve and store whether the current window is on a Retina display
@@ -1240,7 +1239,13 @@ sitecues.def('zoom', function (zoom, callback) {
 
         clearTimeout(unpinchEndTimer);
         unpinchEndTimer = setTimeout(finishZoomOperation, UNPINCH_END_DELAY);
-        zoom.jumpTo(targetZoom);
+        if (!isZoomOperationRunning()) {
+          // 1st call -- we will glide to it, it may be far away from previous zoom value
+          beginZoomOperation(targetZoom, {isUnpinch: true}); // Get ready for more slider updates
+        }
+
+        currentTargetZoom = getSanitizedZoomValue(targetZoom); // Change target
+        performInstantZoomOperation();
         event.preventDefault();
       }
 
