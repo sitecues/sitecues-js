@@ -291,6 +291,9 @@ sitecues.def('zoom', function (zoom, callback) {
             finishZoomOperation();
           });
         }
+        else {
+          zoomInput.isSliderDragStopped = true;
+        }
         // Else is in the middle of gliding to a zoom click -- let it finish --
         // the animation's end will cause finishZoomOperation() to be called
       }
@@ -406,7 +409,7 @@ sitecues.def('zoom', function (zoom, callback) {
           }
           else {
             SC_DEV && console.log('Begin JS zoom');
-            performJsAnimateZoomOperation(true);
+            performJsAnimateZoomOperation();
           }
 
         }
@@ -545,15 +548,19 @@ sitecues.def('zoom', function (zoom, callback) {
         elementDotAnimatePlayer.onfinish = onGlideStopped;
       }
 
+      function isSliderActive() {
+        return zoomInput.isSlider && !zoomInput.isSliderDragStopped;
+      }
+
       // Animate until the currentTargetZoom, used for gliding zoom changes
       // Use falsey value for isTargetZoomStable for slider zoom, where the
       // target keeps changing as the slider moves
-      function performJsAnimateZoomOperation(doZoomFinishedCheck) {
+      function performJsAnimateZoomOperation() {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
           var midAnimationZoom = getMidAnimationZoom();
           $body.css(getZoomCss(midAnimationZoom));
-          if (doZoomFinishedCheck && midAnimationZoom === currentTargetZoom) {
-            finishZoomOperation();
+          if (midAnimationZoom === currentTargetZoom && !isSliderActive()) {
+            zoomAnimator = requestFrame(finishZoomOperation);
           }
           else {
             zoomAnimator = requestFrame(jsZoomStep);
@@ -676,6 +683,7 @@ sitecues.def('zoom', function (zoom, callback) {
         zoomInput = $.extend({
           isSlider: false,                    // Slider in panel
           isSliderDrag: false,                // True if the user drags the slider (as opposed to clicking in it)
+          isSliderDragStopped: false,         // True if the user dragged the slider and now stopped
           isLongGlide: false,                 // Key or A button held down to glide extra
           event: {}
         }, input);
