@@ -532,6 +532,7 @@ sitecues.def('zoom', function (zoom, callback) {
       function performInstantZoomOperation() {
         var zoomCss = getZoomCss(currentTargetZoom);
         if (platform.browser.isChrome && document.body.animate) {
+          // Magically, this works with the new crisper (and the new crisper doesn't kill mouse events on floats ...)
           elementDotAnimatePlayer = body.animate(
             [zoomCss, zoomCss],
             {
