@@ -39,8 +39,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // How many ms does scrolling need to stop for before we highlight?
   SCROLL_STOP_MS = 140,
 
-  // Don't consider the text light unless the yiq is larger than this
-  MIN_YIQ_LIGHT_TEXT = 160,
+  // Color values for YIQ computations
+  MID_COLOR_INTENSITY = 160,   // Don't consider the text light unless the yiq is larger than this
+  VERY_DARK_COLOR_INTENSITY = 16,
+  VERY_LIGHT_COLOR_INTENSITY = 240,
 
   // Extra border width in pixels if background is dark and light bg color is being used
   EXTRA_DARK_BG_BORDER_WIDTH = 1,
@@ -94,15 +96,20 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return getZIndex(item1) !== getZIndex(item2);
     }
 
+    // Returns value 0-255: 0 = darkest, 255=lightest
+    // http://en.wikipedia.org/wiki/YIQ
+    function getColorIntensity(colorValue) {
+      var RGBAColor = getRgba(colorValue),
+        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
+
+      return yiq;
+    }
+
     /**
      * Checks if the color value given of a light tone or not.
      */
-    function isLightTone(colorValue) {
-      var RGBAColor = getRgba(colorValue),
-        // http://en.wikipedia.org/wiki/YIQ
-        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
-
-      return yiq > MIN_YIQ_LIGHT_TEXT;
+    function isLightIntensity(colorValue) {
+      return getColorIntensity(colorValue) > MID_COLOR_INTENSITY;
     }
 
     function getElementsContainingText(selector) {
@@ -121,7 +128,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if (index >= MAX_ELEMENTS_TO_CHECK) {
           return false;
         }
-        if (isLightTone(traitcache.getStyleProp(this, 'color'))) {
+        var textColor = traitcache.getStyleProp(this, 'color');
+        if (isLightIntensity(textColor)) {
           containsLightText = true;
           return false;
         }
@@ -156,11 +164,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function getAlpha(color) {
-      return getRgba(color)['a'];
+      return getRgba(color).a;
     }
 
     function isDarkTone(bgColor) {
-      return !isLightTone(bgColor);
+      return !isLightIntensity(bgColor);
     }
 
     function hasDarkBackgroundOnAnyOf(styles) {
@@ -177,7 +185,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     function updateColorApproach(picked, style) {
       // Get data on backgrounds and text colors used
       state.hasDarkBackgroundColor = hasDarkBackgroundOnAnyOf(style);
-      state.hasLightText = hasLightText(state.target);
+      state.hasLightText = hasLightText(picked);
 
       // Get the approach used for highlighting
       if (DO_SUPPORT_SVG_OVERLAY &&
@@ -326,6 +334,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         appendOverlayPathViaCssOutline(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor());
       }
 
+      // Remove conflicting backgrounds on descendants
+      removeConflictingDescendantBackgrounds();
+
       // Position overlay just on top of the highlighted element (and underneath fixed toolbars)
       updateHighlightOverlayZIndex();
 
@@ -334,9 +345,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Change background image for highlighted elements if necessary
       updateElementBgImage();
-
-      // Remove conflicting backgrounds on descendants
-      removeConflictingDescendantBackgrounds();
 
       // Add event listeners to keep overlay view up-to-date
       addMouseWheelUpdateListenersIfNecessary();
@@ -464,6 +472,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundSize = 'auto auto,' + origBgSize;
     }
 
+    function isCloseToHighlightColor(colorIntensity) {
+      if (state.hasDarkBackgroundColor) {
+        // On dark background, using dark highlight
+        return colorIntensity < VERY_DARK_COLOR_INTENSITY
+      }
+      else {
+        // On light background, using light highlight
+        return colorIntensity > VERY_LIGHT_COLOR_INTENSITY
+      }
+    }
+
     // Check all descendants for redundant background colors that will
     // carve chunks out of the highlight color.
     // For example, a theme on perkins.org that sets white backgrounds on many elements.
@@ -480,11 +499,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.picked.find('*').each(function() {
         var style = traitcache.getStyle(this),
           bgColor = style.backgroundColor;
-        if (getRgba(bgColor)['a'] === 1 && isDarkTone(bgColor) !== !state.hasDarkBackgroundColor) {
-          state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
-          var prevStyle = this.getAttribute('style') || '';
-          // Needed to do this as !important because of Perkins.org theme which also used !important
-          this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+        if (style.backgroundImage ==='none' && getRgba(bgColor).a === 1) {
+          var colorIntensity = getColorIntensity(bgColor);
+          if (isCloseToHighlightColor(colorIntensity)) {
+            state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
+            var prevStyle = this.getAttribute('style') || '';
+            // Needed to do this as !important because of Perkins.org theme which also used !important
+            this.setAttribute('style', 'background-color: transparent !important; ' + prevStyle);
+          }
         }
       });
     }
@@ -930,7 +952,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           .appendTo(appendTo);
         isHorizontal = !isHorizontal; // Every other line is horizontal
       }
-      return;
     }
 
     function shouldAvoidBackgroundImage(picked) {
