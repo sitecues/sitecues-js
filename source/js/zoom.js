@@ -530,7 +530,19 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
-        $body.css(getZoomCss(currentTargetZoom));
+        var zoomCss = getZoomCss(currentTargetZoom);
+        if (platform.browser.isChrome && document.body.animate) {
+          elementDotAnimatePlayer = body.animate(
+            [zoomCss, zoomCss],
+            {
+              duration: 1,
+              iterations: 1,
+              fill: 'forwards'
+            });
+        }
+        else {
+          $body.css(zoomCss);
+        }
         thumbChangeListener && thumbChangeListener(currentTargetZoom);
       }
 
