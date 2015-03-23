@@ -43,6 +43,7 @@ sitecues.def('zoom', function (zoom, callback) {
         isInitialized,           // Is the zoom module already initialized?
         minZoomChangeTimer,      // Keep zooming at least for this long, so that a glide does a minimum step
         zoomAnimator,            // Frame request ID that can be cancelled
+        elementDotAnimatePlayer, // AnimationPlayer used in some browsers (element.animate)
         completedZoom = 1,       // Current zoom as of the last finished operation
         currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
         startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
@@ -95,9 +96,9 @@ sitecues.def('zoom', function (zoom, callback) {
         SITECUES_ZOOM_ID = 'sitecues-zoom',
         ANIMATION_END_EVENTS = 'animationend webkitAnimationEnd MSAnimationEnd',
         MIN_RECT_SIDE = 4,
-        ANIMATION_OPTIMIZATION_SETUP_DELAY = 100,   // Provide extra time to set up compositor layer if a key is pressed
+        ANIMATION_OPTIMIZATION_SETUP_DELAY = 20,   // Provide extra time to set up compositor layer if a key is pressed
         CLEAR_ANIMATION_OPTIMIZATION_DELAY = 7000,  // After zoom, clear the will-change property if no new zoom occurs within this amount of time
-        REPAINT_FOR_CRISP_TEXT_DELAY = 0,          // This is conjured out of thin air. Just seems to work.
+        REPAINT_FOR_CRISP_TEXT_DELAY = 100,          // This is conjured out of thin air. Just seems to work.
         CRISPING_ATTRIBUTE = 'data-sc-crisp',
         UNPINCH_END_DELAY = 150,
         UNPINCH_POWER = .015; // How much the unpinch delta affects zoom
@@ -298,13 +299,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // In dev, we can override as follows:
       // Shift-key: Script-based smooth zoom
       // Ctrl-key: CSS-based smooth zoom
-      function shouldSmoothZoom(event) {
-        var event = event || {};
-
-        if (SC_DEV && (event.shiftKey || event.ctrlKey)) {
-          return true; // Dev override -- use animation no matter what
-        }
-
+      function shouldSmoothZoom() {
         if (shouldFixFirefoxScreenCorruptionBug()) {
           return false;
         }
@@ -312,32 +307,23 @@ sitecues.def('zoom', function (zoom, callback) {
         return zoomConfig.shouldSmoothZoom;
       }
 
+      function shouldUseElementDotAnimate() {
+        return platform.browser.isChrome && document.body.animate;
+      }
+
       // If smooth zoom is used, which kind -- JS or CSS keyframes?
       // In dev, we can override default behavior as follows:
       // Shift-key: Script-based
       // Ctrl-key: CSS-based
-      function shouldUseKeyFramesAnimation(event) {
-        var event = event || {};
-        if (SC_DEV) {
-          // In dev, allow overriding of animation type
-          if (event.shiftKey) {
-            return false; // Use JS-based animation
-          }
-          else if (event.ctrlKey) {
-            return true;
-          }
-        }
-
-        return shouldSmoothZoom(event)
+      function shouldUseKeyFramesAnimation() {
+        return shouldSmoothZoom()
           // IE9 just can't do CSS animate
           && (!platform.browser.isIE || platform.browser.version > 9)
           // Safari is herky jerky if animating the width and using key frames
           // TODO fix initial load zoom with jsZoom -- not doing anything
           && (!platform.browser.isSafari || !shouldRestrictWidth())
-          // Chrome has jerk-back bug on Retina displays so we should only do it for initial zoom
-          // which has an exact end-of-zoom,and really needs key frames during the initial zoom which is
-          // stressing the browser because it's part of the critical load path.
-          && (!platform.browser.isChrome || isInitialLoadZoom || zoomInput.isSlider || !zoom.isRetina() || shouldRestrictWidth());
+          // Chrome will use element.animate();
+          && !shouldUseElementDotAnimate();
       }
 
       // Should we wait for browser to create compositor layer?
@@ -382,7 +368,7 @@ sitecues.def('zoom', function (zoom, callback) {
       function beginGlide(targetZoom, event) {
         if (!isZoomOperationRunning() && targetZoom !== completedZoom) {
           var input = { event: event };
-          if (!shouldSmoothZoom(event)) {
+          if (!shouldSmoothZoom()) {
             beginZoomOperation(targetZoom, input);
             // Instant zoom
             if (event) {
@@ -410,13 +396,17 @@ sitecues.def('zoom', function (zoom, callback) {
           }
 
 
-          if (shouldUseKeyFramesAnimation()) {
+          if (shouldUseElementDotAnimate()) {
+            SC_DEV && console.log('Begin element.animate zoom');
+            performElementDotAnimateZoomOperation();
+          }
+          else if (shouldUseKeyFramesAnimation()) {
             SC_DEV && console.log('Begin keyframes zoom');
             performKeyFramesZoomOperation();
           }
           else {
             SC_DEV && console.log('Begin JS zoom');
-            performJsAnimateZoomOperation();
+            performJsAnimateZoomOperation(true);
           }
 
         }
@@ -472,12 +462,28 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
+        // Stop element.animate player
+        if (elementDotAnimatePlayer) {
+          // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
+          // while the animation player is stopped so that it doesn't block future style attribute changes
+          // from taking affect (e.g. via the slider)
+          elementDotAnimatePlayer.pause();
+          requestFrame(function () {
+            currentTargetZoom = getActualZoom();
+            $body.css(getZoomCss(currentTargetZoom));
+            elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+          });
+          return;
+        }
+
+        // JS zoom operation
         if (!shouldUseKeyFramesAnimation()) {
           currentTargetZoom = getMidAnimationZoom();
           finishZoomOperation();
           return;
         }
 
+        // Stop key frames or element.animate
         zoomAnimator = requestFrame(function () {
           // Stop the key-frame animation at the current zoom level
           // Yes, it's crazy, but this sequence helps the zoom stop where it is supposed to, and not jump back a little
@@ -508,6 +514,12 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function onGlideStopped() {
+        if (elementDotAnimatePlayer) {
+          // If we don't do this, then setting CSS directly on body no longer works
+          // (May not have been cancelled if user holds + and reaches 3 or holds - and reaches 1)
+          elementDotAnimatePlayer.cancel();
+          elementDotAnimatePlayer = null;
+        }
         $body
           .css(getZoomCss(currentTargetZoom))
           .css('animation', '');
@@ -520,12 +532,27 @@ sitecues.def('zoom', function (zoom, callback) {
         thumbChangeListener && thumbChangeListener(currentTargetZoom);
       }
 
+      function performElementDotAnimateZoomOperation() {
+        var animationMs = Math.abs(currentTargetZoom - completedZoom) * MS_PER_X_ZOOM_GLIDE;
+        elementDotAnimatePlayer = body.animate(
+          getAnimationKeyFrames(currentTargetZoom),
+          {
+            duration: animationMs,
+            iterations: 1,
+            fill: 'forwards',
+            easing: isInitialLoadZoom ? 'ease-out' : 'linear'
+          });
+        elementDotAnimatePlayer.onfinish = onGlideStopped;
+      }
+
       // Animate until the currentTargetZoom, used for gliding zoom changes
-      function performJsAnimateZoomOperation() {
+      // Use falsey value for isTargetZoomStable for slider zoom, where the
+      // target keeps changing as the slider moves
+      function performJsAnimateZoomOperation(doZoomFinishedCheck) {
         function jsZoomStep(/*currentTime*/) {  // Firefox passes in a weird startZoomTime that can't be compared with Date.now()
           var midAnimationZoom = getMidAnimationZoom();
           $body.css(getZoomCss(midAnimationZoom));
-          if (midAnimationZoom === currentTargetZoom) {
+          if (doZoomFinishedCheck && midAnimationZoom === currentTargetZoom) {
             finishZoomOperation();
           }
           else {
@@ -593,33 +620,50 @@ sitecues.def('zoom', function (zoom, callback) {
         return SITECUES_ZOOM_ID + '-' + Math.round(completedZoom * 1000) + '-' + Math.round(targetZoom * 1000);
       }
 
-      // Get keyframes css for animating from completed zoom to target zoom
-      function getAnimationCSS(targetZoom) {
-        var animationName = getAnimationName(targetZoom),
-          keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
-          keyFramesCss = animationName + ' {\n',
-          timePercent = 0,
+      function getAnimationKeyFrames(targetZoom, doEase, doIncludeTimePercent) {
+        var timePercent,
           animationPercent,
           step = 0,
           // For animation performance, use adaptive algorithm for number of keyframe steps:
           // Bigger zoom jump = more steps
           numSteps = Math.ceil(Math.abs(targetZoom - completedZoom) * 20),
           percentIncrement = 1 / numSteps,
-          cssPrefix = platform.cssPrefix.slice().replace('-moz-', '');
+          keyFrames = [];
 
         for (; step <= numSteps; ++step) {
           timePercent = step === numSteps ? 1 : step * percentIncrement;
-          if (isInitialLoadZoom) {
+          if (doEase) {
             // Provide simple sinusoidal easing in out effect for initial load zoom
-            animationPercent =   (Math.cos(Math.PI*timePercent) - 1) / -2;
+            animationPercent = (Math.cos(Math.PI*timePercent) - 1) / -2;
           }
           else {
             animationPercent = timePercent;
           }
-          var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent,
-            zoomCss = getZoomCss(midAnimationZoom),
-            zoomCssString = cssPrefix + 'transform: ' + zoomCss.transform + (zoomCss.width ? '; width: ' + zoomCss.width : '');
-          keyFramesCss += Math.round(10000 * timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
+          var midAnimationZoom = completedZoom + (targetZoom - completedZoom) * animationPercent;
+          keyFrames[step] = getZoomCss(midAnimationZoom);
+          if (doIncludeTimePercent) {
+            keyFrames[step].timePercent = timePercent;
+          }
+        }
+
+        return keyFrames;
+      }
+
+      // Get keyframes css for animating from completed zoom to target zoom
+      function getAnimationCSS(targetZoom) {
+        var animationName = getAnimationName(targetZoom),
+          keyFramesCssProperty = platform.browser.isWebKit ? '@-webkit-keyframes ' : '@keyframes ',
+          keyFramesCss = animationName + ' {\n',
+          keyFrames = getAnimationKeyFrames(targetZoom, isInitialLoadZoom, true),
+          cssPrefix = platform.cssPrefix.slice().replace('-moz-', ''),
+          numSteps = keyFrames.length - 1,
+          step = 0;
+
+        for (; step <= numSteps; ++step) {
+          var keyFrame = keyFrames[step],
+            zoomCssString = cssPrefix + 'transform: ' + keyFrame.transform + (keyFrame.width ? '; width: ' + keyFrame.width : '');
+
+          keyFramesCss += Math.round(10000 * keyFrame.timePercent) / 100 + '% { ' + zoomCssString + ' }\n';
         }
         keyFramesCss += '}\n\n';
 
@@ -650,10 +694,6 @@ sitecues.def('zoom', function (zoom, callback) {
         }
 
         function beginZoomOperationAfterDelay() {
-          if (shouldRepaintOnZoomChange) {
-            body.removeAttribute(CRISPING_ATTRIBUTE);
-          }
-
           // Correct the start zoom time with the real starting time
           startZoomTime = Date.now();
 
@@ -807,22 +847,29 @@ sitecues.def('zoom', function (zoom, callback) {
         if (!shouldRepaintOnZoomChange) {
           return;
         }
+
         body.setAttribute(CRISPING_ATTRIBUTE, '');
+        setTimeout(function() {
+          body.removeAttribute(CRISPING_ATTRIBUTE);
+        }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
         var MAX_ZINDEX = 2147483647,
           appendedDiv = $('<div>')
           .css({
             position: 'fixed',
-            width: '1px',
-            height: '1px',
-            opacity: 0,
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 1,
+            backgroundColor: 'transparent',
             zIndex: MAX_ZINDEX,
             pointerEvents: 'none'
           })
           .appendTo('html');
         setTimeout(function () {
           appendedDiv.remove();
-        }, REPAINT_FOR_CRISP_TEXT_DELAY);
+        }, 0);
       }
 
       // We are going to remove scrollbars and re-add them ourselves, because we can do a better job
@@ -1103,7 +1150,9 @@ sitecues.def('zoom', function (zoom, callback) {
         body = document.body;
         $body = $(body);
         originalBodyInfo = getBodyInfo();
-        shouldUseWillChangeOptimization = typeof document.body.style.willChange === 'string';
+        // Not necessary to use CSS will-change with element.animate()
+        shouldUseWillChangeOptimization =
+          typeof document.body.style.willChange === 'string' && !shouldUseElementDotAnimate();
       }
 
       // Lazy init, saves time on page load
