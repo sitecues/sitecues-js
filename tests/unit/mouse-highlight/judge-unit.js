@@ -91,7 +91,7 @@ describe('judge', function() {
                 judgementStack;
 
             traitStack[1].style.backgroundColor = 'rgba(99,99,99,1)';
-            traitStack[2].style.backgroundColor = 'transparent'; // Parent
+            traitStack[2].style.backgroundColor = 'rgba(55,55,55,1)'; // Parent
             judgementStack = judge.getJudgementStack(traitStack, nodes);
             expect(judgementStack[1].hasOwnBackground).to.be.equal(true);
             done();
