@@ -112,15 +112,30 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return getColorIntensity(colorValue) > MID_COLOR_INTENSITY;
     }
 
-    function getElementsContainingText(selector) {
+    function getElementsContainingOwnText(selector) {
+      var TEXT_NODE = 3;
       return $(selector).find('*').addBack().filter(function() {
-        var $this = $(this);
-        return $this.children().length === 0 && $.trim($this.text()).length > 0;
+        var childNodes = this.childNodes,
+          numChildNodes = childNodes.length,
+          index,
+          testNode;
+        if (this.childElementCount === numChildNodes) {
+          return false; // Same number of elements as child nodes -- doesn't have it's own text nodes
+        }
+
+        for (index = 0; index < numChildNodes; index ++) {
+          testNode = childNodes[index];
+          if (testNode.nodeType === TEXT_NODE && testNode.textContent.trim() !== '') {
+            return true;
+          }
+        }
+
+        return false;
       });
     }
 
     function hasLightText(selector) {
-      var textContainers = getElementsContainingText(selector),
+      var textContainers = getElementsContainingOwnText(selector),
         MAX_ELEMENTS_TO_CHECK = 100,
         containsLightText = false;
 
@@ -1527,7 +1542,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       exports.isDarkBackground = isDarkTone;
       exports.hasDarkBackgroundOnAnyOf = hasDarkBackgroundOnAnyOf;
       exports.hasLightText = hasLightText;
-      exports.getElementsContainingText = getElementsContainingText;
+      exports.getElementsContainingOwnText = getElementsContainingOwnText;
       exports.getRgba = getRgba;
       exports.updateColorApproach = updateColorApproach;
       exports.getHighlightVisibilityFactor = getHighlightVisibilityFactor;
