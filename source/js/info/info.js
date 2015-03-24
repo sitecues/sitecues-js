@@ -167,7 +167,6 @@ sitecues.def('info', function(info, callback) {
         .off('message', checkCloseMessage)
         .off('DOMMouseScroll mousewheel', preventScroll);
       enableWebPagePointerEvents(true);
-      $('#sitecues-badge').focus();
 
       dimmer.undimBackgroundContent(DIMMER_SPEED);
 
