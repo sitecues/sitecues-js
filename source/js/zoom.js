@@ -82,8 +82,11 @@ sitecues.def('zoom', function (zoom, callback) {
         // other method, which is to overlay a transparent div and then remove it)
         shouldRepaintOnZoomChange = platform.browser.isChrome,
 
-        // Is the will-change CSS property supported?
+        // Is the will-change CSS property supported? And should we use it?
         shouldUseWillChangeOptimization,
+
+        // Should we use the Web Animations API (element.animate) ?
+        shouldUseElementDotAnimate,
 
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
@@ -309,10 +312,6 @@ sitecues.def('zoom', function (zoom, callback) {
         return zoomConfig.shouldSmoothZoom;
       }
 
-      function shouldUseElementDotAnimate() {
-        return platform.browser.isChrome && document.body.animate;
-      }
-
       // If smooth zoom is used, which kind -- JS or CSS keyframes?
       // In dev, we can override default behavior as follows:
       // Shift-key: Script-based
@@ -325,7 +324,7 @@ sitecues.def('zoom', function (zoom, callback) {
           // TODO fix initial load zoom with jsZoom -- not doing anything
           && (!platform.browser.isSafari || !shouldRestrictWidth())
           // Chrome will use element.animate();
-          && !shouldUseElementDotAnimate();
+          && !shouldUseElementDotAnimate;
       }
 
       // Should we wait for browser to create compositor layer?
@@ -398,7 +397,7 @@ sitecues.def('zoom', function (zoom, callback) {
           }
 
 
-          if (shouldUseElementDotAnimate()) {
+          if (shouldUseElementDotAnimate) {
             SC_DEV && console.log('Begin element.animate zoom');
             performElementDotAnimateZoomOperation();
           }
@@ -469,11 +468,13 @@ sitecues.def('zoom', function (zoom, callback) {
           // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
           // while the animation player is stopped so that it doesn't block future style attribute changes
           // from taking affect (e.g. via the slider)
-          elementDotAnimatePlayer.pause();
-          requestFrame(function () {
-            currentTargetZoom = getActualZoom();
-            $body.css(getZoomCss(currentTargetZoom));
-            elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+          requestFrame(function() {
+            elementDotAnimatePlayer.pause();
+            requestFrame(function () {
+              currentTargetZoom = getActualZoom();
+              $body.css(getZoomCss(currentTargetZoom));
+              elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+            });
           });
           return;
         }
@@ -1170,9 +1171,13 @@ sitecues.def('zoom', function (zoom, callback) {
         body = document.body;
         $body = $(body);
         originalBodyInfo = getBodyInfo();
+
+        // Wait until document.body is available to init
+        shouldUseElementDotAnimate = platform.browser.isChrome && body.animate;
+
         // Not necessary to use CSS will-change with element.animate()
         shouldUseWillChangeOptimization =
-          typeof document.body.style.willChange === 'string' && !shouldUseElementDotAnimate();
+          typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
       }
 
       // Lazy init, saves time on page load
