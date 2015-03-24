@@ -782,24 +782,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg = '',
         color = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
-        innerHighlightWidth = highlightBgScreenRect.width + 2 * extra;
-
-//      // Fudge factors for common gaps on bottom, right
-//      // TODO figure out why these help -- we shouldn't need them
-//      elementRect.top += .5;
-//      elementRect.left += .5;
-//      elementRect.bottom -= .5;
-//      elementRect.right -= .5;
-//      elementRect.height -= 1;
-//      elementRect.width -= 1;
-
-      var
+        innerHighlightWidth = highlightBgScreenRect.width,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
+        extraTop = elementRect.top - highlightBgScreenRect.top,
         extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
-          highlightBgScreenRect.bottom - elementRect.bottom,
-        extraTop = elementRect.top - highlightBgScreenRect.top;
+          extraTop + highlightBgScreenRect.bottom - elementRect.bottom;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
@@ -810,10 +799,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, highlightBgScreenRect.height - topOffset, color);
       }
       if (extraTop > 0) {
-        svg += getSVGFillRectMarkup(extra + state.zoom, extra, innerHighlightWidth, extraTop, color);
+        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra + state.zoom, elementRect.height  + extra + extraTop, innerHighlightWidth, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra  , innerHighlightWidth, extraBottom, color);
       }
       return svg;
     }
@@ -861,7 +850,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var adjustedPath = getAdjustedPath(basePolygonPath, state.fixedContentRect.left,
           state.fixedContentRect.top, extra, state.zoom);
       state.pathFillBackground = basePolygonPath; // Helps fill gaps
-      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2); // Fudge factor of .5 to remove white gaps
+      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - .5); // Fudge factor of .5 to remove white gaps
       state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
       roundPolygonCoordinates(state.pathFillBackground);
       roundPolygonCoordinates(state.pathBorder);
@@ -923,7 +912,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
         // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
         extra = getExtraPixels(),
-        extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra) : '',
+        extraPaddingSVG = paddingColor ? getSVGForExtraPadding(extra * state.zoom) : '',
         svgFragment = common.createSVGFragment(outlineSVG + paddingSVG + extraPaddingSVG, HIGHLIGHT_OUTLINE_CLASS);
 
       document.body.appendChild(svgFragment);
