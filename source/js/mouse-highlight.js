@@ -335,8 +335,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Show the actual overlay
       if (!doKeepHidden) {
         show();
+        return true;
       }
-      return true;
     }
 
     function show() {
@@ -822,7 +822,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       element = state.picked[0];
-      elementRect = traitcache.getScreenRect(element); // Rough bounds
+      elementRect = element.getBoundingClientRect(); // Rough bounds
 
       // Get exact bounds
       var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
@@ -1068,11 +1068,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (!state.isCreated) {
         return false;
       }
-      // If the picked element's rectangle has changed, always return false
-      // because we will need to redraw the highlight anyway.
-      if (!common.equals(state.elementRect, traitcache.getScreenRect(state.picked[0]))) {
-        return false; // Original element has changed size
-      }
       // Return true we're inside in the existing highlight
       return isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
     }
@@ -1274,13 +1269,12 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if (mouseEvent) {
           cursorPos = getCursorPos(mouseEvent);
         }
-        if (!updateView()) {
-          forget(); // Old highlight not appropriate, so hide it
+        if (updateView()) {
+          return;  // Highlight is appropriate and made visible again
         }
       }
-      else {
-        forget();
-      }
+
+      hide();
     }
 
     function onSpeechChanged() {
