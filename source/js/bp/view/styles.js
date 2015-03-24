@@ -230,6 +230,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // TODO text needs to fade in at the end
+        // todo: looks like this style will apply to all the text nodes, not only sitecues-related: is it what we want?
         'text': {
           'display': 'none',
           'transition': 'opacity 1s',
@@ -273,11 +274,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
-        '.scp-large .scp-large-only': {
+        '.scp-large .scp-large-only': { // element is visible in the large state of the badge-panel
           'opacity': '1 !important'
         },
 
-        '.scp-more .scp-more-only': {
+        '.scp-more .scp-more-only': { // element is visible in the more state of the badge-panel
           'opacity': '1 !important'
         },
 
@@ -497,6 +498,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-ready #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
+        },
+
+        // todo: maybe think of a more unique name for this class?
+        '.sc-only': {
+          'visibility': 'visible',
+          'opacity': 1
         }
       };
 
