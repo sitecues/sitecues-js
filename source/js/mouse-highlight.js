@@ -60,6 +60,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   isWindowFocused = document.hasFocus(),
   isSticky,
   isColorDebuggingOn,
+  isHighlightRectDebuggingOn,
 
   pickFromMouseTimer,
 
@@ -1080,12 +1081,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // If we have scrolled since the highlight was originally created,
     // we will need to update the fixed rect(s).
     function correctFixedRectangleCoordinatesForExistingHighlight(deltaX, deltaY) {
-      var rect = state.fixedContentRect;
+      function correctRect(rect) {
+        rect.top += deltaY;
+        rect.bottom += deltaY;
+        rect.left += deltaX;
+        rect.right +=deltaX;
+      }
 
-      rect.top += deltaY;
-      rect.bottom += deltaY;
-      rect.left += deltaX;
-      rect.right +=deltaX;
+      correctRect(state.fixedContentRect);
+      correctRect(state.elementRect);
     }
 
     function onMouseMove(event) {
@@ -1097,6 +1101,24 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       pickFromMouseAfterDelay(event);
     }
+
+   function updateDebugRect() {
+     $('#sc-debug-mh-rect').remove();
+     if (!state.isCreated) {
+       return;
+     }
+     $('<div id="sc-debug-mh-rect">')
+       .appendTo(document.documentElement)
+       .css({
+         top: state.fixedContentRect.top + 'px',
+         left: state.fixedContentRect.left + 'px',
+         width: state.fixedContentRect.width + 'px',
+         height: state.fixedContentRect.height + 'px',
+         position: 'fixed',
+         pointerEvents: 'none',
+         outline: '2px solid rgba(150,0,0,.5)'
+       });
+   }
 
     // We run the picker if the mouse position hasn't changed for a while, meaning
     // that the mouse has paused over content
@@ -1124,14 +1146,26 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           // Already had a highlight
           var lastScrollX = cursorPos.scrollX;
           var lastScrollY = cursorPos.scrollY;
-          cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
-          correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
+          if (window.pageXOffset === lastScrollX && window.pageYOffset == lastScrollY) {
+            // Web page is lying about the scroll position
+            // This happens because of funky scrolling effects on pages like
+            // https://medium.com/backchannel/the-war-over-who-steve-jobs-was-92bda2cd1e1e
+            var newElementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect());
+            correctFixedRectangleCoordinatesForExistingHighlight(newElementRect.left - state.elementRect.left,
+                newElementRect.top - state.elementRect.top);
+            state.elementRect = newElementRect;
+          }
+          else {
+            cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
+            correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
+          }
         }
         else {
           cursorPos = getCursorPos(event);
         }
 
         if (isExistingHighlightRelevant()) {
+          SC_DEV && isHighlightRectDebuggingOn && updateDebugRect();
           return; // No highlighting || highlight is already good -- nothing to do
         }
         // Highlight was inappropriate -- cursor wasn't in it
@@ -1142,6 +1176,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // In case doesn't move after fast velocity, check in a moment and update highlight if no movement
         pickFromMouseTimer = 0;
         pickFromMouse(event);
+        SC_DEV && isHighlightRectDebuggingOn && updateDebugRect();
       }, wasScrollEvent ? SCROLL_STOP_MS : MOUSE_STOP_MS);
     }
 
@@ -1500,6 +1535,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         isColorDebuggingOn = !isColorDebuggingOn;
         return isColorDebuggingOn;
       };
+
+      /**
+       * Toggle debugging of the current highlight rect, which needs to keep up-to-date with scrolling
+       */
+      sitecues.toggleMHRectDebugging = function() {
+        isHighlightRectDebuggingOn = ! isHighlightRectDebuggingOn;
+        return isHighlightRectDebuggingOn;
+      }
 
       sitecues.getHighlight = mh.getHighlight;
     }
