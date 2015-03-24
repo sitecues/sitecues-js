@@ -238,6 +238,7 @@ sitecues.def('bp', function (bp, callback) {
 
     // Replace each {{keyname}} with the translation using that key
     // Key names can container lower case letters, numbers and underscores
+    // todo: for logic separation concerns this code should belong to localization.js!
     function localizeStrings(svg) {
       var MATCH_KEY = /\{\{([a-z0-9\_]+)\}\}/g;
       return svg.replace(MATCH_KEY, function (match, capture) { return locale.translate(capture); });
