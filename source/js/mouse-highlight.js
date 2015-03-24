@@ -1,3 +1,4 @@
+
 sitecues.def('mouse-highlight', function (mh, callback) {
 
   'use strict';
@@ -442,16 +443,17 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
                      getSVGForPath(path, 0, 0, bgColor, 1) +
-                     '</svg>';
+                     '</svg>',
+        FUDGE_FACTOR = 1;
 
       // Use element rectangle to find origin (left, top) of background
       // The background is getting clipped before being offset to the left
-      offsetLeft = state.fixedContentRect.left - state.elementRect.left;
+      offsetLeft = state.fixedContentRect.left - state.elementRect.left + FUDGE_FACTOR;
       if (offsetLeft < 0) {
         // If the background needs to be pulled left, line it up to the right of the outline
         offsetLeft = Math.max(0, state.fixedContentRect.right - state.elementRect.right);
       }
-      offsetTop = state.fixedContentRect.top- state.elementRect.top;
+      offsetTop = state.fixedContentRect.top- state.elementRect.top + FUDGE_FACTOR;
 
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
