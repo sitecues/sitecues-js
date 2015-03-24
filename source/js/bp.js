@@ -214,7 +214,7 @@ sitecues.def('bp', function (bp, callback) {
       // Create the svg container
       bpContainer = document.createElement('div');
 
-      bpSVG.html = localizeStrings(bpSVG.html);
+      bpSVG.html = locale.localizeStrings(bpSVG.html);
 
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
@@ -234,14 +234,6 @@ sitecues.def('bp', function (bp, callback) {
       placement.init(badgeElement, bpContainer, svgElement);
 
       bindPermanentListeners(badgeElement);
-    }
-
-    // Replace each {{keyname}} with the translation using that key
-    // Key names can container lower case letters, numbers and underscores
-    // todo: for logic separation concerns this code should belong to localization.js!
-    function localizeStrings(svg) {
-      var MATCH_KEY = /\{\{([a-z0-9\_]+)\}\}/g;
-      return svg.replace(MATCH_KEY, function (match, capture) { return locale.translate(capture); });
     }
 
     function bindPermanentListeners(badgeElement) {

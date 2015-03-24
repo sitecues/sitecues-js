@@ -78,6 +78,13 @@ sitecues.def('util/localization', function(locale, callback) {
 
   };
 
+  // Replace each {{keyname}} with the translation using that key
+  // Key names can container lower case letters, numbers and underscores
+  locale.localizeStrings = function(text) {
+    var MATCH_KEY = /\{\{([a-z0-9\_]+)\}\}/g;
+    return text.replace(MATCH_KEY, function (match, capture) { return locale.translate(capture); });
+  };
+
   /**
    * Translate a number
    * @param number  Number to translate
