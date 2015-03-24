@@ -862,9 +862,6 @@ sitecues.def('zoom', function (zoom, callback) {
        * See here: https://equinox.atlassian.net/wiki/display/EN/Known+Issues
        */
       function repaintToEnsureCrispText() {
-        // We used to use backfaceVisibility trick, but it erased backgrounds on the body.
-        // This was done as follows:
-        // Luckily, inserting a shim seems to work now (may not have in previous versions of Chrome when we tried it)
         if (!shouldRepaintOnZoomChange) {
           return;
         }
