@@ -59,6 +59,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
+  isColorDebuggingOn,
 
   pickFromMouseTimer,
 
@@ -436,9 +437,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       // Approach #2 --change CSS background of highlighted element
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 0, state.zoom),
+        bgColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(0,255,255,.4)' : state.bgColor,
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
-                     getSVGForPath(path, 0, 0, state.bgColor, 1) +
+                     getSVGForPath(path, 0, 0, bgColor, 1) +
                      '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
@@ -778,7 +780,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       var highlightBgScreenRect = state.fixedContentRect, // Scaled by zoom
         svg = '',
-        color = getTransparentBackgroundColor(),
+        color = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
         innerHighlightWidth = highlightBgScreenRect.width + 2 * extra;
 
@@ -913,8 +915,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // paddingColor:
         //   If overlay is used for fill color, we will put the fill in that, and don't need any padding color
         //   Otherwise, the we need the padding to bridge the gap between the background (clipped by the element) and the outline
-        paddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
-        paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
+        truePaddingColor = state.doUseOverlayForBgColor ? '' : state.bgColor,
+        paddingColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(0, 255, 0, .4)' : truePaddingColor,
+          paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
         outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
           overlayBgColor, 3),
         // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
@@ -1499,6 +1502,14 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       sitecues.toggleStickyMH = function () {
         isSticky = !isSticky;
         return isSticky;
+      };
+
+      /**
+       * Toggle color debugging which makes it easier to see where white gaps in highlight are coming from
+       */
+      sitecues.toggleMHColorDebugging = function () {
+        isColorDebuggingOn = !isColorDebuggingOn;
+        return isColorDebuggingOn;
       };
 
       sitecues.getHighlight = mh.getHighlight;
