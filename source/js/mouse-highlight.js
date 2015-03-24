@@ -3,7 +3,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   'use strict';
 
-  var EXTRA_HIGHLIGHT_PIXELS = 3, // Amount of space around highlighted object before to separate border
+  var
 
   INIT_STATE = {
     isCreated: false, // Has highlight been created
@@ -47,6 +47,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   // Extra border width in pixels if background is dark and light bg color is being used
   EXTRA_DARK_BG_BORDER_WIDTH = 1,
+
+  // Extra room around highlight
+  EXTRA_PIXELS_FOR_FIXED_RECTS = 2, // Amount of extra space computed for fixed highlight rectangles
+  EXTRA_PADDING_PIXELS = 3, // Amount of space around highlighted object before to separate border
 
   // Border color when on dark background
   DARK_BG_BORDER_COLOR = 'rgb(65, 60, 145)',
@@ -790,8 +794,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
         extraTop = elementRect.top - highlightBgScreenRect.top,
+        BOTTOM_FUDGE_FACTOR = 1 * state.zoom,
         extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
-          extraTop + highlightBgScreenRect.bottom - elementRect.bottom;
+          extraTop + highlightBgScreenRect.bottom - elementRect.bottom - BOTTOM_FUDGE_FACTOR;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
@@ -805,7 +810,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra  , innerHighlightWidth, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra  + BOTTOM_FUDGE_FACTOR, innerHighlightWidth, extraBottom, color);
       }
       return svg;
     }
@@ -830,6 +835,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
         fixedRects = mhPositionInfo.allRects;
       state.hiddenElements = mhPositionInfo.hiddenElements;
+      geo.expandOrContractRects(fixedRects, EXTRA_PIXELS_FOR_FIXED_RECTS);
 
       if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
@@ -842,7 +848,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.elementRect = $.extend({}, elementRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom);
-      state.highlightPaddingWidth = roundBorderWidth(EXTRA_HIGHLIGHT_PIXELS);
+      state.highlightPaddingWidth = roundBorderWidth(EXTRA_PADDING_PIXELS);
       var extra = getExtraPixels();
 
       state.cutoutRects = getCutoutRects();
@@ -853,7 +859,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var adjustedPath = getAdjustedPath(basePolygonPath, state.fixedContentRect.left,
           state.fixedContentRect.top, extra, state.zoom);
       state.pathFillBackground = basePolygonPath; // Helps fill gaps
-      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2 - .5); // Fudge factor of .5 to remove white gaps
+      state.pathFillPadding = getExpandedPath(adjustedPath, state.highlightPaddingWidth / 2);
       state.pathBorder = getExpandedPath(state.pathFillPadding, state.highlightPaddingWidth /2 + state.highlightBorderWidth /2 );
       roundPolygonCoordinates(state.pathFillBackground);
       roundPolygonCoordinates(state.pathBorder);

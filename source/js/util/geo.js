@@ -44,6 +44,14 @@ sitecues.def('util/geo', function(geo, callback) {
 			return newRect;
 		};
 
+    geo.expandOrContractRects = function(rects, delta) {
+      var numRects = rects.length,
+        index = 0;
+      for (; index < numRects; index ++ ) {
+        rects[index] = geo.expandOrContractRect(rects[index], delta);
+      }
+    };
+
     // done
 		callback();
 
