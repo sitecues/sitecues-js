@@ -647,7 +647,7 @@ sitecues.def('mouse-highlight/judge', function(judge, callback) {
           }
           sibling = sibling.nextElementSibling;
         }
-        currentAncestor = currentAncestor.parentNode;
+        currentAncestor = currentAncestor.parentElement;
       }
       return 0;
     }
