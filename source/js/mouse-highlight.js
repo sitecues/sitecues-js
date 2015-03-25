@@ -454,7 +454,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       offsetLeft = state.fixedContentRect.left - state.elementRect.left;
       if (offsetLeft < 0) {
         // If the background needs to be pulled left, line it up to the right of the outline
-        offsetLeft = Math.max(0, state.fixedContentRect.right - state.elementRect.right);
+        // Careful of creating gap on left side, e.g. at http://www.wctv.tv/home/headlines/Authorities-Seek-Remedy-for-Naked-North-Carolina-Neighbor-297377681.html
+        offsetLeft = 0; // Math.max(0, state.fixedContentRect.right - state.elementRect.right);
       }
       offsetTop = state.fixedContentRect.top- state.elementRect.top;
 
