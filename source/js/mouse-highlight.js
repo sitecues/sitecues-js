@@ -801,7 +801,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         transparentColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
         opaqueColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getOpaqueBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
-        REMOVE_GAPS_FUDGE_FACTOR = 0.25,
+        REMOVE_GAPS_FUDGE_FACTOR = 0.5,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
