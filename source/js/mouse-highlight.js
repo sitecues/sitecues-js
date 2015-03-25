@@ -447,17 +447,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
                      getSVGForPath(path, 0, 0, bgColor, 1) +
-                     '</svg>',
-        FUDGE_FACTOR = 1;
+                     '</svg>';
 
       // Use element rectangle to find origin (left, top) of background
       // The background is getting clipped before being offset to the left
-      offsetLeft = state.fixedContentRect.left - state.elementRect.left + FUDGE_FACTOR;
+      offsetLeft = state.fixedContentRect.left - state.elementRect.left;
       if (offsetLeft < 0) {
         // If the background needs to be pulled left, line it up to the right of the outline
         offsetLeft = Math.max(0, state.fixedContentRect.right - state.elementRect.right);
       }
-      offsetTop = state.fixedContentRect.top- state.elementRect.top + FUDGE_FACTOR;
+      offsetTop = state.fixedContentRect.top- state.elementRect.top;
 
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
@@ -794,9 +793,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
         extraTop = elementRect.top - highlightBgScreenRect.top,
-        BOTTOM_FUDGE_FACTOR = 1 * state.zoom,
         extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
-          extraTop + highlightBgScreenRect.bottom - elementRect.bottom - BOTTOM_FUDGE_FACTOR;
+          extraTop + highlightBgScreenRect.bottom - elementRect.bottom;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
@@ -810,7 +808,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
       }
       if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra  + BOTTOM_FUDGE_FACTOR, innerHighlightWidth, extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, innerHighlightWidth, extraBottom, color);
       }
       return svg;
     }
