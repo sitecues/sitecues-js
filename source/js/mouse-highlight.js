@@ -535,7 +535,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           bgColor = style.backgroundColor;
         if (style.backgroundImage ==='none' && getRgba(bgColor).a === 1) {
           var colorIntensity = getColorIntensity(bgColor);
-          if (isCloseToHighlightColor(colorIntensity)) {
+          if (isCloseToHighlightColor(colorIntensity) &&
+            !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
             state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });
             var prevStyle = this.getAttribute('style') || '';
             // Needed to do this as !important because of Perkins.org theme which also used !important
