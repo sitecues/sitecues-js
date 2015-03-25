@@ -554,12 +554,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         }
         while (!commonAncestor.is(possibleFloat) && !$(possibleFloat).is('body,html')) {
           if (traitcache.getStyleProp(possibleFloat, 'float') !== 'none') {
-            var floatRect = roundRectCoordinates(mhpos.getRect(possibleFloat)),
+            var floatRect = mhpos.getRect(possibleFloat),
               mhRect = state.fixedContentRect,
               extra = getExtraPixels();
             if (!floatRect) {
               return;
             }
+            floatRect = roundRectCoordinates(floatRect);
             var results = {};
             if (floatRect.left > mhRect.left - extra && floatRect.right <= mhRect.right + extra &&
               floatRect.top >= mhRect.top - extra && floatRect.bottom <= mhRect.bottom + extra) {
