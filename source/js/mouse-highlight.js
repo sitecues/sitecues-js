@@ -55,6 +55,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   // Border color when on dark background
   DARK_BG_BORDER_COLOR = 'rgb(65, 60, 145)',
 
+  // All CSS background properties except color
+  // Image must be listed last for multiple backgrounds code to work
+  BG_PROPS = ['Position', 'Origin', 'Repeat', 'Clip', 'Attachment', 'Size', 'Image'],
+
   state,
 
   isTrackingMouse, // Are we currently tracking the mouse?
@@ -429,10 +433,37 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
     }
 
+    function setMultipleBackgrounds(style, newBg, origBg, doPlaceOrigOnTop) {
+      var hasOrigBgImage = origBg.backgroundImage !== 'none',
+        value;
+      BG_PROPS.forEach(function(prop) {
+        var fullName = 'background' + prop;
+        if (!hasOrigBgImage) {
+          value = newBg[fullName];
+        }
+        else if (doPlaceOrigOnTop) {
+          value = origBg[fullName] + ',' + newBg[fullName];
+        }
+        else {
+          value = newBg[fullName] + ',' + newBg[fullName];
+        }
+        style[fullName] = value;
+      });
+    }
+
+    function copyBackgroundCss(orig) {
+      var copy = {};
+      BG_PROPS.forEach(function (prop) {
+        var fullName = 'background' + prop;
+        copy[fullName] = orig[fullName].slice();
+      });
+      return copy;
+    }
+
     function updateElementBgImage() {
 
       var element = state.picked[0],
-          style = element.style,
+          inlineStyle = element.style,
           offsetLeft,
           offsetTop;
 
@@ -446,7 +477,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         bgColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(0,255,255,.4)' : state.bgColor,
         bgPaintableWidth = state.fixedContentRect.width,
         bgPaintableHeight = state.fixedContentRect.height,
-        bgSizeString,
+        newBgSize,
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
                      getSVGForPath(path, 0, 0, bgColor, 1) +
@@ -468,42 +499,28 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       bgPaintableWidth = Math.min(bgPaintableWidth + state.zoom, state.elementRect.width);
       bgPaintableHeight = Math.min(bgPaintableHeight  + state.zoom, state.elementRect.height);
-      bgSizeString = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(bgPaintableHeight / state.zoom) + 'px';
+      newBgSize = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(bgPaintableHeight / state.zoom) + 'px';
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
 
-      state.savedCss = {
-        'background-image'      : style.backgroundImage,
-        'background-position'   : style.backgroundPosition,
-        'background-origin'     : style.backgroundOrigin,
-        'background-repeat'     : style.backgroundRepeat,
-        'background-clip'       : style.backgroundClip,
-        'background-attachment' : style.backgroundAttachment,
-        'background-size'       : style.backgroundSize,
-        'background-color'      : style.backgroundColor
-      };
-
       // This only returns a non-zero value when there is an offset to the current element, try highlighting "Welcome to Bank of North America" on the eBank test site.
-      var newBgPos = (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
-        newBg ='url("data:image/svg+xml,' + encodeURI(svgMarkup) + '") no-repeat ' + newBgPos + ' scroll',
-        origStyle = traitcache.getStyle(element),
-        // Use .slice() to make a copy so that original string is not changed
-        origBgColor = origStyle.backgroundColor.slice(),
-        origBgOrigin = origStyle.backgroundOrigin.slice(),
-        origBgClip = origStyle.backgroundClip.slice(),
-        origBgSize = origStyle.backgroundSize.slice(),
-        // Remove color and other properties from the original background string, if they don't go into the shorthand background property
-        origBgShorthandProperties = origStyle.backgroundImage === 'none' ? '' :
-          ',' + origStyle.backgroundImage + ' ' + origStyle.backgroundRepeat + ' ' +
-            origStyle.backgroundAttachment + ' ' + origStyle.backgroundPosition,
-        // Put new background behind old one if it exists -- all browsers in our matrix support multiple backgrounds
-        compositeBg = newBg + origBgShorthandProperties;
+      var origBgStyle = traitcache.getStyle(element),
+        newBgStyle = {
+          backgroundImage: 'url("data:image/svg+xml,' + encodeURI(svgMarkup) + '")',
+          backgroundPosition: (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
+          backgroundOrigin: 'border-box',
+          backgroundRepeat: 'no-repeat',
+          backgroundClip: 'border-box,',
+          backgroundAttachment: 'scroll',
+          backgroundSize: newBgSize
+        },
+        doPlaceOrigOnTop = common.isSprite(origBgStyle);  // Place sprites on top of our background, and textures underneath it
 
-      style.background = compositeBg;
-      style.backgroundOrigin = 'border-box,' + origBgOrigin;
-      style.backgroundClip = 'border-box,' + origBgClip;
-      style.backgroundColor = origBgColor;
-      style.backgroundSize = bgSizeString + ',' + origBgSize;
+      // Save the current inline style for later restoration when the highlight is hidden
+      state.savedCss = copyBackgroundCss(inlineStyle);
+
+      // Set the new background
+      setMultipleBackgrounds(inlineStyle, newBgStyle, origBgStyle, doPlaceOrigOnTop);
     }
 
     function isCloseToHighlightColor(colorIntensity) {
