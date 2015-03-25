@@ -471,7 +471,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       bgSizeString = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(state.elementRect.height / state.zoom) + 'px';
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
-      console.log(state.elementRect.height + ' ' + bgPaintableHeight);
 
       state.savedCss = {
         'background-image'      : style.backgroundImage,
