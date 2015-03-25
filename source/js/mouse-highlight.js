@@ -444,6 +444,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Approach #2 --change CSS background of highlighted element
       var path = getAdjustedPath(state.pathFillBackground, state.fixedContentRect.left, state.fixedContentRect.top, 0, state.zoom),
         bgColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(0,255,255,.4)' : state.bgColor,
+        bgPaintableWidth = state.fixedContentRect.width,
+        bgPaintableHeight = state.fixedContentRect.height,
+        bgSizeString,
         // Get the rectangle for the element itself
         svgMarkup = '<svg xmlns="http://www.w3.org/2000/svg">' +
                      getSVGForPath(path, 0, 0, bgColor, 1) +
@@ -453,14 +456,22 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // The background is getting clipped before being offset to the left
       offsetLeft = state.fixedContentRect.left - state.elementRect.left;
       if (offsetLeft < 0) {
-        // If the background needs to be pulled left, line it up to the right of the outline
-        // Careful of creating gap on left side, e.g. at http://www.wctv.tv/home/headlines/Authorities-Seek-Remedy-for-Naked-North-Carolina-Neighbor-297377681.html
-        offsetLeft = 0; // Math.max(0, state.fixedContentRect.right - state.elementRect.right);
+        bgPaintableWidth += offsetLeft;
+        offsetLeft = 0;
       }
-      offsetTop = state.fixedContentRect.top- state.elementRect.top;
 
+      offsetTop = state.fixedContentRect.top- state.elementRect.top;
+      if (offsetTop < 0) {
+        bgPaintableHeight += offsetTop;
+        offsetTop = 0;
+      }
+
+      bgPaintableWidth = Math.min(bgPaintableWidth + state.zoom, state.elementRect.width);
+      bgPaintableHeight = Math.min(bgPaintableHeight  + state.zoom, state.elementRect.height);
+      bgSizeString = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(state.elementRect.height / state.zoom) + 'px';
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
+      console.log(state.elementRect.height + ' ' + bgPaintableHeight);
 
       state.savedCss = {
         'background-image'      : style.backgroundImage,
@@ -493,7 +504,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       style.backgroundOrigin = 'border-box,' + origBgOrigin;
       style.backgroundClip = 'border-box,' + origBgClip;
       style.backgroundColor = origBgColor;
-      style.backgroundSize = 'auto auto,' + origBgSize;
+      style.backgroundSize = bgSizeString + ',' + origBgSize;
     }
 
     function isCloseToHighlightColor(colorIntensity) {
@@ -791,26 +802,26 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         color = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
         innerHighlightWidth = highlightBgScreenRect.width,
+        REMOVE_GAPS_FUDGE_FACTOR = 0.5,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
-        extraTop = elementRect.top - highlightBgScreenRect.top,
-        extraBottom = state.cutoutRects.botLeft || state.cutoutRects.botRight ? 0 :
-          extraTop + highlightBgScreenRect.bottom - elementRect.bottom;
+        extraTop = Math.max(0, elementRect.top - highlightBgScreenRect.top),
+        extraBottom = Math.max(0, highlightBgScreenRect.bottom - elementRect.bottom);
 
       if (extraLeft > 0) {
-        var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : 0; // Top-left area where the highlight is not shown
-        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, highlightBgScreenRect.height - topOffset, color);
+        var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : extraTop; // Top-left area where the highlight is not shown
+        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
       }
       if (extraRight > 0) {
-        var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : 0; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight, highlightBgScreenRect.height - topOffset, color);
+        var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
+        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
       }
       if (extraTop > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop, color);
+        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop + REMOVE_GAPS_FUDGE_FACTOR, color);
       }
-      if (extraBottom > 0) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height  + extra, innerHighlightWidth, extraBottom, color);
+      if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
+        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra, innerHighlightWidth, extraBottom + REMOVE_GAPS_FUDGE_FACTOR, color);
       }
       return svg;
     }
