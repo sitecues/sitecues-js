@@ -468,7 +468,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       bgPaintableWidth = Math.min(bgPaintableWidth + state.zoom, state.elementRect.width);
       bgPaintableHeight = Math.min(bgPaintableHeight  + state.zoom, state.elementRect.height);
-      bgSizeString = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(state.elementRect.height / state.zoom) + 'px';
+      bgSizeString = roundCoordinate(bgPaintableWidth / state.zoom) + 'px ' + roundCoordinate(bgPaintableHeight / state.zoom) + 'px';
       offsetLeft = roundCoordinate(offsetLeft);
       offsetTop = roundCoordinate(offsetTop);
 
@@ -814,13 +814,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
+        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
       }
       if (extraTop > 0) {
         svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop + REMOVE_GAPS_FUDGE_FACTOR, color);
       }
       if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra, innerHighlightWidth, extraBottom + REMOVE_GAPS_FUDGE_FACTOR, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, innerHighlightWidth, extraBottom + REMOVE_GAPS_FUDGE_FACTOR, color);
       }
       return svg;
     }
