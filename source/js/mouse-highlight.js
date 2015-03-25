@@ -460,7 +460,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         offsetLeft = 0;
       }
 
-      offsetTop = state.fixedContentRect.top- state.elementRect.top;
+      offsetTop = state.fixedContentRect.top - state.elementRect.top;
       if (offsetTop < 0) {
         bgPaintableHeight += offsetTop;
         offsetTop = 0;
@@ -804,6 +804,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         REMOVE_GAPS_FUDGE_FACTOR = 0.5,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
+        bgOffsetLeft = Math.max(0, state.fixedContentRect.left - state.elementRect.left),
+        bgOffsetTop = Math.max(0, state.fixedContentRect.top - state.elementRect.top),
         // Don't be fooled by bottom-right cutouts
         extraTop = Math.max(0, elementRect.top - highlightBgScreenRect.top),
         extraBottom = Math.max(0, highlightBgScreenRect.bottom - elementRect.bottom),
@@ -822,7 +824,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
         if (paddingHeight > topOffset) {
-          svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
+          svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - bgOffsetLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
               paddingHeight - topOffset, opaqueColor);
         }
       }
@@ -836,7 +838,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg += getSVGFillRectMarkup(leftCutoutWidth + extra, extra, widthForTop, extraTop + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, paddingWidth,
+        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - bgOffsetTop - REMOVE_GAPS_FUDGE_FACTOR, paddingWidth,
             extraBottom + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       return svg;
