@@ -792,16 +792,16 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
-    // For list bullet area, when it is inside margin instead of padding, and thus couldn't be covered with bg image
-    // Also for right or bottom overflow
+    // For areas such as list bullet area, when it is inside margin instead of element bounds, and thus couldn't be covered with bg image
     function getSVGForExtraPadding(extra) {
 
       var highlightBgScreenRect = state.fixedContentRect, // Scaled by zoom
         svg = '',
-        color = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
+        transparentColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
+        opaqueColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getOpaqueBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
         innerHighlightWidth = highlightBgScreenRect.width,
-        REMOVE_GAPS_FUDGE_FACTOR = 0.5,
+        REMOVE_GAPS_FUDGE_FACTOR = 0.25,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
@@ -810,17 +810,19 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : extraTop; // Top-left area where the highlight is not shown
-        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
+        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, highlightBgScreenRect.height - topOffset - extraBottom + REMOVE_GAPS_FUDGE_FACTOR, transparentColor);
       }
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR, highlightBgScreenRect.height - topOffset - extraBottom, color);
+        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
+            highlightBgScreenRect.height - topOffset - extraBottom, opaqueColor);
       }
       if (extraTop > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop + REMOVE_GAPS_FUDGE_FACTOR, color);
+        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, innerHighlightWidth, extraBottom + REMOVE_GAPS_FUDGE_FACTOR, color);
+        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, innerHighlightWidth,
+            extraBottom + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       return svg;
     }
