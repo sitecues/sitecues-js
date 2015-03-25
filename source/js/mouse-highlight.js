@@ -287,10 +287,15 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // Return an array of styles in the ancestor chain, including fromElement, not including toElement
     function getAncestorStyles(fromElement, toElement) {
-      var styles = [ traitcache.getStyle(fromElement) ];
-      $(fromElement).parentsUntil(toElement).each(function() {
-        styles.push(traitcache.getStyle(this));
-      });
+      var styles = [ ];
+
+      while (fromElement) {
+        styles.push(traitcache.getStyle(fromElement));
+        if (fromElement === toElement) {
+          break; // Finished
+        }
+        fromElement = fromElement.parentElement;
+      }
       return styles;
     }
 
