@@ -823,7 +823,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         REMOVE_GAPS_FUDGE_FACTOR = 0.5,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
-        bgOffsetLeft = Math.max(0, state.fixedContentRect.left - state.elementRect.left),
         bgOffsetTop = Math.max(0, state.fixedContentRect.top - state.elementRect.top),
         // Don't be fooled by bottom-right cutouts
         extraTop = Math.max(0, elementRect.top - highlightBgScreenRect.top),
@@ -841,7 +840,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
         if (paddingHeight > topOffset) {
-          svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - bgOffsetLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
+          svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
               paddingHeight - topOffset, paddingColor);
         }
       }
