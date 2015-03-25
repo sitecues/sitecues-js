@@ -49,7 +49,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   EXTRA_DARK_BG_BORDER_WIDTH = 1,
 
   // Extra room around highlight
-  EXTRA_PIXELS_FOR_FIXED_RECTS = 2, // Amount of extra space computed for fixed highlight rectangles
+  EXTRA_PIXELS_TO_PRESERVE_LETTERS = 1, // Amount of extra space computed for fixed highlight rectangles
   EXTRA_PADDING_PIXELS = 3, // Amount of space around highlighted object before to separate border
 
   // Border color when on dark background
@@ -647,9 +647,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return array;
     }
 
-    function getPolygonPoints(rect) {
+    function getPolygonPoints(orig) {
       // Build points for highlight polygon
-      var orig = geo.expandOrContractRect(rect, 0),
+      var
         // Shortcuts
         topLeftCutout = state.cutoutRects.topLeft,
         topRightCutout = state.cutoutRects.topRight,
@@ -800,28 +800,42 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         transparentColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
         opaqueColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getOpaqueBackgroundColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
-        innerHighlightWidth = highlightBgScreenRect.width,
         REMOVE_GAPS_FUDGE_FACTOR = 0.25,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         // Don't be fooled by bottom-right cutouts
         extraTop = Math.max(0, elementRect.top - highlightBgScreenRect.top),
-        extraBottom = Math.max(0, highlightBgScreenRect.bottom - elementRect.bottom);
+        extraBottom = Math.max(0, highlightBgScreenRect.bottom - elementRect.bottom),
+        paddingWidth = highlightBgScreenRect.width,
+        paddingHeight = highlightBgScreenRect.height - extraBottom,
+        MIN_BULLET_WIDTH = 4;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : extraTop; // Top-left area where the highlight is not shown
-        svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft, highlightBgScreenRect.height - topOffset - extraBottom + REMOVE_GAPS_FUDGE_FACTOR, transparentColor);
+        var isPossibleBullet = extraLeft > MIN_BULLET_WIDTH;
+        var useColor = isPossibleBullet ? transparentColor : opaqueColor; // Don't hide bullets
+        if (paddingHeight > topOffset) {
+          svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft + REMOVE_GAPS_FUDGE_FACTOR, paddingHeight - topOffset, useColor);
+        }
       }
       if (extraRight > 0) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
-        svg += getSVGFillRectMarkup(elementRect.width  + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
-            highlightBgScreenRect.height - topOffset - extraBottom, opaqueColor);
+        if (paddingHeight > topOffset) {
+          svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
+              paddingHeight - topOffset, opaqueColor);
+        }
       }
       if (extraTop > 0) {
-        svg += getSVGFillRectMarkup(extra, extra, innerHighlightWidth, extraTop + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
+        var leftCutoutWidth = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.width: 0;
+        var widthForTop = paddingWidth;
+        if (state.cutoutRects.topRight) {
+          widthForTop = state.cutoutRects.topRight.left - elementRect.left;
+        }
+        widthForTop -= leftCutoutWidth;
+        svg += getSVGFillRectMarkup(leftCutoutWidth + extra, extra, widthForTop, extraTop + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
-        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, innerHighlightWidth,
+        svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - REMOVE_GAPS_FUDGE_FACTOR, paddingWidth,
             extraBottom + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
       }
       return svg;
@@ -847,7 +861,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var mhPositionInfo = mhpos.getHighlightPositionInfo(element, 0, stretchForSprites),
         fixedRects = mhPositionInfo.allRects;
       state.hiddenElements = mhPositionInfo.hiddenElements;
-      geo.expandOrContractRects(fixedRects, EXTRA_PIXELS_FOR_FIXED_RECTS);
+      geo.expandOrContractRects(fixedRects, EXTRA_PIXELS_TO_PRESERVE_LETTERS);
 
       if (!fixedRects.length || !isCursorInHighlightShape(fixedRects, getCutoutRectsArray())) {
         // No valid highlighted content rectangles or cursor not inside of them
