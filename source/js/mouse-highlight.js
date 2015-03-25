@@ -793,13 +793,27 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         getSVGStyle(0, 0, fillColor) + '/>';
     }
 
+
+    function isPossibleBullet() {
+      return state.styles[0].listStyleType !== 'none';
+    }
+
+    function getExtraPaddingColor() {
+      if (SC_DEV && isColorDebuggingOn) {
+        return 'rgba(255, 96, 0, .4)';
+      }
+      if (state.styles[0].backgroundImage) {
+        return getTransparentBackgroundColor();
+      }
+      return getOpaqueBackgroundColor();
+    }
+
     // For areas such as list bullet area, when it is inside margin instead of element bounds, and thus couldn't be covered with bg image
     function getSVGForExtraPadding(extra) {
 
       var highlightBgScreenRect = state.fixedContentRect, // Scaled by zoom
         svg = '',
-        transparentColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getTransparentBackgroundColor(),
-        opaqueColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(255, 96, 0, .4)' : getOpaqueBackgroundColor(),
+        paddingColor = getExtraPaddingColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
         REMOVE_GAPS_FUDGE_FACTOR = 0.5,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
@@ -810,13 +824,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         extraTop = Math.max(0, elementRect.top - highlightBgScreenRect.top),
         extraBottom = Math.max(0, highlightBgScreenRect.bottom - elementRect.bottom),
         paddingWidth = highlightBgScreenRect.width,
-        paddingHeight = highlightBgScreenRect.height - extraBottom,
-        MIN_BULLET_WIDTH = 4;
+        paddingHeight = highlightBgScreenRect.height - extraBottom;
 
       if (extraLeft > 0) {
         var topOffset = state.cutoutRects.topLeft ? state.cutoutRects.topLeft.height : extraTop; // Top-left area where the highlight is not shown
-        var isPossibleBullet = extraLeft > MIN_BULLET_WIDTH;
-        var useColor = isPossibleBullet ? transparentColor : opaqueColor; // Don't hide bullets
+        var useColor = isPossibleBullet() ? paddingColor : getTransparentBackgroundColor(); // Don't hide bullets
         if (paddingHeight > topOffset) {
           svg += getSVGFillRectMarkup(extra, topOffset + extra, extraLeft + REMOVE_GAPS_FUDGE_FACTOR, paddingHeight - topOffset, useColor);
         }
@@ -825,7 +837,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         var topOffset = state.cutoutRects.topRight ? state.cutoutRects.topRight.height : extraTop; // Top-right area where the highlight is not shown
         if (paddingHeight > topOffset) {
           svg += getSVGFillRectMarkup(elementRect.width + extra + extraLeft - bgOffsetLeft - REMOVE_GAPS_FUDGE_FACTOR, topOffset + extra, extraRight + REMOVE_GAPS_FUDGE_FACTOR,
-              paddingHeight - topOffset, opaqueColor);
+              paddingHeight - topOffset, paddingColor);
         }
       }
       if (extraTop > 0) {
@@ -835,11 +847,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           widthForTop = state.cutoutRects.topRight.left - elementRect.left;
         }
         widthForTop -= leftCutoutWidth;
-        svg += getSVGFillRectMarkup(leftCutoutWidth + extra, extra, widthForTop, extraTop + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
+        svg += getSVGFillRectMarkup(leftCutoutWidth + extra, extra, widthForTop, extraTop + REMOVE_GAPS_FUDGE_FACTOR, paddingColor);
       }
       if (extraBottom > 0 && !state.cutoutRects.botLeft && !state.cutoutRects.botRight) {
         svg += getSVGFillRectMarkup(extra, elementRect.height + extraTop + extra - bgOffsetTop - REMOVE_GAPS_FUDGE_FACTOR, paddingWidth,
-            extraBottom + REMOVE_GAPS_FUDGE_FACTOR, opaqueColor);
+            extraBottom + REMOVE_GAPS_FUDGE_FACTOR, paddingColor);
       }
       return svg;
     }
