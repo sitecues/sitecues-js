@@ -34,13 +34,20 @@ sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
     };
 
     traitcache.updateCachedViewPosition = function() {
-      cachedViewPosition.x = window.pageXOffset;
-      cachedViewPosition.y = window.pageYOffset;
+
+      var pageXOffset = window.pageXOffset,
+        pageYOffset = window.pageYOffset;
+      if (cachedViewPosition.x !== pageXOffset ||
+          cachedViewPosition.y !== pageYOffset) {
+        cachedViewPosition.x = pageXOffset;
+        cachedViewPosition.y = pageYOffset;
+        return true;
+      }
     };
 
     traitcache.getCachedViewPosition = function() {
       return cachedViewPosition;
-    }
+    };
 
     traitcache.getCachedViewSize = function() {
       return cachedViewSize;

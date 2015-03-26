@@ -13,7 +13,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     styles: [],
     savedCSS: null,   // map of saved CSS for highlighted element
     savedBgColors: null, // map of descendant elements to saved background colors
-    elementRect: null,
+    elementRect: null,    // Bounding client rect (fixed/screen rect) of picked element
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
     hiddenElements: [], // Elements whose subtrees are hidden or not part of highlight rectangle (e.g. display: none, hidden off-the-page, out-of-flow)
     // Note however, that the coordinates used are zoomed pixels (at 1.1x a zoomed pixel width is 1.1 real pixels)
@@ -50,7 +50,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
   // Extra room around highlight
   EXTRA_PIXELS_TO_PRESERVE_LETTERS = 1, // Amount of extra space computed for fixed highlight rectangles
-  EXTRA_PADDING_PIXELS = 3, // Amount of space around highlighted object before to separate border
+  EXTRA_PADDING_PIXELS = 4, // Amount of space around highlighted object before to separate border
 
   // Border color when on dark background
   DARK_BG_BORDER_COLOR = 'rgb(65, 60, 145)',
@@ -60,6 +60,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   isTrackingMouse, // Are we currently tracking the mouse?
   canTrackScroll = true,  // Is scroll tracking allowable? Turned off during panning from keyboard navigation
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
+  isTrackingWheelEvents,
   isOnlyShift, // Is shift down by itself?
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
@@ -81,7 +82,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // We don't use them in IE9/10 because pointer-events none doesn't work, so mouseouts occur
     // when a user mouses over the visual border, causing menus to close.
     var DO_SUPPORT_SVG_OVERLAY = !platform.browser.isIE || platform.browser.version >= 11,
-      COORDINATE_DECIMAL_PLACES = DO_SUPPORT_SVG_OVERLAY ? 4 : 0;
+      COORDINATE_DECIMAL_PLACES = 0;
 
 
     function getMaxZIndex(styles) {
@@ -374,7 +375,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       updateElementBgImage();
 
       // Add event listeners to keep overlay view up-to-date
-      addMouseWheelUpdateListenersIfNecessary();
+      addMouseWheelUpdateListener();
       $(document).one('mouseleave', onLeaveWindow);
 
       // Update state
@@ -807,10 +808,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (SC_DEV && isColorDebuggingOn) {
         return 'rgba(255, 96, 0, .4)';
       }
-      if (state.styles[0].backgroundImage) {
-        return getTransparentBackgroundColor();
-      }
-      return getOpaqueBackgroundColor();
+      return state.bgColor;
     }
 
     // For areas such as list bullet area, when it is inside margin instead of element bounds, and thus couldn't be covered with bg image
@@ -820,7 +818,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         svg = '',
         paddingColor = getExtraPaddingColor(),
         elementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
-        REMOVE_GAPS_FUDGE_FACTOR = 0.5,
+        REMOVE_GAPS_FUDGE_FACTOR = 0,
         extraLeft = elementRect.left - highlightBgScreenRect.left,
         extraRight = highlightBgScreenRect.right - elementRect.right,
         bgOffsetTop = Math.max(0, state.fixedContentRect.top - state.elementRect.top),
@@ -860,13 +858,48 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return svg;
     }
 
+    function getOverlayRect() {
+      var $measureDiv = $('<div>').appendTo(document.body).css({
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+          position: 'absolute'
+        }),
+      // For some reason using the <body> works better in FF version <= 32
+        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
+        offsetElement = isOldFirefox ? document.body : $measureDiv[0],
+        offsetRect = offsetElement.getBoundingClientRect();
+      $measureDiv.remove();
+
+      var mainFixedRect = state.fixedContentRect,
+          overlayRect = {
+          left: (mainFixedRect.left - offsetRect.left) / state.zoom,
+          top: (mainFixedRect.top - offsetRect.top) / state.zoom,
+          width: mainFixedRect.width / state.zoom,
+          height: mainFixedRect.height / state.zoom
+        };
+      overlayRect.right = overlayRect.left + overlayRect.width;
+      overlayRect.bottom = overlayRect.top + overlayRect.height;
+      return roundRectCoordinates(overlayRect);
+    }
+
+    function getAbsoluteRect() {
+      var rect = $.extend({}, state.fixedContentRect),
+        viewPos = traitcache.getCachedViewPosition();
+      // Next subtract the current scroll position
+      rect.left += viewPos.x;
+      rect.right += viewPos.x;
+      rect.top += viewPos.y;
+      rect.bottom += viewPos.x;
+    }
+
     // Update highlight overlay
     // @return falsey if no valid overlay can be created
     function computeOverlay() {
 
       var element,
           elementRect,
-          overlayRect,
           stretchForSprites = true;
 
       if (!state.picked) {
@@ -891,7 +924,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       var mainFixedRect = fixedRects[0]; // For now just use 1
       state.fixedContentRect = roundRectCoordinates(mainFixedRect);
 
-      state.elementRect = $.extend({}, elementRect);
+      state.elementRect = roundRectCoordinates(elementRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom);
       state.highlightPaddingWidth = roundBorderWidth(EXTRA_PADDING_PIXELS);
       var extra = getExtraPixels();
@@ -912,39 +945,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.isCreated = true;
 
-      var $measureDiv = $('<div>').appendTo(document.body).css({
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 0,
-          position: 'absolute'
-        }),
-        // For some reason using the <body> works better in FF version <= 32
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
-        offsetElement = isOldFirefox ? document.body : $measureDiv[0],
-        offsetRect = offsetElement.getBoundingClientRect();
-      $measureDiv.remove();
-
-      overlayRect = {
-        left: (mainFixedRect.left - offsetRect.left) / state.zoom,
-        top: (mainFixedRect.top - offsetRect.top) / state.zoom,
-        width: mainFixedRect.width / state.zoom,
-        height: mainFixedRect.height / state.zoom
-      };
-      overlayRect.right = overlayRect.left + overlayRect.width;
-      overlayRect.bottom = overlayRect.top + overlayRect.height;
-      state.overlayRect = roundRectCoordinates($.extend({ }, overlayRect));
-
-      // So we can keep track of where highlight is even after panning
-      state.absoluteRect = $.extend({}, mainFixedRect);
-      // Next subtract the current scroll position
-      state.absoluteRect.left += window.pageXOffset;
-      state.absoluteRect.right += window.pageXOffset;
-      state.absoluteRect.top += window.pageYOffset;
-      state.absoluteRect.bottom += window.pageYOffset;
-
-      // Finally update overlay CSS with zoom corrections
-      updateHighlightOverlayPosition();
+      updateAbsolutePositions();
 
       return true;
     }
@@ -1031,85 +1032,96 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return roundCoordinate(state.highlightPaddingWidth + state.highlightBorderWidth);
     }
 
-    function isInScrollableContainer(element) {
-      var canScroll = false;
-      $(element).parentsUntil(document.body).each(function() {
-        var style = traitcache.getStyle(this);
-        if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-          this.scrollHeight > this.offsetHeight) {
-          canScroll = true;
-          return false;
+    function onMouseWheel(event) {
+      if (!state.picked) {
+        return;
+      }
+
+      var newRect = roundRectCoordinates(state.picked[0].getBoundingClientRect()),
+        oldRect = state.elementRect,
+        xDiff = newRect.left - oldRect.left,
+        yDiff = newRect.top - oldRect.top;
+
+      if (!xDiff && !yDiff) {
+        return;
+      }
+
+      function correctRect(rect) {
+        if (!rect) {
+          return;
         }
-      });
-      return canScroll;
+        rect.left += xDiff;
+        rect.right += xDiff;
+        rect.top += yDiff;
+        rect.bottom += yDiff;
+      }
+
+      // -- Fixed rects --
+      // These rects are in screen coordinates and must always be updated
+      state.elementRect = newRect;
+      correctRect(state.fixedContentRect);
+      correctRect(state.cutoutRects.topLeft);
+      correctRect(state.cutoutRects.topRight);
+      correctRect(state.cutoutRects.botLeft);
+      correctRect(state.cutoutRects.botRight);
+
+      // -- Absolute rects --
+
+      // The only need to be changed if scrolling applied to subsection of the document
+      if (!traitcache.updateCachedViewPosition()) {
+        // Absolute position has changed
+        updateAbsolutePositions();
+      }
     }
 
-      function onMouseWheel() {
-        if (!state.picked) {
-          return;
-        }
-        var newRect = state.picked[0].getBoundingClientRect(),
-          oldRect = state.elementRect,
-          xDiff = newRect.left - oldRect.left,
-          yDiff = newRect.top - oldRect.top;
+    function updateAbsolutePositions() {
+      // The overlay rect is where we display the actual highlight
+      state.overlayRect = getOverlayRect();
 
-        if (!xDiff && !yDiff) {
-          return;
-        }
+      // The absolute rect helps keep track of where highlight is even after panning
+      state.absoluteRect = getAbsoluteRect();
 
-        traitcache.updateCachedViewPosition();
+      // Finally update overlay CSS with zoom corrections
+      updateHighlightOverlayPosition();
+    }
 
-        function correctRect(rect) {
-          if (!rect) {
-            return;
-          }
-          rect.left += xDiff;
-          rect.right += xDiff;
-          rect.top += yDiff;
-          rect.bottom += yDiff;
-        }
+    function updateHighlightOverlayZIndex() {
+      var ancestorStyles = getAncestorStyles(state.target, state.picked[0]).concat(state.styles);
+      $('.' + HIGHLIGHT_OUTLINE_CLASS)
+        .css('zIndex', getMaxZIndex(ancestorStyles));
+    }
 
-        correctRect(state.fixedContentRect);
-        correctRect(state.cutoutRects.topLeft);
-        correctRect(state.cutoutRects.topRight);
-        correctRect(state.elementRect);
-        correctRect(state.overlayRect);
-      }
+    function updateHighlightOverlayPosition() {
+      var extra = getExtraPixels(),
+        left = state.overlayRect.left - extra,
+        top = state.overlayRect.top - extra;
+      // TODO use .style with 'important' if we run into page css collisions
+      // Otherwise, if we don't run into problems with that, we should probably get rid of the style plugin
+      // and save the space.
+      $('.' + HIGHLIGHT_OUTLINE_CLASS)
+        .css({
+          top: top + 'px',
+          left: left + 'px'
+        });
+    }
 
-      function updateHighlightOverlayZIndex() {
-        var ancestorStyles = getAncestorStyles(state.target, state.picked[0]).concat(state.styles);
-        $('.' + HIGHLIGHT_OUTLINE_CLASS)
-          .css('zIndex', getMaxZIndex(ancestorStyles));
-      }
-
-      function updateHighlightOverlayPosition() {
-        var extra = getExtraPixels(),
-          left = state.overlayRect.left - extra,
-          top = state.overlayRect.top - extra;
-        // TODO use .style with 'important' if we run into page css collisions
-        // Otherwise, if we don't run into problems with that, we should probably get rid of the style plugin
-        // and save the space.
-        $('.' + HIGHLIGHT_OUTLINE_CLASS)
-          .css({
-            top: top + 'px',
-            left: left + 'px'
-          });
-      }
-
-      function addMouseWheelUpdateListenersIfNecessary() {
+    function addMouseWheelUpdateListener() {
       // If the highlight is visible and there is a scrollable container, add mousewheel listener for
       // smooth highlight position updates as scrolling occurs.
 
       // The mousewheel event is better than the scroll event because we can add it in one place (on document) and it bubbles.
       // It also updates for each scroll change, rather than waiting until the scrolling stops.
 
-      // IMPORTANT: add this only in situations where its necessary, because listening to mousewheel can cause bad performance.
-      // It is deemed necessary when the highlight already exists and it's inside a scrollable element.
+      // IMPORTANT: add this only in situations when there is an active highlight,
+      // because listening to mousewheel can cause bad performance.
 
-      if (isInScrollableContainer(state.target)) {
-        $(document).on('mousewheel', onMouseWheel);
+      if (!isTrackingWheelEvents) {
+        document.addEventListener('wheel', onMouseWheel);
+        isTrackingWheelEvents = true;
       }
+      traitcache.updateCachedViewPosition();
     }
+
 
     function isScrollEvent(event) {
       return cursorPos &&
@@ -1123,21 +1135,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
       // Return true we're inside in the existing highlight
       return isCursorInHighlightShape([state.fixedContentRect], getCutoutRectsArray());
-    }
-
-    // Fixed position rectangles are in screen coordinates.
-    // If we have scrolled since the highlight was originally created,
-    // we will need to update the fixed rect(s).
-    function correctFixedRectangleCoordinatesForExistingHighlight(deltaX, deltaY) {
-      function correctRect(rect) {
-        rect.top += deltaY;
-        rect.bottom += deltaY;
-        rect.left += deltaX;
-        rect.right +=deltaX;
-      }
-
-      correctRect(state.fixedContentRect);
-      correctRect(state.elementRect);
     }
 
     function onMouseMove(event) {
@@ -1191,24 +1188,10 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // We have an old highlight and mouse moved.
         // What to do about the old highlight? Keep or hide? Depends on whether mouse is still in it
         if (!cursorPos || isScrollEvent(event)) {
-          // Already had a highlight
-          var lastScrollX = cursorPos.scrollX;
-          var lastScrollY = cursorPos.scrollY;
-          if (window.pageXOffset === lastScrollX && window.pageYOffset == lastScrollY) {
-            // Web page is lying about the scroll position
-            // This happens because of funky scrolling effects on pages like
-            // https://medium.com/backchannel/the-war-over-who-steve-jobs-was-92bda2cd1e1e
-            var newElementRect = roundRectCoordinates(state.picked[0].getBoundingClientRect());
-            correctFixedRectangleCoordinatesForExistingHighlight(newElementRect.left - state.elementRect.left,
-                newElementRect.top - state.elementRect.top);
-            state.elementRect = newElementRect;
-          }
-          else {
-            cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
-            correctFixedRectangleCoordinatesForExistingHighlight(lastScrollX - cursorPos.scrollX, lastScrollY - cursorPos.scrollY);
-          }
+          cursorPos = getCursorPos(event, window.pageXOffset, window.pageYOffset);
         }
         else {
+          // No need to recalculate scroll position -- it stayed the same
           cursorPos = getCursorPos(event);
         }
 
@@ -1286,8 +1269,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // remove mousemove listener from body
         $(document)
           .off('mousemove', onMouseMove)
-          .off('mousewheel', onMouseWheel)  // In case it was added elsewhere
           .off('focusin focusout', testFocus);
+        if (isTrackingWheelEvents) {
+          document.removeEventListener('mousewheel', onMouseWheel);  // Added only when there is a highlight
+          isTrackingWheelEvents = false;
+        }
         if (platform.browser.isFirefox) {
           $(document).off('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
         }
