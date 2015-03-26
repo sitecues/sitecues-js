@@ -76,17 +76,20 @@ sitecues.def('util/common', function (common, callback) {
       return color === 'transparent' || color.match(/^rgba.*0\)$/);
     }
 
+    common.isSprite = function(style) {
+      return style.backgroundImage !== 'none' && (style.backgroundRepeat === 'no-repeat'
+        || parseFloat(style.backgroundPositionX) === 0 || parseFloat(style.backgroundPositionY) === 0);
+    };
+
     common.hasOwnBackground = function(elem, style, parentStyle) {
       if (!style) {
         return false;
       }
 
       // 1. Background images (sprites don't count -- often used for things like bullets)
-      if (style.backgroundImage !== 'none' && style.backgroundRepeat !== 'no-repeat'
-        && parseFloat(style.backgroundPositionX) === 0 && parseFloat(style.backgroundPositionY) === 0) {
+      if (style.backgroundImage !== 'none' && !common.isSprite(style)) {
         return true;
       }
-
       // 2. Background colors
       return common.hasOwnBackgroundColor(elem, style, parentStyle);
     };
