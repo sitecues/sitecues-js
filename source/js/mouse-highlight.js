@@ -825,7 +825,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       if (SC_DEV && isColorDebuggingOn) {
         return 'rgba(255, 96, 0, .4)';
       }
-      return state.bgColor;
+      return getTransparentBackgroundColor();
     }
 
     // For areas such as list bullet area, when it is inside margin instead of element bounds, and thus couldn't be covered with bg image
@@ -989,8 +989,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       document.body.appendChild(svgFragment);
       var $svg = $('.' + HIGHLIGHT_OUTLINE_CLASS),
-        width = state.fixedContentRect.width / state.zoom + 2 * extra + 1,  // Extra pixel ensures right side not cut off
-        height = state.fixedContentRect.height / state.zoom + 2 * extra + 1;  // Extra pixel ensures bottom not cut off
+        width = roundCoordinate(state.fixedContentRect.width / state.zoom + 2 * extra + 1),  // Extra pixel ensures right side not cut off
+        height = roundCoordinate(state.fixedContentRect.height / state.zoom + 2 * extra + 1);  // Extra pixel ensures bottom not cut off
       $svg.attr({
         width: width + 'px',
         height: height + 'px'
