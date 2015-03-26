@@ -501,7 +501,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // todo: maybe think of a more unique name for this class?
-        '.sc-only': {
+        // General way of showing the content if sitecues-badge is shown.
+        '.sitecues-only': {
           'visibility': 'visible',
           'opacity': 1
         }
