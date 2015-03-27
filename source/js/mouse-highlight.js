@@ -11,7 +11,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     picked: null,     // JQuery for picked element(s)
     target: null,     // Mouse was last over this element
     styles: [],
-    savedCSS: null,   // map of saved CSS for highlighted element
+    savedCss: null,   // map of saved CSS for highlighted element
     savedBgColors: null, // map of descendant elements to saved background colors
     elementRect: null,    // Bounding client rect (fixed/screen rect) of picked element
     fixedContentRect: null,  // Contains the smallest possible rectangle encompassing the content to be highlighted
@@ -379,7 +379,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       updateElementBgImage();
 
       // Add event listeners to keep overlay view up-to-date
-      addMouseWheelUpdateListener();
+      addMouseWheelListener();
       $(document).one('mouseleave', onLeaveWindow);
 
       // Update state
@@ -1122,7 +1122,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         });
     }
 
-    function addMouseWheelUpdateListener() {
+    function addMouseWheelListener() {
       // If the highlight is visible and there is a scrollable container, add mousewheel listener for
       // smooth highlight position updates as scrolling occurs.
 
@@ -1137,6 +1137,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         isTrackingWheelEvents = true;
       }
       traitcache.updateCachedViewPosition();
+    }
+
+    function removeMouseWheelListener() {
+      if (isTrackingWheelEvents) {
+        document.removeEventListener('wheel', onMouseWheel);
+        isTrackingWheelEvents = false;
+      }
     }
 
 
@@ -1287,10 +1294,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         $(document)
           .off('mousemove', onMouseMove)
           .off('focusin focusout', testFocus);
-        if (isTrackingWheelEvents) {
-          document.removeEventListener('mousewheel', onMouseWheel);  // Added only when there is a highlight
-          isTrackingWheelEvents = false;
-        }
+
+        removeMouseWheelListener();
+        
         if (platform.browser.isFirefox) {
           $(document).off('mouseover', onMouseMove); // Mitigate lack of mousemove events when scroll finishes
         }
@@ -1499,6 +1505,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         if ($(state.picked).attr('style') === '') {
           $(state.picked).removeAttr('style'); // Full cleanup of attribute
         }
+        removeMouseWheelListener();
       }
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
 
