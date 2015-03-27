@@ -25,7 +25,10 @@ sitecues.def('cursor', function (cursor, callback) {
         $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
         cursorStylesheetObject,
         bpCursorStylesheetObject,
-        isStyleServiceReady;
+        isStyleServiceReady,
+        doPreventCursors,
+        doForceIECursors,
+        doDisableDuringZoom = platform.browser.isIE && platform.browser.version < 11;
 
     /*
      * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -51,7 +54,8 @@ sitecues.def('cursor', function (cursor, callback) {
      * @returns {void}
      */
     function setCursorStyleWhenReady(rule, cursorValueURL) {
-      if (!platform.browser.isIE) {
+      var doUseIECursors = platform.browser.isIE || doForceIECursors;
+      if (!doUseIECursors) {
         // Not IE: no prefetch needed
         setCursorStyle(rule, cursorValueURL);
       }
@@ -73,7 +77,7 @@ sitecues.def('cursor', function (cursor, callback) {
             },
             error: function (jqXHR) {
               jqXHR.abort();
-              SC_DEV && console.log('[Error] Unable to fetch cursor image from server');
+              SC_DEV && console.log('[Error] Unable to fetch cursor image from server: ' + cursorValueArray[0]);
             }
           });
         }
@@ -148,7 +152,7 @@ sitecues.def('cursor', function (cursor, callback) {
       // The refresh methods will iterate over these styles and modify them
       cursorStylesheetObject = styleService.getDOMStylesheet($stylesheet);
 
-      if (platform.browser.isIE && platform.browser.version < 11) {
+      if (doDisableDuringZoom) {
         // While zooming, turn off our CSS rules so that the browser doesn't spend
         // CPU cycles recalculating the custom cursor rules to apply during each frame
         // This makes a difference in IE 9/10 -- doesn't seem to help in other browsers.
@@ -176,7 +180,7 @@ sitecues.def('cursor', function (cursor, callback) {
      * all cursor properties in the <style id="sitecues-cursor">
      */
     function refreshStylesheets() {
-      if (cursorZoom <= 1) {
+      if (cursorZoom <= 1 || doPreventCursors) {
         if ($stylesheet) {
           $stylesheet.remove();
           $stylesheet = null;
@@ -208,18 +212,35 @@ sitecues.def('cursor', function (cursor, callback) {
      */
     function getCursorTypeUrls(size) {
       var cursorTypeUrls = [],
-        i = 0;
+        i = 0,
+        doUseIECursors = platform.browser.isIE || doForceIECursors;
 
       // Generate cursor images for every cursor type...
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = customCursor.getCursorCss(type, size);
+          css = customCursor.getCursorCss(type, size, doUseIECursors);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
 
       return cursorTypeUrls;
+    }
+
+    if (SC_DEV) {
+      sitecues.toggleCursors = function() {
+        doPreventCursors = !doPreventCursors;
+        refreshStylesheets();
+      };
+
+      sitecues.toggleForceIECursors = function() {
+        doForceIECursors = !doForceIECursors;
+        refreshStylesheets();
+      }
+
+      sitecues.toggleDisableCursorsDuringZoom = function() {
+        doDisableDuringZoom = !doDisableDuringZoom;
+      }
     }
 
     sitecues.on('zoom', function (pageZoom) {

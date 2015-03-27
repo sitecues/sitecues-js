@@ -44,20 +44,20 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
      * @param sizeRatio a number > 1 (e.g. 2 = 2x)
      * @param pixelRatio = 1 for normal, 2 for retina cursor
      */
-    customCursor.getCursorCss = function(type, sizeRatio) {
+    customCursor.getCursorCss = function(type, sizeRatio, doUseIECursors) {
       var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
         pixelRatio = doUseRetinaCursors ? 2 : 1,
         cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
 
-      var url = getUrl(type, sizeRatio, pixelRatio),
+      var url = getUrl(type, sizeRatio, pixelRatio, doUseIECursors),
         hotspotOffset = getCursorHotspotOffset(type, sizeRatio);
 
       return cursorGeneratorFn(url, hotspotOffset, type);
     };
 
-    function getUrl(type, sizeRatio, pixelRatio) {
+    function getUrl(type, sizeRatio, pixelRatio, doUseIECursors) {
 
-      if (platform.browser.is === 'IE') {
+      if (doUseIECursors) {
         return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getIECursorSize(sizeRatio) + '.cur' );
       }
 
