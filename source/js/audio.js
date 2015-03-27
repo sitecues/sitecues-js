@@ -22,12 +22,12 @@ sitecues.def('audio', function (audio, callback) {
       mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
       mediaTypeForPrerecordedAudio;
 
-    function playHlbContent(content) {
+    function playHlbContent($content) {
       if (!ttsOn) {
         return;
       }
       stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
-      speakContent(content);
+      speakContent($content);
     }
 
     function playHighlight(content, doAvoidInterruptions) {
@@ -43,10 +43,10 @@ sitecues.def('audio', function (audio, callback) {
       speakContent(content);
     }
 
-    function speakContent(content) {
-      var text = builder.getText(content);
+    function speakContent($content) {
+      var text = builder.getText($content);
       if (text) {
-        getAudioPlayer().playAudioSrc(getTTSUrl(text));
+        getAudioPlayer().playAudioSrc(getTTSUrl(text, $content));
         addStopAudioHandlers();
       }
     }
@@ -75,8 +75,9 @@ sitecues.def('audio', function (audio, callback) {
     }
 
     // Puts in delimiters on both sides of the parameter -- ? before and & after
-    function getLanguageParameter() {
-      return '?l=' + (locale.getFullWebsiteLang()) + '&';
+    // $content is an optional parameter. If it exists, the closest lang parameter
+    function getLanguageParameter($content) {
+      return '?l=' + (locale.getElementLang($content)) + '&';
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
@@ -85,9 +86,9 @@ sitecues.def('audio', function (audio, callback) {
       return sitecues.getApiUrl(restOfUrl);
     }
 
-    function getTTSUrl(text) {
+    function getTTSUrl(text, $content) {
       var restOfUrl = 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
-        getLanguageParameter() + 't=' + encodeURIComponent(text);
+        getLanguageParameter($content[0]) + 't=' + encodeURIComponent(text);
       return sitecues.getApiUrl(restOfUrl);
     }
 

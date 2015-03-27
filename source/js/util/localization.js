@@ -52,11 +52,25 @@ sitecues.def('util/localization', function(locale, callback) {
         // This helps make sure UK users get a UK accent on all English sites, for example.
         return browserLang;
       }
-      return websiteLang;
     }
 
     return websiteLang;
   };
+
+  // Get language that applies to element (optional param)
+  // Fallback on document and then browser default language
+  locale.getElementLang = function(element) {
+    while (element) {
+      var lang = element.getAttribute('lang') || element.getAttribute('xml:lang');
+      if (lang) {
+        return lang;
+      }
+      element = element.parentElement;
+    }
+
+    return locale.getFullWebsiteLang();
+  };
+
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
