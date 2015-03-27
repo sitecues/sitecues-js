@@ -238,12 +238,12 @@ sitecues.def('cursor', function (cursor, callback) {
         doForceIECursors = !doForceIECursors;
         refreshStylesheets();
         return doForceIECursors;
-      }
+      };
 
       sitecues.toggleDisableCursorsDuringZoom = function() {
         doDisableDuringZoom = !doDisableDuringZoom;
         return doDisableDuringZoom;
-      }
+      };
     }
 
     sitecues.on('zoom', function (pageZoom) {
