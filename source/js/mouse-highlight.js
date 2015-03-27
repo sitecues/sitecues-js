@@ -909,6 +909,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       rect.right += viewPos.x;
       rect.top += viewPos.y;
       rect.bottom += viewPos.x;
+      return rect;
     }
 
     // Update highlight overlay
