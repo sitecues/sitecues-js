@@ -227,7 +227,7 @@ sitecues.def('cursor', function (cursor, callback) {
       return cursorTypeUrls;
     }
 
-    if (SC_DEV) {
+    if (SC_DEV || true) {
       sitecues.toggleCursors = function() {
         doPreventCursors = !doPreventCursors;
         refreshStylesheets();
