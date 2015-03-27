@@ -231,15 +231,18 @@ sitecues.def('cursor', function (cursor, callback) {
       sitecues.toggleCursors = function() {
         doPreventCursors = !doPreventCursors;
         refreshStylesheets();
+        return doPreventCursors;
       };
 
       sitecues.toggleForceIECursors = function() {
         doForceIECursors = !doForceIECursors;
         refreshStylesheets();
+        return doForceIECursors;
       }
 
       sitecues.toggleDisableCursorsDuringZoom = function() {
         doDisableDuringZoom = !doDisableDuringZoom;
+        return doDisableDuringZoom;
       }
     }
 
