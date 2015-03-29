@@ -23,7 +23,6 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
      * This does not change the current zoom of the page -- it only changes the slider appearance.
      */
     slider.updateThumbPosition = function(currZoom) {
-
       var thumbId          = BP_CONST.ZOOM_SLIDER_THUMB_ID,
           thumbElement     = helper.byId(thumbId),
           panelSliderWidth = BP_CONST.TRANSFORMS.PANEL[thumbId].translateX,

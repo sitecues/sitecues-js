@@ -285,19 +285,24 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function finishZoomSliderOperation() {
-        if (zoomInput.isSliderDrag || !zoomAnimator) {
-          // Make sure we freeze at target zoom -- this helps crispen it in Chrome, not actually sure why
+        // ---- Slider drag ----
+        if (zoomInput.isSliderDrag) {
           cancelFrame(zoomAnimator);
-          zoomAnimator = requestFrame(function() {
-            performInstantZoomOperation();
+          if (elementDotAnimatePlayer) {
+            // Make sure we freeze at target zoom -- this helps crispen it in Chrome, not actually sure why
+            elementDotAnimatePlayer.onfinish = onGlideStopped;
+            finishElementDotAnimate();
+          }
+          else {
             finishZoomOperation();
-          });
+          }
+          return;
         }
-        else {
-          zoomInput.isSliderDragStopped = true;
-        }
-        // Else is in the middle of gliding to a zoom click -- let it finish --
-        // the animation's end will cause finishZoomOperation() to be called
+
+        // ---- Slider click ----
+        // Is in the middle of gliding to a zoom click -- this always uses JS.
+        // Let it finish -- the animation's end will cause finishZoomOperation() to be called
+        zoomInput.isSliderDragStopped = true;
       }
 
       // Should smooth zoom be used or step zoom?
@@ -461,21 +466,27 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
 
+      function finishElementDotAnimate() {
+        // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
+        // while the animation player is stopped so that it doesn't block future style attribute changes
+        // from taking affect (e.g. via the slider)
+        requestFrame(function() {
+          elementDotAnimatePlayer.pause();
+          requestFrame(function () {
+            currentTargetZoom = getActualZoom();
+            $body.css(getZoomCss(currentTargetZoom));
+            elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+          });
+        });
+      }
+
       // A glide operation is finishing. Use the current state of the zoom animation for the final zoom amount.
       function finishGlideEarly() {
+        cancelGlideChangeTimer();
+
         // Stop element.animate player
         if (elementDotAnimatePlayer) {
-          // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
-          // while the animation player is stopped so that it doesn't block future style attribute changes
-          // from taking affect (e.g. via the slider)
-          requestFrame(function() {
-            elementDotAnimatePlayer.pause();
-            requestFrame(function () {
-              currentTargetZoom = getActualZoom();
-              $body.css(getZoomCss(currentTargetZoom));
-              elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
-            });
-          });
+          finishElementDotAnimate();
           return;
         }
 
@@ -532,7 +543,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
         var zoomCss = getZoomCss(currentTargetZoom);
-        if (platform.browser.isChrome && document.body.animate) {
+        if (platform.browser.isChrome && document.body.animate && false) {
           // Magically, this works with the new crisper (and the new crisper doesn't kill mouse events on floats ...)
           elementDotAnimatePlayer = body.animate(
             [zoomCss, zoomCss],
@@ -813,7 +824,6 @@ sitecues.def('zoom', function (zoom, callback) {
       }
 
       function cancelGlideChangeTimer() {
-        thumbChangeListener && thumbChangeListener(completedZoom);
         if (glideChangeTimer) {
           clearInterval(glideChangeTimer);
           glideChangeTimer = 0;
