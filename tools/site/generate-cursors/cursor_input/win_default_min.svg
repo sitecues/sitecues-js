@@ -11,7 +11,7 @@
   </defs>
   <!-- g:scale - is used to size the cursors on the fly in browsers that allow SVGs as cursor data-urls. -->
   <!-- g:filter - is used to apply drop-shadow to the cursors in browsers that allow SVGs as cursor data-urls. -->
-  <g transform="scale(1,1)" filter="url(#d)">
+  <g transform="scale(1)" filter="url(#d)">
     <path shadow="rgba(0,0,0,.75)" shadow-blur="1.5" shadow-offset-x=".5" shadow-offset-y="1"
       fill="#000" d="M0,0 L0,17.75 L4.188,13.875 L8.25,21.062 L11.531,18.719 L7.75,12.062 L12.594,12 L0,0 z" />
     <path fill="#FFF" d="M0.931,2.277 L1,15.062 L4.281,12 L8.562,19.469 L10.156,18.406 L5.875,11.062 L10.062,11 L0.931,2.277 z" />

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+function initType(type) {
+  var container = document.getElementById(type);
+  for (var size = 1.1; size <= 3; size += 0.1) {
+    var img = document.createElement('img');
+    var number = size.toFixed(1).replace('.0', '');
+    var name = 'win_' + type + '_' + number + '.svg';
+    img.src = '../cursor_output/svg/' + name;
+    img.id= number;
+    img.onload = convertToPng;
+    container.appendChild(img);
+  }
+}
+
+function init() {
+  initType('default');
+  initType('pointer'); 
+}
+
+function convertToPng(evt) {
+  // var svg = document.querySelector( "svg" );
+  // var svgData = new XMLSerializer().serializeToString( svg );
+  // img.setAttribute( "src", "data:image/svg+xml;base64," + btoa( svgData ) );
+   
+  var img = evt.target;
+  var size = parseFloat(img.id)
+  var canvas = document.createElement("canvas");
+  canvas.height = 23 * size;
+  canvas.width = 14 * size;
+  var ctx = canvas.getContext( "2d" );
+  ctx.drawImage(img, 0, 0);
+  img.src = canvas.toDataURL( "image/png" );
+}
+</script>
+</head>
+<body onload="init()">
+</body>
+</html>
