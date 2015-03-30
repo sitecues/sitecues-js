@@ -44,21 +44,21 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
      * @param sizeRatio a number > 1 (e.g. 2 = 2x)
      * @param pixelRatio = 1 for normal, 2 for retina cursor
      */
-    customCursor.getCursorCss = function(type, sizeRatio, doUseIECursors) {
+    customCursor.getCursorCss = function(type, sizeRatio, doUseAjaxCursors) {
       var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
         pixelRatio = doUseRetinaCursors ? 2 : 1,
         cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
 
-      var url = getUrl(type, sizeRatio, pixelRatio, doUseIECursors),
+      var url = getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors),
         hotspotOffset = getCursorHotspotOffset(type, sizeRatio);
 
       return cursorGeneratorFn(url, hotspotOffset, type);
     };
 
-    function getUrl(type, sizeRatio, pixelRatio, doUseIECursors) {
+    function getUrl(type, sizeRatio, pixelRatio, doUseAjaxCursors) {
 
-      if (doUseIECursors) {
-        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getIECursorSize(sizeRatio) + '.cur' );
+      if (doUseAjaxCursors) {
+        return sitecues.resolveSitecuesUrl( '../images/cursors/win_' + type + '_' + getAjaxCursorSize(sizeRatio) + '.cur' );
       }
 
       var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
@@ -113,9 +113,11 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
         ') ' + hotspotOffset + ', ' + type;
     }
 
-    function getIECursorSize(sizeRatio) {
-      var roundedToTenths = Math.round(sizeRatio * 10) / 10;
-      return Math.min(roundedToTenths, 3);
+    function getAjaxCursorSize(sizeRatio) {
+      var MIN_AJAX_CURSOR_SIZE = 1.2,
+        MAX_AJAX_CURSOR_SIZE = 3,
+        rounded = Math.round(sizeRatio * 5) / 5;
+      return Math.max(Math.min(rounded, MAX_AJAX_CURSOR_SIZE), MIN_AJAX_CURSOR_SIZE);
     }
 
     customCursor.getCursorZoom = function(pageZoom) {
