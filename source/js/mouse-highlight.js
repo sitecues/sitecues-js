@@ -1051,7 +1051,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     function onMouseWheel(event) {
-      if (!state.picked) {
+      if (!state.picked || !state.elementRect) {
         return;
       }
 
