@@ -60,8 +60,8 @@ sitecues.def('cursor', function (cursor, callback) {
     function flushPendingCursorRules(url) {
       var ajaxCursor = ajaxCursors[url],
         cursorValue = ajaxCursor.cursorValue;
-      ajaxCursors.isComplete = true;
-      ajaxCursors.pendingRules.forEach(function(rule) {
+      ajaxCursor.isComplete = true;
+      ajaxCursor.pendingRules.forEach(function(rule) {
         setCursorStyle(rule, cursorValue);
       });
     }
