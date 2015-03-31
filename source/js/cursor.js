@@ -27,7 +27,7 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         bpCursorStylesheetObject,
         isStyleServiceReady,
-        doPreventCursors,
+        doAllowCursors,
         doUseAjaxCursors = platform.browser.isIE,
         doDisableDuringZoom = platform.browser.isIE && platform.browser.version < 11;
 
@@ -236,7 +236,7 @@ sitecues.def('cursor', function (cursor, callback) {
      * all cursor properties in the <style id="sitecues-cursor">
      */
     function refreshStylesheets() {
-      if (cursorZoom <= 1 || doPreventCursors) {
+      if (cursorZoom <= 1 || !doAllowCursors) {
         if ($stylesheet) {
           $stylesheet.remove();
           $stylesheet = null;
@@ -285,9 +285,9 @@ sitecues.def('cursor', function (cursor, callback) {
 
     if (SC_DEV || true) {
       sitecues.toggleCursors = function() {
-        doPreventCursors = !doPreventCursors;
+        doAllowCursors = !doAllowCursors;
         refreshStylesheets();
-        return doPreventCursors;
+        return doAllowCursors;
       };
 
       sitecues.toggleAjaxCursors = function() {
