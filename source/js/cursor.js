@@ -27,7 +27,7 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         bpCursorStylesheetObject,
         isStyleServiceReady,
-        doAllowCursors,
+        doAllowCursors = true,
         doUseAjaxCursors = platform.browser.isIE,
         doDisableDuringZoom = platform.browser.isIE && platform.browser.version < 11;
 
