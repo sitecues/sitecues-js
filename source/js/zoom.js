@@ -290,7 +290,6 @@ sitecues.def('zoom', function (zoom, callback) {
           cancelFrame(zoomAnimator);
           if (elementDotAnimatePlayer) {
             // Make sure we freeze at target zoom -- this helps crispen it in Chrome, not actually sure why
-            elementDotAnimatePlayer.onfinish = onGlideStopped;
             finishElementDotAnimate();
           }
           else {
@@ -466,17 +465,23 @@ sitecues.def('zoom', function (zoom, callback) {
         minZoomChangeTimer = setTimeout(finishGlideEarly, timeRemaining);
       }
 
+      function freezeZoom() {
+        currentTargetZoom = getActualZoom();
+        $body.css(getZoomCss(currentTargetZoom));
+        if (elementDotAnimatePlayer) {
+          elementDotAnimatePlayer.onfinish = null;
+          elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+        }
+        onGlideStopped();
+      }
+
       function finishElementDotAnimate() {
         // We have to stop it like this so that we keep the current amount of zoom in the style attribute,
         // while the animation player is stopped so that it doesn't block future style attribute changes
         // from taking affect (e.g. via the slider)
         requestFrame(function() {
-          elementDotAnimatePlayer.pause();
-          requestFrame(function () {
-            currentTargetZoom = getActualZoom();
-            $body.css(getZoomCss(currentTargetZoom));
-            elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
-          });
+          elementDotAnimatePlayer && elementDotAnimatePlayer.pause();
+          requestFrame(freezeZoom);
         });
       }
 
@@ -543,8 +548,9 @@ sitecues.def('zoom', function (zoom, callback) {
       // Go directly to zoom. Do not pass go. But do collect the $200 anyway.
       function performInstantZoomOperation() {
         var zoomCss = getZoomCss(currentTargetZoom);
-        if (platform.browser.isChrome && document.body.animate && false) {
+        if (platform.browser.isChrome && document.body.animate) {
           // Magically, this works with the new crisper (and the new crisper doesn't kill mouse events on floats ...)
+          elementDotAnimatePlayer && elementDotAnimatePlayer.cancel();
           elementDotAnimatePlayer = body.animate(
             [zoomCss, zoomCss],
             {

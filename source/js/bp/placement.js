@@ -64,7 +64,6 @@ sitecues.def('bp/placement', function(placement, callback) {
         // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
         // because of transparent space to the right/bottom of the visible BP
         svgAspectRatio,
-        isFirstTime       = true, // Helps Chrome not get blurry on sitecues.com after zoom
         documentElement   = document.documentElement;
 
     // Allow animations just before panel expands

@@ -286,7 +286,7 @@ sitecues.def('cursor', function (cursor, callback) {
       return cursorTypeUrls;
     }
 
-    if (SC_DEV || true) {
+    if (SC_DEV) {
       sitecues.toggleCursors = function() {
         doAllowCursors = !doAllowCursors;
         refreshStylesheets();
