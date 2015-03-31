@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style>
+img { border: 10px solid gray; background-color: green;}
+</style>
 <script>
 function initType(type) {
   var container = document.getElementById(type);
-  for (var size = 1.1; size <= 3; size += 0.1) {
+  for (var index = 11; index <= 30; index ++ ) {
+    var size = index / 10;
     var img = document.createElement('img');
     var number = size.toFixed(1).replace('.0', '');
     var name = 'win_' + type + '_' + number + '.svg';
     img.src = '../cursor_output/svg/' + name;
+    img.setAttribute('data-type', type)
     img.id= number;
+    img.setAttribute('alt', name);
+    img.title = type + '_' + number;
     img.onload = convertToPng;
     container.appendChild(img);
   }
@@ -20,16 +27,29 @@ function init() {
   initType('pointer'); 
 }
 
+var sizes = {
+  _pointer: {
+    width: 18,
+    height: 23
+  },
+  _default: {
+    width: 14,
+    height: 23
+  }
+};
+
 function convertToPng(evt) {
   // var svg = document.querySelector( "svg" );
   // var svgData = new XMLSerializer().serializeToString( svg );
   // img.setAttribute( "src", "data:image/svg+xml;base64," + btoa( svgData ) );
-   
+  
   var img = evt.target;
-  var size = parseFloat(img.id)
+  img.onload = null;
+  var size = parseFloat(img.id);
+  var type = img.getAttribute('data-type');
   var canvas = document.createElement("canvas");
-  canvas.height = 23 * size;
-  canvas.width = 14 * size;
+  canvas.width = size * sizes['_' + type].width;
+  canvas.height = size * sizes['_' + type].height;
   var ctx = canvas.getContext( "2d" );
   ctx.drawImage(img, 0, 0);
   img.src = canvas.toDataURL( "image/png" );
@@ -37,5 +57,7 @@ function convertToPng(evt) {
 </script>
 </head>
 <body onload="init()">
+<div id="default"></div>
+<div id="pointer"></div>
 </body>
 </html>
