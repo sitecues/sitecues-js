@@ -21,6 +21,7 @@ sitecues.def('cursor', function (cursor, callback) {
         SITECUES_CURSOR_CSS_ID = 'sitecues-cursor',
         SITECUES_BP_CURSOR_CSS_ID = 'sitecues-bp-cursor',
         MIN_BP_CURSOR_SIZE = 1.9,
+        REENABLE_CURSOR_MS = 20,
         ajaxCursors = {}, // URLs for IE cursors that have already been fetched via AJAX
         $stylesheet,
         $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
@@ -29,7 +30,7 @@ sitecues.def('cursor', function (cursor, callback) {
         isStyleServiceReady,
         doAllowCursors = true,
         doUseAjaxCursors = platform.browser.isIE,
-        doDisableDuringZoom = platform.browser.isIE && platform.browser.version < 11;
+        doDisableDuringZoom = platform.browser.isIE;
 
     /*
      * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -253,7 +254,9 @@ sitecues.def('cursor', function (cursor, callback) {
       // Refresh document cursor stylesheet if we're using one
       if (cursorStylesheetObject) {
         refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
-        setCursorsDisabled(false);
+        if (doDisableDuringZoom) {
+          setTimeout(function() { setCursorsDisabled(false); }, REENABLE_CURSOR_MS);
+        }
       }
 
       // Refresh BP cursor stylesheet
