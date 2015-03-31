@@ -86,15 +86,7 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       currentBPParent = BADGE_PARENT;
 
-      if (isFirstTime) {
-
-        isFirstTime = false;
-
-        setTimeout(repositionBPOverBadge, 0); // Helps Chrome not get blurry on sitecues.com after zoom
-
-      } else {
-        repositionBPOverBadge();
-      }
+      repositionBPOverBadge();
 
     }
 
