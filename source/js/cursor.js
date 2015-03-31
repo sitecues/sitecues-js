@@ -60,8 +60,8 @@ sitecues.def('cursor', function (cursor, callback) {
     function flushPendingCursorRules(url) {
       var ajaxCursor = ajaxCursors[url],
         cursorValue = ajaxCursor.cursorValue;
-      ajaxCursors.isComplete = true;
-      ajaxCursors.pendingRules.forEach(function(rule) {
+      ajaxCursor.isComplete = true;
+      ajaxCursor.pendingRules.forEach(function(rule) {
         setCursorStyle(rule, cursorValue);
       });
     }
@@ -179,9 +179,26 @@ sitecues.def('cursor', function (cursor, callback) {
         .text(cssText);
     }
 
+    function getCursorStyles() {
+      var styles = styleService.getAllMatchingStyles('cursor');
+      if (!platform.browser.isIE) {
+        return styles;
+      }
+
+      // Strip out slow selectors
+      // For example, don't allow 'any descendant' rules in IE --
+      // absolute perf KILLER because executed as cursor moves
+      var SLOW_SELECTORS_IE = new RegExp(/[^\,] /)
+      function isOkayStyle(style) {
+        return !SLOW_SELECTORS_IE.exec(style.rule.selectorText);
+      }
+
+      return styles.filter(isOkayStyle);
+    }
+
     // Create a stylesheet with only the cursor-related style rules
     function constructCursorStylesheet() {
-      var cursorStyleSubset = styleService.getAllMatchingStyles('cursor'),
+      var cursorStyleSubset = getCursorStyles(),
         cssText = styleService.getStyleText(cursorStyleSubset, 'cursor');
 
       // Create the sitecues <style id="sitecues-cursor"> element and content

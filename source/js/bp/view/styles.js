@@ -367,13 +367,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '0px 15px'
         },
 
-        /*************** Disabled **********************/
-
-        '#scp-svg [aria-disabled="true"]': {
-          'fill': '#aaaaaa', /* Grayed out */
-          'pointer-events': 'none'
-        },
-
         /*************** Focus **************************/
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */

@@ -182,10 +182,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       item = item || evt.currentTarget;
 
-      if (item.getAttribute('aria-disabled') === 'true') {
-        return;
-      }
-
       var feature = item.getAttribute('data-feature');
 
       if (feature) {  /* Feature button has data-feature attribute */
