@@ -99,11 +99,16 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
         isModeratelyLargerThanChildInOneDimension: 0.3
       },
       MAX_VISUAL_BOX_CHECK_SIZE = 400,  // We try to highlight even over whitespace if cursor is within a box of this size or less
-      customSelectors = { // Inject selectors via customization modules
-        //prefer: "[selector]",
-        //ignore: "[selector]",
-        //disable: "[selector]"
-      },
+
+      // Inject selectors via sitecues.config.picker or customization module using picker.provideCustomSelectors()
+      // Object is as follows:
+      //{
+      //  prefer: "[selector]",
+      //  ignore: "[selector]",
+      //  disable: "[selector]"
+      //},
+      customSelectors = (window.sitecues && window.sitecues.config.picker) || {},
+
       isDebuggingOn,
       isVoteDebuggingOn,
       isAutoPickDebuggingOn,
@@ -732,7 +737,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
 
     // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-    sitecues.provideCustomSelectors = function(selectors) {
+    picker.provideCustomSelectors = function(selectors) {
       customSelectors = selectors;
     };
 
