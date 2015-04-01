@@ -262,11 +262,6 @@ sitecues.def('bp', function (bp, callback) {
 
     sitecues.on('bp/do-update', updateView);
 
-    sitecues.on('panel/reset', function() {
-      sitecues.emit('speech/reset');
-      sitecues.emit('zoom/reset');
-    });
-
     /*
                            ********  INITIALIZATION **********
 

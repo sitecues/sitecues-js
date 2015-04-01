@@ -18,8 +18,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     };
 
     var DELTA_KEYS = {};
-    DELTA_KEYS[BP_CONST.KEY_CODES.HOME]  = -9999;
-    DELTA_KEYS[BP_CONST.KEY_CODES.END]   = 9999;
     DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
     DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
     DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
@@ -171,7 +169,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     function processSliderCommands(evt) {
       var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
       if (deltaSliderCommand) {
-        slider.changeZoomBy(deltaSliderCommand * BP_CONST.ZOOM_KEY_INCREMENT);
+        sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
         evt.preventDefault();
         return;
       }

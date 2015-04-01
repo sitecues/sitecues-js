@@ -125,12 +125,12 @@ sitecues.def('hpan', function (hpan, callback) {
       refresh();
     });
 
-    sitecues.on('panel/show', function () {
+    sitecues.on('bp/will-expand', function () {
       isPanelOpen = true;
       refresh();
     });
 
-    sitecues.on( 'panel/hide', function () {
+    sitecues.on('bp/did-shrink', function () {
       isPanelOpen = false;
       refresh();
     });

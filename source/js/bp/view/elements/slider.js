@@ -40,13 +40,6 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
 
     };
 
-    /**
-     * Changes the zoom amount by |delta|. Used for key presses.
-     */
-    slider.changeZoomBy = function(delta) {
-      zoomMod.changeZoomBy(delta);
-    };
-
     // Update the slider thumb position on bp view updates because the entire slider changes size
     // (it scales more horizontally than vertically)
     slider.renderView = function() {

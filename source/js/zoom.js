@@ -92,7 +92,8 @@ sitecues.def('zoom', function (zoom, callback) {
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
         // Constants
-        MIN_ZOOM_PER_CLICK = 0.20,  // Change zoom at least this amount if user clicks on A button or presses +/-
+        MIN_ZOOM_PER_CLICK = 0.2,  // Change zoom at least this amount if user clicks on A button or presses +/- or left/right in slider
+
         MS_PER_X_ZOOM_GLIDE = 1400, // For animations, the number of milliseconds per unit of zoom (e.g. from 1x to 2x)
         MS_PER_X_ZOOM_SLIDER = 500, // For click in slider
         ZOOM_PRECISION = 7, // Decimal places allowed
@@ -166,12 +167,6 @@ sitecues.def('zoom', function (zoom, callback) {
           finishZoomOperation();
         }
       }
-
-      // Change the zoom by the given amount -- useful for
-      // increase/decrease caused by keypress on a focused zoom slider
-      zoom.changeZoomBy = function(delta) {
-        beginGlide(completedZoom + delta);
-      };
 
       // Retrieve and store whether the current window is on a Retina display
       zoom.isRetina = function() {
@@ -367,6 +362,10 @@ sitecues.def('zoom', function (zoom, callback) {
         return parseFloat(value.toFixed(ZOOM_PRECISION));
       }
 
+      function getMinZoomPerClick() {
+        return MIN_ZOOM_PER_CLICK;
+      }
+
       // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
       // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
       // If we are zooming with +/- or clicking A/a
@@ -378,7 +377,7 @@ sitecues.def('zoom', function (zoom, callback) {
             // Instant zoom
             if (event) {
               // When no animations and key/button pressed -- just be clunky and zoom a bit closer to the target
-              var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+              var delta = getMinZoomPerClick() * (completedZoom < targetZoom ? 1 : -1);
               currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
             }
             performInstantZoomOperation();
@@ -395,9 +394,9 @@ sitecues.def('zoom', function (zoom, callback) {
           glideChangeTimer = setInterval(onGlideChange, GLIDE_CHANGE_INTERVAL_MS);
           if (!zoomInput.isLongGlide) {
             // Button/key was already released, zoom only for long enough to get minimum zoom
-            var delta = completedZoom < targetZoom ? MIN_ZOOM_PER_CLICK : -MIN_ZOOM_PER_CLICK;
+            var delta = getMinZoomPerClick() * (completedZoom < targetZoom ? 1 : -1);
             currentTargetZoom = getSanitizedZoomValue(completedZoom + delta);
-            minZoomChangeTimer = setTimeout(finishZoomOperation, MIN_ZOOM_PER_CLICK * getMsPerXZoom());
+            minZoomChangeTimer = setTimeout(finishZoomOperation, getMinZoomPerClick() * getMsPerXZoom());
           }
 
 
@@ -442,7 +441,7 @@ sitecues.def('zoom', function (zoom, callback) {
         return Date.now() - startZoomTime;
       }
 
-      // When an A button or +/- key is pressed, we always glide at least MIN_ZOOM_PER_CLICK.
+      // When an A button or +/- key is pressed, we always glide at least getMinZoomPerClick().
       // This provides a consistent amount of zoom change for discrete presses.
       function finishGlideIfEnough() {
         if (!isGlideCurrentlyRunning()) {
@@ -452,10 +451,10 @@ sitecues.def('zoom', function (zoom, callback) {
           return;
         }
 
-        // If MIN_ZOOM_PER_CLICK has not been reached, we set a timer to finish the zoom
-        // based on how much time would be needed to achieve MIN_ZOOM_PER_CLICK
+        // If getMinZoomPerClick() has not been reached, we set a timer to finish the zoom
+        // based on how much time would be needed to achieve getMinZoomPerClick()
         var timeElapsed = getZoomOpElapsedTime(),
-          timeRemaining = Math.max(0, MIN_ZOOM_PER_CLICK * getMsPerXZoom() - timeElapsed);
+          timeRemaining = Math.max(0, getMinZoomPerClick() * getMsPerXZoom() - timeElapsed);
 
         zoomInput.isLongGlide = timeRemaining === 0;
         if (zoomInput.isLongGlide) {
@@ -1294,14 +1293,14 @@ sitecues.def('zoom', function (zoom, callback) {
       sitecues.on('zoom/decrease', function(event) {
         beginGlide(zoom.min, event);
       });
-      sitecues.on('panel/show', function() {
+      sitecues.on('bp/will-expand', function() {
         initZoomModule(); // Lazy init
         isPanelOpen = true;
         if (shouldPrepareAnimations()) {
           prepareAnimationOptimizations();
         }
       });
-      sitecues.on('panel/hide', function() {
+      sitecues.on('bp/did-shrink', function() {
         isPanelOpen = false;
         clearAnimationOptimizations(); // Browser can reclaim resources used
       });
