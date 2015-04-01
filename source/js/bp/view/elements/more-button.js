@@ -111,7 +111,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       btnContainer.setAttribute('class', opacityTransitionClass);
 
       btnContainer.style.opacity = 1;
-      helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
+      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showHelpButton);
       alwaysShowButton = true;
     }
 
@@ -123,7 +123,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       moreButton.setAttribute('class', '');
       moreButton.style.opacity = 0;
 
-      helper.byId(BP_CONST.BOTTOM_ID).removeEventListener('mousemove', showHelpButton);
+      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showHelpButton);
 
       if (mouseEnterAnimation) {
         mouseEnterAnimation.cancel();
@@ -157,7 +157,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         showHelpButton();
         return;
       }
-      helper.byId(BP_CONST.BOTTOM_ID).addEventListener('mousemove', showHelpButton);
+      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).addEventListener('mousemove', showHelpButton);
       helper.byId(BP_CONST.SVG_ID).addEventListener('mousedown', captureUserInput);
       userInputTimeoutId = setTimeout(function () {
         if (!userInputOccured) {
