@@ -35,6 +35,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.VERT_DIVIDER_ID          = 'scp-vert-divider';
   constants.BOTTOM_ID                = 'scp-bottom-def';
+  constants.BOTTOM_MOUSETARGET_ID    = 'scp-bottom-mousetarget';
 
   constants.CLOSE_BUTTON_ID          = 'scp-close-button';
 

@@ -61,7 +61,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target"/>\
   </g>\
   <g id="scp-bottom" class="scp-large-only" opacity="0">\
-    <use xlink:href="#scp-bottom-def"/>\
+    <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
     <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
     <text id="scp-speech-label" x="583" y="178">{{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
