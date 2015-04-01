@@ -56,7 +56,7 @@ describe('pick', function() {
       var startElement = win.document.getElementById('0'),
         actualPickedElements;
 
-      pick.provideCustomSelectors({prefer: '.prefer'});
+      sitecues.provideCustomSelectors({prefer: '.prefer'});
       actualPickedElements = pick.find(startElement);
       expect(actualPickedElements[0].className).to.be.equal('prefer');
       done();
@@ -65,7 +65,7 @@ describe('pick', function() {
       var startElement = win.document.getElementById('0'),
         actualPickedElements;
 
-      pick.provideCustomSelectors({disable: '.disable'});
+      sitecues.provideCustomSelectors({disable: '.disable'});
       actualPickedElements = pick.find(startElement);
       expect(actualPickedElements).to.be.equal(null);
       done();
@@ -75,7 +75,7 @@ describe('pick', function() {
         actualPickedElements,
         ignoredElement = win.document.getElementsByClassName('pickme')[0];
 
-      pick.provideCustomSelectors({ignore: '.pickme'});
+      sitecues.provideCustomSelectors({ignore: '.pickme'});
       actualPickedElements = pick.find(startElement);
       expect(jquery(actualPickedElements)[0]).to.not.be.equal(ignoredElement);
       done();
