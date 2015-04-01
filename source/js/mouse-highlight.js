@@ -329,7 +329,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     }
 
     // Update mouse highlight view and show unless doKeepHidden is truthy
-    // return true if something was shown
+    // return true if something is shown
     function updateView(doKeepHidden) {
       // can't find any element to work with
       if (!state.picked) {
@@ -350,8 +350,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       // Show the actual overlay
       if (!doKeepHidden) {
         show();
-        return true;
       }
+      return true;
     }
 
     function show() {
@@ -1333,7 +1333,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           cursorPos = getCursorPos(mouseEvent);
         }
         if (updateView()) {
-          return;  // Highlight is appropriate and made visible again
+          return;  // Highlight is appropriate and visible
         }
       }
 
