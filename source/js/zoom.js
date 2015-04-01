@@ -283,13 +283,7 @@ sitecues.def('zoom', function (zoom, callback) {
         // ---- Slider drag ----
         if (zoomInput.isSliderDrag) {
           cancelFrame(zoomAnimator);
-          if (elementDotAnimatePlayer) {
-            // Make sure we freeze at target zoom -- this helps crispen it in Chrome, not actually sure why
-            finishElementDotAnimate();
-          }
-          else {
-            finishZoomOperation();
-          }
+          finishZoomOperation();
           return;
         }
 
@@ -469,7 +463,7 @@ sitecues.def('zoom', function (zoom, callback) {
         $body.css(getZoomCss(currentTargetZoom));
         if (elementDotAnimatePlayer) {
           elementDotAnimatePlayer.onfinish = null;
-          elementDotAnimatePlayer.cancel();  // Causes onGlideStop() to be called
+          elementDotAnimatePlayer.cancel();
         }
         onGlideStopped();
       }
@@ -765,6 +759,13 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
+        if (elementDotAnimatePlayer) {
+          // Can't leave animation player around, as it will prevent future animations
+          $body.css(getZoomCss(currentTargetZoom));
+          elementDotAnimatePlayer.onfinish = null;
+          elementDotAnimatePlayer.cancel();
+        }
+
         var didUnzoom = completedZoom > currentTargetZoom;
 
         completedZoom = common.getTransform($body);
