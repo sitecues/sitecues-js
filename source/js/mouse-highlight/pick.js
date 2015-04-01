@@ -732,7 +732,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
     // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
 
     // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-    picker.provideCustomSelectors = function(selectors) {
+    sitecues.provideCustomSelectors = function(selectors) {
       customSelectors = selectors;
     };
 
