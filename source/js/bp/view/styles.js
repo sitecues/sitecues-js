@@ -545,7 +545,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     function toCSS(jsonObject) {
 
       var styles = '';
-      var isTransformPrefixNeeded = document.body.style.transform === undefined;
+      var isTransformPrefixNeeded = document.createElement('p').style.transform === undefined;
 
       for (var selector in jsonObject) {
         if (jsonObject.hasOwnProperty(selector)) {
