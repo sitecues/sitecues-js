@@ -181,20 +181,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function getCursorStyles() {
-      var styles = styleService.getAllMatchingStyles('cursor');
-      if (!platform.browser.isIE) {
-        return styles;
-      }
-
-      // Strip out slow selectors
-      // For example, don't allow 'any descendant' rules in IE --
-      // absolute perf KILLER because executed as cursor moves
-      var SLOW_SELECTORS_IE = new RegExp(/[^\,] /)
-      function isOkayStyle(style) {
-        return !SLOW_SELECTORS_IE.exec(style.rule.selectorText);
-      }
-
-      return styles.filter(isOkayStyle);
+      return styleService.getAllMatchingStyles('cursor');
     }
 
     // Create a stylesheet with only the cursor-related style rules
