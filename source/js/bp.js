@@ -32,6 +32,7 @@ sitecues.def('bp', function (bp, callback) {
 
     // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
     var bpContainer,
+        isInitialized,
         MIN_YIQ_LIGHT_TEXT = 160;
 
     /**
@@ -176,6 +177,10 @@ sitecues.def('bp', function (bp, callback) {
      */
     function initializeBPFeature() {
 
+      if (isInitialized) {
+        return;
+      }
+
       // Initializes the 3 elements fundamental to the BP feature.
       initBPElements();
 
@@ -195,6 +200,7 @@ sitecues.def('bp', function (bp, callback) {
       // tts-button.js -> init (TODO: Be certain that bp/did-create was not necessary)
       sitecues.emit('bp/did-complete');
 
+      isInitialized = true;
     }
 
     // This function augments the customers placeholder if found, otherwise creates the floating badge.
@@ -245,19 +251,17 @@ sitecues.def('bp', function (bp, callback) {
       // bpContainer.addEventListener('click', bpController.changeMode);
     }
 
-    function isBadgeAnImage () {
+    function isBadgeAnImage (badgeElement) {
 
-      var badge = helper.byId(BP_CONST.BADGE_ID);
-
-      return badge && badge.tagName.toLowerCase() === 'img';
+      return badgeElement && badgeElement.localName === 'img';
 
     }
 
     // Initialize the BP feature if any of the following are true:
     //    * document.readyState is 'complete'
     //    * document.readyState is 'interactive' AND the site does not have an <img> placeholder.
-    function isDocumentReadyForBP () {
-      return (document.readyState === 'interactive' && !isBadgeAnImage()) || document.readyState === 'complete';
+    function isDocumentReadyForBP (badgeElement) {
+      return (document.readyState === 'interactive' && !isBadgeAnImage(badgeElement)) || document.readyState === 'complete';
     }
 
     sitecues.on('bp/do-update', updateView);
@@ -273,21 +277,31 @@ sitecues.def('bp', function (bp, callback) {
           - If the customer uses the <img>, attach a load event listener to the <img>
           - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
     */
-    if (isDocumentReadyForBP()) {
 
-      SC_DEV && console.log('Document ready to initialize BP.');
+    function initIfBadgeReady() {
 
-      initializeBPFeature();
+      // Page may still be loading -- check if the badge is available
+      var earlyBadgeElement = helper.byId(BP_CONST.BADGE_ID);
 
-    } else {
+      if (earlyBadgeElement && isDocumentReadyForBP(earlyBadgeElement)) {
 
-      if (isBadgeAnImage() && !helper.byId(BP_CONST.BADGE_ID).complete) {
+        SC_DEV && console.log('Document ready to initialize BP.');
 
-        SC_DEV && console.log('Initialize BP when <img> loads.');
-
-        helper.byId(BP_CONST.BADGE_ID).addEventListener('load', initializeBPFeature);
+        initializeBPFeature();
 
       } else {
+
+        if (isBadgeAnImage(earlyBadgeElement) && !earlyBadgeElement.complete) {
+
+          SC_DEV && console.log('Initialize BP when <img> loads.');
+
+          // Loading of badge image is enough -- once it's ready we can initialize
+          // because we now have the desired dimensions of the badge
+          earlyBadgeElement.addEventListener('load', initializeBPFeature);
+
+          // Because IE does not reliably fire load events for badge, we
+          // will also listen for document complete events and make  sure we are initialized then
+        }
 
         SC_DEV && console.log('Initialize BP when document.readyState === complete.');
 
@@ -296,10 +310,10 @@ sitecues.def('bp', function (bp, callback) {
             initializeBPFeature();
           }
         });
-
       }
-
     }
+
+    initIfBadgeReady();
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
