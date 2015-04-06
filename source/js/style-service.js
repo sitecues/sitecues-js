@@ -47,14 +47,22 @@ sitecues.def('style-service', function (styleService, callback) {
       return stylesheets;
 
     }
-    /**
-     * [constructCombinedStyleSheet builds a <style id="sitecues-combined-css">, maintaining the sites original precedence for styles]
-     */
-    function constructCombinedStyleSheet(linkTagStylesList, styleTags) {
-      // Create the sitecues <style> element
-      $combinedStylesheet = $('<style>').appendTo('head')
-        .attr('id', SITECUES_CSS_ID);
 
+    /**
+     * Create an disabled style sheet to be filled in later with styles
+     */
+    function createCombinedStyleSheet() {
+      // Construct sitecues combined CSS <style> element
+      return $('<style>')
+        .appendTo('head')
+        .attr('id', SITECUES_CSS_ID);
+    }
+
+    /**
+     * collectAllStylesIntoCombinedSheet fills in the <style id="sitecues-combined-css">,
+     * maintaining the sites original precedence for styles
+     */
+    function collectAllStylesIntoCombinedSheet(linkTagStylesList, styleTags) {
       // Add our default styles
       var css = SITECUES_CSS_DEFAULT,
         index,
@@ -74,6 +82,14 @@ sitecues.def('style-service', function (styleService, callback) {
       }
 
       $combinedStylesheet.text(css);
+      combinedDOMStylesheetObject = styleService.getDOMStylesheet($combinedStylesheet);
+      combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
+
+      // Takes the browser a moment to process
+      setTimeout(function() {
+        isInitComplete = true;
+        sitecues.emit('style-service/ready');
+      }, WAIT_BEFORE_INIT_STYLESHEET);
     }
 
     /**
@@ -324,15 +340,10 @@ sitecues.def('style-service', function (styleService, callback) {
         styleTags = getAllStyleTags();
 
       function onStylesRetrieved() {
-        // Create the sitecues <style> element
-        constructCombinedStyleSheet(linkTagStylesList, styleTags); // Builds the <style> tags
+        $combinedStylesheet = createCombinedStyleSheet();
 
-        setTimeout(function() {
-          isInitComplete = true;
-          combinedDOMStylesheetObject = styleService.getDOMStylesheet($combinedStylesheet);
-          combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
-          sitecues.emit('style-service/ready');
-        }, WAIT_BEFORE_INIT_STYLESHEET);
+        // Fill-in the sitecues combined CSS <style> element
+        collectAllStylesIntoCombinedSheet(linkTagStylesList, styleTags);
       }
 
       // Grab all the CSS content from <link> tags
