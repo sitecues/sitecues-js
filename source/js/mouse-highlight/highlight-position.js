@@ -77,8 +77,8 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
 
-      if (platform.browser.isIE) {
-        contentsRangeRect = getIECorrectionsToRangeRect(contentsRangeRect);
+      if (platform.browser.isIE && platform.browser.version < 11) {
+        contentsRangeRect = getOldIECorrectionsToRangeRect(contentsRangeRect);
       }
 
       if (isOldFirefox) {
@@ -101,7 +101,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       return contentsRangeRect;
     };
 
-    function getIECorrectionsToRangeRect(origRangeRect) {
+    function getOldIECorrectionsToRangeRect(origRangeRect) {
       // Factor in IE native browser zoom
       var nativeZoom = screen.deviceXDPI / screen.logicalXDPI
       origRangeRect.top /= nativeZoom;
