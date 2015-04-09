@@ -35,10 +35,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
           allRects: [],
           hiddenElements: []
         },
-        $selector = $(selector),
-        clipRects = getAncestorClipRects($selector);
+        $selector = $(selector);
 
-      getHighlightInfoRecursive($selector, accumulatedPositionInfo, clipRects, doStretchForSprites, doIgnoreFloats, true);
+      getHighlightInfoRecursive($selector, accumulatedPositionInfo, doStretchForSprites, doIgnoreFloats, true);
       mhpos.combineIntersectingRects(accumulatedPositionInfo.allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
       return accumulatedPositionInfo;
@@ -284,11 +283,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     }
 
     // Add rectangle to collected list of all rectangles
-    function addRect(allRects, clipRect, unclippedRect, doLoosenMinSizeRule) {
-      if (!unclippedRect) {
+    function addRect(allRects, rect, doLoosenMinSizeRule) {
+      if (!rect) {
         return;
       }
-      var rect = getClippedRect(unclippedRect, clipRect),
+      var rect = rect,
         zoom = getZoom(),
         minRectSide = MIN_RECT_SIDE * zoom;
       if (!doLoosenMinSizeRule && (rect.width < minRectSide || rect.height < minRectSide)) {
@@ -299,7 +298,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
       allRects.push(rect);
     }
 
-    function getHighlightInfoRecursive($selector, accumulatedResults, clipRects, doStretchForSprites, doIgnoreFloats, isTop) {
+    function getHighlightInfoRecursive($selector, accumulatedResults, doStretchForSprites, doIgnoreFloats, isTop) {
       var
         allRects = accumulatedResults.allRects,
         hiddenElements = accumulatedResults.hiddenElements,
@@ -307,8 +306,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
 
       $selector.each(function (index) {
-        var isElement = this.nodeType === 1,
-          clipRect = Array.isArray(clipRects) ? clipRects[index] : clipRects;
+        var isElement = this.nodeType === 1;
 
         // --- Leaf nodes ---
         if (!isElement) {
@@ -323,7 +321,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // the returned rectangle would be the larger element rect, rather for just the visible content.
             //
             // var parentContentsRect = mhpos.getContentsRangeRect(this.parentNode);
-            // addRect(allRects, clipRect, parentContentsRect);
+            // addRect(allRects, parentContentsRect);
             // return false;  // Don't keep iterating over text/inlines in this container
             // ----------------------------------------------------------------------------------------------------
 
@@ -336,10 +334,10 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
             // ----------------------------------------------------------------------------------------------------
             var rect = mhpos.getContentsRangeRect(this);
 
-            addRect(allRects, clipRect, rect);
+            addRect(allRects, rect);
 
             // --- Overflowing content ---
-            addRect(allRects, clipRect, getOverflowRect(this.parentNode, traitcache.getStyle(this.parentNode)));
+            addRect(allRects, getOverflowRect(this.parentNode, traitcache.getStyle(this.parentNode)));
           }
           return;
         }
@@ -357,9 +355,6 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         }
 
         var thisRect = traitcache.getScreenRect(this);
-
-        // -- Clipping rules ---
-        clipRect = getChildClipRect(this, style, clipRect, thisRect);
 
         if (thisRect.right < -viewPos.x || thisRect.bottom < -viewPos.y) {
           // Hidden off the page
@@ -387,97 +382,32 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         // --- Media elements ---
         if (common.isVisualMedia(this)) {
           // Elements with rendered content such as images and videos
-          addRect(allRects, clipRect, getRectMinusPadding(thisRect, style));
+          addRect(allRects, getRectMinusPadding(thisRect, style));
           return;
         }
 
         // --- Visible border or form controls ---
         if (common.isVisualRegion(this, style, traitcache.getStyle(this.parentNode)) ||
           common.isFormControl(this)) {
-          addRect(allRects, clipRect, thisRect); // Make it all visible, including padding and border
+          addRect(allRects, thisRect); // Make it all visible, including padding and border
           // Keep iterating: there may be some content outside
         }
 
         // --- List bullets ---
-        addRect(allRects, clipRect, getBulletRect(this, style), true);
+        addRect(allRects, getBulletRect(this, style), true);
 
         // --- Background sprites ---
         if (doStretchForSprites) {
-          addRect(allRects, clipRect, getSpriteRect(this, style));
+          addRect(allRects, getSpriteRect(this, style));
         }
 
         // --- Elements with children ---
         if (this.hasChildNodes()) {
-          // Use bounds of visible descendants, but clipped by the bounds of this ancestor
-          getHighlightInfoRecursive($(this.childNodes), accumulatedResults, clipRect, doStretchForSprites, doIgnoreFloats);  // Recursion
+          // Use bounds of visible descendants
+          getHighlightInfoRecursive($(this.childNodes), accumulatedResults, doStretchForSprites, doIgnoreFloats);  // Recursion
           return;
         }
       });
-    }
-
-    function isClipElement(style) {
-      return style.clip !== 'auto' || style.overflow !== 'visible';
-    }
-
-    // Return the portion of unclippedRect after clipRect gets to clip it
-    function getClippedRect(unclippedRect, clipRect) {
-      if (!clipRect) {
-        return normalizeRect(unclippedRect); // Convert to non-native object so that properties can be modified if necessary
-      }
-      if (!unclippedRect) {
-        return normalizeRect(clipRect);
-      }
-      var left = Math.max(unclippedRect.left, clipRect.left),
-        right = Math.min(unclippedRect.left + unclippedRect.width, clipRect.left + clipRect.width),
-        top = Math.max(unclippedRect.top, clipRect.top),
-        bottom = Math.min(unclippedRect.top + unclippedRect.height, clipRect.top + clipRect.height);
-      return {
-        left: left,
-        top: top,
-        bottom: bottom,
-        right: right,
-        width: right - left,
-        height: bottom - top
-      };
-    }
-
-    // Return the new clip rect for the child, taking into account
-    // the old clip rect and usage of CSS positioning
-    // TODO What if overflow-X is hidden and overflow-y is visible?
-    function getChildClipRect(element, style, clipRect, elementRect) {
-      if (clipRect && clipRect.willOutOfFlowCancel && (style.position === 'absolute' || style.position === 'fixed')) {
-        clipRect = null; // Out-of-flow content does not get clipped by overflow:hidden
-      }
-      if (isClipElement(style)) {
-        clipRect = getClippedRect(clipRect, elementRect);
-        clipRect.willOutOfFlowCancel = true;
-      }
-      if (clipRect) {
-        // Turns to false if we have non-static positioning because
-        // next out of flow descendant doesn't affect the current clip rect
-        clipRect.willOutOfFlowCancel = clipRect.willOutOfFlowCancel &&
-          style.position === 'static';
-      }
-
-      return clipRect;
-    }
-
-    // Get clip rectangle from ancestors in the case any of them are clipping us
-    function getAncestorClipRects($selector) {
-      var allClipRects = [];
-
-      $selector.each(function() {
-        var ancestors = $selector.parentsUntil(document.body).get().reverse(),
-          clipRect,
-          style;
-        $(ancestors).each(function() {
-          style = traitcache.getStyle(this);
-          clipRect = getChildClipRect(this, style, clipRect, traitcache.getScreenRect(this));
-        });
-        allClipRects.push(clipRect);
-      });
-
-      return allClipRects;
     }
 
     // A text range is clipped by the vertical bounds of it's parent element
