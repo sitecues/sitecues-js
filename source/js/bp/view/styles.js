@@ -202,24 +202,49 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
+        // .scp-default-badge means it's either a floating badge or toolbar
+        // Also has: .scp-toolbar or .scp-floating-badge
+        //           .scp-left or .scp-right
         '.scp-default-badge': {
-          'position': 'absolute',
-          'top': '5px',
-          'left': '5px',
-          'width': '146px',
-          'height': '24px',
-          'padding': '5px',
-          'background-color': 'white',
+          'position': 'fixed',
+          'width': '190px',
+          'height': '40px',
+          'box-sizing': 'border-box',
+          'padding': '8px',
+          'background-color': '#f8f8f8',
           'z-index': '9999999'
         },
 
-        '.scp-default-badge #scp-opaque-badge-bg': {
-          'opacity': 1    // Make sure page contents don't show through the floating badge
-        },
-
-        '.scp-default-badge[aria-expanded="false"]': {
+        '.scp-default-badge[aria-expanded="false"],.scp-toolbar': {
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
+
+        '.scp-toolbar': {
+          'width': '100%',
+          'top': '0px',
+          'left': '0px'
+        },
+
+        '.scp-default-badge.scp-floating-badge.scp-right': {
+          right: '4px',
+          bottom: '4px'
+        },
+
+        '.scp-default-badge.scp-floating-badge.scp-left': {
+          left: '4px',
+          bottom: '4px'
+        },
+
+        '.scp-toolbar.scp-right': {
+          'padding-left': '88%'
+        },
+
+        // Move the body down by the height of the toolbar + 1px for the box-shadow
+        '.scp-default-badge.scp-toolbar + head + body': {
+          'transform': 'translateY(41px)',
+          'width': '100%'
+        },
+
 
         /********** Transform animation speed **********/
 

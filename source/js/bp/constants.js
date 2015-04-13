@@ -57,7 +57,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
-  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
+  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge scp-toolbar scp-left';
 
   constants.TRANSFORMS = {
     'PANEL': {},
