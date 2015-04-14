@@ -57,7 +57,14 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
-  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge scp-toolbar scp-left';
+  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
+
+  constants.BADGE_STYLES = [
+    'scp-toolbar scp-left',
+    'scp-toolbar scp-right',
+    'scp-floating-badge scp-right',
+    'scp-floating-badge scp-left'
+  ];
 
   constants.TRANSFORMS = {
     'PANEL': {},
@@ -110,8 +117,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   };
 
   constants.DEFAULT_BADGE_ATTRS = {
-    'ID'   : constants.BADGE_ID,
-    'CLASS': constants.DEFAULT_BADGE_CLASS
+    'ID'   : constants.BADGE_ID
   };
 
   // Labels

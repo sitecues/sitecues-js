@@ -1015,8 +1015,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Return a formatted string for translateY as required by CSS
       function getFormattedTranslateY(targetZoom) {
-        var badge = document.getElementById('sitecues-badge');
-        if (toolbarHeight) {
+        if (toolbarHeight && isBadgeToolbar()) {
           var zoomAdjustedToolbarHeight = (toolbarHeight / targetZoom).toFixed(ZOOM_PRECISION);
           return 'translateY(' + zoomAdjustedToolbarHeight + 'px)';
         }
@@ -1212,6 +1211,10 @@ sitecues.def('zoom', function (zoom, callback) {
           typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
       }
 
+      function isBadgeToolbar() {
+        return $('#sitecues-badge').is('.scp-toolbar');
+      }
+
       // Lazy init, saves time on page load
       function initZoomModule() {
         if (isInitialized) {
@@ -1220,8 +1223,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         isInitialized = true;
 
-        var badge = $('#sitecues-badge');
-        toolbarHeight = badge.is('.scp-toolbar') ? badge[0].offsetHeight : 0;
+        toolbarHeight = $('#sitecues-badge')[0].offsetHeight;
 
         initBodyInfo();
 

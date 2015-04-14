@@ -49,6 +49,7 @@ sitecues.def('keys', function(keys, callback) {
         LETTER_H = 72,
         QUOTE = 222,
         SHIFT = 16,
+        F8 = 119,
         isShiftKeyDown,
         isAnyNonShiftKeyDown,
 
@@ -159,6 +160,9 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === END && !hasAnyModifier(event)) ||
               event.keyCode === NUMPAD_1 ||
               (event.keyCode === DOWN && event.metaKey);
+          },
+          'f8': function(event) {
+            return event.keyCode === F8 && !hasAnyModifier(event);
           }
         },
         // define keys map used to bind actions to hotkeys
@@ -169,7 +173,8 @@ sitecues.def('keys', function(keys, callback) {
           'reset': 'sitecues/do-reset',
           'zoom1x': 'zoom/do-reset',
           'esc': 'key/esc',
-          'speech': 'speech/do-toggle'
+          'speech': 'speech/do-toggle',
+          'f8': 'toolbar/cycle'
         },
         KEY_EVENT_DEFAULT = 'key/nav';
 
