@@ -57,6 +57,11 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
+  constants.TIPS_BUTTON_ID           = 'scp-tips-button';
+  constants.SETTINGS_BUTTON_ID       = 'scp-settings-button';
+  constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';
+  constants.ABOUT_BUTTON_ID          = 'scp-about-button';
+
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
   constants.TRANSFORMS = {
@@ -91,6 +96,11 @@ sitecues.def('bp/constants', function (constants, callback) {
   };
 
   constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {scale:1.35};
+  constants.TRANSFORMS[constants.MORE_ID]                  = {translateY:-198};
+  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {scale:1.2, translateX: 25 , translateY: 14};
+  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {scale:1.2, translateX: 235, translateY: 14};
+  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {scale:1.2, translateX: 465, translateY: 14};
+  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {scale:1.2, translateX: 675, translateY: 14};
 
   // Elements that are only shown when panel is expanded
   // Attributes
@@ -207,6 +217,8 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.BADGE_MODE = 0;
   constants.PANEL_MODE = 1;
+  constants.SECONDARY_PANEL_DISABLED = 0;
+  constants.SECONDARY_PANEL_ENABLED  = 1;
 
   // Unless callback() is queued, the module is not registered in global constants.modules{}
   // See: https://fecru.ai2.at/cru/EQJS-39#c187

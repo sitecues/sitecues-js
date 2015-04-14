@@ -9,7 +9,7 @@ sitecues.def('animate', function (animate, callback) {
 
   sitecues.use('util/transform', function (transform) {
 
-    var requestFrameFn = window.requestAnimationFrame    ||
+    var requestFrameFn = window.requestAnimationFrame   ||
                          window.msRequestAnimationFrame ||
                          function (fn) {
                            return setTimeout(fn, 16);
@@ -41,18 +41,18 @@ sitecues.def('animate', function (animate, callback) {
     function normalizeTransformProps (animation, transformProperty) {
 
       var element             = animation.element,
-          currentTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[transformProperty],
-          targetTransform     = animation.CSSProperties[transformProperty],
-          currentScale        = transform.getScale(currentTransform),
-          targetScale         = transform.getScale(targetTransform),
-          currentTranslate    = transform.getTranslate(currentTransform),
-          targetTranslate     = transform.getTranslate(targetTransform);
+          fromTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[transformProperty],
+          toTransform     = animation.CSSProperties[transformProperty],
+          fromScale        = transform.getScale(fromTransform),
+          toScale         = transform.getScale(toTransform),
+          fromTranslate    = transform.getTranslate(fromTransform),
+          toTranslate     = transform.getTranslate(toTransform);
 
-      animation.animateStyles.current.scale = currentScale;
-      animation.animateStyles.target.scale  = targetScale;
+      animation.animateStyles.from.scale = fromScale;
+      animation.animateStyles.to.scale  = toScale;
 
-      animation.animateStyles.current.translate = currentTranslate;
-      animation.animateStyles.target.translate  = targetTranslate;
+      animation.animateStyles.from.translate = fromTranslate;
+      animation.animateStyles.to.translate  = toTranslate;
 
     }
 
@@ -61,10 +61,10 @@ sitecues.def('animate', function (animate, callback) {
       this.element            = element;
       this.CSSProperties      = CSSProperties;
       this.options            = options;
-
+      this.onFinish           = options.onFinish;
       this.animateStyles      = {
-        'current': {},
-        'target' : {}
+        'from': {},
+        'to' : {}
       };
 
       this.useAttribute       = options.useAttribute;
@@ -78,8 +78,8 @@ sitecues.def('animate', function (animate, callback) {
           if (prop.indexOf('transform') !== -1) {
             normalizeTransformProps(this, prop);
           } else {
-            this.animateStyles.current[prop] = element.style[prop];
-            this.animateStyles.target[prop]  = CSSProperties[prop];
+            this.animateStyles.from[prop] = element.style[prop];
+            this.animateStyles.to[prop]  = CSSProperties[prop];
           }
         }
       }
@@ -93,15 +93,15 @@ sitecues.def('animate', function (animate, callback) {
       var timeSinceFirstAnimationTick = Date.now() - this.animationStartTime,
           normalizedAnimationTime     = Math.min(1, this.animationFn(timeSinceFirstAnimationTick / this.duration)),
           that                        = this,
-          currentStyles               = this.animateStyles.current,
-          targetStyles                = this.animateStyles.target;
+          fromStyles               = this.animateStyles.from,
+          toStyles                = this.animateStyles.to;
 
       if (this.useAttribute && this.CSSProperties.transform) {
         setTransformAttr(
           this.element,
-          currentStyles.translate.left + (targetStyles.translate.left - currentStyles.translate.left) * normalizedAnimationTime,
-          currentStyles.translate.top + (targetStyles.translate.top - currentStyles.translate.top) * normalizedAnimationTime,
-          currentStyles.scale + (targetStyles.scale - currentStyles.scale) * normalizedAnimationTime
+          fromStyles.translate.left + (toStyles.translate.left - fromStyles.translate.left) * normalizedAnimationTime,
+          fromStyles.translate.top + (toStyles.translate.top - fromStyles.translate.top) * normalizedAnimationTime,
+          fromStyles.scale + (toStyles.scale - fromStyles.scale) * normalizedAnimationTime
         );
       }
 
@@ -109,6 +109,8 @@ sitecues.def('animate', function (animate, callback) {
         this.animationId = requestFrameFn(function () {
           that.tick();
         });
+      } else if (this.onFinish) {
+        this.onFinish(this.to);
       }
 
     };
@@ -117,7 +119,63 @@ sitecues.def('animate', function (animate, callback) {
       cancelFrameFn(this.animationId);
     };
 
+    function ArbitraryAnimate (properties, options) {
+      this.from               = properties.from;
+      this.to                 = properties.to;
+      this.onTick             = options.onTick;
+      this.onFinish           = options.onFinish;
+      this.animationFn        = options.animationFn ? animationFunctions[options.animationFn] : animationFunctions[defaultAnimation];
+      this.duration           = options.duration;
+      this.animationStartTime = Date.now();
+      this.animationId        = this.tick(); // Start the animation automatically.
+    }
+
+    ArbitraryAnimate.prototype.tick = function () {
+
+      var timeSinceFirstAnimationTick = Date.now() - this.animationStartTime,
+          normalizedAnimationTime     = Math.min(1, this.animationFn(timeSinceFirstAnimationTick / this.duration)),
+          that                        = this;
+
+      if (normalizedAnimationTime < 1) {
+        if (this.onTick) {
+          this.onTick({
+            'current': normalizedAnimationTime,
+            'start'  : this.from,
+            'end'    : this.to
+          });
+        }
+        this.animationId = requestFrameFn(function () {
+          that.tick();
+        });
+      } else {
+
+        if (this.onTick) {
+          this.onTick({
+            'current': normalizedAnimationTime,
+            'start'  : this.from,
+            'end'    : this.to
+          });
+        }
+
+        if (this.onFinish) {
+          this.onFinish({
+            'current': normalizedAnimationTime,
+            'start'  : this.from,
+            'end'    : this.end
+          });
+        }
+
+      }
+    };
+
+    ArbitraryAnimate.prototype.cancel = function () {
+      cancelFrameFn(this.animationId);
+    };
+
     animate.create = function (element, CSSProperties, options) {
+      if (element.hasOwnProperty('from') && element.hasOwnProperty('to')) {
+        return new ArbitraryAnimate(element, CSSProperties);
+      }
       return new Animate(element, CSSProperties, options);
     };
 

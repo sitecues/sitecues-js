@@ -5,6 +5,8 @@ sitecues.def('bp/model/state', function (state, callback) {
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
+    currentSecondaryPanelMode : 0,
+    secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     isMorePanel             : false, // Second panel
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation

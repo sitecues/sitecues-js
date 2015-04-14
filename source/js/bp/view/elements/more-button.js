@@ -58,18 +58,13 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function onMouseClick () {
-      sitecues.emit('info/help');
+      sitecues.emit('bp/toggle-secondary-panel');
     }
 
     function initMorePanel () {
 
       addMouseListeners();
 
-      // Commented out because having the "?" always in the panel makes it look bloated.
-
-      // if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
-      //   alwaysShowButton = true;
-      // }
     }
 
     function addMouseListeners () {
@@ -88,14 +83,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
           currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
           opacityTransitionClass;
 
-          if (useInstantTransition === true) {
-            opacityTransitionClass = 'scp-transition-opacity-instant';
-          } else {
-            opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
-          }
+      if (useInstantTransition === true) {
+        opacityTransitionClass = 'scp-transition-opacity-instant';
+      } else {
+        opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
+      }
 
       // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
-      if (!alwaysShowButton && useInstantTransition !== true) {
+      if (!alwaysShowButton && !useInstantTransition) {
 
         btnContainer.setAttribute('transform', 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + 0.5 + ')');
 
