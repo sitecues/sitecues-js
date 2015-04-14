@@ -19,6 +19,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           animationStartTime,
           animationId,
           MINIMUM_DISTANCE_FROM_EDGE  = 20,
+          MINIMUM_DISTANCE_FROM_EDGE_TOP = 4, // More forgiving on top side
 
           // What we're transitioning from and to
           // Note that if you exit/enter the panel in the middle of animation you can
@@ -91,6 +92,10 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
+      function isBadgeInToolbar() {
+        return helper.byId(BP_CONST.BADGE_ID).className.indexOf('scp-toolbar') > 0;
+      }
+
       /**
        * getPossibleOutlineRects returns the visible panel rectangle to be.  This is useful in our
        * calculation for determining where the panel should be animated to when expanding.
@@ -107,15 +112,26 @@ sitecues.def('bp/animate', function(animate, callback) {
             increaseFactor        = targetSVGWidth / currentSVGWidth,
             currentOutlineRect    = helper.getRectById(BP_CONST.MAIN_OUTLINE_ID),
             remainingTime         = 1 - state.get('currentMode'),
+            possibleOutlineRects;
 
-            possibleOutlineRects  = {
-              '25%0%'   : getScaledRect(currentOutlineRect, 0.25 * remainingTime, 0, increaseFactor),
-              'topLeft' : getScaledRect(currentOutlineRect, 0, 0, increaseFactor),
-              '75%0%'   : getScaledRect(currentOutlineRect, 0.75 * remainingTime, 0, increaseFactor),
-              'topRight': getScaledRect(currentOutlineRect, 1, 0, increaseFactor),
-              'botRight': getScaledRect(currentOutlineRect, 0, 1, increaseFactor),
-              'botLeft' : getScaledRect(currentOutlineRect, 1, 1, increaseFactor)
-            };
+        if (isBadgeInToolbar()) {
+          // Centered toolbar gets centered expansion treatment
+          possibleOutlineRects = {
+            'center'  : getScaledRect(currentOutlineRect, 0.68 * remainingTime, 0, increaseFactor),
+            'topLeft' : getScaledRect(currentOutlineRect, 0, 0, increaseFactor),
+            'topRight': getScaledRect(currentOutlineRect, 1, 0, increaseFactor)
+          };
+        }
+        else {
+          possibleOutlineRects = {
+            '25%0%'   : getScaledRect(currentOutlineRect, 0.25 * remainingTime, 0, increaseFactor),
+            'topLeft' : getScaledRect(currentOutlineRect, 0, 0, increaseFactor),
+            '75%0%'   : getScaledRect(currentOutlineRect, 0.75 * remainingTime, 0, increaseFactor),
+            'topRight': getScaledRect(currentOutlineRect, 1, 0, increaseFactor),
+            'botRight': getScaledRect(currentOutlineRect, 0, 1, increaseFactor),
+            'botLeft' : getScaledRect(currentOutlineRect, 1, 1, increaseFactor)
+          };
+        }
 
         return possibleOutlineRects;
 
@@ -155,7 +171,7 @@ sitecues.def('bp/animate', function(animate, callback) {
       }
 
       function isRectAboveViewport (rect) {
-        return rect.top < MINIMUM_DISTANCE_FROM_EDGE;
+        return rect.top < MINIMUM_DISTANCE_FROM_EDGE_TOP;
       }
 
       function isRectBelowViewport (rect) {

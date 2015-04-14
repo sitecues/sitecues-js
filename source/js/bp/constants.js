@@ -61,6 +61,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.BADGE_STYLES = [
     'scp-toolbar scp-left',
+    'scp-toolbar scp-middle',
     'scp-toolbar scp-right',
     'scp-floating-badge scp-right',
     'scp-floating-badge scp-left'
