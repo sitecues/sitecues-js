@@ -208,7 +208,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-default-badge': {
           'position': 'fixed',
           'width': '190px',
-          'height': '40px',
+          'height': '38px',
           'box-sizing': 'border-box',
           'padding': '6px 8px 8px 8px',
           'background-color': '#f8f8f8',
@@ -237,7 +237,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-toolbar.scp-middle': {
-          'padding-left': 'calc(50% - 65px)'
+          'padding-left': 'calc(50% - 69px)'
         },
 
         '.scp-toolbar.scp-right': {
