@@ -13,7 +13,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
     'hlb/positioning',
     'hlb/styling',
     'platform',
-    'hlb/safe-area',
     'util/common',
     'hlb/animation',
     'mouse-highlight',
@@ -26,7 +25,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       hlbPositioning,
       hlbStyling,
       platform,
-      hlbSafeArea,
       common,
       hlbAnimation,
       mh,
@@ -125,7 +123,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * has changed while the HLB opens
        */
       function retargetHLB() {
-        hlbFormEntryComplete(); // Make sure we don't lose any of the form entry from the current HLB
+        copyFormDataToPage(); // Make sure we don't lose any of the form entry from the current HLB
 
         $hlbElement.remove();
 
@@ -203,7 +201,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function initializeHLB() {
 
-        // Create and append to the DOM the wrapping element for HLB and DIMMER elements
+        // Create and append the HLB and DIMMER wrapper element to the DOM
         $hlbWrappingElement = getOrCreateHLBWrapper();
 
         if (platform.browser.isIE && getEditableItems().length) {
@@ -410,7 +408,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // This event handler is unique in that it unregisters itself once executed.
         $hlbElement.on('mousemove', onHLBHover);
 
-        // Register mouse mousemove handler for deflating the HLB
+        // Register an event handler for closing the HLB by clicking outside of it.
         $('body').on('click', onClick);
       }
 
@@ -434,8 +432,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
 
-      function hlbFormEntryComplete() {
-        // Make sure inputs from HLB are copied over to the original element
+      function copyFormDataToPage() {
+        // Copy any form input the user may have entered in the HLB back into the page.
         mapForm($hlbElement, $originalElement);
       }
 
@@ -444,7 +442,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function closeHLB(e) {
 
-        hlbFormEntryComplete();
+        copyFormDataToPage();
 
         // Set this to true to prevent toggleHLB();
         isHLBClosing = true;
@@ -456,7 +454,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           '$hlbWrappingElement': $hlbWrappingElement,
           'originCSS'          : hlbPositioning.getOriginCSS(),
           'translateCSS'       : hlbPositioning.getTranslateCSS(),
-          'onHLBClosed'        : function() { onHLBClosed(e); },
+          'onHLBClosed'        : function () { onHLBClosed(e); },
           'transitionProperty' : hlbStyling.transitionProperty
         });
 
