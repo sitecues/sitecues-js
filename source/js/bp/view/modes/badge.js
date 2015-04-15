@@ -50,15 +50,16 @@
 
 sitecues.def('bp/view/modes/badge', function (badge, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper',
-    function (BP_CONST, state, locale, helper) {
+  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper', 'conf',
+    function (BP_CONST, state, locale, helper, conf) {
 
     /*
      Default bounding box object.
      */
     var badgeElement,
         getNumberFromString = helper.getNumberFromString,
-        lastBgColor;
+        lastBgColor,
+        badgeStyle;
     /*
      *** Privates ***
      */
@@ -82,12 +83,19 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
       helper.setAttributes(badgeElement, BP_CONST.DEFAULT_BADGE_ATTRS);
       badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+      updateFloatingBadgeClass(badgeElement);
 
       state.set('isPageBadge', false);
 
-      console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
+      if (!isSitecuesEverywhere()) {
+        console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
+      }
 
       return badgeElement;
+    }
+
+    function isSitecuesEverywhere() {
+      return document.documentElement.getAttribute('data-sitecues-type') === 'extension';
     }
 
     // Create <div> and put the existing badge inside it.
@@ -116,8 +124,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
             'paddingTop',
             'paddingBottom',
             'paddingLeft',
-            'paddingRight',
-
+            'paddingRight'
           ];
 
       // Added to fix issue on ruhglobal.com
@@ -275,6 +282,29 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
       return classBuilder;
     };
+
+    function getSanitizedBadgeStyle(badgeStyle) {
+      if (badgeStyle >= 0 && badgeStyle <  BP_CONST.BADGE_STYLES.length) {
+        return parseInt(badgeStyle);
+      }
+      return 0;
+    }
+
+    function updateFloatingBadgeClass(badgeElement) {
+      var badgeClass = BP_CONST.DEFAULT_BADGE_CLASS + ' ' + BP_CONST.BADGE_STYLES[badgeStyle];
+      badgeElement.className = badgeClass;
+      state.set('isToolbarBadge', badgeClass.indexOf('scp-toolbar') > 0);
+    }
+
+    function cycleBadgeStyle() {
+      badgeStyle = getSanitizedBadgeStyle(badgeStyle + 1);
+      conf.set('badgeStyle', badgeStyle);
+      updateFloatingBadgeClass(badgeElement);
+    }
+
+    conf.def('badgeStyle', getSanitizedBadgeStyle);
+    badgeStyle = getSanitizedBadgeStyle(conf.get('badgeStyle'));
+    sitecues.on('toolbar/cycle', cycleBadgeStyle);
 
     // *** Unit tests export... ***
     if (SC_UNIT) {

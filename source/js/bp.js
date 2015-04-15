@@ -244,11 +244,11 @@ sitecues.def('bp', function (bp, callback) {
 
     function bindPermanentListeners(badgeElement) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
+      badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
       bpContainer.addEventListener('blur', baseController.clearPanelFocus);
-      helper.byId(BP_CONST.MOUSEOVER_TARGET).addEventListener('mouseover', bpController.changeModeToPanel);
-      // todo: bring it back or remove if necessary
-      // bpContainer.addEventListener('click', bpController.changeMode);
+      badgeElement.addEventListener('mouseover', bpController.onMouseEnter);
+      badgeElement.addEventListener('mouseout', bpController.onMouseLeave);
     }
 
     function isBadgeAnImage (badgeElement) {
@@ -278,6 +278,13 @@ sitecues.def('bp', function (bp, callback) {
           - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
     */
 
+    function initBPIfDocumentComplete() {
+      if (document.readyState === 'complete') {
+        initializeBPFeature();
+        return true;
+      }
+    }
+
     function initIfBadgeReady() {
 
       // Page may still be loading -- check if the badge is available
@@ -305,11 +312,9 @@ sitecues.def('bp', function (bp, callback) {
 
         SC_DEV && console.log('Initialize BP when document.readyState === complete.');
 
-        document.addEventListener('readystatechange', function () {
-          if (document.readyState === 'complete') {
-            initializeBPFeature();
-          }
-        });
+        if (!initBPIfDocumentComplete()) {
+          document.addEventListener('readystatechange', initBPIfDocumentComplete);
+        }
       }
     }
 

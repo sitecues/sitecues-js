@@ -202,24 +202,54 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
+        // .scp-default-badge means it's either a floating badge or toolbar
+        // Also has: .scp-toolbar or .scp-floating-badge
+        //           .scp-left or .scp-right
         '.scp-default-badge': {
-          'position': 'absolute',
-          'top': '5px',
-          'left': '5px',
-          'width': '146px',
-          'height': '24px',
-          'padding': '5px',
-          'background-color': 'white',
+          'position': 'fixed',
+          'width': '190px',
+          'height': '38px',
+          'box-sizing': 'border-box',
+          'padding': '6px 8px 8px 8px',
+          'background-color': '#f8f8f8',
           'z-index': '9999999'
         },
 
-        '.scp-default-badge #scp-opaque-badge-bg': {
-          'opacity': 1    // Make sure page contents don't show through the floating badge
-        },
-
-        '.scp-default-badge[aria-expanded="false"]': {
+        '.scp-default-badge[aria-expanded="false"],.scp-toolbar': {
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
+
+        '.scp-toolbar': {
+          'width': '100%',
+          'top': '0px',
+          'left': '0px',
+          'background-color': '#f7fcff'
+        },
+
+        '.scp-default-badge.scp-floating-badge.scp-right': {
+          right: '4px',
+          bottom: '4px'
+        },
+
+        '.scp-default-badge.scp-floating-badge.scp-left': {
+          left: '4px',
+          bottom: '4px'
+        },
+
+        '.scp-toolbar.scp-middle': {
+          'padding-left': 'calc(50% - 66px)'
+        },
+
+        '.scp-toolbar.scp-right': {
+          'padding-left': '88%'
+        },
+
+        // Move the body down by the height of the toolbar + 1px for the box-shadow
+        '.scp-default-badge.scp-toolbar + head + body': {
+          'transform': 'translateY(41px)',
+          'width': '100%'
+        },
+
 
         /********** Transform animation speed **********/
 
@@ -371,11 +401,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
         '#sitecues-badge:focus': {
-          'outline': 0,
-          'box-shadow': '0px 0px 3px 3px rgba(82, 168, 236, 0.8)'
+          'outline': 0
         },
-        '#sitecues-badge[aria-expanded="true"]:focus': {
-          'box-shadow': 'none'
+        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
+          'stroke': 'rgba(82, 168, 236, 0.8)',
+          'stroke-width': '14px'
         }
       },
 

@@ -44,6 +44,10 @@ sitecues.def('audio', function (audio, callback) {
     }
 
     function speakContent($content) {
+      if (SC_LOCAL) {
+        return;
+      }
+
       var text = builder.getText($content);
       if (text) {
         getAudioPlayer().playAudioSrc(getTTSUrl(text, $content));
@@ -112,6 +116,9 @@ sitecues.def('audio', function (audio, callback) {
      * Uses a provisional player to play back audio by key, used for audio cues.
      */
     audio.playAudioByKey = function(key) {
+      if (SC_LOCAL) {
+        return;
+      }
       stopAudio();  // Stop any currently playing audio
 
       var url = getAudioKeyUrl(key);
@@ -122,6 +129,9 @@ sitecues.def('audio', function (audio, callback) {
     };
 
     audio.playEarcon = function(earconName) {
+      if (SC_LOCAL) {
+        return;
+      }
       stopAudio();
 
       var url = sitecues.resolveSitecuesUrl('../earcons/' + earconName + '.' + getMediaTypeForPrerecordedAudio());

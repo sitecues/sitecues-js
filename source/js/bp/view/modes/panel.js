@@ -76,6 +76,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
       }
 
       function setPanelExpandedState() {
+        state.set('wasMouseInPanel', false);
         state.set('transitionTo', BP_CONST.PANEL_MODE);
         state.set('isRealSettings', true);    // Always use real settings once expanded
         state.set('featurePanelName', null);  // We're not in a feature panel

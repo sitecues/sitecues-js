@@ -91,6 +91,9 @@ sitecues.def('zoom', function (zoom, callback) {
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
 
+        // Height of toolbar to move page down from
+        toolbarHeight,
+
         // Constants
         MIN_ZOOM_PER_CLICK = 0.2,  // Change zoom at least this amount if user clicks on A button or presses +/- or left/right in slider
 
@@ -975,7 +978,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get a CSS object for the targetZoom level
       function getZoomCss(targetZoom) {
-        var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslateX(targetZoom),
+        var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslate(targetZoom),
           css = {
             transform: transform
           };
@@ -1002,6 +1005,21 @@ sitecues.def('zoom', function (zoom, callback) {
       function getRestrictedWidth(currZoom) {
         var winWidth = window.innerWidth;
         return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
+      }
+
+      // Return a formatted string for translateX as required by CSS
+      function getFormattedTranslate(targetZoom) {
+        return getFormattedTranslateX(targetZoom) + ' ' + getFormattedTranslateY(targetZoom);
+
+      }
+
+      // Return a formatted string for translateY as required by CSS
+      function getFormattedTranslateY(targetZoom) {
+        if (toolbarHeight && isBadgeToolbar()) {
+          var zoomAdjustedToolbarHeight = (toolbarHeight / targetZoom).toFixed(ZOOM_PRECISION);
+          return 'translateY(' + zoomAdjustedToolbarHeight + 'px)';
+        }
+        return '';
       }
 
       // Return a formatted string for translateX as required by CSS
@@ -1193,6 +1211,10 @@ sitecues.def('zoom', function (zoom, callback) {
           typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
       }
 
+      function isBadgeToolbar() {
+        return $('#sitecues-badge').is('.scp-toolbar');
+      }
+
       // Lazy init, saves time on page load
       function initZoomModule() {
         if (isInitialized) {
@@ -1200,6 +1222,8 @@ sitecues.def('zoom', function (zoom, callback) {
         }
 
         isInitialized = true;
+
+        toolbarHeight = $('#sitecues-badge')[0].offsetHeight;
 
         initBodyInfo();
 

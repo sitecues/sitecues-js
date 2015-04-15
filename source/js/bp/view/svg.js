@@ -40,7 +40,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
   </filter>\
 </defs>\
-<rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
+<rect id="scp-badge-rect" stroke="none" fill="none" x="6" y="6" width="620" height="114" rx="6" ry="6"/>\
 <g id="scp-main" aria-label="{{sitecues_main_panel}}">\
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
   <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-large-only" opacity="0"/>\

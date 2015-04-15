@@ -59,6 +59,16 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
+  constants.BADGE_STYLES = [
+    'scp-toolbar scp-middle',
+    'scp-toolbar scp-left',
+    'scp-toolbar scp-right',
+    'scp-floating-badge scp-right',
+    'scp-floating-badge scp-left'
+  ];
+
+  constants.HOVER_DELAY = 100;
+
   constants.TRANSFORMS = {
     'PANEL': {},
     'BADGE': {}
@@ -110,8 +120,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   };
 
   constants.DEFAULT_BADGE_ATTRS = {
-    'ID'   : constants.BADGE_ID,
-    'CLASS': constants.DEFAULT_BADGE_CLASS
+    'ID'   : constants.BADGE_ID
   };
 
   // Labels

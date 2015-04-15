@@ -3,8 +3,9 @@ BP Controller
  */
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller', 'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider',
-    function (BP_CONST, baseController, sliderController, panelController, state, slider) {
+  sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller',
+    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
+    function (BP_CONST, baseController, sliderController, panelController, state, slider, helper) {
 
     var TAB_DIRECTION = {
       'left': -1,
@@ -16,6 +17,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       'SLIDER':   'slider',
       'BUTTON':   'button'
     };
+
+    // How long we wait before expanding BP
+    var hoverDelayTimer;
 
     var DELTA_KEYS = {};
     DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
@@ -68,10 +72,63 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       processSliderCommands(evt);
     };
 
+    bpc.onMouseLeave = function(evt) {
+      if (isVisibleBadgeEvent(evt)) {
+        bpc.cancelHoverDelayTimer();
+      }
+    };
+
+    function isTargetWithin(target, container) {
+      while (target) {
+        if (target === container) {
+          return true;
+        }
+        target = target.parentElement;
+      }
+    }
+    // Is the event related to the visible contents of the badge
+    // (as opposed to the hidden areas around the badge)
+    function isVisibleBadgeEvent(evt) {
+      return evt.target === helper.byId(BP_CONST.BADGE_ID) ||
+             evt.target === helper.byId(BP_CONST.BP_CONTAINER_ID) ||
+             isTargetWithin(evt.target, helper.byId(BP_CONST.MOUSEOVER_TARGET));
+    }
+
+    // Logic to determine whether we should begin to expand panel
+    bpc.onMouseEnter = function(evt) {
+      if (!isVisibleBadgeEvent(evt)) {
+        return;
+      }
+      if (state.isShrinking()) {
+        // If already expanding or contracting, don't use delay timer
+        bpc.changeModeToPanel();
+      }
+      else if (!state.isExpanding() &&  !hoverDelayTimer) { // Don't start a second timer for each mouse move
+        hoverDelayTimer = setTimeout(bpc.changeModeToPanel, BP_CONST.HOVER_DELAY)
+      }
+    };
+
     bpc.changeModeToPanel = function() {
+      bpc.cancelHoverDelayTimer();
       if (!state.get('isShrinkingFromKeyboard')) {
         sitecues.emit('bp/do-expand');
       }
+    };
+
+    bpc.cancelHoverDelayTimer = function() {
+      clearTimeout(hoverDelayTimer);
+      hoverDelayTimer = 0;
+    };
+
+    // User may think they need to click in badge
+    // We don't want to take focus that way -- only via tabbing or from screen reader use
+    bpc.suppressBadgeFocusOnClick = function(event) {
+      // Prevent default handling and thus prevent focus
+      event.returnValue = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      return false;
     };
 
     // When a click happens on the badge, it can be from one of two things:
@@ -79,11 +136,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
     //   so that clicks around the panel don't accidentally open it.
     bpc.clickToOpenPanel = function(event) {
-      var mainRect = document.getElementById('scp-main').getBoundingClientRect();
-      var badge = document.getElementById('sitecues-badge');
-      if (event.clientX < badge.offsetLeft + mainRect.width &&
-        event.clientY < badge.offsetTop + mainRect.height) {
-        // Click is in visible area -- go ahead and open the panel
+      var mainRect = helper.byId(BP_CONST.MAIN_ID).getBoundingClientRect(),
+        badgeElem = helper.byId(BP_CONST.BADGE_ID);
+      if (event.clientX < badgeElem.offsetLeft + mainRect.width &&
+        event.clientY < badgeElem.offsetTop + mainRect.height &&
+        document.activeElement === badgeElem) {
+        // Click is in visible area and badge has focus -- go ahead and open the panel
         bpc.changeModeToPanel();
       }
     };
