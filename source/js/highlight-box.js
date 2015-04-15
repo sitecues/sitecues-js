@@ -13,7 +13,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
     'hlb/positioning',
     'hlb/styling',
     'platform',
-    'hlb/safe-area',
     'util/common',
     'hlb/animation',
     'mouse-highlight',
@@ -26,7 +25,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       hlbPositioning,
       hlbStyling,
       platform,
-      hlbSafeArea,
       common,
       hlbAnimation,
       mh,
@@ -125,7 +123,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * has changed while the HLB opens
        */
       function retargetHLB() {
-        hlbFormEntryComplete(); // Make sure we don't lose any of the form entry from the current HLB
+        copyFormDataToPage(); // Make sure we don't lose any of the form entry from the current HLB
 
         $hlbElement.remove();
 
@@ -203,7 +201,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function initializeHLB() {
 
-        // Create and append to the DOM the wrapping element for HLB and DIMMER elements
+        // Create and append the HLB and DIMMER wrapper element to the DOM
         $hlbWrappingElement = getOrCreateHLBWrapper();
 
         if (platform.browser.isIE && getEditableItems().length) {
@@ -410,7 +408,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // This event handler is unique in that it unregisters itself once executed.
         $hlbElement.on('mousemove', onHLBHover);
 
-        // Register mouse mousemove handler for deflating the HLB
+        // Register an event handler for closing the HLB by clicking outside of it.
         $('body').on('click', onClick);
       }
 
@@ -434,8 +432,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
 
-      function hlbFormEntryComplete() {
-        // Make sure inputs from HLB are copied over to the original element
+      function copyFormDataToPage() {
+        // Copy any form input the user may have entered in the HLB back into the page.
         mapForm($hlbElement, $originalElement);
       }
 
@@ -444,7 +442,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function closeHLB(e) {
 
-        hlbFormEntryComplete();
+        copyFormDataToPage();
 
         // Set this to true to prevent toggleHLB();
         isHLBClosing = true;
@@ -456,7 +454,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           '$hlbWrappingElement': $hlbWrappingElement,
           'originCSS'          : hlbPositioning.getOriginCSS(),
           'translateCSS'       : hlbPositioning.getTranslateCSS(),
-          'onHLBClosed'        : function() { onHLBClosed(e); },
+          'onHLBClosed'        : function () { onHLBClosed(e); },
           'transitionProperty' : hlbStyling.transitionProperty
         });
 
@@ -478,15 +476,16 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
                           .addBack('input, textarea, select')
                           .toArray(),
 
+            i, len = fromInputs.length,
             $currentFromInput,
-            $currentToInput;
+            $currentToInput,
+            fromInputType;
 
-        for (var i = 0; i < fromInputs.length; i += 1) {
-
+        for (i = 0; i < len; i = i + 1) {
           $currentFromInput = $(fromInputs[i]);
           $currentToInput = $(toInputs[i]);
-
-          if ($currentFromInput.prop('type') === 'radio' || $currentFromInput.prop('type') === 'checkbox') {
+          fromInputType = $currentFromInput.prop('type');
+          if (fromInputType === 'radio' || fromInputType === 'checkbox') {
             $currentToInput.prop('checked', $currentFromInput.prop('checked'));
           } else {
             if (platform.browser.isSafari) {
@@ -512,15 +511,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // Any mouse detection within the HLB turns on the ability to exit HLB by moving mouse
         preventDeflationFromMouseout = false;
-
       }
 
       function isElementInsideHlb(element) {
         return $hlbElement.is(element) || $.contains($hlbElement[0], element);
       }
 
-      function onClick(e) {
-        if ($hlbElement && !isElementInsideHlb(e.target)) {
+      function onClick(event) {
+        if ($hlbElement && !isElementInsideHlb(event.target)) {
           // If click is outside of HLB, close it
           // (Need to doublecheck this because HLB can sometimes be inside of <body>)
           sitecues.emit('hlb/toggle');
@@ -576,7 +574,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           closeHLB(e);
 
         }
-
       }
 
       /**
@@ -584,7 +581,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * responsible for setting the state of the application to what it was before
        * any HLB existed.]
        */
-      function onHLBClosed(e) {
+      function onHLBClosed(event) {
 
         // Finally, remove the wrapper element for the HLB and dimmer
         removeHLBWrapper();
@@ -596,7 +593,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         isHLBClosing = false;
 
         // Listeners: hpan.js, mouse-highlight.js, speech.js
-        sitecues.emit('hlb/closed', e);
+        sitecues.emit('hlb/closed', event);
 
         $originalElement = undefined;
         $hlbElement      = undefined;
@@ -625,7 +622,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // Let the rest of the application know that the hlb is ready
         // Listeners: hpan.js, invert.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
         sitecues.emit('hlb/ready', $hlbElement);
-
       }
 
       /**
@@ -645,7 +641,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
                   'position': 'absolute',
                   'overflow': 'visible'
                 });
-
       }
 
       /**
@@ -673,6 +668,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         return $hlbElement && $hlbElement[0];
       };
 
+      // Public methods.
+
       /**
        * [toggleStickyHLB enables/disables HLB deflation]
        * @return {[Boolean]} [True if deflation is disabled.  False if deflation is enabled.]
@@ -690,6 +687,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         };
       }
 
+      // Expose helper APIs during unit testing.
 
       if (SC_UNIT) {
 
