@@ -237,7 +237,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-toolbar.scp-middle': {
-          'padding-left': 'calc(50% - 69px)'
+          'padding-left': 'calc(50% - 66px)'
         },
 
         '.scp-toolbar.scp-right': {
