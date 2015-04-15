@@ -19,7 +19,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           animationStartTime,
           animationId,
           MINIMUM_DISTANCE_FROM_EDGE  = 20,
-          MINIMUM_DISTANCE_FROM_EDGE_TOP = 4, // More forgiving on top side
+          MINIMUM_DISTANCE_FROM_EDGE_TOP = 2, // More forgiving on top side because of toolbar
 
           // What we're transitioning from and to
           // Note that if you exit/enter the panel in the middle of animation you can
@@ -92,10 +92,6 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
-      function isBadgeInToolbar() {
-        return helper.byId(BP_CONST.BADGE_ID).className.indexOf('scp-toolbar') > 0;
-      }
-
       /**
        * getPossibleOutlineRects returns the visible panel rectangle to be.  This is useful in our
        * calculation for determining where the panel should be animated to when expanding.
@@ -114,7 +110,7 @@ sitecues.def('bp/animate', function(animate, callback) {
             remainingTime         = 1 - state.get('currentMode'),
             possibleOutlineRects;
 
-        if (isBadgeInToolbar()) {
+        if (state.get('isToolbarBadge')) {
           // Centered toolbar gets centered expansion treatment
           possibleOutlineRects = {
             'center'  : getScaledRect(currentOutlineRect, 0.68 * remainingTime, 0, increaseFactor),

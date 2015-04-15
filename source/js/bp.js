@@ -244,11 +244,11 @@ sitecues.def('bp', function (bp, callback) {
 
     function bindPermanentListeners(badgeElement) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
+      badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
       bpContainer.addEventListener('blur', baseController.clearPanelFocus);
-      helper.byId(BP_CONST.MOUSEOVER_TARGET).addEventListener('mouseover', bpController.changeModeToPanel);
-      // todo: bring it back or remove if necessary
-      // bpContainer.addEventListener('click', bpController.changeMode);
+      badgeElement.addEventListener('mouseover', bpController.onMouseEnter);
+      badgeElement.addEventListener('mouseout', bpController.onMouseLeave);
     }
 
     function isBadgeAnImage (badgeElement) {

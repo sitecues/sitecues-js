@@ -40,8 +40,22 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         return;
       }
 
-      if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-        pc.shrinkPanel();
+      var isMouseOutside = isMouseOutsidePanel(evt, MIN_DISTANCE);
+      if (isMouseOutside) {
+        if (state.get('isToolbarBadge')) {
+          if (state.get('wasMouseInPanel') || isMouseOutside === 'v') {
+            // Toolbar-based badges
+            // Close panel from mouse out if the user has been inside of it before, or the user moves a vertical distance away from it
+            // Otherwise opening the panel from the toolbar area causes the panel to be closed right away,
+            pc.shrinkPanel();
+          }
+        }
+        else {
+          pc.shrinkPanel();
+        }
+      }
+      else {
+        state.set('wasMouseInPanel', true);
       }
     };
 
@@ -51,7 +65,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       // Once mouse used, no longer need this protection against accidental closure
       pc.wasInFeaturePanel = false;
 
-      if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
+      if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
         pc.shrinkPanel();
       }
     };
@@ -152,8 +166,12 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     function isMouseOutsideRect(evt, elem, minDistance) {
       var rect = helper.getRect(elem);
-      return evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance ||
-        evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance;
+      if (evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance) {
+        return 'h'; // Horizontally outside
+      }
+      if (evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance) {
+        return 'v';
+      }
     }
 
     function isMouseOutsidePanel(evt, distance) {
