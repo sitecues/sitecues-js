@@ -20,7 +20,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     hlbStyling.defaultBorder  = 3;
 
     // Transition property used for hlb animation (-webkit, -moz)
-    // Th is used to transition the transform property for HLB
+    // This is used to transition the transform property for HLB
     // inflation/deflation animation
     hlbStyling.transitionProperty = platform.cssPrefix + 'transform ';
 

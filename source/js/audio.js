@@ -92,10 +92,10 @@ sitecues.def('audio', function (audio, callback) {
       return sitecues.getApiUrl(restOfUrl);
     }
 
-      /**
-       * Turn speech on or off
-       * @param isOn Whether to turn speech on or off
-       */
+    /**
+     * Turn speech on or off
+     * @param isOn Whether to turn speech on or off
+     */
     function setSpeechState(isOn, doSuppressAudioCue) {
       if (ttsOn !== isOn) {
         ttsOn = isOn;

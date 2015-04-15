@@ -121,8 +121,7 @@ sitecues.def('info', function(info, callback) {
     }
 
     function addCloseButton() {
-      var closeButtonUrl = sitecues.resolveSitecuesUrl('../images/close.png'),
-        helpRect = $iframe[0].getBoundingClientRect(),
+      var helpRect = $iframe[0].getBoundingClientRect(),
         offsetLeft = platform.browser.isIE ? -30 : -17, // Deal with big scrollbars on Windows
         offsetTop = platform.browser.isIE ? -6 : -1;
 
