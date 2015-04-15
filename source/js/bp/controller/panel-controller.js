@@ -166,11 +166,11 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     function isMouseOutsideRect(evt, elem, minDistance) {
       var rect = helper.getRect(elem);
-      if (evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance) {
-        return 'h'; // Horizontally outside
-      }
       if (evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance) {
         return 'v';
+      }
+      if (evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance) {
+        return 'h'; // Horizontally outside
       }
     }
 

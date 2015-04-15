@@ -86,7 +86,6 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       updateFloatingBadgeClass(badgeElement);
 
       state.set('isPageBadge', false);
-      state.set('isToolbarBadge', true);
 
       if (!isSitecuesEverywhere()) {
         console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
@@ -294,7 +293,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     function updateFloatingBadgeClass(badgeElement) {
       var badgeClass = BP_CONST.DEFAULT_BADGE_CLASS + ' ' + BP_CONST.BADGE_STYLES[badgeStyle];
       badgeElement.className = badgeClass;
-      state.set(badgeClass.indexOf('scp-toolbar') > 0);
+      state.set('isToolbarBadge', badgeClass.indexOf('scp-toolbar') > 0);
     }
 
     function cycleBadgeStyle() {
