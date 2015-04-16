@@ -31,7 +31,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     var HLB_Z_INDEX = 2147483644,
 
         // How many ancestors do we move up the chain until we find a background image
-        // to use for the $hlbElements background image.
+        // to use for the $hlb background image.
         BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT = 0,
 
         // Default background color for HLB, if HLB is NOT an image.
@@ -43,7 +43,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         // Default background color for HLB, if HLB is an image.
         HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = '#000000',
 
-        // Remove these HLB styles, but NOT from its children.
+        // Remove these styles from the HLB, but NOT its children.
         HLBCSSBlacklist = [
           'padding',
           'margin',
@@ -105,30 +105,30 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [filterElements removes HLBElementBlacklist elements from the HLB element, but not its children]
-     * @param  {[DOM element]} $hlbElement [HLB element]
+     * @param  {[DOM element]} $hlb [HLB element]
      */
-    function filterBlacklistedElements ($hlbElement) {
-      $hlbElement.find(HLBElementBlacklist.join(',')).remove();
+    function filterBlacklistedElements ($hlb) {
+      $hlb.find(HLBElementBlacklist.join(',')).remove();
     }
 
     /**
      * [filterHiddenElements removes elements from the HLB that the picker deems unwanted.]
-     * @param  {[jQuery Element]} $hlbElement    [HLB element]
-     * @param  {[jQuery Element]} $pickedElement [Element picked by picker]
+     * @param  {[jQuery Element]} $hlb    [HLB element]
+     * @param  {[jQuery Element]} $picked [Element picked by picker]
      * @param  {[Array]} hiddenElements [Array of elements to remove]
      */
-    function filterHiddenElements ($hlbElement, $pickedElement, hiddenElements) {
+    function filterHiddenElements ($hlb, $picked, hiddenElements) {
 
-      var hiddenElementsLength   = hiddenElements.length,
-          hiddenElementsRemoved  = 0,
-          pickedElementIsListItem = $pickedElement.is('li'),
-          $pickedElementChildren = $pickedElement.find('*'),
-          $hlbElementChildren    = pickedElementIsListItem ? $hlbElement.children().find('*') : $hlbElement.find('*'),
-          currentChild           = 0,
-          currentElementToRemove = 0;
+      var hiddenElementsLength    = hiddenElements.length,
+          hiddenElementsRemoved   = 0,
+          pickedElementIsListItem = $picked.is('li'),
+          $pickedDescendants      = $picked.find('*'),
+          $hlbDescendants         = pickedElementIsListItem ? $hlb.children().find('*') : $hlb.find('*'),
+          currentChild            = 0,
+          currentElementToRemove  = 0;
 
       if (SC_DEV) {
-        if ($pickedElementChildren.length !== $hlbElementChildren.length) {
+        if ($pickedDescendants.length !== $hlbDescendants.length) {
           console.warn('There is not a 1:1 mapping for filterHiddenElements!');
         }
         if (hiddenElementsLength) {
@@ -140,10 +140,10 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // TODO it's not just about hidden children -- could be any descendant (e.g. grandchild)
       // TODO let's not add them in the first place
       if (hiddenElementsLength) {
-        for (; currentChild < $pickedElementChildren.length; currentChild += 1) {
+        for (; currentChild < $pickedDescendants.length; currentChild += 1) {
           for (; currentElementToRemove < hiddenElementsLength; currentElementToRemove += 1) {
-            if ($pickedElementChildren[currentChild] === hiddenElements[currentElementToRemove]) {
-              $($hlbElementChildren[currentChild]).remove();
+            if ($pickedDescendants[currentChild] === hiddenElements[currentElementToRemove]) {
+              $($hlbDescendants[currentChild]).remove();
               hiddenElementsRemoved += 1;
               if (hiddenElementsRemoved === hiddenElementsLength) {
                 return;
@@ -158,34 +158,34 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [filterElements removes css styles in HLBCSSBlacklist from the HLB element, but not its children]
-     * @param  {[DOM element]} $hlbElement [HLB element]
+     * @param  {[DOM element]} $hlb [HLB element]
      */
-    function filterStyles ($hlbElement) {
+    function filterStyles ($hlb) {
       for (var i = 0; i < HLBCSSBlacklist.length; i += 1) {
-        $hlbElement[0].style[HLBCSSBlacklist[i]] = '';
+        $hlb[0].style[HLBCSSBlacklist[i]] = '';
       }
     }
 
     /**
      * [filterAttributes removes html attributes in HLBAttributeBlacklist]
-     * @param  {[DOM element]} $hlbElement [HLB element]
+     * @param  {[DOM element]} $hlb [HLB element]
     */
-    function filterAttributes ($hlbElement) {
+    function filterAttributes ($hlb) {
       for (var i = 0; i < HLBAttributeBlacklist.length; i += 1) {
-        $hlbElement.removeAttr(HLBAttributeBlacklist[i]);
+        $hlb.removeAttr(HLBAttributeBlacklist[i]);
       }
     }
 
     /**
-     * [getChildStyles computes HLB child element styles]
-     * @param  {[jQuery element]} $child                    [The current HLB element child we are styling]
+     * [getDescendantStyles computes HLB child element styles]
+     * @param  {[jQuery element]} $descendant                    [The current HLB element child we are styling]
      * @param  {[Boolean]} hlbWidthGreaterThanSafeAreaWidth [True if the HLB width >= safe area width]
-     * @param  {[Object]} originalElementsChildStyle        [CSS styles returned from window.getComputedStyle]
+     * @param  {[Object]} foundationDescendantStyle        [CSS styles returned from window.getComputedStyle]
      * @return {[Object]}                                   [Styles to be consumed by jQuery.css]
      */
-    function getChildStyles ($child, originalElementsChildStyle) {
+    function getDescendantStyles ($descendant, foundationDescendantStyle) {
 
-          // Defaut css styles for all HLB children
+      // Defaut css styles for all HLB descendants
       var styles = {
             'webkitTextFillColor': '',
             'textDecoration'     : 'none',
@@ -193,9 +193,9 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
             'height'             : 'auto', // Added to fix cases where text overlapped vertically, like on eeoc
             'min-width'          : ''
           },
-          fontSize       = parseFloat(originalElementsChildStyle.fontSize),
-          lineHeight     = parseFloat(originalElementsChildStyle.lineHeight),
-          textDecoration = originalElementsChildStyle.textDecoration;
+          fontSize       = parseFloat(foundationDescendantStyle.fontSize),
+          lineHeight     = parseFloat(foundationDescendantStyle.lineHeight),
+          textDecoration = foundationDescendantStyle.textDecoration;
 
       // NOTE: Copying cssText directly is not sufficient for copying textDecorations.
       //       ts.dev.sitecues.com/hlb/styling/text-decoration.html
@@ -228,13 +228,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       //       // NOTE: Fix implemented because of opening HLB on http://abclibrary.org/teenzone on the #customheader
       //                Fixes children overlapping children within the HLB.  Comment out the line below to
       //                experience this problem.
-      if (originalElementsChildStyle.position === 'absolute') {
+      if (foundationDescendantStyle.position === 'absolute') {
         styles.position = 'static';
         styles.display  = 'inline-block';
       }
 
       // Implemented to fix very long link that wasn't wrapping in the HLB on www.faast.org/news
-      if ($child.is('a')) {
+      if ($descendant.is('a')) {
         styles.wordWrap = 'break-word';
       }
 
@@ -266,13 +266,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [getNonEmptyBackgroundImage determines what background image will be used
      * for the HLB element.  It moves up the ancestor chain of the original element
      * and returns the first background image it encounters.]
-     * @param  {[DOM element]} $pickedElement [The picked element chosen by the picker]
+     * @param  {[DOM element]} $picked [The picked element chosen by the picker]
      * @return {[String]}                       [CSS background-image property]
      */
-    function getNonEmptyBackgroundImage ($pickedElement, ancestorCount) {
+    function getNonEmptyBackgroundImage ($picked, ancestorCount) {
 
       var backgroundStyles = {},
-          parents = $pickedElement.parents();
+          parents = $picked.parents();
 
       parents.each(function (count) {
         if (count > ancestorCount) {
@@ -296,13 +296,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * [getNonTransparentBackground determines what background color will be used
      * for the HLB element. It moves up the ancestor chain of the original element
      * and returns the first background color it encounters that isn't transparent]
-     * @param  {[DOM element]} $pickedElement [The original element chosen by the picker]
+     * @param  {[DOM element]} $picked [The original element chosen by the picker]
      * @return {[String]}                       [CSS background-color property]
      */
-    function getNonTransparentBackground ($pickedElement) {
+    function getNonTransparentBackground ($picked) {
 
       var newBackgroundColor,
-          parents = $pickedElement.parents();
+          parents = $picked.parents();
 
       parents.each(function () {
         if (!isTransparent($(this).css('backgroundColor'))) {
@@ -326,19 +326,19 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
      * @param  {[Object]} elementComputedStyle         [The original elements computed styles]
      * @return {[String]}                              [The HLB background color]
      */
-    function getHLBBackgroundColor ($pickedElement, elementComputedStyle) {
+    function getHLBBackgroundColor ($picked, elementComputedStyle) {
 
       var newBackgroundColor;
 
       if (isTransparent(elementComputedStyle.backgroundColor)) {
 
-        if ($pickedElement.is('img')) {
+        if ($picked.is('img')) {
 
           return HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
 
         } else {
 
-          newBackgroundColor = getNonTransparentBackground($pickedElement);
+          newBackgroundColor = getNonTransparentBackground($picked);
 
           if (newBackgroundColor) {
 
@@ -360,11 +360,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [getHLBBackgroundImage determines the background image to be used by the $hlbElement]
-     * @param  {[jQuery element]} $pickedElement   [The picked element chosen by the picker.]
+     * @param  {[jQuery element]} $picked   [The picked element chosen by the picker.]
      * @param  {[Object]} elementComputedStyle     [The original elements computed style]
      * @return {[String]}                          [The background image that will be used by the $hlbElement]
      */
-    function getHLBBackgroundImage ($pickedElement, elementComputedStyle) {
+    function getHLBBackgroundImage ($picked, elementComputedStyle) {
 
       var newBackgroundImage;
 
@@ -372,7 +372,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       if (elementComputedStyle.backgroundImage === 'none' &&
           isTransparent(elementComputedStyle.backgroundColor)) {
 
-        newBackgroundImage = getNonEmptyBackgroundImage($pickedElement, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
+        newBackgroundImage = getNonEmptyBackgroundImage($picked, BACKGROUND_IMAGE_ANCESTOR_TRAVERSAL_COUNT);
 
         if (newBackgroundImage) {
 
@@ -392,20 +392,20 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [getHLBLeftPadding is required to visually encapsulate bullet points within the HLB if the
-     * $hlbElement is itself a <ul> or <ol> that uses bullet points.
-     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker.]
-     * @param  {[Object]} elementComputedStyle     [The original elements computed style]
-     * @return {[Integer]}                         [The HLB left-padding]
+     * $hlb is itself a <ul> or <ol> that uses bullet points.
+     * @param  {[jQuery element]} $foundation   [The original element chosen by the picker.]
+     * @param  {[Object]} computedStyle  [The original elements computed style]
+     * @return {[Integer]}                      [The HLB left-padding]
      */
-    function getHLBLeftPadding ($originalElement, elementComputedStyle) {
+    function getHLBLeftPadding ($foundation, computedStyle) {
 
-      return hlbStyling.defaultPadding + getBulletWidth($originalElement, elementComputedStyle);
+      return hlbStyling.defaultPadding + getBulletWidth($foundation, computedStyle);
 
     }
 
     /**
      * [getHLBDisplay determines $hlbElement will use for its CSS display]
-     * @param  {[Object]} elementComputedStyle [The original elements computed styles]
+     * @param  {[Object]} computedStyle [The original elements computed styles]
      * @return {[String]}                      [The display the $hlbElement will use]
      * NOTE:
         // If the original elements display type is a table, force a display type of
@@ -419,13 +419,13 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         //
         // TODO: actually prove these beliefs
      */
-    function getHLBDisplay (elementComputedStyle) {
+    function getHLBDisplay (computedStyle) {
 
-      if (elementComputedStyle.display === 'table') {
+      if (computedStyle.display === 'table') {
         return 'block';
       }
 
-      return elementComputedStyle.display;
+      return computedStyle.display;
 
     }
 
@@ -502,64 +502,64 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     /**
      * [initializeHLBElementStyles initializes the HLB elements styles by directly copying
      *  the styles from the original element.]
-     * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
-     * @param  {[jQuery element]} $hlbElement      [The HLB element]
+     * @param  {[jQuery element]} $foundation [The original element chosen by the picker]
+     * @param  {[jQuery element]} $hlb      [The HLB element]
      */
-    function initializeHLBElementStyles ($originalElement, $hlbElement) {
+    function initializeHLBElementStyles ($foundation, $hlb) {
 
-      $hlbElement[0].style.cssText = hlbStyling.getComputedStyleCssText($originalElement[0]);
+      $hlb[0].style.cssText = hlbStyling.getComputedStyleCssText($foundation[0]);
 
     }
 
      /**
-     * [initializeHLBChildrenStyles initializes the styles of the children of the HLB element.
+     * [initializeHLBDescendantStyles initializes the styles of the children of the HLB element.
      *   Step 1: Copy computed styles of original element children to hlb element children.
      *   Step 2: Remove padding if element is cropped by the initialHLBRect (mouse highlight rect)
      *   Step 3: Compute child styles that must override a direct copy of computed styles.
      *   Step 4: Set child styles.
      *   Step 5: Filter child attributes.
      * ]
-      * @param  {[jQuery element]} $originalElement [The original element chosen by the picker]
-      * @param  {[jQuery element]} $hlbElement      [The HLB element]
+      * @param  {[jQuery element]} $foundation [The original element chosen by the picker]
+      * @param  {[jQuery element]} $hlb      [The HLB element]
       */
 
-    function initializeHLBChildrenStyles ($originalElement, $hlbElement, initialHLBRect) {
+    function initializeHLBDescendantStyles ($foundation, $hlb, initialHLBRect) {
 
-      var $originalElementChildren = $originalElement.find('*'),
-          $hlbElementChildren      = $hlbElement.find('*'),
-          $hlbElementChild,
-          hlbElementChild,
-          $originalElementChild,
-          originalElementChild,
-          originalElementsChildStyle,
+      var $foundationDescendants = $foundation.find('*'),
+          $hlbDescendants        = $hlb.find('*'),
+          $hlbDescendant,
+          hlbDescendant,
+          $foundationDescendant,
+          foundationDescendant,
+          foundationDescendantStyle,
           computedChildStyles,
           removeMargins = true,
           i = 0;
 
-      for (; i < $originalElementChildren.length; i += 1) {
+      for (; i < $foundationDescendants.length; i += 1) {
 
         // Cache the HLB child.
-        hlbElementChild      = $hlbElementChildren[i];
-        originalElementChild = $originalElementChildren[i];
+        hlbDescendant        = $hlbDescendants[i];
+        foundationDescendant = $foundationDescendants[i];
 
-        $hlbElementChild      = $(hlbElementChild);
-        $originalElementChild = $(originalElementChild);
+        $hlbDescendant        = $(hlbDescendant);
+        $foundationDescendant = $(foundationDescendant);
 
         // Cache the HLB child computed style
-        originalElementsChildStyle = getComputedStyle(originalElementChild);
+        foundationDescendantStyle = getComputedStyle(foundationDescendant);
 
         // Copy the original elements child styles to the HLB elements child.
-        hlbElementChild.style.cssText = hlbStyling.getComputedStyleCssText(originalElementChild);
+        hlbDescendant.style.cssText = hlbStyling.getComputedStyleCssText(foundationDescendant);
 
-        if (shouldRemovePadding($originalElementChild, initialHLBRect)) {
-          $hlbElementChild.css(getChildPadding($originalElementChild, initialHLBRect));
+        if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
+          $hlbDescendant.css(getChildPadding($foundationDescendant, initialHLBRect));
         }
 
         // Compute styles that are more complicated than copying cssText.
-        computedChildStyles = getChildStyles($hlbElementChild, originalElementsChildStyle);
+        computedChildStyles = getDescendantStyles($hlbDescendant, foundationDescendantStyle);
 
         // Added to fix HLB sizing when selecting last 2 paragraphs on http://www.ticc.com/
-        if (shouldRemoveHorizontalMargins($originalElementChild, $originalElement)) {
+        if (shouldRemoveHorizontalMargins($foundationDescendant, $foundation)) {
           if (SC_DEV) {
             console.log('%cSPECIAL CASE: Removing left and right margins.',  'background:orange;');
           }
@@ -570,11 +570,11 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         }
 
         // Set the childs css.
-        $hlbElementChild.css(computedChildStyles);
+        $hlbDescendant.css(computedChildStyles);
 
         // Ran into issues with children inheriting styles because of class and id CSS selectors.
         // Filtering children of these attributes solves the problem.
-        filterAttributes($hlbElementChild);
+        filterAttributes($hlbDescendant);
 
       }
     }
@@ -582,14 +582,14 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     /**
      * [shouldRemoveHorizontalMargins determines if left-margin and right-margin can be removed from
      * a child in the HLB element.]
-     * @param  {[jQuery Element]} $originalElementChild [One of the children of the picked element.]
-     * @param  {[jQuery Element]} $originalElement      [The element that is the model for the HLB (typically same as $pickedElement.]
+     * @param  {[jQuery Element]} $foundationDescendant [One of the children of the picked element.]
+     * @param  {[jQuery Element]} $foundation      [The element that is the model for the HLB (typically same as $pickedElement.]
      * @return {[Boolean]}
      */
-    function shouldRemoveHorizontalMargins ($originalElementChild, $originalElement) {
+    function shouldRemoveHorizontalMargins ($foundationDescendant, $foundation) {
 
-      var $children     = $originalElementChild.parent().children(),
-          $parents      = $originalElementChild.parentsUntil($originalElement),
+      var $children     = $foundationDescendant.parent().children(),
+          $parents      = $foundationDescendant.parentsUntil($foundation),
           parentCount   = $parents.length,
           childCount    = $children.length,
           hasOverlap    = false,
@@ -602,7 +602,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       }
 
       for (; i < parentCount; i += 1) {
-        if ($parents[i].getBoundingClientRect().left < $originalElementChild[0].getBoundingClientRect().left) {
+        if ($parents[i].getBoundingClientRect().left < $foundationDescendant[0].getBoundingClientRect().left) {
           return false;
         }
       }
@@ -633,20 +633,20 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
     /**
      * [setHLBChildTextColor determines and sets a text color for all HLB children so that they are in
      * contrast with the background colors behind them.]
-     * @param {[jQuery element]} $hlbElement [The HLB element]
+     * @param {[jQuery element]} $hlb [The HLB element]
      * NOTE: This function was created to fix a bug found on TexasAT home page navigation (Home, Sitemap, Contact Us)
      */
-    hlbStyling.setHLBChildTextColor = function ($hlbElement) {
+    hlbStyling.setHLBChildTextColor = function ($hlb) {
 
       var children;
 
-      // If the $hlbElement uses a background image then assume text is readable.
+      // If the $hlb uses a background image then assume text is readable.
       // TODO: improve this entire mechanism.
-      if ($hlbElement.css('backgroundImage') !== 'none') {
+      if ($hlb.css('backgroundImage') !== 'none') {
         return;
       }
 
-      children = $hlbElement.find('*');
+      children = $hlb.find('*');
 
       // For every HLB child...
       children.each(function () {
@@ -661,7 +661,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
         if (isTransparent(backgroundColor) || textColor === backgroundColor) {
 
           //  Check every ancestor up to and including the HLB element
-          $(this).parentsUntil($hlbElement.parent()).each(function () {
+          $(this).parentsUntil($hlb.parent()).each(function () {
 
             var parentBackgroundColor = $(this).css('backgroundColor');
 
@@ -695,18 +695,18 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [getHLBStyles gets the HLB styles.]
-     * @param {[DOM element]} $originalElement [the original element]
+     * @param {[DOM element]} $foundation [the original element]
      * @return {[Object]} [CSS style object to be used by jQuery.css()]
      */
-    hlbStyling.getHLBStyles = function ($pickedElement, $originalElement) {
+    hlbStyling.getHLBStyles = function ($picked, $foundation) {
 
-      var originalElement       = $originalElement[0],
-          originalElementOffset = $originalElement.offset(),
+      var originalElement       = $foundation[0],
+          originalElementOffset = $foundation.offset(),
           elementComputedStyle  = window.getComputedStyle(originalElement),
-          backgroundStyles      = getHLBBackgroundImage($pickedElement, elementComputedStyle),
-          backgroundColor       = getHLBBackgroundColor($pickedElement, elementComputedStyle),
+          backgroundStyles      = getHLBBackgroundImage($picked, elementComputedStyle),
+          backgroundColor       = getHLBBackgroundColor($picked, elementComputedStyle),
           calculatedHLBStyles   = {
-            'padding-left' : getHLBLeftPadding($originalElement, elementComputedStyle),
+            'padding-left' : getHLBLeftPadding($foundation, elementComputedStyle),
             'display'      : getHLBDisplay(elementComputedStyle),
             'left'         : originalElementOffset.left,
             'top'          : originalElementOffset.top
@@ -714,7 +714,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
           $parent;
 
       // If the background color is the same as the text color, use default text and background colors
-      if (backgroundColor === $originalElement.css('color')) {
+      if (backgroundColor === $foundation.css('color')) {
         calculatedHLBStyles.color           = HLB_DEFAULT_TEXT_COLOR;
         calculatedHLBStyles.backgroundColor = HLB_DEFAULT_BACKGROUND_COLOR;
       } else {
@@ -729,12 +729,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       // If the original element uses a background image, preserve original padding.
       // This was implemented to fix SC-1830
       // If the background image repeats, there is no need to preserve the padding.
-      if ($originalElement.css('backgroundImage') !== 'none' && $originalElement.css('backgroundRepeat') !== 'repeat') {
+      if ($foundation.css('backgroundImage') !== 'none' && $foundation.css('backgroundRepeat') !== 'repeat') {
 
-        calculatedHLBStyles.paddingLeft   = $originalElement.css('paddingLeft');
-        calculatedHLBStyles.paddingTop    = $originalElement.css('paddingTop');
-        calculatedHLBStyles.paddingBottom = $originalElement.css('paddingBottom');
-        calculatedHLBStyles.paddingRight  = $originalElement.css('paddingRight');
+        calculatedHLBStyles.paddingLeft   = $foundation.css('paddingLeft');
+        calculatedHLBStyles.paddingTop    = $foundation.css('paddingTop');
+        calculatedHLBStyles.paddingBottom = $foundation.css('paddingBottom');
+        calculatedHLBStyles.paddingRight  = $foundation.css('paddingRight');
 
       } else if (backgroundStyles.count >= 0) {
 
@@ -765,30 +765,30 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
     /**
      * [filter filters elements, attributes, and styles from the HLB]
-     * @param  {[DOM element]} $hlbElement [HLB]
+     * @param  {[DOM element]} $hlb [HLB]
      */
-    hlbStyling.filter = function ($hlbElement, $pickedElement, hiddenElements) {
+    hlbStyling.filter = function ($hlb, $picked, hiddenElements) {
 
-      filterStyles($hlbElement);
+      filterStyles($hlb);
 
-      filterHiddenElements($hlbElement, $pickedElement, hiddenElements);
+      filterHiddenElements($hlb, $picked, hiddenElements);
 
-      filterBlacklistedElements($hlbElement);
+      filterBlacklistedElements($hlb);
 
-      filterAttributes($hlbElement);
+      filterAttributes($hlb);
 
     };
 
     /**
      * [initializeStyles clones the original elements styles and the styles of all of its children.]
-     * @param  {[DOM element]} $originalElement [original element]
-     * @param  {[DOM element]} $hlbElement [HLB element]
+     * @param  {[DOM element]} $foundation [sanitized picked element]
+     * @param  {[DOM element]} $hlb [The HLB]
      */
-    hlbStyling.initializeStyles = function ($originalElement, $hlbElement, initialHLBRect) {
+    hlbStyling.initializeStyles = function ($foundation, $hlb, initialHLBRect) {
 
-      initializeHLBElementStyles($originalElement, $hlbElement);
+      initializeHLBElementStyles($foundation, $hlb);
 
-      initializeHLBChildrenStyles($originalElement, $hlbElement, initialHLBRect);
+      initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect);
 
     };
 
@@ -819,12 +819,12 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
       exports.getHLBStyles                       = hlbStyling.getHLBStyles;
       exports.filter                             = hlbStyling.filter;
       exports.initializeStyles                   = hlbStyling.initializeStyles;
-      exports.getChildStyles                     = getChildStyles;
+      exports.getDescendantStyles                     = getDescendantStyles;
       exports.getNonEmptyBackgroundImage         = getNonEmptyBackgroundImage;
       exports.getNonTransparentBackground        = getNonTransparentBackground;
       exports.getHLBBackgroundColor              = getHLBBackgroundColor;
       exports.getHLBBackgroundImage              = getHLBBackgroundImage;
-      exports.initializeHLBChildrenStyles        = initializeHLBChildrenStyles;
+      exports.initializeHLBDescendantStyles      = initializeHLBDescendantStyles;
       exports.setHLBChildTextColor               = hlbStyling.setHLBChildTextColor;
       exports.HLB_DEFAULT_BACKGROUND_COLOR       = HLB_DEFAULT_BACKGROUND_COLOR;
       exports.HLB_IMAGE_DEFAULT_BACKGROUND_COLOR = HLB_IMAGE_DEFAULT_BACKGROUND_COLOR;
