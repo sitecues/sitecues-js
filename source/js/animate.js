@@ -31,7 +31,7 @@ sitecues.def('animate', function (animate, callback) {
     function setTransformAttr (element, left, top, transformScale, rotate) {
 
       var scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
-          rotateCSS      = rotate         ? ' rotate(' + rotate + 'deg) '     : '',
+          rotateCSS      = rotate         ? ' rotate(' + rotate + ') '     : '',
           attrVal        = 'translate(' + left + ' , ' + top + ') ' + scaleCSS + rotateCSS;
 
       element.setAttribute('transform', attrVal);
@@ -40,19 +40,26 @@ sitecues.def('animate', function (animate, callback) {
 
     function normalizeTransformProps (animation, transformProperty) {
 
-      var element             = animation.element,
+      var element          = animation.element,
           fromTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[transformProperty],
-          toTransform     = animation.CSSProperties[transformProperty],
-          fromScale        = transform.getScale(fromTransform),
-          toScale         = transform.getScale(toTransform),
-          fromTranslate    = transform.getTranslate(fromTransform),
-          toTranslate     = transform.getTranslate(toTransform);
+          toTransform      = animation.CSSProperties[transformProperty],
+          fromTransformObj = transform.getTransform(fromTransform),
+          toTransformObj   = transform.getTransform(toTransform),
+          fromScale        = fromTransformObj.scale,
+          toScale          = toTransformObj.scale,
+          fromTranslate    = fromTransformObj.translate,
+          toTranslate      = toTransformObj.translate,
+          fromRotate       = fromTransformObj.rotate,
+          toRotate         = toTransformObj.rotate;
 
       animation.animateStyles.from.scale = fromScale;
       animation.animateStyles.to.scale  = toScale;
 
       animation.animateStyles.from.translate = fromTranslate;
       animation.animateStyles.to.translate  = toTranslate;
+
+      animation.animateStyles.from.rotate = fromRotate;
+      animation.animateStyles.to.rotate =  toRotate;
 
     }
 
@@ -83,7 +90,7 @@ sitecues.def('animate', function (animate, callback) {
           }
         }
       }
-
+      console.log(this)
       this.animationId = this.tick(); // Start the animation automatically.
 
     }
@@ -101,7 +108,8 @@ sitecues.def('animate', function (animate, callback) {
           this.element,
           fromStyles.translate.left + (toStyles.translate.left - fromStyles.translate.left) * normalizedAnimationTime,
           fromStyles.translate.top + (toStyles.translate.top - fromStyles.translate.top) * normalizedAnimationTime,
-          fromStyles.scale + (toStyles.scale - fromStyles.scale) * normalizedAnimationTime
+          fromStyles.scale + (toStyles.scale - fromStyles.scale) * normalizedAnimationTime,
+          fromStyles.rotate + (toStyles.rotate - fromStyles.rotate) * normalizedAnimationTime
         );
       }
 

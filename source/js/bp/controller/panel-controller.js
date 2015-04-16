@@ -79,7 +79,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       state.set('isShrinkingFromKeyboard', isFromKeyboard);
 
       // If the secondary panel is active, deactivate it.
-      if (state.isMorePanel()) {
+      if (state.isSecondaryPanelRequested()) {
         disableSecondaryPanel();
       }
 
@@ -139,8 +139,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     function disableSecondaryPanel() {
 
       var moreToggle = helper.byId(BP_CONST.MORE_BUTTON_GROUP_ID);
-
-      state.set('isMorePanel', false);
 
       if (state.get('isKeyboardMode')) {
         state.set('focusIndex', 0);

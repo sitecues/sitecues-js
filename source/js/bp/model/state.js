@@ -77,8 +77,12 @@ sitecues.def('bp/model/state', function (state, callback) {
   };
 
   state.isMorePanel = function() {
-    return data.isMorePanel;
+    return data.currentSecondaryPanelMode === 1 && data.secondaryPanelTransitionTo === 1;
   };
+
+  state.isSecondaryPanelRequested = function () {
+    return data.secondaryPanelTransitionTo === 1;
+  }
 
   state.isShrinking = function() {
     return data.transitionTo === 0 && data.currentMode !== 0;

@@ -1,4 +1,4 @@
-/**
+      /**
  *  This file contains logic for the "?" button placement and functionality that opens up the
  *  help / info page to provide sitecues users with a document to learn how to use the tool, including
  *  keyboard commands.
@@ -10,6 +10,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     var mouseEnterAnimation,
         mouseLeaveAnimation,
+        mouseClickAnimation,
         BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
         BUTTON_LEAVE_ANIMATION_DURATION = 400,
         NO_INPUT_TIMEOUT                = 7000,
@@ -17,18 +18,35 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         alwaysShowButton                = false,
         userInputOccured                = false;
 
+    function setTransform (element, left, top, transformScale, rotate) {
+
+      var scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
+          rotateCSS      = rotate         ? ' rotate(' + rotate + ') '        : '';
+
+      element.setAttribute('transform', 'translate(' + left + ' , ' + top + ') ' + scaleCSS + rotateCSS);
+
+    }
+
     function onMouseEnter (e) {
 
       var id               = e.target.id,
           btn              = helper.byId(id),
-          currentTranslate = transform.getTranslate(btn.getAttribute('transform'));
+          currentTranslate = transform.getTransform(btn.getAttribute('transform')).translate,
+          enabled          = BP_CONST.SECONDARY_PANEL_ENABLED,
+          disabled         = BP_CONST.SECONDARY_PANEL_DISABLED,
+          transitionTo     = state.get('secondaryPanelTransitionTo') === disabled ? disabled : enabled,
+          targetRotation   = transitionTo === disabled ? 0 : -180;
 
       if (mouseLeaveAnimation) {
         mouseLeaveAnimation.cancel();
       }
 
+      if (mouseClickAnimation) {
+        mouseClickAnimation.cancel();
+      }
+
       mouseEnterAnimation = animate.create(btn, {
-        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + BP_CONST.TRANSFORMS[id].scale + ')'
+        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + BP_CONST.TRANSFORMS[id].scale + ') rotate('+targetRotation+')'
       }, {
         'duration': BUTTON_ENTER_ANIMATION_DURATION,
         'useAttribute': true
@@ -38,16 +56,26 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     function onMouseLeave (e) {
 
-      var id               = e.target.id,
+      var enabled          = BP_CONST.SECONDARY_PANEL_ENABLED,
+          disabled         = BP_CONST.SECONDARY_PANEL_DISABLED,
+          transitionTo     = state.get('secondaryPanelTransitionTo') === disabled ? disabled : enabled,
+          id               = e.target.id,
           btn              = helper.byId(id),
-          currentTranslate = transform.getTranslate(btn.getAttribute('transform'));
+          transformObj     = transform.getTransform(btn.getAttribute('transform')),
+          currentTranslate = transformObj.translate,
+          currentRotation  = transformObj.rotate,
+          targetRotation   = transitionTo === disabled ? 0 : -180;
 
       if (mouseEnterAnimation) {
         mouseEnterAnimation.cancel();
       }
 
+      if (mouseClickAnimation) {
+        mouseClickAnimation.cancel();
+      }
+
       mouseLeaveAnimation = animate.create(btn, {
-        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
+        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)' + ' rotate('+targetRotation+')'
       }, {
         'duration': BUTTON_LEAVE_ANIMATION_DURATION,
         'useAttribute': true,
@@ -58,7 +86,44 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function onMouseClick () {
+
       sitecues.emit('bp/toggle-secondary-panel');
+
+      var enabled             = BP_CONST.SECONDARY_PANEL_ENABLED,
+          disabled            = BP_CONST.SECONDARY_PANEL_DISABLED,
+          transitionTo        = state.get('secondaryPanelTransitionTo') === disabled ? disabled : enabled,
+          id                  = BP_CONST.MORE_BUTTON_CONTAINER_ID,
+          moreButton          = helper.byId(id),
+          morePanel           = helper.byId(BP_CONST.MORE_ID),
+          transformObj        = transform.getTransform(moreButton.getAttribute('transform')),
+          moreButtonTranslate = transformObj.translate,
+
+          morePanelCurrentPos = transform.getTransform(morePanel.getAttribute('transform')).translate.top,
+          targetPanelPos      = transitionTo === disabled ? -198 : 0,
+          currentScale        = transformObj.scale,
+          currentRotation     = transformObj.rotate,
+          targetRotation      = transitionTo === disabled ? 0 : -180,
+          posDiff             = targetPanelPos - morePanelCurrentPos,
+          rotDiff             = targetRotation - currentRotation;
+
+      if (mouseLeaveAnimation) {
+        mouseLeaveAnimation.cancel();
+      }
+
+      if (mouseClickAnimation) {
+        mouseClickAnimation.cancel();
+      }
+
+      mouseClickAnimation = animate.create({
+        'from': morePanelCurrentPos,
+        'to'  : targetPanelPos
+      }, {
+        'duration': 800,
+        'onTick': function (animationState) {
+          setTransform(moreButton, moreButtonTranslate.left, moreButtonTranslate.top, currentScale, currentRotation + rotDiff * animationState.current);
+        }
+      });
+
     }
 
     function initMorePanel () {
@@ -80,7 +145,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     function showHelpButton (useInstantTransition) {
 
       var btnContainer           = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
+          currentTranslate       = transform.getTransform(btnContainer.getAttribute('transform')).translate,
           opacityTransitionClass;
 
       if (useInstantTransition === true) {
@@ -113,7 +178,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     function hideHelpButton () {
 
       var moreButton       = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate = transform.getTranslate(moreButton.getAttribute('transform'));
+          currentTranslate = transform.getTransform(moreButton.getAttribute('transform')).translate;
 
       moreButton.setAttribute('class', '');
       moreButton.style.opacity = 0;
