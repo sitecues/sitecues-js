@@ -67,7 +67,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
   <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-large-only" fill="none" opacity="0"/>\
-  <g id="scp-more-button-container" class="scp-transition-opacity" transform="translate(400,198)">\
+  <g id="scp-more-button-container" transform="translate(400,198)">\
     <g id="scp-more-button-group" role="button" aria-label="{{help}}">\
       <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
       <rect id="scp-more-button-transparent-target" fill="transparent" x="-39" y="-39" width="78" height="78"  class="scp-target" role="presentation"/>\
