@@ -348,7 +348,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%'
+          'transform-origin': '50% 50%',
+          'pointer-events': 'none'
         },
 
         '.origin-center': {
@@ -412,10 +413,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#sitecues-badge[aria-expanded=false]': {
          'overflow' : 'hidden'
-        },
-
-        '#sitecues-badge #scp-more-button-container': {
-         'pointer-events': 'none'
         },
 
         /*************** Panel Only **************************/
