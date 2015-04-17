@@ -406,6 +406,22 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
           'stroke-width': '14px'
+        },
+
+        /*************** Badge Only **************************/
+
+        '#sitecues-badge[aria-expanded=false]': {
+         'overflow' : 'hidden'
+        },
+
+        '#sitecues-badge #scp-more-button-container': {
+         'pointer-events': 'none'
+        },
+
+        /*************** Panel Only **************************/
+
+        '#sitecues-badge #scp-more-button-container.scp-transition-opacity, #sitecues-badge #scp-more-button-container.scp-transition-opacity-fast,#sitecues-badge #scp-more-button-container.scp-transition-opacity-instant': {
+         'pointer-events': 'all'
         }
       },
 
