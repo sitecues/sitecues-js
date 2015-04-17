@@ -348,7 +348,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%'
+          'transform-origin': '50% 50%',
+          'pointer-events': 'none'
         },
 
         '.origin-center': {
@@ -365,6 +366,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-transition-opacity-instant' : {
           'transition': 'opacity 0s'
+        },
+
+        // These are the 3 different ways the "?" button might fade in.
+        //
+        // We want to turn on pointer-events when the "?" becomes visible.
+        // If none of these classes are set, then the "?" opacity is 0 and pointer-events are disabled.
+        '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
+         'pointer-events': 'all !important'
         },
 
         /******** Mouse targets must be hidden but still able to handle events *************/
@@ -406,6 +415,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
           'stroke-width': '14px'
+        },
+
+        /*************** Badge Only **************************/
+
+        '#sitecues-badge[aria-expanded=false]': {
+         'overflow' : 'hidden'
         }
       },
 
