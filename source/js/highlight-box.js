@@ -36,21 +36,18 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID         = 'sitecues-hlb',         // ID for $hlb
-
-          MOUSE_SAFETY_ZONE = 0, // Amount of pixels surrounding HLB that is safe for mouse to enter without closing HLB
-
+          // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
+          // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
+          // Value of 2 instead of 1 fixes wrapping text on this page http://www.windoweyesforoffice.com/sitecues/index.php
+          // for all headers...
+          EXTRA_HIGHLIGHT_PADDING = 2, //TODO: compute this, figure out why its needed...
+          MOUSE_SAFETY_ZONE       = 0, // Number of pixels surrounding HLB that is safe for mouse to enter without closing HLB
           highlight,
 
           $picked,      // The element chosen by the picker.
           $foundation,         // The element which serves as a model or basis for imitations or copies
           $hlb,                // Element that is cloned from the $foundation
           $hlbWrapper,         // Element outside the body that contains the HLB and background dimmer
-
-          // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
-          // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
-          // Value of 2 instead of 1 fixes wrapping text on this page http://www.windoweyesforoffice.com/sitecues/index.php
-          // for all headers...
-          EXTRA_HIGHLIGHT_PADDING = 2, //TODO: compute this, figure out why its needed...
 
           initialHLBRect,      // The highlight rect, if it exists, otherwise use the $foundation bounding client rect.
 
@@ -59,7 +56,13 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           isListeningToMouseEvents       = false, // Are event listeners currently attached
           isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
           isSticky                       = false, // DEBUG: HLB deflation toggler
-          inheritedZoom;                          // Amount of zoom inherited from page's scale transform
+          inheritedZoom,                          // Amount of zoom inherited from page's scale transform
+          foundations = {
+            // Keys represent "lonely" elements which rely upon another element being present.
+            // Values are functions that return a foundation (like the relied upon element).
+            'li'       : getValidListElement,
+            'fieldset' : getValidFieldsetElement
+          };
 
       if (SC_DEV) {
         // Boolean that determines if we log HLB information (only works in SC_DEV mode)
@@ -77,7 +80,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function mapForm($from, $to) {
 
-        // Build an array of input elements from the HLB element / the foundation and its decendants.
+        // Get descendants of The HLB / The Foundation that may have a value.
         var $fromInputs = $from.find('input, textarea, select')
                 .addBack('input, textarea, select'),
             $toInputs = $to.find('input, textarea, select')
@@ -258,11 +261,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         initialHLBRect = getInitialHLBRect(highlight);
 
         // Disable mouse highlighting so we don't copy over the highlighting styles from the picked element.
-        // It MUST be called before getValidFoundation().
+        // It MUST be called before getFoundation().
         sitecues.emit('mh/pause');
 
         // Set module scoped variable so the rest of the program has reference.
-        $foundation = getValidFoundation($picked);
+        $foundation = getFoundation($picked);
 
         createHLB(isRetargeting);
       }
@@ -523,33 +526,26 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       }
 
       /**
-       * [getValidFoundation creates and returns a valid element for the HLB.
+       * [getFoundation creates and returns a valid element for the HLB.
        *  SC-1629 - Lonely bullets
        *  It is possible that the picker chooses an element for the HLB that is invalid input, therefore,
        *  return the valid input for the HLB given the invalid input/valid input from the picker.]
        * @param  {[DOM element]} pickedElement   [The element chosen by the picker]
        * @return {[DOM element]}                 [The new element create from the element chosen by the picker]
        */
-      function getValidFoundation($picked) {
+      function getFoundation($picked) {
 
-        if ($picked.is('li')) {
+        var tag;
 
-          if (SC_DEV && loggingEnabled) {
-            console.log('%cSPECIAL CASE: Lonely list item.',  'background:orange;');
+        for (tag in foundations) {
+          if (Object.prototype.hasOwnProperty.call(foundations, tag)) {
+            if ($picked.is(tag)) {
+              if (SC_DEV && loggingEnabled) {
+                console.log('%cSPECIAL CASE: Lonely', tag + '.' ,  'background:orange;');
+              }
+              return foundations[tag]($picked);
+            }
           }
-
-          return getValidListElement($picked);
-
-        }
-
-        if ($picked.is('fieldset')) {
-
-          if (SC_DEV && loggingEnabled) {
-            console.log('%cSPECIAL CASE: Lonely fieldset.',  'background:orange;');
-          }
-
-          return getValidFieldsetElement($picked);
-
         }
 
         return $picked;
@@ -689,7 +685,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         exports.getOrCreateHLBWrapper    = getOrCreateHLBWrapper;
         exports.removeHLBWrapper         = removeHLBWrapper;
         exports.toggleHLB                = toggleHLB;
-        exports.getValidFoundation       = getValidFoundation;
+        exports.getValidFoundation       = getFoundation;
 
         exports.setHLB = function($input) {
           $hlb = $input;
