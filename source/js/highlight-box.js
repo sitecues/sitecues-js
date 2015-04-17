@@ -77,23 +77,19 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        */
       function mapForm($from, $to) {
 
-        // Build an array of input elements from the HLB element / original element and its decendants.
-        var fromInputs = $from.find('input, textarea, select')
-                .addBack('input, textarea, select')
-                .toArray(),
-
-            toInputs = $to.find('input, textarea, select')
-                .addBack('input, textarea, select')
-                .toArray(),
-
-            i, len = fromInputs.length,
+        // Build an array of input elements from the HLB element / the foundation and its decendants.
+        var $fromInputs = $from.find('input, textarea, select')
+                .addBack('input, textarea, select'),
+            $toInputs = $to.find('input, textarea, select')
+                .addBack('input, textarea, select'),
+            i, len = $fromInputs.length,
             $currentFromInput,
             $currentToInput,
             fromInputType;
 
         for (i = 0; i < len; i = i + 1) {
-          $currentFromInput = $(fromInputs[i]);
-          $currentToInput = $(toInputs[i]);
+          $currentFromInput = $fromInputs.eq(i);
+          $currentToInput = $toInputs.eq(i);
           fromInputType = $currentFromInput.prop('type');
           if (fromInputType === 'radio' || fromInputType === 'checkbox') {
             $currentToInput.prop('checked', $currentFromInput.prop('checked'));
