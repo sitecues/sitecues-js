@@ -220,6 +220,19 @@ sitecues.def('bp/placement', function(placement, callback) {
       return ratioOfSVGToVisibleBadgeSize;
     }
 
+    function addClipRectStyleFix () {
+
+      var badgeRect    = helper.getRect(badgeElement),
+
+          // A magic number to fix SC-2759.  Underlying issue is probably
+          // rectangle calculations are a bit off...
+          // TODO: Figure out why we are using magic numbers
+          EXTRA_PIXELS_HEIGHT = 5,
+          EXTRA_PIXELS_WIDTH  = 10;
+
+      bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
+    }
+
     /**
      * [init initializes the placement of the bpElement, svgElement, and badgeElement]
      * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
@@ -240,6 +253,11 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       // Initially, BP must always be part of page content (near #sitecues-badge)
       switchToBadgeParent();
+
+      // For some reason, without this fix elements around the badge
+      // do not get mouse events because the sizing of something is off.
+      // See SC-2759.
+      addClipRectStyleFix();
 
       // Listen for change events for page badges
       if (state.get('isPageBadge')) {

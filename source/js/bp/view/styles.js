@@ -418,9 +418,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         /*************** Badge Only **************************/
-
-        '#sitecues-badge[aria-expanded=false]': {
-         'overflow' : 'hidden'
+        'html > #scp-bp-container, #sitecues-badge[aria-expanded="true"].scp-toolbar #scp-bp-container': {
+          'clip': 'auto !important'
         }
       },
 
