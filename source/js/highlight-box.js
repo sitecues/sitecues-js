@@ -61,7 +61,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             // Keys represent "lonely" elements which rely upon another element being present.
             // Values are functions that return a foundation (like the relied upon element).
             'li'       : getValidListElement,
-            'fieldset' : getValidFieldsetElement
+            'fieldset' : getValidFieldsetElement,
+            'input'    : getValidFormElement
           };
 
       if (SC_DEV) {
@@ -448,18 +449,19 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           We must also append this newly created <ul> to the DOM so the HLB
           module can utilize styles and positioning of the "original element"
           Basically, we create a new original element.]
-       * @param  {[DOM element]} originalElement [The element chosen by the picker]
-       * @return {[DOM element]}                 [The element the HLB will use to create itself]
+       * @param  {[jQuery element]} originalElement [The element chosen by the picker]
+       * @return {[jQuery element]}                 [The element the HLB will use to create itself]
        */
       function getValidListElement($picked) {
 
-        var pickedElement                    = $picked[0],
-            pickedElementComputedStyle       = window.getComputedStyle(pickedElement),
-            pickedElementBoundingBox         = pickedElement.getBoundingClientRect(),
-            pickedElementClone               = pickedElement.cloneNode(true),
-            pickedElementAndDescendants      = $picked.find('*').addBack(),
-            pickedElementCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-            $foundation                      = $('<ul>').append(pickedElementClone),
+        var pickedElement              = $picked[0],
+            pickedElementComputedStyle = window.getComputedStyle(pickedElement),
+            pickedElementBoundingBox   = pickedElement.getBoundingClientRect(),
+            // TODO: Seth: Why not use jQuery's .clone() ??
+            pickedElementClone         = pickedElement.cloneNode(true),
+            $pickedAndDescendants      = $picked.find('*').addBack(),
+            $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
+            $foundation                = $('<ul>').append(pickedElementClone),
             i;
 
         // Setting this to true will remove the $foundation from the DOM before inflation.
@@ -484,8 +486,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         }).insertAfter('body');
 
         // Map all picked elements children CSS to cloned children CSS
-        for (i = 0; i < pickedElementAndDescendants.length; i += 1) {
-          pickedElementCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText(pickedElementAndDescendants[i]);
+        for (i = 0; i < $pickedAndDescendants.length; i += 1) {
+          $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
         }
 
         return $foundation;
@@ -494,12 +496,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
       function getValidFieldsetElement($picked) {
 
-        var pickedElement                    = $picked[0],
-            pickedElementsBoundingBox        = pickedElement.getBoundingClientRect(),
-            pickedElementClone               = pickedElement.cloneNode(true),
-            pickedElementAndDescendants      = $picked.find('*').addBack(),
-            pickedElementCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-            $foundation                      = $('<div>').append(pickedElementClone);
+        var pickedElement              = $picked[0],
+            pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
+            // TODO: Seth: Why not use jQuery's .clone() ??
+            pickedElementClone         = pickedElement.cloneNode(true),
+            $pickedAndDescendants      = $picked.find('*').addBack(),
+            $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
+            $foundation                = $('<div>').append(pickedElementClone),
+            i;
 
         // Setting this to true will remove the $foundation from the DOM before inflation.
         // This is a very special case where the foundation is not the same as the picked element.
@@ -518,8 +522,46 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         }).insertAfter('body');
 
         // Map all picked elements children CSS to cloned children CSS
-        for (var i = 0; i < pickedElementAndDescendants.length; i += 1) {
-          pickedElementCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText(pickedElementAndDescendants[i]);
+        for (i = 0; i < $pickedAndDescendants.length; i += 1) {
+          $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
+        }
+
+        return $foundation;
+      }
+
+      // Implemented to fix issue on http://www.gwmicro.com/Support/Email_Lists/ when HLBing Subscription Management
+      function getValidFormElement($picked) {
+
+        var pickedElement              = $picked[0],
+            pickedElementsBoundingBox  = pickedElement.getBoundingClientRect(),
+            // TODO: Seth: Why not use jQuery's .clone() ??
+            pickedElementClone         = pickedElement.cloneNode(true),
+            $pickedAndDescendants      = $picked.find('*').addBack(),
+            $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
+            $submitButton              = $picked.closest('form').find(':submit'),
+            submitButtonClone          = $submitButton.clone(true),
+            $foundation                = $('<form>').append(pickedElementClone, submitButtonClone),
+            i;
+
+        // Setting this to true will remove the $foundation from the DOM before inflation.
+        // This is a very special case where the foundation is not the same as the picked element.
+        // NOTE: This is setting a module scoped variable so the rest of the program as access.
+        removeTemporaryFoundation = true;
+
+        // Create, position, and style this element so that it overlaps the element chosen by the picker.
+        $foundation.css({
+          'position'       : 'absolute',
+          'left'           : (pickedElementsBoundingBox.left + window.pageXOffset) / inheritedZoom,
+          'top'            : (pickedElementsBoundingBox.top  + window.pageYOffset) / inheritedZoom,
+          'opacity'        : 0,
+          'padding'        : 0,
+          'margin'         : 0,
+          'width'          : pickedElementsBoundingBox.width / inheritedZoom
+        }).insertAfter('body');
+
+        // Map all picked elements children CSS to cloned children CSS
+        for (i = 0; i < $pickedAndDescendants.length; i += 1) {
+          $pickedCloneAndDescendants[i].style.cssText = hlbStyling.getComputedStyleCssText($pickedAndDescendants[i]);
         }
 
         return $foundation;
@@ -541,11 +583,15 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           if (Object.prototype.hasOwnProperty.call(foundations, tag)) {
             if ($picked.is(tag)) {
               if (SC_DEV && loggingEnabled) {
-                console.log('%cSPECIAL CASE: Lonely', tag + '.' ,  'background:orange;');
+                console.log('%cSPECIAL CASE: Lonely ' + tag + '.' ,  'background:orange;');
               }
               return foundations[tag]($picked);
             }
           }
+        }
+
+        if (SC_DEV && loggingEnabled) {
+          console.log('%cTAG: ' + $picked[0].tagName,  'background:orange;');
         }
 
         return $picked;
