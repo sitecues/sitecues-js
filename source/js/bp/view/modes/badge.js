@@ -236,6 +236,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         removeExistingBadgeId();
         setBadgeParentId();
 
+        // Invalidate the cache because we just removed the BADGE_ID
+        // from the <img> and set it on the <div>
+        helper.invalidateId(BP_CONST.BADGE_ID);
+
         badgeElement = badgeElement.parentElement;
 
       }
