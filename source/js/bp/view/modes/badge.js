@@ -50,8 +50,8 @@
 
 sitecues.def('bp/view/modes/badge', function (badge, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper', 'conf',
-    function (BP_CONST, state, locale, helper, conf) {
+  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper', 'conf', 'conf/site',
+    function (BP_CONST, state, locale, helper, conf, site) {
 
     /*
      Default bounding box object.
@@ -75,27 +75,48 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      * </span>
      * @returns {Object}
      */
-    function createDefaultBadge() {
+    function createToolbar() {
 
-      var badgeElement = document.createElement('div');
+      var toolbarElement = document.createElement('div'),
+        docElem = document.documentElement;
 
-      document.documentElement.insertBefore(badgeElement, document.documentElement.childNodes[0]);
+      docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
+      docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
 
-      helper.setAttributes(badgeElement, BP_CONST.DEFAULT_BADGE_ATTRS);
-      badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
-      updateFloatingBadgeClass(badgeElement);
+      helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
+      toolbarElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+      ensureBodyBelowToolbar();
 
       state.set('isPageBadge', false);
+      state.set('isToolbarBadge', true);
 
-      if (!isSitecuesEverywhere()) {
+      if (!isToolbarUIRequested()) {
         console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
       }
 
-      return badgeElement;
+      sitecues.emit('bp/did-insert-toolbar');
+
+      return toolbarElement;
     }
 
-    function isSitecuesEverywhere() {
-      return document.documentElement.getAttribute('data-sitecues-type') === 'extension';
+    // In some cases body may be positioned absolutely above the toolbar
+    function ensureBodyBelowToolbar() {
+      var body = document.body;
+      if (body) {
+        if (getComputedStyle(body).position !== 'static' &&
+          body.getBoundingClientRect().top < 41) {
+            body.setAttribute('data-sc-extra-toolbar-bump', '');
+        }
+      }
+      else {
+        // Wait for body. There will always be one after DOMContentLoaded,
+        // because the browser inserts one if the markup didn't provide it.
+        document.addEventListener('DOMContentLoaded', ensureBodyBelowToolbar);
+      }
+    }
+
+    function isToolbarUIRequested() {
+      return site.get('ui_mode') === 'toolbar';
     }
 
     // Create <div> and put the existing badge inside it.
@@ -192,7 +213,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     }
 
     function getBadgePalette(badge) {
-      var paletteName = badge.localName === 'img' ? badge.src : sitecues.config.palette || '',
+      var paletteName = badge.localName === 'img' ? badge.src : site.get('palette') || '',
         fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
         index = 0;
 
@@ -229,10 +250,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     badge.init = function() {
 
-      var badge = helper.byId(BP_CONST.BADGE_ID);
+      var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 
       // Get site's in-page placeholder badge or create our own
-      badgeElement = badge || createDefaultBadge();
+      badgeElement = badge || createToolbar();
 
       setCustomPalette(badgeElement);
 
@@ -290,29 +311,6 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
       return classBuilder;
     };
-
-    function getSanitizedBadgeStyle(badgeStyle) {
-      if (badgeStyle >= 0 && badgeStyle <  BP_CONST.BADGE_STYLES.length) {
-        return parseInt(badgeStyle);
-      }
-      return 0;
-    }
-
-    function updateFloatingBadgeClass(badgeElement) {
-      var badgeClass = BP_CONST.DEFAULT_BADGE_CLASS + ' ' + BP_CONST.BADGE_STYLES[badgeStyle];
-      badgeElement.className = badgeClass;
-      state.set('isToolbarBadge', badgeClass.indexOf('scp-toolbar') > 0);
-    }
-
-    function cycleBadgeStyle() {
-      badgeStyle = getSanitizedBadgeStyle(badgeStyle + 1);
-      conf.set('badgeStyle', badgeStyle);
-      updateFloatingBadgeClass(badgeElement);
-    }
-
-    conf.def('badgeStyle', getSanitizedBadgeStyle);
-    badgeStyle = getSanitizedBadgeStyle(conf.get('badgeStyle'));
-    sitecues.on('toolbar/cycle', cycleBadgeStyle);
 
     // *** Unit tests export... ***
     if (SC_UNIT) {

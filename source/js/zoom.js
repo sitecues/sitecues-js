@@ -7,28 +7,15 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'platform', 'util/common', 'zoom-forms',
-    function ($, conf, platform, common, zoomForms) {
+  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'zoom-forms',
+    function ($, conf, site, platform, common, zoomForms) {
       
       // Default zoom configuration
       
       // Can be customized via zoom.provideCustomConfig()
       var zoomConfig = {
-          
           // Should smooth zoom animations be enabled?
-          shouldSmoothZoom: true,
-
-          // Does the web page use a fluid layout, where content wraps to the width?
-          isFluid: window.sitecues.config.isFluid, // Can override in site preferences
-
-          // Should the width of the page be restricted as zoom increases?
-          // This is helpful for pages that try to word-wrap or use a fluid layout.
-          // Eventually use fast page health calculation to automatically determine this
-          // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfFluid: window.sitecues.config.maxRewrapZoom || 1.5,
-
-          // Set to 5 on sites where the words get too close to the left window's edge
-          leftMarginOffset: 2
+          shouldSmoothZoom: true
         },
 
         // Body-related
@@ -90,9 +77,6 @@ sitecues.def('zoom', function (zoom, callback) {
 
         // Optimize fonts for legibility? Helps a little bit with Chrome on Windows
         shouldOptimizeLegibility = platform.browser.isChrome && platform.os.isWin,
-
-        // Height of toolbar to move page down from
-        toolbarHeight,
 
         // Constants
         MIN_ZOOM_PER_CLICK = 0.2,  // Change zoom at least this amount if user clicks on A button or presses +/- or left/right in slider
@@ -978,7 +962,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get a CSS object for the targetZoom level
       function getZoomCss(targetZoom) {
-        var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslate(targetZoom),
+        var transform = 'scale(' + targetZoom.toFixed(ZOOM_PRECISION) + ') ' + getFormattedTranslateX(targetZoom),
           css = {
             transform: transform
           };
@@ -1005,21 +989,6 @@ sitecues.def('zoom', function (zoom, callback) {
       function getRestrictedWidth(currZoom) {
         var winWidth = window.innerWidth;
         return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
-      }
-
-      // Return a formatted string for translateX as required by CSS
-      function getFormattedTranslate(targetZoom) {
-        return getFormattedTranslateX(targetZoom) + ' ' + getFormattedTranslateY(targetZoom);
-
-      }
-
-      // Return a formatted string for translateY as required by CSS
-      function getFormattedTranslateY(targetZoom) {
-        if (toolbarHeight && isBadgeToolbar()) {
-          var zoomAdjustedToolbarHeight = (toolbarHeight / targetZoom).toFixed(ZOOM_PRECISION);
-          return 'translateY(' + zoomAdjustedToolbarHeight + 'px)';
-        }
-        return '';
       }
 
       // Return a formatted string for translateX as required by CSS
@@ -1211,10 +1180,6 @@ sitecues.def('zoom', function (zoom, callback) {
           typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
       }
 
-      function isBadgeToolbar() {
-        return $('#sitecues-badge').is('.scp-toolbar');
-      }
-
       // Lazy init, saves time on page load
       function initZoomModule() {
         if (isInitialized) {
@@ -1223,9 +1188,21 @@ sitecues.def('zoom', function (zoom, callback) {
 
         isInitialized = true;
 
-        toolbarHeight = $('#sitecues-badge')[0].offsetHeight;
-
         initBodyInfo();
+
+        $.extend(zoomConfig, {
+          // Does the web page use a fluid layout, where content wraps to the width?
+          isFluid: site.get('isFluid'), // Can override in site preferences
+
+          // Should the width of the page be restricted as zoom increases?
+          // This is helpful for pages that try to word-wrap or use a fluid layout.
+          // Eventually use fast page health calculation to automatically determine this
+          // Assumes window width of 1440 (maximized screen on macbook)
+          maxZoomToRestrictWidthIfFluid: site.get('maxRewrapZoom') || 1.5,
+
+          // Set to 5 on sites where the words get too close to the left window's edge
+          leftMarginOffset: site.get('leftMarginOffset') || 2
+        });
 
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();
@@ -1247,12 +1224,20 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+
       function performInitialLoadZoom() {
+        if (!document.body) {
+          // Wait until <body> is ready
+          // This can happen in the case of extension which loads very fast
+          // In the future, extension may try to zoom sooner rather than waiting for entire document to load
+          $(document).ready(performInitialLoadZoom);
+          return;
+        }
+
         zoom.getNativeZoom(); // Make sure we have native zoom value available
 
         var targetZoom = conf.get('zoom');
         if (targetZoom > 1) {
-          // Wait till badge is inserted and perform initial load zoom from settings
           beginGlide(targetZoom);
         } else {
           // No initial zoom from settings, first zoom will only be from user input
@@ -1330,7 +1315,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearAnimationOptimizations(); // Browser can reclaim resources used
       });
 
-      sitecues.on('bp/did-complete', performInitialLoadZoom);
+      sitecues.on('bp/did-complete', performInitialLoadZoom); // Zoom once badge is ready
 
       callback();
     });

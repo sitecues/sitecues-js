@@ -1,6 +1,6 @@
 sitecues.def('bp/view/styles', function (styling, callback) {
   'use strict';
-  sitecues.use('bp/helper', 'bp/constants', function (helper, BP_CONST) {
+  sitecues.use('bp/helper', 'bp/constants', 'conf/site', function (helper, BP_CONST, site) {
 
     var
       isAnimationDebuggingOn = false,
@@ -202,54 +202,38 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        // .scp-default-badge means it's either a floating badge or toolbar
-        // Also has: .scp-toolbar or .scp-floating-badge
-        //           .scp-left or .scp-right
-        '.scp-default-badge': {
+        // .scp-toolbar means it's a toolbar
+        '.scp-toolbar': {
           'position': 'fixed',
-          'width': '190px',
+          'top': '0px',
+          'left': '0px',
+          'width': '100%',
           'height': '38px',
           'box-sizing': 'border-box',
-          'padding': '6px 8px 8px 8px',
-          'background-color': '#f8f8f8',
+          'padding': '6px 8px 8px calc(50% - 66px)',
+          'background-color': '#f7fcff',
           'z-index': '9999999'
         },
 
-        '.scp-default-badge[aria-expanded="false"],.scp-toolbar': {
+        '.scp-toolbar[aria-expanded="false"]': {
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
 
-        '.scp-toolbar': {
-          'width': '100%',
-          'top': '0px',
-          'left': '0px',
-          'background-color': '#f7fcff'
-        },
-
-        '.scp-default-badge.scp-floating-badge.scp-right': {
-          right: '4px',
-          bottom: '4px'
-        },
-
-        '.scp-default-badge.scp-floating-badge.scp-left': {
-          left: '4px',
-          bottom: '4px'
-        },
-
-        '.scp-toolbar.scp-middle': {
-          'padding-left': 'calc(50% - 66px)'
-        },
-
-        '.scp-toolbar.scp-right': {
-          'padding-left': '88%'
-        },
-
         // Move the body down by the height of the toolbar + 1px for the box-shadow
-        '.scp-default-badge.scp-toolbar + head + body': {
-          'transform': 'translateY(41px)',
-          'width': '100%'
+        'html[data-sitecues-toolbar]': {
+          'padding-top': '41px !important'
         },
 
+        // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
+        // This messes up Google maps for some reason. We've disabled google maps in the extension.
+        // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
+        'html[data-sitecues-toolbar] > body': {
+          'transform': 'translateY(0)'
+        },
+
+        'body[data-sc-extra-toolbar-bump]': {
+          'transform': 'translateY(41px)'
+        },
 
         /********** Transform animation speed **********/
 
@@ -638,8 +622,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
 
-    if (typeof sitecues.config.palette === 'object') {
-      provideCustomPalette(sitecues.config.palette);
+    if (site.get('ui_mode') !== 'toolbar') {
+      // TODO Tony how does this work? We need docs
+      // TODO clean this up -- weird to be checking toolbar in this general code here
+      var customPalette = site.get('palette');
+      if (typeof customPalette === 'object') {
+        provideCustomPalette(customPalette);
+      }
     }
 
     if (SC_DEV) {

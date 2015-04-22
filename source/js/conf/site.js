@@ -17,29 +17,28 @@ sitecues.def('conf/site', function (site, callback) {
   'use strict';
 
   var
-    // The site configuration data object.
-    siteConfig
-    // Keep a reference to the provided site config so that we do not override.
-    , providedSiteConfig = sitecues.getSiteConfig()
-    , isFetched = false
-    ;
+    fetchedSiteConfig = {},
+    providedSiteConfig = sitecues.getSiteConfig(),
+    everywhereConfig = sitecues.getEverywhereConfig(),
+    isFetched = false;
 
   sitecues.use('jquery', function($) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
     // but the contents of root object properties can be modified.
     site.get = function(key) {
-      return key? siteConfig[key] : siteConfig;
-    };
+      if (!key) {
+        return fetchSiteConfig;
+      }
 
-    // Initialize the site configuration to the default.
-    siteConfig = $.extend(true, {}, providedSiteConfig);
+      return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
+    };
 
     function fetchSiteConfig() {
       if (isFetched) {
         return; // Already fetched
       }
 
-      if (SC_LOCAL) {
+      if (SC_LOCAL || everywhereConfig) {
         // Cannot save to server when we have no access to it
         // Putting this condition in allows us to paste sitecues into the console
         // and test it on sites that have a content security policy
@@ -54,17 +53,19 @@ sitecues.def('conf/site', function (site, callback) {
         success: function (data) {
           // Copy the fetched key/value pairs into the site configuration.
           for (var i = 0; i < data.settings.length; i++) {
-            siteConfig[data.settings[i].key] = data.settings[i].value;
+            fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
           }
 
           // Add the provided configuration
-          siteConfig = $.extend(true, siteConfig, providedSiteConfig);
+          fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
           isFetched = true;
         }
       });
     }
 
-    sitecues.on('speech/did-change zoom/begin', fetchSiteConfig); // Fetch once we need it
+    // Fetch once we need it (we currently need it if speech might be used, because the fetched
+    // site config may specify different speech servers)
+    sitecues.on('speech/did-change zoom/begin', fetchSiteConfig);
 
     callback(site);
   });

@@ -85,8 +85,8 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       currentBPParent = BADGE_PARENT;
 
-      repositionBPOverBadge();
-
+      var badgeRect = repositionBPOverBadge();
+      fitSVGtoBadgeRect(badgeRect, getAppliedBPZoom());
     }
 
     // Reparent panel container to <html> so that panel stays constant size and position during zooming/panning
@@ -105,15 +105,17 @@ sitecues.def('bp/placement', function(placement, callback) {
       currentBPParent = HTML_PARENT;
 
       // The BP must be positioned over the #sitecues-badge
-      repositionBPOverBadge();
-
+      var badgeRect = repositionBPOverBadge();
+      fitSVGtoBadgeRect(badgeRect, getAppliedBPZoom());
     }
 
-    // Move the BP object so it sits exactly over the badge rectangle
+    function getAppliedBPZoom() {
+      var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
+      return isBPInBody ? zoomMod.getCompletedZoom() : 1;
+    }
+
+    // Move the BP object so that the top, left sits exactly over the badge rectangle top, left
     // This is only called when the BP is small (about to expand or finished collapsing)
-    // Does 2 important things:
-    //    Position and size the bpContainer
-    //    Set height and width of the SVG to visually fit the badge
     function repositionBPOverBadge() {
 
       function getPadding(property) {
@@ -128,13 +130,9 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       // Current badge rectangle in screen coordinates
       var badgeRect   = helper.getRect(badgeElement),
-          isBPInBadge = currentBPParent === BADGE_PARENT,
-
-          // Is the badge in the body?
-          isBPInBody  = state.get('isPageBadge') && isBPInBadge,
 
           // Get the amount of zoom being applied to the badge
-          appliedZoom = isBPInBody ? zoomMod.getCompletedZoom() : 1,
+          appliedZoom = getAppliedBPZoom(),
 
           // Adjust for padding
           badgeComputedStyle = window.getComputedStyle(badgeElement),
@@ -142,7 +140,7 @@ sitecues.def('bp/placement', function(placement, callback) {
           paddingLeft = getPadding('Left'),
           paddingTop  = getPadding('Top');
 
-      if (isBPInBadge) {
+      if (currentBPParent === BADGE_PARENT) {
 
         // Not a floating badge and in body (inside of #sitecues-badge)
         // Since it's already inside of the #sitecues-badge, which is in the right place on the page,
@@ -155,7 +153,6 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       badgeRect.left   += paddingLeft;
       badgeRect.top    += paddingTop;
-
 
       badgeRect.width  -= paddingLeft + getPadding('Right');
       badgeRect.height -= paddingTop  + getPadding('Bottom');
@@ -171,8 +168,7 @@ sitecues.def('bp/placement', function(placement, callback) {
       bpElement.style.left = 0;
       bpElement.style[helper.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
 
-      fitSVGtoBadgeRect(badgeRect, appliedZoom);
-
+      return badgeRect;
     }
 
     // This makes the collapsed svg large enough so that even with
@@ -251,7 +247,7 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       svgAspectRatio = viewBoxRect.width / viewBoxRect.height;
 
-      // Initially, BP must always be part of page content (near #sitecues-badge)
+      // Initially, BP must always be contained by #sitecues-badge
       switchToBadgeParent();
 
       // For some reason, without this fix elements around the badge
@@ -265,6 +261,9 @@ sitecues.def('bp/placement', function(placement, callback) {
         // Page badges must switch back and forth dynamically
         sitecues.on('bp/will-expand', switchToHtmlParent);
         sitecues.on('bp/did-shrink', switchToBadgeParent);
+      }
+      else {
+        window.addEventListener('resize', repositionBPOverBadge);
       }
 
     };

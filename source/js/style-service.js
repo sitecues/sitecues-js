@@ -6,7 +6,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
   'use strict';
   
-  sitecues.use('jquery', function ($) {
+  sitecues.use('conf/site', 'jquery', function (site, $) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
@@ -15,7 +15,8 @@ sitecues.def('style-service', function (styleService, callback) {
         'input,textarea,select,a,button,label[for]{cursor:pointer}\n',
       WAIT_BEFORE_INIT_STYLESHEET = 50,
       hasInitBeenRequested,   // Have we even begun the init sequence?
-      isInitComplete;      // Init sequence is complete
+      isInitComplete,      // Init sequence is complete
+      doFetchCssFromChromeExtension = site.get('fetch_css') === 'chrome-extension';
 
     function isAcceptableMediaType(media) {
       /*
@@ -78,7 +79,10 @@ sitecues.def('style-service', function (styleService, callback) {
 
       // Add styles from other <style> tags
       for (index = 0; index < numStyleTags; index ++) {
-        css += $(styleTags[index]).text();
+        var styleElem = styleTags[index];
+        if (styleElem.id && styleElem.id.indexOf('sitecues-') < 0) {  // Don't include <style> from sitecues
+          css += $(styleElem).text();
+        }
       }
 
       $combinedStylesheet.text(css);
@@ -92,22 +96,44 @@ sitecues.def('style-service', function (styleService, callback) {
       }, WAIT_BEFORE_INIT_STYLESHEET);
     }
 
+    function ChromeExtHttpRequest(url, requestId) {
+      this.url = url;
+      this.send = function () {
+        var chromeRequest = this;
+        $(window).one('ProcessCss-' + requestId, function (event) {
+          var responseText = event.originalEvent.detail,
+            responseEvent = { target: chromeRequest };
+          if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
+            chromeRequest.responseText = responseText;
+            chromeRequest.onload(responseEvent);
+          }
+          else {
+            chromeRequest.onerror(responseEvent);
+          }
+        });
+        window.dispatchEvent(new CustomEvent('RequestCss', { detail: { url: this.url, id: requestId } }));
+      };
+    }
+
     /**
      * [Cross browser solution to initiating an XMLHTTPRequest
      * that supports the Origin HTTP header]
-     * @param  {[string]} method
-     * @param  {[string]} url
-     * @return {[XMLHTTPRequest]}
+     * @param  {string} method
+     * @param  {string} url
+     * @return {Object}
      */
-    function createRequest(method, url) {
+    function createGetRequest(url, sheetNum) {
+      if (doFetchCssFromChromeExtension) {
+        return new ChromeExtHttpRequest(url, sheetNum);
+      }
       //Credit to Nicholas Zakas
       var xhr = new XMLHttpRequest();
 
       if ('withCredentials' in xhr) {
-        xhr.open(method, url, true);
+        xhr.open('GET', url, true);
       } else if (typeof XDomainRequest !== 'undefined') {
         xhr = new XDomainRequest();
-        xhr.open(method, url);
+        xhr.open('GET', url);
       } else {
         xhr = null;
       }
@@ -154,7 +180,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
       for(; sheetNum < numSheets; ++ sheetNum) {
         var url = validSheets[sheetNum],
-          request = createRequest('GET', url);
+          request = createGetRequest(url, sheetNum);
         request.url = url;
 
         if (!request) {
@@ -325,7 +351,6 @@ sitecues.def('style-service', function (styleService, callback) {
         return;  // Only init once
       }
 
-
       hasInitBeenRequested = true;
 
       /*
@@ -340,6 +365,7 @@ sitecues.def('style-service', function (styleService, callback) {
         styleTags = getAllStyleTags();
 
       function onStylesRetrieved() {
+
         $combinedStylesheet = createCombinedStyleSheet();
 
         // Fill-in the sitecues combined CSS <style> element
@@ -375,7 +401,7 @@ sitecues.def('style-service', function (styleService, callback) {
         ruleValue,
         ruleIndex = 0,
         styleResults = [],
-        numRules = rules.length;
+        numRules = rules ? rules.length : 0;
 
       for (; ruleIndex < numRules; ruleIndex ++) {
         rule = rules[ruleIndex];
@@ -429,6 +455,11 @@ sitecues.def('style-service', function (styleService, callback) {
       if (pageZoom > 1) {
        init();
       }
+    });
+    // We must always move fixed position elements down when there is a toolbar
+    // Therefore we will need the style service even if there is no zoom
+    sitecues.on('bp/did-insert-toolbar', function() {
+      $(document).ready(init);
     });
   });
 

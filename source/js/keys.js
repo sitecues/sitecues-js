@@ -173,8 +173,7 @@ sitecues.def('keys', function(keys, callback) {
           'reset': 'sitecues/do-reset',
           'zoom1x': 'zoom/do-reset',
           'esc': 'key/esc',
-          'speech': 'speech/do-toggle',
-          'f8': 'toolbar/cycle'
+          'speech': 'speech/do-toggle'
         },
         KEY_EVENT_DEFAULT = 'key/nav';
 
