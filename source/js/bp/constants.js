@@ -4,8 +4,10 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // TODO don't repeat this in styles.js
 
-  constants.SMALL                    = 'scp-small';
-  constants.LARGE                    = 'scp-large';
+  constants.IS_BADGE        = 'scp-is-badge';      // BP is already badge and not animating
+  constants.IS_PANEL        = 'scp-is-panel';      // BP is already panel and not animating (used to be called scp-ready)
+  constants.WANT_BADGE      = 'scp-want-badge';     // BP is already badge or shrinking into one
+  constants.WANT_PANEL      = 'scp-want-panel';    // BP is already panel or expanding into one
 
   // IDs
 

@@ -43,8 +43,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-badge-rect" stroke="none" fill="none" x="6" y="6" width="620" height="114" rx="6" ry="6"/>\
 <g id="scp-main" aria-label="{{sitecues_main_panel}}">\
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
-  <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-large-only" opacity="0"/>\
-  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-large-only" opacity="0" fill="none"/>\
+  <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
+  <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" opacity="0" fill="none"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
@@ -52,7 +52,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-target" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="60"/>\
   <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="{{zoom_in}}" class="scp-A-button"/>\
-  <line id="scp-vert-divider" class="scp-large-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
+  <line id="scp-vert-divider" class="scp-panel-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
   <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="{{speech}}"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
     <use id="scp-head" xlink:href="#scp-head-def" x="530" y="11"/>\
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
@@ -60,13 +60,13 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
     <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target"/>\
   </g>\
-  <g id="scp-bottom" class="scp-large-only" opacity="0">\
+  <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
     <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
     <text id="scp-speech-label" x="583" y="178">{{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
-  <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-large-only" fill="none" opacity="0"/>\
+  <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
   <g id="scp-more-button-container" transform="translate(400,198)">\
     <g id="scp-more-button-group" role="button" aria-label="{{help}}">\
       <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\

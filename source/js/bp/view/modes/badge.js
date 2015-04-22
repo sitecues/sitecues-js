@@ -272,7 +272,11 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
     badge.getViewClasses = function() {
 
-      var classBuilder = BP_CONST.SMALL + ' ';
+      var classBuilder = BP_CONST.WANT_BADGE + ' ';
+
+      if (state.isBadge()) {
+        classBuilder += BP_CONST.IS_BADGE + ' ';
+      }
 
       if (state.get('isRealSettings')) {
         // *** scp-realsettings ***
