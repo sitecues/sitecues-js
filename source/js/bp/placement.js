@@ -254,13 +254,13 @@ sitecues.def('bp/placement', function(placement, callback) {
       // Initially, BP must always be part of page content (near #sitecues-badge)
       switchToBadgeParent();
 
-      // For some reason, without this fix elements around the badge
-      // do not get mouse events because the sizing of something is off.
-      // See SC-2759.
-      addClipRectStyleFix();
-
       // Listen for change events for page badges
       if (state.get('isPageBadge')) {
+
+        // For some reason, without this fix elements around the badge
+        // do not get mouse events because the sizing of something is off.
+        // See SC-2759.
+        addClipRectStyleFix();
 
         // Page badges must switch back and forth dynamically
         sitecues.on('bp/will-expand', switchToHtmlParent);
