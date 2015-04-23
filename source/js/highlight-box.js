@@ -36,29 +36,28 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
       var SITECUES_HLB_WRAPPER_ID = 'sitecues-hlb-wrapper', // ID for element which wraps HLB and Dimmer elements
           SITECUES_HLB_ID         = 'sitecues-hlb',         // ID for $hlb
-          // Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
-          // would unnecessarily wrap text.  Seemed to be more prevalent on IE, fixes stuff for EEOC.
-          // Value of 2 instead of 1 fixes wrapping text on this page http://www.windoweyesforoffice.com/sitecues/index.php
-          // for all headers...
-          EXTRA_HIGHLIGHT_PADDING = 2, //TODO: compute this, figure out why its needed...
-          MOUSE_SAFETY_ZONE       = 0, // Number of pixels surrounding HLB that is safe for mouse to enter without closing HLB
-          highlight,
+          // Magic. Fixes problems where mouse highlight was SO accurate, that a simple rounding of a pixel
+          // would unnecessarily wrap text. Seemed to be more prevalent on IE, fixes stuff for EEOC.
+          // Value of 2 instead of 1 fixes wrapping text on this page for all headers:
+          // http://www.windoweyesforoffice.com/sitecues/index.php
+          EXTRA_HIGHLIGHT_PADDING = 2, // TODO: Figure out why this is needed and compute it.
+          MOUSE_SAFETY_ZONE       = 0, // Number of pixels the mouse is allowed to go outside the HLB, before it closes.
 
-          $picked,      // The element chosen by the picker.
-          $foundation,         // The element which serves as a model or basis for imitations or copies
-          $hlb,                // Element that is cloned from the $foundation
-          $hlbWrapper,         // Element outside the body that contains the HLB and background dimmer
+          $picked,         // The object chosen by the picker.
+          $foundation,     // The sanitized input, used as the basis for creating an $hlb.
+          $hlb,            // The cloned object, based on the $foundation.
+          $hlbWrapper,     // Container for both the HLB and background dimmer.
 
-          initialHLBRect,      // The highlight rect, if it exists, otherwise use the $foundation bounding client rect.
-
-          removeTemporaryFoundation      = false, // In some scenarios, we must create our own foundation and must remove it from the DOM
-          preventDeflationFromMouseout   = false, // Boolean that deter mines if HLB can be deflated.
-          isListeningToMouseEvents       = false, // Are event listeners currently attached
-          isHLBClosing                   = false, // Boolean that determines if the HLB is currently deflating.
-          isSticky                       = false, // DEBUG: HLB deflation toggler
-          inheritedZoom,                          // Amount of zoom inherited from page's scale transform
+          highlight,       // The object given to us by the mouse highlight module.
+          initialHLBRect,  // The highlight rect, if it exists, otherwise use the $foundation bounding client rect.
+          inheritedZoom,   // Amount of zoom inherited from page's scale transform.
+          removeTemporaryFoundation    = false,  // Did we create our own foundation? (becomes true for lonely elements)
+          preventDeflationFromMouseout = false,  // State tracking: should the HLB ignore mouse movement?
+          isListeningToMouseEvents     = false,  // State tracking: are event listeners currently attached?
+          isHLBClosing                 = false,  // State tracking: is the HLB currently deflating?
+          isSticky                     = false,  // DEBUG: prevents the HLB from deflating on mouseout.
           foundations = {
-            // Keys represent "lonely" elements which rely upon another element being present.
+            // Keys are tag names of "lonely" elements, which rely upon another element being present to work.
             // Values are functions that return a foundation (like the relied upon element).
             'li'       : getValidListElement,
             'fieldset' : getValidFieldsetElement,
@@ -265,7 +264,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         // It MUST be called before getFoundation().
         sitecues.emit('mh/pause');
 
-        // Set module scoped variable so the rest of the program has reference.
+        // Sanitize the input, by accounting for "lonely" elements.
         $foundation = getFoundation($picked);
 
         createHLB(isRetargeting);
@@ -275,16 +274,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * [toggleHLB closes or creates a new HLB]
        */
       function toggleHLB() {
-
-        // If the HLB is currently deflating, no need to toggle
-        if (isHLBClosing) {
-          return;
-        }
-
-        // If an HLB exists
-        if ($hlb) {
+        if ($hlb && !isHLBClosing) {
           closeHLB();
-          // If the HLB does not exist
         } else {
           targetHLB();
         }
@@ -295,7 +286,6 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * has changed while the HLB opens
        */
       function retargetHLB() {
-
         copyFormDataToPage(); // Make sure we don't lose any of the form entry from the current HLB
         $hlb.remove();
         targetHLB(true);
@@ -649,7 +639,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         highlight        = undefined;
 
         if (SC_DEV && loggingEnabled) {
-          console.log('%c--------------- HLB DESTROYED -----------------', 'color:orange; background:purple; font-size: 9pt');
+          console.log(
+            '%c--------------- HLB DESTROYED -----------------',
+            'color:orange; background:purple; font-size: 9pt'
+          );
         }
       }
 
@@ -709,7 +702,10 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       };
 
       if (SC_DEV) {
-        console.log('%cToggle HLB logging by executing : sitecues.toggleHLBLogging();', 'background:black;color:white;font-size: 11pt');
+        console.log(
+          '%cToggle HLB logging by executing : sitecues.toggleHLBLogging();',
+          'background:black;color:white;font-size: 11pt'
+        );
         sitecues.toggleHLBLogging = function () {
           return loggingEnabled = !loggingEnabled;
         };
