@@ -227,7 +227,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
         // This messes up Google maps for some reason. We've disabled google maps in the extension.
         // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
-        'html[data-sitecues-toolbar] > body': {
+        'html[data-sitecues-toolbar] > body:not([data-sc-extra-toolbar-bump])': {
           'transform': 'translateY(0)'
         },
 
