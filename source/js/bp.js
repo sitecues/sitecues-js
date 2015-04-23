@@ -22,9 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'util/localization', 'bp/animate', 'platform',
+    'util/localization', 'bp/animate', 'platform', 'conf/site',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, locale, animate, platform) {
+              baseController, placement, slider, locale, animate, platform, site) {
 
     /*
      *** Public methods ***
@@ -78,7 +78,7 @@ sitecues.def('bp', function (bp, callback) {
     function updateClasses() {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-      classBuilder += getPaletteClass();
+      classBuilder += 'scp-palette' + getPalette();
       classBuilder += ' scp-ie9-' + !!platform.browser.isIE9;
       bpContainer.setAttribute('class', classBuilder);
     }
@@ -156,12 +156,15 @@ sitecues.def('bp', function (bp, callback) {
 
     }
 
-    function getPaletteClass() {
       // Set the colors
-      if (state.get('isAdaptivePalette')) {
-        return 'scp-palette' + getAdaptivePalette();
+    function getPalette() {
+      if (state.get('isToolbarBadge')) {
+        return BP_CONST.PALETTE_NAME_MAP.normal;
       }
-      return 'scp-palette' + state.get('paletteName');
+      if (state.get('isAdaptivePalette')) {
+        return getAdaptivePalette();
+      }
+      return state.get('paletteName');
     }
 
     // Can get SVG element whether currently attached to document or not
@@ -186,7 +189,8 @@ sitecues.def('bp', function (bp, callback) {
 
       // Use fake settings if undefined -- user never used sitecues before.
       // This will be turned off once user interacts with sitecues.
-      state.set('isRealSettings', zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
+      state.set('isRealSettings', site.get('always_real_settings') ||
+        zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
 
       // Set badge classes. Render the badge. Render slider.
       updateView(true);
@@ -285,7 +289,18 @@ sitecues.def('bp', function (bp, callback) {
       }
     }
 
+    function initBPWhenDocumentComplete() {
+      if (!initBPIfDocumentComplete()) {
+        document.addEventListener('readystatechange', initBPIfDocumentComplete);
+      }
+    }
+
     function initIfBadgeReady() {
+
+      if (site.get('ui_mode') === 'toolbar') {
+        setTimeout(initializeBPFeature, 0);
+        return;
+      }
 
       // Page may still be loading -- check if the badge is available
       var earlyBadgeElement = helper.byId(BP_CONST.BADGE_ID);
@@ -312,9 +327,7 @@ sitecues.def('bp', function (bp, callback) {
 
         SC_DEV && console.log('Initialize BP when document.readyState === complete.');
 
-        if (!initBPIfDocumentComplete()) {
-          document.addEventListener('readystatechange', initBPIfDocumentComplete);
-        }
+        initBPWhenDocumentComplete();
       }
     }
 

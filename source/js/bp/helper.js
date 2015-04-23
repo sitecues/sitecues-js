@@ -18,6 +18,10 @@ sitecues.def('bp/helper', function (helper, callback) {
       return result;
     };
 
+    helper.invalidateId = function (id) {
+      elementByIdCache[id] = undefined;
+    };
+
     /**
      * getRect returns the bounding client rect for the given element.
      * It copies the values because this gets around Safari issue with where values otherwise appear undefined.

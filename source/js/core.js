@@ -16,12 +16,6 @@
   // Library config container
   libraryConfig = null,
 
-  // The parsed library URL object
-  libraryUrl = null,
-
-  // Site config container
-  siteConfig = null,
-
   // Modules container
   modules = {},
 
@@ -38,7 +32,7 @@
   exportPublicFields, resolveUrl, parseUrlQuery, parseUrl,
 
   // Public Functions (these should be registered in the exportPublicFields() function)
-  getVersion, getLibraryUrl, getPrefsUrl, getApiUrl, getSiteConfig, on, off, emit, def, use,
+  getVersion, getLibraryUrl, getPrefsUrl, getApiUrl, getSiteConfig, getEverywhereConfig, on, off, emit, def, use,
   resolveSitecuesUrl, loadScript, load,
 
   // Define place-holder for Logger
@@ -78,6 +72,7 @@
     sitecues.getPrefsUrl = getPrefsUrl;
     sitecues.getLibraryUrl = getLibraryUrl;
     sitecues.getSiteConfig = getSiteConfig;
+    sitecues.getEverywhereConfig = getEverywhereConfig;
     sitecues.on = on;
     sitecues.off = off;
     sitecues.emit = emit;
@@ -110,11 +105,16 @@
   };
 
   getLibraryUrl = function() {
-    return libraryUrl;
+    var url = getEverywhereConfig().script_url || getSiteConfig().script_url;
+    return url && parseUrl(url);
   };
 
   getSiteConfig = function() {
-    return siteConfig;
+    return sitecues.config || {};
+  };
+
+  getEverywhereConfig = function() {
+    return sitecues.everywhereConfig || {};
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -406,6 +406,9 @@
 
   // Parse a URL into its components.
   parseUrl = function(urlStr) {
+    if (typeof urlStr !== 'string') {
+      return;
+    }
     // Ran across this in a Google search... loved the simplicity of the solution.
     var url = {}, parser = document.createElement('a');
     parser.href = urlStr;
@@ -470,7 +473,7 @@
 
   // Resolve a URL as relative to the main script URL.
   resolveSitecuesUrl = function(urlStr) {
-    return resolveUrl(urlStr, libraryUrl);
+    return resolveUrl(urlStr, getLibraryUrl());
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -526,58 +529,33 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var processBasicSiteConfiguration = function() {
-    if (!validateBasicSiteConfiguration()) {
-      return false;
-    }
+  var validateConfiguration = function() {
+    var config = sitecues.everywhereConfig || sitecues.config;
 
-    // Now that the basic site configuration has been validated, we can populate
-    // internal references.
-
-    // Internal reference to the site config object.
-    siteConfig = sitecues.config;
-
-    // The parsed library URL.
-    libraryUrl = parseUrl(siteConfig.script_url);
-
-    return true;
-  };
-
-  var validateBasicSiteConfiguration = function() {
-    if (!sitecues.config) {
+    if (!config) {
       log.error('The ' + sitecues.config + ' object was not provided.');
       return false;
     }
 
-    if (typeof sitecues.config !== 'object') {
+    if (typeof config !== 'object') {
       log.error('The ' + sitecues.config + ' is not an object.');
       return false;
     }
 
-    if (!sitecues.config.site_id) {
+    if (!config.site_id) {
       log.error('The ' + sitecues.config.site_id + ' parameter was not provided.');
       return false;
     }
 
-    if (typeof sitecues.config.site_id !== 'string') {
+    if (typeof config.site_id !== 'string') {
       log.error('The ' + sitecues.config.site_id + ' parameter is not a string.');
-      return false;
-    }
-
-    if (!sitecues.config.script_url) {
-      log.error('The ' + sitecues.config.script_url + ' parameter was not provided.');
-      return false;
-    }
-
-    if (typeof sitecues.config.script_url !== 'string') {
-      log.error('The ' + sitecues.config.script_url + ' parameter is not a string.');
       return false;
     }
 
     // Stop sitecues from initializing if:
         // 1) sitecues is running in an IFRAME
         // 2) sitecues.config.iframe = falsy
-    if (window !== window.top && !window.sitecues.config.iframe) {
+    if (window !== window.top && !config.iframe) {
       safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
         ' ... email support@sitecues.com for more information.');
       return;
@@ -603,8 +581,8 @@
   var validateLibraryConfigs = function(cb) {
     var valid = true;
 
-    if (window.sitecues.libConfig) {
-      libraryConfig = window.sitecues.libConfig;
+    if (sitecues.libConfig) {
+      libraryConfig = sitecues.libConfig;
 
       log.info(libraryConfig);
 
@@ -653,12 +631,12 @@
     var libraryConfigLoadNames = [],
       i;
 
-    if (!window.sitecues.libConfig) {
+    if (!sitecues.libConfig) {
       // We need all of the library configs.
       libraryConfigLoadNames = LIB_CONFIG_NAMES.splice(0, LIB_CONFIG_NAMES.length);
     } else {
       for (i = 0; i < LIB_CONFIG_NAMES.length; i++) {
-        if (!window.sitecues.libConfig[LIB_CONFIG_NAMES[i]]) {
+        if (!sitecues.libConfig[LIB_CONFIG_NAMES[i]]) {
           libraryConfigLoadNames.push(LIB_CONFIG_NAMES[i]);
         }
       }
@@ -688,13 +666,13 @@
     // If the sitecues global object does not exist, then there is no basic site configuration, nor
     // is there a logger. Simply print an error to the console and abort initialization.
 
-    if (!window.sitecues || (typeof window.sitecues != 'object')) {
-      console.error('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
-      return;
-    }
-
     // Set the internal reference.
     sitecues = window.sitecues;
+
+    if (!sitecues || typeof sitecues !== 'object') {
+      console.log('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
+      return;
+    }
 
     // See if another sitecues library has 'planted it's flag' on this page.
     if (sitecues.exists) {
@@ -712,15 +690,18 @@
     }
 
     // Process the basic configuration needed for library initialization.
-    if (!processBasicSiteConfiguration()) {
-      log.error('Unable to load basic site configuration. Library can not initialize.')
+    if (!validateConfiguration()) {
+      log.error('Unable to load basic site configuration. Library can not initialize.');
+    } else if (!getLibraryUrl()) {
+      log.error('Unable to get script url. Library can not initialize.');
     } else {
+
       if (SC_LOCAL) {
         console.log('Running sitecues in local mode.')
         // Use these as defaults if we can't access hosts.js because of
         // Content Security Policy. Having this backup default allows us to paste
         // sitecues into the console of sites with a CSP.
-        window.sitecues.libConfig = {
+        sitecues.libConfig = {
           hosts: {
             up : "up.dev.sitecues.com",  // Should not be used in local mode
             ws: "ws.dev.sitecues.com"  // Used for audio only

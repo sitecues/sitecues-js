@@ -4,8 +4,10 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // TODO don't repeat this in styles.js
 
-  constants.SMALL                    = 'scp-small';
-  constants.LARGE                    = 'scp-large';
+  constants.IS_BADGE        = 'scp-is-badge';      // BP is already badge and not animating
+  constants.IS_PANEL        = 'scp-is-panel';      // BP is already panel and not animating (used to be called scp-ready)
+  constants.WANT_BADGE      = 'scp-want-badge';     // BP is already badge or shrinking into one
+  constants.WANT_PANEL      = 'scp-want-panel';    // BP is already panel or expanding into one
 
   // IDs
 
@@ -56,16 +58,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
-
-  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
-
-  constants.BADGE_STYLES = [
-    'scp-toolbar scp-middle',
-    'scp-toolbar scp-left',
-    'scp-toolbar scp-right',
-    'scp-floating-badge scp-right',
-    'scp-floating-badge scp-left'
-  ];
 
   constants.HOVER_DELAY = 100;
 
@@ -119,8 +111,9 @@ sitecues.def('bp/constants', function (constants, callback) {
     'ARIA-BUSY' : 'false'
   };
 
-  constants.DEFAULT_BADGE_ATTRS = {
-    'ID'   : constants.BADGE_ID
+  constants.DEFAULT_TOOLBAR_ATTRS = {
+    'ID'   : constants.BADGE_ID,
+    'CLASS': 'scp-toolbar'
   };
 
   // Labels
