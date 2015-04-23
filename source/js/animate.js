@@ -90,7 +90,7 @@ sitecues.def('animate', function (animate, callback) {
           }
         }
       }
-      console.log(this)
+
       this.animationId = this.tick(); // Start the animation automatically.
 
     }

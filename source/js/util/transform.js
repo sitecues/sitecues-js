@@ -16,7 +16,9 @@ sitecues.def('util/transform', function (transform, callback) {
     return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
   }
 
-  transform.getTransform = function (transform) {
+
+
+  function getTransform (transform) {
 
     var hasTranslate = transform && transform.indexOf('translate') !== -1,
         hasScale     = transform && transform.indexOf('scale')     !== -1,
@@ -26,12 +28,15 @@ sitecues.def('util/transform', function (transform, callback) {
         translateLeft = 0,
         scale         = 1,
         rotate        = 0,
+        rotateX       = 0,
+        rotateY       = 0,
 
         // IE9 sometimes does not include a translation that is seperated by a comma;
         translateSplitter,
 
         // We use String.prototype.split to extract the values we want, and we need a
         // variable to store the intermediary result.  I'm not a huge fan of this.
+        rotateValues,
         transformValues;
 
     if (hasTranslate) {
@@ -49,7 +54,15 @@ sitecues.def('util/transform', function (transform, callback) {
     }
 
     if (hasRotate) {
+
       rotate = transform.split('rotate')[1];
+
+      if (rotate.indexOf(',') !== -1) {
+        rotateValues = rotate.split(',');
+        rotate       = rotateValues[0];
+        rotateX      = rotateValues[1];
+        rotateY      = rotateValues[2];
+      }
     }
 
     return {
@@ -57,11 +70,35 @@ sitecues.def('util/transform', function (transform, callback) {
         'left': getNumberFromString(translateLeft),
         'top' : getNumberFromString(translateTop)
       },
-      'scale' : getNumberFromString(scale),
-      'rotate': getNumberFromString(rotate)
+      'scale'  : getNumberFromString(scale),
+      'rotate' : getNumberFromString(rotate),
+      'rotateX': getNumberFromString(rotateX),
+      'rotateY': getNumberFromString(rotateY)
     };
 
-  };
+  }
+
+  function setTransform (element, left, top, transformScale, rotate, x, y) {
+
+    element.setAttribute('transform', getTransformString(left, top, transformScale, rotate, x, y));
+
+  }
+
+  function getTransformString (left, top, scale, rotate, x, y) {
+
+    var rotateX        = x ? ',' + x : '',
+        rotateY        = y ? ',' + y : '',
+        translateCSS   = 'translate(' + left + ' , ' + top + ') ',
+        scaleCSS       = scale  ? ' scale('  + scale  + ') ' : '',
+        rotateCSS      = rotate ? ' rotate(' + rotate + rotateX + rotateY + ') ' : '';
+
+    return translateCSS + scaleCSS + rotateCSS;
+
+  }
+
+  transform.getTransform       = getTransform;
+  transform.setTransform       = setTransform;
+  transform.getTransformString = getTransformString;
 
   callback();
 

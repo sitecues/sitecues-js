@@ -5,69 +5,105 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     var animationIds = {},
         BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
         BUTTON_LEAVE_ANIMATION_DURATION = 400,
-        BUTTON_CLICK_ANIMATION_DURATION = 800;
+        BUTTON_CLICK_ANIMATION_DURATION = 800,
+        ENABLED_PANEL_TRANSLATE_Y       = 0,
+        DISABLED_PANEL_TRANSLATE_Y      = -198;
 
-    function setTransform (element, left, top, transformScale, rotate) {
+    function byId (id) {
+      return helper.byId(id);
+    }
 
-      var scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
-          rotateCSS      = rotate         ? ' rotate(' + rotate + ') '        : '';
+    function cancelAnimation (id) {
+      animationIds[id] && animationIds[id].cancel();
+    }
 
-      element.setAttribute('transform', 'translate(' + left + ' , ' + top + ') ' + scaleCSS + rotateCSS);
+    function cancelAllAnimations () {
+      for (var animationId in animationIds) {
+        if (animationIds.hasOwnProperty(animationId)) {
+          animationIds[animationId].cancel();
+        }
+      }
+    }
 
+    function getTargetMorePanelTranslateY () {
+      return state.isSecondaryPanelRequested() ? ENABLED_PANEL_TRANSLATE_Y : DISABLED_PANEL_TRANSLATE_Y;
     }
 
     function onMouseEnter (e) {
 
       var id                  = e.target.id,
-          button              = helper.byId(id),
+          button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
-          transformObj        = transform.getTransform(button.getAttribute('transform')),
-          currentScale        = transformObj.scale,
           targetScale         = BP_CONST.TRANSFORMS[id].scale,
-          currentTransformPos = transformObj.translate,
-          x                   = currentTransformPos.left,
-          y                   = currentTransformPos.top,
+          currentTransform    = transform.getTransform(button.getAttribute('transform')),
+          currentScale        = currentTransform.scale,
+          translate           = currentTransform.translate,
+          x                   = translate.left,
+          y                   = translate.top,
+          rotate              = currentTransform.rotate,
+          rotateX             = currentTransform.rotateX,
+          rotateY             = currentTransform.rotateY,
           width               = buttonBoundingRect.width,
           height              = buttonBoundingRect.height,
-          currentRotation     = transformObj.rotate,
-          centerX             = currentTransformPos.left + buttonBoundingRect.width / 2,
-          centerY             = currentTransformPos.top  + buttonBoundingRect.height / 2;
+          // http://stackoverflow.com/questions/6711610/how-to-set-transform-origin-in-svg
+          translateX          = (x + (width  - width  * targetScale / currentScale) / 2),
+          translateY          = (y + (height - height * targetScale / currentScale) / 2);
 
-      animationIds[id] && animationIds[id].cancel();
+      cancelAnimation(id);
 
       animationIds[id] = animate.create(button, {
-                                                  'transform': 'translate(' + (x + (width - width * targetScale) / 2) + ', ' + (y + (height - height * targetScale) / 2) + ') scale(' + targetScale + ')'
-                                                }, {
-                                                  'duration': BUTTON_ENTER_ANIMATION_DURATION,
-                                                  'useAttribute': true
-                                                });
+        'transform'   : transform.getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
+      }, {
+        'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
+        'useAttribute': true
+      });
     }
 
     function onMouseLeave (e) {
 
       var id                  = e.target.id,
-          button              = helper.byId(id),
+          button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
-          transformObj        = transform.getTransform(button.getAttribute('transform')),
-          currentScale        = transformObj.scale,
           targetScale         = 1,
-          currentTransformPos = transformObj.translate,
-          x                   = currentTransformPos.left,
-          y                   = currentTransformPos.top,
+          currentTransform    = transform.getTransform(button.getAttribute('transform')),
+          currentScale        = currentTransform.scale,
+          translate           = currentTransform.translate,
+          x                   = translate.left,
+          y                   = translate.top,
+          rotate              = currentTransform.rotate,
+          rotateX             = currentTransform.rotateX,
+          rotateY             = currentTransform.rotateY,
           width               = buttonBoundingRect.width,
           height              = buttonBoundingRect.height,
-          currentRotation     = transformObj.rotate,
-          centerX             = currentTransformPos.left + buttonBoundingRect.width / 2,
-          centerY             = currentTransformPos.top  + buttonBoundingRect.height / 2;
+          // http://stackoverflow.com/questions/6711610/how-to-set-transform-origin-in-svg
+          translateX          = (x + (width  - width  * (targetScale / currentScale)) / 2),
+          translateY          = (y + (height - height * (targetScale / currentScale)) / 2);
 
-      animationIds[id] && animationIds[id].cancel();
+      cancelAnimation(id);
 
       animationIds[id] = animate.create(button, {
-                                                  'transform': 'translate(' + BP_CONST.TRANSFORMS[id].translateX + ', ' + BP_CONST.TRANSFORMS[id].translateY + ') scale(' + targetScale + ')'
-                                                }, {
-                                                  'duration': BUTTON_LEAVE_ANIMATION_DURATION,
-                                                  'useAttribute': true
-                                                });
+        'transform'   : transform.getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
+      }, {
+        'duration'    : BUTTON_LEAVE_ANIMATION_DURATION,
+        'useAttribute': true
+      });
+
+    }
+
+    function onMouseClick (e) {
+
+      var element = e.target,
+          dataFeature;
+
+      while(element.parentElement) {
+        dataFeature = element.getAttribute('data-feature');
+        if (dataFeature) {
+          break;
+        }
+        element = element.parentElement;
+      }
+
+      sitecues.emit('bp/toggle-' + dataFeature);
 
     }
 
@@ -90,33 +126,27 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function animateSecondaryPanel () {
 
-      var enabled             = BP_CONST.SECONDARY_PANEL_ENABLED,
-          disabled            = BP_CONST.SECONDARY_PANEL_DISABLED,
-          transitionTo        = state.get('secondaryPanelTransitionTo') === disabled ? disabled : enabled,
-          id                  = BP_CONST.MORE_BUTTON_CONTAINER_ID,
-          moreButton          = helper.byId(id),
-          morePanel           = helper.byId(BP_CONST.MORE_ID),
-          transformObj        = transform.getTransform(moreButton.getAttribute('transform')),
-          moreButtonTranslate = transformObj.translate,
-
+      var moreId              = BP_CONST.MORE_ID,
+          morePanel           = byId(moreId),
           morePanelCurrentPos = transform.getTransform(morePanel.getAttribute('transform')).translate.top,
-          targetPanelPos      = transitionTo === disabled ? -198 : 0,
-          currentScale        = transformObj.scale,
-          currentRotation     = transformObj.rotate,
-          targetRotation      = transitionTo === disabled ? 0 : -180,
-          posDiff             = targetPanelPos - morePanelCurrentPos,
-          rotDiff             = targetRotation - currentRotation;
+          targetPanelPos      = getTargetMorePanelTranslateY(),
+          posDiff             = targetPanelPos - morePanelCurrentPos;
 
-      animationIds[BP_CONST.MORE_ID] && animationIds[BP_CONST.MORE_ID].cancel();
+      cancelAnimation(moreId);
 
-      animationIds[BP_CONST.MORE_ID] = animate.create({
-        'from': morePanelCurrentPos,
-        'to'  : targetPanelPos
+      function onSecondaryAnimationTick (animationState) {
+        state.set('currentSecondaryPanelMode', animationState.current);
+        transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * animationState.current);
+      }
+
+      animationIds[moreId] = animate.create({
+        'from'    : morePanelCurrentPos,
+        'to'      : targetPanelPos
       }, {
         'duration': BUTTON_CLICK_ANIMATION_DURATION,
-        'onTick': function (animationState) {
-          state.set('currentSecondaryPanelMode', animationState.current);
-          setTransform(morePanel, 0, morePanelCurrentPos + posDiff * animationState.current);
+        'onTick'  : onSecondaryAnimationTick,
+        'onFinish': function () {
+          sitecues.emit('bp/did-toggle-secondary-panel', state.get('currentSecondaryPanelMode'));
         }
       });
 
@@ -130,11 +160,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           feedbackId = BP_CONST.FEEDBACK_BUTTON_ID,
           aboutId    = BP_CONST.ABOUT_BUTTON_ID;
 
-      helper.byId(moreId).setAttribute(    'transform', 'translate(0, ' + BP_CONST.TRANSFORMS[moreId].translateY + ')');
-      helper.byId(tipsId).setAttribute(    'transform', 'translate('    + BP_CONST.TRANSFORMS[tipsId].translateX      + ', ' + BP_CONST.TRANSFORMS[tipsId].translateY     + ')');
-      helper.byId(settingsId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[settingsId].translateX  + ', ' + BP_CONST.TRANSFORMS[settingsId].translateY + ')');
-      helper.byId(feedbackId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[feedbackId].translateX  + ', ' + BP_CONST.TRANSFORMS[feedbackId].translateY + ')');
-      helper.byId(aboutId).setAttribute(   'transform', 'translate('    + BP_CONST.TRANSFORMS[aboutId].translateX     + ', ' + BP_CONST.TRANSFORMS[aboutId].translateY    + ')');
+      byId(moreId).setAttribute(    'transform', 'translate(0, ' + BP_CONST.TRANSFORMS[moreId].translateY + ')');
+      byId(tipsId).setAttribute(    'transform', 'translate('    + BP_CONST.TRANSFORMS[tipsId].translateX      + ', ' + BP_CONST.TRANSFORMS[tipsId].translateY     + ')');
+      byId(settingsId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[settingsId].translateX  + ', ' + BP_CONST.TRANSFORMS[settingsId].translateY + ')');
+      byId(feedbackId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[feedbackId].translateX  + ', ' + BP_CONST.TRANSFORMS[feedbackId].translateY + ')');
+      byId(aboutId).setAttribute(   'transform', 'translate('    + BP_CONST.TRANSFORMS[aboutId].translateX     + ', ' + BP_CONST.TRANSFORMS[aboutId].translateY    + ')');
 
     }
 
@@ -158,31 +188,47 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function addMouseListeners () {
 
-      var tipsButton     = helper.byId(BP_CONST.TIPS_BUTTON_ID),
-          settingsButton = helper.byId(BP_CONST.SETTINGS_BUTTON_ID),
-          feedbackButton = helper.byId(BP_CONST.FEEDBACK_BUTTON_ID),
-          aboutButton    = helper.byId(BP_CONST.ABOUT_BUTTON_ID);
+      var tipsButton     = byId(BP_CONST.TIPS_BUTTON_ID),
+          settingsButton = byId(BP_CONST.SETTINGS_BUTTON_ID),
+          feedbackButton = byId(BP_CONST.FEEDBACK_BUTTON_ID),
+          aboutButton    = byId(BP_CONST.ABOUT_BUTTON_ID),
+          tipsLabel      = byId(BP_CONST.TIPS_LABEL_ID),
+          settingsLabel  = byId(BP_CONST.SETTINGS_LABEL_ID),
+          feedbackLabel  = byId(BP_CONST.FEEDBACK_LABEL_ID),
+          aboutLabel     = byId(BP_CONST.ABOUT_LABEL_ID);
 
       tipsButton.addEventListener('mouseenter', onMouseEnter);
       tipsButton.addEventListener('mouseleave', onMouseLeave);
+      tipsButton.addEventListener('click',      onMouseClick);
+      tipsLabel.addEventListener( 'click',      onMouseClick);
 
       settingsButton.addEventListener('mouseenter', onMouseEnter);
       settingsButton.addEventListener('mouseleave', onMouseLeave);
+      settingsButton.addEventListener('click',      onMouseClick);
+      settingsLabel.addEventListener( 'click',      onMouseClick);
 
       feedbackButton.addEventListener('mouseenter', onMouseEnter);
       feedbackButton.addEventListener('mouseleave', onMouseLeave);
+      feedbackButton.addEventListener('click',      onMouseClick);
+      feedbackLabel.addEventListener( 'click',      onMouseClick);
 
       aboutButton.addEventListener('mouseenter', onMouseEnter);
       aboutButton.addEventListener('mouseleave', onMouseLeave);
+      aboutButton.addEventListener('click',      onMouseClick);
+      aboutLabel.addEventListener( 'click',      onMouseClick);
 
     }
 
-    function cancelAllAnimations () {
-      for (var animationId in animationIds) {
-        if (animationIds.hasOwnProperty(animationId)) {
-          animationIds[animationId].cancel();
-        }
-      }
+    function disableButton (element) {
+      element.removeEventListener('mouseenter', onMouseEnter);
+      element.removeEventListener('mouseleave', onMouseLeave);
+      element.removeEventListener('click', onMouseClick);
+    }
+
+    function enableButton (element) {
+      element.addEventListener('mouseenter', onMouseEnter);
+      element.addEventListener('mouseleave', onMouseLeave);
+      element.addEventListener('click', onMouseClick);
     }
 
     // Add mouse listeners once BP is ready
@@ -190,9 +236,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     sitecues.on('bp/toggle-secondary-panel', toggleSecondaryPanel);
 
-    sitecues.on('bp/will-shrink', function () {
-      resetMorePanel();
-    });
+    sitecues.on('bp/will-shrink', resetMorePanel);
+
+    sitecues.on('bp/disable-button', disableButton);
+
+    sitecues.on('bp/enable-button', enableButton);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

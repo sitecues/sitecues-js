@@ -93,6 +93,10 @@ files=\
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
 	source/js/bp/view/elements/more-button.js \
+	source/js/bp/view/elements/about.js \
+	source/js/bp/view/elements/tips.js \
+	source/js/bp/view/elements/settings.js \
+	source/js/bp/view/elements/feedback.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
 	source/js/focus.js \

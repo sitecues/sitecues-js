@@ -317,12 +317,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-more-button-container': {
-          'opacity': 0,
-          'transform-origin': '50% 50%'
-        },
-
-        '.origin-center': {
-          'transform-origin': '50% 50%'
+          'opacity': 0
         },
 
         '.scp-transition-opacity' : {
@@ -376,6 +371,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
         '#sitecues-badge[aria-expanded="true"]:focus': {
           'box-shadow': 'none'
+        },
+
+        /* Secondary Panel - Blue Button */
+        '.sitecues-button-big': {
+          'padding'      : '10px 30px',
+          'font-size'    : '22px',
+          'margin-right' : '22px',
+          'border'       : '3px solid #447AC4',
+          'border-radius': '4px',
+          'color'        : '#FFF',
+          'text-align'   : 'center',
+          'background'   : '#447AC4',
+          'transform'    : 'none !important'
         }
       },
 

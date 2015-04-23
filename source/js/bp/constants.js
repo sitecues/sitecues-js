@@ -36,6 +36,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.VERT_DIVIDER_ID          = 'scp-vert-divider';
   constants.BOTTOM_ID                = 'scp-bottom-def';
   constants.BOTTOM_MOUSETARGET_ID    = 'scp-bottom-mousetarget';
+  constants.BOTTOM_MORE_ID           = 'scp-bottom-more';
 
   constants.CLOSE_BUTTON_ID          = 'scp-close-button';
 
@@ -51,6 +52,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_BUTTON_GROUP_ID     = 'scp-more-button-group';
   constants.MORE_BUTTON_CONTAINER_ID = 'scp-more-button-container';
 
+  constants.SHADOW_ID                = 'scp-shadow';
   constants.OUTLINE_ID               = 'scp-focus-outline';
   constants.MAIN_OUTLINE_ID          = 'scp-main-outline';
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
@@ -62,11 +64,25 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';
   constants.ABOUT_BUTTON_ID          = 'scp-about-button';
 
+  constants.TIPS_LABEL_ID            = 'scp-tips-label';
+  constants.SETTINGS_LABEL_ID        = 'scp-settings-label';
+  constants.FEEDBACK_LABEL_ID        = 'scp-feedback-label';
+  constants.ABOUT_LABEL_ID           = 'scp-about-label';
+
+  constants.ABOUT_PATH_CONTAINER_ID  = 'scp-about-path-container';
+  constants.ABOUT_CONTENT_ID         = 'scp-about-content';
+  constants.ABOUT_CONTENT_BUTTON_CONTAINER_ID = 'scp-about-content-button-container';
+  constants.ABOUT_CONTENT_IMAGE_ID   = 'scp-logo-text';
+
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
   constants.TRANSFORMS = {
-    'PANEL': {},
-    'BADGE': {}
+    'PANEL'           : {},
+    'BADGE'           : {},
+    'ABOUT_ENABLED'   : {},
+    'SETTINGS_ENABLED': {},
+    'FEEDBACK_ENABLED': {},
+    'TIPS_ENABLED'    : {}
   };
 
   constants.TRANSFORMS.PANEL[constants.VERT_DIVIDER_ID] = {translateX:44};
@@ -101,6 +117,9 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {scale:1.2, translateX: 235, translateY: 14};
   constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {scale:1.2, translateX: 465, translateY: 14};
   constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {scale:1.2, translateX: 675, translateY: 14};
+
+  constants.TRANSFORMS.ABOUT_ENABLED[constants.SVG_ID]                   = {translateY: -116};
+  constants.TRANSFORMS.ABOUT_ENABLED[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 346};
 
   // Elements that are only shown when panel is expanded
   // Attributes

@@ -76,8 +76,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <text class="scp-target" id="scp-feedback-label" role="link" data-feature="feedback" x="468" y="178">Rate us</text>\
     <text class="scp-target" id="scp-about-label" role="link" data-feature="about" x="685" y="178">About</text>\
   </g>\
-  <g style="display:none" class="scp-feature-content">\
-    <g class="scp-tips-content scp-settings-content">\
+  <g class="scp-feature-content">\
+    <g style="display:none" class="scp-tips-content scp-settings-content">\
       <text id="scp-prev-card" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
@@ -85,7 +85,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
          &#9658;\
       </text>\
     </g>\
-    <g class="scp-tips-content" clip-path="url(#scp-outline-clip-def)">\
+    <g style="display:none"  class="scp-tips-content" clip-path="url(#scp-outline-clip-def)">\
       <foreignObject>\
         <div class="scp-cards">\
           <div class="scp-card">\
@@ -117,7 +117,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g class="scp-settings-content" clip-path="url(#scp-outline-clip-def)">\
+    <g style="display:none"  class="scp-settings-content" clip-path="url(#scp-outline-clip-def)">\
       <foreignObject>\
         <div class="scp-cards">\
           <div class="scp-card">\
@@ -147,7 +147,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g class="scp-feedback-content">\
+    <g style="display:none"  class="scp-feedback-content">\
       <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
@@ -161,20 +161,21 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
     </g>\
-    <g style="display:None" class="scp-about-content">\
-      <foreignObject x="140" y="105" width="700" height="200" transform="scale(1.5)">\
-         <button class="sitecues-button-big">Quick Start Guide</button>\
+    <g id="scp-about-content" style="display:none;">\
+      <foreignObject id="scp-about-content-button-container" x="140" y="105" width="700" height="200" transform="scale(1.5)" style="opacity:0" class="scp-transition-opacity">\
+         <button class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
       </foreignObject>\
+      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + sitecues.resolveSitecuesUrl("/images/sitecues-logo-text.png") + '" x="805" y="26" width="330" height="110"></image>\
     </g>\
   </g>\
   <g id="scp-feature-nav-buttons">\
-    <g id="scp-tips-button" class="scp-target" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
+    <g id="scp-tips-button" class="scp-target scp-transition-opacity" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
       <circle cx="50" cy="54" r="52" fill="#548ECE"/>\
       <path fill="#FFFFFF" d="m73.1 39.9c0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4 -.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2h0c12.3 0 22.2 10 22.2 22.2l0 0 0 0 0 0zM64.2 75.4c0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2c1.2 0 2.2 1 2.2 2.2zM62 79.8c1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2l0 0zM42 86.5h17.8c0 2.5-2 4.5-4.5 4.5h-8.9c-2.5 0-4.5-2-4.5-4.5l0 0 0 0z"/>\
       <path fill="none" stroke="#FFFFFF" stroke-width="3.3" stroke-miterlimit="10" d="m50.9 17.7c12.3 0 22.2 10 22.2 22.2 0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4M50.9 68.8h-0.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2"/>\
       <rect class="scp-target" x="-8" y="-5" height="120" width="120" fill="transparent" role="presentation"/>\
     </g>\
-    <g id="scp-settings-button" class="scp-target" role="button" data-feature="settings" aria-labelledby="scp-settings-label">\
+    <g id="scp-settings-button" class="scp-target scp-transition-opacity" role="button" data-feature="settings" aria-labelledby="scp-settings-label">\
       <g class="scp-settings1">\
         <path fill="#7B7B7B" d="M17 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6.2c-1.3 0-2.3 1-2.3 2.3V99zM78.4 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8zM47.7 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8z"/>\
         <path fill="#548ECE" d="M33.3 55.5c0 1.3-1 2.3-2.3 2.3H13.9c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V55.5zM64 27c0 1.3-1 2.3-2.3 2.3H44.6c-1.3 0-2.3-1-2.3-2.3v-5.2c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V27.2zM95.5 73.4c0 1.3-1 2.3-2.3 2.3H76.1c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V73.4z"/>\
@@ -182,20 +183,16 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       <!--path class="scp-settings2" fill-rule="evenodd" clip-rule="evenodd" fill="#548ECE" d="M31,53c0-12,10-22,22-22c12,0,22,10,22,22c0,12-10,22-22,22C41,76,31,66,31,53z M9,44c-3,0-6,3-6,6v6c0,3,3,6,6,6h9c1,3,2,6,4,9l-6,6c-2,2-2,6,0,9l4,4c2,2,6,2,9,0l6-6c3,2,6,3,9,4v9c0,3,3,6,6,6h6c3,0,6-3,6-6v-9c3-1,6-2,9-4l6,6c2,2,6,2,9,0l4-4c2-2,2-6,0-9l-6-6c2-3,3-6,4-9h9c3,0,6-3,6-6v-6c0-3-3-6-6-6h-9c-1-3-2-6-4-9l6-6c2-2,2-6,0-9l-4-4c-2-2-6-2-9,0l-6,6c-3-2-6-3-9-4V9c0-3-3-6-6-6h-6c-3,0-6,3-6,6v9c-3,1-6,2-9,4l-6-6c-2-2-6-2-9,0l-5,5c-2,2-2,6,0,9l6,6c-2,3-3,6-4,9H9z M44,53c0,5,4,9,9,9c5,0,9-4,9-9c0-5-4-9-9-9C48,44,44,48,44,53z"/-->\
       <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation"/>\
     </g>\
-    <g id="scp-feedback-button" class="scp-target" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
+    <g id="scp-feedback-button" class="scp-target scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
       <g>\
         <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>\
         <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
       </g>\
     </g>\
-    <g id="scp-about-button" class="scp-target" role="button" data-feature="about" aria-labelledby="scp-about-label">\
-      <g class="scp-about1">\
-        <g><g><g>\
+    <g id="scp-about-button" class="scp-target scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
+      <g id="scp-about-path-container">\
           <path fill="black" d="M70.8 42.5h-11.2c-1 0-3.4 3.9-3.4 5.2L56.3 63 6.5 69.1H6.5c-1.6-5-2.5-10.3-2.5-15.8 0-27.9 22.6-50.4 50.4-50.4 21.2 0 39.4 13 46.8 31.7h0c5 11.2 0 22.2-10.9 24.1l-16.1 2 0-13.1C74.2 46.4 71.8 42.5 70.8 42.5zM63.8 89.8c1.6 1.9 2.8 0 2.8 0l7.1-11.1c0.2-.3 .4-.6 .4-1v0 -4h26.4 0c-7.8 17.8-25.5 30.3-46.2 30.3 -20.7 0-38.4-12.4-46.2-30.3v0h48.1v4.3c0 .3 .2 .6 .4 .9L63.8 89.8z"/>\
-        </g></g></g>\
-        <!--image id="scp-logo-text" xlink:href="./sitecues-logo-text.png" x="130" y="5" width="110" height="110" opacity="0"/-->\
       </g>\
-      <!--path class="scp-about2" fill="#548ECE" d="M71.9 93l-1.4 5.7c-4.2 1.7-7.5 2.9-10 3.8 -2.5 .9-5.4 1.3-8.7 1.3 -5.1 0-9-1.2-11.8-3.7 -2.8-2.5-4.2-5.6-4.2-9.4 0-1.5 .1-3 .3-4.5 .2-1.5 .5-3.3 1-5.2l5.2-18.5c0.5-1.8 .9-3.5 1.2-5 .3-1.6 .5-3 .5-4.3 0-2.4-.5-4-1.5-5 -1-.9-2.8-1.4-5.6-1.4 -1.4 0-2.7 .2-4.2 .6 -1.4 .4-2.6 .8-3.7 1.2l1.4-5.7c3.4-1.4 6.7-2.6 9.9-3.6 3.1-1 6.1-1.5 8.9-1.5 5 0 8.9 1.2 11.7 3.6 2.7 2.4 4.1 5.6 4.1 9.5 0 .8-.1 2.2-.3 4.3s-.5 3.9-1 5.6L58.4 79.1c-.4 1.5-.8 3.2-1.1 5.1 -.3 1.9-.5 3.3-.5 4.3 0 2.5 .5 4.1 1.6 5 1.1 .9 3 1.3 5.7 1.3 1.3 0 2.7-.2 4.3-.7C70 93.8 71.2 93.4 71.9 93zM73.2 15.5c0 3.2-1.2 6-3.6 8.2 -2.4 2.3-5.4 3.4-8.8 3.4s-6.4-1.1-8.8-3.4c-2.5-2.3-3.7-5-3.7-8.2 0-3.2 1.2-6 3.7-8.3 2.5-2.3 5.4-3.4 8.8-3.4s6.4 1.1 8.8 3.4C72 9.6 73.2 12.3 73.2 15.5z"/-->\
       <rect class="scp-target" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
     </g>\
   </g>\
