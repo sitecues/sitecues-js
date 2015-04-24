@@ -167,7 +167,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '#sitecues-badge #scp-bp-container': {
+        // When panel is closed, we use position: absolute
+        // When open, we use position: fixed
+        '#sitecues-badge>#scp-bp-container': {
           'position': 'absolute'
         },
 
