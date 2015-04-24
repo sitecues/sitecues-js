@@ -105,7 +105,8 @@
   };
 
   getLibraryUrl = function() {
-    var url = getEverywhereConfig().script_url || getSiteConfig().script_url;
+    // Underscore names deprecated
+    var url = getEverywhereConfig().scriptUrl || getSiteConfig().scriptUrl || getSiteConfig().script_url;
     return url && parseUrl(url);
   };
 
@@ -530,39 +531,33 @@
   //////////////////////////////////////////////////////////////////////////////////////////
 
   var validateConfiguration = function() {
-    var config = sitecues.everywhereConfig || sitecues.config;
-
-    if (!config) {
+    if (!sitecues.config) {
       log.error('The ' + sitecues.config + ' object was not provided.');
-      return false;
+      return;
     }
 
-    if (typeof config !== 'object') {
+    if (typeof sitecues.config !== 'object') {
       log.error('The ' + sitecues.config + ' is not an object.');
-      return false;
+      return;
     }
 
-    if (!config.site_id) {
-      log.error('The ' + sitecues.config.site_id + ' parameter was not provided.');
-      return false;
+    // Underscore parameters deprecated
+    var everywhereConfig = getEverywhereConfig();
+
+    // siteId is required and must be a string
+    var siteId = everywhereConfig.siteId || sitecues.config.siteId || sitecues.config.site_id;
+    if (typeof siteId !== 'string') {
+      log.error('The siteId parameter is not provided or not a string.');
+      return;
     }
 
-    if (typeof config.site_id !== 'string') {
-      log.error('The ' + sitecues.config.site_id + ' parameter is not a string.');
-      return false;
-    }
-
-    // Stop sitecues from initializing if:
-        // 1) sitecues is running in an IFRAME
-        // 2) sitecues.config.iframe = falsy
-    if (window !== window.top && !config.iframe) {
-      safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
-        ' ... email support@sitecues.com for more information.');
+    // Library URL must be a valid URL
+    if (!getLibraryUrl()) {
+      log.error('Unable to get sitecues script url. Library can not initialize.');
       return;
     }
 
     // Continue loading sitecues
-
     return true;
   };
 
@@ -679,6 +674,7 @@
       console.error('The sitecues library already exists on this page.');
       return;
     }
+
     // 'Plant our flag' on this page.
     sitecues.exists = true;
     // As we have now 'planted our flag', export the public fields.
@@ -692,8 +688,12 @@
     // Process the basic configuration needed for library initialization.
     if (!validateConfiguration()) {
       log.error('Unable to load basic site configuration. Library can not initialize.');
-    } else if (!getLibraryUrl()) {
-      log.error('Unable to get script url. Library can not initialize.');
+    } else if (window !== window.top && !sitecues.config.iframe) {
+      // Stop sitecues from initializing if:
+      // 1) sitecues is running in an IFRAME
+      // 2) sitecues.config.iframe = falsey
+      safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
+        ' ... email support@sitecues.com for more information.');
     } else {
 
       if (SC_LOCAL) {

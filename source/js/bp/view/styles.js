@@ -622,7 +622,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
 
-    if (site.get('ui_mode') !== 'toolbar') {
+    if (site.get('uiMode') !== 'toolbar') {
       // TODO Tony how does this work? We need docs
       // TODO clean this up -- weird to be checking toolbar in this general code here
       var customPalette = site.get('palette');

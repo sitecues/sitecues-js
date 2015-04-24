@@ -19,7 +19,7 @@ sitecues.def('metrics/util', function (metricsUtil, callback) {
           }
 
             // Send data in JSON format to backend using end point.
-            var siteId =  site.get('site_id');
+            var siteId =  site.getSiteId();
             // Update timestamp before send.
             metricsUtil.update(instance, {'client_time_ms': +new Date});
 
