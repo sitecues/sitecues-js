@@ -63,12 +63,12 @@ sitecues.def('info', function(info, callback) {
 
       var
         localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
-        sitecuesJsUrl = window.sitecues.config.script_url,
+        sitecuesJsUrl = sitecues.getLibraryUrl(),
         hostUrl = window.location,
         pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +
-          addParam('sc_url', sitecuesJsUrl) +
-          addParam('site_id', site.get('site_id')) +
-          addParam('site_url', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
+          addParam('scUrl', sitecuesJsUrl) +
+          addParam('siteId', site.getSiteId()) +
+          addParam('siteUrl', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
           addParam('prefs', window.localStorage.sitecues) +
           anchor;
 
@@ -121,8 +121,7 @@ sitecues.def('info', function(info, callback) {
     }
 
     function addCloseButton() {
-      var closeButtonUrl = sitecues.resolveSitecuesUrl('../images/close.png'),
-        helpRect = $iframe[0].getBoundingClientRect(),
+      var helpRect = $iframe[0].getBoundingClientRect(),
         offsetLeft = platform.browser.isIE ? -30 : -17, // Deal with big scrollbars on Windows
         offsetTop = platform.browser.isIE ? -6 : -1;
 

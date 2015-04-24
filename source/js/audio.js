@@ -1,5 +1,5 @@
 /**
- * This is the "main" audio library.  It manages all of the events
+ * This is the main audio library.  It manages all of the events
  * and requests and should be the only speech component referenced
  * by other parts of the application.
  *
@@ -11,9 +11,9 @@
  */
 
 sitecues.def('audio', function (audio, callback) {
-  
+
   'use strict';
-  
+
   sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'util/localization',
     function(conf, site, $, builder, platform, locale) {
 
@@ -81,21 +81,21 @@ sitecues.def('audio', function (audio, callback) {
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
-      var restOfUrl = 'cue/site/' + site.get('site_id') + '/' +
+      var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
         key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
       return sitecues.getApiUrl(restOfUrl);
     }
 
     function getTTSUrl(text, $content) {
-      var restOfUrl = 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
+      var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForTTS() +
         getLanguageParameter($content && $content[0]) + 't=' + encodeURIComponent(text);
       return sitecues.getApiUrl(restOfUrl);
     }
 
-      /**
-       * Turn speech on or off
-       * @param isOn Whether to turn speech on or off
-       */
+    /**
+     * Turn speech on or off
+     * @param isOn Whether to turn speech on or off
+     */
     function setSpeechState(isOn, doSuppressAudioCue) {
       if (ttsOn !== isOn) {
         ttsOn = isOn;

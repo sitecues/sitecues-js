@@ -65,11 +65,6 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
       addMouseListeners();
 
-      // Commented out because having the "?" always in the panel makes it look bloated.
-
-      // if (zoomMod.hasZoomEverBeenSet() || audioMod.isSpeechEnabled()) {
-      //   alwaysShowButton = true;
-      // }
     }
 
     function addMouseListeners () {

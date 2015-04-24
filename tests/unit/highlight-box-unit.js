@@ -31,7 +31,7 @@ describe('highlight-box', function() {
     });
   });
 
-  describe('#getValidOriginalElement()', function () {
+  describe('#getValidFoundation()', function () {
 
     it('Sets removeTemporaryOriginalElement to true if the original element is an <li> because the HLB ' +
        'module relies upon this variable to determine if the original ' +
@@ -74,13 +74,13 @@ describe('highlight-box', function() {
               };
             });
 
-        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.setRemoveTemporaryFoundation(false);
 
-        hlb.getValidOriginalElement($originalElement);
+        hlb.getValidFoundation($originalElement);
 
-        expect(hlb.getRemoveTemporaryOriginalElement()).to.be.true;
+        expect(hlb.getRemoveTemporaryFoundation()).to.be.true;
 
-        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.setRemoveTemporaryFoundation(false);
 
         appendStub.restore();
         isStub.restore();
@@ -131,13 +131,13 @@ describe('highlight-box', function() {
               };
             });
 
-        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.setRemoveTemporaryFoundation(false);
 
-        hlb.getValidOriginalElement($originalElement);
+        hlb.getValidFoundation($originalElement);
 
-        expect(hlb.getRemoveTemporaryOriginalElement()).to.be.false;
+        expect(hlb.getRemoveTemporaryFoundation()).to.be.false;
 
-        hlb.setRemoveTemporaryOriginalElement(false);
+        hlb.setRemoveTemporaryFoundation(false);
 
         appendStub.restore();
         isStub.restore();
@@ -337,8 +337,8 @@ describe('highlight-box', function() {
         closeHLBSpy = sinon.spy(hlbAnimation, 'transitionOutHLB');
 
         hlb.setHLB(jquery(win.document.getElementById('paragraph')));
-        hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
-        hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
+        hlb.setFoundation(jquery(win.document.getElementById('paragraph')));
+        hlb.setHLBWrapper(jquery(win.document.getElementById('hlbWrappingElement')));
         hlb.setPreventDeflationFromMouseout(false);
 
         hlb.onTargetChange(mockedNativeMousemoveEventObject);
@@ -365,7 +365,7 @@ describe('highlight-box', function() {
       var paragraph             = win.document.getElementById('paragraph'),
           disableWheelScrollSpy = sinon.spy(hlbEventHandlers, 'captureWheelEvents'),
           cssStub               = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
-          insertAfterStub       = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {});
+          insertAfterStub       = sinon.stub(hlb.getHLBWrapper(), 'insertAfter', function () {});
 
       hlb.setHighlight({});
       hlb.initializeHLB(paragraph);
@@ -387,7 +387,7 @@ describe('highlight-box', function() {
 
       var paragraph       = win.document.getElementById('paragraph'),
           cssStub         = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
-          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
+          insertAfterStub = sinon.stub(hlb.getHLBWrapper(), 'insertAfter', function () {}),
           expected        = true,
           actual;
 
@@ -412,7 +412,7 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           expected  = 'object',
           actual,
-          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
+          insertAfterStub = sinon.stub(hlb.getHLBWrapper(), 'insertAfter', function () {}),
           cssStub = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
 
       hlb.setHLB(undefined);
@@ -436,14 +436,14 @@ describe('highlight-box', function() {
       var paragraph = win.document.getElementById('paragraph'),
           expected  = 'object',
           actual,
-          insertAfterStub = sinon.stub(hlb.getHLBWrappingElement(), 'insertAfter', function () {}),
+          insertAfterStub = sinon.stub(hlb.getHLBWrapper(), 'insertAfter', function () {}),
           cssStub = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};});
       hlb.setHighlight({});
-      hlb.setHLBWrappingElement(undefined);
+      hlb.setHLBWrapper(undefined);
 
       hlb.initializeHLB(paragraph);
 
-      actual = typeof hlb.getHLBWrappingElement();
+      actual = typeof hlb.getHLBWrapper();
 
       expect(actual).to.be.equal(expected);
 
@@ -468,11 +468,11 @@ describe('highlight-box', function() {
           actual;
 
       hlb.setHighlight({});
-      hlb.setHLBWrappingElement(undefined);
+      hlb.setHLBWrapper(undefined);
 
       hlb.cloneHLB(paragraph);
 
-      actual = typeof hlb.$getOriginalElement();
+      actual = typeof hlb.$getFoundation();
 
       expect(actual).to.be.equal(expected);
 
@@ -590,8 +590,8 @@ describe('highlight-box', function() {
 
     //   hlb.setIsHLBClosing(true);
     //   hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
-    //   hlb.setOriginalElement(jquery(win.document.getElementById('nonScaledElement')));
-    //   hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
+    //   hlb.setFoundation(jquery(win.document.getElementById('nonScaledElement')));
+    //   hlb.setHLBWrapper(jquery(win.document.getElementById('hlbWrappingElement')));
 
     //   hlb.closeHLB();
 
@@ -609,8 +609,8 @@ describe('highlight-box', function() {
 
       hlb.setIsHLBClosing(true);
       hlb.setHLB(jquery(win.document.getElementById('nonScaledElement')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('nonScaledElement')));
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
+      hlb.setFoundation(jquery(win.document.getElementById('nonScaledElement')));
+      hlb.setHLBWrapper(jquery(win.document.getElementById('hlbWrappingElement')));
 
       hlb.closeHLB();
 
@@ -642,11 +642,11 @@ describe('highlight-box', function() {
     it('Sets $originalElement to undefined because $originalElement is a private variable that is an element ' +
        'passed by the picker to the HLB', function (done) {
 
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph')));
+      hlb.setFoundation(jquery(win.document.getElementById('paragraph')));
 
       hlb.onHLBClosed();
 
-      expect(hlb.$getOriginalElement()).to.be.undefined;
+      expect(hlb.$getFoundation()).to.be.undefined;
 
       done();
 
@@ -716,9 +716,9 @@ describe('highlight-box', function() {
       var $hlbWrappingElement,
           removeSpy;
 
-      hlb.setHLBWrappingElement(jquery(win.document.getElementById('hlbWrappingElement')));
+      hlb.setHLBWrapper(jquery(win.document.getElementById('hlbWrappingElement')));
 
-      $hlbWrappingElement = hlb.getHLBWrappingElement();
+      $hlbWrappingElement = hlb.getHLBWrapper();
 
       removeSpy = sinon.spy(jquery.fn, 'remove');
 
@@ -740,7 +740,7 @@ describe('highlight-box', function() {
     it('Sets private variable isHLBClosing to true if $hlbElement already exists and undefined is passed to toggleHLB.', function (done) {
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph2')));
-      hlb.setOriginalElement(jquery(win.document.getElementById('paragraph2')));
+      hlb.setFoundation(jquery(win.document.getElementById('paragraph2')));
 
       hlb.toggleHLB(undefined);
 

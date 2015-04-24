@@ -7,28 +7,15 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'platform', 'util/common', 'zoom-forms',
-    function ($, conf, platform, common, zoomForms) {
+  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'zoom-forms',
+    function ($, conf, site, platform, common, zoomForms) {
       
       // Default zoom configuration
       
       // Can be customized via zoom.provideCustomConfig()
       var zoomConfig = {
-          
           // Should smooth zoom animations be enabled?
-          shouldSmoothZoom: true,
-
-          // Does the web page use a fluid layout, where content wraps to the width?
-          isFluid: window.sitecues.config.isFluid, // Can override in site preferences
-
-          // Should the width of the page be restricted as zoom increases?
-          // This is helpful for pages that try to word-wrap or use a fluid layout.
-          // Eventually use fast page health calculation to automatically determine this
-          // Assumes window width of 1440 (maximized screen on macbook)
-          maxZoomToRestrictWidthIfFluid: window.sitecues.config.maxRewrapZoom || 1.5,
-
-          // Set to 5 on sites where the words get too close to the left window's edge
-          leftMarginOffset: 2
+          shouldSmoothZoom: true
         },
 
         // Body-related
@@ -1203,6 +1190,20 @@ sitecues.def('zoom', function (zoom, callback) {
 
         initBodyInfo();
 
+        $.extend(zoomConfig, {
+          // Does the web page use a fluid layout, where content wraps to the width?
+          isFluid: site.get('isFluid'), // Can override in site preferences
+
+          // Should the width of the page be restricted as zoom increases?
+          // This is helpful for pages that try to word-wrap or use a fluid layout.
+          // Eventually use fast page health calculation to automatically determine this
+          // Assumes window width of 1440 (maximized screen on macbook)
+          maxZoomToRestrictWidthIfFluid: site.get('maxRewrapZoom') || 1.5,
+
+          // Set to 5 on sites where the words get too close to the left window's edge
+          leftMarginOffset: site.get('leftMarginOffset') || 2
+        });
+
         if (typeof zoomConfig.isFluid === 'undefined') {
           zoomConfig.isFluid = isFluidLayout();
         }
@@ -1223,12 +1224,20 @@ sitecues.def('zoom', function (zoom, callback) {
         }
       }
 
+
       function performInitialLoadZoom() {
+        if (!document.body) {
+          // Wait until <body> is ready
+          // This can happen in the case of extension which loads very fast
+          // In the future, extension may try to zoom sooner rather than waiting for entire document to load
+          $(document).ready(performInitialLoadZoom);
+          return;
+        }
+
         zoom.getNativeZoom(); // Make sure we have native zoom value available
 
         var targetZoom = conf.get('zoom');
         if (targetZoom > 1) {
-          // Wait till badge is inserted and perform initial load zoom from settings
           beginGlide(targetZoom);
         } else {
           // No initial zoom from settings, first zoom will only be from user input
@@ -1306,7 +1315,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearAnimationOptimizations(); // Browser can reclaim resources used
       });
 
-      sitecues.on('bp/did-complete', performInitialLoadZoom);
+      sitecues.on('bp/did-complete', performInitialLoadZoom); // Zoom once badge is ready
 
       callback();
     });

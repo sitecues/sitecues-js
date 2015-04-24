@@ -1,6 +1,6 @@
 sitecues.def('bp/view/styles', function (styling, callback) {
   'use strict';
-  sitecues.use('bp/helper', 'bp/constants', function (helper, BP_CONST) {
+  sitecues.use('bp/helper', 'bp/constants', 'conf/site', function (helper, BP_CONST, site) {
 
     var
       isAnimationDebuggingOn = false,
@@ -12,8 +12,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       classDelimiter = '.',
       hover = ':hover',
 
-      BADGE_MODE = classDelimiter + BP_CONST.SMALL,
-      PANEL_MODE = classDelimiter + BP_CONST.LARGE,
+      WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
+      WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
 
       A_CLASS = classDelimiter  + BP_CONST.A_CLASS,
       SMALL_A = idDelimiter + BP_CONST.SMALL_A_ID,
@@ -47,46 +47,46 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     // This is useful for creating custom palettes for the badge and panel.
       CUSTOM_CSS_MAP = {
         'panel': {
-          'largeA': PANEL_MODE + ' ' + LARGE_A,
-          'smallA': PANEL_MODE + ' ' + SMALL_A,
-          'A': PANEL_MODE + ' ' + A_CLASS,
-          'largeAHover': PANEL_MODE + ' ' + LARGE_A_HOVER,
-          'smallAHover': PANEL_MODE + ' ' + SMALL_A_HOVER,
-          'AHover': PANEL_MODE + ' ' + A_CLASS_HOVER,
-          'sliderBar': PANEL_MODE + ' ' + SLIDER_BAR,
-          'sliderThumb': PANEL_MODE + ' ' + SLIDER_THUMB,
-          'sliderThumbHover': PANEL_MODE + ' ' + SLIDER_THUMB_HOVER,
-          'head': PANEL_MODE + ' ' + HEAD,
-          'wave1Off': PANEL_MODE + ' ' + WAVE_1_OFF,
-          'wave2Off': PANEL_MODE + ' ' + WAVE_2_OFF,
-          'wave3Off': PANEL_MODE + ' ' + WAVE_3_OFF,
-          'wave1On': PANEL_MODE + ' ' + WAVE_1_ON,
-          'wave2On': PANEL_MODE + ' ' + WAVE_2_ON,
-          'wave3On': PANEL_MODE + ' ' + WAVE_3_ON,
-          'text': PANEL_MODE + ' ' + TEXT,
-          'textBackground': PANEL_MODE + ' ' + TEXT_BACKGROUND,
-          'background': PANEL_MODE + ' ' + BACKGROUND,
-          'border': PANEL_MODE + ' ' + BORDER,
-          'verticalDivider': PANEL_MODE + ' ' + VERTICAL_DIVIDER
+          'largeA': WANT_PANEL + ' ' + LARGE_A,
+          'smallA': WANT_PANEL + ' ' + SMALL_A,
+          'A': WANT_PANEL + ' ' + A_CLASS,
+          'largeAHover': WANT_PANEL + ' ' + LARGE_A_HOVER,
+          'smallAHover': WANT_PANEL + ' ' + SMALL_A_HOVER,
+          'AHover': WANT_PANEL + ' ' + A_CLASS_HOVER,
+          'sliderBar': WANT_PANEL + ' ' + SLIDER_BAR,
+          'sliderThumb': WANT_PANEL + ' ' + SLIDER_THUMB,
+          'sliderThumbHover': WANT_PANEL + ' ' + SLIDER_THUMB_HOVER,
+          'head': WANT_PANEL + ' ' + HEAD,
+          'wave1Off': WANT_PANEL + ' ' + WAVE_1_OFF,
+          'wave2Off': WANT_PANEL + ' ' + WAVE_2_OFF,
+          'wave3Off': WANT_PANEL + ' ' + WAVE_3_OFF,
+          'wave1On': WANT_PANEL + ' ' + WAVE_1_ON,
+          'wave2On': WANT_PANEL + ' ' + WAVE_2_ON,
+          'wave3On': WANT_PANEL + ' ' + WAVE_3_ON,
+          'text': WANT_PANEL + ' ' + TEXT,
+          'textBackground': WANT_PANEL + ' ' + TEXT_BACKGROUND,
+          'background': WANT_PANEL + ' ' + BACKGROUND,
+          'border': WANT_PANEL + ' ' + BORDER,
+          'verticalDivider': WANT_PANEL + ' ' + VERTICAL_DIVIDER
         },
         'badge': {
-          'largeA': BADGE_MODE + ' ' + LARGE_A,
-          'smallA': BADGE_MODE + ' ' + SMALL_A,
-          'A': BADGE_MODE + ' ' + A_CLASS,
-          'sliderBar': BADGE_MODE + ' ' + SLIDER_BAR,
-          'sliderThumb': BADGE_MODE + ' ' + SLIDER_THUMB,
-          'head': BADGE_MODE + ' ' + HEAD,
-          'wave1Off': BADGE_MODE + ' ' + WAVE_1_OFF,
-          'wave2Off': BADGE_MODE + ' ' + WAVE_2_OFF,
-          'wave3Off': BADGE_MODE + ' ' + WAVE_3_OFF,
-          'wave1On': BADGE_MODE + ' ' + WAVE_1_ON,
-          'wave2On': BADGE_MODE + ' ' + WAVE_2_ON,
-          'wave3On': BADGE_MODE + ' ' + WAVE_3_ON,
-          'text': BADGE_MODE + ' ' + TEXT,
-          'textBackground': BADGE_MODE + ' ' + TEXT_BACKGROUND,
-          'background': BADGE_MODE + ' ' + BACKGROUND,
-          'border': BADGE_MODE + ' ' + BORDER,
-          'verticalDivider': BADGE_MODE + ' ' + VERTICAL_DIVIDER
+          'largeA': WANT_BADGE + ' ' + LARGE_A,
+          'smallA': WANT_BADGE + ' ' + SMALL_A,
+          'A': WANT_BADGE + ' ' + A_CLASS,
+          'sliderBar': WANT_BADGE + ' ' + SLIDER_BAR,
+          'sliderThumb': WANT_BADGE + ' ' + SLIDER_THUMB,
+          'head': WANT_BADGE + ' ' + HEAD,
+          'wave1Off': WANT_BADGE + ' ' + WAVE_1_OFF,
+          'wave2Off': WANT_BADGE + ' ' + WAVE_2_OFF,
+          'wave3Off': WANT_BADGE + ' ' + WAVE_3_OFF,
+          'wave1On': WANT_BADGE + ' ' + WAVE_1_ON,
+          'wave2On': WANT_BADGE + ' ' + WAVE_2_ON,
+          'wave3On': WANT_BADGE + ' ' + WAVE_3_ON,
+          'text': WANT_BADGE + ' ' + TEXT,
+          'textBackground': WANT_BADGE + ' ' + TEXT_BACKGROUND,
+          'background': WANT_BADGE + ' ' + BACKGROUND,
+          'border': WANT_BADGE + ' ' + BORDER,
+          'verticalDivider': WANT_BADGE + ' ' + VERTICAL_DIVIDER
         },
         'both': {
           'largeA': LARGE_A,
@@ -137,14 +137,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
          Classes important for CSS:
          - On #scp-bp-container
-         .scp-small: Badge mode
-         .scp-shrinking: Still shrinking into badge mode
-         .scp-large: Panel mode (or in transtion to panel)
-         .scp-ready: Fully expanded panel mode
+         .scp-is-badge: BP is badge
+         .scp-is-panel: BP is panel
+         .scp-want-badge: BP is badge or shrinking into one
+         .scp-want-panel: BP is panel or expanding into one
+         .scp-is-panel-only  // Only display in panel mode or when becoming panel
          .scp-animate: Enable CSS animations (e.g. do not enable when first showing badge)
          .scp-keyboard: Keyboard mode
          - Elsewhere:
-         .scp-large-only  // Only display in large mode
          .scp-more-only   // Only display in more panel
          .scp-feature-content // Only display in feature panel (reachable for more panel)
          .scp-target: both a click target and good for showing keyboard focus rectangles
@@ -202,23 +202,37 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '.scp-default-badge': {
-          'position': 'absolute',
-          'top': '5px',
-          'left': '5px',
-          'width': '146px',
-          'height': '24px',
-          'padding': '5px',
-          'background-color': 'white',
+        // .scp-toolbar means it's a toolbar
+        '.scp-toolbar': {
+          'position': 'fixed',
+          'top': '0px',
+          'left': '0px',
+          'width': '100%',
+          'height': '38px',
+          'box-sizing': 'border-box',
+          'padding': '6px 8px 8px calc(50% - 66px)',
+          'background-color': '#f7fcff',
           'z-index': '9999999'
         },
 
-        '.scp-default-badge #scp-opaque-badge-bg': {
-          'opacity': 1    // Make sure page contents don't show through the floating badge
+        '.scp-toolbar[aria-expanded="false"]': {
+          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
 
-        '.scp-default-badge[aria-expanded="false"]': {
-          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
+        // Move the body down by the height of the toolbar + 1px for the box-shadow
+        'html[data-sitecues-toolbar]': {
+          'padding-top': '41px !important'
+        },
+
+        // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
+        // This messes up Google maps for some reason. We've disabled google maps in the extension.
+        // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
+        'html[data-sitecues-toolbar] > body:not([data-sc-extra-toolbar-bump])': {
+          'transform': 'translateY(0)'
+        },
+
+        'body[data-sc-extra-toolbar-bump]': {
+          'transform': 'translateY(41px)'
         },
 
         /********** Transform animation speed **********/
@@ -247,7 +261,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* Text label animation for main panel labels */
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
-        '.scp-ready text': {
+        '.scp-is-panel text': {
           'display': 'block'
         },
 
@@ -260,21 +274,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 0
         },
 
-        '.scp-large.scp-ie9-false #scp-shadow': {
+        '.scp-want-panel.scp-ie9-false #scp-shadow': {
           'opacity': 1
         },
 
         /************ Small vs. large  *************/
 
-        '.scp-large > #scp-svg': {
+        '.scp-want-panel > #scp-svg': {
           'opacity': '1 !important'
         },
 
-        '.scp-large:not(.scp-ready) > #scp-svg': {
+        '#scp-bp-container:not(.scp-is-panel) > #scp-svg': {
           'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
-        '.scp-large .scp-large-only': { // element is visible in the large state of the badge-panel
+        '.scp-want-panel .scp-panel-only': { // element is visible in the large state of the badge-panel
           'opacity': '1 !important'
         },
 
@@ -282,7 +296,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '.scp-large #scp-mouseover-target': {
+        '.scp-want-panel #scp-mouseover-target': {
           'display': 'none'  // Don't let badge mouseover target interfere with actual use of panel
         },
 
@@ -318,7 +332,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%'
+          'transform-origin': '50% 50%',
+          'pointer-events': 'none'
         },
 
         '.origin-center': {
@@ -338,10 +353,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // These are the 3 different ways the "?" button might fade in.
+        //
         // We want to turn on pointer-events when the "?" becomes visible.
         // If none of these classes are set, then the "?" opacity is 0 and pointer-events are disabled.
         '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
-          'pointer-events': 'all !important'
+         'pointer-events': 'all !important'
         },
 
         /******** Mouse targets must be hidden but still able to handle events *************/
@@ -363,7 +379,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '70px'
         },
 
-        '.scp-ready.scp-keyboard #scp-close-button': {
+        '.scp-is-panel.scp-keyboard #scp-close-button': {
           'visibility': 'visible',
           'z-index': '99999999'
         },
@@ -378,16 +394,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
         '#sitecues-badge:focus': {
-          'outline': 0,
-          'box-shadow': '0px 0px 3px 3px rgba(82, 168, 236, 0.8)'
+          'outline': 0
         },
-        '#sitecues-badge[aria-expanded="true"]:focus': {
-          'box-shadow': 'none'
+        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
+          'stroke': 'rgba(82, 168, 236, 0.8)',
+          'stroke-width': '14px'
         },
 
-
-        /*************** Badge Only **************************/
-        'html > #scp-bp-container, #sitecues-badge[aria-expanded="true"].scp-toolbar #scp-bp-container': {
+        /*************** Clipping rules for badge **************************/
+        // When the badge is fully collapsed, we clip it so that the invisible parts
+        // of the SVG do not take mouse events.
+        // The clipping is computed in placement.js
+        // This rule undoes the placement.js clipping when the BP is not currently fully collapsed.
+        '#scp-bp-container:not(.scp-is-badge)': {
           'clip': 'auto !important'
         }
       },
@@ -415,7 +434,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'none'
         },
 
-        '.scp-ready.scp-keyboard > #scp-focus-outline': {
+        '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
           'display': 'block'
         },
 
@@ -463,30 +482,31 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#fff'
         },
 
-        '.scp-large.scp-palette-rb .scp-A-button, .scp-large.scp-palette-rb #scp-head, .scp-large.scp-palette-rb #scp-zoom-slider-bar': {
+        '.scp-want-panel.scp-palette-rb .scp-A-button, .scp-want-panel.scp-palette-rb #scp-head, .scp-want-panel.scp-palette-rb #scp-zoom-slider-bar': {
           'fill': '#000'
         },
 
-        '.scp-ready.scp-palette-rb .scp-A-button:hover': {
+        '.scp-is-panel.scp-palette-rb .scp-A-button:hover': {
           'fill': '#447AC4'
         },
 
-        '.scp-ready.scp-palette-rb #scp-zoom-slider-thumb:hover': {
+        '.scp-is-panel.scp-palette-rb #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
         },
-        '.scp-small.scp-palette-ry #scp-wave1': {
+
+        '.scp-want-badge.scp-palette-ry #scp-wave1': {
           'fill': '#FFE460'
         },
 
-        '.scp-small.scp-palette-ry #scp-wave2': {
+        '.scp-want-badge.scp-palette-ry #scp-wave2': {
           'fill': '#FFCC00'
         },
 
-        '.scp-small.scp-palette-ry #scp-wave3': {
+        '.scp-want-badge.scp-palette-ry #scp-wave3': {
           'fill': '#FDAC00'
         },
 
-        '.scp-small.scp-palette-ry #scp-zoom-slider-thumb': {
+        '.scp-want-badge.scp-palette-ry #scp-zoom-slider-thumb': {
           'fill': '#FFCD00'
         },
 
@@ -494,15 +514,15 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#fff'
         },
 
-        '.scp-large.scp-palette-ry .scp-A-button, .scp-large.scp-palette-ry #scp-head, .scp-large.scp-palette-ry #scp-zoom-slider-bar': {
+        '.scp-want-panel.scp-palette-ry .scp-A-button, .scp-want-panel.scp-palette-ry #scp-head, .scp-want-panel.scp-palette-ry #scp-zoom-slider-bar': {
           'fill': '#000'
         },
 
-        '.scp-ready .scp-A-button:hover': {
+        '.scp-is-panel .scp-A-button:hover': {
           'fill': '#447AC4'
         },
 
-        '.scp-ready #scp-zoom-slider-thumb:hover': {
+        '.scp-is-panel #scp-zoom-slider-thumb:hover': {
           'fill': '#6B9AE0'
         },
 
@@ -602,8 +622,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
 
-    if (typeof sitecues.config.palette === 'object') {
-      provideCustomPalette(sitecues.config.palette);
+    if (site.get('uiMode') !== 'toolbar') {
+      // TODO Tony how does this work? We need docs
+      // TODO clean this up -- weird to be checking toolbar in this general code here
+      var customPalette = site.get('palette');
+      if (typeof customPalette === 'object') {
+        provideCustomPalette(customPalette);
+      }
     }
 
     if (SC_DEV) {

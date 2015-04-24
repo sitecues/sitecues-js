@@ -16,12 +16,12 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
         $animation;            // A reference to the $.animate we use for IE9 inflation and deflation
 
-    function shouldFixFirefoxAnimationBug($hlbElement) {
+    function shouldFixFirefoxAnimationBug($hlb) {
       // The Firefox animation bug occurs on retina displays, with Firefox version < 33
       // and a scale animation >= 1024 pixels wide. Basically, the animation goes haywire
       // and jumps to 1/4 the size and back in an unexpected way.
       return platform.browser.isFirefox && platform.browser.version < 33 &&
-        devicePixelRatio > 1.5 && $hlbElement[0].clientWidth * hlbPositioning.getFinalScale($hlbElement) >= 1024;
+        devicePixelRatio > 1.5 && $hlb[0].clientWidth * hlbPositioning.getFinalScale($hlb) >= 1024;
     }
 
     /**
@@ -31,15 +31,15 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     hlbAnimation.transitionInHLB = function (doShowQuickly, data) {
 
       // Dim the background!
-      dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlbElement.parent());
-      var $hlbElement = data.$hlbElement,
+      dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlb.parent());
+      var $hlb = data.$hlb,
         speed = doShowQuickly ? INFLATION_SPEED_FAST : INFLATION_SPEED;
 
-      if (shouldFixFirefoxAnimationBug($hlbElement)) {
+      if (shouldFixFirefoxAnimationBug($hlb)) {
 
         // Render instantly, don't animate (which would activate the Firefox animation bug)
-        $hlbElement.css({
-          'transform'       : 'scale(' + hlbPositioning.getFinalScale($hlbElement) + ') ' + data.translateCSS,
+        $hlb.css({
+          'transform'       : 'scale(' + hlbPositioning.getFinalScale($hlb) + ') ' + data.translateCSS,
           'transform-origin': data.originCSS
         });
 
@@ -67,10 +67,10 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     hlbAnimation.transitionOutHLB = function (data) {
 
-      var $hlbElement = data.$hlbElement;
+      var $hlb = data.$hlb;
 
       // Listeners: mouse-highlight.js, invert.js
-      sitecues.emit('hlb/deflating', $hlbElement);
+      sitecues.emit('hlb/deflating', $hlb);
 
       // Un-dim the background!
       dimmer.undimBackgroundContent(DEFLATION_SPEED);
@@ -84,12 +84,12 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       // mechanism (because there is nothing to animate if scale is already 1).  Therefore,
       // we check to see if the HLB scale is greater than one, and if so, we animate the
       // deflation, otherwise, we just skip the deflation step
-      if (isHLBZoomed($hlbElement)) {
+      if (isHLBZoomed($hlb)) {
 
-        if (shouldFixFirefoxAnimationBug($hlbElement)) {
+        if (shouldFixFirefoxAnimationBug($hlb)) {
 
-          $hlbElement.css({
-            'transform'       : 'scale(' + hlbPositioning.getStartingScale($hlbElement) + ') ' + data.translateCSS,
+          $hlb.css({
+            'transform'       : 'scale(' + hlbPositioning.getStartingScale($hlb) + ') ' + data.translateCSS,
             'transform-origin': data.originCSS
           });
 
@@ -126,17 +126,17 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function transitionInHLBWithJquery(data, speed) {
 
-      var $hlbElement = data.$hlbElement,
-        startingScale = hlbPositioning.getStartingScale($hlbElement);
+      var $hlb = data.$hlb,
+        startingScale = hlbPositioning.getStartingScale($hlb);
 
-      $hlbElement.css({
+      $hlb.css({
         'transform-origin': data.originCSS,
         'transform'       : 'scale(' + startingScale + ') ' + data.translateCSS
       });
 
       $animation = $({'scale': startingScale}).animate(
         {
-          'scale': hlbPositioning.getFinalScale($hlbElement)
+          'scale': hlbPositioning.getFinalScale($hlb)
         }, {
           'step'    : (function (data) {
             return function (now) {
@@ -158,7 +158,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
       $animation = $({'scale' : $animation.attr('scale')}).animate(
         {
-          'scale': hlbPositioning.getStartingScale(data.$hlbElement)
+          'scale': hlbPositioning.getStartingScale(data.$hlb)
         }, {
           'step'    : (function (data) {
             return function (now) {
@@ -178,14 +178,14 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function transitionOutHLBWithCSS(data) {
 
-      var $hlbElement      = data.$hlbElement,
+      var $hlb             = data.$hlb,
           transitionOutCSS = getTransitionOutCSS(data);
 
       // After the deflation animation completes, clean up the HLB modes and DOM
-      $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBClosed);
+      $hlb[0].addEventListener(common.transitionEndEvent, data.onHLBClosed);
 
       // Animate the deflation by setting the transform scale to startingScale.
-      $hlbElement.css(transitionOutCSS);
+      $hlb.css(transitionOutCSS);
 
     }
 
@@ -195,14 +195,14 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function transitionInHLBWithCSS(data, speed) {
 
-      var $hlbElement     = data.$hlbElement,
+      var $hlb            = data.$hlb,
           transitionInCSS = getTransitionInCSS(data, speed);
 
       // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
-      $hlbElement[0].addEventListener(common.transitionEndEvent, data.onHLBReady);
+      $hlb[0].addEventListener(common.transitionEndEvent, data.onHLBReady);
 
       // Scale the element up the final amount
-      $hlbElement.css(transitionInCSS);
+      $hlb.css(transitionInCSS);
 
     }
 
@@ -213,10 +213,10 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
      */
     function hlbSteppingAnimation(now, data) {
 
-      var $hlbElement = data.$hlbElement;
+      var $hlb = data.$hlb;
 
-      if ($hlbElement) {
-        $hlbElement.css('transform', 'scale(' + now + ') ' + data.translateCSS);
+      if ($hlb) {
+        $hlb.css('transform', 'scale(' + now + ') ' + data.translateCSS);
       }
 
     }
@@ -234,7 +234,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       var transitionInCSS = {
         'transition'                : data.transitionProperty + speed + 'ms',
         'transition-timing-function': 'ease',
-        'transform'                 : 'scale(' + hlbPositioning.getFinalScale(data.$hlbElement) + ') ' + data.translateCSS,
+        'transform'                 : 'scale(' + hlbPositioning.getFinalScale(data.$hlb) + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS
       };
 
@@ -248,17 +248,17 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     }
 
     /**
-     * [isHLBZoomed determines if the $hlbElement is scaled greater than one.
+     * [isHLBZoomed determines if the $hlb is scaled greater than one.
      * This is useful for the transitionOutHLB function.]
-     * @return {Boolean} [if true, $hlbElement is scaled > zoom]
+     * @return {Boolean} [if true, $hlb is scaled > zoom]
      * @example "matrix(1.5, 0, 0, 1.5, 1888.0610961914063, 2053.21875)"
      * @example "matrix(1, 0, 0, 1, 1888.0610961914063, 2053.21875)"
      */
-    function isHLBZoomed($hlbElement) {
+    function isHLBZoomed($hlb) {
 
       // If there isn't any transform, then it isn't scaled.
-      var scale = common.getTransform($hlbElement);
-      return scale > hlbPositioning.getStartingScale($hlbElement);
+      var scale = common.getTransform($hlb);
+      return scale > hlbPositioning.getStartingScale($hlb);
     }
 
     /**
@@ -270,7 +270,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
       return {
         'transition'                : data.transitionProperty + DEFLATION_SPEED + 'ms',
         'transition-timing-function': 'ease',
-        'transform'                 : 'scale(' + hlbPositioning.getStartingScale(data.$hlbElement) + ') ' + data.translateCSS,
+        'transform'                 : 'scale(' + hlbPositioning.getStartingScale(data.$hlb) + ') ' + data.translateCSS,
         'transform-origin'          : data.originCSS
       };
 

@@ -1,7 +1,11 @@
 exports.get = function(key) {
   var data = {
-    site_id: '99',
+    siteId: '99',
     ttsAudioFormats: ['aac']
   };
   return data[key];
 };
+
+exports.getSiteId = function() {
+  return '99';
+}

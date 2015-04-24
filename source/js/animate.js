@@ -9,7 +9,7 @@ sitecues.def('animate', function (animate, callback) {
 
   sitecues.use('util/transform', function (transform) {
 
-    var requestFrameFn = window.requestAnimationFrame   ||
+    var requestFrameFn = window.requestAnimationFrame    ||
                          window.msRequestAnimationFrame ||
                          function (fn) {
                            return setTimeout(fn, 16);

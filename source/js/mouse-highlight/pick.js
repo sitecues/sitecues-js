@@ -27,9 +27,9 @@
 
 sitecues.def('mouse-highlight/picker', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'util/common', 'conf',
+  sitecues.use('jquery', 'util/common', 'conf', 'conf/site',
                'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge',
-               function($, common, conf, traitcache, traits, judge) {
+               function($, common, conf, site, traitcache, traits, judge) {
 
     var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
       MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -107,7 +107,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       //  ignore: "[selector]",
       //  disable: "[selector]"
       //},
-      customSelectors = (window.sitecues && window.sitecues.config.picker) || {},
+      customSelectors = site.get('picker') || {},
 
       isDebuggingOn,
       isVoteDebuggingOn,
