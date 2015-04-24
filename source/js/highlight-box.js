@@ -454,6 +454,11 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
             $foundation                = $('<ul>').append(pickedElementClone),
             i;
 
+        // ARCHITECTURE PROBLEM: This function does not take into account any elements in the DOM tree
+        // between the "lonely" picked element and its "guardian" ul or ol ancestor.
+        // Google search results currently have this structure.
+        // https://www.google.com/#q=cats
+
         // Setting this to true will remove the $foundation from the DOM before inflation.
         // This is a very special case where the foundation element is not the same as the picked element.
         // NOTE: This is setting a module scoped variable so the rest of the program as access.
