@@ -461,7 +461,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
 
         // It is important to clone the styles of the parent <ul> of the original element, because it may
         // have important styles such as background images, etc.
-        $foundation[0].style.cssText = hlbStyling.getComputedStyleCssText($picked.parent('ul, ol')[0]);
+        $foundation[0].style.cssText = hlbStyling.getComputedStyleCssText($picked.parents('ul, ol')[0]);
 
         // Create, position, and style this element so that it overlaps the element chosen by the picker.
         $foundation.css({
