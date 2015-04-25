@@ -2,7 +2,7 @@
  * This module is responsible for handling site configuration. This configuration can be supplied in
  * two ways:
  *   1) The 'windows.sitecues.config' object:
- *         This object is required and must have at least the 'site_id' and 'script_url' properties. This
+ *         This object is required and must have at least the 'siteId' and 'scriptUrl' properties. This
  *         requirement is validated by core.js
  *   2) The web services server
  *         This configuration is currently not required, and inability to fetch these setting should be handled
@@ -33,6 +33,11 @@ sitecues.def('conf/site', function (site, callback) {
       return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
     };
 
+    // Names with underscores deprecated
+    site.getSiteId = function() {
+      return providedSiteConfig.siteId || providedSiteConfig.site_id;
+    };
+
     function fetchSiteConfig() {
       if (isFetched) {
         return; // Already fetched
@@ -47,8 +52,8 @@ sitecues.def('conf/site', function (site, callback) {
 
       // Trigger the initial fetch.
       $.ajax({
-        // The 'provided.site_id' parameter must exist, or else core would have aborted the loading of modules.
-        url: sitecues.getApiUrl('2/site/' + providedSiteConfig.site_id + '/config'),
+        // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
+        url: sitecues.getApiUrl('/2/site/' + site.getSiteId() + '/config'),
         dataType: 'json',
         success: function (data) {
           // Copy the fetched key/value pairs into the site configuration.

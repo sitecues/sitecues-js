@@ -16,7 +16,7 @@ sitecues.def('style-service', function (styleService, callback) {
       WAIT_BEFORE_INIT_STYLESHEET = 50,
       hasInitBeenRequested,   // Have we even begun the init sequence?
       isInitComplete,      // Init sequence is complete
-      doFetchCssFromChromeExtension = site.get('fetch_css') === 'chrome-extension';
+      doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension';
 
     function isAcceptableMediaType(media) {
       /*

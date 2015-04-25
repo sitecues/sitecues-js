@@ -81,13 +81,13 @@ sitecues.def('audio', function (audio, callback) {
     }
 
     function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
-      var restOfUrl = 'cue/site/' + site.get('site_id') + '/' +
+      var restOfUrl = 'cue/site/' + site.getSiteId() + '/' +
         key + '.' + getMediaTypeForPrerecordedAudio() + getLanguageParameter();
       return sitecues.getApiUrl(restOfUrl);
     }
 
     function getTTSUrl(text, $content) {
-      var restOfUrl = 'tts/site/' + site.get('site_id') + '/tts.' + getMediaTypeForTTS() +
+      var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForTTS() +
         getLanguageParameter($content && $content[0]) + 't=' + encodeURIComponent(text);
       return sitecues.getApiUrl(restOfUrl);
     }

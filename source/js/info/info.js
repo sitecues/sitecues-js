@@ -63,12 +63,12 @@ sitecues.def('info', function(info, callback) {
 
       var
         localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
-        sitecuesJsUrl = site.get('script_url'),
+        sitecuesJsUrl = sitecues.getLibraryUrl(),
         hostUrl = window.location,
         pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +
-          addParam('sc_url', sitecuesJsUrl) +
-          addParam('site_id', site.get('site_id')) +
-          addParam('site_url', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
+          addParam('scUrl', sitecuesJsUrl) +
+          addParam('siteId', site.getSiteId()) +
+          addParam('siteUrl', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
           addParam('prefs', window.localStorage.sitecues) +
           anchor;
 
