@@ -274,7 +274,14 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
        * [toggleHLB closes or creates a new HLB]
        */
       function toggleHLB() {
-        if ($hlb && !isHLBClosing) {
+        // Sadly, the HLB animation system does not currently
+        // know how to reverse an animation, so we cannot
+        // toggle if currently deflating. :(
+        if (isHLBClosing) {
+          return;
+        }
+
+        if ($hlb) {
           closeHLB();
         } else {
           targetHLB();
@@ -639,9 +646,9 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         sitecues.emit('hlb/closed', event);
 
         $foundation = undefined;
-        $hlb             = undefined;
-        $picked   = undefined;
-        highlight        = undefined;
+        $hlb        = undefined;
+        $picked     = undefined;
+        highlight   = undefined;
 
         if (SC_DEV && loggingEnabled) {
           console.log(
@@ -712,7 +719,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
           'background:black;color:white;font-size: 11pt'
         );
         sitecues.toggleHLBLogging = function () {
-          return loggingEnabled = !loggingEnabled;
+          loggingEnabled = !loggingEnabled;
+          return loggingEnabled;
         };
       }
 
