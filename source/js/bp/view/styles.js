@@ -167,7 +167,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '#sitecues-badge #scp-bp-container': {
+        // When panel is closed, we use position: absolute
+        // When open, we use position: fixed
+        '#sitecues-badge>#scp-bp-container': {
           'position': 'absolute'
         },
 
@@ -177,6 +179,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',
+          'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
 //          'will-change': 'transform',   // Removing helps Chrome not get blurry on sitecues.com after zoom
           'outline': 0 // don't show default dotted focus outline
         },
@@ -210,13 +213,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '100%',
           'height': '38px',
           'box-sizing': 'border-box',
+          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
           'padding': '6px 8px 8px calc(50% - 66px)',
           'background-color': '#f7fcff',
           'z-index': '9999999'
-        },
-
-        '.scp-toolbar[aria-expanded="false"]': {
-          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
 
         // Move the body down by the height of the toolbar + 1px for the box-shadow

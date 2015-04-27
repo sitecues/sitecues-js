@@ -35,7 +35,7 @@ sitecues.def('conf/site', function (site, callback) {
 
     // Names with underscores deprecated
     site.getSiteId = function() {
-      return providedSiteConfig.siteId || providedSiteConfig.site_id;
+      return everywhereConfig.siteId || providedSiteConfig.site_id;
     };
 
     function fetchSiteConfig() {
