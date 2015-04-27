@@ -15,7 +15,7 @@ describe('hlbStyling', function() {
     });
   });
 
-  describe('#getChildStyles()', function () {
+  describe('#getDescendantStyles()', function () {
 
     it('Returns an object whose bottom property value is 0 because child elements of the HLB should not have a non-zero value for bottom style', function (done) {
       var $child = jquery(win.document.getElementById('paragraph')),
@@ -26,7 +26,7 @@ describe('hlbStyling', function() {
 
           },
           expected = 0,
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).bottom;
+          actual = hlbStyling.getDescendantStyles($child, originalElementsComputedStyles, initialHLBRect).bottom;
 
       expect(actual).to.be.equal(expected);
       done();
@@ -37,7 +37,7 @@ describe('hlbStyling', function() {
     //       originalElementsComputedStyles = {
     //         'textDecoration': ''
     //       },
-    //       result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
+    //       result = hlbStyling.getDescendantStyles($child, originalElementsComputedStyles);
 
     //   expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.true;
     //   done();
@@ -48,7 +48,7 @@ describe('hlbStyling', function() {
     //       originalElementsComputedStyles = {
     //         'textDecoration': ''
     //       },
-    //       result = hlbStyling.getChildStyles($child, originalElementsComputedStyles);
+    //       result = hlbStyling.getDescendantStyles($child, originalElementsComputedStyles);
 
     //   expect(result.hasOwnProperty('width') && result.hasOwnProperty('height')).to.be.false;
     //   done();
@@ -63,7 +63,7 @@ describe('hlbStyling', function() {
 
           },
           expected = 'underline',
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).textDecoration;
+          actual = hlbStyling.getDescendantStyles($child, originalElementsComputedStyles, initialHLBRect).textDecoration;
 
       expect(actual).to.be.equal(expected);
       done();
@@ -79,7 +79,7 @@ describe('hlbStyling', function() {
 
           },
           expected = 'inline-block',
-          actual = hlbStyling.getChildStyles($child, originalElementsComputedStyles, initialHLBRect).display;
+          actual = hlbStyling.getDescendantStyles($child, originalElementsComputedStyles, initialHLBRect).display;
 
       expect(actual).to.be.equal(expected);
       done();

@@ -48,17 +48,11 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
         return;
 
       }
-
       if (common.useJqueryAnimate) {
-
         transitionInHLBWithJquery(data, speed);
-
       } else {
-
         transitionInHLBWithCSS(data, speed);
-
       }
-
     };
 
     /**
@@ -100,18 +94,13 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
         }
 
         if (common.useJqueryAnimate) {
-
           // Stop the previous animation if it exists.
           if ($animation) {
             $animation.stop();
           }
-
           transitionOutHLBWithJquery(data);
-
         } else {
-
           transitionOutHLBWithCSS(data);
-
         }
 
       } else {

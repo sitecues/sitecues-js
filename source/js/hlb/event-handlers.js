@@ -40,9 +40,9 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
     /**
      * [captureWheelEvents captures wheel events while the HLB is open. ]
-     * @param  {[jQuery Element]} $hlbElement [The HLB element]
+     * @param  {[jQuery Element]} $hlb [The HLB element]
      */
-    eventHandlers.captureWheelEvents = function ($hlbElement) {
+    eventHandlers.captureWheelEvents = function ($hlb) {
 
       if (isCapturing) {
         return; // Already capturing
@@ -87,7 +87,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         */
 
         // Get the dimensions
-        var elem             = $hlbElement[0]       // The HLB Element
+        var elem             = $hlb[0]       // The HLB Element
           , scrollHeight     = elem.scrollHeight    // The total height of the scrollable area
           , scrollTop        = elem.scrollTop       // Pixel height of invisible area above element (what has been scrolled)
           , clientHeight     = elem.clientHeight    // The height of the element in the window
@@ -102,7 +102,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
         // Prevent any scrolling if the user is:
         //   a) Not scrolling on the HLB element directly.
         //   b) Not scrolling on a decendant of the HLB element.
-        if (!$hlbElement.is(event.target) && !$.contains(elem, event.target))  {
+        if (!$hlb.is(event.target) && !$.contains(elem, event.target))  {
           preventScroll(event);
         }
 
