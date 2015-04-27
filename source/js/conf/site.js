@@ -53,7 +53,7 @@ sitecues.def('conf/site', function (site, callback) {
       // Trigger the initial fetch.
       $.ajax({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
-        url: sitecues.getApiUrl('/2/site/' + site.getSiteId() + '/config'),
+        url: sitecues.getApiUrl('2/site/' + site.getSiteId() + '/config'),
         dataType: 'json',
         success: function (data) {
           // Copy the fetched key/value pairs into the site configuration.
