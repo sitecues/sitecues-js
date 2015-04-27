@@ -193,7 +193,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {
-    'normal': 'n',
+    'normal': '-n',
     'adaptive': '*',
     'reverse-blue': '-rb',
     'reverse-yellow': '-ry'

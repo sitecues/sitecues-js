@@ -459,6 +459,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#447AC4'
         },
 
+        // .scp-palette-n  = normal
         // .scp-palette-rb = reverse-blue
         // .scp-palette-ry = reverse-yellow
 
