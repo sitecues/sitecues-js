@@ -189,7 +189,7 @@ sitecues.def('bp', function (bp, callback) {
 
       // Use fake settings if undefined -- user never used sitecues before.
       // This will be turned off once user interacts with sitecues.
-      state.set('isRealSettings', site.get('always_real_settings') ||
+      state.set('isRealSettings', site.get('alwaysRealSettings') ||
         zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
 
       // Set badge classes. Render the badge. Render slider.
@@ -297,7 +297,7 @@ sitecues.def('bp', function (bp, callback) {
 
     function initIfBadgeReady() {
 
-      if (site.get('ui_mode') === 'toolbar') {
+      if (site.get('uiMode') === 'toolbar') {
         setTimeout(initializeBPFeature, 0);
         return;
       }

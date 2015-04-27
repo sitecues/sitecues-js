@@ -116,7 +116,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     }
 
     function isToolbarUIRequested() {
-      return site.get('ui_mode') === 'toolbar';
+      return site.get('uiMode') === 'toolbar';
     }
 
     // Create <div> and put the existing badge inside it.

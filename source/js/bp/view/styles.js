@@ -167,7 +167,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '#sitecues-badge #scp-bp-container': {
+        // When panel is closed, we use position: absolute
+        // When open, we use position: fixed
+        '#sitecues-badge>#scp-bp-container': {
           'position': 'absolute'
         },
 
@@ -177,6 +179,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '9999999',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',
+          'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
 //          'will-change': 'transform',   // Removing helps Chrome not get blurry on sitecues.com after zoom
           'outline': 0 // don't show default dotted focus outline
         },
@@ -210,13 +213,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '100%',
           'height': '38px',
           'box-sizing': 'border-box',
+          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
           'padding': '6px 8px 8px calc(50% - 66px)',
           'background-color': '#f7fcff',
           'z-index': '9999999'
-        },
-
-        '.scp-toolbar[aria-expanded="false"]': {
-          'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)'
         },
 
         // Move the body down by the height of the toolbar + 1px for the box-shadow
@@ -227,7 +227,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Fixed position elements will now be relative to the <body>, so that they move down below the toolbar
         // This messes up Google maps for some reason. We've disabled google maps in the extension.
         // TODO This also messes up https://www.yahoo.com/movies/monkey-kingdom-disneynature-116935977622.html
-        'html[data-sitecues-toolbar] > body': {
+        'html[data-sitecues-toolbar] > body:not([data-sc-extra-toolbar-bump])': {
           'transform': 'translateY(0)'
         },
 
@@ -622,7 +622,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     createStyleSheet(BP_CONST.PALETTE_STYLESHEET_ID, PALETTE_CSS);
 
-    if (site.get('ui_mode') !== 'toolbar') {
+    if (site.get('uiMode') !== 'toolbar') {
       // TODO Tony how does this work? We need docs
       // TODO clean this up -- weird to be checking toolbar in this general code here
       var customPalette = site.get('palette');

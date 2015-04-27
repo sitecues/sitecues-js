@@ -184,7 +184,7 @@ debug:
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 
-	@echo "SC_DEV=true,SC_UNIT=true,"$(extra-debug-flags)"exports={}," > $(build-dir)/compile/js/sitecues.js
+	@echo "SC_DEV=true,SC_UNIT=false,"$(extra-debug-flags) > $(build-dir)/compile/js/sitecues.js
 	@(awk 'FNR==1{print ""}1' $(files)) >> $(build-dir)/compile/js/sitecues.js
 
 	@mkdir -p $(build-dir)/etc/js

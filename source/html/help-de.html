@@ -2,21 +2,21 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta http-equiv="Content-Type" content="text/html;charhet=UTF8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF8">
 <script>
     function getParam(index, name) {
         return decodeURIComponent(params[index].split(name + '=')[1]);
     }
     var params = location.search.substring(1).split('&'),
-            scriptUrl = getParam(0, 'sc_url'),
-            siteId = getParam(1, 'site_id'),
-            siteUrl = getParam(2, 'site_url'),
+            scriptUrl = getParam(0, 'scUrl'),
+            siteId = getParam(1, 'siteId'),
+            siteUrl = getParam(2, 'siteUrl'),
             prefs = getParam(3, 'prefs');
 
     // Site config
     window.sitecues = {};
     sitecues.config = {
-        site_id : siteId,
+        siteId : siteId,
         iframe  : 1,
         isFluid : 1,
         maxRewrapZoom: 3
@@ -31,8 +31,8 @@
     (function(){
         var script = document.createElement('script'),
                 first = document.getElementsByTagName('script')[0];
-        sitecues.config.script_url=scriptUrl;
-        script.src=sitecues.config.script_url;
+        sitecues.config.scriptUrl=scriptUrl;
+        script.src=sitecues.config.scriptUrl;
         script.type = 'text/javascript';
         script.async = true;
         first.parentNode.insertBefore(script, first);
