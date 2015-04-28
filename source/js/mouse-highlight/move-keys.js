@@ -705,6 +705,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Adjust final scroll position so that highlight that it's not jammed against the top/left of window unless it needs to
       window.scrollBy(-100, -100);
+      succeed();
     }
 
     function constrained(value, min, max) {

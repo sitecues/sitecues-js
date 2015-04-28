@@ -10,7 +10,9 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
 
   sitecues.use('util/common', 'jquery', function(common, $) {
 
-    var textBuffer = '';
+    var textBuffer = '',
+      TEXT_NODE = 3,
+      ELEMENT_NODE = 1;
 
     builder.getText = function(selector) {
       textBuffer = '';
@@ -94,19 +96,24 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
 
       node = $node[0];
 
-      if (node.nodeType === 3) {
-        // Text node
+      if (node.nodeType === TEXT_NODE) {
+        // Text node: we append the text contents
         appendText(node.nodeValue);
         return;
       }
 
-      if (node.nodeType !== 1) {
-        return; // Not an element
+      if (node.nodeType !== ELEMENT_NODE) {
+        return; // Not text or an element, we don't care about it
       }
 
-      // Element
+      // Element -- check for special requirements based on element markup
       styles = window.getComputedStyle(node);
 
+      // Non-label processing:
+      // 1) Visibility checks -- we don't do this for labels because even invisible labels should be spoken, it's a
+      //    common technique to hide labels but have useful text for screen readers
+      // 2) ARIA labels and descriptions: don't use if already inside a label, in order to avoid infinite recursion
+      //    since labels could ultimately point in a circle.
       if (!isLabel) {   // Hidden node checks, label id checks
         // CSS display: none -- hides entire subtree
         if (styles.display === 'none') {
@@ -126,16 +133,21 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
         // isLabel prevents infinite recursion when getting label from elsewhere in document, potentially overlapping
         text += appendFromIdListAttribute($node, 'aria-labelledby') +
           appendFromIdListAttribute($node, 'aria-describedby');
+
+        // If it has @usemap, add any alternative text from within the map
         if ($node.is('img')) {
           appendFromIdListAttribute($node, 'usemap');
         }
       }
 
+      // Add characters to break up paragraphs (before block)
       if (styles.display !== 'inline') {
-        appendBlockSeparator(text);  // Add characters to break up paragraphs (before block)
+        appendBlockSeparator(text);
       }
 
-      // aria-label on any element
+      // Process 'text equivalents' which are attributes that contain additional descriptive text
+      // Note: unlike most text equivalent attributes, aria-label is supported on any element. It is different from
+      // aria-labelledby in that it directly contains the necessary text rather than point to an element by id.
       var textEquiv = node.getAttribute('aria-label'),
         value;
       // alt or title on any image or visual media

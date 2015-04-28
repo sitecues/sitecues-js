@@ -38,11 +38,13 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
       }
 
       var multiplySize = isOldIE ? 2 : 1, // Fixes bug with white line in the middle of the outline
+        width = Math.max(documentElement.scrollWidth, window.innerWidth),
+        height = Math.max(documentElement.scrollHeight, window.innerHeight),
         rect = {
           left: 0,
           top: 0,
-          width: documentElement.scrollWidth * multiplySize ,
-          height: documentElement.scrollHeight * multiplySize
+          width: width * multiplySize ,
+          height: height * multiplySize
         },
         $dimmerElement = common.drawRect(rect, '#000', $parentOfDimmer);
 
