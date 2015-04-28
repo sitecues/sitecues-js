@@ -120,7 +120,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
       // Finally, begin the shrinking animation.
       sitecues.emit('bp/do-update');
-
     };
 
     // TODO: Maybe move to panel-controller?
