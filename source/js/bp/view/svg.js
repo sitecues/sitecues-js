@@ -81,8 +81,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 ';
 
   sitecues.use('util/localization', function(locale) {
-    // The base URL for the current page regardless of <base> tag
-    function getOriginalBaseUrl() {
+    // The original base URL for the current page regardless of <base> tag
+    function getPageUrlMinusHash() {
       var loc = window.location,
         href = loc.href;
       return href.substr(0, href.length - loc.hash.length);
@@ -93,8 +93,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     // when the source document uses a <base> tag.
     function getTextWithNormalizedUrls(text) {
       var MATCH_KEY = /(href="|url\()(#)/g,
-        baseUrl = getOriginalBaseUrl();
-      return text.replace(MATCH_KEY, function (totalMatch, matchPart1) { return matchPart1 + baseUrl + '#'; });
+        pageUrlMinusHash = getPageUrlMinusHash();
+      return text.replace(MATCH_KEY, function (totalMatch, matchPart1) { return matchPart1 + pageUrlMinusHash + '#'; });
     }
 
     bpSVG.getSvg = function() {
