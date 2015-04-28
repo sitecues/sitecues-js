@@ -832,7 +832,7 @@ sitecues.def('zoom', function (zoom, callback) {
         clearTimeout(clearAnimationOptimizationTimer);
         cancelGlideChangeTimer();
         $body.off(ANIMATION_END_EVENTS, onGlideStopped);
-        $(window).off('keyup', zoomStopRequested);
+        $(window).off('keyup', finishGlideIfEnough);
       }
 
       // Scroll content to maximize the use of screen real estate, showing as much content as possible.
