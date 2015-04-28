@@ -22,9 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'util/localization', 'bp/animate', 'platform', 'conf/site',
+    'bp/animate', 'platform', 'conf/site',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, locale, animate, platform, site) {
+              baseController, placement, slider, animate, platform, site) {
 
     /*
      *** Public methods ***
@@ -224,12 +224,10 @@ sitecues.def('bp', function (bp, callback) {
       // Create the svg container
       bpContainer = document.createElement('div');
 
-      bpSVG.html = locale.localizeStrings(bpSVG.html);
-
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-      bpContainer.innerHTML = bpSVG.html;
+      bpContainer.innerHTML = bpSVG.getSvg();
 
       // TODO: Should we remove the commented out code below?
       // Create focus outline element

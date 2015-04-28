@@ -11,7 +11,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   'use strict';
 
-  bpSVG.html = '\
+  var svg = '\
 <svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 868 255" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def">\
@@ -79,6 +79,31 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </svg>\
 <div id="scp-focus-outline" role="presentation"/>\
 ';
+
+  sitecues.use('util/localization', function(locale) {
+    // The base URL for the current page regardless of <base> tag
+    function getOriginalBaseUrl() {
+      var loc = window.location,
+        href = loc.href;
+      return href.substr(0, href.length - loc.hash.length);
+    }
+
+    // Fix relative URLs to that <base> tag doesn't mess them up!
+    // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
+    // when the source document uses a <base> tag.
+    function getTextWithNormalizedUrls(text) {
+      var MATCH_KEY = /(href="|url\()(#)/g,
+        baseUrl = getOriginalBaseUrl();
+      return text.replace(MATCH_KEY, function (totalMatch, matchPart1) { return matchPart1 + baseUrl + '#'; });
+    }
+
+    bpSVG.getSvg = function() {
+      var svgWithNormalizedUrls = getTextWithNormalizedUrls(svg),
+        localizedSvg = locale.localizeStrings(svgWithNormalizedUrls);
+
+      return localizedSvg;
+    };
+  });
 
   // Done.
   callback();
