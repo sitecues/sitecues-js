@@ -84,14 +84,18 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   sitecues.use('util/localization', function(locale) {
     // The original base URL for the current page regardless of <base> tag
-    function getPageUrlMinusHash() {
-      var loc = window.location,
-        href = loc.href;
-      return href.substr(0, href.length - loc.hash.length);
+    function removeHash(loc) {
+      return loc.replace(/\#.*/, '');
+    }
+
+    function getBaseURI() {
+      var link = document.createElement('a');
+      link.href = '';
+      return link.href;
     }
 
     function hasAlteredBaseURI() {
-      return document.baseURI !== location.href;
+      return removeHash(getBaseURI()) !== removeHash(document.location.href);
     }
 
     // Fix relative URLs to that <base> tag doesn't mess them up!
@@ -100,11 +104,13 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     function getTextWithNormalizedUrls(text) {
       if (hasAlteredBaseURI()) {
         var MATCH_KEY = /(href="|url\()(#)/g,
-          pageUrlMinusHash = getPageUrlMinusHash();
+          pageUrlMinusHash = removeHash(document.location.href);
         return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
           return matchPart1 + pageUrlMinusHash + '#';
         });
       }
+
+      return text;
     }
 
     bpSVG.getSvg = function() {
