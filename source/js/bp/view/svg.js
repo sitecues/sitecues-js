@@ -7,7 +7,7 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-sitecues.def('bp/view/svg', 'platform', function (bpSVG, platform, callback) {
+sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   'use strict';
 
@@ -82,7 +82,7 @@ sitecues.def('bp/view/svg', 'platform', function (bpSVG, platform, callback) {
 <div id="scp-focus-outline" role="presentation"/>\
 ';
 
-  sitecues.use('util/localization', function(locale) {
+  sitecues.use('util/localization', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeHash(loc) {
       return loc.replace(/\#.*/, '');
