@@ -102,6 +102,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
     // when the source document uses a <base> tag.
     function getTextWithNormalizedUrls(text) {
+      console.log('Current platform ' + JSON.stringify(platform));
       if (hasAlteredBaseURI() && !platform.isIE9) {
         var MATCH_KEY = /(href="|url\()(#)/g,
           pageUrlMinusHash = removeHash(document.location.href);
