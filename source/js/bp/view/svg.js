@@ -98,12 +98,15 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       return removeHash(getBaseURI()) !== removeHash(document.location.href);
     }
 
+    function isIE9() {
+      return platform.isIE && platform.browser.version === 9;
+    }
+
     // Fix relative URLs to that <base> tag doesn't mess them up!
     // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
     // when the source document uses a <base> tag.
     function getTextWithNormalizedUrls(text) {
-      console.log('Current platform ' + JSON.stringify(platform));
-      if (hasAlteredBaseURI() && !platform.isIE9) {
+      if (hasAlteredBaseURI() && !isIE9()) {
         var MATCH_KEY = /(href="|url\()(#)/g,
           pageUrlMinusHash = removeHash(document.location.href);
         return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
