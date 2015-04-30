@@ -58,12 +58,14 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
-    <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target"/>\
+    <rect id="scp-speech-target" x="500" y="5" width="240" height="125" class="scp-hidden-target"/>\
   </g>\
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
     <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
-    <text id="scp-speech-label" x="583" y="178">{{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
+    <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
+      {{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan>\
+    </text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
   <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\

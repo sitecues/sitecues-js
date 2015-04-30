@@ -77,7 +77,7 @@ sitecues.def('util/localization', function(locale, callback) {
     var lang = locale.getShortWebsiteLang(),
       text = translations[key];
 
-    if (!text) {
+    if (typeof text === 'undefined') {
       // todo: fallback to default?
       SC_DEV && console.log('Unable to get translation for text code: "'+ key + '" and language: "' + lang + '".');
       return '-';
