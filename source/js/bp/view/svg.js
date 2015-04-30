@@ -90,13 +90,21 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       return href.substr(0, href.length - loc.hash.length);
     }
 
+    function hasAlteredBaseURI() {
+      return document.baseURI !== location.href;
+    }
+
     // Fix relative URLs to that <base> tag doesn't mess them up!
     // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
     // when the source document uses a <base> tag.
     function getTextWithNormalizedUrls(text) {
-      var MATCH_KEY = /(href="|url\()(#)/g,
-        pageUrlMinusHash = getPageUrlMinusHash();
-      return text.replace(MATCH_KEY, function (totalMatch, matchPart1) { return matchPart1 + pageUrlMinusHash + '#'; });
+      if (hasAlteredBaseURI()) {
+        var MATCH_KEY = /(href="|url\()(#)/g,
+          pageUrlMinusHash = getPageUrlMinusHash();
+        return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
+          return matchPart1 + pageUrlMinusHash + '#';
+        });
+      }
     }
 
     bpSVG.getSvg = function() {
