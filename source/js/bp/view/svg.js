@@ -7,7 +7,7 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-sitecues.def('bp/view/svg', function (bpSVG, callback) {
+sitecues.def('bp/view/svg', 'platform', function (bpSVG, platform, callback) {
 
   'use strict';
 
@@ -102,7 +102,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
     // when the source document uses a <base> tag.
     function getTextWithNormalizedUrls(text) {
-      if (hasAlteredBaseURI()) {
+      if (hasAlteredBaseURI() && !platform.isIE9) {
         var MATCH_KEY = /(href="|url\()(#)/g,
           pageUrlMinusHash = removeHash(document.location.href);
         return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
