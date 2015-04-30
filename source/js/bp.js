@@ -70,7 +70,6 @@ sitecues.def('bp', function (bp, callback) {
           bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
         }, 10);  // 10ms because IE did not do anything when <10ms....
       }
-
     }
 
     // 1. Badge- or panel- specific view classes
@@ -79,7 +78,7 @@ sitecues.def('bp', function (bp, callback) {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
       classBuilder += 'scp-palette' + getPalette();
-      classBuilder += ' scp-ie9-' + !!platform.browser.isIE9;
+      classBuilder += ' scp-ie9-' + platform.isIE9();
       bpContainer.setAttribute('class', classBuilder);
     }
 

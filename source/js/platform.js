@@ -54,6 +54,11 @@ sitecues.def('platform', function (platformModule, callback) {
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
   })();
 
+  // Convenience method as IE9 is a common issue
+  platformModule.isIE9 = function() {
+    return platformModule.browser.isIE && platformModule.browser.version === 9;
+  };
+
   // Determine which opperating system is being used
   os = platform.indexOf('mac') >-1 ? 'mac' :
        platform.indexOf('win') >-1 ? 'win' :
