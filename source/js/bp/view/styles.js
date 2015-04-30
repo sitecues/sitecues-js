@@ -284,7 +284,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '#scp-bp-container:not(.scp-is-panel) > #scp-svg': {
+        '.scp-want-panel:not(.scp-is-panel) > #scp-svg': {
           'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
