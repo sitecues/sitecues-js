@@ -4,7 +4,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     var FEEDBACK_ENABLED         = 1,
         FEEDBACK_DISABLED        = 0,
-        feedbackTransitionTo        = FEEDBACK_DISABLED,
+        feedbackTransitionTo     = FEEDBACK_DISABLED,
         cssValues                = {},
         enableAnimationDuration  = 1500,
         disableAnimationDuration = 500,
@@ -173,10 +173,11 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       if (feedbackTransitionTo === FEEDBACK_DISABLED) {
 
-        tipsButton.style.opacity                  = 1;
-        settingsButton.style.opacity              = 1;
-        aboutButton.style.opacity                 = 1;
-        feedbackTextarea.style.display            = 'none';
+        tipsButton.style.opacity       = 1;
+        settingsButton.style.opacity   = 1;
+        aboutButton.style.opacity      = 1;
+        feedbackTextarea.style.display = 'none';
+        feedbackContent.style.opacity  = 1;
 
         feedbackAnimation = animate.create({
           'from': currentSVGHeight,
@@ -185,21 +186,18 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'duration': useInstantAnimation ? 1 : disableAnimationDuration,
           'onTick'  : onDisabledTick,
           'onFinish': function () {
-            if (feedbackTransitionTo === FEEDBACK_ENABLED) {
-              feedbackTextarea.style.display = 'block';
-
-            } else {
-              feedbackContent.style.display   = 'none';
-            }
+            feedbackContent.style.display = 'none';
           }
         });
 
       } else {
 
-        tipsButton.style.opacity     = 0;
-        aboutButton.style.opacity    = 0;
-        settingsButton.style.opacity = 0;
-        feedbackButton.style.opacity = 1;
+        tipsButton.style.opacity      = 0;
+        aboutButton.style.opacity     = 0;
+        settingsButton.style.opacity  = 0;
+        feedbackButton.style.opacity  = 1;
+        feedbackContent.style.display = 'block';
+        feedbackContent.style.opacity = 1;
 
         feedbackAnimation = animate.create({
           'from': currentSVGHeight,
@@ -213,8 +211,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         });
 
       }
-
-      feedbackContent.style.display   = 'block';
 
     }
 

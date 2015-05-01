@@ -147,7 +147,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g style="display:none"  id="scp-feedback-content">\
+    <g style="display:none;opacity:0"  id="scp-feedback-content" class="scp-transition-opacity">\
       <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g class="scp-target" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
