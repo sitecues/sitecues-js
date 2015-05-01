@@ -11,7 +11,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   'use strict';
 
-  bpSVG.html = '\
+  var svg = '\
 <svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 868 255" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def">\
@@ -58,12 +58,14 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave3" xlink:href="#scp-wave3-def" class="scp-wave" y="11" x="530"/>\
-    <rect id="scp-speech-target" x="530" y="5" width="193" height="115" class="scp-hidden-target"/>\
+    <rect id="scp-speech-target" x="500" y="5" width="240" height="125" class="scp-hidden-target"/>\
   </g>\
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
     <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
-    <text id="scp-speech-label" x="583" y="178">{{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
+    <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
+      {{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan>\
+    </text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
   <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
@@ -79,6 +81,45 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </svg>\
 <div id="scp-focus-outline" role="presentation"/>\
 ';
+
+  sitecues.use('util/localization', 'platform', function(locale, platform) {
+    // The original base URL for the current page regardless of <base> tag
+    function removeHash(loc) {
+      return loc.replace(/\#.*/, '');
+    }
+
+    function getBaseURI() {
+      var link = document.createElement('a');
+      link.href = '';
+      return link.href;
+    }
+
+    function hasAlteredBaseURI() {
+      return removeHash(getBaseURI()) !== removeHash(document.location.href);
+    }
+
+    // Fix relative URLs to that <base> tag doesn't mess them up!
+    // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
+    // when the source document uses a <base> tag.
+    function getTextWithNormalizedUrls(text) {
+      if (hasAlteredBaseURI() && !platform.isIE9()) {
+        var MATCH_KEY = /(href="|url\()(#)/g,
+          pageUrlMinusHash = removeHash(document.location.href);
+        return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
+          return matchPart1 + pageUrlMinusHash + '#';
+        });
+      }
+
+      return text;
+    }
+
+    bpSVG.getSvg = function() {
+      var svgWithNormalizedUrls = getTextWithNormalizedUrls(svg),
+        localizedSvg = locale.localizeStrings(svgWithNormalizedUrls);
+
+      return localizedSvg;
+    };
+  });
 
   // Done.
   callback();

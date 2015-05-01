@@ -16,17 +16,42 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       return helper.byId(BP_CONST.SPEECH_TARGET_ID);
     }
 
-    function getTTSLabelElement() {
+    function getTTSStateLabelNode() {
       return helper.byId(BP_CONST.SPEECH_STATE_ID).firstChild;
+    }
+
+    function getTTSLabelElement() {
+      return helper.byId(BP_CONST.SPEECH_LABEL_ID);
+    }
+
+    function ensureLabelFitsInPanel() {
+      function setAlignment(alignment) {
+        // alignment is 'start' for left justification, and 'end' for right justification
+        ttsLabelElement.setAttribute('text-anchor', alignment);
+        ttsLabelElement.setAttribute('x', ttsLabelElement.getAttribute('data-x-' + alignment));
+      }
+
+      function getMaxLabelWidth() {
+        // The right side of the speech target, which is almost at the panel's edge
+        // minus the visible left side of the speech button
+        return helper.byId(BP_CONST.SPEECH_TARGET_ID).getBoundingClientRect().right -
+          helper.byId(BP_CONST.HEAD_ID).getBoundingClientRect().left;
+      }
+
+      // Use right justification if label is too large to fit
+      var ttsLabelElement = getTTSLabelElement();
+      var speechLabelWidth = ttsLabelElement.getBoundingClientRect().width;
+      setAlignment(speechLabelWidth > getMaxLabelWidth() ? 'end' : 'start');
     }
 
     function setTTSLabel(text) {
 
-      var label         = getTTSLabelElement(),
+      var speechStateLabel = getTTSStateLabelNode(),
           localizedText = locale.translate(text);
 
-      label.data = localizedText;
+      speechStateLabel.data = localizedText;
 
+      ensureLabelFitsInPanel();
     }
 
     /*

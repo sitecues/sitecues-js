@@ -22,9 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'util/localization', 'bp/animate', 'platform', 'conf/site',
+    'bp/animate', 'platform', 'conf/site',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, locale, animate, platform, site) {
+              baseController, placement, slider, animate, platform, site) {
 
     /*
      *** Public methods ***
@@ -70,7 +70,6 @@ sitecues.def('bp', function (bp, callback) {
           bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
         }, 10);  // 10ms because IE did not do anything when <10ms....
       }
-
     }
 
     // 1. Badge- or panel- specific view classes
@@ -79,7 +78,7 @@ sitecues.def('bp', function (bp, callback) {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
       classBuilder += 'scp-palette' + getPalette();
-      classBuilder += ' scp-ie9-' + !!platform.browser.isIE9;
+      classBuilder += ' scp-ie9-' + platform.isIE9();
       bpContainer.setAttribute('class', classBuilder);
     }
 
@@ -224,12 +223,10 @@ sitecues.def('bp', function (bp, callback) {
       // Create the svg container
       bpContainer = document.createElement('div');
 
-      bpSVG.html = locale.localizeStrings(bpSVG.html);
-
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-      bpContainer.innerHTML = bpSVG.html;
+      bpContainer.innerHTML = bpSVG.getSvg();
 
       // TODO: Should we remove the commented out code below?
       // Create focus outline element

@@ -246,7 +246,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // TODO text needs to fade in at the end
         // todo: looks like this style will apply to all the text nodes, not only sitecues-related: is it what we want?
         'text': {
-          'display': 'none',
+          'visibility': 'hidden',
           'transition': 'opacity 1s',
           'font-family': 'Arial',
           'font-size': '29px',
@@ -262,7 +262,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
         '.scp-is-panel text': {
-          'display': 'block'
+          'visibility': 'visible'
         },
 
         '.fade-in-text text': {
@@ -284,7 +284,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '#scp-bp-container:not(.scp-is-panel) > #scp-svg': {
+        '.scp-want-panel:not(.scp-is-panel) > #scp-svg': {
           'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
@@ -459,6 +459,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#447AC4'
         },
 
+        // .scp-palette-n  = normal
         // .scp-palette-rb = reverse-blue
         // .scp-palette-ry = reverse-yellow
 

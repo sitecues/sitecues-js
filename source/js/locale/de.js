@@ -2,13 +2,13 @@
 Temporary file for German wording.
 todo: remove it when we use API.
  */
-sitecues.def('locale/de', function(german, callback) {
+sitecues.def('locale/de', function(locale_de, callback) {
   'use strict';
 
   // All
   // - lower case
   // - use underscore to concatenate words
-  german.dictionary = {
+  locale_de.dictionary = {
     // ARIA labels
     'sitecues_main_panel': 'sitecues dialog',
     'badge_label': 'sitecues Vergrößerungs und Sprachausgabe Steuerung',

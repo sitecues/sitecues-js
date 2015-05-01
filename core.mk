@@ -50,9 +50,7 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	$(build-dir)/source/js/core.js \
 	source/js/jquery.js \
-	source/js/locale/en.js \
-	source/js/locale/pl.js \
-	source/js/locale/de.js \
+	source/js/locale/*.js \
 	source/js/util/localization.js \
 	source/js/util/localstorage.js \
 	source/js/user.js \

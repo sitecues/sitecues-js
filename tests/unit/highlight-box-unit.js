@@ -33,11 +33,11 @@ describe('highlight-box', function() {
 
   describe('#getValidFoundation()', function () {
 
-    it('Sets removeTemporaryOriginalElement to true if the original element is an <li> because the HLB ' +
-       'module relies upon this variable to determine if the original ' +
+    it('Sets removeTemporaryFoundation to true if the picked element is an <li> because the HLB ' +
+       'module relies upon this variable to determine if the foundation ' +
        'element needs to be removed from the DOM', function (done) {
 
-        var $originalElement = jquery(win.document.getElementById('list-item')),
+        var $picked = jquery(win.document.getElementById('list-item')),
 
             appendStub = sinon.stub(jquery.fn, 'append', function () {
 
@@ -76,7 +76,7 @@ describe('highlight-box', function() {
 
         hlb.setRemoveTemporaryFoundation(false);
 
-        hlb.getValidFoundation($originalElement);
+        hlb.getValidFoundation($picked);
 
         expect(hlb.getRemoveTemporaryFoundation()).to.be.true;
 
@@ -94,7 +94,7 @@ describe('highlight-box', function() {
        'moduel relies upon this variable to determine if the original ' +
        'element needs to be removed from the DOM', function (done) {
 
-        var $originalElement = jquery(win.document.getElementById('paragraph')),
+        var $picked = jquery(win.document.getElementById('paragraph')),
 
             appendStub = sinon.stub(jquery.fn, 'append', function () {
 
@@ -133,7 +133,7 @@ describe('highlight-box', function() {
 
         hlb.setRemoveTemporaryFoundation(false);
 
-        hlb.getValidFoundation($originalElement);
+        hlb.getValidFoundation($picked);
 
         expect(hlb.getRemoveTemporaryFoundation()).to.be.false;
 
@@ -430,7 +430,7 @@ describe('highlight-box', function() {
 
     });
 
-    it('Sets $hlbWrappingElement to an object because $hlbWrappingElement is a private variable in the scope of ' +
+    it('Sets $hlbWrapper to an object because $hlbWrappingElement is a private variable in the scope of ' +
        'the HLB module, which is used by other private functions, and should be assigned a jQuery function.', function (done) {
 
       var paragraph = win.document.getElementById('paragraph'),
@@ -482,7 +482,7 @@ describe('highlight-box', function() {
 
     });
 
-    it('Sets $hlbElement to an object because $hlbElement is a private variable that references ' +
+    it('Sets $hlb to an object because $hlbElement is a private variable that references ' +
        'the element we create that is a result of cloning the original element', function (done) {
 
       var paragraph = win.document.getElementById('paragraph'),
@@ -558,7 +558,7 @@ describe('highlight-box', function() {
 
     });
 
-    it('Sets $hlbElement id attribute because only one HLB can exist at any one moment.', function (done) {
+    it('Sets $hlb id attribute because only one HLB can exist at any one moment.', function (done) {
 
       var paragraph = win.document.getElementById('paragraph'),
           cssStub   = sinon.stub(jquery, 'css', function () {return {'appendTo':function(){}};}),
@@ -737,7 +737,7 @@ describe('highlight-box', function() {
   // The toggleHLB() function is the entry point into opening and closing the HLB.
   describe('#toggleHLB()', function () {
 
-    it('Sets private variable isHLBClosing to true if $hlbElement already exists and undefined is passed to toggleHLB.', function (done) {
+    it('Sets private variable isHLBClosing to true if $hlb already exists and undefined is passed to toggleHLB.', function (done) {
 
       hlb.setHLB(jquery(win.document.getElementById('paragraph2')));
       hlb.setFoundation(jquery(win.document.getElementById('paragraph2')));

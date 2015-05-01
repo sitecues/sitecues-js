@@ -26,7 +26,7 @@ sitecues.def('metrics/badge-hovered', function (badgeHovered, callback) {
 
         // ============= Events Handlers ======================
         // Create an instance on panel show event.
-        sitecues.on('panel/show', function() {
+        sitecues.on('bp/will-expand', function() {
             if (!badgeHovered['data']) {
                 badgeHovered.init();
             }
@@ -39,7 +39,7 @@ sitecues.def('metrics/badge-hovered', function (badgeHovered, callback) {
         });
 
         // Clear an instance data on panel hide event.
-        sitecues.on('panel/hide', function() {
+        sitecues.on('bp/did-shrink', function() {
             badgeHovered.reset();
         });
 

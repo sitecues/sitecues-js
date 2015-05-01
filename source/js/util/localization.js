@@ -8,14 +8,8 @@ sitecues.def('util/localization', function(locale, callback) {
   'use strict';
 
   var translations;
-  var locales = {
-    'english': 'en',
-    'polish': 'pl',
-    'german': 'de'
-  };
-  var modules = [locales['english'], locales['polish'], locales['german']];
 
-  locale.default = locales.english;
+  locale.default = 'en';
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
@@ -80,16 +74,16 @@ sitecues.def('util/localization', function(locale, callback) {
   };
 
   locale.translate = function(key) {
-    var lang = locale.getShortWebsiteLang();
-    try {
-      return translations[key];
-    } catch (e) {
+    var lang = locale.getShortWebsiteLang(),
+      text = translations[key];
+
+    if (typeof text === 'undefined') {
       // todo: fallback to default?
-      console.log('Unable to get translation for text code: "'+ key + '" and language: "' + lang + '".');
+      SC_DEV && console.log('Unable to get translation for text code: "'+ key + '" and language: "' + lang + '".');
+      return '-';
     }
 
-  // todo: request the translation and store them in localstorage or a global variable
-
+    return text;
   };
 
   // Replace each {{keyname}} with the translation using that key
@@ -110,31 +104,24 @@ sitecues.def('util/localization', function(locale, callback) {
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   };
 
+  function getLanguageModuleName(lang) {
+    return 'locale/' + lang;
+  }
+
   // todo: fetch from the server via CORS Ajax
   function getTranslationFile() {
     var lang = locale.getShortWebsiteLang();
-    var moduleName = 'locale/';
-    switch(lang) {
-      case locales.german:
-        moduleName += modules[2]; // e.g. 'locale/german'
-        locale.current = locales.german;
-        break;
-      case locales.polish:
-        moduleName += modules[1]; // e.g. 'locale/polish'
-        locale.current = locales.polish;
-        break;
-      default:
-        moduleName += modules[0]; // e.g. 'locale/english'
-        locale.current = locales.english;
-        break;
-    }
 
-    // moduleName = 'locale/pl'; // todo: remove it, this is for QA
-
-    //todo: maybe, place this code in 'default' switch case
     // use ajax for polish
-    sitecues.use(moduleName, function(lang) {
-      translations = lang.dictionary;
+    sitecues.use(getLanguageModuleName(lang), function(lang) {
+      if (lang) {
+        translations = lang.dictionary;
+      }
+      else {
+        sitecues.use(getLanguageModuleName(locale.default), function(lang) {
+          translations = lang.dictionary;
+        });
+      }
     });
   }
 
