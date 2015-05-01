@@ -147,16 +147,16 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g style="display:none"  class="scp-feedback-content">\
+    <g style="display:none"  id="scp-feedback-content">\
       <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
-      <g id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
+      <g class="scp-target" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
         <use xlink:href="#scp-rating-star-def" x="104" y="254" role="button" aria-label="2 star rating"/>\
         <use xlink:href="#scp-rating-star-def" x="166" y="254" role="button" aria-label="3 star rating"/>\
         <use xlink:href="#scp-rating-star-def" x="228" y="254" role="button" aria-label="4 star rating"/>\
         <use xlink:href="#scp-rating-star-def" x="290" y="254" role="button" aria-label="5 star rating"/>\
       </g>\
-      <g id="scp-feedback-send-button" role="button">\
+      <g id="scp-feedback-send-button" class="scp-target" role="button">\
         <rect x="615" width="150" y="260" height="50" fill="#6B9AE0" rx="20" ry="20"/>\
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
@@ -206,6 +206,11 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
+<div id="feedback-textarea" class="scp-feature-content" style="position:fixed; top: 33px; left: 43px;display:none;">\
+  <div class="scp-feedback-content">\
+     <textarea style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
+  </div>\
+</div>\
 </svg>\
 <div id="scp-focus-outline" role="presentation"/>\
 ';

@@ -219,28 +219,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     }
 
-    function disableButton (element) {
-      element.removeEventListener('mouseenter', onMouseEnter);
-      element.removeEventListener('mouseleave', onMouseLeave);
-      element.removeEventListener('click', onMouseClick);
-    }
-
-    function enableButton (element) {
-      element.addEventListener('mouseenter', onMouseEnter);
-      element.addEventListener('mouseleave', onMouseLeave);
-      element.addEventListener('click', onMouseClick);
-    }
-
     // Add mouse listeners once BP is ready
     sitecues.on('bp/did-complete', initMorePanel);
 
     sitecues.on('bp/toggle-secondary-panel', toggleSecondaryPanel);
 
     sitecues.on('bp/will-shrink', resetMorePanel);
-
-    sitecues.on('bp/disable-button', disableButton);
-
-    sitecues.on('bp/enable-button', enableButton);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

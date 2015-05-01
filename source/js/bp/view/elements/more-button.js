@@ -254,6 +254,8 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
 
+    sitecues.on('bp/toggle-more-button', onMouseClick);
+
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
     //      https://equinox.atlassian.net/browse/EQ-355

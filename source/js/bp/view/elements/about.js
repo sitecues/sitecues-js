@@ -195,7 +195,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         tipsButton.style.opacity                  = 1;
         settingsButton.style.opacity              = 1;
         feedbackButton.style.opacity              = 1;
-        console.log(targetCSSValues.moreBtnTranslateY);
+
         aboutAnimation = animate.create({
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
@@ -203,7 +203,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           'duration': useInstantAnimation ? 1 : disableAnimationDuration,
           'onTick'  : onDisabledTick,
           'onFinish': function () {
-            sitecues.emit('bp/enable-button', aboutButton);
+
             if (aboutTransitionTo === ABOUT_ENABLED) {
               aboutContentButtonContainer.style.opacity = 1;
             } else {
@@ -232,7 +232,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'duration': secondEnableAnimationDuration,
               'onTick'  : onSecondEnableTick,
               'onFinish': function () {
-                sitecues.emit('bp/enable-button', aboutButton);
+
                 if (aboutTransitionTo === ABOUT_ENABLED) {
                   aboutContentButtonContainer.style.opacity = 1;
                 } else {
@@ -246,8 +246,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       }
 
       aboutContent.style.display   = 'block';
-
-      sitecues.emit('bp/disable-button', aboutButton);
 
     }
 

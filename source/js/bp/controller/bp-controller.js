@@ -192,7 +192,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         }
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('info/help');
+        sitecues.emit('bp/toggle-more-button');
       }
       // else if (item.id === 'scp-prev-card') {
       //   switchCard(-1);
