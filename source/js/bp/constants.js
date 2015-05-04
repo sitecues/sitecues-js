@@ -59,7 +59,9 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
-  constants.HOVER_DELAY = 100;
+  constants.HOVER_DELAY_BADGE = 70;
+  constants.HOVER_DELAY_TOOLBAR = 200;
+  constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;
 
   constants.TRANSFORMS = {
     'PANEL': {},
@@ -183,6 +185,9 @@ sitecues.def('bp/constants', function (constants, callback) {
   // Minimum panel size
   constants.MINIMUM_PANEL_WIDTH = 656;
   constants.MINIMUM_PANEL_HEIGHT = 160;
+
+  // Amount toolbar space that will open badge
+  constants.ACTIVE_TOOLBAR_WIDTH = 500;
 
   // Amount of pixels of whitespace at the top of the badge
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)

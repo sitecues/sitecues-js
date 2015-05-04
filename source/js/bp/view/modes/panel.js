@@ -67,12 +67,16 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         window.addEventListener('keydown',   bpController.processKeydown, true);
         window.addEventListener('mousemove', panelController.winMouseMove);
         window.addEventListener('mousedown', panelController.winMouseDown);
+        window.addEventListener('blur', panelController.winBlur);
+        window.addEventListener('mouseout', panelController.winMouseLeave);
       }
 
       function unbindTemporaryMouseHandlers() {
         window.removeEventListener('keydown',   bpController.processKeydown, true);
         window.removeEventListener('mousemove', panelController.winMouseMove);
         window.removeEventListener('mousedown', panelController.winMouseDown);
+        window.removeEventListener('blur', panelController.winBlur);
+        window.removeEventListener('mouseout', panelController.winMouseLeave);
       }
 
       function setPanelExpandedState() {

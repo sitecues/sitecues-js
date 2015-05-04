@@ -248,8 +248,8 @@ sitecues.def('bp', function (bp, callback) {
       badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
       bpContainer.addEventListener('blur', baseController.clearPanelFocus);
-      badgeElement.addEventListener('mouseover', bpController.onMouseEnter);
-      badgeElement.addEventListener('mouseout', bpController.onMouseLeave);
+      badgeElement.addEventListener('mousemove', bpController.onMouseMove);
+      badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }
 
     function isBadgeAnImage (badgeElement) {
