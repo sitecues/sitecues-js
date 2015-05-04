@@ -93,8 +93,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         evt.clientX < middleOfBadge + allowedDistance;
     }
 
-    function isInVisibleBadgeArea(evt, badgeRect) {
+    function isInHorizontalBadgeArea(evt, badgeRect) {
       return evt.clientX >= badgeRect.left && evt.clientX <= badgeRect.right;
+    }
+
+    function isInVerticalBadgeArea(evt, badgeRect) {
+      return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
     }
 
     function onPageBadgeHover() {
@@ -127,31 +131,26 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       // Is the event related to the visible contents of the badge?
       // (as opposed to the hidden areas around the badge)
-      var targetId = evt.target.id,
-          isInSitecuesUI = targetId === BP_CONST.BADGE_ID || targetId === BP_CONST.BP_CONTAINER_ID ||
-            isTargetWithin(evt.target, helper.byId(BP_CONST.MOUSEOVER_TARGET));
+      var badgeRect = getVisibleBadgeRect(),
+        isInBadge = isInHorizontalBadgeArea(evt, badgeRect),
+        isInToolbar = state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
 
-      if (!isInSitecuesUI) {
+      if (!isInVerticalBadgeArea(evt, badgeRect)) {
         return;
       }
 
       // Check if shrinking and need to reopen
       if (state.isShrinking()) {
-        if (isInVisibleBadgeArea) {
+        if (isInBadge) {
           bpc.changeModeToPanel();  // User changed their mind -- reverse course and reopen
         }
         return;
       }
 
-      var
-        badgeRect = getVisibleBadgeRect(),
-        isInBadge = isInVisibleBadgeArea(evt, badgeRect),
-        isInToolbar = !isInBadge && state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
-
       // Use the event
       if (isInToolbar || isInBadge) {
         hoverDelayTimer = setTimeout(bpc.changeModeToPanel,
-          isInToolbar ? BP_CONST.HOVER_DELAY_TOOLBAR : BP_CONST.HOVER_DELAY_BADGE);
+          isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
       }
     };
 

@@ -84,7 +84,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     // @param isFromKeyboard -- optional, if truthy, then the shrink command is from the keyboard (e.g. escape key)
     // bpc.processKeydown, buttonPress, pc.winMouseMove, pc.winMouseDown call this function...
     pc.shrinkPanel = function(isFromKeyboard) {
-      if (!state.isPanel() || state.isShrinking()) {
+      if (state.isShrinking()) {
         return; // Not a panel or is already shrinking -- nothing to do
       }
 
