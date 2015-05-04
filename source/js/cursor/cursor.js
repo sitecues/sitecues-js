@@ -10,8 +10,8 @@ sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform',
-    function (  $, styleService, conf, customCursor, platform) {
+  sitecues.use('jquery', 'style-service', 'conf', 'cursor/css', 'platform',
+    function (  $, styleService, conf, cursorCss, platform) {
 
     var cursorZoom = 1,
         // Regexp is used to match URL in the string given(see below).
@@ -265,7 +265,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = customCursor.getCursorCss(type, size, doUseIECursors);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -290,7 +290,7 @@ sitecues.def('cursor', function (cursor, callback) {
     sitecues.on('zoom', function (pageZoom) {
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-      var newCursorZoom = customCursor.getCursorZoom(pageZoom);
+      var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheets();

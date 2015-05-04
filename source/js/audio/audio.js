@@ -14,7 +14,7 @@ sitecues.def('audio', function (audio, callback) {
 
   'use strict';
 
-  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'util/localization',
+  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'locale',
     function(conf, site, $, builder, platform, locale) {
 
     var ttsOn = false,

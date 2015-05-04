@@ -1,6 +1,6 @@
 sitecues.def('keys', function(keys, callback) {
 
-    sitecues.use('jquery', 'mouse-highlight', 'util/common', 'highlight-box',
+    sitecues.use('jquery', 'mouse-highlight', 'util/common', 'hlb',
       function($, mh, common, hlb) {
 
       var

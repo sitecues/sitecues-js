@@ -62,9 +62,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
-    <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
+    <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value"> </tspan></text>\
     <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
-      {{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan>\
+      {{speech}}<tspan> </tspan><tspan id="scp-speech-state"> </tspan>\
     </text>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
@@ -82,7 +82,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <div id="scp-focus-outline" role="presentation"/>\
 ';
 
-  sitecues.use('util/localization', 'platform', function(locale, platform) {
+  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeHash(loc) {
       return loc.replace(/\#.*/, '');

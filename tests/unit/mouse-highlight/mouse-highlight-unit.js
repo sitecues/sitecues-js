@@ -1,9 +1,9 @@
 /**
  * This file contain unit test(s) for mouse-highlight.js file.
  */
-require('./test/bootstrap');
+require('./../test/bootstrap');
 
-var modulePath = '../../source/js/mouse-highlight',
+var modulePath = '../../../source/js/mouse-highlight/mouse-highlight',
   mh = require(modulePath),
   $ = jquery;
 
@@ -172,6 +172,6 @@ describe('mouse-highlight', function () {
     // Unload module from nodejs's cache
     var name = require.resolve(modulePath);
     delete require.cache[name];
-    require('./test/discharge');  // To unload all of the node modules we use. Allows tests to be run in parallel.
+    require('./../test/discharge');  // To unload all of the node modules we use. Allows tests to be run in parallel.
   });
 });

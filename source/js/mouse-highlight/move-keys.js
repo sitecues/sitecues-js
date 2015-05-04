@@ -1,6 +1,6 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
+  sitecues.use('jquery', 'mouse-highlight', 'hlb', 'platform', 'hlb/dimmer', 'util/common',
     'mouse-highlight/picker', 'zoom', 'util/geo', 'fixed-fixer',
     function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, fixedFixer) {
 

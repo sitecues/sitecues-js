@@ -4,7 +4,7 @@
 
 /*
  */
-sitecues.def('util/localization', function(locale, callback) {
+sitecues.def('locale', function(locale, callback) {
   'use strict';
 
   var translations;

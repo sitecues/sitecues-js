@@ -2,7 +2,7 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-sitecues.def('highlight-box', function(highlightBox, callback) {
+sitecues.def('hlb', function(hlb, callback) {
 
   'use strict';
 
@@ -698,7 +698,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       //////////////////////////////////
 
       // Return the current DOM element for the HLB or falsey value if there is no HLB
-      highlightBox.getElement = function() {
+      hlb.getElement = function() {
         return $hlb && $hlb[0];
       };
 

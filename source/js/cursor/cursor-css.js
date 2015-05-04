@@ -1,4 +1,4 @@
-sitecues.def('cursor/custom', function (customCursor, callback) {
+sitecues.def('cursor/css', function (cursorCss, callback) {
   'use strict';
 
   // Viewbox coordinates are multiplied by 10 so that we can remove coordinates from our decimal places
@@ -44,7 +44,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
      * @param sizeRatio a number > 1 (e.g. 2 = 2x)
      * @param pixelRatio = 1 for normal, 2 for retina cursor
      */
-    customCursor.getCursorCss = function(type, sizeRatio, doUseAjaxCursors) {
+    cursorCss.getCursorCss = function(type, sizeRatio, doUseAjaxCursors) {
       var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
         pixelRatio = doUseRetinaCursors ? 2 : 1,
         cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
@@ -120,7 +120,7 @@ sitecues.def('cursor/custom', function (customCursor, callback) {
       return Math.max(Math.min(rounded, MAX_AJAX_CURSOR_SIZE), MIN_AJAX_CURSOR_SIZE);
     }
 
-    customCursor.getCursorZoom = function(pageZoom) {
+    cursorCss.getCursorZoom = function(pageZoom) {
       var zoomDiff = pageZoom - zoomModule.min,
       // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
       // when on Windows OS, otherwise the cursor intermittently can become a large black square.
