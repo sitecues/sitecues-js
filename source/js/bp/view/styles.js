@@ -384,6 +384,32 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'text-align'   : 'center',
           'background'   : '#447AC4',
           'transform'    : 'none !important'
+        },
+
+        '.scp-cards': {
+          'position': 'relative',
+          'font-family': 'Arial',
+          'top': '170px',
+          'left': '130px',
+          'width': '340px',
+          'opacity': 0
+        },
+
+        '.scp-card': {
+          'position': 'absolute',
+          'display' : 'none'
+        },
+
+        '.scp-card p': {
+          'font-size':'20px'
+        },
+
+        '#scp-arrows>text': {
+          'font-size': '44px'
+        },
+
+        '.active': {
+          'display': 'block'
         }
       },
 

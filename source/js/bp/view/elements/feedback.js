@@ -4,7 +4,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     var FEEDBACK_ENABLED         = 1,
         FEEDBACK_DISABLED        = 0,
-        feedbackTransitionTo     = FEEDBACK_DISABLED,
         cssValues                = {},
         enableAnimationDuration  = 1500,
         disableAnimationDuration = 500,
@@ -18,7 +17,13 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         shadowSVG,
         bottomSVG,
         moreButton,
+        tipsContent,
+        arrowButtons,
+        settingsContent,
         feedbackContent,
+        aboutContent,
+        settingsCards,
+        tipsCards,
         feedbackTextarea,
         moreBtnTranslate,
         feedbackBtnTransform,
@@ -42,7 +47,13 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
+      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
+      aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
+      settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
+      tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
+      arrowButtons                = byId(BP_CONST.ARROWS_ID);
       feedbackTextarea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       moreBtnTranslate            = transform.getTransform(moreButton.getAttribute('transform')).translate;
       feedbackBtnTransform        = transform.getTransform(feedbackButton.getAttribute('transform'));
@@ -87,21 +98,21 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     function toggleFeedback () {
 
-      if (feedbackTransitionTo === FEEDBACK_ENABLED) {
-        feedbackTransitionTo = FEEDBACK_DISABLED;
+      if (state.get('feedbackMode') === FEEDBACK_ENABLED) {
+        state.set('feedbackMode', FEEDBACK_DISABLED);
       } else {
-        feedbackTransitionTo = FEEDBACK_ENABLED;
+        state.set('feedbackMode', FEEDBACK_ENABLED);
       }
 
-      SC_DEV && console.log('Transitioning about mode: ' + feedbackTransitionTo);
+      SC_DEV && console.log('Transitioning about mode: ' + state.get('feedbackMode'));
 
       animateFeedback();
 
     }
 
     function resetFeedback () {
-      if (feedbackTransitionTo !== FEEDBACK_DISABLED) {
-        feedbackTransitionTo = FEEDBACK_DISABLED;
+      if (state.get('feedbackMode') !== FEEDBACK_DISABLED) {
+        state.set('feedbackMode', FEEDBACK_DISABLED);
         animateFeedback(true);
       }
     }
@@ -117,23 +128,24 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     // Fade out the other buttons ()
     function animateFeedback (useInstantAnimation) {
 
-      var currentOutlineHeight        = getCurrentOutlineHeight(),
-          currentSVGHeight            = parseFloat(mainSVG.style.height),
-          currentSVGTranslateY        = transform.getTransform(mainSVG.style.transform).translate.top,
-          currentBottomSVGTranslateY  = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
-          currentMoreBtnTransform     = transform.getTransform(moreButton.getAttribute('transform')),
-          currentMoreBtnTranslate     = currentMoreBtnTransform.translate,
-          currentMoreBtnTranslateX    = currentMoreBtnTranslate.left,
-          currentMoreBtnTranslateY    = currentMoreBtnTranslate.top,
-          currentMoreBtnScale         = currentMoreBtnTransform.scale,
-          currentMoreBtnRotate        = currentMoreBtnTransform.rotate,
-          currentfeedbackBtnTransform    = transform.getTransform(feedbackButton.getAttribute('transform')),
-          currentFeedbackBtnTranslateX   = currentfeedbackBtnTransform.translate.left,
-          currentFeedbackBtnTranslateY   = currentfeedbackBtnTransform.translate.top,
-          currentFeedbackBtnScale        = currentfeedbackBtnTransform.scale,
-
-          targetCSSValues             = cssValues[feedbackTransitionTo],
-          targetSVGTranslateY         = feedbackTransitionTo === FEEDBACK_ENABLED ? -(targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[FEEDBACK_DISABLED].svgTranslateY;
+      var feedbackTransitionTo         = state.get('feedbackMode'),
+          currentOutlineHeight         = getCurrentOutlineHeight(),
+          currentSVGHeight             = parseFloat(mainSVG.style.height),
+          currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
+          currentBottomSVGTranslateY   = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
+          currentMoreBtnTransform      = transform.getTransform(moreButton.getAttribute('transform')),
+          currentMoreBtnTranslate      = currentMoreBtnTransform.translate,
+          currentMoreBtnTranslateX     = currentMoreBtnTranslate.left,
+          currentMoreBtnTranslateY     = currentMoreBtnTranslate.top,
+          currentMoreBtnScale          = currentMoreBtnTransform.scale,
+          currentMoreBtnRotate         = currentMoreBtnTransform.rotate,
+          currentfeedbackBtnTransform  = transform.getTransform(feedbackButton.getAttribute('transform')),
+          currentFeedbackBtnTranslateX = currentfeedbackBtnTransform.translate.left,
+          currentFeedbackBtnTranslateY = currentfeedbackBtnTransform.translate.top,
+          currentFeedbackBtnScale      = currentfeedbackBtnTransform.scale,
+          targetCSSValues              = cssValues[feedbackTransitionTo],
+          targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
+          targetSVGTranslateY          = feedbackTransitionTo === FEEDBACK_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[FEEDBACK_DISABLED].svgTranslateY;
 
       function onDisabledTick (animationState) {
 
@@ -142,12 +154,9 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
         mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
-
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
-
+        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
         feedbackButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
-
         outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
@@ -177,7 +186,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         settingsButton.style.opacity   = 1;
         aboutButton.style.opacity      = 1;
         feedbackTextarea.style.display = 'none';
-        feedbackContent.style.opacity  = 1;
+        feedbackContent.style.opacity  = 0;
 
         feedbackAnimation = animate.create({
           'from': currentSVGHeight,
@@ -192,12 +201,21 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       } else {
 
+        arrowButtons.style.opacity    = 0;
         tipsButton.style.opacity      = 0;
         aboutButton.style.opacity     = 0;
         settingsButton.style.opacity  = 0;
         feedbackButton.style.opacity  = 1;
         feedbackContent.style.display = 'block';
         feedbackContent.style.opacity = 1;
+        tipsContent.style.opacity     = 0;
+        settingsContent.style.opacity = 0;
+        aboutContent.style.opacity    = 0;
+        tipsCards.style.opacity       = 0;
+        settingsCards.style.opacity   = 0;
+        state.set('tipsMode', 0);
+        state.set('settingsMode', 0);
+        state.set('aboutMode', 0);
 
         feedbackAnimation = animate.create({
           'from': currentSVGHeight,
@@ -207,6 +225,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'onTick'  : onEnableTick,
           'onFinish': function () {
             feedbackTextarea.style.display = 'block';
+            arrowButtons.style.display     = 'none';
           }
         });
 

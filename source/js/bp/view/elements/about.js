@@ -4,7 +4,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
     var ABOUT_ENABLED                 = 1,
         ABOUT_DISABLED                = 0,
-        aboutTransitionTo             = ABOUT_DISABLED,
         cssValues                     = {},
         firstEnableAnimationDuration  = 1500,
         secondEnableAnimationDuration = 600,
@@ -19,9 +18,16 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         shadowSVG,
         bottomSVG,
         moreButton,
+        tipsContent,
+        settingsContent,
+        feedbackContent,
+        feedbackTextArea,
         aboutContent,
         aboutContentButtonContainer,
         aboutContentImage,
+        settingsCards,
+        tipsCards,
+        arrowButtons,
         moreBtnTranslate,
         aboutBtnTransform,
         isInitialized = false;
@@ -44,8 +50,15 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
+      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
+      feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
+      feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
       aboutContentButtonContainer = byId(BP_CONST.ABOUT_CONTENT_BUTTON_CONTAINER_ID);
+      settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
+      tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
+      arrowButtons                = byId(BP_CONST.ARROWS_ID);
       aboutContentImage           = byId(BP_CONST.ABOUT_CONTENT_IMAGE_ID);
       moreBtnTranslate            = transform.getTransform(moreButton.getAttribute('transform')).translate;
       aboutBtnTransform           = transform.getTransform(aboutButton.getAttribute('transform'));
@@ -92,21 +105,21 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
     function toggleAbout () {
 
-      if (aboutTransitionTo === ABOUT_ENABLED) {
-        aboutTransitionTo = ABOUT_DISABLED;
+      if (state.get('aboutMode') === ABOUT_ENABLED) {
+        state.set('aboutMode', ABOUT_DISABLED);
       } else {
-        aboutTransitionTo = ABOUT_ENABLED;
+        state.set('aboutMode', ABOUT_ENABLED);
       }
 
-      SC_DEV && console.log('Transitioning about mode: ' + aboutTransitionTo);
+      SC_DEV && console.log('Transitioning about mode: ' + state.get('aboutMode'));
 
       animateAbout();
 
     }
 
     function resetAbout () {
-      if (aboutTransitionTo !== ABOUT_DISABLED) {
-        aboutTransitionTo = ABOUT_DISABLED;
+      if (state.get('aboutMode') !== ABOUT_DISABLED) {
+        state.set('aboutMode', ABOUT_DISABLED);
         animateAbout(true);
       }
     }
@@ -122,7 +135,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
     // Fade out the other buttons ()
     function animateAbout (useInstantAnimation) {
 
-      var currentOutlineHeight        = getCurrentOutlineHeight(),
+      var aboutTransitionTo           = state.get('aboutMode'),
+          currentOutlineHeight        = getCurrentOutlineHeight(),
           currentSVGHeight            = parseFloat(mainSVG.style.height),
           currentSVGTranslateY        = transform.getTransform(mainSVG.style.transform).translate.top,
           currentBottomSVGTranslateY  = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
@@ -139,7 +153,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           currentAboutBtnRotate       = currentAboutBtnTransform.rotate,
           currentAboutImageTranslateX = transform.getTransform(aboutContentImage.getAttribute('transform')).translate.left,
           targetCSSValues             = cssValues[aboutTransitionTo],
-          targetSVGTranslateY         = aboutTransitionTo === ABOUT_ENABLED ? -(targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[ABOUT_DISABLED].svgTranslateY;
+          targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
+          targetSVGTranslateY         = aboutTransitionTo === ABOUT_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[ABOUT_DISABLED].svgTranslateY;
 
       function onDisabledTick (animationState) {
 
@@ -150,7 +165,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
+        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
 
         aboutContentImage.setAttribute('transform', transform.getTransformString(getValueInTime(currentAboutImageTranslateX, targetCSSValues.aboutImageTranslateX, t), 0));
 
@@ -214,9 +229,22 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
       } else {
 
-        tipsButton.style.opacity     = 0;
-        settingsButton.style.opacity = 0;
-        feedbackButton.style.opacity = 0;
+        arrowButtons.style.opacity    = 0;
+        tipsButton.style.opacity      = 0;
+        settingsButton.style.opacity  = 0;
+        feedbackButton.style.opacity  = 0;
+        aboutButton.style.opacity     = 1;
+        aboutContent.style.opacity    = 1;
+        aboutContentButtonContainer.style.display = 'block';
+        tipsContent.style.opacity     = 0;
+        settingsContent.style.opacity = 0;
+        feedbackContent.style.opacity = 0;
+        tipsCards.style.opacity       = 0;
+        settingsCards.style.opacity   = 0;
+        feedbackTextArea.style.display = 'none';
+        state.set('tipsMode', 0);
+        state.set('settingsMode', 0);
+        state.set('feedbackMode', 0);
 
         aboutAnimation = animate.create({
           'from': currentAboutImageTranslateX,
@@ -232,12 +260,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'duration': secondEnableAnimationDuration,
               'onTick'  : onSecondEnableTick,
               'onFinish': function () {
-
-                if (aboutTransitionTo === ABOUT_ENABLED) {
-                  aboutContentButtonContainer.style.opacity = 1;
-                } else {
-                  aboutContent.style.display   = 'none';
-                }
+                aboutContentButtonContainer.style.opacity = 1;
+                arrowButtons.style.display = 'none';
               }
             });
           }

@@ -77,7 +77,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <text class="scp-target" id="scp-about-label" role="link" data-feature="about" x="685" y="178">About</text>\
   </g>\
   <g class="scp-feature-content">\
-    <g style="display:none" class="scp-tips-content scp-settings-content">\
+    <g style="display:none;opacity:0;" id="scp-arrows" class="scp-transition-opacity">\
       <text id="scp-prev-card" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
@@ -85,10 +85,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
          &#9658;\
       </text>\
     </g>\
-    <g style="display:none"  class="scp-tips-content" clip-path="url(#scp-outline-clip-def)">\
+    <g style="display:none" id="scp-tips-content" clip-path="url(#scp-outline-clip-def)">\
       <foreignObject>\
-        <div class="scp-cards">\
-          <div class="scp-card">\
+        <div id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
+          <div class="scp-card active">\
             <h1>Welcome</h1>\
             <p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</p>\
             <p>Use the arrow buttons at the top right of this panel to read more tips.</p>\
@@ -117,10 +117,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g style="display:none"  class="scp-settings-content" clip-path="url(#scp-outline-clip-def)">\
+    <g style="display:none;"  id="scp-settings-content" clip-path="url(#scp-outline-clip-def)">\
       <foreignObject>\
-        <div class="scp-cards">\
-          <div class="scp-card">\
+        <div id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
+          <div class="scp-card active">\
             <h1>Settings</h1>\
             <p>Get more out of sitecues zoom and speech tools by adjusting the settings.</p>\
             <p>Use the arrow buttons at the top right of this panel to find all the provided settings.</p>\
@@ -147,7 +147,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         </div>\
       </foreignObject>\
     </g>\
-    <g style="display:none;opacity:0"  id="scp-feedback-content" class="scp-transition-opacity">\
+    <g id="scp-feedback-content" class="scp-transition-opacity" style="display:none;opacity:0">\
       <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g class="scp-target" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
@@ -202,7 +202,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <g id="scp-more-button-group" role="button" aria-label="View more options">\
     <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
     <rect id="scp-more-button-transparent-target" fill="transparent" x="-39" y="-39" width="78" height="78"  class="scp-target" role="presentation"/>\
-    <path id="scp-more-arrow" class="pointer" fill="#777777" transform="scale(0.8)" d="m20.5,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
+    <path id="scp-more-arrow" class="pointer" fill="#777777" transform="scale(0.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

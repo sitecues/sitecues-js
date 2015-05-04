@@ -77,6 +77,14 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.FEEDBACK_CONTENT_ID      = 'scp-feedback-content';
   constants.FEEDBACK_TEXTAREA        = 'feedback-textarea';
 
+  constants.SETTINGS_CONTENT_ID      = 'scp-settings-content';
+  constants.SETTINGS_CARDS_ID        = 'scp-settings-cards';
+
+  constants.TIPS_CONTENT_ID          = 'scp-tips-content';
+  constants.TIPS_CARDS_ID            = 'scp-tips-cards';
+
+  constants.ARROWS_ID                = 'scp-arrows';
+
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
   constants.TRANSFORMS = {

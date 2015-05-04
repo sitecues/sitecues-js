@@ -190,7 +190,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       cancelAnimations();
 
       mouseLeaveAnimation = animate.create(moreButton, {
-        'transform'   : transform.getTransformString(currentTranslate.left, currentTranslate.top, 1)
+        'transform'   : transform.getTransformString(currentTranslate.left, currentTranslate.top, 1, DISABLED_BUTTON_ROTATION)
       }, {
         'duration'    : 1,
         'useAttribute': true,

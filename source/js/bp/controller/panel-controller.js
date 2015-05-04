@@ -66,6 +66,11 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       // If the morePanel is already active, then we deactivate it and set the focusIndex to 0.
       baseController.clearPanelFocus();
 
+
+      state.set('transitionTo', BP_CONST.BADGE_MODE);
+      state.set('featurePanelName', '');
+      state.set('isShrinkingFromKeyboard', isFromKeyboard);
+
       /*
         bp/will-shrink sets and removes attributes used for screen readers.
         bp/will-shrink removes mousedown, mousemove, and keydown event listeners bound to the window.
@@ -73,10 +78,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         bp/will-shrink removes click handler for toggling speech
        */
       sitecues.emit('bp/will-shrink');
-
-      state.set('transitionTo', BP_CONST.BADGE_MODE);
-      state.set('featurePanelName', '');
-      state.set('isShrinkingFromKeyboard', isFromKeyboard);
 
       // If the secondary panel is active, deactivate it.
       if (state.isSecondaryPanelRequested()) {
