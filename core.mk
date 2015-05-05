@@ -121,6 +121,7 @@ files=\
 	source/js/metrics/badge-hovered.js \
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics/zoom-changed.js \
+	source/js/metrics/tts-requested.js \
 	source/js/metrics/metrics.js \
 
 ################################################################################
