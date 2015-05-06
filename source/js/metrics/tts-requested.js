@@ -77,6 +77,10 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
       TTSRequested['data'] && TTSRequested.update(metrics.data);
     });
 
+    sitecues.on('audio/loaded', function(requestTime) {
+      TTSRequested.data.request_time = requestTime;
+    });
+
     // Clear an instance data on hlb opened(ready) event.
     sitecues.on('hlb/closed', function() {
       TTSRequested.send();
