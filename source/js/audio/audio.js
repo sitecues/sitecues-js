@@ -47,7 +47,7 @@ sitecues.def('audio', function (audio, callback) {
       var text = builder.getText($content);
       if (text) {
         var TTSUrl = getTTSUrl(text, $content);
-        getAudioPlayer().playAudioSrc();
+        getAudioPlayer().playAudioSrc(TTSUrl);
         sitecues.emit('hlb/speech-play', TTSUrl);
         addStopAudioHandlers();
       }

@@ -5,7 +5,7 @@
  * Create and send a metric event when the user requests TTS with HLB.
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
-// todo: bug with the undefined request
+
 sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
 
   var SPEECH_TRIGGERS = ['space', 'shift', 'shift+m', 'shift+a'];
@@ -16,8 +16,7 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
     'trigger': SPEECH_TRIGGERS[0],       // For now, it's always HLB
     'audio_format': TTS_AUDIO_FORMATS[0],
     'char_count': 0,
-    'request_time': 0,                   // The number of milliseconds the TTS request took to complete.
-    'vcue': 0
+    'request_time': 0                   // The number of milliseconds the TTS request took to complete.
   };
 
   sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
