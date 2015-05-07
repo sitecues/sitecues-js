@@ -137,6 +137,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
       var aboutTransitionTo           = state.get('aboutMode'),
           currentOutlineHeight        = getCurrentOutlineHeight(),
+          fromCSSValues               = aboutTransitionTo === ABOUT_DISABLED ? cssValues[ABOUT_ENABLED] : cssValues[ABOUT_DISABLED],
+          targetCSSValues             = cssValues[aboutTransitionTo],
           currentSVGHeight            = parseFloat(mainSVG.style.height),
           currentSVGTranslateY        = transform.getTransform(mainSVG.style.transform).translate.top,
           currentBottomSVGTranslateY  = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
@@ -152,9 +154,10 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           currentAboutBtnScale        = currentAboutBtnTransform.scale,
           currentAboutBtnRotate       = currentAboutBtnTransform.rotate,
           currentAboutImageTranslateX = transform.getTransform(aboutContentImage.getAttribute('transform')).translate.left,
-          targetCSSValues             = cssValues[aboutTransitionTo],
           targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
           targetSVGTranslateY         = aboutTransitionTo === ABOUT_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[ABOUT_DISABLED].svgTranslateY;
+
+      aboutAnimation && aboutAnimation.cancel();
 
       function onDisabledTick (animationState) {
 
@@ -215,7 +218,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
         }, {
-          'duration': useInstantAnimation ? 1 : disableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(disableAnimationDuration, fromCSSValues.svgHeight, targetCSSValues.svgHeight, currentSVGHeight),
           'onTick'  : onDisabledTick,
           'onFinish': function () {
 
@@ -250,14 +253,14 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           'from': currentAboutImageTranslateX,
           'to'  : targetCSSValues.aboutImageTranslateX
         }, {
-          'duration': firstEnableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(firstEnableAnimationDuration, fromCSSValues.aboutImageTranslateX, targetCSSValues.aboutImageTranslateX, currentAboutImageTranslateX),
           'onTick'  : onFirstEnableTick,
           'onFinish': function () {
             aboutAnimation = animate.create({
               'from': currentSVGHeight,
               'to'  : targetCSSValues.svgHeight
             }, {
-              'duration': secondEnableAnimationDuration,
+              'duration': useInstantAnimation ? 1 : animate.getDuration(secondEnableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
               'onTick'  : onSecondEnableTick,
               'onFinish': function () {
                 aboutContentButtonContainer.style.opacity = 1;

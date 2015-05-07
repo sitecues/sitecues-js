@@ -129,6 +129,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function animateTips (useInstantAnimation) {
 
       var tipsTransitionTo             = state.get('tipsMode'),
+          targetCSSValues              = cssValues[tipsTransitionTo],
+          fromCSSValues                = tipsTransitionTo === TIPS_DISABLED ? cssValues[TIPS_ENABLED] : cssValues[TIPS_DISABLED],
           currentOutlineHeight         = getCurrentOutlineHeight(),
           currentSVGHeight             = parseFloat(mainSVG.style.height),
           currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
@@ -143,9 +145,10 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           currentTipsBtnTranslateX     = currentTipsBtnTransform.translate.left,
           currentTipsBtnTranslateY     = currentTipsBtnTransform.translate.top,
           currentTipsBtnScale          = currentTipsBtnTransform.scale,
-          targetCSSValues              = cssValues[tipsTransitionTo],
           targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
           targetSVGTranslateY          = tipsTransitionTo === TIPS_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[TIPS_DISABLED].svgTranslateY;
+
+      tipsAnimation && tipsAnimation.cancel();
 
       function onDisabledTick (animationState) {
 
@@ -194,7 +197,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
         }, {
-          'duration': useInstantAnimation ? 1 : disableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(disableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onDisabledTick,
           'onFinish': function () {
             tipsContent.style.display  = 'none';
@@ -209,11 +212,13 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 0;
         tipsContent.style.display     = 'block';
+        tipsCards.style.display       = 'block';
         arrowButtons.style.display    = 'block';
         settingsContent.style.opacity = 0;
         feedbackContent.style.opacity = 0;
         aboutContent.style.opacity    = 0;
         settingsCards.style.opacity   = 0;
+        settingsCards.style.display   = 'none';
         feedbackTextArea.style.display = 'none';
         state.set('settingsMode', 0);
         state.set('feedbackMode', 0);
@@ -223,7 +228,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
         }, {
-          'duration': enableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(enableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onEnableTick,
           'onFinish': function () {
             tipsCards.style.opacity   = 1;

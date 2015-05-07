@@ -78,7 +78,7 @@ sitecues.def('animate', function (animate, callback) {
 
       this.animationStartTime = Date.now();
       this.animationFn        = options.animationFn ? animationFunctions[options.animationFn] : animationFunctions[defaultAnimation];
-      this.duration           = options.duration || options;
+      this.duration           = options.duration || options || 1;
 
       for (var prop in CSSProperties) {
         if (CSSProperties.hasOwnProperty(prop)) {
@@ -133,7 +133,7 @@ sitecues.def('animate', function (animate, callback) {
       this.onTick             = options.onTick;
       this.onFinish           = options.onFinish;
       this.animationFn        = options.animationFn ? animationFunctions[options.animationFn] : animationFunctions[defaultAnimation];
-      this.duration           = options.duration;
+      this.duration           = options.duration || 1;
       this.animationStartTime = Date.now();
       this.animationId        = this.tick(); // Start the animation automatically.
     }
@@ -185,6 +185,10 @@ sitecues.def('animate', function (animate, callback) {
         return new ArbitraryAnimate(element, CSSProperties);
       }
       return new Animate(element, CSSProperties, options);
+    };
+
+    animate.getDuration = function (duration, from, to, currentVal) {
+      return Math.abs(((to - currentVal) / (to - from))) * duration;
     };
 
     callback();

@@ -129,6 +129,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     function animateFeedback (useInstantAnimation) {
 
       var feedbackTransitionTo         = state.get('feedbackMode'),
+          targetCSSValues              = cssValues[feedbackTransitionTo],
+          fromCSSValues                = feedbackTransitionTo === FEEDBACK_DISABLED ? cssValues[FEEDBACK_ENABLED] : cssValues[FEEDBACK_DISABLED],
           currentOutlineHeight         = getCurrentOutlineHeight(),
           currentSVGHeight             = parseFloat(mainSVG.style.height),
           currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
@@ -143,9 +145,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           currentFeedbackBtnTranslateX = currentfeedbackBtnTransform.translate.left,
           currentFeedbackBtnTranslateY = currentfeedbackBtnTransform.translate.top,
           currentFeedbackBtnScale      = currentfeedbackBtnTransform.scale,
-          targetCSSValues              = cssValues[feedbackTransitionTo],
           targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
           targetSVGTranslateY          = feedbackTransitionTo === FEEDBACK_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[FEEDBACK_DISABLED].svgTranslateY;
+
+      feedbackAnimation && feedbackAnimation.cancel();
 
       function onDisabledTick (animationState) {
 
@@ -192,7 +195,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
         }, {
-          'duration': useInstantAnimation ? 1 : disableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(disableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onDisabledTick,
           'onFinish': function () {
             feedbackContent.style.display = 'none';
@@ -221,7 +224,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'from': currentSVGHeight,
           'to'  : targetCSSValues.svgHeight
         }, {
-          'duration': enableAnimationDuration,
+          'duration': useInstantAnimation ? 1 : animate.getDuration(enableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onEnableTick,
           'onFinish': function () {
             feedbackTextarea.style.display = 'block';
