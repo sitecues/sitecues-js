@@ -183,6 +183,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
       }
 
+      sitecues.emit('bp/do-disable-button', tipsButton);
+
       if (tipsTransitionTo === TIPS_DISABLED) {
 
         tipsButton.style.opacity       = 1;
@@ -202,6 +204,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'onFinish': function () {
             tipsContent.style.display  = 'none';
             arrowButtons.style.display = 'none';
+            sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
 
@@ -233,6 +236,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'onFinish': function () {
             tipsCards.style.opacity   = 1;
             arrowButtons.style.opacity    = 1;
+            sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
 

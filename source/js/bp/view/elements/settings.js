@@ -183,6 +183,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
       }
 
+      sitecues.emit('bp/do-disable-button', settingsButton);
+
       if (settingsTransitionTo === SETTINGS_DISABLED) {
 
         tipsButton.style.opacity       = 1;
@@ -202,6 +204,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
           'onFinish': function () {
             settingsContent.style.display = 'none';
             arrowButtons.style.display    = 'none';
+            sitecues.emit('bp/do-enable-button', settingsButton);
           }
         });
 
@@ -212,7 +215,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 1;
         settingsContent.style.display = 'block';
+        settingsCards.style.display   = 'block';
         arrowButtons.style.display    = 'block';
+        settingsContent.style.opacity = 1;
         tipsContent.style.opacity     = 0;
         feedbackContent.style.opacity = 0;
         aboutContent.style.opacity    = 0;
@@ -232,6 +237,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
           'onFinish': function () {
             settingsCards.style.opacity   = 1;
             arrowButtons.style.opacity    = 1;
+            sitecues.emit('bp/do-enable-button', settingsButton);
           }
         });
 

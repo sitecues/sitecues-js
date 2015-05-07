@@ -207,6 +207,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
       }
 
+      sitecues.emit('bp/do-disable-button', aboutButton);
+
       if (aboutTransitionTo === ABOUT_DISABLED) {
 
         aboutContentButtonContainer.style.opacity = 0;
@@ -221,12 +223,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           'duration': useInstantAnimation ? 1 : animate.getDuration(disableAnimationDuration, fromCSSValues.svgHeight, targetCSSValues.svgHeight, currentSVGHeight),
           'onTick'  : onDisabledTick,
           'onFinish': function () {
-
-            if (aboutTransitionTo === ABOUT_ENABLED) {
-              aboutContentButtonContainer.style.opacity = 1;
-            } else {
-              aboutContent.style.display   = 'none';
-            }
+            aboutContent.style.display   = 'none';
+            sitecues.emit('bp/do-enable-button', aboutButton);
           }
         });
 
@@ -265,6 +263,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'onFinish': function () {
                 aboutContentButtonContainer.style.opacity = 1;
                 arrowButtons.style.display = 'none';
+                sitecues.emit('bp/do-enable-button', aboutButton);
               }
             });
           }
