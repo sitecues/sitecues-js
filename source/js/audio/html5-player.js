@@ -23,19 +23,20 @@ sitecues.def('audio/html5-player', function (player, callback) {
   player.playAudioSrc = function(url) {
     var t = 0;
     var audioElement = new Audio();
+
     // Metrics Start
-    sitecues.$(audioElement)[0].addEventListener('loadeddata', function() {
-      sitecues.emit('audio/loaded', new Date - t);
+    sitecues.$(audioElement)[0].addEventListener('playing', function() {
+      sitecues.emit('audio/playing', new Date - t);
     });
+
     sitecues.$(audioElement)[0].addEventListener('loadstart', function() {
       t = new Date();
     });
+
     // Metrics End
     audioElement.src = ''; // Clean up
     sitecues.$(audioElement).one('canplay', playIt);
-
     audioElement.src = url;
-
     audioElements.push(audioElement);
   };
 
@@ -59,7 +60,7 @@ sitecues.def('audio/html5-player', function (player, callback) {
    */
   player.stop = function () {
     audioElements.forEach(function(audioElement) {
-      sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
+      sitecues.$(audioElement).off('canplaythrough'); // Don't fire notification to play if we haven't played yet
       sitecues.$(audioElement).off('ended');
       // We can only pause in IE9 if there is enough data
       // for the current and at least the next frame

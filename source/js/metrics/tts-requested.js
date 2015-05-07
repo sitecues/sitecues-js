@@ -77,7 +77,7 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
       TTSRequested['data'] && TTSRequested.update(metrics.data);
     });
 
-    sitecues.on('audio/loaded', function(requestTime) {
+    sitecues.on('audio/playing', function(requestTime) {
       TTSRequested.data.request_time = requestTime;
     });
 

@@ -43,7 +43,7 @@ sitecues.def('audio/safari-player', function (player, callback) {
         return;
       }
       // Metrics Start
-      sitecues.emit('audio/loaded', new Date - t);
+      sitecues.emit('audio/playing', new Date - t);
       // Metrics End
       // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       context.decodeAudioData(request.response, function (buffer) {
