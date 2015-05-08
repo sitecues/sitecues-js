@@ -208,6 +208,9 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       }
 
       sitecues.emit('bp/do-disable-button', aboutButton);
+      sitecues.emit('bp/do-disable-button', feedbackButton);
+      sitecues.emit('bp/do-disable-button', settingsButton);
+      sitecues.emit('bp/do-disable-button', tipsButton);
 
       if (aboutTransitionTo === ABOUT_DISABLED) {
 
@@ -215,6 +218,14 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         tipsButton.style.opacity                  = 1;
         settingsButton.style.opacity              = 1;
         feedbackButton.style.opacity              = 1;
+        tipsButton.style.display                  = 'block';
+        settingsButton.style.display              = 'block';
+        feedbackButton.style.display              = 'block';
+        settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
+        feedbackButton.setAttribute('transform',transform.getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
+        tipsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
+
+
 
         aboutAnimation = animate.create({
           'from': currentSVGHeight,
@@ -225,11 +236,15 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           'onFinish': function () {
             aboutContent.style.display   = 'none';
             sitecues.emit('bp/do-enable-button', aboutButton);
+            sitecues.emit('bp/do-enable-button', feedbackButton);
+            sitecues.emit('bp/do-enable-button', settingsButton);
+            sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
 
       } else {
 
+        aboutButton.style.display     = 'block';
         arrowButtons.style.opacity    = 0;
         tipsButton.style.opacity      = 0;
         settingsButton.style.opacity  = 0;
@@ -263,6 +278,9 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'onFinish': function () {
                 aboutContentButtonContainer.style.opacity = 1;
                 arrowButtons.style.display = 'none';
+                tipsButton.style.display       = 'none';
+                settingsButton.style.display   = 'none';
+                feedbackButton.style.display      = 'none';
                 sitecues.emit('bp/do-enable-button', aboutButton);
               }
             });

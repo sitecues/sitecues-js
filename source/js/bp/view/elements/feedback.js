@@ -183,15 +183,27 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       }
 
+      sitecues.emit('bp/do-disable-button', aboutButton);
       sitecues.emit('bp/do-disable-button', feedbackButton);
+      sitecues.emit('bp/do-disable-button', settingsButton);
+      sitecues.emit('bp/do-disable-button', tipsButton);
 
       if (feedbackTransitionTo === FEEDBACK_DISABLED) {
 
+        tipsButton.style.display       = 'block';
+        settingsButton.style.display   = 'block';
+        aboutButton.style.display      = 'block';
         tipsButton.style.opacity       = 1;
         settingsButton.style.opacity   = 1;
         aboutButton.style.opacity      = 1;
         feedbackTextarea.style.display = 'none';
         feedbackContent.style.opacity  = 0;
+
+        settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
+
+        tipsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
+        aboutButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
+
 
         feedbackAnimation = animate.create({
           'from': currentSVGHeight,
@@ -201,7 +213,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'onTick'  : onDisabledTick,
           'onFinish': function () {
             feedbackContent.style.display = 'none';
+            sitecues.emit('bp/do-enable-button', aboutButton);
             sitecues.emit('bp/do-enable-button', feedbackButton);
+            sitecues.emit('bp/do-enable-button', settingsButton);
+            sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
 
@@ -213,6 +228,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         settingsButton.style.opacity  = 0;
         feedbackButton.style.opacity  = 1;
         feedbackContent.style.display = 'block';
+        feedbackButton.style.display  = 'block';
         feedbackContent.style.opacity = 1;
         tipsContent.style.opacity     = 0;
         settingsContent.style.opacity = 0;
@@ -232,6 +248,9 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           'onFinish': function () {
             feedbackTextarea.style.display = 'block';
             arrowButtons.style.display     = 'none';
+            tipsButton.style.display       = 'none';
+            settingsButton.style.display   = 'none';
+            aboutButton.style.display      = 'none';
             sitecues.emit('bp/do-enable-button', feedbackButton);
           }
         });

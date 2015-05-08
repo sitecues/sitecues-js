@@ -91,7 +91,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function onMouseClick (e) {
-
+      console.log(e.target);
       var element = e.target,
           dataFeature;
 
@@ -220,6 +220,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function enableButton (btn) {
+      console.log(btn);
       btn.addEventListener('mouseenter', onMouseEnter);
       btn.addEventListener('mouseleave', onMouseLeave);
       btn.addEventListener('click', onMouseClick);

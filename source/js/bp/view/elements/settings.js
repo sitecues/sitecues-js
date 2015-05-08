@@ -183,7 +183,10 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
       }
 
+      sitecues.emit('bp/do-disable-button', aboutButton);
+      sitecues.emit('bp/do-disable-button', feedbackButton);
       sitecues.emit('bp/do-disable-button', settingsButton);
+      sitecues.emit('bp/do-disable-button', tipsButton);
 
       if (settingsTransitionTo === SETTINGS_DISABLED) {
 
@@ -191,9 +194,16 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         settingsButton.style.opacity   = 1;
         aboutButton.style.opacity      = 1;
         feedbackButton.style.opacity   = 1;
+        tipsButton.style.display       = 'block';
+        feedbackButton.style.display   = 'block';
+        aboutButton.style.display      = 'block';
 
+        feedbackButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
+        tipsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
+        aboutButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
         arrowButtons.style.opacity     = 0;
         settingsCards.style.opacity    = 0;
+        settingsContent.style.display = 'none';
 
         settingsAnimation = animate.create({
           'from': currentSVGHeight,
@@ -202,9 +212,11 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
           'duration': useInstantAnimation ? 1 : animate.getDuration(disableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onDisabledTick,
           'onFinish': function () {
-            settingsContent.style.display = 'none';
             arrowButtons.style.display    = 'none';
+            sitecues.emit('bp/do-enable-button', aboutButton);
+            sitecues.emit('bp/do-enable-button', feedbackButton);
             sitecues.emit('bp/do-enable-button', settingsButton);
+            sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
 
@@ -214,6 +226,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         aboutButton.style.opacity     = 0;
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 1;
+        settingsButton.style.display  = 'block';
         settingsContent.style.display = 'block';
         settingsCards.style.display   = 'block';
         arrowButtons.style.display    = 'block';
@@ -237,6 +250,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
           'onFinish': function () {
             settingsCards.style.opacity   = 1;
             arrowButtons.style.opacity    = 1;
+            tipsButton.style.display       = 'none';
+            feedbackButton.style.display   = 'none';
+            aboutButton.style.display      = 'none';
             sitecues.emit('bp/do-enable-button', settingsButton);
           }
         });
