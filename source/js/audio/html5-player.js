@@ -24,16 +24,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
     var t = 0;
     var audioElement = new Audio();
 
-    // Metrics Start
-    sitecues.$(audioElement)[0].addEventListener('playing', function() {
-      sitecues.emit('audio/playing', new Date - t);
-    });
-
-    sitecues.$(audioElement)[0].addEventListener('loadstart', function() {
-      t = new Date();
-    });
-
-    // Metrics End
     audioElement.src = ''; // Clean up
     sitecues.$(audioElement).one('canplay', playIt);
     audioElement.src = url;
