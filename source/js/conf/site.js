@@ -33,7 +33,11 @@ sitecues.def('conf/site', function (site, callback) {
       return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
     };
 
-    // Names with underscores deprecated
+    // Names with underscores deprecated.
+    // Here is the order of precedence:
+    // 1. sitecues everywhere siteId
+    // 2. sitecues.config.siteId (camelCase is the new way)
+    // 3. sitecues.config.site_id (underscore in config field names is deprecated)
     site.getSiteId = function() {
       return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
     };
