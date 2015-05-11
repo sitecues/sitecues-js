@@ -147,7 +147,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          - Elsewhere:
          .scp-more-only   // Only display in more panel
          .scp-feature-content // Only display in feature panel (reachable for more panel)
-         .scp-target: both a click target and good for showing keyboard focus rectangles
+         .scp-hand-cursor: show a hand (aka pointer) cursor over this element
          .scp-hidden-target: a click target that is hidden (e.g. a rect that covers more area than the visible part of the target)
 
 
@@ -284,7 +284,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '.scp-want-panel:not(.scp-is-panel) > #scp-svg': {
+        '.scp-want-panel:not(.scp-is-panel) .scp-hand-cursor': {
           'pointer-events': 'none'   // Fix for SC-2542: don't process mouseover hovers while expanding toward large state
         },
 
@@ -436,10 +436,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
           'display': 'block'
-        },
-
-        '#scp-svg text[role="link"]:hover': {
-          'fill': '#447AC4 !important'
         },
 
         '#scp-wave1': {

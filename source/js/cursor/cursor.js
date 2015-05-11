@@ -205,11 +205,12 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     // Stylesheet just for BP cursors
-    // The cursors have a minimum size, and are never disabled during smooth zoom for performance
+    // The cursors have a minimum size, and are NOT disabled during smooth zoom for performance,
+    // as opposed to the page cursors, which can be disabled during smooth zoom for performance
     function constructBPCursorStylesheet() {
       var cssText =
-        '#scp-main {cursor: default;}\n' +
-        '.scp-target,.scp-hidden-target {cursor:pointer};';
+        '#scp-main,.scp-toolbar {cursor:default;}\n' +
+        '.scp-hand-cursor {cursor:pointer};';
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
       bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);

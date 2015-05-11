@@ -76,15 +76,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       processSliderCommands(evt);
     };
 
-    function isTargetWithin(target, container) {
-      while (target) {
-        if (target === container) {
-          return true;
-        }
-        target = target.parentElement;
-      }
-    }
-
     function isInActiveToolbarArea(evt, badgeRect) {
       var middleOfBadge = badgeRect.left + badgeRect.width / 2,
         allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
@@ -99,11 +90,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function isInVerticalBadgeArea(evt, badgeRect) {
       return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
-    }
-
-    function onPageBadgeHover() {
-      // Don't reset timer on moves -- just require that the mouse is within the badge for the required time
-      hoverDelayTimer = setTimeout(bpc.changeModeToPanel, BP_CONST.HOVER_DELAY_BADGE);
     }
 
     function getVisibleBadgeRect() {
