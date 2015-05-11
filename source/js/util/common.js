@@ -340,6 +340,15 @@ sitecues.def('util/common', function (common, callback) {
         .appendTo(optionalParent || 'html');
     };
 
+    // Return truthy value if a button is pressed on a mouse event.
+    // There are three properties for mouse buttons, and they all work differently -- both
+    // in terms of browsers and on mousemove events in particular.
+    // DANGER! Does not work in IE9 -- always returns falsey value.
+    // If we need it in IE9 we'll need to globally track mousedown and mouseup events.
+    common.isButtonDown = function(mouseEvent) {
+      return (typeof mouseEvent.buttons === 'undefined' ? mouseEvent.which : mouseEvent.buttons);
+    };
+
     // Done.
     callback();
   });

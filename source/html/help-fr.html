@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF8">
-  <script>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF8">
+<script>
     function getParam(index, name) {
-      return decodeURIComponent(params[index].split(name + '=')[1]);
+        return decodeURIComponent(params[index].split(name + '=')[1]);
     }
     var params = location.search.substring(1).split('&'),
             scriptUrl = getParam(0, 'scUrl'),
@@ -15,35 +15,35 @@
     // Site config
     window.sitecues = {};
     sitecues.config = {
-      siteId : siteId,
-      iframe  : 1,
-      isFluid : 1,
-      maxRewrapZoom: 3
+        siteId : siteId,
+        iframe  : 1,
+        isFluid : 1,
+        maxRewrapZoom: 3
     };
 
     // User prefs
     window.localStorage.sitecues = prefs;
-  </script>
-  <script data-provider="sitecues" type="text/javascript">
+</script>
+<script data-provider="sitecues" type="text/javascript">
     var sitecues = window.sitecues || {};
 
     (function(){
-      var script = document.createElement('script'),
-              first = document.getElementsByTagName('script')[0];
-      sitecues.config.scriptUrl=scriptUrl;
-      script.src=sitecues.config.scriptUrl;
-      script.type = 'text/javascript';
-      script.async = true;
-      first.parentNode.insertBefore(script, first);
+        var script = document.createElement('script'),
+                first = document.getElementsByTagName('script')[0];
+        sitecues.config.scriptUrl=scriptUrl;
+        script.src=sitecues.config.scriptUrl;
+        script.type = 'text/javascript';
+        script.async = true;
+        first.parentNode.insertBefore(script, first);
     })();
-  </script>
+</script>
 
-  <script>
+<script>
     // send a message to the parent window if escape is pressed
     window.addEventListener('keydown', function(evt) {
-      if (evt.keyCode === 27) {
-        window.top.postMessage('sc-close-iframe', siteUrl);
-      }
+        if (evt.keyCode === 27) {
+            window.top.postMessage('sc-close-iframe', siteUrl);
+        }
     });
 
     function checkBadgeKey(evt) {
@@ -54,55 +54,55 @@
         return true;
       }
     }
-  </script>
+</script>
 
-  <style>
+<style>
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 0 20px;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 0 20px;
     }
 
     kbd {
-      font-family: Monaco, monospace;
-      display: inline-block;
+        font-family: Monaco, monospace;
+        display: inline-block;
     }
 
     h1, h2 {
-      border-bottom: 1px dotted gray;
-      padding: 3px;
-      width: 99%;
+        border-bottom: 1px dotted gray;
+        padding: 3px;
+        width: 99%;
     }
 
     kbd {
-      background-color: green;
-      padding-left: 1.5ch;
-      padding-right: 1.5ch;
-      font-size: 90%;
-      color: white;
+        background-color: green;
+        padding-left: 1.5ch;
+        padding-right: 1.5ch;
+        font-size: 90%;
+        color: white;
     }
 
     ul {
-      list-style-type: square;
+        list-style-type: square;
     }
 
     li {
-      padding: 3px 0px;
+        padding: 3px 0px;
     }
 
     p, ul, h3 {
-      margin-left: 50px;
-      margin-right: 50px;
+        margin-left: 50px;
+        margin-right: 50px;
     }
 
     #sitecues-badge {
-      display: inline-block;
-      width: 136px;
-      height: 24px;
-      float: right;
-      padding-top: 10px;
-      padding-left: 10px;
-      padding-right: 10px;
-      margin-right: 46px;
+        display: inline-block;
+        width: 136px;
+        height: 24px;
+        float: right;
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-right: 46px;
     }
 
     /* Don't allow help to be opened inside of help! */
@@ -111,7 +111,7 @@
     }
 
     #pinch-entry { display: none; }
-  </style>
+</style>
 </head>
 
 <body>
@@ -123,91 +123,88 @@
 </script>
 
 <!-- Content -->
-<h1>sitecues Zoom and Speech: Help and Tips</h1>
+<h1>sitecues Zoom et Lecture: Aide et conseils</h1>
 
-<p>sitecues makes it easier to see, hear and use this website.</p>
+<p>sitecues rend plus facile à voir, entendre et utiliser ce site Web.</p>
 <p>
-  Zoom the entire web page or the parts that most interest you. You can even listen to sitecues speak the text aloud.</p>
+  Zoom de la page Web entière ou les parties qui vous intéressent le plus. Vous pouvez même écouter sitecues lire le texte à haute voix.</p>
 
-<h2>Page Zoom</h2>
+<h2>Zoom de page</h2>
 
-<p>With the mouse, hover over the sitecues icon and use the slider to zoom in and out.</p>
+<p>Avec la souris, survolez l'icône sitecues et utiliser le curseur pour zoomer et dézoomer.</p>
 
-<p>You can also simply press <kbd>+</kbd> or <kbd>-</kbd> to zoom with the keyboard &mdash; please see the
-  <a href="#keyboard">full list of keyboard tips below</a>.</p>
+<p>Vous pouvez aussi simplement appuyer sur <kbd>+</kbd> ou <kbd>-</kbd> pour zoomer avec le clavier &mdash; s'il vous plaît voir 
+  <a href="#keyboard">la liste complète de conseils clavier ci-dessous</a>.</p>
 
-<h2>One-Touch Read</h2>
+<h2>Lecture One-Touch</h2>
 
 <p>
-  The One-Touch Read feature zooms in on your selected content &mdash; and can also read it to you aloud.
-  One-Touch Read is enabled once sitecues zoom or speech is turned on.
+  La fonction Lecture One-Touch zoome sur votre contenu sélectionné &mdash; et peut également lire à haute voix pour vous. Lecture One-Touch est activée une fois sitecues zoom ou la parole est activée.
 </p>
 
-<h3>Zoom part of a web page</h3>
+<h3>Zoom d’une partie d'une page Web</h3>
 
 <ul>
-  <li>Start by moving your mouse to something you want to read. It should be highlighted (if it isn't, make sure zoom or speech have been enabled in sitecues).</li>
-  <li>Press the spacebar to zoom the highlighted area.</li>
+    <li>Démarrez en déplaçant votre souris vers quelque chose que vous voulez lire. Il convient de souligner (si elle ne l’est pas, assurez-vous que le zoom ou la lecture ont été activé dans sitecues).</li>
+    <li>Appuyez sur la barre d'espace pour agrandir la zone en surbrillance.</li>
 </ul>
 
-<h3>Listen to part of a web page</h3>
+<h3>Ecoutez une partie d'une page Web</h3>
 
-<p>First, turn on speech:</p>
+<p>Tout d'abord, mettez-vous en mode lecture:</p>
 <ul>
-  <li>With the mouse, hover over the sitecues icon and click on the speech button</li>
-  <li>Highlight text that you want to read then press the spacebar</li>
+    <li> Avec la souris, survolez l'icône sitecues et cliquez sur le bouton Voix</li>
+    <li>Sélectionnez le texte que vous voulez lire puis appuyez sur la barre d'espace</li>
 </ul>
 
-<h2><a name="keyboard">Keyboard Commands</a></h2>
+<h2><a name="keyboard">Commandes clavier Zoomer la page</a></h2>
 
-<h3>Zooming the page</h3>
+<h3>Zoom de page</h3>
 <ul>
-  <li><kbd>+</kbd> to zoom in</li>
-  <li><kbd>-</kbd> to zoom out</li>
-  <li>Hold these keys down longer to zoom or unzoom for longer</li>
+    <li><kbd>+</kbd> pour agrandir</li>
+    <li><kbd>-</kbd> pour rétrécir</li>
+    <li>Maintenez un appuie long sur ses touche pour plus de zoom et de dézoom</li>
 </ul>
 <h3>One-Touch Zoom</h3>
 <ul>
-  <li>If nothing is highlighted yet, press <kbd>Spacebar</kbd> to highlight something near the center of the screen.</li>
-  <li>Move the highlight around with the <kbd>Up</kbd> / <kbd>Down</kbd> / <kbd>Left</kbd> / <kbd>Right</kbd> arrow keys.</li>
-  <li>Press <kbd>Spacebar</kbd> again to zoom the highlighted area.</li>
-  <li>Next press <kbd>Escape</kbd> to close the zoomed area. Pressing Escape a second time will also clear highlighting.</li>
-  <li>Navigate quickly with <kbd>H</kbd> / <kbd>Shift+H</kbd> to move forwards/backwards by heading.</li>
+    <li>Si rien est encore en surbrillance, appuyez sur <kbd> la barre d'espace</kbd> pour mettre en évidence quelque chose près du centre de l'écran. </li>
+    <li>Placez le pointeur autour avec les touches fléchées <kbd>Droite</kbd> / <kbd>Haut</kbd> / <kbd>Bas</kbd> / <kbd>Gauche</kbd>. </li>
+    <li>Appuyez sur <kbd>la barre d'espace</kbd> nouveau pour agrandir la zone en surbrillance.</li>
+    <li>appuyez sur <kbd>Echap</kbd> pour fermer One-Touch Lecture. Appuyant sur Echap une deuxième fois pour annuler la surbrillance.</li>
+    <li>Naviguez rapidement avec <kbd>H</kbd> / <kbd>Maj+H</kbd> pour déplacer avant / arrière par rubrique.</li>
 </ul>
-<h3>One-Touch Read (Speech)</h3>
+<h3>One-Touch Lecture (Voix)</h3>
 <ul>
-  <li>Press <kbd>Alt+Quote</kbd> to turn speech on or off</li>
-  <li>Now, the One-Touch command (<kbd>Spacebar</kbd>) will also read text.</li>
+  <li>Appuyez sur <kbd>Alt+Apostrophe</kbd> pour activer ou désactiver la parole</li>
+  <li>Maintenant, la commande One-Touch (<kbd>barre d'espace</kbd>) pourra également lire le texte.</li>
 </ul>
-<h2>Exploring with Speech</h2>
-<p>Pressing the <kbd>Shift</kbd> key while moving the highlight tells sitecues to read highlighted areas.
-  There are several ways to use it:</p>
+<h2>Explorer avec la voix</h2>
+<p>En appuyant sur la touche <kbd>Maj</kbd> tout en déplaçant le curseur indique à sitecues de lire zones en surbrillance. Il y a plusieurs façons de l'utiliser:</p>
 <ul>
-  <li><kbd>Shift+arrow</kbd> to move and read in the given direction</li>
-  <li><kbd>Shift</kbd> while moving the mouse to read whatever the mouse moves over</li>
-  <li><kbd>Shift</kbd> by itself to read the current highlight</li>
+  <li><kbd>Maj+flèche</kbd> pour déplacer et lire dans la direction donnée</li>
+  <li><kbd>Maj</kbd> tout en déplaçant la souris pour lire tout ce que le curseur survole</li>
+  <li><kbd>Maj</kbd> seul pour lire la partie en surbrillance</li>
 </ul>
-<p>Using shift to speak works whether or not speech is turned on in the sitecues panel.</p>
-<h2>Other Cool Shortcuts</h2>
-<p>You can zoom the page with your mouse.
-  Try holding down <kbd>Control</kbd> key while rolling your mousewheel.
-  <span id="pinch-entry">You can even pinch/unpinch on a trackpad (Chrome on Mac only).</span>
+<p>UUtiliser shift pour la lecture peu importe si la commande vocale est activée dans le panneau sitecues.</p>
+<h2>Autres raccourcis intéressants</h2>
+<p>Vous pouvez agrandir la page avec votre souris. Essayez maintenant la touche <kbd>Ctrl</kbd> enfoncée tout en roulant molette de votre souris. 
+  <span id="pinch-entry">Vous pouvez même pincer / unpinch sur un trackpad (Chrome sur Mac uniquement).</span>
 </p>
-<h2>Quitting sitecues</h2>
-<p>To quit sitecues, either turn off both zoom and speech, or press <kbd>Alt+0</kbd>.</p>
+<h2>Quitter sitecues</h2>
+<p>Pour quitter sitecues, soit désactiver les zooms ou la parole, ou appuyez sur <kbd>Alt+0.</kbd>.</p>
 </body>
 <script>
-  try {
-    document.body.focus();
-  } catch(ex) {};
+    try {
+        document.body.focus();
+    } catch(ex) {};
 
-  function isPinchZoomSupported() {
-    return navigator.userAgent.indexOf('Chrome') > 0 && navigator.platform.toLowerCase().indexOf('mac') >= 0;
-  }
+    function isPinchZoomSupported() {
+      return navigator.userAgent.indexOf('Chrome') > 0 && navigator.platform.toLowerCase().indexOf('mac') >= 0;
+    }
 
-  if (isPinchZoomSupported()) {
-    document.getElementById('pinch-entry').style.display = 'inline';
-  }
+    if (isPinchZoomSupported()) {
+      document.getElementById('pinch-entry').style.display = 'inline';
+    }
 </script>
 </html>
 
