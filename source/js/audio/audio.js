@@ -14,7 +14,7 @@ sitecues.def('audio', function (audio, callback) {
 
   'use strict';
 
-  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'util/localization',
+  sitecues.use('conf', 'conf/site', 'jquery', 'audio/speech-builder', 'platform', 'locale',
     function(conf, site, $, builder, platform, locale) {
 
     var ttsOn = false,
@@ -46,7 +46,9 @@ sitecues.def('audio', function (audio, callback) {
     function speakContent($content) {
       var text = builder.getText($content);
       if (text) {
-        getAudioPlayer().playAudioSrc(getTTSUrl(text, $content));
+        var TTSUrl = getTTSUrl(text, $content);
+        getAudioPlayer().playAudioSrc(TTSUrl);
+        sitecues.emit('hlb/speech-play', TTSUrl);
         addStopAudioHandlers();
       }
     }

@@ -1,13 +1,13 @@
     // Actual source file for highlight-box module.
-var HLB_MODULE_PATH             = '../../source/js/highlight-box',
+var HLB_MODULE_PATH             = '../../../source/js/hlb/hlb',
 
     // Mocked source files that are highlight-box dependencies.
-    HLB_POSITIONING_MODULE_PATH    = './data/modules/hlb/positioning',
-    HLB_DIMMER_MODULE_PATH         = './data/modules/hlb/dimmer',
-    HLB_STYLING_MODULE_PATH        = './data/modules/hlb/styling',
+    HLB_POSITIONING_MODULE_PATH    = '../data/modules/hlb/positioning',
+    HLB_DIMMER_MODULE_PATH         = '../data/modules/hlb/dimmer',
+    HLB_STYLING_MODULE_PATH        = '../data/modules/hlb/styling',
     HLB_PAGE_PATH                  = './data/html/test-hlb.html',
-    HLB_ANIMATION                  = './data/modules/hlb/animation',
-    HLB_EVENT_HANDLERS_MODULE_PATH = './data/modules/hlb/event-handlers',
+    HLB_ANIMATION                  = '../data/modules/hlb/animation',
+    HLB_EVENT_HANDLERS_MODULE_PATH = '../data/modules/hlb/event-handlers',
 
     // Load 'em up.
     hlb              = require(HLB_MODULE_PATH),
@@ -21,9 +21,9 @@ var HLB_MODULE_PATH             = '../../source/js/highlight-box',
     win;
 
 // This require exposes a global variable to all tests.  (domutils)
-require('./test/domutils');
+require('./../test/domutils');
 
-describe('highlight-box', function() {
+describe('hlb', function() {
 
   before(function() {
     domutils.loadHtml(HLB_PAGE_PATH, function(newWindow) {

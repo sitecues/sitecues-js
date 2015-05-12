@@ -1,9 +1,9 @@
-require('./test/bootstrap');
+require('./../test/bootstrap');
 
 //// Require the module file we want to test.
-var modulePath = '../../source/js/audio',
+var modulePath = '../../../source/js/audio/audio',
   audio, // Module
-  platform = require('./data/modules/platform');
+  platform = require('./../data/modules/platform');
 
 describe('audio', function() {
   beforeEach(function() {

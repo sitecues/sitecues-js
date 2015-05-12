@@ -21,6 +21,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // How long we wait before expanding BP
     var hoverDelayTimer;
 
+    // We ignore the first mouse move when a window becomes active, otherwise badge opens
+    // if the mouse happens to be over the badge/toolbar
+    var doIgnoreNextMouseMove = true;
+
     var DELTA_KEYS = {};
     DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
     DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
@@ -72,52 +76,86 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       processSliderCommands(evt);
     };
 
-    bpc.onMouseLeave = function(evt) {
-      if (isVisibleBadgeEvent(evt)) {
-        bpc.cancelHoverDelayTimer();
-      }
-    };
+    function isInActiveToolbarArea(evt, badgeRect) {
+      var middleOfBadge = badgeRect.left + badgeRect.width / 2,
+        allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
 
-    function isTargetWithin(target, container) {
-      while (target) {
-        if (target === container) {
-          return true;
-        }
-        target = target.parentElement;
-      }
+      return evt.clientX > middleOfBadge - allowedDistance &&
+        evt.clientX < middleOfBadge + allowedDistance;
     }
-    // Is the event related to the visible contents of the badge
-    // (as opposed to the hidden areas around the badge)
-    function isVisibleBadgeEvent(evt) {
-      return evt.target === helper.byId(BP_CONST.BADGE_ID) ||
-             evt.target === helper.byId(BP_CONST.BP_CONTAINER_ID) ||
-             isTargetWithin(evt.target, helper.byId(BP_CONST.MOUSEOVER_TARGET));
+
+    function isInHorizontalBadgeArea(evt, badgeRect) {
+      return evt.clientX >= badgeRect.left && evt.clientX <= badgeRect.right;
+    }
+
+    function isInVerticalBadgeArea(evt, badgeRect) {
+      return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
+    }
+
+    function getVisibleBadgeRect() {
+      return helper.byId(BP_CONST.MOUSEOVER_TARGET).getBoundingClientRect();
+    }
+
+    // When window is newly activated, ignore the automatic first mousemove that is generated
+    // that may happen to be over the badge/toolbar. Require that the user intentionally moves to the toolbar.
+    function onWindowFocus() {
+      doIgnoreNextMouseMove = true;
     }
 
     // Logic to determine whether we should begin to expand panel
-    bpc.onMouseEnter = function(evt) {
-      if (!isVisibleBadgeEvent(evt)) {
+    bpc.onMouseMove = function(evt) {
+      cancelHoverDelayTimer();
+
+      if (doIgnoreNextMouseMove) {
+        doIgnoreNextMouseMove = false;
         return;
       }
-      if (state.isShrinking()) {
-        // If already expanding or contracting, don't use delay timer
-        bpc.changeModeToPanel();
+
+      if (state.isExpanding()) {
+        return;  // Already expanding -> do nothing
       }
-      else if (!state.isExpanding() &&  !hoverDelayTimer) { // Don't start a second timer for each mouse move
-        hoverDelayTimer = setTimeout(bpc.changeModeToPanel, BP_CONST.HOVER_DELAY)
+
+      // Is the event related to the visible contents of the badge?
+      // (as opposed to the hidden areas around the badge)
+      var badgeRect = getVisibleBadgeRect(),
+        isInBadge = isInHorizontalBadgeArea(evt, badgeRect),
+        isInToolbar = state.get('isToolbarBadge') && isInActiveToolbarArea(evt, badgeRect);
+
+      if (!isInVerticalBadgeArea(evt, badgeRect)) {
+        return;
+      }
+
+      // Check if shrinking and need to reopen
+      if (state.isShrinking()) {
+        if (isInBadge) {
+          bpc.changeModeToPanel();  // User changed their mind -- reverse course and reopen
+        }
+        return;
+      }
+
+      // Use the event
+      if (isInToolbar || isInBadge) {
+        hoverDelayTimer = setTimeout(bpc.changeModeToPanel,
+          isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
       }
     };
 
     bpc.changeModeToPanel = function() {
-      bpc.cancelHoverDelayTimer();
+      cancelHoverDelayTimer();
       if (!state.get('isShrinkingFromKeyboard')) {
         sitecues.emit('bp/do-expand');
       }
     };
 
-    bpc.cancelHoverDelayTimer = function() {
+    function cancelHoverDelayTimer() {
       clearTimeout(hoverDelayTimer);
       hoverDelayTimer = 0;
+    }
+
+    bpc.onMouseOut = function(evt) {
+      if (evt.target.id === BP_CONST.BADGE_ID) {
+        cancelHoverDelayTimer();
+      }
     };
 
     // User may think they need to click in badge
@@ -267,6 +305,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       sitecues.emit('bp/do-update');
     }
+
+    window.addEventListener('focus', onWindowFocus);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

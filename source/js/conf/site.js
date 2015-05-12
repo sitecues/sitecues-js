@@ -33,9 +33,13 @@ sitecues.def('conf/site', function (site, callback) {
       return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
     };
 
-    // Names with underscores deprecated
+    // Names with underscores deprecated.
+    // Here is the order of precedence:
+    // 1. sitecues everywhere siteId
+    // 2. sitecues.config.siteId (camelCase is the new way)
+    // 3. sitecues.config.site_id (underscore in config field names is deprecated)
     site.getSiteId = function() {
-      return everywhereConfig.siteId || providedSiteConfig.site_id;
+      return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
     };
 
     function fetchSiteConfig() {
@@ -43,7 +47,7 @@ sitecues.def('conf/site', function (site, callback) {
         return; // Already fetched
       }
 
-      if (SC_LOCAL || everywhereConfig) {
+      if (SC_LOCAL || !isEmptyObject(everywhereConfig)) {
         // Cannot save to server when we have no access to it
         // Putting this condition in allows us to paste sitecues into the console
         // and test it on sites that have a content security policy
@@ -66,6 +70,10 @@ sitecues.def('conf/site', function (site, callback) {
           isFetched = true;
         }
       });
+    }
+
+    function isEmptyObject(obj){
+      return JSON.stringify(obj) === '{}';
     }
 
     // Fetch once we need it (we currently need it if speech might be used, because the fetched

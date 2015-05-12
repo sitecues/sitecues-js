@@ -8,7 +8,7 @@
  * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
  * - attaches correspondent window events so that handle custom cursor events.
  */
-sitecues.def('cursor', function (cursor, callback) {
+sitecues.def('styles/media-rules', function (cursor, callback) {
 
   'use strict';
   

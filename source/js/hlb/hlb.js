@@ -2,7 +2,7 @@
  * This is the box that appears when the user asks to read the highlighted text in a page.
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
-sitecues.def('highlight-box', function(highlightBox, callback) {
+sitecues.def('hlb', function(hlb, callback) {
 
   'use strict';
 
@@ -122,15 +122,8 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
         var newTarget   = event.target,
             mouseX      = event.clientX,
             mouseY      = event.clientY,
-            isMouseDown,
+            isMouseDown = common.isButtonDown(event),
             HLBBoundingBox;
-
-        // This fixes SC-1834
-        if (platform.browser.isIE || platform.browser.isFirefox) {
-          isMouseDown = event.buttons === 1;
-        } else {
-          isMouseDown = event.which === 1;
-        }
 
         // The mouse has never been within the HLB bounds or
         // debugging is enabled.
@@ -698,7 +691,7 @@ sitecues.def('highlight-box', function(highlightBox, callback) {
       //////////////////////////////////
 
       // Return the current DOM element for the HLB or falsey value if there is no HLB
-      highlightBox.getElement = function() {
+      hlb.getElement = function() {
         return $hlb && $hlb[0];
       };
 

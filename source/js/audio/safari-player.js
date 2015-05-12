@@ -40,6 +40,7 @@ sitecues.def('audio/safari-player', function (player, callback) {
       if (isCancelled) {
         return;
       }
+
       // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       context.decodeAudioData(request.response, function (buffer) {
         if (isCancelled) {

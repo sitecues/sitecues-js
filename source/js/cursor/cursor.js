@@ -10,8 +10,8 @@ sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform',
-    function (  $, styleService, conf, customCursor, platform) {
+  sitecues.use('jquery', 'style-service', 'conf', 'cursor/css', 'platform',
+    function (  $, styleService, conf, cursorCss, platform) {
 
     var cursorZoom = 1,
         // Regexp is used to match URL in the string given(see below).
@@ -205,11 +205,12 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     // Stylesheet just for BP cursors
-    // The cursors have a minimum size, and are never disabled during smooth zoom for performance
+    // The cursors have a minimum size, and are NOT disabled during smooth zoom for performance,
+    // as opposed to the page cursors, which can be disabled during smooth zoom for performance
     function constructBPCursorStylesheet() {
       var cssText =
-        '#scp-main {cursor: default;}\n' +
-        '.scp-target,.scp-hidden-target {cursor:pointer};';
+        '#scp-main,.scp-toolbar {cursor:default;}\n' +
+        '.scp-hand-cursor {cursor:pointer};';
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
       bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);
@@ -265,7 +266,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = customCursor.getCursorCss(type, size, doUseIECursors);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -290,7 +291,7 @@ sitecues.def('cursor', function (cursor, callback) {
     sitecues.on('zoom', function (pageZoom) {
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-      var newCursorZoom = customCursor.getCursorZoom(pageZoom);
+      var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
         refreshStylesheets();

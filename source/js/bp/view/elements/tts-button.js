@@ -2,7 +2,7 @@
 sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
   'use strict';
 
-  sitecues.use('bp/constants', 'bp/helper', 'audio', 'bp/model/state', 'util/localization',
+  sitecues.use('bp/constants', 'bp/helper', 'audio', 'bp/model/state', 'locale',
     function (BP_CONST, helper, audio, state, locale) {
 
     var waveAnimationTimer,
