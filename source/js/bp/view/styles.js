@@ -531,6 +531,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         }
       };
 
+    // Palette behavior is based on the type:
+    // - string: predefined palette name like 'reverse-blue'
+    // - object: custom palette
+    function isCustomPalette(palette) {
+      return typeof palette === 'object';
+    }
+
     function provideCustomPalette (palette) {
       var panelOnly         = 'panel',
           badgeOnly         = 'badge',
@@ -622,9 +629,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
     if (site.get('uiMode') !== 'toolbar') {
       // TODO Tony how does this work? We need docs
       // TODO clean this up -- weird to be checking toolbar in this general code here
-      var customPalette = site.get('palette');
-      if (typeof customPalette === 'object') {
-        provideCustomPalette(customPalette);
+      var palette = site.get('palette');
+      if (isCustomPalette(palette)) {
+        provideCustomPalette(palette);
       }
     }
 
