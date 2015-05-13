@@ -47,7 +47,7 @@ sitecues.def('conf/site', function (site, callback) {
         return; // Already fetched
       }
 
-      if (SC_LOCAL || everywhereConfig) {
+      if (SC_LOCAL || !isEmptyObject(everywhereConfig)) {
         // Cannot save to server when we have no access to it
         // Putting this condition in allows us to paste sitecues into the console
         // and test it on sites that have a content security policy
@@ -70,6 +70,10 @@ sitecues.def('conf/site', function (site, callback) {
           isFetched = true;
         }
       });
+    }
+
+    function isEmptyObject(obj){
+      return JSON.stringify(obj) === '{}';
     }
 
     // Fetch once we need it (we currently need it if speech might be used, because the fetched

@@ -1031,8 +1031,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         // Updating the stylesheet is visibly slower on complex pages such as nytimes.com
         // So, while cleaner, it's only used if we're inserting in the middle of the document
         // where we're likely to mess something up
-        state.overlayContainer.setAttribute(HIGHLIGHT_OUTLINE_ATTR, '');
         updateStyleSheet(svg, left, top, width, height, zIndex);
+        // Now we set the attribute (don't do it before updating the stylesheet,
+        // otherwise we end up with 2 style reflows, one based on the old stylesheet contents
+        // which is still around)
+        state.overlayContainer.setAttribute(HIGHLIGHT_OUTLINE_ATTR, '');
       }
     }
 
@@ -1556,7 +1559,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       }
 
       state.overlayContainer && state.overlayContainer.removeAttribute(HIGHLIGHT_OUTLINE_ATTR);
-      $highlightStyleSheet && $highlightStyleSheet.text(''); // Clear old old style sheet, not being used
       $('.' + HIGHLIGHT_OUTLINE_CLASS).remove();
 
       if (pickFromMouseTimer) {

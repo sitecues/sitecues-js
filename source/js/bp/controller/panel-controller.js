@@ -39,15 +39,8 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     // TODO: rename
     pc.winMouseMove = function(evt) {
 
-
-      // Firefox/IE:
-      //          evt.buttons is 0 when no mousebutton is held down.
-      //          evt.which is always 1.
-      // Chrome:
-      //          evt.buttons is always undefined.
-      //          evt.which is 0 if no mouse button is held down.  1 if left mouse button is held down.
-      if (evt.buttons > 0 || (evt.buttons !== 0 && evt.which)) {
-        return;
+      if (sliderController.isSliderActive()) {
+        return;  // Dragging slider, so don't close panel
       }
 
       if (pc.wasInFeaturePanel) {

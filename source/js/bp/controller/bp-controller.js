@@ -76,15 +76,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       processSliderCommands(evt);
     };
 
-    function isTargetWithin(target, container) {
-      while (target) {
-        if (target === container) {
-          return true;
-        }
-        target = target.parentElement;
-      }
-    }
-
     function isInActiveToolbarArea(evt, badgeRect) {
       var middleOfBadge = badgeRect.left + badgeRect.width / 2,
         allowedDistance = BP_CONST.ACTIVE_TOOLBAR_WIDTH / 2;
@@ -99,11 +90,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function isInVerticalBadgeArea(evt, badgeRect) {
       return evt.clientY >= badgeRect.top && evt.clientY<= badgeRect.bottom;
-    }
-
-    function onPageBadgeHover() {
-      // Don't reset timer on moves -- just require that the mouse is within the badge for the required time
-      hoverDelayTimer = setTimeout(bpc.changeModeToPanel, BP_CONST.HOVER_DELAY_BADGE);
     }
 
     function getVisibleBadgeRect() {
@@ -188,11 +174,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
     //   so that clicks around the panel don't accidentally open it.
     bpc.clickToOpenPanel = function(event) {
-      var mainRect = helper.byId(BP_CONST.MAIN_ID).getBoundingClientRect(),
-        badgeElem = helper.byId(BP_CONST.BADGE_ID);
-      if (event.clientX < badgeElem.offsetLeft + mainRect.width &&
-        event.clientY < badgeElem.offsetTop + mainRect.height &&
-        document.activeElement === badgeElem) {
+      var badgeElem = helper.byId(BP_CONST.BADGE_ID);
+      if (document.activeElement === badgeElem) {
         // Click is in visible area and badge has focus -- go ahead and open the panel
         bpc.changeModeToPanel();
       }

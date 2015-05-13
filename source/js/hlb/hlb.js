@@ -122,15 +122,8 @@ sitecues.def('hlb', function(hlb, callback) {
         var newTarget   = event.target,
             mouseX      = event.clientX,
             mouseY      = event.clientY,
-            isMouseDown,
+            isMouseDown = common.isButtonDown(event),
             HLBBoundingBox;
-
-        // This fixes SC-1834
-        if (platform.browser.isIE || platform.browser.isFirefox) {
-          isMouseDown = event.buttons === 1;
-        } else {
-          isMouseDown = event.which === 1;
-        }
 
         // The mouse has never been within the HLB bounds or
         // debugging is enabled.

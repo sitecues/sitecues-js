@@ -142,7 +142,6 @@ build:
 #Copy files for Source-Maps
 
 	@mkdir -p $(build-dir)/etc/js
-	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
@@ -187,7 +186,6 @@ debug:
 	@(awk 'FNR==1{print ""}1' $(files)) >> $(build-dir)/compile/js/sitecues.js
 
 	@mkdir -p $(build-dir)/etc/js
-	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 

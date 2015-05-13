@@ -217,11 +217,17 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
         index = 0;
 
-      for (; index < fullNames.length; index ++) {
-        var fullName = fullNames[index];
-        if (paletteName.indexOf(fullName) >= 0) {
-          return BP_CONST.PALETTE_NAME_MAP[fullName];
+      // Check for a string because site.get('palette')
+      // returns an Object if a custom palette is used.
+      if (typeof paletteName === 'string') {
+
+        for (; index < fullNames.length; index ++) {
+          var fullName = fullNames[index];
+          if (paletteName.indexOf(fullName) >= 0) {
+            return BP_CONST.PALETTE_NAME_MAP[fullName];
+          }
         }
+
       }
 
       return '';
