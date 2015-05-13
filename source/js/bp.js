@@ -48,7 +48,7 @@ sitecues.def('bp', function (bp, callback) {
     function updateView(isFirstTime) {
 
       // If we are expanding or contracting, aria-expanded is true (enables CSS)
-      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested() || !state.isBadge());
+      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
 
       // 2. Suppress animations if necessary
       // This is done for the first view change
