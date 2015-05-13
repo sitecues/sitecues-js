@@ -13,8 +13,11 @@
    // Array's prototype
   arr = Array.prototype,
 
-  // Library config container
-  libraryConfig = null,
+  // Either ws.sitecues.com/ or ws.dev.sitecues.com/
+  apiDomain,
+
+  // Either up.sitecues.com/ or up.dev.sitecues.com/
+  prefsDomain,
 
   // Modules container
   modules = {},
@@ -96,12 +99,22 @@
     return version;
   };
 
+  function isProduction() {
+    return getLibraryUrl().host === 'js.sitecues.com';
+  }
+
+  function initServices() {
+    var domainEnding = isProduction() ? '.sitecues.com/' : '.dev.sitecues.com/';
+    apiDomain = 'ws' + domainEnding;
+    prefsDomain = 'up' + domainEnding;
+  }
+
   getApiUrl = function(restOfUrl) {
-    return 'https://' + libraryConfig.hosts.ws + '/sitecues/api/' + restOfUrl;
+    return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
   };
 
   getPrefsUrl = function(restOfUrl) {
-    return 'https://' + libraryConfig.hosts.up + '/' + restOfUrl;
+    return 'https://' + prefsDomain + restOfUrl;
   };
 
   getLibraryUrl = function() {
@@ -569,86 +582,6 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  var LIB_CONFIG_NAMES = ['hosts'],
-    libraryConfigLoadCount;
-
-  // Validation method for library configuration. If valid, initialize sitecues.
-  var validateLibraryConfigs = function(cb) {
-    var valid = true;
-
-    if (sitecues.libConfig) {
-      libraryConfig = sitecues.libConfig;
-
-      log.info(libraryConfig);
-
-      if (libraryConfig.hosts) {
-
-        if (libraryConfig.hosts.ws) {
-          log.info('sitecues ws host: ' + libraryConfig.hosts.ws);
-        } else {
-          log.warn('sitecues ws host not specified.');
-          valid = false;
-        }
-
-        if (libraryConfig.hosts.up) {
-          log.info('sitecues up host: ' + libraryConfig.hosts.up);
-        } else {
-          log.warn('sitecues up host not specified.');
-          valid = false;
-        }
-      } else {
-        log.warn('sitecues hosts library config not found.');
-        valid = false;
-      }
-    } else {
-      log.warn('sitecues library config not found.');
-      valid = false;
-    }
-
-    if (!valid) {
-      log.error('Invalid sitecues library config.');
-    }
-
-    cb(!valid);
-  };
-
-  var processLibraryConfiguration = function(cb) {
-    // Called after all library configs that require loading are loaded, triggering validation.
-    var onLibraryConfigLoadComplete = function() {
-
-      libraryConfigLoadCount--;
-      if (libraryConfigLoadCount <= 0) {
-        validateLibraryConfigs(cb);
-      }
-    };
-
-    // Determine which library configs require loading.
-    var libraryConfigLoadNames = [],
-      i;
-
-    if (!sitecues.libConfig) {
-      // We need all of the library configs.
-      libraryConfigLoadNames = LIB_CONFIG_NAMES.splice(0, LIB_CONFIG_NAMES.length);
-    } else {
-      for (i = 0; i < LIB_CONFIG_NAMES.length; i++) {
-        if (!sitecues.libConfig[LIB_CONFIG_NAMES[i]]) {
-          libraryConfigLoadNames.push(LIB_CONFIG_NAMES[i]);
-        }
-      }
-    }
-    // Set the counter of outstanding library configs.
-    libraryConfigLoadCount = libraryConfigLoadNames.length;
-
-    // If there are no outstanding library configs, trigger validation.
-    if (libraryConfigLoadCount <= 0) {
-      validateLibraryConfigs(cb);
-    } else { // Trigger loading of missing library configs.
-      for (i = 0; i < libraryConfigLoadNames.length; i++) {
-        loadScript('_config/' + libraryConfigLoadNames[i] + '.js', onLibraryConfigLoadComplete);
-      }
-    }
-  };
-
   //////////////////////////////////////////////////////////////////////////////////////////
   //
   //  Library Initialization
@@ -677,6 +610,7 @@
 
     // 'Plant our flag' on this page.
     sitecues.exists = true;
+
     // As we have now 'planted our flag', export the public fields.
     exportPublicFields();
 
@@ -694,29 +628,10 @@
       // 2) sitecues.config.iframe = falsey
       safe_production_msg('Developer note (sitecues): the following iframe attempted to load sitecues, which does not currently support iframes: '+window.location +
         ' ... email support@sitecues.com for more information.');
-    } else {
-
-      if (SC_LOCAL) {
-        console.log('Running sitecues in local mode.')
-        // Use these as defaults if we can't access hosts.js because of
-        // Content Security Policy. Having this backup default allows us to paste
-        // sitecues into the console of sites with a CSP.
-        sitecues.libConfig = {
-          hosts: {
-            up : "up.dev.sitecues.com",  // Should not be used in local mode
-            ws: "ws.dev.sitecues.com"  // Used for audio only
-          }
-        };
-      }
-
-      processLibraryConfiguration(function(err) {
-        if (err) {
-          log.error('Unable to load library configuration. Library can not initialize.')
-        } else {
-          // Start processing the queued-up module definition requests (in essence, load the library).
-          _processDefQueue();
-        }
-      });
+    }
+    else {
+      initServices();
+      _processDefQueue(); // Load all modules
     }
   };
 
