@@ -159,7 +159,13 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
         value = $node.children(':selected').text();
         doWalkChildren = false; // Otherwise will read all the <option> elements
       }
-      else if ($node.is('input,textarea,button') && node.getAttribute('type') != 'radio' && node.getAttribute('type') != 'checkbox') {
+
+      else if ($node.is('input[type=radio],input[type=checkbox]')) {
+        // value, and title on these form controls
+        textEquiv = textEquiv || node.getAttribute("title") || '';
+      }
+
+      else if ($node.is('input,textarea,button')) {
         // value, placeholder and title on these form controls
         textEquiv = textEquiv || node.getAttribute("placeholder") || node.getAttribute("title") || '';
         value = node.value;
