@@ -174,6 +174,9 @@ sitecues.def('hlb', function(hlb, callback) {
 
         // Register an event handler for closing the HLB by clicking outside of it.
         $('body').on('click', onClick);
+
+        // Make sure mousewheel scrolls HLB but not page
+        eventHandlers.captureWheelEvents($hlb);
       }
 
       /**
@@ -187,9 +190,6 @@ sitecues.def('hlb', function(hlb, callback) {
           $hlb.focus();
         }
 
-        // Turn on event listeners for the HLB
-        turnOnHLBEventListeners();
-
         // Let the rest of the application know that the hlb is ready
         // Listeners: hpan.js, invert.js, metrics/hlb-opened.js, mouse-highlight.js, speech.js
         sitecues.emit('hlb/ready', $hlb);
@@ -199,6 +199,9 @@ sitecues.def('hlb', function(hlb, callback) {
        * [turnOffHLBEventListeners turns off HLB event handlers for deflation and scroll]
        */
       function turnOffHLBEventListeners() {
+        if (!isListeningToMouseEvents) {
+          return;
+        }
 
         // UNTrap the mousewheel events (we don't want the event to even think when the user scrolls without the HLB)
         eventHandlers.releaseWheelEvents();
@@ -259,6 +262,9 @@ sitecues.def('hlb', function(hlb, callback) {
 
         // Sanitize the input, by accounting for "lonely" elements.
         $foundation = getFoundation($picked);
+
+        // Turn off listeners for the old HLB. createHLB() will add new ones.
+        turnOffHLBEventListeners();
 
         createHLB(isRetargeting);
       }
@@ -385,7 +391,7 @@ sitecues.def('hlb', function(hlb, callback) {
         // Clone, style, filter
         cloneHLB();
 
-        eventHandlers.captureWheelEvents($hlb);
+        turnOnHLBEventListeners();
 
         // Listeners: metrics/hlb-opened.js, speech.js
         sitecues.emit('hlb/create', $hlb);
