@@ -20,7 +20,7 @@ sitecues.def('conf/site', function (site, callback) {
     fetchedSiteConfig = {},
     providedSiteConfig = sitecues.getSiteConfig(),
     everywhereConfig = sitecues.getEverywhereConfig(),
-    isFetched = false;
+    isSiteConfigFetchNeeded = false;
 
   sitecues.use('jquery', function($) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
@@ -56,11 +56,11 @@ sitecues.def('conf/site', function (site, callback) {
         return;
       }
 
-      if (isFetched) {
-        return; // Already fetched
+      if (isSiteConfigFetchNeeded) {
+        return; // Already being fetched or we already have the info
       }
 
-      isFetched = true;
+      isSiteConfigFetchNeeded = true;
 
       // Trigger the initial fetch.
       $.ajax({
