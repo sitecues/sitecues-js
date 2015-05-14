@@ -55,8 +55,13 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
     }
 
     /**
-     * Add ". " between blocks if the previous block did not end the sentence, to avoid combining 2 sentences into 1.
+     * Add " . " between blocks if the previous block did not end the sentence, to avoid combining 2 sentences into 1.
      * Or, if the sentence already ended, add " " between blocks to ensure words are not jammed together into one word.
+     * This string is magical, at least in Ivona.
+     * We tried '. ' but it caused abbreviations to be expanded (e.g. "No." is spoken as "Number").
+     * Also tried "; " and "! " but these caused the block of text to be read with a slightly rising pitch at the end.
+     * The ' . ' seems to do a good job of ending the sentence without causing abbreviation expansion or pitch changes.
+     * (If this ends up causing 'dot' to be spoken we can try ';. ' which also seemed to work but was weirder).
      * @param {string} original text
      */
     function appendBlockSeparator() {
@@ -67,7 +72,7 @@ sitecues.def('audio/speech-builder', function (builder, callback) {
       var lastChar = textBuffer.slice(-1),
         IS_LETTER_REGEX = /[\w\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]/; // Shortest way to test if char is a letter
       if (lastChar.match(IS_LETTER_REGEX)) {
-        appendText('. ');  // Ended in a letter, so add sentence marker so that TTS engine can treat it as a sentence
+        appendText(' . ');  // Ended in a letter, so add sentence marker so that TTS engine can treat it as a sentence
       }
       else {
         appendText(' ');  // Did not end in a letter, but add space so that text from the two blocks not jammed together
