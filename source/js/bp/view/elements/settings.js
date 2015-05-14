@@ -104,7 +104,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         state.set('settingsMode', SETTINGS_ENABLED);
       }
 
-      SC_DEV && console.log('Transitioning about mode: ' + state.get('settingsMode'));
+      SC_DEV && console.log('Transitioning settings mode: ' + state.get('settingsMode'));
 
       animateSettings();
 
@@ -127,7 +127,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     // Fade out the other buttons ()
     function animateSettings (useInstantAnimation) {
-
       var settingsTransitionTo         = state.get('settingsMode'),
           targetCSSValues              = cssValues[settingsTransitionTo],
           fromCSSValues                = settingsTransitionTo === SETTINGS_DISABLED ? cssValues[SETTINGS_ENABLED] : cssValues[SETTINGS_DISABLED],

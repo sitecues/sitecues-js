@@ -86,7 +86,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </text>\
     </g>\
     <g style="display:none" id="scp-tips-content" clip-path="url(#scp-outline-clip-def)">\
-      <foreignObject>\
+      <foreignObject x="100" y="-100" width="500" height="500">\
         <div id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
           <div class="scp-card active">\
             <h1>Welcome</h1>\
@@ -118,7 +118,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </foreignObject>\
     </g>\
     <g style="display:none;"  id="scp-settings-content" clip-path="url(#scp-outline-clip-def)">\
-      <foreignObject>\
+      <foreignObject x="100" y="-100" width="500" height="500">\
         <div id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
           <div class="scp-card active">\
             <h1>Settings</h1>\

@@ -104,7 +104,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         state.set('tipsMode', TIPS_ENABLED);
       }
 
-      SC_DEV && console.log('Transitioning about mode: ' + state.get('tipsMode'));
+      SC_DEV && console.log('Transitioning tips mode: ' + state.get('tipsMode'));
 
       animateTips();
 
@@ -248,6 +248,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'duration': useInstantAnimation ? 1 : animate.getDuration(enableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onEnableTick,
           'onFinish': function () {
+            tipsContent.style.opacity  = 1;
             tipsCards.style.opacity   = 1;
             arrowButtons.style.opacity    = 1;
             feedbackButton.style.display       = 'none';

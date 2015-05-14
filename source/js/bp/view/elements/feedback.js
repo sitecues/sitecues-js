@@ -104,7 +104,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         state.set('feedbackMode', FEEDBACK_ENABLED);
       }
 
-      SC_DEV && console.log('Transitioning about mode: ' + state.get('feedbackMode'));
+      SC_DEV && console.log('Transitioning feedback mode: ' + state.get('feedbackMode'));
 
       animateFeedback();
 

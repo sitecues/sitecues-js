@@ -91,16 +91,17 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function onMouseClick (e) {
-      console.log(e.target);
+
       var element = e.target,
           dataFeature;
 
-      while(element.parentElement) {
+      while(element.parentNode) {
+
         dataFeature = element.getAttribute('data-feature');
         if (dataFeature) {
           break;
         }
-        element = element.parentElement;
+        element = element.parentNode;
       }
 
       sitecues.emit('bp/toggle-' + dataFeature);
@@ -220,13 +221,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function enableButton (btn) {
-      console.log(btn);
+      cancelAllAnimations();
       btn.addEventListener('mouseenter', onMouseEnter);
       btn.addEventListener('mouseleave', onMouseLeave);
       btn.addEventListener('click', onMouseClick);
     }
 
     function disableButton (btn) {
+      cancelAllAnimations();
       btn.removeEventListener('mouseenter', onMouseEnter);
       btn.removeEventListener('mouseleave', onMouseLeave);
       btn.removeEventListener('click', onMouseClick);

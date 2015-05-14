@@ -168,7 +168,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#sitecues-badge #scp-bp-container': {
-          'position': 'absolute'
+          'position': 'absolute',
+          'clip': 'rect(0px 800px 400px 0px)'
         },
 
         // Fade in the badge when it appears
@@ -182,7 +183,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-svg': {
-          'max-width': 'none'
+          'max-width': 'none',
+          'overflow': 'hidden'
         },
 
         // The new badge is hidden until sitecues is loaded
@@ -408,7 +410,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-size': '44px'
         },
 
-        '.active': {
+        '.active, .active *': {
           'display': 'block'
         }
       },

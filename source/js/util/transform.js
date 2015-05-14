@@ -43,8 +43,8 @@ sitecues.def('util/transform', function (transform, callback) {
 
       translateSplitter = transform.indexOf(',') !== -1 ? ',' : ' ';
       transformValues   = transform.split(translateSplitter);
-      translateLeft     = transformValues[0];
-      translateTop      = hasScale ? transformValues[1].split('scale')[0] : transformValues[1];
+      translateLeft     = transformValues[0] || 0;
+      translateTop      = hasScale ? transformValues[1].split('scale')[0] : transformValues[1] || 0;
 
     }
 
