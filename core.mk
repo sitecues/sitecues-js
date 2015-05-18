@@ -100,6 +100,7 @@ files=\
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight/mouse-highlight.js \
+	source/js/style-service/user-agent-css.js \
 	source/js/style-service/style-service.js \
 	source/js/cursor/cursor.js \
 	source/js/zoom/fixed-position-fixer.js \

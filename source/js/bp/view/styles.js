@@ -215,8 +215,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'box-sizing': 'border-box',
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
           'padding': '6px 8px 8px calc(50% - 66px)',
-          'background-color': '#f7fcff',
+          'background-color': '#f7fcff !important',
           'z-index': '9999999'
+        },
+
+        '.scp-toolbar > #scp-bp-container': {
+          'background-color': 'transparent !important'
         },
 
         // Move the body down by the height of the toolbar + 1px for the box-shadow

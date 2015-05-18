@@ -11,8 +11,6 @@ sitecues.def('themes/color/engine', function(colorEngine, callback) {
         THEME_STYLESHEET_NAME = 'sitecues-theme',
         DEFAULT_THEME = 'lightened',
         REPAINT_MS = 40,
-        DEFAULT_BG = { rgba: { r: 255, g: 255, b: 255, a: 1 }, prop: 'background-color' },
-        DEFAULT_FG = { rgba: { r: 0, g: 0, b: 0, a: 1 }, prop: 'color' },
         bgStyles,
         fgStyles;
 
@@ -44,18 +42,13 @@ sitecues.def('themes/color/engine', function(colorEngine, callback) {
           return 'color: ' + colorString + ' !important;\n';
         }
 
-        // First modify default user agent colors
-        styleSheetText += 'html,body {\n' +
-          createBgRule(colorMapFn(DEFAULT_BG, intensity)) +
-          createFgRule(colorMapFn(DEFAULT_FG, intensity)) +
-          '}\n\n';
-
-        // Next modify page color rules
+        // Backgrounds
         bgStyles.forEach(function(bgStyle) {
           var bg = colorMapFn(bgStyle.value, intensity);
           styleSheetText += bgStyle.rule.selectorText + ' {' + createBgRule(bg) + ';}\n';
         });
 
+        // Foregrounds
         fgStyles.forEach(function(fgStyle) {
           var fg = colorMapFn(fgStyle.value, intensity);
           styleSheetText += fgStyle.rule.selectorText + ' {' + createFgRule(fg) + ';}\n';
@@ -101,7 +94,7 @@ sitecues.def('themes/color/engine', function(colorEngine, callback) {
         if (colorString.substr(0,3) !== 'rgb') {
           // Convert color names such as 'white', 'black', 'transparent'
           var $div = $('<div>').appendTo('html')
-            .css('color', colorString + ' !important');
+            .css('color', colorString);
           colorString = $div.css('color');
           $div.remove();
         }

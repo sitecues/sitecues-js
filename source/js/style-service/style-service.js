@@ -6,13 +6,11 @@ sitecues.def('style-service', function (styleService, callback) {
 
   'use strict';
   
-  sitecues.use('conf/site', 'jquery', function (site, $) {
+  sitecues.use('conf/site', 'jquery', 'ua-css', function (site, $, uaCss) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
       SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',
-      SITECUES_CSS_DEFAULT = 'html,#scp-main {cursor:auto}\n' +
-        'input,textarea,select,a,button,label[for]{cursor:pointer}\n',
       WAIT_BEFORE_INIT_STYLESHEET = 50,
       hasInitBeenRequested,   // Have we even begun the init sequence?
       isInitComplete,      // Init sequence is complete
@@ -71,7 +69,7 @@ sitecues.def('style-service', function (styleService, callback) {
      */
     function collectAllStylesIntoCombinedSheet(linkTagStylesList, styleTags) {
       // Add our default styles
-      var css = SITECUES_CSS_DEFAULT,
+      var css = uaCss.DEFAULT,
         index,
         numLinkTags = linkTagStylesList.length,
         numStyleTags = styleTags.length;
