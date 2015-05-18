@@ -114,8 +114,8 @@ files=\
 	source/js/keys/keys.js \
 	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan/hpan.js \
-	source/js/themes/color-choices.js \
-	source/js/themes/color-engine.js \
+	source/js/theme/color-choices.js \
+	source/js/theme/color-engine.js \
 	source/js/info/info.js \
 	source/js/util/status.js \
 	source/js/metrics/util.js \

@@ -186,7 +186,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       }
     }
 
-    function onPossiblePaletteChange() {
+    function onPossibleWebpageThemeChange() {
       setTimeout(checkBackgroundColorChange, 0);
     }
 
@@ -194,10 +194,22 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       return getComputedStyle(document.body).backgroundColor;
     }
 
-    function addPaletteListener() {
-      document.body.addEventListener('click', onPossiblePaletteChange);
-      document.body.addEventListener('keydown', onPossiblePaletteChange);
+    // Listen for change in the web page's custom theme (as opposed to the sitecues theme)
+    function addWebPageThemeListener() {
+      document.body.addEventListener('click', onPossibleWebpageThemeChange);
+      document.body.addEventListener('keydown', onPossibleWebpageThemeChange);
       lastBgColor = getBackgroundColor();
+    }
+
+    // Listen for changes in the sitecues theme
+    function addSitecuesThemeListener() {
+      sitecues.on('theme/did-apply', onSitecuesThemeChange);
+    }
+
+    function onSitecuesThemeChange() {
+      console.log('hello');
+      state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
+      checkBackgroundColorChange();
     }
 
     function setCustomPalette (badgeElement) {
@@ -205,8 +217,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       var paletteName = getBadgePalette(badgeElement);
       if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
         state.set('isAdaptivePalette', true);
-        addPaletteListener();
+        addWebPageThemeListener();
       }
+
+      addSitecuesThemeListener();
 
       state.set('paletteName', paletteName);
 

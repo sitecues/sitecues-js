@@ -13,12 +13,14 @@
 //   - Parts of http://www.cnn.com/
 //   - http://timesofindia.indiatimes.com/world/europe/French-mayor-expelled-for-claiming-Islam-will-be-banned-from-France-by-2027/articleshow/47316711.cms
 //   - is it because we apply styles in the wrong order (style-service doesn't try to preserve order)
+// @import support -- needed for faast.org
+// Erasing background when only background-color set is messing up background images, e.g. on acbohio.org
 // Not working on
 // - http://www.jsonline.com/sports/bucks/
 // - http://news.yahoo.com/us-raid-syria-killed-32-members-including-4-102310292.html
 // - http://english.alarabiya.net/en/News/middle-east/2015/05/17/Egypt-restricts-women-travelling-to-Turkey-.html
 
-sitecues.def('themes/color/choices', function(colorChoices, callback) {
+sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
 
   sitecues.use('jquery', function($) {

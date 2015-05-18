@@ -2,15 +2,16 @@
  *  Support color themes in page
  */
 
-sitecues.def('themes/color/engine', function(colorEngine, callback) {
+sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'themes/color/choices',
+  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices',
     function($, styleService, platform, colorChoices) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
         DEFAULT_THEME = 'lightened',
         REPAINT_MS = 40,
+        THEME_APPLIED_TIMEOUT = 40,
         bgStyles,
         fgStyles;
 
@@ -21,10 +22,23 @@ sitecues.def('themes/color/engine', function(colorEngine, callback) {
       // type (optional)
       // intensity (optional) = .01-1
       colorEngine.applyTheme = function(type, intensity) {
+        var styleSheetText = type === 'none' ? '' : getThemeCss(type, intensity || 1);
+
+        getStyleSheet().text(styleSheetText);
+
+        if (shouldRepaintToEnsureFullCoverage) {
+          forceRepaint();
+        }
+
+        setTimeout(function() {
+          sitecues.emit('theme/did-apply');
+        }, THEME_APPLIED_TIMEOUT);
+      };
+
+      function getThemeCss(type, intensity) {
+
         var colorMapFn = colorChoices[type || DEFAULT_THEME],
           styleSheetText = '';
-
-        intensity = intensity || 1;
 
         function getColorString(rgba) {
           var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
@@ -54,11 +68,7 @@ sitecues.def('themes/color/engine', function(colorEngine, callback) {
           styleSheetText += fgStyle.rule.selectorText + ' {' + createFgRule(fg) + ';}\n';
         });
 
-        getStyleSheet().text(styleSheetText);
-
-        if (shouldRepaintToEnsureFullCoverage) {
-          setTimeout(forceRepaint, 0);
-        }
+        return styleSheetText;
       };
 
       // Necessary on youtube.com and https://www.arlington.k12.ma.us/stratton/
