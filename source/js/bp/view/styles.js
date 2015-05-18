@@ -412,6 +412,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.active, .active *': {
           'display': 'block'
+        },
+
+        '#scp-svg h1': {
+          'font-size': '32px'
+        },
+
+        '#scp-svg p': {
+          'font-size': '20px'
         }
       },
 
