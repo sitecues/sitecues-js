@@ -20,7 +20,7 @@ sitecues.def('conf/site', function (site, callback) {
     fetchedSiteConfig = {},
     providedSiteConfig = sitecues.getSiteConfig(),
     everywhereConfig = sitecues.getEverywhereConfig(),
-    isFetched = false;
+    isSiteConfigFetchNeeded = false;
 
   sitecues.use('jquery', function($) {
     // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
@@ -42,17 +42,25 @@ sitecues.def('conf/site', function (site, callback) {
       return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
     };
 
-    function fetchSiteConfig() {
-      if (isFetched) {
-        return; // Already fetched
-      }
+    // The everywhereConfig will be an empty object or will
+    // contain sitecues everywhere configuration, in which case it will contain a siteId
+    function isEverywhereConfigValid() {
+      return everywhereConfig.siteId;
+    }
 
-      if (SC_LOCAL || !isEmptyObject(everywhereConfig)) {
+    function fetchSiteConfig() {
+      if (SC_LOCAL || isEverywhereConfigValid()) {
         // Cannot save to server when we have no access to it
         // Putting this condition in allows us to paste sitecues into the console
         // and test it on sites that have a content security policy
         return;
       }
+
+      if (isSiteConfigFetchNeeded) {
+        return; // Already being fetched or we already have the info
+      }
+
+      isSiteConfigFetchNeeded = true;
 
       // Trigger the initial fetch.
       $.ajax({
@@ -67,13 +75,8 @@ sitecues.def('conf/site', function (site, callback) {
 
           // Add the provided configuration
           fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
-          isFetched = true;
         }
       });
-    }
-
-    function isEmptyObject(obj){
-      return JSON.stringify(obj) === '{}';
     }
 
     // Fetch once we need it (we currently need it if speech might be used, because the fetched

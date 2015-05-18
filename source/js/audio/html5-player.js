@@ -21,7 +21,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
    * @param url source of audio to play
    */
   player.playAudioSrc = function(url) {
-    var t = 0;
     var audioElement = new Audio();
 
     audioElement.src = ''; // Clean up
@@ -50,7 +49,7 @@ sitecues.def('audio/html5-player', function (player, callback) {
    */
   player.stop = function () {
     audioElements.forEach(function(audioElement) {
-      sitecues.$(audioElement).off('canplaythrough'); // Don't fire notification to play if we haven't played yet
+      sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
       sitecues.$(audioElement).off('ended');
       // We can only pause in IE9 if there is enough data
       // for the current and at least the next frame

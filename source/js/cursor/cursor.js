@@ -22,6 +22,7 @@ sitecues.def('cursor', function (cursor, callback) {
         SITECUES_BP_CURSOR_CSS_ID = 'sitecues-bp-cursor',
         MIN_BP_CURSOR_SIZE = 1.9,
         REENABLE_CURSOR_MS = 20,
+        ENABLE_BP_CURSOR_MS = 50,  // Wait for browser to process stylesheet
         ajaxCursors = {}, // URLs for IE cursors that have already been fetched via AJAX
         $stylesheet,
         $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
@@ -213,10 +214,11 @@ sitecues.def('cursor', function (cursor, callback) {
         '.scp-hand-cursor {cursor:pointer};';
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
-      bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);
 
-      refreshStylesheets();
-
+      setTimeout(function() {
+        bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);
+        refreshStylesheets();
+      }, ENABLE_BP_CURSOR_MS);
     }
 
     /**

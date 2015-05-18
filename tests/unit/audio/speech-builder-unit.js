@@ -26,11 +26,11 @@ describe('speech-builder', function() {
       expect(actualText).to.be.equal('This is an Absolutely Amazing test!');
       done();
     });
-    it('Should append period space between block elements when previous block did not end sentence', function (done) {
+    it('Should append space period space between block elements when previous block did not end sentence', function (done) {
       var div = document.createElement('div');
       div.innerHTML = '<div><div data-display="block">This is an</div><div data-display="block">Absolutely Amazing test!</div></div>';
       var actualText = builder.getText(div);
-      expect(actualText).to.be.equal('This is an. Absolutely Amazing test!');
+      expect(actualText).to.be.equal('This is an . Absolutely Amazing test!');
       done();
     });
     it('Should append spaces between block elements', function (done) {
