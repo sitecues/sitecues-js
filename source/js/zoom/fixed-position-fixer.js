@@ -62,6 +62,11 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           else {
             css.maxWidth = ''; // Not fixed -- clear width restriction
           }
+          if (css.transform) {
+            // So that our fix doesn't caused fixed position bars to slowly move down screen, e.g.
+            // http://www.ibtimes.com/spiders-rain-down-australia-millions-reportedly-descended-sky-town-1925810
+            css.transitionProperty = 'none';
+          }
           $(element).css(css);
         }
 

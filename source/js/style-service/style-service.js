@@ -10,7 +10,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
-      SITECUES_CSS_ID = 'sitecues-combined-css',
+      SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',
       SITECUES_CSS_DEFAULT = 'html,#scp-main {cursor:auto}\n' +
         'input,textarea,select,a,button,label[for]{cursor:pointer}\n',
       WAIT_BEFORE_INIT_STYLESHEET = 50,
@@ -37,11 +37,17 @@ sitecues.def('style-service', function (styleService, callback) {
           linkTags = document.getElementsByTagName('link'),
           numLinkTags = linkTags.length;
 
+      function isCss(link) {
+        return link.href.lastIndexOf('.css') !== -1 ||
+          link.type.lastIndexOf('text/css') !== -1;
+      }
+
       for(var i = 0; i < numLinkTags; i ++) {
-        if (linkTags[i].href.indexOf('.css') !== -1 &&    // Make sure it is actually a CSS file
-          isAcceptableMediaType(linkTags[i].media) &&     // Ignore all CSS with the wrong media, e.g. print
-          linkTags[i].rel !== 'alternate stylesheet') {   // Ignore alternate stylesheets
-          stylesheets.push(linkTags[i].href);
+        var linkTag = linkTags[i];
+        if (isCss(linkTag) &&    // Make sure it is actually a CSS file
+          isAcceptableMediaType(linkTag.media) &&     // Ignore all CSS with the wrong media, e.g. print
+          linkTag.rel !== 'alternate stylesheet') {   // Ignore alternate stylesheets
+          stylesheets.push(linkTag.href);
         }
       }
 
@@ -56,7 +62,7 @@ sitecues.def('style-service', function (styleService, callback) {
       // Construct sitecues combined CSS <style> element
       return $('<style>')
         .appendTo('head')
-        .attr('id', SITECUES_CSS_ID);
+        .attr('id', SITECUES_COMBINED_CSS_ID);
     }
 
     /**
@@ -365,7 +371,6 @@ sitecues.def('style-service', function (styleService, callback) {
         styleTags = getAllStyleTags();
 
       function onStylesRetrieved() {
-
         $combinedStylesheet = createCombinedStyleSheet();
 
         // Fill-in the sitecues combined CSS <style> element
@@ -391,14 +396,29 @@ sitecues.def('style-service', function (styleService, callback) {
      * @return  {[]} Array of objects with rule (selector) and value (CSS property affected)
      */
     styleService.getAllMatchingStyles = function(propertyName, matchValue) {
+      return styleService.getAllMatchingStylesCustom(function(cssStyleDeclaration) {
+        var ruleValue = cssStyleDeclaration[propertyName];
+        if (ruleValue && (!matchValue || matchValue === ruleValue)) {
+          return ruleValue;
+        }
+      });
+    };
+
+    /**
+     * [This function allows the targeting of styles, such as "cursor", and invokes a callback
+     * that gets passed the style and the rule associated with it for any CSS selector]
+     * @param  {fn} matchingFn takes a cssStyleDecl and returns a truthy/falsey value
+     * @return  {[]} Array of objects with rule (selector) and value (CSS property affected)
+     */
+    styleService.getAllMatchingStylesCustom = function(matchingRuleFn) {
       if (!isInitComplete) {
         return [];
       }
 
       var rules = combinedDOMStylesheetObject.cssRules,
         rule,
-        cssStyleDeclaration,
         ruleValue,
+        cssStyleDeclaration,
         ruleIndex = 0,
         styleResults = [],
         numRules = rules ? rules.length : 0;
@@ -407,8 +427,8 @@ sitecues.def('style-service', function (styleService, callback) {
         rule = rules[ruleIndex];
         cssStyleDeclaration = rule.style;
         if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
-          ruleValue = cssStyleDeclaration[propertyName];
-          if (matchValue ? (ruleValue === matchValue) : ruleValue) {
+          ruleValue = matchingRuleFn(cssStyleDeclaration);
+          if (ruleValue) {
             styleResults.push({rule : rule, value : ruleValue });
           }
         }
@@ -430,7 +450,7 @@ sitecues.def('style-service', function (styleService, callback) {
           return document.styleSheets[i];
         }
       }
-      SC_DEV && console.log('Could not find stylesheet');
+      SC_DEV && console.log('Could not find stylesheet ' + $stylesheet[0].id);
       return [];
     };
 
@@ -456,10 +476,16 @@ sitecues.def('style-service', function (styleService, callback) {
        init();
       }
     });
+
     // We must always move fixed position elements down when there is a toolbar
     // Therefore we will need the style service even if there is no zoom
     sitecues.on('bp/did-insert-toolbar', function() {
-      $(document).ready(init);
+      if (document.readyState === 'complete') {
+        init();
+      }
+      else {
+        window.addEventListener('load', init);
+      }
     });
   });
 
