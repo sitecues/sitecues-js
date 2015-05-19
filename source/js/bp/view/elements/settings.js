@@ -18,8 +18,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         bottomSVG,
         moreButton,
         arrowButtons,
-        tipsContent,
-        settingsContent,
+
+
         feedbackContent,
         feedbackTextArea,
         aboutContent,
@@ -47,8 +47,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
-      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
+
+
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
@@ -202,7 +202,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         aboutButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
         arrowButtons.style.opacity     = 0;
         settingsCards.style.opacity    = 0;
-        settingsContent.style.display = 'none';
+
 
         settingsAnimation = animate.create({
           'from': currentSVGHeight,
@@ -226,11 +226,11 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 1;
         settingsButton.style.display  = 'block';
-        settingsContent.style.display = 'block';
+
         settingsCards.style.display   = 'block';
         arrowButtons.style.display    = 'block';
-        settingsContent.style.opacity = 1;
-        tipsContent.style.opacity     = 0;
+
+
         feedbackContent.style.opacity = 0;
         aboutContent.style.opacity    = 0;
         tipsCards.style.opacity       = 0;

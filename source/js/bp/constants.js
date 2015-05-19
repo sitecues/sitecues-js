@@ -71,7 +71,6 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.ABOUT_PATH_CONTAINER_ID  = 'scp-about-path-container';
   constants.ABOUT_CONTENT_ID         = 'scp-about-content';
-  constants.ABOUT_CONTENT_BUTTON_CONTAINER_ID = 'scp-about-content-button-container';
   constants.ABOUT_CONTENT_IMAGE_ID   = 'scp-logo-text';
 
   constants.FEEDBACK_CONTENT_ID      = 'scp-feedback-content';
@@ -80,7 +79,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SETTINGS_CONTENT_ID      = 'scp-settings-content';
   constants.SETTINGS_CARDS_ID        = 'scp-settings-cards';
 
-  constants.TIPS_CONTENT_ID          = 'scp-tips-content';
   constants.TIPS_CARDS_ID            = 'scp-tips-cards';
 
   constants.ARROWS_ID                = 'scp-arrows';

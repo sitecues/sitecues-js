@@ -385,16 +385,18 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'color'        : '#FFF',
           'text-align'   : 'center',
           'background'   : '#447AC4',
-          'transform'    : 'none !important'
+          'transform'    : 'none !important',
+          'display'      : 'none'
         },
 
         '.scp-cards': {
           'position': 'relative',
           'font-family': 'Arial',
-          'top': '170px',
           'left': '130px',
           'width': '340px',
-          'opacity': 0
+          'z-index': 999,
+          'opacity': 0,
+          'pointer-events': 'none'
         },
 
         '.scp-card': {

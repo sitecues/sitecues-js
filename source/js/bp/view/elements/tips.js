@@ -18,8 +18,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         bottomSVG,
         moreButton,
         arrowButtons,
-        tipsContent,
-        settingsContent,
+
+
         feedbackContent,
         feedbackTextArea,
         aboutContent,
@@ -47,8 +47,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
-      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
+
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
@@ -199,7 +198,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         aboutButton.style.display      = 'block';
         arrowButtons.style.opacity     = 0;
         tipsCards.style.opacity        = 0;
-        tipsContent.style.display  = 'none';
+
         settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
         feedbackButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
 
@@ -228,10 +227,10 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         aboutButton.style.opacity     = 0;
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 0;
-        tipsContent.style.display     = 'block';
+
         tipsCards.style.display       = 'block';
         arrowButtons.style.display    = 'block';
-        settingsContent.style.opacity = 0;
+
         feedbackContent.style.opacity = 0;
         aboutContent.style.opacity    = 0;
         settingsCards.style.opacity   = 0;
@@ -248,7 +247,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'duration': useInstantAnimation ? 1 : animate.getDuration(enableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
           'onTick'  : onEnableTick,
           'onFinish': function () {
-            tipsContent.style.opacity  = 1;
+
             tipsCards.style.opacity   = 1;
             arrowButtons.style.opacity    = 1;
             feedbackButton.style.display       = 'none';

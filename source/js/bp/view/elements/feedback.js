@@ -17,9 +17,9 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         shadowSVG,
         bottomSVG,
         moreButton,
-        tipsContent,
+
         arrowButtons,
-        settingsContent,
+
         feedbackContent,
         aboutContent,
         settingsCards,
@@ -47,8 +47,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
-      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
+
+
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
       settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
@@ -230,8 +230,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         feedbackContent.style.display = 'block';
         feedbackButton.style.display  = 'block';
         feedbackContent.style.opacity = 1;
-        tipsContent.style.opacity     = 0;
-        settingsContent.style.opacity = 0;
+
+
         aboutContent.style.opacity    = 0;
         tipsCards.style.opacity       = 0;
         settingsCards.style.opacity   = 0;

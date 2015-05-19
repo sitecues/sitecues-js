@@ -23,7 +23,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         feedbackContent,
         feedbackTextArea,
         aboutContent,
-        aboutContentButtonContainer,
         aboutContentImage,
         settingsCards,
         tipsCards,
@@ -55,7 +54,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
-      aboutContentButtonContainer = byId(BP_CONST.ABOUT_CONTENT_BUTTON_CONTAINER_ID);
       settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
       tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
       arrowButtons                = byId(BP_CONST.ARROWS_ID);
@@ -214,7 +212,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
       if (aboutTransitionTo === ABOUT_DISABLED) {
 
-        aboutContentButtonContainer.style.opacity = 0;
         tipsButton.style.opacity                  = 1;
         settingsButton.style.opacity              = 1;
         feedbackButton.style.opacity              = 1;
@@ -251,7 +248,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         feedbackButton.style.opacity  = 0;
         aboutButton.style.opacity     = 1;
         aboutContent.style.opacity    = 1;
-        aboutContentButtonContainer.style.display = 'block';
         tipsContent.style.opacity     = 0;
         settingsContent.style.opacity = 0;
         feedbackContent.style.opacity = 0;
@@ -276,7 +272,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'duration': useInstantAnimation ? 1 : animate.getDuration(secondEnableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
               'onTick'  : onSecondEnableTick,
               'onFinish': function () {
-                aboutContentButtonContainer.style.opacity = 1;
+
                 arrowButtons.style.display = 'none';
                 tipsButton.style.display       = 'none';
                 settingsButton.style.display   = 'none';
