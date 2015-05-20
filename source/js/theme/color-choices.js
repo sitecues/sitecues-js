@@ -7,11 +7,6 @@
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
-// Sidebar colors not taking effect at
-//   - http://www.foxnews.com/world/2015/05/17/russia-putin-scores-8-goals-in-game-with-nhl-veterans/
-//   - Parts of http://www.cnn.com/
-//   - http://timesofindia.indiatimes.com/world/europe/French-mayor-expelled-for-claiming-Islam-will-be-banned-from-France-by-2027/articleshow/47316711.cms
-//   - is it because we apply styles in the wrong order (style-service doesn't try to preserve order)
 // @import support -- needed for faast.org
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {

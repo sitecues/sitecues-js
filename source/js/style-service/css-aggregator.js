@@ -16,10 +16,13 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension';
 
     // Must provide url or text, but not both
-    function StyleSheet(url, text) {
+    function StyleSheet(url, text, debugName) {
 
       this.url = url;
       this.text = !url && (text || '');
+      if (SC_DEV) {
+        this.debugName = debugName;
+      }
 
       ++numPending;
 
@@ -198,13 +201,14 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     }
 
     function insertSheetBefore(sheet, url) {
-      var insertionIndex = sheets.indexOf(sheet),
-        newSheet = new StyleSheet(url);
+      var debugName = SC_DEV && '@import ' + url,
+        insertionIndex = sheets.indexOf(sheet),
+        newSheet = new StyleSheet(url, null, debugName);
       sheets.splice(insertionIndex, 0, newSheet);
     }
 
-    function addSheet(url, text) {
-      sheets.push(new StyleSheet(url, text));
+    function addSheet(url, text, debugName) {
+      sheets.push(new StyleSheet(url, text, debugName));
     }
 
     function hasPendingRequests() {
@@ -219,7 +223,10 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       // Concatenate retrieved CSS text
       var allCss = '';
       sheets.forEach(function(sheet) {
-        allCss += sheet.text || '';
+        if (SC_DEV) {
+          allCss += '/***** ' + sheet.debugName + ' *****/\n\n';
+        }
+        allCss += (sheet.text || '') + '\n\n';
       });
 
       // Clear the sheets references and free the memory
@@ -261,12 +268,20 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
         return this.localName === 'link' ? isUsableLinkedStyleSheet(this) : isUsableStyleElement(this);
       }
 
+      function addSheetForElem(index, elem) {
+        var isLink = elem.localName === 'link',
+          href = isLink && elem.href,
+          text = !isLink && elem.firstChild.data,
+          debugName = SC_DEV && (elem.localName + ' ' + (href || ''));
+        return addSheet(href, text, debugName);
+      }
+
       // First come the default user agent CSS rules
-      addSheet(null, UA_CSS.text);
+      addSheet(null, UA_CSS.text, SC_DEV && 'User agent styles');
 
       // Next add <link> and <style> sheets, in document order
       var $styleElems = $('link,style').filter(isUsable);
-      $styleElems.each(addSheet);
+      $styleElems.each(addSheetForElem);
 
       onCssReadyFn = cssReadyCallbackFn;
       finalizeCssIfComplete();
