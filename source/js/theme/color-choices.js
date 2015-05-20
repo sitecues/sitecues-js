@@ -1,6 +1,5 @@
 /**
- *  Support color themes in page
- *  The available color theme choices
+ *  The available color theme choices that can be used by the color engine
  */
 
 // TODO media queries -- wikipedia and digg

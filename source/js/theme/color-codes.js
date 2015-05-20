@@ -1,6 +1,5 @@
 /**
- * Service that lazily gets user agent stylesheets
- * and provides information about them.
+ * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
 sitecues.def('themes/color/codes', function (colorCodes, callback) {
 

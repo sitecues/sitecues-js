@@ -1,10 +1,15 @@
 /**
- * Service that lazily gets user agent stylesheets
- * and provides information about them.
+ * This provides the default user agent style rules we care about -- e.g. cursor and colors
+ * They have been gleaned from some of the *.css files at:
+ * http://mxr.mozilla.org/mozilla-central/source/layout/style
  */
 sitecues.def('ua-css', function (UA_CSS, callback) {
 
 'use strict';
+
+// The following system colors are converted to hex colors here to improve performance:
+// button { color: ButtonText; border-color: ButtonFace; background-color: ButtonFace; }
+// input:disabled, select:disabled {color: GrayText; background-color: ThreeDFace; }
 
 UA_CSS.text =
 'html,#scp-main {\n\
@@ -14,45 +19,45 @@ input,textarea,select,button,label[for]{\n\
   cursor:pointer;\n\
 }\n\
 body,html,input {\n\
-    background-color: white;\n\
-    color: black;\n\
+    background-color: 0xfff;\n\
+    color: 0x000;\n\
 }\n\
 input[type="image"] {\n\
-  background-color: transparent;\n\
+  background-color: rgba(0,0,0,0);\n\
 }\n\
 select {\n\
-  background-color: white;\n\
-  color: black;\n\
-  border-color: foo;\n\
+  background-color: #fff;\n\
+  color: #000;\n\
+  border-color: #fff;\n\
 }\n\
 button,\n\
   input[type="color"],\n\
   input[type="reset"],\n\
   input[type="button"],\n\
   input[type="submit"] {\n\
-  color: ButtonText;\n\
-  border: 2px outset ButtonFace;\n\
-  background-color: ButtonFace;\n\
+  color: #000;\n\
+  border: 2px outset #c0c0c0;\n\
+  background-color: #c0c0c0;\n\
 }\n\
 input:disabled, select:disabled {\n\
-  color: GrayText !important;\n\
-  background-color: ThreeDFace !important;\n\
+  color: #0x7f7f7f !important;\n\
+  background-color: #0xc0c0c0 !important;\n\
 }\n\
 blockquote[type="cite"] {\n\
-  border-color: blue;\n\
+  border-color: #00f;\n\
 }\n\
 mark {\n\
-  background: yellow;\n\
-  color: black;\n\
+  background: #ffff00;\n\
+  color: #000;\n\
 }\n\
 hr {\n\
-  color: gray;\n\
+  color: #808080;\n\
 }\n\
 img[usemap], object[usemap] {\n\
-  color: blue;\n\
+  color:#00f;\n\
 }\n\
 :link {\n\
-  color:blue;\n\
+  color:#00f;\n\
   cursor:pointer;\n\
 }\n\
 :visited {\n\
