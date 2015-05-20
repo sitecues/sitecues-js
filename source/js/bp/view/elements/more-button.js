@@ -125,6 +125,8 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         'onTick'  : clickAnimationTick
       });
 
+      morePanel.setAttribute('opacity', 1);
+
     }
 
     function addMouseListeners () {

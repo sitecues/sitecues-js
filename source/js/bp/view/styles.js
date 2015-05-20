@@ -314,9 +314,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /******************* More **********************/
 
-        '#scp-more': {
-          'opacity'   : 1
-        },
 
         '#scp-more-button-container': {
           'opacity': 0

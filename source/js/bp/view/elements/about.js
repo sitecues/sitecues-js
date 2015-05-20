@@ -18,8 +18,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         shadowSVG,
         bottomSVG,
         moreButton,
-        tipsContent,
-        settingsContent,
+
+
         feedbackContent,
         feedbackTextArea,
         aboutContent,
@@ -49,8 +49,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      tipsContent                 = byId(BP_CONST.TIPS_CONTENT_ID);
-      settingsContent             = byId(BP_CONST.SETTINGS_CONTENT_ID);
+
+
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
@@ -127,7 +127,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
     }
 
     function getCurrentOutlineHeight () {
-      return getNumberFromString(outlineSVG.getAttribute('d').split('0V').pop());
+      return getNumberFromString(outlineSVG.getAttribute('d').split(' ').pop());
     }
 
     // Fade out the other buttons ()
@@ -172,7 +172,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
         aboutButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentAboutBtnTranslateX, targetCSSValues.aboutBtnTranslateX, t), getValueInTime(currentAboutBtnTranslateY, targetCSSValues.aboutBtnTranslateY, t), getValueInTime(currentAboutBtnScale, targetCSSValues.aboutBtnScale, t), getValueInTime(currentAboutBtnRotate, targetCSSValues.aboutBtnRotate, t), targetCSSValues.aboutBtnRotateX, targetCSSValues.aboutBtnRotateY));
 
-        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
       }
@@ -200,7 +200,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
 
-        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
       }
@@ -248,8 +248,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         feedbackButton.style.opacity  = 0;
         aboutButton.style.opacity     = 1;
         aboutContent.style.opacity    = 1;
-        tipsContent.style.opacity     = 0;
-        settingsContent.style.opacity = 0;
+
+
         feedbackContent.style.opacity = 0;
         tipsCards.style.opacity       = 0;
         settingsCards.style.opacity   = 0;

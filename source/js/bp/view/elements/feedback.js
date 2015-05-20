@@ -122,7 +122,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     }
 
     function getCurrentOutlineHeight () {
-      return getNumberFromString(outlineSVG.getAttribute('d').split('0V').pop());
+      return getNumberFromString(outlineSVG.getAttribute('d').split(' ').pop());
     }
 
     // Fade out the other buttons ()
@@ -160,7 +160,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
         feedbackButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
-        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
       }
@@ -176,7 +176,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
 
-        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
         feedbackButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
