@@ -7,7 +7,7 @@
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
-// @import support -- needed for faast.org
+// White blocks left o texasat.net, digg.com
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
