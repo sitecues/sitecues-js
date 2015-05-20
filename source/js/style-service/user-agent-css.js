@@ -19,8 +19,8 @@ input,textarea,select,button,label[for]{\n\
   cursor:pointer;\n\
 }\n\
 body,html,input {\n\
-    background-color: 0xfff;\n\
-    color: 0x000;\n\
+    background-color: #fff;\n\
+    color: #000;\n\
 }\n\
 input[type="image"] {\n\
   background-color: rgba(0,0,0,0);\n\
@@ -40,8 +40,8 @@ button,\n\
   background-color: #c0c0c0;\n\
 }\n\
 input:disabled, select:disabled {\n\
-  color: #0x7f7f7f !important;\n\
-  background-color: #0xc0c0c0 !important;\n\
+  color: #7f7f7f !important;\n\
+  background-color: #c0c0c0 !important;\n\
 }\n\
 blockquote[type="cite"] {\n\
   border-color: #00f;\n\

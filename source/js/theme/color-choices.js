@@ -6,9 +6,16 @@
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
-// White blocks left on texasat.net, digg.com
-// White text on white on news.google.com, http://www.lloydsbank.com/
-// Page unresponsive foe 5 seconds after loading reddit.com
+// White blocks left on texasat.net -- wtf Chrome?, digg.com
+// White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
+//    ** news.google.com **
+//    background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
+//    ** lloydsbank **
+//    background: -webkit-gradient(linear,0% 0,0% 100%,from(#fff),to(#e6e6e6));
+//    background: -webkit-linear-gradient(top,#fff,#e6e6e6);
+//    background: -moz-linear-gradient(top,#fff,#e6e6e6);
+//    background: -ms-linear-gradient(top,#fff,#e6e6e6);
+//    background: -o-linear-gradient(top,#fff,#e6e6e6);
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
