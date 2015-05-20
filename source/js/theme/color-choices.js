@@ -2,11 +2,12 @@
  *  The available color theme choices that can be used by the color engine
  */
 
-// TODO media queries -- wikipedia and digg
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
+// - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
+// Wrong colors in darkOriginal on Firefox / nytimes
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
 //    ** news.google.com **
 //    background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);

@@ -6,7 +6,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
   'use strict';
   
-  sitecues.use('jquery', 'css-aggregator', function ($, cssAggregator) {
+  sitecues.use('jquery', 'css-aggregator', 'media-queries', function ($, cssAggregator, mediaQueries) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
@@ -80,28 +80,50 @@ sitecues.def('style-service', function (styleService, callback) {
      * @return  {[]} Array of objects with rule (selector) and value (CSS property affected)
      */
     styleService.getAllMatchingStylesCustom = function(matchingRuleFn) {
+      var rule,
+        ruleValue,
+        cssStyleDeclaration,
+        styleResults = [];
+
+      function addMatchingRules(rulesContainer) {
+        var rules = rulesContainer.cssRules,
+          ruleIndex = 0,
+          numRules = rules ? rules.length : 0;
+
+        for (; ruleIndex < numRules; ruleIndex++) {
+          rule = rules[ruleIndex];
+          cssStyleDeclaration = rule.style;
+          if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
+            ruleValue = matchingRuleFn(cssStyleDeclaration);
+            if (ruleValue) {
+              styleResults.push({rule: rule, value: ruleValue });
+            }
+          }
+          else if (rule.media) {
+            // Only add CSS rules where the media query fits
+            // TODO Unfortunately, this means that if the window size or zoom changes,
+            //      we won't have those rules anymore. Do we reanalyze at that point?
+            function getMediaTypeFromCssText(cssText) {
+              return cssText.split('{')[0].substr(7);
+            }
+            var media = getMediaTypeFromCssText(rule.cssText);
+            if (mediaQueries.isActiveMediaQuery(media)) {
+              SC_DEV && console.log('@media matched: ' + media);
+              addMatchingRules(rule);    // Recursive
+            }
+            else {
+              SC_DEV && console.log('@media DID NOT match: ' + media);
+            }
+          }
+        }
+      }
+
       if (!isInitComplete) {
         return [];
       }
 
-      var rules = combinedDOMStylesheetObject.cssRules,
-        rule,
-        ruleValue,
-        cssStyleDeclaration,
-        ruleIndex = 0,
-        styleResults = [],
-        numRules = rules ? rules.length : 0;
+      addMatchingRules(combinedDOMStylesheetObject);
 
-      for (; ruleIndex < numRules; ruleIndex ++) {
-        rule = rules[ruleIndex];
-        cssStyleDeclaration = rule.style;
-        if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
-          ruleValue = matchingRuleFn(cssStyleDeclaration);
-          if (ruleValue) {
-            styleResults.push({rule : rule, value : ruleValue });
-          }
-        }
-      }
       return styleResults;
     };
 

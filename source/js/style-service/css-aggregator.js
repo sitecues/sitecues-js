@@ -7,7 +7,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'ua-css', 'conf/site', function ($, UA_CSS, site) {
+  sitecues.use('jquery', 'ua-css', 'conf/site', 'media-queries', function ($, UA_CSS, site, mediaQueries) {
 
     var numPending = 0,
       sheets = [],
@@ -165,7 +165,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     }
 
     function processSheetCss(sheet) {
-      var IMPORT_REGEXP = /\s*(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*).*)/g;  // TODO check media type after whitespace here
+      var IMPORT_REGEXP = /\s*(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/g;
 
       // Ensure some text even in the case of an error
       sheet.text = sheet.text || '';
@@ -180,22 +180,15 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       }
 
       // Convert imports into new pending sheets
-      sheet.text = sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl) {
+      sheet.text = sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl, mediaQuery) {
         // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
-        var newSheet = insertNewSheetBefore(sheet, actualUrl);
-
-        // Remove @import line from CSS
+        SC_DEV && console.log("@import media query: " + mediaQuery);
+        if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
+          insertNewSheetBefore(sheet, actualUrl);
+        }
+        // Now remove @import line from CSS
         return '';
       });
-    }
-
-    function isAcceptableMediaType(media) {
-      /*
-       * TODO What about "and" operator? See http://www.w3schools.com/tags/att_link_media.asp
-       * @media can even have width. Example "screen and (min-width:500px)"
-       * I'm not really sure we want to exclude media at all unless it really is just for another device
-       */
-      return media !== 'print';  // The most realistic value that we need to ignore
     }
 
     function insertNewSheetBefore(insertBeforeSheet, urlForNewSheet) {
@@ -228,9 +221,9 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       var allCss = '';
       sheets.forEach(function(sheet) {
         if (SC_DEV) {
-          allCss += '/***** ' + sheet.debugName + ' *****/\n\n';
+          allCss += '\n/***** ' + sheet.debugName + ' *****/\n\n';
         }
-        allCss += (sheet.text || '') + '\n\n';
+        allCss += (sheet.text || '') + '\n';
       });
 
       // Clear the sheets references and free the memory
@@ -249,15 +242,8 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
         return s1.substr(0, s2.length) === s2;
       }
 
-      function isCss(linkElem) {
-        return linkElem.href.lastIndexOf('.css') > 0 ||
-          startsWith(linkElem.type, 'text/css');
-      }
-
       function isUsableLinkedStyleSheet(linkElem) {
-        return isCss(linkElem) &&    // Make sure it is actually a CSS file
-          isAcceptableMediaType(linkElem.media) &&     // Ignore all CSS with the wrong media, e.g. print
-          linkElem.rel !== 'alternate stylesheet';  // Ignore alternate stylesheets
+        return mediaQueries.isActiveMediaQuery(linkElem.media);     // Ignore all CSS with the wrong media, e.g. print
       }
 
       function isUsableStyleElement(styleElem) {
@@ -277,6 +263,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
           href = isLink && elem.href,
           text = !isLink && elem.firstChild.data,
           debugName = SC_DEV && (elem.localName + ' ' + (href || ''));
+        SC_DEV && isLink && console.log(href);
         return addSheet(href, text, debugName);
       }
 
@@ -284,7 +271,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       addSheet(null, UA_CSS.text, SC_DEV && 'User agent styles');
 
       // Next add <link> and <style> sheets, in document order
-      var $styleElems = $('link,style').filter(isUsable);
+      var $styleElems = $('link[rel="stylesheet"],style').filter(isUsable);
       $styleElems.each(addSheetForElem);
 
       onCssReadyFn = cssReadyCallbackFn;
