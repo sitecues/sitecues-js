@@ -7,7 +7,9 @@
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
-// White blocks left o texasat.net, digg.com
+// White blocks left on texasat.net, digg.com
+// White text on white on news.google.com, http://www.lloydsbank.com/
+// Page unresponsive foe 5 seconds after loading reddit.com
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
@@ -15,8 +17,14 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
   sitecues.use('jquery', function($) {
     var BLACK = { r: 0, g: 0, b: 0, a: 1 },
       MIN_INTENSITY = 0.6,
-      YELLOW_HUE = 0.167;
+      YELLOW_HUE = 0.167,
+      GREEN_HUE = 0.333,
+      monochromeHue;
 
+    // TODO Put in UI rather than global function
+    sitecues.setHue = function (newHue) {
+      monochromeHue = newHue;
+    };
 
     /**
      * Converts an HSL color value to RGB. Conversion formula
@@ -24,7 +32,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
      * Assumes h, s, and l are contained in the set [0, 1] and
      * returns r, g, and b in the set [0, 255].
      *
-     * @param   Number  h       The hue
+     * @param   Number  h       The monochromeHue
      * @param   Number  s       The saturation
      * @param   Number  l       The lightness
      * @return  Object          The RGB representation
@@ -114,7 +122,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return lightenedRgb;
     }
 
-    function getInvertedColor(rgba) {
+    function getInvertedLightness(rgba) {
       var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
       hsl.l = 1 - hsl.l;  // Invert lightness
       var invertedRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
@@ -130,13 +138,12 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return darkWithHue(YELLOW_HUE, style, intensity);
     };
 
-    var hue;
-    sitecues.setHue = function (newHue) {
-      hue = newHue;
+    colorChoices.darkWithGreen = function (style, intensity) {
+      return darkWithHue(GREEN_HUE, style, intensity);
     };
 
-    colorChoices.darkWithHue = function (style, intensity) {
-      return darkWithHue(hue, style, intensity);
+    colorChoices.darkWithAnyHue = function (style, intensity) {
+      return darkWithHue(monochromeHue, style, intensity);
     };
 
     function darkWithHue(hue, style, intensity) {
@@ -178,10 +185,12 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     };
 
+    // Invert all colors using HSL inversion
     colorChoices.hslInvert = function (style, intensity) {
-      return getReducedIntensity(getInvertedColor(style.parsedVal), intensity);
+      return getReducedIntensity(getInvertedLightness(style.parsedVal), intensity);
     };
 
+    // Invert all colors using RGB inversion
     colorChoices.rgbInvert = function (style, intensity) {
       var rgba = style.parsedVal,
         newRgba = {
@@ -193,6 +202,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return getReducedIntensity(newRgba, intensity);
     };
 
+    // Reduce overall contrast
     colorChoices.lightened = function (style, intensity) {
       return getReducedIntensity(style.parsedVal, intensity);
     };

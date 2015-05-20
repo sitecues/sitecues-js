@@ -116,6 +116,7 @@ files=\
 	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan/hpan.js \
 	source/js/theme/color-choices.js \
+	source/js/theme/color-codes.js \
 	source/js/theme/color-engine.js \
 	source/js/info/info.js \
 	source/js/util/status.js \

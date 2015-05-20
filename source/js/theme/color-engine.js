@@ -4,8 +4,8 @@
 
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices',
-    function($, styleService, platform, colorChoices) {
+  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'themes/color/codes',
+    function($, styleService, platform, colorChoices, colorCodes) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -101,36 +101,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
       }
 
-      function convertColorNameToRgbFormat(colorName) {
-        // Convert color names such as 'white', 'black', 'transparent'
-        var $div = $('<div>').appendTo('html').css('color', colorName),
-          isLegalColor = $div[0].style.color,  // Browser won't set the color on the <div> if it's not a legal color name
-          rgb = isLegalColor ? $div.css('color') : 'rgba(0, 0, 0, 0)';
-        $div.remove();
-        return rgb;
-      }
-
-      function getRgba(colorString) {
-        // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
-        var rgb;
-        if (colorString.substr(0,3) !== 'rgb') {
-          rgb = convertColorNameToRgbFormat(colorString);
-        }
-        else {
-          rgb = colorString;
-        }
-
-        var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
-          match = MATCH_COLORS.exec(rgb) || {};
-
-        return {
-          r: parseInt(match[1] || 0),
-          g: parseInt(match[2] || 0),
-          b: parseInt(match[3] || 0),
-          a: parseFloat(match[4] || 1)
-        };
-      }
-
       function hasTypicalBgTextureRepeat(cssStyleDecl) {
         var repeatPropValue = cssStyleDecl.backgroundRepeat || cssStyleDecl.background || '';
         return repeatPropValue.indexOf('repeat-') >= 0;
@@ -153,7 +123,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       function getSignificantBgColor(cssStyleDecl) {
         var bgStyle = cssStyleDecl.background,
           colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
-          rgba = colorString && getRgba(colorString);
+          rgba = colorString && colorCodes.getRgba(colorString);
 
         if (rgba && rgba.a) {
           return {
@@ -168,7 +138,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         if (fgStyle) {
           return {
             prop: 'color',
-            parsedVal: getRgba(fgStyle)
+            parsedVal: colorCodes.getRgba(fgStyle)
           }
         }
       }
