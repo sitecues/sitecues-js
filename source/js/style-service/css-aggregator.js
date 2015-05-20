@@ -41,13 +41,11 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
         // Only apply the request if the response status is 200
         request.onload = function(evt) {
           onload(evt, currentSheet);
-        }
+        };
         request.onerror = function(evt) {
           requestComplete(evt, currentSheet);
-        }
+        };
         request.send();
-      } else {
-        markReady(this);
       }
     }
 
@@ -167,7 +165,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     }
 
     function processSheetCss(sheet) {
-      var IMPORT_REGEXP = /^(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*).*$)/g;  // TODO check media type after whitespace here
+      var IMPORT_REGEXP = /\s*(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*).*)/g;  // TODO check media type after whitespace here
 
       // Ensure some text even in the case of an error
       sheet.text = sheet.text || '';
@@ -182,9 +180,9 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       }
 
       // Convert imports into new pending sheets
-      sheet.text = sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, actualUrl) {
+      sheet.text = sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl) {
         // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
-        var newSheet = insertSheetBefore(sheet, actualUrl);
+        var newSheet = insertNewSheetBefore(sheet, actualUrl);
 
         // Remove @import line from CSS
         return '';
@@ -200,15 +198,21 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       return media !== 'print';  // The most realistic value that we need to ignore
     }
 
-    function insertSheetBefore(sheet, url) {
-      var debugName = SC_DEV && '@import ' + url,
-        insertionIndex = sheets.indexOf(sheet),
-        newSheet = new StyleSheet(url, null, debugName);
+    function insertNewSheetBefore(insertBeforeSheet, urlForNewSheet) {
+      var debugName = SC_DEV && '@import ' + urlForNewSheet,
+        insertionIndex = sheets.indexOf(insertBeforeSheet),
+        newSheet = new StyleSheet(urlForNewSheet, null, debugName);
       sheets.splice(insertionIndex, 0, newSheet);
     }
 
     function addSheet(url, text, debugName) {
-      sheets.push(new StyleSheet(url, text, debugName));
+      var newSheet = new StyleSheet(url, text, debugName);
+      sheets.push(newSheet);
+      if (newSheet.text) {
+        // A <style> already has it's text --
+        // as opposed to a <link href> which will be marked ready after it's loaded
+        markReady(newSheet);
+      }
     }
 
     function hasPendingRequests() {
