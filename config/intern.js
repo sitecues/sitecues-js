@@ -23,7 +23,7 @@ define(
             capabilities: {
                 // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
                 'name': 'Automated tests - sitecues.js',  // name of the test run, for logging purposes
-                'selenium-version': '2.43.1',             // request a version, which may not always be respected
+                'selenium-version': '2.45.0',             // request a version, which may not always be respected
                 'build': build                            // useful to log success history tied to code changes
             },
             // Places where unit and/or functional tests will be run...

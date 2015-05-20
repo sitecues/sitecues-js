@@ -26,6 +26,17 @@ define(
                 // Code to run when the suite starts, before tests...
                 before(
                     function () {
+                        return this.remote
+                            .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
+                            .get(url)                     // navigate to the desired page
+                            .setFindTimeout(3000)         // fail test if any find method can't succeed this quickly
+                            .setExecuteAsyncTimeout(500)  // max ms for things like animations
+                            .pressKeys(keys.EQUALS)  // zoom in to enable sitecues features
+                            .executeAsync(           // run an async callback in the remote browser
+                                function (done) {
+                                    sitecues.on('zoom', done);  // use our event system to know when zoom is done
+                                }
+                            )
                     }
                 )
                 // Code to run before each test, including the first one...
@@ -651,18 +662,6 @@ define(
                         originalText;
 
                     return this.remote               // represents the browser being tested
-                        .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                        .get(url)                    // navigate to the desired page
-                        .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                        .setExecuteAsyncTimeout(300) // max ms for things like animations
-                        .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                            .pressKeys(keys.EQUALS)  // unicode for: hit the + key!
-                            .end()                   // get out of the current element context
-                        .executeAsync(               // run an async callback in the remote browser
-                            function (done) {
-                                sitecues.on('zoom', done);  // use our event system to know when zoom is done
-                            }
-                        )
                         .execute(                    // run a callback in the remote browser
                             function (selector) {
                                 sitecues.highlight(selector);
