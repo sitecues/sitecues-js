@@ -29,10 +29,9 @@ define(
                         return this.remote
                             .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
                             .get(url)                     // navigate to the desired page
-                            .setFindTimeout(3000)         // fail test if any find method can't succeed this quickly
-                            .setExecuteAsyncTimeout(500)  // max ms for things like animations
-                            .pressKeys(keys.EQUALS)  // zoom in to enable sitecues features
-                            .executeAsync(           // run an async callback in the remote browser
+                            .setExecuteAsyncTimeout(400)  // max ms for executeAsync to complete
+                            .pressKeys(keys.EQUALS)       // zoom in to enable sitecues features
+                            .executeAsync(                // run an async callback in the remote browser
                                 function (done) {
                                     sitecues.on('zoom', done);  // use our event system to know when zoom is done
                                 }
@@ -606,56 +605,6 @@ define(
 
                 /////////////////////////////// ------- test boundary -------
 
-                // test('HLB closes when space key is pressed.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')
-                //         .pressKeys(keys.SPACE)
-                //         .sleep(1000)
-                //         .execute(function () {
-                //             return document.getElementById('sitecues-hlb');
-                //         })
-                //         .then(function (data) {
-                //             assert.isNull(data, 'HLB no longer exists.');
-                //         });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
                 test('HLB Respects Text', function () {
 
                     var selector = 'p',
@@ -675,7 +624,7 @@ define(
                             })
                             .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
                             .end()
-                        .setFindTimeout(2000)        // set the find timeout to be more strict
+                        .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
                         .findById('sitecues-hlb')    // get the HLB!
                             .getVisibleText()
                             .then(function (text) {
@@ -689,7 +638,27 @@ define(
 
                 /////////////////////////////// ------- test boundary -------
 
-                // test('HLB Closes Properly', function () {
+                test('Spacebar Closes HLB', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .pressKeys(keys.SPACE)       // close the HLB
+                        .executeAsync(
+                            function (done) {
+                                sitecues.on('hlb/closed', function () {
+                                    done(
+                                        document.getElementById('sitecues-hlb')
+                                    );
+                                });
+                            }
+                        )
+                        .then(function (data) {
+                            assert.notOk(data, 'HLB no longer exists.');
+                        });
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                // test('Screenshot experiment', function () {
 
                 //     var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
