@@ -7,7 +7,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', function ($, site) {
+  sitecues.use('jquery', 'ua-css', 'conf/site', function ($, UA_CSS, site) {
 
     var numPending = 0,
       sheets = [],
@@ -212,14 +212,14 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     }
 
     function finalizeCssIfComplete() {
-      if (hasPendingRequests()) {
+      if (!onCssReadyFn || hasPendingRequests()) {
         return;
       }
 
       // Concatenate retrieved CSS text
       var allCss = '';
-      sheets.forEach(function(cssText) {
-        allCss += cssText || '';
+      sheets.forEach(function(sheet) {
+        allCss += sheet.text || '';
       });
 
       // Clear the sheets references and free the memory
@@ -250,20 +250,25 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       }
 
       function isUsableStyleElement(styleElem) {
-        var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
-          id = styleElem.id;
-        return !id || !startsWith(id, SITECUES_STYLE_ID_PREFIX);
+        if (styleElem.firstChild) {
+          var SITECUES_STYLE_ID_PREFIX = 'sitecues-',  // <style id="sitecues-XXX"> are sitecues stylesheets
+            id = styleElem.id;
+          return !id || !startsWith(id, SITECUES_STYLE_ID_PREFIX);
+        }
       }
 
       function isUsable() {
         return this.localName === 'link' ? isUsableLinkedStyleSheet(this) : isUsableStyleElement(this);
       }
 
+      // First come the default user agent CSS rules
+      addSheet(null, UA_CSS.text);
+
+      // Next add <link> and <style> sheets, in document order
       var $styleElems = $('link,style').filter(isUsable);
       $styleElems.each(addSheet);
 
       onCssReadyFn = cssReadyCallbackFn;
-
       finalizeCssIfComplete();
     };
 

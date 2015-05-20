@@ -2,11 +2,11 @@
  * Service that lazily gets user agent stylesheets
  * and provides information about them.
  */
-sitecues.def('ua-css', function (uaCss, callback) {
+sitecues.def('ua-css', function (UA_CSS, callback) {
 
 'use strict';
 
-uaCss.DEFAULT =
+UA_CSS.text =
 'html,#scp-main {\n\
   cursor:auto;\n\
 }\n\

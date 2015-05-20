@@ -6,7 +6,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
   'use strict';
   
-  sitecues.use('jquery', 'ua-css', 'css-aggregator', function ($, uaCss, cssAggregator) {
+  sitecues.use('jquery', 'css-aggregator', function ($, cssAggregator) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
@@ -51,7 +51,7 @@ sitecues.def('style-service', function (styleService, callback) {
       // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 
       // This will initialize the composite stylesheet when finished and call style-service/ready
-      cssAggregator.collectAllCss();
+      cssAggregator.collectAllCss(allCssRetrieved);
     };
 
 
