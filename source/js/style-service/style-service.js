@@ -6,348 +6,37 @@ sitecues.def('style-service', function (styleService, callback) {
 
   'use strict';
   
-  sitecues.use('conf/site', 'jquery', 'ua-css', function (site, $, uaCss) {
+  sitecues.use('jquery', 'ua-css', 'css-aggregator', function ($, uaCss, cssAggregator) {
 
     var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
       combinedDOMStylesheetObject,
       SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',
       WAIT_BEFORE_INIT_STYLESHEET = 50,
       hasInitBeenRequested,   // Have we even begun the init sequence?
-      isInitComplete,      // Init sequence is complete
-      doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension';
-
-    function isAcceptableMediaType(media) {
-      /*
-       * TODO What about "and" operator? See http://www.w3schools.com/tags/att_link_media.asp
-       * @media can even have width. Example "screen and (min-width:500px)"
-       * I'm not really sure we want to exclude media at all unless it really is just for another device
-       */
-      return media !== 'print';  // The most realistic value that we need to ignore
-    }
-
-    /**
-     * [Creates an array of all <link> href attribute values]
-     * @return {[array]}
-     */
-    function getAllLinkedStylesheets() {
-
-      var stylesheets = [],
-          linkTags = document.getElementsByTagName('link'),
-          numLinkTags = linkTags.length;
-
-      function isCss(link) {
-        return link.href.lastIndexOf('.css') !== -1 ||
-          link.type.lastIndexOf('text/css') !== -1;
-      }
-
-      for(var i = 0; i < numLinkTags; i ++) {
-        var linkTag = linkTags[i];
-        if (isCss(linkTag) &&    // Make sure it is actually a CSS file
-          isAcceptableMediaType(linkTag.media) &&     // Ignore all CSS with the wrong media, e.g. print
-          linkTag.rel !== 'alternate stylesheet') {   // Ignore alternate stylesheets
-          stylesheets.push(linkTag.href);
-        }
-      }
-
-      return stylesheets;
-
-    }
+      isInitComplete;      // Init sequence is complete
 
     /**
      * Create an disabled style sheet to be filled in later with styles
      */
-    function createCombinedStyleSheet() {
+    function createCombinedStyleSheet(allCss) {
       // Construct sitecues combined CSS <style> element
       return $('<style>')
         .appendTo('head')
-        .attr('id', SITECUES_COMBINED_CSS_ID);
+        .attr('id', SITECUES_COMBINED_CSS_ID)
+        .text(allCss);
     }
 
-    /**
-     * collectAllStylesIntoCombinedSheet fills in the <style id="sitecues-combined-css">,
-     * maintaining the sites original precedence for styles
-     */
-    function collectAllStylesIntoCombinedSheet(linkTagStylesList, styleTags) {
-      // Add our default styles
-      var css = uaCss.DEFAULT,
-        index,
-        numLinkTags = linkTagStylesList.length,
-        numStyleTags = styleTags.length;
-
-      // Add styles from link tags
-      for (index = 0; index < numLinkTags; index ++) {
-        if (linkTagStylesList[index]) {
-          css += linkTagStylesList[index];
-        }
-      }
-
-      // Add styles from other <style> tags
-      for (index = 0; index < numStyleTags; index ++) {
-        var styleElem = styleTags[index];
-        if (styleElem.id && styleElem.id.indexOf('sitecues-') < 0) {  // Don't include <style> from sitecues
-          css += $(styleElem).text();
-        }
-      }
-
-      $combinedStylesheet.text(css);
-      combinedDOMStylesheetObject = styleService.getDOMStylesheet($combinedStylesheet);
-      combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
-
-      // Takes the browser a moment to process
-      setTimeout(function() {
-        isInitComplete = true;
-        sitecues.emit('style-service/ready');
-      }, WAIT_BEFORE_INIT_STYLESHEET);
-    }
-
-    function ChromeExtHttpRequest(url, requestId) {
-      this.url = url;
-      this.send = function () {
-        var chromeRequest = this;
-        $(window).one('ProcessCss-' + requestId, function (event) {
-          var responseText = event.originalEvent.detail,
-            responseEvent = { target: chromeRequest };
-          if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
-            chromeRequest.responseText = responseText;
-            chromeRequest.onload(responseEvent);
-          }
-          else {
-            chromeRequest.onerror(responseEvent);
-          }
-        });
-        window.dispatchEvent(new CustomEvent('RequestCss', { detail: { url: this.url, id: requestId } }));
-      };
-    }
-
-    /**
-     * [Cross browser solution to initiating an XMLHTTPRequest
-     * that supports the Origin HTTP header]
-     * @param  {string} method
-     * @param  {string} url
-     * @return {Object}
-     */
-    function createGetRequest(url, sheetNum) {
-      if (doFetchCssFromChromeExtension) {
-        return new ChromeExtHttpRequest(url, sheetNum);
-      }
-      //Credit to Nicholas Zakas
-      var xhr = new XMLHttpRequest();
-
-      if ('withCredentials' in xhr) {
-        xhr.open('GET', url, true);
-      } else if (typeof XDomainRequest !== 'undefined') {
-        xhr = new XDomainRequest();
-        xhr.open('GET', url);
-      } else {
-        xhr = null;
-      }
-      return xhr;
-    }
-
-    /**
-     * [Abstracts away creating XMLHTTPRequests that support the
-     * Origin HTTP Header, and also sets up the callback when the
-     * response returns]
-     * @param  {[string]}   method
-     * @param  {[string]}   url
-     * @param  {Function} callback
-     * @return {number}  number of open CORS requests
-     */
-    function createCORSRequests(validSheets, linkTagStylesList, callback) {
-      var openRequests = [],
-        sheetNum = 0,
-        numSheets = validSheets.length;
-
-      function requestComplete(evt) {
-        var request = evt.target || this;
-        if (openRequests.length === 0) {
-          return; // Already completed all requests
-        }
-        var index = openRequests.indexOf(request);
-        if (index >= 0) {
-          openRequests.splice(index, 1);
-          if (openRequests.length === 0) {
-            // Finished getting all requests back
-            callback();
-          }
-        }
-        else {
-          // TODO remove if we don't see it happening
-          SC_DEV && console.log('Request not found %s %o', request.url, request);
-        }
-      }
-
-      function onload(evt) {
-        linkTagStylesList.push(getStyleSheetTextFromCORSRequest(evt.target || this));
-        requestComplete(evt);
-      }
-
-      for(; sheetNum < numSheets; ++ sheetNum) {
-        var url = validSheets[sheetNum],
-          request = createGetRequest(url, sheetNum);
-        request.url = url;
-
-        if (!request) {
-          SC_DEV && console.log('CORS not supported');
-          return 0;
-        }
-        // Only apply the request if the response status is 200
-        request.onload = onload;
-        request.onerror = requestComplete;
-        openRequests.push(request);
-        request.send();
-      }
-
-      return numSheets;
-    }
-
-    function getAllStyleTags() {
-
-      var allStyleTags = document.getElementsByTagName('style'),
-        validStyleTags = [],
-        numStyleTags = allStyleTags.length;
-
-      for (var styleTagNum = 0; styleTagNum < numStyleTags; ++ styleTagNum) {
-        if (!allStyleTags[styleTagNum].id || allStyleTags[styleTagNum].id.indexOf('sitecues') === -1) {
-          validStyleTags.push(allStyleTags[styleTagNum]);
-        }
-      }
-
-      return validStyleTags;
-    }
-
-    /**
-     * [extractUrlsForReplacing removes the redundancy in the array of URLs]
-     * @param  {[array]} matches [URLs extracted from response text]
-     * @return {[array]}         [URLs extracted from response text minus the redundancy]
-     * @example ['../a/b/styles.css','../a/b/styles.css?#iefix'] => ['../a/b/styles.css']
-     * Above is an example of a redundancy that needs to be addressed before we globally
-     * do a replacement.
-     */
-    function extractUrlsForReplacing(matches) {
-
-      var i = 0,
-          j,
-          match_i,
-          len = matches.length;
-
-      for (; i < len; i ++) {
-        match_i = matches[i];
-        for (j = 0; j < len; j ++) {
-          if (i !== j) {
-            if (match_i.indexOf(matches[j]) !== -1) {
-              matches.splice(i, 1);
-              i = i > 0 ? i - 1 : 0;
-              j = j > 0 ? j - 1 : 0;
-              len = matches.length;
-              match_i = matches[i];
-            }
-          }
-        }
-      }
-      return matches;
-    }
-
-    /**
-     * [extractUniqueUrlsFromMatches extracts the unique URLS from the array returned by matching
-     * CSS file response text with the Regular Expression used in applyCORSRequest.]
-     * @param  {[array]} matches [RegEx matches]
-     * @return {[array]}         [list of URLs]
-     * @example ['url(../images/a.png', 'url(../images/b.png']
-     */
-    function extractUniqueUrlsFromMatches(matches) {
-
-      var urls = [],
-        match,
-        i,
-        numMatches;
-
-      if (!matches) {
-        return urls;  // TODO does this case occur?
-      }
-
-      numMatches = matches.length;
-
-      for (i = 0; i < numMatches; i ++) {
-
-        match = matches[i].trim(); //Trim whitespace
-        match = match.substr(4);   //remove url(
-
-        if (match.charAt(0) === '\"') {              //If the URL is surrounded by a double quote
-          match = match.substr(1);                   //remove the first
-          match = match.substr(0, match.length - 1); //remove the last
-        }
-
-        match = match.trim(); //Trim whitespace
-
-        if (match.charAt(0) === '\'') {              //If the URL is surrounded by a single quote
-          match = match.substr(1);                   //remove the first
-          match = match.substr(0, match.length - 1); //remove the last
-        }
-
-        match = match.trim(); //Trim whitespace
-
-        if (urls.indexOf(match) === -1) { //Get rid of duplicates
-          if (match.indexOf('?') !== -1) { //Escape the ?
-            match = match.replace('?', '\\?');
-          }
-          urls.push(match);
-        }
-      }
-
-      return urls;
-    }
-
-    /**
-     * [applyCORSRequest Makes a xmlhttprequest for CSS resources.  Replaces all
-     * relatively defined style resources with their absolute counterparts. See EQ-1302]
-     * @param  {[xmlhttprequest Object]} request [description]
-     */
-    function getStyleSheetTextFromCORSRequest(request) {
-      /*
-       One of our goals is to extract from a CSS file all relative URLs. This document outlines
-       valid URLs for CSS: http://www.w3.org/TR/CSS21/syndata.html#uri
-
-       The RegEx below will MATCH the following:
-
-       background: url(instant/templates/_default_/images/nyromodal/close.gif);
-       background: url('instant/templates/_default_/images/nyromodal/close.gif');
-       background: url("instant/templates/_default_/images/nyromodal/close.gif");
-       background: url(  instant/templates/_default_/images/nyromodal/close.gif  );
-       background: url(./instant/templates/_default_/images/nyromodal/close.gif);
-       background: url('./instant/templates/_default_/images/nyromodal/close.gif');
-       background: url("./instant/templates/_default_/images/nyromodal/close.gif");
-       background: url(  ./instant/templates/_default_/images/nyromodal/close.gif  );
-       background: url(../instant/templates/_default_/images/nyromodal/close.gif);
-       background: url('../instant/templates/_default_/images/nyromodal/close.gif');
-       background: url("../instant/templates/_default_/images/nyromodal/close.gif");
-       background: url(  ../../instant/templates/_default_/images/nyromodal/close.gif  );
-
-       The RegEx below will IGNORE the following:
-
-       background: url(http://example.ru/templates/_default_/close.gif)
-       background: url(https://instant/templates/_default_/images/nyromodal/close.gif);
-       background: url('http://example.ru/templates/_default_/close.gif')
-       background: url('https://instant/templates/_default_/images/nyromodal/close.gif');
-       background: url("http://example.ru/templates/_default_/close.gif")
-       background: url("https://instant/templates/_default_/images/nyromodal/close.gif");
-       background: url(   http://example.ru/templates/_default_/close.gif   )
-       background: url(   https://instant/templates/_default_/images/nyromodal/close.gif   );
-       background:url(data:jpg;base64,/QL9Av0GaqAAA//2Q==)
-
-       */
-      var URL_REGEXP = /url(\(([\'\" ])*(?!data:|.*https?:\/\/)([^\"\'\)]+)[\'\" ]*)/g,
-        relativeRegEx = new RegExp(URL_REGEXP),
-        baseUrlObject = sitecues.parseUrl(request.url),
-        newText       = request.responseText,
-        matches       = extractUrlsForReplacing(extractUniqueUrlsFromMatches(newText.match(relativeRegEx))),
-        matchNum;
-
-      for (matchNum = 0; matchNum < matches.length; matchNum ++) {
-        newText = newText.replace(new RegExp(matches[matchNum], 'g'), sitecues.resolveUrl(matches[matchNum], baseUrlObject));
-      }
-
-      return newText;
+    function allCssRetrieved(allCss) {
+      $combinedStylesheet = createCombinedStyleSheet(allCss);
+      styleService.getDOMStylesheet($combinedStylesheet, function(styleSheetObject) {
+        combinedDOMStylesheetObject = styleSheetObject;
+        combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
+        // Takes the browser a moment to process the new stylesheet
+        setTimeout(function() {
+          isInitComplete = true;
+          sitecues.emit('style-service/ready');
+        }, WAIT_BEFORE_INIT_STYLESHEET);
+      });
     }
 
     function init() {
@@ -357,30 +46,12 @@ sitecues.def('style-service', function (styleService, callback) {
 
       hasInitBeenRequested = true;
 
-      /*
-        Basically, we will begin by creating a <style> containing rules found in SITECUES_CSS_DEFAULT.
-        Then, grab any <style> that is not ours, and append our <style> with those contents.
-        Then we grab any <link> href attributes and attempt to download them, if they are successfully
-        downloaded, then we simply concatenate our <style> with the response text.
-        At the end of each successful callback, we update our <style> to reflect the current level of zoom.
-      */
-      var linkedSheets = getAllLinkedStylesheets(),
-        linkTagStylesList  = [],  // An ordered list of external stylesheet styles to be applied to the page.
-        styleTags = getAllStyleTags();
+      // Create a <style id="sitecues-combined-css"> containing all relevant style rule in the right order.
+      // It will start with default user agent style rules and add
+      // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 
-      function onStylesRetrieved() {
-        $combinedStylesheet = createCombinedStyleSheet();
-
-        // Fill-in the sitecues combined CSS <style> element
-        collectAllStylesIntoCombinedSheet(linkTagStylesList, styleTags);
-      }
-
-      // Grab all the CSS content from <link> tags
       // This will initialize the composite stylesheet when finished and call style-service/ready
-      if (! createCORSRequests(linkedSheets, linkTagStylesList, onStylesRetrieved)) {
-        // No CORS requests, so begin initialization right away
-        onStylesRetrieved();
-      }
+      cssAggregator.collectAllCss();
     };
 
 
@@ -440,16 +111,29 @@ sitecues.def('style-service', function (styleService, callback) {
      * @param $stylesheet
      * @returns {*}
      */
-    styleService.getDOMStylesheet = function($stylesheet) {
-      var i = 0,
-        numSheets = document.styleSheets.length;
-      for (; i < numSheets; i ++ ) {
-        if ($stylesheet.is(document.styleSheets[i].ownerNode)) {
-          return document.styleSheets[i];
+    styleService.getDOMStylesheet = function($stylesheet, callback) {
+      var tries = 1,
+        MAX_TRIES = 20,
+        TRY_INTERVAL_MS = 10,
+        id = $stylesheet[0].id;
+      function getStyleSheet() {
+        var i = 0,
+          numSheets = document.styleSheets.length;
+        for (; i < numSheets; i++) {
+          if (document.styleSheets[i].ownerNode.id === id) {
+            SC_DEV && console.log('Found stylesheet %s after try#%d', id, tries);
+            callback(document.styleSheets[i]);
+            return;
+          }
+        }
+
+        if (++ tries <= MAX_TRIES) {
+          SC_DEV && console.log('Could not find stylesheet ' + id);
+          setTimeout(getStyleSheet, TRY_INTERVAL_MS);
         }
       }
-      SC_DEV && console.log('Could not find stylesheet ' + $stylesheet[0].id);
-      return [];
+
+      getStyleSheet();
     };
 
     /*
@@ -469,14 +153,17 @@ sitecues.def('style-service', function (styleService, callback) {
       return css;
     };
 
+    // Once the user zooms the style service is necessary to create the proper cursor rules
     sitecues.on('zoom', function (pageZoom) {
       if (pageZoom > 1) {
        init();
       }
     });
 
-    // We must always move fixed position elements down when there is a toolbar
-    // Therefore we will need the style service even if there is no zoom
+    // Normally we wait until the user zooms before initializing the style sevice.
+    // However, in the case of the toolbar, we must always move fixed position elements
+    // down. As this process requires the style-service, when the toolbar is inserted,
+    // we will initialize the style service immediately.
     sitecues.on('bp/did-insert-toolbar', function() {
       if (document.readyState === 'complete') {
         init();

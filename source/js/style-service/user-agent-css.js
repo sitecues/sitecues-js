@@ -7,57 +7,56 @@ sitecues.def('ua-css', function (uaCss, callback) {
 'use strict';
 
 uaCss.DEFAULT =
-
-'html,#scp-main {\
-  cursor:auto;\
-}\
-input,textarea,select,button,label[for]{\
-  cursor:pointer;\
-}\
-body,html,input {\
-    background-color: white;\
-    color: black;\
-}\
-input[type="image"] {\
-  background-color: transparent;\
-}\
-select {\
-  background-color: white;\
-  color: black;\
-  border-color: foo;\
-}\
-button,\
-  input[type="color"],\
-  input[type="reset"],\
-  input[type="button"],\
-  input[type="submit"] {\
-  color: ButtonText;\
-  border: 2px outset ButtonFace;\
-  background-color: ButtonFace;\
-}\
-input:disabled, select:disabled {\
-  color: GrayText !important;\
-  background-color: ThreeDFace !important;\
-}\
-blockquote[type="cite"] {\
-  border-color: blue;\
-}\
-mark {\
-  background: yellow;\
-  color: black;\
-}\
-hr {\
-  color: gray;\
-}\
-img[usemap], object[usemap] {\
-  color: blue;\
-}\
-:link {\
-  color:blue;\
-  cursor:pointer;\
-}\
-:visited {\
-  color: #551a8b;\
+'html,#scp-main {\n\
+  cursor:auto;\n\
+}\n\
+input,textarea,select,button,label[for]{\n\
+  cursor:pointer;\n\
+}\n\
+body,html,input {\n\
+    background-color: white;\n\
+    color: black;\n\
+}\n\
+input[type="image"] {\n\
+  background-color: transparent;\n\
+}\n\
+select {\n\
+  background-color: white;\n\
+  color: black;\n\
+  border-color: foo;\n\
+}\n\
+button,\n\
+  input[type="color"],\n\
+  input[type="reset"],\n\
+  input[type="button"],\n\
+  input[type="submit"] {\n\
+  color: ButtonText;\n\
+  border: 2px outset ButtonFace;\n\
+  background-color: ButtonFace;\n\
+}\n\
+input:disabled, select:disabled {\n\
+  color: GrayText !important;\n\
+  background-color: ThreeDFace !important;\n\
+}\n\
+blockquote[type="cite"] {\n\
+  border-color: blue;\n\
+}\n\
+mark {\n\
+  background: yellow;\n\
+  color: black;\n\
+}\n\
+hr {\n\
+  color: gray;\n\
+}\n\
+img[usemap], object[usemap] {\n\
+  color: blue;\n\
+}\n\
+:link {\n\
+  color:blue;\n\
+  cursor:pointer;\n\
+}\n\
+:visited {\n\
+  color: #551a8b;\n\
 }';
 
 callback();

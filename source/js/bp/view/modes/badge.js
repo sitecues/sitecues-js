@@ -207,7 +207,6 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
     }
 
     function onSitecuesThemeChange() {
-      console.log('hello');
       state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
       checkBackgroundColorChange();
     }

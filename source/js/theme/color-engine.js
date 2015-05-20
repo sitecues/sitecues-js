@@ -12,8 +12,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         DEFAULT_THEME = 'lightened',
         REPAINT_MS = 40,
         THEME_APPLIED_TIMEOUT = 40,
-        bgStyles,
-        fgStyles;
+        themeStyles;
 
       var shouldRepaintToEnsureFullCoverage = platform.browser.isChrome;
 
@@ -27,7 +26,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         getStyleSheet().text(styleSheetText);
 
         if (shouldRepaintToEnsureFullCoverage) {
-          forceRepaint();
+          repaintPage();
         }
 
         setTimeout(function() {
@@ -45,34 +44,31 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return rgba.a === 1 ? 'rgb(' + rgb + ')' : 'rgba(' + rgb + ',' +rgba.a + ')';
         }
 
-        function createBgRule(rgba) {
-          var colorString = getColorString(rgba);
-          return 'background: ' + colorString + ' !important; ' +
-            'background-color: ' + colorString + ' !important;\n';
-        }
-
-        function createFgRule(rgba) {
-          var colorString = getColorString(rgba);
-          return 'color: ' + colorString + ' !important;\n';
+        function createRule(prop, newValue) {
+          return prop + ': ' + newValue + ' !important;';
         }
 
         // Backgrounds
-        bgStyles.forEach(function(bgStyle) {
-          var bg = colorMapFn(bgStyle.value, intensity);
-          styleSheetText += bgStyle.rule.selectorText + ' {' + createBgRule(bg) + ';}\n';
-        });
-
-        // Foregrounds
-        fgStyles.forEach(function(fgStyle) {
-          var fg = colorMapFn(fgStyle.value, intensity);
-          styleSheetText += fgStyle.rule.selectorText + ' {' + createFgRule(fg) + ';}\n';
+        themeStyles.forEach(function(style) {
+          var newValue;
+          if (style.value.prop === 'background-image') {
+            newValue = 'none';
+          }
+          else {
+            // color, background-color
+            var newRgba = colorMapFn(style.value, intensity);
+            newValue = getColorString(newRgba);
+          }
+          if (newValue) {
+            styleSheetText += style.rule.selectorText + ' {' + createRule(style.value.prop, newValue) + ';}\n';
+          }
         });
 
         return styleSheetText;
       };
 
       // Necessary on youtube.com and https://www.arlington.k12.ma.us/stratton/
-      function forceRepaint() {
+      function repaintPage() {
         var oldTransform = document.body.style.transform;
         document.documentElement.style.transform = 'translateY(1px)';
         document.body.style.transform = 'translateY(-1px)';
@@ -91,25 +87,41 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       }
 
       function extractColorFromBgShorthand(bgShorthand) {
-        if (bgShorthand.substr(0, 3) === 'rgb') {
-          // Format = rgb(x,x,x) or rgba(x,x,x,x)
-          return bgShorthand.split(')')[0] + ')';
+        var lastIndexRgb = bgShorthand.lastIndexOf('rgb(');
+        if (lastIndexRgb < 0) {
+          bgShorthand.lastIndexOf('rgba(');
         }
-        // Otherwise, provide the color string up to the next space
-        return bgShorthand.split(' ')[0];
+        if (lastIndexRgb < 0) {
+          // Color is not rgb() or rgba() -- may be a color name such as 'white'.
+          // Color name will be last.
+          var possibleColors = bgShorthand.split(' ');
+          return possibleColors[possibleColors.length - 1];
+        }
+        // Format = rgb(x,x,x) or rgba(x,x,x,x)
+        return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
+      }
+
+      function convertColorNameToRgbFormat(colorName) {
+        // Convert color names such as 'white', 'black', 'transparent'
+        var $div = $('<div>').appendTo('html').css('color', colorName),
+          isLegalColor = $div[0].style.color,  // Browser won't set the color on the <div> if it's not a legal color name
+          rgb = isLegalColor ? $div.css('color') : 'rgba(0, 0, 0, 0)';
+        $div.remove();
+        return rgb;
       }
 
       function getRgba(colorString) {
         // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
+        var rgb;
         if (colorString.substr(0,3) !== 'rgb') {
-          // Convert color names such as 'white', 'black', 'transparent'
-          var $div = $('<div>').appendTo('html')
-            .css('color', colorString);
-          colorString = $div.css('color');
-          $div.remove();
+          rgb = convertColorNameToRgbFormat(colorString);
         }
+        else {
+          rgb = colorString;
+        }
+
         var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
-          match = MATCH_COLORS.exec(colorString) || {};
+          match = MATCH_COLORS.exec(rgb) || {};
 
         return {
           r: parseInt(match[1] || 0),
@@ -119,27 +131,34 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         };
       }
 
-      // Return bg color if bg color is used, otherwise falsey value
-      function getSignificantBgColor(cssStyleDecl) {
-        var bgColor = getBgColor(cssStyleDecl);
-        return (bgColor && bgColor.rgba.a) ? bgColor : null;
+      function hasTypicalBgTextureRepeat(cssStyleDecl) {
+        var repeatPropValue = cssStyleDecl.backgroundRepeat || cssStyleDecl.background || '';
+        return repeatPropValue.indexOf('repeat-') >= 0;
       }
 
-      function getBgColor(cssStyleDecl) {
-        var bgStyle = cssStyleDecl.background;
+      // For now, return only background images that we want to erase
+      function getSignificantBackgroundImage(cssStyleDecl) {
+        var bgStyle = cssStyleDecl.background,
+          hasBgImage = bgStyle.indexOf('url(') >= 0 || (cssStyleDecl.backgroundImage && cssStyleDecl.backgroundImage !== 'none'),
+          hasBgImageRepeat = hasBgImage && hasTypicalBgTextureRepeat(cssStyleDecl);
 
-        if (bgStyle /* && bgStyle.indexOf('url(') < 0 */) {
+        if (hasBgImageRepeat) {
           return {
-            rgba: getRgba(extractColorFromBgShorthand(bgStyle)),
-            prop: 'background'
+            prop: 'background-image',
+            parsedVal: true  // All we need for now
           };
         }
+      }
 
-        var bgColorStyle = cssStyleDecl.backgroundColor;
-        if (bgColorStyle /* && !cssStyleDecl.backgroundImage */) {
+      function getSignificantBgColor(cssStyleDecl) {
+        var bgStyle = cssStyleDecl.background,
+          colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
+          rgba = colorString && getRgba(colorString);
+
+        if (rgba && rgba.a) {
           return {
-            rgba: getRgba(bgColorStyle),
-            prop: 'background-color'
+            prop: 'background-color',
+            parsedVal: rgba
           };
         }
       }
@@ -149,17 +168,19 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         if (fgStyle) {
           return {
             prop: 'color',
-            rgba: getRgba(fgStyle)
+            parsedVal: getRgba(fgStyle)
           }
         }
       }
 
       function initialize() {
-        bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor);
-        fgStyles = styleService.getAllMatchingStylesCustom(getFgColor);
+        var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
+          fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
+          bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBackgroundImage);
+
+        themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
 
         console.log('-------------------------- INIT ------------------------------');
-        //colorEngine.setTheme(1);
       }
 
       sitecues.on('style-service/ready', initialize);

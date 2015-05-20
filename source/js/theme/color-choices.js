@@ -6,19 +6,13 @@
 // TODO media queries -- wikipedia and digg
 // Do we want to do:
 // - border color
-// - images, background-images?
-// - Force adaptive badge?
+// - images, background-images, iframes?
 // Sidebar colors not taking effect at
 //   - http://www.foxnews.com/world/2015/05/17/russia-putin-scores-8-goals-in-game-with-nhl-veterans/
 //   - Parts of http://www.cnn.com/
 //   - http://timesofindia.indiatimes.com/world/europe/French-mayor-expelled-for-claiming-Islam-will-be-banned-from-France-by-2027/articleshow/47316711.cms
 //   - is it because we apply styles in the wrong order (style-service doesn't try to preserve order)
 // @import support -- needed for faast.org
-// Erasing background when only background-color set is messing up background images, e.g. on acbohio.org
-// Not working on
-// - http://www.jsonline.com/sports/bucks/
-// - http://news.yahoo.com/us-raid-syria-killed-32-members-including-4-102310292.html
-// - http://english.alarabiya.net/en/News/middle-east/2015/05/17/Egypt-restricts-women-travelling-to-Turkey-.html
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
@@ -137,32 +131,26 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     // rgba: color
     // prop: property name ('background', 'background-color' or 'color')
 
-    colorChoices.blackWithYellow = function (style, intensity) {
-      return blackWithHue(YELLOW_HUE, style, intensity);
+    colorChoices.darkWithYellow = function (style, intensity) {
+      return darkWithHue(YELLOW_HUE, style, intensity);
     };
 
     var hue;
     sitecues.setHue = function (newHue) {
       hue = newHue;
-    }
-
-    colorChoices.blackWithHue = function (style, intensity) {
-      return blackWithHue(hue, style, intensity);
     };
 
-    var yowza = 0;
-    colorChoices.blackWithYowza = function (style, intensity) {
-      yowza = ((yowza + 1) % 21)
-      return blackWithHue(yowza / 20, style, intensity);
+    colorChoices.darkWithHue = function (style, intensity) {
+      return darkWithHue(hue, style, intensity);
     };
 
-    function blackWithHue(hue, style, intensity) {
+    function darkWithHue(hue, style, intensity) {
       if (style.prop === 'color') {
-        var rgba = style.rgba,
+        var rgba = style.parsedVal,
           hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
           origLightness = Math.max(hsl.l, 1 - hsl.l);
         intensity = Math.max(intensity * origLightness, MIN_INTENSITY);
-        var newRgba = $.extend(rgba, hslToRgb(hue, 1, 0.5));
+        var newRgba = $.extend({}, rgba, hslToRgb(hue, 1, 0.5));
         return getReducedIntensity(newRgba, intensity);
       }
       else {
@@ -170,9 +158,15 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     };
 
-    colorChoices.blackKeepForeground = function (style, intensity) {
+    var yowza = 0;
+    colorChoices.darkCreative = function (style, intensity) {
+      yowza = ((yowza + 1) % 21)
+      return darkWithHue(yowza / 20, style, intensity);
+    };
+
+    colorChoices.darkOriginal = function (style, intensity) {
       if (style.prop === 'color') {
-        var rgba = style.rgba,
+        var rgba = style.parsedVal,
           hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
           origLightness = 1 - hsl.l,
           newLightness = Math.max(Math.min(intensity * (origLightness + 0.2), intensity), MIN_INTENSITY);
@@ -180,7 +174,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         return newRgba;
       }
       else {
-        var rgba = style.rgba,
+        var rgba = style.parsedVal,
           hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
           origLightness = hsl.l,
           newLightness = Math.max(intensity * (0.18 - origLightness / 5), 0);
@@ -190,11 +184,11 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     };
 
     colorChoices.hslInvert = function (style, intensity) {
-      return getReducedIntensity(getInvertedColor(style.rgba), intensity);
+      return getReducedIntensity(getInvertedColor(style.parsedVal), intensity);
     };
 
-    colorChoices.invert = function (style, intensity) {
-      var rgba = style.rgba,
+    colorChoices.rgbInvert = function (style, intensity) {
+      var rgba = style.parsedVal,
         newRgba = {
           r: 255 - rgba.r,
           g: 255 - rgba.g,
@@ -205,7 +199,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     };
 
     colorChoices.lightened = function (style, intensity) {
-      return getReducedIntensity(style.rgba, intensity);
+      return getReducedIntensity(style.parsedVal, intensity);
     };
 
     sitecues.hslToRgb = hslToRgb;
