@@ -1,12 +1,5 @@
-// TODO on zoom change, refreshStyleSheet
-
 /**
- * This is the module for the cursor enhancement.
- * It works as follows:
- * - enables/disables cursor module if zoom level is above/below certain value appropriately;
- * - takes over cursor style(retrives and sets image) when necessary; 
- * - switches custom cursor image when hover over elements that demand certain - not default or auto - cursor;
- * - attaches correspondent window events so that handle custom cursor events.
+ * This is the module for handling helping sitecues handle media queries.
  */
 sitecues.def('media-queries', function (mediaQueries, callback) {
 

@@ -26,7 +26,8 @@ sitecues.def('style-service', function (styleService, callback) {
         .text(allCss);
     }
 
-    function allCssRetrieved(allCss) {
+    // This is called() when all the CSS text of the document is available for processing
+    function onAllCssRetrieved(allCss) {
       $combinedStylesheet = createCombinedStyleSheet(allCss);
       styleService.getDOMStylesheet($combinedStylesheet, function(styleSheetObject) {
         combinedDOMStylesheetObject = styleSheetObject;
@@ -51,7 +52,7 @@ sitecues.def('style-service', function (styleService, callback) {
       // any <style> or <link> that is not from sitecues, and create a combined stylesheet with those contents (in the right order).
 
       // This will initialize the composite stylesheet when finished and call style-service/ready
-      cssAggregator.collectAllCss(allCssRetrieved);
+      cssAggregator.collectAllCss(onAllCssRetrieved);
     };
 
 
@@ -85,6 +86,11 @@ sitecues.def('style-service', function (styleService, callback) {
         cssStyleDeclaration,
         styleResults = [];
 
+      function getMediaTypeFromCssText(rule) {
+        // Change @media MEDIA_QUERY_RULES { to just MEDIA_QUERY_RULES
+        return rule.cssText.split('{')[0].substr(7);
+      }
+
       function addMatchingRules(rulesContainer) {
         var rules = rulesContainer.cssRules,
           ruleIndex = 0,
@@ -103,10 +109,7 @@ sitecues.def('style-service', function (styleService, callback) {
             // Only add CSS rules where the media query fits
             // TODO Unfortunately, this means that if the window size or zoom changes,
             //      we won't have those rules anymore. Do we reanalyze at that point?
-            function getMediaTypeFromCssText(cssText) {
-              return cssText.split('{')[0].substr(7);
-            }
-            var media = getMediaTypeFromCssText(rule.cssText);
+            var media = getMediaTypeFromCssText(rule);
             if (mediaQueries.isActiveMediaQuery(media)) {
               SC_DEV && console.log('@media matched: ' + media);
               addMatchingRules(rule);    // Recursive

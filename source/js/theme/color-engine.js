@@ -9,19 +9,20 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
-        DEFAULT_THEME = 'lightened',
         REPAINT_MS = 40,
         THEME_APPLIED_TIMEOUT = 40,
-        themeStyles;
-
-      var shouldRepaintToEnsureFullCoverage = platform.browser.isChrome;
+        themeStyles,
+        shouldRepaintToEnsureFullCoverage = platform.browser.isChrome;
 
       // ---- PUBLIC ----
 
-      // type (optional)
-      // intensity (optional) = .01-1
+      /**
+       * Apply a theme to the current document
+       * @param {string} type one of the theme names from color-choices.js
+       * @param {number} intensity (optional) = .01-1
+       */
       colorEngine.applyTheme = function(type, intensity) {
-        var styleSheetText = type === 'none' ? '' : getThemeCss(type, intensity || 1);
+        var styleSheetText = type === 'none' ? '' : getThemeCssText(type, intensity || 1);
 
         getStyleSheet().text(styleSheetText);
 
@@ -34,9 +35,17 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }, THEME_APPLIED_TIMEOUT);
       };
 
-      function getThemeCss(type, intensity) {
+      /**
+       * Retrieve the CSS text required to apply the requested theme
+       * @param type
+       * @param intensity
+       * @returns {string}
+       */
+      function getThemeCssText(type, intensity) {
 
-        var colorMapFn = colorChoices[type || DEFAULT_THEME],
+        initialize();
+
+        var colorMapFn = colorChoices[type],
           styleSheetText = '';
 
         function getColorString(rgba) {
@@ -67,17 +76,22 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return styleSheetText;
       };
 
-      // Necessary on youtube.com and https://www.arlington.k12.ma.us/stratton/
+      /**
+       * Deal with Chrome bugs where scrolled-off content doesn't get new background color
+       * Necessary on at least youtube.com and https://www.arlington.k12.ma.us/stratton/
+       */
       function repaintPage() {
         var oldTransform = document.body.style.transform;
         document.documentElement.style.transform = 'translateY(1px)';
-        document.body.style.transform = 'translateY(-1px)';
         setTimeout(function () {
           document.documentElement.style.transform = '';
-          document.body.style.transform = oldTransform;
         }, REPAINT_MS);
       }
 
+      /**
+       * Lazily get the style sheet to be used for applying the theme.
+       * @returns {jQuery}
+       */
       function getStyleSheet() {
         if (!$themeStyleSheet) {
           $themeStyleSheet = $('<style>').appendTo('head')
@@ -86,6 +100,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return $themeStyleSheet;
       }
 
+      /**
+       * The CSS background property is shorthand for applying many CSS background- related properties at once.
+       * This function extracts the color fro the background propery.
+       * @param bgShorthand The background property value
+       * @returns {string}
+       */
       function extractColorFromBgShorthand(bgShorthand) {
         var lastIndexRgb = bgShorthand.lastIndexOf('rgb(');
         if (lastIndexRgb < 0) {
@@ -101,18 +121,28 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
       }
 
-      function hasTypicalBgTextureRepeat(cssStyleDecl) {
+      /**
+       * Return true if the background image appears to be used for a gradient
+       * @param cssStyleDecl
+       * @returns {boolean}
+       */
+      function isBgImageUsedForGradient(cssStyleDecl) {
         var repeatPropValue = cssStyleDecl.backgroundRepeat || cssStyleDecl.background || '';
-        return repeatPropValue.indexOf('repeat-') >= 0;
+        return repeatPropValue.indexOf('repeat-') >= 0;  // Look for repeat-x or repeat-y
       }
 
-      // For now, return only background images that we want to erase
+      /**
+       * Retrieve information about background images the theme needs to care about.
+       * For now we only care about gradients.
+       * @param cssStyleDecl
+       * @returns {{prop: string, parsedVal: boolean}}
+       */
       function getSignificantBackgroundImage(cssStyleDecl) {
         var bgStyle = cssStyleDecl.background,
           hasBgImage = bgStyle.indexOf('url(') >= 0 || (cssStyleDecl.backgroundImage && cssStyleDecl.backgroundImage !== 'none'),
-          hasBgImageRepeat = hasBgImage && hasTypicalBgTextureRepeat(cssStyleDecl);
+          hasBgImageGradient = hasBgImage && isBgImageUsedForGradient(cssStyleDecl);
 
-        if (hasBgImageRepeat) {
+        if (hasBgImageGradient) {
           return {
             prop: 'background-image',
             parsedVal: true  // All we need for now
@@ -120,6 +150,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
+      /**
+       * Retrieve information about background colors if we care about them
+       * We don't care about transparent colors.
+       * @param cssStyleDecl
+       * @returns {{prop: string, parsedVal: object }}
+       */
       function getSignificantBgColor(cssStyleDecl) {
         var bgStyle = cssStyleDecl.background,
           colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
@@ -133,6 +169,11 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
+      /**
+       * Retrieve rgba information about foreground colors
+       * @param cssStyleDecl
+       * @returns {{prop: string, parsedVal: *}}
+       */
       function getFgColor(cssStyleDecl) {
         var fgStyle = cssStyleDecl.color;
         if (fgStyle) {
@@ -144,17 +185,18 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       }
 
       function initialize() {
+        if (themeStyles) {
+          return;
+        }
         var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
           fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
           bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBackgroundImage);
 
         themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
-
-        console.log('-------------------------- INIT ------------------------------');
       }
 
-      sitecues.on('style-service/ready', initialize);
-
+      // For now this our hacky way to provide access to the theme engine
+      // TODO remove this:
       sitecues.applyTheme  = colorEngine.applyTheme;
 
       if (SC_UNIT) {

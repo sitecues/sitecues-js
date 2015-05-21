@@ -214,8 +214,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return getReducedIntensity(style.parsedVal, intensity);
     };
 
-    sitecues.hslToRgb = hslToRgb;
-    sitecues.rgbToHsl = rgbToHsl;
   });
 
   if (SC_UNIT) {

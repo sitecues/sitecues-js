@@ -186,18 +186,21 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       }
     }
 
-    function onPossibleWebpageThemeChange() {
-      setTimeout(checkBackgroundColorChange, 0);
-    }
-
     function getBackgroundColor() {
       return getComputedStyle(document.body).backgroundColor;
     }
 
-    // Listen for change in the web page's custom theme (as opposed to the sitecues theme)
+    // Input event has occured that may trigger a theme change produced from the website code
+    // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
+    function onPossibleWebpageThemeChange() {
+      setTimeout(checkBackgroundColorChange, 0);
+    }
+
+    // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
+    // We don't know when they occur so we check shortly after a click or keypress.
     function addWebPageThemeListener() {
       document.body.addEventListener('click', onPossibleWebpageThemeChange);
-      document.body.addEventListener('keydown', onPossibleWebpageThemeChange);
+      document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
       lastBgColor = getBackgroundColor();
     }
 

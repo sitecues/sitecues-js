@@ -1,6 +1,5 @@
 /**
- *
- * This file exposes an API for creating javascript animations.
+ * This module collects all the relevant CSS for the entire web page into one large string.
  */
 
 sitecues.def('css-aggregator', function (cssAggregator, callback) {
@@ -12,58 +11,75 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     var numPending = 0,
       sheets = [],
       onCssReadyFn,
-      currentSheetId = 0,
+      chromeRequestId = 0,
       doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension';
 
-    // Must provide url or text, but not both
+    /**
+     * StyleSheet object constructor. This object represents one stylesheet on the page,
+     * either from a <link rel="stylesheet">, a <style> or an @import.
+     * Caller should provide a url or text, but not both.
+     * @param url The url of the stylesheet to fetch
+     * @param text The text of the stylesheet if already known (ignored if there is a url)
+     * @param debugName [optional] -- a name for the stylesheet to help with debugging
+     * @constructor
+     */
     function StyleSheet(url, text, debugName) {
 
       this.url = url;
-      this.text = !url && (text || '');
       if (SC_DEV) {
         this.debugName = debugName;
       }
 
       ++numPending;
 
-      if (url) {
-        // We will need to retrieve this one
-        this.sheetId = ++ currentSheetId;
-        var request = createGetRequest(url, currentSheetId),
-          currentSheet = this;
-        request.url = url;
+      var currentSheet = this;
 
-        if (!request) {
-          SC_DEV && console.log('CORS not supported');
-          return 0;
-        }
+      if (url) {
+        // We will need to retrieve this stylesheet over the network
+        var request = createGetRequest(url);
+        request.url = url;
 
         // Only apply the request if the response status is 200
         request.onload = function(evt) {
           onload(evt, currentSheet);
         };
-        request.onerror = function(evt) {
-          requestComplete(evt, currentSheet);
+        request.onerror = function() {
+          // Still need to mark it ready even though we don't have any CSS text for it,
+          // otherwise the numPending will not return to 0 and we will never finish aggregating the CSS
+          markReady(currentSheet);
         };
         request.send();
       }
-    }
-
-    function requestComplete(evt, sheet) {
-      markReady(sheet);
+      else {
+        // A <style> already has it's text --
+        // as opposed to a <link href> which will be marked ready after it's loaded
+        currentSheet.text = (text || '');
+        setTimeout(function () {
+          // Use the setTimeout as a fake fetch that will simply provide the text we already have.
+          // (We don't want to mark ready until all the sheets are added to the queue, otherwise we could finish too early)
+          markReady(currentSheet);
+        }, 0);
+      }
     }
 
     function onload(evt, sheet) {
       var request = evt.target || this;
       sheet.text = request.responseText;
-      requestComplete(evt, sheet);
+      markReady(sheet);
     }
 
-    function ChromeExtHttpRequest(url, requestId) {
+    /**
+     * Create a request object that proxies through the Chrome extension, in order to get around CORS
+     * @param url
+     * @constructor
+     */
+    function ChromeExtHttpRequest(url) {
+      ++ chromeRequestId;  // Each request gets a unique ID so that we can keep it's request events separate
+
       this.url = url;
       this.send = function () {
         var chromeRequest = this;
-        $(window).one('ProcessCss-' + requestId, function (event) {
+        $(window).one('ProcessCss-' + chromeRequestId, function (event) {
           var responseText = event.originalEvent.detail,
             responseEvent = { target: chromeRequest };
           if (responseText) {  // We succeeded in getting the content and the response text is in the detail field
@@ -74,7 +90,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
             chromeRequest.onerror(responseEvent);
           }
         });
-        window.dispatchEvent(new CustomEvent('RequestCss', { detail: { url: this.url, id: requestId } }));
+        window.dispatchEvent(new CustomEvent('RequestCss', { detail: { url: this.url, id: chromeRequestId } }));
       };
     }
 
@@ -85,24 +101,25 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
      * @param  {string} url
      * @return {Object}
      */
-    function createGetRequest(url, sheetId) {
+    function createGetRequest(url) {
       if (doFetchCssFromChromeExtension) {
-        return new ChromeExtHttpRequest(url, sheetId);
+        return new ChromeExtHttpRequest(url);
       }
-      //Credit to Nicholas Zakas
+      // Credit to Nicholas Zakas
+      // http://www.nczonline.net/blog/2010/05/25/cross-domain-ajax-with-cross-origin-resource-sharing/
       var xhr = new XMLHttpRequest();
 
       if ('withCredentials' in xhr) {
         xhr.open('GET', url, true);
-      } else if (typeof XDomainRequest !== 'undefined') {
+      } else {
         xhr = new XDomainRequest();
         xhr.open('GET', url);
-      } else {
-        xhr = null;
       }
+
       return xhr;
     }
 
+    // Once a sheet is ready, mark it as complete and finalize the process if there are no pending sheet requests
     function markReady(sheet) {
       -- numPending;
 
@@ -150,23 +167,39 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
        background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
        */
 
-      var URL_REGEXP = /url\((([\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/g,
+      var RELATIVE_URL_REGEXP = /url\((([\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/g,
         baseUrlObject = sitecues.parseUrl(sheet.url);
-      return sheet.text.replace(URL_REGEXP, function (totalMatch, match1, match2, actualUrl) {
+      return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, match1, match2, actualUrl) {
         // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
         return 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
       });
     }
 
+    // Clear CSS comments out of the current string
     function removeComments(sheet) {
       // From http://blog.ostermiller.org/find-comment
       var COMMENTS_REGEXP = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g;
       return sheet.text.replace(COMMENTS_REGEXP, '');
     }
 
-    function processSheetCss(sheet) {
+    // Convert @import into new stylesheet requests
+    function processAtImports(sheet) {
       var IMPORT_REGEXP = /\s*(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/g;
 
+      return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl, mediaQuery) {
+        // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
+        mediaQuery = mediaQuery.split(';')[0];
+        SC_DEV && mediaQuery && console.log("@import media query: " + mediaQuery);
+        if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
+          insertNewSheetBefore(sheet, actualUrl);
+        }
+        // Now remove @import line from CSS so that it does not get reprocessed
+        return '';
+      });
+    }
+
+    // Perform post-processing on the CSS text in the style sheet
+    function processSheetCss(sheet) {
       // Ensure some text even in the case of an error
       sheet.text = sheet.text || '';
 
@@ -180,15 +213,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       }
 
       // Convert imports into new pending sheets
-      sheet.text = sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl, mediaQuery) {
-        // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
-        SC_DEV && console.log("@import media query: " + mediaQuery);
-        if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
-          insertNewSheetBefore(sheet, actualUrl);
-        }
-        // Now remove @import line from CSS
-        return '';
-      });
+      sheet.text = processAtImports(sheet);
     }
 
     function insertNewSheetBefore(insertBeforeSheet, urlForNewSheet) {
@@ -201,11 +226,6 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     function addSheet(url, text, debugName) {
       var newSheet = new StyleSheet(url, text, debugName);
       sheets.push(newSheet);
-      if (newSheet.text) {
-        // A <style> already has it's text --
-        // as opposed to a <link href> which will be marked ready after it's loaded
-        markReady(newSheet);
-      }
     }
 
     function hasPendingRequests() {
@@ -213,7 +233,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
     }
 
     function finalizeCssIfComplete() {
-      if (!onCssReadyFn || hasPendingRequests()) {
+      if (hasPendingRequests()) {
         return;
       }
 
@@ -263,7 +283,6 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
           href = isLink && elem.href,
           text = !isLink && elem.firstChild.data,
           debugName = SC_DEV && (elem.localName + ' ' + (href || ''));
-        SC_DEV && isLink && console.log(href);
         return addSheet(href, text, debugName);
       }
 
@@ -275,7 +294,6 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       $styleElems.each(addSheetForElem);
 
       onCssReadyFn = cssReadyCallbackFn;
-      finalizeCssIfComplete();
     };
 
     callback();
