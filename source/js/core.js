@@ -100,7 +100,7 @@
   };
 
   function isProduction() {
-    return getLibraryUrl().host === 'js.sitecues.com';
+    return getLibraryUrl().hostname === 'js.sitecues.com';
   }
 
   function initServices() {
