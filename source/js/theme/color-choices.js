@@ -237,6 +237,24 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     };
 
+    colorChoices.blueReduction = function(style, intensity) {
+      function getMixedColor(origColor, mixInColor) {
+        return Math.min(Math.round(origColor * reductionRatio + mixInColor * mixInRatio), 255);
+      }
+      var rgba = $.extend({}, style.parsedVal),
+        mixInRatio = rgba.b * 0.001 * (1 - intensity),
+        reductionRatio = 1 - mixInRatio,
+        mixInColor = hslToRgb(0.13, 1, 0.5),
+        newRgba = {
+          r: getMixedColor(rgba.r, mixInColor.r),
+          g: getMixedColor(rgba.g, mixInColor.g),
+          b: getMixedColor(rgba.b, mixInColor.b),
+          a: rgba.a
+        };
+
+      return newRgba;
+    };
+
     colorChoices.isDarkTheme = function(colorMapFn, originalBg) {
       var originalBg = {
         prop: 'background-color',
