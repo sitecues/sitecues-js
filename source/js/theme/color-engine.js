@@ -28,11 +28,22 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param {number} intensity (optional) = .01-1
        */
       colorEngine.applyTheme = function(type, intensity) {
-        var colorMapFn = colorChoices[type],
-          styleSheetText = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1) : '',
-          transitionCss = initializeTransition(colorMapFn);
+        var colorMapFn = colorChoices[type];
+        if (colorMapFn) {
+          initialize();
+        }
+
+        var
+          isDark = colorChoices.isDarkColor(getCurrentBodyBackgroundColor()),
+          willBeDark = isDarkTheme(colorMapFn),
+          isReverse = isDark !== willBeDark,
+          styleSheetText = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, willBeDark) : '',
+          transitionCss = initializeTransition(isReverse);
 
         getStyleSheet().text(transitionCss + styleSheetText);
+
+        // Allow web pages to create CSS rules that respond to reverse themes
+        $('html').toggleClass('sitecues-reverse-theme', willBeDark !== isOriginalThemeDark);
 
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
@@ -47,13 +58,11 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return colorMapFn ? colorChoices.isDarkTheme(colorMapFn, originalBodyBackgroundColor) : isOriginalThemeDark;
       }
 
-      function initializeTransition(colorMapFn) {
-        var isDark = colorChoices.isDarkColor(getCurrentBodyBackgroundColor()),
-          willBeDark = isDarkTheme(colorMapFn),
-          isLargeChange = isDark !== willBeDark,
+      function initializeTransition(isReverse) {
+        var
           // We want to animate quickly between light themes, but slowly when performing a drastic change
           // such as going from light to dark or vice-versa
-          transitionMs = isLargeChange ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
+          transitionMs = isReverse ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
 
         $('html').addClass(TRANSITION_CLASS);
         clearTimeout(transitionTimer);
@@ -78,12 +87,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param intensity
        * @returns {string}
        */
-      function getThemeCssText(colorMapFn, intensity) {
+      function getThemeCssText(colorMapFn, intensity, willBeDark) {
 
-        initialize();
-
-        var willBeDark = isDarkTheme(colorMapFn),
-          styleSheetText = '';
+        var styleSheetText = '';
 
         function getColorString(rgba) {
           function isAlphaRelevant(alpha) {
