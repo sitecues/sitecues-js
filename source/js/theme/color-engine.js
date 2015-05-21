@@ -12,7 +12,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         REPAINT_MS = 40,
         THEME_APPLIED_TIMEOUT = 40,
         themeStyles,
-        shouldRepaintToEnsureFullCoverage = platform.browser.isChrome;
+        shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
+        isOriginalThemeDark = false; // TODO does the page start out dark?
 
       // ---- PUBLIC ----
 
@@ -46,11 +47,15 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         initialize();
 
         var colorMapFn = colorChoices[type],
+          isReverseTheme = colorChoices.isDarkTheme(colorMapFn) !== isOriginalThemeDark,
           styleSheetText = '';
 
         function getColorString(rgba) {
+          function isAlphaRelevant(alpha) {
+            return (alpha >= 0 && alpha < 1);  // false if undefined
+          }
           var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
-          return rgba.a === 1 ? 'rgb(' + rgb + ')' : 'rgba(' + rgb + ',' +rgba.a + ')';
+          return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
         }
 
         function createRule(prop, newValue) {
@@ -61,7 +66,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         themeStyles.forEach(function(style) {
           var newValue;
           if (style.value.prop === 'background-image') {
-            newValue = 'none';
+            newValue = isReverseTheme && 'none';
           }
           else {
             // color, background-color

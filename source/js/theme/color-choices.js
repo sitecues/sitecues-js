@@ -28,11 +28,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       GREEN_HUE = 0.333,
       monochromeHue;
 
-    // TODO Put in UI rather than global function
-    sitecues.setHue = function (newHue) {
-      monochromeHue = newHue;
-    };
-
     /**
      * Converts an HSL color value to RGB. Conversion formula
      * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
@@ -214,7 +209,52 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return getReducedIntensity(style.parsedVal, intensity);
     };
 
+    // Creme colored background
+    colorChoices.paper = function (style, intensity) {
+      if (style.prop === 'color') {
+        var rgba = style.parsedVal,
+          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
+//        if (hsl.l > .5) {
+//          // Ensure dark foreground
+//          hsl = 1 - hsl.l;
+//          rgba = $.extend({}, hslToRgb(hsl.h, hsl.l, 1-hsl.l), rgba.a);
+//        }
+        return getReducedIntensity(rgba, intensity - 0.2);
+      }
+      else {
+        var rgba = style.parsedVal,
+          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
+
+        if (hsl.l > 0.95) {
+          var PAPER_HUE = 0.17,
+            PAPER_SATURATION = 0.7,
+            PAPER_LIGHTNESS_REDUCTION = 0.015;
+          rgba = $.extend({}, hslToRgb(PAPER_HUE, PAPER_SATURATION, hsl.l - PAPER_LIGHTNESS_REDUCTION), rgba.a);
+        }
+        return getReducedIntensity(rgba, intensity);
+      }
+    };
+
+    colorChoices.isDarkTheme = function(colorMapFn) {
+      var whiteBg = {
+        prop: 'background-color',
+        parsedVal: {r: 255, g: 255, b: 255, a:1 }
+      };
+      var translatedBg = colorMapFn(whiteBg);
+      return rgbToHsl(translatedBg) < 0.2;
+    };
+
+    if (SC_DEV) {
+      // TODO remove
+      sitecues.rgbToHsl = rgbToHsl;
+      sitecues.hslToRgb = hslToRgb;
+      // TODO Put in UI rather than global function
+      sitecues.setHue = function (newHue) {
+        monochromeHue = newHue;
+      };
+    }
   });
+
 
   if (SC_UNIT) {
     $.extend(exports, colorChoices);
