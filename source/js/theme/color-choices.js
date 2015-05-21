@@ -237,22 +237,32 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     };
 
-    colorChoices.blueReduction = function(style, intensity) {
-      function getMixedColor(origColor, mixInColor) {
-        return Math.min(Math.round(origColor * reductionRatio + mixInColor * mixInRatio), 255);
-      }
-      var rgba = $.extend({}, style.parsedVal),
-        mixInRatio = rgba.b * 0.001 * (1 - intensity),
-        reductionRatio = 1 - mixInRatio,
-        mixInColor = hslToRgb(0.13, 1, 0.5),
-        newRgba = {
-          r: getMixedColor(rgba.r, mixInColor.r),
-          g: getMixedColor(rgba.g, mixInColor.g),
-          b: getMixedColor(rgba.b, mixInColor.b),
-          a: rgba.a
-        };
+    function mixRgbaColors(origRgba, mixInRgba, mixInRatio) {
+      var reductionRatio = 1 - mixInRatio;
 
-      return newRgba;
+      function mixChannel(origChannelValue, mixInChannelValue) {
+        return Math.min(Math.round(origChannelValue * reductionRatio + mixInChannelValue * mixInRatio), 255);
+      }
+
+      return {
+        r: mixChannel(origRgba.r, mixInRgba.r),
+        g: mixChannel(origRgba.g, mixInRgba.g),
+        b: mixChannel(origRgba.b, mixInRgba.b),
+        a: origRgba.a
+      };
+    }
+
+    colorChoices.blueReduction = function(style, intensity) {
+      var rgba = $.extend({}, style.parsedVal);
+
+      if (style.prop === 'color' && rgbToHsl(rgba.r, rgba.g, rgba.b).l < 0.2) {
+        return getReducedIntensity(rgba, intensity - 0.15);
+      }
+
+      var mixInRatio = /*rgba.b * 0.001 */ .2 * (1 - intensity),
+        mixInRgba = hslToRgb(0.15, 1, 0.5);
+
+      return mixRgbaColors(rgba, mixInRgba, mixInRatio);
     };
 
     colorChoices.isDarkTheme = function(colorMapFn, originalBg) {

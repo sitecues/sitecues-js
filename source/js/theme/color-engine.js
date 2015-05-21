@@ -99,8 +99,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
         }
 
-        function createRule(prop, newValue) {
-          return prop + ': ' + newValue + ' !important;';
+        function createRule(prop, newValue, important) {
+          return prop + ': ' + newValue + (important ? ' !important' : '');
         }
 
         // Backgrounds
@@ -115,7 +115,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             newValue = getColorString(newRgba);
           }
           if (newValue) {
-            styleSheetText += style.rule.selectorText + ' {' + createRule(style.value.prop, newValue) + ';}\n';
+            var selectorText = style.rule.selectorText,
+              important = selectorText !== ':link' && selectorText !== ':visited'; // Don't let these UA rules override page's <a> rules
+            styleSheetText += selectorText +
+              ' {' + createRule(style.value.prop, newValue, important) + ';}\n';
           }
         });
 
