@@ -13,7 +13,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         THEME_APPLIED_TIMEOUT = 40,
         themeStyles,
         shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
-        isOriginalThemeDark = false; // TODO does the page start out dark?
+        originalBodyBackgroundColor,
+        isOriginalThemeDark,
+        transitionTimer,
+        TRANSITION_CLASS = 'sc-animate-theme',
+        TRANSITION_MS_FAST = 300,
+        TRANSITION_MS_SLOW = 2000;
 
       // ---- PUBLIC ----
 
@@ -23,9 +28,11 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param {number} intensity (optional) = .01-1
        */
       colorEngine.applyTheme = function(type, intensity) {
-        var styleSheetText = type === 'none' ? '' : getThemeCssText(type, intensity || 1);
+        var colorMapFn = colorChoices[type],
+          styleSheetText = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1) : '',
+          transitionCss = initializeTransition(colorMapFn);
 
-        getStyleSheet().text(styleSheetText);
+        getStyleSheet().text(transitionCss + styleSheetText);
 
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
@@ -36,18 +43,46 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }, THEME_APPLIED_TIMEOUT);
       };
 
+      function isDarkTheme(colorMapFn) {
+        return colorMapFn ? colorChoices.isDarkTheme(colorMapFn, originalBodyBackgroundColor) : isOriginalThemeDark;
+      }
+
+      function initializeTransition(colorMapFn) {
+        var isDark = colorChoices.isDarkColor(getCurrentBodyBackgroundColor()),
+          willBeDark = isDarkTheme(colorMapFn),
+          isLargeChange = isDark !== willBeDark,
+          // We want to animate quickly between light themes, but slowly when performing a drastic change
+          // such as going from light to dark or vice-versa
+          transitionMs = isLargeChange ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
+
+        $('html').addClass(TRANSITION_CLASS);
+        clearTimeout(transitionTimer);
+        transitionTimer = setTimeout(function() {
+          $('html').removeClass(TRANSITION_CLASS);
+        }, transitionMs);
+
+        return getThemeTransitionCss(transitionMs);
+      }
+
+      function getThemeTransitionCss(transitionMs) {
+        var ANIMATION_SELECTOR = 'html.' + TRANSITION_CLASS +', html.' +
+              TRANSITION_CLASS + '> body, html.' + TRANSITION_CLASS + '> body *',
+          TRANSITION_CSS = '{ transition: all ' + transitionMs + 'ms; }\n\n';
+
+        return ANIMATION_SELECTOR + TRANSITION_CSS;
+      }
+
       /**
        * Retrieve the CSS text required to apply the requested theme
        * @param type
        * @param intensity
        * @returns {string}
        */
-      function getThemeCssText(type, intensity) {
+      function getThemeCssText(colorMapFn, intensity) {
 
         initialize();
 
-        var colorMapFn = colorChoices[type],
-          isReverseTheme = colorChoices.isDarkTheme(colorMapFn) !== isOriginalThemeDark,
+        var willBeDark = isDarkTheme(colorMapFn),
           styleSheetText = '';
 
         function getColorString(rgba) {
@@ -66,7 +101,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         themeStyles.forEach(function(style) {
           var newValue;
           if (style.value.prop === 'background-image') {
-            newValue = isReverseTheme && 'none';
+            newValue = willBeDark && 'none';
           }
           else {
             // color, background-color
@@ -189,13 +224,21 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
+      function getCurrentBodyBackgroundColor() {
+        return colorCodes.getRgba(getComputedStyle(document.body).backgroundColor);
+      }
+
       function initialize() {
         if (themeStyles) {
           return;
         }
+
         var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
           fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
           bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBackgroundImage);
+
+        originalBodyBackgroundColor = getCurrentBodyBackgroundColor();
+        isOriginalThemeDark = colorChoices.isDarkColor(originalBodyBackgroundColor);
 
         themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
       }

@@ -219,7 +219,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 //        if (hsl.l > .5) {
 //          // Ensure dark foreground
 //          hsl = 1 - hsl.l;
-//          rgba = $.extend({}, hslToRgb(hsl.h, hsl.l, 1-hsl.l), rgba.a);
+//          rgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.l, 1-hsl.l));
 //        }
         return getReducedIntensity(rgba, intensity - 0.2);
       }
@@ -229,21 +229,26 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
         if (hsl.l > 0.95) {
           var PAPER_HUE = 0.17,
-            PAPER_SATURATION = 0.7,
+            PAPER_SATURATION = 0.8,
             PAPER_LIGHTNESS_REDUCTION = 0.015;
-          rgba = $.extend({}, hslToRgb(PAPER_HUE, PAPER_SATURATION, hsl.l - PAPER_LIGHTNESS_REDUCTION), rgba.a);
+          rgba = $.extend({}, rgba, hslToRgb(PAPER_HUE, PAPER_SATURATION, hsl.l - PAPER_LIGHTNESS_REDUCTION));
         }
         return getReducedIntensity(rgba, intensity);
       }
     };
 
-    colorChoices.isDarkTheme = function(colorMapFn) {
-      var whiteBg = {
+    colorChoices.isDarkTheme = function(colorMapFn, originalBg) {
+      var originalBg = {
         prop: 'background-color',
-        parsedVal: {r: 255, g: 255, b: 255, a:1 }
+        parsedVal: originalBg
       };
-      var translatedBg = colorMapFn(whiteBg);
-      return rgbToHsl(translatedBg) < 0.2;
+      var themedBg = colorMapFn(originalBg, 1);
+      return colorChoices.isDarkColor(themedBg);
+    };
+
+    colorChoices.isDarkColor = function(rgb) {
+      var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b  );
+      return hsl.l < 0.2;
     };
 
     if (SC_DEV) {
