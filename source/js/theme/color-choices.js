@@ -209,7 +209,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return getReducedIntensity(style.parsedVal, intensity);
     };
 
-    // Creme colored background
+    // Creme colored background and lightened text
+    // Roughly based on the research on readability for people with dyslexia at
+    // http://www.w3.org/WAI/RD/2012/text-customization/r11
     colorChoices.paper = function (style, intensity) {
       if (style.prop === 'color') {
         var rgba = style.parsedVal,
