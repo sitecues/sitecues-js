@@ -24,7 +24,7 @@ sitecues.def('themes/color/codes', function (colorCodes, callback) {
     var oldBorderColor = document.body.style.borderColor;
     document.body.style.borderColor = colorName;
     var isLegalColor = document.body.style.borderColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor ? getComputedStyle(document.body).color : 'rgba(0, 0, 0, 0)';
+      rgb = isLegalColor ? getComputedStyle(document.body).borderColor : 'rgba(0, 0, 0, 0)';
     document.body.style.borderColor = oldBorderColor;
     return rgb;
   }
