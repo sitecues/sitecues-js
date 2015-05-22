@@ -1,6 +1,6 @@
 sitecues.def('keys', function(keys, callback) {
 
-    sitecues.use('jquery', 'mouse-highlight', 'util/common', 'highlight-box',
+    sitecues.use('jquery', 'mouse-highlight', 'util/common', 'hlb',
       function($, mh, common, hlb) {
 
       var
@@ -49,6 +49,7 @@ sitecues.def('keys', function(keys, callback) {
         LETTER_H = 72,
         QUOTE = 222,
         SHIFT = 16,
+        F8 = 119,
         isShiftKeyDown,
         isAnyNonShiftKeyDown,
 
@@ -159,6 +160,9 @@ sitecues.def('keys', function(keys, callback) {
             return (event.keyCode === END && !hasAnyModifier(event)) ||
               event.keyCode === NUMPAD_1 ||
               (event.keyCode === DOWN && event.metaKey);
+          },
+          'f8': function(event) {
+            return event.keyCode === F8 && !hasAnyModifier(event);
           }
         },
         // define keys map used to bind actions to hotkeys

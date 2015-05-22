@@ -1,11 +1,18 @@
 /**
  * This is the audio player we use for all modern browsers (even IE!)
  */
+// Represents the ready state of the audio/video element:
+// 0 = HAVE_NOTHING      - no information whether or not the audio/video is ready
+// 1 = HAVE_METADATA     - metadata for the audio/video is ready
+// 2 = HAVE_CURRENT_DATA - data for the current playback position is available, but not enough data to play next frame/millisecond
+// 3 = HAVE_FUTURE_DATA  - data for the current and at least the next frame is available
+// 4 = HAVE_ENOUGH_DATA  - enough data available to start playing
 sitecues.def('audio/html5-player', function (player, callback) {
 
   'use strict';
 
-  var audioElements = [];
+  var audioElements    = [],
+      HAVE_FUTURE_DATA = 3;
 
   player.init = function() { };
 
@@ -15,10 +22,10 @@ sitecues.def('audio/html5-player', function (player, callback) {
    */
   player.playAudioSrc = function(url) {
     var audioElement = new Audio();
+
     audioElement.src = ''; // Clean up
     sitecues.$(audioElement).one('canplay', playIt);
     audioElement.src = url;
-
     audioElements.push(audioElement);
   };
 
@@ -44,8 +51,9 @@ sitecues.def('audio/html5-player', function (player, callback) {
     audioElements.forEach(function(audioElement) {
       sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
       sitecues.$(audioElement).off('ended');
-      // We can only pause in IE9 if there is enough data to play
-      if (audioElement.readyState === 4) {
+      // We can only pause in IE9 if there is enough data
+      // for the current and at least the next frame
+      if (audioElement.readyState >= HAVE_FUTURE_DATA) {
         audioElement.pause();
       }
     });

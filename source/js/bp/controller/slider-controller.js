@@ -5,6 +5,8 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/helper', 'zoom', 'bp/model/state', function (BP_CONST, helper, zoomMod, state) {
 
+    var isActive;
+
     /**
      * Mouse is been pressed down on the slider:
      * If the slider is ready for input, begin sending zoom new values for every mouse move.
@@ -18,8 +20,14 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
       window.addEventListener('mousemove', sc.moveThumb);
       window.addEventListener('mouseup',   sc.finishZoomChanges);
 
+      isActive = true;
+
       sc.moveThumb(evt);
 
+    };
+
+    sc.isSliderActive = function() {
+      return isActive;
     };
 
     // Mouse button was pressed down over slider and mouse cursor has moved
@@ -58,6 +66,7 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
     sc.finishZoomChanges = function() {
       sitecues.emit('zoom/stop');
       window.removeEventListener('mousemove', sc.moveThumb);
+      isActive = false;
     };
 
     // Unless callback() is queued, the module is not registered in global var modules{}

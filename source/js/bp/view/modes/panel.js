@@ -67,15 +67,20 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         window.addEventListener('keydown',   bpController.processKeydown, true);
         window.addEventListener('mousemove', panelController.winMouseMove);
         window.addEventListener('mousedown', panelController.winMouseDown);
+        window.addEventListener('blur', panelController.winBlur);
+        window.addEventListener('mouseout', panelController.winMouseLeave);
       }
 
       function unbindTemporaryMouseHandlers() {
         window.removeEventListener('keydown',   bpController.processKeydown, true);
         window.removeEventListener('mousemove', panelController.winMouseMove);
         window.removeEventListener('mousedown', panelController.winMouseDown);
+        window.removeEventListener('blur', panelController.winBlur);
+        window.removeEventListener('mouseout', panelController.winMouseLeave);
       }
 
       function setPanelExpandedState() {
+        state.set('wasMouseInPanel', false);
         state.set('transitionTo', BP_CONST.PANEL_MODE);
         state.set('isRealSettings', true);    // Always use real settings once expanded
         state.set('featurePanelName', null);  // We're not in a feature panel
@@ -101,15 +106,15 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         classBuilder += ' scp-realsettings';
 
         if (state.isPanel()) {
-          // *** scp-ready ***
+          // *** scp-panel ***
           // The panel is fully enlarged and ready to accept mouse input
-          classBuilder += ' scp-ready';
+          classBuilder += ' ' + BP_CONST.IS_PANEL;
         }
 
-        // *** scp-large ***
+        // *** scp-want-panel ***
         // Sets larger panel sizes on everything.
         // It can take time to take effect because of the animation properties.
-        classBuilder += ' scp-large' + (state.isMorePanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
+        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isMorePanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
 
         if (state.get('isKeyboardMode')) {
           // *** scp-keyboard ***

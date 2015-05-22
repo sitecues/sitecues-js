@@ -10,8 +10,8 @@ sitecues.def('cursor', function (cursor, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'style-service', 'conf', 'cursor/custom', 'platform',
-    function (  $, styleService, conf, customCursor, platform) {
+  sitecues.use('jquery', 'style-service', 'conf', 'cursor/css', 'platform',
+    function (  $, styleService, conf, cursorCss, platform) {
 
     var cursorZoom = 1,
         // Regexp is used to match URL in the string given(see below).
@@ -185,7 +185,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     // Create a stylesheet with only the cursor-related style rules
-    function constructCursorStylesheet() {
+    function constructCursorStylesheet(callback) {
       var cursorStyleSubset = getCursorStyles(),
         cssText = styleService.getStyleText(cursorStyleSubset, 'cursor');
 
@@ -194,7 +194,10 @@ sitecues.def('cursor', function (cursor, callback) {
 
       // Now set the cursorStyles global to the rules in the cursor style sheet.
       // The refresh methods will iterate over these styles and modify them
-      cursorStylesheetObject = styleService.getDOMStylesheet($stylesheet);
+      styleService.getDOMStylesheet($stylesheet, function(styleSheetObject) {
+        cursorStylesheetObject = styleSheetObject;
+        callback();
+      });
 
       if (doDisableDuringZoom) {
         // While zooming, turn off our CSS rules so that the browser doesn't spend
@@ -205,17 +208,19 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     // Stylesheet just for BP cursors
-    // The cursors have a minimum size, and are never disabled during smooth zoom for performance
+    // The cursors have a minimum size, and are NOT disabled during smooth zoom for performance,
+    // as opposed to the page cursors, which can be disabled during smooth zoom for performance
     function constructBPCursorStylesheet() {
       var cssText =
-        '#scp-main {cursor: default;}\n' +
-        '.scp-target,.scp-hidden-target {cursor:pointer};';
+        '#scp-main,.scp-toolbar {cursor:default;}\n' +
+        '.scp-hand-cursor {cursor:pointer};';
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
-      bpCursorStylesheetObject = styleService.getDOMStylesheet($bpStylesheet);
 
-      refreshStylesheets();
-
+      styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
+        bpCursorStylesheetObject = styleSheetObject;
+        refreshStylesheetsIfNecessary();
+      });
     }
 
     /**
@@ -223,17 +228,7 @@ sitecues.def('cursor', function (cursor, callback) {
      * cursor type at the current zoom level and then changes
      * all cursor properties in the <style id="sitecues-cursor">
      */
-    function refreshStylesheets() {
-      if (cursorZoom <= 1 || !doAllowCursors) {
-        if ($stylesheet) {
-          $stylesheet.remove();
-          $stylesheet = null;
-        }
-      }
-      else if (!$stylesheet && isStyleServiceReady) {
-        constructCursorStylesheet();
-      }
-
+    function doRefresh() {
       // Get cursor URLs for current zoom levels
       var cursorTypeUrls = getCursorTypeUrls(cursorZoom),
         bpCursorTypeUrls = cursorZoom < MIN_BP_CURSOR_SIZE ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
@@ -242,13 +237,30 @@ sitecues.def('cursor', function (cursor, callback) {
       if (cursorStylesheetObject) {
         refreshCursorStyles(cursorStylesheetObject, cursorTypeUrls);
         if (doDisableDuringZoom) {
-          setTimeout(function() { setCursorsDisabled(false); }, REENABLE_CURSOR_MS);
+          setTimeout(function () {
+            setCursorsDisabled(false);
+          }, REENABLE_CURSOR_MS);
         }
       }
 
       // Refresh BP cursor stylesheet
       if (bpCursorStylesheetObject) {
         refreshCursorStyles(bpCursorStylesheetObject, bpCursorTypeUrls);
+      }
+    }
+
+    function refreshStylesheetsIfNecessary() {
+      if (cursorZoom <= 1 || !doAllowCursors) {
+        if ($stylesheet) {
+          $stylesheet.remove();
+          $stylesheet = null;
+        }
+      }
+      else if (!$stylesheet && isStyleServiceReady) {
+        constructCursorStylesheet(doRefresh);
+      }
+      else {
+        doRefresh();
       }
     }
 
@@ -265,7 +277,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = customCursor.getCursorCss(type, size, doUseIECursors);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -276,13 +288,13 @@ sitecues.def('cursor', function (cursor, callback) {
     if (SC_DEV) {
       sitecues.toggleCursors = function() {
         doAllowCursors = !doAllowCursors;
-        refreshStylesheets();
+        refreshStylesheetsIfNecessary();
         return doAllowCursors;
       };
 
       sitecues.toggleAjaxCursors = function() {
         doUseAjaxCursors = !doUseAjaxCursors;
-        refreshStylesheets();
+        refreshStylesheetsIfNecessary();
         return doUseAjaxCursors;
       };
     }
@@ -290,16 +302,16 @@ sitecues.def('cursor', function (cursor, callback) {
     sitecues.on('zoom', function (pageZoom) {
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-      var newCursorZoom = customCursor.getCursorZoom(pageZoom);
+      var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
       if (cursorZoom !== newCursorZoom) {
         cursorZoom = newCursorZoom;
-        refreshStylesheets();
+        refreshStylesheetsIfNecessary();
       }
     });
 
     sitecues.on('style-service/ready', function() {
       isStyleServiceReady = true;
-      refreshStylesheets();
+      refreshStylesheetsIfNecessary();
     });
 
     constructBPCursorStylesheet();

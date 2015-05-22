@@ -8,6 +8,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
       var MIN_DISTANCE = 75; // Min distance before shrink
 
+      // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
+      var mouseLeaveShrinkTimer;
+
       // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
       pc.wasInFeaturePanel  = false;
       pc.lastFocus = null;
@@ -19,18 +22,25 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       sitecues.emit('bp/do-update');
     };
 
+    function cancelMouseLeaveShrinkTimer() {
+      clearTimeout(mouseLeaveShrinkTimer);
+      mouseLeaveShrinkTimer = 0;
+    }
+
+    // Don't close panel too quickly when the mouse leaves the window, because the panel
+    // may be near the window's edge and users with shaky hands may accidentally move mouse outside the window.
+    // We don't know anything about the mouse other than the fact that it left the window
+    pc.winMouseLeave = function(evt) {
+      if (evt.target.id === BP_CONST.BADGE_ID) {
+        mouseLeaveShrinkTimer = setTimeout(pc.shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
+      }
+    };
+
     // TODO: rename
     pc.winMouseMove = function(evt) {
 
-
-      // Firefox/IE:
-      //          evt.buttons is 0 when no mousebutton is held down.
-      //          evt.which is always 1.
-      // Chrome:
-      //          evt.buttons is always undefined.
-      //          evt.which is 0 if no mouse button is held down.  1 if left mouse button is held down.
-      if (evt.buttons > 0 || (evt.buttons !== 0 && evt.which)) {
-        return;
+      if (sliderController.isSliderActive()) {
+        return;  // Dragging slider, so don't close panel
       }
 
       if (pc.wasInFeaturePanel) {
@@ -43,6 +53,10 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
         pc.shrinkPanel();
       }
+      else {
+        state.set('wasMouseInPanel', true);
+        cancelMouseLeaveShrinkTimer();
+      }
     };
 
     // TODO: rename
@@ -51,14 +65,21 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       // Once mouse used, no longer need this protection against accidental closure
       pc.wasInFeaturePanel = false;
 
-      if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
+      if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
         pc.shrinkPanel();
       }
+    };
+
+    pc.winBlur = function() {
+      pc.shrinkPanel(true);
     };
 
     // @param isFromKeyboard -- optional, if truthy, then the shrink command is from the keyboard (e.g. escape key)
     // bpc.processKeydown, buttonPress, pc.winMouseMove, pc.winMouseDown call this function...
     pc.shrinkPanel = function(isFromKeyboard) {
+      if (state.isShrinking()) {
+        return; // Not a panel or is already shrinking -- nothing to do
+      }
 
       var activeElement = document.activeElement;
 
@@ -107,7 +128,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
       // Finally, begin the shrinking animation.
       sitecues.emit('bp/do-update');
-
     };
 
     // TODO: Maybe move to panel-controller?
@@ -151,14 +171,17 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     function isMouseOutsideRect(evt, elem, minDistance) {
       var rect = helper.getRect(elem);
-      return evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance ||
-        evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance;
+      return evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance ||
+             evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance;
     }
 
     function isMouseOutsidePanel(evt, distance) {
+      var targetId = evt.target.id;
+      if (targetId === BP_CONST.BP_CONTAINER_ID || targetId === BP_CONST.BADGE_ID) {
+        return false;
+      }
       var elem = helper.byId(state.isMorePanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
-//      var moreButtonRect = helper.getRectById(MORE_BUTTON_CONTAINER_ID); // More button hanging off
-      return isMouseOutsideRect(evt, elem, distance) /* && isMouseOutsideRect(evt, moreButtonRect, 0) */;
+      return isMouseOutsideRect(evt, elem, distance);
     }
 
     sitecues.on('bp/do-shrink', pc.shrinkPanel);

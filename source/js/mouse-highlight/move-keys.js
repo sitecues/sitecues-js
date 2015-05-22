@@ -1,6 +1,6 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight', 'highlight-box', 'platform', 'hlb/dimmer', 'util/common',
+  sitecues.use('jquery', 'mouse-highlight', 'hlb', 'platform', 'hlb/dimmer', 'util/common',
     'mouse-highlight/picker', 'zoom', 'util/geo', 'fixed-fixer',
     function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, fixedFixer) {
 
@@ -705,6 +705,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
 
       // Adjust final scroll position so that highlight that it's not jammed against the top/left of window unless it needs to
       window.scrollBy(-100, -100);
+      succeed();
     }
 
     function constrained(value, min, max) {

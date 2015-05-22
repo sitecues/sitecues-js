@@ -12,7 +12,6 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
         'tts_clicked': 0
     };
 
-
     sitecues.use('metrics/util', 'jquery', function(metricsUtil, $) {
 
         // ============= Objects methods ======================
@@ -32,10 +31,10 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
 
         function initPanelClosed() {
           panelClosed.data = $.extend({}, DEFAULT_STATE);
-          var $slider = $('#sitecues-track, #sitecues-trackBack, #sitecues-thumb'),
-            $letterBig = $('#sitecues-letterBig, #sitecues-letterBigBack'),
-            $letterSmall = $('#sitecues-letterSml, #sitecues-letterSmlBack'),
-            $ttsButton = $('#sitecues-tts');
+          var $slider = $('#scp-zoom-slider-bar, #scp-zoom-slider-thumb'),
+            $letterBig = $('#scp-large-A'),
+            $letterSmall = $('#scp-small-A'),
+            $ttsButton = $('#scp-speech');
 
             // todo: delegate
             // better to add event listener for a wrapper and then use event target to get the element that fired it
@@ -59,7 +58,7 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
 
         // ============= Events Handlers ======================
         // Create an instance on panel show event.
-        sitecues.on('panel/show', function() {
+        sitecues.on('bp/will-expand', function() {
             if (!panelClosed['data']) {
                 panelClosed.init();
             }
@@ -71,7 +70,7 @@ sitecues.def('metrics/panel-closed', function (panelClosed, callback) {
         });
 
         // Clear an instance data on panel hide event.
-        sitecues.on('panel/hide', function() {
+        sitecues.on('bp/did-shrink', function() {
             panelClosed.send();
             panelClosed.reset();
         });

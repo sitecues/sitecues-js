@@ -50,31 +50,29 @@ package-dir:=$(package-basedir)/$(package-name)
 files=\
 	$(build-dir)/source/js/core.js \
 	source/js/jquery.js \
-	source/js/locale/en.js \
-	source/js/locale/pl.js \
-	source/js/locale/de.js \
-	source/js/util/localization.js \
+	source/js/locale/lang/*.js \
+	source/js/locale/locale.js \
 	source/js/util/localstorage.js \
-	source/js/user.js \
-	source/js/custom.js \
+	source/js/conf/user/user-id.js \
+	source/js/custom-scripts/custom-scripts.js \
 	$(custom-files) \
 	source/js/conf/user/manager.js \
 	source/js/conf/user/server.js \
-	source/js/conf/user.js \
+	source/js/conf/user/user.js \
 	source/js/conf/site.js \
-	source/js/conf.js \
-	source/js/platform.js \
+	source/js/conf/conf.js \
+	source/js/util/platform.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
 	source/js/util/transform.js \
 	source/js/audio/speech-builder.js \
 	source/js/audio/html5-player.js \
 	source/js/audio/safari-player.js \
-	source/js/audio.js \
+	source/js/audio/audio.js \
 	source/js/audio/audio-cues.js \
 	source/js/audio/earcons.js \
-	source/js/zoom-forms.js \
-	source/js/zoom.js \
+	source/js/zoom/zoom-forms.js \
+	source/js/zoom/zoom.js \
 	source/js/animate.js \
 	source/js/bp/model/state.js \
 	source/js/bp/constants.js \
@@ -87,7 +85,7 @@ files=\
 	source/js/bp/view/elements/slider.js \
 	source/js/bp/controller/bp-controller.js \
 	source/js/bp/view/svg.js \
-	source/js/cursor/custom.js \
+	source/js/cursor/cursor-css.js \
 	source/js/bp/view/modes/panel.js \
 	source/js/bp/view/styles.js \
 	source/js/bp/view/modes/badge.js \
@@ -99,36 +97,43 @@ files=\
 	source/js/bp/view/elements/feedback.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
-	source/js/focus.js \
+	source/js/keys/focus.js \
 	source/js/mouse-highlight/traitcache.js \
 	source/js/mouse-highlight/highlight-position.js \
 	source/js/mouse-highlight/traits.js \
 	source/js/mouse-highlight/judge.js \
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
-	source/js/mouse-highlight.js \
-	source/js/style-service.js \
-	source/js/cursor.js \
-	source/js/fixed-position-fixer.js \
+	source/js/mouse-highlight/mouse-highlight.js \
+	source/js/style-service/user-agent-css.js \
+	source/js/style-service/media-queries.js \
+	source/js/style-service/css-aggregator.js \
+	source/js/style-service/style-service.js \
+	source/js/cursor/cursor.js \
+	source/js/zoom/fixed-position-fixer.js \
 	source/js/hlb/event-handlers.js \
 	source/js/hlb/safe-area.js \
 	source/js/hlb/styling.js \
 	source/js/hlb/positioning.js \
 	source/js/hlb/dimmer.js \
 	source/js/hlb/animation.js \
-	source/js/highlight-box.js \
-	source/js/keys.js \
+	source/js/hlb/hlb.js \
+	source/js/keys/keys.js \
 	source/js/mouse-highlight/move-keys.js \
-	source/js/hpan.js \
+	source/js/hpan/hpan.js \
+	source/js/theme/color-choices.js \
+	source/js/theme/color-codes.js \
+	source/js/theme/color-engine.js \
 	source/js/info/info.js \
-	source/js/status.js \
+	source/js/util/status.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics/zoom-changed.js \
-	source/js/metrics.js \
+	source/js/metrics/tts-requested.js \
+	source/js/metrics/metrics.js \
 
 ################################################################################
 # TARGET: build
@@ -148,7 +153,6 @@ build:
 #Copy files for Source-Maps
 
 	@mkdir -p $(build-dir)/etc/js
-	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 
@@ -189,11 +193,10 @@ debug:
 	@mkdir -p $(build-dir)/js/source
 	@cp -R source/js $(build-dir)/js/source/
 
-	@echo "SC_DEV=true,SC_UNIT=true,"$(extra-debug-flags)"exports={}," > $(build-dir)/compile/js/sitecues.js
+	@echo "SC_DEV=true,SC_UNIT=false,"$(extra-debug-flags) > $(build-dir)/compile/js/sitecues.js
 	@(awk 'FNR==1{print ""}1' $(files)) >> $(build-dir)/compile/js/sitecues.js
 
 	@mkdir -p $(build-dir)/etc/js
-	@cp -r source/js/_config $(build-dir)/etc/js
 	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
 	@echo
 

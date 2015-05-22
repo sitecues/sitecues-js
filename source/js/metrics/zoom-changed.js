@@ -59,7 +59,7 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     function anyKeyDown(event) {
       // Handle keypress events(for ex., +/-)
       if (event && event.type === 'keydown') {
-        var code = event.keyCode || event.which;
+        var code = event.keyCode;
         var plus  = code === 187 || code === 61  || code === 107 || code === 43;
         var minus = code === 189 || code === 109 || code === 173 || code === 45;
 

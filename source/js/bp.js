@@ -22,9 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'util/localization', 'bp/animate', 'platform',
+    'bp/animate', 'platform', 'conf/site',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, locale, animate, platform) {
+              baseController, placement, slider, animate, platform, site) {
 
     /*
      *** Public methods ***
@@ -48,7 +48,7 @@ sitecues.def('bp', function (bp, callback) {
     function updateView(isFirstTime) {
 
       // If we are expanding or contracting, aria-expanded is true (enables CSS)
-      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested() || !state.isBadge());
+      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
 
       // 2. Suppress animations if necessary
       // This is done for the first view change
@@ -70,7 +70,6 @@ sitecues.def('bp', function (bp, callback) {
           bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
         }, 10);  // 10ms because IE did not do anything when <10ms....
       }
-
     }
 
     // 1. Badge- or panel- specific view classes
@@ -78,8 +77,8 @@ sitecues.def('bp', function (bp, callback) {
     function updateClasses() {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-      classBuilder += getPaletteClass();
-      classBuilder += ' scp-ie9-' + !!platform.browser.isIE9;
+      classBuilder += 'scp-palette' + getPalette();
+      classBuilder += ' scp-ie9-' + platform.isIE9();
       bpContainer.setAttribute('class', classBuilder);
     }
 
@@ -156,12 +155,15 @@ sitecues.def('bp', function (bp, callback) {
 
     }
 
-    function getPaletteClass() {
       // Set the colors
-      if (state.get('isAdaptivePalette')) {
-        return 'scp-palette' + getAdaptivePalette();
+    function getPalette() {
+      if (state.get('isToolbarBadge')) {
+        return BP_CONST.PALETTE_NAME_MAP.normal;
       }
-      return 'scp-palette' + state.get('paletteName');
+      if (state.get('isAdaptivePalette')) {
+        return getAdaptivePalette();
+      }
+      return state.get('paletteName');
     }
 
     // Can get SVG element whether currently attached to document or not
@@ -186,7 +188,8 @@ sitecues.def('bp', function (bp, callback) {
 
       // Use fake settings if undefined -- user never used sitecues before.
       // This will be turned off once user interacts with sitecues.
-      state.set('isRealSettings', zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
+      state.set('isRealSettings', site.get('alwaysRealSettings') ||
+        zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
 
       // Set badge classes. Render the badge. Render slider.
       updateView(true);
@@ -220,12 +223,10 @@ sitecues.def('bp', function (bp, callback) {
       // Create the svg container
       bpContainer = document.createElement('div');
 
-      bpSVG.html = locale.localizeStrings(bpSVG.html);
-
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
-      bpContainer.innerHTML = bpSVG.html;
+      bpContainer.innerHTML = bpSVG.getSvg();
 
       // TODO: Should we remove the commented out code below?
       // Create focus outline element
@@ -244,11 +245,11 @@ sitecues.def('bp', function (bp, callback) {
 
     function bindPermanentListeners(badgeElement) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
+      badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
       bpContainer.addEventListener('blur', baseController.clearPanelFocus);
-      helper.byId(BP_CONST.MOUSEOVER_TARGET).addEventListener('mouseover', bpController.changeModeToPanel);
-      // todo: bring it back or remove if necessary
-      // bpContainer.addEventListener('click', bpController.changeMode);
+      badgeElement.addEventListener('mousemove', bpController.onMouseMove);
+      badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }
 
     function isBadgeAnImage (badgeElement) {
@@ -278,7 +279,25 @@ sitecues.def('bp', function (bp, callback) {
           - If the customer does NOT use the <img>, attach a readystatechange event listener to the document.
     */
 
+    function initBPIfDocumentComplete() {
+      if (document.readyState === 'complete') {
+        initializeBPFeature();
+        return true;
+      }
+    }
+
+    function initBPWhenDocumentComplete() {
+      if (!initBPIfDocumentComplete()) {
+        document.addEventListener('readystatechange', initBPIfDocumentComplete);
+      }
+    }
+
     function initIfBadgeReady() {
+
+      if (site.get('uiMode') === 'toolbar') {
+        setTimeout(initializeBPFeature, 0);
+        return;
+      }
 
       // Page may still be loading -- check if the badge is available
       var earlyBadgeElement = helper.byId(BP_CONST.BADGE_ID);
@@ -305,11 +324,7 @@ sitecues.def('bp', function (bp, callback) {
 
         SC_DEV && console.log('Initialize BP when document.readyState === complete.');
 
-        document.addEventListener('readystatechange', function () {
-          if (document.readyState === 'complete') {
-            initializeBPFeature();
-          }
-        });
+        initBPWhenDocumentComplete();
       }
     }
 

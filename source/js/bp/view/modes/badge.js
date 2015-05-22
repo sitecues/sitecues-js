@@ -50,15 +50,16 @@
 
 sitecues.def('bp/view/modes/badge', function (badge, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'util/localization', 'bp/helper',
-    function (BP_CONST, state, locale, helper) {
+  sitecues.use('bp/constants', 'bp/model/state', 'locale', 'bp/helper', 'conf', 'conf/site',
+    function (BP_CONST, state, locale, helper, conf, site) {
 
     /*
      Default bounding box object.
      */
     var badgeElement,
         getNumberFromString = helper.getNumberFromString,
-        lastBgColor;
+        lastBgColor,
+        badgeStyle;
     /*
      *** Privates ***
      */
@@ -74,20 +75,48 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      * </span>
      * @returns {Object}
      */
-    function createDefaultBadge() {
+    function createToolbar() {
 
-      var badgeElement = document.createElement('div');
+      var toolbarElement = document.createElement('div'),
+        docElem = document.documentElement;
 
-      document.documentElement.insertBefore(badgeElement, document.documentElement.childNodes[0]);
+      docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
+      docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
 
-      helper.setAttributes(badgeElement, BP_CONST.DEFAULT_BADGE_ATTRS);
-      badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+      helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
+      toolbarElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+      ensureBodyBelowToolbar();
 
       state.set('isPageBadge', false);
+      state.set('isToolbarBadge', true);
 
-      console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
+      if (!isToolbarUIRequested()) {
+        console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
+      }
 
-      return badgeElement;
+      sitecues.emit('bp/did-insert-toolbar');
+
+      return toolbarElement;
+    }
+
+    // In some cases body may be positioned absolutely above the toolbar
+    function ensureBodyBelowToolbar() {
+      var body = document.body;
+      if (body) {
+        if (getComputedStyle(body).position !== 'static' &&
+          body.getBoundingClientRect().top < 41) {
+            body.setAttribute('data-sc-extra-toolbar-bump', '');
+        }
+      }
+      else {
+        // Wait for body. There will always be one after DOMContentLoaded,
+        // because the browser inserts one if the markup didn't provide it.
+        document.addEventListener('DOMContentLoaded', ensureBodyBelowToolbar);
+      }
+    }
+
+    function isToolbarUIRequested() {
+      return site.get('uiMode') === 'toolbar';
     }
 
     // Create <div> and put the existing badge inside it.
@@ -116,8 +145,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
             'paddingTop',
             'paddingBottom',
             'paddingLeft',
-            'paddingRight',
-
+            'paddingRight'
           ];
 
       // Added to fix issue on ruhglobal.com
@@ -158,18 +186,32 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       }
     }
 
-    function onPossiblePaletteChange() {
-      setTimeout(checkBackgroundColorChange, 0);
-    }
-
     function getBackgroundColor() {
       return getComputedStyle(document.body).backgroundColor;
     }
 
-    function addPaletteListener() {
-      document.body.addEventListener('click', onPossiblePaletteChange);
-      document.body.addEventListener('keydown', onPossiblePaletteChange);
+    // Input event has occured that may trigger a theme change produced from the website code
+    // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
+    function onPossibleWebpageThemeChange() {
+      setTimeout(checkBackgroundColorChange, 0);
+    }
+
+    // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
+    // We don't know when they occur so we check shortly after a click or keypress.
+    function addWebPageThemeListener() {
+      document.body.addEventListener('click', onPossibleWebpageThemeChange);
+      document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
       lastBgColor = getBackgroundColor();
+    }
+
+    // Listen for changes in the sitecues theme
+    function addSitecuesThemeListener() {
+      sitecues.on('theme/did-apply', onSitecuesThemeChange);
+    }
+
+    function onSitecuesThemeChange() {
+      state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
+      checkBackgroundColorChange();
     }
 
     function setCustomPalette (badgeElement) {
@@ -177,23 +219,31 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       var paletteName = getBadgePalette(badgeElement);
       if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
         state.set('isAdaptivePalette', true);
-        addPaletteListener();
+        addWebPageThemeListener();
       }
+
+      addSitecuesThemeListener();
 
       state.set('paletteName', paletteName);
 
     }
 
     function getBadgePalette(badge) {
-      var paletteName = badge.localName === 'img' ? badge.src : sitecues.config.palette || '',
+      var paletteName = badge.localName === 'img' ? badge.src : site.get('palette') || '',
         fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
         index = 0;
 
-      for (; index < fullNames.length; index ++) {
-        var fullName = fullNames[index];
-        if (paletteName.indexOf(fullName) >= 0) {
-          return BP_CONST.PALETTE_NAME_MAP[fullName];
+      // Check for a string because site.get('palette')
+      // returns an Object if a custom palette is used.
+      if (typeof paletteName === 'string') {
+
+        for (; index < fullNames.length; index ++) {
+          var fullName = fullNames[index];
+          if (paletteName.indexOf(fullName) >= 0) {
+            return BP_CONST.PALETTE_NAME_MAP[fullName];
+          }
         }
+
       }
 
       return '';
@@ -222,10 +272,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     badge.init = function() {
 
-      var badge = helper.byId(BP_CONST.BADGE_ID);
+      var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 
       // Get site's in-page placeholder badge or create our own
-      badgeElement = badge || createDefaultBadge();
+      badgeElement = badge || createToolbar();
 
       setCustomPalette(badgeElement);
 
@@ -235,6 +285,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         convertExistingBadge();
         removeExistingBadgeId();
         setBadgeParentId();
+
+        // Invalidate the cache because we just removed the BADGE_ID
+        // from the <img> and set it on the <div>
+        helper.invalidateId(BP_CONST.BADGE_ID);
 
         badgeElement = badgeElement.parentElement;
 
@@ -261,7 +315,11 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
     badge.getViewClasses = function() {
 
-      var classBuilder = BP_CONST.SMALL + ' ';
+      var classBuilder = BP_CONST.WANT_BADGE + ' ';
+
+      if (state.isBadge()) {
+        classBuilder += BP_CONST.IS_BADGE + ' ';
+      }
 
       if (state.get('isRealSettings')) {
         // *** scp-realsettings ***

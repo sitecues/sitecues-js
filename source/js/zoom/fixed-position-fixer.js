@@ -7,12 +7,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'platform', 'style-service',
-    function ($, zoomMod, platform, styleService) {
+  sitecues.use('jquery', 'zoom', 'platform', 'style-service', 'util/common',
+    function ($, zoomMod, platform, styleService, common) {
 
       var isOn = false,
+        toolbarHeight = 0,
         fixedSelector            = null,   //CSS selectors & properties that specify position:fixed
         lastAdjustedElements     = $(),
+        autoRefreshTimer,         // Refresh fixed elements every now and then even if no scroll, e.g. a user's click may have made a fixed lightbox appear
+        AUTO_REFRESH_MS = 500,   // How often to refresh the fixed elements even without a scroll
         MAX_ZOOM_FIXED_CONTENT = 1.8,
         // These browsers need the position of fixed elements to be adjusted on the fly.
         // Note: we avoid this in Safari on Mac and Chrome on Windows because of general shakiness.
@@ -37,6 +40,10 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
          * @param  elements [element to position]
          */
         function adjustElement(index, element) {
+          if (common.isInSitecuesUI(element)) {
+            return;
+          }
+
           var css = {
             transform: ''
           };
@@ -54,6 +61,11 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           }
           else {
             css.maxWidth = ''; // Not fixed -- clear width restriction
+          }
+          if (css.transform) {
+            // So that our fix doesn't caused fixed position bars to slowly move down screen, e.g.
+            // http://www.ibtimes.com/spiders-rain-down-australia-millions-reportedly-descended-sky-town-1925810
+            css.transitionProperty = 'none';
           }
           $(element).css(css);
         }
@@ -73,7 +85,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           bodyRect = document.body.getBoundingClientRect(),
           // Amount to move the fixed positioned items so that they appear in the correct place
           offsetLeft = (- bodyRect.left / pageZoom).toFixed(1),
-          offsetTop = (- bodyRect.top / pageZoom).toFixed(1),
+          offsetTop = ((toolbarHeight - bodyRect.top) / pageZoom).toFixed(1),
           // To help restrict the width of toolbars
           winWidth = window.innerWidth;
 
@@ -90,6 +102,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         var styles = styleService.getAllMatchingStyles('position', 'fixed'),
           selectors = styles.map(function(style) { return style.rule.selectorText; });
         fixedSelector = selectors.join();
+
         return fixedSelector;
       }
 
@@ -102,6 +115,16 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
 
         $(selector).css(applyCssProp, applyCssValue);
       };
+
+      function refreshTimer() {
+        refresh();
+        autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
+      }
+
+      function onToolbarEnabled() {
+        toolbarHeight = $('.scp-toolbar')[0].offsetHeight;
+        lazyTurnOn();
+      }
 
       /**
        * Listens for events emitted by the cursor module, which indicates that new CSS has
@@ -119,15 +142,15 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
               willChange: 'transform',
               transformOrigin: '0% 0%'
             });
-            lazyTurnOn(zoomMod.getCompletedZoom());
+            lazyTurnOn();
           }
         });
 
         /**
          * Now that the html element has a new level of scale and width, reposition fixed elements, badge, and panel
          */
-        sitecues.on('zoom resize', function (zoom) {
-          lazyTurnOn(zoom);
+        sitecues.on('zoom resize', function () {
+          lazyTurnOn();
           refresh(true);
         });
 
@@ -139,6 +162,8 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
           // we come up with a more clever solution.
           $(fixedSelector).css('transform', 'translate(-9999px,-9999px)');
         });
+
+        sitecues.on('bp/did-insert-toolbar', onToolbarEnabled);
       }
 
 
@@ -149,10 +174,12 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
       // Initialize only when we really have to, because it's a very, very bad idea to
       // attach handlers to the window scroll event:
       // http://ejohn.org/blog/learning-from-twitter
-      function lazyTurnOn(zoom) {
-        var doTurnOn = fixedSelector && zoom > 1;
+      function lazyTurnOn() {
+        var doTurnOn = fixedSelector && (document.body.style.transform !== '' || toolbarHeight);
 
         if (!doTurnOn) {
+          $(window).off('scroll', refresh);
+          clearTimeout(autoRefreshTimer);
           return;
         }
         // We used to turn the scroll listener off when the user went back to 1x, but nowadays
@@ -160,6 +187,7 @@ sitecues.def('fixed-fixer', function (fixedfixer, callback) {
         if (!isOn) {
           isOn = true;
           $(window).on('scroll', refresh);
+          autoRefreshTimer = setTimeout(refreshTimer, AUTO_REFRESH_MS);
         }
 
         refresh();

@@ -4,8 +4,10 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // TODO don't repeat this in styles.js
 
-  constants.SMALL                    = 'scp-small';
-  constants.LARGE                    = 'scp-large';
+  constants.IS_BADGE        = 'scp-is-badge';      // BP is already badge and not animating
+  constants.IS_PANEL        = 'scp-is-panel';      // BP is already panel and not animating (used to be called scp-ready)
+  constants.WANT_BADGE      = 'scp-want-badge';     // BP is already badge or shrinking into one
+  constants.WANT_PANEL      = 'scp-want-panel';    // BP is already panel or expanding into one
 
   // IDs
 
@@ -85,6 +87,11 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
+  constants.HOVER_DELAY_BADGE = 70;
+  constants.HOVER_DELAY_TOOLBAR = 200;
+  constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;
+
+
   constants.TRANSFORMS = {
     'PANEL'           : {},
     'BADGE'           : {},
@@ -147,9 +154,9 @@ sitecues.def('bp/constants', function (constants, callback) {
     'ARIA-BUSY' : 'false'
   };
 
-  constants.DEFAULT_BADGE_ATTRS = {
+  constants.DEFAULT_TOOLBAR_ATTRS = {
     'ID'   : constants.BADGE_ID,
-    'CLASS': constants.DEFAULT_BADGE_CLASS
+    'CLASS': 'scp-toolbar'
   };
 
   // Labels
@@ -220,6 +227,9 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MINIMUM_PANEL_WIDTH = 656;
   constants.MINIMUM_PANEL_HEIGHT = 160;
 
+  // Amount toolbar space that will open badge
+  constants.ACTIVE_TOOLBAR_WIDTH = 500;
+
   // Amount of pixels of whitespace at the top of the badge
   // (This whitespace exists for a reason -- it turns into the top border when the panel opens)
   constants.BADGE_VERTICAL_OFFSET = 2;
@@ -229,7 +239,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Map legal full palette names to short names, used to create a class e.g. .scp-palette-rb
   constants.PALETTE_NAME_MAP = {
-    'normal': 'n',
+    'normal': '-n',
     'adaptive': '*',
     'reverse-blue': '-rb',
     'reverse-yellow': '-ry'

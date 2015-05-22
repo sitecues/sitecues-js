@@ -29,7 +29,7 @@ sitecues.def('metrics', function (metrics, callback) {
   // Taken from here(free puplic license): https://gist.github.com/jed/982883
   var UUIDv4 = function b(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b)};
 
-  sitecues.use('metrics/util', 'jquery', 'conf', 'audio', 'util/localization',
+  sitecues.use('metrics/util', 'jquery', 'conf', 'audio', 'locale',
     function(metricsUtil, $, conf, audio, locale) {
       var init = function() {
           // Default state.
@@ -44,7 +44,7 @@ sitecues.def('metrics', function (metrics, callback) {
               'zoom_level': conf.get('zoom') || 1,
               'tts_state' : +audio.isSpeechEnabled(),
               'browser_user_agent': navigator && navigator.userAgent ? navigator.userAgent : '',
-              'client_language': locale.getShortWebsiteLang()
+              'client_language': locale.getFullWebsiteLang()
           };
           metrics.update(data);
           sitecues.emit('metrics/ready', metrics);
@@ -61,9 +61,9 @@ sitecues.def('metrics', function (metrics, callback) {
           metrics.update(data);
       });
 
-      sitecues.on('tts/did-change', function(isOn) {
+      sitecues.on('speech/did-change', function() {
           // + is a simple way to convert boolean to a number: true becomes 1 and false is 0.
-          var data = {'tts_state': +isOn };
+          var data = {'tts_state': +audio.isSpeechEnabled() };
           metrics.update(data);
       });
 

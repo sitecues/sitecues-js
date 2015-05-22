@@ -1,5 +1,5 @@
 // This module includes functionality used in user identification.
-sitecues.def('user', function(user, callback) {
+sitecues.def('user-id', function(user, callback) {
 
   sitecues.use('util/localstorage', function(ls) {
 

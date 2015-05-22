@@ -2,7 +2,7 @@
 
     // This file contains unit tests for core.js:sitecues.status().
 
-    require('./test/libs');
+    require('./../test/libs');
     navigator = {
         userAgent : true
     };
@@ -19,7 +19,7 @@
         true;
 
     // Get a reference to the module file we want to test.
-    var module = require('../../source/js/status');
+    var module = require('../../../source/js/util/status');
     describe('sitecues', function () {
         describe('#status()', function () {
             it(
