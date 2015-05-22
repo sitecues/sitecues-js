@@ -26,7 +26,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       MIN_INTENSITY = 0.6,
       YELLOW_HUE = 0.167,
       GREEN_HUE = 0.333,
-      monochromeHue;
+      monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
+      monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 };
 
     /**
      * Converts an HSL color value to RGB. Conversion formula
@@ -144,8 +145,14 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return darkWithHue(GREEN_HUE, style, intensity);
     };
 
-    colorChoices.darkWithAnyHue = function (style, intensity) {
-      return darkWithHue(monochromeHue, style, intensity);
+    colorChoices.monochrome = function (style, intensity) {
+      var mixInHsl = (style.prop === 'color') ? monoForegroundHsl : monoBackgroundHsl,
+        rgba = style.parsedVal,
+        origHsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+        origLightness = Math.max(origHsl.l, 1 - origHsl.l);
+      intensity = Math.max(intensity * origLightness, MIN_INTENSITY);
+      var newRgba = $.extend({}, rgba, hslToRgb(mixInHsl.h, mixInHsl.s, mixInHsl.l));
+      return getReducedIntensity(newRgba, intensity);
     };
 
     function darkWithHue(hue, style, intensity) {
@@ -284,8 +291,11 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       sitecues.rgbToHsl = rgbToHsl;
       sitecues.hslToRgb = hslToRgb;
       // TODO Put in UI rather than global function
-      sitecues.setHue = function (newHue) {
-        monochromeHue = newHue;
+      sitecues.setMonoForegroundHsl = function (newHsl) {
+        monoForegroundHsl = newHsl;
+      };
+      sitecues.setMonoBackgroundHsl = function (newHsl) {
+        monoBackgroundHsl = newHsl;
       };
     }
   });
