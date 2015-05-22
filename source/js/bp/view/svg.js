@@ -11,7 +11,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   'use strict';
 
-  bpSVG.html = '\
+  var svg = '\
 <div id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
   <div class="scp-card active">\
     <h1>Welcome</h1>\
