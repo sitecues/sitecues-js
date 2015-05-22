@@ -454,7 +454,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-svg p': {
           'font-size': '20px'
-=======
+        },
 
         /*************** Clipping rules for badge **************************/
         // When the badge is fully collapsed, we clip it so that the invisible parts
@@ -463,7 +463,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // This rule undoes the placement.js clipping when the BP is not currently fully collapsed.
         '#scp-bp-container:not(.scp-is-badge)': {
           'clip': 'auto !important'
->>>>>>> themes
         }
       },
 
