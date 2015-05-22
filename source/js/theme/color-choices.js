@@ -69,6 +69,25 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     }
 
+    // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
+    function getLuminosity(rgb) {
+      function getValue(color) {
+        return Math.pow(rgb[color] / 255, 2.2);
+      }
+      return 0.213 * getValue('r') +
+             0.715 * getValue('g') +
+             0.072 * getValue('b');
+    }
+
+    function getContrastRatio(rgb1, rgb2) {
+      var L1 = getLuminosity(rgb1),
+        L2 = getLuminosity(rgb2);
+      var ratio = (L1 + 0.05) / (L2 + 0.05);
+      if (ratio >= 1) {
+        return ratio;
+      }
+      return (L2 + 0.05) / (L1 + 0.05);
+    }
 
     /**
      * Converts an RGB color value to HSL. Conversion formula
@@ -159,8 +178,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       if (style.prop === 'color') {
         var rgba = style.parsedVal,
           hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
-          origLightness = Math.max(hsl.l, 1 - hsl.l);
-        intensity = Math.max(intensity * origLightness, MIN_INTENSITY);
+          origLightness = Math.max(Math.max(hsl.l, 1 - hsl.l), 0.5);
+        intensity = Math.max(origLightness, intensity);
         var newRgba = $.extend({}, rgba, hslToRgb(hue, 1, 0.5));
         return getReducedIntensity(newRgba, intensity);
       }
@@ -169,29 +188,69 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       }
     };
 
+    function isHueBrightEnoughForDarkTheme(hue) {
+       return hue <= 0.6 || (hue >= 0.8 && hue <= .92);
+    }
+
+    function getClosestGoodHueForDarkTheme(hue) {
+      if (isHueBrightEnoughForDarkTheme(hue)) {
+        return hue;
+      }
+      if (hue > 0.96) {
+        return 0;
+      }
+      else if (hue > .9) {
+        return .92;
+      }
+      else if (hue > .7) {
+        return .8
+      }
+      return .6;
+    }
+
+
     var yowza = 0;
     colorChoices.darkCreative = function (style, intensity) {
-      yowza = ((yowza + 1) % 21)
-      return darkWithHue(yowza / 20, style, intensity);
+
+      // Hues from .1 - .56 and .84 - .86 are dark enough
+      var MIN_CONTRAST_RATIO = 4.4,
+        NUM_COLORS = 50,
+        newHue,
+        contrastRatio,
+        oldYowza = yowza;
+      while (true) {
+        yowza = ((yowza + 1) % NUM_COLORS);
+        newHue = yowza / NUM_COLORS;
+        contrastRatio = getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
+        if (contrastRatio > MIN_CONTRAST_RATIO) {
+          SC_DEV && console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1');
+          break;
+        }
+        if (yowza === oldYowza) {
+          break;
+        }
+      }
+      return darkWithHue(newHue, style, intensity);
     };
 
     colorChoices.darkOriginal = function (style, intensity) {
+      var rgba = style.parsedVal,
+        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
       if (style.prop === 'color') {
-        var rgba = style.parsedVal,
-          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
-          origLightness = 1 - hsl.l,
-          newLightness = Math.max(Math.min(intensity * (origLightness + 0.2), intensity), MIN_INTENSITY);
-        var newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness));
-        return newRgba;
+        var origLightness = Math.max(hsl.l, 1 - hsl.l),
+          newLightness = Math.max(Math.min(intensity * (origLightness + 0.1), intensity), 0.5),
+          newHue = getClosestGoodHueForDarkTheme(hsl.h),
+          newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
       else {
-        var rgba = style.parsedVal,
-          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+        var
           origLightness = hsl.l,
-          newLightness = Math.max(intensity * (0.18 - origLightness / 5), 0);
-        var newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness));
-        return newRgba;
+          newLightness = origLightness < 0.3 ? origLightness / 4 :
+            Math.min(0.2, (1 - origLightness) * 3),
+          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness * intensity));
+        console.log(newLightness);
       }
+      return newRgba;
     };
 
     // Invert all colors using HSL inversion
@@ -297,6 +356,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       sitecues.setMonoBackgroundHsl = function (newHsl) {
         monoBackgroundHsl = newHsl;
       };
+      sitecues.getLuminosity = getLuminosity;
+      sitecues.getContrastRatio = getContrastRatio;
     }
   });
 
