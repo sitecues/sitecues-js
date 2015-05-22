@@ -253,6 +253,23 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       onCssReadyFn(allCss);
     }
 
+    // Needed to support deprecated @bgcolor
+    // for example on http://www.nhptv.org/natureworks/fisher.htm
+    function addDeprecatedAttributeStyles() {
+      var bgColors = {},
+        cssText = '';
+      $('body[bgColor],table[bgcolor],td[bgcolor],th[bgcolor]').each(function() {
+        bgColors[this.getAttribute('bgcolor')] = 1;
+      });
+
+      Object.keys(bgColors).forEach(function (bgColor) {
+        cssText += '[bgColor="' + bgColor + '"] { background-color:' + bgColor + ' };\n';
+      });
+      if (cssText) {
+        addSheet(null, cssText, SC_DEV && 'bgcolor attrs');
+      }
+    }
+
     /**
      * Initiates the collection of all style sheet text
      */
@@ -288,6 +305,9 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
       // First come the default user agent CSS rules
       addSheet(null, UA_CSS.text, SC_DEV && 'User agent styles');
+
+      // Add styles to make up for deprecated bgcolor attribute
+      addDeprecatedAttributeStyles();
 
       // Next add <link> and <style> sheets, in document order
       var $styleElems = $('link[rel="stylesheet"],style').filter(isUsable);

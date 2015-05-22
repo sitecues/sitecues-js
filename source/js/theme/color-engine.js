@@ -254,7 +254,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       // For now this our hacky way to provide access to the theme engine
       // TODO remove this:
-      sitecues.applyTheme  = colorEngine.applyTheme;
+      if (SC_DEV) {
+        sitecues.applyTheme  = colorEngine.applyTheme;
+        sitecues.getRgba = colorCodes.getRgba;
+      }
 
       if (SC_UNIT) {
         $.extend(exports, colorEngine);

@@ -7,7 +7,6 @@
 // - images, background-images, iframes?
 // - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
-// Wrong colors in darkOriginal on Firefox / nytimes
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
 //    ** news.google.com **
 //    background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
@@ -246,8 +245,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         var
           origLightness = hsl.l,
           newLightness = origLightness < 0.4 ? origLightness : (1 - origLightness) * 3,
-          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.2, newLightness) * intensity));
-        console.log(newLightness);
+          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * intensity));
       }
       return newRgba;
     };

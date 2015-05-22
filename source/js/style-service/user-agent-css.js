@@ -62,7 +62,7 @@ img[usemap], object[usemap] {\n\
 }\n\
 :visited {\n\
   color: #551a8b;\n\
-}';
+}',
 
 callback();
 });
