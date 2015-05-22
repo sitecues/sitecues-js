@@ -245,9 +245,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       else {
         var
           origLightness = hsl.l,
-          newLightness = origLightness < 0.3 ? origLightness / 4 :
-            Math.min(0.2, (1 - origLightness) * 3),
-          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness * intensity));
+          newLightness = origLightness < 0.4 ? origLightness : (1 - origLightness) * 3,
+          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.2, newLightness) * intensity));
         console.log(newLightness);
       }
       return newRgba;
