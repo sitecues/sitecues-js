@@ -54,62 +54,6 @@ define(
                     }
                 );
 
-                test('HLB has 3px border width', function () {
-
-                    var selector = 'p';
-
-                    return this.remote               // represents the browser being tested
-                        .execute(                    // run a callback in the remote browser
-                            function (selector) {
-                                sitecues.highlight(selector);
-                            },
-                            [selector]               // list of arguments to pass to the remote code
-                        )
-                        .findByCssSelector(selector)
-                            .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
-                            .end()
-                        .setFindTimeout(2000)        // set the find timeout to be more strict
-                        .findById('sitecues-hlb')    // get the HLB!
-                            .getComputedStyle('borderWidth')
-                            .then(function (data) {
-                                assert.strictEqual(
-                                    data,
-                                    '3px',
-                                    'The HLB border width must be 3px'
-                                );
-                            });
-                });
-
-                /////////////////////////// ------- test boundary -------
-
-                test('HLB is positioned absolutely.', function () {
-
-                    var selector = 'p';
-
-                    return this.remote               // represents the browser being tested
-                        .execute(                    // run a callback in the remote browser
-                            function (selector) {
-                                sitecues.highlight(selector);
-                            },
-                            [selector]               // list of arguments to pass to the remote code
-                        )
-                        .findByCssSelector(selector)
-                            .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
-                            .end()
-                        .setFindTimeout(2000)        // set the find timeout to be more strict
-                        .findById('sitecues-hlb')    // get the HLB!
-                        .getComputedStyle('position')
-                            .then(function (data) {
-                                assert.strictEqual(
-                                    data,
-                                    'absolute',
-                                    'The HLB must be positioned absolutely'
-                                );
-                            });
-                });
-
-                /////////////////////////////// ------- test boundary -------
-
                 //Heidi is working on rewriting this test below, notice the one after it has the same title.
                 // test('HLB is inside viewport.', function () {
 
@@ -126,7 +70,7 @@ define(
                 //             .end()
                 //         .setFindTimeout(2000)
                 //         .findById('sitecues-hlb')
-                //         //.getBoundingClientRect('sitecues-hlb') <-this crashes the test.  
+                //         //.getBoundingClientRect('sitecues-hlb') <-this crashes the test.
 
                 // });
 
@@ -612,6 +556,42 @@ define(
                                     text,
                                     originalText,
                                     'The HLB must contain the same text as the picked element'
+                                );
+                            });
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('HLB has 3px border width', function () {
+
+                    var selector = 'p';
+
+                    return this.remote               // represents the browser being tested
+                        .findById('sitecues-hlb')    // get the HLB!
+                            .getComputedStyle('borderWidth')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    '3px',
+                                    'The HLB border width must be 3px'
+                                );
+                            });
+                });
+
+                /////////////////////////// ------- test boundary -------
+
+                test('HLB is positioned absolutely.', function () {
+
+                    var selector = 'p';
+
+                    return this.remote               // represents the browser being tested
+                        .findById('sitecues-hlb')    // get the HLB!
+                        .getComputedStyle('position')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    'absolute',
+                                    'The HLB must be positioned absolutely'
                                 );
                             });
                 });
