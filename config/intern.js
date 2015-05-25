@@ -34,8 +34,8 @@ define(
                 //     // pretend to be Chrome, to avoid fallbacks...
                 //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
                 // },
-                { browserName: 'chrome' }
-                // { browserName: 'firefox' },
+                { browserName: 'chrome' },
+                { browserName: 'firefox' }
                 // { browserName: 'safari' }
                 // BrowserStack-style...
                 // { os: 'Windows', os_version: '8.1',       browser: 'chrome',  browser_version: '36.0' },
@@ -49,7 +49,7 @@ define(
                 // { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
             ],
 
-            maxConcurrency: 1,  // how many browsers may be open at once
+            maxConcurrency: 3,  // how many browsers may be open at once
 
             // Specify which AMD module loader to use...
             // useLoader: {
