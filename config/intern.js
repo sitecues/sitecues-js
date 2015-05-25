@@ -85,8 +85,8 @@ define(
             // The paths that match this regex will NOT be included in code coverage reports...
             excludeInstrumentation: /^(?:config|test|node_modules)\//
 
-            // Output test results using these mechanisms...
-            // reporters: ['console']
+            // Test result output mechanisms.
+            // reporters: ['pretty']
         };
     }
 );
