@@ -334,8 +334,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%',
-          'pointer-events': 'none'
+          'transform-origin': '50% 50%'
         },
 
         '.origin-center': {
@@ -358,9 +357,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         //
         // We want to turn on pointer-events when the "?" becomes visible.
         // If none of these classes are set, then the "?" opacity is 0 and pointer-events are disabled.
-        '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
-         'pointer-events': 'all !important'
-        },
+        // COMMENTED OUT BECAUSE IT DOESNT WORK!
+        // '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
+        //  'pointer-events': 'all !important'
+        // },
 
         /******** Mouse targets must be hidden but still able to handle events *************/
 
