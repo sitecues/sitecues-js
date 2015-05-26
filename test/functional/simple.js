@@ -35,7 +35,7 @@ define(
                         return this.remote                // represents the browser being tested
                             .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
                             .get(url)                     // navigate to the desired page
-                            .setExecuteAsyncTimeout(400)  // max ms for executeAsync calls to complete
+                            .setExecuteAsyncTimeout(800)  // max ms for executeAsync calls to complete
                             // Store some data about the original picked element before
                             // we do anything to mess with it, for later comparison.
                             .findByCssSelector(picked.selector)
@@ -307,7 +307,8 @@ define(
 
                 test('HLB Copies <textarea> Value', function () {
 
-                    var expected = 'Yipee!', selector = 'textarea';
+                    var selector = 'textarea',
+                        expected = 'Yipee!';
 
                     return this.remote               // represents the browser being tested
                         .findByCssSelector(selector)
@@ -315,9 +316,10 @@ define(
                                 expected
                             )
                             .end()
-                        .pressKeys(keys.TAB)         // jump out of editing mode, so spacebar can open HLB
                         .execute(                    // run the given code in the remote browser
                             function (selector) {
+                                // Jump out of editing mode, so spacebar can open HLB.
+                                document.querySelector(selector).blur();
                                 sitecues.highlight(selector);
                             },
                             [selector]
