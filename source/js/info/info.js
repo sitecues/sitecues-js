@@ -126,7 +126,7 @@ sitecues.def('info', function(info, callback) {
         offsetTop = platform.browser.isIE ? -6 : -1;
 
       $closeButton =
-          $('<div><span style="position:relative;left:14px;top:23px">x</span></div>')
+          $('<sc style="display:block"><sc style="position:relative;left:14px;top:23px">x</sc></sc>')
         .css(CLOSE_BUTTON_CSS)
         .css({
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well

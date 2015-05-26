@@ -869,12 +869,13 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           height: mainFixedRect.height / state.zoom
         };
       if (state.overlayContainer === document.body) {
-        var $measureDiv = $('<div>').appendTo(document.body).css({
+        var $measureDiv = $('<sc>').appendTo(document.body).css({
             top: 0,
             left: 0,
             width: 0,
             height: 0,
-            position: 'absolute'
+            position: 'absolute',
+            display: 'block'
           }),
           // For some reason using the <body> works better in FF version <= 32
           isOldFirefox = platform.browser.isFirefox && platform.browser.version < 33,
@@ -1226,7 +1227,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      if (!state.isCreated) {
        return;
      }
-     $('<div id="sc-debug-mh-rect">')
+     $('<sc id="sc-debug-mh-rect">')
        .appendTo(document.documentElement)
        .css({
          top: state.fixedContentRect.top + 'px',

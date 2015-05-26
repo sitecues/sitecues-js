@@ -503,7 +503,7 @@ sitecues.def('hlb', function(hlb, callback) {
             pickedElementClone         = pickedElement.cloneNode(true),
             $pickedAndDescendants      = $picked.find('*').addBack(),
             $pickedCloneAndDescendants = $(pickedElementClone).find('*').addBack(),
-            $foundation                = $('<div>').append(pickedElementClone),
+            $foundation                = $('<sc>').append(pickedElementClone),
             i;
 
         // Setting this to true will remove the $foundation from the DOM before inflation.
@@ -663,7 +663,7 @@ sitecues.def('hlb', function(hlb, callback) {
       function getOrCreateHLBWrapper() {
 
         return $hlbWrapper ||
-                $('<div>', {
+                $('<sc>', {
                   'id': SITECUES_HLB_WRAPPER_ID
                 })
                 .css({

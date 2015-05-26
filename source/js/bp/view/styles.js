@@ -118,9 +118,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          General CSS rules for panel
 
          Basic structure of panel:
-         <div #scp-bp-container>
-         <div #scp-close-button>
-         <div .scp-feature-content>
+         <sc #scp-bp-container>
+         <sc #scp-close-button>
+         <sc .scp-feature-content>
          <svg #scp-svg>
          <defs>
          <g #scp-main>
@@ -158,6 +158,31 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          - Not used for CSS: aria-activedescendant (focused item ID), aria-valuenow, aria-valuemin, aria-valuemax, aria-label, aria-labelledby
          Data attributes: data-hasfocus, data-hadfocusonce (so dynamically shown items like close button remain onscreen), data-active (active feature card)
          */
+
+        /***************** sitecues div ******************/
+        // Prevent page style pollution, use our own <sc> element rather than
+        // <div> which may be styled by the page, e.g. at
+        // - Margins http://www.independent.ie/entertainment/trending/westboro-baptist-church-accidentally-hates-the-ivory-coast-31251240.html
+        // - Fonts: https://shuttle.support.signiant.com/customer/portal/articles/1720613-why-am-i-repeatedly-asked-to-make-my-media-shuttle-site-trusted-
+        'sc': {
+          'margin': '0',
+          'display': 'block',
+          'font-family': 'Arial',
+          'color': '#000',
+          'line-height': 'normal'
+        },
+
+        'sc-h1': {
+          'margin': '16px 0',
+          'font-size': '40px'
+        },
+
+        'sc-p': {
+          'font-size': '18px',
+          'margin': '12px 0'
+        },
+
+
 
         /***************** Loading/badge  ****************/
 
@@ -223,10 +248,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-toolbar > #scp-bp-container': {
           'background-color': 'transparent !important',
-          'margin': '0 !important'  // Prevent page style pollution
-        },
-
-        '#scp-bp-container > div': {
           'margin': '0 !important'  // Prevent page style pollution
         },
 
