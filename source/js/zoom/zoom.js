@@ -875,7 +875,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
         var MAX_ZINDEX = 2147483647,
-          appendedDiv = $('<div>')
+          appendedDiv = $('<sc>')
           .css({
             position: 'fixed',
             top: 0,

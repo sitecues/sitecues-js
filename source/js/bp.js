@@ -221,7 +221,7 @@ sitecues.def('bp', function (bp, callback) {
       var badgeElement = badge.init();
 
       // Create the svg container
-      bpContainer = document.createElement('div');
+      bpContainer = document.createElement('sc');
 
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
@@ -230,7 +230,7 @@ sitecues.def('bp', function (bp, callback) {
 
       // TODO: Should we remove the commented out code below?
       // Create focus outline element
-      // var focusOutline = document.createElement('div');
+      // var focusOutline = document.createElement('sc');
       // document.querySelector('#scp-bp-container').appendChild(focusOutline);
       // focusOutline.setAttribute('id', 'scbp-target-outline')
 

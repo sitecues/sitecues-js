@@ -12,60 +12,60 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   'use strict';
 
   var svg = '\
-<div id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
-  <div class="scp-card active">\
-    <h1>Welcome</h1>\
-    <p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</p>\
-    <p>Use the arrow buttons at the top right of this panel to read more tips.</p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Zoom the web page</h1>\
-    <p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</p>\
-    <p>The more you zoom, the easier everything is to see &mdash; even the mouse.</p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Zoom in on a part</h1>\
-    <p>You can zoom in even more on parts of this web page.</p>\
-    <p>Just move your mouse to an area you\'re interested in, and press the spacebar.</p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Listen to it</h1>\
-    <p>First &mdash; click the speech button on.</p>\
-    <p>Next &mdash; move your mouse to to something and press the spacebar.</p>\
-    <p>Now listen as it\'s read aloud.</p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Get more help</h1>\
-    <p>Get started with sitecues in the<br>\
-    <br><button class="sitecues-button-big">Quick Start Guide</button></p>\
-  </div>\
-</div>\
-<div id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
-  <div class="scp-card active">\
-    <h1>Settings</h1>\
-    <p>Get more out of sitecues zoom and speech tools by adjusting the settings.</p>\
-    <p>Use the arrow buttons at the top right of this panel to find all the provided settings.</p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Choose a voice</h1>\
-    <p>Who should read your text aloud?</p>\
-    <p><button>Sarah</button><button>Rebecca</button><button>Henry</button></p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Voice speed</h1>\
-    <p>How fast should sitecues read?</p>\
-    <p><span role="button" class="scp-range-label">Slower</span><input type="range" aria-label="Speech rate"/><span role="button" class="scp-range-label">Faster</span></p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Lens Size</h1>\
-    <p>How much extra should the spacebar zoom content?</p>\
-    <p><button>None</button><button>Small</button><button>Medium</button><button>Large</button></p>\
-  </div>\
-  <div class="scp-card">\
-    <h1>Colors</h1>\
-    <p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</p>\
-  </div>\
-</div>\
+<sc id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
+  <sc class="scp-card active">\
+    <sc-h1>Welcome</sc-h1>\
+    <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
+    <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Zoom the web page</sc-h1>\
+    <sc-p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</sc-p>\
+    <sc-p>The more you zoom, the easier everything is to see &mdash; even the mouse.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Zoom in on a part</sc-h1>\
+    <sc-p>You can zoom in even more on parts of this web page.</sc-p>\
+    <sc-p>Just move your mouse to an area you\'re interested in, and press the spacebar.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Listen to it</sc-h1>\
+    <sc-p>First &mdash; click the speech button on.</sc-p>\
+    <sc-p>Next &mdash; move your mouse to to something and press the spacebar.</sc-p>\
+    <sc-p>Now listen as it\'s read aloud.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Get more help</sc-h1>\
+    <sc-p>Get started with sitecues in the<br>\
+    <br><button class="sitecues-button-big">Quick Start Guide</button></sc-p>\
+  </sc>\
+</sc>\
+<sc id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
+  <sc class="scp-card active">\
+    <sc-h1>Settings</sc-h1>\
+    <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
+    <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Choose a voice</sc-h1>\
+    <sc-p>Who should read your text aloud?</sc-p>\
+    <sc-p><button>Sarah</button><button>Rebecca</button><button>Henry</button></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Voice speed</sc-h1>\
+    <sc-p>How fast should sitecues read?</sc-p>\
+    <sc-p><span role="button" class="scp-range-label">Slower</span><input type="range" aria-label="Speech rate"/><span role="button" class="scp-range-label">Faster</span></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Lens Size</sc-h1>\
+    <sc-p>How much extra should the spacebar zoom content?</sc-p>\
+    <sc-p><button>None</button><button>Small</button><button>Medium</button><button>Large</button></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Colors</sc-h1>\
+    <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
+  </sc>\
+</sc>\
 <button class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
 <svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 858 245" id="scp-svg">\
 <defs>\
@@ -196,13 +196,13 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
-<div id="feedback-textarea" class="scp-feature-content" style="position:fixed; top: 33px; left: 43px;display:none;">\
-  <div class="scp-feedback-content">\
+<sc id="feedback-textarea" class="scp-feature-content" style="position:fixed; top: 33px; left: 43px;display:none;">\
+  <sc class="scp-feedback-content">\
      <textarea style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
-  </div>\
-</div>\
+  </sc>\
+</sc>\
 </svg>\
-<div id="scp-focus-outline" role="presentation"/>\
+<sc id="scp-focus-outline" role="presentation"/>\
 ';
  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag

@@ -77,7 +77,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     function createToolbar() {
 
-      var toolbarElement = document.createElement('div'),
+      var toolbarElement = document.createElement('sc'),
         docElem = document.documentElement;
 
       docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
@@ -134,7 +134,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         }
       }
 
-      var div                 = document.createElement('div'),
+      var div                 = document.createElement('sc'),
           badgeImgBoundingBox = helper.getRect(badgeElement),
           badgeComputedStyles = window.getComputedStyle(badgeElement),
           stylesToTransfer    = [

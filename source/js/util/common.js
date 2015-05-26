@@ -334,8 +334,9 @@ sitecues.def('util/common', function (common, callback) {
       useCss.left = (absRect.left + useOutlineWidth) + 'px';
       useCss.top = (absRect.top + useOutlineWidth) + 'px';
       useCss.outlineWidth = Math.round(useOutlineWidth) + 'px'; // Must round otherwise we get an outline in the middle
+      useCss.display = 'block';
 
-      return $('<div>')
+      return $('<sc>')
         .css(useCss)
         .appendTo(optionalParent || 'html');
     };
