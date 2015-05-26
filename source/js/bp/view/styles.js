@@ -213,6 +213,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'left': '0px',
           'width': '100%',
           'height': '38px',
+          'margin': '0 !important',  // Prevent page style pollution
           'box-sizing': 'border-box',
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
           'padding': '6px 8px 8px calc(50% - 66px)',
@@ -221,7 +222,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-toolbar > #scp-bp-container': {
-          'background-color': 'transparent !important'
+          'background-color': 'transparent !important',
+          'margin': '0 !important'  // Prevent page style pollution
+        },
+
+        '#scp-bp-container > div': {
+          'margin': '0 !important'  // Prevent page style pollution
         },
 
         // Move the body down by the height of the toolbar + 1px for the box-shadow
