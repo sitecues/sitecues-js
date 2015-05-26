@@ -5,6 +5,8 @@
 // Do we want to do:
 // - border color
 // - images, background-images, iframes?
+// - example background-image problem:
+//    http://www.teachingvisuallyimpaired.com/increase-contrast.html
 // - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
