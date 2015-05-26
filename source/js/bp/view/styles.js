@@ -424,7 +424,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'text-align'   : 'center',
           'background'   : '#447AC4',
           'transform'    : 'none !important',
-          'display'      : 'none'
+          'display'      : 'none',
+          'position'     : 'absolute',
+          'z-index'      : '9999'
         },
 
         '.scp-cards': {
