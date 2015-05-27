@@ -8,7 +8,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       'main': [
         'zoom-slider-bar',
         'speech',
-        'more-button-group',
+        'more-button-group'
         //'close-button-group'
       ],
       'more': [

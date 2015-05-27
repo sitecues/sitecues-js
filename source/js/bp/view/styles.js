@@ -355,7 +355,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%'
+          'transform-origin': '50% 50%',
+          'pointer-events': 'all'
         },
 
         '.origin-center': {

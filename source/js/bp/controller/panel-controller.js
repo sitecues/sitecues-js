@@ -59,7 +59,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       }
     };
 
-    // TODO: rename
     pc.winMouseDown = function(evt) {
 
       // Once mouse used, no longer need this protection against accidental closure
@@ -169,6 +168,15 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       moreToggle.setAttribute('aria-label', 'View more options');
     }
 
+    function isWithinContainer(elem, id) {
+      while (elem) {
+        if (elem.id === id) {
+          return true;
+        }
+        elem = elem.parentElement;
+      }
+    }
+
     function isMouseOutsideRect(evt, elem, minDistance) {
       var rect = helper.getRect(elem);
       return evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance ||
@@ -177,11 +185,11 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     function isMouseOutsidePanel(evt, distance) {
       var targetId = evt.target.id;
-      if (targetId === BP_CONST.BP_CONTAINER_ID || targetId === BP_CONST.BADGE_ID) {
-        return false;
+      if (targetId !== BP_CONST.BP_CONTAINER_ID && targetId !== BP_CONST.BADGE_ID &&
+        !isWithinContainer(evt.target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
+        var visiblePanelContainer = helper.byId(state.isMorePanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
+        return isMouseOutsideRect(evt, visiblePanelContainer, distance);
       }
-      var elem = helper.byId(state.isMorePanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
-      return isMouseOutsideRect(evt, elem, distance);
     }
 
     sitecues.on('bp/do-shrink', pc.shrinkPanel);

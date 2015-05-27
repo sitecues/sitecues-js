@@ -193,9 +193,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </g>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
-  <g id="scp-more-button-group" role="button" aria-label="View more options">\
+  <g id="scp-more-button-group" role="button" aria-label="View more options" class="scp-hand-cursor">\
     <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
-    <rect id="scp-more-button-transparent-target" fill="transparent" x="-39" y="-39" width="78" height="78"  class="scp-hand-cursor" role="presentation"/>\
     <path id="scp-more-arrow" class="pointer" fill="#777777" transform="scale(0.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
   </g>\
 </g>\

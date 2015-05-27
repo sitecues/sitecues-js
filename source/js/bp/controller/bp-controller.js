@@ -188,7 +188,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         evt.preventDefault();
         // TODO Return to using the following:
         bpc.changeModeToPanel();
-
       }
     };
 
