@@ -39,7 +39,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
       TEXT = idDelimiter + BP_CONST.SPEECH_LABEL_ID + ' ' + idDelimiter + BP_CONST.ZOOM_LABEL_ID,
       VERTICAL_DIVIDER = idDelimiter + BP_CONST.VERT_DIVIDER_ID,
-      TEXT_BACKGROUND = idDelimiter + BP_CONST.BOTTOM_ID + ' path',
+      TEXT_BACKGROUND = idDelimiter + BP_CONST.BOTTOM_DEF_ID + '>path',
       BACKGROUND = idDelimiter + BP_CONST.MAIN_OUTLINE_ID,
       BORDER = idDelimiter + BP_CONST.MAIN_OUTLINE_BORDER_ID,
 
@@ -275,15 +275,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'fill .2s, opacity .2s'
         },
 
-        // TODO text needs to fade in at the end
-        // todo: looks like this style will apply to all the text nodes, not only sitecues-related: is it what we want?
-        'text': {
-          'visibility': 'hidden',
+        '#scp-bottom-text': {
           'transition': 'opacity 1s',
+          'visibility': 'hidden',
           'font-family': 'Arial',
           'font-size': '29px',
           'font-weight': 'bold',
-          'opacity': 0,
           'user-select': 'none',
           '-webkit-user-select': 'none',
           '-moz-user-select': 'none',
@@ -293,12 +290,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* Text label animation for main panel labels */
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
-        '.scp-is-panel text': {
-          'visibility': 'visible'
-        },
-
-        '.fade-in-text text': {
-          'opacity': 1
+        '.scp-is-panel #scp-bottom-text': {
+          'visibility': 'visible !important',
+          'opacity': '1 !important'
         },
 
         '#scp-shadow': {
