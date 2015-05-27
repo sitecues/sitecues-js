@@ -209,6 +209,20 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return .6;
     }
 
+    colorChoices.increaseContrast = function(style, intensity) {
+      var rgba = style.parsedVal,
+        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+        luminosity = getLuminosity(rgba);
+      if (style.prop === 'color') {
+        var MIN_LUMINOSITY = 0.22 * intensity;
+        if (luminosity > MIN_LUMINOSITY && luminosity < 0.5) {
+          var tooLightFactor = (luminosity / MIN_LUMINOSITY),   // 1 -> just right, 2 -> 2x light as it should be
+            newLightness = hsl.l /= tooLightFactor;
+          return $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness));
+        }
+      }
+      return rgba;
+    };
 
     var yowza = 0;
     colorChoices.darkCreative = function (style, intensity) {
