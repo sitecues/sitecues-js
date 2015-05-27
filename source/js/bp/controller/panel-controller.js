@@ -180,7 +180,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     function isMouseOutsideRect(evt, elem, minDistance) {
       var rect = helper.getRect(elem);
       return evt.clientY > rect.bottom + minDistance || evt.clientY < rect.top - minDistance ||
-             evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance;
+        evt.clientX > rect.right + minDistance || evt.clientX < rect.left - minDistance;
     }
 
     function isMouseOutsidePanel(evt, distance) {

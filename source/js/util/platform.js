@@ -54,6 +54,20 @@ sitecues.def('platform', function (platformModule, callback) {
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
   })();
 
+// TODO add back in if we need to use it
+//  // Set globally accessible version constants
+//  platformModule.os.versionString = (function() {
+//    // If IE is being used, determine which version
+//    var charIndex = agent.indexOf('Windows N') || agent.indexOf('Mac OS X ');
+//    if (charIndex === -1) {
+//      return '0'; // Unknown version
+//    }
+//    return agent.slice(charIndex + 9).replace(/\W.*$/, "");
+//  })();
+//
+//  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
+//  platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
+
   // Convenience method as IE9 is a common issue
   platformModule.isIE9 = function() {
     return platformModule.browser.isIE && platformModule.browser.version === 9;
@@ -70,7 +84,6 @@ sitecues.def('platform', function (platformModule, callback) {
     is        : os,
     isMac     : os === 'mac',
     isWin     : os === 'win',
-    isWin8    : os === 'win' && agent.indexOf('NT 6.3') > -1,
     isLinux   : os === 'mac', // This should say 'mac', not 'linux'
     isUnknown : os === 'Unknown OS'
   };

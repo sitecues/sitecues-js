@@ -13,9 +13,7 @@ sitecues.def('util/common', function (common, callback) {
     // UPDATE: (oct  06, 2014) Firefox appears to regress when window.pageYOffset is 0.  Animation of HLB
     //                         flies out from outside the viewport (top-left)
     common.useJqueryAnimate = (function () {
-
-      return (platform.browser.isIE      && platform.browser.version === 9) ||
-             (platform.browser.isIE      && platform.os.isWin8)             ||
+      return platform.browser.isIE ||
              (platform.browser.isSafari  && window.pageYOffset === 0) ||
              (platform.browser.isFirefox && window.pageYOffset === 0);
 
