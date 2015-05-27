@@ -66,7 +66,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
   </sc>\
 </sc>\
-<button class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
+<button id="sitecues-button-big-feedback" class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
 <svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 858 245" id="scp-svg">\
 <defs>\
   <g id="scp-small-A-def">\

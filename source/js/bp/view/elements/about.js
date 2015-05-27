@@ -18,7 +18,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         shadowSVG,
         bottomSVG,
         moreButton,
-
+        contentButton,
 
         feedbackContent,
         feedbackTextArea,
@@ -49,7 +49,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-
+      contentButton               = byId(BP_CONST.FEEDBACK_CONTENT_BUTTON_ID);
 
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
@@ -218,6 +218,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         tipsButton.style.display                  = 'block';
         settingsButton.style.display              = 'block';
         feedbackButton.style.display              = 'block';
+        contentButton.style.display               = 'none';
         settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
         feedbackButton.setAttribute('transform',transform.getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
         tipsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
@@ -272,7 +273,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
               'duration': useInstantAnimation ? 1 : animate.getDuration(secondEnableAnimationDuration, fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY),
               'onTick'  : onSecondEnableTick,
               'onFinish': function () {
-
+                contentButton.style.display = 'block';
                 arrowButtons.style.display = 'none';
                 tipsButton.style.display       = 'none';
                 settingsButton.style.display   = 'none';

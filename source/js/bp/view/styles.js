@@ -442,7 +442,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transform'    : 'none !important',
           'display'      : 'none',
           'position'     : 'absolute',
-          'z-index'      : '9999'
+          'z-index'      : '9999',
+          'left'         : '192px',
+          'top'          : '132px'
         },
 
         '.scp-cards': {
