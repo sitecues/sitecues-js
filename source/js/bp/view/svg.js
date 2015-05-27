@@ -214,6 +214,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       return locString.substring(0, locString.lastIndexOf('/'));
     }
 
+    function removeHash(loc) {
+      return loc.replace(/\#.*/, '');
+    }
+
     function getBaseURI() {
       var link = document.createElement('a');
       link.href = '';
@@ -230,7 +234,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     function getTextWithNormalizedUrls(text) {
       if (hasAlteredBaseURI() && !platform.isIE9()) {
         var MATCH_KEY = /(href="|url\()(#)/g,
-          pageUrlMinusHash = removeEnd(document.location.href);
+          pageUrlMinusHash = removeHash(document.location.href);
         return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
           return matchPart1 + pageUrlMinusHash + '#';
         });
