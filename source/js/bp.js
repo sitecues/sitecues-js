@@ -61,15 +61,6 @@ sitecues.def('bp', function (bp, callback) {
       updateClasses();
 
       animate.initAnimation(isFirstTime);
-
-      // Required to fade in text, because text is display:none and it is impossible
-      // to transition any property AND set display:block with a single operation... so
-      // setTimeout saves the day.
-      if (state.isPanel()) {
-        setTimeout(function () {
-          bpContainer.setAttribute('class', bpContainer.getAttribute('class') + ' fade-in-text');
-        }, 10);  // 10ms because IE did not do anything when <10ms....
-      }
     }
 
     // 1. Badge- or panel- specific view classes

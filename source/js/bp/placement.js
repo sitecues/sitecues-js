@@ -49,8 +49,8 @@
  */
 sitecues.def('bp/placement', function(placement, callback) {
   'use strict';
-  sitecues.use('bp/view/modes/badge', 'bp/model/state', 'zoom', 'bp/constants', 'bp/helper',
-    function(baseBadge, state, zoomMod, BP_CONST, helper) {
+  sitecues.use('bp/view/modes/badge', 'bp/model/state', 'zoom', 'bp/constants', 'bp/helper', 'platform',
+    function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
 
     var BADGE_PARENT = BP_CONST.BADGE_MODE,
         HTML_PARENT  = BP_CONST.PANEL_MODE,
@@ -107,6 +107,27 @@ sitecues.def('bp/placement', function(placement, callback) {
       // The BP must be positioned over the #sitecues-badge
       var badgeRect = repositionBPOverBadge();
       fitSVGtoBadgeRect(badgeRect, getAppliedBPZoom());
+    }
+
+    // Spartan and IE11 on Windows 10 fix
+    // Once the BP is moved, these browsers are not re-recognizing the @xlink:href on <use> elements
+    // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
+    function fixUseElementsInIE() {
+      if (!platform.browser.isIE) {
+        return;
+      }
+      var useElements = svgElement.getElementsByTagName('use'),
+        numUseElements = useElements.length,
+        useIndex = 0,
+        useElement;
+      for (; useIndex < numUseElements; useIndex ++) {
+        useElement = useElements[useIndex];
+        // Toggle space in front of href attribute to get
+        // IE to 'wake up' and understand it again
+        var href = useElement.getAttribute('xlink:href'),
+          newHref = href.charAt(0) === ' ' ? href.substr(1) : ' ' + href;
+        useElement.setAttribute('xlink:href', newHref);
+      }
     }
 
     function getAppliedBPZoom() {
@@ -187,6 +208,8 @@ sitecues.def('bp/placement', function(placement, callback) {
       // We only animate large-scale size changes (badge->panel or panel->badge)
       disableAnimations();
 
+      // Oh, IE (Edge, we know you're still really IE).
+      fixUseElementsInIE();
     }
 
     // This is the ratio of the height allotted by the badge to the visible height.
