@@ -23,7 +23,7 @@ define(
             capabilities: {
                 // See examples: https://code.google.com/p/selenium/wiki/DesiredCapabilities
                 'name': 'Automated tests - sitecues.js',  // name of the test run, for logging purposes
-                'selenium-version': '2.43.1',             // request a version, which may not always be respected
+                'selenium-version': '2.45.0',             // request a version, which may not always be respected
                 'build': build                            // useful to log success history tied to code changes
             },
             // Places where unit and/or functional tests will be run...
@@ -34,8 +34,8 @@ define(
                 //     // pretend to be Chrome, to avoid fallbacks...
                 //     'phantomjs.page.settings.userAgent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'
                 // },
-                { browserName: 'chrome' }
-                // { browserName: 'firefox' },
+                { browserName: 'chrome' },
+                { browserName: 'firefox' }
                 // { browserName: 'safari' }
                 // BrowserStack-style...
                 // { os: 'Windows', os_version: '8.1',       browser: 'chrome',  browser_version: '36.0' },
@@ -49,7 +49,7 @@ define(
                 // { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
             ],
 
-            maxConcurrency: 1,  // how many browsers may be open at once
+            maxConcurrency: 3,  // how many browsers may be open at once
 
             // Specify which AMD module loader to use...
             // useLoader: {
@@ -85,8 +85,8 @@ define(
             // The paths that match this regex will NOT be included in code coverage reports...
             excludeInstrumentation: /^(?:config|test|node_modules)\//
 
-            // Output test results using these mechanisms...
-            // reporters: ['console']
+            // Test result output mechanisms.
+            // reporters: ['pretty']
         };
     }
 );

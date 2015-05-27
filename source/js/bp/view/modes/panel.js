@@ -4,6 +4,8 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
     'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
     function(bp, BP_CONST, baseController, panelController, bpController, state, helper) {
 
+      var isSticky;
+
       /*
        Show panel according to settings.
        */
@@ -13,7 +15,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           return; // Already expanded or in the middle of shrinking
         }
 
-        // switchToHtmlParent()
         sitecues.emit('bp/will-expand');
 
         prepareKeyboardFocus();
@@ -65,10 +66,12 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
       function bindTemporaryHandlers() {
         // Pressing tab or shift tab when panel is open switches it to keyboard mode
         window.addEventListener('keydown',   bpController.processKeydown, true);
-        window.addEventListener('mousemove', panelController.winMouseMove);
         window.addEventListener('mousedown', panelController.winMouseDown);
-        window.addEventListener('blur', panelController.winBlur);
-        window.addEventListener('mouseout', panelController.winMouseLeave);
+        if (!SC_DEV || !isSticky) {
+          window.addEventListener('mousemove', panelController.winMouseMove);
+          window.addEventListener('blur', panelController.winBlur);
+          window.addEventListener('mouseout', panelController.winMouseLeave);
+        }
       }
 
       function unbindTemporaryMouseHandlers() {
@@ -185,6 +188,13 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // Don't listen to events on the window when the BP is collapsing
         unbindTemporaryMouseHandlers();
       });
+
+      if (SC_DEV) {
+        sitecues.toggleStickyPanel = function() {
+          isSticky = !isSticky;
+          return isSticky;
+        }
+      }
 
       // Unless callback() is queued, the module is not registered in global var modules{}
       // See: https://fecru.ai2.at/cru/EQJS-39#c187

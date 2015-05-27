@@ -117,8 +117,12 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g id="scp-bottom" class="scp-panel-only" opacity="0">\
     <use id="scp-bottom-mousetarget" xlink:href="#scp-bottom-def"/>\
-    <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value">{{zoomvalue}}</tspan></text>\
-    <text id="scp-speech-label" x="583" y="178"  data-x-start="581" data-x-end="795">{{speech}}<tspan> </tspan><tspan id="scp-speech-state">{{speechstate}}</tspan></text>\
+    <g id="scp-bottom-text" opacity="0">\
+      <text id="scp-zoom-label" x="25" y="178"><tspan id="scp-zoom-value"> </tspan></text>\
+      <text id="scp-speech-label" x="581" y="178" data-x-start="581" data-x-end="795">\
+        {{speech}}<tspan> </tspan><tspan id="scp-speech-state"> </tspan>\
+      </text>\
+    </g>\
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
@@ -206,8 +210,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 ';
  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
-    function removeHash(loc) {
-      return loc.replace(/\#.*/, '');
+    function removeEnd(loc) {
+      var locString = '' + loc; // Convert to string
+      return locString.substring(0, locString.lastIndexOf('/'));
     }
 
     function getBaseURI() {
@@ -217,7 +222,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     }
 
     function hasAlteredBaseURI() {
-      return removeHash(getBaseURI()) !== removeHash(document.location.href);
+      return removeEnd(getBaseURI()) !== removeEnd(document.location.href);
     }
 
     // Fix relative URLs to that <base> tag doesn't mess them up!
@@ -226,7 +231,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     function getTextWithNormalizedUrls(text) {
       if (hasAlteredBaseURI() && !platform.isIE9()) {
         var MATCH_KEY = /(href="|url\()(#)/g,
-          pageUrlMinusHash = removeHash(document.location.href);
+          pageUrlMinusHash = removeEnd(document.location.href);
         return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
           return matchPart1 + pageUrlMinusHash + '#';
         });

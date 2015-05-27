@@ -23,9 +23,53 @@ define(
 
         with (tdd) {
             suite('HLB Simple', function () {
+
+                var picked = {
+                    selector : 'p'
+                };
+
                 // Code to run when the suite starts, before tests...
                 before(
                     function () {
+
+                        return this.remote                // represents the browser being tested
+                            .maximizeWindow()             // best effort to normalize window sizes (not every browser opens the same)
+                            .get(url)                     // navigate to the desired page
+                            .setExecuteAsyncTimeout(800)  // max ms for executeAsync calls to complete
+                            // Store some data about the original picked element before
+                            // we do anything to mess with it, for later comparison.
+                            .findByCssSelector(picked.selector)
+                                .getVisibleText()
+                                .then(function (text) {
+                                    // A test in this suite checks if the HLB cloned all
+                                    // visible text properly.
+                                    picked.visibleText = text;
+                                })
+                                .getAttribute('class')
+                                .then(function (className) {
+                                    // We store the original classes so that we can restore
+                                    // them later after messing with them.
+                                    picked.className = className;
+                                })
+                                .end()
+                            .execute(
+                                function (selector) {
+                                    document.querySelector(selector).className = 'testClass';
+                                },
+                                [picked.selector]
+                            )
+                            .pressKeys(keys.EQUALS)       // zoom in to enable sitecues features
+                            .executeAsync(                // run an async callback in the remote browser
+                                function (done) {
+                                    sitecues.on('zoom', done);  // use our event system to know when zoom is done
+                                }
+                            )
+                            .execute(                     // run a callback in the remote browser
+                                function (selector) {
+                                    sitecues.highlight(selector);
+                                },
+                                [picked.selector]         // list of arguments to pass to the remote code
+                            );
                     }
                 )
                 // Code to run before each test, including the first one...
@@ -44,645 +88,92 @@ define(
                     }
                 );
 
-                // test('HLB has 3px border width', function () {
+                test('Spacebar Opens the HLB', function () {
 
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return parseInt(getComputedStyle(document.getElementById('sitecues-hlb')).borderWidth);
-                //             })
-                //             .then(function (data) {
-                //                 assert.strictEqual(data, 3);
-                //             });
-                // });
+                    return this.remote
+                            .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
+                            .end()
+                        .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
+                        .findById('sitecues-hlb')
+                            .executeAsync(           // run an async callback in the remote browser
+                                function (done) {
+                                    sitecues.on('hlb/ready', done);  // use our event system to know when the HLB is ready
+                                }
+                            )
+                });
 
                 /////////////////////////////// ------- test boundary -------
 
-                // test('HLB is positioned absolutely.', function () {
+                test('HLB is Displayed', function () {
 
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return getComputedStyle(document.getElementById('sitecues-hlb')).position;
-                //             })
-                //             .then(function (data) {
-                //                 assert.strictEqual(data, 'absolute');
-                //             });
-                // });
+                    this.skip('This fails for some reason. Why?')
+
+                    return this.remote
+                        .findById('sitecues-hlb')
+                        .isDisplayed()
+                        .then(function (isDisplayed) {
+                            assert.isTrue(
+                                isDisplayed,
+                                'HLB must be displayed to be useful.'
+                            );
+                        });
+                })
 
                 /////////////////////////////// ------- test boundary -------
 
-                // test('HLB is inside viewport.', function () {
+                test('HLB is Inside Viewport', function () {
 
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return {
-                //                     'hlb': document.getElementById('sitecues-hlb').getBoundingClientRect(),
-                //                     'viewport': {
-                //                         'left'  : 0,
-                //                         'top'   : 0,
-                //                         'right' : window.innerWidth,
-                //                         'bottom': window.innerHeight
-                //                     }
-                //                 };
-                //             })
-                //             .then(function (data) {
-                //                 assert(
-                //                     data.hlb.left   > data.viewport.left  &&
-                //                     data.hlb.top    > data.viewport.top   &&
-                //                     data.hlb.right  < data.viewport.right &&
-                //                     data.hlb.bottom < data.viewport.bottom,
-                //                     'HLB is not inside viewport.'
-                //                 );
-                //             });
-                // });
+                    this.skip('Designed for upcoming Intern 3 release.');
 
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB is a <ul> if picked element is a <li>.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#spectrum');
-                //             }
-                //         )
-                //         .findById('spectrum')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return document.getElementById('sitecues-hlb').tagName;
-                //             })
-                //             .then(function (data) {
-                //                 assert(data === 'UL', 'HLB must be <ul> if picked element is <li>');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB copies <textarea> value.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 document.getElementsByTagName('textarea')[0].id = 'textarea';
-                //                 document.getElementById('textarea').value = 'Yipee!';
-                //                 sitecues.highlight(document.getElementById('textarea'));
-                //             }
-                //         )
-                //         .findById('textarea')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return document.getElementById('textarea').value;
-                //             })
-                //             .then(function (data) {
-                //                 assert(data === 'Yipee!', 'HLB copies <textarea> value');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB copies <input type="checkbox"> value.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on( 'zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 document.getElementsByTagName('input')[0].id = 'checkbox';
-                //                 document.getElementById('checkbox').checked = true;
-                //                 sitecues.highlight(document.getElementById('checkbox'));
-                //             }
-                //         )
-                //         .findById('checkbox')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return document.getElementById('checkbox').checked;
-                //             })
-                //             .then(function (data) {
-                //                 assert.isTrue(data, 'HLBed checked checkbox is checked');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB has no class.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //                 document.getElementById('p1').className = 'testClass';
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return !!document.getElementById('sitecues-hlb').className;
-                //             })
-                //             .then(function (data) {
-                //                 assert.isFalse(data, 'HLB element does not have a class');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB has zindex of 2147483644.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return document.getElementById('sitecues-hlb').style.zIndex;
-                //             })
-                //             .then(function (data) {
-                //                 assert(data === '2147483644', 'HLB element has zIndex of 2147483644');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB has content-box style for box-sizing CSS property.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')    // get the HLB!
-                //             .execute(function () {
-                //                 return document.getElementById('sitecues-hlb').style.boxSizing;
-                //             })
-                //             .then(function (data) {
-                //                 assert(data === 'content-box', 'HLB element has content-box style');
-                //             });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB closes when mouse moves out of HLB.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .sleep(1000)
-                //         .findById('title')
-                //         .click()
-                //         .execute(function () {
-                //             return document.getElementById('sitecues-hlb');
-                //         })
-                //         .then(function (data) {
-                //             assert.isNull(data, 'HLB no longer exists.');
-                //         });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB closes when escape key is pressed.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')
-                //         .pressKeys(keys.ESCAPE)
-                //         .sleep(1000)
-                //         .execute(function () {
-                //             return document.getElementById('sitecues-hlb');
-                //         })
-                //         .then(function (data) {
-                //             assert.isNull(data, 'HLB no longer exists.');
-                //         });
-                // });
-
-                /////////////////////////////// ------- test boundary -------
-
-                // test('HLB closes when space key is pressed.', function () {
-
-                //     return this.remote               // represents the browser being tested
-                //         .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                //         .get(url)                    // navigate to the desired page
-                //         .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                //         .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                //             .execute(                // run the given code in the remote browser
-                //                 function () {
-                //                     function onZoom() {
-                //                         sitecues.zoomIsDone = true; // set a state we can look for
-                //                     }
-                //                     sitecues.on('zoom', onZoom);  // listener for when the zoom animation is done
-                //                 }
-                //             )
-                //             .pressKeys(keys.ADD)     // unicode for: hit the + key!
-                //             .end()                   // get out of the current element context
-                //         .then(
-                //             pollUntil(
-                //                 function () {        // keeps running until it returns a value other than null or undefined
-                //                     return sitecues.zoomIsDone === true || undefined;
-                //                 },
-                //                 undefined,           // arguments to pass to the poller
-                //                 3000,                // timeout - max duration, if unsuccessful
-                //                 30                   // interval - how often to run
-                //             )
-                //         )
-                //         .execute(                    // run the given code in the remote browser
-                //             function () {
-                //                 delete sitecues.zoomIsDone;
-                //                 sitecues.highlight('#p1');
-                //             }
-                //         )
-                //         .findById('p1')
-                //             .pressKeys('\uE00D')   // hit the spacebar, to open the HLB
-                //             .end()
-                //         .setFindTimeout(2000)        // set the find timeout to be more strict
-                //         .findById('sitecues-hlb')
-                //         .pressKeys(keys.SPACE)
-                //         .sleep(1000)
-                //         .execute(function () {
-                //             return document.getElementById('sitecues-hlb');
-                //         })
-                //         .then(function (data) {
-                //             assert.isNull(data, 'HLB no longer exists.');
-                //         });
-                // });
+                    return this.remote               // represents the browser being tested
+                        .execute(
+                            function () {
+                                return {
+                                    'hlb': document.getElementById('sitecues-hlb').getBoundingClientRect(),
+                                    'viewport': {
+                                        'left'  : 0,
+                                        'top'   : 0,
+                                        'right' : window.innerWidth,
+                                        'bottom': window.innerHeight
+                                    }
+                                };
+                            }
+                        )
+                        .then(function (data) {
+                            assert.isAbove(
+                                data.hlb.left,
+                                data.viewport.left,
+                                'HLB must be inside the viewport to be seen.'
+                            );
+                            assert.isAbove(
+                                data.hlb.top,
+                                data.viewport.top,
+                                'HLB must be inside the viewport to be seen.'
+                            );
+                            assert.isBelow(
+                                data.hlb.right,
+                                data.viewport.right,
+                                'HLB must be inside the viewport to be seen.'
+                            );
+                            assert.isBelow(
+                                data.hlb.bottom,
+                                data.viewport.bottom,
+                                'HLB must be inside the viewport to be seen.'
+                            );
+                        });
+                });
 
                 /////////////////////////////// ------- test boundary -------
 
                 test('HLB Respects Text', function () {
 
-                    var selector = 'p',
-                        originalText;
-
                     return this.remote               // represents the browser being tested
-                        .maximizeWindow()            // best effort to normalize window sizes (not every browser opens the same)
-                        .get(url)                    // navigate to the desired page
-                        .setFindTimeout(6000)        // fail test if any find method can't succeed this quickly
-                        .setExecuteAsyncTimeout(300) // max ms for things like animations
-                        .findById('sitecues-panel')  // finding this is our sign that sitecues is loaded and ready
-                            .pressKeys(keys.EQUALS)  // unicode for: hit the + key!
-                            .end()                   // get out of the current element context
-                        .executeAsync(               // run an async callback in the remote browser
-                            function (done) {
-                                sitecues.on('zoom', done);  // use our event system to know when zoom is done
-                            }
-                        )
-                        .execute(                    // run a callback in the remote browser
-                            function (selector) {
-                                sitecues.highlight(selector);
-                            },
-                            [selector]               // list of arguments to pass to the remote code
-                        )
-                        .findByCssSelector(selector)
-                            .getVisibleText()
-                            .then(function (text) {
-                                originalText = text;
-                            })
-                            .pressKeys(keys.SPACE)   // hit the spacebar, to open the HLB
-                            .end()
-                        .setFindTimeout(2000)        // set the find timeout to be more strict
                         .findById('sitecues-hlb')    // get the HLB!
                             .getVisibleText()
                             .then(function (text) {
                                 assert.strictEqual(
                                     text,
-                                    originalText,
+                                    picked.visibleText,
                                     'The HLB must contain the same text as the picked element'
                                 );
                             });
@@ -690,7 +181,233 @@ define(
 
                 /////////////////////////////// ------- test boundary -------
 
-                // test('HLB Closes Properly', function () {
+                test('HLB Has Good Computed Styles', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .findById('sitecues-hlb')    // get the HLB!
+                            .getComputedStyle('position')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    'absolute',
+                                    'HLB must be positioned absolutely, so it does not affect the page'
+                                );
+                            })
+                            .getComputedStyle('borderWidth')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    '3px',
+                                    'HLB must have a specific border width, so it looks nice'
+                                );
+                            })
+                            .getComputedStyle('zIndex')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    '2147483644',
+                                    'HLB must have a high zIndex, so it\'s visible'
+                                );
+                            })
+                            .getComputedStyle('boxSizing')
+                            .then(function (data) {
+                                assert.strictEqual(
+                                    data,
+                                    'content-box',
+                                    'HLB must consistently calculate its width and height'
+                                );
+                            });
+
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('HLB Has No Class', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .findById('sitecues-hlb')    // get the HLB!
+                            .getAttribute('class')
+                            .then(function (data) {
+                                assert.notOk(data, 'HLB element does not have a class');
+                            })
+                            .end()
+                        .execute(                    // run the given code in the remote browser
+                            function (selector, className) {
+                                document.querySelector(selector).className = className;
+                            },
+                            [picked.selector, picked.className]
+                        );
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('Spacebar Closes HLB', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .pressKeys(keys.SPACE)       // close the HLB
+                        .setExecuteAsyncTimeout(1200)
+                        .executeAsync(
+                            function (done) {
+                                sitecues.on('hlb/closed', function () {
+                                    done(
+                                        document.getElementById('sitecues-hlb')
+                                    );
+                                });
+                            }
+                        )
+                        .then(function (data) {
+                            assert.notOk(data, 'HLB no longer exists.');
+                        });
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('HLB is a <ul> if picked element is a <li>', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .execute(                    // run the given code in the remote browser
+                            function () {
+                                sitecues.highlight('li');
+                            }
+                        )
+                        .pressKeys(keys.SPACE)       // open the HLB
+                        .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
+                        .findById('sitecues-hlb')    // get the HLB!
+                        .getProperty('tagName')
+                        .then(function (data) {
+                            assert.strictEqual(
+                                data,
+                                'UL',
+                                'HLB must be a valid standalone DOM element, to make browsers happy'
+                            );
+                        })
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('Escape Closes the HLB', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .pressKeys(keys.ESCAPE)
+                        .executeAsync(
+                            function (done) {
+                                sitecues.on('hlb/closed', function () {
+                                    done(
+                                        document.getElementById('sitecues-hlb')
+                                    );
+                                });
+                            }
+                        )
+                        .then(function (data) {
+                            assert.notOk(data, 'HLB no longer exists.');
+                        });
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('HLB Copies <textarea> Value', function () {
+
+                    var selector = 'textarea',
+                        expected = 'Yipee!';
+
+                    return this.remote               // represents the browser being tested
+                        .findByCssSelector(selector)
+                            .type(
+                                expected
+                            )
+                            .end()
+                        .execute(                    // run the given code in the remote browser
+                            function (selector) {
+                                // Jump out of editing mode, so spacebar can open HLB.
+                                document.querySelector(selector).blur();
+                                sitecues.highlight(selector);
+                            },
+                            [selector]
+                        )
+                        .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
+                        .setFindTimeout(2000)        // set the find timeout to be more strict
+                        .findById('sitecues-hlb')    // get the HLB!
+                        .getProperty('value')
+                        .then(function (data) {
+                            assert.strictEqual(
+                                data,
+                                expected,
+                                'HLB copies <textarea> value'
+                            );
+                        })
+                        .pressKeys(keys.ESCAPE)
+                        .executeAsync(
+                            function (done) {
+                                sitecues.on('hlb/closed', done);
+                            }
+                        );
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('HLB Copies <input type="checkbox"> Value.', function () {
+
+                    this.skip('WebDriver claims the checkbox is not visible. Why?');
+
+                    var selector = 'input[type="checkbox"]';
+
+                    return this.remote               // represents the browser being tested
+                        .findByCssSelector(selector)
+                            .click()
+                            .end()
+                        .execute(                    // run the given code in the remote browser
+                            function (selector) {
+                                sitecues.highlight(selector);
+                            },
+                            [selector]
+                        )
+                        .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
+                        .setFindTimeout(2000)        // set the find timeout to be more strict
+                        .findById('sitecues-hlb')    // get the HLB!
+                        .getProperty('checked')
+                        .then(function (data) {
+                            assert.isTrue(
+                                data,
+                                'HLB copies <input type="checkbox"> value'
+                            );
+                        })
+                        .pressKeys(keys.ESCAPE)
+                        .executeAsync(
+                            function (done) {
+                                sitecues.on('hlb/closed', done);
+                            }
+                        );
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                test('Outside Mouse Click Closes HLB.', function () {
+
+                    return this.remote               // represents the browser being tested
+                        .pressKeys(keys.SPACE)       // hit the spacebar, to open the HLB
+                            .end()
+                        .setFindTimeout(20)          // the HLB has this many milliseconds to come into existence
+                        .findById('sitecues-hlb')
+                            .executeAsync(           // run an async callback in the remote browser
+                                function (done) {
+                                    sitecues.on('hlb/ready', done);  // use our event system to know when the HLB is ready
+                                }
+                            )
+                        findByCssSelector('html')
+                            .moveMouseTo()
+                            .click()
+                        .end()
+                        .execute(function () {
+                            return document.getElementById('sitecues-hlb');
+                        })
+                        .then(function (data) {
+                            assert.isNull(data, 'HLB no longer exists.');
+                        });
+                });
+
+                /////////////////////////////// ------- test boundary -------
+
+                // test('Screenshot experiment', function () {
 
                 //     var canDoScreenshot = this.remote.session.capabilities.takesScreenshot;
 
