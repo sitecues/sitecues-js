@@ -277,9 +277,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-bottom-text': {
           'transition': 'opacity 1s',
-          'visibility': 'hidden',
+          'visibility': 'hidden'
         },
-        
+
         '.scp-is-panel text': {
           'font-family': 'Arial',
           'font-size': '29px',
