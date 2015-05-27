@@ -167,13 +167,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc': {
           'margin': '0',
           'display': 'block',
-          'font-family': 'Arial',
           'color': '#000',
           'line-height': 'normal'
         },
 
         'sc-h1': {
           'margin': '16px 0',
+          'font-family': 'Arial',
           'font-size': '40px'
         },
 
@@ -278,6 +278,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-bottom-text': {
           'transition': 'opacity 1s',
           'visibility': 'hidden',
+        },
+        
+        '.scp-is-panel text': {
           'font-family': 'Arial',
           'font-size': '29px',
           'font-weight': 'bold',
