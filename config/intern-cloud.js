@@ -30,15 +30,28 @@ define(
             // { browserName: 'firefox' },
             // { browserName: 'safari' }
             // BrowserStack-style...
-            { os: 'Windows', os_version: '8.1',       browser: 'chrome',  browser_version: '36.0' }
-            // { os: 'Windows', os_version: '8.1',       browser: 'firefox', browser_version: '31.0' },
-            // { os: "Windows", os_version: '8.1',       browser: 'ie',      browser_version: '11.0' },
-            // { os: 'OS X',    os_version: 'Mavericks', browser: 'safari',  browser_version: '7.0' }
+            // { os: "Windows", os_version: '7',        browser: 'ie',      browser_version: '9.0' },
+            // { os: "Windows", os_version: '7',        browser: 'ie',      browser_version: '10.0' },
+            // { os: "Windows", os_version: '7',        browser: 'ie',      browser_version: '11.0' },
+            { os: 'Windows', os_version: '7',        browser: 'chrome',  browser_version: '39.0' },
+            { os: 'Windows', os_version: '7',        browser: 'firefox', browser_version: '35.0' },
+            // { os: "Windows", os_version: '8',        browser: 'ie',      browser_version: '10.0' },
+            // { os: "Windows", os_version: '8',        browser: 'ie',      browser_version: '11.0' },
+            { os: 'Windows', os_version: '8',        browser: 'chrome',  browser_version: '39.0' },
+            { os: 'Windows', os_version: '8',        browser: 'firefox', browser_version: '35.0' },
+            // { os: "Windows", os_version: '8.1',      browser: 'ie',      browser_version: '11.0' },
+            { os: 'Windows', os_version: '8.1',      browser: 'chrome',  browser_version: '39.0' },
+            { os: 'Windows', os_version: '8.1',      browser: 'firefox', browser_version: '35.0' },
+            { os: 'OS X',    os_version: 'Yosemite', browser: 'chrome',  browser_version: '39.0' },
+            { os: 'OS X',    os_version: 'Yosemite', browser: 'firefox', browser_version: '35.0' },
+            // { os: 'OS X',    os_version: 'Yosemite', browser: 'safari',  browser_version: '8.0' },
             // SauceLabs-style...
-            // { platform: 'Windows 8.1', browserName: 'chrome',            version: '36' },
-            // { platform: 'Windows 8.1', browserName: 'firefox',           version: '31' },
             // { platform: 'Windows 8.1', browserName: 'internet explorer', version: '11' },
-            // { platform: 'OS X 10.9',   browserName: 'safari',            version: '7' }
+            // { platform: 'Windows 8.1', browserName: 'chrome',            version: '39' },
+            // { platform: 'Windows 8.1', browserName: 'firefox',           version: '35' },
+            // { platform: 'OS X 10.9',   browserName: 'chrome',            version: '39' },
+            // { platform: 'OS X 10.9',   browserName: 'firefox',           version: '35' },
+            // { platform: 'OS X 10.9',   browserName: 'safari',            version: '8' },
         ];
 
         // test.maxConcurrency = 10;  // how many browsers may be open at once
