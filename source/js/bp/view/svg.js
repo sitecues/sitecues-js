@@ -198,7 +198,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 <div id="feedback-textarea" class="scp-feature-content" style="position:absolute; top: 33px; left: 43px;display:none;">\
   <div class="scp-feedback-content">\
-     <textarea style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
+     <textarea id="feedback-textarea-id" style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
   </div>\
 </div\
 </svg>\

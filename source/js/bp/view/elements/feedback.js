@@ -7,6 +7,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         cssValues                = {},
         enableAnimationDuration  = 1500,
         disableAnimationDuration = 500,
+        feedbackTextareaElement,
         feedbackAnimation,
         tipsButton,
         settingsButton,
@@ -55,8 +56,13 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
       arrowButtons                = byId(BP_CONST.ARROWS_ID);
       feedbackTextarea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
+      feedbackTextareaElement     = byId(BP_CONST.FEEDBACK_TEXTAREA_ID);
       moreBtnTranslate            = transform.getTransform(moreButton.getAttribute('transform')).translate;
       feedbackBtnTransform        = transform.getTransform(feedbackButton.getAttribute('transform'));
+
+      feedbackTextarea.addEventListener('click', function () {
+        feedbackTextareaElement.focus();
+      });
 
       cssValues[FEEDBACK_ENABLED] = {
         'outlineHeight'        : 377, // The outline

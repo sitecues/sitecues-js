@@ -38,7 +38,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     // TODO: rename
     pc.winMouseMove = function(evt) {
-      return;
+
       if (sliderController.isSliderActive()) {
         return;  // Dragging slider, so don't close panel
       }
@@ -61,7 +61,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     // TODO: rename
     pc.winMouseDown = function(evt) {
-      return;
+
       // Once mouse used, no longer need this protection against accidental closure
       pc.wasInFeaturePanel = false;
 
@@ -71,7 +71,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     };
 
     pc.winBlur = function() {
-      return;
       pc.shrinkPanel(true);
     };
 
