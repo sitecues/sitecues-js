@@ -18,7 +18,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         bottomSVG,
         moreButton,
         arrowButtons,
-
+        contentButton,
 
         feedbackContent,
         feedbackTextArea,
@@ -47,7 +47,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       shadowSVG                   = byId(BP_CONST.SHADOW_ID);
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-
+      contentButton               = byId(BP_CONST.FEEDBACK_CONTENT_BUTTON_ID);
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
@@ -227,7 +227,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         aboutButton.style.opacity     = 0;
         feedbackButton.style.opacity  = 0;
         settingsButton.style.opacity  = 0;
-
+        contentButton.style.display   = 'none';
         tipsCards.style.display       = 'block';
         arrowButtons.style.display    = 'block';
 
