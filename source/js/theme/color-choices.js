@@ -22,7 +22,7 @@
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
 
-  sitecues.use('jquery', function($) {
+  sitecues.use('jquery', 'theme/color/codes', function($, colorCodes) {
     var BLACK = { r: 0, g: 0, b: 0, a: 1 },
       MIN_INTENSITY = 0.6,
       YELLOW_HUE = 0.167,
@@ -209,19 +209,101 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return .6;
     }
 
+    // Sample pages with low contrast issues:
+    // http://reederapp.com/ios/#/2/features
+    // http://www.breckgear.com/
+    // http://www.goldbrecht-systems.com/
+    // https://dribbble.com/owltastic
+    // https://news.ycombinator.com/item?id=2222522
+    // http://mediatemple.net/
+    // http://www.pomona.edu/museum/exhibitions/
+
+    function isSelectorOnDarkBackground(style) {
+//      if (style.isOnDarkBackground) {
+//        return true;
+//      }
+
+      var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
+        selector = style.selector.replace(REMOVE_PSEUDO_CLASSES, ''),
+        sampleElement;
+
+      try {
+        sampleElement = document.querySelector(selector); // Only need one
+      }
+      catch(ex) {
+        return;   // Was unable to use selector
+      }
+
+      while (sampleElement) {
+        var computedStyle = window.getComputedStyle(sampleElement);
+        if (computedStyle.backgroundColor) {
+          var bgRgba = colorCodes.getRgba(computedStyle.backgroundColor);
+          if (bgRgba.a > 0.2) {
+            return getLuminosity(bgRgba) < 0.5;
+          }
+        }
+        sampleElement = sampleElement.parentElement;
+      }
+    }
+
+    /**
+     * @param {object} style { parsedVal: rgba, selector, prop: 'color', etc. }
+     * @return -1: decrease lightness, 0: do nothing, 1: increase lightness
+     */
+    function getContrastEnhancementDirection(style) {
+      var rgba = style.parsedVal,
+        luminosity = getLuminosity(rgba);
+
+      if (style.prop === 'color') {
+        // Foreground decision
+        if (luminosity < 0.3) {
+          return -1;  // Very dark gets darker
+        }
+        if (luminosity > 0.7) {
+          return 1;  // Very light gets lighter
+        }
+        // Middle of the road foreground color -- analyze background
+        // If on light background make text darker, and vice-versa
+        var isOnDarkBg = isSelectorOnDarkBackground(style);
+        if (typeof isOnDarkBg === 'undefined') {
+          return luminosity < 0.5 ? -1 : 1;
+        }
+        return isOnDarkBg ? 1 : -1;
+      }
+
+      // Background decision
+      return luminosity < 0.5 ? -1 : 1;
+    }
+
     colorChoices.increaseContrast = function(style, intensity) {
       var rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
-        luminosity = getLuminosity(rgba);
-      if (style.prop === 'color') {
-        var MIN_LUMINOSITY = 0.22 * intensity;
-        if (luminosity > MIN_LUMINOSITY && luminosity < 0.5) {
-          var tooLightFactor = (luminosity / MIN_LUMINOSITY),   // 1 -> just right, 2 -> 2x light as it should be
-            newLightness = hsl.l /= tooLightFactor;
-          return $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, newLightness));
-        }
+        newLightness = hsl.l,
+        saturation = hsl.s, // Reduce contrast change for saturated colors so that we remain colorful
+        power = (1 - intensity) * 4 * (0.3 + saturation),
+        factor = style.prop === 'color' ? 2 : 5,
+        contrastEnhancementDirection = getContrastEnhancementDirection(style),
+        newAlpha = rgba.a;
+
+      if (contrastEnhancementDirection < 0) {
+        // Reduce lightness
+        newLightness = hsl.l - Math.pow(hsl.l / factor, power) * intensity;
       }
-      return rgba;
+      else if (contrastEnhancementDirection > 0) {
+        // Reduce darkness
+        var darkness = 1 - hsl.l,
+          newDarkness = darkness - Math.pow(darkness / factor, power) * intensity;
+        newLightness = 1 - newDarkness;
+      }
+      // Also increase the alpha if it's < 1
+      if (newAlpha < 1) {
+        newAlpha += ((1 - newAlpha) / 2) * intensity;
+      }
+
+      var lightnessDiff = Math.abs(newLightness - hsl.l),
+        MIN_SIGNIFICANT_LIGHTNESS_DIFF = .01,
+        isSignificantChange = lightnessDiff > MIN_SIGNIFICANT_LIGHTNESS_DIFF || newAlpha !== rgba.a;
+      return isSignificantChange ? $.extend({ a: newAlpha }, hslToRgb(hsl.h, hsl.s, newLightness)): rgba;
     };
 
     var yowza = 0;

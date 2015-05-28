@@ -1,7 +1,7 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-sitecues.def('themes/color/codes', function (colorCodes, callback) {
+sitecues.def('theme/color/codes', function (colorCodes, callback) {
 
   'use strict';
 
@@ -39,7 +39,7 @@ sitecues.def('themes/color/codes', function (colorCodes, callback) {
       rgb = colorString;
     }
 
-    var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
+    var MATCH_COLORS = /rgba?\((\d+), ?(\d+), ?(\d+),?( ?[\d?.]+)?\)/,
       match = MATCH_COLORS.exec(rgb) || {};
 
     return {

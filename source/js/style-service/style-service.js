@@ -100,7 +100,7 @@ sitecues.def('style-service', function (styleService, callback) {
           rule = rules[ruleIndex];
           cssStyleDeclaration = rule.style;
           if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
-            ruleValue = matchingRuleFn(cssStyleDeclaration);
+            ruleValue = matchingRuleFn(cssStyleDeclaration, rule.selectorText);
             if (ruleValue) {
               styleResults.push({rule: rule, value: ruleValue });
             }

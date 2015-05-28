@@ -4,7 +4,7 @@
 
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'themes/color/codes',
+  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'theme/color/codes',
     function($, styleService, platform, colorChoices, colorCodes) {
 
       var $themeStyleSheet,
@@ -205,7 +205,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param cssStyleDecl
        * @returns {{prop: string, parsedVal: object }}
        */
-      function getSignificantBgColor(cssStyleDecl) {
+      function getSignificantBgColor(cssStyleDecl, selector) {
         var bgStyle = cssStyleDecl.background,
           colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
           rgba = colorString && colorCodes.getRgba(colorString);
@@ -213,6 +213,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         if (rgba && rgba.a) {
           return {
             prop: 'background-color',
+            selector: selector,
             parsedVal: rgba
           };
         }
@@ -223,11 +224,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param cssStyleDecl
        * @returns {{prop: string, parsedVal: *}}
        */
-      function getFgColor(cssStyleDecl) {
+      function getFgColor(cssStyleDecl, selector) {
         var fgStyle = cssStyleDecl.color;
         if (fgStyle) {
           return {
             prop: 'color',
+            selector: selector,
             parsedVal: colorCodes.getRgba(fgStyle)
           }
         }
