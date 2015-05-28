@@ -1,14 +1,14 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-sitecues.def('theme/color/codes', function (colorCodes, callback) {
+sitecues.def('theme/color/util', function (colorUtil, callback) {
 
   'use strict';
 
   // Convert color names such as 'white', 'black', 'transparent'
   function convertColorNameToRgbFormat(colorName) {
 // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
-//    var hexVal = colorCodes.COLOR_NAMES_MAP[colorName];
+//    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
 //    if (typeof hexVal === 'undefined') {
 //      return 'rgba(0, 0, 0, 0)';
 //    }
@@ -21,22 +21,28 @@ sitecues.def('theme/color/codes', function (colorCodes, callback) {
 
 // APPROACH #2 is slower (~34ms on Chrome) but does not require COLOR_NAMES_MAP
 // Setting the border on the <body> and then immediately resetting will not cause a visible change
-    var oldBorderColor = document.body.style.borderColor;
-    document.body.style.borderColor = colorName;
-    var isLegalColor = document.body.style.borderColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor ? getComputedStyle(document.body).borderColor : 'rgba(0, 0, 0, 0)';
-    document.body.style.borderColor = oldBorderColor;
+    var docElt = document.documentElement,
+      docStyle = docElt.style,
+      oldBorderColor = docStyle.outlineColor;
+    docStyle.outlineColor = colorName;
+    var isLegalColor = docStyle.outlineColor,  // Browser didn't set the border color -> not a legal color
+      rgb = isLegalColor ? getComputedStyle(docElt).outlineColor : 'rgba(0, 0, 0, 0)';
+    docStyle.outlineColor = oldBorderColor;
     return rgb;
   }
 
-  colorCodes.getRgba =function(colorString) {
+  colorUtil.getRgba = function(color) {
+    if (typeof color === 'object') {
+      return color;
+    }
+
     // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
     var rgb;
-    if (colorString.substr(0,3) !== 'rgb') {
-      rgb = convertColorNameToRgbFormat(colorString);
+    if (color.substr(0,3) !== 'rgb') {
+      rgb = convertColorNameToRgbFormat(color);
     }
     else {
-      rgb = colorString;
+      rgb = color;
     }
 
     var MATCH_COLORS = /rgba?\((\d+), ?(\d+), ?(\d+),?( ?[\d?.]+)?\)/,
@@ -50,7 +56,7 @@ sitecues.def('theme/color/codes', function (colorCodes, callback) {
     };
   };
 
-//  colorCodes.COLOR_NAMES_MAP = {
+//  colorUtil.COLOR_NAMES_MAP = {
 //    // System color names -- currently based on OS X colors
 //    // To get a color code for a certain system color, do the following:
 //    // function getHexCode(color) {
@@ -225,5 +231,128 @@ sitecues.def('theme/color/codes', function (colorCodes, callback) {
 //    yellowgreen: 0x9acd32
 //  };
 
-callback();
+  /**
+   * Converts an HSL color value to RGB. Conversion formula
+   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+   * Assumes h, s, and l are contained in the set [0, 1] and
+   * returns r, g, and b in the set [0, 255].
+   *
+   * @param   Number  h       The monochromeHue
+   * @param   Number  s       The saturation
+   * @param   Number  l       The lightness
+   * @return  Object          The RGB representation
+   */
+  colorUtil.hslToRgb = function(h, s, l) {
+    var r, g, b;
+
+    if (!s) {
+      r = g = b = l; // achromatic
+    } else {
+      var hue2rgb = function hue2rgb(p, q, t) {
+        if (t < 0) {
+          t += 1;
+        }
+        if (t > 1) {
+          t -= 1;
+        }
+        if (t < 1 / 6) {
+          return p + (q - p) * 6 * t;
+        }
+        if (t < 1 / 2) {
+          return q;
+        }
+        if (t < 2 / 3) {
+          return p + (q - p) * (2 / 3 - t) * 6;
+        }
+        return p;
+      };
+
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      var p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255)
+    };
+  };
+
+  // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
+  colorUtil.getLuminosity = function(color) {
+    var rgb = colorUtil.getRgba(color);
+
+    function getValue(color) {
+      return Math.pow(rgb[color] / 255, 2.2);
+    }
+    return 0.213 * getValue('r') +
+      0.715 * getValue('g') +
+      0.072 * getValue('b');
+  };
+
+  colorUtil.getContrastRatio = function(color1, color2) {
+    var L1 = colorUtil.getLuminosity(color1),
+      L2 = colorUtil.getLuminosity(color2);
+    var ratio = (L1 + 0.05) / (L2 + 0.05);
+    if (ratio >= 1) {
+      return ratio;
+    }
+    return (L2 + 0.05) / (L1 + 0.05);
+  };
+
+  /**
+   * Converts an RGB color value to HSL. Conversion formula
+   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+   * Assumes r, g, and b are contained in the set [0, 255] and
+   * returns h, s, and l in the set [0, 1].
+   *
+   * @param   Number  r       The red color value
+   * @param   Number  g       The green color value
+   * @param   Number  b       The blue color value
+   * @return  Object          The HSL representation
+   */
+  colorUtil.rgbToHsl = function(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; // achromatic
+    } else {
+      var d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    return {
+      h: h,
+      s: s,
+      l: l
+    };
+  };
+
+  if (SC_DEV) {
+    // TODO remove
+    sitecues.getRgba = colorUtil.getRgba;
+    sitecues.rgbToHsl = colorUtil.rgbToHsl;
+    sitecues.hslToRgb = colorUtil.hslToRgb;
+    sitecues.getLuminosity = colorUtil.getLuminosity;
+    sitecues.getContrastRatio = colorUtil.getContrastRatio;
+  }
+
+  callback();
 });

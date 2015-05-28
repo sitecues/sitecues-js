@@ -27,7 +27,11 @@
     "exports",
     "CSSPrimitiveValue",
     "CSSStyleDeclaration",
-    "escape"
+    "escape",
+    "console",
+    "SC_DEV",
+    "SC_UNIT",
+    "$"
   ],
 
   // Globals -- copy to both predef and globals sections
@@ -41,7 +45,11 @@
     "exports": true,
     "CSSPrimitiveValue": true,
     "CSSStyleDeclaration": true,
-    "escape": true
+    "escape": true,
+    "console": true,
+    "SC_DEV": true,
+    "SC_UNIT": true,
+    "$": true
   },
 
   // Enforcing
@@ -110,6 +118,7 @@
   // JS Lint Warnings
 
   "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
-  "-W008": true      // Leading 0 before decimal point
+  "-W008": true,      // Leading 0 before decimal point
+  "-W030": false
 
   }

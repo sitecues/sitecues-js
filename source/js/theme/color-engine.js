@@ -4,8 +4,8 @@
 
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'theme/color/codes',
-    function($, styleService, platform, colorChoices, colorCodes) {
+  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'theme/color/util',
+    function($, styleService, platform, colorChoices, colorUtil) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -123,14 +123,13 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         });
 
         return styleSheetText;
-      };
+      }
 
       /**
        * Deal with Chrome bugs where scrolled-off content doesn't get new background color
        * Necessary on at least youtube.com and https://www.arlington.k12.ma.us/stratton/
        */
       function repaintPage() {
-        var oldTransform = document.body.style.transform;
         document.documentElement.style.transform = 'translateY(1px)';
         setTimeout(function () {
           document.documentElement.style.transform = '';
@@ -208,7 +207,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       function getSignificantBgColor(cssStyleDecl, selector) {
         var bgStyle = cssStyleDecl.background,
           colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
-          rgba = colorString && colorCodes.getRgba(colorString);
+          rgba = colorString && colorUtil.getRgba(colorString);
 
         if (rgba && rgba.a) {
           return {
@@ -230,13 +229,17 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return {
             prop: 'color',
             selector: selector,
-            parsedVal: colorCodes.getRgba(fgStyle)
-          }
+            parsedVal: colorUtil.getRgba(fgStyle),
+            contrastEnhancementDirection:
+              cssStyleDecl.backgroundColor ?
+                colorUtil.getLuminosity(cssStyleDecl.backgroundColor) < 0.5 :
+                undefined
+          };
         }
       }
 
       function getCurrentBodyBackgroundColor() {
-        return colorCodes.getRgba(getComputedStyle(document.body).backgroundColor);
+        return colorUtil.getRgba(getComputedStyle(document.body).backgroundColor);
       }
 
       function initialize() {
@@ -258,7 +261,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       // TODO remove this:
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;
-        sitecues.getRgba = colorCodes.getRgba;
       }
 
       if (SC_UNIT) {

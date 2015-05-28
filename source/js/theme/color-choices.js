@@ -22,119 +22,20 @@
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
 
-  sitecues.use('jquery', 'theme/color/codes', function($, colorCodes) {
+  sitecues.use('jquery', 'theme/color/util', function($, colorUtil) {
     var BLACK = { r: 0, g: 0, b: 0, a: 1 },
       MIN_INTENSITY = 0.6,
       YELLOW_HUE = 0.167,
       GREEN_HUE = 0.333,
       monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
-      monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 };
-
-    /**
-     * Converts an HSL color value to RGB. Conversion formula
-     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-     * Assumes h, s, and l are contained in the set [0, 1] and
-     * returns r, g, and b in the set [0, 255].
-     *
-     * @param   Number  h       The monochromeHue
-     * @param   Number  s       The saturation
-     * @param   Number  l       The lightness
-     * @return  Object          The RGB representation
-     */
-    function hslToRgb(h, s, l) {
-      var r, g, b;
-
-      if (s == 0) {
-        r = g = b = l; // achromatic
-      } else {
-        var hue2rgb = function hue2rgb(p, q, t) {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1 / 6) return p + (q - p) * 6 * t;
-          if (t < 1 / 2) return q;
-          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-          return p;
-        }
-
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-      }
-
-      return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
-      }
-    }
-
-    // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
-    function getLuminosity(rgb) {
-      function getValue(color) {
-        return Math.pow(rgb[color] / 255, 2.2);
-      }
-      return 0.213 * getValue('r') +
-             0.715 * getValue('g') +
-             0.072 * getValue('b');
-    }
-
-    function getContrastRatio(rgb1, rgb2) {
-      var L1 = getLuminosity(rgb1),
-        L2 = getLuminosity(rgb2);
-      var ratio = (L1 + 0.05) / (L2 + 0.05);
-      if (ratio >= 1) {
-        return ratio;
-      }
-      return (L2 + 0.05) / (L1 + 0.05);
-    }
-
-    /**
-     * Converts an RGB color value to HSL. Conversion formula
-     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-     * Assumes r, g, and b are contained in the set [0, 255] and
-     * returns h, s, and l in the set [0, 1].
-     *
-     * @param   Number  r       The red color value
-     * @param   Number  g       The green color value
-     * @param   Number  b       The blue color value
-     * @return  Object          The HSL representation
-     */
-    function rgbToHsl(r, g, b) {
-      r /= 255, g /= 255, b /= 255;
-      var max = Math.max(r, g, b), min = Math.min(r, g, b);
-      var h, s, l = (max + min) / 2;
-
-      if (max == min) {
-        h = s = 0; // achromatic
-      } else {
-        var d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          case b:
-            h = (r - g) / d + 4;
-            break;
-        }
-        h /= 6;
-      }
-
-      return {
-        h: h,
-        s: s,
-        l: l
-      };
-    }
+      monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
+      hslToRgb = colorUtil.hslToRgb,
+      rgbToHsl = colorUtil.rgbToHsl,
+      getRgba = colorUtil.getRgba;
 
     function getReducedIntensity(rgba, intensity) {
       var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-      if (hsl.l < .5) {
+      if (hsl.l < 0.5) {
         hsl.l = 1 - intensity * ( 1 - hsl.l);
       }
       else {
@@ -187,7 +88,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       else {
         return getReducedIntensity(BLACK, intensity);
       }
-    };
+    }
 
     function isHueBrightEnoughForDarkTheme(hue) {
        return hue <= 0.6 || (hue >= 0.8 && hue <= .92);
@@ -204,7 +105,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         return .92;
       }
       else if (hue > .7) {
-        return .8
+        return .8;
       }
       return .6;
     }
@@ -218,14 +119,11 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     // http://mediatemple.net/
     // http://www.pomona.edu/museum/exhibitions/
 
-    function isSelectorOnDarkBackground(style) {
-//      if (style.isOnDarkBackground) {
-//        return true;
-//      }
-
+    function isSelectorOnDarkBackground(selector) {
       var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
-        selector = style.selector.replace(REMOVE_PSEUDO_CLASSES, ''),
         sampleElement;
+
+      selector = selector.replace(REMOVE_PSEUDO_CLASSES, '');
 
       try {
         sampleElement = document.querySelector(selector); // Only need one
@@ -237,9 +135,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       while (sampleElement) {
         var computedStyle = window.getComputedStyle(sampleElement);
         if (computedStyle.backgroundColor) {
-          var bgRgba = colorCodes.getRgba(computedStyle.backgroundColor);
+          var bgRgba = getRgba(computedStyle.backgroundColor);
           if (bgRgba.a > 0.2) {
-            return getLuminosity(bgRgba) < 0.5;
+            return colorUtil.getLuminosity(bgRgba) < 0.5;
           }
         }
         sampleElement = sampleElement.parentElement;
@@ -250,9 +148,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
      * @param {object} style { parsedVal: rgba, selector, prop: 'color', etc. }
      * @return -1: decrease lightness, 0: do nothing, 1: increase lightness
      */
-    function getContrastEnhancementDirection(style) {
+    function computeContrastEnhancementDirection(style) {
       var rgba = style.parsedVal,
-        luminosity = getLuminosity(rgba);
+        luminosity = colorUtil.getLuminosity(rgba);
 
       if (style.prop === 'color') {
         // Foreground decision
@@ -264,7 +162,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         }
         // Middle of the road foreground color -- analyze background
         // If on light background make text darker, and vice-versa
-        var isOnDarkBg = isSelectorOnDarkBackground(style);
+        var isOnDarkBg = isSelectorOnDarkBackground(style.selector);
         if (typeof isOnDarkBg === 'undefined') {
           return luminosity < 0.5 ? -1 : 1;
         }
@@ -273,6 +171,15 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
       // Background decision
       return luminosity < 0.5 ? -1 : 1;
+    }
+
+    function getContrastEnhancementDirection(style) {
+      if (typeof style.contrastEnhancementDirection !== 'undefined') {
+        return style.contrastEnhancementDirection;
+      }
+      var direction = computeContrastEnhancementDirection(style);
+      style.contrastEnhancementDirection = direction; // Cache
+      return direction;
     }
 
     colorChoices.increaseContrast = function(style, intensity) {
@@ -318,7 +225,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       while (true) {
         yowza = ((yowza + 1) % NUM_COLORS);
         newHue = yowza / NUM_COLORS;
-        contrastRatio = getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
+        contrastRatio = colorUtil.getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
         if (contrastRatio > MIN_CONTRAST_RATIO) {
           SC_DEV && console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1');
           break;
@@ -332,18 +239,22 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
     colorChoices.darkOriginal = function (style, intensity) {
       var rgba = style.parsedVal,
-        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
+        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+        newRgba,
+        origLightness,
+        newLightness,
+        newHue;
+
       if (style.prop === 'color') {
-        var origLightness = Math.max(hsl.l, 1 - hsl.l),
-          newLightness = Math.max(Math.min(intensity * (origLightness + 0.1), intensity), 0.5),
-          newHue = getClosestGoodHueForDarkTheme(hsl.h),
-          newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
+        origLightness = Math.max(hsl.l, 1 - hsl.l);
+        newLightness = Math.max(Math.min(intensity * (origLightness + 0.1), intensity), 0.5);
+        newHue = getClosestGoodHueForDarkTheme(hsl.h);
+        newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
       else {
-        var
-          origLightness = hsl.l,
-          newLightness = origLightness < 0.4 ? origLightness : (1 - origLightness) * 3,
-          newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * intensity));
+        origLightness = hsl.l;
+        newLightness = origLightness < 0.4 ? origLightness : (1 - origLightness) * 3;
+        newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * intensity));
       }
       return newRgba;
     };
@@ -374,20 +285,12 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     // Roughly based on the research on readability for people with dyslexia at
     // http://www.w3.org/WAI/RD/2012/text-customization/r11
     colorChoices.paper = function (style, intensity) {
+      var rgba = style.parsedVal,
+        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
       if (style.prop === 'color') {
-        var rgba = style.parsedVal,
-          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-//        if (hsl.l > .5) {
-//          // Ensure dark foreground
-//          hsl = 1 - hsl.l;
-//          rgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.l, 1-hsl.l));
-//        }
         return getReducedIntensity(rgba, intensity - 0.2);
       }
       else {
-        var rgba = style.parsedVal,
-          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-
         if (hsl.l > 0.95) {
           var PAPER_HUE = 0.17,
             PAPER_SATURATION = 0.8,
@@ -426,24 +329,21 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return mixRgbaColors(rgba, mixInRgba, mixInRatio);
     };
 
-    colorChoices.isDarkTheme = function(colorMapFn, originalBg) {
+    colorChoices.isDarkTheme = function(colorMapFn, originalBgRgba) {
       var originalBg = {
         prop: 'background-color',
-        parsedVal: originalBg
+        parsedVal: originalBgRgba
       };
       var themedBg = colorMapFn(originalBg, 1);
       return colorChoices.isDarkColor(themedBg);
     };
 
     colorChoices.isDarkColor = function(rgb) {
-      var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b  );
+      var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
       return hsl.l < 0.2;
     };
 
     if (SC_DEV) {
-      // TODO remove
-      sitecues.rgbToHsl = rgbToHsl;
-      sitecues.hslToRgb = hslToRgb;
       // TODO Put in UI rather than global function
       sitecues.setMonoForegroundHsl = function (newHsl) {
         monoForegroundHsl = newHsl;
@@ -451,8 +351,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       sitecues.setMonoBackgroundHsl = function (newHsl) {
         monoBackgroundHsl = newHsl;
       };
-      sitecues.getLuminosity = getLuminosity;
-      sitecues.getContrastRatio = getContrastRatio;
     }
   });
 
