@@ -38,9 +38,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           willBeDark = isDarkTheme(colorMapFn),
           isReverseTheme = willBeDark !== isOriginalThemeDark,
           themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
-          transitionCss = initializeTransition(isDark !== willBeDark);
+          transitionCss = initializeTransition(isDark !== willBeDark),
+          reverseCss = isReverseTheme ? getReverseCssText() : '';
 
-        getStyleSheet().text(transitionCss + themeCss);
+        getStyleSheet().text(transitionCss + themeCss + reverseCss);
 
         // Allow web pages to create CSS rules that respond to reverse themes
         $('html').toggleClass('sitecues-reverse-theme', isReverseTheme);
@@ -81,16 +82,14 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return ANIMATION_SELECTOR + TRANSITION_CSS;
       }
 
-//      function getReverseCssText() {
-//        var BUTTON_SELECTOR =
-////          'input[type="button" i],input[type="submit" i],input[type="color" i],input[type="reset" i],' +
-////          'input[type="file" i]::-webkit-file-upload-button,button', // i = case insensitive flag
-//          'input[type="button"],input[type="submit"],input[type="color"],input[type="reset"],button', // i = case insensitive flag
-//          INVERT_FILTER = 'filter:invert(100%);',
-//          PLATFORM_INVERT_FILTER = platform.cssPrefix + INVERT_FILTER;
-//
-//        return BUTTON_SELECTOR + '{' + PLATFORM_INVERT_FILTER + '};\n';
-//      }
+      function getReverseCssText() {
+        var FRAME ='frame,iframe',
+          BG_OPAQUE = 'background-color:' + colorUtil.getDocumentBackgroundColor() + ';',
+          INVERT_FILTER = 'filter:invert(100%);',
+          PLATFORM_INVERT_FILTER =  INVERT_FILTER + platform.cssPrefix + INVERT_FILTER;
+
+        return FRAME + '{' + BG_OPAQUE + PLATFORM_INVERT_FILTER + '};\n';
+      }
 
       /**
        * Retrieve the CSS text required to apply the requested theme
