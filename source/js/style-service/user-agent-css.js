@@ -8,8 +8,8 @@ sitecues.def('ua-css', function (UA_CSS, callback) {
 'use strict';
 
 // The following system colors are converted to hex colors here to improve performance:
-// button { color: ButtonText; border-color: ButtonFace; background-color: ButtonFace; }
-// input:disabled, select:disabled {color: GrayText; background-color: ThreeDFace; }
+// button { color:ButtonText; border-color:ButtonFace; background-color:ButtonFace; }
+// input:disabled, select:disabled {color:GrayText; background-color:ThreeDFace; }
 
 UA_CSS.text =
 'html,#scp-main {\n\
@@ -18,40 +18,36 @@ UA_CSS.text =
 input,textarea,select,button,label[for]{\n\
   cursor:pointer;\n\
 }\n\
-body,html,input {\n\
-    background-color: #fff;\n\
-    color: #000;\n\
+body,html {\n\
+    background-color:#fff;\n\
+    color:#000;\n\
 }\n\
 input[type="image"] {\n\
-  background-color: rgba(0,0,0,0);\n\
+  background-color:rgba(0,0,0,0);\n\
 }\n\
 select {\n\
-  background-color: #fff;\n\
-  color: #000;\n\
-  border-color: #fff;\n\
+  background-color:#fff;\n\
+  color:#000;\n\
+  border-color:#fff;\n\
 }\n\
-button,\n\
-  input[type="color"],\n\
-  input[type="reset"],\n\
-  input[type="button"],\n\
-  input[type="submit"] {\n\
-  color: #000;\n\
-  border: 2px outset #c0c0c0;\n\
-  background-color: #c0c0c0;\n\
+textarea,input,button{\n\
+  color:#000;\n\
+  border-color:#c0c0c0;\n\
+  background-color:#fff;\n\
 }\n\
 input:disabled, select:disabled {\n\
-  color: #7f7f7f !important;\n\
-  background-color: #c0c0c0 !important;\n\
+  color:#7f7f7f !important;\n\
+  background-color:#c0c0c0 !important;\n\
 }\n\
 blockquote[type="cite"] {\n\
-  border-color: #00f;\n\
+  border-color:#00f;\n\
 }\n\
 mark {\n\
-  background: #ffff00;\n\
-  color: #000;\n\
+  background:#ffff00;\n\
+  color:#000;\n\
 }\n\
 hr {\n\
-  color: #808080;\n\
+  color:#808080;\n\
 }\n\
 img[usemap], object[usemap] {\n\
   color:#00f;\n\
@@ -61,8 +57,8 @@ img[usemap], object[usemap] {\n\
   cursor:pointer;\n\
 }\n\
 :visited {\n\
-  color: #551a8b;\n\
-}',
+  color:#551a8b;\n\
+}';
 
 callback();
 });

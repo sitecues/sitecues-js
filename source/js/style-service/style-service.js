@@ -99,7 +99,7 @@ sitecues.def('style-service', function (styleService, callback) {
         for (; ruleIndex < numRules; ruleIndex++) {
           rule = rules[ruleIndex];
           cssStyleDeclaration = rule.style;
-          if (cssStyleDeclaration) { // Could be null if rule is CSSMediaRule
+          if (cssStyleDeclaration && rule.selectorText) { // Could be null if rule is CSSMediaRule / @font-face
             ruleValue = matchingRuleFn(cssStyleDeclaration, rule.selectorText);
             if (ruleValue) {
               styleResults.push({rule: rule, value: ruleValue });

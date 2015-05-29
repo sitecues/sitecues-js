@@ -5,6 +5,8 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
 
   'use strict';
 
+  var TRANSPARENT = 'rgba(0, 0, 0, 0)';
+
   // Convert color names such as 'white', 'black', 'transparent'
   function convertColorNameToRgbFormat(colorName) {
 // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
@@ -24,14 +26,20 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
     var docElt = document.documentElement,
       docStyle = docElt.style,
       oldBorderColor = docStyle.outlineColor;
+    if (colorName === 'initial' || colorName === 'inherit') {
+      return TRANSPARENT;
+    }
     docStyle.outlineColor = colorName;
     var isLegalColor = docStyle.outlineColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor ? getComputedStyle(docElt).outlineColor : 'rgba(0, 0, 0, 0)';
+      rgb = isLegalColor ? getComputedStyle(docElt).outlineColor : TRANSPARENT;
     docStyle.outlineColor = oldBorderColor;
     return rgb;
   }
 
   colorUtil.getRgba = function(color) {
+    if (!color) {
+      return TRANSPARENT;
+    }
     if (typeof color === 'object') {
       return color;
     }
@@ -343,6 +351,20 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
       s: s,
       l: l
     };
+  };
+
+  colorUtil.isDarkColor = function(rgba) {
+    var hsl = colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b);
+    return hsl.l < 0.2;
+  };
+
+  // Get the current background color
+  colorUtil.getDocumentBackgroundColor = function() {
+    var
+      color = getComputedStyle(document.documentElement).backgroundColor,
+      rgba = colorUtil.getRgba(color),
+      WHITE = {r: 255, g: 255, b: 255};
+    return rgba.a > 0 ? rgba : WHITE;
   };
 
   if (SC_DEV) {

@@ -34,16 +34,16 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         var
-          isDark = colorChoices.isDarkColor(getCurrentBodyBackgroundColor()),
+          isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
           willBeDark = isDarkTheme(colorMapFn),
-          isReverse = isDark !== willBeDark,
-          styleSheetText = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, willBeDark) : '',
-          transitionCss = initializeTransition(isReverse);
+          isReverseTheme = willBeDark !== isOriginalThemeDark,
+          themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
+          transitionCss = initializeTransition(isDark !== willBeDark);
 
-        getStyleSheet().text(transitionCss + styleSheetText);
+        getStyleSheet().text(transitionCss + themeCss);
 
         // Allow web pages to create CSS rules that respond to reverse themes
-        $('html').toggleClass('sitecues-reverse-theme', willBeDark !== isOriginalThemeDark);
+        $('html').toggleClass('sitecues-reverse-theme', isReverseTheme);
 
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
@@ -58,11 +58,11 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return colorMapFn ? colorChoices.isDarkTheme(colorMapFn, originalBodyBackgroundColor) : isOriginalThemeDark;
       }
 
-      function initializeTransition(isReverse) {
+      function initializeTransition(isCurrentlyReversing) {
         var
           // We want to animate quickly between light themes, but slowly when performing a drastic change
           // such as going from light to dark or vice-versa
-          transitionMs = isReverse ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
+          transitionMs = isCurrentlyReversing ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
 
         $('html').addClass(TRANSITION_CLASS);
         clearTimeout(transitionTimer);
@@ -76,10 +76,21 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       function getThemeTransitionCss(transitionMs) {
         var ANIMATION_SELECTOR = 'html.' + TRANSITION_CLASS +', html.' +
               TRANSITION_CLASS + '> body, html.' + TRANSITION_CLASS + '> body *',
-          TRANSITION_CSS = '{ transition: all ' + transitionMs + 'ms; }\n\n';
+          TRANSITION_CSS = '{transition:all ' + transitionMs + 'ms;}\n\n';
 
         return ANIMATION_SELECTOR + TRANSITION_CSS;
       }
+
+//      function getReverseCssText() {
+//        var BUTTON_SELECTOR =
+////          'input[type="button" i],input[type="submit" i],input[type="color" i],input[type="reset" i],' +
+////          'input[type="file" i]::-webkit-file-upload-button,button', // i = case insensitive flag
+//          'input[type="button"],input[type="submit"],input[type="color"],input[type="reset"],button', // i = case insensitive flag
+//          INVERT_FILTER = 'filter:invert(100%);',
+//          PLATFORM_INVERT_FILTER = platform.cssPrefix + INVERT_FILTER;
+//
+//        return BUTTON_SELECTOR + '{' + PLATFORM_INVERT_FILTER + '};\n';
+//      }
 
       /**
        * Retrieve the CSS text required to apply the requested theme
@@ -87,7 +98,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param intensity
        * @returns {string}
        */
-      function getThemeCssText(colorMapFn, intensity, willBeDark) {
+      function getThemeCssText(colorMapFn, intensity, isReverse) {
 
         var styleSheetText = '';
 
@@ -107,18 +118,23 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         themeStyles.forEach(function(style) {
           var newValue;
           if (style.value.prop === 'background-image') {
-            newValue = willBeDark && 'none';
+            newValue = isReverse && 'none';
           }
           else {
+            // Don't alter buttons -- it will change it from a native button and the appearance will break
             // color, background-color
             var newRgba = colorMapFn(style.value, intensity);
             newValue = getColorString(newRgba);
           }
           if (newValue) {
             var selectorText = style.rule.selectorText,
-              important = selectorText !== ':link' && selectorText !== ':visited'; // Don't let these UA rules override page's <a> rules
+              important = selectorText !== ':link' && selectorText !== ':visited', // Don't let these UA rules override page's <a> rules
+              formFixes = '';
+            if (isButtonRule(selectorText)) {
+              formFixes = ';border:1px outset ButtonFace;border-radius:4px';
+            }
             styleSheetText += selectorText +
-              ' {' + createRule(style.value.prop, newValue, important) + ';}\n';
+              ' {' + createRule(style.value.prop, newValue, important) + formFixes + ';}\n';
           }
         });
 
@@ -198,6 +214,13 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
+      function isButtonRule(selector) {
+        if (selector && (selector.lastIndexOf('button') >= 0 || selector.lastIndexOf('input') >= 0)) {
+          var BUTTON_SELECTOR = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/;
+          return selector.match(BUTTON_SELECTOR);
+        }
+      }
+
       /**
        * Retrieve information about background colors if we care about them
        * We don't care about transparent colors.
@@ -209,7 +232,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           colorString = extractColorFromBgShorthand(bgStyle) || cssStyleDecl.backgroundColor,
           rgba = colorString && colorUtil.getRgba(colorString);
 
-        if (rgba && rgba.a) {
+        if (rgba) {
           return {
             prop: 'background-color',
             selector: selector,
@@ -225,21 +248,28 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        */
       function getFgColor(cssStyleDecl, selector) {
         var fgStyle = cssStyleDecl.color;
-        if (fgStyle) {
+        if (fgStyle && fgStyle !== 'inherit') {
           return {
             prop: 'color',
             selector: selector,
             parsedVal: colorUtil.getRgba(fgStyle),
             contrastEnhancementDirection:
-              cssStyleDecl.backgroundColor ?
-                colorUtil.getLuminosity(cssStyleDecl.backgroundColor) < 0.5 :
-                undefined
+              (function() {
+                var fgLuminosity = colorUtil.getLuminosity(fgStyle);
+                if (fgLuminosity < 0.05) {
+                  return -1;
+                }
+                if (fgLuminosity > 0.95) {
+                  return 1;
+                }
+                // If we're directly on a dark background, we know the text must get lighter
+                var bgRgba = colorUtil.getRgba(cssStyleDecl.backgroundColor);
+                if (bgRgba && bgRgba.a > 0.2) {
+                  return colorUtil.getLuminosity(bgRgba) < 0.5 ? 1 : -1;
+                }
+              }())
           };
         }
-      }
-
-      function getCurrentBodyBackgroundColor() {
-        return colorUtil.getRgba(getComputedStyle(document.body).backgroundColor);
       }
 
       function initialize() {
@@ -251,8 +281,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
           bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBackgroundImage);
 
-        originalBodyBackgroundColor = getCurrentBodyBackgroundColor();
-        isOriginalThemeDark = colorChoices.isDarkColor(originalBodyBackgroundColor);
+        originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
+        isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
 
         themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
       }

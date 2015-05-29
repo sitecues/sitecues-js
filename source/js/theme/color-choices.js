@@ -91,23 +91,23 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     }
 
     function isHueBrightEnoughForDarkTheme(hue) {
-       return hue <= 0.6 || (hue >= 0.8 && hue <= .92);
+       return hue <= 0.56 || (hue >= 0.8 && hue <= 0.92);
     }
 
     function getClosestGoodHueForDarkTheme(hue) {
       if (isHueBrightEnoughForDarkTheme(hue)) {
         return hue;
       }
-      if (hue > 0.96) {
+      if (hue >= 0.96) {
         return 0;
       }
-      else if (hue > .9) {
-        return .92;
+      else if (hue >= 0.92) {
+        return 0.92;
       }
-      else if (hue > .7) {
-        return .8;
+      else if (hue >= 0.68) {   // .56-.8 is a hole
+        return 0.8;
       }
-      return .6;
+      return 0.56;
     }
 
     // Sample pages with low contrast issues:
@@ -119,29 +119,71 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     // http://mediatemple.net/
     // http://www.pomona.edu/museum/exhibitions/
 
-    function isSelectorOnDarkBackground(selector) {
-      var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
-        sampleElement;
+    function isOnDarkBackground(origElement) {
+      var origRect,
+        testBackgroundElement,
+        testBackgroundRect,
+        testBackgroundRgba;
 
-      selector = selector.replace(REMOVE_PSEUDO_CLASSES, '');
+      testBackgroundElement = origElement;
 
-      try {
-        sampleElement = document.querySelector(selector); // Only need one
-      }
-      catch(ex) {
-        return;   // Was unable to use selector
-      }
-
-      while (sampleElement) {
-        var computedStyle = window.getComputedStyle(sampleElement);
+      while (testBackgroundElement) {
+        var computedStyle = getComputedStyle(testBackgroundElement);
         if (computedStyle.backgroundColor) {
-          var bgRgba = getRgba(computedStyle.backgroundColor);
-          if (bgRgba.a > 0.2) {
-            return colorUtil.getLuminosity(bgRgba) < 0.5;
+          testBackgroundRgba = getRgba(computedStyle.backgroundColor);
+          if (testBackgroundRgba.a > 0.2) {
+            // Make sure the element is geometrically within the background test rect
+            origRect = origRect || origElement.getBoundingClientRect();
+            testBackgroundRect = testBackgroundElement.getBoundingClientRect();
+            if (testBackgroundRect.right > origRect.left && testBackgroundRect.left < origRect.right &&
+              testBackgroundRect.bottom > origRect.top && testBackgroundRect.top < origRect.bottom) {
+              return colorUtil.getLuminosity(testBackgroundRgba) < 0.5;
+            }
           }
         }
-        sampleElement = sampleElement.parentElement;
+        testBackgroundElement = testBackgroundElement.parentElement;
       }
+    }
+
+    function getSampleElements(selector) {
+      var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
+        $result = $();
+      try { $result = $(selector.replace(REMOVE_PSEUDO_CLASSES, '')); }
+      catch(ex) {}
+      return $result;
+    }
+
+    function isInDarkParagraph($sampleElements, luminosity) {
+      var isInDarkPara;
+
+      $sampleElements.each(function(index, sampleElement) {
+        var sampleElementStyle = getComputedStyle(sampleElement);
+        if (sampleElementStyle.display === 'inline') {
+          var parentElement = sampleElement.parentElement,
+            parentStyle = getComputedStyle(parentElement),
+            parentLuminosity;
+          if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
+            sampleElementStyle.backgroundColor == parentStyle.backgroundColor) {
+            parentLuminosity = colorUtil.getLuminosity(parentStyle.color);
+            if (parentLuminosity !== luminosity) {
+              if (parentLuminosity < 0.3) {
+                isInDarkPara = true;
+                return false; // Stop iterating
+              }
+              if (parentLuminosity > 0.7) {
+                isInDarkPara = false;
+                return false; // Stop iterating
+              }
+            }
+          }
+        }
+      });
+
+      return isInDarkPara;
+    }
+
+    function isWithDarkForeground($sampleElements) {
+      return colorUtil.getLuminosity($sampleElements.css('color')) < 0.5;
     }
 
     /**
@@ -150,26 +192,37 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
      */
     function computeContrastEnhancementDirection(style) {
       var rgba = style.parsedVal,
-        luminosity = colorUtil.getLuminosity(rgba);
+        luminosity = colorUtil.getLuminosity(rgba),
+        $sampleElements;
 
       if (style.prop === 'color') {
         // Foreground decision
-        if (luminosity < 0.3) {
-          return -1;  // Very dark gets darker
+        $sampleElements = getSampleElements(style.selector);
+
+        var isInDarkPara = isInDarkParagraph($sampleElements, luminosity);
+        if (typeof isInDarkPara !== 'undefined') {
+          return isInDarkPara ? -1 : 1;
         }
-        if (luminosity > 0.7) {
-          return 1;  // Very light gets lighter
-        }
+
         // Middle of the road foreground color -- analyze background
         // If on light background make text darker, and vice-versa
-        var isOnDarkBg = isSelectorOnDarkBackground(style.selector);
-        if (typeof isOnDarkBg === 'undefined') {
-          return luminosity < 0.5 ? -1 : 1;
+        var isOnDarkBg = isOnDarkBackground($sampleElements[0]);
+        if (typeof isOnDarkBg !== 'undefined') {
+          return isOnDarkBg ? 1 : -1;
         }
-        return isOnDarkBg ? 1 : -1;
+
+        return luminosity < 0.5 ? -1 : 1;
       }
 
       // Background decision
+      if (luminosity > 0.4 && luminosity < 0.6) {
+        // Not sure about bg, check fg darkness
+        $sampleElements = getSampleElements(style.selector);
+        var isWithDarkFg = isWithDarkForeground($sampleElements);
+        if (typeof isWithDarkFg !== 'undefined') {
+          //return isWithDarkFg ? 1: -1;
+        }
+      }
       return luminosity < 0.5 ? -1 : 1;
     }
 
@@ -182,29 +235,36 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return direction;
     }
 
+    function getSaturationImpactOnContrast(saturation) {
+      return 0.3 + saturation * 0.8;
+    }
+
     colorChoices.increaseContrast = function(style, intensity) {
+      intensity /= 1.8;
+
       var rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
         newLightness = hsl.l,
         saturation = hsl.s, // Reduce contrast change for saturated colors so that we remain colorful
-        power = (1 - intensity) * 4 * (0.3 + saturation),
-        factor = style.prop === 'color' ? 2 : 5,
+        power = (1 - intensity) * 4 * getSaturationImpactOnContrast(saturation) + (style.prop === 'color' ? 0 : 0.2),
+        factor = style.prop === 'color' ? 2 : 6,
         contrastEnhancementDirection = getContrastEnhancementDirection(style),
         newAlpha = rgba.a;
 
       if (contrastEnhancementDirection < 0) {
         // Reduce lightness
         newLightness = hsl.l - Math.pow(hsl.l / factor, power) * intensity;
+        // Also increase the alpha if it's < 1
+        // This multiplies the alpha, so that if the original is fully transparent it remains transparent
+        if (newAlpha < 1) {
+          newAlpha = Math.min(1, newAlpha * (intensity + 1));
+        }
       }
       else if (contrastEnhancementDirection > 0) {
         // Reduce darkness
         var darkness = 1 - hsl.l,
           newDarkness = darkness - Math.pow(darkness / factor, power) * intensity;
         newLightness = 1 - newDarkness;
-      }
-      // Also increase the alpha if it's < 1
-      if (newAlpha < 1) {
-        newAlpha += ((1 - newAlpha) / 2) * intensity;
       }
 
       var lightnessDiff = Math.abs(newLightness - hsl.l),
@@ -335,12 +395,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         parsedVal: originalBgRgba
       };
       var themedBg = colorMapFn(originalBg, 1);
-      return colorChoices.isDarkColor(themedBg);
-    };
-
-    colorChoices.isDarkColor = function(rgb) {
-      var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-      return hsl.l < 0.2;
+      return colorUtil.isDarkColor(themedBg);
     };
 
     if (SC_DEV) {
