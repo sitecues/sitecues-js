@@ -44,7 +44,7 @@
         "grunt-jscs": "1.8.0",
         "grunt-jslint": "1.1.14",
         "grunt-selenium-webdriver": "0.2.451",
-        "intern": "2.2.2",
+        "intern": "git@github.com:theintern/intern.git",
         "grunt-contrib-uglify": "0.9.1",
         "grunt-contrib-watch": "0.6.1"
     },
