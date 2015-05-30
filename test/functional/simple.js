@@ -123,8 +123,6 @@ define(
 
                 test('HLB is Inside Viewport', function () {
 
-                    this.skip('Designed for upcoming Intern 3 release.');
-
                     return this.remote               // represents the browser being tested
                         .execute(
                             function () {
