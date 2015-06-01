@@ -20,6 +20,9 @@ sitecues.def('util/color', function (colorUtil, callback) {
 
     while (true) {
       current = current.parentElement;
+      if (!current) {
+        return;
+      }
       currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
 
       // Only care about non-transparent backgrounds
@@ -392,7 +395,6 @@ sitecues.def('util/color', function (colorUtil, callback) {
   };
 
   if (SC_DEV) {
-    // TODO remove
     sitecues.getRgba = colorUtil.getRgba;
     sitecues.rgbToHsl = colorUtil.rgbToHsl;
     sitecues.hslToRgb = colorUtil.hslToRgb;

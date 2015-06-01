@@ -159,7 +159,6 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           bgRgba = colorUtil.getRgba(bgColor),
           isMostlyOpaque = bgRgba.a > 0.8;
         if (isMostlyOpaque) {
-          console.log(bgRgba);
           return !isLightIntensity(bgRgba);
         }
       }

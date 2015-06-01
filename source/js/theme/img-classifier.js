@@ -14,7 +14,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   sitecues.use('jquery', 'zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
 
     var REVERSIBLE_ATTR = 'data-sc-reversible',
-      customSelectors = site.get('themes') || {};
+      customSelectors = site.get('themes') || {},
+      isDebuggingOn;
 
     function getImageExtension(src) {
       var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif/i);
@@ -35,7 +36,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         return imageData.data;
       }
       catch (ex) {
-        SC_DEV && console.log('Could not get image data for %s: %s', img.src, ex);
+        SC_DEV && isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex);
         return null;
       }
     }
@@ -96,8 +97,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
           ++ numDifferentGrayscaleVals;
         }
       }
-      SC_DEV && console.log('Histogram: %o', grayscaleHistogram);
-      SC_DEV && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
+      SC_DEV && isDebuggingOn && console.log('Histogram: %o', grayscaleHistogram);
+      SC_DEV && isDebuggingOn && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
 
       return {
         hasTransparentPixels: hasTransparentPixels,
@@ -170,7 +171,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
 
       // Image has full color information
       if (pixelInfo) {
-        if (SC_DEV) {
+        if (SC_DEV && isDebuggingOn) {
           $(img).attr('pixel-info', JSON.stringify(pixelInfo));
         }
         return 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
@@ -200,7 +201,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         pixelInfoScore = getPixelInfoScore(img, size),
         finalScore = sizeScore + extensionScore + pixelInfoScore;
 
-      SC_DEV && console.log('%d (size) + %d (ext) + %d (pixels) = %d', sizeScore, extensionScore, pixelInfoScore, finalScore);
+      SC_DEV && isDebuggingOn && console.log('%d (size) + %d (ext) + %d (pixels) = %d', sizeScore, extensionScore, pixelInfoScore, finalScore);
 
       return finalScore > 0;
     }
@@ -217,14 +218,24 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
       $(selector).each(function (index, element) {
         var isReversible = shouldInvert(element);
-        if (SC_DEV) {
+        if (SC_DEV && isDebuggingOn) {
           $(element).css('outline', '5px solid ' + (isReversible ? 'red': 'green'));
         }
         $(element).attr(REVERSIBLE_ATTR, isReversible);
       });
     };
 
-    $(window).on('load', imgClassifier.classify);
+    if (SC_DEV) {
+      sitecues.debugImageClassifier = function() {
+        isDebuggingOn = true;
+        if (document.readyState === 'complete') {
+          imgClassifier.classify();
+        }
+        else {
+          $(window).on('load', imgClassifier.classify);
+        }
+      };
+    }
 
     if (SC_UNIT) {
       $.extend(exports, imgClassifier);
