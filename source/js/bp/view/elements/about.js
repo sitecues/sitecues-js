@@ -91,6 +91,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         'aboutBtnRotateY'     : 54, // A way to rotate around an origin
         'aboutImageTranslateX': 0
       };
+
     }
 
     function byId (id) {
@@ -138,7 +139,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           fromCSSValues               = aboutTransitionTo === ABOUT_DISABLED ? cssValues[ABOUT_ENABLED] : cssValues[ABOUT_DISABLED],
           targetCSSValues             = cssValues[aboutTransitionTo],
           currentSVGHeight            = parseFloat(mainSVG.style.height),
-          currentSVGTranslateY        = transform.getTransform(mainSVG.style.transform).translate.top,
+          currentSVGTranslateY        = transform.getTransform(mainSVG.style[helper.transformProperty]).translate.top,
           currentBottomSVGTranslateY  = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
           currentMoreBtnTransform     = transform.getTransform(moreButton.getAttribute('transform')),
           currentMoreBtnTranslate     = currentMoreBtnTransform.translate,
@@ -163,7 +164,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
@@ -195,7 +196,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));

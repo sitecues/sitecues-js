@@ -132,7 +132,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           fromCSSValues                = tipsTransitionTo === TIPS_DISABLED ? cssValues[TIPS_ENABLED] : cssValues[TIPS_DISABLED],
           currentOutlineHeight         = getCurrentOutlineHeight(),
           currentSVGHeight             = parseFloat(mainSVG.style.height),
-          currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
+          currentSVGTranslateY         = transform.getTransform(mainSVG.style[helper.transformProperty]).translate.top,
           currentBottomSVGTranslateY   = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
           currentMoreBtnTransform      = transform.getTransform(moreButton.getAttribute('transform')),
           currentMoreBtnTranslate      = currentMoreBtnTransform.translate,
@@ -155,7 +155,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
         tipsButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentTipsBtnTranslateX, targetCSSValues.settingsBtnTranslateX, t), getValueInTime(currentTipsBtnTranslateY, targetCSSValues.settingsBtnTranslateY, t), getValueInTime(currentTipsBtnScale, targetCSSValues.settingsBtnScale, t)));
@@ -170,7 +170,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
         bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
