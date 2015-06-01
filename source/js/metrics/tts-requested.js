@@ -15,7 +15,8 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
     'name': 'tts-requested',
     'trigger': SPEECH_TRIGGERS[0],       // For now, it's always HLB
     'audio_format': TTS_AUDIO_FORMATS[0],
-    'char_count': 0
+    'char_count': 0,
+    'request_time': 0                   // The number of milliseconds the TTS request took to complete.
   };
 
   sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
@@ -63,7 +64,7 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
 
     // ============= Events Handlers ======================
     // Create an instance on hlb create event.
-    sitecues.on('hlb/speech-play', function(TTSUrl) {
+    sitecues.on('audio/speech-play', function(TTSUrl) {
       if (!TTSRequested['data']) {
         TTSRequested.init(TTSUrl);
       }
@@ -74,10 +75,15 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
       TTSRequested['data'] && TTSRequested.update(metrics.data);
     });
 
-    // Clear an instance data on hlb opened(ready) event.
-    sitecues.on('hlb/closed', function() {
-      TTSRequested.send();
-      TTSRequested.reset();
+    // Update requested time
+    sitecues.on('audio/playing', function(metrics) {
+      if (TTSRequested['data']) {
+        TTSRequested.update(metrics.data);
+
+        // Send the metric data and clear an instance data on hlb opened(ready) event.
+        TTSRequested.send();
+        TTSRequested.reset();
+      }
     });
 
     // Done.
