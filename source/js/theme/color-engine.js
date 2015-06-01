@@ -93,7 +93,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       // - http://roc.cs.rochester.edu/e/ic/classify.php?user=none
       // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
       function getReverseCssText() {
-        var FRAME ='frame,iframe',
+        var REVERSIBLE = ':not(data-sc-reversible="false")',
+          FRAME ='frame' + REVERSIBLE + ',iframe' + REVERSIBLE,
           BG_OPAQUE = 'background-color:' + colorUtil.getDocumentBackgroundColor() + ';',
           INVERT_FILTER = 'filter:invert(100%);',
           PLATFORM_INVERT_FILTER =  INVERT_FILTER + platform.cssPrefix + INVERT_FILTER;
