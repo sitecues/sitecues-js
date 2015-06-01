@@ -1,13 +1,20 @@
 /**
  *  Mark images as needing inversion for a dark theme
+ *  Web page can override either via:
+ *    data-sc-reversible="true" or "false"
+ *    config.themes = {
+ *      reversible: [selector],
+ *      nonReversible: [selector]
+ *    }
  */
 
 sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   'use strict';
 
-  var REVERSIBLE_ATTR = 'data-sc-reversible';
+  sitecues.use('jquery', 'zoom', 'theme/color/util', 'conf/site', function($, zoomMod, colorUtil, site) {
 
-  sitecues.use('jquery', 'zoom', 'theme/color/util', function($, zoomMod, colorUtil) {
+    var REVERSIBLE_ATTR = 'data-sc-reversible',
+      customSelectors = site.get('themes') || {};
 
     function getImageExtension(src) {
       var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif/i);
@@ -60,8 +67,6 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         numPixelsToCheck = Math.floor(area / stepSize),
         histogramIndex;
 
-      // TODO do we only need numDifferentGrayscaleVals?
-
       for(; byteIndex < numBytes; byteIndex += DWORD_SIZE * stepSize) {
         var rgba = {
           r: data[byteIndex],
@@ -91,8 +96,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
           ++ numDifferentGrayscaleVals;
         }
       }
-      console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
-      SC_DEV && console.log(grayscaleHistogram);
+      SC_DEV && console.log('Histogram: %o', grayscaleHistogram);
+      SC_DEV && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
 
       return {
         hasTransparentPixels: hasTransparentPixels,
@@ -109,27 +114,15 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       };
     }
 
-    /**
-     * Classifier function for images without missing features.
-     * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
-     * @param imageInfo
-     * @returns {*}
-     */
-    // TODO cache results in localStorage based on URL?
-    // TODO don't do if original bg was dark? E.g. http://news.dessci.com/mathplayer-4-works-assistive-technology-products
-    function shouldInvert(img) {
-      var src = img.getAttribute('src'),
-        size = getImageSize(img),
-        imageExt = getImageExtension(src),
-        pixelInfo = getPixelInfo(img, size.width, size.height),
-        score = 0,
-        aspectRatio = size.width / size.height;
+    function getSizeScore(height, width) {
+      var score = 0,
+        aspectRatio = width / height;
 
       // No color information
-      if (size.height < 26) {
+      if (height < 26) {
         score += 100;
       }
-      else if (size.height < 36) {
+      else if (height < 36) {
         score += 50;
       }
 
@@ -140,56 +133,88 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         score += 50;
       }
       else {
-        if (size.height > 250) {
-          score -= 50;
-          if (size.height > 400) {
-            score -= 50;
-          }
+        if (height > 200) {
+          score += 200 - height;
         }
         if (aspectRatio < 0.7) {
           score -= 50;
         }
-        else if (aspectRatio > 1.4 && aspectRatio < 1.6) {
-          score -= 50; // Typical photo
+        else if (aspectRatio > 1.4 && aspectRatio < 1.8) {
+          score -= 70; // Typical photo
+          if (height > 130) {
+            score += 130 - height;
+          }
         }
       }
 
+      return Math.max(score, -150);
+    }
+
+    function getExtensionScore(imageExt) {
       switch (imageExt) {
         case '.png':
-          score += 50;
-          break;
+          return 50;
 //        case '.jpg':
 //        case '.jpeg':
 //        case '.gif':
         default:
-          score -= 70;
+          return -70;
       }
+    }
+
+    function getPixelInfoScore(img, size) {
+      var pixelInfo = getPixelInfo(img, size.width, size.height);
 
       // Image has full color information
       if (pixelInfo) {
-        console.log(pixelInfo);
         if (SC_DEV) {
           $(img).attr('pixel-info', JSON.stringify(pixelInfo));
         }
-        score +=
-          180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
+        return 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
           pixelInfo.numMultiGrayscaleVals * 10 +
           (pixelInfo.percentWithSameGrayscale > 0.3) * 50;
       }
-      else {
-        score += 40; // Add an average amount
-      }
 
+      return 40; // Add an average amount
+    }
 
-      SC_DEV && console.log(score);
+    /**
+     * Classifier function for images without missing features.
+     * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
+     * @param imageInfo
+     * @returns {*}
+     */
+    // TODO cache results in localStorage based on URL?
+    // TODO don't do if original bg was dark? E.g.
+    //   http://news.dessci.com/mathplayer-4-works-assistive-technology-products
+    //   http://fantasynews.cbssports.com/fantasybasketball/update/25201107/cavaliers-kyrie-irving-practices-but-still-not-himself
+    //   http://bigstory.ap.org/article/9a3b8c44aae746cbb44a87fd6e779fcd/spike-water-toxins-blamed-hundreds-turtle-deaths
+    //   http://www.usatoday.com/story/news/politics/elections/2015/05/30/martin-omalley-president-announcement/27330857/
 
-      return score > 0;
+    function shouldInvert(img) {
+      var src = img.getAttribute('src'),
+        size = getImageSize(img),
+        imageExt = getImageExtension(src),
+        sizeScore = getSizeScore(size.height, size.width),
+        extensionScore = getExtensionScore(imageExt),
+        pixelInfoScore = getPixelInfoScore(img, size),
+        finalScore = sizeScore + extensionScore + pixelInfoScore;
+
+      SC_DEV && console.log('%d (size) + %d (ext) + %d (pixels) = %d', sizeScore, extensionScore, pixelInfoScore, finalScore);
+
+      return finalScore > 0;
     }
 
     imgClassifier.classify = function() {
       var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
-        selector = 'img' + NOT_CLASSIFIED +
-                   ',input[type="image"]' + NOT_CLASSIFIED;
+        selector = 'body img' + NOT_CLASSIFIED +
+                   ',body input[type="image"]' + NOT_CLASSIFIED;
+      if (customSelectors.reversible) {
+        $(customSelectors.reversible).attr(REVERSIBLE_ATTR, true);
+      }
+      if (customSelectors.nonReversible) {
+        $(customSelectors.nonReversible).attr(REVERSIBLE_ATTR, false);
+      }
       $(selector).each(function (index, element) {
         var isReversible = shouldInvert(element);
         if (SC_DEV) {
