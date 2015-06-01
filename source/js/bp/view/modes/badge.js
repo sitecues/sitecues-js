@@ -282,6 +282,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       // If a customer uses the <img> placeholder...
       if (badgeElement.localName === 'img') {
 
+        badgeElement.setAttribute('data-sc-reversible', 'false'); // Will use a different palette dark theme is used
+
         convertExistingBadge();
         removeExistingBadgeId();
         setBadgeParentId();

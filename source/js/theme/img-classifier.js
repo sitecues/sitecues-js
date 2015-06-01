@@ -11,7 +11,7 @@
 sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'theme/color/util', 'conf/site', function($, zoomMod, colorUtil, site) {
+  sitecues.use('jquery', 'zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
 
     var REVERSIBLE_ATTR = 'data-sc-reversible',
       customSelectors = site.get('themes') || {};
@@ -122,11 +122,14 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       if (height < 26) {
         score += 100;
       }
-      else if (height < 36) {
+      else if (height < 37) {
         score += 50;
       }
 
-      if (aspectRatio > 4) {
+      if (aspectRatio === 1) {
+        score *= 2;
+      }
+      else if (aspectRatio > 4) {
         score += 100;
       }
       else if (aspectRatio > 3) {
@@ -185,13 +188,10 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    // TODO don't do if original bg was dark? E.g.
-    //   http://news.dessci.com/mathplayer-4-works-assistive-technology-products
-    //   http://fantasynews.cbssports.com/fantasybasketball/update/25201107/cavaliers-kyrie-irving-practices-but-still-not-himself
-    //   http://bigstory.ap.org/article/9a3b8c44aae746cbb44a87fd6e779fcd/spike-water-toxins-blamed-hundreds-turtle-deaths
-    //   http://www.usatoday.com/story/news/politics/elections/2015/05/30/martin-omalley-president-announcement/27330857/
-
     function shouldInvert(img) {
+      if (colorUtil.isOnDarkBackground(img)) {
+        return false; // Already on a dark background, inverting won't help make it visible
+      }
       var src = img.getAttribute('src'),
         size = getImageSize(img),
         imageExt = getImageExtension(src),

@@ -1,11 +1,33 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-sitecues.def('theme/color/util', function (colorUtil, callback) {
+sitecues.def('util/color', function (colorUtil, callback) {
 
   'use strict';
 
-  var TRANSPARENT = 'rgba(0, 0, 0, 0)';
+  var TRANSPARENT = 'rgba(0, 0, 0, 0)',
+    MIN_LUMINOSITY_LIGHT_TONE = 160;
+
+  function isDarkTone(colorValue) {
+
+    var rgba = colorUtil.getRgba(colorValue);
+
+    return colorUtil.getLuminosity(rgba) < MIN_LUMINOSITY_LIGHT_TONE;
+  }
+
+  colorUtil.isOnDarkBackground = function(current) {
+    var currentBackgroundColor;
+
+    while (true) {
+      current = current.parentElement;
+      currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
+
+      // Only care about non-transparent backgrounds
+      if (currentBackgroundColor.a > 0.5) {
+        return isDarkTone(currentBackgroundColor);
+      }
+    }
+  };
 
   // Convert color names such as 'white', 'black', 'transparent'
   function convertColorNameToRgbFormat(colorName) {

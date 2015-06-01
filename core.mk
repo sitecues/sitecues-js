@@ -64,6 +64,7 @@ files=\
 	source/js/util/platform.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
+	source/js/util/color.js \
 	source/js/util/transform.js \
 	source/js/audio/speech-builder.js \
 	source/js/audio/html5-player.js \
@@ -121,7 +122,6 @@ files=\
 	source/js/keys/keys.js \
 	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan/hpan.js \
-	source/js/theme/color-util.js \
 	source/js/theme/color-choices.js \
 	source/js/theme/img-classifier.js \
 	source/js/theme/color-engine.js \
