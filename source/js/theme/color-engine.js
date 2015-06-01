@@ -4,8 +4,8 @@
 
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'theme/color/util',
-    function($, styleService, platform, colorChoices, colorUtil) {
+  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'theme/color/util', 'theme/color/img-classifier',
+    function($, styleService, platform, colorChoices, colorUtil, imgClassifier) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -44,7 +44,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         getStyleSheet().text(transitionCss + themeCss + reverseCss);
 
         // Allow web pages to create CSS rules that respond to reverse themes
-        $('html').toggleClass('sitecues-reverse-theme', isReverseTheme);
+        $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
+        if (isReverseTheme) {
+          imgClassifier.classify();
+        }
 
         if (shouldRepaintToEnsureFullCoverage) {
           repaintPage();
@@ -82,6 +85,13 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return ANIMATION_SELECTOR + TRANSITION_CSS;
       }
 
+      // Reverses iframes if we are in a reverse theme
+      // Should we reverse non-photo images as well?
+      // See http://stackoverflow.com/questions/9354744/how-to-detect-if-an-image-is-a-photo-clip-art-or-a-line-drawing
+      // Also see Jeff's image classifier code:
+      // - http://roc.cs.rochester.edu/e/ic/features.php?user=none
+      // - http://roc.cs.rochester.edu/e/ic/classify.php?user=none
+      // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
       function getReverseCssText() {
         var FRAME ='frame,iframe',
           BG_OPAQUE = 'background-color:' + colorUtil.getDocumentBackgroundColor() + ';',
@@ -254,7 +264,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             parsedVal: colorUtil.getRgba(fgStyle),
             contrastEnhancementDirection:
               (function() {
-                var fgLuminosity = colorUtil.getLuminosity(fgStyle);
+                var fgLuminosity = colorUtil.getLuminosityFromColorName(fgStyle);
                 if (fgLuminosity < 0.05) {
                   return -1;
                 }
@@ -264,7 +274,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
                 // If we're directly on a dark background, we know the text must get lighter
                 var bgRgba = colorUtil.getRgba(cssStyleDecl.backgroundColor);
                 if (bgRgba && bgRgba.a > 0.2) {
-                  return colorUtil.getLuminosity(bgRgba) < 0.5 ? 1 : -1;
+                  return colorUtil.getLuminosityFromColorName(bgRgba) < 0.5 ? 1 : -1;
                 }
               }())
           };

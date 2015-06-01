@@ -290,11 +290,13 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
   };
 
   // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
-  colorUtil.getLuminosity = function(color) {
-    var rgb = colorUtil.getRgba(color);
+  colorUtil.getLuminosityFromColorName = function(colorName) {
+    return colorUtil.getLuminosity(colorUtil.getRgba(colorName));
+  };
 
-    function getValue(color) {
-      return Math.pow(rgb[color] / 255, 2.2);
+  colorUtil.getLuminosity = function(rgb) {
+    function getValue(channel) {
+      return Math.pow(rgb[channel] / 255, 2.2);
     }
     return 0.213 * getValue('r') +
       0.715 * getValue('g') +
@@ -302,8 +304,8 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
   };
 
   colorUtil.getContrastRatio = function(color1, color2) {
-    var L1 = colorUtil.getLuminosity(color1),
-      L2 = colorUtil.getLuminosity(color2);
+    var L1 = colorUtil.getLuminosityFromColorName(color1),
+      L2 = colorUtil.getLuminosityFromColorName(color2);
     var ratio = (L1 + 0.05) / (L2 + 0.05);
     if (ratio >= 1) {
       return ratio;
@@ -372,7 +374,7 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
     sitecues.getRgba = colorUtil.getRgba;
     sitecues.rgbToHsl = colorUtil.rgbToHsl;
     sitecues.hslToRgb = colorUtil.hslToRgb;
-    sitecues.getLuminosity = colorUtil.getLuminosity;
+    sitecues.getLuminosityFromColorName = colorUtil.getLuminosityFromColorName;
     sitecues.getContrastRatio = colorUtil.getContrastRatio;
   }
 

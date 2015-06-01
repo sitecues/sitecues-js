@@ -123,6 +123,7 @@ files=\
 	source/js/hpan/hpan.js \
 	source/js/theme/color-util.js \
 	source/js/theme/color-choices.js \
+	source/js/theme/img-classifier.js \
 	source/js/theme/color-engine.js \
 	source/js/info/info.js \
 	source/js/util/status.js \

@@ -137,7 +137,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             testBackgroundRect = testBackgroundElement.getBoundingClientRect();
             if (testBackgroundRect.right > origRect.left && testBackgroundRect.left < origRect.right &&
               testBackgroundRect.bottom > origRect.top && testBackgroundRect.top < origRect.bottom) {
-              return colorUtil.getLuminosity(testBackgroundRgba) < 0.5;
+              return colorUtil.getLuminosityFromColorName(testBackgroundRgba) < 0.5;
             }
           }
         }
@@ -164,7 +164,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             parentLuminosity;
           if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
             sampleElementStyle.backgroundColor == parentStyle.backgroundColor) {
-            parentLuminosity = colorUtil.getLuminosity(parentStyle.color);
+            parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
               if (parentLuminosity < 0.3) {
                 isInDarkPara = true;
@@ -183,7 +183,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     }
 
     function isWithDarkForeground($sampleElements) {
-      return colorUtil.getLuminosity($sampleElements.css('color')) < 0.5;
+      return colorUtil.getLuminosityFromColorName($sampleElements.css('color')) < 0.5;
     }
 
     /**
@@ -192,7 +192,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
      */
     function computeContrastEnhancementDirection(style) {
       var rgba = style.parsedVal,
-        luminosity = colorUtil.getLuminosity(rgba),
+        luminosity = colorUtil.getLuminosityFromColorName(rgba),
         $sampleElements;
 
       if (style.prop === 'color') {

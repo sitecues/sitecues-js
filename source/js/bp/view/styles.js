@@ -290,6 +290,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           '-ms-user-select': 'none'
         },
 
+        'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg': {
+          'filter': 'invert(100%)',
+          '-webkit-filter': 'invert(100%)',
+          '-moz-filter': 'invert(100%)',
+          '-ms-filter': 'invert(100%)'
+        },
+
         /* Text label animation for main panel labels */
         /* The problem with the text scale transition is jerkiness, so for now we delay text labels until panel is large */
         /* One way to fix this might be to render text into a canvas element, or maybe there's another font that doesn't do this */
