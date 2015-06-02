@@ -6,6 +6,7 @@
 sitecues.def('ua-css', function (UA_CSS, callback) {
 
 'use strict';
+/*jshint multistr: true */
 
 // The following system colors are converted to hex colors here to improve performance:
 // button { color:ButtonText; border-color:ButtonFace; background-color:ButtonFace; }

@@ -14,7 +14,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   sitecues.use('jquery', 'zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
 
     var REVERSIBLE_ATTR = 'data-sc-reversible',
-      customSelectors = site.get('themes') || {},
+      customSelectors = site.get('themes') || { },
       DARK_BG_THRESHOLD = 0.3,
       BUTTON_BONUS = 50,
       isDebuggingOn;
@@ -191,7 +191,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     /**
      * Classifier function for images without missing features.
      * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
-     * @param imageInfo
+     * @param img
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
