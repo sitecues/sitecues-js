@@ -16,6 +16,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     var REVERSIBLE_ATTR = 'data-sc-reversible',
       customSelectors = site.get('themes') || {},
       DARK_BG_THRESHOLD = 0.3,
+      BUTTON_BONUS = 50,
       isDebuggingOn;
 
     function getImageExtension(src) {
