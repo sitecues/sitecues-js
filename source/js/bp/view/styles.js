@@ -290,7 +290,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           '-ms-user-select': 'none'
         },
 
-        'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not(data-sc-reversible="false")': {
+        'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not([data-sc-reversible="false"])': {
           'filter': 'invert(100%)',
           '-webkit-filter': 'invert(100%)',
           '-moz-filter': 'invert(100%)',

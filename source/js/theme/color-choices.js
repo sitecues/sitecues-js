@@ -4,9 +4,10 @@
 
 // Do we want to do:
 // - border color
-// - images, background-images, iframes?
+// - background-images: put in :before and invert if necessary()
 // - example background-image problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
+//    http://markets.on.nytimes.com/research/markets/mutualfunds/snapshot.asp?symbol=IBMD
 // - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:

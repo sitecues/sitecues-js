@@ -297,8 +297,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
       }
 
-      // For now this our hacky way to provide access to the theme engine
-      // TODO remove this:
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;
       }
