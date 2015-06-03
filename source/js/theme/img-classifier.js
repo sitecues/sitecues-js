@@ -17,6 +17,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       customSelectors = site.get('themes') || { },
       DARK_BG_THRESHOLD = 0.3,
       BUTTON_BONUS = 50,
+      SVG_BONUS = 999,
       BG_IMAGE_BONUS = 30,
       MAX_SCORE_CHECK_PIXELS = 120,
       isDebuggingOn;
@@ -170,8 +171,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       switch (imageExt) {
         case '.png':
           return 50;
-        case 'svg':
-          return 999;
+        case '.svg':
+          return SVG_BONUS;
 //        case '.jpg':
 //        case '.jpeg':
 //        case '.gif':
@@ -196,6 +197,17 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       return 40; // Add an average amount
     }
 
+    function getElementTypeScore(img) {
+      switch (img.localName) {
+        case 'input':
+          return BUTTON_BONUS;
+        case 'svg':
+          return SVG_BONUS;
+        default:
+          return 0;
+      }
+    }
+
     /**
      * Classifier function for images without missing features.
      * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
@@ -211,7 +223,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         size = getImageSize(img),
         imageExt = getImageExtension(src),
         sizeScore = getSizeScore(size.height, size.width),
-        elementTypeScore = img.localName === 'input' ? BUTTON_BONUS : 0,
+        elementTypeScore = getElementTypeScore(img),
         extensionScore = getExtensionScore(imageExt),
         finalScore = sizeScore + elementTypeScore + extensionScore,
         pixelInfoScore = 0;
@@ -253,7 +265,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     imgClassifier.classify = function() {
       var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
         selector = 'body img' + NOT_CLASSIFIED +
-                   ',body input[type="image"]' + NOT_CLASSIFIED;
+                   ',body input[type="image"]' + NOT_CLASSIFIED +
+                   ',body svg' + NOT_CLASSIFIED;
       if (customSelectors.reversible) {
         $(customSelectors.reversible).attr(REVERSIBLE_ATTR, true);
       }

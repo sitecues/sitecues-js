@@ -19,19 +19,24 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 2000,
-        URL_REGEXP = /(?:url|\-gradient)\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/gi,
+        URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
+        MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"";',
         BACKGROUND_IMAGE_STYLES_TO_COPY = [
-          'background',
           'background-image',
-          'background-color',
-          'background-position',
-          'vertical-align',
-          'padding',
-          'padding-top',
-          'padding-left',
-          'padding-bottom',
-          'padding-right',
-          'box-sizing'
+          'background-repeat',
+          'background-attachment',
+          'background-position-x',
+          'background-position-y',
+          'background-origin',
+          'background-size',
+          'background-clip'
+//          'vertical-align',
+//          'padding',
+//          'padding-top',
+//          'padding-left',
+//          'padding-bottom',
+//          'padding-right',
+//          'box-sizing'
         ];
 
       // ---- PUBLIC ----
@@ -153,33 +158,29 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
           if (style.value.prop === 'background-image') {
             if (isReverse) {
-              // Move background image to :before where we can safely invert them without inverting
-              // the entire element
-              var INHERIT = 'inherit',
-                  bgImageFixText =
-                  getBeforeSelector(selectorText) +' {' +
-                    createRule('display', 'block') +
-                    createRule('position', 'absolute') +
-                    createRule('background-repeat', INHERIT) +
-                    createRule('background-attachment', INHERIT) +
-                    createRule('background-position-x', INHERIT) +
-                    createRule('background-position-y', INHERIT) +
-                    createRule('background-origin', INHERIT) +
-                    createRule('background-size', INHERIT) +
-                    createRule('background-clip', INHERIT) +
-                    createRule('width', INHERIT) +
-                    createRule('height', INHERIT) +
-                    createRule('content', '""') +
-//                    createRule('border', '1px solid rgb(0,255,255)') +
-                    style.value.allBgStyles +
-                    getInvertFilter() +
-                  '}\n' +
-                  selectorText +' {' +
-                    //createRule('background', 'none', true) +
-                    createRule('background-image', 'none', true) +
-                    createRule('background-color', 'transparent', true) +
-                  '}\n';
-              styleSheetText += bgImageFixText;
+              if (style.value.isOnPseudo) {
+                // Background already on a pseudo element, just invert it there
+                styleSheetText += selectorText + '{' + getInvertFilter() + '}\n';
+                return;
+              }
+              // Move background to a new :before pseudo element so that we can invert it without affecting anything else
+              var addBgImageToBeforeCss =
+                    style.value.hasImage ? MOVE_BG_IMAGE_TO_BEFORE + getInvertFilter() : '',
+                  addRelevantBgPropsToBeforeCss =
+                    getBeforeSelector(selectorText) +' {' +
+                      addBgImageToBeforeCss +
+                      style.value.allBgStyles +
+                    '}\n',
+                  removeBgFromMainElementCss =
+                    style.value.hasImage ?
+                      selectorText +' {' +
+                        createRule('background', 'none', true) +
+                        createRule('background-image', 'none', true) +
+                        createRule('background-color', 'transparent', true) +
+                        (SC_DEV ? createRule('outline', '2px solid red', true) : '') +
+                      '}\n' :
+                      '';
+              styleSheetText += addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss;
               return;
             }
           }
@@ -254,7 +255,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        */
       function isBgRepeatUsed(cssStyleDecl) {
         var repeatPropValue = cssStyleDecl.backgroundRepeat || cssStyleDecl.background || '';
-        return repeatPropValue.indexOf('repeat') >= 0;  // Look for repeat, repeat-x or repeat-y
+        return repeatPropValue.indexOf('repeat') >= 0 && // Look for repeat, repeat-x or repeat-y
+          repeatPropValue.indexOf('no-repeat') < 0;
       }
 
       function getSampleElement(selector) {
@@ -267,7 +269,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       function shouldInvert(cssStyleDecl, bgImage, selector) {
         if (bgImage) {
-          var sampleElement = getSampleElement(selector)[0],
+          var sampleElement = getSampleElement(selector),
             rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
           if (colorUtil.isOnDarkBackground(sampleElement)) {
             return false; // Already designed to show on a dark background
@@ -282,33 +284,68 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
-      /**
-       * Retrieve information about background images the theme needs to care about.
-       * @param cssStyleDecl
-       * @returns {{prop: string, parsedVal: boolean}}
-       */
-      function getSignificantBackgroundImage(cssStyleDecl, selector) {
-        var bgStyle = cssStyleDecl.background,
-          bgImageStyle = cssStyleDecl.backgroundImage,
-          bgImage =
-            (bgStyle.indexOf('(') >= 0 && bgStyle.match(URL_REGEXP)) ||   // background takes precedence over
-            (bgImageStyle !== 'none' && bgImageStyle),                       // background-image
-          isRepeating = bgImage && (bgImage.indexOf('-gradient') || isBgRepeatUsed(cssStyleDecl)),
-          isSignificantBgImage = isRepeating || shouldInvert(cssStyleDecl, bgImage, selector),
-          allBgStyles = '';
+      function getSignificantBgImageProperties(cssStyleDecl, selector) {
+        var allBgStyles = '',
+          hasImage = false,
+          hasPositioningProperty = false,
+          cssText = cssStyleDecl.cssText;
 
-        function addPropAndValue(propName) {
-          var value = cssStyleDecl[propName];
-          allBgStyles += value ? propName + ':' + value + ';\n' : '';
+        if (cssText.indexOf('background') < 0) {
+          return;  // Need some background property
         }
 
-        if (isSignificantBgImage) {
-          BACKGROUND_IMAGE_STYLES_TO_COPY.forEach(addPropAndValue);
+        function addPositioningProp(prop) {
+          var propVal = cssStyleDecl[prop];
+          if (propVal) {
+            if (prop === 'background' || prop === 'background-image') {
+              if (!isSignificantBackgroundImage(propVal, cssStyleDecl, selector)) {
+                return;
+              }
+              hasImage = true;
+            }
+            else {
+              hasPositioningProperty = true;
+            }
+            allBgStyles += prop + ':' + propVal + ';\n';
+          }
+        }
+
+        BACKGROUND_IMAGE_STYLES_TO_COPY.forEach(addPositioningProp);
+
+        if (!hasImage && !hasPositioningProperty) {
+          return;
+        }
+
+
+
+        if (allBgStyles) {
           return {
             prop: 'background-image',
-            allBgStyles: allBgStyles
+            allBgStyles: allBgStyles,
+            hasImage: hasImage,
+            isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0
           };
         }
+      }
+
+      function getCssUrl(propVal) {
+        if (propVal.indexOf('url(') >= 0) {
+          var match = propVal.match(URL_REGEXP);
+          return match && match[1];
+        }
+      }
+
+      /**
+       * Retrieve information about background images the theme needs to care about.
+       * @param propVal
+       * @returns {boolean}
+       */
+      function isSignificantBackgroundImage(propVal, cssStyleDecl, selector) {
+        var bgImage = getCssUrl(propVal),
+          isRepeating = isBgRepeatUsed(cssStyleDecl),
+          isSignificantBgImage = !isRepeating && bgImage && shouldInvert(cssStyleDecl, bgImage, selector);
+
+        return isSignificantBgImage;
       }
 
       function isButtonRule(selector) {
@@ -376,7 +413,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
           fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
-          bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBackgroundImage);
+          bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
 
         originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
         isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);

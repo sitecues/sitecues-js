@@ -44,7 +44,7 @@ blockquote[type="cite"] {\n\
   border-color:#00f;\n\
 }\n\
 mark {\n\
-  background:#ffff00;\n\
+  background-color:#ffff00;\n\
   color:#000;\n\
 }\n\
 hr {\n\

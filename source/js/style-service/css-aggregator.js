@@ -163,16 +163,16 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
        background: url(   http://example.ru/templates/_default_/close.gif   )
        background: url(   https://instant/templates/_default_/images/nyromodal/close.gif   );
        background:url(data:jpg;base64,/QL9Av0GaqAAA//2Q==)
-       background: url(/assets/homepage/20150518-111116/images/sprite/sprite-no-repeat.svg);
        background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
        */
 
-      var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/gi,
+      var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi,
         baseUrlObject;
       return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
         // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
         baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
-        return 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
+        var newUrl = 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
+        return newUrl;
       });
     }
 

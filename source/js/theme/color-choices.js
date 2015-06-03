@@ -4,11 +4,9 @@
 
 // Do we want to do:
 // - border color
-// - images, background-images
-// - example background-image problem:
+// - background-image textures and gradients
+// - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
-//    http://markets.on.nytimes.com/research/markets/mutualfunds/snapshot.asp?symbol=IBMD
-// - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
 //    ** news.google.com **
