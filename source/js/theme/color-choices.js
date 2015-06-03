@@ -4,7 +4,7 @@
 
 // Do we want to do:
 // - border color
-// - background-images: put in :before and invert if necessary()
+// - images, background-images
 // - example background-image problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
 //    http://markets.on.nytimes.com/research/markets/mutualfunds/snapshot.asp?symbol=IBMD
@@ -147,9 +147,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     }
 
     function getSampleElements(selector) {
-      var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
+      var REMOVE_PSEUDO_CLASSES_AND_ELEMENTS = /::?[^ ,:.]+/g,
         $result = $();
-      try { $result = $(selector.replace(REMOVE_PSEUDO_CLASSES, '')); }
+      try { $result = $(selector.replace(REMOVE_PSEUDO_CLASSES_AND_ELEMENTS, '')); }
       catch(ex) {}
       return $result;
     }

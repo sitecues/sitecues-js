@@ -18,17 +18,15 @@ sitecues.def('util/color', function (colorUtil, callback) {
   colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
     var currentBackgroundColor;
 
-    while (true) {
-      current = current.parentElement;
-      if (!current) {
-        return;
-      }
+    while (current) {
       currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
 
       // Only care about non-transparent backgrounds
       if (currentBackgroundColor.a > 0.5) {
         return isDarkTone(currentBackgroundColor, optionalThreshold);
       }
+
+      current = current.parentElement;
     }
   };
 

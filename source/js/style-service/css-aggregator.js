@@ -167,7 +167,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
        background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
        */
 
-      var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/g,
+      var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/gi,
         baseUrlObject;
       return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
         // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
@@ -185,7 +185,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
     // Convert @import into new stylesheet requests
     function processAtImports(sheet) {
-      var IMPORT_REGEXP = /\s*(?:\@import\s+url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/g,
+      var IMPORT_REGEXP = /\s*(?:\@import\s+url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/gi,
         baseUrlObject;
 
       return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {

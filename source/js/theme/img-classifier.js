@@ -17,16 +17,22 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       customSelectors = site.get('themes') || { },
       DARK_BG_THRESHOLD = 0.3,
       BUTTON_BONUS = 50,
+      BG_IMAGE_BONUS = 30,
+      MAX_SCORE_CHECK_PIXELS = 120,
       isDebuggingOn;
 
     function getImageExtension(src) {
-      var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif/i);
+      var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
       return imageExtension && imageExtension[0];
     }
 
-    function getImageData(img, width, height) {
+    function getImageData(img, rect) {
       var canvas = document.createElement('canvas'),
-        ctx;
+        ctx,
+        top = rect.top || 0,
+        left = rect.left || 0,
+        width = rect.width,
+        height = rect.height;
       canvas.width = width;
       canvas.height = height;
 
@@ -37,7 +43,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
 
       try {
-        ctx.drawImage(img, 0, 0, width, height);  // Works with img, canvas, video
+        ctx.drawImage(img, top, left, width, height);  // Works with img, canvas, video
         var imageData = ctx.getImageData(0, 0, width, height);
         return imageData.data;
       }
@@ -47,9 +53,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
     }
 
-    function getPixelInfo(img, width, height) {
-      var data = getImageData(img, width, height);
-      return data && getPixelInfoImpl(data, width, height);
+    function getPixelInfo(img, rect) {
+      var data = getImageData(img, rect);
+      return data && getPixelInfoImpl(data, rect.width, rect.height);
     }
 
     function getPixelInfoImpl(data, width, height) {
@@ -164,6 +170,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       switch (imageExt) {
         case '.png':
           return 50;
+        case 'svg':
+          return 999;
 //        case '.jpg':
 //        case '.jpeg':
 //        case '.gif':
@@ -172,8 +180,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
     }
 
-    function getPixelInfoScore(img, size) {
-      var pixelInfo = getPixelInfo(img, size.width, size.height);
+    function getPixelInfoScore(img, rect) {
+      var pixelInfo = getPixelInfo(img, rect);
 
       // Image has full color information
       if (pixelInfo) {
@@ -195,7 +203,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    function shouldInvert(img) {
+    function shouldInvertElement(img) {
       if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
         return false; // Already on a dark background, inverting won't help make it visible
       }
@@ -205,8 +213,15 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         sizeScore = getSizeScore(size.height, size.width),
         elementTypeScore = img.localName === 'input' ? BUTTON_BONUS : 0,
         extensionScore = getExtensionScore(imageExt),
-        pixelInfoScore = getPixelInfoScore(img, size),
-        finalScore = sizeScore + elementTypeScore + extensionScore + pixelInfoScore;
+        finalScore = sizeScore + elementTypeScore + extensionScore,
+        pixelInfoScore = 0;
+
+      if (finalScore > - MAX_SCORE_CHECK_PIXELS && finalScore < MAX_SCORE_CHECK_PIXELS) {
+        // Pixel info takes longer to get: only do it if necessary
+        pixelInfoScore = getPixelInfoScore(img, size);
+      }
+
+      finalScore += pixelInfoScore;
 
       SC_DEV && isDebuggingOn && $(img).attr('score',
         sizeScore + ' (size) + ' +
@@ -216,6 +231,24 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
 
       return finalScore > 0;
     }
+
+//    colorUtil.shouldInvertBgImage = function(src, rect) {
+//      var imageExt = getImageExtension(src),
+//        sizeScore = getSizeScore(rect.height, rect.width),
+//        elementTypeScore = BG_IMAGE_BONUS,
+//        extensionScore = getExtensionScore(imageExt),
+//        img = $('<img>').attr('src', src)[0],
+//        pixelInfoScore = getPixelInfoScore(img, rect),
+//        finalScore = sizeScore + elementTypeScore + extensionScore + pixelInfoScore;
+//
+//      SC_DEV && isDebuggingOn && $(img).attr('score',
+//          sizeScore + ' (size) + ' +
+//          (elementTypeScore ? elementTypeScore + ' (button) + ' : '' ) +
+//          extensionScore + ' (ext) + ' +
+//          pixelInfoScore + ' (pixels) = ' + finalScore);
+//
+//      return finalScore > 0;
+//    };
 
     imgClassifier.classify = function() {
       var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
@@ -228,7 +261,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         $(customSelectors.nonReversible).attr(REVERSIBLE_ATTR, false);
       }
       $(selector).each(function (index, element) {
-        var isReversible = shouldInvert(element);
+        var isReversible = shouldInvertElement(element);
         if (SC_DEV && isDebuggingOn) {
           $(element).css('outline', '5px solid ' + (isReversible ? 'red': 'green'));
         }
