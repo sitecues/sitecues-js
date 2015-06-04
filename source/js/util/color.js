@@ -8,12 +8,12 @@ sitecues.def('util/color', function (colorUtil, callback) {
   var TRANSPARENT = 'rgba(0, 0, 0, 0)',
     MIN_LUMINOSITY_LIGHT_TONE = 0.62;
 
-  function isDarkTone(colorValue, optionalThreshold) {
+  colorUtil.isDarkColor = function(colorValue, optionalThreshold) {
 
     var rgba = colorUtil.getRgba(colorValue);
 
     return colorUtil.getLuminosity(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
-  }
+  };
 
   colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
     var currentBackgroundColor;
@@ -23,7 +23,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
 
       // Only care about non-transparent backgrounds
       if (currentBackgroundColor.a > 0.5) {
-        return isDarkTone(currentBackgroundColor, optionalThreshold);
+        colorUtil.isDarkColor(currentBackgroundColor, optionalThreshold);
       }
 
       current = current.parentElement;
@@ -395,11 +395,6 @@ sitecues.def('util/color', function (colorUtil, callback) {
       s: s,
       l: l
     };
-  };
-
-  colorUtil.isDarkColor = function(rgba) {
-    var hsl = colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b);
-    return hsl.l < 0.2;
   };
 
   // Get the current background color

@@ -218,10 +218,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    function classifyImage(inex, img) {
+    function classifyImage(index, img) {
       function onImageLoad(event) {
-        console.log(event);
-        classifyImage(event.target);
+        classifyImage(0, event.target);
       }
 
       var isReversible;

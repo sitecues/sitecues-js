@@ -22,7 +22,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-        MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"WW";color:transparent;',
+        MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"";color:transparent;',
         BACKGROUND_IMG_POSITIONING_PROPS = [
           'background-repeat',
           'background-attachment',
@@ -120,9 +120,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       function getReverseFramesCssText() {
         var REVERSIBLE = ':not(data-sc-reversible="false")',
           FRAME ='frame' + REVERSIBLE + ',iframe' + REVERSIBLE,
-          BG_OPAQUE = 'background-color:' + colorUtil.getDocumentBackgroundColor() + ';';
+          docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
 
-        return FRAME + '{' + BG_OPAQUE + getInvertFilter() + '};\n';
+        return FRAME + '{' + createRule('background-color', docBg) + getInvertFilter() + '};\n';
       }
 
       function createRule(prop, newValue, important) {
@@ -316,17 +316,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return bgShorthand.substr(lastIndexRgb).split(')')[0] + ')';
       }
 
-      /**
-       * Return true if the background image appears to be used for a gradient
-       * @param cssStyleDecl
-       * @returns {boolean}
-       */
-      function isBgRepeatUsed(cssStyleDecl) {
-        var repeatPropValue = cssStyleDecl.backgroundRepeat || cssStyleDecl.background || '';
-        return repeatPropValue.indexOf('repeat') >= 0 && // Look for repeat, repeat-x or repeat-y
-          repeatPropValue.indexOf('no-repeat') < 0;
-      }
-
       function getSampleElement(selector) {
         var REMOVE_PSEUDO_CLASSES_AND_ELEMENTS = /::?[^ ,:.]+/g,
           result;
@@ -337,8 +326,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       function shouldInvert(cssStyleDecl, bgImage, selector) {
         if (bgImage) {
-          var sampleElement = getSampleElement(selector),
-            rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
+          var sampleElement = getSampleElement(selector);
+//            rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
           if (colorUtil.isOnDarkBackground(sampleElement)) {
             return false; // Already designed to show on a dark background
           }
@@ -412,8 +401,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        */
       function getBackgroundImageUrlIfSignificant(propVal, cssStyleDecl, selector) {
         var imageUrl = getCssUrl(propVal),
-          isRepeating = isBgRepeatUsed(cssStyleDecl),
-          isSignificantBgImage = !isRepeating && imageUrl && shouldInvert(cssStyleDecl, imageUrl, selector);
+          isSignificantBgImage = imageUrl && shouldInvert(cssStyleDecl, imageUrl, selector);
 
         return isSignificantBgImage && imageUrl;
       }
