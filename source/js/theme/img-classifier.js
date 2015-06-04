@@ -129,6 +129,10 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     }
 
     function getSizeScore(height, width) {
+      if (width <= 1 || height <= 1) {
+        return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      }
+
       var score = 0,
         aspectRatio = width / height;
 
@@ -185,6 +189,10 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     }
 
     function getPixelInfoScore(img, rect) {
+      if (rect.width <= 1 || rect.height <= 1) {
+        return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      }
+
       var pixelInfo = getPixelInfo(img, rect);
 
       // Image has full color information
