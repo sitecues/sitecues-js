@@ -45,7 +45,6 @@ sitecues.def('audio/html5-player', function (player, callback) {
     var audioElement = event.target;
     sitecues.$(audioElement).one('ended', onEnded);
     audioElement.play();
-    sitecues.emit('audio/playing');
   }
 
   function onEnded(event) {

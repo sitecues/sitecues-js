@@ -60,7 +60,6 @@ sitecues.def('audio/safari-player', function (player, callback) {
         soundSource.noteOn(0);
 
         allRequests.splice(allRequests.indexOf(request), 1);
-        sitecues.emit('audio/playing');
       });
     };
 
