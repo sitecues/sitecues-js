@@ -118,7 +118,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       // - http://roc.cs.rochester.edu/e/ic/classify.php?user=none
       // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
       function getReverseFramesCssText() {
-        var REVERSIBLE = ':not(data-sc-reversible="false")',
+        var REVERSIBLE = ':not([data-sc-reversible="false"])',
           FRAME ='frame' + REVERSIBLE + ',iframe' + REVERSIBLE,
           docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
 
