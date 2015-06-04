@@ -218,8 +218,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    function classifyImage(img) {
+    function classifyImage(inex, img) {
       function onImageLoad(event) {
+        console.log(event);
         classifyImage(event.target);
       }
 
@@ -232,6 +233,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         // Too early to tell anything
         img.addEventListener('load', onImageLoad);
         return;
+      }
+      else if (img.localName === 'svg') {
+        isReversible = true;
       }
       else {
         isReversible = shouldInvertElement(img);
@@ -246,7 +250,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     function shouldInvertElement(img) {
       var src = img.getAttribute('src'),
         size = getImageSize(img),
-        imageExt = img.localName !=='svg' && getImageExtension(src),
+        imageExt = getImageExtension(src),
         sizeScore = getSizeScore(size.height, size.width),
         elementTypeScore = getElementTypeScore(img),
         extensionScore = getExtensionScore(imageExt),

@@ -30,7 +30,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
     }
   };
 
-  // Convert color names such as 'white', 'black', 'transparent'
+  // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
   function convertColorNameToRgbFormat(colorName) {
 // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
 //    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
@@ -54,14 +54,22 @@ sitecues.def('util/color', function (colorUtil, callback) {
     }
     docStyle.outlineColor = colorName;
     var isLegalColor = docStyle.outlineColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor ? getComputedStyle(docElt).outlineColor : TRANSPARENT;
+      rgb = isLegalColor && getComputedStyle(docElt).outlineColor;
     docStyle.outlineColor = oldBorderColor;
     return rgb;
   }
 
-  colorUtil.getRgba = function(color) {
+  colorUtil.getColorString = function(rgba) {
+    function isAlphaRelevant(alpha) {
+      return (alpha >= 0 && alpha < 1);  // false if undefined
+    }
+    var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
+    return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
+  };
+
+  colorUtil.getRgbaIfLegalColor = function(color) {
     if (!color) {
-      return TRANSPARENT;
+      return;
     }
     if (typeof color === 'object') {
       return color;
@@ -71,6 +79,9 @@ sitecues.def('util/color', function (colorUtil, callback) {
     var rgb;
     if (color.substr(0,3) !== 'rgb') {
       rgb = convertColorNameToRgbFormat(color);
+      if (!rgb) {
+        return; // Not a color
+      }
     }
     else {
       rgb = color;
@@ -85,6 +96,14 @@ sitecues.def('util/color', function (colorUtil, callback) {
       b: parseInt(match[3] || 0),
       a: parseFloat(match[4] || 1)
     };
+  };
+
+  /**
+   * Ensure that an rgba object is returned. Will use TRANSPARENT if necessary.
+   * @param color
+   */
+  colorUtil.getRgba = function(color) {
+    return colorUtil.getRgbaIfLegalColor(color) || { r: 0, g: 0, b: 0, a: 0};
   };
 
 //  colorUtil.COLOR_NAMES_MAP = {

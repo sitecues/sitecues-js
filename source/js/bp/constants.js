@@ -155,7 +155,7 @@ sitecues.def('bp/constants', function (constants, callback) {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
     'ARIA-BUSY' : 'false',
-    'DATA-SC-REVERSIBLE': 'true'
+    'DATA-SC-REVERSIBLE': 'false'
   };
 
   constants.DEFAULT_TOOLBAR_ATTRS = {

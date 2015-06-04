@@ -20,6 +20,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 2000,
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
+        GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
+        BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
         MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"WW";color:transparent;',
         BACKGROUND_IMG_POSITIONING_PROPS = [
           'background-repeat',
@@ -127,6 +129,63 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return newValue ? prop + ': ' + newValue + (important ? ' !important; ' : '; ') : '';
       }
 
+      // Split a,b,c(d, e, f), g as
+      // ['a', 'b', 'c(d, e, f)', 'g']
+      function splitOutsideParens(str, splitter) {
+        var length = str.length,  // String to eat as it gets processed left ot right
+          splitterLength = splitter.length,
+          resultArray = [],
+          lastSplitIndex = 0,
+          nextSplitIndex,
+          nextParenIndex = indexOf('('),
+          nextItem;
+        function indexOf(lookFor, startIndex) {
+          var index = str.indexOf(lookFor, startIndex);
+          return index < 0 ? length : index;
+        }
+        while (lastSplitIndex < length) {
+          nextSplitIndex = indexOf(splitter, lastSplitIndex);
+          if (nextParenIndex < nextSplitIndex) {
+            // Found open paren before splitter
+            // get comma after next closed paren
+            nextParenIndex = indexOf(')', nextParenIndex);
+            nextSplitIndex = indexOf(splitter, nextParenIndex);
+            nextParenIndex = indexOf('(', nextParenIndex);
+          }
+
+          nextItem = str.substring(lastSplitIndex, nextSplitIndex);
+          if (nextItem) {
+            resultArray.push(nextItem);
+          }
+          lastSplitIndex = nextSplitIndex + splitterLength;
+        }
+
+        return resultArray;
+      }
+
+      function getThemedGradientCssText(gradientType, gradientVal, colorMapFn, intensity) {
+        var
+          gradientParams = splitOutsideParens(gradientVal, ','), // Split on commas not in parens
+          newGradientParams = gradientParams.map(mapParam);
+
+        function mapParam(param) {
+          var trimmedParam = param.trim(),
+            words = splitOutsideParens(trimmedParam, ' '),  // Split on spaces not in parens
+            rgba = colorUtil.getRgbaIfLegalColor(words[0]),
+            newRgba;
+
+          if (rgba) {
+            newRgba = colorMapFn({ prop: 'background-color', parsedVal: rgba }, intensity);
+            if (newRgba) {
+              words[0] = colorUtil.getColorString(newRgba);
+            }
+          }
+          return words.join(' ');
+        }
+
+        return gradientType + '(' + newGradientParams.join(',') + ')';
+      }
+
       // Map background image related rules to something that can be reversed
       function getReverseSpriteCssText(styleVal, selector) {
         // Create a pseudo element selector for everything that matches the selector
@@ -176,31 +235,28 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         var styleSheetText = '';
 
-        function getColorString(rgba) {
-          function isAlphaRelevant(alpha) {
-            return (alpha >= 0 && alpha < 1);  // false if undefined
-          }
-          var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
-          return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
-        }
-
         // Backgrounds
         themeStyles.forEach(function(style) {
           var newValue,
             selector = style.rule.selectorText;
 
           if (style.value.prop === 'background-image') {
-            if (isReverse) {
-              var css = getReverseSpriteCssText(style.value, selector);
-              styleSheetText += css;
+            if (style.value.gradientVal) {
+              newValue = getThemedGradientCssText(style.value.gradientType, style.value.gradientVal, colorMapFn, intensity);
             }
-            return;
+            else if (isReverse) {
+              styleSheetText += getReverseSpriteCssText(style.value, selector);
+              return;
+            }
+            else {
+              return;
+            }
           }
           else {
             // Don't alter buttons -- it will change it from a native button and the appearance will break
             // color, background-color
             var newRgba = colorMapFn(style.value, intensity);
-            newValue = getColorString(newRgba);
+            newValue = colorUtil.getColorString(newRgba);
           }
           if (newValue) {
             var important = selector !== ':link' && selector !== ':visited', // Don't let these UA rules override page's <a> rules
@@ -300,8 +356,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         var bgPositionStyles = '',
           bgImagePropVal = cssStyleDecl['background-image'],
           imageUrl,
-          cssText = cssStyleDecl.cssText,
-          isPlacedBeforeText;
+          gradient,
+          cssText = cssStyleDecl.cssText;
 
         if (cssText.indexOf('background') < 0) {
           return;  // Need some background property
@@ -314,17 +370,30 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           }
         }
 
+        function getBackgroundGradient(propVal) {
+          if (propVal.indexOf('gradient') >= 0) {
+            return propVal.match(GRADIENT_REGEXP);
+          }
+        }
+
+        function isPlacedBeforeText() {
+          var paddingLeft = cssStyleDecl.paddingLeft || $(getSampleElement(selector)).css('paddingLeft');
+          return parseFloat(paddingLeft) > 0;
+        }
+
         BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
         imageUrl = getBackgroundImageUrlIfSignificant(bgImagePropVal, cssStyleDecl, selector);
+        gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
 
-        if (imageUrl || bgPositionStyles) {
-          isPlacedBeforeText = cssStyleDecl.paddingLeft || parseFloat($(getSampleElement(selector)).css('paddingLeft')) > 0;
+        if (imageUrl || gradient || bgPositionStyles) {
           return {
             prop: 'background-image',
             bgPositionStyles: bgPositionStyles,
             imageUrl: imageUrl,
+            gradientType: gradient && gradient[1],
+            gradientVal: gradient && gradient[2],
             isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0,
-            isPlacedBeforeText: !!isPlacedBeforeText
+            isPlacedBeforeText: isPlacedBeforeText()
           };
         }
       }
@@ -351,8 +420,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       function isButtonRule(selector) {
         if (selector && (selector.lastIndexOf('button') >= 0 || selector.lastIndexOf('input') >= 0)) {
-          var BUTTON_SELECTOR = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/;
-          return selector.match(BUTTON_SELECTOR);
+          return selector.match(BUTTON_REGEXP);
         }
       }
 
