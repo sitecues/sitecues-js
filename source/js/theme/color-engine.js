@@ -256,7 +256,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             // Don't alter buttons -- it will change it from a native button and the appearance will break
             // color, background-color
             var newRgba = colorMapFn(style.value, intensity);
-            newValue = colorUtil.getColorString(newRgba);
+            newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
           }
           if (newValue) {
             var important = selector !== ':link' && selector !== ':visited', // Don't let these UA rules override page's <a> rules
@@ -354,7 +354,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         function addPositioningProp(prop) {
           var propVal = cssStyleDecl[prop];
-          if (propVal) {
+          if (propVal && propVal !== 'initial') {
             bgPositionStyles += prop + ':' + propVal + ';\n';
           }
         }

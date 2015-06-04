@@ -56,7 +56,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   EXTRA_PADDING_PIXELS = 4, // Amount of space around highlighted object before to separate border
 
   // Border color when on dark background
-  DARK_BG_BORDER_COLOR = 'rgb(65, 60, 145)',
+  DARK_BG_BORDER_COLOR = '#bec36e',
 
   // All CSS background properties except color
   // Image must be listed last for multiple backgrounds code to work
@@ -1011,7 +1011,8 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       state.overlayContainer.appendChild(svgFragment);
       $('.' + HIGHLIGHT_OUTLINE_CLASS).attr({
         width: width + 'px',
-        height: height + 'px'
+        height: height + 'px',
+        'data-sc-reversible': false
       }).css({
         position: 'absolute',
         left: left + 'px',
