@@ -183,17 +183,33 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       }
 
       // Map background image related rules to something that can be reversed
+      // TODO clean this up
       function getReverseSpriteCssText(styleVal, selector) {
         // Create a pseudo element selector for everything that matches the selector
         function getPseudoSelector(pseudo) {
           return selector.replace(/(,|$)/g, pseudo + '$1');
         }
 
+        function hasPseudoElement(selector) {
+          return !hasNoPseudoElement(selector);
+        }
+
+        function hasNoPseudoElement(selector) {
+          return selector.indexOf(':before') < 0 && selector.indexOf(':after') < 0;
+        }
+
+        var invertPseudoElemsCss = '';
+
         if (styleVal.isOnPseudo) {
-          // Background already on a pseudo element, just invert it there
-          // TODO should pull out only the items that are on pseudo, the rest get normal treatment.
-          //      See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
-          return selector + '{' + INVERT_FILTER + '}\n';
+          // Background already on a pseudo element are just inverted there
+          // See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
+          var items = selector.split(','),
+            pseudoElemsSelector = items.filter(hasPseudoElement).join(',');
+          invertPseudoElemsCss = pseudoElemsSelector + '{' + INVERT_FILTER + '}\n';
+          selector = items.filter(hasNoPseudoElement).join(',');
+          if (!selector) {
+            return invertPseudoElemsCss;
+          }
         }
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
@@ -220,7 +236,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 //                        (SC_DEV ? createRule('outline', '2px solid red', true) : '') +
               '}\n' :
               '';
-        return addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss;
+        return invertPseudoElemsCss + addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss;
       }
 
       /**
