@@ -218,10 +218,32 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    function shouldInvertElement(img) {
-      if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
-        return false; // Already on a dark background, inverting won't help make it visible
+    function classifyImage(img) {
+      function onImageLoad(event) {
+        classifyImage(event.target);
       }
+
+      var isReversible;
+      if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
+        // If already on a dark background, inverting won't help make it visible
+        isReversible = false;
+      }
+      else if (img.localName === 'img' && !img.complete) {
+        // Too early to tell anything
+        img.addEventListener('load', onImageLoad);
+        return;
+      }
+      else {
+        isReversible = shouldInvertElement(img);
+      }
+
+      if (SC_DEV && isDebuggingOn) {
+        $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
+      }
+      $(img).attr(REVERSIBLE_ATTR, isReversible);
+    }
+
+    function shouldInvertElement(img) {
       var src = img.getAttribute('src'),
         size = getImageSize(img),
         imageExt = img.localName !=='svg' && getImageExtension(src),
@@ -276,13 +298,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       if (customSelectors.nonReversible) {
         $(customSelectors.nonReversible).attr(REVERSIBLE_ATTR, false);
       }
-      $(selector).each(function (index, element) {
-        var isReversible = shouldInvertElement(element);
-        if (SC_DEV && isDebuggingOn) {
-          $(element).css('outline', '5px solid ' + (isReversible ? 'red': 'green'));
-        }
-        $(element).attr(REVERSIBLE_ATTR, isReversible);
-      });
+      $(selector).each(classifyImage);
     };
 
     if (SC_DEV) {
