@@ -15,10 +15,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         originalBodyBackgroundColor,
         isOriginalThemeDark,
         transitionTimer,
-        docElt = document.documentElement,
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
-        TRANSITION_MS_SLOW = 2000,
+        TRANSITION_MS_SLOW = 1400,
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
@@ -101,7 +100,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       function getThemeTransitionCss(transitionMs) {
         var ANIMATION_SELECTOR = 'html.' + TRANSITION_CLASS +', html.' +
               TRANSITION_CLASS + '> body, html.' + TRANSITION_CLASS + '> body *',
-          TRANSITION_CSS = '{transition:all ' + transitionMs + 'ms;}\n\n';
+          TRANSITION_CSS = '{transition: background-color ' + transitionMs + 'ms;}\n\n';
 
         return ANIMATION_SELECTOR + TRANSITION_CSS;
       }

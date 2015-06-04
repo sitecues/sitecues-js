@@ -4,20 +4,9 @@
 
 // Do we want to do:
 // - border color
-// - background-image textures and gradients
 // - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
-// White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
-//    ** news.google.com **
-//    background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
-//    ** lloydsbank **
-//    background: -webkit-gradient(linear,0% 0,0% 100%,from(#fff),to(#e6e6e6));
-//    background: -webkit-linear-gradient(top,#fff,#e6e6e6);
-//    background: -moz-linear-gradient(top,#fff,#e6e6e6);
-//    background: -ms-linear-gradient(top,#fff,#e6e6e6);
-//    background: -o-linear-gradient(top,#fff,#e6e6e6);
-// Images that weren't loaded yet -- brewhoop.com, bottom of page
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
@@ -30,9 +19,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
       monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
       hslToRgb = colorUtil.hslToRgb,
-      rgbToHsl = colorUtil.rgbToHsl,
-      getRgba = colorUtil.getRgba;
-
+      rgbToHsl = colorUtil.rgbToHsl;
+  
     function getReducedIntensity(rgba, intensity) {
       var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
       if (hsl.l < 0.5) {
@@ -129,7 +117,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             parentLuminosity;
           if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
             sampleElementStyle.backgroundColor === parentStyle.backgroundColor) {
-            parentLuminosity = colorUtil.getLuminosityFromsiteColorName(parentStyle.color);
+            parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
               if (parentLuminosity < 0.3) {
                 isInDarkPara = true;
