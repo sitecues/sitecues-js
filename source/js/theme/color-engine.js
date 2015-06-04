@@ -10,7 +10,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
         REPAINT_MS = 40,
-        THEME_APPLIED_TIMEOUT = 40,
         themeStyles,
         shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
         originalBodyBackgroundColor,
@@ -30,7 +29,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           'background-position-y',
           'background-origin',
           'background-size',
-          'background-clip'
+          'background-clip',
+          'width',
+          'height'
 //          'vertical-align',
 //          'padding',
 //          'padding-top',
@@ -58,7 +59,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           willBeDark = isDarkTheme(colorMapFn),
           isReverseTheme = willBeDark !== isOriginalThemeDark,
           themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
-          transitionCss = initializeTransition(isDark !== willBeDark),
+          // We want to animate quickly between light themes, but slowly when performing a drastic change
+          // such as going from light to dark or vice-versa
+          transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
+          transitionCss = initializeTransition(transitionMs),
           reverseCss = isReverseTheme ? getReverseFramesCssText() : '';
 
         getStyleSheet().text(transitionCss + themeCss + reverseCss);
@@ -75,19 +79,14 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         setTimeout(function() {
           sitecues.emit('theme/did-apply');
-        }, THEME_APPLIED_TIMEOUT);
+        }, transitionMs);
       };
 
       function isDarkTheme(colorMapFn) {
         return colorMapFn ? colorChoices.isDarkTheme(colorMapFn, originalBodyBackgroundColor) : isOriginalThemeDark;
       }
 
-      function initializeTransition(isCurrentlyReversing) {
-        var
-          // We want to animate quickly between light themes, but slowly when performing a drastic change
-          // such as going from light to dark or vice-versa
-          transitionMs = isCurrentlyReversing ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST;
-
+      function initializeTransition(transitionMs) {
         $('html').addClass(TRANSITION_CLASS);
         clearTimeout(transitionTimer);
         transitionTimer = setTimeout(function() {
@@ -209,7 +208,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             addBgImageToBeforeCss +
 //                      (isPlacedBeforeText ? createRule('margin-left', '-' + isPlacedBeforeText) : '') +
             (imageUrl ? createRule(imageProp, 'url(' + imageUrl + ')') : '') +
-            (isPlacedBeforeText ? 'left:0;top:0;height:100%;overflow-y:hidden;' : '') +
+            (isPlacedBeforeText ? 'left:0;top:0;height:100%;width:inherit;overflow-y:hidden;' : '') +
             styleVal.bgPositionStyles +
             '}\n',
           removeBgFromMainElementCss =
@@ -354,6 +353,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         function addPositioningProp(prop) {
           var propVal = cssStyleDecl[prop];
+          if (propVal === 'auto' && (prop === 'width' || prop === 'height')) {
+            propVal = '100%'; // 'auto' won't properly apply to positioned:absolute
+          }
           if (propVal && propVal !== 'initial') {
             bgPositionStyles += prop + ':' + propVal + ';\n';
           }
