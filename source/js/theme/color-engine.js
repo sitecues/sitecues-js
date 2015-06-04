@@ -15,6 +15,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         originalBodyBackgroundColor,
         isOriginalThemeDark,
         transitionTimer,
+        docElt = document.documentElement,
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 2000,
@@ -22,6 +23,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
         MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"";',
+        INVERT_FILTER = platform.cssPrefix + 'filter:invert(100%);',
         BACKGROUND_IMG_POSITIONING_PROPS = [
           'background-repeat',
           'background-attachment',
@@ -104,11 +106,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return ANIMATION_SELECTOR + TRANSITION_CSS;
       }
 
-      function getInvertFilter() {
-        var INVERT_FILTER = 'filter:invert(100%);';
-        return INVERT_FILTER + platform.cssPrefix + INVERT_FILTER;
-      }
-
       // Reverses iframes if we are in a reverse theme
       // Should we reverse non-photo images as well?
       // See http://stackoverflow.com/questions/9354744/how-to-detect-if-an-image-is-a-photo-clip-art-or-a-line-drawing
@@ -121,7 +118,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           FRAME ='frame' + REVERSIBLE + ',iframe' + REVERSIBLE,
           docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
 
-        return FRAME + '{' + createRule('background-color', docBg) + getInvertFilter() + '};\n';
+        return FRAME + '{' + createRule('background-color', docBg) + INVERT_FILTER + '};\n';
       }
 
       function createRule(prop, newValue, important) {
@@ -194,7 +191,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         if (styleVal.isOnPseudo) {
           // Background already on a pseudo element, just invert it there
-          return selector + '{' + getInvertFilter() + '}\n';
+          // TODO should pull out only the items that are on pseudo, the rest get normal treatment.
+          //      See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
+          return selector + '{' + INVERT_FILTER + '}\n';
         }
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
@@ -202,7 +201,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           imageProp = isPlacedBeforeText ? 'content' : 'background-image',
           imageUrl = styleVal.imageUrl,
           addBgImageToBeforeCss =
-            imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + getInvertFilter() : '',
+            imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + INVERT_FILTER : '',
           addRelevantBgPropsToBeforeCss =
             getPseudoSelector('::before') + '{' +
             addBgImageToBeforeCss +
