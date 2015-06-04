@@ -209,7 +209,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             addBgImageToBeforeCss +
 //                      (isPlacedBeforeText ? createRule('margin-left', '-' + isPlacedBeforeText) : '') +
             (imageUrl ? createRule(imageProp, 'url(' + imageUrl + ')') : '') +
-            (isPlacedBeforeText ? 'left:0;top:0;' : '') +
+            (isPlacedBeforeText ? 'left:0;top:0;height:100%;overflow-y:hidden;' : '') +
             styleVal.bgPositionStyles +
             '}\n',
           removeBgFromMainElementCss =

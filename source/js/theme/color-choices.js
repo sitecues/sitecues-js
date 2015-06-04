@@ -110,41 +110,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return 0.56;
     }
 
-    // Sample pages with low contrast issues:
-    // http://reederapp.com/ios/#/2/features
-    // http://www.breckgear.com/
-    // http://www.goldbrecht-systems.com/
-    // https://dribbble.com/owltastic
-    // https://news.ycombinator.com/item?id=2222522
-    // http://mediatemple.net/
-    // http://www.pomona.edu/museum/exhibitions/
-
-    function isOnDarkBackground(origElement) {
-      var origRect,
-        testBackgroundElement,
-        testBackgroundRect,
-        testBackgroundRgba;
-
-      testBackgroundElement = origElement;
-
-      while (testBackgroundElement) {
-        var computedStyle = getComputedStyle(testBackgroundElement);
-        if (computedStyle.backgroundColor) {
-          testBackgroundRgba = getRgba(computedStyle.backgroundColor);
-          if (testBackgroundRgba.a > 0.2) {
-            // Make sure the element is geometrically within the background test rect
-            origRect = origRect || origElement.getBoundingClientRect();
-            testBackgroundRect = testBackgroundElement.getBoundingClientRect();
-            if (testBackgroundRect.right > origRect.left && testBackgroundRect.left < origRect.right &&
-              testBackgroundRect.bottom > origRect.top && testBackgroundRect.top < origRect.bottom) {
-              return colorUtil.getLuminosityFromColorName(testBackgroundRgba) < 0.5;
-            }
-          }
-        }
-        testBackgroundElement = testBackgroundElement.parentElement;
-      }
-    }
-
     function getSampleElements(selector) {
       var REMOVE_PSEUDO_CLASSES_AND_ELEMENTS = /::?[^ ,:.]+/g,
         $result = $();
@@ -164,7 +129,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             parentLuminosity;
           if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
             sampleElementStyle.backgroundColor === parentStyle.backgroundColor) {
-            parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
+            parentLuminosity = colorUtil.getLuminosityFromsiteColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
               if (parentLuminosity < 0.3) {
                 isInDarkPara = true;
@@ -206,7 +171,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
         // Middle of the road foreground color -- analyze background
         // If on light background make text darker, and vice-versa
-        var isOnDarkBg = isOnDarkBackground($sampleElements[0]);
+        var isOnDarkBg = colorUtil.isOnDarkBackground($sampleElements[0]);
         if (typeof isOnDarkBg !== 'undefined') {
           return isOnDarkBg ? 1 : -1;
         }

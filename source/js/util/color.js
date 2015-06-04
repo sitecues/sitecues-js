@@ -16,19 +16,27 @@ sitecues.def('util/color', function (colorUtil, callback) {
   };
 
   colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
-    var currentBackgroundColor;
+    var currentBackgroundColor,
+      origElement = current,
+      currentRect,
+      origRect;
 
     while (current) {
       currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
 
       // Only care about non-transparent backgrounds
       if (currentBackgroundColor.a > 0.5) {
-        colorUtil.isDarkColor(currentBackgroundColor, optionalThreshold);
+        origRect = origRect || origElement.getBoundingClientRect();
+        currentRect = current.getBoundingClientRect();
+        if (currentRect.right > origRect.left && currentRect.left < origRect.right &&
+          currentRect.bottom > origRect.top && currentRect.top < origRect.bottom) {
+          return colorUtil.isDarkColor(currentBackgroundColor, optionalThreshold);
+        }
       }
 
       current = current.parentElement;
     }
-  };
+  }
 
   // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
   function convertColorNameToRgbFormat(colorName) {
@@ -411,6 +419,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
     sitecues.rgbToHsl = colorUtil.rgbToHsl;
     sitecues.hslToRgb = colorUtil.hslToRgb;
     sitecues.getLuminosityFromColorName = colorUtil.getLuminosityFromColorName;
+    sitecues.getLuminosity = colorUtil.getLuminosity;
     sitecues.getContrastRatio = colorUtil.getContrastRatio;
   }
 
