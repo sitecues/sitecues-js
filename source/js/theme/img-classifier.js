@@ -156,8 +156,11 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         if (aspectRatio < 0.7) {
           score -= 50;
         }
-        else if (aspectRatio > 1.4 && aspectRatio < 1.8) {
+        else if (aspectRatio > 1.4 && aspectRatio < 1.85) {
           score -= 70; // Typical photo
+          if (aspectRatio > 1.49 && aspectRatio < 1.51) {
+            score -= 30;  // 1.5:1 even more typical photo
+          }
           if (height > 130) {
             score += 130 - height;
           }
@@ -221,7 +224,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
       var src = img.getAttribute('src'),
         size = getImageSize(img),
-        imageExt = getImageExtension(src),
+        imageExt = img.localName !=='svg' && getImageExtension(src),
         sizeScore = getSizeScore(size.height, size.width),
         elementTypeScore = getElementTypeScore(img),
         extensionScore = getExtensionScore(imageExt),

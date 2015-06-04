@@ -7,6 +7,11 @@
 // - background-image textures and gradients
 // - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
+// background sprites don't work if paired with text, e.g.:
+//    comments icons at jsonline.com/sports/bucks
+//    RSS icons at http://planet.mozilla.org/
+//    RSS icon at bottom of http://markets.on.nytimes.com/research/markets/mutualfunds/snapshot.asp?symbol=IBMD
+//    Maybe try :not(:empty) { position: relative } and :not(:empty):before { left: 0px, background-position: -?px; }
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
 // White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
 //    ** news.google.com **
