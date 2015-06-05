@@ -41,7 +41,9 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
         // Only apply the request if the response status is 200
         request.onload = function(evt) {
-          onload(evt, currentSheet);
+          var request = evt.target || this;
+          currentSheet.text = request.responseText;
+          markReady(currentSheet);
         };
         request.onerror = function() {
           // Still need to mark it ready even though we don't have any CSS text for it,
@@ -61,13 +63,6 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
         }, 0);
       }
     }
-
-    function onload(evt, sheet) {
-      var request = evt.target || this;
-      sheet.text = request.responseText;
-      markReady(sheet);
-    }
-
     /**
      * Create a request object that proxies through the Chrome extension, in order to get around CORS
      * @param url
@@ -87,6 +82,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
             chromeRequest.onload(responseEvent);
           }
           else {
+            SC_DEV && console.log('Error loading CSS: ' + chromeRequest.url);
             chromeRequest.onerror(responseEvent);
           }
         });
@@ -128,6 +124,10 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       finalizeCssIfComplete();
     }
 
+    function getParsedSheetUrl(sheet) {
+      return sitecues.parseUrl(sheet.url);
+    }
+
     /**
      * Replace all relatively defined style resources with their absolute counterparts. See SC-1302.
      * @param  {StyleSheet} sheet    A stylesheet object with text
@@ -163,35 +163,38 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
        background: url(   http://example.ru/templates/_default_/close.gif   )
        background: url(   https://instant/templates/_default_/images/nyromodal/close.gif   );
        background:url(data:jpg;base64,/QL9Av0GaqAAA//2Q==)
-       background: url(/assets/homepage/20150518-111116/images/sprite/sprite-no-repeat.svg);
        background: url(//int.nyt.com/applications/portals/assets/loader-t-logo-32x32-ecedeb-49955d7789658d80497f4f2b996577f6.gif)
        */
 
-      var RELATIVE_URL_REGEXP = /url\((([\'\" ])*(?!data:|.*https?:\/\/|\/)([^\"\'\)]+)[\'\" ]*)/g,
-        baseUrlObject = sitecues.parseUrl(sheet.url);
-      return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, match1, match2, actualUrl) {
+      var RELATIVE_URL_REGEXP = /url\((?:(?:[\'\" ])*(?!data:|https?:\/\/|\/\/)([^\"\'\)]+)[\'\" ]*)/gi,
+        baseUrlObject;
+      return sheet.text.replace(RELATIVE_URL_REGEXP, function (totalMatch, actualUrl) {
         // totalMatch includes the prefix string  url("      - whereas actualUrl is just the url
-        return 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
+        baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
+        var newUrl = 'url(' + sitecues.resolveUrl(actualUrl, baseUrlObject);
+        return newUrl;
       });
     }
 
     // Clear CSS comments out of the current string
     function removeComments(sheet) {
       // From http://blog.ostermiller.org/find-comment
-      var COMMENTS_REGEXP = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g;
+      var COMMENTS_REGEXP = /\/\*(?:[^*]|[\r\n]|(?:\*+(?:[^*/]|[\r\n])))*\*+\//g;
       return sheet.text.replace(COMMENTS_REGEXP, '');
     }
 
     // Convert @import into new stylesheet requests
     function processAtImports(sheet) {
-      var IMPORT_REGEXP = /\s*(\@import\s+url\((([\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/g;
+      var IMPORT_REGEXP = /\s*(?:\@import\s+url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)\)\s*(.*))/gi,
+        baseUrlObject;
 
-      return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, match1, match2, match3, actualUrl, mediaQuery) {
+      return sheet.text.replace(IMPORT_REGEXP, function(totalMatch, actualUrl, mediaQuery) {
         // Insert sheet for retrieval before this sheet, so that the order of precedence is preserved
         mediaQuery = mediaQuery.split(';')[0];
-        SC_DEV && mediaQuery && console.log("@import media query: " + mediaQuery);
+        SC_DEV && mediaQuery && console.log('@import media query: ' + mediaQuery);
         if (mediaQueries.isActiveMediaQuery(mediaQuery)) {
-          insertNewSheetBefore(sheet, actualUrl);
+          baseUrlObject = baseUrlObject || getParsedSheetUrl(sheet);
+          insertNewSheetBefore(sheet, sitecues.resolveUrl(actualUrl, baseUrlObject));
         }
         // Now remove @import line from CSS so that it does not get reprocessed
         return '';
@@ -291,8 +294,8 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
         }
       }
 
-      function isUsable() {
-        return this.localName === 'link' ? isUsableLinkedStyleSheet(this) : isUsableStyleElement(this);
+      function isUsable(index, elem) {
+        return elem.localName === 'link' ? isUsableLinkedStyleSheet(elem) : isUsableStyleElement(elem);
       }
 
       function addSheetForElem(index, elem) {

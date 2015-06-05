@@ -1,13 +1,44 @@
 /**
  * Service that converts color strings into an rgba object { r: number, g: number, b: number, a: number }
  */
-sitecues.def('theme/color/util', function (colorUtil, callback) {
+sitecues.def('util/color', function (colorUtil, callback) {
 
   'use strict';
 
-  var TRANSPARENT = 'rgba(0, 0, 0, 0)';
+  var TRANSPARENT = 'rgba(0, 0, 0, 0)',
+    MIN_LUMINOSITY_LIGHT_TONE = 0.62;
 
-  // Convert color names such as 'white', 'black', 'transparent'
+  colorUtil.isDarkColor = function(colorValue, optionalThreshold) {
+
+    var rgba = colorUtil.getRgba(colorValue);
+
+    return colorUtil.getLuminosity(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
+  };
+
+  colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
+    var currentBackgroundColor,
+      origElement = current,
+      currentRect,
+      origRect;
+
+    while (current) {
+      currentBackgroundColor = colorUtil.getRgba(window.getComputedStyle(current).backgroundColor);
+
+      // Only care about non-transparent backgrounds
+      if (currentBackgroundColor.a > 0.5) {
+        origRect = origRect || origElement.getBoundingClientRect();
+        currentRect = current.getBoundingClientRect();
+        if (currentRect.right > origRect.left && currentRect.left < origRect.right &&
+          currentRect.bottom > origRect.top && currentRect.top < origRect.bottom) {
+          return colorUtil.isDarkColor(currentBackgroundColor, optionalThreshold);
+        }
+      }
+
+      current = current.parentElement;
+    }
+  }
+
+  // Convert color names such as 'white', 'black', 'transparent' to rgba object or TRANSPARENT
   function convertColorNameToRgbFormat(colorName) {
 // APPROACH #1 is fast but bloats library by 1.6k with COLOR_NAMES_MAP
 //    var hexVal = colorUtil.COLOR_NAMES_MAP[colorName];
@@ -31,14 +62,22 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
     }
     docStyle.outlineColor = colorName;
     var isLegalColor = docStyle.outlineColor,  // Browser didn't set the border color -> not a legal color
-      rgb = isLegalColor ? getComputedStyle(docElt).outlineColor : TRANSPARENT;
+      rgb = isLegalColor && getComputedStyle(docElt).outlineColor;
     docStyle.outlineColor = oldBorderColor;
     return rgb;
   }
 
-  colorUtil.getRgba = function(color) {
+  colorUtil.getColorString = function(rgba) {
+    function isAlphaRelevant(alpha) {
+      return (alpha >= 0 && alpha < 1);  // false if undefined
+    }
+    var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
+    return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
+  };
+
+  colorUtil.getRgbaIfLegalColor = function(color) {
     if (!color) {
-      return TRANSPARENT;
+      return;
     }
     if (typeof color === 'object') {
       return color;
@@ -48,6 +87,9 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
     var rgb;
     if (color.substr(0,3) !== 'rgb') {
       rgb = convertColorNameToRgbFormat(color);
+      if (!rgb) {
+        return; // Not a color
+      }
     }
     else {
       rgb = color;
@@ -62,6 +104,14 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
       b: parseInt(match[3] || 0),
       a: parseFloat(match[4] || 1)
     };
+  };
+
+  /**
+   * Ensure that an rgba object is returned. Will use TRANSPARENT if necessary.
+   * @param color
+   */
+  colorUtil.getRgba = function(color) {
+    return colorUtil.getRgbaIfLegalColor(color) || { r: 0, g: 0, b: 0, a: 0};
   };
 
 //  colorUtil.COLOR_NAMES_MAP = {
@@ -355,11 +405,6 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
     };
   };
 
-  colorUtil.isDarkColor = function(rgba) {
-    var hsl = colorUtil.rgbToHsl(rgba.r, rgba.g, rgba.b);
-    return hsl.l < 0.2;
-  };
-
   // Get the current background color
   colorUtil.getDocumentBackgroundColor = function() {
     var
@@ -370,11 +415,11 @@ sitecues.def('theme/color/util', function (colorUtil, callback) {
   };
 
   if (SC_DEV) {
-    // TODO remove
     sitecues.getRgba = colorUtil.getRgba;
     sitecues.rgbToHsl = colorUtil.rgbToHsl;
     sitecues.hslToRgb = colorUtil.hslToRgb;
     sitecues.getLuminosityFromColorName = colorUtil.getLuminosityFromColorName;
+    sitecues.getLuminosity = colorUtil.getLuminosity;
     sitecues.getContrastRatio = colorUtil.getContrastRatio;
   }
 

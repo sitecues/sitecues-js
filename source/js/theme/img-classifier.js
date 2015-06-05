@@ -11,38 +11,52 @@
 sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'theme/color/util', 'conf/site', function($, zoomMod, colorUtil, site) {
+  sitecues.use('jquery', 'zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
 
     var REVERSIBLE_ATTR = 'data-sc-reversible',
-      customSelectors = site.get('themes') || {};
+      customSelectors = site.get('themes') || { },
+      DARK_BG_THRESHOLD = 0.3,
+      BUTTON_BONUS = 50,
+      SVG_BONUS = 999,
+      BG_IMAGE_BONUS = 30,
+      MAX_SCORE_CHECK_PIXELS = 120,
+      isDebuggingOn;
 
     function getImageExtension(src) {
-      var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif/i);
+      var imageExtension = src.match(/\.png|\.jpg|\.jpeg|\.gif|\.svg/i);
       return imageExtension && imageExtension[0];
     }
 
-    function getImageData(img, width, height) {
+    function getImageData(img, rect) {
       var canvas = document.createElement('canvas'),
-        ctx;
+        ctx,
+        top = rect.top || 0,
+        left = rect.left || 0,
+        width = rect.width,
+        height = rect.height;
       canvas.width = width;
       canvas.height = height;
 
-      ctx = canvas.getContext('2d', { antialias: false });
-      ctx.drawImage(img, 0, 0, width, height);
+      ctx = canvas.getContext('2d');
+
+      if (img.localName !== 'img') {
+        img = $('<img>').attr('src', img.src)[0];
+      }
 
       try {
+        ctx.drawImage(img, top, left, width, height);  // Works with img, canvas, video
         var imageData = ctx.getImageData(0, 0, width, height);
         return imageData.data;
       }
       catch (ex) {
-        SC_DEV && console.log('Could not get image data for %s: %s', img.src, ex);
+        SC_DEV && isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex);
         return null;
       }
     }
 
-    function getPixelInfo(img, width, height) {
-      var data = getImageData(img, width, height);
-      return data && getPixelInfoImpl(data, width, height);
+    function getPixelInfo(img, rect) {
+      var data = getImageData(img, rect);
+      return data && getPixelInfoImpl(data, rect.width, rect.height);
     }
 
     function getPixelInfoImpl(data, width, height) {
@@ -96,8 +110,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
           ++ numDifferentGrayscaleVals;
         }
       }
-      SC_DEV && console.log('Histogram: %o', grayscaleHistogram);
-      SC_DEV && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
+      SC_DEV && isDebuggingOn && console.log('Histogram: %o', grayscaleHistogram);
+      SC_DEV && isDebuggingOn && console.log('numDiff = ' + numDifferentGrayscaleVals + ' numMulti = ' + numMultiUseGrayscaleVals);
 
       return {
         hasTransparentPixels: hasTransparentPixels,
@@ -115,6 +129,10 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     }
 
     function getSizeScore(height, width) {
+      if (width <= 1 || height <= 1) {
+        return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      }
+
       var score = 0,
         aspectRatio = width / height;
 
@@ -122,11 +140,14 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       if (height < 26) {
         score += 100;
       }
-      else if (height < 36) {
+      else if (height < 37) {
         score += 50;
       }
 
-      if (aspectRatio > 4) {
+      if (aspectRatio === 1) {
+        score *= 2;
+      }
+      else if (aspectRatio > 4) {
         score += 100;
       }
       else if (aspectRatio > 3) {
@@ -139,8 +160,11 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         if (aspectRatio < 0.7) {
           score -= 50;
         }
-        else if (aspectRatio > 1.4 && aspectRatio < 1.8) {
+        else if (aspectRatio > 1.4 && aspectRatio < 1.85) {
           score -= 70; // Typical photo
+          if (aspectRatio > 1.49 && aspectRatio < 1.51) {
+            score -= 30;  // 1.5:1 even more typical photo
+          }
           if (height > 130) {
             score += 130 - height;
           }
@@ -154,6 +178,8 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       switch (imageExt) {
         case '.png':
           return 50;
+        case '.svg':
+          return SVG_BONUS;
 //        case '.jpg':
 //        case '.jpeg':
 //        case '.gif':
@@ -162,12 +188,16 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
     }
 
-    function getPixelInfoScore(img, size) {
-      var pixelInfo = getPixelInfo(img, size.width, size.height);
+    function getPixelInfoScore(img, rect) {
+      if (rect.width <= 1 || rect.height <= 1) {
+        return 0; // It's possible that image simply isn't loaded yet, scroll down in brewhoop.com
+      }
+
+      var pixelInfo = getPixelInfo(img, rect);
 
       // Image has full color information
       if (pixelInfo) {
-        if (SC_DEV) {
+        if (SC_DEV && isDebuggingOn) {
           $(img).attr('pixel-info', JSON.stringify(pixelInfo));
         }
         return 180 - Math.min(pixelInfo.numDiffGrayscaleVals, 150) -
@@ -178,53 +208,122 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       return 40; // Add an average amount
     }
 
+    function getElementTypeScore(img) {
+      switch (img.localName) {
+        case 'input':
+          return BUTTON_BONUS;
+        case 'svg':
+          return SVG_BONUS;
+        default:
+          return 0;
+      }
+    }
+
     /**
      * Classifier function for images without missing features.
      * This formula came from a machine learning algorithm with the help of Jeffrey Bigham
-     * @param imageInfo
+     * @param img
      * @returns {*}
      */
     // TODO cache results in localStorage based on URL?
-    // TODO don't do if original bg was dark? E.g.
-    //   http://news.dessci.com/mathplayer-4-works-assistive-technology-products
-    //   http://fantasynews.cbssports.com/fantasybasketball/update/25201107/cavaliers-kyrie-irving-practices-but-still-not-himself
-    //   http://bigstory.ap.org/article/9a3b8c44aae746cbb44a87fd6e779fcd/spike-water-toxins-blamed-hundreds-turtle-deaths
-    //   http://www.usatoday.com/story/news/politics/elections/2015/05/30/martin-omalley-president-announcement/27330857/
+    function classifyImage(index, img) {
+      function onImageLoad(event) {
+        classifyImage(0, event.target);
+      }
 
-    function shouldInvert(img) {
+      var isReversible;
+      if (colorUtil.isOnDarkBackground(img, DARK_BG_THRESHOLD)) {
+        // If already on a dark background, inverting won't help make it visible
+        isReversible = false;
+      }
+      else if (img.localName === 'img' && !img.complete) {
+        // Too early to tell anything
+        img.addEventListener('load', onImageLoad);
+        return;
+      }
+      else if (img.localName === 'svg') {
+        isReversible = true;
+      }
+      else {
+        isReversible = shouldInvertElement(img);
+      }
+
+      if (SC_DEV && isDebuggingOn) {
+        $(img).css('outline', '5px solid ' + (isReversible ? 'red' : 'green'));
+      }
+      $(img).attr(REVERSIBLE_ATTR, isReversible);
+    }
+
+    function shouldInvertElement(img) {
       var src = img.getAttribute('src'),
         size = getImageSize(img),
         imageExt = getImageExtension(src),
         sizeScore = getSizeScore(size.height, size.width),
+        elementTypeScore = getElementTypeScore(img),
         extensionScore = getExtensionScore(imageExt),
-        pixelInfoScore = getPixelInfoScore(img, size),
-        finalScore = sizeScore + extensionScore + pixelInfoScore;
+        finalScore = sizeScore + elementTypeScore + extensionScore,
+        pixelInfoScore = 0;
 
-      SC_DEV && console.log('%d (size) + %d (ext) + %d (pixels) = %d', sizeScore, extensionScore, pixelInfoScore, finalScore);
+      if (finalScore > - MAX_SCORE_CHECK_PIXELS && finalScore < MAX_SCORE_CHECK_PIXELS) {
+        // Pixel info takes longer to get: only do it if necessary
+        pixelInfoScore = getPixelInfoScore(img, size);
+      }
+
+      finalScore += pixelInfoScore;
+
+      SC_DEV && isDebuggingOn && $(img).attr('score',
+        sizeScore + ' (size) + ' +
+        (elementTypeScore ? elementTypeScore + ' (button) + ' : '' ) +
+        extensionScore + ' (ext) + ' +
+        pixelInfoScore + ' (pixels) = ' + finalScore);
 
       return finalScore > 0;
     }
 
+//    colorUtil.shouldInvertBgImage = function(src, rect) {
+//      var imageExt = getImageExtension(src),
+//        sizeScore = getSizeScore(rect.height, rect.width),
+//        elementTypeScore = BG_IMAGE_BONUS,
+//        extensionScore = getExtensionScore(imageExt),
+//        img = $('<img>').attr('src', src)[0],
+//        pixelInfoScore = getPixelInfoScore(img, rect),
+//        finalScore = sizeScore + elementTypeScore + extensionScore + pixelInfoScore;
+//
+//      SC_DEV && isDebuggingOn && $(img).attr('score',
+//          sizeScore + ' (size) + ' +
+//          (elementTypeScore ? elementTypeScore + ' (button) + ' : '' ) +
+//          extensionScore + ' (ext) + ' +
+//          pixelInfoScore + ' (pixels) = ' + finalScore);
+//
+//      return finalScore > 0;
+//    };
+
     imgClassifier.classify = function() {
       var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
         selector = 'body img' + NOT_CLASSIFIED +
-                   ',body input[type="image"]' + NOT_CLASSIFIED;
+                   ',body input[type="image"]' + NOT_CLASSIFIED +
+                   ',body svg' + NOT_CLASSIFIED;
       if (customSelectors.reversible) {
         $(customSelectors.reversible).attr(REVERSIBLE_ATTR, true);
       }
       if (customSelectors.nonReversible) {
         $(customSelectors.nonReversible).attr(REVERSIBLE_ATTR, false);
       }
-      $(selector).each(function (index, element) {
-        var isReversible = shouldInvert(element);
-        if (SC_DEV) {
-          $(element).css('outline', '5px solid ' + (isReversible ? 'red': 'green'));
-        }
-        $(element).attr(REVERSIBLE_ATTR, isReversible);
-      });
+      $(selector).each(classifyImage);
     };
 
-    $(window).on('load', imgClassifier.classify);
+    if (SC_DEV) {
+      sitecues.debugImageClassifier = function() {
+        isDebuggingOn = true;
+        if (document.readyState === 'complete') {
+          imgClassifier.classify();
+        }
+        else {
+          $(window).on('load', imgClassifier.classify);
+        }
+      };
+//      sitecues.debugImageClassifier();
+    }
 
     if (SC_UNIT) {
       $.extend(exports, imgClassifier);

@@ -53,7 +53,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
       // This will initialize the composite stylesheet when finished and call style-service/ready
       cssAggregator.collectAllCss(onAllCssRetrieved);
-    };
+    }
 
 
     // -------------------------------------- PUBLIC -----------------------------------------------

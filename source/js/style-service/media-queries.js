@@ -20,7 +20,7 @@ sitecues.def('media-queries', function (mediaQueries, callback) {
      * IE9: does not support window.matchMedia
      */
     return mediaQuery !== 'print';  // The most realistic value that we need to ignore
-  }
+  };
 
   callback();
 });

@@ -154,7 +154,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BADGE_ATTRS = {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
-    'ARIA-BUSY' : 'false'
+    'ARIA-BUSY' : 'false',
+    'DATA-SC-REVERSIBLE': 'false'
   };
 
   constants.DEFAULT_TOOLBAR_ATTRS = {

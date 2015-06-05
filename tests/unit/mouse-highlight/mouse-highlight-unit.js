@@ -9,46 +9,6 @@ var modulePath = '../../../source/js/mouse-highlight/mouse-highlight',
 
 describe('mouse-highlight', function () {
 
-  describe('#hasDarkBackgroundOnAnyOf()', function () {
-    it('should return falsey value if the background is mostly transparent (alpha level < 10%)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgba(255, 255, 255, 0.01)'}])).to.not.be.false;
-      done();
-    });
-    it('should return false if the background is white and mostly opaque (alpha level > 90%)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgba(255, 255, 255, .90)'}])).to.be.false;
-      done();
-    });
-    it('should return true if the background cannot be matched with a regex', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(wtf)'}])).to.be.true;
-      done();
-    });
-    it('should return false if the background is mostly white (rgb levels > 242/255)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(242, 245, 255)'}])).to.be.false;
-      done();
-    });
-    it('should return true if the background is not mostly white (rgb levels < 242/255)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(100, 125, 100)'}])).to.be.true;
-      done();
-    });
-    it('should return true if the parent background is not mostly white (rgb levels < 242/255)', function (done) {
-      expect(mh.hasDarkBackgroundOnAnyOf([{'backgroundColor': 'rgb(255, 255, 255, .3)'}, {'backgroundColor': 'rgb(100, 125, 100)'}])).to.be.true;
-      done();
-    });
-  });
-
-  describe('#hasLightText()', function () {
-    it('should return true if element containing text has color: rgba(250, 250, 250, 1)', function (done) {
-      var contentTree = $('<div><p style="color: rgba(250, 250, 250, 1)">Text</p></div>');
-      expect(mh.hasLightText(contentTree)).to.be.true;
-      done();
-    });
-    it('should return false if element containing text has color: rgba(50, 50, 50, 1)', function (done) {
-      var contentTree = $('<div><p style="color: rgba(50, 50, 50, 1)">Text</p></div>');
-      expect(mh.hasLightText(contentTree)).to.be.false;
-      done();
-    });
-  });
-
   describe('#getMaxZIndex()', function () {
     it('should return the largest z-index in array of styles', function (done) {
       expect(mh.getMaxZIndex([{ zIndex: 10 }, { zIndex: 100 }, { zIndex: 20 }])).to.be.equals(100);

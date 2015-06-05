@@ -6,6 +6,7 @@
 sitecues.def('ua-css', function (UA_CSS, callback) {
 
 'use strict';
+/*jshint multistr: true */
 
 // The following system colors are converted to hex colors here to improve performance:
 // button { color:ButtonText; border-color:ButtonFace; background-color:ButtonFace; }
@@ -43,7 +44,7 @@ blockquote[type="cite"] {\n\
   border-color:#00f;\n\
 }\n\
 mark {\n\
-  background:#ffff00;\n\
+  background-color:#ffff00;\n\
   color:#000;\n\
 }\n\
 hr {\n\

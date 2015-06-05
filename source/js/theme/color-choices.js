@@ -4,25 +4,14 @@
 
 // Do we want to do:
 // - border color
-// - images, background-images, iframes?
-// - example background-image problem:
+// - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
-// - gradients
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
-// White on white button text at news.google.com and http://www.lloydsbank.com/, because of:
-//    ** news.google.com **
-//    background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
-//    ** lloydsbank **
-//    background: -webkit-gradient(linear,0% 0,0% 100%,from(#fff),to(#e6e6e6));
-//    background: -webkit-linear-gradient(top,#fff,#e6e6e6);
-//    background: -moz-linear-gradient(top,#fff,#e6e6e6);
-//    background: -ms-linear-gradient(top,#fff,#e6e6e6);
-//    background: -o-linear-gradient(top,#fff,#e6e6e6);
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
 
-  sitecues.use('jquery', 'theme/color/util', function($, colorUtil) {
+  sitecues.use('jquery', 'util/color', function($, colorUtil) {
     var BLACK = { r: 0, g: 0, b: 0, a: 1 },
       MIN_INTENSITY = 0.6,
       YELLOW_HUE = 0.167,
@@ -30,9 +19,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
       monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
       hslToRgb = colorUtil.hslToRgb,
-      rgbToHsl = colorUtil.rgbToHsl,
-      getRgba = colorUtil.getRgba;
-
+      rgbToHsl = colorUtil.rgbToHsl;
+  
     function getReducedIntensity(rgba, intensity) {
       var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
       if (hsl.l < 0.5) {
@@ -110,45 +98,10 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return 0.56;
     }
 
-    // Sample pages with low contrast issues:
-    // http://reederapp.com/ios/#/2/features
-    // http://www.breckgear.com/
-    // http://www.goldbrecht-systems.com/
-    // https://dribbble.com/owltastic
-    // https://news.ycombinator.com/item?id=2222522
-    // http://mediatemple.net/
-    // http://www.pomona.edu/museum/exhibitions/
-
-    function isOnDarkBackground(origElement) {
-      var origRect,
-        testBackgroundElement,
-        testBackgroundRect,
-        testBackgroundRgba;
-
-      testBackgroundElement = origElement;
-
-      while (testBackgroundElement) {
-        var computedStyle = getComputedStyle(testBackgroundElement);
-        if (computedStyle.backgroundColor) {
-          testBackgroundRgba = getRgba(computedStyle.backgroundColor);
-          if (testBackgroundRgba.a > 0.2) {
-            // Make sure the element is geometrically within the background test rect
-            origRect = origRect || origElement.getBoundingClientRect();
-            testBackgroundRect = testBackgroundElement.getBoundingClientRect();
-            if (testBackgroundRect.right > origRect.left && testBackgroundRect.left < origRect.right &&
-              testBackgroundRect.bottom > origRect.top && testBackgroundRect.top < origRect.bottom) {
-              return colorUtil.getLuminosityFromColorName(testBackgroundRgba) < 0.5;
-            }
-          }
-        }
-        testBackgroundElement = testBackgroundElement.parentElement;
-      }
-    }
-
     function getSampleElements(selector) {
-      var REMOVE_PSEUDO_CLASSES = /::?[^ ,:.]+/g,
+      var REMOVE_PSEUDO_CLASSES_AND_ELEMENTS = /::?[^ ,:.]+/g,
         $result = $();
-      try { $result = $(selector.replace(REMOVE_PSEUDO_CLASSES, '')); }
+      try { $result = $(selector.replace(REMOVE_PSEUDO_CLASSES_AND_ELEMENTS, '')); }
       catch(ex) {}
       return $result;
     }
@@ -163,7 +116,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             parentStyle = getComputedStyle(parentElement),
             parentLuminosity;
           if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
-            sampleElementStyle.backgroundColor == parentStyle.backgroundColor) {
+            sampleElementStyle.backgroundColor === parentStyle.backgroundColor) {
             parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
               if (parentLuminosity < 0.3) {
@@ -206,7 +159,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
         // Middle of the road foreground color -- analyze background
         // If on light background make text darker, and vice-versa
-        var isOnDarkBg = isOnDarkBackground($sampleElements[0]);
+        var isOnDarkBg = colorUtil.isOnDarkBackground($sampleElements[0]);
         if (typeof isOnDarkBg !== 'undefined') {
           return isOnDarkBg ? 1 : -1;
         }
@@ -220,7 +173,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         $sampleElements = getSampleElements(style.selector);
         var isWithDarkFg = isWithDarkForeground($sampleElements);
         if (typeof isWithDarkFg !== 'undefined') {
-          //return isWithDarkFg ? 1: -1;
+          return isWithDarkFg ? 1: -1;
         }
       }
       return luminosity < 0.5 ? -1 : 1;

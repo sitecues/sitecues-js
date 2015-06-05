@@ -67,7 +67,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </sc>\
 </sc>\
 <button id="sitecues-button-big-feedback" class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
-<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 858 245" id="scp-svg">\
+<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 858 245" id="scp-svg" data-sc-reversible="false">\
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\
