@@ -6,7 +6,7 @@
 // - border color
 // - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
-// White blocks left on texasat.net -- wtf Chrome?, digg.com
+// Bg image z-index on texasat, #h_contentwrapper, #news
 // Deleting #wrap:before fixes http://nautil.us/issue/25/water/to-save-california-read-dune invert theme
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {

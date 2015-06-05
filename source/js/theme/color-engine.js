@@ -22,7 +22,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
         MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"";',
-        INVERT_FILTER = platform.cssPrefix + 'filter:invert(100%);',
+        FILTER_PROP = platform.cssPrefix + 'filter',
+        FILTER_VAL = {
+          invert: 'invert(100%)',
+          darken: 'brightness(.6)'
+        },
+        INVERT_FILTER = createRule(FILTER_PROP, FILTER_VAL.invert),
         BACKGROUND_IMG_POSITIONING_PROPS = [
           'background-repeat',
           'background-attachment',
@@ -215,7 +220,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           imageProp = isPlacedBeforeText ? 'content' : 'background-image',
           imageUrl = styleVal.imageUrl,
           addBgImageToBeforeCss =
-            imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + INVERT_FILTER : '',
+            imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + createRule(FILTER_PROP, FILTER_VAL[styleVal.filter]) : '',
           addRelevantBgPropsToBeforeCss =
             getPseudoSelector('::before') + '{' +
             addBgImageToBeforeCss +
@@ -336,7 +341,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return result;
       }
 
-      function shouldInvert(cssStyleDecl, bgImage, selector) {
+      function shouldInvertBackground(cssStyleDecl, bgImage, selector) {
         if (bgImage) {
           var sampleElement = getSampleElement(selector);
 //            rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
@@ -386,7 +391,13 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
-        imageUrl = getBackgroundImageUrlIfSignificant(bgImagePropVal, cssStyleDecl, selector);
+        imageUrl = getCssUrl(bgImagePropVal);
+        if (imageUrl && parseInt(cssStyleDecl.zIndex)) {
+          // Why do we check z-index? Because we can't seem to invert z-index background-images
+          // without covering other content it was supposed to go over, for example, on texasat.net
+          console.log(parseInt(cssStyleDecl.zIndex));
+          imageUrl = 'none';
+        }
         gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
 
         if (imageUrl || gradient || bgPositionStyles) {
@@ -394,6 +405,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             prop: 'background-image',
             bgPositionStyles: bgPositionStyles,
             imageUrl: imageUrl,
+            filter: imageUrl && getBackgroundImageFilter(imageUrl, cssStyleDecl, selector),
             gradientType: gradient && gradient[1],
             gradientVal: gradient && gradient[2],
             isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0,
@@ -414,11 +426,14 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param propVal
        * @returns {boolean}
        */
-      function getBackgroundImageUrlIfSignificant(propVal, cssStyleDecl, selector) {
-        var imageUrl = getCssUrl(propVal),
-          isSignificantBgImage = imageUrl && shouldInvert(cssStyleDecl, imageUrl, selector);
+      function getBackgroundImageFilter(imageUrl, cssStyleDecl, selector) {
+        if (cssStyleDecl.width === '100%') {
+          return 'darken';
+        }
 
-        return isSignificantBgImage && imageUrl;
+        if (shouldInvertBackground(cssStyleDecl, imageUrl, selector)) {
+          return 'invert';
+        }
       }
 
       function isButtonRule(selector) {
