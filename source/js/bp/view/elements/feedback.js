@@ -4,11 +4,15 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     var FEEDBACK_ENABLED         = 1,
         FEEDBACK_DISABLED        = 0,
-        cssValues                = {},
+
         enableAnimationDuration  = 1500,
         disableAnimationDuration = 500,
-        feedbackTextareaElement,
+
+        cssValues                = {},
+
         feedbackAnimation,
+
+        feedbackTextareaElement,
         tipsButton,
         settingsButton,
         feedbackButton,
@@ -20,23 +24,17 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         moreButton,
         contentButton,
         arrowButtons,
-
         feedbackContent,
         aboutContent,
         settingsCards,
         tipsCards,
         feedbackTextarea,
+
         moreBtnTranslate,
-        feedbackBtnTransform,
-        isInitialized = false;
+        feedbackBtnTransform;
 
-    function initFeedback (currentMode) {
+    function initFeedback () {
 
-      if (isInitialized || currentMode === 0) {
-        return;
-      }
-
-      isInitialized     = true;
       sitecues.off('bp/did-toggle-secondary-panel', initFeedback);
 
       tipsButton                  = byId(BP_CONST.TIPS_BUTTON_ID);
@@ -49,7 +47,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
       moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
       contentButton               = byId(BP_CONST.FEEDBACK_CONTENT_BUTTON_ID);
-
       feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
       aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
       settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
@@ -57,8 +54,9 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       arrowButtons                = byId(BP_CONST.ARROWS_ID);
       feedbackTextarea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
       feedbackTextareaElement     = byId(BP_CONST.FEEDBACK_TEXTAREA_ID);
-      moreBtnTranslate            = transform.getTransform(moreButton.getAttribute('transform')).translate;
-      feedbackBtnTransform        = transform.getTransform(feedbackButton.getAttribute('transform'));
+
+      moreBtnTranslate            = getTransform(moreButton.getAttribute('transform')).translate;
+      feedbackBtnTransform        = getTransform(feedbackButton.getAttribute('transform'));
 
       feedbackTextarea.addEventListener('click', function () {
         feedbackTextareaElement.focus();
@@ -81,8 +79,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       cssValues[FEEDBACK_DISABLED] = {
         'outlineHeight'        : getCurrentOutlineHeight(),
         'svgHeight'            : parseFloat(mainSVG.style.height),
-        'svgTranslateY'        : transform.getTransform(mainSVG.getAttribute('transform')).translate.top,
-        'bottomSVGTranslateY'  : transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
+        'svgTranslateY'        : getTransform(mainSVG.getAttribute('transform')).translate.top,
+        'bottomSVGTranslateY'  : getTransform(bottomSVG.getAttribute('transform')).translate.top,
         'moreBtnTranslateX'    : moreBtnTranslate.left,
         'moreBtnTranslateY'    : moreBtnTranslate.top,
         'feedbackBtnTranslateX': feedbackBtnTransform.translate.left,
@@ -96,6 +94,14 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     function byId (id) {
       return helper.byId(id);
+    }
+
+    function getTransform (string) {
+      return transform.getTransform(string);
+    }
+
+    function getTransformString (x, y, scale, rotate) {
+      return transform.getTransformString(x, y, scale, rotate);
     }
 
     function getNumberFromString (str) {
@@ -139,15 +145,15 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           fromCSSValues                = feedbackTransitionTo === FEEDBACK_DISABLED ? cssValues[FEEDBACK_ENABLED] : cssValues[FEEDBACK_DISABLED],
           currentOutlineHeight         = getCurrentOutlineHeight(),
           currentSVGHeight             = parseFloat(mainSVG.style.height),
-          currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
-          currentBottomSVGTranslateY   = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
-          currentMoreBtnTransform      = transform.getTransform(moreButton.getAttribute('transform')),
+          currentSVGTranslateY         = getTransform(mainSVG.style[helper.transformProperty]).translate.top,
+          currentBottomSVGTranslateY   = getTransform(bottomSVG.getAttribute('transform')).translate.top,
+          currentMoreBtnTransform      = getTransform(moreButton.getAttribute('transform')),
           currentMoreBtnTranslate      = currentMoreBtnTransform.translate,
           currentMoreBtnTranslateX     = currentMoreBtnTranslate.left,
           currentMoreBtnTranslateY     = currentMoreBtnTranslate.top,
           currentMoreBtnScale          = currentMoreBtnTransform.scale,
           currentMoreBtnRotate         = currentMoreBtnTransform.rotate,
-          currentfeedbackBtnTransform  = transform.getTransform(feedbackButton.getAttribute('transform')),
+          currentfeedbackBtnTransform  = getTransform(feedbackButton.getAttribute('transform')),
           currentFeedbackBtnTranslateX = currentfeedbackBtnTransform.translate.left,
           currentFeedbackBtnTranslateY = currentfeedbackBtnTransform.translate.top,
           currentFeedbackBtnScale      = currentfeedbackBtnTransform.scale,
@@ -162,10 +168,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
-        bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
-        feedbackButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        bottomSVG.setAttribute(  'transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
+        moreButton.setAttribute( 'transform', getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
+        feedbackButton.setAttribute('transform', getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
         outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
@@ -177,15 +183,15 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
-        bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
+        moreButton.setAttribute( 'transform', getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
+        bottomSVG.setAttribute(  'transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
 
         outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
-        feedbackButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
+        feedbackButton.setAttribute('transform', getTransformString(getValueInTime(currentFeedbackBtnTranslateX, targetCSSValues.feedbackBtnTranslateX, t), getValueInTime(currentFeedbackBtnTranslateY, targetCSSValues.feedbackBtnTranslateY, t), getValueInTime(currentFeedbackBtnScale, targetCSSValues.feedbackBtnScale, t)));
 
       }
 
@@ -205,10 +211,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         feedbackTextarea.style.display = 'none';
         feedbackContent.style.opacity  = 0;
 
-        settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
+        settingsButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
 
-        tipsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
-        aboutButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
+        tipsButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[tipsButton.id].translateX, BP_CONST.TRANSFORMS[tipsButton.id].translateY));
+        aboutButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
 
 
         feedbackAnimation = animate.create({

@@ -4,10 +4,14 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
     var TIPS_ENABLED             = 1,
         TIPS_DISABLED            = 0,
-        cssValues                = {},
+
         enableAnimationDuration  = 1500,
         disableAnimationDuration = 500,
+
+        cssValues                = {},
+
         tipsAnimation,
+
         tipsButton,
         settingsButton,
         feedbackButton,
@@ -19,43 +23,38 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         moreButton,
         arrowButtons,
         contentButton,
-
         feedbackContent,
         feedbackTextArea,
         aboutContent,
         settingsCards,
         tipsCards,
+
         moreBtnTranslate,
-        tipsBtnTransform,
-        isInitialized = false;
+        tipsBtnTransform;
 
-    function initTips (currentMode) {
+    function initTips () {
 
-      if (isInitialized || currentMode === 0) {
-        return;
-      }
-
-      isInitialized     = true;
       sitecues.off('bp/did-toggle-secondary-panel', initTips);
 
-      tipsButton                  = byId(BP_CONST.TIPS_BUTTON_ID);
-      settingsButton              = byId(BP_CONST.SETTINGS_BUTTON_ID);
-      feedbackButton              = byId(BP_CONST.FEEDBACK_BUTTON_ID);
-      aboutButton                 = byId(BP_CONST.ABOUT_BUTTON_ID);
-      mainSVG                     = byId(BP_CONST.SVG_ID);
-      outlineSVG                  = byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
-      shadowSVG                   = byId(BP_CONST.SHADOW_ID);
-      bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID);
-      moreButton                  = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      contentButton               = byId(BP_CONST.FEEDBACK_CONTENT_BUTTON_ID);
-      feedbackContent             = byId(BP_CONST.FEEDBACK_CONTENT_ID);
-      feedbackTextArea            = byId(BP_CONST.FEEDBACK_TEXTAREA);
-      aboutContent                = byId(BP_CONST.ABOUT_CONTENT_ID);
-      settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
-      tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
-      arrowButtons                = byId(BP_CONST.ARROWS_ID);
-      moreBtnTranslate            = transform.getTransform(moreButton.getAttribute('transform')).translate;
-      tipsBtnTransform            = transform.getTransform(tipsButton.getAttribute('transform'));
+      tipsButton       = byId(BP_CONST.TIPS_BUTTON_ID);
+      settingsButton   = byId(BP_CONST.SETTINGS_BUTTON_ID);
+      feedbackButton   = byId(BP_CONST.FEEDBACK_BUTTON_ID);
+      aboutButton      = byId(BP_CONST.ABOUT_BUTTON_ID);
+      mainSVG          = byId(BP_CONST.SVG_ID);
+      outlineSVG       = byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
+      shadowSVG        = byId(BP_CONST.SHADOW_ID);
+      bottomSVG        = byId(BP_CONST.BOTTOM_MORE_ID);
+      moreButton       = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+      contentButton    = byId(BP_CONST.FEEDBACK_CONTENT_BUTTON_ID);
+      feedbackContent  = byId(BP_CONST.FEEDBACK_CONTENT_ID);
+      feedbackTextArea = byId(BP_CONST.FEEDBACK_TEXTAREA);
+      aboutContent     = byId(BP_CONST.ABOUT_CONTENT_ID);
+      settingsCards    = byId(BP_CONST.SETTINGS_CARDS_ID);
+      tipsCards        = byId(BP_CONST.TIPS_CARDS_ID);
+      arrowButtons     = byId(BP_CONST.ARROWS_ID);
+
+      moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate;
+      tipsBtnTransform = getTransform(tipsButton.getAttribute('transform'));
 
       cssValues[TIPS_ENABLED] = {
         'outlineHeight'        : 377, // The outline
@@ -74,8 +73,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       cssValues[TIPS_DISABLED] = {
         'outlineHeight'        : getCurrentOutlineHeight(),
         'svgHeight'            : parseFloat(mainSVG.style.height),
-        'svgTranslateY'        : transform.getTransform(mainSVG.getAttribute('transform')).translate.top,
-        'bottomSVGTranslateY'  : transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
+        'svgTranslateY'        : getTransform(mainSVG.getAttribute('transform')).translate.top,
+        'bottomSVGTranslateY'  : getTransform(bottomSVG.getAttribute('transform')).translate.top,
         'moreBtnTranslateX'    : moreBtnTranslate.left,
         'moreBtnTranslateY'    : moreBtnTranslate.top,
         'settingsBtnTranslateX': tipsBtnTransform.translate.left,
@@ -89,6 +88,14 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
     function byId (id) {
       return helper.byId(id);
+    }
+
+    function getTransform (string) {
+      return transform.getTransform(string);
+    }
+
+    function getTransformString (x, y, scale, rotate) {
+      return transform.getTransformString(x, y, scale, rotate);
     }
 
     function getNumberFromString (str) {
@@ -128,25 +135,34 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function animateTips (useInstantAnimation) {
 
       var tipsTransitionTo             = state.get('tipsMode'),
+
           targetCSSValues              = cssValues[tipsTransitionTo],
           fromCSSValues                = tipsTransitionTo === TIPS_DISABLED ? cssValues[TIPS_ENABLED] : cssValues[TIPS_DISABLED],
+
           currentOutlineHeight         = getCurrentOutlineHeight(),
+
           currentSVGHeight             = parseFloat(mainSVG.style.height),
-          currentSVGTranslateY         = transform.getTransform(mainSVG.style.transform).translate.top,
-          currentBottomSVGTranslateY   = transform.getTransform(bottomSVG.getAttribute('transform')).translate.top,
-          currentMoreBtnTransform      = transform.getTransform(moreButton.getAttribute('transform')),
+          currentSVGTranslateY         = getTransform(mainSVG.style[helper.transformProperty]).translate.top,
+
+          currentBottomSVGTranslateY   = getTransform(bottomSVG.getAttribute('transform')).translate.top,
+
+          currentMoreBtnTransform      = getTransform(moreButton.getAttribute('transform')),
           currentMoreBtnTranslate      = currentMoreBtnTransform.translate,
           currentMoreBtnTranslateX     = currentMoreBtnTranslate.left,
           currentMoreBtnTranslateY     = currentMoreBtnTranslate.top,
           currentMoreBtnScale          = currentMoreBtnTransform.scale,
           currentMoreBtnRotate         = currentMoreBtnTransform.rotate,
-          currentTipsBtnTransform      = transform.getTransform(tipsButton.getAttribute('transform')),
+
+          currentTipsBtnTransform      = getTransform(tipsButton.getAttribute('transform')),
           currentTipsBtnTranslateX     = currentTipsBtnTransform.translate.left,
           currentTipsBtnTranslateY     = currentTipsBtnTransform.translate.top,
           currentTipsBtnScale          = currentTipsBtnTransform.scale,
+
           targetMoreBtnRotate          = state.isShrinking() ? 0 : currentMoreBtnRotate,
+
           targetSVGTranslateY          = tipsTransitionTo === TIPS_ENABLED ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[TIPS_DISABLED].svgTranslateY;
 
+      // Cancel the currently running animation if it exists.
       tipsAnimation && tipsAnimation.cancel();
 
       function onDisabledTick (animationState) {
@@ -155,10 +171,10 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
-        bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
-        tipsButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentTipsBtnTranslateX, targetCSSValues.settingsBtnTranslateX, t), getValueInTime(currentTipsBtnTranslateY, targetCSSValues.settingsBtnTranslateY, t), getValueInTime(currentTipsBtnScale, targetCSSValues.settingsBtnScale, t)));
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        bottomSVG.setAttribute(  'transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
+        moreButton.setAttribute( 'transform', getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, targetMoreBtnRotate));
+        tipsButton.setAttribute( 'transform', getTransformString(getValueInTime(currentTipsBtnTranslateX, targetCSSValues.settingsBtnTranslateX, t), getValueInTime(currentTipsBtnTranslateY, targetCSSValues.settingsBtnTranslateY, t), getValueInTime(currentTipsBtnScale, targetCSSValues.settingsBtnScale, t)));
         outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
@@ -170,15 +186,15 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         var t = animationState.current;
 
         mainSVG.style.height    = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-        mainSVG.style.transform = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
 
-        bottomSVG.setAttribute(  'transform', transform.getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-        moreButton.setAttribute( 'transform', transform.getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
+        bottomSVG.setAttribute(  'transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
+        moreButton.setAttribute( 'transform', getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t), getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
 
         outlineSVG.setAttribute( 'd', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute(  'd', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t)+'c0,6 -5,11 -11,11H11m797,-11v-'+(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
 
-        tipsButton.setAttribute('transform', transform.getTransformString(getValueInTime(currentTipsBtnTranslateX, targetCSSValues.settingsBtnTranslateX, t), getValueInTime(currentTipsBtnTranslateY, targetCSSValues.settingsBtnTranslateY, t), getValueInTime(currentTipsBtnScale, targetCSSValues.settingsBtnScale, t)));
+        tipsButton.setAttribute('transform', getTransformString(getValueInTime(currentTipsBtnTranslateX, targetCSSValues.settingsBtnTranslateX, t), getValueInTime(currentTipsBtnTranslateY, targetCSSValues.settingsBtnTranslateY, t), getValueInTime(currentTipsBtnScale, targetCSSValues.settingsBtnScale, t)));
 
       }
 
@@ -191,18 +207,19 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
         tipsButton.style.opacity       = 1;
         settingsButton.style.opacity   = 1;
-        aboutButton.style.opacity      = 1;
         feedbackButton.style.opacity   = 1;
-        feedbackButton.style.display       = 'block';
+        aboutButton.style.opacity      = 1;
+        tipsButton.style.display       = 'block';
         settingsButton.style.display   = 'block';
+        feedbackButton.style.display   = 'block';
         aboutButton.style.display      = 'block';
         arrowButtons.style.opacity     = 0;
         tipsCards.style.opacity        = 0;
 
-        settingsButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
-        feedbackButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
+        settingsButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[settingsButton.id].translateX, BP_CONST.TRANSFORMS[settingsButton.id].translateY));
+        feedbackButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[feedbackButton.id].translateX, BP_CONST.TRANSFORMS[feedbackButton.id].translateY));
 
-        aboutButton.setAttribute('transform', transform.getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
+        aboutButton.setAttribute('transform', getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
 
 
         tipsAnimation = animate.create({
@@ -248,11 +265,12 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
           'onTick'  : onEnableTick,
           'onFinish': function () {
 
-            tipsCards.style.opacity   = 1;
-            arrowButtons.style.opacity    = 1;
-            feedbackButton.style.display       = 'none';
-            settingsButton.style.display   = 'none';
-            aboutButton.style.display      = 'none';
+            tipsCards.style.opacity      = 1;
+            arrowButtons.style.opacity   = 1;
+            feedbackButton.style.display = 'none';
+            settingsButton.style.display = 'none';
+            aboutButton.style.display    = 'none';
+
             sitecues.emit('bp/do-enable-button', tipsButton);
           }
         });
