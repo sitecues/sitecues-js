@@ -144,7 +144,10 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         score += 50;
       }
 
-      if (aspectRatio === 1) {
+      if (height > 200) {
+        score += 200 - height;
+      }
+      else if (aspectRatio === 1) {
         score *= 2;
       }
       else if (aspectRatio > 4) {
@@ -153,10 +156,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       else if (aspectRatio > 3) {
         score += 50;
       }
-      else {
-        if (height > 200) {
-          score += 200 - height;
-        }
+      if (height < 400) {
         if (aspectRatio < 0.7) {
           score -= 50;
         }
@@ -255,6 +255,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
     }
 
     function shouldInvertElement(img) {
+      if (!img.src) {
+        return true;
+      }
       var src = img.getAttribute('src'),
         size = getImageSize(img),
         imageExt = getImageExtension(src),
