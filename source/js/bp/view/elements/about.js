@@ -100,8 +100,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       return transform.getTransform(string);
     }
 
-    function getTransformString (x, y, scale, rotate) {
-      return transform.getTransformString(x, y, scale, rotate);
+    function getTransformString (x, y, scale, rotate, rotateX, rotateY) {
+      return transform.getTransformString(x, y, scale, rotate, rotateX, rotateY);
     }
 
     function getNumberFromString (str) {
