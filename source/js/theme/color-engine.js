@@ -74,11 +74,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           imgClassifier.classify();
         }
 
-        if (shouldRepaintToEnsureFullCoverage) {
-          repaintPage();
-        }
-
         setTimeout(function() {
+          if (shouldRepaintToEnsureFullCoverage) {
+            repaintPage();
+          }
           sitecues.emit('theme/did-apply');
         }, transitionMs);
       };
@@ -290,7 +289,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * Necessary on at least youtube.com and https://www.arlington.k12.ma.us/stratton/
        */
       function repaintPage() {
-        document.documentElement.style.transform = 'translateY(1px)';
+        document.documentElement.style.transform = 'translateY(0.3px)';
         setTimeout(function () {
           document.documentElement.style.transform = '';
         }, REPAINT_MS);

@@ -7,6 +7,7 @@
 // - example background-image texture problem:
 //    http://www.teachingvisuallyimpaired.com/increase-contrast.html
 // White blocks left on texasat.net -- wtf Chrome?, digg.com
+// Deleting #wrap:before fixes http://nautil.us/issue/25/water/to-save-california-read-dune invert theme
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
