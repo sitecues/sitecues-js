@@ -54,20 +54,6 @@ sitecues.def('platform', function (platformModule, callback) {
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
   })();
 
-//  // Set globally accessible version constants
-  platformModule.os.versionString = (function() {
-    // If IE is being used, determine which version
-    var charIndex = agent.indexOf('Windows N') || agent.indexOf('Mac OS X ');
-    if (charIndex === -1) {
-      return '0'; // Unknown version
-    }
-    return agent.slice(charIndex + 9).replace(/\W.*$/, '');
-  })();
-
-  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
-  // Restore if needed
-  //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
-
   // Convenience method as IE9 is a common issue
   platformModule.isIE9 = function() {
     return platformModule.browser.isIE && platformModule.browser.version === 9;
@@ -85,9 +71,21 @@ sitecues.def('platform', function (platformModule, callback) {
     isMac     : os === 'mac',
     isWin     : os === 'win',
     isLinux   : os === 'mac', // This should say 'mac', not 'linux'
-    isUnknown : os === 'Unknown OS'
+    isUnknown : os === 'Unknown OS',
+    // Set globally accessible version constants
+    versionString: (function() {
+      // If IE is being used, determine which version
+      var charIndex = agent.indexOf('Windows N') || agent.indexOf('Mac OS X ');
+      if (charIndex === -1) {
+        return '0'; // Unknown version
+      }
+      return agent.slice(charIndex + 9).replace(/\W.*$/, '');
+    })()
   };
 
+  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
+  // Restore if needed
+  //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
 
   // platformModule.pixel is deprecated
   // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
