@@ -28,6 +28,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         aboutContent,
         settingsCards,
         tipsCards,
+        nextBtn,
+        prevBtn,
 
         moreBtnTranslate,
         settingsBtnTransform;
@@ -52,6 +54,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       settingsCards               = byId(BP_CONST.SETTINGS_CARDS_ID);
       tipsCards                   = byId(BP_CONST.TIPS_CARDS_ID);
       arrowButtons                = byId(BP_CONST.ARROWS_ID);
+      nextBtn                     = byId(BP_CONST.NEXT_ID);
+      prevBtn                     = byId(BP_CONST.PREV_ID);
 
       moreBtnTranslate            = getTransform(moreButton.getAttribute('transform')).translate;
       settingsBtnTransform        = getTransform(settingsButton.getAttribute('transform'));

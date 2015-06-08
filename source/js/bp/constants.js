@@ -87,6 +87,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.TIPS_CARDS_ID            = 'scp-tips-cards';
 
   constants.ARROWS_ID                = 'scp-arrows';
+  constants.NEXT_ID                  = 'scp-next-card';
+  constants.PREV_ID                  = 'scp-prev-card';
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
