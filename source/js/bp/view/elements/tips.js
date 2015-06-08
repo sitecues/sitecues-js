@@ -113,11 +113,12 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
       if (state.get('tipsMode') === TIPS_ENABLED) {
 
-        var activeCard = tipsCards.getElementsByClassName('scp-active')[0];
+        var activeCard = tipsCards.getElementsByClassName('scp-active')[0],
+            nextSibling = activeCard.nextElementSibling;
 
-        if (activeCard.nextElementSibling) {
+        if (nextSibling) {
           activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
-          activeCard.nextElementSibling.setAttribute('class', activeCard.nextElementSibling.getAttribute('class') + ' scp-active');
+          nextSibling.setAttribute('class', nextSibling.getAttribute('class') + ' scp-active');
         }
 
       }
@@ -125,11 +126,12 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
     function prevCard () {
       if (state.get('tipsMode') === TIPS_ENABLED) {
-        var activeCard = tipsCards.getElementsByClassName('scp-active')[0];
+        var activeCard = tipsCards.getElementsByClassName('scp-active')[0],
+            prevSibling = activeCard.previousElementSibling;
 
-        if (activeCard.previousElementSibling) {
+        if (prevSibling) {
           activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
-          activeCard.previousElementSibling.setAttribute('class', activeCard.previousElementSibling.getAttribute('class') + ' scp-active');
+          prevSibling.setAttribute('class', prevSibling.getAttribute('class') + ' scp-active');
         }
       }
     }
