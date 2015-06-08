@@ -55,36 +55,39 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param {number} intensity (optional) = .01-1
        */
       colorEngine.applyTheme = function(type, intensity) {
-        var colorMapFn = colorChoices[type];
-        if (colorMapFn) {
-          initialize();
-        }
 
-        var
-          isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
-          willBeDark = isDarkTheme(colorMapFn),
-          isReverseTheme = willBeDark !== isOriginalThemeDark,
-          themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
+        function applyThemeImpl() {
+          var
+            isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
+            willBeDark = isDarkTheme(colorMapFn),
+            isReverseTheme = willBeDark !== isOriginalThemeDark,
+            themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
           // We want to animate quickly between light themes, but slowly when performing a drastic change
           // such as going from light to dark or vice-versa
-          transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
-          transitionCss = initializeTransition(transitionMs),
-          reverseCss = isReverseTheme ? getReverseFramesCssText() : '';
+            transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
+            transitionCss = initializeTransition(transitionMs),
+            reverseCss = isReverseTheme ? getReverseFramesCssText() : '';
 
-        getStyleSheet().text(transitionCss + themeCss + reverseCss);
+          getStyleSheet().text(transitionCss + themeCss + reverseCss);
 
-        // Allow web pages to create CSS rules that respond to reverse themes
-        $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
-        if (isReverseTheme) {
-          imgClassifier.classify();
+          // Allow web pages to create CSS rules that respond to reverse themes
+          $('body').toggleClass('sitecues-reverse-theme', isReverseTheme);
+          if (isReverseTheme) {
+            imgClassifier.classify();
+          }
+
+          setTimeout(function () {
+            if (shouldRepaintToEnsureFullCoverage) {
+              repaintPage();
+            }
+            sitecues.emit('theme/did-apply');
+          }, transitionMs);
         }
 
-        setTimeout(function() {
-          if (shouldRepaintToEnsureFullCoverage) {
-            repaintPage();
-          }
-          sitecues.emit('theme/did-apply');
-        }, transitionMs);
+        var colorMapFn = colorChoices[type];
+        if (colorMapFn) {
+          init(applyThemeImpl);
+        }
       };
 
       function isDarkTheme(colorMapFn) {
@@ -222,7 +225,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           addBgImageToBeforeCss =
             imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + createRule(FILTER_PROP, FILTER_VAL[styleVal.filter]) : '',
           addRelevantBgPropsToBeforeCss =
-            getPseudoSelector('::before') + '{' +
+            getPseudoSelector('::after') + '{' +
             addBgImageToBeforeCss +
 //                      (isPlacedBeforeText ? createRule('margin-left', '-' + isPlacedBeforeText) : '') +
             (imageUrl ? createRule(imageProp, 'url(' + imageUrl + ')') : '') +
@@ -232,14 +235,18 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           removeBgFromMainElementCss =
             styleVal.imageUrl ?
               selector +' {' +
-              createRule('background', 'none', true) +
+              // TODO can we remove these? They messed with the menus on EEOC.gov
+              //createRule('background', 'none', true) +
+              //createRule('background-color', 'transparent', true) +
               createRule('background-image', 'none', true) +
-              createRule('background-color', 'transparent', true) +
               (isPlacedBeforeText ? createRule('position', 'relative') : '') + // Help position the ::before
 //                        (SC_DEV ? createRule('outline', '2px solid red', true) : '') +
               '}\n' :
-              '';
-        return invertPseudoElemsCss + addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss;
+              '',
+          fixStackingOrder =
+            getPseudoSelector(':empty::after') + '{' + createRule('z-index', styleVal.zIndex ) + '}\n' +
+            getPseudoSelector(':empty') + '{' + createRule('z-index', styleVal.zIndex + 1) + '}\n';
+        return invertPseudoElemsCss + addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss + fixStackingOrder;
       }
 
       /**
@@ -392,12 +399,6 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
         imageUrl = getCssUrl(bgImagePropVal);
-        if (imageUrl && parseInt(cssStyleDecl.zIndex)) {
-          // Why do we check z-index? Because we can't seem to invert z-index background-images
-          // without covering other content it was supposed to go over, for example, on texasat.net
-          console.log(parseInt(cssStyleDecl.zIndex));
-          imageUrl = 'none';
-        }
         gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
 
         if (imageUrl || gradient || bgPositionStyles) {
@@ -408,6 +409,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             filter: imageUrl && getBackgroundImageFilter(imageUrl, cssStyleDecl, selector),
             gradientType: gradient && gradient[1],
             gradientVal: gradient && gradient[2],
+            zIndex: parseInt(cssStyleDecl.zIndex) || 0,
             isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0,
             isPlacedBeforeText: isPlacedBeforeText()
           };
@@ -493,19 +495,30 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
       }
 
-      function initialize() {
-        if (themeStyles) {
-          return;
+      function init(callbackFn) {
+        if (!styleService.isReady()) {
+          sitecues.on('style-service/ready', function () {
+            collectRelevantStyles(callbackFn);
+          });
+          styleService.init();
         }
+        else {
+          collectRelevantStyles(callbackFn);
+        }
+      }
 
-        var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
-          fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
-          bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
+      function collectRelevantStyles(callbackFn) {
+        if (!themeStyles) {
+          var bgStyles = styleService.getAllMatchingStylesCustom(getSignificantBgColor),
+            fgStyles = styleService.getAllMatchingStylesCustom(getFgColor),
+            bgImageStyles = styleService.getAllMatchingStylesCustom(getSignificantBgImageProperties);
 
-        originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
-        isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
+          originalBodyBackgroundColor = colorUtil.getDocumentBackgroundColor();
+          isOriginalThemeDark = colorUtil.isDarkColor(originalBodyBackgroundColor);
 
-        themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
+          themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
+        }
+        callbackFn();
       }
 
       if (SC_DEV) {

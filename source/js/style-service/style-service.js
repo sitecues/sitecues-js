@@ -40,7 +40,11 @@ sitecues.def('style-service', function (styleService, callback) {
       });
     }
 
-    function init() {
+    styleService.isReady = function() {
+      return isInitComplete;
+    };
+
+    styleService.init = function() {
       if (hasInitBeenRequested) {
         return;  // Only init once
       }
@@ -53,7 +57,7 @@ sitecues.def('style-service', function (styleService, callback) {
 
       // This will initialize the composite stylesheet when finished and call style-service/ready
       cssAggregator.collectAllCss(onAllCssRetrieved);
-    }
+    };
 
 
     // -------------------------------------- PUBLIC -----------------------------------------------
@@ -181,9 +185,10 @@ sitecues.def('style-service', function (styleService, callback) {
     // Once the user zooms the style service is necessary to create the proper cursor rules
     sitecues.on('zoom', function (pageZoom) {
       if (pageZoom > 1) {
-       init();
+       styleService.init();
       }
     });
+
 
     // Normally we wait until the user zooms before initializing the style sevice.
     // However, in the case of the toolbar, we must always move fixed position elements
@@ -191,10 +196,10 @@ sitecues.def('style-service', function (styleService, callback) {
     // we will initialize the style service immediately.
     sitecues.on('bp/did-insert-toolbar', function() {
       if (document.readyState === 'complete') {
-        init();
+        styleService.init();
       }
       else {
-        window.addEventListener('load', init);
+        window.addEventListener('load', styleService.init);
       }
     });
   });
