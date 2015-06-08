@@ -44,8 +44,11 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
 
       try {
+        var oldCrossOrigin = img.crossOrigin;
+        img.crossOrigin = 'anonymous';
         ctx.drawImage(img, top, left, width, height);  // Works with img, canvas, video
         var imageData = ctx.getImageData(0, 0, width, height);
+        img.crossOrigin = oldCrossOrigin;
         return imageData.data;
       }
       catch (ex) {
