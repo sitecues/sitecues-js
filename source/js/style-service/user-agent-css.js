@@ -23,9 +23,6 @@ body,html {\n\
     background-color:#fff;\n\
     color:#000;\n\
 }\n\
-input[type="image"] {\n\
-  background-color:rgba(0,0,0,0);\n\
-}\n\
 select {\n\
   background-color:#fff;\n\
   color:#000;\n\

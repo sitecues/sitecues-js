@@ -21,7 +21,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-        MOVE_BG_IMAGE_TO_BEFORE = 'display:block;position:absolute;width:inherit;height:inherit;content:"";',
+        MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";',
         FILTER_PROP = platform.cssPrefix + 'filter',
         FILTER_VAL = {
           invert: 'invert(100%)',
@@ -128,7 +128,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       }
 
       function createRule(prop, newValue, important) {
-        return newValue ? prop + ': ' + newValue + (important ? ' !important; ' : '; ') : '';
+        if (newValue === null || typeof newValue === 'undefined') {
+          return '';
+        }
+        return prop + ': ' + newValue + (important ? ' !important; ' : '; ');
       }
 
       // Split a,b,c(d, e, f), g as
@@ -219,34 +222,46 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
-        var isPlacedBeforeText = styleVal.isPlacedBeforeText,
-          imageProp = isPlacedBeforeText ? 'content' : 'background-image',
+        var PSEUDO = '::before',
+          imageProp = 'background-image',
           imageUrl = styleVal.imageUrl,
-          addBgImageToBeforeCss =
-            imageUrl ? MOVE_BG_IMAGE_TO_BEFORE + createRule(FILTER_PROP, FILTER_VAL[styleVal.filter]) : '',
-          addRelevantBgPropsToBeforeCss =
-            getPseudoSelector('::after') + '{' +
-            addBgImageToBeforeCss +
-//                      (isPlacedBeforeText ? createRule('margin-left', '-' + isPlacedBeforeText) : '') +
+          moveBgToPseudoCss =
+            getPseudoSelector(PSEUDO) + '{' +
             (imageUrl ? createRule(imageProp, 'url(' + imageUrl + ')') : '') +
-            (isPlacedBeforeText ? 'left:0;top:0;height:100%;width:inherit;overflow-y:hidden;' : '') +
             styleVal.bgPositionStyles +
             '}\n',
-          removeBgFromMainElementCss =
-            styleVal.imageUrl ?
-              selector +' {' +
-              // TODO can we remove these? They messed with the menus on EEOC.gov
-              //createRule('background', 'none', true) +
-              //createRule('background-color', 'transparent', true) +
-              createRule('background-image', 'none', true) +
-              (isPlacedBeforeText ? createRule('position', 'relative') : '') + // Help position the ::before
-//                        (SC_DEV ? createRule('outline', '2px solid red', true) : '') +
-              '}\n' :
-              '',
-          fixStackingOrder =
-            getPseudoSelector(':empty::after') + '{' + createRule('z-index', styleVal.zIndex ) + '}\n' +
-            getPseudoSelector(':empty') + '{' + createRule('z-index', styleVal.zIndex + 1) + '}\n';
-        return invertPseudoElemsCss + addRelevantBgPropsToBeforeCss + removeBgFromMainElementCss + fixStackingOrder;
+          css = moveBgToPseudoCss;
+
+        if (styleVal.imageUrl) {
+          // TODO can we remove these? They messed with the menus on EEOC.gov
+          //createRule('background', 'none', true) +
+          //createRule('background-color', 'transparent', true) +
+          var
+            removeBgFromMainElementCss =
+              selector + '{' + createRule('background-image', 'none', true) +
+              '}\n',
+            positionRelativeCss =
+              styleVal.isPositioned ? '' :
+                getPseudoSelector(':not(:empty)') + '{' +
+                createRule('position', 'relative') + // Help position the pseudo element, only add if we need it (not empty)
+                '}\n',
+            sizePosCss =
+              getPseudoSelector(':not(:empty)' + PSEUDO) + '{' +
+              'left:0;top:0;height:100%;width:100%;overflow:hidden;' +   // Size and position the pseudo element
+              '}\n',
+            filterCss =
+              getPseudoSelector(PSEUDO) + '{' +
+              MOVE_BG_IMAGE_TO_PSEUDO + createRule(FILTER_PROP, FILTER_VAL[styleVal.filter]) +
+              '}\n',
+            stackBelowCss = getPseudoSelector(':not(:empty)' + PSEUDO) + '{' + createRule('z-index', -99999) + '}\n',
+            ensureStackingContextCss =
+                styleVal.isPlacedBeforeText && !styleVal.hasStackingContext ? getPseudoSelector(':not(:empty)') + '{' + createRule('opacity', 0.999) +
+              '}\n' : '';
+
+          css += removeBgFromMainElementCss + positionRelativeCss + sizePosCss +
+            filterCss + stackBelowCss + ensureStackingContextCss;
+        }
+        return css;
       }
 
       /**
@@ -348,10 +363,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return result;
       }
 
-      function shouldInvertBackground(cssStyleDecl, bgImage, selector) {
+      function shouldInvertBackground(cssStyleDecl, bgImage, sampleElement) {
         if (bgImage) {
-          var sampleElement = getSampleElement(selector);
-//            rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
+//        var rect = { top: 0, left: 0, width: 20, height: 20 }; // Default
           if (colorUtil.isOnDarkBackground(sampleElement)) {
             return false; // Already designed to show on a dark background
           }
@@ -370,7 +384,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           bgImagePropVal = cssStyleDecl['background-image'],
           imageUrl,
           gradient,
-          cssText = cssStyleDecl.cssText;
+          cssText = cssStyleDecl.cssText,
+          sampleElement,
+          position;
 
         if (cssText.indexOf('background') < 0) {
           return;  // Need some background property
@@ -393,10 +409,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         function isPlacedBeforeText() {
-          var paddingLeft = cssStyleDecl.paddingLeft || $(getSampleElement(selector)).css('paddingLeft');
+          var paddingLeft = cssStyleDecl.paddingLeft || $(sampleElement).css('paddingLeft');
           return parseFloat(paddingLeft) > 0;
         }
 
+        sampleElement = getSampleElement(selector);
+        position = cssStyleDecl.position || $(sampleElement).css('position');
         BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
         imageUrl = getCssUrl(bgImagePropVal);
         gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
@@ -406,10 +424,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             prop: 'background-image',
             bgPositionStyles: bgPositionStyles,
             imageUrl: imageUrl,
-            filter: imageUrl && getBackgroundImageFilter(imageUrl, cssStyleDecl, selector),
+            filter: imageUrl && getBackgroundImageFilter(imageUrl, cssStyleDecl, sampleElement),
             gradientType: gradient && gradient[1],
             gradientVal: gradient && gradient[2],
-            zIndex: parseInt(cssStyleDecl.zIndex) || 0,
+            isPositioned: position && position !== 'static',
+            hasStackingContext: cssStyleDecl.zIndex || parseInt($(sampleElement).css('zIndex')) > 0 ||
+              cssStyleDecl.opacity || parseFloat($(sampleElement).css('opacity') < 1),
             isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0,
             isPlacedBeforeText: isPlacedBeforeText()
           };
@@ -428,12 +448,12 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param propVal
        * @returns {boolean}
        */
-      function getBackgroundImageFilter(imageUrl, cssStyleDecl, selector) {
+      function getBackgroundImageFilter(imageUrl, cssStyleDecl, sampleElement) {
         if (cssStyleDecl.width === '100%') {
           return 'darken';
         }
 
-        if (shouldInvertBackground(cssStyleDecl, imageUrl, selector)) {
+        if (shouldInvertBackground(cssStyleDecl, imageUrl, sampleElement)) {
           return 'invert';
         }
       }

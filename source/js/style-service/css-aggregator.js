@@ -273,10 +273,32 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       }
     }
 
+
+    // Needed to support hacky inline style attributes
+    // for example background-image on http://www.classifieds.faast.org/
+    function addInlineStyles() {
+      var cssText = '';
+
+      $('body [style]').each(function(index, element) {
+        $(element).attr('data-sc-id', index);
+        cssText += '[data-sc-id="' + index + '"] {' + element.getAttribute('style') + '}\n';
+      });
+
+      if (cssText) {
+        addSheet(null, cssText, SC_DEV && 'inline style attrs');
+      }
+    }
+
     /**
      * Initiates the collection of all style sheet text
      */
     cssAggregator.collectAllCss = function(cssReadyCallbackFn) {
+      onCssReadyFn = cssReadyCallbackFn;
+
+      $(document).ready(collectAllCssImpl);
+    };
+
+    function collectAllCssImpl() {
 
       function startsWith(s1, s2) {
         return s1.substr(0, s2.length) === s2;
@@ -312,11 +334,12 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       // Add styles to make up for deprecated bgcolor attribute
       addDeprecatedAttributeStyles();
 
+      // Add styles to deal with inline style="foo" attributes?
+      addInlineStyles();
+
       // Next add <link> and <style> sheets, in document order
       var $styleElems = $('link[rel="stylesheet"],style').filter(isUsable);
       $styleElems.each(addSheetForElem);
-
-      onCssReadyFn = cssReadyCallbackFn;
     };
 
     callback();
