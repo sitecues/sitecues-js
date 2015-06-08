@@ -13,7 +13,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   var svg = '\
 <sc id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
-  <sc class="scp-card active">\
+  <sc class="scp-card scp-active">\
     <sc-h1>Welcome</sc-h1>\
     <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
@@ -41,7 +41,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </sc>\
 </sc>\
 <sc id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
-  <sc class="scp-card active">\
+  <sc class="scp-card scp-active">\
     <sc-h1>Settings</sc-h1>\
     <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
@@ -137,10 +137,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g class="scp-feature-content">\
     <g style="display:none;opacity:0;" id="scp-arrows" class="scp-transition-opacity">\
-      <text id="scp-prev-card" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
+      <text id="scp-prev-card" class="scp-hand-cursor" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
-      <text id="scp-next-card" role="button" aria-label="Next" x="735" y="74">\
+      <text id="scp-next-card" class="scp-hand-cursor" role="button" aria-label="Next" x="735" y="74">\
          &#9658;\
       </text>\
     </g>\
@@ -195,7 +195,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <g id="scp-more-button-container" transform="translate(400,198)">\
   <g id="scp-more-button-group" role="button" aria-label="View more options" class="scp-hand-cursor">\
     <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
-    <path id="scp-more-arrow" class="pointer" fill="#777777" transform="scale(0.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
+    <path id="scp-more-arrow" class="scp-hand-cursor" fill="#777777" transform="scale(0.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

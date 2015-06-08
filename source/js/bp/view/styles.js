@@ -480,7 +480,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-size': '44px'
         },
 
-        '.active, .active *': {
+        '.scp-active, .scp-active *': {
           'display': 'block'
         },
 

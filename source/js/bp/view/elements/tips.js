@@ -28,6 +28,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         aboutContent,
         settingsCards,
         tipsCards,
+        nextBtn,
+        prevBtn,
 
         moreBtnTranslate,
         tipsBtnTransform;
@@ -52,9 +54,14 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       settingsCards    = byId(BP_CONST.SETTINGS_CARDS_ID);
       tipsCards        = byId(BP_CONST.TIPS_CARDS_ID);
       arrowButtons     = byId(BP_CONST.ARROWS_ID);
+      nextBtn          = byId(BP_CONST.NEXT_ID);
+      prevBtn          = byId(BP_CONST.PREV_ID);
 
       moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate;
       tipsBtnTransform = getTransform(tipsButton.getAttribute('transform'));
+
+      nextBtn.addEventListener('click', nextCard);
+      prevBtn.addEventListener('click', prevCard);
 
       cssValues[TIPS_ENABLED] = {
         'outlineHeight'        : 377, // The outline
@@ -100,6 +107,31 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
     function getNumberFromString (str) {
       return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
+    }
+
+    function nextCard () {
+
+      if (state.get('tipsMode') === TIPS_ENABLED) {
+
+        var activeCard = tipsCards.getElementsByClassName('scp-active')[0];
+
+        if (activeCard.nextElementSibling) {
+          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
+          activeCard.nextElementSibling.setAttribute('class', activeCard.nextElementSibling.getAttribute('class') + ' scp-active');
+        }
+
+      }
+    }
+
+    function prevCard () {
+      if (state.get('tipsMode') === TIPS_ENABLED) {
+        var activeCard = tipsCards.getElementsByClassName('scp-active')[0];
+
+        if (activeCard.previousElementSibling) {
+          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
+          activeCard.previousElementSibling.setAttribute('class', activeCard.previousElementSibling.getAttribute('class') + ' scp-active');
+        }
+      }
     }
 
     function toggleTips () {
