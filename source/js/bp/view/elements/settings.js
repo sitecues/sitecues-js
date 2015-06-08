@@ -60,6 +60,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       moreBtnTranslate            = getTransform(moreButton.getAttribute('transform')).translate;
       settingsBtnTransform        = getTransform(settingsButton.getAttribute('transform'));
 
+      nextBtn.addEventListener('click', nextCard);
+      prevBtn.addEventListener('click', prevCard);
+
       cssValues[SETTINGS_ENABLED] = {
         'outlineHeight'        : 377, // The outline
         'svgHeight'            : 520, // The main SVG, allows more space
@@ -104,6 +107,31 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     function getNumberFromString (str) {
       return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
+    }
+
+    function nextCard () {
+
+      if (state.get('settingsMode') === SETTINGS_ENABLED) {
+
+        var activeCard = settingsCards.getElementsByClassName('scp-active')[0];
+
+        if (activeCard.nextElementSibling) {
+          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
+          activeCard.nextElementSibling.setAttribute('class', activeCard.nextElementSibling.getAttribute('class') + ' scp-active');
+        }
+
+      }
+    }
+
+    function prevCard () {
+      if (state.get('settingsMode') === SETTINGS_ENABLED) {
+        var activeCard = settingsCards.getElementsByClassName('scp-active')[0];
+
+        if (activeCard.previousElementSibling) {
+          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
+          activeCard.previousElementSibling.setAttribute('class', activeCard.previousElementSibling.getAttribute('class') + ' scp-active');
+        }
+      }
     }
 
     function toggleSettings () {
@@ -213,7 +241,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         aboutButton.setAttribute('transform',    getTransformString(BP_CONST.TRANSFORMS[aboutButton.id].translateX, BP_CONST.TRANSFORMS[aboutButton.id].translateY));
         arrowButtons.style.opacity     = 0;
         settingsCards.style.opacity    = 0;
-
 
         settingsAnimation = animate.create({
           'from': currentSVGHeight,
