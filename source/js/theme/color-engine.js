@@ -4,8 +4,8 @@
 
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
-  sitecues.use('jquery', 'style-service', 'platform', 'theme/color/choices', 'util/color', 'theme/color/img-classifier',
-    function($, styleService, platform, colorChoices, colorUtil, imgClassifier) {
+  sitecues.use('jquery', 'conf', 'style-service', 'platform', 'theme/color/choices', 'util/color', 'theme/color/img-classifier',
+    function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
 
       var $themeStyleSheet,
         THEME_STYLESHEET_NAME = 'sitecues-theme',
@@ -91,7 +91,15 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       };
 
       function isDarkTheme(colorMapFn) {
-        return colorMapFn ? colorChoices.isDarkTheme(colorMapFn, originalBodyBackgroundColor) : isOriginalThemeDark;
+        if (!colorMapFn) {
+          return isOriginalThemeDark;
+        }
+        var originalBg = {
+          prop: 'background-color',
+          parsedVal: originalBodyBackgroundColor
+        };
+        var themedBg = colorMapFn(originalBg, 1);
+        return colorUtil.isDarkColor(themedBg);
       }
 
       function initializeTransition(transitionMs) {
@@ -597,6 +605,20 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
         callbackFn();
       }
+
+      function getSanitizedTheme(theme) {
+        return {
+          name: theme.name in colorChoices ? theme.name : null,      // Theme name must exist in colorChoices
+          power: Math.max(0, Math.min(theme.power, 1))               // Theme power is 0 - 1
+        };
+      }
+
+      function onThemeChange(theme) {
+        colorEngine.applyTheme(theme.name, theme.power);
+      }
+
+      conf.def('theme', getSanitizedTheme);
+      conf.get('theme', onThemeChange);
 
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;

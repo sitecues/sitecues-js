@@ -343,15 +343,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return mixRgbaColors(rgba, mixInRgba, mixInRatio);
     };
 
-    colorChoices.isDarkTheme = function(colorMapFn, originalBgRgba) {
-      var originalBg = {
-        prop: 'background-color',
-        parsedVal: originalBgRgba
-      };
-      var themedBg = colorMapFn(originalBg, 1);
-      return colorUtil.isDarkColor(themedBg);
-    };
-
     if (SC_DEV) {
       // TODO Put in UI rather than global function
       sitecues.setMonoForegroundHsl = function (newHsl) {

@@ -8,6 +8,7 @@ The purpose of some elements:
 -
  */
 sitecues.def('bp/view/svg', function (bpSVG, callback) {
+  /*jshint multistr: true */
 
   'use strict';
 
@@ -160,7 +161,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </g>\
     </g>\
     <g id="scp-about-content" style="display:none;">\
-      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + sitecues.resolveSitecuesUrl("/images/sitecues-logo-text.png") + '" x="805" y="26" width="330" height="110"></image>\
+      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="26" width="330" height="110"></image>\
     </g>\
   </g>\
   <g id="scp-feature-nav-buttons">\
@@ -205,8 +206,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
      <textarea id="feedback-textarea-id" style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
   </div>\
 </div\
-</svg>\
-';
+</svg>';
  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeEnd(loc) {
@@ -228,24 +228,35 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       return removeEnd(getBaseURI()) !== removeEnd(document.location.href);
     }
 
-    // Fix relative URLs to that <base> tag doesn't mess them up!
-    // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
-    // when the source document uses a <base> tag.
-    function getTextWithNormalizedUrls(text) {
-      if (hasAlteredBaseURI() && !platform.isIE9()) {
-        var MATCH_KEY = /(href="|url\()(#)/g,
-          pageUrlMinusHash = removeHash(document.location.href);
-        return text.replace(MATCH_KEY, function (totalMatch, matchPart1) {
-          return matchPart1 + pageUrlMinusHash + '#';
-        });
-      }
+    // Sitecues URLs must be absolute.
+    // For example, change /images/foo.png to http://js.sitecues.com/images/foo.png
+    function convertSitecuesUrlsToAbsolute(text) {
+      var MATCH_URLS = /(href="|url\()(\/.*)"/g;
 
-      return text;
+      return text.replace(MATCH_URLS, function (totalMatch, attributeName, url) {
+        return attributeName + sitecues.resolveSitecuesUrl(url);
+      });
     }
 
+   // Relative URLs must be full URLS that <base> tag doesn't mess them up!
+   // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
+   // when the source document uses a <base> tag.
+   function convertRelativeUrlsToAbsolute(text) {
+     if (hasAlteredBaseURI() && !platform.isIE9()) {
+       var MATCH_URLS = /(href="|url\()(?:#)/g,
+         pageUrlMinusHash = removeHash(document.location.href);
+
+       return text.replace(MATCH_URLS, function (totalMatch, attributeName) {
+         return attributeName + pageUrlMinusHash + '#';
+       });
+     }
+
+     return text;
+   }
     bpSVG.getSvg = function() {
-      var svgWithNormalizedUrls = getTextWithNormalizedUrls(svg),
-        localizedSvg = locale.localizeStrings(svgWithNormalizedUrls);
+      var svgWithCorrectSitecuesUrls = convertSitecuesUrlsToAbsolute(svg),
+        svgWithAllAbsoluteUrls = convertRelativeUrlsToAbsolute(svgWithCorrectSitecuesUrls),
+        localizedSvg = locale.localizeStrings(svgWithAllAbsoluteUrls);
 
       return localizedSvg;
     };
