@@ -21,7 +21,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-        MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";width:inherit;height:inherit;',
+        MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";',
         PSEUDO_FOR_BG_IMAGES = '::before',
         FILTER_PROP = platform.cssPrefix + 'filter',
         FILTER_VAL = {
@@ -208,6 +208,34 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return selector.indexOf(':before') < 0 && selector.indexOf(':after') < 0;
         }
 
+        function getWidthRule(doProvideFallback) {
+          var value = bgInfo.width,
+            important;
+          if (value) {
+            important = true;
+          }
+          else if (doProvideFallback) {
+            // If positioned '100%' will fill the space of the positioned element and no more
+            // If not positioned 'auto' will fill the available space and no less
+            value = (bgInfo.doSetPositionRelative || bgInfo.isPositioned)? '100%' : 'auto';
+          }
+          return createRule('width', value, important);
+        }
+
+        function getHeightRule(doProvideFallback) {
+          var value = bgInfo.height,
+            important;
+          if (value) {
+            important = true;
+          }
+          if (doProvideFallback) {
+            // If positioned '100%' will fill the space of the positioned element and no more
+            // If not positioned 'auto' will fill the available space and no less
+            value = (bgInfo.doSetPositionRelative || bgInfo.isPositioned)? '100%' : 'auto';
+          }
+          return createRule('height', value, important);
+        }
+
         if (!bgInfo.doMoveToPseudo) {  // Definitely a sprite, only content will be background-image
           return bgInfo.hasImageUrl ? getSelector() + INVERT_FILTER + '}\n' : '';
         }
@@ -231,7 +259,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
         if (!bgInfo.hasImageUrl) {
-          return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + '}\n';
+          return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + getWidthRule() + getHeightRule() + '}\n';
         }
 
         var
@@ -239,32 +267,32 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             getSelector() + createRule('background-image', 'none', true) +
             '}\n',
           positionRelativeCss =
-            bgInfo.isPositioned || bgInfo.hasHiddenText || bgInfo.isFullWidth || bgInfo.hasRepeat ? '' :
-              getSelector(':not(:empty)') +
-              createRule('position', 'relative') + // Help position the pseudo element, only add if we need it (not empty)
-              '}\n',
+            bgInfo.doSetPositionRelative ?
+              getSelector(':not(:empty)') + createRule('position', 'relative') + '}\n' : // Help position the pseudo element, only add if we need it (not empty)
+              '',
           sizePosCss =
             getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) +
-            'left:0;top:0;height:100%;width:100%;overflow:hidden;' +   // Size and position the pseudo element
-            '}\n',
+            'left:0;top:0;overflow:hidden;' +   // Size and position the pseudo element
+             '}\n',
           filterCss =
             getSelector(PSEUDO_FOR_BG_IMAGES) +
             MOVE_BG_IMAGE_TO_PSEUDO +
             bgInfo.bgPositionStyles +
             createRule('background-color', bgInfo.backgroundColor) +
-            createRule('width', bgInfo.width, true) +
-            createRule('height', bgInfo.height, true) +
+            getWidthRule(true) +
+            getHeightRule(true) +
             createRule('background-image', bgInfo.imageUrlProp) +
             createRule(FILTER_PROP, FILTER_VAL[bgInfo.filter]) +
             '}\n',
           stackBelowCss =
             getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) + createRule('z-index', -99999) + '}\n',
           ensureStackingContextCss =
-              bgInfo.isPlacedBeforeText && !bgInfo.hasStackingContext ? getSelector(':not(:empty)') + createRule('opacity', 0.999) +
-            '}\n' : '';
+              bgInfo.isPlacedBeforeText && !bgInfo.hasStackingContext ?
+                getSelector(':not(:empty)') + createRule('opacity', 0.999) + '}\n' :
+                '';
 
-        return invertExistingPseudoElemsCss + removeBgFromMainElementCss + positionRelativeCss + sizePosCss +
-          filterCss + stackBelowCss + ensureStackingContextCss;
+        return invertExistingPseudoElemsCss + removeBgFromMainElementCss + positionRelativeCss + filterCss +
+          sizePosCss + stackBelowCss + ensureStackingContextCss;
       }
 
       /**
@@ -401,7 +429,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             propVal = '100%'; // 'auto' won't properly apply to positioned:absolute
           }
           if (propVal && propVal !== 'initial') {
-            bgPositionStyles += prop + ':' + propVal + ';\n';
+            bgPositionStyles += prop + ':' + propVal + ';';
           }
         }
 
@@ -450,6 +478,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             backgroundColor: cssStyleDecl.backgroundColor
           };
           bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
+          bgInfo.doSetPositionRelative = !bgInfo.isPositioned && !bgInfo.hasHiddenText && !bgInfo.isFullWidth && !bgInfo.hasRepeat;
           return bgInfo;
         }
       }
