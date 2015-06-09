@@ -12,7 +12,8 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       sheets = [],
       onCssReadyFn,
       chromeRequestId = 0,
-      doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension';
+      doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension',
+      INLINE_ID_ATTR = 'data-sc-inline'; // Allow each element with inline @style to have own ID for use with stylesheets
 
     /**
      * StyleSheet object constructor. This object represents one stylesheet on the page,
@@ -280,8 +281,8 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       var cssText = '';
 
       $('body [style]').each(function(index, element) {
-        $(element).attr('data-sc-id', index);
-        cssText += '[data-sc-id="' + index + '"] {' + element.getAttribute('style') + '}\n';
+        $(element).attr(INLINE_ID_ATTR, index);
+        cssText += '[' + INLINE_ID_ATTR + '="' + index + '"] {' + element.getAttribute('style') + '}\n';
       });
 
       if (cssText) {

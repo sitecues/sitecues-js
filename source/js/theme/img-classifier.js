@@ -18,7 +18,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       DARK_BG_THRESHOLD = 0.3,
       BUTTON_BONUS = 50,
       SVG_BONUS = 999,
-      BG_IMAGE_BONUS = 30,
+      BG_IMAGE_BONUS = 150,
       MAX_SCORE_CHECK_PIXELS = 120,
       isDebuggingOn;
 
@@ -33,7 +33,9 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
         top = rect.top || 0,
         left = rect.left || 0,
         width = rect.width,
-        height = rect.height;
+        height = rect.height,
+        oldCrossOrigin,
+        imageData;
       canvas.width = width;
       canvas.height = height;
 
@@ -44,17 +46,16 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       }
 
       try {
-        var oldCrossOrigin = img.crossOrigin;
+        oldCrossOrigin = img.crossOrigin;
         img.crossOrigin = 'anonymous';
         ctx.drawImage(img, top, left, width, height);  // Works with img, canvas, video
-        var imageData = ctx.getImageData(0, 0, width, height);
-        img.crossOrigin = oldCrossOrigin;
-        return imageData.data;
+        imageData = ctx.getImageData(0, 0, width, height).data;
       }
       catch (ex) {
         SC_DEV && isDebuggingOn && console.log('Could not get image data for %s: %s', img.src, ex);
-        return null;
       }
+      img.crossOrigin = oldCrossOrigin;
+      return imageData;
     }
 
     function getPixelInfo(img, rect) {
@@ -257,12 +258,25 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       $(img).attr(REVERSIBLE_ATTR, isReversible);
     }
 
+    function getSource(img) {
+      var src = img.getAttribute('src'),
+        srcSet;
+      if (!src) {
+        srcSet = img.getAttribute('srcset');
+        if (srcSet) {
+          src = srcSet.split('/, /')[0]; // Get first URL
+        }
+      }
+      return src;
+    }
+
     function shouldInvertElement(img) {
-      if (!img.src) {
+      var src = getSource(img);
+
+      if (!src) {
         return true;
       }
-      var src = img.getAttribute('src'),
-        size = getImageSize(img),
+      var size = getImageSize(img),
         imageExt = getImageExtension(src),
         sizeScore = getSizeScore(size.height, size.width),
         elementTypeScore = getElementTypeScore(img),
@@ -286,27 +300,22 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
       return finalScore > 0;
     }
 
-//    colorUtil.shouldInvertBgImage = function(src, rect) {
-//      var imageExt = getImageExtension(src),
-//        sizeScore = getSizeScore(rect.height, rect.width),
-//        elementTypeScore = BG_IMAGE_BONUS,
-//        extensionScore = getExtensionScore(imageExt),
-//        img = $('<img>').attr('src', src)[0],
+    imgClassifier.shouldInvertBgImage = function(src, rect) {
+      var imageExt = getImageExtension(src),
+        sizeScore = getSizeScore(rect.height, rect.width),
+        elementTypeScore = BG_IMAGE_BONUS,
+        extensionScore = getExtensionScore(imageExt),
+//        img = $('<img>').attr('src', src)[0],  // Would need to wait for load, or?
 //        pixelInfoScore = getPixelInfoScore(img, rect),
-//        finalScore = sizeScore + elementTypeScore + extensionScore + pixelInfoScore;
-//
-//      SC_DEV && isDebuggingOn && $(img).attr('score',
-//          sizeScore + ' (size) + ' +
-//          (elementTypeScore ? elementTypeScore + ' (button) + ' : '' ) +
-//          extensionScore + ' (ext) + ' +
-//          pixelInfoScore + ' (pixels) = ' + finalScore);
-//
-//      return finalScore > 0;
-//    };
+        finalScore = sizeScore + elementTypeScore + extensionScore; // + pixelInfoScore;
+
+      return finalScore > 0;
+    };
 
     imgClassifier.classify = function() {
       var NOT_CLASSIFIED = ':not([' + REVERSIBLE_ATTR + '])',
-        selector = 'body img' + NOT_CLASSIFIED +
+        selector = 'body img[src]' + NOT_CLASSIFIED +
+                   ',body picture[srcset]' + NOT_CLASSIFIED +
                    ',body input[type="image"]' + NOT_CLASSIFIED +
                    ',body svg' + NOT_CLASSIFIED;
       if (customSelectors.reversible) {

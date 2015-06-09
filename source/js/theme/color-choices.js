@@ -4,10 +4,10 @@
 
 // Do we want to do:
 // - border color
-// - example background-image texture problem:
-//    http://www.teachingvisuallyimpaired.com/increase-contrast.html
-// Bg image z-index on texasat, #h_contentwrapper, #news
-// Deleting #wrap:before fixes http://nautil.us/issue/25/water/to-save-california-read-dune invert theme
+// Reverse colors:
+// - sitecues.com positioning
+// - Bad photo reversal guesses:
+//   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';

@@ -21,13 +21,15 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
-        MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";',
+        MOVE_BG_IMAGE_TO_PSEUDO = 'display:block;position:absolute;content:"";width:inherit;height:inherit;',
+        PSEUDO_FOR_BG_IMAGES = '::before',
         FILTER_PROP = platform.cssPrefix + 'filter',
         FILTER_VAL = {
-          invert: 'invert(100%)',
-          darken: 'brightness(.6)'
+          reversed: 'invert(100%)',
+          mediumDark: 'brightness(.6)',
+          veryDark: 'brightness(.2)'
         },
-        INVERT_FILTER = createRule(FILTER_PROP, FILTER_VAL.invert),
+        INVERT_FILTER = createRule(FILTER_PROP, FILTER_VAL.reversed),
         BACKGROUND_IMG_POSITIONING_PROPS = [
           'background-repeat',
           'background-attachment',
@@ -35,9 +37,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           'background-position-y',
           'background-origin',
           'background-size',
-          'background-clip',
-          'width',
-          'height'
+          'background-clip'
 //          'vertical-align',
 //          'padding',
 //          'padding-top',
@@ -121,14 +121,15 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
       function getReverseFramesCssText() {
         var REVERSIBLE = ':not([data-sc-reversible="false"])',
-          FRAME ='frame' + REVERSIBLE + ',iframe' + REVERSIBLE,
+          FRAME ='frame' + REVERSIBLE + ',iframe:not([src*="youtube"])' + REVERSIBLE,
           docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
 
         return FRAME + '{' + createRule('background-color', docBg) + INVERT_FILTER + '};\n';
       }
 
       function createRule(prop, newValue, important) {
-        if (newValue === null || typeof newValue === 'undefined') {
+        // Check for non-values but allow 0 or false through
+        if (newValue === null || typeof newValue === 'undefined' || newValue === '') {
           return '';
         }
         return prop + ': ' + newValue + (important ? ' !important; ' : '; ');
@@ -193,10 +194,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
       // Map background image related rules to something that can be reversed
       // TODO clean this up
-      function getReverseSpriteCssText(styleVal, selector) {
+      function getReverseSpriteCssText(bgInfo, selector) {
         // Create a pseudo element selector for everything that matches the selector
-        function getPseudoSelector(pseudo) {
-          return selector.replace(/(,|$)/g, pseudo + '$1');
+        function getSelector(pseudo) {
+          return (pseudo ? selector.replace(/(,|$)/g, pseudo + '$1')  : selector) + ' {\n';
         }
 
         function hasPseudoElement(selector) {
@@ -207,61 +208,63 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return selector.indexOf(':before') < 0 && selector.indexOf(':after') < 0;
         }
 
-        var invertPseudoElemsCss = '';
-
-        if (styleVal.isOnPseudo) {
-          // Background already on a pseudo element are just inverted there
-          // See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
-          var items = selector.split(','),
-            pseudoElemsSelector = items.filter(hasPseudoElement).join(',');
-          invertPseudoElemsCss = pseudoElemsSelector + '{' + INVERT_FILTER + '}\n';
-          selector = items.filter(hasNoPseudoElement).join(',');
-          if (!selector) {
-            return invertPseudoElemsCss;
-          }
+        if (!bgInfo.doMoveToPseudo) {  // Definitely a sprite, only content will be background-image
+          return bgInfo.hasImageUrl ? getSelector() + INVERT_FILTER + '}\n' : '';
         }
+
+        // Background already on a pseudo element are just inverted there
+        // See http://www.bbc.co.uk/newsbeat/article/32973341/british-tank-crushes-learner-drivers-car-in-germany
+        var invertExistingPseudoElemsCss = '',
+          items = selector.split(','),
+          pseudoElemsSelector = items.filter(hasPseudoElement).join(',').trim(),
+          nonPseudoElemsSelector =  items.filter(hasNoPseudoElement).join(',');
+        if (pseudoElemsSelector) {
+          invertExistingPseudoElemsCss = getSelector(pseudoElemsSelector) + INVERT_FILTER + '}\n';
+        }
+
+        if (!nonPseudoElemsSelector) {
+          // Nothing left to do, everything was already in a ::before or ::after
+          return invertExistingPseudoElemsCss;
+        }
+
+        selector = nonPseudoElemsSelector;
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
-        var PSEUDO = '::before',
-          imageProp = 'background-image',
-          imageUrl = styleVal.imageUrl,
-          moveBgToPseudoCss =
-            getPseudoSelector(PSEUDO) + '{' +
-            (imageUrl ? createRule(imageProp, 'url(' + imageUrl + ')') : '') +
-            styleVal.bgPositionStyles +
-            '}\n',
-          css = moveBgToPseudoCss;
-
-        if (styleVal.imageUrl) {
-          // TODO can we remove these? They messed with the menus on EEOC.gov
-          //createRule('background', 'none', true) +
-          //createRule('background-color', 'transparent', true) +
-          var
-            removeBgFromMainElementCss =
-              selector + '{' + createRule('background-image', 'none', true) +
-              '}\n',
-            positionRelativeCss =
-              styleVal.isPositioned ? '' :
-                getPseudoSelector(':not(:empty)') + '{' +
-                createRule('position', 'relative') + // Help position the pseudo element, only add if we need it (not empty)
-                '}\n',
-            sizePosCss =
-              getPseudoSelector(':not(:empty)' + PSEUDO) + '{' +
-              'left:0;top:0;height:100%;width:100%;overflow:hidden;' +   // Size and position the pseudo element
-              '}\n',
-            filterCss =
-              getPseudoSelector(PSEUDO) + '{' +
-              MOVE_BG_IMAGE_TO_PSEUDO + createRule(FILTER_PROP, FILTER_VAL[styleVal.filter]) +
-              '}\n',
-            stackBelowCss = getPseudoSelector(':not(:empty)' + PSEUDO) + '{' + createRule('z-index', -99999) + '}\n',
-            ensureStackingContextCss =
-                styleVal.isPlacedBeforeText && !styleVal.hasStackingContext ? getPseudoSelector(':not(:empty)') + '{' + createRule('opacity', 0.999) +
-              '}\n' : '';
-
-          css += removeBgFromMainElementCss + positionRelativeCss + sizePosCss +
-            filterCss + stackBelowCss + ensureStackingContextCss;
+        if (!bgInfo.hasImageUrl) {
+          return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + '}\n';
         }
-        return css;
+
+        var
+          removeBgFromMainElementCss =
+            getSelector() + createRule('background-image', 'none', true) +
+            '}\n',
+          positionRelativeCss =
+            bgInfo.isPositioned || bgInfo.hasHiddenText || bgInfo.isFullWidth || bgInfo.hasRepeat ? '' :
+              getSelector(':not(:empty)') +
+              createRule('position', 'relative') + // Help position the pseudo element, only add if we need it (not empty)
+              '}\n',
+          sizePosCss =
+            getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) +
+            'left:0;top:0;height:100%;width:100%;overflow:hidden;' +   // Size and position the pseudo element
+            '}\n',
+          filterCss =
+            getSelector(PSEUDO_FOR_BG_IMAGES) +
+            MOVE_BG_IMAGE_TO_PSEUDO +
+            bgInfo.bgPositionStyles +
+            createRule('background-color', bgInfo.backgroundColor) +
+            createRule('width', bgInfo.width, true) +
+            createRule('height', bgInfo.height, true) +
+            createRule('background-image', bgInfo.imageUrlProp) +
+            createRule(FILTER_PROP, FILTER_VAL[bgInfo.filter]) +
+            '}\n',
+          stackBelowCss =
+            getSelector(':not(:empty)' + PSEUDO_FOR_BG_IMAGES) + createRule('z-index', -99999) + '}\n',
+          ensureStackingContextCss =
+              bgInfo.isPlacedBeforeText && !bgInfo.hasStackingContext ? getSelector(':not(:empty)') + createRule('opacity', 0.999) +
+            '}\n' : '';
+
+        return invertExistingPseudoElemsCss + removeBgFromMainElementCss + positionRelativeCss + sizePosCss +
+          filterCss + stackBelowCss + ensureStackingContextCss;
       }
 
       /**
@@ -369,13 +372,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           if (colorUtil.isOnDarkBackground(sampleElement)) {
             return false; // Already designed to show on a dark background
           }
-          return true;
-          // TODO Figure out the clipping and size of the bg image and pass it in to imgClassifier.shouldInvertBgImage(bgImage, rect);
-//          if (sampleElement) {
-//            // TODO this sucks, but what about % widths in background-size etc.? Those would be hard to figure out
-//            rect = sampleElement.getBoundingClientRect();
-//          }
-//          return imgClassifier.shouldInvertBgImage(bgImage, rect);
+          if (!sampleElement) {
+            return true;
+          }
+          return imgClassifier.shouldInvertBgImage(bgImage, sampleElement.getBoundingClientRect());
         }
       }
 
@@ -386,7 +386,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           gradient,
           cssText = cssStyleDecl.cssText,
           sampleElement,
-          position;
+          sampleElementCss,
+          position,
+          hasImage,
+          hasHiddenText;
 
         if (cssText.indexOf('background') < 0) {
           return;  // Need some background property
@@ -409,30 +412,45 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         function isPlacedBeforeText() {
-          var paddingLeft = cssStyleDecl.paddingLeft || $(sampleElement).css('paddingLeft');
+          // Content with text-indent is using inner text as alternative text but placing it offscreen
+          var paddingLeft = cssStyleDecl.paddingLeft || sampleElementCss.paddingLeft;
           return parseFloat(paddingLeft) > 0;
         }
 
         sampleElement = getSampleElement(selector);
-        position = cssStyleDecl.position || $(sampleElement).css('position');
+        sampleElementCss = sampleElement ? getComputedStyle(sampleElement) : {};
+        position = cssStyleDecl.position || sampleElementCss.position;
         BACKGROUND_IMG_POSITIONING_PROPS.forEach(addPositioningProp);
         imageUrl = getCssUrl(bgImagePropVal);
         gradient = !imageUrl && getBackgroundGradient(bgImagePropVal);
+        hasImage = imageUrl || (bgPositionStyles && sampleElementCss.backgroundImage !== 'none');
+        hasHiddenText = cssStyleDecl.textIndent || parseInt(sampleElementCss.textIndent) < 0 ||
+          parseInt(cssStyleDecl.fontSize) === 0 || parseInt(sampleElementCss.fontSize) === 0;
 
         if (imageUrl || gradient || bgPositionStyles) {
-          return {
+          var bgInfo = {
             prop: 'background-image',
             bgPositionStyles: bgPositionStyles,
-            imageUrl: imageUrl,
-            filter: imageUrl && getBackgroundImageFilter(imageUrl, cssStyleDecl, sampleElement),
+            backgroundPosition: cssStyleDecl.backgroundPosition,
+            hasRepeat: cssStyleDecl.backgroundRepeat &&
+              cssStyleDecl.backgroundRepeat.indexOf('no-repeat') === -1,
+            hasHiddenText: hasHiddenText,
+            hasImageUrl: !!imageUrl,
+            imageUrlProp: cssStyleDecl.backgroundImage,
             gradientType: gradient && gradient[1],
             gradientVal: gradient && gradient[2],
             isPositioned: position && position !== 'static',
-            hasStackingContext: cssStyleDecl.zIndex || parseInt($(sampleElement).css('zIndex')) > 0 ||
-              cssStyleDecl.opacity || parseFloat($(sampleElement).css('opacity') < 1),
-            isOnPseudo: selector.indexOf(':before') >= 0 || selector.indexOf(':after') >= 0,
-            isPlacedBeforeText: isPlacedBeforeText()
+            hasStackingContext: cssStyleDecl.zIndex || parseInt(sampleElementCss.zIndex) > 0 ||
+              cssStyleDecl.opacity || parseFloat(sampleElementCss.opacity) < 1,
+            doMoveToPseudo: hasImage && !hasHiddenText,
+            isPlacedBeforeText: isPlacedBeforeText(),
+            isFullWidth: cssStyleDecl.width === '100%',
+            width: cssStyleDecl.width,
+            height: cssStyleDecl.height,
+            backgroundColor: cssStyleDecl.backgroundColor
           };
+          bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
+          return bgInfo;
         }
       }
 
@@ -448,14 +466,24 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param propVal
        * @returns {boolean}
        */
-      function getBackgroundImageFilter(imageUrl, cssStyleDecl, sampleElement) {
+      function getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement) {
+        if (bgInfo.hasRepeat) {
+          return 'veryDark';
+        }
         if (cssStyleDecl.width === '100%') {
-          return 'darken';
+          return 'mediumDark';
+        }
+
+        if (bgInfo.hasHiddenText || bgInfo.doMoveToPseudo || bgInfo.isPlacedBeforeText ||
+          bgInfo.backgroundPosition) {  // Clearly a sprite
+          return 'reversed';
         }
 
         if (shouldInvertBackground(cssStyleDecl, imageUrl, sampleElement)) {
-          return 'invert';
+          return 'reversed';
         }
+
+        return 'mediumDark';
       }
 
       function isButtonRule(selector) {

@@ -19,7 +19,7 @@ UA_CSS.text =
 input,textarea,select,button,label[for]{\n\
   cursor:pointer;\n\
 }\n\
-body,html {\n\
+body {\n\
     background-color:#fff;\n\
     color:#000;\n\
 }\n\
