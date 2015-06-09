@@ -522,7 +522,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'border-radius': '3px',
           'display': 'none',
           'position': 'absolute',
-          'pointer-events': 'none'
+          'pointer-events': 'none',
+          'z-index': 99999
         },
 
         '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
