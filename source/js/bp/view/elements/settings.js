@@ -270,7 +270,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         settingsCards.style.display   = 'block';
         arrowButtons.style.display    = 'block';
 
-
         feedbackContent.style.opacity = 0;
         aboutContent.style.opacity    = 0;
         tipsCards.style.opacity       = 0;

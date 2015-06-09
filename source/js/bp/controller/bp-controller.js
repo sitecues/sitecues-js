@@ -173,7 +173,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
     //   so that clicks around the panel don't accidentally open it.
-    bpc.clickToOpenPanel = function(event) {
+    bpc.clickToOpenPanel = function() {
       var badgeElem = helper.byId(BP_CONST.BADGE_ID);
       if (document.activeElement === badgeElem) {
         // Click is in visible area and badge has focus -- go ahead and open the panel
@@ -273,31 +273,13 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       item = item || evt.currentTarget;
 
       var feature = item.getAttribute('data-feature');
-
       if (feature) {  /* Feature button has data-feature attribute */
         baseController.clearPanelFocus();
-        if (state.get('featurePanelName') === feature) {
-          state.set('featurePanelName', null); // Already on this feature, toggle it off (back to more panel)
-        }
-        else {
-          state.set('featurePanelName', feature);
-        }
+        sitecues.emit('bp/toggle-' + feature);
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
         sitecues.emit('bp/toggle-more-button');
       }
-      // else if (item.id === 'scp-prev-card') {
-      //   switchCard(-1);
-      // }
-      // else if (item.id === 'scp-next-card') {
-      //   switchCard(1);
-      // }
-      // else if (item.id === 'scp-close-button-group') {
-      //   panelController.shrinkPanel();
-      // }
-      // else if (item.id === "scp-more-button-group") {
-      //   onMoreButton();
-      // }
 
       sitecues.emit('bp/do-update');
     }

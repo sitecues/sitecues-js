@@ -12,6 +12,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   'use strict';
 
   var svg = '\
+<sc id="scp-focus-outline" role="presentation"></sc>\
 <sc id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
   <sc class="scp-card scp-active">\
     <sc-h1>Welcome</sc-h1>\
@@ -205,7 +206,6 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </div>\
 </div\
 </svg>\
-<sc id="scp-focus-outline" role="presentation"/>\
 ';
  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag

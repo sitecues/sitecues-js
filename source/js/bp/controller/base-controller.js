@@ -16,8 +16,27 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         'settings-button',
         'feedback-button',
         'about-button',
+        'more-button-group'
+      ],
+      'tips':[
+        'tips-button',
         'more-button-group',
-        'close-button-group'
+        'next-card',
+        'prev-card'
+      ],
+      'settings':[
+        'settings-button',
+        'more-button-group',
+        'next-card',
+        'prev-card'
+      ],
+      'feedback':[
+        'feedback-button',
+        'more-button-group'
+      ],
+      'about':[
+        'about-button',
+        'more-button-group'
       ]
     };
 

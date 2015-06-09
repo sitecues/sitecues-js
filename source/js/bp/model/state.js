@@ -26,11 +26,6 @@ sitecues.def('bp/model/state', function (state, callback) {
     aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
-    //cardNumber         : { tips: 0, settings: 0 },
-    //hasEverCycledCards : { tips: false, settings: false}
-    //extraHeight        : 0,          // Current extra height of panel, used to accommodate tall feature panels
-    //targetExtraHeight  : 0,          // Extra height we are growing toward via animation
-    //numCards           : {tips: undefined, settings: undefined}, // Needs to be initialized
   };
 
   /*
@@ -87,10 +82,25 @@ sitecues.def('bp/model/state', function (state, callback) {
 
   state.isSecondaryPanelRequested = function () {
     return data.secondaryPanelTransitionTo === 1;
-  }
+  };
 
   state.isShrinking = function() {
     return data.transitionTo === 0 && data.currentMode !== 0;
+  };
+
+  state.getSecondaryMode = function () {
+    if (state.get('tipsMode')) {
+      return 'tips';
+    }
+    if (state.get('settingsMode')) {
+      return 'settings';
+    }
+    if (state.get('feedbackMode')) {
+      return 'feedback';
+    }
+    if (state.get('aboutMode')) {
+      return 'about';
+    }
   };
 
   callback();
