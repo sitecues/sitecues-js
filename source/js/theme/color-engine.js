@@ -473,8 +473,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             doMoveToPseudo: hasImage && !hasHiddenText,
             isPlacedBeforeText: isPlacedBeforeText(),
             isFullWidth: cssStyleDecl.width === '100%',
-            width: cssStyleDecl.width,
-            height: cssStyleDecl.height,
+            width: cssStyleDecl.width !== 'auto' && cssStyleDecl.width,
+            height: cssStyleDecl.height !== 'auto' && cssStyleDecl.height,
             backgroundColor: cssStyleDecl.backgroundColor
           };
           bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
