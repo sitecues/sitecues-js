@@ -237,7 +237,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         if (!bgInfo.doMoveToPseudo) {  // Definitely a sprite, only content will be background-image
-          return bgInfo.hasImageUrl ? getSelector() + INVERT_FILTER + '}\n' : '';
+          return bgInfo.hasImageUrl ? getSelector(':not([data-sc-reversible])') + INVERT_FILTER + '}\n' : '';
         }
 
         // Background already on a pseudo element are just inverted there
@@ -275,7 +275,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             'left:0;top:0;overflow:hidden;' +   // Size and position the pseudo element
              '}\n',
           filterCss =
-            getSelector(PSEUDO_FOR_BG_IMAGES) +
+            getSelector(':not([data-sc-reversible])' + PSEUDO_FOR_BG_IMAGES) + // Only items that don't already have a filter rule (e.g. not images)
             MOVE_BG_IMAGE_TO_PSEUDO +
             bgInfo.bgPositionStyles +
             createRule('background-color', bgInfo.backgroundColor) +
