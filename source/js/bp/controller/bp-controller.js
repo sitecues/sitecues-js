@@ -211,7 +211,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
 
       var direction     = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
-          currentPanel  = BP_CONST.PANEL_TYPES[+state.isMorePanel()],
+          currentPanel  = baseController.getTab(),
           numItems      = baseController.tabbable[currentPanel].length,
           newFocusIndex = state.get('focusIndex') + direction;
 
@@ -234,7 +234,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     function processFocusedItem(evt) {
 
       var item = baseController.getFocusedItem();
-
+      console.log(item);
       if(!item) {
         return;
       }

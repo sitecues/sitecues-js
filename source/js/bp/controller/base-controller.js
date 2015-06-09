@@ -40,6 +40,13 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ]
     };
 
+    main.getTab = function () {
+      if (BP_CONST.PANEL_TYPES[+state.isMorePanel()] && state.getSecondaryMode()) {
+        return state.getSecondaryMode();
+      }
+      return BP_CONST.PANEL_TYPES[+state.isMorePanel()];
+    };
+
     // Clear the visual focus rectangle and current focus state
     main.clearPanelFocus = function() {
 
@@ -58,7 +65,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       if (state.get('focusIndex') < 0) {
         return null;
       }
-      var currentPanel = BP_CONST.PANEL_TYPES[+state.isMorePanel()];
+      var currentPanel = main.getTab();
       var focusId = main.tabbable[currentPanel][state.get('focusIndex')];
       return helper.byId('scp-' + focusId);
     };
