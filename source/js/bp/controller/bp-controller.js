@@ -280,6 +280,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
         sitecues.emit('bp/toggle-more-button');
       }
+      if (item.id === BP_CONST.NEXT_ID) {
+        sitecues.emit('bp/next-card');
+      }
+      if (item.id === BP_CONST.PREV_ID) {
+        sitecues.emit('bp/prev-card');
+      }
 
       sitecues.emit('bp/do-update');
     }

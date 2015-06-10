@@ -20,15 +20,15 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ],
       'tips':[
         'tips-button',
-        'more-button-group',
+        'prev-card',
         'next-card',
-        'prev-card'
+        'more-button-group'
       ],
       'settings':[
         'settings-button',
-        'more-button-group',
+        'prev-card',
         'next-card',
-        'prev-card'
+        'more-button-group'
       ],
       'feedback':[
         'feedback-button',

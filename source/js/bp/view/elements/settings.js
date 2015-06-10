@@ -63,6 +63,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       nextBtn.addEventListener('click', nextCard);
       prevBtn.addEventListener('click', prevCard);
 
+      sitecues.on('bp/next-card', nextCard);
+      sitecues.on('bp/prev-card', prevCard);
+
       cssValues[SETTINGS_ENABLED] = {
         'outlineHeight'        : 377, // The outline
         'svgHeight'            : 520, // The main SVG, allows more space
