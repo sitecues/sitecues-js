@@ -24,7 +24,7 @@ sitecues.def('metrics', function (metrics, callback) {
       'tts_state': '',
       'browser_user_agent': '',
       'client_language': '',
-      'sc-version': sitecues.getVersion()
+      'sc_version': sitecues.getVersion()
   };
 
   // Taken from here(free puplic license): https://gist.github.com/jed/982883
