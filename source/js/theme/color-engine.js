@@ -216,8 +216,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           return selector.indexOf(':before') < 0 && selector.indexOf(':after') < 0;
         }
 
-        function getWidthRule(doProvideFallback) {
-          var value = bgInfo.width,
+        // propName is width or height
+        function getSizeRule(propName, doProvideFallback) {
+          var value = bgInfo[propName],
             important;
           if (value) {
             important = true;
@@ -225,23 +226,16 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           else if (doProvideFallback) {
             // If positioned '100%' will fill the space of the positioned element and no more
             // If not positioned 'auto' will fill the available space and no less
-            value = (bgInfo.doSetPositionRelative || bgInfo.isPositioned)? '100%' : 'auto';
+            // TODO Now I need to try 'inherit' instead of '100%' because of http://www.sfgate.com/crime/article/Man-beaten-up-at-Little-Caesars-after-calling-6313685.php
+            // TODO go and see what using 'inherit' breaks
+            if (bgInfo.doSetPositionRelative || bgInfo.isPositioned) {
+              value = '100%';
+            }
+            else {
+              value = bgInfo.isInline ? 'inherit' : 'auto';
+            }
           }
-          return createRule('width', value, important);
-        }
-
-        function getHeightRule(doProvideFallback) {
-          var value = bgInfo.height,
-            important;
-          if (value) {
-            important = true;
-          }
-          if (doProvideFallback) {
-            // If positioned '100%' will fill the space of the positioned element and no more
-            // If not positioned 'auto' will fill the available space and no less
-            value = (bgInfo.doSetPositionRelative || bgInfo.isPositioned)? '100%' : 'auto';
-          }
-          return createRule('height', value, important);
+          return createRule(propName, value, important);
         }
 
         if (!bgInfo.doMoveToPseudo) {  // Definitely a sprite, only content will be background-image
@@ -267,7 +261,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
         // Move background to a new :before pseudo element so that we can invert it without affecting anything else
         if (!bgInfo.hasImageUrl) {
-          return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + getWidthRule() + getHeightRule() + '}\n';
+          return getSelector(PSEUDO_FOR_BG_IMAGES) + bgInfo.bgPositionStyles + getSizeRule('width') + getSizeRule('height') + '}\n';
         }
 
         var
@@ -287,8 +281,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             MOVE_BG_IMAGE_TO_PSEUDO +
             bgInfo.bgPositionStyles +
             createRule('background-color', bgInfo.backgroundColor) +
-            getWidthRule(true) +
-            getHeightRule(true) +
+            getSizeRule('width', true) +
+            getSizeRule('height', true) +
             createRule('background-image', bgInfo.imageUrlProp) +
             createRule(FILTER_PROP, FILTER_VAL[bgInfo.filter]) +
             '}\n',
@@ -483,6 +477,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             isFullWidth: cssStyleDecl.width === '100%',
             width: cssStyleDecl.width !== 'auto' && cssStyleDecl.width,
             height: cssStyleDecl.height !== 'auto' && cssStyleDecl.height,
+            isInline: (cssStyleDecl.display || sampleElementCss.display) === 'inline',
             backgroundColor: cssStyleDecl.backgroundColor
           };
           bgInfo.filter = imageUrl && getBackgroundImageFilter(bgInfo, imageUrl, cssStyleDecl, sampleElement);
