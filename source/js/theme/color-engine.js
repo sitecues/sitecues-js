@@ -129,7 +129,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       // We should maybe just do stuff that looks like text -- this is usually 3x as long, and < 200px high
       function getReverseFramesCssText() {
         var REVERSIBLE = ':not([data-sc-reversible="false"])',
-          FRAME ='frame' + REVERSIBLE + ',iframe:not([src*="youtube"])' + REVERSIBLE,
+          FRAME ='frame' + REVERSIBLE + ',iframe:not([src*="youtube"]:not([src*=".vine."])' + REVERSIBLE,
           docBg = colorUtil.getColorString(colorUtil.getDocumentBackgroundColor());
 
         return FRAME + '{' + createRule('background-color', docBg) + INVERT_FILTER + '};\n';
