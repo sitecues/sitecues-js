@@ -23,7 +23,8 @@ sitecues.def('metrics', function (metrics, callback) {
       'zoom_level': '',
       'tts_state': '',
       'browser_user_agent': '',
-      'client_language': ''
+      'client_language': '',
+      'sc-version': sitecues.getVersion()
   };
 
   // Taken from here(free puplic license): https://gist.github.com/jed/982883
