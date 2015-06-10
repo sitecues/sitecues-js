@@ -333,6 +333,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     colorChoices.blueReduction = function(style, intensity) {
       var rgba = $.extend({}, style.parsedVal);
 
+
+      intensity = 1 - intensity / 3;
+
       if (style.prop === 'color' && rgbToHsl(rgba.r, rgba.g, rgba.b).l < 0.2) {
         return getReducedIntensity(rgba, intensity - 0.15);
       }
@@ -341,15 +344,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         mixInRgba = hslToRgb(0.15, 1, 0.5);
 
       return mixRgbaColors(rgba, mixInRgba, mixInRatio);
-    };
-
-    colorChoices.isDarkTheme = function(colorMapFn, originalBgRgba) {
-      var originalBg = {
-        prop: 'background-color',
-        parsedVal: originalBgRgba
-      };
-      var themedBg = colorMapFn(originalBg, 1);
-      return colorUtil.isDarkColor(themedBg);
     };
 
     if (SC_DEV) {

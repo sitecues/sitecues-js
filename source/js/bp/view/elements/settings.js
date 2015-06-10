@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', function (BP_CONST, state, helper, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features', 'conf',
+    function (BP_CONST, state, helper, animate, transform, generalFeatures, conf) {
 
     var SETTINGS_ENABLED         = 1,
         SETTINGS_DISABLED        = 0,
@@ -63,8 +64,12 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       nextBtn.addEventListener('click', nextCard);
       prevBtn.addEventListener('click', prevCard);
 
+
       sitecues.on('bp/next-card', nextCard);
       sitecues.on('bp/prev-card', prevCard);
+
+      settingsCards.addEventListener('click', onSettingsClick);
+
 
       cssValues[SETTINGS_ENABLED] = {
         'outlineHeight'        : 377, // The outline
@@ -295,11 +300,22 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
             feedbackButton.style.display   = 'none';
             aboutButton.style.display      = 'none';
             sitecues.emit('bp/do-enable-button', settingsButton);
+            generalFeatures.setCurrentPanel(BP_CONST.SETTINGS_CARDS_ID);
           }
         });
 
       }
 
+    }
+
+    function onSettingsClick(evt) {
+      var target = evt.target;
+      if (target) {
+        var settingName = target.getAttribute('data-setting-name');
+        if (settingName) {
+          conf.set(settingName, target.getAttribute('data-setting-value'));
+        }
+      }
     }
 
     sitecues.on('bp/toggle-settings', toggleSettings);

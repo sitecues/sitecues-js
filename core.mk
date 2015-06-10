@@ -82,6 +82,7 @@ files=\
 	source/js/bp/controller/slider-controller.js \
 	source/js/bp/controller/panel-controller.js \
 	source/js/bp/animate.js \
+	source/js/bp/view/elements/features/general.js \
 	source/js/bp/view/elements/secondary-panel.js \
 	source/js/bp/view/elements/slider.js \
 	source/js/bp/controller/bp-controller.js \

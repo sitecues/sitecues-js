@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', function (BP_CONST, state, helper, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features',
+    function (BP_CONST, state, helper, animate, transform, generalFeatures) {
 
     var FEEDBACK_ENABLED         = 1,
         FEEDBACK_DISABLED        = 0,
@@ -264,6 +265,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
             settingsButton.style.display   = 'none';
             aboutButton.style.display      = 'none';
             sitecues.emit('bp/do-enable-button', feedbackButton);
+            generalFeatures.setCurrentPanel(BP_CONST.FEEDBACK_CONTENT_ID);
           }
         });
 

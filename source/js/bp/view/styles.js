@@ -165,23 +165,35 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // - Margins http://www.independent.ie/entertainment/trending/westboro-baptist-church-accidentally-hates-the-ivory-coast-31251240.html
         // - Fonts: https://shuttle.support.signiant.com/customer/portal/articles/1720613-why-am-i-repeatedly-asked-to-make-my-media-shuttle-site-trusted-
         'sc': {
-          'margin': '0',
           'display': 'block',
+          'margin': '0',
           'color': '#000',
           'line-height': 'normal'
         },
 
         'sc-h1': {
+          'display': 'block',
           'margin': '16px 0',
           'font-family': 'Arial',
           'font-size': '40px'
         },
 
         'sc-p': {
-          'font-size': '18px',
+          'display': 'block',
+          'font-size': '20px',
           'margin': '12px 0'
         },
 
+        'sc-button': {
+          'display': 'block',
+          'font-size': '20px',
+          'background-color': 'blue',
+          'font-weight': 'bold',
+          'color': 'white',
+          'border': '2px solid beige',
+          'border-radius': '5px',
+          'padding': '4px'
+        },
 
 
         /***************** Loading/badge  ****************/
@@ -472,16 +484,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display' : 'none'
         },
 
-        '.scp-card p': {
-          'font-size':'20px'
-        },
-
         '#scp-arrows>text': {
           'font-size': '44px'
         },
 
-        '.scp-active, .scp-active *': {
-          'display': 'block'
+        '.scp-feature[data-current], .scp-feature[data-current] > .scp-card.scp-active': {
+          'display': 'block',
+          'pointer-events': 'all'
         },
 
         '#scp-svg h1': {

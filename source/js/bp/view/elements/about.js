@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/about', function (about, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', function (BP_CONST, state, helper, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features',
+    function (BP_CONST, state, helper, animate, transform, generalFeatures) {
 
     var ABOUT_ENABLED                 = 1,
         ABOUT_DISABLED                = 0,
@@ -284,6 +285,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
                 settingsButton.style.display   = 'none';
                 feedbackButton.style.display      = 'none';
                 sitecues.emit('bp/do-enable-button', aboutButton);
+                generalFeatures.setCurrentPanel(BP_CONST.ABOUT_CONTENT_ID);
               }
             });
           }
