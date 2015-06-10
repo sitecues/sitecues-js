@@ -82,8 +82,8 @@ files=\
 	source/js/bp/controller/slider-controller.js \
 	source/js/bp/controller/panel-controller.js \
 	source/js/bp/animate.js \
-	source/js/bp/view/elements/features/general.js \
-	source/js/bp/view/elements/secondary-panel.js \
+	source/js/bp/view/elements/secondary/general.js \
+	source/js/bp/view/elements/secondary/secondary-panel.js \
 	source/js/bp/view/elements/slider.js \
 	source/js/bp/controller/bp-controller.js \
 	source/js/bp/view/svg.js \
@@ -93,10 +93,10 @@ files=\
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
 	source/js/bp/view/elements/more-button.js \
-	source/js/bp/view/elements/features/about.js \
-	source/js/bp/view/elements/features/tips.js \
-	source/js/bp/view/elements/features/settings.js \
-	source/js/bp/view/elements/features/feedback.js \
+	source/js/bp/view/elements/secondary/about.js \
+	source/js/bp/view/elements/secondary/tips.js \
+	source/js/bp/view/elements/secondary/settings.js \
+	source/js/bp/view/elements/secondary/feedback.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
 	source/js/keys/focus.js \
