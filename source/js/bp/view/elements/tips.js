@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', function (BP_CONST, state, helper, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features',
+    function (BP_CONST, state, helper, animate, transform, generalFeatures) {
 
     var TIPS_ENABLED             = 1,
         TIPS_DISABLED            = 0,
@@ -306,6 +307,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
             aboutButton.style.display    = 'none';
 
             sitecues.emit('bp/do-enable-button', tipsButton);
+            generalFeatures.setCurrentPanel(BP_CONST.TIPS_CARDS_ID);
           }
         });
 

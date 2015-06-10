@@ -14,7 +14,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
-<sc id="scp-tips-cards" class="scp-cards scp-transition-opacity">\
+<sc id="scp-tips-cards" class="scp-feature scp-cards scp-transition-opacity">\
   <sc class="scp-card scp-active">\
     <sc-h1>Welcome</sc-h1>\
     <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
@@ -42,11 +42,34 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <br><button class="sitecues-button-big">Quick Start Guide</button></sc-p>\
   </sc>\
 </sc>\
-<sc id="scp-settings-cards" class="scp-cards scp-transition-opacity">\
+<sc id="scp-settings-cards" class="scp-feature scp-cards scp-transition-opacity">\
   <sc class="scp-card scp-active">\
     <sc-h1>Settings</sc-h1>\
     <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Color themes</sc-h1>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName" data-setting-value="none"> \
+        Normal\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-relaxed" data-setting-name="themeName" data-setting-value="blueReduction">\
+        Relaxed tones\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-contrast" data-setting-name="themeName" data-setting-value="increaseContrast">\
+        Enhanced contrast\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-night" data-setting-name="themeName" data-setting-value="darkOriginal">\
+        Nighttime\
+      </sc-button>\
+    </sc-p>\
   </sc>\
   <sc class="scp-card">\
     <sc-h1>Choose a voice</sc-h1>\
@@ -160,7 +183,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
     </g>\
-    <g id="scp-about-content" style="display:none;">\
+    <g class="scp-feature" id="scp-about-content" style="display:none;">\
       <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="26" width="330" height="110"></image>\
     </g>\
   </g>\
@@ -201,13 +224,13 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
-<div id="feedback-textarea" class="scp-feature-content" style="position:absolute; top: 33px; left: 43px;display:none;">\
+<div id="feedback-textarea" class="scp-feature scp-feature-content" style="position:absolute; top: 33px; left: 43px;display:none;">\
   <div class="scp-feedback-content">\
      <textarea id="feedback-textarea-id" style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
   </div>\
 </div\
 </svg>';
- sitecues.use('locale', 'platform', function(locale, platform) {
+  sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeEnd(loc) {
       var locString = '' + loc; // Convert to string
@@ -238,21 +261,21 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       });
     }
 
-   // Relative URLs must be full URLS that <base> tag doesn't mess them up!
-   // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
-   // when the source document uses a <base> tag.
-   function convertRelativeUrlsToAbsolute(text) {
-     if (hasAlteredBaseURI() && !platform.isIE9()) {
-       var MATCH_URLS = /(href="|url\()(?:#)/g,
-         pageUrlMinusHash = removeHash(document.location.href);
+    // Relative URLs must be full URLS that <base> tag doesn't mess them up!
+    // Without this fix, markup such as xlink:href="#foo" or filter="url(#foo)" will not work in Firefox
+    // when the source document uses a <base> tag.
+    function convertRelativeUrlsToAbsolute(text) {
+      if (hasAlteredBaseURI() && !platform.isIE9()) {
+        var MATCH_URLS = /(href="|url\()(?:#)/g,
+          pageUrlMinusHash = removeHash(document.location.href);
 
-       return text.replace(MATCH_URLS, function (totalMatch, attributeName) {
-         return attributeName + pageUrlMinusHash + '#';
-       });
-     }
+        return text.replace(MATCH_URLS, function (totalMatch, attributeName) {
+          return attributeName + pageUrlMinusHash + '#';
+        });
+      }
 
-     return text;
-   }
+      return text;
+    }
     bpSVG.getSvg = function() {
       var svgWithCorrectSitecuesUrls = convertSitecuesUrlsToAbsolute(svg),
         svgWithAllAbsoluteUrls = convertRelativeUrlsToAbsolute(svgWithCorrectSitecuesUrls),

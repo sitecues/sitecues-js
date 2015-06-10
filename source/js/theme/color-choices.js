@@ -333,6 +333,9 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     colorChoices.blueReduction = function(style, intensity) {
       var rgba = $.extend({}, style.parsedVal);
 
+
+      intensity = 1 - intensity / 3;
+
       if (style.prop === 'color' && rgbToHsl(rgba.r, rgba.g, rgba.b).l < 0.2) {
         return getReducedIntensity(rgba, intensity - 0.15);
       }

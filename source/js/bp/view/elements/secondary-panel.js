@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', function (BP_CONST, state, helper, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features',
+    function (BP_CONST, state, helper, animate, transform, generalFeatures) {
 
     var animationIds = {},
         BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
@@ -103,6 +104,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
         element = element.parentNode;
       }
+
+      generalFeatures.clearCurrentPanel();
 
       sitecues.emit('bp/toggle-' + dataFeature);
 

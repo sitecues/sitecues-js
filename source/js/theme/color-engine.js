@@ -606,19 +606,27 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         callbackFn();
       }
 
-      function getSanitizedTheme(theme) {
-        return {
-          name: theme.name in colorChoices ? theme.name : null,      // Theme name must exist in colorChoices
-          power: Math.max(0, Math.min(theme.power, 1))               // Theme power is 0 - 1
-        };
+      // Theme name must exist in colorChoices
+      function getSanitizedThemeName(name) {
+        return name in colorChoices ? name : null;
+      }
+
+      // Theme power must be 0 - 1
+      function getSanitizedThemePower(power) {
+        if (power >= 0) {
+          return Math.min(power, 1);
+        }
+        return 1;
       }
 
       function onThemeChange(theme) {
-        colorEngine.applyTheme(theme.name, theme.power);
+        colorEngine.applyTheme(conf.get('themeName'), conf.get('themePower'));
       }
 
-      conf.def('theme', getSanitizedTheme);
-      conf.get('theme', onThemeChange);
+      conf.def('themeName', getSanitizedThemeName);
+      conf.def('themePower', getSanitizedThemePower);
+      conf.get('themeName', onThemeChange);
+      conf.get('themePower', onThemeChange);
 
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;
