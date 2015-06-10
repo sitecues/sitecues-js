@@ -21,18 +21,16 @@ sitecues.def('metrics/tts-requested', function (TTSRequested, callback) {
 
   sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
 
-    // ============= Objects methods ======================
-    TTSRequested = {
-      init: initTTSRequestedData,
-      update: function(data) {
+    // ============= The API ======================
+    TTSRequested.init = initTTSRequestedData;
+    TTSRequested.update = function (data) {
         metricsUtil.update(TTSRequested, data);
-      },
-      send: function() {
+    };
+    TTSRequested.send = function () {
         metricsUtil.send(TTSRequested);
-      },
-      reset: function() {
+    };
+    TTSRequested.reset = function() {
         TTSRequested.update(DEFAULT_STATE);
-      }
     };
 
     function initTTSRequestedData(TTSUrl) {
