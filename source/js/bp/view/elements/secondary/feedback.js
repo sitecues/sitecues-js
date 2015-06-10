@@ -32,7 +32,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         feedbackTextarea,
 
         moreBtnTranslate,
-        feedbackBtnTransform;
+        feedbackBtnTransform,
+
+        // Oft-used functions. Putting it in a variable helps code clarity and minifier
+        getValueInTime = generalFeatures.getValueInTime;
 
     function initFeedback () {
 
@@ -128,10 +131,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         state.set('feedbackMode', FEEDBACK_DISABLED);
         animateFeedback(true);
       }
-    }
-
-    function getValueInTime (from, to, time) {
-      return from + (to - from) * time;
     }
 
     function getCurrentOutlineHeight () {

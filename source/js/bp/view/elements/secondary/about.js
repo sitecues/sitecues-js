@@ -33,7 +33,10 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         arrowButtons,
 
         moreBtnTranslate,
-        aboutBtnTransform;
+        aboutBtnTransform,
+
+        // Oft-used functions. Putting it in a variable helps code clarity and minifier
+        getValueInTime = generalFeatures.getValueInTime;
 
     function initAbout () {
 
@@ -128,10 +131,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
         state.set('aboutMode', ABOUT_DISABLED);
         animateAbout(true);
       }
-    }
-
-    function getValueInTime (from, to, time) {
-      return from + (to - from) * time;
     }
 
     function getCurrentOutlineHeight () {

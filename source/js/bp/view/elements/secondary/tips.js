@@ -33,7 +33,11 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         prevBtn,
 
         moreBtnTranslate,
-        tipsBtnTransform;
+        tipsBtnTransform,
+
+        // Oft-used functions. Putting it in a variable helps code clarity and minifier
+        getValueInTime = generalFeatures.getValueInTime;
+
 
     function initTips () {
 
@@ -159,10 +163,6 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         state.set('tipsMode', TIPS_DISABLED);
         animateTips(true);
       }
-    }
-
-    function getValueInTime (from, to, time) {
-      return from + (to - from) * time;
     }
 
     function getCurrentOutlineHeight () {

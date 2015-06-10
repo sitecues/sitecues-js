@@ -24,6 +24,12 @@ sitecues.def('bp/view/elements/general-features', function (generalFeatures, cal
       panel.setAttribute('data-current', '');
     };
 
+    generalFeatures.getValueInTime = function(from, to, time) {
+      return from + (to - from) * time;
+    };
+
+
+
     callback();
 
   });
