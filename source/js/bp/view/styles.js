@@ -465,15 +465,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display'      : 'none',
           'position'     : 'absolute',
           'z-index'      : '9999',
-          'left'         : '83%',
+          'left'         : '192px',
           'top'          : '132px'
         },
 
         '.scp-cards': {
           'position': 'relative',
           'font-family': 'Arial',
-          'left': '58%',
-          'top':'50%',
+          'left': '130px',
           'width': '340px',
           'z-index': 999,
           'opacity': 0,
