@@ -1,11 +1,27 @@
-sitecues.def('status', function (status_module, callback) {
+sitecues.def('status', function (module, callback) {
 
   'use strict';
 
   sitecues.use('jquery', 'audio', 'conf', function ($, audio, conf) {
 
-    // The default status formatter: logs all data to the console.
+    function format(object) {
+
+      // Helper to turn objects into string representations for logging.
+
+      var INDENTATION = '    ',
+            result = object;
+
+      if (JSON && JSON.stringify) {
+        result = JSON.stringify(object, null, INDENTATION);
+      }
+
+      return result;
+    }
+
     function consoleCallback(status) {
+
+      // The default status formatter, logs all data to the console.
+
       // Make sure we are not running from a file (unit testing in node)...
       if (location.protocol === 'http:' || location.protocol === 'https:') {
         // We only support the native console for now, so make sure it exists...
@@ -20,25 +36,15 @@ sitecues.def('status', function (status_module, callback) {
       }
     }
 
-    // Helper to turn objects into string representations for logging...
-    function format(object) {
-
-        var INDENTATION = '    ',
-            result = object;
-
-        if (JSON && JSON.stringify) {
-          result = JSON.stringify(object, null, INDENTATION);
-        }
-
-        return result;
-    }
-
-    status_module = function (callback) {
+    function status(callback) {
 
       var html = document.documentElement,
           confData = conf.data(),
           coordinates,
-          ajax_urls,
+          ajaxUrls = {  // Set the server URLs for retrieving the status of our services (version info, etc.)
+            up : sitecues.getPrefsUrl('status'),
+            ws : sitecues.getApiUrl('util/status')
+          },
           setting,
           state,
           info;
@@ -85,58 +91,36 @@ sitecues.def('status', function (status_module, callback) {
         }
       };
 
-      // Set the server URLs for retrieving the status of our services (version info, etc.)
-      ajax_urls = {
-        up : sitecues.getPrefsUrl('status'),
-        ws : sitecues.getApiUrl('util/status')
-      };
-
-      // Add current settings (zoom level, etc) to the log...
+      // Add current settings (zoom level, etc) to the log.
       for (setting in confData) {
         if (confData.hasOwnProperty(setting)) {
           info[setting] = confData[setting];
         }
       }
-      // Add all measurements for bug reproduction to the log...
+      // Add all measurements for bug reproduction to the log.
       for (state in coordinates) {
         if (coordinates.hasOwnProperty(state)) {
           info[state] = coordinates[state];
         }
       }
 
-      // Appends sitecues status to the document (useful for automated testing)
-      function addStatusToDOM(status) {
-        var id      = 'sitecues-status-output',
-            elem    = document.getElementById(id),
-            content = format(status);
-
-        if (!elem) {
-          elem = document.createElement('div');
-          elem.setAttribute('id', id);
-          elem.setAttribute('style', 'display:none!important;');
-          html.appendChild(elem);
-        }
-
-        elem.innerHTML = content;
-      }
-
-        // Defer the ajax calls so we can respond when both are complete
+      // Defer the ajax calls so we can respond when both are complete.
       function readyCheck() {
         var ready = typeof info.version.sitecues_up === 'string' &&
                     typeof info.version.sitecues_ws === 'string';
 
         if (ready) {
+          // Publish the status for later retrieval.
           sitecues.latestStatus = info;
-          addStatusToDOM(info);
           callback(info);
         }
       }
 
       $.ajax({
-        cache:    false,
-        dataType: 'json',
         type:     'GET',
-        url:      ajax_urls.up,
+        dataType: 'json',
+        cache:    false,
+        url:      ajaxUrls.up,
         success: function (response) {
           // Set the version based on the AJAX response object
           info.version.sitecues_up = response.version;
@@ -150,10 +134,10 @@ sitecues.def('status', function (status_module, callback) {
       });
 
       $.ajax({
-        cache:    false,
-        dataType: 'json',
         type:     'GET',
-        url:      ajax_urls.ws,
+        dataType: 'json',
+        cache:    false,
+        url:      ajaxUrls.ws,
         success: function (response) {
           // Set the version based on the AJAX response object
           info.version.sitecues_ws = response.version;
@@ -168,10 +152,11 @@ sitecues.def('status', function (status_module, callback) {
       return 'Fetching sitecues status...';
     };
 
-    sitecues.status = status_module;
+
+    sitecues.status = status;
 
     if (SC_UNIT) {
-      exports.status = status_module;
+      exports.status = status;
     }
 
     callback();
