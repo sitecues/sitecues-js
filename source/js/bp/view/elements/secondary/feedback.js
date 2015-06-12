@@ -8,7 +8,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       var feedbackTextarea = byId(BP_CONST.FEEDBACK_TEXTAREA),
         feedbackTextareaElement = byId(BP_CONST.FEEDBACK_TEXTAREA_ID),
         feedbackButton = byId(BP_CONST.FEEDBACK_BUTTON_ID);
-      sitecues.emit('bp/do-toggle-button', feedbackButton, isActive);
       if (isActive) {
         feedbackTextarea.addEventListener('click', function () {
           feedbackTextareaElement.focus();
@@ -23,8 +22,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       return baseCssValues;
     };
 
-
-    sitecues.on('bp/did-toggle-feedback', onToggle);
 
     callback();
 

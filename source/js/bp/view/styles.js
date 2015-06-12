@@ -495,7 +495,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
-        '.scp-panel-buttonmenu #scp-buttonmenu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
         '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
         '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
         '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,

@@ -63,6 +63,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.MORE_OUTLINE_ID          = 'scp-more-outline';
   constants.MORE_TARGET              = 'scp-more-button-transparent-target';
 
+  constants.BUTTON_MENU_ID           = 'scp-button-menu';
   constants.TIPS_BUTTON_ID           = 'scp-tips-button';
   constants.SETTINGS_BUTTON_ID       = 'scp-settings-button';
   constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';

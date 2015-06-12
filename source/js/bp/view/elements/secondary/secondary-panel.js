@@ -13,7 +13,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y       = 0,
         DISABLED_PANEL_TRANSLATE_Y      = -198,
-        activePanel,
         currentAnimation,
         mainPanelContentsRect,
 
@@ -26,23 +25,27 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           tips : {
             module: tipsModule,
             menuButtonId: BP_CONST.TIPS_BUTTON_ID,
+            labelId: BP_CONST.TIPS_LABEL_ID,
             hasArrows: true,
             panelId: BP_CONST.TIPS_CONTENT_ID
           },
           settings : {
             module: settingsModule,
             menuButtonId: BP_CONST.SETTINGS_BUTTON_ID,
+            labelId: BP_CONST.SETTINGS_LABEL_ID,
             hasArrows: true,
             panelId: BP_CONST.SETTINGS_CONTENT_ID
           },
           feedback : {
             module: feedbackModule,
             menuButtonId: BP_CONST.FEEDBACK_BUTTON_ID,
+            labelId: BP_CONST.FEEDBACK_LABEL_ID,
             panelId: BP_CONST.FEEDBACK_CONTENT_ID
           },
           about : {
             module: aboutModule,
             menuButtonId: BP_CONST.ABOUT_BUTTON_ID,
+            labelId: BP_CONST.ABOUT_LABEL_ID,
             panelId: BP_CONST.ABOUT_CONTENT_ID
           }
         };
@@ -66,7 +69,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function onMouseEnter (e) {
 
-      var id                  = e.target.id,
+      var target = e.target;
+      if (!target.getAttribute('data-feature')) {
+        return;
+      }
+
+      var id                  = target.id,
           button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
           targetScale         = BP_CONST.TRANSFORMS[id].scale,
@@ -96,7 +104,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function onMouseLeave (e) {
 
-      var id                  = e.target.id,
+      var target = e.target;
+      if (!target.getAttribute('data-feature')) {
+        return;
+      }
+
+      var id                  = target.id,
           button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
           targetScale         = 1,
@@ -122,30 +135,32 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         'duration'    : BUTTON_LEAVE_ANIMATION_DURATION,
         'useAttribute': true
       });
-
     }
 
-    function onMouseClick (e) {
-
+    function getTargetFeature(e) {
       var element = e.target,
-          dataFeature;
+        dataFeature;
 
-      while(element.parentNode) {
+      while (element.parentNode) {
 
         dataFeature = element.getAttribute('data-feature');
         if (dataFeature) {
-          break;
+          return dataFeature;
         }
+
         element = element.parentNode;
       }
-
-      setCurrentFeature();
-
-      if (features[dataFeature]) {
-        toggleSecondaryFeature(dataFeature);
-      }
-
     }
+
+
+
+    function onMouseClick (e) {
+
+      var featureName = getTargetFeature(e);
+      if (featureName) {
+        toggleSecondaryFeature(featureName);
+      }
+   }
 
     function toggleSecondaryPanel () {
 
@@ -214,57 +229,33 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function resetSecondaryPanel () {
 
-      var disabled = BP_CONST.SECONDARY_PANEL_DISABLED;
+      var DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED,
+        activePanel = state.getSecondaryPanelName();
 
       cancelAllAnimations();
 
       initStyles();
 
-      state.set('currentSecondaryPanelMode',  disabled);
-      state.set('secondaryPanelTransitionTo', disabled);
+      state.set('currentSecondaryPanelMode',  DISABLED);
+      state.set('secondaryPanelTransitionTo', DISABLED);
 
+      if (features[activePanel]) {
+        animateSecondaryFeature(activePanel, true, true);
+      }
+
+      setCurrentFeature();
     }
 
     function addMouseListeners () {
 
-      var tipsButton     = byId(BP_CONST.TIPS_BUTTON_ID),
-          settingsButton = byId(BP_CONST.SETTINGS_BUTTON_ID),
-          feedbackButton = byId(BP_CONST.FEEDBACK_BUTTON_ID),
-          aboutButton    = byId(BP_CONST.ABOUT_BUTTON_ID),
-          tipsLabel      = byId(BP_CONST.TIPS_LABEL_ID),
-          settingsLabel  = byId(BP_CONST.SETTINGS_LABEL_ID),
-          feedbackLabel  = byId(BP_CONST.FEEDBACK_LABEL_ID),
-          aboutLabel     = byId(BP_CONST.ABOUT_LABEL_ID);
-
-      tipsButton.addEventListener('mouseenter', onMouseEnter);
-      tipsButton.addEventListener('mouseleave', onMouseLeave);
-      tipsButton.addEventListener('click',      onMouseClick);
-      tipsLabel.addEventListener( 'click',      onMouseClick);
-
-      settingsButton.addEventListener('mouseenter', onMouseEnter);
-      settingsButton.addEventListener('mouseleave', onMouseLeave);
-      settingsButton.addEventListener('click',      onMouseClick);
-      settingsLabel.addEventListener( 'click',      onMouseClick);
-
-      feedbackButton.addEventListener('mouseenter', onMouseEnter);
-      feedbackButton.addEventListener('mouseleave', onMouseLeave);
-      feedbackButton.addEventListener('click',      onMouseClick);
-      feedbackLabel.addEventListener( 'click',      onMouseClick);
-
-      aboutButton.addEventListener('mouseenter', onMouseEnter);
-      aboutButton.addEventListener('mouseleave', onMouseLeave);
-      aboutButton.addEventListener('click',      onMouseClick);
-      aboutLabel.addEventListener( 'click',      onMouseClick);
-
-    }
-
-    function toggleButton (btn, doEnable) {
-      var addOrRemoveFn = doEnable ? btn.addEventListener : btn.removeEventListener;
-      addOrRemoveFn('mouseenter', onMouseEnter);
-      addOrRemoveFn('mouseleave', onMouseLeave);
-      addOrRemoveFn('click', onMouseClick);
-
-      cancelAllAnimations();
+      forEachFeature(function(feature) {
+        var button = byId(feature.menuButtonId),
+          label = byId(feature.labelId);
+        button.addEventListener('mouseenter', onMouseEnter);
+        button.addEventListener('mouseleave', onMouseLeave);
+        button.addEventListener('click', onMouseClick);
+        label.addEventListener('click', onMouseClick);
+      });
     }
 
     function forEachFeature(fn) {
@@ -274,6 +265,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
       }
     }
+
     function resetMenuButtonTransforms() {
       forEachFeature(function(feature) {
         var button = feature.menuButtonId,
@@ -288,7 +280,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
      */
     function setCurrentFeature(name, isSecondaryExpanding) {
       currentAnimation && currentAnimation.cancel();
-      state.set('secondaryPanelName', name || 'buttonmenu');
+      state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
       sitecues.emit('bp/do-update');
     }
@@ -463,7 +455,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         panelSizeTick(t, moreButtonRotate);
       }
 
-      function onDisabledTick(animationState) {
+      function onDisableTick(animationState) {
 
         contentsTick(animationState.current, targetMoreBtnRotate);
       }
@@ -478,7 +470,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       currentAnimation = animate.create(heightTransition,
         {
           'duration': duration,
-          'onTick': doEnable ? onEnableTick : onDisabledTick(),
+          'onTick': doEnable ? onEnableTick : onDisableTick,
           'onFinish': function () {
             // Finished expanding now
             if (isExpanding) {
@@ -490,25 +482,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function toggleSecondaryFeature(name) {
-      var willEnable = activePanel !== name;
+      var willEnable = state.getSecondaryPanelName() !== name;
       animateSecondaryFeature(name, willEnable);
 
       // TODO we need to fire this when panel closed, right?
       sitecues.emit('did-toggle-' + name, willEnable);
-    }
-
-
-    // TODO not sure about this
-    // From anardi:
-    //      i just was taking advantage of code i already wrote that did what i needed
-    //      probably a smarter way to do what i want, im sure, but i thought it was cool i guess
-    //      because the disabling animation should make everything like it was the first time someone was at the secondary panel, if that makes sense
-    //      but, if you are in the settings panel for example, and you click the about label, i don't bother "disabling" the settings panel, cuz then it would collapse and then expand again
-    function resetSecondaryFeature() {
-      if (activePanel) {
-        animateSecondaryFeature(activePanel, true, true);
-      }
-      setCurrentFeature();
     }
 
 //    function switchCard(direction) {
@@ -531,10 +509,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     sitecues.on('bp/do-toggle-secondary-panel', toggleSecondaryPanel);
 
     sitecues.on('bp/will-shrink', resetSecondaryPanel);
-
-    sitecues.on('bp/do-toggle-button', toggleButton);
-
-    sitecues.on('bp/will-shrink bp/do-toggle-secondary-panel', resetSecondaryFeature);
 
 //    sitecues.on('bp/next-card', nextCard);
 //    sitecues.on('bp/prev-card', prevCard);

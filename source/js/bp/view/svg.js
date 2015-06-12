@@ -190,7 +190,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="26" width="330" height="110"></image>\
     </g>\
   </g>\
-  <g id="scp-buttonmenu">\
+  <g id="scp-button-menu">\
     <g id="scp-tips-button" class="scp-if-tips scp-hand-cursor scp-transition-opacity" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
       <circle cx="50" cy="54" r="52" fill="#548ECE"/>\
       <path fill="#FFFFFF" d="m73.1 39.9c0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4 -.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2h0c12.3 0 22.2 10 22.2 22.2l0 0 0 0 0 0zM64.2 75.4c0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2c1.2 0 2.2 1 2.2 2.2zM62 79.8c1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2l0 0zM42 86.5h17.8c0 2.5-2 4.5-4.5 4.5h-8.9c-2.5 0-4.5-2-4.5-4.5l0 0 0 0z"/>\
