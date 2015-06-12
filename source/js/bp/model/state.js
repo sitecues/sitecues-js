@@ -9,6 +9,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'buttonmenu', // 'buttonmenu', 'tips', 'settings', 'feedback', 'about'
+    isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new conents?
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
@@ -88,7 +89,7 @@ sitecues.def('bp/model/state', function (state, callback) {
    * Returns 'buttonmenu' or name of secondary panel
    * @returns {string}
    */
-  state.getPanelName = function () {
+  state.getSecondaryPanelName = function () {
     return data.secondaryPanelName;
   };
 

@@ -158,7 +158,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
       // Only use instant transition if true, not truthy, because mouse event is
       // passed in when we use event listeners
-      if (useInstantTransition === true) {
+      if (useInstantTransition) {
         opacityTransitionClass = 'scp-transition-opacity-instant';
       } else {
         opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';

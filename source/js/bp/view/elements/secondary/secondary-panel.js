@@ -284,8 +284,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
      *
      * @param name or null for button menu
      */
-    function setCurrentFeature(name) {
+    function setCurrentFeature(name, isSecondaryExpanding) {
+      currentAnimation && currentAnimation.cancel();
       state.set('secondaryPanelName', name || 'buttonmenu');
+      state.set('isSecondaryExpanding', isSecondaryExpanding);
       sitecues.emit('bp/do-update');
     }
 
@@ -378,7 +380,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         heightTransition = {
           'from': currentSVGHeight,
           'to': targetCSSValues.svgHeight
-        };
+        },
+
+        isExpanding = heightTransition.to > heightTransition.from;
 
       function getDuration() {
         if (isInstant) {
@@ -425,30 +429,20 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         contentsTick(animationState.current, currentMoreBtnRotate);
       }
 
-      currentAnimation && currentAnimation.cancel();
+      setCurrentFeature(doEnable && name, isExpanding);
 
-      setCurrentFeature(doEnable && name);
-
-      if (doEnable) {
-
-        currentAnimation = animate.create(heightTransition,
-          {
-            'duration': duration,
-            'onTick': onEnableTick,
-            'onFinish': function () {
+      currentAnimation = animate.create(heightTransition,
+        {
+          'duration': duration,
+          'onTick': doEnable ? onEnableTick : onDisabledTick(),
+          'onFinish': function () {
+            // Finished expanding now
+            if (isExpanding) {
+              state.set('isSecondaryExpanding', false);
+              sitecues.emit('bp/do-update');
             }
-          });
-      }
-      else {
-        currentAnimation = animate.create(
-          heightTransition,
-          {
-            'duration': duration,
-            'onTick': onDisabledTick,
-            'onFinish': function () {
-            }
-          });
-      }
+          }
+        });
     }
 
     function toggleSecondaryFeature(name) {

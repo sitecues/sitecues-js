@@ -125,7 +125,11 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-keyboard';
         }
 
-        return classBuilder + getPanelClass() + ' ';
+        if (state.get('isSecondaryExpanding')) {
+          classBuilder += ' scp-secondary-expanding';
+        }
+
+        return classBuilder + getSecondaryPanelClasses();
       };
 
       /*
@@ -138,9 +142,8 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
        These can only be shown when the panel is large.
        */
 
-      // TODO all of the feature panels
-      function getPanelClass() {
-        return ' scp-panel-' + state.getPanelName();
+      function getSecondaryPanelClasses() {
+        return ' scp-panel-' + state.getSecondaryPanelName();
       }
 
       // Bind the mouse handlers that we don't need to add/remove each time

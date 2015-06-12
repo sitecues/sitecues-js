@@ -13,12 +13,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       hover = ':hover',
 
       MAKE_HIDDEN = {
-        'display': 'none',
+        'pointer-events': 'none',
+        'visibility': 'hidden',
         'opacity': 0
       },
 
       MAKE_VISIBLE = {
-        'display': 'block',
+        'pointer-events': 'all',
+        'visibility': 'visible',
         'opacity': 1
       },
 
@@ -396,7 +398,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-transition-opacity' : {
-          'transition': 'opacity 0.8s'
+          'transition': 'opacity .8s'
         },
 
         '.scp-transition-opacity-fast' : {
@@ -463,7 +465,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /*************** Secondary panel **************************/
 
-        '#scp-feedback-textarea': {
+       '#scp-feedback-textarea': {
           'position': 'absolute',
           'top': '33px',
           'left': '43px'
@@ -478,14 +480,18 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-family': 'Arial',
           'left': '130px',
           'width': '340px',
-          'z-index': 999,
-          'opacity': 0,
-          'display': 'none'
+          'z-index': 999
         },
 
         '.scp-card': {
           'position': 'absolute',
-          'display' : 'none'
+          'visibility' : 'hidden',
+          'opacity': 0
+        },
+
+        '.scp-card.scp-active': {
+          'visibility': 'visible',
+          'opacity': 1
         },
 
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
@@ -494,7 +500,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
         '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
         '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
-        '.scp-card.scp-active': MAKE_VISIBLE,
+        '.scp-secondary-expanding .scp-wait-expand': MAKE_HIDDEN,
 
         // TODO what's this?
         /* Secondary Panel - Blue Button */

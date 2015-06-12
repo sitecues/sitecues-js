@@ -67,7 +67,7 @@ sitecues.def('bp', function (bp, callback) {
     function updateClasses() {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-      classBuilder += 'scp-palette' + getPalette();
+      classBuilder += ' scp-palette' + getPalette();
       classBuilder += ' scp-ie9-' + platform.isIE9();
       bpContainer.setAttribute('class', classBuilder);
     }

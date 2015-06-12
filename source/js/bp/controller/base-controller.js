@@ -41,8 +41,8 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     main.getTab = function () {
-      if (BP_CONST.PANEL_TYPES[+state.isPanel()] && state.getPanelName()) {
-        return state.getPanelName();
+      if (BP_CONST.PANEL_TYPES[+state.isPanel()] && state.getSecondaryPanelName()) {
+        return state.getSecondaryPanelName();
       }
       return BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()];
     };

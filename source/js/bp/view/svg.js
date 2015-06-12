@@ -14,7 +14,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
-<sc id="scp-tips" class="scp-if-tips scp-cards scp-transition-opacity">\
+<sc id="scp-tips" class="scp-if-tips scp-cards scp-transition-opacity scp-wait-expand">\
   <sc class="scp-card scp-active">\
     <sc-h1>Welcome</sc-h1>\
     <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
@@ -42,7 +42,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <br><button class="sitecues-button-big">Quick Start Guide</button></sc-p>\
   </sc>\
 </sc>\
-<sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity">\
+<sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity scp-wait-expand">\
   <sc class="scp-card scp-active">\
     <sc-h1>Settings</sc-h1>\
     <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
@@ -161,7 +161,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <text class="scp-hand-cursor" id="scp-about-label" role="link" data-feature="about" x="685" y="178">About</text>\
   </g>\
   <g>\
-    <g id="scp-arrows" class="scp-transition-opacity scp-if-settings scp-if-tips">\
+    <g id="scp-arrows" class="scp-transition-opacity scp-wait-expand scp-if-settings scp-if-tips">\
       <text id="scp-prev-card" class="scp-hand-cursor" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
@@ -169,7 +169,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
          &#9658;\
       </text>\
     </g>\
-    <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity">\
+    <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-wait-expand">\
       <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g class="scp-hand-cursor" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\

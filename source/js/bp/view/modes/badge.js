@@ -58,8 +58,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     var badgeElement,
         getNumberFromString = helper.getNumberFromString,
-        lastBgColor,
-        badgeStyle;
+        lastBgColor;
     /*
      *** Privates ***
      */
@@ -317,10 +316,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
     badge.getViewClasses = function() {
 
-      var classBuilder = BP_CONST.WANT_BADGE + ' ';
+      var classBuilder = BP_CONST.WANT_BADGE;
 
       if (state.isBadge()) {
-        classBuilder += BP_CONST.IS_BADGE + ' ';
+        classBuilder += ' ' + BP_CONST.IS_BADGE;
       }
 
       if (state.get('isRealSettings')) {
@@ -330,7 +329,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         // The initial badge is easier-to-see, more attractive and more inviting when speech is on and zoom is
         // somewhere in the middle. Therefore the initial badge uses fake settings.
         // However, once the user has ever expanded the badge or used sitecues we show the real settings.
-        classBuilder += 'scp-realsettings ';
+        classBuilder += ' scp-realsettings';
       }
 
       return classBuilder;
