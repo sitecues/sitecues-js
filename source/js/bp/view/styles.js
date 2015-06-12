@@ -12,6 +12,16 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       classDelimiter = '.',
       hover = ':hover',
 
+      MAKE_HIDDEN = {
+        'display': 'none',
+        'opacity': 0
+      },
+
+      MAKE_VISIBLE = {
+        'display': 'block',
+        'opacity': 1
+      },
+
       WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
       WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
 
@@ -129,7 +139,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          ...
          <g #scp-more>     // Secondary panel that slides down
          <g .scp-feature-content>
-         <g .scp-feature-tips-content> etc.
+         <g .scp-tips> etc.
          .cards
          .card
          .card
@@ -451,6 +461,42 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'box-shadow': 'none'
         },
 
+        /*************** Secondary panel **************************/
+
+        '#scp-feedback-textarea': {
+          'position': 'absolute',
+          'top': '33px',
+          'left': '43px'
+        },
+
+        '#scp-arrows>text': {
+          'font-size': '44px'
+        },
+
+        '.scp-cards': {
+          'position': 'relative',
+          'font-family': 'Arial',
+          'left': '130px',
+          'width': '340px',
+          'z-index': 999,
+          'opacity': 0,
+          'display': 'none'
+        },
+
+        '.scp-card': {
+          'position': 'absolute',
+          'display' : 'none'
+        },
+
+        '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
+        '.scp-panel-buttonmenu #scp-buttonmenu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
+        '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
+        '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
+        '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
+        '.scp-card.scp-active': MAKE_VISIBLE,
+
+        // TODO what's this?
         /* Secondary Panel - Blue Button */
         '.sitecues-button-big': {
           'padding'      : '10px 30px',
@@ -469,37 +515,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'top'          : '132px'
         },
 
-        '.scp-cards': {
-          'position': 'relative',
-          'font-family': 'Arial',
-          'left': '130px',
-          'width': '340px',
-          'z-index': 999,
-          'opacity': 0,
-          'pointer-events': 'none'
-        },
-
-        '.scp-card': {
-          'position': 'absolute',
-          'display' : 'none'
-        },
-
-        '#scp-arrows>text': {
-          'font-size': '44px'
-        },
-
-        '.scp-feature[data-current], .scp-feature[data-current] > .scp-card.scp-active': {
-          'display': 'block',
-          'pointer-events': 'all'
-        },
-
-        '#scp-svg h1': {
-          'font-size': '32px'
-        },
-
-        '#scp-svg p': {
-          'font-size': '20px'
-        },
 
         /*************** Clipping rules for badge **************************/
         // When the badge is fully collapsed, we clip it so that the invisible parts

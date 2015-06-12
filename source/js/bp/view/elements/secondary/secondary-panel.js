@@ -1,18 +1,51 @@
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform', 'bp/view/elements/general-features',
-    function (BP_CONST, state, helper, animate, transform, generalFeatures) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform',
+    'bp/view/elements/tips',
+    'bp/view/elements/settings',
+    'bp/view/elements/feedback',
+    'bp/view/elements/about',
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule) {
 
     var animationIds = {},
         BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
         BUTTON_LEAVE_ANIMATION_DURATION = 400,
         BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y       = 0,
-        DISABLED_PANEL_TRANSLATE_Y      = -198;
+        DISABLED_PANEL_TRANSLATE_Y      = -198,
+        activePanel,
+        currentAnimation,
 
-    function byId (id) {
-      return helper.byId(id);
-    }
+        // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
+        byId = helper.byId,
+        getTransform = transform.getTransform,
+        getTransformString = transform.getTransformString,
+
+        features = {
+          tips : {
+            module: tipsModule,
+            menuButtonId: BP_CONST.TIPS_BUTTON_ID,
+            hasArrows: true,
+            panelId: BP_CONST.TIPS_CONTENT_ID
+          },
+          settings : {
+            module: settingsModule,
+            menuButtonId: BP_CONST.SETTINGS_BUTTON_ID,
+            hasArrows: true,
+            panelId: BP_CONST.SETTINGS_CONTENT_ID
+          },
+          feedback : {
+            module: feedbackModule,
+            menuButtonId: BP_CONST.FEEDBACK_BUTTON_ID,
+            panelId: BP_CONST.FEEDBACK_CONTENT_ID
+          },
+          about : {
+            module: aboutModule,
+            menuButtonId: BP_CONST.ABOUT_BUTTON_ID,
+            panelId: BP_CONST.ABOUT_CONTENT_ID
+          }
+        };
+
 
     function cancelAnimation (id) {
       animationIds[id] && animationIds[id].cancel();
@@ -36,7 +69,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
           targetScale         = BP_CONST.TRANSFORMS[id].scale,
-          currentTransform    = transform.getTransform(button.getAttribute('transform')),
+          currentTransform    = getTransform(button.getAttribute('transform')),
           currentScale        = currentTransform.scale,
           translate           = currentTransform.translate,
           x                   = translate.left,
@@ -53,7 +86,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       cancelAnimation(id);
 
       animationIds[id] = animate.create(button, {
-        'transform'   : transform.getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
+        'transform'   : getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
       }, {
         'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
         'useAttribute': true
@@ -66,7 +99,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           button              = byId(id),
           buttonBoundingRect  = button.getBoundingClientRect(),
           targetScale         = 1,
-          currentTransform    = transform.getTransform(button.getAttribute('transform')),
+          currentTransform    = getTransform(button.getAttribute('transform')),
           currentScale        = currentTransform.scale,
           translate           = currentTransform.translate,
           x                   = translate.left,
@@ -83,7 +116,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       cancelAnimation(id);
 
       animationIds[id] = animate.create(button, {
-        'transform'   : transform.getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
+        'transform'   : getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
       }, {
         'duration'    : BUTTON_LEAVE_ANIMATION_DURATION,
         'useAttribute': true
@@ -105,26 +138,27 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         element = element.parentNode;
       }
 
-      generalFeatures.clearCurrentPanel();
+      setCurrentFeature();
 
-      sitecues.emit('bp/toggle-' + dataFeature);
+      if (features[dataFeature]) {
+        toggleSecondaryFeature(dataFeature);
+      }
 
     }
 
     function toggleSecondaryPanel () {
 
-      var enabled  = BP_CONST.SECONDARY_PANEL_ENABLED,
-          disabled = BP_CONST.SECONDARY_PANEL_DISABLED;
+      var ENABLED  = BP_CONST.SECONDARY_PANEL_ENABLED,
+          DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 
-      if (state.get('secondaryPanelTransitionTo') === enabled) {
-        state.set('secondaryPanelTransitionTo', disabled);
-      } else {
-        state.set('secondaryPanelTransitionTo', enabled);
-      }
+      var wasEnabled = state.get('secondaryPanelTransitionTo') === ENABLED;
+      state.set('secondaryPanelTransitionTo', wasEnabled ? DISABLED : ENABLED);
 
       SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
 
       animateSecondaryPanel();
+
+      sitecues.emit('bp/do-update');
 
     }
 
@@ -132,7 +166,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       var moreId              = BP_CONST.MORE_ID,
           morePanel           = byId(moreId),
-          morePanelCurrentPos = transform.getTransform(morePanel.getAttribute('transform')).translate.top,
+          morePanelCurrentPos = getTransform(morePanel.getAttribute('transform')).translate.top,
           targetPanelPos      = getTargetMorePanelTranslateY(),
           posDiff             = targetPanelPos - morePanelCurrentPos;
 
@@ -148,14 +182,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         'to'      : targetPanelPos
       }, {
         'duration': BUTTON_CLICK_ANIMATION_DURATION,
-        'onTick'  : onSecondaryAnimationTick,
-        'onFinish': function () {
-          sitecues.emit('bp/did-toggle-secondary-panel', state.get('currentSecondaryPanelMode'));
-        }
+        'onTick'  : onSecondaryAnimationTick
       });
 
     }
 
+    // TODO reduce
     function initStyles () {
 
       var moreId     = BP_CONST.MORE_ID,
@@ -164,21 +196,21 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           feedbackId = BP_CONST.FEEDBACK_BUTTON_ID,
           aboutId    = BP_CONST.ABOUT_BUTTON_ID;
 
+      byId(moreId).setAttribute('opacity', 0);
       byId(moreId).setAttribute(    'transform', 'translate(0, ' + BP_CONST.TRANSFORMS[moreId].translateY + ')');
       byId(tipsId).setAttribute(    'transform', 'translate('    + BP_CONST.TRANSFORMS[tipsId].translateX      + ', ' + BP_CONST.TRANSFORMS[tipsId].translateY     + ')');
       byId(settingsId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[settingsId].translateX  + ', ' + BP_CONST.TRANSFORMS[settingsId].translateY + ')');
       byId(feedbackId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[feedbackId].translateX  + ', ' + BP_CONST.TRANSFORMS[feedbackId].translateY + ')');
       byId(aboutId).setAttribute(   'transform', 'translate('    + BP_CONST.TRANSFORMS[aboutId].translateX     + ', ' + BP_CONST.TRANSFORMS[aboutId].translateY    + ')');
-      byId(moreId).setAttribute('opacity', 0);
 
     }
 
-    function initMorePanel () {
+    function initSecondaryPanel () {
       addMouseListeners();
       initStyles();
     }
 
-    function resetMorePanel () {
+    function resetSecondaryPanel () {
 
       var disabled = BP_CONST.SECONDARY_PANEL_DISABLED;
 
@@ -224,34 +256,251 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     }
 
-    function enableButton (btn) {
+    function toggleButton (btn, doEnable) {
+      var addOrRemoveFn = doEnable ? btn.addEventListener : btn.removeEventListener;
+      addOrRemoveFn('mouseenter', onMouseEnter);
+      addOrRemoveFn('mouseleave', onMouseLeave);
+      addOrRemoveFn('click', onMouseClick);
+
       cancelAllAnimations();
-      btn.addEventListener('mouseenter', onMouseEnter);
-      btn.addEventListener('mouseleave', onMouseLeave);
-      btn.addEventListener('click', onMouseClick);
     }
 
-    function disableButton (btn) {
-      cancelAllAnimations();
-      btn.removeEventListener('mouseenter', onMouseEnter);
-      btn.removeEventListener('mouseleave', onMouseLeave);
-      btn.removeEventListener('click', onMouseClick);
+    function forEachFeature(fn) {
+      for (var feature in features) {
+        if (features.hasOwnProperty(feature)) {
+          fn(features[feature]);
+        }
+      }
     }
+    function resetMenuButtonTransforms() {
+      forEachFeature(function(feature) {
+        var button = feature.menuButtonId,
+          transform = BP_CONST.TRANSFORMS[button];
+        byId(button).setAttribute('transform', getTransformString(transform.translateX, transform.translateY));
+      });
+    }
+
+    /**
+     *
+     * @param name or null for button menu
+     */
+    function setCurrentFeature(name) {
+      state.set('secondaryPanelName', name || 'buttonmenu');
+      sitecues.emit('bp/do-update');
+    }
+
+    function getValueInTime(from, to, time) {
+      return from + (to - from) * time;
+    }
+
+    function getNumberFromString (str) {
+      return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
+    }
+
+    function getCssValues(featureModule, menuButton, moreButton, currentOutlineHeight) {
+      var moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate,
+        menuButtonTransform = getTransform(menuButton.getAttribute('transform')),
+        mainSVG                     = byId(BP_CONST.SVG_ID),
+        bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID),
+        baseCssValues = {
+          true: {
+            'outlineHeight'           : 377, // The outline
+            'svgHeight'               : 520, // The main SVG, allows more space
+            'bottomSVGTranslateY'     : 189, // The labels and grey background
+            'moreBtnTranslateX'       : 400, // The more button
+            'moreBtnTranslateY'       : 386, // The more button
+            'menuBtnTranslateX'        : 26, // The about icon, which rolls to the left
+            'menuBtnTranslateY'        : BP_CONST.TRANSFORMS[menuButton.id].translateY, // The about icon rotates
+            'menuBtnScale'             : 1,   // About icon scales to 1
+            'menuBtnRotate'            : 0,   // Roll the about icon
+            'menuBtnRotateX'           : 0,   // A way to rotate around an origin
+            'menuBtnRotateY'           : 0    // A way to rotate around an origin
+          },
+          false: {
+            'outlineHeight'            : currentOutlineHeight,
+            'svgHeight'                : parseFloat(mainSVG.style.height),
+            'svgTranslateY'            : getTransform(mainSVG.getAttribute('transform')).translate.top,
+            'bottomSVGTranslateY'      : getTransform(bottomSVG.getAttribute('transform')).translate.top,
+            'moreBtnTranslateX'        : moreBtnTranslate.left,
+            'moreBtnTranslateY'        : moreBtnTranslate.top,
+            'menuBtnTranslateX'        : menuButtonTransform.translate.left,
+            'menuBtnTranslateY'        : menuButtonTransform.translate.top,
+            'menuBtnScale'             : menuButtonTransform.scale,
+            'menuBtnRotate'            : 0,  // Roll the about icon
+            'menuBtnRotateX'           : 54, // A way to rotate around an origin
+            'menuBtnRotateY'           : 54  // A way to rotate around an origin
+          }
+        };
+
+      return featureModule.getCssValues(baseCssValues);
+    }
+
+    function animateSecondaryFeature(name, doEnable, isInstant) {
+      var
+        mainSVG = byId(BP_CONST.SVG_ID),
+        outlineSVG = byId(BP_CONST.MAIN_OUTLINE_BORDER_ID),
+        shadowSVG = byId(BP_CONST.SHADOW_ID),
+        bottomSVG = byId(BP_CONST.BOTTOM_MORE_ID),
+        moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+
+        feature = features[name],
+        featureModule = feature.module,
+        menuButton = byId(feature.menuButtonId),
+
+        currentMenuBtnTransform = getTransform(menuButton.getAttribute('transform')),
+
+        currentOutlineHeight = getCurrentOutlineHeight(),
+        currentSVGHeight = parseFloat(mainSVG.style.height),
+        currentSVGTranslateY = getTransform(mainSVG.style[helper.transformProperty]).translate.top,
+        currentBottomSVGTranslateY = getTransform(bottomSVG.getAttribute('transform')).translate.top,
+        currentMoreBtnTransform = getTransform(moreButton.getAttribute('transform')),
+        currentMoreBtnTranslate = currentMoreBtnTransform.translate,
+        currentMoreBtnTranslateX = currentMoreBtnTranslate.left,
+        currentMoreBtnTranslateY = currentMoreBtnTranslate.top,
+        currentMoreBtnScale = currentMoreBtnTransform.scale,
+        currentMoreBtnRotate = currentMoreBtnTransform.rotate,
+        currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
+        currentMenuBtnTranslateY = currentMenuBtnTransform.translate.top,
+        currentMenuBtnScale = currentMenuBtnTransform.scale,
+
+        cssValues = getCssValues(featureModule, menuButton, moreButton, currentOutlineHeight),
+        fromCSSValues = cssValues[!doEnable],
+        targetCSSValues = cssValues[doEnable],
+
+        targetMoreBtnRotate = state.isShrinking() ? 0 : currentMoreBtnRotate,
+        targetSVGTranslateY = doEnable ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[false].svgTranslateY,
+
+        ENABLE_ANIMATION_MS = 1500,
+        DISABLE_ANIMATION_MS = 500,
+
+        duration = getDuration(),
+
+        heightTransition = {
+          'from': currentSVGHeight,
+          'to': targetCSSValues.svgHeight
+        };
+
+      function getDuration() {
+        if (isInstant) {
+          return 1;
+        }
+
+        // Use the progress of the more button to determine how far along we are in the animation,
+        // and therefore how much time is left
+        return animate.getDuration(doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS,
+          fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY);
+      }
+
+      function getCurrentOutlineHeight() {
+        return getNumberFromString(outlineSVG.getAttribute('d').split(' ').pop());
+      }
+
+      function panelSizeTick(t, moreButtonRotate) {
+        mainSVG.style.height = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
+        mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
+        bottomSVG.setAttribute('transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
+        moreButton.setAttribute('transform',
+          getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
+            getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, moreButtonRotate));
+        outlineSVG.setAttribute('d', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        shadowSVG.setAttribute('d', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0,6 -5,11 -11,11H11m797,-11v-' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+      }
+
+      function contentsTick(t, moreButtonRotate) {
+        menuButton.setAttribute('transform',
+          getTransformString(getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
+            getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
+            getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t)));
+
+        panelSizeTick(t, moreButtonRotate);
+      }
+
+      function onDisabledTick(animationState) {
+
+        contentsTick(animationState.current, targetMoreBtnRotate);
+      }
+
+      function onEnableTick(animationState) {
+
+        contentsTick(animationState.current, currentMoreBtnRotate);
+      }
+
+      currentAnimation && currentAnimation.cancel();
+
+      setCurrentFeature(doEnable && name);
+
+      if (doEnable) {
+
+        currentAnimation = animate.create(heightTransition,
+          {
+            'duration': duration,
+            'onTick': onEnableTick,
+            'onFinish': function () {
+            }
+          });
+      }
+      else {
+        currentAnimation = animate.create(
+          heightTransition,
+          {
+            'duration': duration,
+            'onTick': onDisabledTick,
+            'onFinish': function () {
+            }
+          });
+      }
+    }
+
+    function toggleSecondaryFeature(name) {
+      var willEnable = activePanel !== name;
+      animateSecondaryFeature(name, willEnable);
+
+      // TODO we need to fire this when panel closed, right?
+      sitecues.emit('did-toggle-' + name, willEnable);
+    }
+
+
+    // TODO not sure about this
+    // From anardi:
+    //      i just was taking advantage of code i already wrote that did what i needed
+    //      probably a smarter way to do what i want, im sure, but i thought it was cool i guess
+    //      because the disabling animation should make everything like it was the first time someone was at the secondary panel, if that makes sense
+    //      but, if you are in the settings panel for example, and you click the about label, i don't bother "disabling" the settings panel, cuz then it would collapse and then expand again
+    function resetSecondaryFeature() {
+      if (activePanel) {
+        animateSecondaryFeature(activePanel, true, true);
+      }
+      setCurrentFeature();
+    }
+
+//    function switchCard(direction) {
+//      if (activePanel && features[activePanel].hasArrows) {
+//        featureModule.switchCard(direction);
+//      }
+//    }
+//
+//    function nextCard () {
+//      switchCard(1);
+//    }
+//
+//    function prevCard () {
+//      switchCard(-1);
+//    }
 
     // Add mouse listeners once BP is ready
-    sitecues.on('bp/did-complete', initMorePanel);
+    sitecues.on('bp/did-complete', initSecondaryPanel);
 
-    sitecues.on('bp/toggle-secondary-panel', toggleSecondaryPanel);
+    sitecues.on('bp/do-toggle-secondary-panel', toggleSecondaryPanel);
 
-    sitecues.on('bp/will-shrink', resetMorePanel);
+    sitecues.on('bp/will-shrink', resetSecondaryPanel);
 
-    sitecues.on('bp/do-disable-button', disableButton);
+    sitecues.on('bp/do-toggle-button', toggleButton);
 
-    sitecues.on('bp/do-enable-button', enableButton);
+    sitecues.on('bp/will-shrink bp/do-toggle-secondary-panel', resetSecondaryFeature);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
+//    sitecues.on('bp/next-card', nextCard);
+//    sitecues.on('bp/prev-card', prevCard);
+
     callback();
   });
 

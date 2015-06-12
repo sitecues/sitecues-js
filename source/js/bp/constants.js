@@ -73,18 +73,16 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.ABOUT_LABEL_ID           = 'scp-about-label';
 
   constants.ABOUT_PATH_CONTAINER_ID  = 'scp-about-path-container';
-  constants.ABOUT_CONTENT_ID         = 'scp-about-content';
+  constants.ABOUT_CONTENT_ID         = 'scp-about';
   constants.ABOUT_CONTENT_IMAGE_ID   = 'scp-logo-text';
 
-  constants.FEEDBACK_CONTENT_ID      = 'scp-feedback-content';
+  constants.FEEDBACK_CONTENT_ID      = 'scp-feedback';
   constants.FEEDBACK_TEXTAREA        = 'feedback-textarea';
   constants.FEEDBACK_TEXTAREA_ID     = 'feedback-textarea-id';
   constants.FEEDBACK_CONTENT_BUTTON_ID = 'sitecues-button-big-feedback';
 
-  constants.SETTINGS_CONTENT_ID      = 'scp-settings-content';
-  constants.SETTINGS_CARDS_ID        = 'scp-settings-cards';
-
-  constants.TIPS_CARDS_ID            = 'scp-tips-cards';
+  constants.SETTINGS_CONTENT_ID      = 'scp-settings';
+  constants.TIPS_CONTENT_ID          = 'scp-tips';
 
   constants.ARROWS_ID                = 'scp-arrows';
   constants.NEXT_ID                  = 'scp-next-card';

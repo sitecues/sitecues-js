@@ -22,9 +22,9 @@ sitecues.def('bp', function (bp, callback) {
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
     'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'bp/animate', 'platform', 'conf/site', 'util/color',
+    'bp/size-animation', 'platform', 'conf/site', 'util/color',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, animate, platform, site, colorUtil) {
+              baseController, placement, slider, sizeAnimation, platform, site, colorUtil) {
 
     /*
      *** Public methods ***
@@ -59,7 +59,7 @@ sitecues.def('bp', function (bp, callback) {
 
       updateClasses();
 
-      animate.initAnimation(isFirstTime);
+      sizeAnimation.initAnimation(isFirstTime);
     }
 
     // 1. Badge- or panel- specific view classes

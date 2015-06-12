@@ -1,4 +1,7 @@
-sitecues.def('bp/animate', function(animate, callback) {
+/**
+ * Expand or contract the BP
+ */
+sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
   'use strict';
   sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'zoom', 'bp/controller/panel-controller',
 
@@ -491,7 +494,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
-      animate.initAnimation = function (isFirstTime) {
+      sizeAnimation.initAnimation = function (isFirstTime) {
 
         if (isFirstTime) {
           firstTimeRender();
@@ -509,7 +512,7 @@ sitecues.def('bp/animate', function(animate, callback) {
           // There is room to animate, not already at the size limit of where we're transitioning to
 
           SC_DEV && console.log('PERFORM BP2 ANIMATION');
-          SC_DEV && console.log('        currentMode : ' + state.get('currentMode'));
+          SC_DEV && console.log('currentMode : ' + state.get('currentMode'));
           SC_DEV && console.log('        transitionTo: ' + state.get('transitionTo'));
 
           performAnimation();

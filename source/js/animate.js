@@ -82,7 +82,7 @@ sitecues.def('animate', function (animate, callback) {
 
       for (var prop in CSSProperties) {
         if (CSSProperties.hasOwnProperty(prop)) {
-          if (prop.indexOf('transform') !== -1) {
+          if (prop.indexOf('transform') >= 0) {
             normalizeTransformProps(this, prop);
           } else {
             this.animateStyles.from[prop] = element.style[prop];

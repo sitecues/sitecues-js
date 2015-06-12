@@ -104,7 +104,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     function onMouseClick () {
 
       // Show or hide the secondary panel.
-      sitecues.emit('bp/toggle-secondary-panel');
+      sitecues.emit('bp/do-toggle-secondary-panel');
 
       var id                         = BP_CONST.MORE_BUTTON_CONTAINER_ID,
           moreButton                 = byId(id),

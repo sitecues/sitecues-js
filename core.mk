@@ -81,9 +81,7 @@ files=\
 	source/js/bp/controller/base-controller.js \
 	source/js/bp/controller/slider-controller.js \
 	source/js/bp/controller/panel-controller.js \
-	source/js/bp/animate.js \
-	source/js/bp/view/elements/secondary/general.js \
-	source/js/bp/view/elements/secondary/secondary-panel.js \
+	source/js/bp/size-animation.js \
 	source/js/bp/view/elements/slider.js \
 	source/js/bp/controller/bp-controller.js \
 	source/js/bp/view/svg.js \
@@ -97,6 +95,7 @@ files=\
 	source/js/bp/view/elements/secondary/tips.js \
 	source/js/bp/view/elements/secondary/settings.js \
 	source/js/bp/view/elements/secondary/feedback.js \
+	source/js/bp/view/elements/secondary/secondary-panel.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
 	source/js/keys/focus.js \

@@ -7,12 +7,8 @@ sitecues.def('bp/model/state', function (state, callback) {
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
     currentSecondaryPanelMode : 0,
     secondaryPanelTransitionTo: 0,
-    tipsMode                : 0,
-    settingsMode            : 0,
-    feedbackMode            : 0,
-    aboutMode               : 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
-    isMorePanel             : false, // Second panel
+    secondaryPanelName      : 'buttonmenu', // 'buttonmenu', 'tips', 'settings', 'feedback', 'about'
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
@@ -76,7 +72,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     return data.transitionTo === 1 && data.currentMode !== 1;
   };
 
-  state.isMorePanel = function() {
+  state.isSecondaryPanel = function() {
     return data.currentSecondaryPanelMode === 1 && data.secondaryPanelTransitionTo === 1;
   };
 
@@ -88,19 +84,12 @@ sitecues.def('bp/model/state', function (state, callback) {
     return data.transitionTo === 0 && data.currentMode !== 0;
   };
 
-  state.getSecondaryMode = function () {
-    if (state.get('tipsMode')) {
-      return 'tips';
-    }
-    if (state.get('settingsMode')) {
-      return 'settings';
-    }
-    if (state.get('feedbackMode')) {
-      return 'feedback';
-    }
-    if (state.get('aboutMode')) {
-      return 'about';
-    }
+  /**
+   * Returns 'buttonmenu' or name of secondary panel
+   * @returns {string}
+   */
+  state.getPanelName = function () {
+    return data.secondaryPanelName;
   };
 
   callback();

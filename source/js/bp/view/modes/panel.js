@@ -117,7 +117,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // *** scp-want-panel ***
         // Sets larger panel sizes on everything.
         // It can take time to take effect because of the animation properties.
-        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isMorePanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
+        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
 
         if (state.get('isKeyboardMode')) {
           // *** scp-keyboard ***
@@ -125,7 +125,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-keyboard';
         }
 
-        return classBuilder + ' ' + getFeatureClass();
+        return classBuilder + getPanelClass() + ' ';
       };
 
       /*
@@ -139,22 +139,8 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
        */
 
       // TODO all of the feature panels
-      function getFeatureClass() {
-        return '';
-//        var featureClassBuilder = '';
-//
-//        // Feature panels are only displayed when the panel is large.
-//        if (state.data.featurePanelName) {
-//          featureClassBuilder += ' scp-feature ' + 'scp-' + state.data.featurePanelName + '-feature';
-//          var feature = BP_CONST.FEATURES[state.data.featurePanelName];
-//          doExtraHeight(feature);
-//          if (state.data.numCards[state.data.featurePanelName]) {
-//            displayActiveCard();
-//          } else {
-//            baseController.hideActiveCard();
-//          }
-//        }
-//        return featureClassBuilder;
+      function getPanelClass() {
+        return ' scp-panel-' + state.getPanelName();
       }
 
       // Bind the mouse handlers that we don't need to add/remove each time

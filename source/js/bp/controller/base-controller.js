@@ -41,10 +41,10 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     main.getTab = function () {
-      if (BP_CONST.PANEL_TYPES[+state.isMorePanel()] && state.getSecondaryMode()) {
-        return state.getSecondaryMode();
+      if (BP_CONST.PANEL_TYPES[+state.isPanel()] && state.getPanelName()) {
+        return state.getPanelName();
       }
-      return BP_CONST.PANEL_TYPES[+state.isMorePanel()];
+      return BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()];
     };
 
     // Clear the visual focus rectangle and current focus state
