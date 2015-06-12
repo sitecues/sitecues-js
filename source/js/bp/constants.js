@@ -19,6 +19,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SPEECH_STATE_ID          = 'scp-speech-state';
 
   constants.MAIN_ID                  = 'scp-main';
+  constants.MAIN_CONTENT_FILL_ID     = 'scp-main-content-fill';
 
   constants.MOUSEOVER_TARGET         = 'scp-mouseover-target'; // Mousing over this element causes BP to expand
 

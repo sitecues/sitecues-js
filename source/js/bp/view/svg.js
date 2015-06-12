@@ -20,6 +20,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
   </sc>\
+  <!--\
   <sc class="scp-card">\
     <sc-h1>Zoom the web page</sc-h1>\
     <sc-p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</sc-p>\
@@ -41,14 +42,16 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-p>Get started with sitecues in the<br>\
     <br><button class="sitecues-button-big">Quick Start Guide</button></sc-p>\
   </sc>\
+  -->\
 </sc>\
 <sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity scp-wait-expand">\
   <sc class="scp-card scp-active">\
     <sc-h1>Settings</sc-h1>\
     <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
+    <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
   </sc>\
-  <sc class="scp-card">\
+  <!-- <sc class="scp-card">\
     <sc-h1>Color themes</sc-h1>\
     <sc-p>\
       <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName" data-setting-value="none"> \
@@ -90,7 +93,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-h1>Colors</sc-h1>\
     <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
   </sc>\
-</sc>\
+--> </sc>\
 <button id="sitecues-button-big-feedback" class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
 <svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" id="scp-svg" data-sc-reversible="false">\
 <defs>\
@@ -123,7 +126,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <g id="scp-main" aria-label="sitecues main panel">\
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
-  <rect fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
+  <rect id="scp-main-content-fill" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" opacity="0" fill="none"/>\
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\

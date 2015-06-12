@@ -26,7 +26,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
 
-    settings.getCssValues = function(baseCssValues) {
+    settings.extendCssValues = function(baseCssValues) {
       return baseCssValues;
     };
 

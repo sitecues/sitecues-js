@@ -19,7 +19,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       }
     }
 
-    feedback.getCssValues = function(baseCssValues) {
+    feedback.extendCssValues = function(baseCssValues) {
       return baseCssValues;
     };
 

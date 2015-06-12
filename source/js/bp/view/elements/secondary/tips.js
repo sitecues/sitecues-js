@@ -2,7 +2,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/helper', function (BP_CONST, helper) {
 
-    tips.getCssValues = function(baseCssValues) {
+    tips.extendCssValues = function(baseCssValues) {
       return baseCssValues;
     };
 

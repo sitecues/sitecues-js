@@ -15,6 +15,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         DISABLED_PANEL_TRANSLATE_Y      = -198,
         activePanel,
         currentAnimation,
+        mainPanelContentsRect,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
@@ -208,6 +209,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     function initSecondaryPanel () {
       addMouseListeners();
       initStyles();
+      mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
     }
 
     function resetSecondaryPanel () {
@@ -299,18 +301,52 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
     }
 
-    function getCssValues(featureModule, menuButton, moreButton, currentOutlineHeight) {
-      var moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate,
+    // Compute based on the size of the contents
+    // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
+    function getPanelContentsHeight(featureName) {
+      var range = document.createRange(),
+        contentElements = document.querySelectorAll('.scp-if-' + featureName),
+        numContentElements = contentElements.length,
+        maxHeight = mainPanelContentsRect.height,
+        normalTop = mainPanelContentsRect.top,
+        index = 0,
+        EXTRA_SPACE = 120;
+
+      // TODO just use selectNodeContents
+      function addRect(item) {
+        var thisRect = item.getBoundingClientRect(),
+          height = thisRect.bottom - normalTop;
+        if (height > maxHeight) {
+          maxHeight = height;
+        }
+      }
+
+      for (; index < numContentElements; index ++) {
+        var elem = contentElements[index];
+        range.selectNodeContents(elem);
+        addRect(range);
+        addRect(elem);
+      }
+
+      return maxHeight + EXTRA_SPACE;
+    }
+
+
+    function getCssValues(featureName, menuButton, moreButton, currentOutlineHeight) {
+      var
+        feature = features[featureName],
+        moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate,
         menuButtonTransform = getTransform(menuButton.getAttribute('transform')),
         mainSVG                     = byId(BP_CONST.SVG_ID),
         bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID),
+        panelContentsHeight         = getPanelContentsHeight(featureName),
         baseCssValues = {
           true: {
-            'outlineHeight'           : 377, // The outline
-            'svgHeight'               : 520, // The main SVG, allows more space
-            'bottomSVGTranslateY'     : 189, // The labels and grey background
+            'bottomSVGTranslateY'     : panelContentsHeight - 85, // The labels and grey background
+            'outlineHeight'           : panelContentsHeight + 93, // The outline
+            'svgHeight'               : panelContentsHeight + 163, // The main SVG, allows more space
             'moreBtnTranslateX'       : 400, // The more button
-            'moreBtnTranslateY'       : 386, // The more button
+            'moreBtnTranslateY'       : panelContentsHeight + 104, // The more button
             'menuBtnTranslateX'        : 26, // The about icon, which rolls to the left
             'menuBtnTranslateY'        : BP_CONST.TRANSFORMS[menuButton.id].translateY, // The about icon rotates
             'menuBtnScale'             : 1,   // About icon scales to 1
@@ -334,7 +370,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           }
         };
 
-      return featureModule.getCssValues(baseCssValues);
+      console.log(panelContentsHeight);
+
+      return feature.module.extendCssValues(baseCssValues);
     }
 
     function animateSecondaryFeature(name, doEnable, isInstant) {
@@ -346,7 +384,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
 
         feature = features[name],
-        featureModule = feature.module,
         menuButton = byId(feature.menuButtonId),
 
         currentMenuBtnTransform = getTransform(menuButton.getAttribute('transform')),
@@ -364,8 +401,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
         currentMenuBtnTranslateY = currentMenuBtnTransform.translate.top,
         currentMenuBtnScale = currentMenuBtnTransform.scale,
+        currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
-        cssValues = getCssValues(featureModule, menuButton, moreButton, currentOutlineHeight),
+        cssValues = getCssValues(name, menuButton, moreButton, currentOutlineHeight),
         fromCSSValues = cssValues[!doEnable],
         targetCSSValues = cssValues[doEnable],
 
@@ -414,7 +452,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         menuButton.setAttribute('transform',
           getTransformString(getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
             getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
-            getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t)));
+            getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t),
+            getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t), targetCSSValues.menuBtnRotateX, targetCSSValues.menuBtnRotateY));
+
+
+        //aboutContentImage.setAttribute('transform', getTransformString(getValueInTime(currentAboutImageTranslateX, targetCSSValues.aboutImageTranslateX, t), 0));
+
+        //aboutButton.setAttribute('transform', getTransformString(getValueInTime(currentAboutBtnTranslateX, targetCSSValues.aboutBtnTranslateX, t), getValueInTime(currentAboutBtnTranslateY, targetCSSValues.aboutBtnTranslateY, t), getValueInTime(currentAboutBtnScale, targetCSSValues.aboutBtnScale, t), getValueInTime(currentAboutBtnRotate, targetCSSValues.aboutBtnRotate, t), targetCSSValues.aboutBtnRotateX, targetCSSValues.aboutBtnRotateY));
 
         panelSizeTick(t, moreButtonRotate);
       }
