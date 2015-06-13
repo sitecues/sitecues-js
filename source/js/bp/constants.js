@@ -140,9 +140,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {scale:1.2, translateX: 675, translateY: 14};
   constants.MENU_BUTTON_ROTATE_XY = 54;  // Rotation origin
 
-  constants.TRANSFORMS.ABOUT_ENABLED[constants.SVG_ID]                   = {translateY: -116};
-  constants.TRANSFORMS.ABOUT_ENABLED[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 346};
-
   // Elements that are only shown when panel is expanded
   // Attributes
   constants.PANEL_CONTAINER_ATTRS = {

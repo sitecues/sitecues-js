@@ -148,6 +148,13 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     }
 
+    // TODO this is ugly
+    function positionHelpButton() {
+      var moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+
+      moreButton.setAttribute('transform', 'translate(400,198)');
+    }
+
     function showHelpButton (useInstantTransition) {
 
       var btnContainer           = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
@@ -191,7 +198,9 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     function hideHelpButton () {
 
       var moreButton       = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate = getTransform(moreButton.getAttribute('transform')).translate;
+          currentTranslate = getTransform(moreButton.getAttribute('transform')).translate,
+          targetMorePanelTranslateY  = getTargetMorePanelTranslateY();
+
 
       moreButton.setAttribute('class', '');
       moreButton.style.opacity = 0;
@@ -264,6 +273,9 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
+
+    // TODO help from Tony?
+    sitecues.on('bp/will-expand', positionHelpButton);
 
     sitecues.on('bp/toggle-more-button', onMouseClick);
 

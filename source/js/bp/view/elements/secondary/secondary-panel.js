@@ -126,11 +126,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function resetMenuButtonStyles() {
 
-      // More button
+      // TODO rename
       var moreId = BP_CONST.MORE_ID,
-        moreButton = byId(moreId);
-      moreButton.setAttribute('opacity', 0); // TODO more button never comes back after panel collapses
-      moreButton.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[moreId].translateY));
+        more = byId(moreId);
+      more.setAttribute('opacity', 0);
+      more.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[moreId].translateY));
 
       // Menu buttons
       forEachFeature(function(feature) {
@@ -155,12 +155,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function resetPanelGeometry() {
-      var mainSvg = getMainSVG();
-      mainSvg.style.height = origSvgHeight + 'px';
-      mainSvg.style[helper.transformProperty] = origSvgTransform;
+      if (origSvgHeight) {  // Was initialized
+        var mainSvg = getMainSVG();
+        mainSvg.style.height = origSvgHeight + 'px';
+        mainSvg.style[helper.transformProperty] = origSvgTransform;
 
-      setCurrentOutlineHeight(origOutlineHeight);
-      getBottom().style[helper.transformProperty] = origBottomTransform;
+        setCurrentOutlineHeight(origOutlineHeight);
+        getBottom().style[helper.transformProperty] = origBottomTransform;
+      }
     }
 
     function initSecondaryPanel () {
@@ -213,10 +215,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function getValueInTime(from, to, time) {
       return from + (to - from) * time;
-    }
-
-    function getNumberFromString (str) {
-      return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
     }
 
     // Compute based on the size of the contents
@@ -287,6 +285,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       return feature.module.extendCssValues(baseCssValues);
     }
 
+    function getMoreButton() {
+      return byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
+    }
+
     function getMainSVG() {
       return byId(BP_CONST.SVG_ID);
     }
@@ -300,7 +302,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function getCurrentOutlineHeight() {
-      return getNumberFromString(getOutlineSVG().getAttribute('d').split(' ').pop());
+      return parseInt(getOutlineSVG().getAttribute('d').split(' ')[1]);
     }
 
     function setCurrentOutlineHeight(height) {
@@ -314,7 +316,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       var
         mainSVG = getMainSVG(),
         bottomSVG = getBottom(),
-        moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+        moreButton = getMoreButton(),
 
         feature = features[name],
         featureModule = feature.module,
