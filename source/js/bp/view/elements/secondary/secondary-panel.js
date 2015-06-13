@@ -3,6 +3,7 @@
 // Feedback
 // Toggle feature off
 // Auto size
+// Cards
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
@@ -120,27 +121,25 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     }
 
-    // TODO reduce
-    function initStyles () {
+    function resetStyles() {
 
-      var moreId     = BP_CONST.MORE_ID,
-          tipsId     = BP_CONST.TIPS_BUTTON_ID,
-          settingsId = BP_CONST.SETTINGS_BUTTON_ID,
-          feedbackId = BP_CONST.FEEDBACK_BUTTON_ID,
-          aboutId    = BP_CONST.ABOUT_BUTTON_ID;
+      // More button
+      var moreId = BP_CONST.MORE_ID,
+        moreButton = byId(moreId);
+      moreButton.setAttribute('opacity', 0);
+      moreButton.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[moreId].translateY));
 
-      byId(moreId).setAttribute('opacity', 0);
-      byId(moreId).setAttribute(    'transform', 'translate(0, ' + BP_CONST.TRANSFORMS[moreId].translateY + ')');
-      byId(tipsId).setAttribute(    'transform', 'translate('    + BP_CONST.TRANSFORMS[tipsId].translateX      + ', ' + BP_CONST.TRANSFORMS[tipsId].translateY     + ')');
-      byId(settingsId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[settingsId].translateX  + ', ' + BP_CONST.TRANSFORMS[settingsId].translateY + ')');
-      byId(feedbackId).setAttribute('transform', 'translate('    + BP_CONST.TRANSFORMS[feedbackId].translateX  + ', ' + BP_CONST.TRANSFORMS[feedbackId].translateY + ')');
-      byId(aboutId).setAttribute(   'transform', 'translate('    + BP_CONST.TRANSFORMS[aboutId].translateX     + ', ' + BP_CONST.TRANSFORMS[aboutId].translateY    + ')');
-
+      // Menu button
+      forEachFeature(function(feature) {
+        var button = feature.menuButtonId,
+          transform = BP_CONST.TRANSFORMS[button];
+        byId(button).setAttribute('transform', getTransformString(transform.translateX, transform.translateY));
+      });
     }
 
     function initSecondaryPanel () {
       addMouseListeners();
-      initStyles();
+      resetStyles();
       mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
     }
 
@@ -151,7 +150,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       cancelAllAnimations();
 
-      initStyles();
+      resetStyles();
 
       state.set('currentSecondaryPanelMode',  DISABLED);
       state.set('secondaryPanelTransitionTo', DISABLED);
@@ -179,14 +178,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           fn(features[feature]);
         }
       }
-    }
-
-    function resetMenuButtonTransforms() {
-      forEachFeature(function(feature) {
-        var button = feature.menuButtonId,
-          transform = BP_CONST.TRANSFORMS[button];
-        byId(button).setAttribute('transform', getTransformString(transform.translateX, transform.translateY));
-      });
     }
 
     /**
