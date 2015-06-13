@@ -1,9 +1,9 @@
 // TODO rename icon menu buton menu
 // About
 // Feedback
-// Toggle feature off
-// Auto size
-// Cards
+// Toggle feature not working anymore
+// Auto size not right
+// Card interactions
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
@@ -149,7 +149,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       origSvgTransform = mainSvg.style[helper.transformProperty];
 
       origOutlineHeight = getCurrentOutlineHeight(),
-      origBottomTransform = getBottom().style[helper.transformProperty];
+      origBottomTransform = getBottom().getAttribute('transform');
 
       mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
     }
@@ -161,7 +161,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         mainSvg.style[helper.transformProperty] = origSvgTransform;
 
         setCurrentOutlineHeight(origOutlineHeight);
-        getBottom().style[helper.transformProperty] = origBottomTransform;
+        getBottom().setAttribute('transform', origBottomTransform);
       }
     }
 
@@ -171,6 +171,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function resetSecondaryPanel () {
+
+      if (state.isSecondaryPanel()) {
+        // Toggle current panel off
+        sitecues.emit('bp/did-toggle-' + state.getSecondaryPanelName(), false);
+      }
 
       var DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 

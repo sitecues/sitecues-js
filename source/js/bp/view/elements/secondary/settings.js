@@ -6,7 +6,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     function onToggle(isActive) {
 
-      var settingsCards = byId(BP_CONST.SETTINGS_CARDS_ID);
+      var settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
       if (isActive) {
         // TODO why both?
