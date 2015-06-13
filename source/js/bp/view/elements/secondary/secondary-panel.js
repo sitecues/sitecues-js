@@ -19,6 +19,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         DISABLED_PANEL_TRANSLATE_Y      = -198,
         runningAnimations = [],
         mainPanelContentsRect,
+        origOutlineHeight,
+        origSvgHeight,
+        origSvgTransform,
+        origBottomTransform,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
@@ -64,7 +68,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     function createAnimation(transitionFromTo, details) {
       var newAnimation = animate.create(transitionFromTo, details);
       runningAnimations.push(newAnimation);
-      console.log(runningAnimations);
     }
 
     function getTargetMorePanelTranslateY () {
@@ -81,6 +84,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function toggleSecondaryPanel () {
 
+      getOrigPanelGeometry();
+
       var ENABLED  = BP_CONST.SECONDARY_PANEL_ENABLED,
           DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 
@@ -92,7 +97,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       animateButtonMenuDrop();
 
       sitecues.emit('bp/do-update');
-
     }
 
     function animateButtonMenuDrop () {
@@ -120,15 +124,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     }
 
-    function resetStyles() {
+    function resetMenuButtonStyles() {
 
       // More button
       var moreId = BP_CONST.MORE_ID,
         moreButton = byId(moreId);
-      moreButton.setAttribute('opacity', 0);
+      moreButton.setAttribute('opacity', 0); // TODO more button never comes back after panel collapses
       moreButton.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[moreId].translateY));
 
-      // Menu button
+      // Menu buttons
       forEachFeature(function(feature) {
         var button = feature.menuButtonId,
           transform = BP_CONST.TRANSFORMS[button];
@@ -136,27 +140,43 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       });
     }
 
+    function getOrigPanelGeometry() {
+      if (origSvgHeight) {
+        return; // Already initialized
+      }
+      var mainSvg = getMainSVG();
+      origSvgHeight = parseFloat(mainSvg.style.height),
+      origSvgTransform = mainSvg.style[helper.transformProperty];
+
+      origOutlineHeight = getCurrentOutlineHeight(),
+      origBottomTransform = getBottom().style[helper.transformProperty];
+
+      mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
+    }
+
+    function resetPanelGeometry() {
+      var mainSvg = getMainSVG();
+      mainSvg.style.height = origSvgHeight + 'px';
+      mainSvg.style[helper.transformProperty] = origSvgTransform;
+
+      setCurrentOutlineHeight(origOutlineHeight);
+      getBottom().style[helper.transformProperty] = origBottomTransform;
+    }
+
     function initSecondaryPanel () {
       addMouseListeners();
-      resetStyles();
-      mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
+      resetMenuButtonStyles();
     }
 
     function resetSecondaryPanel () {
 
-      var DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED,
-        activePanel = state.getSecondaryPanelName();
+      var DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 
-      cancelAllAnimations();
-
-      resetStyles();
+      resetMenuButtonStyles();
+      resetPanelGeometry();
 
       state.set('currentSecondaryPanelMode',  DISABLED);
       state.set('secondaryPanelTransitionTo', DISABLED);
-
-      if (features[activePanel]) {
-        animateSecondaryFeature(activePanel, true, true);
-      }
 
       setCurrentFeature();
     }
@@ -183,11 +203,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
      *
      * @param name or null for button menu
      */
-    function setCurrentFeature(name, isSecondaryExpanding) {
+    function setCurrentFeature(name, isSecondaryExpanding, isAnimating) {
       cancelAllAnimations();
       state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
-      state.set('isAnimating', true);
+      state.set('isAnimating', isAnimating);
       sitecues.emit('bp/do-update');
     }
 
@@ -239,7 +259,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         bottomSVG                   = byId(BP_CONST.BOTTOM_MORE_ID),
         panelContentsHeight         = getPanelContentsHeight(featureName),
         baseCssValues = {
-          true: {
+          true: {   // Feature enabled
             'bottomSVGTranslateY'     : panelContentsHeight - 85, // The labels and grey background
             'outlineHeight'           : panelContentsHeight + 103, // The outline
             'svgHeight'               : 1200, // The main SVG, allows more space
@@ -250,7 +270,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             'menuBtnScale'             : 1,   // Icon scales to 1
             'menuBtnRotate'            : 0    // Will be used by the icons that roll
           },
-          false: {
+          false: {   // Feature disabled
             'outlineHeight'            : currentOutlineHeight,
             'svgHeight'                : parseFloat(mainSVG.style.height),
             'svgTranslateY'            : getTransform(mainSVG.getAttribute('transform')).translate.top,
@@ -267,12 +287,33 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       return feature.module.extendCssValues(baseCssValues);
     }
 
-    function animateSecondaryFeature(name, doEnable, isInstant) {
+    function getMainSVG() {
+      return byId(BP_CONST.SVG_ID);
+    }
+
+    function getBottom() {
+      return byId(BP_CONST.BOTTOM_MORE_ID);
+    }
+
+    function getOutlineSVG() {
+      return byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
+    }
+
+    function getCurrentOutlineHeight() {
+      return getNumberFromString(getOutlineSVG().getAttribute('d').split(' ').pop());
+    }
+
+    function setCurrentOutlineHeight(height) {
+      var outlineSVG = getOutlineSVG(),
+        shadowSVG = byId(BP_CONST.SHADOW_ID);
+      outlineSVG.setAttribute('d', 'M808 ' + height + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + height);
+      shadowSVG.setAttribute('d', 'm808,' + height + 'c0,6 -5,11 -11,11H11m797,-11v-' + height);
+    }
+
+    function animateSecondaryFeature(name, doEnable) {
       var
-        mainSVG = byId(BP_CONST.SVG_ID),
-        outlineSVG = byId(BP_CONST.MAIN_OUTLINE_BORDER_ID),
-        shadowSVG = byId(BP_CONST.SHADOW_ID),
-        bottomSVG = byId(BP_CONST.BOTTOM_MORE_ID),
+        mainSVG = getMainSVG(),
+        bottomSVG = getBottom(),
         moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
 
         feature = features[name],
@@ -313,21 +354,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           'to': targetCSSValues.svgHeight
         },
 
-        isSlowlyExpanding = !isInstant && heightTransition.to > heightTransition.from;
+        isSlowlyExpanding = heightTransition.to > heightTransition.from;
 
       function getDuration() {
-        if (isInstant) {
-          return 1;
-        }
-
         // Use the progress of the more button to determine how far along we are in the animation,
         // and therefore how much time is left
         return animate.getDuration(doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS,
           fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY);
-      }
-
-      function getCurrentOutlineHeight() {
-        return getNumberFromString(outlineSVG.getAttribute('d').split(' ').pop());
       }
 
       function panelHeightTick(animationState) {
@@ -338,8 +371,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         moreButton.setAttribute('transform',
           getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
             getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
-        outlineSVG.setAttribute('d', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
-        shadowSVG.setAttribute('d', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0,6 -5,11 -11,11H11m797,-11v-' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
+        setCurrentOutlineHeight(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t);
       }
 
       function contentsTick(animationState) {
@@ -353,7 +385,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         featureTick && featureTick(t, targetCSSValues);
       }
 
-      setCurrentFeature(doEnable && name, isSlowlyExpanding);
+      setCurrentFeature(doEnable && name, isSlowlyExpanding, true);
 
       featureModule.onAnimationStart && featureModule.onAnimationStart();
 
