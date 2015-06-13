@@ -129,6 +129,10 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-secondary-expanding';
         }
 
+        if (state.get('isSecondaryAnimating')) {
+          classBuilder += ' scp-secondary-animating';
+        }
+
         return classBuilder + getSecondaryPanelClasses();
       };
 

@@ -67,96 +67,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       return state.isSecondaryPanelRequested() ? ENABLED_PANEL_TRANSLATE_Y : DISABLED_PANEL_TRANSLATE_Y;
     }
 
-    function onMouseEnter (e) {
-
-      var target = e.target;
-      if (!target.getAttribute('data-feature')) {
-        return;
-      }
-
-      var id                  = target.id,
-          button              = byId(id),
-          buttonBoundingRect  = button.getBoundingClientRect(),
-          targetScale         = BP_CONST.TRANSFORMS[id].scale,
-          currentTransform    = getTransform(button.getAttribute('transform')),
-          currentScale        = currentTransform.scale,
-          translate           = currentTransform.translate,
-          x                   = translate.left,
-          y                   = translate.top,
-          rotate              = currentTransform.rotate,
-          rotateX             = currentTransform.rotateX,
-          rotateY             = currentTransform.rotateY,
-          width               = buttonBoundingRect.width,
-          height              = buttonBoundingRect.height,
-          // http://stackoverflow.com/questions/6711610/how-to-set-transform-origin-in-svg
-          translateX          = (x + (width  - width  * targetScale / currentScale) / 2),
-          translateY          = (y + (height - height * targetScale / currentScale) / 2);
-
-      cancelAnimation(id);
-
-      animationIds[id] = animate.create(button, {
-        'transform'   : getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
-      }, {
-        'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
-        'useAttribute': true
-      });
-    }
-
-    function onMouseLeave (e) {
-
-      var target = e.target;
-      if (!target.getAttribute('data-feature')) {
-        return;
-      }
-
-      var id                  = target.id,
-          button              = byId(id),
-          buttonBoundingRect  = button.getBoundingClientRect(),
-          targetScale         = 1,
-          currentTransform    = getTransform(button.getAttribute('transform')),
-          currentScale        = currentTransform.scale,
-          translate           = currentTransform.translate,
-          x                   = translate.left,
-          y                   = translate.top,
-          rotate              = currentTransform.rotate,
-          rotateX             = currentTransform.rotateX,
-          rotateY             = currentTransform.rotateY,
-          width               = buttonBoundingRect.width,
-          height              = buttonBoundingRect.height,
-          // http://stackoverflow.com/questions/6711610/how-to-set-transform-origin-in-svg
-          translateX          = (x + (width  - width  * (targetScale / currentScale)) / 2),
-          translateY          = (y + (height - height * (targetScale / currentScale)) / 2);
-
-      cancelAnimation(id);
-
-      animationIds[id] = animate.create(button, {
-        'transform'   : getTransformString(translateX, translateY, targetScale, rotate, rotateX, rotateY)
-      }, {
-        'duration'    : BUTTON_LEAVE_ANIMATION_DURATION,
-        'useAttribute': true
-      });
-    }
-
-    function getTargetFeature(e) {
-      var element = e.target,
-        dataFeature;
-
-      while (element.parentNode) {
-
-        dataFeature = element.getAttribute('data-feature');
-        if (dataFeature) {
-          return dataFeature;
-        }
-
-        element = element.parentNode;
-      }
-    }
-
-
-
     function onMouseClick (e) {
 
-      var featureName = getTargetFeature(e);
+      var featureName = e.currentTarget.getAttribute('data-feature');
       if (featureName) {
         toggleSecondaryFeature(featureName);
       }
@@ -251,8 +164,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       forEachFeature(function(feature) {
         var button = byId(feature.menuButtonId),
           label = byId(feature.labelId);
-        button.addEventListener('mouseenter', onMouseEnter);
-        button.addEventListener('mouseleave', onMouseLeave);
         button.addEventListener('click', onMouseClick);
         label.addEventListener('click', onMouseClick);
       });
@@ -282,6 +193,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       currentAnimation && currentAnimation.cancel();
       state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
+      state.set('isSecondaryAnimating', !!name);
       sitecues.emit('bp/do-update');
     }
 
@@ -412,7 +324,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           'to': targetCSSValues.svgHeight
         },
 
-        isExpanding = heightTransition.to > heightTransition.from;
+        isSlowlyExpanding = !isInstant && heightTransition.to > heightTransition.from;
 
       function getDuration() {
         if (isInstant) {
@@ -465,18 +377,18 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         contentsTick(animationState.current, currentMoreBtnRotate);
       }
 
-      setCurrentFeature(doEnable && name, isExpanding);
+      setCurrentFeature(doEnable && name, isSlowlyExpanding);
 
-      currentAnimation = animate.create(heightTransition,
+      currentAnimation = animate.create(
+        heightTransition,
         {
           'duration': duration,
           'onTick': doEnable ? onEnableTick : onDisableTick,
           'onFinish': function () {
             // Finished expanding now
-            if (isExpanding) {
-              state.set('isSecondaryExpanding', false);
-              sitecues.emit('bp/do-update');
-            }
+            state.set('isSecondaryAnimating', false);
+            state.set('isSecondaryExpanding', false);
+            sitecues.emit('bp/do-update');
           }
         });
     }

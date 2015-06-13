@@ -495,12 +495,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
-        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-button-menu #scp-button-menu > g > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
         '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
         '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
         '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
         '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
         '.scp-secondary-expanding .scp-wait-expand': MAKE_HIDDEN,
+
+        '.scp-hover-expand': {
+          'transform': 'scale(1)',
+          'transition': 'transform .3s',
+          'transform-origin': '50% 50%'
+        },
+        '.scp-panel-button-menu .scp-hover-expand:hover': {
+          'transform': 'scale(1.2)'
+        },
 
         // TODO what's this?
         /* Secondary Panel - Blue Button */
