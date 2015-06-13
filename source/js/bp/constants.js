@@ -138,6 +138,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {scale:1.2, translateX: 235, translateY: 14};
   constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {scale:1.2, translateX: 465, translateY: 14};
   constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {scale:1.2, translateX: 675, translateY: 14};
+  constants.MENU_BUTTON_ROTATE_XY = 54;  // Rotation origin
 
   constants.TRANSFORMS.ABOUT_ENABLED[constants.SVG_ID]                   = {translateY: -116};
   constants.TRANSFORMS.ABOUT_ENABLED[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 346};

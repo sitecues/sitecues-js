@@ -18,7 +18,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y       = 0,
         DISABLED_PANEL_TRANSLATE_Y      = -198,
-        currentAnimation,
+        featureAnimation,
+        heightAnimation,
         mainPanelContentsRect,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
@@ -51,7 +52,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             module: aboutModule,
             menuButtonId: BP_CONST.ABOUT_BUTTON_ID,
             labelId: BP_CONST.ABOUT_LABEL_ID,
-            panelId: BP_CONST.ABOUT_CONTENT_ID
+            panelId: BP_CONST.ABOUT_CONTENT_ID,
+            heightAnimationDelay: 1200
           }
         };
 
@@ -185,10 +187,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
      * @param name or null for button menu
      */
     function setCurrentFeature(name, isSecondaryExpanding) {
-      currentAnimation && currentAnimation.cancel();
+      featureAnimation && featureAnimation.cancel();
       state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
-      state.set('isSecondaryAnimating', !!name);  // TODO remove if not needed
+      state.set('isAnimating', true);
       sitecues.emit('bp/do-update');
     }
 
@@ -242,16 +244,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         baseCssValues = {
           true: {
             'bottomSVGTranslateY'     : panelContentsHeight - 85, // The labels and grey background
-            'outlineHeight'           : panelContentsHeight + 93, // The outline
-            'svgHeight'               : panelContentsHeight + 163, // The main SVG, allows more space
+            'outlineHeight'           : panelContentsHeight + 103, // The outline
+            'svgHeight'               : 1200, // The main SVG, allows more space
             'moreBtnTranslateX'       : 400, // The more button
             'moreBtnTranslateY'       : panelContentsHeight + 104, // The more button
-            'menuBtnTranslateX'        : 26, // The about icon, which rolls to the left
-            'menuBtnTranslateY'        : BP_CONST.TRANSFORMS[menuButton.id].translateY, // The about icon rotates
-            'menuBtnScale'             : 1,   // About icon scales to 1
-            'menuBtnRotate'            : 0,   // Roll the about icon
-            'menuBtnRotateX'           : 0,   // A way to rotate around an origin
-            'menuBtnRotateY'           : 0    // A way to rotate around an origin
+            'menuBtnTranslateX'        : 26, // The icon rolls left by default
+            'menuBtnTranslateY'        : BP_CONST.TRANSFORMS[menuButton.id].translateY,
+            'menuBtnScale'             : 1,   // Icon scales to 1
+            'menuBtnRotate'            : 0    // Will be used by the icons that roll
           },
           false: {
             'outlineHeight'            : currentOutlineHeight,
@@ -263,13 +263,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             'menuBtnTranslateX'        : menuButtonTransform.translate.left,
             'menuBtnTranslateY'        : menuButtonTransform.translate.top,
             'menuBtnScale'             : menuButtonTransform.scale,
-            'menuBtnRotate'            : 0,  // Roll the about icon
-            'menuBtnRotateX'           : 54, // A way to rotate around an origin
-            'menuBtnRotateY'           : 54  // A way to rotate around an origin
+            'menuBtnRotate'            : 0  // Will be used by icons that roll
           }
         };
-
-      console.log(panelContentsHeight);
 
       return feature.module.extendCssValues(baseCssValues);
     }
@@ -283,6 +279,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
 
         feature = features[name],
+        featureModule = feature.module,
+        featureTick = featureModule.tick,
         menuButton = byId(feature.menuButtonId),
 
         currentMenuBtnTransform = getTransform(menuButton.getAttribute('transform')),
@@ -306,7 +304,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         fromCSSValues = cssValues[!doEnable],
         targetCSSValues = cssValues[doEnable],
 
-        targetMoreBtnRotate = state.isShrinking() ? 0 : currentMoreBtnRotate,
         targetSVGTranslateY = doEnable ? currentSVGTranslateY - (targetCSSValues.svgHeight - currentSVGHeight) / 2 : cssValues[false].svgTranslateY,
 
         ENABLE_ANIMATION_MS = 1500,
@@ -336,56 +333,58 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         return getNumberFromString(outlineSVG.getAttribute('d').split(' ').pop());
       }
 
-      function panelSizeTick(t, moreButtonRotate) {
+      function panelHeightTick(animationState) {
+        var t = animationState.current;
         mainSVG.style.height = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
         mainSVG.style[helper.transformProperty] = 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)';
         bottomSVG.setAttribute('transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
         moreButton.setAttribute('transform',
           getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
-            getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, moreButtonRotate));
+            getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
         outlineSVG.setAttribute('d', 'M808 ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
         shadowSVG.setAttribute('d', 'm808,' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t) + 'c0,6 -5,11 -11,11H11m797,-11v-' + (currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t));
       }
 
-      function contentsTick(t, moreButtonRotate) {
+      function contentsTick(animationState) {
+        var t = animationState.current;
         menuButton.setAttribute('transform',
           getTransformString(getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
             getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
             getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t),
-            getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t), targetCSSValues.menuBtnRotateX, targetCSSValues.menuBtnRotateY));
+            getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t), BP_CONST.MENU_BUTTON_ROTATE_XY, BP_CONST.MENU_BUTTON_ROTATE_XY));
 
-
-        //aboutContentImage.setAttribute('transform', getTransformString(getValueInTime(currentAboutImageTranslateX, targetCSSValues.aboutImageTranslateX, t), 0));
-
-        //aboutButton.setAttribute('transform', getTransformString(getValueInTime(currentAboutBtnTranslateX, targetCSSValues.aboutBtnTranslateX, t), getValueInTime(currentAboutBtnTranslateY, targetCSSValues.aboutBtnTranslateY, t), getValueInTime(currentAboutBtnScale, targetCSSValues.aboutBtnScale, t), getValueInTime(currentAboutBtnRotate, targetCSSValues.aboutBtnRotate, t), targetCSSValues.aboutBtnRotateX, targetCSSValues.aboutBtnRotateY));
-
-        panelSizeTick(t, moreButtonRotate);
-      }
-
-      function onDisableTick(animationState) {
-
-        contentsTick(animationState.current, targetMoreBtnRotate);
-      }
-
-      function onEnableTick(animationState) {
-
-        contentsTick(animationState.current, currentMoreBtnRotate);
+        featureTick && featureTick(t, targetCSSValues);
       }
 
       setCurrentFeature(doEnable && name, isSlowlyExpanding);
 
-      currentAnimation = animate.create(
+      featureModule.onAnimationStart && featureModule.onAnimationStart();
+
+      featureAnimation = animate.create(
         heightTransition,
         {
           'duration': duration,
-          'onTick': doEnable ? onEnableTick : onDisableTick,
-          'onFinish': function () {
-            // Finished expanding now
-            state.set('isSecondaryAnimating', false);
-            state.set('isSecondaryExpanding', false);
-            sitecues.emit('bp/do-update');
-          }
+          'onTick': contentsTick
         });
+
+      setTimeout(function() {
+        if (isSlowlyExpanding) {
+          setTimeout(function() {
+            state.set('isSecondaryExpanding', false);
+            state.set('isAnimating', false);
+            sitecues.emit('bp/do-update');
+          }, duration * 0.7);
+        }
+
+        heightAnimation = animate.create(
+          heightTransition,
+          {
+            'duration': duration,
+            'onTick': panelHeightTick
+          });
+        },
+        feature.heightAnimationDelay || 0);
+
     }
 
     function toggleSecondaryFeature(name) {

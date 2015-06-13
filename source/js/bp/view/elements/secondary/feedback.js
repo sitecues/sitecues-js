@@ -18,8 +18,11 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       }
     }
 
-    feedback.extendCssValues = function(baseCssValues) {
-      return baseCssValues;
+    feedback.extendCssValues = function(cssValues) {
+
+      cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
+
+      return cssValues;
     };
 
 

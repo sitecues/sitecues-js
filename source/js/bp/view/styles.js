@@ -207,6 +207,20 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'padding': '4px'
         },
 
+        /* Secondary Panel - Blue Button */
+        'sc-button-big': {
+          'display'      : 'inline-block',
+          'padding'      : '10px 30px',
+          'font-size'    : '22px',
+          'border'       : '3px solid #447AC4',
+          'border-radius': '4px',
+          'color'        : '#FFF',
+          'text-align'   : 'center',
+          'background'   : '#447AC4',
+          'transform'    : 'none !important'
+        },
+
+
 
         /***************** Loading/badge  ****************/
 
@@ -494,6 +508,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
+        '.scp-about-teaser': {
+          'position'     : 'absolute',
+          'z-index'      : '9999',
+          'left'         : '135px',
+          'top'          : '120px'
+        },
+
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
         '.scp-panel-button-menu #scp-button-menu > g > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
         '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
@@ -508,29 +529,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transform-origin': '50% 50%'
         },
 
-        '.scp-panel-button-menu .scp-hover-expand:hover': {
+        '.scp-hover-expand:hover:not([aria-disabled])': {
           'transform': 'scale(1.2)'
         },
 
-        // TODO what's this?
-        /* Secondary Panel - Blue Button */
-        '.sitecues-button-big': {
-          'padding'      : '10px 30px',
-          'font-size'    : '22px',
-          'margin-right' : '22px',
-          'border'       : '3px solid #447AC4',
-          'border-radius': '4px',
-          'color'        : '#FFF',
-          'text-align'   : 'center',
-          'background'   : '#447AC4',
-          'transform'    : 'none !important',
-          'display'      : 'none',
-          'position'     : 'absolute',
-          'z-index'      : '9999',
-          'left'         : '192px',
-          'top'          : '132px'
+        // Don't do hover effect while panel is animating, because it messes up the animations (at least in Chrome)
+        '.scp-animating .scp-hover-expand': {
+          'transform': 'scale(1) !important'
         },
-
 
         /*************** Clipping rules for badge **************************/
         // When the badge is fully collapsed, we clip it so that the invisible parts

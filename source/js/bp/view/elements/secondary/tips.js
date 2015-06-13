@@ -2,8 +2,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/helper', function (BP_CONST, helper) {
 
-    tips.extendCssValues = function(baseCssValues) {
-      return baseCssValues;
+    tips.extendCssValues = function(cssValues) {
+      return cssValues;
     };
 
     function onToggle(isActive) {

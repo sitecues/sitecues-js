@@ -26,8 +26,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
 
-    settings.extendCssValues = function(baseCssValues) {
-      return baseCssValues;
+    settings.extendCssValues = function(cssValues) {
+      return cssValues;
     };
 
 //    function nextCard () {

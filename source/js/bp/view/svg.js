@@ -20,7 +20,6 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
   </sc>\
-  <!--\
   <sc class="scp-card">\
     <sc-h1>Zoom the web page</sc-h1>\
     <sc-p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</sc-p>\
@@ -39,19 +38,17 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </sc>\
   <sc class="scp-card">\
     <sc-h1>Get more help</sc-h1>\
-    <sc-p>Get started with sitecues in the<br>\
-    <br><button class="sitecues-button-big">Quick Start Guide</button></sc-p>\
+    <sc-p>Get started with sitecues in the</sc-p>\
+    <sc-p><sc-button-big role="button">Quick Start Guide</sc-button-big></sc-p>\
   </sc>\
-  -->\
 </sc>\
 <sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity scp-wait-expand">\
   <sc class="scp-card scp-active">\
     <sc-h1>Settings</sc-h1>\
     <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
-    <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
     <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
   </sc>\
-  <!-- <sc class="scp-card">\
+  <sc class="scp-card">\
     <sc-h1>Color themes</sc-h1>\
     <sc-p>\
       <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName" data-setting-value="none"> \
@@ -93,9 +90,12 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <sc-h1>Colors</sc-h1>\
     <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
   </sc>\
---> </sc>\
-<button id="sitecues-button-big-feedback" class="sitecues-button-big" style="transform:none">Quick Start Guide</button>\
-<svg role="group"xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" id="scp-svg" data-sc-reversible="false">\
+</sc>\
+<sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-wait-expand">\
+  <sc-button-big role="button" class="scp-hand-cursor scp-hover-expand" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
+</sc>\
+\
+<svg role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" id="scp-svg" data-sc-reversible="false">\
 <defs>\
   <g id="scp-small-A-def">\
     <path d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>\
@@ -165,10 +165,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-wait-expand scp-if-settings scp-if-tips">\
-      <text id="scp-prev-card" class="scp-hand-cursor" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
+      <text id="scp-prev-card" class="scp-hand-cursor scp-hover-expand" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
-      <text id="scp-next-card" class="scp-hand-cursor" role="button" aria-label="Next" x="735" y="74">\
+      <text id="scp-next-card" class="scp-hand-cursor scp-hover-expand" role="button" aria-label="Next" x="735" y="74">\
          &#9658;\
       </text>\
     </g>\
@@ -212,7 +212,6 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <g class="scp-hover-expand">\
       <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
         <g>\
-          <rect id="fill-behind-white" x="0" y="0" height="100" width="50" fill="white" role="presentation" />\
           <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" \
           d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>\
           <rect class="scp-hand-cursor" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
