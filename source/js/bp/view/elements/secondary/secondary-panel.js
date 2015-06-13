@@ -14,12 +14,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/about',
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule) {
 
-    var animationIds = {},
-        BUTTON_CLICK_ANIMATION_DURATION = 800,
+    var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y       = 0,
         DISABLED_PANEL_TRANSLATE_Y      = -198,
-        featureAnimation,
-        heightAnimation,
+        runningAnimations = [],
         mainPanelContentsRect,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
@@ -58,16 +56,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         };
 
 
-    function cancelAnimation (id) {
-      animationIds[id] && animationIds[id].cancel();
+    function cancelAllAnimations () {
+      runningAnimations.forEach(function(animation) { animation.cancel(); });
+      runningAnimations.length = 0;
     }
 
-    function cancelAllAnimations () {
-      for (var animationId in animationIds) {
-        if (animationIds.hasOwnProperty(animationId)) {
-          animationIds[animationId].cancel();
-        }
-      }
+    function createAnimation(transitionFromTo, details) {
+      var newAnimation = animate.create(transitionFromTo, details);
+      runningAnimations.push(newAnimation);
+      console.log(runningAnimations);
     }
 
     function getTargetMorePanelTranslateY () {
@@ -106,14 +103,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           targetPanelPos      = getTargetMorePanelTranslateY(),
           posDiff             = targetPanelPos - morePanelCurrentPos;
 
-      cancelAnimation(moreId);
-
       function onSecondaryAnimationTick (animationState) {
         state.set('currentSecondaryPanelMode', animationState.current);
         transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * animationState.current);
       }
 
-      animationIds[moreId] = animate.create({
+      cancelAllAnimations();
+
+      createAnimation({
         'from'    : morePanelCurrentPos,
         'to'      : targetPanelPos
       }, {
@@ -187,7 +184,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
      * @param name or null for button menu
      */
     function setCurrentFeature(name, isSecondaryExpanding) {
-      featureAnimation && featureAnimation.cancel();
+      cancelAllAnimations();
       state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
       state.set('isAnimating', true);
@@ -360,7 +357,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       featureModule.onAnimationStart && featureModule.onAnimationStart();
 
-      featureAnimation = animate.create(
+      createAnimation(
         heightTransition,
         {
           'duration': duration,
@@ -376,7 +373,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           }, duration * 0.7);
         }
 
-        heightAnimation = animate.create(
+        createAnimation(
           heightTransition,
           {
             'duration': duration,
