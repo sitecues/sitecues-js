@@ -504,9 +504,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-hover-expand': {
           'transform': 'scale(1)',
-          'transition': 'transform .3s',
+          'transition': 'transform .5s',
           'transform-origin': '50% 50%'
         },
+
         '.scp-panel-button-menu .scp-hover-expand:hover': {
           'transform': 'scale(1.2)'
         },

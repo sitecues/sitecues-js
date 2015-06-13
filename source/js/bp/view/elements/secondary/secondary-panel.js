@@ -1,3 +1,9 @@
+// TODO rename icon menu buton menu
+// About
+// Feedback
+// Toggle feature off
+// Auto size
+
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform',
@@ -8,8 +14,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule) {
 
     var animationIds = {},
-        BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
-        BUTTON_LEAVE_ANIMATION_DURATION = 400,
         BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y       = 0,
         DISABLED_PANEL_TRANSLATE_Y      = -198,
@@ -85,13 +89,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
 
-      animateSecondaryPanel();
+      animateButtonMenuDrop();
 
       sitecues.emit('bp/do-update');
 
     }
 
-    function animateSecondaryPanel () {
+    function animateButtonMenuDrop () {
 
       var moreId              = BP_CONST.MORE_ID,
           morePanel           = byId(moreId),
@@ -193,7 +197,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       currentAnimation && currentAnimation.cancel();
       state.set('secondaryPanelName', name || 'button-menu');
       state.set('isSecondaryExpanding', isSecondaryExpanding);
-      state.set('isSecondaryAnimating', !!name);
+      state.set('isSecondaryAnimating', !!name);  // TODO remove if not needed
       sitecues.emit('bp/do-update');
     }
 

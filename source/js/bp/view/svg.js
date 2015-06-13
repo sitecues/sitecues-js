@@ -212,7 +212,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <g class="scp-hover-expand">\
       <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
         <g>\
-          <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>\
+          <rect id="fill-behind-white" x="0" y="0" height="100" width="50" fill="white" role="presentation" />\
+          <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" \
+          d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>\
           <rect class="scp-hand-cursor" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
         </g>\
       </g>\
