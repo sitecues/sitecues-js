@@ -153,10 +153,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       }
 
-      function getValueInTime(from, to, time) {
-        return from + (to - from) * time;
-      }
-
       // Compute based on the size of the contents
       // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
       function getPanelContentsHeight(featureName) {
@@ -280,6 +276,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             'to': targetCSSValues.svgHeight
           },
 
+          heightAnimationDelay = feature.heightAnimationDelay || 0,
+
           isSlowlyExpanding = heightTransition.to > heightTransition.from;
 
         function getDuration() {
@@ -289,58 +287,82 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             fromCSSValues.moreBtnTranslateY, targetCSSValues.moreBtnTranslateY, currentMoreBtnTranslateY);
         }
 
-        function panelHeightTick(animationState) {
-          var t = animationState.current;
-          mainSVG.style.height = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
-          setTransformStyle(mainSVG, 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)');
-          bottomSVG.setAttribute('transform', getTransformString(0, getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
-          moreButton.setAttribute('transform',
-            getTransformString(getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
-              getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t), currentMoreBtnScale, currentMoreBtnRotate));
-          setCurrentOutlineHeight(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t);
+        function getValueInTime(from, to, time) {
+          return from + (to - from) * time;
         }
 
-        function contentsTick(animationState) {
+        function panelHeightTick(animationState) {
           var t = animationState.current;
+          // SVG height and outline
+          mainSVG.style.height = getValueInTime(currentSVGHeight, targetCSSValues.svgHeight, t) + 'px';
+          setTransformStyle(mainSVG, 'translate(0,' + getValueInTime(currentSVGTranslateY, targetSVGTranslateY, t) + 'px)');
+          setCurrentOutlineHeight(currentOutlineHeight + (targetCSSValues.outlineHeight - currentOutlineHeight) * t);
+
+          // Bottom gray area
+          bottomSVG.setAttribute('transform',
+            getTransformString(0,
+              getValueInTime(currentBottomSVGTranslateY, targetCSSValues.bottomSVGTranslateY, t)));
+
+          // More button
+          moreButton.setAttribute('transform',
+            getTransformString(
+              getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
+              getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t),
+              currentMoreBtnScale,
+              currentMoreBtnRotate));
+        }
+
+        function openFeatureAnimationTick(animationState) {
+          var t = animationState.current;
+
+          // Menu button
           menuButton.setAttribute('transform',
-            getTransformString(getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
+            getTransformString(
+              getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
               getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
               getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t),
-              getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t), BP_CONST.MENU_BUTTON_ROTATE_XY, BP_CONST.MENU_BUTTON_ROTATE_XY));
+              getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t),
+              BP_CONST.MENU_BUTTON_ROTATE_XY));
 
           featureTick && featureTick(t, targetCSSValues);
+        }
+
+        function fadeInTextContentWhenLargeEnough() {
+          setTimeout(function () {
+            state.set('isSecondaryExpanding', false);
+            state.set('isAnimating', false);
+            sitecues.emit('bp/do-update');
+          }, duration * 0.7);
+        }
+
+        function animateHeight() {
+          createAnimation(
+            heightTransition, {
+              'duration': duration,
+              'onTick': panelHeightTick
+            });
         }
 
         cancelAllAnimations();
         updateGlobalState(doEnable && name, isSlowlyExpanding, true);
 
+        // Let feature module know that animation is about to begin
         featureModule.onAnimationStart && featureModule.onAnimationStart();
 
+        // Animate the menu button and anything else related to opening the feature
         createAnimation(
           heightTransition,
           {
             'duration': duration,
-            'onTick': contentsTick
+            'onTick': openFeatureAnimationTick
           });
 
-        setTimeout(function () {
-            if (isSlowlyExpanding) {
-              setTimeout(function () {
-                state.set('isSecondaryExpanding', false);
-                state.set('isAnimating', false);
-                sitecues.emit('bp/do-update');
-              }, duration * 0.7);
-            }
+        // Animate the height at the right time
+        setTimeout(animateHeight, heightAnimationDelay);
 
-            createAnimation(
-              heightTransition,
-              {
-                'duration': duration,
-                'onTick': panelHeightTick
-              });
-          },
-            feature.heightAnimationDelay || 0);
-
+        if (isSlowlyExpanding) {
+          fadeInTextContentWhenLargeEnough();
+        }
       }
 
       /********************** INTERACTIONS **************************/
@@ -358,19 +380,22 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
        */
       function toggleSecondaryPanel() {
 
-        getOrigPanelGeometry();
+        if (getOrigPanelGeometry()) {
+          resetPanelGeometry();
+        }
 
         var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,
           DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 
-        var wasEnabled = state.get('secondaryPanelTransitionTo') === ENABLED;
-        state.set('secondaryPanelTransitionTo', wasEnabled ? DISABLED : ENABLED);
+        var willEnable = state.get('secondaryPanelTransitionTo') !== ENABLED;
+        state.set('secondaryPanelTransitionTo', willEnable ? ENABLED : DISABLED);
+        updateGlobalState();
 
         SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
 
-        animateButtonMenuDrop();
-
         sitecues.emit('bp/do-update');
+
+        animateButtonMenuDrop();
       }
 
       /**
@@ -380,9 +405,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       function toggleSecondaryFeature(featureName) {
         var willEnable = state.getSecondaryPanelName() !== featureName;
         animateSecondaryFeature(featureName, willEnable);
-
-        // TODO we need to fire this when panel closed, right?
-        sitecues.emit('did-toggle-' + featureName, willEnable);
       }
 
       function getActiveCard() {
@@ -458,7 +480,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
     function getOrigPanelGeometry() {
       if (origSvgHeight) {
-        return; // Already initialized
+        return true; // Already initialized
       }
       var mainSvg = getMainSVG();
       origSvgHeight = parseFloat(mainSvg.style.height);

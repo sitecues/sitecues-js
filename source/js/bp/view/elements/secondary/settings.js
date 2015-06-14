@@ -1,12 +1,13 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf', function (BP_CONST, helper, conf) {
+  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', function (BP_CONST, helper, conf, state) {
 
     var byId = helper.byId;
 
-    function onToggle(isActive) {
+    function onPanelUpdate() {
 
-      var settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
+      var isActive = state.getSecondaryPanelName() === 'settings',
+        settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
       if (isActive) {
         // TODO why both?
@@ -30,34 +31,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       return cssValues;
     };
 
-//    function nextCard () {
-//
-//      if (state.get('settingsMode') === SETTINGS_ENABLED) {
-//
-//        var activeCard = settingsCards.getElementsByClassName('scp-active')[0],
-//            nextSibling = activeCard.nextElementSibling;
-//
-//        if (nextSibling) {
-//          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
-//          nextSibling.setAttribute('class', nextSibling.getAttribute('class') + ' scp-active');
-//        }
-//
-//      }
-//    }
-//
-//    function prevCard () {
-//      if (state.get('settingsMode') === SETTINGS_ENABLED) {
-//        var activeCard = settingsCards.getElementsByClassName('scp-active')[0],
-//            prevSibling = activeCard.previousElementSibling;
-//
-//        if (prevSibling) {
-//          activeCard.setAttribute('class', activeCard.getAttribute('class').replace('scp-active', ''));
-//          prevSibling.setAttribute('class', prevSibling.getAttribute('class') + ' scp-active');
-//        }
-//      }
-//    }
-//
-
     function onSettingsClick(evt) {
       var target = evt.target;
       if (target) {
@@ -68,7 +41,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       }
     }
 
-    sitecues.on('bp/did-toggle-settings', onToggle);
+    sitecues.on('bp/do-update', onPanelUpdate);
 
     callback();
 
