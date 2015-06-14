@@ -10,18 +10,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
       if (isActive) {
-        // TODO why both?
-//        nextBtn.addEventListener('click', nextCard);
-//        prevBtn.addEventListener('click', prevCard);
-//        sitecues.on('bp/next-card', nextCard);
-//        sitecues.on('bp/prev-card', prevCard);
         settingsCards.addEventListener('click', onSettingsClick);
       }
       else {
-//        nextBtn.removeEventListener('click', nextCard);
-//        prevBtn.removeEventListener('click', prevCard);
-//        sitecues.off('bp/next-card', nextCard);
-//        sitecues.off('bp/prev-card', prevCard);
         settingsCards.removeEventListener('click', onSettingsClick);
       }
     }
