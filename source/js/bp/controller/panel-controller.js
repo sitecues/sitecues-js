@@ -51,7 +51,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       }
 
       if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
-        pc.shrinkPanel();
+        if (state.get('wasMouseInPanel')) {
+          pc.shrinkPanel();
+        }
       }
       else {
         state.set('wasMouseInPanel', true);

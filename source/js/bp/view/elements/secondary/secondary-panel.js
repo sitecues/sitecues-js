@@ -76,6 +76,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         state.set('secondaryPanelName', featureName || 'button-menu');
         state.set('isSecondaryExpanding', isSecondaryExpanding);
         state.set('isAnimating', isAnimating);
+        state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
         sitecues.emit('bp/do-update');
       }
 
