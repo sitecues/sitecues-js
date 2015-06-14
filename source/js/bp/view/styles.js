@@ -489,6 +489,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-size': '44px'
         },
 
+        '#scp-arrows>[aria-disabled]': {
+          fill: '#aaa'
+        },
+
         '.scp-cards': {
           'position': 'relative',
           'font-family': 'Arial',
@@ -524,7 +528,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-secondary-expanding .scp-wait-expand': MAKE_HIDDEN,
 
         '.scp-hover-expand': {
-          'transform': 'scale(1)',
           'transition': 'transform .5s',
           'transform-origin': '50% 50%'
         },
