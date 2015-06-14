@@ -132,7 +132,6 @@ sitecues.def('bp/constants', function (constants, callback) {
     scaleY    : 1
   };
 
-  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {scale:1.35};
   constants.TRANSFORMS[constants.MORE_ID]                  = {translateY:-198};
   constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {scale:1.2, translateX: 25 , translateY: 14};
   constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {scale:1.2, translateX: 235, translateY: 14};

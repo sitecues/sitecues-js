@@ -12,7 +12,6 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         mouseLeaveAnimation,
         mouseClickAnimation,
         BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
-        BUTTON_LEAVE_ANIMATION_DURATION = 400,
         BUTTON_CLICK_ANIMATION_DURATION = 800,
         NO_INPUT_TIMEOUT                = 7000,
         ENABLED_BUTTON_ROTATION         = -180,
@@ -61,60 +60,16 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     }
 
-    function onMouseEnter (e) {
-
-      var id               = e.target.id,
-          btn              = byId(id),
-          currentTranslate = getTransform(btn.getAttribute('transform')).translate,
-          targetRotation   = getTargetRotation(),
-          transformString  = getTransformString(currentTranslate.left, currentTranslate.top, BP_CONST.TRANSFORMS[id].scale, targetRotation);
-
-      cancelAnimations();
-
-      mouseEnterAnimation = animate.create(btn, {
-        'transform'   : transformString
-      }, {
-        'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
-        'useAttribute': true
-      });
-
-    }
-
-    function onMouseLeave (e) {
-
-      var id               = e.target.id,
-          btn              = byId(id),
-          currentTranslate = getTransform(btn.getAttribute('transform')).translate,
-          targetRotation   = getTargetRotation(),
-          transformString  = getTransformString(currentTranslate.left, currentTranslate.top, 1, targetRotation);
-
-      cancelAnimations();
-
-      mouseLeaveAnimation = animate.create(btn, {
-        'transform'   : transformString
-      }, {
-        'duration'    : BUTTON_LEAVE_ANIMATION_DURATION,
-        'useAttribute': true,
-        'animationFn' : 'linear'
-
-      });
-
-    }
-
     function onMouseClick () {
 
       // Show or hide the secondary panel.
       sitecues.emit('bp/do-toggle-secondary-panel');
 
-      var id                         = BP_CONST.MORE_BUTTON_CONTAINER_ID,
-          moreButton                 = byId(id),
+      var moreButton                 = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
           morePanel                  = byId(BP_CONST.MORE_ID),
           transformObj               = getTransform(moreButton.getAttribute('transform')),
-          currentScale               = transformObj.scale,
           currentRotation            = transformObj.rotate,
-          targetScale                = BP_CONST.TRANSFORMS[id].scale,
           targetRotation             = getTargetRotation(),
-          scaleDiff                  = targetScale - currentScale,
           rotDiff                    = targetRotation - currentRotation,
           currentMorePanelTranslateY = transform.getTransform(morePanel.getAttribute('transform')).translate.top,
           targetMorePanelTranslateY  = getTargetMorePanelTranslateY();
@@ -122,7 +77,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       cancelAnimations();
 
       function clickAnimationTick (animationState) {
-        transform.setTransform(moreButton, MORE_BTN_TRANSLATEX, MORE_BTN_TRANSLATEY, currentScale + scaleDiff * animationState.current, currentRotation + rotDiff * animationState.current);
+        transform.setTransform(moreButton, MORE_BTN_TRANSLATEX, MORE_BTN_TRANSLATEY, 1, currentRotation + rotDiff * animationState.current);
       }
 
       mouseClickAnimation = animate.create({
@@ -139,13 +94,8 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     }
 
     function addMouseListeners () {
-
       var moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-
-      moreButton.addEventListener('mouseenter', onMouseEnter);
-      moreButton.addEventListener('mouseleave', onMouseLeave);
       moreButton.addEventListener('click', onMouseClick);
-
     }
 
     // TODO this is ugly
@@ -277,7 +227,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     // TODO help from Tony?
     sitecues.on('bp/will-expand', positionHelpButton);
 
-    sitecues.on('bp/toggle-more-button', onMouseClick);
+    sitecues.on('bp/toggle- more-button', onMouseClick);
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187
