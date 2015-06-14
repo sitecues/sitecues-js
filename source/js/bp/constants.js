@@ -188,26 +188,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SHRINK_ANIMATION_DURATION_MS  = 750;  // Time it takes to shrink panel to badge -- no hovers during this time
   constants.NO_INPUT_TIMEOUT     = 7000;  // Show more button if no activity for this amount of time
 
+  // TODO is this still needed? It's fixed in Firefox
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
-
-  constants.FEATURES = {
-    'ABOUT': {
-      'EXTRA_HEIGHT'      : 150,
-      'WAIT_BEFORE_EXPAND': 1600
-    },
-    'SETTINGS': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    },
-    'FEEDBACK': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    },
-    'TIPS': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    }
-  };
 
   constants.KEY_CODES = {
     'TAB'   : 9,

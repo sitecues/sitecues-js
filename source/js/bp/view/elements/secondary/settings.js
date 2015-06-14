@@ -26,7 +26,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
 
-    settings.extendCssValues = function(cssValues) {
+    settings.extendAnimationParams = function(cssValues) {
       return cssValues;
     };
 

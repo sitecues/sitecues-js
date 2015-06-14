@@ -18,7 +18,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       }
     }
 
-    feedback.extendCssValues = function(cssValues) {
+    feedback.extendAnimationParams = function(cssValues) {
 
       cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
 
