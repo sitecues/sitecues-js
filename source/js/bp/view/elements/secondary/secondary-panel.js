@@ -18,10 +18,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         ENABLED_PANEL_TRANSLATE_Y       = 0,
         DISABLED_PANEL_TRANSLATE_Y      = -198,
         runningAnimations = [],
-        mainPanelContentsRect,
+        origPanelContentsRect,
         origOutlineHeight,
         origSvgHeight,
-        origSvgTransform,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
@@ -157,8 +156,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       var range = document.createRange(),
         contentElements = document.querySelectorAll('.scp-if-' + featureName),
         numContentElements = contentElements.length,
-        maxHeight = mainPanelContentsRect.height,
-        normalTop = mainPanelContentsRect.top,
+        maxHeight = origPanelContentsRect.height,
+        normalTop = origPanelContentsRect.top,
         index = 0,
         EXTRA_SPACE = 120;
 
@@ -427,19 +426,16 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         return; // Already initialized
       }
       var mainSvg = getMainSVG();
-      origSvgHeight = parseFloat(mainSvg.style.height),
-      origSvgTransform = getTransformStyle(mainSvg);
-
+      origSvgHeight = parseFloat(mainSvg.style.height);
       origOutlineHeight = getCurrentOutlineHeight();
-
-      mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
+      origPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
     }
 
     function resetPanelGeometry() {
       if (origSvgHeight) {  // Was initialized
         var mainSvg = getMainSVG();
         mainSvg.style.height = origSvgHeight + 'px';
-        setTransformStyle(mainSvg, origSvgTransform);
+        setTransformStyle(mainSvg, '');
 
         setCurrentOutlineHeight(origOutlineHeight);
         getBottom().removeAttribute('transform');
