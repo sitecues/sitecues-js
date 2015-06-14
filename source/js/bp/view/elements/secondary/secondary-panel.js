@@ -22,7 +22,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         origOutlineHeight,
         origSvgHeight,
         origSvgTransform,
-        origBottomTransform,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
@@ -432,7 +431,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       origSvgTransform = getTransformStyle(mainSvg);
 
       origOutlineHeight = getCurrentOutlineHeight();
-      origBottomTransform = getTransformStyle(getBottom());
 
       mainPanelContentsRect = document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
     }
@@ -444,7 +442,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         setTransformStyle(mainSvg, origSvgTransform);
 
         setCurrentOutlineHeight(origOutlineHeight);
-        setTransformStyle(getBottom(), origBottomTransform);
+        getBottom().removeAttribute('transform');
       }
     }
 
