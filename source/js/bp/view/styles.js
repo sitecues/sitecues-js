@@ -532,13 +532,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transform-origin': '50% 50%'
         },
 
-        '.scp-hover-expand:hover:not([aria-disabled])': {
+        '.scp-hovers .scp-hover-expand:hover:not([aria-disabled])': {
           'transform': 'scale(1.2)'
-        },
-
-        // Don't do hover effect while panel is animating, because it messes up the animations (at least in Chrome)
-        '.scp-animating .scp-hover-expand': {
-          'transform': 'scale(1) !important'
         },
 
         /*************** Clipping rules for badge **************************/

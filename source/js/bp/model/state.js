@@ -10,7 +10,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
-    isAnimating             : false, // Is panel currently animating?
+    doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted

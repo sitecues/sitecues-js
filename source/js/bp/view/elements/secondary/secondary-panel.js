@@ -75,7 +75,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       function updateGlobalState(featureName, isSecondaryExpanding, isAnimating) {
         state.set('secondaryPanelName', featureName || 'button-menu');
         state.set('isSecondaryExpanding', isSecondaryExpanding);
-        state.set('isAnimating', isAnimating);
         state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
         sitecues.emit('bp/do-update');
       }
@@ -330,7 +329,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         function fadeInTextContentWhenLargeEnough() {
           setTimeout(function () {
             state.set('isSecondaryExpanding', false);
-            state.set('isAnimating', false);
             sitecues.emit('bp/do-update');
           }, heightAnimationDelay + duration * 0.7);
         }
@@ -365,6 +363,23 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         setTimeout(animateHeight, heightAnimationDelay);
 
         fadeInTextContentWhenLargeEnough();
+
+        suppressHoversUntilMousemove();
+      }
+
+      // Some browsers don't recompute CSS hover state unless mouse moves, so
+      // hover even though a button has moved away from the mouse cursor, it will still get
+      // the :hover effect unless we suppress it until the next mouse move
+      function suppressHoversUntilMousemove() {
+        function suppressHovers() {
+          state.set('doSuppressHovers', false);
+          sitecues.emit('bp/do-update');
+          getMainSVG().removeEventListener('mousemove', suppressHovers);
+        }
+
+        state.set('doSuppressHovers', true);
+        sitecues.emit('bp/do-update');
+        getMainSVG().addEventListener('mousemove', suppressHovers);
       }
 
       /********************** INTERACTIONS **************************/
