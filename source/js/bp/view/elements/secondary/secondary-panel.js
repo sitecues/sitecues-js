@@ -344,6 +344,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             });
         }
 
+        function openFeatureAnimation() {
+          createAnimation(
+            heightTransition,
+            {
+              'duration': duration,
+              'onTick': openFeatureAnimationTick
+            });
+        }
+
         cancelAllAnimations();
         updateGlobalState(doEnable && name, isSlowlyExpanding, true);
 
@@ -351,15 +360,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         featureModule.onAnimationStart && featureModule.onAnimationStart();
 
         // Animate the menu button and anything else related to opening the feature
-        createAnimation(
-          heightTransition,
-          {
-            'duration': duration,
-            'onTick': openFeatureAnimationTick
-          });
+        openFeatureAnimation();
 
         // Animate the height at the right time
-        setTimeout(animateHeight, heightAnimationDelay);
+        // TODO why does this close the panel?
+        if (doEnable) {
+          setTimeout(animateHeight, heightAnimationDelay);
+        }
 
         if (isSlowlyExpanding) {
           fadeInTextContentWhenLargeEnough();
