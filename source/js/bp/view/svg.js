@@ -190,40 +190,32 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="26" width="330" height="110"></image>\
     </g>\
   </g>\
-  <g id="scp-button-menu">\
-    <g class="scp-hover-expand">\
-      <g id="scp-tips-button" class="scp-if-tips scp-hand-cursor scp-transition-opacity" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
-        <circle cx="50" cy="54" r="52" fill="#548ECE"/>\
-        <path fill="#FFFFFF" d="m73.1 39.9c0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4 -.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2h0c12.3 0 22.2 10 22.2 22.2l0 0 0 0 0 0zM64.2 75.4c0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2c1.2 0 2.2 1 2.2 2.2zM62 79.8c1.2 0 2.2 1 2.2 2.2 0 1.2-1 2.2-2.2 2.2h-22.2c-1.2 0-2.2-1-2.2-2.2 0-1.2 1-2.2 2.2-2.2h22.2l0 0zM42 86.5h17.8c0 2.5-2 4.5-4.5 4.5h-8.9c-2.5 0-4.5-2-4.5-4.5l0 0 0 0z"/>\
-        <path fill="none" stroke="#FFFFFF" stroke-width="3.3" stroke-miterlimit="10" d="m50.9 17.7c12.3 0 22.2 10 22.2 22.2 0 12.1-7.3 13.5-8.7 26.7 0 1.2-1 2.2-2.2 2.2h-11.4M50.9 68.8h-0.1 -11.3c-1.2 0-2.2-1-2.2-2.2 -1.4-13.2-8.7-14.6-8.7-26.7 0-12.3 10-22.2 22.2-22.2"/>\
-        <rect class="scp-hand-cursor" x="-8" y="-5" height="120" width="120" fill="transparent" role="presentation"/>\
+  <g id="scp-button-menu" transform="translate(52,66)">\
+    <g id="scp-tips-button" class="scp-if-tips scp-hand-cursor scp-transition-opacity" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
+      <g class="scp-hover-expand">\
+        <circle r="52" fill="#548ECE"/>\
+        <path fill="#fff" d="m14,23.5c0,1.2 -1,2.2 -2.2,2.2h-22.2c-1.2,0 -2.2,-1 -2.2,-2.2c0,-1.2 1,-2.2 2.2,-2.2h22.2c1.2,0 2.2,1 2.2,2.2zm0,6.5c0,1.2 -1,2.2 -2.2,2.2h-22.2c-1.2,0 -2.2,-1 -2.2,-2.2c0,-1.2 1,-2.2 2.2,-2.2h22.2c1.2,0 2.2,1 2.2,2.2zm-27,4.5h23c0,2.5 -2,4.5 -4.5,4.5h-8.9c-2.5,0 -4.5,-2 -4.5,-4.5l0,0l0,0l0.1,0l-5.2,0z"/>\
+        <path fill="#FFF" stroke="#FFF" stroke-width="3.3" stroke-miterlimit="10" d="m0.9,-34.3c12.3,0 22.2,10 22.2,22.2c0,12.1 -7.3,13.5 -8.7,26.7c0,1.2 -1,2.2 -2.2,2.2h-11.4m0.1,0h-0.1h-11.3c-1.2,0 -2.2,-1 -2.2,-2.2c-1.4,-13.2 -8.7,-14.6 -8.7,-26.7c0,-12.3 10,-22.2 22.2,-22.2"/>\
+        <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
-    <g class="scp-hover-expand">\
-      <g id="scp-settings-button" class="scp-if-settings scp-hand-cursor scp-transition-opacity" role="button" data-feature="settings" aria-labelledby="scp-settings-label">\
-        <g class="scp-settings1">\
-          <path fill="#7B7B7B" d="M17 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6.2c-1.3 0-2.3 1-2.3 2.3V99zM78.4 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8zM47.7 98.8c0 1.3 1 2.3 2.3 2.3h6.2c1.3 0 2.3-1 2.3-2.3V8c0-1.3-1-2.3-2.3-2.3h-6c-1.3 0-2.3 1-2.3 2.3V98.8z"/>\
-          <path fill="#548ECE" d="M33.3 55.5c0 1.3-1 2.3-2.3 2.3H13.9c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V55.5zM64 27c0 1.3-1 2.3-2.3 2.3H44.6c-1.3 0-2.3-1-2.3-2.3v-5.2c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V27.2zM95.5 73.4c0 1.3-1 2.3-2.3 2.3H76.1c-1.3 0-2.3-1-2.3-2.3v-5.3c0-1.3 1-2.3 2.3-2.3h17.1c1.3 0 2.3 1 2.3 2.3V73.4z"/>\
-        </g>\
-        <!--path class="scp-settings2" fill-rule="evenodd" clip-rule="evenodd" fill="#548ECE" d="M31,53c0-12,10-22,22-22c12,0,22,10,22,22c0,12-10,22-22,22C41,76,31,66,31,53z M9,44c-3,0-6,3-6,6v6c0,3,3,6,6,6h9c1,3,2,6,4,9l-6,6c-2,2-2,6,0,9l4,4c2,2,6,2,9,0l6-6c3,2,6,3,9,4v9c0,3,3,6,6,6h6c3,0,6-3,6-6v-9c3-1,6-2,9-4l6,6c2,2,6,2,9,0l4-4c2-2,2-6,0-9l-6-6c2-3,3-6,4-9h9c3,0,6-3,6-6v-6c0-3-3-6-6-6h-9c-1-3-2-6-4-9l6-6c2-2,2-6,0-9l-4-4c-2-2-6-2-9,0l-6,6c-3-2-6-3-9-4V9c0-3-3-6-6-6h-6c-3,0-6,3-6,6v9c-3,1-6,2-9,4l-6-6c-2-2-6-2-9,0l-5,5c-2,2-2,6,0,9l6,6c-2,3-3,6-4,9H9z M44,53c0,5,4,9,9,9c5,0,9-4,9-9c0-5-4-9-9-9C48,44,44,48,44,53z"/-->\
-        <rect class="scp-hand-cursor" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation"/>\
+    <g id="scp-settings-button" class="scp-if-settings scp-hand-cursor scp-transition-opacity" role="button" data-feature="settings" aria-labelledby="scp-settings-label">\
+      <g class="scp-hover-expand">\
+        <path d="m-36,47.8c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6.2c-1.3,0 -2.3,1 -2.3,2.3v91l0,-.2zm61.4,0c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6c-1.3,0 -2.3,1 -2.3,2.3v90.8l-.2,0zm-30.7,0c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6c-1.3,0 -2.3,1 -2.3,2.3v90.8l-.2,0z" fill="#7B7B7B"/>\
+        <path d="m-19.7,4.5c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.3c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.3l0,0zm30.7,-28.5c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.2c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.40001l0,-.2zm31.5,46.4c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.3c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.3l0,0z" fill="#548ECE"/>\
+        <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
-    <g class="scp-hover-expand">\
-      <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
-        <g>\
-          <path fill="white" stroke="#548ECE" stroke-width="5.5" stroke-linecap="round" stroke-miterlimit="10" \
-          d="M44 92c3 1 7 1 11 1 27 0 49-19 49-43C104 26 82 6 55 6 28 6 5 25 5 49c0 12 6 23 15 31M44 91.5c-6 5-19 9.4-41 9M20.4 80.2c-2.2 9.2-7.6 14.8-17 20.7"/>\
-          <rect class="scp-hand-cursor" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
-        </g>\
+    <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
+      <g class="scp-hover-expand">\
+        <path d="m-10,40c3,1 7,1 11,1c27,0 49,-19 49,-43c0,-24 -22,-44 -49,-44c-27,0 -50,19 -50,43c0,12 6,23 15,31m24,11.5c-6,5 -19,9.4 -41,9m17.4,-20.3c-2.2,9.2 -7.6,14.8 -17,20.7" stroke-miterlimit="10" stroke-linecap="round" stroke-width="5.5" stroke="#548ECE" fill="#FFF"/>\
+        <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
-    <g class="scp-hover-expand">\
-      <g id="scp-about-button" class="scp-if-about scp-hand-cursor scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
-        <g id="scp-about-path-container">\
-            <path fill="black" d="M70.8 42.5h-11.2c-1 0-3.4 3.9-3.4 5.2L56.3 63 6.5 69.1H6.5c-1.6-5-2.5-10.3-2.5-15.8 0-27.9 22.6-50.4 50.4-50.4 21.2 0 39.4 13 46.8 31.7h0c5 11.2 0 22.2-10.9 24.1l-16.1 2 0-13.1C74.2 46.4 71.8 42.5 70.8 42.5zM63.8 89.8c1.6 1.9 2.8 0 2.8 0l7.1-11.1c0.2-.3 .4-.6 .4-1v0 -4h26.4 0c-7.8 17.8-25.5 30.3-46.2 30.3 -20.7 0-38.4-12.4-46.2-30.3v0h48.1v4.3c0 .3 .2 .6 .4 .9L63.8 89.8z"/>\
-        </g>\
-        <rect class ="scp-hand-cursor" x="-5" y="-8" height="120" width="120" fill="transparent" role="presentation" />\
+    <g id="scp-about-button" class="scp-if-about scp-hand-cursor scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
+      <g class="scp-hover-expand">\
+        <path d="m15.8,-9.5h-11.2c-1,0 -3.4,3.9 -3.4,5.2l.1,15.3l-49.8,6.1h0c-1.6,-5 -2.5,-10.3 -2.5,-15.8c0,-27.9 22.6,-50.4 50.4,-50.4c21.2,0 39.4,13 46.8,31.7h0c5,11.2 0,22.2 -10.89999,24.1l-16.10001,2l0,-13.1c0,-1.2 -2.39999,-5.1 -3.39999,-5.1zm-7,47.3c1.6,1.89999 2.8,0 2.8,0l7.1,-11.10001c.2,-.3 .4,-.6 .4,-1v0v-4h26.4h0c-7.8,17.8 -25.5,30.3 -46.2,30.3c-20.7,0 -38.4,-12.4 -46.2,-30.3v0h48.1v4.3c0,.3 .2,.6 .4,.9l7.2,10.9z" fill="#000"/>\
+        <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
   </g>\
@@ -231,8 +223,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
   <g id="scp-more-button-group" class="scp-hover-expand" role="button" aria-label="View more options" class="scp-hand-cursor">\
-    <circle id="scp-more-button" fill="#FFFFFF" stroke="#777777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
-    <path id="scp-more-arrow" class="scp-hand-cursor" fill="#777777" transform="scale(0.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
+    <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="31"/>\
+    <path id="scp-more-arrow" class="scp-hand-cursor" fill="#777" transform="scale(.8)" d="m20.50,0c-1.5,1.6 -17.6,16.9 -17.6,16.9-.8,.8 -1.9,1.3 -3,1.3c-1.1,0 -2.1,-.4 -3,-1.3c0,0 -16,-15.3 -17.6,-16.9c-1.5,-1.6 -1.6,-4.4 0,-6c1.6,-1.7 3.9,-1.8 5.9,0l14.7,14.1l14.7,-14.1c2,-1.8 4.3,-1.7 5.9,0c1.5,2 1.5,4.5 0,6z"/>\
   </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

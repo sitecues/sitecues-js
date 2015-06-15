@@ -72,7 +72,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
        * Notify the entire panel that changes have occured
        * @param featureName or null for button menu
        */
-      function updateGlobalState(featureName, isSecondaryExpanding, isAnimating) {
+      function updateGlobalState(featureName, isSecondaryExpanding) {
         state.set('secondaryPanelName', featureName || 'button-menu');
         state.set('isSecondaryExpanding', isSecondaryExpanding);
         state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
@@ -196,20 +196,16 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               'svgHeight': origSvgHeight,
               'svgTranslateY': 0,
               'bottomSVGTranslateY': 0,
-              'moreBtnTranslateX': origMoreBtnTransforms.translateX,
               'moreBtnTranslateY': origMoreBtnTransforms.translateY,
               'menuBtnTranslateX': origMenuBtnTransforms.translateX,
-              'menuBtnTranslateY': origMenuBtnTransforms.translateY,
               'menuBtnRotate': 0  // Will be used by icons that roll
             },
             true: {   // Feature enabled
               'bottomSVGTranslateY': panelContentsHeight - 85, // The labels and grey background
               'outlineHeight': panelContentsHeight + 103, // The outline
               'svgHeight': 1200, // The main SVG, allows more space
-              'moreBtnTranslateX': origMoreBtnTransforms.translateX, // The more button
               'moreBtnTranslateY': panelContentsHeight + 104, // The more button
               'menuBtnTranslateX': 26, // The icon rolls left by default
-              'menuBtnTranslateY': BP_CONST.TRANSFORMS[menuButton.id].translateY,
               'menuBtnRotate': 0    // Will be used by the icons that roll
             }
           };
@@ -256,7 +252,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           currentMoreBtnTranslateY = currentMoreBtnTranslate.top,
           currentMoreBtnRotate = currentMoreBtnTransform.rotate,
           currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
-          currentMenuBtnTranslateY = currentMenuBtnTransform.translate.top,
           currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
           cssValues = getAnimationParams(name, menuButton, moreButton, currentOutlineHeight),
@@ -305,7 +300,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           // More button
           moreButton.setAttribute('transform',
             getTransformString(
-              getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
+              BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID].translateX,
               getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t),
               1,
               currentMoreBtnRotate));
@@ -318,10 +313,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           menuButton.setAttribute('transform',
             getTransformString(
               getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
-              getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
+              0,
               1,
-              getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t),
-              BP_CONST.MENU_BUTTON_ROTATE_XY));
+              getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t)));
 
           featureTick && featureTick(t, targetCSSValues);
         }
@@ -506,7 +500,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       forEachFeature(function(feature) {
         var button = feature.menuButtonId,
           transform = BP_CONST.TRANSFORMS[button];
-        byId(button).setAttribute('transform', getTransformString(transform.translateX, transform.translateY));
+        byId(button).setAttribute('transform', getTransformString(transform.translateX, 0));
       });
     }
 

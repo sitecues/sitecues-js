@@ -74,7 +74,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.FEEDBACK_LABEL_ID        = 'scp-feedback-label';
   constants.ABOUT_LABEL_ID           = 'scp-about-label';
 
-  constants.ABOUT_PATH_CONTAINER_ID  = 'scp-about-path-container';
   constants.ABOUT_CONTENT_ID         = 'scp-about';
   constants.ABOUT_CONTENT_IMAGE_ID   = 'scp-logo-text';
 
@@ -134,11 +133,10 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.TRANSFORMS[constants.MORE_ID]                  = {translateY: -198};
   constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 198};
-  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25 , translateY: 14};
-  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235, translateY: 14};
-  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {translateX: 465, translateY: 14};
-  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {translateX: 675, translateY: 14};
-  constants.MENU_BUTTON_ROTATE_XY = 54;  // Rotation origin
+  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25};
+  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235};
+  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {translateX: 465};
+  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {translateX: 675};
 
   // Elements that are only shown when panel is expanded
   // Attributes

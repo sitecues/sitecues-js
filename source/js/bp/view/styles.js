@@ -142,9 +142,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          <g #scp-more>     // Secondary panel that slides down
          <g .scp-feature-content>
          <g .scp-tips> etc.
-         .cards
-         .card
-         .card
+         .scp-cards
+         .scp-card
+         .scp-card
          ...
 
          Classes important for CSS:
@@ -403,12 +403,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%',
           'pointer-events': 'all'
-        },
-
-        '.origin-center': {
-          'transform-origin': '50% 50%'
         },
 
         '.scp-transition-opacity' : {
@@ -520,7 +515,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
-        '.scp-panel-button-menu #scp-button-menu > g > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
         '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
         '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
         '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
@@ -528,8 +523,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-secondary-expanding .scp-wait-expand': MAKE_HIDDEN,
 
         '.scp-hover-expand': {
-          'transition': 'transform .5s',
-          'transform-origin': '50% 50%'
+          'transform': 'scale(1)',
+          'transition': 'transform .5s'
         },
 
         '.scp-hovers .scp-hover-expand:hover:not([aria-disabled])': {
