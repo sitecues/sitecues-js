@@ -192,15 +192,17 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-p': {
           'display': 'block',
+          'font-family': 'Arial',
           'font-size': '20px',
           'margin': '12px 0'
         },
 
         'sc-button': {
           'display': 'block',
+          'font-family': 'Arial',
           'font-size': '20px',
-          'background-color': 'blue',
           'font-weight': 'bold',
+          'background-color': 'blue',
           'color': 'white',
           'border': '2px solid beige',
           'border-radius': '5px',
@@ -211,6 +213,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-button-big': {
           'display'      : 'inline-block',
           'padding'      : '10px 30px',
+          'font-family'  : 'Arial',
           'font-size'    : '22px',
           'border'       : '3px solid #447AC4',
           'border-radius': '4px',
