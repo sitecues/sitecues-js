@@ -523,7 +523,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
         '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
         '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
-        '.scp-secondary-expanding .scp-wait-expand': MAKE_HIDDEN,
+        '.scp-secondary-expanding .scp-secondary-feature': MAKE_HIDDEN,
+        '.scp-want-badge .scp-secondary-feature': {
+          'display': 'none !important'
+        },
+
 
         '.scp-hover-expand': {
           'transform': 'scale(1)',

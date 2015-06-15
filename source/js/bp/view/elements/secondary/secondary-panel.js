@@ -1,7 +1,6 @@
 // TODO rename icon menu buton menu
 // Auto size not right
 // Card interactions
-// When panel shrinks, <html> content still visible outside of it -- should we clip?
 // Feedback
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
