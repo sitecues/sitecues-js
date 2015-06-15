@@ -67,11 +67,9 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // Pressing tab or shift tab when panel is open switches it to keyboard mode
         window.addEventListener('keydown',   bpController.processKeydown, true);
         window.addEventListener('mousedown', panelController.winMouseDown);
-        if (!SC_DEV || !isSticky) {
-          window.addEventListener('mousemove', panelController.winMouseMove);
-          window.addEventListener('blur', panelController.winBlur);
-          window.addEventListener('mouseout', panelController.winMouseLeave);
-        }
+        window.addEventListener('mousemove', panelController.winMouseMove);
+        window.addEventListener('blur', panelController.winBlur);
+        window.addEventListener('mouseout', panelController.winMouseLeave);
       }
 
       function unbindTemporaryMouseHandlers() {
@@ -181,13 +179,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // Don't listen to events on the window when the BP is collapsing
         unbindTemporaryMouseHandlers();
       });
-
-      if (SC_DEV) {
-        sitecues.toggleStickyPanel = function() {
-          isSticky = !isSticky;
-          return isSticky;
-        }
-      }
 
       // Unless callback() is queued, the module is not registered in global var modules{}
       // See: https://fecru.ai2.at/cru/EQJS-39#c187

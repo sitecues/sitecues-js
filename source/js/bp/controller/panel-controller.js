@@ -6,10 +6,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
   sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
     function (BP_CONST, baseController, sliderController, state, slider, helper) {
 
-      var MIN_DISTANCE = 75; // Min distance before shrink
-
-      // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
-      var mouseLeaveShrinkTimer;
+      var MIN_DISTANCE = 75, // Min distance before shrink
+        mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
+        isSticky;
 
       // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
       pc.wasInFeaturePanel  = false;
@@ -51,6 +50,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       }
 
       if (isMouseOutsidePanel(evt, MIN_DISTANCE)) {
+        if (SC_DEV && isSticky) {
+          return;
+        }
         if (state.get('wasMouseInPanel')) {
           pc.shrinkPanel();
         }
@@ -62,7 +64,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     };
 
     pc.winMouseDown = function(evt) {
-
+      if (SC_DEV && isSticky) {
+        return;
+      }
       // Once mouse used, no longer need this protection against accidental closure
       pc.wasInFeaturePanel = false;
 
@@ -72,6 +76,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     };
 
     pc.winBlur = function() {
+      if (SC_DEV && isSticky) {
+        return;
+      }
       pc.shrinkPanel(true);
     };
 
@@ -195,6 +202,13 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     }
 
     sitecues.on('bp/do-shrink', pc.shrinkPanel);
+
+      if (SC_DEV) {
+        sitecues.toggleStickyPanel = function() {
+          isSticky = !isSticky;
+          return isSticky;
+        }
+      }
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

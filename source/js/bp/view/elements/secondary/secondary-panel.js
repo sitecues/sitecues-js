@@ -189,7 +189,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         var
           feature = features[featureName],
           origMenuBtnTransforms = BP_CONST.TRANSFORMS[menuButton.id],
-          origMoreBtnTransforms = BP_CONST.TRANSFORMS[BP_CONST.MORE_ID],
+          origMoreBtnTransforms = BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID],
           panelContentsHeight = getPanelContentsHeight(featureName),
           baseCssValues = {
             false: {   // Feature disabled
@@ -230,6 +230,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       function animateSecondaryFeature(name, doEnable) {
+        if (doEnable && getFeaturePanelName()) {
+          // If we are switching from one panel to another, make sure buttons start from initial state
+          resetButtonStyles();
+        }
+
         var
           mainSVG = getMainSVG(),
           bottomSVG = getBottom(),
@@ -271,7 +276,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             'to': targetCSSValues.svgHeight
           },
 
-          heightAnimationDelay = feature.heightAnimationDelay || 0,
+          heightAnimationDelay = (doEnable && feature.heightAnimationDelay) || 0,
 
           isSlowlyExpanding = heightTransition.to > heightTransition.from;
 
@@ -327,7 +332,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             state.set('isSecondaryExpanding', false);
             state.set('isAnimating', false);
             sitecues.emit('bp/do-update');
-          }, duration * 0.7);
+          }, heightAnimationDelay + duration * 0.7);
         }
 
         function animateHeight() {
@@ -357,12 +362,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         openFeatureAnimation();
 
         // Animate the height at the right time
-        // TODO why does this close the panel?
         setTimeout(animateHeight, heightAnimationDelay);
 
-        if (isSlowlyExpanding) {
-          fadeInTextContentWhenLargeEnough();
-        }
+        fadeInTextContentWhenLargeEnough();
       }
 
       /********************** INTERACTIONS **************************/
@@ -375,10 +377,21 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
       }
 
+      function getFeaturePanelName() {
+        var secondaryPanelName = state.getSecondaryPanelName();
+        return features[secondaryPanelName] && secondaryPanelName;
+      }
+
       /**
        * Toggle back and forth between main panel and secondary panel
        */
       function toggleSecondaryPanel() {
+
+        var featurePanelName = getFeaturePanelName();
+        if (featurePanelName) {
+          toggleSecondaryFeature(featurePanelName);
+          return;
+        }
 
         if (getOrigPanelGeometry()) {
           resetPanelGeometry();
@@ -470,6 +483,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       more.setAttribute('opacity', 0);
       more.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[morePanelId].translateY));
 
+      resetButtonStyles();
+    }
+
+    function resetButtonStyles() {
       // Menu buttons
       forEachFeature(function(feature) {
         var button = feature.menuButtonId,
