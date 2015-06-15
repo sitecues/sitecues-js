@@ -1,9 +1,8 @@
 // TODO rename icon menu buton menu
-// About
-// Feedback
-// Toggle feature not working anymore
 // Auto size not right
 // Card interactions
+// When panel shrinks, <html> content still visible outside of it -- should we clip?
+// Feedback
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
@@ -69,8 +68,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       /**
-       * Notify the entire panel that changes have occured
-       * @param featureName or null for button menu
+       * Notify the entire panel that changes have occurred
+       * @param featureName or falsey value for button menu
        */
       function updateGlobalState(featureName, isSecondaryExpanding) {
         state.set('secondaryPanelName', featureName || 'button-menu');
@@ -345,7 +344,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
 
         cancelAllAnimations();
-        updateGlobalState(doEnable && name, isSlowlyExpanding, true);
+        updateGlobalState(doEnable && name, isSlowlyExpanding);
 
         // Let feature module know that animation is about to begin
         featureModule.onAnimationStart && featureModule.onAnimationStart();
