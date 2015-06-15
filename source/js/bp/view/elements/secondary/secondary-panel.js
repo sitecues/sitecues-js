@@ -188,34 +188,30 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       function getAnimationParams(featureName, menuButton, moreButton, currentOutlineHeight) {
         var
           feature = features[featureName],
-          moreBtnTranslate = getTransform(moreButton.getAttribute('transform')).translate,
-          menuButtonTransform = getTransform(menuButton.getAttribute('transform')),
-          mainSVG = byId(BP_CONST.SVG_ID),
-          bottomSVG = byId(BP_CONST.BOTTOM_MORE_ID),
+          origMenuBtnTransforms = BP_CONST.TRANSFORMS[menuButton.id],
+          origMoreBtnTransforms = BP_CONST.TRANSFORMS[BP_CONST.MORE_ID],
           panelContentsHeight = getPanelContentsHeight(featureName),
           baseCssValues = {
+            false: {   // Feature disabled
+              'outlineHeight': origOutlineHeight,
+              'svgHeight': origSvgHeight,
+              'svgTranslateY': 0,
+              'bottomSVGTranslateY': 0,
+              'moreBtnTranslateX': origMoreBtnTransforms.translateX,
+              'moreBtnTranslateY': origMoreBtnTransforms.translateY,
+              'menuBtnTranslateX': origMenuBtnTransforms.translateX,
+              'menuBtnTranslateY': origMenuBtnTransforms.translateY,
+              'menuBtnRotate': 0  // Will be used by icons that roll
+            },
             true: {   // Feature enabled
               'bottomSVGTranslateY': panelContentsHeight - 85, // The labels and grey background
               'outlineHeight': panelContentsHeight + 103, // The outline
               'svgHeight': 1200, // The main SVG, allows more space
-              'moreBtnTranslateX': 400, // The more button
+              'moreBtnTranslateX': origMoreBtnTransforms.translateX, // The more button
               'moreBtnTranslateY': panelContentsHeight + 104, // The more button
               'menuBtnTranslateX': 26, // The icon rolls left by default
               'menuBtnTranslateY': BP_CONST.TRANSFORMS[menuButton.id].translateY,
-              'menuBtnScale': 1,   // Icon scales to 1
               'menuBtnRotate': 0    // Will be used by the icons that roll
-            },
-            false: {   // Feature disabled
-              'outlineHeight': currentOutlineHeight,
-              'svgHeight': parseFloat(mainSVG.style.height),
-              'svgTranslateY': getTransform(mainSVG.getAttribute('transform')).translate.top,
-              'bottomSVGTranslateY': getTransform(bottomSVG.getAttribute('transform')).translate.top,
-              'moreBtnTranslateX': moreBtnTranslate.left,  // TODO this should never change, right?
-              'moreBtnTranslateY': moreBtnTranslate.top,
-              'menuBtnTranslateX': menuButtonTransform.translate.left,
-              'menuBtnTranslateY': menuButtonTransform.translate.top,
-              'menuBtnScale': menuButtonTransform.scale,
-              'menuBtnRotate': 0  // Will be used by icons that roll
             }
           };
 
@@ -254,11 +250,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           currentMoreBtnTranslate = currentMoreBtnTransform.translate,
           currentMoreBtnTranslateX = currentMoreBtnTranslate.left,
           currentMoreBtnTranslateY = currentMoreBtnTranslate.top,
-          currentMoreBtnScale = currentMoreBtnTransform.scale,
           currentMoreBtnRotate = currentMoreBtnTransform.rotate,
           currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
           currentMenuBtnTranslateY = currentMenuBtnTransform.translate.top,
-          currentMenuBtnScale = currentMenuBtnTransform.scale,
           currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
           cssValues = getAnimationParams(name, menuButton, moreButton, currentOutlineHeight),
@@ -309,7 +303,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             getTransformString(
               getValueInTime(currentMoreBtnTranslateX, targetCSSValues.moreBtnTranslateX, t),
               getValueInTime(currentMoreBtnTranslateY, targetCSSValues.moreBtnTranslateY, t),
-              currentMoreBtnScale,
+              1,
               currentMoreBtnRotate));
         }
 
@@ -321,7 +315,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             getTransformString(
               getValueInTime(currentMenuBtnTranslateX, targetCSSValues.menuBtnTranslateX, t),
               getValueInTime(currentMenuBtnTranslateY, targetCSSValues.menuBtnTranslateY, t),
-              getValueInTime(currentMenuBtnScale, targetCSSValues.menuBtnScale, t),
+              1,
               getValueInTime(currentMenuBtnRotate, targetCSSValues.menuBtnRotate, t),
               BP_CONST.MENU_BUTTON_ROTATE_XY));
 
@@ -364,9 +358,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         // Animate the height at the right time
         // TODO why does this close the panel?
-        if (doEnable) {
-          setTimeout(animateHeight, heightAnimationDelay);
-        }
+        setTimeout(animateHeight, heightAnimationDelay);
 
         if (isSlowlyExpanding) {
           fadeInTextContentWhenLargeEnough();

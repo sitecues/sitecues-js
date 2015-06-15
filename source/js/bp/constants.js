@@ -132,11 +132,11 @@ sitecues.def('bp/constants', function (constants, callback) {
     scaleY    : 1
   };
 
-  constants.TRANSFORMS[constants.MORE_ID]                  = {translateY:-198};
-  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {scale:1.2, translateX: 25 , translateY: 14};
-  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {scale:1.2, translateX: 235, translateY: 14};
-  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {scale:1.2, translateX: 465, translateY: 14};
-  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {scale:1.2, translateX: 675, translateY: 14};
+  constants.TRANSFORMS[constants.MORE_ID]                  = {translateX: 400, translateY:-198};
+  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25 , translateY: 14};
+  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235, translateY: 14};
+  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {translateX: 465, translateY: 14};
+  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {translateX: 675, translateY: 14};
   constants.MENU_BUTTON_ROTATE_XY = 54;  // Rotation origin
 
   // Elements that are only shown when panel is expanded
