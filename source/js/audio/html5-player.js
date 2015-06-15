@@ -21,16 +21,12 @@ sitecues.def('audio/html5-player', function (player, callback) {
    * @param url source of audio to play
    */
   player.playAudioSrc = function(url) {
-    var t = 0;
     var audioElement = new Audio();
+    var t = new Date();
 
     // Metrics Start
     sitecues.$(audioElement)[0].addEventListener('playing', function() {
       sitecues.emit('audio/playing', {'data': {'request_time': new Date - t}});
-    });
-
-    sitecues.$(audioElement)[0].addEventListener('loadstart', function() {
-      t = new Date();
     });
 
     // Metrics End

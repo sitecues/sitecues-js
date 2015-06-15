@@ -29,12 +29,11 @@ sitecues.def('audio/safari-player', function (player, callback) {
    * @param url source of audio to play
    */
   player.playAudioSrc = function(baseMediaUrl) {
-    var t = 0;
     isCancelled = false;
 
     // Create a reusable request object
     var request = new XMLHttpRequest();
-    t = new Date();
+    var t = new Date();
     request.open('GET', baseMediaUrl, true);
     request.responseType = 'arraybuffer';
     // Our asynchronous callback
