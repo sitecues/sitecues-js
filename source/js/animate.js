@@ -45,21 +45,17 @@ sitecues.def('animate', function (animate, callback) {
           toTransform      = animation.CSSProperties[transformProperty],
           fromTransformObj = transform.getTransform(fromTransform),
           toTransformObj   = transform.getTransform(toTransform),
-          fromScale        = fromTransformObj.scale,
-          toScale          = toTransformObj.scale,
-          fromTranslate    = fromTransformObj.translate,
-          toTranslate      = toTransformObj.translate,
-          fromRotate       = fromTransformObj.rotate,
-          toRotate         = toTransformObj.rotate;
+          styles = animation.animateStyles,
+          from = styles.from,
+          to = styles.to;
 
-      animation.animateStyles.from.scale = fromScale;
-      animation.animateStyles.to.scale  = toScale;
+      from.scale =fromTransformObj.scale;
+      from.translate = fromTransformObj.translate;
+      from.rotate = fromTransformObj.rotate;
 
-      animation.animateStyles.from.translate = fromTranslate;
-      animation.animateStyles.to.translate  = toTranslate;
-
-      animation.animateStyles.from.rotate = fromRotate;
-      animation.animateStyles.to.rotate =  toRotate;
+      to.scale = toTransformObj.scale;
+      to.translate = toTransformObj.translate;
+      to.rotate = toTransformObj.rotate;
 
     }
 
