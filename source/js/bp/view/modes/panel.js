@@ -145,7 +145,12 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
        */
 
       function getSecondaryPanelClasses() {
-        return ' scp-panel-' + state.getSecondaryPanelName();
+        var panelName = state.getSecondaryPanelName(),
+          className =' scp-panel-' + panelName;
+        if (panelName !== 'button-menu') {
+          className += ' scp-tall'; // Need room in SVG for contents
+        }
+        return className;
       }
 
       // Bind the mouse handlers that we don't need to add/remove each time

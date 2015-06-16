@@ -477,6 +477,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /*************** Secondary panel **************************/
 
+        '.scp-tall > svg': {
+          'height': '1200px !important',    // Make room for tall panel contents
+          'transform': 'translateY(-506px)' // Compensate for height increase
+        },
+
        '#scp-feedback-textarea': {
           'position': 'absolute',
           'top': '33px',
@@ -527,7 +532,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-want-badge .scp-secondary-feature': {
           'display': 'none !important'
         },
-
 
         '.scp-hover-expand': {
           'transform': 'scale(1)',

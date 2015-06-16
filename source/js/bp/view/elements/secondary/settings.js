@@ -18,8 +18,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
 
-    settings.extendAnimationParams = function(cssValues) {
-      return cssValues;
+    settings.getGeometryTargets = function(geometryTargets) {
+      return geometryTargets;
     };
 
     function onSettingsClick(evt) {

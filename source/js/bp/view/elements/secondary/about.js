@@ -16,7 +16,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       return from + (to - from) * time;
     }
 
-    about.extendAnimationParams = function(cssValues) {
+    about.getGeometryTargets = function(cssValues) {
       // Which additional animations
       cssValues[false].menuImageTranslateX = 0;   // About logo transitions to the left following the rolling icon
 
