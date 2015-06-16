@@ -477,12 +477,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /*************** Secondary panel **************************/
 
-        '.scp-tall > svg': {
+        '.scp-is-secondary-feature > svg': {
           'height': '1200px !important',    // Make room for tall panel contents
-          'transform': 'translateY(-506px)' // Compensate for height increase
+          'transform': 'translateY(-506px)' // Compensate for height increase TODO how does this work?
         },
 
-       '#scp-feedback-textarea': {
+        '#scp-feedback-textarea': {
           'position': 'absolute',
           'top': '33px',
           'left': '43px'

@@ -154,7 +154,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
-<g id="scp-more" class="scp-more-only" aria-label="More features" opacity="0" clip-path="url(#scp-outline-clip-def)">\
+<g id="scp-more" class="scp-more-only" aria-label="More features" clip-path="url(#scp-outline-clip-def)">\
   <use id="scp-more-outline" xlink:href="#scp-outline-def" fill="white"/>\
   <g id="scp-bottom-more">\
     <use xlink:href="#scp-bottom-def"/>\

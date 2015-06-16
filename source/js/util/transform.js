@@ -84,12 +84,11 @@ sitecues.def('util/transform', function (transform, callback) {
 
   }
 
-  function getTransformString (left, top, scale, rotate, rotateOffset) {
+  function getTransformString (left, top, scale, rotate) {
 
-    var rotateOffsetStr = rotateOffset ? ',' + rotateOffset + ',' + rotateOffset : '',
-        translateCSS    = 'translate(' + left + ' , ' + top + ') ',
+    var translateCSS    = 'translate(' + left + ' , ' + top + ') ',
         scaleCSS        = scale  ? ' scale('  + scale  + ') ' : '',
-        rotateCSS       = rotate ? ' rotate(' + rotate + rotateOffsetStr + ') ' : '';
+        rotateCSS       = rotate ? ' rotate(' + rotate + ') ' : '';
 
     return translateCSS + scaleCSS + rotateCSS;
 

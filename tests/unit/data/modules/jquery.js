@@ -9501,5 +9501,5 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   return window.jQuery;
 }
 module.exports = create('undefined' === typeof window ? undefined : window);
-module.exports.create = create;
+module.exports.animateCssProperties = create;
 }());

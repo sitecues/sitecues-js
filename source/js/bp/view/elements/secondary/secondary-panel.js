@@ -15,6 +15,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y = 0,
         DISABLED_PANEL_TRANSLATE_Y = -198,
+        MORE_BUTTON_ROTATION_ENABLED = -180,
         runningAnimations = [],
         origPanelContentsRect,
         origOutlineHeight,
@@ -91,9 +92,18 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         return byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
       }
 
-      function setPanelHeight(outlineHeight) {
-        var BOTTOM_Y_OFFSET = -188,
-          MORE_BUTTON_Y_OFFSET = 1;
+      function updateMoreButton(outlineHeight, moreButtonRotate) {
+        var MORE_BUTTON_Y_OFFSET = 10,
+          moreButton = getMoreButton();
+        moreButton.setAttribute('transform',
+          getTransformString(
+            BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID].translateX,
+              outlineHeight + MORE_BUTTON_Y_OFFSET, 1, moreButtonRotate));
+      }
+
+      function setPanelHeight(outlineHeight, moreButtonRotate) {
+        var BOTTOM_Y_OFFSET = -188;
+
         // Outline
         setCurrentOutlineHeight(outlineHeight);
 
@@ -101,12 +111,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         getBottom().setAttribute('transform', getTransformString(0, outlineHeight + BOTTOM_Y_OFFSET));
 
         // More button
-        var moreButton = getMoreButton(),
-          currentMoreButtonRotate = getTransform(moreButton).rotate; // Don't change rotation of button
-        moreButton.setAttribute('transform',
-          getTransformString(
-            BP_CONST.TRANSFORMS[BP_CONST.MORE_BUTTON_CONTAINER_ID].translateX,
-            outlineHeight + MORE_BUTTON_Y_OFFSET, 1, currentMoreButtonRotate));
+        updateMoreButton(outlineHeight, moreButtonRotate);
       }
 
       function isDisabled(id) {
@@ -128,37 +133,42 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       // Create an animation and store it in runningAnimations so we can cancel it if need be
-      function createAnimation(transitionFromTo, details) {
-        var newAnimation = animate.create(transitionFromTo, details);
+      function createAnimation(duration, onTickFn) {
+        var newAnimation = animate.animateViaCallbacks({
+          'duration': duration,
+          'onTick': onTickFn
+        });
         runningAnimations.push(newAnimation);
+      }
+
+      function getValueInTime(from, to, time) {
+        return from + (to - from) * time;
       }
 
       function getTargetMorePanelTranslateY() {
         return state.isSecondaryPanelRequested() ? ENABLED_PANEL_TRANSLATE_Y : DISABLED_PANEL_TRANSLATE_Y;
       }
 
-      function animateButtonMenuDrop() {
+      function animateButtonMenuDrop(willEnable) {
 
         var moreId = BP_CONST.MORE_ID,
           morePanel = byId(moreId),
           morePanelCurrentPos = getTransform(morePanel).translate.top,
           targetPanelPos = getTargetMorePanelTranslateY(),
-          posDiff = targetPanelPos - morePanelCurrentPos;
+          posDiff = targetPanelPos - morePanelCurrentPos,
+          moreBtnStartRotation = willEnable ? 0 : MORE_BUTTON_ROTATION_ENABLED,
+          moreBtnEndRotation = willEnable ? MORE_BUTTON_ROTATION_ENABLED : 0;
 
-        function onSecondaryAnimationTick(animationState) {
-          state.set('currentSecondaryPanelMode', animationState.current);
-          transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * animationState.current);
+        function onButtonMenuDropTick(time) {
+          state.set('currentSecondaryPanelMode', time);
+          transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * time);
+          var moreBtnRotation = getValueInTime(moreBtnStartRotation, moreBtnEndRotation, time);
+          updateMoreButton(origOutlineHeight, moreBtnRotation);
         }
 
         cancelAllAnimations();
 
-        createAnimation({
-          'from': morePanelCurrentPos,
-          'to': targetPanelPos
-        }, {
-          'duration': BUTTON_CLICK_ANIMATION_DURATION,
-          'onTick': onSecondaryAnimationTick
-        });
+        createAnimation(BUTTON_CLICK_ANIMATION_DURATION, onButtonMenuDropTick);
 
       }
 
@@ -253,14 +263,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
           duration = getDuration(),
 
-          transition = {
-            'from': currentOutlineHeight,
-            'to': toGeo.outlineHeight
-          },
-
           heightAnimationDelay = (doEnable && feature.heightAnimationDelay) || 0,
 
-          isSlowlyExpanding = transition.to > transition.from;
+          isSlowlyExpanding = toGeo.outlineHeight > currentOutlineHeight;
 
         function getDuration() {
           // Use the progress of the more button to determine how far along we are in the animation,
@@ -269,29 +274,21 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             fromGeo.outlineHeight, toGeo.outlineHeight, currentOutlineHeight);
         }
 
-        function getValueInTime(from, to, time) {
-          return from + (to - from) * time;
-        }
-
-        function panelHeightTick(animationState) {
-          var t = animationState.current;
-
+        function panelHeightTick(time) {
           // SVG height and outline
-          setPanelHeight(getValueInTime(currentOutlineHeight, toGeo.outlineHeight, t));
+          setPanelHeight(getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time), MORE_BUTTON_ROTATION_ENABLED);
         }
 
-        function openFeatureAnimationTick(animationState) {
-          var t = animationState.current;
-
+        function openFeatureAnimationTick(time) {
           // Menu button
           menuButton.setAttribute('transform',
             getTransformString(
-              getValueInTime(currentMenuBtnTranslateX, toGeo.menuBtnTranslateX, t),
+              getValueInTime(currentMenuBtnTranslateX, toGeo.menuBtnTranslateX, time),
               0,
               1,
-              getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, t)));
+              getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
-          featureTick && featureTick(t, toGeo);
+          featureTick && featureTick(time, toGeo);
         }
 
         function fadeInTextContentWhenLargeEnough() {
@@ -302,23 +299,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
 
         function animateHeight() {
-          createAnimation(
-            transition, {
-              'duration': duration,
-              'onTick': panelHeightTick
-            });
+          createAnimation(duration, panelHeightTick);
         }
 
         function openFeatureAnimation() {
-          createAnimation(
-            transition,
-            {
-              'duration': duration,
-              'onTick': openFeatureAnimationTick
-            });
+          createAnimation(duration, openFeatureAnimationTick);
         }
 
         cancelAllAnimations();
+
         updateGlobalState(doEnable && name, isSlowlyExpanding);
 
         // Let feature module know that animation is about to begin
@@ -392,7 +381,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         sitecues.emit('bp/do-update');
 
-        animateButtonMenuDrop();
+        animateButtonMenuDrop(willEnable);
       }
 
       /**
@@ -463,7 +452,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       var morePanelId = BP_CONST.MORE_ID,
         more = byId(morePanelId);
-      more.setAttribute('opacity', 0);
       more.setAttribute('transform', getTransformString(0, BP_CONST.TRANSFORMS[morePanelId].translateY));
 
       resetButtonStyles();
@@ -479,7 +467,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function resetPanelHeight() {
-      setPanelHeight(origOutlineHeight);
+      setPanelHeight(origOutlineHeight, state.isSecondaryPanel() ? MORE_BUTTON_ROTATION_ENABLED: 0);
     }
 
     function initSecondaryPanel () {

@@ -8,7 +8,7 @@ var sandbox;
 describe('traitcache', function() {
   beforeEach(function() {
     // Override getComputedStyle() for tests
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.animateCssProperties();
     sandbox.stub(window, 'getComputedStyle', function(element) {
             return element.tagName === 'DIV' ? {'borderTop': '3px'} : {'borderTop': '5px'};
           });

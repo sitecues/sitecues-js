@@ -127,9 +127,7 @@ sitecues.def('animate', function (animate, callback) {
       cancelFrameFn(this.animationId);
     };
 
-    function ArbitraryAnimate (properties, options) {
-      this.from               = properties.from;
-      this.to                 = properties.to;
+    function ArbitraryAnimate (options) {
       this.onTick             = options.onTick;
       this.onFinish           = options.onFinish;
       this.animationFn        = options.animationFn ? animationFunctions[options.animationFn] : animationFunctions[defaultAnimation];
@@ -144,35 +142,17 @@ sitecues.def('animate', function (animate, callback) {
           normalizedAnimationTime     = Math.min(1, this.animationFn(timeSinceFirstAnimationTick / this.duration)),
           that                        = this;
 
+      if (this.onTick) {
+        this.onTick(normalizedAnimationTime);
+      }
       if (normalizedAnimationTime < 1) {
-        if (this.onTick) {
-          this.onTick({
-            'current': normalizedAnimationTime,
-            'start'  : this.from,
-            'end'    : this.to
-          });
-        }
         this.animationId = requestFrameFn(function () {
           that.tick();
         });
       } else {
-
-        if (this.onTick) {
-          this.onTick({
-            'current': normalizedAnimationTime,
-            'start'  : this.from,
-            'end'    : this.to
-          });
-        }
-
         if (this.onFinish) {
-          this.onFinish({
-            'current': normalizedAnimationTime,
-            'start'  : this.from,
-            'end'    : this.end
-          });
+          this.onFinish(normalizedAnimationTime);
         }
-
       }
     };
 
@@ -180,11 +160,12 @@ sitecues.def('animate', function (animate, callback) {
       cancelFrameFn(this.animationId);
     };
 
-    animate.create = function (element, CSSProperties, options) {
-      if (element.hasOwnProperty('from') && element.hasOwnProperty('to')) {
-        return new ArbitraryAnimate(element, CSSProperties);
-      }
+    animate.animateCssProperties = function (element, CSSProperties, options) {
       return new Animate(element, CSSProperties, options);
+    };
+
+    animate.animateViaCallbacks = function(options) {
+      return new ArbitraryAnimate(options);
     };
 
     animate.getDuration = function (duration, from, to, currentVal) {

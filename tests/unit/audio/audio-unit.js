@@ -50,7 +50,7 @@ describe('audio', function() {
     var safariSandbox;
 
     before(function() {
-      safariSandbox = sinon.sandbox.create();
+      safariSandbox = sinon.sandbox.animateCssProperties();
       safariSandbox.stub(platform, 'browser', {
         is: 'Safari',
         isChrome: false,
