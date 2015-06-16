@@ -58,7 +58,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
       setOpacityTransition(btnContainer, useInstantTransition);
 
-      // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
+      // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
       if (!doAlwaysShowButton && !useInstantTransition) {
 
         btnContainer.setAttribute('transform', getTransformString(currentTranslate.left, currentTranslate.top, 0.5));
@@ -142,11 +142,6 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
 
-    sitecues.on('bp/toggle- more-button', onMouseClick);
-
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 
