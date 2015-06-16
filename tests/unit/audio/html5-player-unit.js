@@ -10,7 +10,7 @@ var modulePath = '../../../source/js/audio/speech-builder',
 describe('speech-builder', function() {
   beforeEach(function() {
     // Override getComputedStyle() for tests
-    sandbox = sinon.sandbox.animateCssProperties();
+    sandbox = sinon.sandbox.create();
     sandbox.stub(window, 'getComputedStyle', function(element) {
       return {
         display: element.getAttribute('data-display'),
