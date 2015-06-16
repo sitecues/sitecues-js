@@ -109,7 +109,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * Checks if the color value given of a light tone or not.
      */
     function isLightIntensity(colorValue) {
-      return colorUtil.getLuminosity(colorValue) > MID_COLOR_INTENSITY;
+      return colorUtil.getLuminosityFromColorName(colorValue) > MID_COLOR_INTENSITY;
     }
 
     function getElementsContainingOwnText(selector) {
@@ -456,7 +456,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           backgroundPosition: (offsetLeft / state.zoom) + 'px '+ (offsetTop / state.zoom) + 'px',
           backgroundOrigin: 'border-box',
           backgroundRepeat: 'no-repeat',
-          backgroundClip: 'border-box,',
+          backgroundClip: 'border-box',
           backgroundAttachment: 'scroll',
           backgroundSize: newBgSize
         },
@@ -720,7 +720,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       return ' style="' +
           'pointer-events:none;' +
           'stroke-width: ' + strokeWidth + ';' +
-          'stroke: ' + strokeColor + ';' +
+          (strokeWidth ? 'stroke: ' + strokeColor + ';' : '') +
           'fill: ' + (fillColor ? fillColor : 'none' ) + '"';
     }
 

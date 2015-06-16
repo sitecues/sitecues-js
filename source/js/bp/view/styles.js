@@ -466,6 +466,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#sitecues-badge:focus': {
           'outline': 0
         },
+
         '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
           'stroke-width': '14px'

@@ -57,7 +57,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
     var docElt = document.documentElement,
       docStyle = docElt.style,
       oldBorderColor = docStyle.outlineColor;
-    if (colorName === 'initial' || colorName === 'inherit') {
+    if (colorName === 'initial' || colorName === 'inherit' || colorName === 'transparent') {
       return TRANSPARENT;
     }
     docStyle.outlineColor = colorName;
