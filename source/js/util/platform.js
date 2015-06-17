@@ -75,11 +75,11 @@ sitecues.def('platform', function (platformModule, callback) {
     // Set globally accessible version constants
     versionString: (function() {
       // If IE is being used, determine which version
-      var charIndex = agent.indexOf(os === 'win' ? 'Windows N' : 'Mac OS X ');
+      var charIndex = agent.indexOf(os === 'win' ? 'Windows NT' : 'Mac OS X ');
       if (charIndex === -1) {
         return '0'; // Unknown version
       }
-      return agent.slice(charIndex + 9).replace(/\W.*$/, '');
+      return agent.slice(charIndex).replace(/^\D*/,'').replace(/\W.*$/, '');
     })()
   };
 
