@@ -3,10 +3,13 @@
  */
 sitecues.def('bp/view/elements/cards', function (cards, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'locale', function (BP_CONST, helper, locale) {
+  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', function (BP_CONST, helper, locale, state) {
 
-    var byId = helper.byId,
+    var
+      PANELS_WITH_CARDS = { tips: 1, settings: 1},
+      byId = helper.byId,
       isInitialized,
+      isActive,
       activePanelName,
       activePanel;
 
@@ -49,20 +52,34 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       return html.replace(/\<sc-button /g, '<sc-button role="button" class="scp-hand-cursor" ');
     }
 
-    cards.toggleActive = function(isActive, panelName) {
-      if (isActive) {
-        byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
-        byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
+    function onPanelUpdate() {
+      var panelName = state.getSecondaryPanelName(),
+        willBeActive = panelName && PANELS_WITH_CARDS.hasOwnProperty(panelName);
+
+      // Active state
+      if (willBeActive) {
         activePanelName = panelName;
         activePanel = getPanelElement(panelName);
       }
       else {
-        byId(BP_CONST.PREV_ID).removeEventListener('click', prevCard);
-        byId(BP_CONST.NEXT_ID).removeEventListener('click', nextCard);
         activePanelName = null;
         activePanel = null;
       }
-    };
+
+      // Event listeners
+      if (isActive !== willBeActive) {
+        if (willBeActive) {
+          byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
+          byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
+        }
+        else {
+          byId(BP_CONST.PREV_ID).removeEventListener('click', prevCard);
+          byId(BP_CONST.NEXT_ID).removeEventListener('click', nextCard);
+        }
+      }
+
+      isActive = willBeActive;
+    }
 
     function toggleCardActive(cardElement, isActive) {
       if (isActive) {
@@ -111,6 +128,8 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         switchCard(-1);
       }
     }
+
+    sitecues.on('bp/do-update', onPanelUpdate);
 
     sitecues.on('bp/do-toggle-secondary-panel', init);
 

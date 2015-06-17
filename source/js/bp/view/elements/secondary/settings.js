@@ -1,22 +1,26 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', 'bp/view/elements/cards',
-    function (BP_CONST, helper, conf, state, cards) {
+  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state',
+    function (BP_CONST, helper, conf, state) {
 
-    var byId = helper.byId;
+    var byId = helper.byId,
+      isActive;
 
     function onPanelUpdate() {
 
-      var isActive = state.getSecondaryPanelName() === 'settings',
+      var willBeActive = state.getSecondaryPanelName() === 'settings',
         settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
-      if (isActive) {
-        settingsCards.addEventListener('click', onSettingsClick);
+      if (isActive !== willBeActive) {
+        if (willBeActive) {
+          settingsCards.addEventListener('click', onSettingsClick);
+        }
+        else {
+          settingsCards.removeEventListener('click', onSettingsClick);
+        }
       }
-      else {
-        settingsCards.removeEventListener('click', onSettingsClick);
-      }
-      cards.toggleActive(isActive, 'settings');
+
+      isActive = willBeActive;
     }
 
 
