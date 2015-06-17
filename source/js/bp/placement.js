@@ -114,7 +114,7 @@ sitecues.def('bp/placement', function(placement, callback) {
     // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
     function fixUseElementsInIE() {
 
-      if (!platform.browser.isIE || platform.os.majorVersion < 10) {
+      if (!platform.browser.isIE || platform.isIE9()) {
         return;
       }
       var useElements = svgElement.getElementsByTagName('use'),
