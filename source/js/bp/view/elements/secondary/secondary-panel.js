@@ -224,13 +224,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       function getCurrentOutlineHeight() {
-        return parseInt(getOutlineSVG().getAttribute('d').split(' ')[1]);
+        var outlinePath = getOutlineSVG().getAttribute('d');
+        return parseInt(outlinePath.split(' ')[2]);
       }
 
       function setCurrentOutlineHeight(height) {
         var outlineSVG = getOutlineSVG(),
           shadowSVG = byId(BP_CONST.SHADOW_ID);
-        outlineSVG.setAttribute('d', 'M808 ' + height + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + height);
+        // Important: do not take the space out. We need it for parsing in getCurrentOutlineHeight()
+        outlineSVG.setAttribute('d', 'M 808 ' + height + 'c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V ' + height);
         shadowSVG.setAttribute('d', 'm808,' + height + 'c0,6 -5,11 -11,11H11m797,-11v-' + height);
       }
 
