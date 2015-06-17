@@ -5,7 +5,8 @@
 // IE broken
 //   -- .scp-hover-expand: no CSS transform in SVG, all versions of IE: http://stackoverflow.com/questions/21298338/css-transform-on-svg-elements-ie9
 //   -- panel height issues
-
+// Firefox
+//   -- Prev, next not working
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
