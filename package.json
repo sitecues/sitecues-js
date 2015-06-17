@@ -8,10 +8,9 @@
     },
     "main": "source/js/core.js",
     "private": true,
-    "engineStrict": true,
     "engines": {
         "node": "~0.10.38",
-        "npm": "~2.7.5"
+        "npm": "^2.7.5"
     },
     "bin": "binary/web.js",
     "dependencies": {
@@ -44,7 +43,7 @@
         "grunt-jscs": "1.8.0",
         "grunt-jslint": "1.1.14",
         "grunt-selenium-webdriver": "0.2.451",
-        "intern": "https://github.com/theintern/intern.git",
+        "intern": "theintern/intern#master",
         "grunt-contrib-uglify": "0.9.1",
         "grunt-contrib-watch": "0.6.1"
     },
