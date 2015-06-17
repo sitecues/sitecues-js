@@ -173,7 +173,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       // Compute based on the size of the contents
       // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
       function getPanelContentsHeight(featureName) {
-        return 250;
         var range = document.createRange(),
           contentElements = document.querySelectorAll('.scp-if-' + featureName),
           numContentElements = contentElements.length,
