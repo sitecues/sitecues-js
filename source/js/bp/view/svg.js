@@ -85,10 +85,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
-      <text id="scp-prev-card" class="scp-hand-cursor scp-hover-expand" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
+      <text id="scp-prev-card" class="scp-hand-cursor" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
          &#9668;\
       </text>\
-      <text id="scp-next-card" class="scp-hand-cursor scp-hover-expand" role="button" aria-label="Next" x="735" y="74">\
+      <text id="scp-next-card" class="scp-hand-cursor" role="button" aria-label="Next" x="735" y="74">\
          &#9658;\
       </text>\
     </g>\

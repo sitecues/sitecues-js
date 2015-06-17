@@ -368,7 +368,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         origOutlineHeight = origOutlineHeight || getCurrentOutlineHeight();
         origPanelContentsRect = origPanelContentsRect || document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
 
-        resetPanelHeight();
+        SC_DEV && console.log('outline height from gBCR = ' + getOutlineSVG().getBoundingClientRect().height);
+        SC_DEV && console.log('Ratio= ' + getCurrentOutlineHeight() / getOutlineSVG().getBoundingClientRect().height);
 
         var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,
           DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED,
@@ -423,12 +424,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       });
     }
 
-    function resetPanelHeight() {
-      if (origOutlineHeight) {
-        setPanelHeight(origOutlineHeight, state.isSecondaryPanel() ? MORE_BUTTON_ROTATION_ENABLED : 0);
-      }
-    }
-
     function initSecondaryPanel () {
       addMouseListeners();
       resetStyles();
@@ -444,7 +439,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       var DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED;
 
       resetStyles();
-      resetPanelHeight();
+      if (origOutlineHeight) {
+        setPanelHeight(origOutlineHeight, 0);
+      }
 
       state.set('currentSecondaryPanelMode',  DISABLED);
       state.set('secondaryPanelTransitionTo', DISABLED);
