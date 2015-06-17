@@ -90,6 +90,7 @@ sitecues.def('platform', function (platformModule, callback) {
   // 6.2 = Windows 8
   // 6.3 = Windows 8.1
   // 10 = Windows 10
+  // For more details see https://en.wikipedia.org/?title=Windows_NT
   platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
 
   // Restore if needed
