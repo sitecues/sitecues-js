@@ -1,6 +1,7 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', function (BP_CONST, helper, conf, state) {
+  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', 'bp/view/elements/cards',
+    function (BP_CONST, helper, conf, state, cards) {
 
     var byId = helper.byId;
 
@@ -15,6 +16,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       else {
         settingsCards.removeEventListener('click', onSettingsClick);
       }
+      cards.toggleActive(isActive, 'settings');
     }
 
 

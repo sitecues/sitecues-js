@@ -142,9 +142,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          <g #scp-more>     // Secondary panel that slides down
          <g .scp-feature-content>
          <g .scp-tips> etc.
-         .scp-cards
-         .scp-card
-         .scp-card
+         <sc-cards>
+           <sc-card>
+           <sc-card>
          ...
 
          Classes important for CSS:
@@ -176,7 +176,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // <div> which may be styled by the page, e.g. at
         // - Margins http://www.independent.ie/entertainment/trending/westboro-baptist-church-accidentally-hates-the-ivory-coast-31251240.html
         // - Fonts: https://shuttle.support.signiant.com/customer/portal/articles/1720613-why-am-i-repeatedly-asked-to-make-my-media-shuttle-site-trusted-
-        'sc': {
+        'sc,sc-cards,sc-card': {
           'display': 'block',
           'margin': '0',
           'color': '#000',
@@ -501,7 +501,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           fill: '#aaa'
         },
 
-        '.scp-cards': {
+        'sc-cards': {
           'position': 'relative',
           'font-family': 'Arial',
           'left': '130px',
@@ -509,13 +509,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': 999
         },
 
-        '.scp-card': {
+        'sc-card': {
           'position': 'absolute',
           'visibility' : 'hidden',
           'opacity': 0
         },
 
-        '.scp-card.scp-active': {
+        'sc-card.scp-active': {
           'visibility': 'visible',
           'opacity': 1
         },

@@ -29,14 +29,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             module: tipsModule,
             menuButtonId: BP_CONST.TIPS_BUTTON_ID,
             labelId: BP_CONST.TIPS_LABEL_ID,
-            hasArrows: true,
             panelId: BP_CONST.TIPS_CONTENT_ID
           },
           settings: {
             module: settingsModule,
             menuButtonId: BP_CONST.SETTINGS_BUTTON_ID,
             labelId: BP_CONST.SETTINGS_LABEL_ID,
-            hasArrows: true,
             panelId: BP_CONST.SETTINGS_CONTENT_ID
           },
           feedback: {
@@ -112,10 +110,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         // More button
         updateMoreButton(outlineHeight, moreButtonRotate);
-      }
-
-      function isDisabled(id) {
-        return byId(id).hasAttribute('aria-disabled');
       }
 
       function getTransform(elem) {
@@ -393,44 +387,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         animateSecondaryFeature(featureName, willEnable);
       }
 
-      function getActiveCard() {
-        var featureName = state.getSecondaryPanelName(),
-          feature = features[featureName];
-
-        return feature && feature.hasArrows && byId(feature.panelId).getElementsByClassName('scp-active')[0];
-      }
-
-      function switchCard(direction) {
-        var activeCard = getActiveCard(),
-            cardToSelect,
-            allCards;
-        if (activeCard) {
-          cardToSelect = direction === 1 ? activeCard.nextElementSibling : activeCard.previousElementSibling;
-          if (!cardToSelect) {
-            allCards = activeCard.parentElement;
-            cardToSelect = direction === 1 ? allCards.firstElementChild : allCards.lastElementChild;
-          }
-
-          if (cardToSelect) {
-            activeCard.className = activeCard.className.replace('scp-active', '');
-            cardToSelect.className = cardToSelect.className + ' scp-active';
-          }
-        }
-      }
-
-      function nextCard() {
-        switchCard(1);
-        // At first, back button is disabled when on first card
-        // However, once we've gone forward we allow backwards cycling
-        byId(BP_CONST.PREV_ID).removeAttribute('aria-disabled');
-      }
-
-      function prevCard() {
-        if (!isDisabled(BP_CONST.PREV_ID)) {
-          switchCard(-1);
-        }
-      }
-
       function addMouseListeners () {
 
         forEachFeature(function(feature) {
@@ -439,11 +395,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           button.addEventListener('click', onMouseClick);
           label.addEventListener('click', onMouseClick);
         });
-
-
-        // Some panels have cards
-        byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
-        byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
       }
 
     /********************** INIT / RESET **************************/

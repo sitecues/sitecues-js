@@ -91,10 +91,11 @@ files=\
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
 	source/js/bp/view/elements/more-button.js \
-	source/js/bp/view/elements/secondary/about.js \
+	source/js/bp/view/elements/secondary/cards.js \
 	source/js/bp/view/elements/secondary/tips.js \
 	source/js/bp/view/elements/secondary/settings.js \
 	source/js/bp/view/elements/secondary/feedback.js \
+	source/js/bp/view/elements/secondary/about.js \
 	source/js/bp/view/elements/secondary/secondary-panel.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \

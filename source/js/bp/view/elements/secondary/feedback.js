@@ -25,6 +25,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       return cssValues;
     };
 
+    sitecues.on('bp/did-toggle-feedback', onToggle);
 
     callback();
 

@@ -65,7 +65,7 @@ sitecues.def('info', function(info, callback) {
         localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
         sitecuesJsUrl = sitecues.getLibraryUrl().raw,
         hostUrl = window.location,
-        pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +
+        pageUrl = sitecues.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html?') +
           addParam('scUrl', sitecuesJsUrl) +
           addParam('siteId', site.getSiteId()) +
           addParam('siteUrl', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +

@@ -102,6 +102,14 @@ app.on('listen', function(e){
   console.log('LISTEN: ' + JSON.stringify(e));
 });
 
+// CORS -- allow settings-[locale].html and tips-[locale].html to be loaded via xhr
+app.all(/\/html\/|\/images\/cursors\//, function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
+  return next();
+});
+
 // Set up the handling of the per-siteID URLs of the format /l/s;id=s-XXXXXXXX/*
 (function(){
   // Creates a build data instance

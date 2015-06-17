@@ -9,9 +9,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       return byId(BP_CONST.ABOUT_CONTENT_IMAGE_ID);
     }
 
-    function onToggle(isActive) {
-    }
-
     function getValueInTime(from, to, time) {
       return from + (to - from) * time;
     }
@@ -40,8 +37,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           transform.getTransformString(getValueInTime(currentMenuImageTranslateX, targetCSSValues.menuImageTranslateX, t), 0);
       aboutImage.setAttribute('transform', newTransformString);
     };
-
-    sitecues.on('bp/did-toggle-about', onToggle);
 
     callback();
 
