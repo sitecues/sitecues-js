@@ -1,5 +1,5 @@
-// TODO rename icon menu buton menu
-// Auto size not right
+// TODO rename icon menu button menu
+// Auto size not right?
 // Card interactions
 // Feedback
 

@@ -14,86 +14,6 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
-<sc id="scp-tips" class="scp-if-tips scp-cards scp-transition-opacity scp-secondary-feature">\
-  <sc class="scp-card scp-active">\
-    <sc-h1>Welcome</sc-h1>\
-    <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
-    <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Zoom the web page</sc-h1>\
-    <sc-p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</sc-p>\
-    <sc-p>The more you zoom, the easier everything is to see &mdash; even the mouse.</sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Zoom in on a part</sc-h1>\
-    <sc-p>You can zoom in even more on parts of this web page.</sc-p>\
-    <sc-p>Just move your mouse to an area you\'re interested in, and press the spacebar.</sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Listen to it</sc-h1>\
-    <sc-p>First &mdash; click the speech button on.</sc-p>\
-    <sc-p>Next &mdash; move your mouse to to something and press the spacebar.</sc-p>\
-    <sc-p>Now listen as it\'s read aloud.</sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Get more help</sc-h1>\
-    <sc-p>Get started with sitecues in the</sc-p>\
-    <sc-p><sc-button-big role="button">Quick Start Guide</sc-button-big></sc-p>\
-  </sc>\
-</sc>\
-<sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity scp-secondary-feature">\
-  <sc class="scp-card scp-active">\
-    <sc-h1>Settings</sc-h1>\
-    <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
-    <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Color themes</sc-h1>\
-    <sc-p>\
-      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName" data-setting-value="none"> \
-        Normal\
-      </sc-button>\
-    </sc-p>\
-    <sc-p>\
-      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-relaxed" data-setting-name="themeName" data-setting-value="blueReduction">\
-        Relaxed tones\
-      </sc-button>\
-    </sc-p>\
-    <sc-p>\
-      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-contrast" data-setting-name="themeName" data-setting-value="increaseContrast">\
-        Enhanced contrast\
-      </sc-button>\
-    </sc-p>\
-    <sc-p>\
-      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-night" data-setting-name="themeName" data-setting-value="darkOriginal">\
-        Nighttime\
-      </sc-button>\
-    </sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Choose a voice</sc-h1>\
-    <sc-p>Who should read your text aloud?</sc-p>\
-    <sc-p><button>Sarah</button><button>Rebecca</button><button>Henry</button></sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Voice speed</sc-h1>\
-    <sc-p>How fast should sitecues read?</sc-p>\
-    <sc-p><span role="button" class="scp-range-label">Slower</span><input type="range" aria-label="Speech rate"/><span role="button" class="scp-range-label">Faster</span></sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Lens Size</sc-h1>\
-    <sc-p>How much extra should the spacebar zoom content?</sc-p>\
-    <sc-p><button>None</button><button>Small</button><button>Medium</button><button>Large</button></sc-p>\
-  </sc>\
-  <sc class="scp-card">\
-    <sc-h1>Colors</sc-h1>\
-    <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
-  </sc>\
-</sc>\
-<sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
-  <sc-button-big role="button" class="scp-hand-cursor scp-hover-expand" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
-</sc>\
 \
 <svg id="scp-svg" role="group" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1050 300" preserveAspectRatio="xMinYMin" data-sc-reversible="false">\
 <defs>\
@@ -228,12 +148,93 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
    </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
+</svg>\
+\
+<sc id="scp-tips" class="scp-if-tips scp-cards scp-transition-opacity scp-secondary-feature">\
+  <sc class="scp-card scp-active">\
+    <sc-h1>Welcome</sc-h1>\
+    <sc-p>sitecues zoom and speech tools let you see this page better, and even listen to it read aloud.</sc-p>\
+    <sc-p>Use the arrow buttons at the top right of this panel to read more tips.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Zoom the web page</sc-h1>\
+    <sc-p>To zoom the entire page, press <kbd>+</kbd> or <kbd>-</kbd> at any time, or use the zoom slider.</sc-p>\
+    <sc-p>The more you zoom, the easier everything is to see &mdash; even the mouse.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Zoom in on a part</sc-h1>\
+    <sc-p>You can zoom in even more on parts of this web page.</sc-p>\
+    <sc-p>Just move your mouse to an area you\'re interested in, and press the spacebar.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Listen to it</sc-h1>\
+    <sc-p>First &mdash; click the speech button on.</sc-p>\
+    <sc-p>Next &mdash; move your mouse to to something and press the spacebar.</sc-p>\
+    <sc-p>Now listen as it\'s read aloud.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Get more help</sc-h1>\
+    <sc-p>Get started with sitecues in the</sc-p>\
+    <sc-p><sc-button-big role="button">Quick Start Guide</sc-button-big></sc-p>\
+  </sc>\
+</sc>\
+<sc id="scp-settings" class="scp-if-settings scp-cards scp-transition-opacity scp-secondary-feature">\
+  <sc class="scp-card scp-active">\
+    <sc-h1>Settings</sc-h1>\
+    <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>\
+    <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Color themes</sc-h1>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName" data-setting-value="none"> \
+        Normal\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-relaxed" data-setting-name="themeName" data-setting-value="blueReduction">\
+        Relaxed tones\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-contrast" data-setting-name="themeName" data-setting-value="increaseContrast">\
+        Enhanced contrast\
+      </sc-button>\
+    </sc-p>\
+    <sc-p>\
+      <sc-button role="button" name="scp-setting-theme" id="scp-setting-theme-night" data-setting-name="themeName" data-setting-value="darkOriginal">\
+        Nighttime\
+      </sc-button>\
+    </sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Choose a voice</sc-h1>\
+    <sc-p>Who should read your text aloud?</sc-p>\
+    <sc-p><button>Sarah</button><button>Rebecca</button><button>Henry</button></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Voice speed</sc-h1>\
+    <sc-p>How fast should sitecues read?</sc-p>\
+    <sc-p><sc-span role="button" class="scp-range-label">Slower</sc-span><input type="range" aria-label="Speech rate"/><sc-span role="button" class="scp-range-label">Faster</sc-span></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Lens Size</sc-h1>\
+    <sc-p>How much extra should the spacebar zoom content?</sc-p>\
+    <sc-p><button>None</button><button>Small</button><button>Medium</button><button>Large</button></sc-p>\
+  </sc>\
+  <sc class="scp-card">\
+    <sc-h1>Colors</sc-h1>\
+    <sc-p>TBD Nothing to see here, move along, la la la. All work and no play makes Aaron a dull boy. This is a joke, I promise.</sc-p>\
+  </sc>\
+</sc>\
+<sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
+  <sc-button-big role="button" class="scp-hand-cursor scp-hover-expand" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
+</sc>\
 <sc id="scp-feedback-textarea" class="scp-if-feedback">\
   <sc class="scp-feedback-content">\
      <textarea id="feedback-textarea-id" style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
   </sc>\
-</sc>\
-</svg>';
+</sc>';
   sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeEnd(loc) {

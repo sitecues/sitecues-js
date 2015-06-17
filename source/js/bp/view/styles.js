@@ -197,6 +197,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '12px 0'
         },
 
+        'sc-span': {
+          'display': 'inline-block'
+        },
+
         'sc-button': {
           'display': 'block',
           'font-family': 'Arial',
@@ -252,7 +256,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-svg': {
           'max-width': 'none',
-          'overflow': 'hidden'
+          'overflow': 'hidden',
+          'position': 'absolute'
         },
 
         // The new badge is hidden until sitecues is loaded
