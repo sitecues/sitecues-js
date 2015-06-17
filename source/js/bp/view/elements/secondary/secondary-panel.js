@@ -2,6 +2,10 @@
 // Auto size not right?
 // Card interactions
 // Feedback
+// IE broken
+//   -- .scp-hover-expand: no CSS transform in SVG, all versions of IE: http://stackoverflow.com/questions/21298338/css-transform-on-svg-elements-ie9
+//   -- panel height issues
+
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
@@ -169,6 +173,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       // Compute based on the size of the contents
       // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
       function getPanelContentsHeight(featureName) {
+        return 250;
         var range = document.createRange(),
           contentElements = document.querySelectorAll('.scp-if-' + featureName),
           numContentElements = contentElements.length,
@@ -418,7 +423,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     }
 
     function resetPanelHeight() {
-      setPanelHeight(origOutlineHeight, state.isSecondaryPanel() ? MORE_BUTTON_ROTATION_ENABLED: 0);
+      if (origOutlineHeight) {
+        setPanelHeight(origOutlineHeight, state.isSecondaryPanel() ? MORE_BUTTON_ROTATION_ENABLED : 0);
+      }
     }
 
     function initSecondaryPanel () {

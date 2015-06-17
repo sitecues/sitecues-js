@@ -484,6 +484,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /*************** Secondary panel **************************/
 
         '.scp-is-secondary-feature > svg': {
+//          'transform': 'translateY(-506px)', // Compensate, not necessary if we use <svg @preserveAspectRation>
           'height': '1200px !important'    // Make room for tall panel contents
         },
 
