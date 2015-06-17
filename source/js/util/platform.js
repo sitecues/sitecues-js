@@ -83,13 +83,14 @@ sitecues.def('platform', function (platformModule, callback) {
     })()
   };
 
+  // Windows versions are weird:
+  // 5.1, 5.2 = Windows XP
+  // 5 = Windows Vista, Windows Server 2008
+  // 6.1 = Windows 7
+  // 6.2 = Windows 8
+  // 6.3 = Windows 8.1
+  // 10 = Windows 10
   platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
-
-  if (SC_DEV) {
-    sitecues.getOSVersion = function () {
-      return platformModule.os.versionString;
-    };
-  }
 
   // Restore if needed
   //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
