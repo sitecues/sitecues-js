@@ -64,7 +64,9 @@ sitecues.def('bp/placement', function(placement, callback) {
         // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
         // because of transparent space to the right/bottom of the visible BP
         svgAspectRatio,
-        documentElement   = document.documentElement;
+        documentElement   = document.documentElement,
+
+        SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
 
     // Allow animations just before panel expands
     function disableAnimations() {
@@ -114,20 +116,20 @@ sitecues.def('bp/placement', function(placement, callback) {
     // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
     function fixUseElementsInIE() {
 
-      if (!platform.browser.isIE || platform.isIE9()) {
-        return;
-      }
-      var useElements = svgElement.getElementsByTagName('use'),
-        numUseElements = useElements.length,
-        useIndex = 0,
-        useElement;
-      for (; useIndex < numUseElements; useIndex ++) {
-        useElement = useElements[useIndex];
-        // Toggle space in front of href attribute to get
-        // IE to 'wake up' and understand it again
-        var href = useElement.getAttribute('xlink:href'),
-          newHref = href.charAt(0) === ' ' ? href.substr(1) : ' ' + href;
-        useElement.setAttribute('xlink:href', newHref);
+      if (SHOULD_FIX_USE_ELEMENTS) {
+
+        var useElements = svgElement.getElementsByTagName('use'),
+          numUseElements = useElements.length,
+          useIndex = 0,
+          useElement;
+        for (; useIndex < numUseElements; useIndex++) {
+          useElement = useElements[useIndex];
+          // Toggle space in front of href attribute to get
+          // IE to 'wake up' and understand it again
+          var href = useElement.getAttribute('xlink:href'),
+            newHref = href.charAt(0) === ' ' ? href.substr(1) : ' ' + href;
+          useElement.setAttribute('xlink:href', newHref);
+        }
       }
     }
 

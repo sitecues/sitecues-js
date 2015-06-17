@@ -75,7 +75,7 @@ sitecues.def('platform', function (platformModule, callback) {
     // Set globally accessible version constants
     versionString: (function() {
       // If IE is being used, determine which version
-      var charIndex = agent.indexOf('Windows N') || agent.indexOf('Mac OS X ');
+      var charIndex = agent.indexOf(os === 'win' ? 'Windows N' : 'Mac OS X ');
       if (charIndex === -1) {
         return '0'; // Unknown version
       }
@@ -84,6 +84,13 @@ sitecues.def('platform', function (platformModule, callback) {
   };
 
   platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
+
+  if (SC_DEV) {
+    sitecues.getOSVersion = function () {
+      return platformModule.os.versionString;
+    };
+  }
+
   // Restore if needed
   //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
 
