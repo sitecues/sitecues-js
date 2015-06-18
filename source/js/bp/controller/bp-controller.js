@@ -275,10 +275,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var feature = item.getAttribute('data-feature');
       if (feature) {  /* Feature button has data-feature attribute */
         baseController.clearPanelFocus();
-        sitecues.emit('bp/toggle-' + feature);
+        sitecues.emit('bp/do-toggle-secondary-panel', feature);
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/toggle-more-button');
+        sitecues.emit('bp/do-toggle-secondary-panel');
       }
       if (item.id === BP_CONST.NEXT_ID) {
         sitecues.emit('bp/next-card');

@@ -358,9 +358,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       /**
        * Toggle back and forth between main panel and secondary panel
        */
-      function toggleSecondaryPanel() {
+      function toggleSecondaryPanel(feature) {
 
-        var featurePanelName = getFeaturePanelName();
+        var featurePanelName = feature || getFeaturePanelName();
         if (featurePanelName) {
           toggleSecondaryFeature(featurePanelName);
           return;
@@ -394,6 +394,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         var willEnable = state.getSecondaryPanelName() !== featureName;
         animateSecondaryFeature(featureName, willEnable);
       }
+
+
 
       function addMouseListeners () {
 

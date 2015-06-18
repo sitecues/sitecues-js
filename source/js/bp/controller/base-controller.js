@@ -11,7 +11,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         'more-button-group'
         //'close-button-group'
       ],
-      'more': [
+      'button-menu': [
         'tips-button',
         'settings-button',
         'feedback-button',
