@@ -200,7 +200,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-kbd': {
           'padding': '.1em .6em',
           'border': '1px solid #ccc',
-          'font-size': '13px',
+          'font-size': '14px',
           'background-color': '#f7f7f7',
           'color': '#333',
           '-moz-box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
