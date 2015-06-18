@@ -8,7 +8,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     currentSecondaryPanelMode : 0,
     secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
-    secondaryPanelName      : 'main', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
+    secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
     isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
     doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation

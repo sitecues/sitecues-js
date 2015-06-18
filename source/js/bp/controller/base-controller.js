@@ -9,7 +9,6 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         'zoom-slider-bar',
         'speech',
         'more-button-group'
-        //'close-button-group'
       ],
       'button-menu': [
         'tips-button',
@@ -41,7 +40,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     main.getTab = function () {
-      if (BP_CONST.PANEL_TYPES[+state.isPanel()] && state.getSecondaryPanelName()) {
+      if (state.isPanel() && state.isSecondaryPanel()) {
         return state.getSecondaryPanelName();
       }
       return BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()];
@@ -62,12 +61,18 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     main.getFocusedItem = function() {
+      var focusId = main.getFocusedItemName();
+      if (focusId) {
+        return helper.byId('scp-' + focusId);
+      }
+    };
+
+    main.getFocusedItemName = function() {
       if (state.get('focusIndex') < 0) {
         return null;
       }
       var currentPanel = main.getTab();
-      var focusId = main.tabbable[currentPanel][state.get('focusIndex')];
-      return helper.byId('scp-' + focusId);
+      return main.tabbable[currentPanel][state.get('focusIndex')];
     };
 
     function renderFocusOutline(focusedItem, panelContainer) {
