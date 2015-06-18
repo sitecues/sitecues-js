@@ -197,6 +197,24 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '12px 0'
         },
 
+        'sc-kbd': {
+          'padding': '.1em .6em',
+          'border': '1px solid #ccc',
+          'font-size': '13px',
+          'background-color': '#f7f7f7',
+          'color': '#333',
+          '-moz-box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
+          '-webkit-box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
+          'box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
+          'border-radius': '3px',
+          'display': 'inline-block',
+          'text-shadow': '0 1px 0 #fff',
+          'line-height': '1.4',
+          'white-space': 'nowrap',
+          'position': 'relative',
+          'top': '-3px'
+        },
+
         'sc-span': {
           'display': 'inline-block'
         },
