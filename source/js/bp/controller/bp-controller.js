@@ -37,10 +37,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var item = baseController.getFocusedItem(),
           role;
 
-      //if (!getIsMorePanelState()) {
-      //  return;
-      //}
-
       if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
         panelController.shrinkPanel(true);
         evt.preventDefault();
@@ -234,7 +230,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     function processFocusedItem(evt) {
 
       var item = baseController.getFocusedItem();
-      console.log(item);
+
       if(!item) {
         return;
       }
@@ -275,10 +271,11 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var feature = item.getAttribute('data-feature');
       if (feature) {  /* Feature button has data-feature attribute */
         baseController.clearPanelFocus();
-        sitecues.emit('bp/toggle-' + feature);
+        sitecues.emit('bp/do-toggle-secondary-panel', feature);
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/toggle-more-button');
+        sitecues.emit('bp/do-toggle-secondary-panel');
+        syncFocusIndex();
       }
       if (item.id === BP_CONST.NEXT_ID) {
         sitecues.emit('bp/next-card');
@@ -288,6 +285,11 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
 
       sitecues.emit('bp/do-update');
+    }
+
+    function syncFocusIndex () {
+      var currentTabbable = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()];
+      state.set('focusIndex', baseController.tabbable[currentTabbable].indexOf(baseController.getFocusedItemName()));
     }
 
     window.addEventListener('focus', onWindowFocus);

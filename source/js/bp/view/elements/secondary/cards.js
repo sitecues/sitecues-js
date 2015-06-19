@@ -49,7 +49,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     // Add useful attributes to various elements, based on elemTypes
     function addSemanticSugar(html) {
-      return html.replace(/\<sc-button /g, '<sc-button role="button" class="scp-hand-cursor" ');
+      return html.replace(/\<sc-button /g, '<sc-button role="button" class="scp-hand-cursor scp-tabbable" ');
     }
 
     function onPanelUpdate() {

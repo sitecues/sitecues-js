@@ -359,9 +359,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       /**
        * Toggle back and forth between main panel and secondary panel
        */
-      function toggleSecondaryPanel() {
+      function toggleSecondaryPanel(feature) {
 
-        var featurePanelName = getFeaturePanelName();
+        var featurePanelName = feature || getFeaturePanelName();
         if (featurePanelName) {
           toggleSecondaryFeature(featurePanelName);
           return;
