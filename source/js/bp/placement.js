@@ -79,7 +79,7 @@ sitecues.def('bp/placement', function(placement, callback) {
     function switchToBadgeParent() {
 
       // Remove transform/translate so that badge is fully returned to origin state
-      bpElement.style[helper.transformProperty] = '';
+      bpElement.style[platform.transformProperty] = '';
 
       badgeElement.appendChild(bpElement);
 
@@ -190,7 +190,7 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       bpElement.style.top  = 0;
       bpElement.style.left = 0;
-      bpElement.style[helper.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
+      bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
 
       return badgeRect;
     }

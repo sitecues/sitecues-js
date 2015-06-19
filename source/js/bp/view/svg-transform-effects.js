@@ -15,7 +15,6 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       var isActivePanel,
         byId = helper.byId,
         HOVER_ANIMATION_MS = 500,
-        HOVER_SCALE = 1.2,
         expandHoverElems,
         animations = [];
 
@@ -26,14 +25,15 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       function toggleHover(target, isActiveHover) {
 
         var id = + target.getAttribute('data-id'),
-          targetScale = isActiveHover ? HOVER_SCALE : 1,
           cssProperties = {
-            transform: 'scale(' + targetScale + ')'
+            transform: isActiveHover ? target.getAttribute('data-hover') : ' ' // Setting to space is like no transform
           },
           options = {
             duration    : HOVER_ANIMATION_MS,
-            useAttribute: true,
-            onFinish    : !isActiveHover && function() { target.removeAttr('transform'); }
+            useAttribute: target instanceof SVGElement
+//            onFinish: function() {
+//              animations[id] = null;
+//            }
           };
 
         animations[id] && animations[id].cancel();
@@ -54,15 +54,15 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         isActivePanel = willBeActive;
-        expandHoverElems = expandHoverElems || getContainer().getElementsByClassName('scp-hover-expand');
+        expandHoverElems = expandHoverElems || getContainer().querySelectorAll('[data-hover]');
 
         var addOrRemoveFn = isActivePanel ? 'addEventListener' : 'removeEventListener',
           index = expandHoverElems.length;
 
         function addOrRemoveHovers(elem) {
           elem.setAttribute('data-id', index);
-          elem[addOrRemoveFn]('mouseover', onMouseOver);
-          elem[addOrRemoveFn]('mouseout', onMouseOut);
+          elem[addOrRemoveFn]('mouseenter', onMouseOver);
+          elem[addOrRemoveFn]('mouseleave', onMouseOut);
         }
 
         while (index --) {
@@ -71,15 +71,9 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       }
 
       function cancelHovers() {
-        animations.forEach(function(animation) { animation.cancel(); });
-
-        var index = expandHoverElems.length,
-          elem;
+        var index = expandHoverElems.length;
         while (index --) {
-          elem = expandHoverElems[index];
-          if (elem.hasAttribute('transform')) {
-            toggleHover(elem, false);
-          }
+          toggleHover(expandHoverElems[index], false);
         }
       }
 

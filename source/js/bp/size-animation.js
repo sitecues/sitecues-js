@@ -3,9 +3,9 @@
  */
 sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
   'use strict';
-  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'zoom', 'bp/controller/panel-controller',
+  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'platform', 'zoom', 'bp/controller/panel-controller',
 
-    function(state, BP_CONST, helper, zoomMod, panelController) {
+    function(state, BP_CONST, helper, platform, zoomMod, panelController) {
 
       var requestFrameFn = window.requestAnimationFrame   ||
                            window.msRequestAnimationFrame ||
@@ -382,7 +382,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
       function getCurrentTransformPosition () {
 
-        var transform = byId(transformElementId).style[helper.transformProperty],
+        var transform = byId(transformElementId).style[platform.transformProperty],
             position  = {},
             transformValues,
             translateLeft,
@@ -421,7 +421,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
       function getCurrentScale () {
 
-        var transformStyle = byId(transformElementId).style[helper.transformProperty],
+        var transformStyle = byId(transformElementId).style[platform.transformProperty],
             transformValues;
 
         if (transformStyle.indexOf('scale') !== -1) {
@@ -449,7 +449,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
         var transformStyle = byId(transformElementId).style;
 
-        transformStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
+        transformStyle[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
 
       }
 

@@ -112,7 +112,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g id="scp-button-menu" transform="translate(52,66)">\
     <g id="scp-tips-button" class="scp-if-tips scp-hand-cursor scp-transition-opacity" role="button" data-feature="tips" aria-labelledby="scp-tips-label">\
-      <g class="scp-hover-expand">\
+      <g data-hover="scale(1.2)">\
         <circle r="52" fill="#548ECE"/>\
         <path fill="#fff" d="m14,23.5c0,1.2 -1,2.2 -2.2,2.2h-22.2c-1.2,0 -2.2,-1 -2.2,-2.2c0,-1.2 1,-2.2 2.2,-2.2h22.2c1.2,0 2.2,1 2.2,2.2zm0,6.5c0,1.2 -1,2.2 -2.2,2.2h-22.2c-1.2,0 -2.2,-1 -2.2,-2.2c0,-1.2 1,-2.2 2.2,-2.2h22.2c1.2,0 2.2,1 2.2,2.2zm-27,4.5h23c0,2.5 -2,4.5 -4.5,4.5h-8.9c-2.5,0 -4.5,-2 -4.5,-4.5l0,0l0,0l.1,0l-5.2,0z"/>\
         <path fill="#FFF" stroke="#FFF" stroke-width="3.3" stroke-miterlimit="10" d="m.9,-34.3c12.3,0 22.2,10 22.2,22.2c0,12.1 -7.3,13.5 -8.7,26.7c0,1.2 -1,2.2 -2.2,2.2h-11.4m.1,0h-.1h-11.3c-1.2,0 -2.2,-1 -2.2,-2.2c-1.4,-13.2 -8.7,-14.6 -8.7,-26.7c0,-12.3 10,-22.2 22.2,-22.2"/>\
@@ -120,20 +120,20 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </g>\
     </g>\
     <g id="scp-settings-button" class="scp-if-settings scp-hand-cursor scp-transition-opacity" role="button" data-feature="settings" aria-labelledby="scp-settings-label">\
-      <g class="scp-hover-expand">\
+      <g data-hover="scale(1.2)">\
         <path d="m-36,47.8c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6.2c-1.3,0 -2.3,1 -2.3,2.3v91l0,-.2zm61.4,0c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6c-1.3,0 -2.3,1 -2.3,2.3v90.8l-.2,0zm-30.7,0c0,1.3 1,2.3 2.3,2.3h6.2c1.3,0 2.3,-1 2.3,-2.3v-90.8c0,-1.3 -1,-2.3 -2.3,-2.3h-6c-1.3,0 -2.3,1 -2.3,2.3v90.8l-.2,0z" fill="#7B7B7B"/>\
         <path d="m-19.7,4.5c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.3c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.3l0,0zm30.7,-28.5c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.2c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.40001l0,-.2zm31.5,46.4c0,1.3 -1,2.3 -2.3,2.3h-17.1c-1.3,0 -2.3,-1 -2.3,-2.3v-5.3c0,-1.3 1,-2.3 2.3,-2.3h17.1c1.3,0 2.3,1 2.3,2.3v5.3l0,0z" fill="#548ECE"/>\
         <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
     <g id="scp-feedback-button" class="scp-if-feedback scp-hand-cursor scp-transition-opacity" role="button" data-feature="feedback" aria-labelledby="scp-feedback-label">\
-      <g class="scp-hover-expand">\
+      <g data-hover="scale(1.2)">\
         <path d="m-10,40c3,1 7,1 11,1c27,0 49,-19 49,-43c0,-24 -22,-44 -49,-44c-27,0 -50,19 -50,43c0,12 6,23 15,31m24,11.5c-6,5 -19,9.4 -41,9m17.4,-20.3c-2.2,9.2 -7.6,14.8 -17,20.7" stroke-miterlimit="10" stroke-linecap="round" stroke-width="5.5" stroke="#548ECE" fill="#FFF"/>\
         <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
     </g>\
     <g id="scp-about-button" class="scp-if-about scp-hand-cursor scp-transition-opacity" role="button" data-feature="about" aria-labelledby="scp-about-label">\
-      <g class="scp-hover-expand">\
+      <g data-hover="scale(1.2)">\
         <path d="m15.8,-9.5h-11.2c-1,0 -3.4,3.9 -3.4,5.2l.1,15.3l-49.8,6.1h0c-1.6,-5 -2.5,-10.3 -2.5,-15.8c0,-27.9 22.6,-50.4 50.4,-50.4c21.2,0 39.4,13 46.8,31.7h0c5,11.2 0,22.2 -10.89999,24.1l-16.10001,2l0,-13.1c0,-1.2 -2.39999,-5.1 -3.39999,-5.1zm-7,47.3c1.6,1.89999 2.8,0 2.8,0l7.1,-11.10001c.2,-.3 .4,-.6 .4,-1v0v-4h26.4h0c-7.8,17.8 -25.5,30.3 -46.2,30.3c-20.7,0 -38.4,-12.4 -46.2,-30.3v0h48.1v4.3c0,.3 .2,.6 .4,.9l7.2,10.9z" fill="#000"/>\
         <rect fill="none" width="120" height="120" y="-60" x="-60" class="scp-hand-cursor"/>\
       </g>\
@@ -142,7 +142,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </g>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
-  <g id="scp-more-button-group" class="scp-hover-expand scp-hand-cursor" role="button" aria-label="View more options">\
+  <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="View more options">\
     <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
     <path id="scp-more-arrow" class="scp-hand-cursor" fill="#777" d="m18,-1.9c-1.3,1.4 -15.6,15 -15.6,15c-.7,.7 -1.7,1.2 -2.7,1.2c-1,0 -1.89999,-.4 -2.7,-1.2c0,0 -14.2,-13.6 -15.6,-15c-1.3,-1.4 -1.4,-3.9 0,-5.3c1.4,-1.5 3.5,-1.6 5.2,0l13,12.5l13,-12.5c1.8,-1.6 3.8,-1.5 5.2,0c1.3,1.8 1.3,4 0,5.3l.2,0z"/>\
    </g>\
@@ -153,7 +153,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <sc-cards id="scp-tips" class="scp-if-tips scp-transition-opacity scp-secondary-feature"></sc-cards>\
 <sc-cards id="scp-settings" class="scp-if-settings scp-transition-opacity scp-secondary-feature"></sc-cards>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
-  <sc-button-big role="button" class="scp-hand-cursor scp-hover-expand" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
+  <sc-button-big role="button" data-hover="scale(1.2)" class="scp-hand-cursor" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
 </sc>\
 <sc id="scp-feedback-textarea" class="scp-if-feedback">\
   <sc class="scp-feedback-content">\

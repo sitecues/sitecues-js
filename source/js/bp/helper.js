@@ -76,8 +76,6 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
 
-    helper.transformProperty = helper.isIE9 ? 'msTransform' : (helper.isWebKit ? 'webkitTransform' : 'transform');
-
     helper.getCurrentSVGElementTransforms = function () {
 
       var result      = {},

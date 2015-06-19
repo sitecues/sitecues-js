@@ -241,8 +241,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'border-radius': '4px',
           'color'        : '#FFF',
           'text-align'   : 'center',
-          'background'   : '#447AC4',
-          'transform'    : 'none !important'
+          'background'   : '#447AC4'
         },
 
 

@@ -114,6 +114,8 @@ sitecues.def('platform', function (platformModule, callback) {
     return '';
   })();
 
+  platformModule.transformProperty = platformModule.isIE9() ? 'msTransform' : (platformModule.browser.isWebKit ? 'webkitTransform' : 'transform');
+
   // Done
   callback();
 });

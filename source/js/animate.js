@@ -7,7 +7,7 @@ sitecues.def('animate', function (animate, callback) {
 
   'use strict';
 
-  sitecues.use('util/transform', function (transform) {
+  sitecues.use('util/transform', 'platform', function (transform, platform) {
 
     var requestFrameFn = window.requestAnimationFrame   ||
                          window.msRequestAnimationFrame ||
@@ -28,21 +28,27 @@ sitecues.def('animate', function (animate, callback) {
 
         defaultAnimation = 'easeOutCubic';
 
-    function setTransformAttr (element, left, top, transformScale, rotate) {
+    function setTransform (element, useAttribute, left, top, transformScale, rotate) {
 
-      var scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
-          rotateCSS      = rotate         ? ' rotate(' + rotate + ') '     : '',
-          attrVal        = 'translate(' + left + ' , ' + top + ') ' + scaleCSS + rotateCSS;
+      var translateCss   = (left || top) ? 'translate(' + left + ',' + top + ') ' : '',
+          scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
+          rotateCSS      = rotate         ? ' rotate(' + rotate + ')'     : '',
+          attrVal        = translateCss + scaleCSS + rotateCSS;
 
-      element.setAttribute('transform', attrVal);
+      if (useAttribute) {
+        element.setAttribute('transform', attrVal);
+      }
+      else {
+        element.style[platform.transformProperty] = attrVal;
+      }
 
     }
 
     function normalizeTransformProps (animation, transformProperty) {
 
       var element          = animation.element,
-          fromTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[transformProperty],
-          toTransform      = animation.CSSProperties[transformProperty],
+          fromTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[platform.transformProperty],
+          toTransform      = animation.CSSProperties.transform,
           fromTransformObj = transform.getTransform(fromTransform),
           toTransformObj   = transform.getTransform(toTransform),
           styles = animation.animateStyles,
@@ -78,8 +84,8 @@ sitecues.def('animate', function (animate, callback) {
 
       for (var prop in CSSProperties) {
         if (CSSProperties.hasOwnProperty(prop)) {
-          if (prop.indexOf('transform') >= 0) {
-            normalizeTransformProps(this, prop);
+          if (prop === 'transform') {
+            normalizeTransformProps(this);
           } else {
             this.animateStyles.from[prop] = element.style[prop];
             this.animateStyles.to[prop]  = CSSProperties[prop];
@@ -99,9 +105,10 @@ sitecues.def('animate', function (animate, callback) {
           fromStyles               = this.animateStyles.from,
           toStyles                = this.animateStyles.to;
 
-      if (this.useAttribute && this.CSSProperties.transform) {
-        setTransformAttr(
+      if (this.CSSProperties.transform) {
+        setTransform(
           this.element,
+          this.useAttribute,
           fromStyles.translate.left + (toStyles.translate.left - fromStyles.translate.left) * normalizedAnimationTime,
           fromStyles.translate.top + (toStyles.translate.top - fromStyles.translate.top) * normalizedAnimationTime,
           fromStyles.scale + (toStyles.scale - fromStyles.scale) * normalizedAnimationTime,

@@ -10,10 +10,7 @@ sitecues.def('util/transform', function (transform, callback) {
 
   'use strict';
 
-
   sitecues.use('platform', function(platform) {
-
-    var TRANSFORM_PROPERTY = platform.isIE9()? 'msTransform' : (platform.isWebKit ? 'webkitTransform' : 'transform');
 
     // Skips past non-numeric characters and get the next number as type 'number'
     // It will include a negative sign and decimal point if it exists in the string
@@ -23,7 +20,7 @@ sitecues.def('util/transform', function (transform, callback) {
 
     function getComputedScale(elem) {
       var style = getComputedStyle(elem),
-        transform = style[TRANSFORM_PROPERTY];
+        transform = style[platform.transformProperty];
       return +transform.substring(7) || 1;
     }
 
