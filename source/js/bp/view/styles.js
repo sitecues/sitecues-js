@@ -557,15 +557,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'none !important'
         },
 
-        '.scp-hover-expand': {
-          'transform': 'scale(1)',
-          'transition': 'transform .5s'
-        },
-
-        '.scp-hovers .scp-hover-expand:hover:not([aria-disabled])': {
-          'transform': 'scale(1.2)'
-        },
-
         /*************** Clipping rules for badge **************************/
         // When the badge is fully collapsed, we clip it so that the invisible parts
         // of the SVG do not take mouse events.

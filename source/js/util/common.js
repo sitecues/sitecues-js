@@ -264,11 +264,6 @@ sitecues.def('util/common', function (common, callback) {
       $.extend(exports, common);
     }
 
-    common.getTransform = function($jquery) {
-      var transform = $jquery.css('transform') || $jquery.css('webkitTransform');
-      return parseFloat(transform.substring(7)) || 1;
-    };
-
     function getEmsToPx(fontSize, ems) {
       // Create a div to measure the number of px in an em with this font-size
       var measureDiv = $('<div/>')

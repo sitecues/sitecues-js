@@ -14,6 +14,7 @@
 // bp/did-create   -- BP inserted in page
 // bp/did-complete -- BP ready for input
 // bp/will-expand  -- BP is about to expand
+// bp/did-expand   -- BP has finished expanding
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 

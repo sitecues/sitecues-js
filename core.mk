@@ -97,6 +97,7 @@ files=\
 	source/js/bp/view/elements/secondary/feedback.js \
 	source/js/bp/view/elements/secondary/about.js \
 	source/js/bp/view/elements/secondary/secondary-panel.js \
+	source/js/bp/view/svg-transform-effects.js \
 	source/js/bp/placement.js \
 	source/js/bp.js \
 	source/js/keys/focus.js \

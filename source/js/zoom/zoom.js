@@ -7,8 +7,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'zoom-forms',
-    function ($, conf, site, platform, common, zoomForms) {
+  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'util/transform', 'zoom-forms',
+    function ($, conf, site, platform, common, transform, zoomForms) {
       
       // Default zoom configuration
       
@@ -509,7 +509,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the current zoom value as reported by the layout engine
       function getActualZoom() {
-        return getSanitizedZoomValue(common.getTransform($body));
+        return getSanitizedZoomValue(transform.getComputedScale(body));
       }
 
       function onGlideStopped() {
@@ -755,7 +755,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         var didUnzoom = completedZoom > currentTargetZoom;
 
-        completedZoom = common.getTransform($body);
+        completedZoom = getActualZoom();
         startZoomTime = 0;
 
         if (didUnzoom) {

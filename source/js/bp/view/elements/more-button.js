@@ -17,7 +17,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
         isAfterUserInput,
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
-        getTransform = transform.getTransform,
+        getElemTransform = transform.getElemTransform,
         getTransformString = transform.getTransformString;
 
     function onMouseClick () {
@@ -52,7 +52,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
     function showMoreButton (useInstantTransition) {
 
       var btnContainer           = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate       = getTransform(btnContainer.getAttribute('transform')).translate;
+          currentTranslate       = getElemTransform(btnContainer).translate;
 
       byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButton);
 
@@ -122,7 +122,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       // pressed their mouse button.  If they have not, show the additional button.
       userInputTimeoutId = setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
 
-      var currentBtnTranslate = getTransform(byId(BP_CONST.MORE_BUTTON_CONTAINER_ID).getAttribute('transform')).translate;
+      var currentBtnTranslate = getElemTransform(byId(BP_CONST.MORE_BUTTON_CONTAINER_ID)).translate;
 
       MORE_BTN_TRANSLATEY = currentBtnTranslate.top;
       MORE_BTN_TRANSLATEX = currentBtnTranslate.left;

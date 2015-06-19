@@ -127,10 +127,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-secondary-expanding';
         }
 
-        if (!state.get('doSuppressHovers')) {
-          classBuilder += ' scp-hovers';
-        }
-
         return classBuilder + getSecondaryPanelClasses();
       };
 

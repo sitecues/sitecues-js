@@ -27,7 +27,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
     };
 
     about.onAnimationStart = function() {
-      currentMenuImageTranslateX = transform.getTransform(getAboutImage().getAttribute('transform')).translate.left;
+      currentMenuImageTranslateX = transform.getElemTransform(getAboutImage()).translate.left;
     };
 
     // Custom animation of feature

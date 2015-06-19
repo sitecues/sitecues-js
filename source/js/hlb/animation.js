@@ -6,9 +6,9 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/common', 'jquery', 'hlb/positioning', 'platform',
+  sitecues.use('hlb/dimmer', 'util/common', 'util/transform', 'jquery', 'hlb/positioning', 'platform',
 
-  function (dimmer, common, $, hlbPositioning, platform) {
+  function (dimmer, common, transform, $, hlbPositioning, platform) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
         INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
@@ -246,7 +246,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
     function isHLBZoomed($hlb) {
 
       // If there isn't any transform, then it isn't scaled.
-      var scale = common.getTransform($hlb);
+      var scale = transform.getComputedScale($hlb[0]);
       return scale > hlbPositioning.getStartingScale($hlb);
     }
 
