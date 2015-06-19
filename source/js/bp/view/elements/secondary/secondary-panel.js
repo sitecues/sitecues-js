@@ -1,13 +1,9 @@
 // TODO rename icon menu button menu
-// Auto size not right?
 // Card interactions
 // Feedback
+// Mouse cursor not enlarging over panel
 // IE broken
-//   -- .scp-hover-expand: no CSS transform in SVG, all versions of IE: http://stackoverflow.com/questions/21298338/css-transform-on-svg-elements-ie9
-//   -- panel height issues
-//   -- slider working even when not visible
-// Firefox
-//   -- Prev, next not working
+//   -- slider working even when not visible (IE9?)
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
@@ -84,10 +80,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       function getMoreButton() {
         return byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-      }
-
-      function getMainSVG() {
-        return byId(BP_CONST.SVG_ID);
       }
 
       function getBottom() {
@@ -170,18 +162,23 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       }
 
+      // For each SVG pixel of size, how many screen pixels do we get?
+      function getSVGExpansionRatio() {
+        var heightInSvgPixels = getCurrentOutlineHeight(),
+          heightInScreenPixels = byId(BP_CONST.MAIN_OUTLINE_ID).getBoundingClientRect().height;
+        return heightInScreenPixels / heightInSvgPixels;
+      }
+
       // Compute based on the size of the contents
       // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
       function getPanelContentsHeight(featureName) {
-        var range = document.createRange(),
-          contentElements = document.querySelectorAll('.scp-if-' + featureName),
+        var contentElements = document.querySelectorAll('.scp-if-' + featureName),
           numContentElements = contentElements.length,
           maxHeight = origPanelContentsRect.height,
           normalTop = origPanelContentsRect.top,
           index = 0,
-          EXTRA_SPACE = 120;
+          EXTRA_SPACE = 7;
 
-        // TODO just use selectNodeContents
         function addRect(item) {
           var thisRect = item.getBoundingClientRect(),
             height = thisRect.bottom - normalTop;
@@ -191,13 +188,16 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
 
         for (; index < numContentElements; index++) {
-          var elem = contentElements[index];
-          range.selectNodeContents(elem);
-          addRect(range);
+          var elem = contentElements[index],
+            children = elem.children || [],
+            childIndex = children.length;
           addRect(elem);
+          while (childIndex --) {
+            addRect(children[childIndex]);
+          }
         }
 
-        return maxHeight + EXTRA_SPACE;
+        return (maxHeight + EXTRA_SPACE) / getSVGExpansionRatio();
       }
 
 
@@ -263,9 +263,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
           duration = getDuration(),
 
-          heightAnimationDelay = (doEnable && feature.heightAnimationDelay) || 0,
+          isExpanding = toGeo.outlineHeight > currentOutlineHeight,
 
-          isSlowlyExpanding = toGeo.outlineHeight > currentOutlineHeight;
+          heightAnimationDelay = (doEnable && isExpanding && feature.heightAnimationDelay) || 0;
+
 
         function getDuration() {
           // Use the progress of the more button to determine how far along we are in the animation,
@@ -308,10 +309,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         cancelAllAnimations();
 
-        updateGlobalState(doEnable && name, isSlowlyExpanding);
-
-        // Let feature module know that animation is about to begin
-        featureModule.onAnimationStart && featureModule.onAnimationStart();
+        updateGlobalState(doEnable && name, isExpanding);
 
         // Animate the menu button and anything else related to opening the feature
         openFeatureAnimation();
@@ -369,9 +367,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         origOutlineHeight = origOutlineHeight || getCurrentOutlineHeight();
         origPanelContentsRect = origPanelContentsRect || document.getElementById(BP_CONST.MAIN_CONTENT_FILL_ID).getBoundingClientRect();
-
-        SC_DEV && console.log('outline height from gBCR = ' + getOutlineSVG().getBoundingClientRect().height);
-        SC_DEV && console.log('Ratio= ' + getCurrentOutlineHeight() / getOutlineSVG().getBoundingClientRect().height);
 
         var ENABLED = BP_CONST.SECONDARY_PANEL_ENABLED,
           DISABLED = BP_CONST.SECONDARY_PANEL_DISABLED,

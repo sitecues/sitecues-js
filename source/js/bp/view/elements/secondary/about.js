@@ -2,8 +2,7 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/helper', 'util/transform', function (BP_CONST, helper, transform) {
 
-    var byId = helper.byId,
-      currentMenuImageTranslateX;
+    var byId = helper.byId;
 
     function getAboutImage() {
       return byId(BP_CONST.ABOUT_CONTENT_IMAGE_ID);
@@ -26,15 +25,11 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       return cssValues;
     };
 
-    about.onAnimationStart = function() {
-      currentMenuImageTranslateX = transform.getElemTransform(getAboutImage()).translate.left;
-    };
-
     // Custom animation of feature
     about.tick = function(t, targetCSSValues) {
       var aboutImage = getAboutImage(),
         newTransformString =
-          transform.getTransformString(getValueInTime(currentMenuImageTranslateX, targetCSSValues.menuImageTranslateX, t), 0);
+          transform.getTransformString(getValueInTime(0, targetCSSValues.menuImageTranslateX, t), 0);
       aboutImage.setAttribute('transform', newTransformString);
     };
 
