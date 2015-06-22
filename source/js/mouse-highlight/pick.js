@@ -136,7 +136,7 @@ sitecues.def('mouse-highlight/picker', function(picker, callback) {
       if (SC_DEV && startElement && !startElement.ownerDocument) {
         debugger;
       }
-      if (!startElement || common.isInSitecuesUI(startElement) || $(startElement).is('html,body')) {
+      if (!startElement || $(startElement).is('html,body') || common.isInSitecuesUI(startElement)) {
         return null;
       }
 

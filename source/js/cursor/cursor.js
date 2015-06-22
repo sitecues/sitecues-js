@@ -217,10 +217,12 @@ sitecues.def('cursor', function (cursor, callback) {
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
 
-      styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
-        bpCursorStylesheetObject = styleSheetObject;
-        refreshStylesheetsIfNecessary();
-      });
+      setTimeout(function() {
+        styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
+          bpCursorStylesheetObject = styleSheetObject;
+          refreshStylesheetsIfNecessary();
+        });
+      }, 100);
     }
 
     /**

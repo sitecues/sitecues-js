@@ -69,6 +69,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
   isTrackingWheelEvents,
   isOnlyShift, // Is shift down by itself?
+  isBadgeReady,
   isAppropriateFocus,
   isWindowFocused = document.hasFocus(),
   isSticky,
@@ -1285,7 +1286,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     // return true if highlight visibility should be restored
     function refreshEventListeners(doForceOff) {
       // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-      var doTrackMouse = sitecues.isSitecuesOn() && !doForceOff;
+      var doTrackMouse = sitecues.isSitecuesOn() && isBadgeReady && !doForceOff;
 
       if (doTrackMouse === isTrackingMouse) {
         return isTrackingMouse;
@@ -1556,6 +1557,11 @@ sitecues.def('mouse-highlight', function (mh, callback) {
       isOnlyShift = isShift;
     }
 
+    function onBadgeReady() {
+      isBadgeReady = true;
+      refreshEventListeners();
+    }
+
     // Return all of the highlight information provided in the |state| variable
     mh.getHighlight = function() {
       return state;
@@ -1585,6 +1591,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('mh/hide', hide);
+
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('bp/did-complete', onBadgeReady);
 
     // Darken highlight appearance when speech is enabled
     conf.get('ttsOn', onSpeechChanged);
