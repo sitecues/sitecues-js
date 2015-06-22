@@ -79,7 +79,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.FEEDBACK_CONTENT_ID      = 'scp-feedback';
   constants.FEEDBACK_INPUT_RECT      = 'scp-feedback-input-rect';
   constants.FEEDBACK_TEXTAREA        = 'scp-feedback-textarea';
-  constants.FEEDBACK_CONTENT_BUTTON_ID = 'sitecues-button-big-feedback';
+  constants.FEEDBACK_SEND            = 'scp-feedback-send';
+  constants.RATING                   = 'scp-rating';
 
   constants.SETTINGS_CONTENT_ID      = 'scp-settings';
   constants.TIPS_CONTENT_ID          = 'scp-tips';

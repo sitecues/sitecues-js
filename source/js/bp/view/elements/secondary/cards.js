@@ -9,7 +9,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       PANELS_WITH_CARDS = { tips: 1, settings: 1},
       byId = helper.byId,
       isInitialized,
-      isActive,
+      isActive = false,
       activePanelName,
       activePanel;
 

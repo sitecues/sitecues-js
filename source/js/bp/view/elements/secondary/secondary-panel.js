@@ -19,7 +19,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         runningAnimations = [],
         origPanelContentsRect,
         origOutlineHeight,
-        isActive,
+        isActive = false,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,

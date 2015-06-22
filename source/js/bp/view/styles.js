@@ -402,7 +402,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* Waves use gray off state if not hovering and showing real settings (not first time badge) */
         '.scp-realsettings #scp-speech[aria-checked="false"]:not(.scp-dim-waves) > .scp-wave': {
           /* First time we're small we always show on state because it's more inviting. However, going from small to large the first time, we're going from fake on to real off. Transition gently, don't draw attention to that. */
-          'fill': '#B0B0B0' /* Gray */
+          'fill': '#aaa' /* Gray */
         },
 
         '.scp-dim-waves> #scp-wave1': {
@@ -498,24 +498,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '1200px !important'    // Make room for tall panel contents
         },
 
-        '#scp-feedback-textarea': {
-          'position': 'absolute !important',  // Size will be set by feedback.js
-          'top': '23px !important',
-          'left': '29px !important',
-          'font-size': '22px !important',
-          'font-family': 'Arial !important',
-          'padding': '10px 60px 10px 10px !important', // Make room for feedback icon on the top right
-          'border': '0 !important',
-          'resize': 'none !important',
-          'outline': '0 !important',
-          'background-color': 'transparent !important'
-        },
-
-        '#scp-feedback-input-rect.scp-focus': {
-          'stroke': 'rgba(82,168,236,.8)',
-          'stroke-width': '6px'
-        },
-
         '#scp-arrows>text': {
           'font-size': '44px'
         },
@@ -543,13 +525,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        '.scp-about-teaser': {
-          'position'     : 'absolute',
-          'z-index'      : '9999',
-          'left'         : '135px',
-          'top'          : '120px'
-        },
-
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
         '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
         '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
@@ -567,6 +542,59 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-is-secondary > svg > #scp-main > *': {
           'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
+        },
+
+        '#scp-feedback-textarea': {
+          'position': 'absolute !important',  // Size will be set by feedback.js
+          'top': '23px !important',
+          'left': '29px !important',
+          'font-size': '22px !important',
+          'font-family': 'Arial !important',
+          'padding': '10px 60px 10px 10px !important', // Make room for feedback icon on the top right
+          'border': '0 !important',
+          'resize': 'none !important',
+          'outline': '0 !important',
+          'background-color': 'transparent !important'
+        },
+
+        '#scp-feedback-input-rect.scp-focus': {
+          'stroke': 'rgba(82,168,236,.8)',
+          'stroke-width': '6px'
+        },
+
+        '.scp-rating-star': {
+          'fill': '#ccc',
+          'stroke': '#333',
+          'stroke-width': '1px',
+          'pointer-events': 'all'
+        },
+
+        '.scp-rating-star[data-selected="true"]': {    // Selected color
+          'fill': '#80A9F8'
+        },
+
+        '#scp-rating:hover > .scp-rating-star': {       // Hover color
+          'fill': '#80A9F8'
+        },
+
+        '.scp-rating-star:hover ~ .scp-rating-star': {   // Any star after the currently hovered one is gray
+          'fill': '#aaa !important'
+        },
+
+        '#scp-feedback-send>rect': {    // Disabled send button
+          'fill': '#6B9AE0'
+          },
+
+        '#scp-feedback-send[aria-disabled="true"]>rect': {    // Disabled send button
+          'fill': '#aaa !important'
+        },
+
+
+        '.scp-about-teaser': {
+          'position'     : 'absolute',
+          'z-index'      : '9999',
+          'left'         : '135px',
+          'top'          : '120px'
         },
 
         /*************** Clipping rules for badge **************************/

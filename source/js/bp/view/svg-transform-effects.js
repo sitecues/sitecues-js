@@ -24,6 +24,10 @@ sitecues.def('bp/view/effects', function (effects, callback) {
 
       function toggleHover(target, isActiveHover) {
 
+        if (target.getAttribute('aria-disabled') === 'true') {
+          return;
+        }
+
         var id = + target.getAttribute('data-id'),
           cssProperties = {
             transform: isActiveHover ? target.getAttribute('data-hover') : ' ' // Setting to space is like no transform

@@ -4,7 +4,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     function (BP_CONST, helper, conf, state) {
 
     var byId = helper.byId,
-      isActive;
+      isActive = false;
 
     function onPanelUpdate() {
 

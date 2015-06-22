@@ -38,7 +38,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <clipPath id="scp-outline-clip-def">\
     <path id="scp-outline-def" d="M 808 187c0 6-5 11-11 11H11 c-6 0-11-5-11-11V0c0 0 5 0 11 0h786c6 0 11 0 11 0V 187" stroke="#999" stroke-width="1.5"/>\
   </clipPath>\
-  <path id="scp-rating-star-def" d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
+  <g id="scp-rating-star-def">\
+    <path d="M30 45L48 54L44 35L59 21L39 18L30 0L21 18L1 21L16 35L12 54L30 45"/>\
+    <rect class="scp-hidden-target scp-hand-cursor" width="66" height="62"/>\
+  </g>\
   <filter id="scp-shadowblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
   </filter>\
@@ -94,15 +97,15 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
       <rect id="scp-feedback-input-rect" x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
-      <g class="scp-hand-cursor" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
-        <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
-        <use xlink:href="#scp-rating-star-def" x="104" y="254" role="button" aria-label="2 star rating"/>\
-        <use xlink:href="#scp-rating-star-def" x="166" y="254" role="button" aria-label="3 star rating"/>\
-        <use xlink:href="#scp-rating-star-def" x="228" y="254" role="button" aria-label="4 star rating"/>\
-        <use xlink:href="#scp-rating-star-def" x="290" y="254" role="button" aria-label="5 star rating"/>\
+      <g id="scp-rating" class="scp-hand-cursor" aria-valuemin="1" aria-valuemax="5" role="slider">\
+        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
+        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
+        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
+        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
+        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
       </g>\
-      <g id="scp-feedback-send-button" class="scp-hand-cursor" role="button">\
-        <rect x="615" width="150" y="260" height="50" fill="#6B9AE0" rx="20" ry="20"/>\
+      <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
+        <rect x="615" width="150" y="260" height="50" rx="20" ry="20"/>\
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
     </g>\
