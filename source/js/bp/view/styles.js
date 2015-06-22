@@ -139,7 +139,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          #scp-zoom-slider
          #scp-speech›
          ...
-         <g #scp-more>     // Secondary panel that slides down
+         <g #scp-secondaty>     // Secondary panel that slides down
          <g .scp-feature-content>
          <g .scp-tips> etc.
          <sc-cards>
@@ -157,7 +157,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          .scp-animate: Enable CSS animations (e.g. do not enable when first showing badge)
          .scp-keyboard: Keyboard mode
          - Elsewhere:
-         .scp-more-only   // Only display in more panel
+         .scp-secondary-only   // Only display in more panel
          .scp-feature-content // Only display in feature panel (reachable for more panel)
          .scp-hand-cursor: show a hand (aka pointer) cursor over this element
          .scp-hidden-target: a click target that is hidden (e.g. a rect that covers more area than the visible part of the target)
@@ -391,10 +391,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '.scp-more .scp-more-only': { // element is visible in the more state of the badge-panel
-          'opacity': '1 !important'
-        },
-
         '.scp-want-panel #scp-mouseover-target': {
           'display': 'none'  // Don't let badge mouseover target interfere with actual use of panel
         },
@@ -500,8 +496,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /*************** Secondary panel **************************/
 
-        '.scp-is-secondary-feature > svg': {
-//          'transform': 'translateY(-506px)', // Compensate, not necessary if we use <svg @preserveAspectRation>
+        '.scp-is-secondary > svg': {
           'height': '1200px !important'    // Make room for tall panel contents
         },
 
@@ -533,7 +528,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 0
         },
 
-        'sc-card.scp-active': {
+        '.scp-panel-tips .scp-if-tips > .scp-active, .scp-panel-settings .scp-if-settings > .scp-active': {
           'visibility': 'visible',
           'opacity': 1
         },
@@ -554,6 +549,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-secondary-expanding .scp-secondary-feature': MAKE_HIDDEN,
         '.scp-want-badge .scp-secondary-feature': {
           'display': 'none !important'
+        },
+
+        '.scp-is-secondary .scp-secondary-only': { // element is visible in the more state of the badge-panel
+          'opacity': '1 !important'
+        },
+
+        '.scp-is-secondary > svg > #scp-main > *': {
+          'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
         },
 
         /*************** Clipping rules for badge **************************/

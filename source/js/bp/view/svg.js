@@ -74,9 +74,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
-<g id="scp-more" class="scp-more-only" aria-label="More features" clip-path="url(#scp-outline-clip-def)">\
-  <use id="scp-more-outline" xlink:href="#scp-outline-def" fill="white"/>\
-  <g id="scp-bottom-more">\
+<g id="scp-secondary" class="scp-secondary-only" aria-label="More features" clip-path="url(#scp-outline-clip-def)">\
+  <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
+  <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
     <text class="scp-hand-cursor" id="scp-tips-label" role="link" data-feature="tips" x="45" y="178">Tips</text>\
     <text class="scp-hand-cursor" id="scp-settings-label" role="link" data-feature="settings" x="240" y="178">Adjust</text>\

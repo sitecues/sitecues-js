@@ -115,16 +115,12 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // *** scp-want-panel ***
         // Sets larger panel sizes on everything.
         // It can take time to take effect because of the animation properties.
-        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
+        classBuilder += ' ' + BP_CONST.WANT_PANEL;
 
         if (state.get('isKeyboardMode')) {
           // *** scp-keyboard ***
           // Keyboard mode is enabled and therefore current focus outline must be visible
           classBuilder += ' scp-keyboard';
-        }
-
-        if (state.get('isSecondaryExpanding')) {
-          classBuilder += ' scp-secondary-expanding';
         }
 
         return classBuilder + getSecondaryPanelClasses();
@@ -144,8 +140,12 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         var panelName = state.getSecondaryPanelName(),
           className =' scp-panel-' + panelName;
         if (state.get('currentSecondaryPanelMode')) {
-          className += ' scp-is-secondary-feature'; // Need room in SVG for contents
+          className += ' scp-is-secondary';
         }
+        if (state.get('isSecondaryExpanding')) {
+          className += ' scp-secondary-expanding';  // Growing in visual height
+        }
+
         return className;
       }
 

@@ -30,6 +30,13 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
       var xhr = new XMLHttpRequest();
 
+      if ('withCredentials' in xhr) {
+        xhr.open('GET', panelUrl, true);
+      } else {
+        xhr = new XDomainRequest();
+        xhr.open('GET', panelUrl);
+      }
+
       xhr.onload = function(evt) {
         var request = evt.target || this,
           panelElement = getPanelElement(panelName),
@@ -38,7 +45,6 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         toggleCardActive(panelElement.firstElementChild, true);
       };
 
-      xhr.open('GET', panelUrl, true);
       xhr.url = panelUrl;
       xhr.send();
     }
@@ -49,7 +55,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     // Add useful attributes to various elements, based on elemTypes
     function addSemanticSugar(html) {
-      return html.replace(/\<sc-button /g, '<sc-button role="button" class="scp-hand-cursor scp-tabbable" ');
+      return html.replace(/<sc-button /g, '<sc-button role="button" class="scp-hand-cursor scp-tabbable" ');
     }
 
     function onPanelUpdate() {

@@ -40,7 +40,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BOTTOM_DEF_ID            = 'scp-bottom-def';
   constants.BOTTOM_TEXT_ID           = 'scp-bottom-text';
   constants.BOTTOM_MOUSETARGET_ID    = 'scp-bottom-mousetarget';
-  constants.BOTTOM_MORE_ID           = 'scp-bottom-more';
+  constants.BOTTOM_MORE_ID           = 'scp-bottom-secondary';
 
   constants.CLOSE_BUTTON_ID          = 'scp-close-button';
 
@@ -52,7 +52,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SHOW_ID                  = 'scp-show';
   constants.PANEL_TYPES              = ['main', 'more'];
 
-  constants.MORE_ID                  = 'scp-more';
+  constants.MORE_ID                  = 'scp-secondary';
   constants.MORE_BUTTON_GROUP_ID     = 'scp-more-button-group';
   constants.MORE_BUTTON_CONTAINER_ID = 'scp-more-button-container';
 
@@ -60,8 +60,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.OUTLINE_ID               = 'scp-focus-outline';
   constants.MAIN_OUTLINE_ID          = 'scp-main-outline';
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
-  constants.MORE_OUTLINE_ID          = 'scp-more-outline';
-  constants.MORE_TARGET              = 'scp-more-button-transparent-target';
+  constants.MORE_OUTLINE_ID          = 'scp-secondary-outline';
 
   constants.BUTTON_MENU_ID           = 'scp-button-menu';
   constants.TIPS_BUTTON_ID           = 'scp-tips-button';
