@@ -203,12 +203,12 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     sitecues.on('bp/do-shrink', pc.shrinkPanel);
 
-      if (SC_DEV) {
+//      if (SC_DEV) {
         sitecues.toggleStickyPanel = function() {
           isSticky = !isSticky;
           return isSticky;
-        }
-      }
+        };
+//      }
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

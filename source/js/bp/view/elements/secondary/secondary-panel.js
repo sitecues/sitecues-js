@@ -2,7 +2,7 @@
 // Card interactions
 // Feedback
 // Mouse cursor not enlarging over panel
-// IE broken
+// IE9 broken
 //   -- slider working even when not visible (IE9?)
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
