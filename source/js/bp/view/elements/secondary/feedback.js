@@ -38,8 +38,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         getFeedbackArea()[addOrRemoveFn]('focus', onFocus);
         getFeedbackArea()[addOrRemoveFn]('blur', onBlur);
         getFeedbackArea()[addOrRemoveFn]('keyup', enableSendIfText);
-        getRating()[addOrRemoveFn]('mousedown', onRatingClick);
-        getFeedbackSend()[addOrRemoveFn]('mousedown', onSendFeedbackClick);
+        getRating()[addOrRemoveFn]('click', onRatingClick);
+        getFeedbackSend()[addOrRemoveFn]('click', onSendFeedbackClick);
       }
 
       isActive = willBeActive;
@@ -85,7 +85,8 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       if (isSendEnabled()) {
         sitecues.emit('feedback/do-send', getFeedbackText(), currRating);
         toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
-        // TODO Provide visual feedback, e.g. thank you message
+        var bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
+        bpContainer.className += bpContainer.className + ' scp-feedback-sent';
       }
     }
 

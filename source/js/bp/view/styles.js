@@ -544,6 +544,17 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
         },
 
+        '.scp-feedback-sent .scp-if-feedback.scp-secondary-feature': MAKE_HIDDEN,
+        '.scp-if-feedback-sent': {
+          'visibility': 'hidden',
+          'opacity': 0,
+          'position': 'relative',
+          'left': '154px',
+          'top': '62px',
+          'width': '340px'
+        },
+        '.scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent': MAKE_VISIBLE,
+
         '#scp-feedback-textarea': {
           'position': 'absolute !important',  // Size will be set by feedback.js
           'top': '23px !important',
@@ -588,7 +599,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-feedback-send[aria-disabled="true"]>rect': {    // Disabled send button
           'fill': '#aaa !important'
         },
-
 
         '.scp-about-teaser': {
           'position'     : 'absolute',

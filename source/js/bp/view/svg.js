@@ -154,6 +154,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </svg>\
 \
 <textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" placeholder="Tell us something ...."></textarea>\
+<sc class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
+  <sc-h1>Thank you</sc-h1>\
+</sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-button-big role="button" data-hover="scale(1.2)" class="scp-hand-cursor" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
 </sc>\
