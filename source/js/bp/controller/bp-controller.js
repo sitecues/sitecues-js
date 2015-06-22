@@ -274,8 +274,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var feature     = item.getAttribute('data-feature'),
           currentMode = baseController.getTab();
       if (feature) {  /* Feature button has data-feature attribute */
-        baseController.clearPanelFocus();
         sitecues.emit('bp/do-toggle-secondary-panel', feature);
+        syncFocusIndex(currentMode);
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
         sitecues.emit('bp/do-toggle-secondary-panel');
