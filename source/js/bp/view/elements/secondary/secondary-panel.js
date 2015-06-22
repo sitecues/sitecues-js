@@ -2,8 +2,7 @@
 // Card interactions
 // Feedback
 // Mouse cursor not enlarging over panel
-// IE9 broken
-//   -- slider working even when not visible (IE9?)
+// What happens if AJAX content doesn't load? Do we have some kind of fallback content?
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';

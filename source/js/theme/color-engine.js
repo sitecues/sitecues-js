@@ -85,7 +85,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         var colorMapFn = colorChoices[type];
-        if (colorMapFn) {
+        if (colorMapFn || type === 'none') {
           init(applyThemeImpl);
         }
       };
