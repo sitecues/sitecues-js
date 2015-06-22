@@ -135,6 +135,10 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       }
     }
 
+    sitecues.on('bp/next-card', nextCard);
+
+    sitecues.on('bp/prev-card', prevCard);
+
     sitecues.on('bp/do-update', onPanelUpdate);
 
     sitecues.on('bp/do-toggle-secondary-panel', init);
