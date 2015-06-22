@@ -60,7 +60,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         star.setAttribute('data-selected', currRating > 0);
       }
 
-      enableSend();
+      toggleSendEnabled(true);
     }
 
     function getFeedbackText() {
@@ -69,22 +69,23 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     function enableSendIfText() {
       if (getFeedbackText().length) {
-        enableSend();
+        toggleSendEnabled(true);
       }
     }
 
-    function enableSend() {
-      getFeedbackSend().removeAttribute('aria-disabled');
+    function toggleSendEnabled(doEnable) {
+      getFeedbackSend().setAttribute('aria-disabled', !doEnable);
     }
 
     function isSendEnabled() {
-      return !getFeedbackSend().hasAttribute('aria-disabled');
+      return getFeedbackSend().getAttribute('aria-disabled') !== 'true';
     }
-
 
     function onSendFeedbackClick() {
       if (isSendEnabled()) {
         sitecues.emit('feedback/do-send', getFeedbackText(), currRating);
+        toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
+        // TODO Provide visual feedback, e.g. thank you message
       }
     }
 
@@ -104,7 +105,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     };
 
     sitecues.on('bp/did-expand', autoSizeTextarea);
-
 
     sitecues.on('bp/do-update', onPanelUpdate);
 

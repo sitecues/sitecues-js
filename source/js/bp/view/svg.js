@@ -154,12 +154,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </svg>\
 \
 <textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" placeholder="Tell us something ...."></textarea>\
-\
-<sc-cards id="scp-tips" class="scp-if-tips scp-transition-opacity scp-secondary-feature"></sc-cards>\
-<sc-cards id="scp-settings" class="scp-if-settings scp-transition-opacity scp-secondary-feature"></sc-cards>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-button-big role="button" data-hover="scale(1.2)" class="scp-hand-cursor" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
-</sc>';
+</sc>\
+<sc style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
   sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeEnd(loc) {

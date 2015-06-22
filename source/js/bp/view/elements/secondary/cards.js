@@ -39,14 +39,24 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
       xhr.onload = function(evt) {
         var request = evt.target || this,
-          panelElement = getPanelElement(panelName),
-          html = addSemanticSugar(request.responseText);
+          html = addSemanticSugar(request.responseText),
+          panelElement = document.createElement('sc-cards');
+
+        panelElement.id = 'scp-' + panelName;
+        panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
         panelElement.innerHTML = html;
+
+        getContainer().appendChild(panelElement);
+
         toggleCardActive(panelElement.firstElementChild, true);
       };
 
       xhr.url = panelUrl;
       xhr.send();
+    }
+
+    function getContainer() {
+      return byId(BP_CONST.BP_CONTAINER_ID);
     }
 
     function getPanelElement(panelName) {
