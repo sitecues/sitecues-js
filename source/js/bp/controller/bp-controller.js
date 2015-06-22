@@ -268,14 +268,15 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       item = item || evt.currentTarget;
 
-      var feature = item.getAttribute('data-feature');
+      var feature     = item.getAttribute('data-feature'),
+          currentMode = baseController.getTab();
       if (feature) {  /* Feature button has data-feature attribute */
         baseController.clearPanelFocus();
         sitecues.emit('bp/do-toggle-secondary-panel', feature);
       }
       if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
         sitecues.emit('bp/do-toggle-secondary-panel');
-        syncFocusIndex();
+        syncFocusIndex(currentMode);
       }
       if (item.id === BP_CONST.NEXT_ID) {
         sitecues.emit('bp/next-card');
@@ -287,9 +288,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       sitecues.emit('bp/do-update');
     }
 
-    function syncFocusIndex () {
-      var currentTabbable = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()];
-      state.set('focusIndex', baseController.tabbable[currentTabbable].indexOf(baseController.getFocusedItemName()));
+    function syncFocusIndex (synchWith) {
+      var currentMode = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()],
+          tabbable        = baseController.tabbable,
+          previousMode    = tabbable[synchWith];
+
+      state.set('focusIndex', tabbable[currentMode].indexOf(previousMode[state.get('focusIndex')]));
     }
 
     window.addEventListener('focus', onWindowFocus);
