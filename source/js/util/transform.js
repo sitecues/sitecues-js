@@ -21,7 +21,7 @@ sitecues.def('util/transform', function (transform, callback) {
     function getComputedScale(elem) {
       var style = getComputedStyle(elem),
         transform = style[platform.transformProperty];
-      return +transform.substring(7) || 1;
+      return parseFloat(transform.substring(7)) || 1;
     }
 
     function getElemTransform(elem) {
