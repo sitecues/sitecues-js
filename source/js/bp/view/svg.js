@@ -93,7 +93,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </text>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
-      <rect x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
+      <rect id="scp-feedback-input-rect" x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g class="scp-hand-cursor" id="rating" aria-valuemin="1" aria-valuemax="5" role="slider" fill="#bbbbbb">\
         <use xlink:href="#scp-rating-star-def" x="42" y="254" role="button" aria-label="1 star rating"/>\
         <use xlink:href="#scp-rating-star-def" x="104" y="254" role="button" aria-label="2 star rating"/>\
@@ -150,15 +150,12 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
+<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" placeholder="Tell us something ...."></textarea>\
+\
 <sc-cards id="scp-tips" class="scp-if-tips scp-transition-opacity scp-secondary-feature"></sc-cards>\
 <sc-cards id="scp-settings" class="scp-if-settings scp-transition-opacity scp-secondary-feature"></sc-cards>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-button-big role="button" data-hover="scale(1.2)" class="scp-hand-cursor" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
-</sc>\
-<sc id="scp-feedback-textarea" class="scp-if-feedback">\
-  <sc class="scp-feedback-content">\
-     <textarea id="feedback-textarea-id" style="font-size: 22px; font-family: Arial; width: 430px; height: 142px; padding: 10px; border: 0 !important; outline: 0 !important; resize: none !important; background-color: transparent !important;" placeholder="Tell us something ...."></textarea>\
-  </sc>\
 </sc>';
   sitecues.use('locale', 'platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag

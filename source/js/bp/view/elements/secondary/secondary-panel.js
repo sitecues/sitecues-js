@@ -1,7 +1,6 @@
-// TODO rename icon menu button menu
+// TODO
 // Card interactions
 // Feedback
-// Mouse cursor not enlarging over panel
 // What happens if AJAX content doesn't load? Do we have some kind of fallback content?
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {

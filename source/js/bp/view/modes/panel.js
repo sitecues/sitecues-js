@@ -115,7 +115,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // *** scp-want-panel ***
         // Sets larger panel sizes on everything.
         // It can take time to take effect because of the animation properties.
-        classBuilder += ' ' + BP_CONST.WANT_PANEL;
+        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
 
         if (state.get('isKeyboardMode')) {
           // *** scp-keyboard ***

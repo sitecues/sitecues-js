@@ -244,9 +244,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background'   : '#447AC4'
         },
 
-
-
-        /***************** Loading/badge  ****************/
+      /***************** Loading/badge  ****************/
 
         // If there is an old badge image, it will fade out
         '#sitecues-badge>img': {
@@ -501,9 +499,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-feedback-textarea': {
-          'position': 'absolute',
-          'top': '33px',
-          'left': '43px'
+          'position': 'absolute !important',  // Size will be set by feedback.js
+          'top': '23px !important',
+          'left': '29px !important',
+          'font-size': '22px !important',
+          'font-family': 'Arial !important',
+          'padding': '10px 60px 10px 10px !important', // Make room for feedback icon on the top right
+          'border': '0 !important',
+          'resize': 'none !important',
+          'outline': '0 !important',
+          'background-color': 'transparent !important'
+        },
+
+        '#scp-feedback-input-rect.scp-focus': {
+          'stroke': 'rgba(82,168,236,.8)',
+          'stroke-width': '6px'
         },
 
         '#scp-arrows>text': {
