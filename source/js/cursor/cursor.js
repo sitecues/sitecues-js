@@ -217,12 +217,10 @@ sitecues.def('cursor', function (cursor, callback) {
 
       $bpStylesheet = createStyleSheet(SITECUES_BP_CURSOR_CSS_ID, cssText);
 
-      setTimeout(function() {
-        styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
-          bpCursorStylesheetObject = styleSheetObject;
-          refreshStylesheetsIfNecessary();
-        });
-      }, 100);
+      styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
+        bpCursorStylesheetObject = styleSheetObject;
+        refreshStylesheetsIfNecessary();
+      });
     }
 
     /**
@@ -257,6 +255,7 @@ sitecues.def('cursor', function (cursor, callback) {
           $stylesheet.remove();
           $stylesheet = null;
         }
+        doRefresh();
       }
       else if (!$stylesheet && isStyleServiceReady) {
         constructCursorStylesheet(doRefresh);
