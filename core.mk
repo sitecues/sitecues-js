@@ -133,6 +133,7 @@ files=\
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
+	source/js/metrics/feedback-sent.js \
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics/zoom-changed.js \
 	source/js/metrics/tts-requested.js \
