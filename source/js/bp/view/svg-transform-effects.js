@@ -1,6 +1,6 @@
 /**
  * IE cannot handle SVG transforms via CSS, so we do them in script
- * Currently this module implements .scp-expand-hover, but it can implement more
+ * Currently this module implements data-hover="[transform attributes]"
  */
 
 // TODO do we still need .scp-hovers?
@@ -15,7 +15,7 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       var isActivePanel,
         byId = helper.byId,
         HOVER_ANIMATION_MS = 500,
-        expandHoverElems,
+        hoverElems,
         origTransforms = [],
         animations = [];
 
@@ -57,10 +57,10 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         isActivePanel = willBeActive;
-        expandHoverElems = expandHoverElems || getContainer().querySelectorAll('[data-hover]');
+        hoverElems = hoverElems || getContainer().querySelectorAll('[data-hover]');
 
         var addOrRemoveFn = isActivePanel ? 'addEventListener' : 'removeEventListener',
-          index = expandHoverElems.length,
+          index = hoverElems.length,
           currElem;
 
         function addOrRemoveHovers(elem) {
@@ -70,29 +70,36 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         while (index --) {
-          currElem = expandHoverElems[index];
+          currElem = hoverElems[index];
           origTransforms[index] = currElem.getAttribute('transform');
           addOrRemoveHovers(currElem);
         }
       }
 
       function cancelHovers() {
-        var index = expandHoverElems.length;
+        var index = hoverElems.length;
         while (index --) {
-          toggleHover(expandHoverElems[index], false);
+          toggleHover(hoverElems[index], false);
         }
       }
 
-      function onDidExpand() {
+      function hoversOn() {
         toggleMouseListeners(true);
       }
 
-      function onWillShrink() {
+      function hoversOff() {
         toggleMouseListeners(false);
       }
 
-      sitecues.on('bp/did-expand', onDidExpand);
-      sitecues.on('bp/will-shrink', onWillShrink);
+      function refreshHovers() {  // Ensure listeners are added for new content
+        hoversOff();
+        hoverElems = null;
+        hoversOn();
+      }
+
+      sitecues.on('bp/did-expand', hoversOn);
+      sitecues.on('bp/will-shrink', hoversOff);
+      sitecues.on('bp/content-loaded', refreshHovers);
       sitecues.on('bp/do-cancel-hovers', cancelHovers);
 
       callback();

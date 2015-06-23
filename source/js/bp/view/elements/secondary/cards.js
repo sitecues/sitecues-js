@@ -11,7 +11,9 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       isInitialized,
       isActive = false,
       activePanelName,
-      activePanel;
+      activePanel,
+      NUM_PANELS_WITH_CARDS = 2, // can also be computed via PANELS_WITH_CARDS.keys().length;
+      panelsToLoad = NUM_PANELS_WITH_CARDS;
 
     function init() {
       if (isInitialized) {
@@ -49,6 +51,10 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         getContainer().appendChild(panelElement);
 
         toggleCardActive(panelElement.firstElementChild, true);
+
+        if (-- panelsToLoad === 0) {
+          sitecues.emit('bp/content-loaded');
+        }
       };
 
       xhr.url = panelUrl;
@@ -65,7 +71,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     // Add useful attributes to various elements, based on elemTypes
     function addSemanticSugar(html) {
-      return html.replace(/<sc-button /g, '<sc-button role="button" class="scp-hand-cursor scp-tabbable" ');
+      return html.replace(/<sc-button /g, '<sc-button role="button" data-hover="scale(1.2)" class="scp-hand-cursor scp-tabbable" ');
     }
 
     function onPanelUpdate() {
@@ -151,7 +157,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     sitecues.on('bp/do-update', onPanelUpdate);
 
-    sitecues.on('bp/do-toggle-secondary-panel', init);
+    sitecues.on('bp/did-expand', init);
 
     callback();
 

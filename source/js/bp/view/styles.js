@@ -187,8 +187,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'block',
           'margin': '16px 0',
           'font-family': 'Arial',
-          'font-size': '40px',
-          'width': 'calc(100% - 80px)'  // If arrows are on top-right, we need this
+          'font-size': '44px',
+          'width': '292px'  // If arrows are on top-right, we need this
         },
 
         'sc-p': {
@@ -537,8 +537,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-cards': {
           'position': 'relative',
           'font-family': 'Arial',
-          'left': '130px',
-          'width': '340px',
+          'left': '105px',
+          'width': '360px',
           'z-index': 999
         },
 
