@@ -528,6 +528,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
         },
 
+        // Active label highlights
+        '.scp-panel-tips #scp-tips-label, .scp-panel-settings #scp-settings-label, .scp-panel-feedback #scp-feedback-label, .scp-panel-about #scp-about-label': {
+          fill: '#447AC4'
+        },
+
         // Cards (for tips and settings)
         'sc-cards': {
           'position': 'relative',
