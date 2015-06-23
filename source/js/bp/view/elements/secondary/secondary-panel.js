@@ -8,7 +8,8 @@
 // Later
 // About: Get it now
 // What happens if AJAX content doesn't load? Do we have some kind of fallback content?
-
+//
+// Localization
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform',

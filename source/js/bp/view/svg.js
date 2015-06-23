@@ -45,7 +45,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <filter id="scp-shadowblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
   </filter>\
-  <path id="scp-left-arrow" d="m24,25l-48,-25l48,-25l0,50l0,0z" stroke="none"/>\
+  <path id="scp-arrow" d="m18,-1.9c-1.3,1.4 -15.6,15 -15.6,15c-.7,.7 -1.7,1.2 -2.7,1.2c-1,0 -1.89999,-.4 -2.7,-1.2c0,0 -14.2,-13.6 -15.6,-15c-1.3,-1.4 -1.4,-3.9 0,-5.3c1.4,-1.5 3.5,-1.6 5.2,0l13,12.5l13,-12.5c1.8,-1.6 3.8,-1.5 5.2,0c1.3,1.8 1.3,4 0,5.3l.2,0z"/>\
 </defs>\
 <rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <g id="scp-main" aria-label="sitecues main panel">\
@@ -89,11 +89,19 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
-      <g transform="translate(630,60)">\
-        <use id="scp-prev-card" xlink:href="#scp-left-arrow" class="scp-arrow scp-hand-cursor" data-hover="scale(1.2)" role="button" aria-label="Previous" aria-disabled="true"/>\
+      <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(650,60) rotate(90) scale(1.2)" role="button" aria-label="Previous" aria-disabled="true">\
+        <g data-hover="scale(1.2)">\
+          <use xlink:href="#scp-arrow"/>\
+          <use xlink:href="#scp-arrow" y="16"/>\
+          <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
+        </g>\
       </g>\
-      <g transform="translate(730,60)">\
-        <use id="scp-next-card" xlink:href="#scp-left-arrow" class="scp-arrow scp-hand-cursor" data-hover="scale(1.2)" role="button" aria-label="Next" transform="rotate(180)"/>\
+      <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(730,60) rotate(-90) scale(1.2)" role="button" aria-label="Next">\
+        <g data-hover="scale(1.2)">\
+          <use xlink:href="#scp-arrow"/>\
+          <use xlink:href="#scp-arrow" y="16""/>\
+          <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
+        </g>\
       </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
@@ -147,8 +155,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
   <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="View more options">\
-    <circle id="scp-more-button" fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
-    <path id="scp-more-arrow" class="scp-hand-cursor" fill="#777" d="m18,-1.9c-1.3,1.4 -15.6,15 -15.6,15c-.7,.7 -1.7,1.2 -2.7,1.2c-1,0 -1.89999,-.4 -2.7,-1.2c0,0 -14.2,-13.6 -15.6,-15c-1.3,-1.4 -1.4,-3.9 0,-5.3c1.4,-1.5 3.5,-1.6 5.2,0l13,12.5l13,-12.5c1.8,-1.6 3.8,-1.5 5.2,0c1.3,1.8 1.3,4 0,5.3l.2,0z"/>\
+    <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
+    <use fill="#777" xlink:href="#scp-arrow"/>\
    </g>\
 </g>\
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\

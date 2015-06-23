@@ -188,7 +188,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '16px 0',
           'font-family': 'Arial',
           'font-size': '40px',
-          'width': 'calc(100% - 100px)'  // If arrows are on top-right, we need this
+          'width': 'calc(100% - 80px)'  // If arrows are on top-right, we need this
         },
 
         'sc-p': {
@@ -225,7 +225,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-family': 'Arial',
           'font-size': '20px',
           'font-weight': 'bold',
-          'background-color': 'blue',
+          'background-color': '#447AC4',
           'color': 'white',
           'border': '2px solid beige',
           'border-radius': '5px',
@@ -500,11 +500,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '1200px !important'
         },
 
-        // Arrows
-        '.scp-arrow[aria-disabled]': {
-          //fill: '#aaa'
-          'display': 'none' // Just don't show the first time, otherwise it's just more noise for the user
+        '.scp-arrow': {
+          'fill': '#6B9AE0'
         },
+
+        // Arrows
+        '.scp-arrow[aria-disabled]': MAKE_HIDDEN,
 
         // Conditional content
         '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
@@ -540,7 +541,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'position': 'absolute',
           'visibility' : 'hidden',
           'pointer-events': 'none',  // Allow arrow pointer events
-          'opacity': 0
+          'opacity': 0,
+          'transition': 'opacity .5s'
         },
 
         '.scp-panel-tips .scp-if-tips > .scp-active, .scp-panel-settings .scp-if-settings > .scp-active': {
