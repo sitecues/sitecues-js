@@ -102,7 +102,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     // Use native value for things like <input type="range">
     function onSettingsNativeInputChange(evt) {
-      debugger;
       var target = evt.target;
       if (target) {
         var settingName = target.getAttribute('data-setting-name');

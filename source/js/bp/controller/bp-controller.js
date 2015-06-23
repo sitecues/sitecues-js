@@ -157,7 +157,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // User may think they need to click in badge
     // We don't want to take focus that way -- only via tabbing or from screen reader use
     bpc.suppressBadgeFocusOnClick = function(event) {
-      if (event.target.localName === 'textarea') {
+      var targetType = event.target.localName;
+      if (targetType === 'textarea' || targetType === 'input') {
         return;
       }
       // Prevent default handling and thus prevent focus
