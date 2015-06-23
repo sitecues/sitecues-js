@@ -494,10 +494,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /*************** Secondary panel **************************/
 
+        // Make room for tall panel contents
         '.scp-is-secondary > svg': {
-          'height': '1200px !important'    // Make room for tall panel contents
+          'height': '1200px !important'
         },
 
+        // Arrows
         '#scp-arrows>text': {
           'font-size': '44px'
         },
@@ -506,6 +508,28 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           fill: '#aaa'
         },
 
+        // Conditional content
+        '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
+        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
+        '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
+        '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
+        '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
+        '.scp-secondary-expanding .scp-secondary-feature': MAKE_HIDDEN,
+        '.scp-want-badge .scp-secondary-feature': {
+          'display': 'none !important'
+        },
+
+        '.scp-is-secondary .scp-secondary-only': { // element is visible in the more state of the badge-panel
+          'opacity': '1 !important'
+        },
+
+        // Don't allow hidden main panel elements to accept pointer events
+        '.scp-is-secondary > svg > #scp-main > *': {
+          'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
+        },
+
+        // Cards (for tips and settings)
         'sc-cards': {
           'position': 'relative',
           'font-family': 'Arial',
@@ -525,25 +549,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
-        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
-        '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
-        '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
-        '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
-        '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
-        '.scp-secondary-expanding .scp-secondary-feature': MAKE_HIDDEN,
-        '.scp-want-badge .scp-secondary-feature': {
-          'display': 'none !important'
-        },
-
-        '.scp-is-secondary .scp-secondary-only': { // element is visible in the more state of the badge-panel
-          'opacity': '1 !important'
-        },
-
-        '.scp-is-secondary > svg > #scp-main > *': {
-          'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
-        },
-
+        // Feedback -- thank you message
         '.scp-feedback-sent .scp-if-feedback.scp-secondary-feature': MAKE_HIDDEN,
         '.scp-if-feedback-sent': {
           'visibility': 'hidden',
@@ -555,6 +561,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
         '.scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent': MAKE_VISIBLE,
 
+        // Feedback -- text area
         '#scp-feedback-textarea': {
           'position': 'absolute !important',  // Size will be set by feedback.js
           'top': '23px !important',
@@ -567,12 +574,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'outline': '0 !important',
           'background-color': 'transparent !important'
         },
-
+        // Visible focus
         '#scp-feedback-input-rect.scp-focus': {
           'stroke': 'rgba(82,168,236,.8)',
           'stroke-width': '6px'
         },
 
+        // Feedback -- rating stars
         '.scp-rating-star': {
           'fill': '#ccc',
           'stroke': '#333',
@@ -592,6 +600,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#aaa !important'
         },
 
+        // Feedback -- send button
         '#scp-feedback-send>rect': {    // Disabled send button
           'fill': '#6B9AE0'
           },
@@ -600,6 +609,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#aaa !important'
         },
 
+        // About -- content that shows up after rolling animation
         '.scp-about-teaser': {
           'position'     : 'absolute',
           'z-index'      : '9999',
