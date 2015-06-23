@@ -18,17 +18,25 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
             init();
           }
           settingsCards.addEventListener('click', onSettingsClick);
+          settingsCards.addEventListener('change', onSettingsNativeInputChange);
         }
         else {
           settingsCards.removeEventListener('click', onSettingsClick);
+          settingsCards.removeEventListener('change', onSettingsNativeInputChange);
         }
       }
 
       isActive = willBeActive;
     }
 
-    // Set up setting synchronization
     function init() {
+      generalInit();
+
+      themePowerInit();
+    }
+
+    // Set up setting synchronization
+    function generalInit() {
       var settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID),
         allSettingNames = {},
         allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
@@ -56,18 +64,50 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       });
     }
 
+    function getThemePowerRangeInput() {
+      return byId(BP_CONST.THEME_POWER_ID);
+    }
+
+    function themePowerInit() {
+      conf.get('themePower', function(power) {
+        getThemePowerRangeInput().value = power;
+      });
+
+      conf.get('themeName', function (name) {
+        var isThemePowerEnabled = name !== null;
+        getThemePowerRangeInput().setAttribute('data-show', isThemePowerEnabled);
+      });
+    }
+
 
     settings.getGeometryTargets = function(cssValues) {
       cssValues[true].focusOutlineTranslateX = -130;
       return cssValues;
     };
 
+    function isNativeInput(elem) {
+      return typeof elem.value !== 'undefined';
+    }
+
     function onSettingsClick(evt) {
+      var target = evt.target,
+        settingName;
+      if (target && !isNativeInput(target)) {
+        settingName = target.getAttribute('data-setting-name');
+        if (settingName) {
+          conf.set(settingName, target.getAttribute('data-setting-value'));
+        }
+      }
+    }
+
+    // Use native value for things like <input type="range">
+    function onSettingsNativeInputChange(evt) {
+      debugger;
       var target = evt.target;
       if (target) {
         var settingName = target.getAttribute('data-setting-name');
         if (settingName) {
-          conf.set(settingName, target.getAttribute('data-setting-value'));
+          conf.set(settingName, + target.value);
         }
       }
     }

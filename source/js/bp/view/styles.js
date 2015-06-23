@@ -472,12 +472,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '99999999'
         },
 
-        /*************** Range *************************/
-
-        '#scp-bp-container input[type="range"]': {
-          'margin': '0px 15px'
-        },
-
         /*************** Focus **************************/
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
@@ -588,7 +582,23 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background-color': '#000'
         },
 
-      // Settings -- Lens: small/medium/large
+        // Settings -- Color theme power
+        '#scp-theme-power': {
+          'pointer-events': 'none',
+          'opacity': 0,
+          'margin-left': '80px',
+          'margin-top': '20px',
+          'width': '150px',
+          'transform': 'scale(1.5)',
+          'transition': 'opacity 1s'
+        },
+
+        '.scp-ie9-false #scp-theme-power[data-show="true"]': {
+          'pointer-events': 'inherit',
+          'opacity': 1
+        },
+
+        // Settings -- Lens: small/medium/large
         'sc-button[data-setting-name="lensSize"]': {
           'padding': '15px'
         },

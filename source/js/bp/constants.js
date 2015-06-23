@@ -91,6 +91,8 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
+  constants.THEME_POWER_ID           = 'scp-theme-power';
+
   constants.HOVER_DELAY_BADGE = 70;
   constants.HOVER_DELAY_TOOLBAR = 200;
   constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;

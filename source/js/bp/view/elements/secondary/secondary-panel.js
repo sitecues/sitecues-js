@@ -5,6 +5,8 @@
 // Tips: go to full guide
 // Settings: non-ugly UI for themes
 //
+// Zoom larger, panel formatting borked
+//
 // Later
 // About: Get it now
 // What happens if AJAX content doesn't load? Do we have some kind of fallback content?
