@@ -548,7 +548,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-if-feedback-sent': {
           'visibility': 'hidden',
           'opacity': 0,
-          'position': 'relative',
+          'position': 'absolute',
           'left': '154px',
           'top': '62px',
           'width': '340px'

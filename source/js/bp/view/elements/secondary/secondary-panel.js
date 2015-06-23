@@ -1,6 +1,12 @@
 // TODO
-// Card interactions
-// Feedback
+// Now
+// Card polish
+// Card back/forward buttons
+// Tips: go to full guide
+// Settings: non-ugly UI for themes
+//
+// Later
+// About: Get it now
 // What happens if AJAX content doesn't load? Do we have some kind of fallback content?
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
