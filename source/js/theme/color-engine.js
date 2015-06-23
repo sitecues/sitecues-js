@@ -85,7 +85,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         }
 
         var colorMapFn = colorChoices[type];
-        if (colorMapFn || type === 'none') {
+        if (colorMapFn || !type) {
           init(applyThemeImpl);
         }
       };
@@ -602,6 +602,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       }
 
       // Theme name must exist in colorChoices
+      // Except for null, which means no theme
       function getSanitizedThemeName(name) {
         return name in colorChoices ? name : null;
       }
