@@ -49,13 +49,15 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     // Clear the visual focus rectangle and current focus state
     main.clearPanelFocus = function() {
 
-      var focusedItem = main.getFocusedItem();
+      var focusedItem = main.getFocusedItem(),
+          outlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style;
 
       if (focusedItem) {
         focusedItem.removeAttribute('data-hasfocus');
       }
 
-      helper.byId(BP_CONST.OUTLINE_ID).style.display = 'none';
+      outlineStyle.display   = 'none';
+      outlineStyle.transform = '';
 
       state.set('focusIndex', -1);
     };

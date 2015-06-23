@@ -24,8 +24,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
 
-    settings.getGeometryTargets = function(geometryTargets) {
-      return geometryTargets;
+    settings.getGeometryTargets = function(cssValues) {
+      cssValues[true].focusOutlineTranslateX = -130;
+      return cssValues;
     };
 
     function onSettingsClick(evt) {

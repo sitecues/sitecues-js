@@ -14,14 +14,14 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
 
     about.getGeometryTargets = function(cssValues) {
       // Which additional animations
-      cssValues[false].menuImageTranslateX = 0;   // About logo transitions to the left following the rolling icon
+      cssValues[false].menuImageTranslateX   = 0;   // About logo transitions to the left following the rolling icon
 
-      cssValues[true].menuBtnTranslateX    = 175; // The about icon, which rolls to the left
-      cssValues[true].menuBtnTranslateY    = BP_CONST.TRANSFORMS[BP_CONST.ABOUT_BUTTON_ID].translateY; // The about icon
-      cssValues[true].menuBtnScale         = 1;    // About icon scales to 1
-      cssValues[true].menuBtnRotate        = -360; // Roll the about icon
-      cssValues[true].menuImageTranslateX  = -500;
-
+      cssValues[true].menuBtnTranslateX      = 175; // The about icon, which rolls to the left
+      cssValues[true].menuBtnTranslateY      = BP_CONST.TRANSFORMS[BP_CONST.ABOUT_BUTTON_ID].translateY; // The about icon
+      cssValues[true].menuBtnScale           = 1;    // About icon scales to 1
+      cssValues[true].menuBtnRotate          = -360; // Roll the about icon
+      cssValues[true].menuImageTranslateX    = -500;
+      cssValues[true].focusOutlineTranslateX = -314;
       return cssValues;
     };
 
