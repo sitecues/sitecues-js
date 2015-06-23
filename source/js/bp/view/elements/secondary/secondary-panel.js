@@ -88,6 +88,10 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         return byId(BP_CONST.MAIN_OUTLINE_BORDER_ID);
       }
 
+      function getFocusOutline() {
+        return byId(BP_CONST.OUTLINE_ID);
+      }
+
       function updateMoreButton(outlineHeight, moreButtonRotate) {
         var MORE_BUTTON_Y_OFFSET = 10,
           moreButton = getMoreButton();
@@ -208,12 +212,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             false: {  // Feature disabled
               outlineHeight: origOutlineHeight,
               menuBtnTranslateX: origMenuBtnTransforms.translateX,
-              menuBtnRotate: 0  // Will be used by icons that roll
+              menuBtnRotate: 0,  // Will be used by icons that roll
+              focusOutlineTranslateX: 0
             },
             true: {   // Feature enabled
               outlineHeight: panelContentsHeight + 103, // The outline
               menuBtnTranslateX: 26, // The icon rolls left by default
-              menuBtnRotate: 0    // Will be used by the icons that roll
+              menuBtnRotate: 0,    // Will be used by the icons that roll
+              focusOutlineTranslateX: 0
             }
           };
 
@@ -244,12 +250,15 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           featureModule = feature.module,
           featureTick = featureModule.tick,
           menuButton = byId(feature.menuButtonId),
+          focusOutline = getFocusOutline(),
 
           currentMenuBtnTransform = getElemTransform(menuButton),
+          currentOutlineTransform = getElemTransform(focusOutline),
 
           currentOutlineHeight = getCurrentOutlineHeight(),
 
           currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
+          currentOutlineTranslateX = currentOutlineTransform.translate.left,
           currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
           geometryTargets = getGeometryTargets(name, menuButton),
@@ -287,6 +296,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               1,
               getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
+          focusOutline.style.transform = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX, time) +'px,0)';
+
+
           featureTick && featureTick(time, toGeo);
         }
 
@@ -313,7 +325,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         openFeatureAnimation();
 
         // Animate the height at the right time
-        setTimeout(animateHeight, heightAnimationDelay);
+        setTimeout(animateHeight, heightAnimationDelay );
 
         fadeInTextContentWhenLargeEnough();
 
