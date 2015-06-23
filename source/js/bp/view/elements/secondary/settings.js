@@ -4,7 +4,8 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     function (BP_CONST, helper, conf, state) {
 
     var byId = helper.byId,
-      isActive = false;
+      isActive = false,
+      settingsPanel;
 
     function onPanelUpdate() {
 
@@ -13,6 +14,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
       if (isActive !== willBeActive) {
         if (willBeActive) {
+          if (!settingsPanel) {
+            init();
+          }
           settingsCards.addEventListener('click', onSettingsClick);
         }
         else {
@@ -21,6 +25,35 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       }
 
       isActive = willBeActive;
+    }
+
+    // Set up setting synchronization
+    function init() {
+      var settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID),
+        allSettingNames = {},
+        allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
+        index = allSettingElems.length,
+        name;
+
+      // For each setting name, get a list of elements
+      while (index --) {
+        name = allSettingElems[index].getAttribute('data-setting-name');
+        allSettingNames[name] = 1;
+      }
+
+      Object.keys(allSettingNames).forEach(function(name) {
+        conf.get(name, function(newValue) {
+          var settingElems = settingsPanel.querySelectorAll('[data-setting-name="' + name + '"]'),
+            index = settingElems.length,
+            elem,
+            isCurrentValue;
+          while (index -- ) {
+            elem = settingElems[index];
+            isCurrentValue = elem.getAttribute('data-setting-value') === newValue;
+            elem.setAttribute('data-setting-current', isCurrentValue);
+          }
+        });
+      });
     }
 
 

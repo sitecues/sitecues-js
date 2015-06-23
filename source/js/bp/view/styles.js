@@ -559,6 +559,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
+        // Settings
+        'sc-button[data-setting-current="true"]': {
+          'outline': '5px solid green'
+        },
+
         // Feedback -- thank you message
         '.scp-feedback-sent .scp-if-feedback.scp-secondary-feature': MAKE_HIDDEN,
         '.scp-if-feedback-sent': {
