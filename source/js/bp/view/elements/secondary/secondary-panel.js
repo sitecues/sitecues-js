@@ -17,7 +17,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/settings',
     'bp/view/elements/feedback',
     'bp/view/elements/about',
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule) {
+    'platform',
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, platform) {
 
       var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -32,6 +33,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         byId = helper.byId,
         getElemTransform = transform.getElemTransform,
         getTransformString = transform.getTransformString,
+        getTransform       = transform.getTransform,
 
         features = {
           tips: {
@@ -260,7 +262,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           focusOutline = getFocusOutline(),
 
           currentMenuBtnTransform = getElemTransform(menuButton),
-          currentOutlineTransform = getElemTransform(focusOutline),
+          currentOutlineTransform = getTransform(focusOutline.style[platform.transformProperty]),
 
           currentOutlineHeight = getCurrentOutlineHeight(),
 
@@ -303,7 +305,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               1,
               getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
-          focusOutline.style.transform = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX, time) +'px,0)';
+          focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX, time) +'px,0)';
 
 
           featureTick && featureTick(time, toGeo);
