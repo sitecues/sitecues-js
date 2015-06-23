@@ -5,29 +5,21 @@
 </sc-card>
 
 <sc-card>
-  <sc-h1>Color themes</sc-h1>
-  <sc-p>
-    <sc-button name="scp-setting-theme" id="scp-setting-theme-none" data-setting-name="themeName">
-      Normal
+  <sc-h1>Colors</sc-h1>
+  <sc-p class="scp-color-theme-group">
+    <sc-button data-setting-name="themeName">
+      None
     </sc-button>
-  </sc-p>
-  <sc-p>
-    <sc-button name="scp-setting-theme" id="scp-setting-theme-relaxed" data-setting-name="themeName" data-setting-value="blueReduction">
-      Relaxed tones
+    <sc-button data-setting-name="themeName" data-setting-value="blueReduction">
+      Warm
     </sc-button>
-  </sc-p>
-  <sc-p>
-    <sc-button name="scp-setting-theme" id="scp-setting-theme-contrast" data-setting-name="themeName" data-setting-value="increaseContrast">
-      Enhanced contrast
-    </sc-button>
-  </sc-p>
-  <sc-p>
-    <sc-button name="scp-setting-theme" id="scp-setting-theme-night" data-setting-name="themeName" data-setting-value="darkOriginal">
-      Nighttime
+    <sc-button data-setting-name="themeName" data-setting-value="darkOriginal">
+      Dark
     </sc-button>
   </sc-p>
 </sc-card>
 
+<!--
 <sc-card>
   <sc-h1>Reading voice</sc-h1>
   <sc-p>Who should read your text aloud?</sc-p>
@@ -39,10 +31,32 @@
   <sc-p>How fast should sitecues read?</sc-p>
   <sc-p><sc-span role="button" class="scp-range-label">Slower</sc-span><input type="range" aria-label="Speech rate"/><sc-span role="button" class="scp-range-label">Faster</sc-span></sc-p>
 </sc-card>
+-->
 
 <sc-card>
   <sc-h1>Lens Size</sc-h1>
   <sc-p>How much extra should the spacebar zoom content?</sc-p>
-  <sc-p><sc-button>None</sc-button><sc-button>Small</sc-button><sc-button>Medium</sc-button><sc-button>Large</sc-button></sc-p>
+  <sc-p>
+    <sc-span class="scp-lens-small">
+      <sc-button data-setting-name="lensSize" data-setting-value="-">
+        Small
+      </sc-button>
+    </sc-span>
+    <sc-span class="scp-lens-medium">
+      <sc-button data-setting-name="lensSize">
+        Medium
+      </sc-button>
+    </sc-span>
+    <sc-span class="scp-lens-large">
+      <sc-button data-setting-name="lensSize" data-setting-value="+">
+        Large
+      </sc-button>
+    </sc-span>
+  </sc-p>
+  <sc-p>
+    <sc-span role="button" class="scp-range-label">Less</sc-span>
+    <input type="range" aria-label="Theme power"/>
+    <sc-span role="button" class="scp-range-label">More</sc-span>
+  </sc-p>
 </sc-card>
 

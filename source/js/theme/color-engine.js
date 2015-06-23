@@ -615,7 +615,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return 1;
       }
 
-      function onThemeChange(theme) {
+      function onThemeChange() {
         colorEngine.applyTheme(conf.get('themeName'), conf.get('themePower'));
       }
 

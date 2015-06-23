@@ -187,7 +187,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'block',
           'margin': '16px 0',
           'font-family': 'Arial',
-          'font-size': '44px',
+          'font-size': '48px',
           'width': '292px'  // If arrows are on top-right, we need this
         },
 
@@ -221,7 +221,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-button': {
-          'display': 'block',
+          'display': 'inline-block',
           'font-family': 'Arial',
           'font-size': '20px',
           'font-weight': 'bold',
@@ -229,7 +229,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'color': 'white',
           'border': '2px solid beige',
           'border-radius': '5px',
-          'padding': '4px'
+          'padding': '9px',
+          'margin-right': '10px'
         },
 
         /* Secondary Panel - Blue Button */
@@ -559,9 +560,54 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        // Settings
+        // Settings -- Color theme buttons
+        '.scp-color-theme-group': {
+          'margin-top': '27px',
+          'margin-left': '-7px'
+        },
+
+        'sc-button[data-setting-name="themeName"]': {
+          'padding': '15px 0',
+          'font-size': '26px',
+          'border-radius': '50px',
+          'text-align': 'center',
+          'color': '#000',
+          'width': '84px',
+          'border': '5px solid #000',
+          'background-color': '#fff'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"]': {
+          'color': '#777',
+          'border-color': '#777',
+          'background-color': '#fffdde'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="darkOriginal"]': {
+          'color': '#fff',
+          'background-color': '#000'
+        },
+
+      // Settings -- Lens: small/medium/large
+        'sc-button[data-setting-name="lensSize"]': {
+          'padding': '15px'
+        },
+
+        '.scp-lens-small': {
+          'transform': 'translateX(-3px)'
+        },
+
+        '.scp-lens-medium': {
+          'transform': 'scale(1.2)'
+        },
+
+        '.scp-lens-large': {
+          'transform': 'scale(1.4) translateX(16px)'
+        },
+
+        // Settings -- current
         'sc-button[data-setting-current="true"]': {
-          'outline': '5px solid green'
+          'border-color': 'orange !important'
         },
 
         // Feedback -- thank you message

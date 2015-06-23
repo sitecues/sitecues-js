@@ -595,10 +595,19 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
       translateCSS = val;
     };
 
+    function getHlbZoom() {
+      var lensSizeSetting = conf.get('lensSize');
+      switch (lensSizeSetting) {
+        case '-': return 1.2;
+        case '+': return 2;
+        default: return 1.5;
+      }
+    }
+
     // HLB transform scale necessary to provide the HLBExtraZoom size increase.
     // If zoom is on the body, then scaling needs to account for that since the HLB is outside of the body.
     hlbPositioning.getFinalScale = function ($hlb) {
-      return HLB_DEFAULT_ZOOM * hlbPositioning.getStartingScale($hlb);
+      return getHlbZoom() * hlbPositioning.getStartingScale($hlb);
     };
 
     // HLB transform scale necessary to show HLB at same size as original highlighted content.
@@ -690,6 +699,10 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
         'webkit-transform-origin': originCSS
       });
 
+      // Legal sizes == '-' (smaller), null (default), '+' (larger)
+      conf.def('lensSize', function(size) {
+        return size === '-' || size === '+' ? size : null;
+      });
     };
 
     if (SC_UNIT) {
