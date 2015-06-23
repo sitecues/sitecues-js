@@ -550,6 +550,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'opacity .5s'
         },
 
+        'sc-card > *': {
+          'pointer-events': 'all'  // They were disallowed in parent because of arrows, but we still need them
+        },
+
         '.scp-panel-tips .scp-if-tips > .scp-active, .scp-panel-settings .scp-if-settings > .scp-active': {
           'visibility': 'visible',
           'opacity': 1
