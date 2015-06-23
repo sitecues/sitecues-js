@@ -16,6 +16,7 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         byId = helper.byId,
         HOVER_ANIMATION_MS = 500,
         expandHoverElems,
+        origTransforms = [],
         animations = [];
 
       function getContainer() {
@@ -29,15 +30,13 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         var id = + target.getAttribute('data-id'),
+          origTransform = origTransforms[id],
           cssProperties = {
-            transform: isActiveHover ? target.getAttribute('data-hover') : ' ' // Setting to space is like no transform
+            transform: origTransform + ' ' + (isActiveHover ? target.getAttribute('data-hover') : '')
           },
           options = {
             duration    : HOVER_ANIMATION_MS,
             useAttribute: target instanceof SVGElement
-//            onFinish: function() {
-//              animations[id] = null;
-//            }
           };
 
         animations[id] && animations[id].cancel();
@@ -61,7 +60,8 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         expandHoverElems = expandHoverElems || getContainer().querySelectorAll('[data-hover]');
 
         var addOrRemoveFn = isActivePanel ? 'addEventListener' : 'removeEventListener',
-          index = expandHoverElems.length;
+          index = expandHoverElems.length,
+          currElem;
 
         function addOrRemoveHovers(elem) {
           elem.setAttribute('data-id', index);
@@ -70,7 +70,9 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         while (index --) {
-          addOrRemoveHovers(expandHoverElems[index]);
+          currElem = expandHoverElems[index];
+          origTransforms[index] = currElem.getAttribute('transform');
+          addOrRemoveHovers(currElem);
         }
       }
 

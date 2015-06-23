@@ -45,6 +45,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <filter id="scp-shadowblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
   </filter>\
+  <path id="scp-left-arrow" d="m24,25l-48,-25l48,-25l0,50l0,0z" stroke="none"/>\
 </defs>\
 <rect id="scp-opaque-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <g id="scp-main" aria-label="sitecues main panel">\
@@ -88,12 +89,12 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
-      <text id="scp-prev-card" class="scp-hand-cursor" role="button" aria-label="Previous" x="655" y="74" aria-disabled="true">\
-         &#9668;\
-      </text>\
-      <text id="scp-next-card" class="scp-hand-cursor" role="button" aria-label="Next" x="735" y="74">\
-         &#9658;\
-      </text>\
+      <g transform="translate(630,60)">\
+        <use id="scp-prev-card" xlink:href="#scp-left-arrow" class="scp-arrow scp-hand-cursor" data-hover="scale(1.2)" role="button" aria-label="Previous" aria-disabled="true"/>\
+      </g>\
+      <g transform="translate(730,60)">\
+        <use id="scp-next-card" xlink:href="#scp-left-arrow" class="scp-arrow scp-hand-cursor" data-hover="scale(1.2)" role="button" aria-label="Next" transform="rotate(180)"/>\
+      </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
       <rect id="scp-feedback-input-rect" x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
@@ -110,7 +111,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about">\
-      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="26" width="330" height="110"></image>\
+      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="16" width="330" height="110"></image>\
     </g>\
   </g>\
   <g id="scp-button-menu" transform="translate(52,66)">\

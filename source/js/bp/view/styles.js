@@ -187,7 +187,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'block',
           'margin': '16px 0',
           'font-family': 'Arial',
-          'font-size': '40px'
+          'font-size': '40px',
+          'width': 'calc(100% - 100px)'  // If arrows are on top-right, we need this
         },
 
         'sc-p': {
@@ -500,12 +501,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // Arrows
-        '#scp-arrows>text': {
-          'font-size': '44px'
-        },
-
-        '#scp-arrows>[aria-disabled]': {
-          fill: '#aaa'
+        '.scp-arrow[aria-disabled]': {
+          //fill: '#aaa'
+          'display': 'none' // Just don't show the first time, otherwise it's just more noise for the user
         },
 
         // Conditional content
@@ -541,6 +539,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-card': {
           'position': 'absolute',
           'visibility' : 'hidden',
+          'pointer-events': 'none',  // Allow arrow pointer events
           'opacity': 0
         },
 
