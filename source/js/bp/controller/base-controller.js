@@ -1,8 +1,8 @@
 /* Front Controller */
 sitecues.def('bp/controller/base-controller', function (main, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper',
-    function (BP_CONST, state, helper) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'platform',
+    function (BP_CONST, state, helper, platform) {
 
     main.tabbable = {
       'main': [
@@ -57,7 +57,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       }
 
       outlineStyle.display   = 'none';
-      outlineStyle.transform = '';
+      outlineStyle[platform.transformProperty] = '';
 
       state.set('focusIndex', -1);
     };
