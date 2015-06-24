@@ -13,7 +13,7 @@ sitecues.def('cursor', function (cursor, callback) {
   sitecues.use('jquery', 'style-service', 'conf', 'cursor/css', 'platform',
     function (  $, styleService, conf, cursorCss, platform) {
 
-    var cursorZoom = 1,
+    var autoSize = 1,
         // Regexp is used to match URL in the string given(see below).
         URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
         CURSOR_TYPES = ['default', 'pointer' ],
@@ -28,6 +28,9 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         bpCursorStylesheetObject,
         isStyleServiceReady,
+        MAX_USER_SPECIFIED_CURSOR_SIZE = 4,
+        userSpecifiedSize,
+        userSpecifiedHue,
         doAllowCursors = true,
         doUseAjaxCursors = platform.browser.isIE,
         doDisableDuringZoom = platform.browser.isIE;
@@ -230,8 +233,10 @@ sitecues.def('cursor', function (cursor, callback) {
      */
     function doRefresh() {
       // Get cursor URLs for current zoom levels
-      var cursorTypeUrls = getCursorTypeUrls(cursorZoom),
-        bpCursorTypeUrls = cursorZoom < MIN_BP_CURSOR_SIZE ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
+      var useCursorZoom = userSpecifiedSize || autoSize,
+        cursorTypeUrls = getCursorTypeUrls(useCursorZoom, userSpecifiedHue),
+        useDifferentBpSizes = !userSpecifiedSize && autoSize < MIN_BP_CURSOR_SIZE,
+        bpCursorTypeUrls = useDifferentBpSizes ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
 
       // Refresh document cursor stylesheet if we're using one
       if (cursorStylesheetObject) {
@@ -250,7 +255,8 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function refreshStylesheetsIfNecessary() {
-      if (cursorZoom <= 1 || !doAllowCursors) {
+      if ((autoSize <= 1 || !doAllowCursors) && !userSpecifiedSize && !userSpecifiedHue) {
+        // Autosizing or no cursors allowed right now
         if ($stylesheet) {
           $stylesheet.remove();
           $stylesheet = null;
@@ -269,7 +275,7 @@ sitecues.def('cursor', function (cursor, callback) {
      * Get the cursor URLs to support the current cursorZoom level
      * @returns {Array} Array of cursor URLS
      */
-    function getCursorTypeUrls(size) {
+    function getCursorTypeUrls(size, hue) {
       var cursorTypeUrls = [],
         i = 0,
         doUseIECursors = platform.browser.isIE || doUseAjaxCursors;
@@ -278,7 +284,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = cursorCss.getCursorCss(type, size, doUseIECursors);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors, hue);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -300,15 +306,50 @@ sitecues.def('cursor', function (cursor, callback) {
       };
     }
 
-    sitecues.on('zoom', function (pageZoom) {
+    function onMouseSizeSetting(size) {
+      userSpecifiedSize = size;
+      sitecues.off('zoom', onPageZoom);
+      if (isStyleServiceReady) {
+        refreshStylesheetsIfNecessary();
+      }
+    }
+
+    function onMouseHueSetting(hue) {
+      userSpecifiedHue = hue;
+      if (isStyleServiceReady) {
+        refreshStylesheetsIfNecessary();
+      }
+    }
+
+    function sanitizeMouseSize(size) {
+      return Math.min(Math.max(size, 1), MAX_USER_SPECIFIED_CURSOR_SIZE);
+    }
+
+    function sanitizeMouseHue(hue) {
+      return Math.min(Math.max(hue, 0), 1);
+    }
+
+    conf.def('mouseSize', sanitizeMouseSize);
+    conf.def('mouseHue', sanitizeMouseHue);
+    conf.get('mouseSize', onMouseSizeSetting);
+    conf.get('mouseHue', onMouseHueSetting);
+
+    function onPageZoom(pageZoom) {
+      if (userSpecifiedSize) {
+        return;
+      }
       // At page zoom level 1.0, the cursor is the default size (same as us being off).
       // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
       var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
-      if (cursorZoom !== newCursorZoom) {
-        cursorZoom = newCursorZoom;
+      if (autoSize !== newCursorZoom) {
+        autoSize = newCursorZoom;
         refreshStylesheetsIfNecessary();
       }
-    });
+    }
+
+    if (!userSpecifiedSize) {
+      sitecues.on('zoom', onPageZoom);
+    }
 
     sitecues.on('style-service/ready', function() {
       isStyleServiceReady = true;

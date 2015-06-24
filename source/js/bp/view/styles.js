@@ -558,6 +558,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
+        // Settings -- input ranges
+        '#scp-bp-container input[type="range"]': {
+          'transform': 'scale(1.8)'
+        },
+
         // Settings -- Color theme buttons
         '.scp-color-theme-group': {
           'margin-top': '27px',
@@ -593,7 +598,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin-left': '80px',
           'margin-top': '20px',
           'width': '150px',
-          'transform': 'scale(1.5)',
           'transition': 'opacity 1s'
         },
 
@@ -601,6 +605,24 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'inherit',
           'opacity': 1
         },
+
+        // Settings -- Mouse size
+        '.scp-mouse-size-group,.scp-mouse-hue-group': {
+          'text-align': 'center',
+          'padding-top': '12px'
+        },
+        '#scp-mouse-size-label,#scp-mouse-hue-label':{
+          'font-size': '30px',
+          'margin-top': '8px'
+        },
+
+//        'sc-button[data-setting-name="mouseSize"]': {
+//          'background-color': 'transparent',
+//          'border': 0,
+//          'padding': 0,
+//          'width': '5px',
+//          'height': '40px'
+//        },
 
         // Settings -- Lens: small/medium/large
         'sc-button[data-setting-name="lensSize"]': {

@@ -3,7 +3,8 @@
  */
 sitecues.def('bp/view/elements/cards', function (cards, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', function (BP_CONST, helper, locale, state) {
+  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', 'platform',
+    function (BP_CONST, helper, locale, state, platform) {
 
     var
       PANELS_WITH_CARDS = { tips: 1, settings: 1},
@@ -50,6 +51,8 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
         getContainer().appendChild(panelElement);
 
+        removeUnsupportedContent(panelElement);
+
         toggleCardActive(panelElement.firstElementChild, true);
 
         if (-- panelsToLoad === 0) {
@@ -73,6 +76,22 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     function addSemanticSugar(html) {
       return html.replace(/<sc-button /g, '<sc-button role="button" data-hover="scale(1.2)" class="scp-hand-cursor scp-tabbable" ')
         .replace(/<input /g, '<input class="scp-hand-cursor scp-tabbable" ');
+    }
+
+    function removeAllElements(elements) {
+      var index = elements.length;
+      while (index --) {
+        elements[index].parentNode.removeChild(elements[index]);
+      }
+    }
+
+    function removeUnsupportedContent(panelElement) {
+      if (platform.browser.isIE) {
+        removeAllElements(panelElement.getElementsByClassName('scp-no-ie'));
+        if (platform.isIE9()) {
+          removeAllElements(panelElement.getElementsByClassName('scp-no-ie9'));
+        }
+      }
     }
 
     function onPanelUpdate() {

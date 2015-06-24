@@ -55,7 +55,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
-    <rect id="scp-zoom-slider-target" class="scp-hidden-target" x="80" y="44" width="280" height="67"/>\
+    <rect id="scp-zoom-slider-target" class="scp-hidden-target scp-hand-cursor" x="80" y="44" width="280" height="67"/>\
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-hand-cursor" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="60"/>\
   <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>\

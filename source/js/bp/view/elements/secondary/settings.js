@@ -1,7 +1,7 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state',
-    function (BP_CONST, helper, conf, state) {
+  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', 'cursor/css',
+    function (BP_CONST, helper, conf, state, cursorCss) {
 
     var byId = helper.byId,
       isActive = false,
@@ -30,15 +30,18 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
     function init() {
+      settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
+
       generalInit();
+
+      initRanges();
 
       themePowerInit();
     }
 
     // Set up setting synchronization
     function generalInit() {
-      var settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID),
-        allSettingNames = {},
+      var allSettingNames = {},
         allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
         index = allSettingElems.length,
         name;
@@ -68,11 +71,27 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       return byId(BP_CONST.THEME_POWER_ID);
     }
 
-    function themePowerInit() {
-      conf.get('themePower', function(power) {
-        getThemePowerRangeInput().value = power;
+    function initRangeListener(settingName, rangeElem) {
+      conf.get(settingName, function(val) {
+        rangeElem.value = val;
       });
+    }
 
+    function initRanges() {
+      var rangeElems = settingsPanel.querySelectorAll('input[type="range"]'),
+        index = rangeElems.length,
+        rangeElem,
+        settingName;
+
+      while (index --) {
+        rangeElem = rangeElems[index];
+        settingName = rangeElem.getAttribute('data-setting-name');
+        initRangeListener(settingName, rangeElem);
+      }
+
+    }
+
+    function themePowerInit() {
       conf.get('themeName', function (name) {
         var isThemePowerEnabled = name !== null;
         getThemePowerRangeInput().setAttribute('data-show', isThemePowerEnabled);

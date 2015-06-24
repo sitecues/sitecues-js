@@ -44,7 +44,7 @@ sitecues.def('cursor/css', function (cursorCss, callback) {
      * @param sizeRatio a number > 1 (e.g. 2 = 2x)
      * @param pixelRatio = 1 for normal, 2 for retina cursor
      */
-    cursorCss.getCursorCss = function(type, sizeRatio, doUseAjaxCursors) {
+    cursorCss.getCursorCss = function(type, sizeRatio, doUseAjaxCursors, hue) {
       var doUseRetinaCursors = zoomModule.isRetina() && platform.canUseRetinaCursors,
         pixelRatio = doUseRetinaCursors ? 2 : 1,
         cursorGeneratorFn = doUseRetinaCursors ? generateCursorStyle2x : generateCursorStyle1x;
