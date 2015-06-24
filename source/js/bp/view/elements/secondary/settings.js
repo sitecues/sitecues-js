@@ -1,7 +1,7 @@
 sitecues.def('bp/view/elements/settings', function (settings, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state', 'cursor/css',
-    function (BP_CONST, helper, conf, state, cursorCss) {
+  sitecues.use('bp/constants', 'bp/helper', 'conf', 'bp/model/state',
+    function (BP_CONST, helper, conf, state) {
 
     var byId = helper.byId,
       isActive = false,

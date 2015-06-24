@@ -89,14 +89,14 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
-      <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(690,68) rotate(90) scale(1.2)" role="button" aria-label="Previous" aria-disabled="true">\
+      <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(690,72) rotate(90) scale(1.3)" role="button" aria-label="Previous" aria-disabled="true">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
           <use xlink:href="#scp-arrow" y="16"/>\
           <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
         </g>\
       </g>\
-      <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(740,68) rotate(-90) scale(1.2)" role="button" aria-label="Next">\
+      <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(740,72) rotate(-90) scale(1.3)" role="button" aria-label="Next">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
           <use xlink:href="#scp-arrow" y="16""/>\

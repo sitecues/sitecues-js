@@ -29,6 +29,7 @@ sitecues.def('cursor', function (cursor, callback) {
         bpCursorStylesheetObject,
         isStyleServiceReady,
         MAX_USER_SPECIFIED_CURSOR_SIZE = 4,
+        MAX_USER_SPECIFIED_MOUSE_HUE = 1.19,// If > 1.0 then use white
         userSpecifiedSize,
         userSpecifiedHue,
         doAllowCursors = true,
@@ -254,9 +255,16 @@ sitecues.def('cursor', function (cursor, callback) {
       }
     }
 
+    function isCustomCursorNeeded() {
+      if (!doAllowCursors) {
+        return false;
+      }
+      return autoSize > 1 || userSpecifiedSize || userSpecifiedHue;
+    }
+
     function refreshStylesheetsIfNecessary() {
-      if ((autoSize <= 1 || !doAllowCursors) && !userSpecifiedSize && !userSpecifiedHue) {
-        // Autosizing or no cursors allowed right now
+      if (!isCustomCursorNeeded()) {
+        // Cursor is normal size or no custom cursor allowed right now
         if ($stylesheet) {
           $stylesheet.remove();
           $stylesheet = null;
@@ -284,7 +292,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = cursorCss.getCursorCss(type, size, doUseIECursors, userSpecifiedHue);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors, getRealUserHue());
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -315,7 +323,6 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function onMouseHueSetting(hue) {
-      debugger;
       userSpecifiedHue = hue;
       if (isStyleServiceReady) {
         refreshStylesheetsIfNecessary();
@@ -327,7 +334,14 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function sanitizeMouseHue(hue) {
-      return Math.min(Math.max(hue, 0), 0.99);
+      if (hue <= 0 || hue > MAX_USER_SPECIFIED_MOUSE_HUE) {
+        return MAX_USER_SPECIFIED_MOUSE_HUE;
+      }
+      return hue;
+    }
+
+    function getRealUserHue() {
+      return userSpecifiedHue > 0 && userSpecifiedHue < 1.1 ? Math.min(userSpecifiedHue, 1) : 0;
     }
 
     conf.def('mouseSize', sanitizeMouseSize);

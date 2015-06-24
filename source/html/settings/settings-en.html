@@ -1,11 +1,12 @@
 <sc-card>
   <sc-h1>Settings</sc-h1>
-  <sc-p>Get more out of sitecues zoom and speech tools by adjusting the settings.</sc-p>
-  <sc-p>Use the arrow buttons at the top right of this panel to find all the provided settings.</sc-p>
+  <sc-p>Get more out of sitecues with custom settings.</sc-p>
+  <sc-p>Use the arrow buttons at the top right to see them all.</sc-p>
 </sc-card>
 
+
 <sc-card>
-  <sc-h1>Colors</sc-h1>
+  <sc-h1>Theme</sc-h1>
   <sc-p class="scp-color-theme-group">
     <sc-button data-setting-name="themeName">
       None
@@ -17,41 +18,27 @@
       Dark
     </sc-button>
   </sc-p>
-  <sc-p>
-    <input id="scp-theme-power" type="range" min=".01" max="1" step =".01" data-setting-name="themePower" aria-label="Theme power"/>
+  <sc-p class="scp-range-group">
+    <input id="scp-theme-power" type="range" min=".01" max="1" step =".001" data-setting-name="themePower" aria-label="Theme power"/>
   </sc-p>
 </sc-card>
-
-<!--
-<sc-card>
-  <sc-h1>Reading voice</sc-h1>
-  <sc-p>Who should read your text aloud?</sc-p>
-  <sc-p><sc-button>Sarah</sc-button><sc-button>Rebecca</sc-button><sc-button>Henry</sc-button></sc-p>
-</sc-card>
-
-<sc-card>
-  <sc-h1>Voice speed</sc-h1>
-  <sc-p>How fast should sitecues read?</sc-p>
-  <sc-p><sc-span role="button" class="scp-range-label">Slower</sc-span><input type="range" aria-label="Speech rate"/><sc-span role="button" class="scp-range-label">Faster</sc-span></sc-p>
-</sc-card>
--->
 
 <sc-card class="scp-no-ie9">
   <sc-h1>Mouse</sc-h1>
-  <sc-p class="scp-mouse-size-group">
-    <input id="scp-mouse-size" type="range" min="1" max="4" step =".1" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"/><br/>
+  <sc-p class="scp-range-group">
+    <input id="scp-mouse-size" type="range" min="1" max="4" step =".01" data-setting-name="mouseSize" aria-labelledby="scp-mouse-size-label"/><br/>
     <sc-span id="scp-mouse-size-label">size</sc-span>
   </sc-p>
-  <sc-p class="scp-mouse-hue-group" class="scp-no-ie">
-    <input id="scp-mouse-hue" type="range" min="0" max=".99" step =".01" data-setting-name="mouseHue" aria-labelledby="scp-mouse-hue-label"/><br/>
+  <sc-p class="scp-range-group scp-no-ie">
+    <input id="scp-mouse-hue" type="range" min=".01" max="1.19" step =".01" data-setting-name="mouseHue" aria-labelledby="scp-mouse-hue-label"/><br/>
     <sc-span id="scp-mouse-hue-label">color</sc-span>
   </sc-p>
 </sc-card>
 
 <sc-card>
-  <sc-h1>Lens size</sc-h1>
+  <sc-h1>Smart lens</sc-h1>
   <sc-p>How much extra should the spacebar zoom content?</sc-p>
-  <sc-p>
+  <sc-p class="scp-lens-size-group">
     <sc-span class="scp-lens-small">
       <sc-button data-setting-name="lensSize" data-setting-value="-">
         Small

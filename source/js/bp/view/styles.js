@@ -12,16 +12,23 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       classDelimiter = '.',
       hover = ':hover',
 
+      // Repeating code
       MAKE_HIDDEN = {
         'pointer-events': 'none',
         'visibility': 'hidden',
         'opacity': 0
       },
-
       MAKE_VISIBLE = {
         'pointer-events': 'all',
         'visibility': 'visible',
         'opacity': 1
+      },
+      RANGE_THUMB = {
+        '-webkit-appearance': 'none',
+        'width': '30px',
+        'height': '18px',
+        'border': '4px solid black',
+        'border-radius': '12px'
       },
 
       WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
@@ -558,15 +565,60 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        // Settings -- input ranges
-        '#scp-bp-container input[type="range"]': {
-          'transform': 'scale(1.8)'
+        // Input ranges
+        '.scp-range-group': {
+          'text-align': 'center',
+          'padding-top': '16px'
         },
+        '#scp-bp-container input[type="range"]': {
+          '-webkit-appearance': 'none',
+          'width': '240px',
+          'height': '24px',
+          'margin': '0',
+          'border': '4px solid #555',
+          'padding': '1px 2px',
+          'border-radius': '14px',
+          'background': 'transparent',
+          'outline': 0 // TODO need some other way of showing focus
+        },
+
+        '#scp-bp-container input[type=range]::-webkit-slider-runnable-track': {
+          'border': 'none',
+          'border-radius': '14px'
+        },
+
+        '#scp-bp-container input[type="range"]::-moz-range-track': {
+          'border': 'none',
+          'background': 'transparent'
+        },
+        '#scp-bp-container input[type=range]::-moz-focus-outer': {
+          'border': 0
+        },
+
+        '#scp-bp-container input[type="range"]::-ms-track': {
+          'border': 'none',
+          'border-radius': '14px',
+          'color': 'transparent' /* don't drawn vertical reference line */
+        },
+
+        '#scp-bp-container input[type="range"]::-ms-fill-lower,input[type="range"]::-ms-fill-upper': {
+          'background': '#fffdde'
+        },
+        '#scp-bp-container input[type="range"]::-ms-tooltip': {
+          'display': 'none'
+        },
+        '#scp-bp-container input::-webkit-slider-thumb': RANGE_THUMB,
+        '#scp-bp-container input::-moz-range-thumb': RANGE_THUMB,
+        '#scp-bp-container input::-ms-thumb': RANGE_THUMB,
 
         // Settings -- Color theme buttons
         '.scp-color-theme-group': {
           'margin-top': '27px',
           'margin-left': '-7px'
+        },
+
+        '.scp-color-theme-group > :last-child': {
+          'margin-right': 0   // Otherwise we look wider than we are and centering other stuff with it looks off
         },
 
         'sc-button[data-setting-name="themeName"]': {
@@ -595,36 +647,41 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-theme-power': {
           'pointer-events': 'none',
           'opacity': 0,
-          'margin-left': '80px',
-          'margin-top': '20px',
-          'width': '150px',
-          'transition': 'opacity 1s'
+          'transition': 'opacity 1s',
+          'padding-top': '24px'
         },
+        '#scp-theme-power::-webkit-slider-thumb': { 'background': '#ddd !important' },
+        '#scp-theme-power::-moz-range-thumb': { 'background': '#ddd !important' },
+        '#scp-theme-power::-ms-thumb': { 'background': '#ddd !important' },
 
         '.scp-ie9-false #scp-theme-power[data-show="true"]': {
           'pointer-events': 'inherit',
           'opacity': 1
         },
 
-        // Settings -- Mouse size
-        '.scp-mouse-size-group,.scp-mouse-hue-group': {
-          'text-align': 'center',
-          'padding-top': '12px'
-        },
+        // Settings -- Mouse
         '#scp-mouse-size-label,#scp-mouse-hue-label':{
           'font-size': '30px',
           'margin-top': '8px'
         },
+        '#scp-mouse-size': {
+          'transform': 'perspective(162px) rotateY(-23deg)',
+          'background': '#eee !important',
+          'margin-left': '-71px !important'
+        },
+        '#scp-mouse-hue': {
+          'background-image': 'linear-gradient(to right, #f00 0%, #ff0 14%, #0f0 28%, #0ff 42%, #00f 56%, #f0f 70%, #f00 84%, #fff 88%, #fff 100%) !important'
+        },
 
-//        'sc-button[data-setting-name="mouseSize"]': {
-//          'background-color': 'transparent',
-//          'border': 0,
-//          'padding': 0,
-//          'width': '5px',
-//          'height': '40px'
-//        },
+        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#444 !important' },
+        '#scp-mouse-size::-moz-range-thumb': { 'background': '#444 !important' },
+        '#scp-mouse-size::-ms-thumb': { 'background': '#444 !important' },
 
         // Settings -- Lens: small/medium/large
+        '.scp-lens-size-group': {
+          'padding-top': '10px'
+        },
+
         'sc-button[data-setting-name="lensSize"]': {
           'padding': '15px'
         },
