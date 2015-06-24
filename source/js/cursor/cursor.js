@@ -234,7 +234,7 @@ sitecues.def('cursor', function (cursor, callback) {
     function doRefresh() {
       // Get cursor URLs for current zoom levels
       var useCursorZoom = userSpecifiedSize || autoSize,
-        cursorTypeUrls = getCursorTypeUrls(useCursorZoom, userSpecifiedHue),
+        cursorTypeUrls = getCursorTypeUrls(useCursorZoom),
         useDifferentBpSizes = !userSpecifiedSize && autoSize < MIN_BP_CURSOR_SIZE,
         bpCursorTypeUrls = useDifferentBpSizes ? getCursorTypeUrls(MIN_BP_CURSOR_SIZE) : cursorTypeUrls;
 
@@ -275,7 +275,7 @@ sitecues.def('cursor', function (cursor, callback) {
      * Get the cursor URLs to support the current cursorZoom level
      * @returns {Array} Array of cursor URLS
      */
-    function getCursorTypeUrls(size, hue) {
+    function getCursorTypeUrls(size) {
       var cursorTypeUrls = [],
         i = 0,
         doUseIECursors = platform.browser.isIE || doUseAjaxCursors;
@@ -284,7 +284,7 @@ sitecues.def('cursor', function (cursor, callback) {
       for (; i < CURSOR_TYPES.length; i ++) {
         // Don't use hotspotOffset in IE because that's part of the .cur file.
         var type = CURSOR_TYPES[i],
-          css = cursorCss.getCursorCss(type, size, doUseIECursors, hue);
+          css = cursorCss.getCursorCss(type, size, doUseIECursors, userSpecifiedHue);
 
         cursorTypeUrls[CURSOR_TYPES[i]] = css;
       }
@@ -315,6 +315,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function onMouseHueSetting(hue) {
+      debugger;
       userSpecifiedHue = hue;
       if (isStyleServiceReady) {
         refreshStylesheetsIfNecessary();
@@ -326,7 +327,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function sanitizeMouseHue(hue) {
-      return Math.min(Math.max(hue, 0), 1);
+      return Math.min(Math.max(hue, 0), 0.99);
     }
 
     conf.def('mouseSize', sanitizeMouseSize);
