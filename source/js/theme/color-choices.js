@@ -257,6 +257,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         newRgba,
         origLightness,
         newLightness,
+        bgAddedLightness,
+        bgPreservationFactor,
         newHue;
 
       if (style.prop === 'color') {
@@ -266,9 +268,11 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
       else {
+        bgAddedLightness = (1 - intensity) / 8; // Add a little lightness when theme is less intense
+        bgPreservationFactor = 1 - intensity / 4;
         origLightness = hsl.l;
-        newLightness = origLightness < 0.4 ? origLightness : (1 - origLightness) * 3;
-        newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * intensity));
+        newLightness = (origLightness < 0.4 ? origLightness : (1 - origLightness) * 3);
+        newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * bgPreservationFactor + bgAddedLightness));
       }
       return newRgba;
     };
