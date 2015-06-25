@@ -5,7 +5,9 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     var byId = helper.byId,
       isActive = false,
-      settingsPanel;
+      settingsPanel,
+      lastDragUpdateTime = 0,
+      SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
 
     function onPanelUpdate() {
 
@@ -19,10 +21,12 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
           }
           settingsCards.addEventListener('click', onSettingsClick);
           settingsCards.addEventListener('change', onSettingsNativeInputChange);
+          settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
         }
         else {
           settingsCards.removeEventListener('click', onSettingsClick);
           settingsCards.removeEventListener('change', onSettingsNativeInputChange);
+          settingsCards.removeEventListener('input', onSettingsNativeInputChangeDrag);
         }
       }
 
@@ -120,6 +124,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
     // Use native value for things like <input type="range">
+    // For sliders, this occurs when user drops the thumb (lets go of mouse button)
     function onSettingsNativeInputChange(evt) {
       var target = evt.target;
       if (target) {
@@ -127,6 +132,17 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
         if (settingName) {
           conf.set(settingName, + target.value);
         }
+      }
+    }
+
+    // Native input change
+    // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
+    // We don't want to update too much, hence the timer
+    function onSettingsNativeInputChangeDrag(evt) {
+      var currTime = + Date.now();
+      if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
+        lastDragUpdateTime = currTime;
+        setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
       }
     }
 
