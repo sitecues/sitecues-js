@@ -767,8 +767,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-about-teaser': {
           'position'     : 'absolute',
           'z-index'      : '9999',
-          'left'         : '135px',
-          'top'          : '120px'
+          'left'         : '163px',
+          'top'          : '99px',
+          'text-align'   : 'center'
         },
 
         /*************** Clipping rules for badge **************************/

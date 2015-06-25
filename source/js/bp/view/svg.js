@@ -167,7 +167,15 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <sc-h1>Thank you</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
-  <sc-button-big role="button" data-hover="scale(1.2)" class="scp-hand-cursor" id="scp-button-get-sitecues">Get sitecues now!</sc-button-big>\
+  <sc-p>\
+    <a href="http://sitecues.com">sitecues.com</a>\
+    </sc-p>\
+  <sc-p>\
+    +1-857-259-5272\
+  </sc-p>\
+  <sc-p>\
+    <a href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
+  </sc-p>\
 </sc>\
 <sc style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
   sitecues.use('locale', 'platform', function(locale, platform) {
