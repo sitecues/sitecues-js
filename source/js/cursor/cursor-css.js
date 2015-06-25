@@ -29,6 +29,7 @@ sitecues.def('cursor/css', function (cursorCss, callback) {
           '<path d="m127,103l0,0c2,0 4,1 4,3l0,34c0,2 -2,3 -4,3l0,0c-2,0 -4,-1 -4,-3l0,-34c0,-2 2,-3 4,-3z"/>'
         }
       },
+      CURSOR_HUE_LIGHTNESS = 0.7,
       MAX_CURSOR_SIZE_DEFAULT = 128,
       MAX_CURSOR_SIZE_WIN = 71,
       CURSOR_OFFSETS = {
@@ -62,7 +63,7 @@ sitecues.def('cursor/css', function (cursorCss, callback) {
       }
 
       var maxCursorSize = platform.os.isWin ? MAX_CURSOR_SIZE_WIN: MAX_CURSOR_SIZE_DEFAULT,
-          hueString = hue ? colorUtil.getColorString(colorUtil.hslToRgb(hue, 1,.5)) : '#FFF',
+          hueString = hue ? colorUtil.getColorString(colorUtil.hslToRgb(hue, 1, CURSOR_HUE_LIGHTNESS)) : '#FFF',
           prefix = PREFIX
           .replace(/SIZE/g, '' + sizeRatio * pixelRatio)
           .replace(/SIDE/g, '' + maxCursorSize * pixelRatio),

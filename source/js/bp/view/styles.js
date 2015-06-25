@@ -669,8 +669,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background': '#eee !important',
           'margin-left': '-71px !important'
         },
-        '#scp-mouse-hue': {
-          'background-image': 'linear-gradient(to right, #f00 0%, #ff0 14%, #0f0 28%, #0ff 42%, #00f 56%, #f0f 70%, #f00 84%, #fff 88%, #fff 100%) !important'
+        '#scp-mouse-hue': {  // These colors match up with HSL values where the saturation is .5 and the lightness is .7 (must match CURSOR_HUE_LIGHTNESS in cursor-css.js)
+          'background-image': 'linear-gradient(to right, #f66 0%, #ff6 14%, #6f6 28%, #6ff 42%, #66f 56%, #f6f 70%, #f66 84%, #fff 88%, #fff 100%) !important'
         },
 
         '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#444 !important' },

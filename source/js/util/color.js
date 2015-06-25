@@ -421,6 +421,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
     sitecues.getLuminosityFromColorName = colorUtil.getLuminosityFromColorName;
     sitecues.getLuminosity = colorUtil.getLuminosity;
     sitecues.getContrastRatio = colorUtil.getContrastRatio;
+    sitecues.getColorString = colorUtil.getColorString;
   }
 
   callback();
