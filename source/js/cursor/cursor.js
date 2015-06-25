@@ -348,6 +348,9 @@ sitecues.def('cursor', function (cursor, callback) {
     conf.def('mouseHue', sanitizeMouseHue);
     conf.get('mouseSize', onMouseSizeSetting);
     conf.get('mouseHue', onMouseHueSetting);
+    if (typeof conf.get('mouseHue') === 'undefined') {
+      conf.set('mouseHue', MAX_USER_SPECIFIED_MOUSE_HUE);
+    }
 
     function onPageZoom(pageZoom) {
       if (userSpecifiedSize) {

@@ -18,6 +18,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 1400,
+        DEFAULT_INTENSITY = 0.8,
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
@@ -61,7 +62,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
             willBeDark = isDarkTheme(colorMapFn),
             isReverseTheme = willBeDark !== isOriginalThemeDark,
-            themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || 1, isReverseTheme) : '',
+            themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, isReverseTheme) : '',
           // We want to animate quickly between light themes, but slowly when performing a drastic change
           // such as going from light to dark or vice-versa
             transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
@@ -623,6 +624,9 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       conf.def('themePower', getSanitizedThemePower);
       conf.get('themeName', onThemeChange);
       conf.get('themePower', onThemeChange);
+      if (typeof conf.get('themePower') === 'undefined') {
+        conf.set('themePower', DEFAULT_INTENSITY);
+      }
 
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;
