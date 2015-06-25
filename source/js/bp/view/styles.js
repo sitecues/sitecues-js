@@ -574,7 +574,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
         '#scp-bp-container input[type="range"]': {
           '-webkit-appearance': 'none',
-          'width': '240px',
+          'width': '282px',
           'height': '24px',
           'margin': '0',
           'border': '4px solid #888',
@@ -679,8 +679,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-mouse-size': {
           'border': '0 !important',
-          'background': '#fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%28.83%2C.6%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important',
-          'transform': 'scale(1.03)'  // Make wider to make up for lack of border -- so that it appears balanced with color slider
+          'background': '#fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%281%2C.6%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important',
+          'transform': 'scale(1.01)'  // Make wider to make up for lack of border -- so that it appears balanced with color slider
         },
         '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
         '#scp-mouse-size::-moz-range-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
