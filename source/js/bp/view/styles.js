@@ -28,7 +28,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'width': '30px',
         'height': '18px',
         'border': '4px solid black',
-        'border-radius': '12px'
+        'border-radius': '12px',
+        'transform': 'scale(1.5)',
+        'transition': 'transform .5s'
       },
 
       WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
@@ -575,7 +577,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '240px',
           'height': '24px',
           'margin': '0',
-          'border': '4px solid #555',
+          'border': '4px solid #888',
           'padding': '1px 2px',
           'border-radius': '14px',
           'background': 'transparent',
@@ -583,12 +585,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-bp-container input[type=range]::-webkit-slider-runnable-track': {
-          'border': 'none',
-          'border-radius': '14px'
+          'border': 0
         },
 
         '#scp-bp-container input[type="range"]::-moz-range-track': {
-          'border': 'none',
+          'border': 0,
           'background': 'transparent'
         },
         '#scp-bp-container input[type=range]::-moz-focus-outer': {
@@ -596,7 +597,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-bp-container input[type="range"]::-ms-track': {
-          'border': 'none',
+          'border': 0,
           'border-radius': '14px',
           'color': 'transparent' /* don't drawn vertical reference line */
         },
@@ -610,6 +611,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-bp-container input::-webkit-slider-thumb': RANGE_THUMB,
         '#scp-bp-container input::-moz-range-thumb': RANGE_THUMB,
         '#scp-bp-container input::-ms-thumb': RANGE_THUMB,
+        '#scp-bp-container input:hover::-webkit-slider-thumb': { 'transform': 'scale(1.7)' },
+        '#scp-bp-container input:hover::-moz-range-thumb': { 'transform': 'scale(1.7)' },
+        '#scp-bp-container input:hover::-ms-thumb': { 'transform': 'scale(1.7)' },
 
         // Settings -- Color theme buttons
         '.scp-color-theme-group': {
@@ -664,18 +668,30 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-size': '30px',
           'margin-top': '8px'
         },
+//        '#scp-mouse-size': {
+//          'transform': 'perspective(162px) rotateY(-23deg)',
+//          'background': '#eee !important',
+//          'margin-left': '-71px !important'
+//        },
+//        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#444 !important' },
+//        '#scp-mouse-size::-moz-range-thumb': { 'background': '#444 !important' },
+//        '#scp-mouse-size::-ms-thumb': { 'background': '#444 !important' },
+
         '#scp-mouse-size': {
-          'transform': 'perspective(162px) rotateY(-23deg)',
-          'background': '#eee !important',
-          'margin-left': '-71px !important'
+          'border': '0 !important',
+          'transform': 'scale(1.03)'  // Make wider to make up for lack of border -- so that it appears balanced with color slider
         },
+        '#scp-mouse-size::-webkit-slider-runnable-track': {
+          'background': '#fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%28.83%2C.6%29%22%2F%3E%0D%0A%3C%2Fsvg%3E")'
+        },
+        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+        '#scp-mouse-size::-moz-range-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+        '#scp-mouse-size::-ms-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+
         '#scp-mouse-hue': {  // These colors match up with HSL values where the saturation is .5 and the lightness is .7 (must match CURSOR_HUE_LIGHTNESS in cursor-css.js)
           'background-image': 'linear-gradient(to right, #f66 0%, #ff6 14%, #6f6 28%, #6ff 42%, #66f 56%, #f6f 70%, #f66 84%, #fff 88%, #fff 100%) !important'
         },
 
-        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#444 !important' },
-        '#scp-mouse-size::-moz-range-thumb': { 'background': '#444 !important' },
-        '#scp-mouse-size::-ms-thumb': { 'background': '#444 !important' },
 
         // Settings -- Lens: small/medium/large
         '.scp-lens-size-group': {
