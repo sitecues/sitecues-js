@@ -196,9 +196,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-h1': {
           'display': 'block',
-          'margin': '16px 0',
+          'margin': '24px 0',
           'font-family': 'Arial',
-          'font-size': '48px',
+          'font-size': '40px',
           'width': '292px'  // If arrows are on top-right, we need this
         },
 
