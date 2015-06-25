@@ -268,8 +268,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
       else {
-        bgAddedLightness = (1 - intensity) / 8; // Add a little lightness when theme is less intense
-        bgPreservationFactor = 1 - intensity / 4;
+        bgAddedLightness = (1 - intensity) / 7; // Add a little lightness when theme is less intense
+        bgPreservationFactor = 0.6 - intensity / 8;
         origLightness = hsl.l;
         newLightness = (origLightness < 0.4 ? origLightness : (1 - origLightness) * 3);
         newRgba = $.extend({}, rgba, hslToRgb(hsl.h, hsl.s, Math.min(0.16, newLightness) * bgPreservationFactor + bgAddedLightness));
