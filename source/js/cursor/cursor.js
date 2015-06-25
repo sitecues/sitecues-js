@@ -271,8 +271,10 @@ sitecues.def('cursor', function (cursor, callback) {
         }
         doRefresh();
       }
-      else if (!$stylesheet && isStyleServiceReady) {
-        constructCursorStylesheet(doRefresh);
+      else if (!$stylesheet) {
+        if (isStyleServiceReady) {
+          constructCursorStylesheet(doRefresh);
+        }
       }
       else {
         doRefresh();

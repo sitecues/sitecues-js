@@ -13,7 +13,8 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       onCssReadyFn,
       chromeRequestId = 0,
       doFetchCssFromChromeExtension = site.get('fetchCss') === 'chrome-extension',
-      INLINE_ID_ATTR = 'data-sc-inline'; // Allow each element with inline @style to have own ID for use with stylesheets
+      INLINE_ID_ATTR = 'data-sc-inline', // Allow each element with inline @style to have own ID for use with stylesheets
+      TIMEOUT_MS = 2000;
 
     /**
      * StyleSheet object constructor. This object represents one stylesheet on the page,
@@ -51,6 +52,9 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
           // otherwise the numPending will not return to 0 and we will never finish aggregating the CSS
           markReady(currentSheet);
         };
+        currentSheet.errorTimeout = setTimeout(function() {
+          markReady(currentSheet);
+        }, TIMEOUT_MS);
         request.send();
       }
       else {
@@ -118,7 +122,14 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
 
     // Once a sheet is ready, mark it as complete and finalize the process if there are no pending sheet requests
     function markReady(sheet) {
-      -- numPending;
+      if (sheet.isFinished) {
+        return;  // Don't allow sheet to be processed twice in the case of a timeout occuring earlier
+      }
+
+      sheet.isFinished = true;
+      --numPending;
+
+      clearTimeout(sheet.errorTimeout);
 
       processSheetCss(sheet);
 
@@ -341,7 +352,7 @@ sitecues.def('css-aggregator', function (cssAggregator, callback) {
       // Next add <link> and <style> sheets, in document order
       var $styleElems = $('link[rel="stylesheet"],style').filter(isUsable);
       $styleElems.each(addSheetForElem);
-    };
+    }
 
     callback();
 
