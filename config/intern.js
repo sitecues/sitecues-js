@@ -86,7 +86,7 @@ define(
             excludeInstrumentation: /^(?:config|test|node_modules)\//
 
             // Test result output mechanisms.
-            // reporters: ['pretty']
+            // reporters: ['Pretty']
         };
     }
 );
