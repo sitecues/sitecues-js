@@ -235,10 +235,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'text-align': 'center',
           'border-radius': '3px',
           'border': '0',
-          'background-image': 'linear-gradient(to top, rgb(210, 210, 210), rgb(255, 255, 255))',
+          'background-image': 'linear-gradient(to top, #EEE, #FFF)',
           'color':  '#333',
-          'text-shadow': '0 0 2px rgb(255, 255, 255)',
-          'box-shadow': 'inset 0 0 1px rgb(255, 255, 255), inset 0 0 .4em rgb(200, 200, 200), 0 .1em 0 rgb(130, 130, 130), 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9)',
+          'text-shadow': '0 0 2px #FFF',
+          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 .1em 0 #888, 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9)',
           'transition': 'transform .5s, box-shadow .5s'
         },
         'sc-kbd.scp-space': {
@@ -585,13 +585,34 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // Tips -- lens demo
-        'sc-kbd[data-pressed]': {
+        'sc-kbd[data-demo="true"]': {
           'transform': 'translate(2px,2px)',
-          'box-shadow': 'inset 0 0 1px rgb(255, 255, 255), inset 0 0 .4em rgb(200, 200, 200), 0 1px 0 rgb(130, 130, 130), 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
+          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
         },
 
-        '#lens-demo-cursor': {
+        '#scp-demo-mouse': {
+          'position': 'absolute',
+          'width': '30px',
+          'left': '-80px',
+          'top': '100px',
+          'transition': 'transform 2s'
+        },
 
+        '#scp-demo-mouse[data-demo="true"]': {
+          'transform': 'translate(100px, 50px)'
+        },
+
+        '#scp-highlight-paragraph-demo': {
+          'position': 'relative',
+          'top': '-4px',
+          'left': '-4px',
+          'padding': '2px',
+          'border': '2px solid transparent',
+          'border-radius': '4px'
+        },
+        '#scp-highlight-paragraph-demo[data-demo="true"]': {
+          'background-color': 'rgba(240, 240, 180, 0.3)',
+          'border-color': '#222'
         },
 
         // Settings -- input ranges

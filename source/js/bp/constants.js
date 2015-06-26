@@ -91,6 +91,12 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
+  // Tips panel gadgets
+  constants.DEMO_MOUSE               = 'scp-demo-mouse';
+  constants.DEMO_PARA_HIGHLIGHT      = 'scp-highlight-paragraph-demo';
+  constants.LENS_SPACE               = 'scp-lens-spacebar';
+
+  // Settings panel gadgets
   constants.THEME_POWER_ID           = 'scp-theme-power';
 
   constants.HOVER_DELAY_BADGE = 70;

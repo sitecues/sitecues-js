@@ -42,7 +42,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
       xhr.onload = function(evt) {
         var request = evt.target || this,
-          html = addSemanticSugar(request.responseText),
+          html = convertUrls(addSemanticSugar(request.responseText)),
           panelElement = document.createElement('sc-cards');
 
         panelElement.id = 'scp-' + panelName;
@@ -76,6 +76,16 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     function addSemanticSugar(html) {
       return html.replace(/<sc-button /g, '<sc-button role="button" data-hover="scale(1.2)" class="scp-hand-cursor scp-tabbable" ')
         .replace(/<input /g, '<input class="scp-hand-cursor scp-tabbable" ');
+    }
+
+    // Sitecues URLs must be absolute.
+    // For example, change /images/foo.png to http://js.sitecues.com/images/foo.png
+    function convertUrls(html) {
+      var MATCH_URLS = /src="(\/.*)"/g;
+
+      return html.replace(MATCH_URLS, function (totalMatch, url) {
+        return 'src="' + sitecues.resolveSitecuesUrl(url) + '"';
+      });
     }
 
     function removeAllElements(elements) {
