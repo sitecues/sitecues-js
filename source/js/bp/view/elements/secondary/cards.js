@@ -154,6 +154,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         if (cardToSelect) {
           toggleCardActive(activeCard, false);
           toggleCardActive(cardToSelect, true);
+          sitecues.emit('did-show-card', cardToSelect.id);
         }
       }
     }
@@ -171,9 +172,9 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       }
     }
 
-    sitecues.on('bp/next-card', nextCard);
+    sitecues.on('bp/do-next-card', nextCard);
 
-    sitecues.on('bp/prev-card', prevCard);
+    sitecues.on('bp/do-prev-card', prevCard);
 
     sitecues.on('bp/do-update', onPanelUpdate);
 

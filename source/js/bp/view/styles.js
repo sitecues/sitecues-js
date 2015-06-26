@@ -204,6 +204,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '292px'  // If arrows are on top-right, we need this
         },
 
+        'sc-h2': {
+          'display': 'block',
+          'margin': '20px 0',
+          'font-family': 'Arial',
+          'font-size': '26px'
+        },
+
+        'sc-center': {
+          'text-align': 'center',
+          'position': 'relative',
+          'left': '-30px'
+        },
+
         'sc-p': {
           'display': 'block',
           'font-family': 'Arial',
@@ -212,21 +225,25 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-kbd': {
-          'padding': '.1em .6em',
-          'border': '1px solid #ccc',
-          'font-size': '14px',
-          'background-color': '#f7f7f7',
-          'color': '#333',
-          '-moz-box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
-          '-webkit-box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
-          'box-shadow': '0 1px 0 rgba(0,0,0,0.2),0 0 0 2px #fff inset',
-          'border-radius': '3px',
           'display': 'inline-block',
-          'text-shadow': '0 1px 0 #fff',
-          'line-height': '1.4',
           'white-space': 'nowrap',
           'position': 'relative',
-          'top': '-3px'
+          'top': '-3px',
+          'min-width': '30px',
+          'padding': '.04em',
+          'font-family': 'Arial',
+          'text-align': 'center',
+          'border-radius': '3px',
+          'border': '0',
+          'background-image': 'linear-gradient(to top, rgb(210, 210, 210), rgb(255, 255, 255))',
+          'color':  '#333',
+          'text-shadow': '0 0 2px rgb(255, 255, 255)',
+          'box-shadow': 'inset 0 0 1px rgb(255, 255, 255), inset 0 0 .4em rgb(200, 200, 200), 0 .1em 0 rgb(130, 130, 130), 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9)',
+          'transition': 'transform .5s, box-shadow .5s'
+        },
+        'sc-kbd.scp-space': {
+          'padding-left': '2em',
+          'padding-right': '2em'
         },
 
         'sc-span': {
@@ -546,7 +563,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'position': 'relative',
           'font-family': 'Arial',
           'left': '105px',
-          'width': '360px',
           'z-index': 999
         },
 
@@ -555,6 +571,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'visibility' : 'hidden',
           'pointer-events': 'none',  // Allow arrow pointer events
           'opacity': 0,
+          'width': '360px',
           'transition': 'opacity .5s'
         },
 
@@ -567,10 +584,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        // Input ranges
+        // Tips -- lens demo
+        'sc-kbd[data-pressed]': {
+          'transform': 'translate(2px,2px)',
+          'box-shadow': 'inset 0 0 1px rgb(255, 255, 255), inset 0 0 .4em rgb(200, 200, 200), 0 1px 0 rgb(130, 130, 130), 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
+        },
+
+        '#lens-demo-cursor': {
+
+        },
+
+        // Settings -- input ranges
         '.scp-range-group': {
-          'text-align': 'center',
-          'padding-top': '16px'
+          'padding': '14px'
         },
         '#scp-bp-container input[type="range"]': {
           '-webkit-appearance': 'none',
@@ -668,14 +694,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'font-size': '30px',
           'margin-top': '8px'
         },
-//        '#scp-mouse-size': {
-//          'transform': 'perspective(162px) rotateY(-23deg)',
-//          'background': '#eee !important',
-//          'margin-left': '-71px !important'
-//        },
-//        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#444 !important' },
-//        '#scp-mouse-size::-moz-range-thumb': { 'background': '#444 !important' },
-//        '#scp-mouse-size::-ms-thumb': { 'background': '#444 !important' },
 
         '#scp-mouse-size': {
           'border': '0 !important',

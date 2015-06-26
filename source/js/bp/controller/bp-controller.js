@@ -283,10 +283,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         syncFocusIndex(currentMode);
       }
       if (item.id === BP_CONST.NEXT_ID) {
-        sitecues.emit('bp/next-card');
+        sitecues.emit('bp/do-next-card');
       }
       if (item.id === BP_CONST.PREV_ID) {
-        sitecues.emit('bp/prev-card');
+        sitecues.emit('bp/do-prev-card');
       }
 
       sitecues.emit('bp/do-update');
