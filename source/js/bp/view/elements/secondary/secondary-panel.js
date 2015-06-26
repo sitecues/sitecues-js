@@ -20,7 +20,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/feedback',
     'bp/view/elements/about',
     'platform',
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, platform) {
+    'bp/controller/base-controller',
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, platform, baseController) {
 
       var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -136,11 +137,18 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       // Create an animation and store it in runningAnimations so we can cancel it if need be
-      function createAnimation(duration, onTickFn) {
-        var newAnimation = animate.animateViaCallbacks({
-          'duration': duration,
-          'onTick': onTickFn
-        });
+      function createAnimation(duration, onTickFn, onFinishFn) {
+        var options = {
+              'duration': duration,
+              'onTick': onTickFn
+            };
+
+        if (onFinishFn) {
+          options.onFinish = onFinishFn;
+        }
+
+        var newAnimation = animate.animateViaCallbacks(options);
+
         runningAnimations.push(newAnimation);
       }
 
@@ -256,6 +264,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           resetButtonStyles();
         }
 
+
         var
           feature = features[name],
           featureModule = feature.module,
@@ -264,12 +273,12 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           focusOutline = getFocusOutline(),
 
           currentMenuBtnTransform = getElemTransform(menuButton),
-          currentOutlineTransform = getTransform(focusOutline.style[platform.transformProperty]),
+          currentOutlineTransform,
+          currentOutlineTranslateX,
 
           currentOutlineHeight = getCurrentOutlineHeight(),
 
           currentMenuBtnTranslateX = currentMenuBtnTransform.translate.left,
-          currentOutlineTranslateX = currentOutlineTransform.translate.left,
           currentMenuBtnRotate = currentMenuBtnTransform.rotate,
 
           geometryTargets = getGeometryTargets(name, menuButton),
@@ -280,6 +289,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           DISABLE_ANIMATION_MS = 500,
 
           duration = getDuration(),
+          normalizedDuration = getNormalizedDuration(),
 
           isExpanding = toGeo.outlineHeight > currentOutlineHeight,
 
@@ -291,6 +301,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           // and therefore how much time is left
           return animate.getDuration(doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS,
             fromGeo.outlineHeight, toGeo.outlineHeight, currentOutlineHeight);
+        }
+
+        function getNormalizedDuration () {
+          // A multiplier used for determining where to position things when in the middle of
+          // an animation.
+          var totalAnimationDuration = doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS;
+          return animate.getDuration(totalAnimationDuration, fromGeo.outlineHeight, toGeo.outlineHeight, currentOutlineHeight) / totalAnimationDuration;
         }
 
         function panelHeightTick(time) {
@@ -307,10 +324,14 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               1,
               getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
-          focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX, time) +'px,0)';
-
+          focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX * normalizedDuration, time) +'px,0)';
 
           featureTick && featureTick(time, toGeo);
+        }
+
+        function reDrawFocusOutline () {
+          focusOutline.style[platform.transformProperty] = '';
+          baseController.showFocus();
         }
 
         function fadeInTextContentWhenLargeEnough() {
@@ -325,8 +346,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
 
         function openFeatureAnimation() {
-          createAnimation(duration, openFeatureAnimationTick);
+          createAnimation(duration, openFeatureAnimationTick, reDrawFocusOutline);
         }
+
+        reDrawFocusOutline();
+
+        currentOutlineTransform = getTransform(focusOutline.style[platform.transformProperty]);
+        currentOutlineTranslateX = currentOutlineTransform.translate.left;
 
         cancelAllAnimations();
 
