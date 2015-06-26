@@ -285,6 +285,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           fromGeo = geometryTargets[!doEnable],
           toGeo = geometryTargets[doEnable],
 
+          animateMoreButtonFocus = baseController.getFocusedItemName() === 'more-button-group',
+
           ENABLE_ANIMATION_MS = 1500,
           DISABLE_ANIMATION_MS = 500,
 
@@ -293,7 +295,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
           isExpanding = toGeo.outlineHeight > currentOutlineHeight,
 
-          heightAnimationDelay = (doEnable && isExpanding && feature.heightAnimationDelay) || 0;
+          heightAnimationDelay = (doEnable && isExpanding && feature.heightAnimationDelay) || 0,
+
+          expansionRatio = getSVGExpansionRatio();
 
 
         function getDuration() {
@@ -313,6 +317,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         function panelHeightTick(time) {
           // SVG height and outline
           setPanelHeight(getValueInTime(currentOutlineHeight, toGeo.outlineHeight, time), MORE_BUTTON_ROTATION_ENABLED);
+
+          if (animateMoreButtonFocus) {
+            focusOutline.style[platform.transformProperty] = 'translate('+ currentOutlineTranslateX +'px, ' + (getValueInTime(0, toGeo.outlineHeight - currentOutlineHeight, time) * expansionRatio) +'px)';
+          }
+
         }
 
         function openFeatureAnimationTick(time) {
@@ -324,7 +333,9 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               1,
               getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
-          focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX * normalizedDuration, time) +'px,0)';
+          if (!animateMoreButtonFocus) {
+            focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX * normalizedDuration, time) +'px,0)';
+          }
 
           featureTick && featureTick(time, toGeo);
         }
@@ -346,11 +357,11 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         }
 
         function openFeatureAnimation() {
-          createAnimation(duration, openFeatureAnimationTick, reDrawFocusOutline);
+          var onFinish = !animateMoreButtonFocus ? reDrawFocusOutline : undefined;
+          createAnimation(duration, openFeatureAnimationTick, onFinish);
         }
 
         reDrawFocusOutline();
-
         currentOutlineTransform = getTransform(focusOutline.style[platform.transformProperty]);
         currentOutlineTranslateX = currentOutlineTransform.translate.left;
 
@@ -362,7 +373,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         openFeatureAnimation();
 
         // Animate the height at the right time
-        setTimeout(animateHeight, heightAnimationDelay );
+        setTimeout(animateHeight, heightAnimationDelay);
 
         fadeInTextContentWhenLargeEnough();
 
