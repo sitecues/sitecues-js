@@ -102,6 +102,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
       cssValues[true].focusOutlineTranslateX = 130;
+      cssValues[false].focusOutlineTranslateX = -136;
       return cssValues;
     };
 
