@@ -584,6 +584,17 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
+        // Tips -- zoom demo
+        '#scp-slider-demo': {
+          'background': 'none',
+          'width': '180px',
+          'height': '51px',
+          'text-indent': '-9999px'
+        },
+        '.scp-active #scp-slider-demo': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
+        },
+
         // Tips -- lens demo
         'sc-kbd[data-demo="true"]': {
           'transform': 'translate(2px,2px)',

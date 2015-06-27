@@ -4,8 +4,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
     'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
     function(bp, BP_CONST, baseController, panelController, bpController, state, helper) {
 
-      var isSticky;
-
       /*
        Show panel according to settings.
        */
