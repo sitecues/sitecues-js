@@ -623,7 +623,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'border': '1px solid black',
           'border-bottom': 0,
           'height': '90px',
-          'padding': '20px 30px'
+          'padding': '20px 30px',
+          'overflow': 'hidden'
         },
 
         '#scp-demo-highlight-paragraph,#scp-demo-lens-paragraph': {
@@ -633,7 +634,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'padding': '2px',
           'border': '2px solid transparent',
           'border-radius': '4px',
-          'transition': 'transform .4s',
+          'transition': 'transform .4s, box-shadow .2s',
           'display': 'inline-block'
         },
         '#scp-demo-highlight-paragraph[data-demo="true"],#scp-demo-lens-paragraph': {  // Highlighted paragraph
@@ -643,7 +644,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-demo-lens-paragraph[data-demo="true"]': {  // HLB open
           'background-color': 'white',
-          'transform': 'scale(1.6)'
+          'transform': 'scale(1.6)',
+          'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
         },
 
         // Settings -- input ranges
