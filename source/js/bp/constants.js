@@ -93,6 +93,7 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   // Tips panel gadgets
   constants.DEMO_PAGE                = 'scp-demo-page';
+  constants.DEMO_PAGE_CONTENTS       = 'scp-demo-page-contents';
   constants.DEMO_PARA                = 'scp-demo-para';
   constants.DEMO_MOUSE               = 'scp-demo-mouse';
   constants.DEMO_SLIDER_THUMB        = 'scp-demo-slider-thumb';

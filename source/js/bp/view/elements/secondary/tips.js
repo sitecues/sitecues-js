@@ -1,3 +1,6 @@
+/**
+ * Tips cards, supporting demo animations
+ */
 sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/helper', function (BP_CONST, helper) {
@@ -10,7 +13,15 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         'scp-highlight-card': animateHighlight,
         'scp-lens-card': animateLens,
         'scp-speech-card': animateLens
-      };
+      },
+      ACTORS = [
+        BP_CONST.DEMO_PAGE_CONTENTS,
+        BP_CONST.DEMO_PARA,
+        BP_CONST.DEMO_MOUSE,
+        BP_CONST.DEMO_ZOOM_PLUS,
+        BP_CONST.DEMO_ZOOM_MINUS,
+        BP_CONST.DEMO_LENS_SPACE
+      ];
 
     tips.getGeometryTargets = function(cssValues) {
       return cssValues;
@@ -20,8 +31,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       // Clear existing tips animations
       animationTimers.forEach(clearTimeout);
       animationTimers.length = 0;
-      clearElementDemo(BP_CONST.DEMO_PARA);
-      clearElementDemo(BP_CONST.DEMO_MOUSE);
+      ACTORS.forEach(clearElementDemo);
 
       // Run the animation function for this card (if any)
       var newAnimation = animationFns[id];
@@ -45,7 +55,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       elem.style.transitionDuration = '0s';
       setTimeout(function() {
         elem.style.transitionDuration = '';
-      }, 10);
+      }, 20);
 
     }
 
@@ -60,8 +70,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function animateZoom() {
       function toggleZoom(isOn, key, howLongMs) {
         var FAKE_KEY_DELAY = 70;
-        toggleElementDemo(BP_CONST.DEMO_PARA, isOn, howLongMs + FAKE_KEY_DELAY);          // Zoom para
-        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, true, howLongMs + FAKE_KEY_DELAY);  // Move slider
+        toggleElementDemo(BP_CONST.DEMO_PAGE_CONTENTS, isOn, howLongMs + FAKE_KEY_DELAY); // Zoom page
+        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, isOn, howLongMs + FAKE_KEY_DELAY);  // Move slider
         toggleElementDemo(key, true, howLongMs);                                          // Push key
         toggleElementDemo(key, false, howLongMs + 2000);                                  // Release key
       }
