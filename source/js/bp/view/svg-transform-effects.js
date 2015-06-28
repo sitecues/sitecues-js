@@ -57,7 +57,7 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         isActivePanel = willBeActive;
-        hoverElems = hoverElems || getContainer().querySelectorAll('[data-hover]');
+        hoverElems = getContainer().querySelectorAll('[data-hover]');
 
         var addOrRemoveFn = isActivePanel ? 'addEventListener' : 'removeEventListener',
           index = hoverElems.length,

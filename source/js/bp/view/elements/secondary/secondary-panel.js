@@ -1,9 +1,12 @@
 // TODO
 // Now
-// Card polish
-// Card back/forward buttons
 // Tips: go to full guide
-// Settings: non-ugly UI for themes
+//
+// Questions:
+// - are back/forward buttons too ugly? (Anna)
+// - tips: is fake page or presence of second mouse in fake page confusing?
+// - tips: should user be able to try each exercise themselves?
+// - contrast: should we squeeze contrast fix or mono color options in?
 //
 // Zoom larger, panel formatting borked
 //
@@ -262,7 +265,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           // If we are switching from one panel to another, make sure buttons start from initial state
           resetButtonStyles();
         }
-
 
         var
           feature = features[name],

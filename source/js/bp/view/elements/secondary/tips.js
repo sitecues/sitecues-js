@@ -109,7 +109,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       }
 
       function speakIt() {
-        sitecues.emit('mh/do-speak', byId(BP_CONST.DEMO_PARA));
+        sitecues.emit('mh/do-speak', byId(BP_CONST.DEMO_PARA), true, true);
       }
 
       function openThenCloseLens() {

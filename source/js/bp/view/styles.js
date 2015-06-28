@@ -621,6 +621,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'padding': '2px',
           'border': '2px solid transparent',
           'border-radius': '4px',
+          'transform-origin': '30% 50%', // Don't go off the left side of the page (simulates safe-zone)
           'transition': 'transform .4s, box-shadow .2s'
         },
 

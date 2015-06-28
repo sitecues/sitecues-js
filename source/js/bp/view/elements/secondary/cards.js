@@ -154,7 +154,13 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         if (cardToSelect) {
           toggleCardActive(activeCard, false);
           toggleCardActive(cardToSelect, true);
-          sitecues.emit('did-show-card', cardToSelect.id);
+          if (cardToSelect.localName !== 'sc-card') {
+            // THis element was not a card -- keep going in same direction
+            switchCard(direction);
+          }
+          else {
+            sitecues.emit('did-show-card', cardToSelect.id);
+          }
         }
       }
     }

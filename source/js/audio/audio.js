@@ -30,7 +30,7 @@ sitecues.def('audio', function (audio, callback) {
       speakContent($content);
     }
 
-    function playHighlight(content, doAvoidInterruptions) {
+    function playHighlight(content, doAvoidInterruptions, doSuppressEarcon) {
       if (doAvoidInterruptions && getAudioPlayer().isBusy()) {
         return; // Already reading the highlight
       }
@@ -39,7 +39,9 @@ sitecues.def('audio', function (audio, callback) {
       }
       stopAudio();
       // Play audio highlight earcon if highlight moved with shift key and speech being fetched
-      audio.playEarcon('audio-highlight');
+      if (!doSuppressEarcon) {
+        audio.playEarcon('audio-highlight');
+      }
       speakContent(content);
     }
 
