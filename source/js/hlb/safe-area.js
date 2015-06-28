@@ -6,7 +6,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     // PRIVATE VARIABLES
     ////////////////////////
 
-    var documentElement = window.document.documentElement;
+    var documentElement = document.documentElement;
 
 
 
@@ -52,12 +52,12 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
         var unsafePixels = getUnsafePixels();
 
         return {
-            'left': unsafePixels,
-            'top': unsafePixels,
-            'width': window.innerWidth - unsafePixels * 2,
-            'height': window.innerHeight - unsafePixels * 2,
-            'right': window.innerWidth - unsafePixels,
-            'bottom': window.innerHeight - unsafePixels
+            'left'   : unsafePixels,
+            'top'    : unsafePixels,
+            'width'  : innerWidth - unsafePixels * 2,
+            'height' : innerHeight - unsafePixels * 2,
+            'right'  : innerWidth - unsafePixels,
+            'bottom' : innerHeight - unsafePixels
         };
 
     };
