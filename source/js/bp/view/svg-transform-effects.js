@@ -3,8 +3,6 @@
  * Currently this module implements data-hover="[transform attributes]"
  */
 
-// TODO do we still need .scp-hovers?
-
 sitecues.def('bp/view/effects', function (effects, callback) {
 
   'use strict';

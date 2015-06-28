@@ -3,11 +3,17 @@
  */
 sitecues.def('bp/view/elements/cards', function (cards, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', 'platform',
-    function (BP_CONST, helper, locale, state, platform) {
+  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', 'platform', 'animate',
+    function (BP_CONST, helper, locale, state, platform, animate) {
 
     var
       PANELS_WITH_CARDS = { tips: 1, settings: 1},
+      PULSE_NEXT_BUTTON_ANIMATION_MS = 300,
+      NUM_PULSE_STEPS = 12,
+      INITIAL_PULSE_WAIT_MS = 3000,
+      PULSE_SCALE = 1.2,
+      pulseAnimationTimeout,
+      pulseAnimation,
       byId = helper.byId,
       isInitialized,
       isActive = false,
@@ -98,6 +104,22 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       var panelName = state.getSecondaryPanelName(),
         willBeActive = panelName && PANELS_WITH_CARDS.hasOwnProperty(panelName);
 
+      // Event listeners
+      if (isActive !== willBeActive) {
+        if (willBeActive) {
+          byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
+          byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
+          byId(BP_CONST.BP_CONTAINER_ID).addEventListener('keydown', onKeyDown);
+          enablePulseOnMousePause(panelName);
+        }
+        else {
+          byId(BP_CONST.PREV_ID).removeEventListener('click', prevCard);
+          byId(BP_CONST.NEXT_ID).removeEventListener('click', nextCard);
+          byId(BP_CONST.BP_CONTAINER_ID).removeEventListener('keydown', onKeyDown);
+          disablePulseOnMousePause();
+        }
+      }
+
       // Active state
       if (willBeActive) {
         activePanelName = panelName;
@@ -108,19 +130,75 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         activePanel = null;
       }
 
-      // Event listeners
-      if (isActive !== willBeActive) {
-        if (willBeActive) {
-          byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
-          byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
-        }
-        else {
-          byId(BP_CONST.PREV_ID).removeEventListener('click', prevCard);
-          byId(BP_CONST.NEXT_ID).removeEventListener('click', nextCard);
-        }
-      }
-
       isActive = willBeActive;
+    }
+
+    // Pulse the next button if the user doesn't do anything
+    function enablePulseOnMousePause(panelName) {
+      if (isFirstTimeOnWelcomeCard()) {
+        pulseAfterMousePause();
+        getPanelElement(panelName).addEventListener('mousemove', pulseAfterMousePause);
+      }
+    }
+
+    function disablePulseOnMousePause() {
+      clearPulseAnimation();
+      activePanel && activePanel.removeEventListener('mousemove', pulseAfterMousePause);
+    }
+
+    function isFirstTimeOnWelcomeCard() {
+      return isDisabled(BP_CONST.PREV_ID);
+    }
+
+    function getPulseAnimationTarget() {
+      return byId(BP_CONST.NEXT_ID).firstElementChild;
+    }
+
+    function pulseAfterMousePause() {
+      clearPulseAnimation();
+      pulseAnimationTimeout = setTimeout(pulseNextButton, INITIAL_PULSE_WAIT_MS);
+    }
+
+    function pulseNextButton() {
+      var
+        nextButton = getPulseAnimationTarget(),
+        options = {
+          duration    : PULSE_NEXT_BUTTON_ANIMATION_MS,
+          useAttribute: true,
+          animationFn: 'sinusoidal'
+        };
+
+      pulseAnimation = animate.animateCssProperties(nextButton, { transform: 'scale(' + PULSE_SCALE+ ')' }, options);
+
+      setTimeout(clearPulseAnimation, PULSE_NEXT_BUTTON_ANIMATION_MS * NUM_PULSE_STEPS);
+    }
+
+    function clearPulseAnimation() {
+      clearTimeout(pulseAnimationTimeout);
+      if (pulseAnimation) {
+        pulseAnimation && pulseAnimation.cancel();
+        var
+          nextButton = getPulseAnimationTarget(),
+          options = {
+            duration: PULSE_NEXT_BUTTON_ANIMATION_MS,
+            useAttribute: true
+          };
+        animate.animateCssProperties(nextButton, { transform: '' }, options);
+        pulseAnimation = null;
+      }
+    }
+
+
+    function onKeyDown(evt) {
+      var LEFT     = 37,
+        RIGHT    = 39;
+
+      if (evt.keyCode === LEFT) {
+        prevCard();
+      }
+      else if (evt.keyCode === RIGHT) {
+        nextCard();
+      }
     }
 
     function toggleCardActive(cardElement, isActive) {
@@ -142,6 +220,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     }
 
     function switchCard(direction) {
+      disablePulseOnMousePause();
       var activeCard = getActiveCard(),
         cardToSelect;
 

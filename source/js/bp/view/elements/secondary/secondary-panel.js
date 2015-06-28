@@ -1,17 +1,18 @@
 // TODO
 // Questions:
-// - are back/forward buttons too ugly? (Anna)
+// - tips: first page ugly -- should it be a TOC?
+// - tips/settings: are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
 // - tips: should user be able to try each exercise themselves?
-// - tips: first page ugly
-// - tips: speech page needs love
-// - contrast: should we squeeze contrast fix or mono color options in?
+// - tips: speech page needs love -- break into Activate speech  and Use speech?
+// - settings: should we squeeze contrast fix or mono color options in?
 //
 // Later
 // About: Get it now
 // What happens if AJAX content doesn't load? Do we have some kind of fallback content?
-//
 // Localization
+//
+
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'animate', 'util/transform',
