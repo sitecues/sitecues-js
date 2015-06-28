@@ -1,7 +1,4 @@
 // TODO
-// Now
-// Tips: go to full guide
-//
 // Questions:
 // - are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
@@ -200,7 +197,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           numContentElements = contentElements.length,
           maxHeight = origPanelContentsRect.height,
           normalTop = origPanelContentsRect.top,
-          index = 0;
+          index = 0,
+          FUDGE_FACTOR = 8;
 
         function addRect(item) {
           var thisRect = item.getBoundingClientRect(),
@@ -220,7 +218,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           }
         }
 
-        return maxHeight / getSVGExpansionRatio();
+        return (maxHeight - FUDGE_FACTOR) / getSVGExpansionRatio();
       }
 
 
