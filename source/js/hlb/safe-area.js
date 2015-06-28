@@ -28,10 +28,15 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
      */
     function getUnsafePixels() {
 
-        var hypotenuse = Math.sqrt(
-            Math.pow(window.innerHeight, 2) +
-            Math.pow(window.innerWidth, 2)
-        );
+        var hypotenuse = Math.hypot ?
+                Math.hypot(  // modern browsers (not IE)
+                    innerHeight,
+                    innerWidth
+                )
+                : Math.sqrt(  // fallback for IE
+                    Math.pow(innerHeight, 2) +
+                    Math.pow(innerWidth, 2)
+                );
 
         return hypotenuse * safeArea.HLB_SAFE_AREA;
 
