@@ -7,61 +7,38 @@
 
 <sc-card id="scp-zoom-card">
   <sc-h1>Zoom the page</sc-h1>
-  <sc class="scp-demo-fake-page-instructions">
-    <sc-center>
-      <sc-h2>
-        Use the sitecues slider
-      </sc-h2>
-      <sc-p><sc-span id="scp-demo-slider"/></sc-p>
-    </sc-center>
-  </sc>
-  <sc class="scp-demo-fake-page">
-    <sc-p class="scp-demo-para scp-demo-para-zoom" id="scp-demo-para-zoom">Hello.</sc-p>
-  </sc>
+  <sc-center>
+    <sc-h2>
+      Use the sitecues slider
+    </sc-h2>
+    <sc-p><sc-span id="scp-demo-slider"/></sc-p>
+  </sc-center>
 </sc-card>
 
 <sc-card id="scp-zoom-keys-card">
   <sc-h1>Zoom with keys</sc-h1>
-  <sc class="scp-demo-fake-page-instructions">
-    <sc-center>
-      <sc-h2>
-        <sc-span aria-label="Press the - or + key to zoom the page">
-          <sc-kbd>&#65293;</sc-kbd>
-          &nbsp;/&nbsp;
-          <sc-kbd>+</sc-kbd>
-        </sc-span>
-      </sc-h2>
-      <sc-p>Hold keys longer to zoom more.</sc-p>
-    </sc-center>
-  </sc>
-  <sc class="scp-demo-fake-page">
-    <sc-p class="scp-demo-para scp-demo-para-zoom" id="scp-demo-para-zoom-keys">Hello.</sc-p>
-  </sc>
+  <sc-center>
+    <sc-h2>
+      <sc-span aria-label="Press the - or + key to zoom the page">
+        <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
+        &nbsp;/&nbsp;
+        <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
+      </sc-span>
+    </sc-h2>
+    <sc-p>Hold keys longer to zoom more.</sc-p>
+  </sc-center>
 </sc-card>
-
 
 <sc-card id="scp-highlight-card">
   <sc-h1>Highlighter</sc-h1>
-  <sc class="scp-demo-fake-page-instructions">
-    <sc-p>Choose something to focus on.</sc-p>
-    <sc-p>Move your mouse over something to highlight it.</sc-p>
-  </sc>
-  <sc class="scp-demo-fake-page">
-    <img id="scp-demo-mouse" src="/images/cursor-demo.svg"/>
-    <sc-p class="scp-demo-para" id="scp-demo-para-highlight">Hello.</sc-p>
-  </sc>
+  <sc-p>Choose something to focus on.</sc-p>
+  <sc-p>Move your mouse over something to highlight it.</sc-p>
 </sc-card>
 
 <sc-card id="scp-lens-card">
   <sc-h1>Smart Lens</sc-h1>
-  <sc class="scp-demo-fake-page-instructions">
-    <sc-p>The Smart Lens can zoom a highlighted area.</sc-p>
-    <sc-p>Just press the&nbsp; <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spacebar</sc-kbd> .</sc-p>
-  </sc>
-  <sc class="scp-demo-fake-page">
-    <img id="scp-demo-lens-mouse" src="/images/cursor-demo.svg"/>
-    <sc-p class="scp-demo-para" id="scp-demo-para-lens">Hello.</sc-p>
-  </sc>
+  <sc-p>The Smart Lens can zoom a highlighted area.</sc-p>
+  <sc-p>Just press the&nbsp; <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spacebar</sc-kbd> .</sc-p>
 </sc-card>
 
 <sc-card>
@@ -77,3 +54,10 @@
   <sc-p>Practice using sitecues in the</sc-p>
   <sc-p><sc-button-big role="button">Quick Start Guide</sc-button-big></sc-p>
 </sc-card>
+
+<!-- Fake demo page -->
+<sc id="scp-demo-page">
+  <sc-p id="scp-demo-para">Hello.</sc-p>
+  <sc-span id="scp-demo-mouse"/>
+</sc>
+

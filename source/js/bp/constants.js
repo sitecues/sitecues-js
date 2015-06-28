@@ -92,11 +92,12 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
 
   // Tips panel gadgets
-  constants.DEMO_PARA_ZOOM           = 'scp-demo-para-zoom';
+  constants.DEMO_PAGE                = 'scp-demo-page';
+  constants.DEMO_PARA                = 'scp-demo-para';
   constants.DEMO_MOUSE               = 'scp-demo-mouse';
-  constants.DEMO_PARA_HIGHLIGHT      = 'scp-demo-para-highlight';
   constants.DEMO_LENS_SPACE          = 'scp-demo-lens-spacebar';
-  constants.DEMO_PARA_HIGHLIGHT      = 'scp-demo-para-lens';
+  constants.DEMO_ZOOM_PLUS           = 'scp-demo-zoom-plus';
+  constants.DEMO_ZOOM_MINUS          = 'scp-demo-zoom-minus';
 
   // Settings panel gadgets
   constants.THEME_POWER_ID           = 'scp-theme-power';

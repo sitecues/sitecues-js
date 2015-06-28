@@ -584,42 +584,23 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': 1
         },
 
-        // Tips -- zoom demo
-        '#scp-demo-slider': {
-          'background': 'none',
-          'width': '180px',
-          'height': '51px',
-          'text-indent': '-9999px'
-        },
-        '.scp-active #scp-demo-slider': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
-        },
-
-        // Tips -- lens demo
-        'sc-kbd[data-demo="true"]': {
-          'transform': 'translate(4px,4px)',
-          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
-        },
-
-        '#scp-demo-mouse,#scp-demo-lens-mouse': {
+        // Tips -- demo page general styles
+        '#scp-demo-mouse': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/cursor-demo.svg') + ') 100% 100% no-repeat',
           'position': 'absolute',
-          'width': '30px',
           'left': '137px',
           'top': '77px',
+          'width': '30px',
+          'height': '40px',
           'transition': 'transform 2s',
-          'z-index': 1
+          'z-index': 1,
+          'display': 'none'
         },
 
-        '#scp-demo-mouse[data-demo="true"],#scp-demo-lens-mouse': {
-          'transform': 'translate(-75px, -37px)'
-        },
-
-        '.scp-demo-fake-page-instructions': {
-          'min-height': '100px'
-        },
-
-        '.scp-demo-fake-page': {
-          'position': 'relative',  // Make fake mouse cursor positioning easier
+        '#scp-demo-page': {
+          'position': 'absolute',  // Make fake mouse cursor positioning easier
+          'top': '220px',
+          'width': '280px',
           'border': '1px solid black',
           'background-color': '#f8f8f8',
           'border-bottom': 0,
@@ -628,7 +609,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'overflow': 'hidden' // So that fake dimmer doesn't go outside
         },
 
-        '.scp-demo-para': {
+        '#scp-demo-para': {
           'position': 'relative',
           'top': '-4px',
           'left': '-4px',
@@ -638,24 +619,47 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'transform .4s, box-shadow .2s',
           'display': 'inline-block'
         },
-        '#scp-demo-para-highlight[data-demo="true"],#scp-demo-para-lens': {  // Highlighted paragraph
+
+        // Tips -- zoom demo (scp-zoom-card, scp-zoom-keys-card)
+        '#scp-demo-slider': {
+          'background': 'none',
+          'width': '180px',
+          'height': '51px',
+          'text-indent': '-9999px'
+        },
+        '.scp-active #scp-demo-slider': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
+        },
+        '.scp-zoom-card>#scp-demo-para,.scp-zoom-keys-card>#scp-demo-para': {
+          'transition': 'transform 2.2s linear',
+          'transform-origin': '0% 0%'
+        },
+        '.scp-zoom-card>#scp-demo-para[data-demo="true"],.scp-zoom-keys-card>#scp-demo-para[data-demo="true"]': { // Zoom page
+          'transform': 'scale(2)'
+        },
+
+        // Tips -- highlight and lens demo (scp-highlight-card, scp-lens-card)
+        'sc-kbd[data-demo="true"]': {
+          'transform': 'translate(4px,4px)',
+          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
+        },
+
+        '.scp-highlight-card>#scp-demo-mouse,.scp-lens-card>#scp-demo-mouse': {
+          'display': 'block'
+        },
+        '.scp-highlight-card>#scp-demo-mouse[data-demo="true"],.scp-lens-card>#scp-demo-mouse': {
+          'transform': 'translate(-75px, -37px)'
+        },
+
+        '.scp-highlight-card>#scp-demo-para[data-demo="true"],.scp-lens-card>#scp-demo-para': {  // Highlighted paragraph
           'background-color': 'rgba(240, 240, 180, 0.3)',
           'border-color': '#222'
         },
 
-        '#scp-demo-para-lens[data-demo="true"]': {  // HLB open
+        '.scp-lens-card>#scp-demo-para[data-demo="true"]': {  // HLB open
           'background-color': 'white',
           'transform': 'scale(1.6)',
           'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
-        },
-
-        '.scp-demo-para-zoom': {
-          'transition': 'transform 2.2s linear',
-          'transform-origin': '0% 0%'
-        },
-
-        '.scp-demo-para-zoom[data-demo="true"]': { // Zoom page
-          'transform': 'scale(2)'
         },
 
         // Settings -- input ranges
