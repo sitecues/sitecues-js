@@ -18,6 +18,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function cardActivated(id) {
       // Clear existing tips animations
       animationTimers.forEach(clearTimeout);
+      clearElementDemo(BP_CONST.DEMO_PARA);
+      clearElementDemo(BP_CONST.DEMO_MOUSE);
 
       // Run the animation function for this card (if any)
       var newAnimation = animationFns[id];
@@ -27,6 +29,17 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
       // Set a class on the demo-page element so it knows what's up
       byId(BP_CONST.DEMO_PAGE).className = id;
+    }
+
+    // Reset demo page element back to original state
+    function clearElementDemo(id) {
+      var elem = byId(id);
+      elem.setAttribute('data-demo', false);
+      elem.style.transitionDuration = '0s';
+      setTimeout(function() {
+        elem.style.transitionDuration = '';
+      }, 0);
+
     }
 
     // Optional -- howLongMs is how logn to wait before doing it
@@ -40,7 +53,11 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function animateZoom() {
       function zoomThenUnzoom() {
         toggleElementDemo(BP_CONST.DEMO_PARA, true, 2000);
+        toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, true, 1930);
+        toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, false, 3930);
         toggleElementDemo(BP_CONST.DEMO_PARA, false, 6000);
+        toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, true, 5930);
+        toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, false, 7930);
       }
 
       zoomThenUnzoom();
