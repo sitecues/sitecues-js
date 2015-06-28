@@ -11,13 +11,19 @@
     <sc-h2>
       Use the sitecues slider
     </sc-h2>
-    <sc-p><sc-span id="scp-demo-slider"/></sc-p>
+    <sc-p>
+      <sc-span id="scp-demo-slider">
+        <sc-span id="scp-demo-slider-bar"></sc-span>
+        <sc-span id="scp-demo-slider-thumb"></sc-span>
+      </sc-span>
+    </sc-p>
   </sc-center>
 </sc-card>
 
 <sc-card id="scp-zoom-keys-card">
   <sc-h1>Zoom with keys</sc-h1>
   <sc-center>
+    <sc-p>Hold keys longer to zoom more.</sc-p>
     <sc-h2>
       <sc-span aria-label="Press the - or + key to zoom the page">
         <sc-kbd id="scp-demo-zoom-minus">&#65293;</sc-kbd>
@@ -25,7 +31,6 @@
         <sc-kbd id="scp-demo-zoom-plus">+</sc-kbd>
       </sc-span>
     </sc-h2>
-    <sc-p>Hold keys longer to zoom more.</sc-p>
   </sc-center>
 </sc-card>
 
@@ -58,6 +63,6 @@
 <!-- Fake demo page -->
 <sc id="scp-demo-page">
   <sc-p id="scp-demo-para">Hello.</sc-p>
-  <sc-span id="scp-demo-mouse"/>
+  <sc-span id="scp-demo-mouse"></sc-span>
 </sc>
 

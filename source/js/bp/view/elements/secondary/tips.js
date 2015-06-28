@@ -53,9 +53,11 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function animateZoom() {
       function zoomThenUnzoom() {
         toggleElementDemo(BP_CONST.DEMO_PARA, true, 2000);
+        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, true, 2000);
         toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, true, 1930);
         toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, false, 3930);
         toggleElementDemo(BP_CONST.DEMO_PARA, false, 6000);
+        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, false, 6000);
         toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, true, 5930);
         toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, false, 7930);
       }

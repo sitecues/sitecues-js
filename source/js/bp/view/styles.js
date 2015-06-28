@@ -622,13 +622,26 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Tips -- zoom demo (scp-zoom-card, scp-zoom-keys-card)
         '#scp-demo-slider': {
-          'background': 'none',
+          'position': 'relative',
           'width': '180px',
           'height': '51px',
-          'text-indent': '-9999px'
+          'text-align': 'left'
         },
-        '.scp-active #scp-demo-slider': {
+        '#scp-demo-slider>*': {
+          'background': 'none',
+          'position': 'absolute',
+          'width': '180px',
+          'height': '51px'
+        },
+        '.scp-active #scp-demo-slider-bar': {
           'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
+        },
+        '.scp-active #scp-demo-slider-thumb': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo-thumb.svg') + ') 100% 100% no-repeat',
+          'transition': 'transform 2s linear'
+        },
+        '.scp-active #scp-demo-slider-thumb[data-demo="true"]': {
+          'transform': 'translateX(70px)'
         },
         '.scp-zoom-card>#scp-demo-para,.scp-zoom-keys-card>#scp-demo-para': {
           'transition': 'transform 2.2s linear',
