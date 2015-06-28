@@ -170,7 +170,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
       pulseAnimation = animate.animateCssProperties(nextButton, { transform: 'scale(' + PULSE_SCALE+ ')' }, options);
 
-      setTimeout(clearPulseAnimation, PULSE_NEXT_BUTTON_ANIMATION_MS * NUM_PULSE_STEPS);
+      pulseAnimationTimeout = setTimeout(clearPulseAnimation, PULSE_NEXT_BUTTON_ANIMATION_MS * NUM_PULSE_STEPS);
     }
 
     function clearPulseAnimation() {
@@ -183,7 +183,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
             duration: PULSE_NEXT_BUTTON_ANIMATION_MS,
             useAttribute: true
           };
-        animate.animateCssProperties(nextButton, { transform: '' }, options);
+        animate.animateCssProperties(nextButton, { transform: 'scale(1)' }, options);
         pulseAnimation = null;
       }
     }
