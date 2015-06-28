@@ -221,9 +221,11 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.LARGE_SLIDER_WIDTH = 256;
   constants.SMALL_SLIDER_WIDTH = 160;
 
-  // Minimum panel size
-  constants.MINIMUM_PANEL_WIDTH = 656;
-  constants.MINIMUM_PANEL_HEIGHT = 160;
+  // Ideal panel size for correct formatting of all contents.
+  // We may need to use a larger size if the badge was already large
+  // In that case we will make up the extra size using transform scale, so as not to disturb the HTML formatting
+  constants.IDEAL_PANEL_WIDTH = 656;
+  constants.IDEAL_PANEL_HEIGHT = 160;
 
   // Amount toolbar space that will open badge
   constants.ACTIVE_TOOLBAR_WIDTH = 500;

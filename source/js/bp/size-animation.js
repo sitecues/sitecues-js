@@ -33,7 +33,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
           // The minimum amount we want to increase the badge size
           // when transitioning to the panel.  Basically, the panel
-          // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
+          // should be BP_CONST.IDEAL_PANEL_WIDTH by BP_CONST.IDEAL_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           panelScaleFromBadge,
@@ -238,7 +238,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
             newBadgeHeight      = newBadgeWidth / svgAspectRatio,
 
             // PANEL SIZE
-            newPanelWidth       = Math.max(BP_CONST.MINIMUM_PANEL_WIDTH, svgRect.width * MINIMUM_PANEL_SIZE_INCREASE * (1 - state.get('currentMode'))),
+            newPanelWidth       = Math.max(BP_CONST.IDEAL_PANEL_WIDTH, svgRect.width * MINIMUM_PANEL_SIZE_INCREASE * (1 - state.get('currentMode'))),
             newPanelHeight      = svgRect.height * newPanelWidth / svgRect.width,
 
             newWidth            = isPanelRequested ? newPanelWidth  : newBadgeWidth,
@@ -447,6 +447,10 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
       function setTransform (left, top, transformScale) {
 
+        if (transformScale === 1) {
+          console.trace();
+        }
+
         var transformStyle = byId(transformElementId).style;
 
         transformStyle[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
@@ -641,13 +645,16 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
           if (isAnimationEnding) {
 
-            // Remove scale and set correct size.
-            setSize(getCurrentSize(), 1);
+            // The final size must be IDEAL_PANEL_WIDTH x IDEAL_PANEL_HEIGHT
+            // We use scale to make up the difference so that all HTML BP content is also sized properly (not just SVG)
+            var currentSize = getCurrentSize(),
+              ratioFromIdealSize = BP_CONST.IDEAL_PANEL_WIDTH / currentSize.width;
+            setSize(getCurrentSize(), ratioFromIdealSize);
 
             setTransform(
               (startingPosition.left + positionDifference.left * normalizedAnimationTime),
               (startingPosition.top  + positionDifference.top  * normalizedAnimationTime),
-              1
+              1 / ratioFromIdealSize
             );
 
             endAnimation();
