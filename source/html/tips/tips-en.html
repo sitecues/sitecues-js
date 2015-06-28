@@ -6,17 +6,39 @@
 </sc-card>
 
 <sc-card id="scp-zoom-card">
-  <sc-h1>Zoom</sc-h1>
-  <sc-center>
-    <sc-h2>
-      <sc-span id="scp-demo-slider">Use the sitecues slider to zoom the page</sc-span>
-    </sc-h2>
-    <sc-h2>
-      <sc-span aria-label="Press the - or + key to zoom the page"><sc-kbd>&#65293;</sc-kbd> &nbsp;/&nbsp; <sc-kbd>+</sc-kbd></sc-span>
-    </sc-h2>
-    <sc-p><sc-span style="width:240px">Hint: hold keys longer to zoom more</sc-span></sc-p>
-  </sc-center>
+  <sc-h1>Zoom the page</sc-h1>
+  <sc class="scp-demo-fake-page-instructions">
+    <sc-center>
+      <sc-h2>
+        Use the sitecues slider
+      </sc-h2>
+      <sc-p><sc-span id="scp-demo-slider"/></sc-p>
+    </sc-center>
+  </sc>
+  <sc class="scp-demo-fake-page">
+    <sc-p class="scp-demo-para scp-demo-para-zoom" id="scp-demo-para-zoom">Hello.</sc-p>
+  </sc>
 </sc-card>
+
+<sc-card id="scp-zoom-keys-card">
+  <sc-h1>Zoom with keys</sc-h1>
+  <sc class="scp-demo-fake-page-instructions">
+    <sc-center>
+      <sc-h2>
+        <sc-span aria-label="Press the - or + key to zoom the page">
+          <sc-kbd>&#65293;</sc-kbd>
+          &nbsp;/&nbsp;
+          <sc-kbd>+</sc-kbd>
+        </sc-span>
+      </sc-h2>
+      <sc-p>Hold keys longer to zoom more.</sc-p>
+    </sc-center>
+  </sc>
+  <sc class="scp-demo-fake-page">
+    <sc-p class="scp-demo-para scp-demo-para-zoom" id="scp-demo-para-zoom-keys">Hello.</sc-p>
+  </sc>
+</sc-card>
+
 
 <sc-card id="scp-highlight-card">
   <sc-h1>Highlighter</sc-h1>
@@ -26,7 +48,7 @@
   </sc>
   <sc class="scp-demo-fake-page">
     <img id="scp-demo-mouse" src="/images/cursor-demo.svg"/>
-    <sc-p id="scp-demo-highlight-paragraph">Hello.</sc-p>
+    <sc-p class="scp-demo-para" id="scp-demo-para-highlight">Hello.</sc-p>
   </sc>
 </sc-card>
 
@@ -38,7 +60,7 @@
   </sc>
   <sc class="scp-demo-fake-page">
     <img id="scp-demo-lens-mouse" src="/images/cursor-demo.svg"/>
-    <sc-p id="scp-demo-lens-paragraph">Hello.</sc-p>
+    <sc-p class="scp-demo-para" id="scp-demo-para-lens">Hello.</sc-p>
   </sc>
 </sc-card>
 

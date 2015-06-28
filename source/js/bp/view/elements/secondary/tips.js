@@ -5,6 +5,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     var byId = helper.byId,
       animationTimers = [],
       animationFns = {
+        'scp-zoom-card': animateZoom,
+        'scp-zoom-keys-card': animateZoom,
         'scp-highlight-card': animateHighlight,
         'scp-lens-card': animateLens
       };
@@ -30,6 +32,17 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       animationTimers.push(setTimeout(toggle, howLongMs || 0));
     }
 
+    function animateZoom() {
+      function zoomThenUnzoom() {
+        toggleElementDemo(BP_CONST.DEMO_PARA_ZOOM, true, 2000);
+        toggleElementDemo(BP_CONST.DEMO_PARA_ZOOM, false, 6000);
+      }
+
+      zoomThenUnzoom();
+      animationTimers.push(setTimeout(zoomThenUnzoom, 8000));
+
+    }
+
     function animateHighlight() {
       function highlightThenUnhighlight() {
         toggleElementDemo(BP_CONST.DEMO_MOUSE, true, 2000);
@@ -53,9 +66,9 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
       function openThenCloseLens() {
         animationTimers.push(setTimeout(pressSpacebar, 2000));
-        toggleElementDemo(BP_CONST.DEMO_LENS_PARAGRAPH, true, 3200);  // Open lens
+        toggleElementDemo(BP_CONST.DEMO_PARA_HIGHLIGHT, true, 3200);  // Open lens
         animationTimers.push(setTimeout(pressSpacebar, 6000));
-        toggleElementDemo(BP_CONST.DEMO_LENS_PARAGRAPH, false, 7200);  // Close lens
+        toggleElementDemo(BP_CONST.DEMO_PARA_HIGHLIGHT, false, 7200);  // Close lens
       }
 
       openThenCloseLens();

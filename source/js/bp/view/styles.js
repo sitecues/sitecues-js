@@ -628,7 +628,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'overflow': 'hidden' // So that fake dimmer doesn't go outside
         },
 
-        '#scp-demo-highlight-paragraph,#scp-demo-lens-paragraph': {
+        '.scp-demo-para': {
           'position': 'relative',
           'top': '-4px',
           'left': '-4px',
@@ -638,15 +638,24 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'transform .4s, box-shadow .2s',
           'display': 'inline-block'
         },
-        '#scp-demo-highlight-paragraph[data-demo="true"],#scp-demo-lens-paragraph': {  // Highlighted paragraph
+        '#scp-demo-para-highlight[data-demo="true"],#scp-demo-para-lens': {  // Highlighted paragraph
           'background-color': 'rgba(240, 240, 180, 0.3)',
           'border-color': '#222'
         },
 
-        '#scp-demo-lens-paragraph[data-demo="true"]': {  // HLB open
+        '#scp-demo-para-lens[data-demo="true"]': {  // HLB open
           'background-color': 'white',
           'transform': 'scale(1.6)',
           'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
+        },
+
+        '.scp-demo-para-zoom': {
+          'transition': 'transform 2.2s linear',
+          'transform-origin': '0% 0%'
+        },
+
+        '.scp-demo-para-zoom[data-demo="true"]': { // Zoom page
+          'transform': 'scale(2)'
         },
 
         // Settings -- input ranges

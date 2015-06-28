@@ -2,8 +2,9 @@
     <path id="a"     transform="translate(0,28)" d="m37 .2l23 62h-14l-5 -14h-23l-5 14h-14l23 -62h14zm1 38l-9 -23h0l-8 23h16z"/>
     <path id="bar"   transform="translate(80,40)" d="m278 3v27c0 2 -1 3 -3 3h-273c-2 0 -3 -1 -3 -3v-6c0 -1 1 -2 2 -3l273 -22c1 0 3 1 3 3z"/>
     <path id="A"     transform="translate(376,1)" d="m54 0l33 89h-20l-7 -20h-33l-7 20h-20l34 -89h20zm1 55l-11 -32h0l-12 33h23z"/>
-    <g id="thumb-and-mouse" transform="translate(100,28)">
-        <animateMotion id="anim1" path="M 0 0 H 200 Z" begin="3s;anim1.end+5s" dur="3s"/>
+    <g id="thumb-and-mouse" transform="translate(80,28)">
+        <animateMotion id="anim1" path="M 0 0 H 160" begin="2s;10s" dur="2s" fill="freeze"/>
+        <animateMotion id="anim1" path="M 160 0 H 0" begin="6s;14s" dur="2s" fill="freeze"/>
         <path id="thumb" fill="#447AC4" d="m11,64l-10,-15v-41c0,-2 3,-7 5,-7h15c1,0 5,5 5,7v41l-10,15c0,0 -2.5,2 -5,0"/>
         <g transform="scale(.4) translate(4,75)">
             <path d="m51,13c-3,1 -6,3 -7,5c-5,7 -5,20 -2,39c2,7 5,23 6,25c0,1 -1,0 -3,-1c-6,-6 -11,-9 -17,-9c-6,0 -12,4 -15,10c-1,3 -1,4 -1,8c0,8 2,12 14,27c6,8 8,11 13,20c2,2 5,6 13,14l11,11l0,6l0,6l19,1l18,0l6,-6l6,-6l5,6l6,6l9,0l9,-1l1,-10l0,-10l2,-3c1,-2 4,-6 6,-9c3,-4 6,-9 8,-11c7,-10 7,-10 7,-37c0,-21 0,-21 -2,-24c-1,-3 -4,-5 -7,-7c-2,-1 -3,-1 -7,-1c-3,0 -4,0 -7,1c-2,1 -3,2 -3,2c0,0 -1,-2 -2,-3c-1,-4 -4,-6 -8,-8c-2,-1 -3,-2 -7,-2c-6,0 -8,1 -12,4c-1,2 -2,2 -2,1c0,-2 -6,-6 -9,-7c-4,-2 -9,-2 -12,0c-2,1 -4,2 -5,3c-1,0 -2,1 -2,0c0,-1 -1,-11 -2,-14c-3,-13 -8,-21 -15,-24c-3,-2 -9,-2 -12,-2z"/>
