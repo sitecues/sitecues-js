@@ -234,7 +234,7 @@ sitecues.def('bp', function (bp, callback) {
 
         SC_DEV && console.log('Document ready to initialize BP.');
 
-        initializeBPFeature();
+        setTimeout(initializeBPFeature, 0);
 
       } else {
 
