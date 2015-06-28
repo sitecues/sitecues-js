@@ -599,7 +599,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-demo-page': {
           'position': 'absolute',  // Make fake mouse cursor positioning easier
-          'top': '220px',
+          'top': '240px',
           'width': '280px',
           'border': '1px solid black',
           'background-color': '#f8f8f8',
@@ -657,22 +657,27 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
         },
 
-        '.scp-highlight-card>#scp-demo-mouse,.scp-lens-card>#scp-demo-mouse': {
+        '.scp-highlight-card>#scp-demo-mouse,.scp-lens-card>#scp-demo-mouse,.scp-speech-card>#scp-demo-mouse': {
           'display': 'block'
         },
-        '.scp-highlight-card>#scp-demo-mouse[data-demo="true"],.scp-lens-card>#scp-demo-mouse': {
+        '.scp-highlight-card>#scp-demo-mouse[data-demo="true"],.scp-lens-card>#scp-demo-mouse,.scp-speech-card>#scp-demo-mouse': {
           'transform': 'translate(-75px, -37px)'
         },
 
-        '.scp-highlight-card>#scp-demo-para[data-demo="true"],.scp-lens-card>#scp-demo-para': {  // Highlighted paragraph
+        '.scp-highlight-card>#scp-demo-para[data-demo="true"],.scp-lens-card>#scp-demo-para,.scp-speech-card>#scp-demo-para': {  // Highlighted paragraph
           'background-color': 'rgba(240, 240, 180, 0.3)',
           'border-color': '#222'
         },
 
-        '.scp-lens-card>#scp-demo-para[data-demo="true"]': {  // HLB open
+        '.scp-lens-card>#scp-demo-para[data-demo="true"],.scp-speech-card>#scp-demo-para[data-demo="true"]': {  // HLB open
           'background-color': 'white',
           'transform': 'scale(1.6)',
           'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
+        },
+
+        // Tips -- full guide (scp-full-guide-card)
+        '#scp-tips[data-active="scp-full-guide-card"] #scp-demo-page': {
+          'display': 'none'  // No demo page on fuill guide card
         },
 
         // Settings -- input ranges

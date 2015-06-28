@@ -8,7 +8,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         'scp-zoom-card': animateZoom,
         'scp-zoom-keys-card': animateZoom,
         'scp-highlight-card': animateHighlight,
-        'scp-lens-card': animateLens
+        'scp-lens-card': animateLens,
+        'scp-speech-card': animateLens
       };
 
     tips.getGeometryTargets = function(cssValues) {
@@ -18,17 +19,23 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function cardActivated(id) {
       // Clear existing tips animations
       animationTimers.forEach(clearTimeout);
+      animationTimers.length = 0;
       clearElementDemo(BP_CONST.DEMO_PARA);
       clearElementDemo(BP_CONST.DEMO_MOUSE);
 
       // Run the animation function for this card (if any)
       var newAnimation = animationFns[id];
       if (newAnimation) {
-        newAnimation();
+        newAnimation(id);
       }
 
       // Set a class on the demo-page element so it knows what's up
       byId(BP_CONST.DEMO_PAGE).className = id;
+      byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
+    }
+
+    function pushTimeout(fn, howLongMs) {
+      animationTimers.push(setTimeout(fn, howLongMs));
     }
 
     // Reset demo page element back to original state
@@ -38,32 +45,34 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       elem.style.transitionDuration = '0s';
       setTimeout(function() {
         elem.style.transitionDuration = '';
-      }, 0);
+      }, 10);
 
     }
 
     // Optional -- howLongMs is how logn to wait before doing it
     function toggleElementDemo(id, isOn, howLongMs) {
       function toggle() {
-        byId(id).setAttribute('data-demo', isOn);
+        byId(id).setAttribute('data-demo', isOn || false);
       }
-      animationTimers.push(setTimeout(toggle, howLongMs || 0));
+      pushTimeout(toggle, howLongMs || 0);
     }
 
     function animateZoom() {
+      function toggleZoom(isOn, key, howLongMs) {
+        var FAKE_KEY_DELAY = 70;
+        toggleElementDemo(BP_CONST.DEMO_PARA, isOn, howLongMs + FAKE_KEY_DELAY);          // Zoom para
+        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, true, howLongMs + FAKE_KEY_DELAY);  // Move slider
+        toggleElementDemo(key, true, howLongMs);                                          // Push key
+        toggleElementDemo(key, false, howLongMs + 2000);                                  // Release key
+      }
+
       function zoomThenUnzoom() {
-        toggleElementDemo(BP_CONST.DEMO_PARA, true, 2000);
-        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, true, 2000);
-        toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, true, 1930);
-        toggleElementDemo(BP_CONST.DEMO_ZOOM_PLUS, false, 3930);
-        toggleElementDemo(BP_CONST.DEMO_PARA, false, 6000);
-        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, false, 6000);
-        toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, true, 5930);
-        toggleElementDemo(BP_CONST.DEMO_ZOOM_MINUS, false, 7930);
+        toggleZoom(true, BP_CONST.DEMO_ZOOM_PLUS, 2000);
+        toggleZoom(false, BP_CONST.DEMO_ZOOM_MINUS, 6000);
       }
 
       zoomThenUnzoom();
-      animationTimers.push(setTimeout(zoomThenUnzoom, 8000));
+      pushTimeout(zoomThenUnzoom, 8000);
 
     }
 
@@ -75,28 +84,36 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         toggleElementDemo(BP_CONST.DEMO_PARA, false, 6500);
       }
       highlightThenUnhighlight();
-      animationTimers.push(setTimeout(highlightThenUnhighlight, 9999));
+      pushTimeout(highlightThenUnhighlight, 9999);
     }
 
-    function animateLens() {
+    function animateLens(id) {
       function toggleSpacebar(isPressed) {
         toggleElementDemo(BP_CONST.DEMO_LENS_SPACE, isPressed);
+        toggleElementDemo(BP_CONST.DEMO_SPEECH_SPACE, isPressed);
       }
 
       function pressSpacebar() {
         toggleSpacebar(true);
-        animationTimers.push(setTimeout(toggleSpacebar, 1000));
+        pushTimeout(toggleSpacebar, 1000);
+      }
+
+      function speakIt() {
+        sitecues.emit('mh/do-speak', byId(BP_CONST.DEMO_PARA));
       }
 
       function openThenCloseLens() {
-        animationTimers.push(setTimeout(pressSpacebar, 2000));
+        pushTimeout(pressSpacebar, 2000);
         toggleElementDemo(BP_CONST.DEMO_PARA, true, 3200);  // Open lens
-        animationTimers.push(setTimeout(pressSpacebar, 6000));
+        if (id === 'scp-speech-card') {
+          pushTimeout(speakIt, 3300);
+        }
+        pushTimeout(pressSpacebar, 6000);
         toggleElementDemo(BP_CONST.DEMO_PARA, false, 7200);  // Close lens
       }
 
       openThenCloseLens();
-      animationTimers.push(setTimeout(openThenCloseLens, 12000));
+      pushTimeout(openThenCloseLens, 12000);
     }
 
     sitecues.on('did-show-card', cardActivated);

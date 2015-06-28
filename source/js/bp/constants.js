@@ -99,6 +99,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.DEMO_ZOOM_PLUS           = 'scp-demo-zoom-plus';
   constants.DEMO_ZOOM_MINUS          = 'scp-demo-zoom-minus';
   constants.DEMO_LENS_SPACE          = 'scp-demo-lens-spacebar';
+  constants.DEMO_SPEECH_SPACE        = 'scp-demo-speech-spacebar';
 
   // Settings panel gadgets
   constants.THEME_POWER_ID           = 'scp-theme-power';
