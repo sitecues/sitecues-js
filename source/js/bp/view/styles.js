@@ -597,7 +597,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Tips -- lens demo
         'sc-kbd[data-demo="true"]': {
-          'transform': 'translate(2px,2px)',
+          'transform': 'translate(4px,4px)',
           'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
         },
 
@@ -619,12 +619,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-demo-fake-page': {
-          'position': 'relative',
+          'position': 'relative',  // Make fake mouse cursor positioning easier
           'border': '1px solid black',
+          'background-color': '#f8f8f8',
           'border-bottom': 0,
           'height': '90px',
           'padding': '20px 30px',
-          'overflow': 'hidden'
+          'overflow': 'hidden' // So that fake dimmer doesn't go outside
         },
 
         '#scp-demo-highlight-paragraph,#scp-demo-lens-paragraph': {
