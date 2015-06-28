@@ -3,9 +3,10 @@
  */
 sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', function (BP_CONST, helper) {
+  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', function (BP_CONST, helper, state) {
 
     var byId = helper.byId,
+      isActive = false,
       animationTimers = [],
       animationFns = {
         'scp-zoom-card': animateZoom,
@@ -22,6 +23,27 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         BP_CONST.DEMO_ZOOM_MINUS,
         BP_CONST.DEMO_LENS_SPACE
       ];
+
+    function onPanelUpdate() {
+
+      var willBeActive = state.getSecondaryPanelName() === 'tips',
+        fullGuide = byId(BP_CONST.FULL_GUIDE_BUTTON);
+
+      if (isActive !== willBeActive) {
+        if (willBeActive) {
+          fullGuide.addEventListener('click', onFullGuideClick);
+        }
+        else {
+          fullGuide.removeEventListener('click', onFullGuideClick);
+        }
+      }
+
+      isActive = willBeActive;
+    }
+
+    function onFullGuideClick() {
+      sitecues.emit('info/help');
+    }
 
     tips.getGeometryTargets = function(cssValues) {
       return cssValues;
@@ -127,6 +149,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     }
 
     sitecues.on('did-show-card', cardActivated);
+    sitecues.on('bp/do-update', onPanelUpdate);
 
     callback();
   });

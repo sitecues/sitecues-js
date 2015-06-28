@@ -6,9 +6,9 @@
 // - are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
 // - tips: should user be able to try each exercise themselves?
+// - tips: first page ugly
+// - tips: speech page needs love
 // - contrast: should we squeeze contrast fix or mono color options in?
-//
-// Zoom larger, panel formatting borked
 //
 // Later
 // About: Get it now

@@ -29,7 +29,6 @@ sitecues.def('info', function(info, callback) {
       BUTTON_SIZE = 60,
       CLOSE_BUTTON_CSS = {
         cursor: 'pointer',
-        color: '#ccc',
         border: '3px solid #ccc',
         borderRadius: '48px',
         background: '#222',
@@ -102,7 +101,7 @@ sitecues.def('info', function(info, callback) {
         }
       }, INITIAL_DELAY); // Waiting helps animation performance
 
-      addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
+      addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
       isModalOpen = true;
     }
@@ -126,7 +125,7 @@ sitecues.def('info', function(info, callback) {
         offsetTop = platform.browser.isIE ? -6 : -1;
 
       $closeButton =
-          $('<sc style="display:block"><sc style="position:relative;left:14px;top:23px">x</sc></sc>')
+          $('<sc style="display:block"><sc style="position:relative;left:14px;top:-8px;color:#ccc">x</sc></sc>')
         .css(CLOSE_BUTTON_CSS)
         .css({
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
@@ -137,7 +136,7 @@ sitecues.def('info', function(info, callback) {
 
       addCloseButtonTimer = setTimeout(function() {
         $closeButton.css('opacity', 1);
-      }, 50);
+      }, 100);
     }
 
     function removeCloseButton() {
