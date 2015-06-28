@@ -585,13 +585,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // Tips -- zoom demo
-        '#scp-slider-demo': {
+        '#scp-demo-slider': {
           'background': 'none',
           'width': '180px',
           'height': '51px',
           'text-indent': '-9999px'
         },
-        '.scp-active #scp-slider-demo': {
+        '.scp-active #scp-demo-slider': {
           'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
         },
 
@@ -601,29 +601,49 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
         },
 
-        '#scp-demo-mouse': {
+        '#scp-demo-mouse,#scp-demo-lens-mouse': {
           'position': 'absolute',
           'width': '30px',
-          'left': '-80px',
-          'top': '100px',
-          'transition': 'transform 2s'
+          'left': '137px',
+          'top': '77px',
+          'transition': 'transform 2s',
+          'z-index': 1
         },
 
-        '#scp-demo-mouse[data-demo="true"]': {
-          'transform': 'translate(100px, 50px)'
+        '#scp-demo-mouse[data-demo="true"],#scp-demo-lens-mouse': {
+          'transform': 'translate(-75px, -37px)'
         },
 
-        '#scp-highlight-paragraph-demo': {
+        '.scp-demo-fake-page-instructions': {
+          'min-height': '100px'
+        },
+
+        '.scp-demo-fake-page': {
+          'position': 'relative',
+          'border': '1px solid black',
+          'border-bottom': 0,
+          'height': '90px',
+          'padding': '20px 30px'
+        },
+
+        '#scp-demo-highlight-paragraph,#scp-demo-lens-paragraph': {
           'position': 'relative',
           'top': '-4px',
           'left': '-4px',
           'padding': '2px',
           'border': '2px solid transparent',
-          'border-radius': '4px'
+          'border-radius': '4px',
+          'transition': 'transform .4s',
+          'display': 'inline-block'
         },
-        '#scp-highlight-paragraph-demo[data-demo="true"]': {
+        '#scp-demo-highlight-paragraph[data-demo="true"],#scp-demo-lens-paragraph': {  // Highlighted paragraph
           'background-color': 'rgba(240, 240, 180, 0.3)',
           'border-color': '#222'
+        },
+
+        '#scp-demo-lens-paragraph[data-demo="true"]': {  // HLB open
+          'background-color': 'white',
+          'transform': 'scale(1.6)'
         },
 
         // Settings -- input ranges

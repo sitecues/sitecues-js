@@ -5,8 +5,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     var byId = helper.byId,
       animationTimers = [],
       animationFns = {
-        'scp-highlight-demo': animateHighlight,
-        'scp-lens-demo': animateLens
+        'scp-highlight-card': animateHighlight,
+        'scp-lens-card': animateLens
       };
 
     tips.getGeometryTargets = function(cssValues) {
@@ -31,19 +31,19 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     }
 
     function animateHighlight() {
-      function doIt() {
+      function highlightThenUnhighlight() {
         toggleElementDemo(BP_CONST.DEMO_MOUSE, true, 2000);
         toggleElementDemo(BP_CONST.DEMO_PARA_HIGHLIGHT, true, 4000);
         toggleElementDemo(BP_CONST.DEMO_MOUSE, false, 6000);
         toggleElementDemo(BP_CONST.DEMO_PARA_HIGHLIGHT, false, 6500);
       }
-      doIt();
-      animationTimers.push(setTimeout(doIt, 9999));
+      highlightThenUnhighlight();
+      animationTimers.push(setTimeout(highlightThenUnhighlight, 9999));
     }
 
     function animateLens() {
       function toggleSpacebar(isPressed) {
-        toggleElementDemo(BP_CONST.LENS_SPACE, isPressed);
+        toggleElementDemo(BP_CONST.DEMO_LENS_SPACE, isPressed);
       }
 
       function pressSpacebar() {
@@ -51,8 +51,15 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         animationTimers.push(setTimeout(toggleSpacebar, 1000));
       }
 
-      animationTimers.push(setTimeout(pressSpacebar, 2000));
-      animationTimers.push(setTimeout(pressSpacebar, 6000));
+      function openThenCloseLens() {
+        animationTimers.push(setTimeout(pressSpacebar, 2000));
+        toggleElementDemo(BP_CONST.DEMO_LENS_PARAGRAPH, true, 3200);  // Open lens
+        animationTimers.push(setTimeout(pressSpacebar, 6000));
+        toggleElementDemo(BP_CONST.DEMO_LENS_PARAGRAPH, false, 7200);  // Close lens
+      }
+
+      openThenCloseLens();
+      animationTimers.push(setTimeout(openThenCloseLens, 12000));
     }
 
     sitecues.on('did-show-card', cardActivated);

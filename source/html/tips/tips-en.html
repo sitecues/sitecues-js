@@ -5,11 +5,11 @@
   <sc-p>&ndash; listen to content read aloud</sc-p>
 </sc-card>
 
-<sc-card id="scp-zoom-demo">
+<sc-card id="scp-zoom-card">
   <sc-h1>Zoom</sc-h1>
   <sc-center>
     <sc-h2>
-      <sc-span id="scp-slider-demo">Use the sitecues slider to zoom the page</sc-span>
+      <sc-span id="scp-demo-slider">Use the sitecues slider to zoom the page</sc-span>
     </sc-h2>
     <sc-h2>
       <sc-span aria-label="Press the - or + key to zoom the page"><sc-kbd>&#65293;</sc-kbd> &nbsp;/&nbsp; <sc-kbd>+</sc-kbd></sc-span>
@@ -18,17 +18,28 @@
   </sc-center>
 </sc-card>
 
-<sc-card id="scp-highlight-demo">
+<sc-card id="scp-highlight-card">
   <sc-h1>Highlighter</sc-h1>
-  <img id="scp-demo-mouse" src="/images/cursor-demo.svg"/>
-  <sc-p>Choose something to focus on.</sc-p>
-  <sc-p id="scp-highlight-paragraph-demo">Move your mouse over anything in the page to highlight it.</sc-p>
+  <sc class="scp-demo-fake-page-instructions">
+    <sc-p>Choose something to focus on.</sc-p>
+    <sc-p>Move your mouse over something to highlight it.</sc-p>
+  </sc>
+  <sc class="scp-demo-fake-page">
+    <img id="scp-demo-mouse" src="/images/cursor-demo.svg"/>
+    <sc-p id="scp-demo-highlight-paragraph">Hello.</sc-p>
+  </sc>
 </sc-card>
 
-<sc-card id="scp-lens-demo">
+<sc-card id="scp-lens-card">
   <sc-h1>Smart Lens</sc-h1>
-  <sc-p>The Smart Lens can zoom highlighted content.</sc-p>
-  <sc-p>To use it, press the&nbsp; <sc-kbd class="scp-space" id="scp-lens-spacebar">spacebar</sc-kbd> over a highlighted area.</sc-p>
+  <sc class="scp-demo-fake-page-instructions">
+    <sc-p>The Smart Lens can zoom a highlighted area.</sc-p>
+    <sc-p>To use it, press the&nbsp; <sc-kbd class="scp-space" id="scp-demo-lens-spacebar">spacebar</sc-kbd> .</sc-p>
+  </sc>
+  <sc class="scp-demo-fake-page">
+    <img id="scp-demo-lens-mouse" src="/images/cursor-demo.svg"/>
+    <sc-p id="scp-demo-lens-paragraph">Hello.</sc-p>
+  </sc>
 </sc-card>
 
 <sc-card>
