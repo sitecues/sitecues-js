@@ -31,9 +31,9 @@ sitecues.def('animate', function (animate, callback) {
     function setTransform (element, useAttribute, left, top, transformScale, rotate) {
 
       var translateCss   = (left || top) ? 'translate(' + left + ',' + top + ') ' : '',
-          scaleCSS       = transformScale ? ' scale(' + transformScale + ') ' : '',
+          scaleCSS       = transformScale && transformScale !== 1 ? ' scale(' + transformScale + ') ' : '',
           rotateCSS      = rotate         ? ' rotate(' + rotate + ')'     : '',
-          attrVal        = translateCss + scaleCSS + rotateCSS;
+          attrVal        = (translateCss + scaleCSS + rotateCSS);
 
       if (useAttribute) {
         element.setAttribute('transform', attrVal);
