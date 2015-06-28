@@ -116,7 +116,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         pushTimeout(pressSpacebar, 2000);
         toggleElementDemo(BP_CONST.DEMO_PARA, true, 3200);  // Open lens
         if (id === 'scp-speech-card') {
-          pushTimeout(speakIt, 3300);
+          pushTimeout(speakIt, 3200);
         }
         pushTimeout(pressSpacebar, 6000);
         toggleElementDemo(BP_CONST.DEMO_PARA, false, 7200);  // Close lens

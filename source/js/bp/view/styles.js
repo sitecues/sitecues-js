@@ -588,8 +588,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-demo-mouse': {
           'background': 'url(' + sitecues.resolveSitecuesUrl('/images/cursor-demo.svg') + ') 100% 100% no-repeat',
           'position': 'absolute',
-          'left': '137px',
-          'top': '77px',
+          'left': '157px',
+          'top': '36px',
           'width': '30px',
           'height': '40px',
           'transition': 'transform 2s',
@@ -662,7 +662,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'block'
         },
         '.scp-highlight-card #scp-demo-mouse[data-demo="true"],.scp-lens-card #scp-demo-mouse,.scp-speech-card #scp-demo-mouse': {
-          'transform': 'translate(-75px, -37px)'
+          'transform': 'translate(-65px, -3px)'
         },
 
         '.scp-highlight-card #scp-demo-para[data-demo="true"],.scp-lens-card #scp-demo-para,.scp-speech-card #scp-demo-para': {  // Highlighted paragraph
