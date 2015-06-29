@@ -50,7 +50,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
         state.set('isKeyboardMode', true);
         sitecues.emit('bp/do-update');
-        setTabCycles(evt);
+        if (baseController.getFocusedItemName() !== '$') {
+          setTabCycles(evt);
+        }
         processFocusedItem(evt);
       }
 
@@ -231,15 +233,101 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     }
 
+    function getAllTabbableItemsInActiveCard () {
+      return document.querySelectorAll('#scp-' + baseController.getTab() + ' > .scp-active .scp-tabbable');
+    }
+
+    function getFocusedItemInActiveCard (tabbableItems) {
+      for (var i = 0, l = tabbableItems.length; i < l; i++) {
+        if (tabbableItems[i].getAttribute('data-focused')) {
+          return tabbableItems[i];
+        }
+      }
+    }
+
+    function setFocusedItemInActiveCard (tabbableItems, tabbableItem) {
+      clearAllFocusedItemsInActiveCard(tabbableItems);
+      tabbableItem.setAttribute('data-focused', true);
+    }
+
+    function clearAllFocusedItemsInActiveCard (tabbableItems) {
+      for (var i = 0, l = tabbableItems.length; i < l; i++) {
+        tabbableItems[i].removeAttribute('data-focused');
+      }
+    }
+
+    function getAdjacentTabbableItem (all, current, dir) {
+      if (!current) {
+        return;
+      }
+      for (var i = 0, l = all.length; i < l; i++) {
+        if (all[i] === current) {
+          return all[i + dir];
+        }
+      }
+    }
+
+    function skipItem (evt) {
+      setTabCycles(evt);
+      processFocusedItem(evt);
+    }
+
     function processFocusedItem(evt) {
 
-      var item = baseController.getFocusedItem();
+      var item      = baseController.getFocusedItem(),
+          itemName  = baseController.getFocusedItemName(),
+          direction = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
+          isRight   = direction === TAB_DIRECTION.right,
+          tabbableItemsInActiveCard,
+          focusedTabbableItem,
+          adjacentTabbableItem,
+          nextItem,
+          nextItemIndex;
+
+      // Process the dynamic content for the possibility of tabbable items.
+      if (itemName === '$') {
+
+        // All items in the active card.
+        tabbableItemsInActiveCard = getAllTabbableItemsInActiveCard();
+
+        // If there are none, skip to the next item.
+        if (!tabbableItemsInActiveCard.length) {
+          skipItem(evt);
+          return;
+        }
+
+        // The current focused item.  Might not exist.
+        focusedTabbableItem = getFocusedItemInActiveCard(tabbableItemsInActiveCard);
+
+        // The item adjacent to the current focused item, depending on what direction user tabs.
+        adjacentTabbableItem = getAdjacentTabbableItem(tabbableItemsInActiveCard, focusedTabbableItem, direction);
+
+        // There is a current focused item, but the adjacent item is not within the dynamic content
+        // within the active card.  Meaning, the adjacent item is really outside the dynamic content.
+        // Just skip.
+        if (focusedTabbableItem && !adjacentTabbableItem) {
+          clearAllFocusedItemsInActiveCard(tabbableItemsInActiveCard);
+          skipItem(evt);
+          return;
+        }
+
+        // First or last dynamic tabbable item.
+        nextItemIndex = isRight ? 0 : tabbableItemsInActiveCard.length - 1;
+
+        // If a focused item exists, use the adjacent item.  Otherwise, its either the first or last item.
+        nextItem = focusedTabbableItem ? adjacentTabbableItem : tabbableItemsInActiveCard[nextItemIndex];
+
+        setFocusedItemInActiveCard(tabbableItemsInActiveCard, nextItem);
+
+        item = adjacentTabbableItem || tabbableItemsInActiveCard[nextItemIndex];
+
+      }
 
       if(!item) {
         return;
       }
 
-      baseController.showFocus();
+      baseController.showFocus(item);
 
       evt.preventDefault();
     }
