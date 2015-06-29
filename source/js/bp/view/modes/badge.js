@@ -84,7 +84,6 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
 
       helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
-      toolbarElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
       ensureBodyBelowToolbar();
 
       state.set('isPageBadge', false);
@@ -260,6 +259,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
       // Get site's in-page placeholder badge or create our own
       badgeElement = badge || createToolbar();
+      badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
+
 
       setCustomPalette(badgeElement);
 
