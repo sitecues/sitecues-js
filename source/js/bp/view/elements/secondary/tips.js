@@ -9,11 +9,16 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       isActive = false,
       animationTimers = [],
       animationFns = {
-        'scp-zoom-card': animateZoom,
-        'scp-zoom-keys-card': animateZoom,
-        'scp-highlight-card': animateHighlight,
-        'scp-lens-card': animateLens,
-        'scp-speech-card': animateLens
+        'scp-zoom-card': 'zoom',
+        'scp-zoom-keys-card': 'zoom',
+        'scp-highlight-card': 'highlight',
+        'scp-lens-card': 'lens',
+        'scp-speech-card': 'lens'
+      },
+      animationFnMap = {
+        'zoom': animateZoom,
+        'highlight': animateHighlight,
+        'lens': animateLens
       },
       ACTORS = [
         BP_CONST.DEMO_PAGE_CONTENTS,
@@ -56,13 +61,15 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       ACTORS.forEach(clearElementDemo);
 
       // Run the animation function for this card (if any)
-      var newAnimation = animationFns[id];
+      var newAnimation = animationFns[id],
+        demoPage = byId(BP_CONST.DEMO_PAGE);
       if (newAnimation) {
-        newAnimation(id);
+        animationFnMap[newAnimation](id);
       }
 
       // Set a class on the demo-page element so it knows what's up
-      byId(BP_CONST.DEMO_PAGE).className = id;
+      demoPage.className = 'scp-' + newAnimation;
+      demoPage.setAttribute('data-hasdemo', !!newAnimation);
       byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
     }
 
@@ -73,12 +80,12 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     // Reset demo page element back to original state
     function clearElementDemo(id) {
       var elem = byId(id);
+      // Reset element back to normal position instantly (temporarily turn of animations)
       elem.setAttribute('data-demo', false);
       elem.style.transitionDuration = '0s';
-      setTimeout(function() {
+      setTimeout(function () {
         elem.style.transitionDuration = '';
-      }, 20);
-
+      }, 20); // Wait at least one frame tick to turn animations back on
     }
 
     // Optional -- howLongMs is how logn to wait before doing it
@@ -148,7 +155,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       pushTimeout(openThenCloseLens, 12000);
     }
 
-    sitecues.on('did-show-card', cardActivated);
+    sitecues.on('bp/did-show-card', cardActivated);
     sitecues.on('bp/do-update', onPanelUpdate);
 
     callback();

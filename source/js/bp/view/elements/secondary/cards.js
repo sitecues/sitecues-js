@@ -124,6 +124,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       if (willBeActive) {
         activePanelName = panelName;
         activePanel = getPanelElement(panelName);
+        sitecues.emit('bp/did-show-card', getActiveCard().id);
       }
       else {
         activePanelName = null;
@@ -238,7 +239,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
             switchCard(direction);
           }
           else {
-            sitecues.emit('did-show-card', cardToSelect.id);
+            sitecues.emit('bp/did-show-card', cardToSelect.id);
           }
         }
       }

@@ -1,5 +1,6 @@
 // TODO
 // Questions:
+// - tips: second time opening the size is wrong (not tall enough)
 // - tips: first page ugly -- should it be a TOC?
 // - tips/settings: are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
