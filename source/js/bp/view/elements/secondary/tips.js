@@ -32,14 +32,17 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     function onPanelUpdate() {
 
       var willBeActive = state.getSecondaryPanelName() === 'tips',
-        fullGuide = byId(BP_CONST.FULL_GUIDE_BUTTON);
+        fullGuideLink = byId(BP_CONST.FULL_GUIDE_LINK),
+        fullGuideButton = byId(BP_CONST.FULL_GUIDE_BUTTON);
 
       if (isActive !== willBeActive) {
         if (willBeActive) {
-          fullGuide.addEventListener('click', onFullGuideClick);
+          fullGuideLink.addEventListener('click', onFullGuideClick);
+          fullGuideButton.addEventListener('click', onFullGuideClick);
         }
         else {
-          fullGuide.removeEventListener('click', onFullGuideClick);
+          fullGuideLink.addEventListener('click', onFullGuideClick);
+          fullGuideButton.removeEventListener('click', onFullGuideClick);
         }
       }
 
@@ -68,7 +71,7 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
       }
 
       // Set a class on the demo-page element so it knows what's up
-      demoPage.className = 'scp-' + newAnimation;
+      demoPage.className = 'scp-demo-' + newAnimation;
       demoPage.setAttribute('data-hasdemo', !!newAnimation);
       byId(BP_CONST.TIPS_CONTENT_ID).setAttribute('data-active', id);
     }

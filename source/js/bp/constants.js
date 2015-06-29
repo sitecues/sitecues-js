@@ -101,7 +101,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.DEMO_ZOOM_MINUS          = 'scp-demo-zoom-minus';
   constants.DEMO_LENS_SPACE          = 'scp-demo-lens-spacebar';
   constants.DEMO_SPEECH_SPACE        = 'scp-demo-speech-spacebar';
-  constants.FULL_GUIDE_BUTTON        = 'scp-full-guide';
+  constants.FULL_GUIDE_LINK          = 'scp-full-guide-link';
+  constants.FULL_GUIDE_BUTTON        = 'scp-full-guide-button';
 
   // Settings panel gadgets
   constants.THEME_POWER_ID           = 'scp-theme-power';

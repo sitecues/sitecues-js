@@ -224,6 +224,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '12px 0'
         },
 
+        'sc-link,sc-menuitem': {
+          'font-family': 'Arial',
+          'font-size': '20px',
+          'text-decoration': 'underline',
+          'color': '#6B9AE0'
+        },
+
+        'sc-menuitem': {
+          'display': 'list-item',
+          'list-style-position': 'inside',
+          'margin': '12px 0'
+        },
+
         'sc-kbd': {
           'display': 'inline-block',
           'white-space': 'nowrap',
@@ -658,19 +671,19 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
         },
 
-        '.scp-animateHighlight #scp-demo-mouse,.scp-animateLens #scp-demo-mouse': {
+        '.scp-demo-highlight #scp-demo-mouse,.scp-demo-lens #scp-demo-mouse': {
           'display': 'block'
         },
-        '.scp-animateHighlight #scp-demo-mouse[data-demo="true"],.scp-animateLens #scp-demo-mouse': {
+        '.scp-demo-highlight #scp-demo-mouse[data-demo="true"],.scp-demo-lens #scp-demo-mouse': {
           'transform': 'translate(-65px, -3px)'
         },
 
-        '.scp-animateHighlight #scp-demo-para[data-demo="true"],.scp-animateLens #scp-demo-para': {  // Highlighted paragraph
+        '.scp-demo-highlight #scp-demo-para[data-demo="true"],.scp-demo-lens #scp-demo-para': {  // Highlighted paragraph
           'background-color': 'rgba(240, 240, 180, 0.3)',
           'border-color': '#222'
         },
 
-        '.scp-animateLens #scp-demo-para[data-demo="true"]': {  // HLB open
+        '.scp-demo-lens #scp-demo-para[data-demo="true"]': {  // HLB open
           'background-color': 'white',
           'transform': 'scale(1.6)',
           'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'

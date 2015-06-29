@@ -80,8 +80,11 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     // Add useful attributes to various elements, based on elemTypes
     function addSemanticSugar(html) {
-      return html.replace(/(<sc-button(?:-big)?)/g, '$1 role="button" data-hover="scale(1.2)" class="scp-hand-cursor scp-tabbable" ')
-        .replace(/<input /g, '<input class="scp-hand-cursor scp-tabbable" ');
+      var INTERACTIVE =  ' class="scp-hand-cursor scp-tabbable" ';
+      return html.replace(/(<sc-button(?:-big)?)/g, '$1 role="button" data-hover="scale(1.2)"' + INTERACTIVE)
+        .replace(/<sc-menuitem /g, '<sc-menuitem role="link"' + INTERACTIVE)
+        .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE)
+        .replace(/<input /g, '<input' + INTERACTIVE);
     }
 
     function removeAllElements(elements) {
@@ -102,29 +105,24 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
 
     function onPanelUpdate() {
       var panelName = state.getSecondaryPanelName(),
-        willBeActive = panelName && PANELS_WITH_CARDS.hasOwnProperty(panelName);
+        willBeActive = panelName && PANELS_WITH_CARDS.hasOwnProperty(panelName),
+        addOrRemoveFn = willBeActive ? 'addEventListener' : 'removeEventListener',
+        bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
 
       // Event listeners
       if (isActive !== willBeActive) {
-        if (willBeActive) {
-          byId(BP_CONST.PREV_ID).addEventListener('click', prevCard);
-          byId(BP_CONST.NEXT_ID).addEventListener('click', nextCard);
-          byId(BP_CONST.BP_CONTAINER_ID).addEventListener('keydown', onKeyDown);
-          enablePulseOnMousePause(panelName);
-        }
-        else {
-          byId(BP_CONST.PREV_ID).removeEventListener('click', prevCard);
-          byId(BP_CONST.NEXT_ID).removeEventListener('click', nextCard);
-          byId(BP_CONST.BP_CONTAINER_ID).removeEventListener('keydown', onKeyDown);
-          disablePulseOnMousePause();
-        }
+        byId(BP_CONST.PREV_ID)[addOrRemoveFn]('click', prevCard);
+        byId(BP_CONST.NEXT_ID)[addOrRemoveFn]('click', nextCard);
+        bpContainer[addOrRemoveFn]('keydown', onKeyDown);
+        bpContainer[addOrRemoveFn]('click', onClick);
+        willBeActive ? enablePulseOnMousePause(panelName) : disablePulseOnMousePause();
       }
 
       // Active state
       if (willBeActive) {
         activePanelName = panelName;
         activePanel = getPanelElement(panelName);
-        sitecues.emit('bp/did-show-card', getActiveCard().id);
+        newCardNotification();
       }
       else {
         activePanelName = null;
@@ -189,6 +187,18 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       }
     }
 
+    function onClick(evt) {
+      var clickedElem = evt.target,
+        linkTarget = clickedElem.getAttribute('data-target');
+
+      if (linkTarget) {
+        selectNewCard(byId(linkTarget));
+      }
+    }
+
+    function newCardNotification() {
+      sitecues.emit('bp/did-show-card', getActiveCard().id);
+    }
 
     function onKeyDown(evt) {
       var LEFT     = 37,
@@ -220,9 +230,14 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       return activePanel && activePanel.getElementsByClassName('scp-active')[0];
     }
 
-    function switchCard(direction) {
+      /**
+       * Switch to a new card
+       * @param direction 1 for next card, -1 for previous
+       * @param fromCard (optional) Card to navigate to next/prev from. If not specified will use current active card
+       */
+    function switchCard(direction, fromCard) {
       disablePulseOnMousePause();
-      var activeCard = getActiveCard(),
+      var activeCard = fromCard || getActiveCard(),
         cardToSelect;
 
       if (activeCard) {
@@ -231,25 +246,30 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
           cardToSelect = direction === 1 ? activePanel.firstElementChild : activePanel.lastElementChild;
         }
 
-        if (cardToSelect) {
-          toggleCardActive(activeCard, false);
-          toggleCardActive(cardToSelect, true);
-          if (cardToSelect.localName !== 'sc-card') {
-            // THis element was not a card -- keep going in same direction
-            switchCard(direction);
-          }
-          else {
-            sitecues.emit('bp/did-show-card', cardToSelect.id);
-          }
+        if (!selectNewCard(cardToSelect)) {
+          switchCard(direction, activeCard);
         }
       }
     }
 
+    // Returns true on success
+    function selectNewCard(cardToSelect) {
+      if (cardToSelect) {
+        if (cardToSelect.localName === 'sc-card') {
+          toggleCardActive(getActiveCard(), false);
+          toggleCardActive(cardToSelect, true);
+          newCardNotification();
+          // At first, back button is disabled when on first card
+          // However, once we've gone forward we allow backwards cycling
+          byId(BP_CONST.PREV_ID).removeAttribute('aria-disabled');
+          return true;
+        }
+      }
+
+    }
+
     function nextCard() {
       switchCard(1);
-      // At first, back button is disabled when on first card
-      // However, once we've gone forward we allow backwards cycling
-      byId(BP_CONST.PREV_ID).removeAttribute('aria-disabled');
     }
 
     function prevCard() {
