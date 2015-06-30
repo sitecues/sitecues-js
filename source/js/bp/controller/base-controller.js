@@ -25,6 +25,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ],
       'settings':[
         'settings-button',
+        '$',
         'prev-card',
         'next-card',
         'more-button-group'
@@ -93,9 +94,9 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';
     }
 
-    main.showFocus = function () {
+    main.showFocus = function (item) {
 
-      var focusedItem    = main.getFocusedItem(),
+      var focusedItem    = item || main.getFocusedItem(),
           panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
 
       if (!focusedItem) {
