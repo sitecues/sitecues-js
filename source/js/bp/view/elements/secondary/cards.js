@@ -247,7 +247,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         }
 
         if (!selectNewCard(cardToSelect)) {
-          switchCard(direction, activeCard);
+          switchCard(direction, cardToSelect);
         }
       }
     }
