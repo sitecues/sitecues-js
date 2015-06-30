@@ -25,8 +25,13 @@
   </sc-center>
 </sc-card>
 
+<<<<<<< Updated upstream
 <sc-card id="scp-zoom-keys-card" data-advanced>
-  <sc-h1>Zoom keys</sc-h1>
+  <sc-h1>Zoom with keys</sc-h1>
+=======
+<sc-card id="scp-zoom-keys-card">
+  <sc-h1>Zoom</sc-h1>
+>>>>>>> Stashed changes
   <sc-center>
     <sc-p>Hold keys longer to zoom more.</sc-p>
     <sc-h2>

@@ -595,7 +595,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Tips -- demo page general styles
         '#scp-demo-mouse': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/cursor-demo.svg') + ') 100% 100% no-repeat',
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/cursor-demo.svg') + ') 100% 100% no-repeat',
           'position': 'absolute',
           'left': '157px',
           'top': '36px',
@@ -635,6 +635,24 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'transform .4s, box-shadow .2s'
         },
 
+        // Keyboard button
+        '#scp-kbd-icon': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ') no-repeat',
+          'background-size': '100% auto',
+          'position': 'absolute',
+          'left': '-89px',
+          'top': '97px',
+          'width': '51px',
+          'height': '26px',
+          'border': 0,
+          'display': 'none'
+        },
+
+        'sc-cards[data-active="scp-zoom-card"] #scp-kbd-icon, sc-cards[data-active="scp-highlight-card"] #scp-kbd-icon, sc-cards[data-active="scp-lens-card"] #scp-kbd-icon, sc-cards[data-active="scp-speech-card"] #scp-kbd-icon': {
+          'display': 'inline-block'
+        },
+
+
         // Tips -- zoom demo (scp-zoom-card, scp-zoom-keys-card)
         '#scp-demo-slider': {
           'position': 'relative',
@@ -649,10 +667,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '51px'
         },
         '.scp-active #scp-demo-slider-bar': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo-bar.svg') + ') 100% 100% no-repeat'
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-demo-bar.svg') + ') 100% 100% no-repeat'
         },
         '.scp-active #scp-demo-slider-thumb': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo-thumb.svg') + ') 100% 100% no-repeat',
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-demo-thumb.svg') + ') 100% 100% no-repeat',
           'transition': 'transform 2s linear'
         },
         '.scp-active #scp-demo-slider-thumb[data-demo="true"]': {
