@@ -199,7 +199,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-h1': {
           'display': 'block',
           'margin': '24px 0',
-          'font-family': 'Arial',
           'font-size': '40px',
           'width': '292px'  // If arrows are on top-right, we need this
         },
@@ -207,7 +206,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-h2': {
           'display': 'block',
           'margin': '20px 0',
-          'font-family': 'Arial',
           'font-size': '26px'
         },
 
@@ -219,14 +217,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-p': {
           'display': 'block',
-          'font-family': 'Arial',
-          'font-size': '20px',
           'margin': '12px 0'
         },
 
+        'sc-menu': {
+          'display': 'list',
+          'margin': '0 20px'        },
+
         'sc-link,sc-menuitem': {
-          'font-family': 'Arial',
-          'font-size': '20px',
           'text-decoration': 'underline',
           'color': '#6B9AE0'
         },
@@ -234,7 +232,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-menuitem': {
           'display': 'list-item',
           'list-style-position': 'inside',
-          'margin': '12px 0'
+          'list-style-type': 'decimal',
+          'margin': '10px 32px'
         },
 
         'sc-kbd': {
@@ -244,7 +243,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'top': '-3px',
           'min-width': '30px',
           'padding': '.04em',
-          'font-family': 'Arial',
           'text-align': 'center',
           'border-radius': '3px',
           'border': '0',
@@ -265,8 +263,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-button': {
           'display': 'inline-block',
-          'font-family': 'Arial',
-          'font-size': '20px',
           'font-weight': 'bold',
           'background-color': '#447AC4',
           'color': 'white',
@@ -280,8 +276,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-button-big': {
           'display'      : 'inline-block',
           'padding'      : '10px 30px',
-          'font-family'  : 'Arial',
-          'font-size'    : '22px',
+          'font-size'    : '24px',
           'border'       : '3px solid #447AC4',
           'border-radius': '4px',
           'color'        : '#FFF',
@@ -575,6 +570,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-cards': {
           'position': 'relative',
           'font-family': 'Arial',
+          'font-size': '20px',
           'left': '105px',
           'z-index': 999
         },
@@ -612,6 +608,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-demo-page': {
           'position': 'absolute',  // Make fake mouse cursor positioning easier
+          'font-size': '16px',
           'top': '240px',
           'width': '280px',
           'border': '1px solid black',
@@ -652,7 +649,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '51px'
         },
         '.scp-active #scp-demo-slider-bar': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo.svg') + ') 100% 100% no-repeat'
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo-bar.svg') + ') 100% 100% no-repeat'
         },
         '.scp-active #scp-demo-slider-thumb': {
           'background': 'url(' + sitecues.resolveSitecuesUrl('/images/slider-demo-thumb.svg') + ') 100% 100% no-repeat',
