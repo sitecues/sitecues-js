@@ -100,7 +100,7 @@ sitecues.def('hpan', function (hpan, callback) {
 
       // Turn on if zoom is > 1 and content overflows window more than a tiny amount
       var zoom = conf.get('zoom'),
-        doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.01 && !isHlbOn && !isPanelOpen;
+        doTurnOn = zoom > 1 && zoomMod.getBodyRight() / window.innerWidth > 1.02 && !isHlbOn && !isPanelOpen;
 
       if (doTurnOn !== isOn) {
         if (doTurnOn) {

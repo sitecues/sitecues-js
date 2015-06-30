@@ -744,6 +744,19 @@ sitecues.def('zoom', function (zoom, callback) {
         return glideChangeTimer;
       }
 
+      // After the user's initial zoom we need to realign any location hash target to the top of the screen
+      function jumpToLocationHash() {
+        var hash = document.location.hash,
+          EXTRA_SPACE_SCROLL_TOP = 60;
+        if (hash) {
+          var elem = document.querySelector(hash + ',[name="' + hash.substring(1) +'"]');
+          if (elem) {
+            elem.scrollIntoView(true);
+            window.scrollBy(0, - EXTRA_SPACE_SCROLL_TOP);
+          }
+        }
+      }
+
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
         if (elementDotAnimatePlayer) {
@@ -779,6 +792,10 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('zoom', completedZoom);
 
         clearZoomCallbacks();
+
+        if (isInitialLoadZoom) {
+          jumpToLocationHash();
+        }
 
         isInitialLoadZoom = false;
         zoomInput = {};
@@ -987,7 +1004,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the desired width of the body for the current level of zoom
       function getRestrictedWidth(currZoom) {
-        var winWidth = window.innerWidth;
+        var winWidth = originalBodyInfo.width;
         return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
       }
 
@@ -1148,7 +1165,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Does not use getBoundingClientRect because we need size to include overflow
       function getAbsoluteRect(node) {
         var clientRect = node.getBoundingClientRect(),
-          width = Math.max(node.scrollWidth, clientRect.width),
+          width = clientRect.width, //  Math.max(node.scrollWidth, clientRect.width),
           height = Math.max(node.scrollHeight, clientRect.height),
           left = clientRect.left + window.pageXOffset,
           top = clientRect.top + window.pageYOffset;
