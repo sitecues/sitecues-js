@@ -339,8 +339,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // .scp-toolbar means it's a toolbar
         '.scp-toolbar': {
           'position': 'fixed',
-          'top': '0px',
-          'left': '0px',
+          'top': 0,
+          'left': 0,
           'width': '100%',
           'height': '38px',
           'margin': '0 !important',  // Prevent page style pollution
