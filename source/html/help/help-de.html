@@ -46,15 +46,6 @@
             window.top.postMessage('sc-close-iframe', siteUrl);
         }
     });
-
-    function checkBadgeKey(evt) {
-      if (evt.keyCode === 13 || evt.keyCode === 32) {
-        document.location.hash = '#keyboard';
-        evt.preventDefault();
-        evt.stopImmediatePropagation();
-        return true;
-      }
-    }
 </script>
 
 <style>
@@ -115,11 +106,8 @@
 
 <body>
 <!-- Badge -->
-<span id="sitecues-badge" href="#keyboard">
+<span id="sitecues-badge">
 </span>
-<script>
-  document.getElementById('sitecues-badge').addEventListener('keydown', checkBadgeKey);
-</script>
 
 <!-- Content -->
 <h1>sitecues &mdash; Vergr&ouml;&szlig;erung und Sprachausgabe: Hilfe</h1>

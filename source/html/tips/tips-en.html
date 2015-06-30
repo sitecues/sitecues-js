@@ -7,7 +7,7 @@
     <sc-menuitem data-target="scp-lens-card">Magnify</sc-menuitem>
     <sc-menuitem data-target="scp-speech-card">Speak</sc-menuitem>
   </sc-menu>
-  <sc-p>Or, head to our <sc-link id="scp-full-guide-link">practice area</sc-link> to use sitecues as you read about it.</sc-p>
+  <sc-p>Or, head to our <sc-link data-target="#">practice area</sc-link> to use sitecues as you read about it.</sc-p>
 </sc-card>
 
 <sc-card id="scp-zoom-card">
@@ -61,11 +61,16 @@
 
 <sc-card id="scp-full-guide-card">
   <sc-h1>Learn more</sc-h1>
-  <sc-center>
-    <sc-h2>Practice sitecues<br/>in the</sc-h2>
-    <sc-p><sc-button-big id="scp-full-guide-button">Full Guide</sc-button-big></sc-p>
-    <sc-h2>Jump straight to <br><sc-link>keyboard shortcuts</sc-link>.<br><sc-span id="sc-kbd-icon"></sc-span></sc-h2>
-  </sc-center>
+  <sc-h2 class="scp-icon-menuitem">
+    <sc-button id="scp-guide-icon" data-target="#"></sc-button>
+    <sc-link data-target="#">Full guide</sc-link><br/>
+    <sc-span>Practice sitecues</sc-span>
+  </sc-h2>
+  <sc-h2 class="scp-icon-menuitem">
+    <sc-button id="scp-kbd-icon" data-target="##keyboard"></sc-button>
+    <sc-link data-target="##keyboard">Keyboard help</sc-link><br/>
+    <sc-span>Jump straight there</sc-span>
+  </sc-h2>
 </sc-card>
 
 <!-- Fake demo page -->
@@ -76,6 +81,3 @@
     <sc-p>Learn more at sitecues.com.</sc-p>
   </sc>
 </sc>
-
-<!-- Keyboard icon -->
-<sc-button id="scp-kbd-icon"></sc-button>

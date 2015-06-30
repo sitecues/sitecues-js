@@ -207,7 +207,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-h2': {
           'display': 'block',
-          'margin': '20px 0',
+          'margin': '15px 0',
           'font-size': '26px'
         },
 
@@ -223,8 +223,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-menu': {
-          'display': 'list',
-          'margin': '0 20px'        },
+          'margin': '0 12px'
+        },
 
         'sc-link,sc-menuitem': {
           'text-decoration': 'underline',
@@ -635,23 +635,34 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'transform .4s, box-shadow .2s'
         },
 
-        // Keyboard button
-        '#scp-kbd-icon': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ') no-repeat',
-          'background-size': '100% auto',
-          'position': 'absolute',
-          'left': '-89px',
-          'top': '97px',
-          'width': '51px',
-          'height': '26px',
+        '.scp-icon-menuitem': {
+          'margin-top': '33px',
+          'width': '90%'
+        },
+
+        '.scp-icon-menuitem>sc-button': {
           'border': 0,
-          'display': 'none'
+          'width': '51px',
+          'margin-right': '20px',
+          'background-size': '100% auto',
+          'float': 'left',
+          'background-color': 'transparent',
+          'background-repeat': 'no-repeat'
         },
 
-        'sc-cards[data-active="scp-zoom-card"] #scp-kbd-icon, sc-cards[data-active="scp-highlight-card"] #scp-kbd-icon, sc-cards[data-active="scp-lens-card"] #scp-kbd-icon, sc-cards[data-active="scp-speech-card"] #scp-kbd-icon': {
-          'display': 'inline-block'
+        // Full guide icon
+        '#scp-guide-icon': {
+          'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/full-guide-icon.png') + ')',
+          'height': '46px',
+          'margin-top': '-8px'
         },
 
+        // Keyboard icon
+        '#scp-kbd-icon': {
+          'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ')',
+          'height': '26px',
+          'margin-top': '11px'
+        },
 
         // Tips -- zoom demo (scp-zoom-card, scp-zoom-keys-card)
         '#scp-demo-slider': {

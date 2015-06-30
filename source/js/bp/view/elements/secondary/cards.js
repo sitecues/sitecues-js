@@ -192,7 +192,14 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         linkTarget = clickedElem.getAttribute('data-target');
 
       if (linkTarget) {
-        selectNewCard(byId(linkTarget));
+        if (linkTarget.charAt(0) === '#') {
+          // Help target
+          sitecues.emit('info/help', linkTarget.substring(1));
+        }
+        else {
+          // Card link
+          selectNewCard(byId(linkTarget));
+        }
       }
     }
 

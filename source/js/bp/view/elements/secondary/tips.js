@@ -29,30 +29,6 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         BP_CONST.DEMO_LENS_SPACE
       ];
 
-    function onPanelUpdate() {
-
-      var willBeActive = state.getSecondaryPanelName() === 'tips',
-        fullGuideLink = byId(BP_CONST.FULL_GUIDE_LINK),
-        fullGuideButton = byId(BP_CONST.FULL_GUIDE_BUTTON);
-
-      if (isActive !== willBeActive) {
-        if (willBeActive) {
-          fullGuideLink.addEventListener('click', onFullGuideClick);
-          fullGuideButton.addEventListener('click', onFullGuideClick);
-        }
-        else {
-          fullGuideLink.addEventListener('click', onFullGuideClick);
-          fullGuideButton.removeEventListener('click', onFullGuideClick);
-        }
-      }
-
-      isActive = willBeActive;
-    }
-
-    function onFullGuideClick() {
-      sitecues.emit('info/help');
-    }
-
     tips.getGeometryTargets = function(cssValues) {
       return cssValues;
     };
@@ -159,7 +135,6 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
     }
 
     sitecues.on('bp/did-show-card', cardActivated);
-    sitecues.on('bp/do-update', onPanelUpdate);
 
     callback();
   });

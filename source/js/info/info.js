@@ -15,7 +15,7 @@ sitecues.def('info', function(info, callback) {
         height: '80%',
         transform: 'scale3d(.7,.7,1)',
         willChange: 'transform',
-        backgroundColor: 'white',
+        backgroundColor: '#fff',
         border: '20px solid #000',
         borderRadius: '8px',
         transition: 'opacity .9s, transform 1s',
@@ -125,7 +125,7 @@ sitecues.def('info', function(info, callback) {
         offsetTop = platform.browser.isIE ? -6 : -1;
 
       $closeButton =
-          $('<sc style="display:block"><sc style="position:relative;left:14px;top:-8px;color:#ccc">x</sc></sc>')
+          $('<scx style="display:block"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
         .css(CLOSE_BUTTON_CSS)
         .css({
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
