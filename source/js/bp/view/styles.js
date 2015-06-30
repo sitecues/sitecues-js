@@ -192,7 +192,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc,sc-cards,sc-card': {
           'display': 'block',
           'font-family': 'Arial',
-          'font-size': '20px',
+          'font-size': '21px',
           'margin': '0',
           'color': '#000',
           'line-height': 'normal'
@@ -208,7 +208,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'sc-h2': {
           'display': 'block',
           'margin': '15px 0',
-          'font-size': '26px'
+          'font-size': '24px'
         },
 
         'sc-center': {
@@ -235,7 +235,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'display': 'list-item',
           'list-style-position': 'inside',
           'list-style-type': 'decimal',
-          'margin': '10px 32px'
+          'margin': '10px 32px',
+          'font-size': '22px'
         },
 
         'sc-kbd': {
@@ -250,13 +251,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'border': '0',
           'background-image': 'linear-gradient(to top, #EEE, #FFF)',
           'color':  '#333',
+          'margin': '0 4px',
           'text-shadow': '0 0 2px #FFF',
           'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 .1em 0 #888, 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9)',
           'transition': 'transform .5s, box-shadow .5s'
         },
         'sc-kbd.scp-space': {
-          'padding-left': '2em',
-          'padding-right': '2em'
+          'padding-left': '1.5em',
+          'padding-right': '1.5em'
         },
 
         'sc-span': {
@@ -636,8 +638,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '.scp-icon-menuitem': {
-          'margin-top': '33px',
-          'width': '90%'
+          'margin-top': '38px',
+          'width': '90%',
+          'font-size': '26px'
         },
 
         '.scp-icon-menuitem>sc-button': {
@@ -678,10 +681,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'height': '51px'
         },
         '.scp-active #scp-demo-slider-bar': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-demo-bar.svg') + ') 100% 100% no-repeat'
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
         },
         '.scp-active #scp-demo-slider-thumb': {
-          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-demo-thumb.svg') + ') 100% 100% no-repeat',
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat',
           'transition': 'transform 2s linear'
         },
         '.scp-active #scp-demo-slider-thumb[data-demo="true"]': {
@@ -713,6 +716,15 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background-color': 'white',
           'transform': 'scale(1.6)',
           'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
+        },
+
+        // Tips -- speech
+        '#scp-speech-button-demo': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat',
+          'position': 'relative',
+          'top': '2px',
+          'width': '39px',
+          'height': '26px'
         },
 
         // Tips -- full guide (scp-full-guide-card)

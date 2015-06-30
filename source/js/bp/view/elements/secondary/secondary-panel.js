@@ -1,13 +1,10 @@
 // TODO
 // Questions:
-// - tips: second time opening the size is wrong (not tall enough)
-// - tips: first page ugly -- should it be a TOC?
 // - tips/settings: are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
 // - tips: should user be able to try each exercise themselves?
 // - tips: speech page needs love -- break into Activate speech  and Use speech?
 // - settings: should we squeeze contrast fix or mono color options in?
-// - tips: jump to keyboard, if zoom, not aligned  --       after zoom do this? document.querySelector(hash + ',[name="' + hash.substring(1) +'"]').scrollIntoView(true);
 //
 // Later
 // About: Get it now
