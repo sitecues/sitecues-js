@@ -24,8 +24,8 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
         BP_CONST.DEMO_PAGE_CONTENTS,
         BP_CONST.DEMO_PARA,
         BP_CONST.DEMO_MOUSE,
-        BP_CONST.DEMO_ZOOM_PLUS,
-        BP_CONST.DEMO_ZOOM_MINUS,
+//        BP_CONST.DEMO_ZOOM_PLUS,
+//        BP_CONST.DEMO_ZOOM_MINUS,
         BP_CONST.DEMO_LENS_SPACE
       ];
 

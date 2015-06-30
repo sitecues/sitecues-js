@@ -255,7 +255,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     // Returns true on success
     function selectNewCard(cardToSelect) {
       if (cardToSelect) {
-        if (cardToSelect.localName === 'sc-card') {
+        if (cardToSelect.localName === 'sc-card' && cardToSelect.hasAttribute('data-advanced')) {
           toggleCardActive(getActiveCard(), false);
           toggleCardActive(cardToSelect, true);
           newCardNotification();

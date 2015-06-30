@@ -191,6 +191,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc,sc-cards,sc-card': {
           'display': 'block',
+          'font-family': 'Arial',
+          'font-size': '20px',
           'margin': '0',
           'color': '#000',
           'line-height': 'normal'
@@ -569,8 +571,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Cards (for tips and settings)
         'sc-cards': {
           'position': 'relative',
-          'font-family': 'Arial',
-          'font-size': '20px',
           'left': '105px',
           'z-index': 999
         },

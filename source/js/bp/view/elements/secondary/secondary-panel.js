@@ -291,28 +291,19 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           ENABLE_ANIMATION_MS = 1500,
           DISABLE_ANIMATION_MS = 500,
 
-          duration = getDuration(),
-          normalizedDuration = getNormalizedDuration(),
-
           isExpanding = toGeo.outlineHeight > currentOutlineHeight,
 
+          percentRemaining = getPercentAnimationRemaining(),
+          heightAnimationDuration = (doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS) * percentRemaining,
           heightAnimationDelay = (doEnable && isExpanding && feature.heightAnimationDelay) || 0,
+          openFeatureDuration = doEnable && feature.heightAnimationDelay ? ENABLE_ANIMATION_MS : heightAnimationDuration,
 
           expansionRatio = getSVGExpansionRatio();
 
 
-        function getDuration() {
-          // Use the progress of the more button to determine how far along we are in the animation,
-          // and therefore how much time is left
-          return animate.getDuration(doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS,
-            fromGeo.outlineHeight, toGeo.outlineHeight, currentOutlineHeight);
-        }
-
-        function getNormalizedDuration () {
-          // A multiplier used for determining where to position things when in the middle of
-          // an animation.
-          var totalAnimationDuration = doEnable ? ENABLE_ANIMATION_MS : DISABLE_ANIMATION_MS;
-          return animate.getDuration(totalAnimationDuration, fromGeo.outlineHeight, toGeo.outlineHeight, currentOutlineHeight) / totalAnimationDuration;
+        function getPercentAnimationRemaining () {
+          // A multiplier used for determining where to position things when in the middle of an animation.
+          return Math.abs(((toGeo.outlineHeight - currentOutlineHeight) / (toGeo.outlineHeight - fromGeo.outlineHeight)));
         }
 
         function panelHeightTick(time) {
@@ -335,7 +326,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
               getValueInTime(currentMenuBtnRotate, toGeo.menuBtnRotate, time)));
 
           if (!animateMoreButtonFocus) {
-            focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX * normalizedDuration, time) +'px,0)';
+            focusOutline.style[platform.transformProperty] = 'translate('+ getValueInTime(currentOutlineTranslateX, toGeo.focusOutlineTranslateX * percentRemaining, time) +'px,0)';
           }
 
           featureTick && featureTick(time, toGeo);
@@ -350,16 +341,16 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           setTimeout(function () {
             state.set('isSecondaryExpanding', false);
             sitecues.emit('bp/do-update');
-          }, heightAnimationDelay + duration * 0.7);
+          }, heightAnimationDelay + heightAnimationDuration * 0.7);
         }
 
         function animateHeight() {
-          createAnimation(duration, panelHeightTick);
+          createAnimation(heightAnimationDuration, panelHeightTick);
         }
 
         function openFeatureAnimation() {
           var onFinish = !animateMoreButtonFocus ? reDrawFocusOutline : undefined;
-          createAnimation(duration, openFeatureAnimationTick, onFinish);
+          createAnimation(openFeatureDuration, openFeatureAnimationTick, onFinish);
         }
 
         reDrawFocusOutline();
