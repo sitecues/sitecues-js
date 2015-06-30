@@ -1,11 +1,15 @@
 <sc-card>
   <sc-h1>Settings</sc-h1>
-  <sc-p>Get more out of sitecues with custom settings.</sc-p>
-  <sc-p>Use the arrow buttons at the top right to see them all.</sc-p>
+  <sc-p>Get more out of sitecues:</sc-p>
+  <sc-menu>
+    <sc-menuitem data-target="scp-theme-settings" class="scp-no-ie9">Theme</sc-menuitem>
+    <sc-menuitem data-target="scp-mouse-settings">Mouse</sc-menuitem>
+    <sc-menuitem data-target="scp-lens-settings">Smart Lens</sc-menuitem>
+  </sc-menu>
 </sc-card>
 
 
-<sc-card>
+<sc-card id="scp-theme-settings">
   <sc-h1>Theme</sc-h1>
   <sc-p class="scp-color-theme-group">
     <sc-button data-setting-name="themeName">
@@ -23,7 +27,7 @@
   </sc-p>
 </sc-card>
 
-<sc-card class="scp-no-ie9">
+<sc-card id="scp-mouse-settings" class="scp-no-ie9">
   <sc-h1>Mouse</sc-h1>
   <sc-center>
     <sc-p class="scp-range-group">
@@ -37,7 +41,7 @@
   </sc-center>
 </sc-card>
 
-<sc-card>
+<sc-card id="scp-lens-settings">
   <sc-h1>Smart lens</sc-h1>
   <sc-p>How much should the lens magnify highlighted content?</sc-p>
   <sc-p class="scp-lens-size-group">
