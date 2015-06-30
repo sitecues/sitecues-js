@@ -234,7 +234,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     function getAllTabbableItemsInActiveCard () {
-      return document.querySelectorAll('#scp-' + baseController.getTab() + ' > .scp-active .scp-tabbable');
+      return document.querySelectorAll('#scp-' + baseController.getTab() + ' > .scp-active .scp-tabbable:not([data-show="false"])');
     }
 
     function getFocusedItemInActiveCard (tabbableItems) {
@@ -284,6 +284,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
           nextItem,
           nextItemIndex;
 
+
       // Process the dynamic content for the possibility of tabbable items.
       if (itemName === '$') {
 
@@ -324,6 +325,13 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
 
       if(!item) {
+        return;
+      }
+
+      // The prev arrow is turned off when on the first card when
+      // going to the settings panel
+      if (item.getAttribute('aria-disabled') === 'true') {
+        skipItem(evt);
         return;
       }
 
