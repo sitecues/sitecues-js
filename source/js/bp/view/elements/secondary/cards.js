@@ -113,7 +113,6 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       if (isActive !== willBeActive) {
         byId(BP_CONST.PREV_ID)[addOrRemoveFn]('click', prevCard);
         byId(BP_CONST.NEXT_ID)[addOrRemoveFn]('click', nextCard);
-        bpContainer[addOrRemoveFn]('keydown', onKeyDown);
         bpContainer[addOrRemoveFn]('click', onClick);
         willBeActive ? enablePulseOnMousePause(panelName) : disablePulseOnMousePause();
       }
@@ -207,17 +206,18 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       sitecues.emit('bp/did-show-card', getActiveCard().id);
     }
 
-    function onKeyDown(evt) {
-      var LEFT     = 37,
-        RIGHT    = 39;
-
-      if (evt.keyCode === LEFT) {
-        prevCard();
-      }
-      else if (evt.keyCode === RIGHT) {
-        nextCard();
-      }
-    }
+// This interferes with slider usage which also needs left/right arrow keys
+//    function onKeyDown(evt) {
+//      var LEFT     = 37,
+//        RIGHT    = 39;
+//
+//      if (evt.keyCode === LEFT) {
+//        prevCard();
+//      }
+//      else if (evt.keyCode === RIGHT) {
+//        nextCard();
+//      }
+//    }
 
     function toggleCardActive(cardElement, isActive) {
       if (isActive) {

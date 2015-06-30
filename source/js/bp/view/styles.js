@@ -791,13 +791,23 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-button[data-setting-name="themeName"]': {
           'padding': '15px 0',
-          'font-size': '26px',
+          'font-size': '20px',
           'border-radius': '50px',
           'text-align': 'center',
           'color': '#000',
-          'width': '84px',
+          'width': '62px',
           'border': '5px solid #000',
           'background-color': '#fff'
+        },
+
+        'sc-button[data-setting-name="themeName"]:not([data-setting-value])': {
+          'font-weight': 100,
+          'color': '#222'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="increaseContrast"]': {
+          'font-weight': 700,
+          'text-shadow': '.4px .2px'
         },
 
         'sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"]': {

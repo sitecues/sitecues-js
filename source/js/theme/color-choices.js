@@ -115,8 +115,10 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         if (sampleElementStyle.display === 'inline') {
           var parentElement = sampleElement.parentElement,
             parentStyle = getComputedStyle(parentElement),
-            parentLuminosity;
-          if (parentElement.innerText.trim().length > sampleElement.innerText.length &&
+            parentLuminosity,
+            parentInnerText = parentElement.innerText,
+            sampleInnerText = sampleElement.innerText;
+          if (parentInnerText && parentInnerText.trim().length > (sampleInnerText && sampleInnerText.length) &&
             sampleElementStyle.backgroundColor === parentStyle.backgroundColor) {
             parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
@@ -194,37 +196,43 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     }
 
     colorChoices.increaseContrast = function(style, intensity) {
-      intensity /= 1.8;
-
-      var rgba = style.parsedVal,
+      var colorChangeIntensity = intensity / 1.6 + 0.1,
+        textShadowIntensity = intensity / 1.6 + 0.1,
+        rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
         newLightness = hsl.l,
         saturation = hsl.s, // Reduce contrast change for saturated colors so that we remain colorful
-        power = (1 - intensity) * 4 * getSaturationImpactOnContrast(saturation) + (style.prop === 'color' ? 0 : 0.2),
+        power = (1 - colorChangeIntensity) * 4 * getSaturationImpactOnContrast(saturation) + (style.prop === 'color' ? 0 : 0.2),
         factor = style.prop === 'color' ? 2 : 6,
         contrastEnhancementDirection = getContrastEnhancementDirection(style),
         newAlpha = rgba.a;
 
       if (contrastEnhancementDirection < 0) {
         // Reduce lightness
-        newLightness = hsl.l - Math.pow(hsl.l / factor, power) * intensity;
+        newLightness = hsl.l - Math.pow(hsl.l / factor, power) * colorChangeIntensity;
         // Also increase the alpha if it's < 1
         // This multiplies the alpha, so that if the original is fully transparent it remains transparent
         if (newAlpha < 1) {
-          newAlpha = Math.min(1, newAlpha * (intensity + 1));
+          newAlpha = Math.min(1, newAlpha * (colorChangeIntensity + 1));
         }
       }
       else if (contrastEnhancementDirection > 0) {
         // Reduce darkness
         var darkness = 1 - hsl.l,
-          newDarkness = darkness - Math.pow(darkness / factor, power) * intensity;
+          newDarkness = darkness - Math.pow(darkness / factor, power) * colorChangeIntensity;
         newLightness = 1 - newDarkness;
       }
 
       var lightnessDiff = Math.abs(newLightness - hsl.l),
         MIN_SIGNIFICANT_LIGHTNESS_DIFF = .01,
-        isSignificantChange = lightnessDiff > MIN_SIGNIFICANT_LIGHTNESS_DIFF || newAlpha !== rgba.a;
-      return isSignificantChange ? $.extend({ a: newAlpha }, hslToRgb(hsl.h, hsl.s, newLightness)): rgba;
+        isSignificantChange = lightnessDiff > MIN_SIGNIFICANT_LIGHTNESS_DIFF || newAlpha !== rgba.a,
+        returnVal = isSignificantChange ? $.extend({ a: newAlpha }, hslToRgb(hsl.h, hsl.s, newLightness)): rgba;
+
+      if (style.prop === 'color') {
+        // Make the text thicker
+        $.extend(returnVal, { textShadow : textShadowIntensity });
+      }
+      return returnVal;
     };
 
     var yowza = 0;

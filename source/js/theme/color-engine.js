@@ -311,6 +311,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         // Backgrounds
         themeStyles.forEach(function(style) {
           var newValue,
+            newRgba = {},
             selector = style.rule.selectorText;
 
           if (style.value.prop === 'background-image') {
@@ -328,17 +329,22 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           else {
             // Don't alter buttons -- it will change it from a native button and the appearance will break
             // color, background-color
-            var newRgba = colorMapFn(style.value, intensity);
+            newRgba = colorMapFn(style.value, intensity);
             newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
           }
           if (newValue) {
             var important = selector !== ':link' && selector !== ':visited', // Don't let these UA rules override page's <a> rules
-              formFixes = '';
+              formFixes = '',
+              textShadow = '';
             if (isButtonRule(selector)) {
               formFixes = 'border:1px outset ButtonFace;border-radius:4px';
             }
+            if (newRgba.textShadow) {
+              // Sometimes we want to darken, so we create a tiny text shadow of the same color as the text
+              textShadow = createRule('text-shadow', + newRgba.textShadow + 'px ' + (newRgba.textShadow / 2) + 'px ' + newValue);
+            }
             styleSheetText += selector +
-              '{' + createRule(style.value.prop, newValue, important) + formFixes + '}\n';
+              '{' + createRule(style.value.prop, newValue, important) + formFixes + textShadow + '}\n';
           }
         });
 
