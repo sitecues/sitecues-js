@@ -185,8 +185,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // <div> which may be styled by the page, e.g. at
         // - Margins http://www.independent.ie/entertainment/trending/westboro-baptist-church-accidentally-hates-the-ivory-coast-31251240.html
         // - Fonts: https://shuttle.support.signiant.com/customer/portal/articles/1720613-why-am-i-repeatedly-asked-to-make-my-media-shuttle-site-trusted-
-        '#sc-bp-container *': {
-          'box-sizing': 'content-box'
+        '#scp-bp-container *': {
+          'box-sizing': 'content-box !important'
         },
 
         'sc,sc-cards,sc-card': {
@@ -223,6 +223,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-menu': {
+          'display': 'block',
           'margin': '0 12px'
         },
 
