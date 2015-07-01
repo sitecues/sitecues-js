@@ -8,6 +8,8 @@
 // - sitecues.com positioning
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
+// Bold (increaseContrast)
+// - text-shadow not erased in Chrome when switching to another them
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
@@ -230,7 +232,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
       if (style.prop === 'color') {
         // Make the text thicker
-        $.extend(returnVal, { textShadow : textShadowIntensity });
+        $.extend({}, returnVal, { textShadow : textShadowIntensity });
       }
       return returnVal;
     };
@@ -279,11 +281,12 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         newLightness,
         bgAddedLightness,
         bgPreservationFactor,
-        newHue;
+        newHue,
+        foregroundIntensity = 0.5 + (intensity / 2);
 
       if (style.prop === 'color') {
         origLightness = Math.max(hsl.l, 1 - hsl.l);
-        newLightness = Math.max(Math.min(intensity * (origLightness + 0.1), intensity), 0.5);
+        newLightness = Math.max(foregroundIntensity * 0.91 * (origLightness + 0.1), foregroundIntensity / 3);
         newHue = getClosestGoodHueForDarkTheme(hsl.h);
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
