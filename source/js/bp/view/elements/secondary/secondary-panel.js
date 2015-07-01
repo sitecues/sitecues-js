@@ -194,11 +194,13 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       // Auto-resizing is better because the contents will always fit, even if we change them (and importantly after l10n)
       function getPanelContentsHeight(featureName) {
         var contentElements = document.querySelectorAll('.scp-if-' + featureName),
+          feature = features[featureName],
           numContentElements = contentElements.length,
           maxHeight = origPanelContentsRect.height,
           normalTop = origPanelContentsRect.top,
           index = 0,
-          FUDGE_FACTOR = 8;
+          FUDGE_FACTOR = 8,
+          finalHeight;
 
         function addRect(item) {
           var thisRect = item.getBoundingClientRect(),
@@ -208,17 +210,21 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           }
         }
 
-        for (; index < numContentElements; index++) {
-          var elem = contentElements[index],
-            children = elem.children || [],
-            childIndex = children.length;
-          addRect(elem);
-          while (childIndex --) {
-            addRect(children[childIndex]);
+        if (!feature.contentsHeight) {
+          for (; index < numContentElements; index++) {
+            var elem = contentElements[index],
+              children = elem.children || [],
+              childIndex = children.length;
+            addRect(elem);
+            while (childIndex--) {
+              addRect(children[childIndex]);
+            }
           }
+
+          feature.contentsHeight = (maxHeight - FUDGE_FACTOR) / getSVGExpansionRatio();
         }
 
-        return (maxHeight - FUDGE_FACTOR) / getSVGExpansionRatio();
+        return feature.contentsHeight;
       }
 
 

@@ -8,8 +8,6 @@
 // - sitecues.com positioning
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
-// Bold (increaseContrast)
-// - text-shadow not erased in Chrome when switching to another them
 
 sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
