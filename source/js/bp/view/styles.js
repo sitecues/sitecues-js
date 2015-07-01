@@ -224,7 +224,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-menu': {
           'display': 'block',
-          'margin': '0 12px'
+          'margin': '21px 16px'
         },
 
         'sc-link,sc-menuitem': {
@@ -804,6 +804,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-button[data-setting-name="themeName"]:not([data-setting-value])': {
+          'position': 'relative',
+          'top': '30px',
           'color': '#222',
           'border-width': '2px'
         },
@@ -820,16 +822,18 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-button[data-setting-name="themeName"][data-setting-value="darkOriginal"]': {
+          'position': 'relative',
+          'top': '30px',
           'color': '#fff',
           'background-color': '#000'
         },
 
         // Settings -- Color theme power
         '#scp-theme-power': {
+          'margin-top': '36px !important',
           'pointer-events': 'none',
           'opacity': 0,
-          'transition': 'opacity 1s',
-          'padding-top': '24px'
+          'transition': 'opacity 1s'
         },
         '#scp-theme-power::-webkit-slider-thumb': { 'background': '#ddd !important' },
         '#scp-theme-power::-moz-range-thumb': { 'background': '#ddd !important' },
