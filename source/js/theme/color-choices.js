@@ -197,7 +197,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
     colorChoices.increaseContrast = function(style, intensity) {
       var colorChangeIntensity = intensity / 1.6 + 0.1,
-        textShadowIntensity = intensity / 1.6 + 0.1,
+        textShadowIntensity = intensity / 2.5 + 0.1,
         rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
         newLightness = hsl.l,

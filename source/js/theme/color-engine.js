@@ -12,6 +12,8 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         REPAINT_MS = 40,
         themeStyles,
         shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
+        isPanelExpanded,
+        isRepaintNeeded,
         originalBodyBackgroundColor,
         isOriginalThemeDark,
         transitionTimer,
@@ -341,7 +343,10 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             }
             if (newRgba.textShadow) {
               // Sometimes we want to darken, so we create a tiny text shadow of the same color as the text
-              textShadow = createRule('text-shadow', + newRgba.textShadow + 'px ' + (newRgba.textShadow / 2) + 'px ' + newValue);
+              textShadow = createRule('text-shadow',
+                  newRgba.textShadow + 'px ' + (newRgba.textShadow / 2) + 'px ' + newValue + ',' +
+                    newRgba.textShadow + 'px ' + '0 ' + newValue + ',' +
+                    '0 ' + (newRgba.textShadow / 4) + 'px ' + newValue);
             }
             styleSheetText += selector +
               '{' + createRule(style.value.prop, newValue, important) + formFixes + textShadow + '}\n';
@@ -356,10 +361,15 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * Necessary on at least youtube.com and https://www.arlington.k12.ma.us/stratton/
        */
       function repaintPage() {
-        document.documentElement.style.transform = 'translateY(0.3px)';
-        setTimeout(function () {
-          document.documentElement.style.transform = '';
-        }, REPAINT_MS);
+        if (isPanelExpanded) {
+          isRepaintNeeded = true;
+        }
+        else {
+          document.documentElement.style.transform = 'translateY(0.01px)';
+          setTimeout(function () {
+            document.documentElement.style.transform = '';
+          }, REPAINT_MS);
+        }
       }
 
       /**
@@ -633,6 +643,20 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
       if (typeof conf.get('themePower') === 'undefined') {
         conf.set('themePower', DEFAULT_INTENSITY);
       }
+
+      function onPanelExpand() {
+        isPanelExpanded = true;
+      }
+      function onPanelShrink() {
+        isPanelExpanded = false;
+        if (isRepaintNeeded) {
+          repaintPage();
+          isRepaintNeeded = false;
+        }
+      }
+
+      sitecues.on('bp/did-expand', onPanelExpand);
+      sitecues.on('bp/did-shrink', onPanelShrink);
 
       if (SC_DEV) {
         sitecues.applyTheme  = colorEngine.applyTheme;
