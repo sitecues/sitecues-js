@@ -23,7 +23,8 @@ sitecues.def('focus', function(focus, callback) {
       // TODO -- change z-index and use position: relative if statically positioned so outline on top
       // 'z-index: 999999; position: relative;' +
       $styleSheet = $('<style>')
-        .html('*:focus{box-shadow:0 0 3pt 2pt ' + FOCUS_RING_COLOR + ' !important;}')
+        // Note: using :not() helps avoid non-performant general descendant selector like 'body *'
+        .html('*:not(#sitecues-badge):not(#scp-bp-container):focus{box-shadow:0 0 3pt 2pt ' + FOCUS_RING_COLOR + ' !important;}')
         .appendTo('head');
     }
 
