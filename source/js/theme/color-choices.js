@@ -259,6 +259,18 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return darkWithHue(newHue, style, intensity);
     };
 
+    function getSaturation(rgba) {
+      return rgbToHsl(rgba.r, rgba.g, rgba.b).s;
+    }
+
+    colorChoices.darkOriginalWithHue = function (style, intensity) {
+      var MOSTLY_GRAYSCALE = 0.1;
+      if (style.prop === 'color' && getSaturation(style.parsedVal) < MOSTLY_GRAYSCALE) {
+        return colorChoices.monochrome(style, intensity);
+      }
+      return colorChoices.darkOriginal(style,intensity);
+    }
+
     colorChoices.darkOriginal = function (style, intensity) {
       var rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),

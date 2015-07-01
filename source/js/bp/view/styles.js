@@ -735,6 +735,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Settings -- input ranges
         '.scp-range-group': {
+          'margin-top': '19px',
           'padding': '14px'
         },
         '#scp-bp-container input[type="range"]': {
@@ -782,7 +783,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Settings -- Color theme buttons
         '.scp-color-theme-group': {
-          'margin-top': '27px',
+          'margin-top': '43px',
           'margin-left': '-7px'
         },
 
@@ -798,12 +799,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'color': '#000',
           'width': '62px',
           'border': '5px solid #000',
-          'background-color': '#fff'
+          'background-color': '#fff',
+          'font-weight': 100,
         },
 
         'sc-button[data-setting-name="themeName"]:not([data-setting-value])': {
-          'font-weight': 100,
-          'color': '#222'
+          'color': '#222',
+          'border-width': '2px'
         },
 
         'sc-button[data-setting-name="themeName"][data-setting-value="increaseContrast"]': {
@@ -884,7 +886,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Settings -- current
         'sc-button[data-setting-current="true"]': {
-          'border-color': 'orange !important'
+          'box-shadow': 'rgba(82, 168, 236, 0.8) 0 0 2px 7px !important'
         },
 
         // Feedback -- thank you message
