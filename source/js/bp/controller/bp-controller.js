@@ -4,8 +4,8 @@ BP Controller
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller',
-    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, baseController, sliderController, panelController, state, slider, helper) {
+    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper', 'conf',
+    function (BP_CONST, baseController, sliderController, panelController, state, slider, helper, conf) {
 
     var TAB_DIRECTION = {
       'left': -1,
@@ -71,7 +71,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
           return;
       }
 
-      processSliderCommands(evt);
+      item.focus();
+
+      processSliderCommands(evt, item);
     };
 
     function isInActiveToolbarArea(evt, badgeRect) {
@@ -284,7 +286,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
           nextItem,
           nextItemIndex;
 
-
       // Process the dynamic content for the possibility of tabbable items.
       if (itemName === '$') {
 
@@ -354,9 +355,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
     }
 
-    function processSliderCommands(evt) {
+    function processSliderCommands(evt, item) {
       var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
-      if (deltaSliderCommand) {
+      if (deltaSliderCommand && !item.hasAttribute('data-setting-name')) {
         sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
         evt.preventDefault();
         return;
@@ -368,8 +369,11 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       item = item || evt.currentTarget;
 
-      var feature     = item.getAttribute('data-feature'),
-          currentMode = baseController.getTab();
+      var feature      = item.getAttribute('data-feature'),
+          currentMode  = baseController.getTab(),
+          settingName  = item.getAttribute('data-setting-name'),
+          settingValue = item.getAttribute('data-setting-value');
+
       if (feature) {  /* Feature button has data-feature attribute */
         sitecues.emit('bp/do-toggle-secondary-panel', feature);
         syncFocusIndex(currentMode);
@@ -384,7 +388,9 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       if (item.id === BP_CONST.PREV_ID) {
         sitecues.emit('bp/do-prev-card');
       }
-
+      if (settingName) {
+        conf.set(settingName, settingValue);
+      }
       sitecues.emit('bp/do-update');
     }
 
