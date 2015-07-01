@@ -65,6 +65,12 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
 
     main.getFocusedItem = function() {
       var focusId = main.getFocusedItemName();
+      if (focusId === '$') {
+        var item = document.querySelectorAll('#scp-' + main.getTab() + ' > .scp-active .scp-tabbable[data-focused="true"]');
+        if (item.length) {
+          return item[0];
+        }
+      }
       if (focusId) {
         return helper.byId('scp-' + focusId);
       }

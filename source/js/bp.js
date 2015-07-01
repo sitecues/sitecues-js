@@ -175,7 +175,9 @@ sitecues.def('bp', function (bp, callback) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
       badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
-      bpContainer.addEventListener('blur', baseController.clearPanelFocus);
+      // Commented out because it was breaking the focus outline when the slider
+      // is focused...  why is this necessary?
+      // bpContainer.addEventListener('blur', baseController.clearPanelFocus);
       badgeElement.addEventListener('mousemove', bpController.onMouseMove);
       badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }
