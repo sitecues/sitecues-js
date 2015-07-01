@@ -288,9 +288,6 @@ sitecues.def('bp/placement', function(placement, callback) {
         sitecues.on('bp/will-expand', switchToHtmlParent);
         sitecues.on('bp/did-shrink', switchToBadgeParent);
       }
-      else {
-        window.addEventListener('resize', repositionBPOverBadge);
-      }
 
     };
 
