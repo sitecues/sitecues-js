@@ -389,7 +389,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         sitecues.emit('bp/do-prev-card');
       }
       if (settingName) {
-        console.log('Setting: ' + settingName + ' to ' + settingValue);
         conf.set(settingName, settingValue);
       }
       sitecues.emit('bp/do-update');
