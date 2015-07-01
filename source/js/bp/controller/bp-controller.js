@@ -369,10 +369,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       item = item || evt.currentTarget;
 
-      var feature     = item.getAttribute('data-feature'),
-          currentMode = baseController.getTab(),
-          settingName = item.getAttribute('data-setting-name'),
-          isTheme     = settingName === 'themeName';
+      var feature      = item.getAttribute('data-feature'),
+          currentMode  = baseController.getTab(),
+          settingName  = item.getAttribute('data-setting-name'),
+          settingValue = item.getAttribute('data-setting-value');
 
       if (feature) {  /* Feature button has data-feature attribute */
         sitecues.emit('bp/do-toggle-secondary-panel', feature);
@@ -388,10 +388,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       if (item.id === BP_CONST.PREV_ID) {
         sitecues.emit('bp/do-prev-card');
       }
-      if (isTheme) {
-        conf.set(settingName, item.getAttribute('data-setting-value'));
+      if (settingName) {
+        console.log('Setting: ' + settingName + ' to ' + settingValue);
+        conf.set(settingName, settingValue);
       }
-
       sitecues.emit('bp/do-update');
     }
 
