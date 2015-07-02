@@ -197,7 +197,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
     colorChoices.increaseContrast = function(style, intensity) {
       var colorChangeIntensity = intensity / 1.6 + 0.1,
-        textShadowIntensity = intensity / 2,
+        textShadowIntensity = intensity / 4,
         rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
         newLightness = hsl.l,
@@ -230,7 +230,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
       if (style.prop === 'color') {
         // Make the text thicker
-        $.extend({}, returnVal, { textShadow : textShadowIntensity });
+        returnVal = $.extend({}, returnVal, { textShadow : textShadowIntensity });
       }
       return returnVal;
     };
