@@ -372,7 +372,8 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var feature      = item.getAttribute('data-feature'),
           currentMode  = baseController.getTab(),
           settingName  = item.getAttribute('data-setting-name'),
-          settingValue = item.getAttribute('data-setting-value');
+          settingValue = item.getAttribute('data-setting-value'),
+          target       = item.getAttribute('data-target');
 
       if (feature) {  /* Feature button has data-feature attribute */
         sitecues.emit('bp/do-toggle-secondary-panel', feature);
@@ -390,6 +391,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
       if (settingName) {
         conf.set(settingName, settingValue);
+      }
+      if (target) {
+        sitecues.emit('bp/do-target-card', helper.byId(target));
+        baseController.clearPanelFocus();
       }
       sitecues.emit('bp/do-update');
     }
