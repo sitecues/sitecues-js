@@ -86,7 +86,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     function addSemanticSugar(html) {
       var INTERACTIVE =  ' class="scp-hand-cursor scp-tabbable" ';
       return html.replace(/(<sc-button(?:-big)?)/g, '$1 role="button" data-hover="scale(1.2)"' + INTERACTIVE)
-        .replace(/<sc-menuitem /g, '<sc-menuitem role="link"' + INTERACTIVE)
+        .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE)
         .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE)
         .replace(/<input /g, '<input' + INTERACTIVE);
     }
@@ -303,6 +303,8 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     sitecues.on('bp/do-update', onPanelUpdate);
 
     sitecues.on('bp/did-expand', init);
+
+    sitecues.on('bp/do-target-card', selectNewCard);
 
     callback();
 
