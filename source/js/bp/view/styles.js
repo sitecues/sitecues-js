@@ -25,11 +25,11 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       },
       RANGE_THUMB = {
         '-webkit-appearance': 'none',
-        'width': '30px',
-        'height': '18px',
-        'border': '4px solid black',
+        'width': '18px',
+        'height': '24px',
+        'border': '4px solid #444',
         'border-radius': '12px',
-        'transform': 'scale(1.5)',
+        'transform': 'scale(1.7)',
         'transition': 'transform .5s'
       },
 
@@ -735,9 +735,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         // Settings -- input ranges
         '.scp-range-group': {
-          'margin-top': '19px',
-          'padding': '14px'
+          'margin-top': '-20px',
+          'padding': '17px',
+          'pointer-events': 'none',
+          'opacity': 0,
+          'transition': 'opacity 1s'
         },
+
         '#scp-bp-container input[type="range"]': {
           '-webkit-appearance': 'none',
           'width': '282px',
@@ -777,14 +781,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-bp-container input::-webkit-slider-thumb': RANGE_THUMB,
         '#scp-bp-container input::-moz-range-thumb': RANGE_THUMB,
         '#scp-bp-container input::-ms-thumb': RANGE_THUMB,
-        '#scp-bp-container input:hover::-webkit-slider-thumb': { 'transform': 'scale(1.7)' },
+        '#scp-bp-container input:hover::-webkit-slider-thumb': { 'transform': 'scale(2.1)' },
         //'#scp-bp-container input:hover::-moz-range-thumb': { 'transform': 'scale(1.7)' }, // Doesn't transition, is too big anyway
         '#scp-bp-container input:hover::-ms-thumb': { 'transform': 'scale(1.7)' },
 
         // Settings -- Color theme buttons
         '.scp-color-theme-group': {
-          'margin-top': '43px',
-          'margin-left': '-7px'
+          'margin': '36px 0 62px 0'
         },
 
         '.scp-color-theme-group > :last-child': {
@@ -821,7 +824,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background-color': '#fffdde'
         },
 
-        'sc-button[data-setting-name="themeName"][data-setting-value="darkOriginal"]': {
+        'sc-button[data-setting-name="themeName"][data-setting-value="dark"]': {
           'position': 'relative',
           'top': '30px',
           'color': '#fff',
@@ -829,25 +832,35 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         // Settings -- Color theme power
-        '#scp-theme-power': {
-          'margin-top': '36px !important',
-          'pointer-events': 'none',
-          'opacity': 0,
-          'transition': 'opacity 1s'
-        },
         '#scp-theme-power::-webkit-slider-thumb': { 'background': '#ddd !important' },
         '#scp-theme-power::-moz-range-thumb': { 'background': '#ddd !important' },
         '#scp-theme-power::-ms-thumb': { 'background': '#ddd !important' },
 
-        '.scp-ie9-false #scp-theme-power[data-show="true"]': {
-          'pointer-events': 'inherit',
-          'opacity': 1
+        '.scp-ie9-false .scp-range-group[data-show="true"]': {
+          'pointer-events': 'all',
+          'opacity': '1'
         },
 
+        // Settings -- general hue slider (theme or mouse)
+        '[data-type="hue"]': {  // These colors match up with HSL values where the saturation is .5 and the lightness is .7 (must match CURSOR_HUE_LIGHTNESS in cursor-css.js)
+          'background-image': 'linear-gradient(to right, #f66 0%, #ff6 15%, #6f6 30%, #6ff 45%, #66f 60%, #f6f 75%, #f66 90%, #fff 92%, #fff 100%) !important'
+        },
+        '[data-type="hue"]::-webkit-slider-thumb': { 'background': 'transparent !important' },
+        '[data-type="hue"]::-moz-range-thumb': { 'background': 'transparent !important' },
+        '[data-type="hue"]::-ms-thumb': { 'background': 'transparent !important' },
+
         // Settings -- Mouse
+        '#scp-mouse-settings-group': {
+          'margin-top': '60px'
+        },
+
+        '#scp-mouse-settings-group>sc-p': {
+          'margin-top': '20px'
+        },
+
         '#scp-mouse-size-label,#scp-mouse-hue-label':{
-          'font-size': '30px',
-          'margin-top': '8px'
+          'font-size': '26px',
+          'margin-top': '5px'
         },
 
         '#scp-mouse-size': {
@@ -858,14 +871,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
         '#scp-mouse-size::-moz-range-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
         '#scp-mouse-size::-ms-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
-
-        '#scp-mouse-hue': {  // These colors match up with HSL values where the saturation is .5 and the lightness is .7 (must match CURSOR_HUE_LIGHTNESS in cursor-css.js)
-          'background-image': 'linear-gradient(to right, #f66 0%, #ff6 14%, #6f6 28%, #6ff 42%, #66f 56%, #f6f 70%, #f66 84%, #fff 88%, #fff 100%) !important'
-        },
-        '#scp-mouse-hue::-webkit-slider-thumb': { 'background': 'transparent !important' },
-        '#scp-mouse-hue::-moz-range-thumb': { 'background': 'transparent !important' },
-        '#scp-mouse-hue::-ms-thumb': { 'background': 'transparent !important' },
-
 
         // Settings -- Lens: small/medium/large
         '.scp-lens-size-group': {

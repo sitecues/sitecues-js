@@ -17,6 +17,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         originalBodyBackgroundColor,
         isOriginalThemeDark,
         transitionTimer,
+        MAX_USER_SPECIFIED_HUE = 1.1,   // If > 1.0 then use white
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 1400,
@@ -57,14 +58,14 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param {string} type one of the theme names from color-choices.js
        * @param {number} intensity (optional) = .01-1
        */
-      colorEngine.applyTheme = function(type, intensity) {
+      colorEngine.applyTheme = function(type, intensity, textHue) {
 
         function applyThemeImpl() {
           var
             isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
             willBeDark = isDarkTheme(colorMapFn),
             isReverseTheme = willBeDark !== isOriginalThemeDark,
-            themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, isReverseTheme) : '',
+            themeCss = colorMapFn ? getThemeCssText(colorMapFn, intensity || DEFAULT_INTENSITY, textHue, isReverseTheme) : '',
           // We want to animate quickly between light themes, but slowly when performing a drastic change
           // such as going from light to dark or vice-versa
             transitionMs = isDark !== willBeDark ? TRANSITION_MS_SLOW : TRANSITION_MS_FAST,
@@ -306,7 +307,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
        * @param intensity
        * @returns {string}
        */
-      function getThemeCssText(colorMapFn, intensity, isReverse) {
+      function getThemeCssText(colorMapFn, intensity, textHue, isReverse) {
 
         var styleSheetText = '';
 
@@ -331,7 +332,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           else {
             // Don't alter buttons -- it will change it from a native button and the appearance will break
             // color, background-color
-            newRgba = colorMapFn(style.value, intensity);
+            newRgba = colorMapFn(style.value, intensity, textHue);
             newValue = newRgba && newRgba.a && colorUtil.getColorString(newRgba);
           }
           if (newValue) {
@@ -615,6 +616,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
 
           themeStyles = bgStyles.concat(fgStyles).concat(bgImageStyles);
         }
+
         callbackFn();
       }
 
@@ -632,16 +634,29 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         return 1;
       }
 
+      // If user specifies > 1 use white
+      function getSanitizedHue(hue) {
+        if (!hue || hue < 0 || hue > MAX_USER_SPECIFIED_HUE) {
+          return MAX_USER_SPECIFIED_HUE;
+        }
+        return hue;
+      }
+
       function onThemeChange() {
-        colorEngine.applyTheme(conf.get('themeName'), conf.get('themePower'));
+        colorEngine.applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
       }
 
       conf.def('themeName', getSanitizedThemeName);
       conf.def('themePower', getSanitizedThemePower);
+      conf.def('themeTextHue', getSanitizedHue);
       conf.get('themeName', onThemeChange);
       conf.get('themePower', onThemeChange);
+      conf.get('themeTextHue', onThemeChange);
       if (typeof conf.get('themePower') === 'undefined') {
         conf.set('themePower', DEFAULT_INTENSITY);
+      }
+      if (typeof conf.get('themeTextHue') === 'undefined') {
+        conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
       }
 
       function onPanelExpand() {

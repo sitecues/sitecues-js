@@ -71,7 +71,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
     function isAlphaRelevant(alpha) {
       return (alpha >= 0 && alpha < 1);  // false if undefined
     }
-    var rgb = rgba.r + ',' + rgba.g +',' + rgba.b;
+    var rgb = Math.round(rgba.r) + ',' + Math.round(rgba.g) +',' + Math.round(rgba.b);
     return isAlphaRelevant(rgba.a)? 'rgba(' + rgb + ',' +rgba.a + ')' : 'rgb(' + rgb + ')';
   };
 

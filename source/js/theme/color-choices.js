@@ -17,6 +17,10 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       MIN_INTENSITY = 0.6,
       YELLOW_HUE = 0.167,
       GREEN_HUE = 0.333,
+      RED_HUE = 0,
+      BLUE_HUE = 0.667,
+      MAGENTA_HUE = 0.8333,
+
       monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
       monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
       hslToRgb = colorUtil.hslToRgb,
@@ -197,7 +201,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
 
     colorChoices.increaseContrast = function(style, intensity) {
       var colorChangeIntensity = intensity / 1.6 + 0.1,
-        textShadowIntensity = intensity / 4,
+        textShadowIntensity = intensity / 3.5,
         rgba = style.parsedVal,
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
         newLightness = hsl.l,
@@ -263,17 +267,18 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return rgbToHsl(rgba.r, rgba.g, rgba.b).s;
     }
 
-    colorChoices.darkOriginalWithHue = function (style, intensity) {
-      var MOSTLY_GRAYSCALE = 0.1;
-      if (style.prop === 'color' && getSaturation(style.parsedVal) < MOSTLY_GRAYSCALE) {
-        return colorChoices.monochrome(style, intensity);
-      }
-      return colorChoices.darkOriginal(style,intensity);
+    function colorizeGrayText(rgba, textHue) {
+      var FOREGROUND_MIXIN_INTENSITY = 0.5,
+        grayness = 1 - getSaturation(rgba),
+        mixInRatio = FOREGROUND_MIXIN_INTENSITY * (grayness + 0.2) / 1.2,  // More gray (less saturated)  = more channel reduction, so we can keep colors
+        mixInRgba = hslToRgb(textHue, 1, 0.5);
+      return mixRgbaColors(rgba, mixInRgba, mixInRatio);  // Mix in the opposite color
     }
 
-    colorChoices.darkOriginal = function (style, intensity) {
+    colorChoices.dark = function (style, intensity, textHue) {
       var rgba = style.parsedVal,
-        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+        hsl,
+        colorizedRgba,
         newRgba,
         origLightness,
         newLightness,
@@ -283,12 +288,15 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         foregroundIntensity = 0.5 + (intensity / 2);
 
       if (style.prop === 'color') {
+        colorizedRgba = (textHue && textHue < 1) ? colorizeGrayText(rgba, textHue) : rgba;
+        hsl = rgbToHsl(colorizedRgba.r, colorizedRgba.g, colorizedRgba.b);
         origLightness = Math.max(hsl.l, 1 - hsl.l);
         newLightness = Math.max(foregroundIntensity * 0.91 * (origLightness + 0.1), foregroundIntensity / 3);
         newHue = getClosestGoodHueForDarkTheme(hsl.h);
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
       }
       else {
+        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
         bgAddedLightness = (1 - intensity) / 7; // Add a little lightness when theme is less intense
         bgPreservationFactor = 0.6 - intensity / 8;
         origLightness = hsl.l;

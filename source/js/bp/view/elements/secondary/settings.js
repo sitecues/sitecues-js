@@ -40,7 +40,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
       initRanges();
 
-      themePowerInit();
+      themeSlidersInit();
     }
 
     // Set up setting synchronization
@@ -58,7 +58,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
       Object.keys(allSettingNames).forEach(function(name) {
         conf.get(name, function(newValue) {
-          var settingElems = settingsPanel.querySelectorAll('[data-setting-name="' + name + '"]'),
+          var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
             index = settingElems.length,
             elem,
             isCurrentValue;
@@ -71,8 +71,12 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       });
     }
 
-    function getThemePowerRangeInput() {
+    function getThemePowerGroup() {
       return byId(BP_CONST.THEME_POWER_ID);
+    }
+
+    function getThemeTextHueGroup() {
+      return byId(BP_CONST.THEME_TEXT_HUE_ID);
     }
 
     function initRangeListener(settingName, rangeElem) {
@@ -95,10 +99,12 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
     }
 
-    function themePowerInit() {
+    function themeSlidersInit() {
       conf.get('themeName', function (name) {
-        var isThemePowerEnabled = name !== null;
-        getThemePowerRangeInput().setAttribute('data-show', isThemePowerEnabled);
+        var isThemePowerEnabled = name !== null,
+          isThemeTextHueEnabled = name === 'dark';
+        getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
+        getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
       });
     }
 

@@ -29,7 +29,7 @@ sitecues.def('cursor', function (cursor, callback) {
         bpCursorStylesheetObject,
         isStyleServiceReady,
         MAX_USER_SPECIFIED_CURSOR_SIZE = 4,
-        MAX_USER_SPECIFIED_MOUSE_HUE = 1.19,// If > 1.0 then use white
+        MAX_USER_SPECIFIED_MOUSE_HUE = 1.1,// If > 1.0 then use white
         userSpecifiedSize,
         userSpecifiedHue,
         doAllowCursors = true,
@@ -336,7 +336,7 @@ sitecues.def('cursor', function (cursor, callback) {
     }
 
     function sanitizeMouseHue(hue) {
-      if (hue <= 0 || hue > MAX_USER_SPECIFIED_MOUSE_HUE) {
+      if (!hue || hue < 0 || hue > MAX_USER_SPECIFIED_MOUSE_HUE) {
         return MAX_USER_SPECIFIED_MOUSE_HUE;
       }
       return hue;
