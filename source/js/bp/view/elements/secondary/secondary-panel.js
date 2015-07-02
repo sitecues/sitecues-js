@@ -442,12 +442,26 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       /**
+       * Return truthy value if feature is loaded and available
+       * @param featureName
+       * @returns {*|HTMLElement}
+       */
+      function isFeatureAvailable(featureName) {
+        return byId(features[featureName].panelId);
+      }
+
+      /**
        * Toggle back and forth between button menu and a feature
        * @param featureName
        */
       function toggleSecondaryFeature(featureName) {
         var willEnable = state.getSecondaryPanelName() !== featureName;
-        animateSecondaryFeature(featureName, willEnable);
+        if (willEnable && !isFeatureAvailable(featureName)) {
+          sitecues.emit('info/help'); // The feature was not loaded -- punt and go to help page
+        }
+        else {
+          animateSecondaryFeature(featureName, willEnable);
+        }
       }
 
       function toggleMouseListeners (willBeActive) {

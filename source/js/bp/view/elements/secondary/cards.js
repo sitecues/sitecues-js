@@ -49,20 +49,24 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       xhr.onload = function(evt) {
         var request = evt.target || this,
           html = addSemanticSugar(request.responseText),
-          panelElement = document.createElement('sc-cards');
+          panelElement = document.createElement('sc-cards'),
+          SUCCESS = 200;
 
-        panelElement.id = 'scp-' + panelName;
-        panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
-        panelElement.innerHTML = html;
+        if (request.status === SUCCESS) {
 
-        getContainer().appendChild(panelElement);
+          panelElement.id = 'scp-' + panelName;
+          panelElement.className = 'scp-if-' + panelName + ' scp-transition-opacity scp-secondary-feature';
+          panelElement.innerHTML = html;
 
-        removeUnsupportedContent(panelElement);
+          getContainer().appendChild(panelElement);
 
-        toggleCardActive(panelElement.firstElementChild, true);
+          removeUnsupportedContent(panelElement);
 
-        if (-- panelsToLoad === 0) {
-          sitecues.emit('bp/content-loaded');
+          toggleCardActive(panelElement.firstElementChild, true);
+
+          if (--panelsToLoad === 0) {
+            sitecues.emit('bp/content-loaded');
+          }
         }
       };
 
