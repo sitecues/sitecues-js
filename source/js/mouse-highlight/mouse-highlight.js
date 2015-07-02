@@ -110,7 +110,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
      * Checks if the color value given of a light tone or not.
      */
     function isLightIntensity(colorValue) {
-      return colorUtil.getLuminosityFromColorName(colorValue) > MID_COLOR_INTENSITY;
+      return colorUtil.getLuminanceFromColorName(colorValue) > MID_COLOR_INTENSITY;
     }
 
     function getElementsContainingOwnText(selector) {
@@ -501,7 +501,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
           colorIntensity;
         if (style.backgroundImage ==='none') {
           bgRgba = colorUtil.getRgba(bgColor);
-          colorIntensity = colorUtil.getLuminosity(bgColor);
+          colorIntensity = colorUtil.getPerceivedLuminance(bgColor);
           if (bgRgba.a === 1 && isCloseToHighlightColor(colorIntensity) &&
             !common.hasOwnBackgroundColor(this, style, state.styles[0])) { // If it's a unique color, we want to preserve it
             state.savedBgColors.push({ elem: this, color: this.style.backgroundColor });

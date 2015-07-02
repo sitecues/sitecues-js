@@ -19,11 +19,11 @@ exports.getRgba = function(color) {
 };
 
 // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
-exports.getLuminosityFromColorName = function(colorName) {
+exports.getLuminanceFromColorName = function(colorName) {
   return 0.5;
 };
 
-exports.getLuminosity = function(rgb) {
+exports.getLuminance = function(rgb) {
   return 0.5;
 };
 

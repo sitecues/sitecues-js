@@ -97,7 +97,7 @@ sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
           hasTransparentPixels = true;
         }
 
-        grayscaleVal = colorUtil.getLuminosity(rgba);
+        grayscaleVal = colorUtil.getFastLuminance(rgba);
         histogramIndex = Math.floor(grayscaleVal * HISTOGRAM_SIZE);
 
         if (grayscaleHistogram[histogramIndex] > 0)  {

@@ -120,7 +120,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
             sampleInnerText = sampleElement.innerText;
           if (parentInnerText && parentInnerText.trim().length > (sampleInnerText && sampleInnerText.length) &&
             sampleElementStyle.backgroundColor === parentStyle.backgroundColor) {
-            parentLuminosity = colorUtil.getLuminosityFromColorName(parentStyle.color);
+            parentLuminosity = colorUtil.getLuminanceFromColorName(parentStyle.color);
             if (parentLuminosity !== luminosity) {
               if (parentLuminosity < 0.3) {
                 isInDarkPara = true;
@@ -139,7 +139,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
     }
 
     function isWithDarkForeground($sampleElements) {
-      return colorUtil.getLuminosityFromColorName($sampleElements.css('color')) < 0.5;
+      return colorUtil.getLuminanceFromColorName($sampleElements.css('color')) < 0.5;
     }
 
     /**
@@ -148,7 +148,7 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
      */
     function computeContrastEnhancementDirection(style) {
       var rgba = style.parsedVal,
-        luminosity = colorUtil.getLuminosityFromColorName(rgba),
+        luminosity = colorUtil.getLuminanceFromColorName(rgba),
         $sampleElements;
 
       if (style.prop === 'color') {

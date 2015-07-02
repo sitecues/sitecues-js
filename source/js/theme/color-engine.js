@@ -575,7 +575,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             parsedVal: colorUtil.getRgba(fgStyle),
             contrastEnhancementDirection:
               (function() {
-                var fgLuminosity = colorUtil.getLuminosityFromColorName(fgStyle);
+                var fgLuminosity = colorUtil.getLuminanceFromColorName(fgStyle);
                 if (fgLuminosity < 0.05) {
                   return -1;
                 }
@@ -585,7 +585,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
                 // If we're directly on a dark background, we know the text must get lighter
                 var bgRgba = colorUtil.getRgba(cssStyleDecl.backgroundColor);
                 if (bgRgba && bgRgba.a > 0.2) {
-                  return colorUtil.getLuminosityFromColorName(bgRgba) < 0.5 ? 1 : -1;
+                  return colorUtil.getLuminanceFromColorName(bgRgba) < 0.5 ? 1 : -1;
                 }
               }())
           };

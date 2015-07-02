@@ -12,7 +12,7 @@ sitecues.def('util/color', function (colorUtil, callback) {
 
     var rgba = colorUtil.getRgba(colorValue);
 
-    return colorUtil.getLuminosity(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
+    return colorUtil.getPerceivedLuminance(rgba) < (optionalThreshold || MIN_LUMINOSITY_LIGHT_TONE);
   };
 
   colorUtil.isOnDarkBackground = function(current, optionalThreshold) {
@@ -340,22 +340,38 @@ sitecues.def('util/color', function (colorUtil, callback) {
   };
 
   // From http://www.w3.org/TR/2006/WD-WCAG20-20060427/complete.html#luminosity-contrastdef
-  colorUtil.getLuminosityFromColorName = function(colorName) {
-    return colorUtil.getLuminosity(colorUtil.getRgba(colorName));
+  colorUtil.getLuminanceFromColorName = function(colorName) {
+    return colorUtil.getPerceivedLuminance(colorUtil.getRgba(colorName));
   };
 
-  colorUtil.getLuminosity = function(rgb) {
+  // Perceived luminance must apply inverse gamma correction (the ^2.2)
+  // See https://en.wikipedia.org/wiki/Luma_(video)
+  //     https://en.wikipedia.org/wiki/Luminous_intensity
+  //     https://en.wikipedia.org/wiki/Gamma_correction
+  //     http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color
+  colorUtil.getPerceivedLuminance = function(rgb) {
+    var gammaReversed =
+        0.299 * getValue('r') +
+        0.587 * getValue('g') +
+        0.114 * getValue('b');
+
     function getValue(channel) {
-      return Math.pow(rgb[channel] / 255, 2.2);
+      var rawValue = rgb[channel] / 255;
+      return rawValue * rawValue;
     }
-    return 0.213 * getValue('r') +
-      0.715 * getValue('g') +
-      0.072 * getValue('b');
+
+    return Math.sqrt(gammaReversed);
+  };
+
+  // Trades accuracy for performance
+  colorUtil.getFastLuminance = function(rgb) {
+    var DIVISOR = 2550; // 255 * (2 + 7 + 1)
+    return (rgb.r*2 + rgb.g*7 + rgb.b) / DIVISOR;
   };
 
   colorUtil.getContrastRatio = function(color1, color2) {
-    var L1 = colorUtil.getLuminosityFromColorName(color1),
-      L2 = colorUtil.getLuminosityFromColorName(color2);
+    var L1 = colorUtil.getLuminanceFromColorName(color1),
+      L2 = colorUtil.getLuminanceFromColorName(color2);
     var ratio = (L1 + 0.05) / (L2 + 0.05);
     if (ratio >= 1) {
       return ratio;
@@ -418,8 +434,8 @@ sitecues.def('util/color', function (colorUtil, callback) {
     sitecues.getRgba = colorUtil.getRgba;
     sitecues.rgbToHsl = colorUtil.rgbToHsl;
     sitecues.hslToRgb = colorUtil.hslToRgb;
-    sitecues.getLuminosityFromColorName = colorUtil.getLuminosityFromColorName;
-    sitecues.getLuminosity = colorUtil.getLuminosity;
+    sitecues.getLuminanceFromColorName = colorUtil.getLuminanceFromColorName;
+    sitecues.getPerceivedLuminance = colorUtil.getPerceivedLuminance;
     sitecues.getContrastRatio = colorUtil.getContrastRatio;
     sitecues.getColorString = colorUtil.getColorString;
   }
