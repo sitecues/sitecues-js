@@ -19,6 +19,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ],
       'tips':[
         'tips-button',
+        '$',
         'prev-card',
         'next-card',
         'more-button-group'
