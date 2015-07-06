@@ -1296,7 +1296,8 @@ sitecues.def('zoom', function (zoom, callback) {
       // Use conf module for sharing current zoom level value
       conf.def('zoom', getSanitizedZoomValue);
 
-      addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
+      // ATKratter wouldn't scroll when we listened to this on the window
+      document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
 
       // Set up listeners for zoom  operations
       sitecues.on('zoom/stop', zoomStopRequested);
