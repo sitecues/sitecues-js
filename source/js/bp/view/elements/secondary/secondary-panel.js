@@ -1,6 +1,5 @@
 // TODO
 // Bugs:
-// - Resize panel breaks
 // - Anti glare theme (black with whatever color?)
 // Questions:
 // - tips/settings: are back/forward buttons too ugly? (Anna)
