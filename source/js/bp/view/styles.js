@@ -347,7 +347,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'margin': '0 !important',  // Prevent page style pollution
           'box-sizing': 'border-box',
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
-          'padding': '6px 8px 8px calc(50% - 66px)',
+          'padding': '6px 0 8px calc(50% - 66px)',
           'background-color': '#f7fcff !important',  // Ensure our own theme engine doesn't turn the toolbar dark
           'z-index': '9999999'
         },

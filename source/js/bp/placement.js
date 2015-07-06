@@ -56,6 +56,7 @@ sitecues.def('bp/placement', function(placement, callback) {
         HTML_PARENT  = BP_CONST.PANEL_MODE,
         currentBPParent,
         badgeElement,
+        badgeRect = {},
         bpElement,
         svgElement,
         ratioOfSVGToVisibleBadgeSize,
@@ -87,8 +88,8 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       currentBPParent = BADGE_PARENT;
 
-      var badgeRect = repositionBPOverBadge();
-      fitSVGtoBadgeRect(badgeRect, getAppliedBPZoom());
+      repositionBPOverBadge();
+      fitSVGtoBadgeRect();
     }
 
     // Reparent panel container to <html> so that panel stays constant size and position during zooming/panning
@@ -107,8 +108,8 @@ sitecues.def('bp/placement', function(placement, callback) {
       currentBPParent = HTML_PARENT;
 
       // The BP must be positioned over the #sitecues-badge
-      var badgeRect = repositionBPOverBadge();
-      fitSVGtoBadgeRect(badgeRect, getAppliedBPZoom());
+      repositionBPOverBadge();
+      fitSVGtoBadgeRect();
     }
 
     // Spartan and IE11 on Windows 10 fix
@@ -153,7 +154,7 @@ sitecues.def('bp/placement', function(placement, callback) {
       }
 
       // Current badge rectangle in screen coordinates
-      var badgeRect   = helper.getRect(badgeElement),
+      var newBadgeRect   = helper.getRect(badgeElement),
 
           // Get the amount of zoom being applied to the badge
           appliedZoom = getAppliedBPZoom(),
@@ -162,27 +163,35 @@ sitecues.def('bp/placement', function(placement, callback) {
           badgeComputedStyle = window.getComputedStyle(badgeElement),
 
           paddingLeft = getPadding('Left'),
-          paddingTop  = getPadding('Top');
+          paddingTop  = getPadding('Top'),
+
+          isToolbarBadge = state.get('isToolbarBadge');
+
 
       if (currentBPParent === BADGE_PARENT) {
 
-        // Not a floating badge and in body (inside of #sitecues-badge)
-        // Since it's already inside of the #sitecues-badge, which is in the right place on the page,
+        // Not a toolbar badge and in body (inside of #sitecues-badge)
+        // It's already inside of the #sitecues-badge, which is in the right place on the page,
         // and we only need transform translate to move it from there for padding and vertical offset.
         // By being a child of #sitecues-badge, it will automatically be positioned within that.
-        badgeRect.left = 0;
-        badgeRect.top  = 0;
+        newBadgeRect.left = 0;
+        newBadgeRect.top  = 0;
 
       }
 
-      badgeRect.left   += paddingLeft;
-      badgeRect.top    += paddingTop;
-
-      badgeRect.width  -= paddingLeft + getPadding('Right');
-      badgeRect.height -= paddingTop  + getPadding('Bottom');
-
       // Adjust for top whitespace in SVG badge (it's there because it turns into an outline on expansion)
-      badgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
+      if (!isToolbarBadge) {
+        newBadgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
+      }
+
+      badgeRect.left   = newBadgeRect.left + paddingLeft;
+      badgeRect.top    = newBadgeRect.top + paddingTop;
+
+      // A toolbar badge's size remains the same for the lifetime of the page, so we use the cached version of size in that case
+      if (!badgeRect.width || !isToolbarBadge) {
+        badgeRect.width = newBadgeRect.width - paddingLeft - getPadding('Right');
+        badgeRect.height = newBadgeRect.height - paddingTop - getPadding('Bottom');
+      }
 
       // Set left and top for positioning.
       // Set width and height for focus outline.
@@ -190,18 +199,16 @@ sitecues.def('bp/placement', function(placement, callback) {
 
       bpElement.style.top  = 0;
       bpElement.style.left = 0;
-      bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom  + 'px,' + badgeRect.top / appliedZoom + 'px)';
-
-      return badgeRect;
+      bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
     }
 
     // This makes the collapsed svg large enough so that even with
     // all the whitespace it stretches to cover the badge
     // So it should be the actual svg width / badge width
-    function fitSVGtoBadgeRect(badgeRect, appliedZoom) {
+    function fitSVGtoBadgeRect() {
 
       var svgStyle  = svgElement.style,
-          svgWidth  = badgeRect.width * getSVGScale(badgeRect) / appliedZoom,
+          svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
           svgHeight = svgWidth / svgAspectRatio;
 
       svgStyle.width  = svgWidth  + 'px';
@@ -289,7 +296,7 @@ sitecues.def('bp/placement', function(placement, callback) {
         sitecues.on('bp/did-shrink', switchToBadgeParent);
       }
       else {
-        sitecues.on('resize', repositionBPOverBadge);
+        window.addEventListener('resize', repositionBPOverBadge);
       }
 
     };
