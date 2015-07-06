@@ -1,17 +1,14 @@
 // TODO
-// Bugs:
-// - Anti glare theme (black with whatever color?)
 // Questions:
 // - tips/settings: are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
 // - tips: should user be able to try each exercise themselves?
 // - tips: speech page needs love -- break into Activate speech  and Use speech?
-// - settings: should we squeeze mono color options in?
+//
+// Localization
 //
 // Later
-// Localization
 // About: Get it now
-// What happens if AJAX content doesn't load? Do we have some kind of fallback content?
 //
 
 sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callback) {
