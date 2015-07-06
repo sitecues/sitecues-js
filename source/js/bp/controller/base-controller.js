@@ -88,14 +88,14 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     function renderFocusOutline(focusedItem, panelContainer) {
 
       // Show focus outline
-      var EXTRA_FOCUS_PADDING = 5,
+      var EXTRA_FOCUS_PADDING = 1,
           clientFocusRect     = helper.getRect(focusedItem),
           clientPanelRect     = helper.getRect(panelContainer),  // Focus rect is positioned relative to this
           focusOutlineStyle   = helper.byId(BP_CONST.OUTLINE_ID).style;
 
       focusOutlineStyle.display = 'block';
-      focusOutlineStyle.width  = (clientFocusRect.width) + 'px';
-      focusOutlineStyle.height = (clientFocusRect.height) + 'px';
+      focusOutlineStyle.width  = (clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING) + 'px';
+      focusOutlineStyle.height = (clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING) + 'px';
 
       focusOutlineStyle.top  = (clientFocusRect.top  - EXTRA_FOCUS_PADDING - clientPanelRect.top)  + 'px';
       focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';

@@ -522,9 +522,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'outline': 0
         },
 
-        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
+        // TODO make this look nicer using box-shadow or something, and consistent with other focus rects
+        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-focus-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
-          'stroke-width': '14px'
+          'stroke-width': '24px'
         },
 
         '#sitecues-badge[aria-expanded="true"]:focus': {
@@ -993,8 +994,8 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-focus-outline': {
-          'border': '5px solid rgba(82, 168, 236, 0.8)',
-          'border-radius': '3px',
+          'box-shadow': '0 0 4px 6px rgba(82, 168, 236, 0.8)',
+          'border-radius': '4px',
           'display': 'none',
           'position': 'absolute',
           'pointer-events': 'none',
