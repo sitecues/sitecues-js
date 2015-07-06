@@ -229,7 +229,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         'sc-link,sc-menuitem': {
           'text-decoration': 'underline',
-          'color': '#6B9AE0'
+          'color': '#447AC4'
         },
 
         'sc-menuitem': {
@@ -882,21 +882,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'padding': '15px'
         },
 
-        '.scp-lens-small': {
-          'transform': 'translateX(-3px)'
+        '#scp-lens-small': {
+          'transform': 'translateX(-3px) scale(.9)'
         },
 
-        '.scp-lens-medium': {
+        '#scp-lens-medium': {
           'transform': 'scale(1.2)'
         },
 
-        '.scp-lens-large': {
-          'transform': 'scale(1.4) translateX(16px)'
+        '#scp-lens-large': {
+          'transform': 'scale(1.5) translateX(16px)'
         },
 
         // Settings -- current
         'sc-button[data-setting-current="true"]': {
-          'box-shadow': 'rgba(82, 168, 236, 0.8) 0 0 2px 7px !important'
+          'text-decoration': 'underline'
         },
 
         // Feedback -- thank you message
