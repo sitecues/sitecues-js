@@ -3,10 +3,9 @@
  */
 sitecues.def('bp/view/elements/tips', function (tips, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', function (BP_CONST, helper, state) {
+  sitecues.use('bp/constants', 'bp/helper', function (BP_CONST, helper) {
 
     var byId = helper.byId,
-      isActive = false,
       animationTimers = [],
       animationFns = {
         'scp-zoom-card': 'zoom',

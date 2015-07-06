@@ -803,7 +803,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'width': '62px',
           'border': '5px solid #000',
           'background-color': '#fff',
-          'font-weight': 100,
+          'font-weight': 100
         },
 
         'sc-button[data-setting-name="themeName"]:not([data-setting-value])': {

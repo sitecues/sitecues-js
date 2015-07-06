@@ -202,8 +202,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           maxHeight = origPanelContentsRect.height,
           normalTop = origPanelContentsRect.top,
           index = 0,
-          FUDGE_FACTOR = 8,
-          finalHeight;
+          FUDGE_FACTOR = 8;
 
         function addRect(item) {
           var thisRect = item.getBoundingClientRect(),
