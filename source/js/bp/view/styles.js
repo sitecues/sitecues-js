@@ -177,7 +177,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          ARIA modes:
          - Used for CSS: aria-checked, aria-disabled
          - Not used for CSS: aria-activedescendant (focused item ID), aria-valuenow, aria-valuemin, aria-valuemax, aria-label, aria-labelledby
-         Data attributes: data-hasfocus, data-hadfocusonce (so dynamically shown items like close button remain onscreen), data-active (active feature card)
          */
 
         /***************** sitecues div ******************/
@@ -518,18 +517,35 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /*************** Focus **************************/
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
-        '#sitecues-badge:focus': {
-          'outline': 0
+        '#sitecues-badge:focus,#scp-bp-container:focus,#scp-svg g:focus': {
+          'outline': '0 !important',
+          'box-shadow': 'none !important'
         },
 
-        // TODO make this look nicer using box-shadow or something, and consistent with other focus rects
         '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-focus-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
           'stroke-width': '24px'
         },
 
-        '#sitecues-badge[aria-expanded="true"]:focus': {
-          'box-shadow': 'none'
+        '#scp-focus-outline': {
+          'box-shadow': '0 0 4px 6px rgba(82, 168, 236, 0.8)',
+          'border-radius': '4px',
+          'display': 'none',
+          'position': 'absolute',
+          'pointer-events': 'none',
+          'z-index': 99999
+        },
+
+        '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
+          'display': 'block'
+        },
+
+        // The feedback text area has its own focus ring so that it can show behind the feedback button :/ !
+        '[data-own-focus-ring][data-show-focus]': {
+          'stroke': 'rgba(82,168,236,.8)',
+          'stroke-width': '6px',
+          'filter': 'url(#scp-focusblur)',
+          '-webkit-filter': 'url(#scp-focusblur)'
         },
 
         /*************** Secondary panel **************************/
@@ -918,16 +934,18 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'left': '29px !important',
           'font-size': '22px !important',
           'font-family': 'Arial !important',
+          'color': '#000 !important',
           'padding': '10px 60px 10px 10px !important', // Make room for feedback icon on the top right
           'border': '0 !important',
           'resize': 'none !important',
           'outline': '0 !important',
-          'background-color': 'transparent !important'
+          'background-color': 'transparent !important',
+          'box-shadow': 'none !important',
+          'box-sizing': 'border-box !important'
         },
-        // Visible focus
-        '#scp-feedback-input-rect.scp-focus': {
-          'stroke': 'rgba(82,168,236,.8)',
-          'stroke-width': '6px'
+
+        '#scp-feedback-textarea:focus': {
+          'box-shadow': 'none !important'
         },
 
         // Feedback -- rating stars
@@ -991,19 +1009,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-zoom-slider-bar': {
           'fill': '#383838'
-        },
-
-        '#scp-focus-outline': {
-          'box-shadow': '0 0 4px 6px rgba(82, 168, 236, 0.8)',
-          'border-radius': '4px',
-          'display': 'none',
-          'position': 'absolute',
-          'pointer-events': 'none',
-          'z-index': 99999
-        },
-
-        '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
-          'display': 'block'
         },
 
         '#scp-wave1': {

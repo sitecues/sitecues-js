@@ -276,12 +276,13 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       badgeElement = badge || createToolbar();
       badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
 
+
       setCustomPalette(badgeElement);
 
       // If a customer uses the <img> placeholder...
       if (badgeElement.localName === 'img') {
 
-        badgeElement.setAttribute('data-sc-reversible', 'false'); // Will use a different palette dark theme is used
+        badgeElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
 
         convertExistingBadge();
         removeExistingBadgeId();

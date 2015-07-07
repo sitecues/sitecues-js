@@ -35,8 +35,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         addOrRemoveFn = willBeActive ? 'addEventListener' : 'removeEventListener';
 
       if (isActive !== willBeActive) {
-        getFeedbackArea()[addOrRemoveFn]('focus', onFocus);
-        getFeedbackArea()[addOrRemoveFn]('blur', onBlur);
         getFeedbackArea()[addOrRemoveFn]('keyup', enableSendIfText);
         getRating()[addOrRemoveFn]('click', onRatingClick);
         getFeedbackSend()[addOrRemoveFn]('click', onSendFeedbackClick);
@@ -88,14 +86,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
         var bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
         bpContainer.className += bpContainer.className + ' scp-feedback-sent';
       }
-    }
-
-    function onFocus() {
-      getFeedbackInputRect().setAttribute('class', 'scp-focus');
-    }
-
-    function onBlur() {
-      getFeedbackInputRect().removeAttribute('class');
     }
 
     feedback.getGeometryTargets = function(cssValues) {

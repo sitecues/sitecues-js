@@ -236,7 +236,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function getFocusedItemInActiveCard (tabbableItems) {
       for (var i = 0, l = tabbableItems.length; i < l; i++) {
-        if (tabbableItems[i].getAttribute('data-focused')) {
+        if (tabbableItems[i].getAttribute('data-show-focus')) {
           return tabbableItems[i];
         }
       }
@@ -244,12 +244,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function setFocusedItemInActiveCard (tabbableItems, tabbableItem) {
       clearAllFocusedItemsInActiveCard(tabbableItems);
-      tabbableItem.setAttribute('data-focused', true);
+      tabbableItem.setAttribute('data-show-focus', true);
     }
 
     function clearAllFocusedItemsInActiveCard (tabbableItems) {
       for (var i = 0, l = tabbableItems.length; i < l; i++) {
-        tabbableItems[i].removeAttribute('data-focused');
+        tabbableItems[i].removeAttribute('data-show-focus');
       }
     }
 
@@ -342,11 +342,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       if (role === ROLES.CHECKBOX) {
         if (item.id === BP_CONST.SPEECH_ID) {
           sitecues.emit('speech/do-toggle');
+          evt.preventDefault();
         }
       } else if (role === ROLES.BUTTON) {
         buttonPress(evt, item);
+        evt.preventDefault();
       }
-      evt.preventDefault();
     }
 
     function performZoomSliderCommand(evt) {

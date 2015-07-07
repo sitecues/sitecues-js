@@ -45,6 +45,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <filter id="scp-shadowblur">\
     <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>\
   </filter>\
+  <filter id="scp-focusblur">\
+    <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>\
+  </filter>\
   <path id="scp-arrow" d="m18,-1.9c-1.3,1.4 -15.6,15 -15.6,15c-.7,.7 -1.7,1.2 -2.7,1.2c-1,0 -1.89999,-.4 -2.7,-1.2c0,0 -14.2,-13.6 -15.6,-15c-1.3,-1.4 -1.4,-3.9 0,-5.3c1.4,-1.5 3.5,-1.6 5.2,0l13,12.5l13,-12.5c1.8,-1.6 3.8,-1.5 5.2,0c1.3,1.8 1.3,4 0,5.3l.2,0z"/>\
 </defs>\
 <rect id="scp-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
@@ -106,7 +109,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
       </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
-      <rect id="scp-feedback-input-rect" x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
+      <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" aria-valuemin="1" aria-valuemax="5" role="slider">\
         <use id="scp-stars-1" role="button" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
         <use id="scp-stars-2" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
@@ -163,19 +166,19 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
-<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" placeholder="Tell us something ...."></textarea>\
+<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" data-visible-focus-on="scp-feedback-input-rect" placeholder="Tell us something ...."></textarea>\
 <sc class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
   <sc-h1>Thank you</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-p>\
-    <a href="http://sitecues.com">sitecues.com</a>\
+    <a id="scp-about-1" target="_blank" href="http://sitecues.com">sitecues.com</a>\
     </sc-p>\
   <sc-p>\
-    <a href="tel:+1-857-259-5272">+1-857-259-5272</a>\
+    <a id="scp-about-2" target="_blank" href="tel:+1-857-259-5272">+1-857-259-5272</a>\
   </sc-p>\
   <sc-p>\
-    <a href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
+    <a id="scp-about-3" target="_blank" href="mailto:sales@sitecues.com">sales@sitecues.com</a>\
   </sc-p>\
 </sc>\
 <sc style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element

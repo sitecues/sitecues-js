@@ -21,17 +21,17 @@ custom-config-names:=$(shell echo "$(targets)" | sed 's%,% %g')
 # If true, clean and update the Node.js package dependencies.
 clean-deps=false
 
-# Whether or not to enable HTTPS on the test server. 
+# Whether or not to enable HTTPS on the test server.
 https=off
 
-# Whether or not to lint the codebase before the build. 
+# Whether or not to lint the codebase before the build.
 lint=false
 
 # Node.js express test server HTTP port.
 port=8000
 
 # Whether or not to run the test server in prod-only mode, in which source
-# file locations will not be checked for async module loads. 
+# file locations will not be checked for async module loads.
 prod=off
 
 
@@ -73,10 +73,10 @@ export test-run-id=$(default-test-run-id)
 # Options common to all Macchiato test runs.
 export common-macchiato-options:=-Dbrowser.name.prefix=$(test-run-id)
 
-# Mocha unit test command line options.  
+# Mocha unit test command line options.
 export testunit-mocha-options:=-c
 
-# Macchiato smoke test command line options.  
+# Macchiato smoke test command line options.
 export smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
 
 ################################################################################
@@ -85,7 +85,7 @@ export smoke-macchiato-options:=-Dphantomjs.run.cwd=$(phantomjs-service-root)
 
 # If the 'clean-deps' option is 'true', set the 'deps-clean' target as a
 # dependency of 'deps'. Otherwise, print a message stating that the
-# dependencies will not be cleaned before the update. 
+# dependencies will not be cleaned before the update.
 ifeq ($(clean-deps), true)
 	_clean_deps:=deps-clean
 else
@@ -99,7 +99,7 @@ endif
 
 # If the 'list' option is 'true', set the 'lint' target as a
 # dependency of 'build'. Otherwise, print a message stating that the
-# linting is disabled. 
+# linting is disabled.
 ifeq ($(lint), true)
 	_build_lint_dep:=lint
 else
@@ -146,7 +146,8 @@ endif
 #	Build the compressed file and, optionally, run gjslint.
 ################################################################################
 build: $(_force-deps-refresh) $(_build_lint_dep)
-	@echo
+	@echo "Node version : $(shell node --version)"
+	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk build custom-config-name=$$_CUSTOM_CONF_NAME ; \
 	done

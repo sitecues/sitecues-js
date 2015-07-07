@@ -33,10 +33,20 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ],
       'feedback':[
         'feedback-button',
+        'feedback-textarea',
+        'stars-1',
+        'stars-2',
+        'stars-3',
+        'stars-4',
+        'stars-5',
+        'feedback-send',
         'more-button-group'
       ],
       'about':[
         'about-button',
+        'about-1',
+        'about-2',
+        'about-3',
         'more-button-group'
       ]
     };
@@ -51,11 +61,11 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     // Clear the visual focus rectangle and current focus state
     main.clearPanelFocus = function() {
 
-      var focusedItem = main.getFocusedItem(),
-          outlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style;
+      var outlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style,
+        focusedItem = document.querySelector('data-show-focus');
 
       if (focusedItem) {
-        focusedItem.removeAttribute('data-hasfocus');
+        focusedItem.removeAttribute('data-show-focus');
       }
 
       outlineStyle.display   = 'none';
@@ -67,7 +77,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     main.getFocusedItem = function() {
       var focusId = main.getFocusedItemName();
       if (focusId === '$') {
-        var item = document.querySelectorAll('#scp-' + main.getTab() + ' > .scp-active .scp-tabbable[data-focused="true"]');
+        var item = document.querySelectorAll('#scp-' + main.getTab() + ' > .scp-active .scp-tabbable[data-show-focus]');
         if (item.length) {
           return item[0];
         }
@@ -86,19 +96,28 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     function renderFocusOutline(focusedItem, panelContainer) {
+      // @data-visible-focus-on = id of element to show focus on
+      // @data-show-focus = focus to be shown on this element
+      // @data-own-focus-ring = element will show it's own focus ring
 
-      // Show focus outline
-      var EXTRA_FOCUS_PADDING = 1,
-          clientFocusRect     = helper.getRect(focusedItem),
-          clientPanelRect     = helper.getRect(panelContainer),  // Focus rect is positioned relative to this
-          focusOutlineStyle   = helper.byId(BP_CONST.OUTLINE_ID).style;
+      var focusForwarder = focusedItem.getAttribute('data-visible-focus-on'),
+        showFocusOn = focusForwarder ? helper.byId(focusForwarder) : focusedItem;
 
-      focusOutlineStyle.display = 'block';
-      focusOutlineStyle.width  = (clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING) + 'px';
-      focusOutlineStyle.height = (clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING) + 'px';
+      showFocusOn.setAttribute('data-show-focus', '');
+      if (!showFocusOn.hasAttribute('data-own-focus-ring')) {
+        // Show focus outline
+        var EXTRA_FOCUS_PADDING = 1,
+          clientFocusRect = helper.getRect(focusedItem),
+          clientPanelRect = helper.getRect(panelContainer),  // Focus rect is positioned relative to this
+          focusOutlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style;
 
-      focusOutlineStyle.top  = (clientFocusRect.top  - EXTRA_FOCUS_PADDING - clientPanelRect.top)  + 'px';
-      focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';
+        focusOutlineStyle.display = 'block';
+        focusOutlineStyle.width = (clientFocusRect.width + 2 * EXTRA_FOCUS_PADDING) + 'px';
+        focusOutlineStyle.height = (clientFocusRect.height + 2 * EXTRA_FOCUS_PADDING) + 'px';
+
+        focusOutlineStyle.top = (clientFocusRect.top - EXTRA_FOCUS_PADDING - clientPanelRect.top) + 'px';
+        focusOutlineStyle.left = (clientFocusRect.left - EXTRA_FOCUS_PADDING - clientPanelRect.left) + 'px';
+      }
     }
 
     main.showFocus = function (item) {
@@ -117,8 +136,15 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       }
 
       panelContainer.setAttribute('aria-activedescendant', focusedItem.id);
-      focusedItem.setAttribute('data-hasfocus', 'true');     // Has focus now
-      focusedItem.setAttribute('data-hadfocusonce', 'true'); // Has been focused before
+      focusedItem.setAttribute('focusable', true);
+      focusedItem.setAttribute('tabindex', 0);
+      try {
+        // Allow real focus if item/browser allows it:
+        // - In Firefox, for now this will only work on HTML elements
+        // - In other browsers, anything with focusable/tabindex can be focused
+        focusedItem.focus();
+      }
+      catch (ex) {}
 
       renderFocusOutline(focusedItem, panelContainer);
     };

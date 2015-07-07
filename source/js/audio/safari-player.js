@@ -33,6 +33,7 @@ sitecues.def('audio/safari-player', function (player, callback) {
 
     // Create a reusable request object
     var request = new XMLHttpRequest();
+    var t = new Date();
     request.open('GET', baseMediaUrl, true);
     request.responseType = 'arraybuffer';
     // Our asynchronous callback
@@ -40,6 +41,10 @@ sitecues.def('audio/safari-player', function (player, callback) {
       if (isCancelled) {
         return;
       }
+
+      // Metrics Start
+      sitecues.emit('audio/playing', {'data': {'request_time': new Date - t}});
+      // Metrics End
 
       // Asynchronously decodes the audio file data contained in the ArrayBuffer.
       context.decodeAudioData(request.response, function (buffer) {

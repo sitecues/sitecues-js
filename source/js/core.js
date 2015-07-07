@@ -31,13 +31,6 @@
   // variable is initialized at the bottom of this script.
   sitecues = null,
 
-  // Private Functions
-  exportPublicFields, resolveUrl, parseUrlQuery, parseUrl,
-
-  // Public Functions (these should be registered in the exportPublicFields() function)
-  getVersion, getLibraryUrl, getPrefsUrl, getApiUrl, getSiteConfig, getEverywhereConfig, on, off, emit, def, use,
-  resolveSitecuesUrl, loadScript, load,
-
   // Define place-holder for Logger
   log = {
     fatal     : function () {},
@@ -69,7 +62,7 @@
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
   // we risk overwriting the methods of the live library.
-  exportPublicFields = function () {
+  function exportPublicFields() {
     sitecues.getVersion = getVersion;
     sitecues.getApiUrl = getApiUrl;
     sitecues.getPrefsUrl = getPrefsUrl;
@@ -86,7 +79,7 @@
     sitecues.load = load;
     sitecues.parseUrl = parseUrl;
     sitecues.resolveUrl = resolveUrl;
-  };
+  }
 
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,9 +88,9 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  getVersion = function() {
+  function getVersion() {
     return version;
-  };
+  }
 
   function isProduction() {
     return getLibraryUrl().hostname === 'js.sitecues.com';
@@ -109,27 +102,27 @@
     prefsDomain = 'up' + domainEnding;
   }
 
-  getApiUrl = function(restOfUrl) {
+  function getApiUrl(restOfUrl) {
     return 'https://' + apiDomain + 'sitecues/api/' + restOfUrl;
-  };
+  }
 
-  getPrefsUrl = function(restOfUrl) {
+  function getPrefsUrl(restOfUrl) {
     return 'https://' + prefsDomain + restOfUrl;
-  };
+  }
 
-  getLibraryUrl = function() {
+  function getLibraryUrl() {
     // Underscore names deprecated
     var url = getEverywhereConfig().scriptUrl || getSiteConfig().scriptUrl || getSiteConfig().script_url;
     return url && parseUrl(url);
-  };
+  }
 
-  getSiteConfig = function() {
+  function getSiteConfig() {
     return sitecues.config || {};
-  };
+  }
 
-  getEverywhereConfig = function() {
+  function getEverywhereConfig() {
     return sitecues.everywhereConfig || {};
-  };
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -139,7 +132,7 @@
 
   // bind an event, specified by a string name, `events`, to a `callback`
   // function. passing `'*'` will bind the callback to all events fired
-  on = function(events, callback, context) {
+  function on(events, callback, context) {
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
@@ -152,14 +145,14 @@
       tail.callback = callback;
       tail.context = context;
       list.tail = tail.next = {};
-  }
+    }
     return this;
-  };
+  }
 
   // remove one or many callbacks. if `context` is null, removes all callbacks
   // with that function. if `callback` is null, removes all callbacks for the
   // event. if `events` is null, removes all bound callbacks for all events
-  off = function(events, callback, context) {
+  function off(events, callback, context) {
     var ev, calls, node;
     if (!events) {
       delete this._events;
@@ -183,12 +176,12 @@
     }
 
     return this;
-  };
+  }
 
   // emit an event, firing all bound callbacks. callbacks are passed the
   // same arguments as `trigger` is, apart from the event name.
   // listening for `'*'` passes the true event name as the first argument
-  emit = function(events) {
+  function emit(events) {
     var event, node, calls, tail, args, all, rest;
     if (!(calls = this._events)) {
         return this;
@@ -226,7 +219,7 @@
     }
 
       return this;
-  };
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -246,7 +239,7 @@
   LOAD_LIST = [];
 
   // Returns the state of the requested module.
-  var getModuleState = function(name) {
+  function getModuleState(name) {
     var module = modules[name];
 
     if (!module) {
@@ -261,10 +254,10 @@
 
     // Otherwise, the entry is an object, so the module is ready.
     return MODULE_STATE.READY;
-  };
+  }
 
   // define equinox module
-  var _def = function(name, constructor) {
+  function _def(name, constructor) {
 
     // Handle customizations, which do not require a def name for defining the module
     if (typeof name === 'function') {
@@ -313,10 +306,10 @@
 
         // Pass a new logger into the constructor scope of the module
     }, log.newLogger(name));
-  };
+  }
 
   // exposed function for defining modules: queues until library is ready.
-  def = function(name, constructor) {
+  function def(name, constructor) {
 
     if (READY_FOR_DEF_CALLS) {
       _def(name, constructor);
@@ -329,12 +322,12 @@
 
       LOAD_LIST.push(name);
     }
-  };
+  }
 
   var procDefCount = 0;
 
   // processes the def queue once initialization has completed.
-  var _processDefQueue = function() {
+  function _processDefQueue() {
     if (procDefCount < DEF_QUEUE.length) {
       var defObj = DEF_QUEUE[procDefCount];
       procDefCount++;
@@ -349,10 +342,10 @@
       }
 
     }
-  };
+  }
 
   // Fire use callbacks from module files
-  use = function() {
+  function use() {
 
     var i = 0,
       args = arguments,
@@ -377,7 +370,7 @@
     }
 
     useCallback.apply(sitecuesScope, requiredModules);
-  };
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -386,7 +379,7 @@
   //////////////////////////////////////////////////////////////////////////////////////////
 
   // Parse a URL query into key/value pairs.
-  parseUrlQuery = function(queryStr) {
+  function parseUrlQuery(queryStr) {
     var query = {};
     query.raw = queryStr;
     query.parameters = {};
@@ -416,10 +409,10 @@
       }
       query.parameters[key] = value;
     }
-  };
+  }
 
   // Parse a URL into its components.
-  parseUrl = function(urlStr) {
+  function parseUrl(urlStr) {
     if (typeof urlStr !== 'string') {
       return;
     }
@@ -458,14 +451,14 @@
     url.file = pathname.substring(index);
 
     return url;
-  };
+  }
 
   // The regular expression for an absolute URL. There is a capturing group for
   // the protocol-relative portion of the URL.
   var ABSOLUTE_URL_REQEXP = /^[a-zA-Z0-9-]+:(\/\/.*)$/i;
 
   // Resolve a URL as relative to a base URL.
-  resolveUrl = function(urlStr, baseUrl) {
+  function resolveUrl(urlStr, baseUrl) {
     var absRegExpResult = ABSOLUTE_URL_REQEXP.exec(urlStr);
     if (absRegExpResult) {
       // We have an absolute URL, with protocol. That's a no-no, so, convert to a
@@ -483,12 +476,12 @@
     }
 
     return urlStr;
-  };
+  }
 
   // Resolve a URL as relative to the main script URL.
-  resolveSitecuesUrl = function(urlStr) {
+  function resolveSitecuesUrl(urlStr) {
     return resolveUrl(urlStr, getLibraryUrl());
-  };
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
@@ -496,8 +489,8 @@
   //
   //////////////////////////////////////////////////////////////////////////////////////////
 
-  // async script loading
-  loadScript = function(url, callback) {
+  // Async script loading.
+  function loadScript(url, callback) {
     // Resolve the URL as relative to the library URL.
     url = sitecues.resolveSitecuesUrl(url);
 
@@ -522,18 +515,17 @@
 
     // add element to head to start loading
     document.getElementsByTagName('head')[0].appendChild(script);
-  };
+  }
 
-  /**
-/* trigger module loading
-/*/
-  load = function() {
+
+  // Trigger module loading.
+  function load() {
     // iterate over passed module names
     for (var i = 0, l = arguments.length; i < l; i++) {
       // and initiate loading of code for each
       sitecues.loadScript(arguments[i] + '.js');
     }
-  };
+  }
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //

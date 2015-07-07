@@ -8,10 +8,9 @@
     },
     "main": "source/js/core.js",
     "private": true,
-    "engineStrict": true,
     "engines": {
         "node": "~0.10.38",
-        "npm": "~2.7.5"
+        "npm": "^2.7.5"
     },
     "bin": "binary/web.js",
     "dependencies": {
@@ -30,7 +29,7 @@
         "wd": "0.3.11",
         "empty-port": "0.0.1",
         "jquery" : "1.8.3",
-        "jsdom" : "3.0.2",
+        "jsdom" : "3.1.2",
         "xmlhttprequest": "1.7.0",
         "location": "0.0.1",
         "navigator": "1.0.1"
@@ -44,7 +43,7 @@
         "grunt-jscs": "1.8.0",
         "grunt-jslint": "1.1.14",
         "grunt-selenium-webdriver": "0.2.451",
-        "intern": "2.2.2",
+        "intern": "theintern/intern#master",
         "grunt-contrib-uglify": "0.9.1",
         "grunt-contrib-watch": "0.6.1"
     },

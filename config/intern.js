@@ -52,11 +52,11 @@ define(
             maxConcurrency: 3,  // how many browsers may be open at once
 
             // Specify which AMD module loader to use...
-            // useLoader: {
+            // loaders: {
 
             // }
             // Options to pass to the AMD module loader...
-            loader: {
+            loaderOptions: {
                 packages: [
                     { name: 'unit', location: testDir + 'unit' },
                     { name: 'functional', location: testDir + 'functional' }
@@ -86,7 +86,7 @@ define(
             excludeInstrumentation: /^(?:config|test|node_modules)\//
 
             // Test result output mechanisms.
-            // reporters: ['pretty']
+            // reporters: ['Pretty']
         };
     }
 );
