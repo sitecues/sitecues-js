@@ -227,7 +227,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         'sc-link,sc-menuitem': {
-          'text-decoration': 'underline',
+          'text-decoration': 'none',
           'color': '#447AC4'
         },
 
@@ -244,6 +244,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'white-space': 'nowrap',
           'position': 'relative',
           'top': '-3px',
+          'font-size': '18px',
           'min-width': '30px',
           'padding': '.04em',
           'text-align': 'center',
@@ -706,10 +707,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'transform 2s linear'
         },
         '.scp-active #scp-demo-slider-thumb[data-demo="true"]': {
-          'transform': 'translateX(50px)'
+          'transform': 'translateX(90px) scale(1.6)'
         },
         '#scp-demo-page-contents[data-demo="true"]': { // Zoom page
-          'transform': 'scale(1.8)'
+          'transform': 'scale(1.6)'
         },
 
         // Tips -- highlight and lens demo (scp-highlight-card, scp-lens-card)
@@ -899,6 +900,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-lens-small': {
+          'padding-left': '30px',
           'transform': 'translateX(-3px) scale(.9)'
         },
 

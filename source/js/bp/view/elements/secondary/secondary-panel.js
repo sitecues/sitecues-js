@@ -6,10 +6,14 @@
 // - tips: speech page needs love -- break into Activate speech  and Use speech?
 //
 // Next
+// Design polish
+// UX testing -- Vermont?
+// Beta testing
+// Firefox & IE
+// Applause testing
 // Localization
+// Provisional patents  -- who can help? Jeff? Ai2?
 // Accessibility
-// Firefox
-// IE
 // Move bp.js into bp/
 //
 // Later

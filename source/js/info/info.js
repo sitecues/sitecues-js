@@ -50,6 +50,7 @@ sitecues.def('info', function(info, callback) {
       isModalOpen = false;
 
     function getBorderCss() {
+      // Use adaptive border that is visible on any background
       return colorUtil.isOnDarkBackground(document.body) ? '7px solid #fff' : '20px solid #000';
     }
 

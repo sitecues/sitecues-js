@@ -62,13 +62,17 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     main.clearPanelFocus = function() {
 
       var outlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style,
-        focusedItem = document.querySelector('data-show-focus');
+        focusedItems = document.querySelectorAll('#scp-bp-container [tabindex]'),
+        index = focusedItems.length,
+        currItem;
 
-      if (focusedItem) {
-        focusedItem.removeAttribute('data-show-focus');
+      while (index --) {
+        currItem = focusedItems[index];
+        currItem.removeAttribute('data-show-focus');
+        currItem.removeAttribute('tabindex');
       }
 
-      outlineStyle.display   = 'none';
+        outlineStyle.display   = 'none';
       outlineStyle[platform.transformProperty] = '';
 
       state.set('focusIndex', -1);

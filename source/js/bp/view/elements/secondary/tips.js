@@ -76,11 +76,10 @@ sitecues.def('bp/view/elements/tips', function (tips, callback) {
 
     function animateZoom() {
       function toggleZoom(isOn, key, howLongMs) {
-        var FAKE_KEY_DELAY = 70;
-        toggleElementDemo(BP_CONST.DEMO_PAGE_CONTENTS, isOn, howLongMs + FAKE_KEY_DELAY); // Zoom page
-        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, isOn, howLongMs + FAKE_KEY_DELAY);  // Move slider
-        toggleElementDemo(key, true, howLongMs);                                          // Push key
-        toggleElementDemo(key, false, howLongMs + 2000);                                  // Release key
+        toggleElementDemo(BP_CONST.DEMO_PAGE_CONTENTS, isOn, howLongMs); // Zoom page
+        toggleElementDemo(BP_CONST.DEMO_SLIDER_THUMB, isOn, howLongMs);  // Move slider
+        toggleElementDemo(key, true, howLongMs);                         // Push key
+        toggleElementDemo(key, false, howLongMs + 2000);                 // Release key
       }
 
       function zoomThenUnzoom() {
