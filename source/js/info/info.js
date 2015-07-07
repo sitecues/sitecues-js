@@ -2,8 +2,8 @@ sitecues.def('info', function(info, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'locale',
-    function($, site, dimmer, platform, locale) {
+  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'locale', 'util/color',
+    function($, site, dimmer, platform, locale, colorUtil) {
 
     var $iframe = $(),
       $closeButton = $(),
@@ -16,7 +16,6 @@ sitecues.def('info', function(info, callback) {
         transform: 'scale3d(.7,.7,1)',
         willChange: 'transform',
         backgroundColor: '#fff',
-        border: '20px solid #000',
         borderRadius: '8px',
         transition: 'opacity .9s, transform 1s',
         opacity: 0,
@@ -50,6 +49,10 @@ sitecues.def('info', function(info, callback) {
       addCloseButtonTimer,
       isModalOpen = false;
 
+    function getBorderCss() {
+      return colorUtil.isOnDarkBackground(document.body) ? '7px solid #fff' : '20px solid #000';
+    }
+
     function showModal(pageName, anchor) {
 
       if (isModalOpen) {
@@ -76,6 +79,7 @@ sitecues.def('info', function(info, callback) {
       $iframe = $('<iframe>')
         .attr('src', pageUrl)
         .css(INITIAL_CSS)
+        .css('border', getBorderCss())
         .appendTo('html');
 
       $(window)
