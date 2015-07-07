@@ -34,15 +34,14 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // TODO: rename
     bpc.processKeydown = function (evt) {
 
-      var item = baseController.getFocusedItem(),
-          role;
-
+      // Escape = close
       if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
         panelController.shrinkPanel(true);
         evt.preventDefault();
         return;
       }
 
+      // Tab navigation
       if (evt.keyCode === BP_CONST.KEY_CODES.TAB) {
         if (isModifiedKey(evt) || !state.isPanel()) {
           return;
@@ -53,27 +52,23 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         if (baseController.getFocusedItemName() !== '$') {
           setTabCycles(evt);
         }
-        processFocusedItem(evt);
-      }
+        navigateToNextItemInTabCycle(evt);
 
-      if (!item) {
-        // Return early -- the remaining commands are specific to each control
         return;
       }
 
-      role = item.getAttribute('role');
+      // Perform widget-specific commands
+      var item = baseController.getFocusedItem();
 
-      processRoles(evt, item, role);
-
-      if (evt.keyCode === BP_CONST.KEY_CODES.ENTER ||
-          evt.keyCode === BP_CONST.KEY_CODES.SPACE ||
-          role !== ROLES.SLIDER) { // Remaining commands are for sliders only
-          return;
+      if (item) {
+        if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
+          performMainAction(evt, item);
+        }
+        else if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+          performZoomSliderCommand(evt);
+        }
+        // else fall through to native processing of keystroke
       }
-
-      item.focus();
-
-      processSliderCommands(evt, item);
     };
 
     function isInActiveToolbarArea(evt, badgeRect) {
@@ -216,7 +211,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       var direction     = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
           currentPanel  = baseController.getTab(),
-          numItems      = baseController.tabbable[currentPanel].length,
+          numItems      = baseController.TABBABLE[currentPanel].length,
           newFocusIndex = state.get('focusIndex') + direction;
 
       if (newFocusIndex < 0) {
@@ -271,10 +266,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function skipItem (evt) {
       setTabCycles(evt);
-      processFocusedItem(evt);
+      navigateToNextItemInTabCycle(evt);
     }
 
-    function processFocusedItem(evt) {
+    function navigateToNextItemInTabCycle(evt) {
 
       var item      = baseController.getFocusedItem(),
           itemName  = baseController.getFocusedItemName(),
@@ -341,26 +336,24 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       evt.preventDefault();
     }
 
-    function processRoles(evt, item, role) {
-      if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
-        if (role === ROLES.CHECKBOX) {
-          if (item.id === BP_CONST.SPEECH_ID) {
-            sitecues.emit('speech/do-toggle');
-          }
-        } else if (role === ROLES.BUTTON) {
-          buttonPress(evt, item);
+    // Enter or space key pressed
+    function performMainAction(evt, item) {
+      var role = item.getAttribute('role');
+      if (role === ROLES.CHECKBOX) {
+        if (item.id === BP_CONST.SPEECH_ID) {
+          sitecues.emit('speech/do-toggle');
         }
-        evt.preventDefault();
-        return;
+      } else if (role === ROLES.BUTTON) {
+        buttonPress(evt, item);
       }
+      evt.preventDefault();
     }
 
-    function processSliderCommands(evt, item) {
+    function performZoomSliderCommand(evt) {
       var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
-      if (deltaSliderCommand && !item.hasAttribute('data-setting-name')) {
+      if (deltaSliderCommand) {
         sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
         evt.preventDefault();
-        return;
       }
     }
 
@@ -401,7 +394,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function syncFocusIndex (synchWith) {
       var currentMode = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()],
-          tabbable        = baseController.tabbable,
+          tabbable        = baseController.TABBABLE,
           previousMode    = tabbable[synchWith];
 
       state.set('focusIndex', tabbable[currentMode].indexOf(previousMode[state.get('focusIndex')]));

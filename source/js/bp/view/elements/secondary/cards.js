@@ -88,7 +88,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       return html.replace(/(<sc-button(?:-big)?)/g, '$1 role="button" data-hover="scale(1.2)"' + INTERACTIVE)
         .replace(/<sc-menuitem /g, '<sc-menuitem role="button"' + INTERACTIVE)
         .replace(/<sc-link /g, '<sc-link role="link"' + INTERACTIVE)
-        .replace(/<input type="range"/g, '<input type="range" role="slider"' + INTERACTIVE);
+        .replace(/<input type="range"/g, '<input type="range"' + INTERACTIVE);
     }
 
     function removeAllElements(elements) {

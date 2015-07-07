@@ -108,11 +108,11 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
       <rect id="scp-feedback-input-rect" x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" aria-valuemin="1" aria-valuemax="5" role="slider">\
-        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
-        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
-        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
-        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
-        <use class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
+        <use id="scp-stars-1" role="button" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
+        <use id="scp-stars-2" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
+        <use id="scp-stars-3" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
+        <use id="scp-stars-4" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
+        <use id="scp-stars-5" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
         <rect x="615" width="150" y="260" height="50" rx="20" ry="20"/>\
@@ -172,7 +172,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <a href="http://sitecues.com">sitecues.com</a>\
     </sc-p>\
   <sc-p>\
-    +1-857-259-5272\
+    <a href="tel:+1-857-259-5272">+1-857-259-5272</a>\
   </sc-p>\
   <sc-p>\
     <a href="mailto:sales@sitecues.com">sales@sitecues.com</a>\

@@ -1,11 +1,16 @@
 // TODO
-// Questions:
+// Design questions:
 // - tips/settings: are back/forward buttons too ugly? (Anna)
 // - tips: is fake page or presence of second mouse in fake page confusing?
 // - tips: should user be able to try each exercise themselves?
 // - tips: speech page needs love -- break into Activate speech  and Use speech?
 //
+// Next
 // Localization
+// Accessibility
+// Firefox
+// IE
+// Move bp.js into bp/
 //
 // Later
 // About: Get it now

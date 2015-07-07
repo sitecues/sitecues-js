@@ -4,7 +4,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'platform',
     function (BP_CONST, state, helper, platform) {
 
-    main.tabbable = {
+    main.TABBABLE = {
       'main': [
         'zoom-slider-bar',
         'speech',
@@ -82,7 +82,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         return null;
       }
       var currentPanel = main.getTab();
-      return main.tabbable[currentPanel][state.get('focusIndex')];
+      return main.TABBABLE[currentPanel][state.get('focusIndex')];
     };
 
     function renderFocusOutline(focusedItem, panelContainer) {
