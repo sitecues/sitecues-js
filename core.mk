@@ -78,7 +78,7 @@ files=\
 	source/js/bp/model/state.js \
 	source/js/bp/constants.js \
 	source/js/bp/helper.js \
-	source/js/bp/controller/base-controller.js \
+	source/js/bp/controller/focus-controller.js \
 	source/js/bp/controller/slider-controller.js \
 	source/js/bp/controller/panel-controller.js \
 	source/js/bp/size-animation.js \

@@ -1,10 +1,10 @@
 /* Front Controller */
-sitecues.def('bp/controller/base-controller', function (main, callback) {
+sitecues.def('bp/controller/focus-controller', function (focusController, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'platform',
     function (BP_CONST, state, helper, platform) {
 
-    main.TABBABLE = {
+    focusController.TABBABLE = {
       'main': [
         'zoom-slider-bar',
         'speech',
@@ -51,7 +51,7 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       ]
     };
 
-    main.getTab = function () {
+    focusController.getTab = function () {
       if (state.isPanel() && state.isSecondaryPanelRequested()) {
         return state.getSecondaryPanelName();
       }
@@ -59,8 +59,9 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
     };
 
     // Clear the visual focus rectangle and current focus state
-    main.clearPanelFocus = function() {
+    focusController.clearPanelFocus = function() {
 
+      debugger;
       var outlineStyle = helper.byId(BP_CONST.OUTLINE_ID).style,
         focusedItems = document.querySelectorAll('#scp-bp-container [tabindex]'),
         index = focusedItems.length,
@@ -72,18 +73,18 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
         currItem.removeAttribute('tabindex');
       }
 
-        outlineStyle.display   = 'none';
+      outlineStyle.display = 'none';
       outlineStyle[platform.transformProperty] = '';
 
       state.set('focusIndex', -1);
     };
 
-    main.getFocusedItem = function() {
-      var focusId = main.getFocusedItemName();
+    focusController.getFocusedItem = function() {
+      var focusId = focusController.getFocusedItemName();
       if (focusId === '$') {
-        var item = document.querySelectorAll('#scp-' + main.getTab() + ' > .scp-active .scp-tabbable[data-show-focus]');
-        if (item.length) {
-          return item[0];
+        var item = document.querySelector('#scp-' + focusController.getTab() + ' > .scp-active .scp-tabbable[data-show-focus]');
+        if (item) {
+          return item;
         }
       }
       if (focusId) {
@@ -91,12 +92,12 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       }
     };
 
-    main.getFocusedItemName = function() {
+    focusController.getFocusedItemName = function() {
       if (state.get('focusIndex') < 0) {
         return null;
       }
-      var currentPanel = main.getTab();
-      return main.TABBABLE[currentPanel][state.get('focusIndex')];
+      var currentPanel = focusController.getTab();
+      return focusController.TABBABLE[currentPanel][state.get('focusIndex')];
     };
 
     function renderFocusOutline(focusedItem, panelContainer) {
@@ -124,13 +125,13 @@ sitecues.def('bp/controller/base-controller', function (main, callback) {
       }
     }
 
-    main.showFocus = function (item) {
+    focusController.showFocus = function (item) {
 
-      var focusedItem    = item || main.getFocusedItem(),
+      var focusedItem    = item || focusController.getFocusedItem(),
           panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
 
       if (!focusedItem) {
-        main.clearPanelFocus();
+        focusController.clearPanelFocus();
         panelContainer.removeAttribute('aria-activedescendant');
         return;
       }

@@ -28,8 +28,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/feedback',
     'bp/view/elements/about',
     'platform',
-    'bp/controller/base-controller',
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, platform, baseController) {
+    'bp/controller/focus-controller',
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, platform, focusController) {
 
       var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -297,7 +297,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           fromGeo = geometryTargets[!doEnable],
           toGeo = geometryTargets[doEnable],
 
-          animateMoreButtonFocus = baseController.getFocusedItemName() === 'more-button-group',
+          animateMoreButtonFocus = focusController.getFocusedItemName() === 'more-button-group',
 
           ENABLE_ANIMATION_MS = 1500,
           DISABLE_ANIMATION_MS = 500,
@@ -345,7 +345,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
         function reDrawFocusOutline () {
           focusOutline.style[platform.transformProperty] = '';
-          baseController.showFocus();
+          focusController.showFocus();
         }
 
         function fadeInTextContentWhenLargeEnough() {

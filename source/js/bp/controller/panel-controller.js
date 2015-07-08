@@ -3,8 +3,8 @@
  */
 sitecues.def('bp/controller/panel-controller', function (pc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, baseController, sliderController, state, slider, helper) {
+  sitecues.use('bp/constants', 'bp/controller/focus-controller', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
+    function (BP_CONST, focusController, sliderController, state, slider, helper) {
 
       var MIN_DISTANCE = 75, // Min distance before shrink
         mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
@@ -16,7 +16,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     // TODO: rename
     pc.panelMouseDown = function() {
-      baseController.clearPanelFocus();
+      focusController.clearPanelFocus();
       state.set('isKeyboardMode', false);
       sitecues.emit('bp/do-update');
     };
@@ -93,7 +93,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
       // Clears the focus attribute from the element that has focus. Sets the focusIndex to -1
       // If the morePanel is already active, then we deactivate it and set the focusIndex to 0.
-      baseController.clearPanelFocus();
+      focusController.clearPanelFocus();
 
 
       state.set('transitionTo', BP_CONST.BADGE_MODE);
@@ -150,7 +150,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       state.set('currentMode', BP_CONST.PANEL_MODE);
 
       if (state.get('isKeyboardMode')) {
-        baseController.showFocus();
+        focusController.showFocus();
       }
 
       sitecues.emit('bp/did-expand');
@@ -171,7 +171,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
       if (state.get('isKeyboardMode')) {
         state.set('focusIndex', 0);
-        baseController.showFocus();
+        focusController.showFocus();
       }
 
       moreToggle.setAttribute('aria-label', 'View more options');
@@ -203,12 +203,11 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
 
     sitecues.on('bp/do-shrink', pc.shrinkPanel);
 
-      if (SC_DEV) {
-        sitecues.toggleStickyPanel = function() {
-          isSticky = !isSticky;
-          return isSticky;
-        };
-      }
+    // TODO put in SC_DEV only
+    sitecues.toggleStickyPanel = function() {
+      isSticky = !isSticky;
+      return isSticky;
+    };
 
     // Unless callback() is queued, the module is not registered in global var modules{}
     // See: https://fecru.ai2.at/cru/EQJS-39#c187

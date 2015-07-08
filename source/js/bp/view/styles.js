@@ -519,8 +519,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
         '#sitecues-badge:focus,#scp-bp-container:focus,#scp-svg g:focus': {
-          'outline': '0 !important',
-          'box-shadow': 'none !important'
+          'outline': '0 !important'
         },
 
         '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-focus-rect': {

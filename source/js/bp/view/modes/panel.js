@@ -1,8 +1,8 @@
 sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
-  sitecues.use('bp', 'bp/constants', 'bp/controller/base-controller',
+  sitecues.use('bp', 'bp/constants', 'bp/controller/focus-controller',
     'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    function(bp, BP_CONST, baseController, panelController, bpController, state, helper) {
+    function(bp, BP_CONST, focusController, panelController, bpController, state, helper) {
 
       /*
        Show panel according to settings.
@@ -42,7 +42,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
 
         panelController.lastFocus = lastFocus;
 
-        baseController.clearPanelFocus();
+        focusController.clearPanelFocus();
 
         if (isFocused) {
 

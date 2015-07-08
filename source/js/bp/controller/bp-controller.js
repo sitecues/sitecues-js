@@ -3,14 +3,9 @@ BP Controller
  */
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller',
+  sitecues.use('bp/constants', 'bp/controller/focus-controller', 'bp/controller/slider-controller',
     'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper', 'conf',
-    function (BP_CONST, baseController, sliderController, panelController, state, slider, helper, conf) {
-
-    var TAB_DIRECTION = {
-      'left': -1,
-      'right': 1
-    };
+    function (BP_CONST, focusController, sliderController, panelController, state, slider, helper, conf) {
 
     var ROLES = {
       'CHECKBOX': 'checkbox',
@@ -49,16 +44,13 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
         state.set('isKeyboardMode', true);
         sitecues.emit('bp/do-update');
-        if (baseController.getFocusedItemName() !== '$') {
-          setTabCycles(evt);
-        }
-        navigateToNextItemInTabCycle(evt);
-
+        navigateToNextItem(evt.shiftKey ? -1 : 1);
+        evt.preventDefault();
         return;
       }
 
       // Perform widget-specific commands
-      var item = baseController.getFocusedItem();
+      var item = focusController.getFocusedItem();
 
       if (item) {
         if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
@@ -202,16 +194,15 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     // Tab cycles means that if you tab past the last tabbable item in the
     // current view, it goes back to the first. Also the reverse:
     // if you shift+tab from the first item, it goes to the last.
-    function setTabCycles(evt) {
+    function navigateInDirection(direction) {
 
       if (!state.isPanel()) {
         // Skip if bp in badge state
         return;
       }
 
-      var direction     = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
-          currentPanel  = baseController.getTab(),
-          numItems      = baseController.TABBABLE[currentPanel].length,
+      var currentPanel  = focusController.getTab(),
+          numItems      = focusController.TABBABLE[currentPanel].length,
           newFocusIndex = state.get('focusIndex') + direction;
 
       if (newFocusIndex < 0) {
@@ -224,19 +215,19 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
       }
 
-      baseController.clearPanelFocus();
+      focusController.clearPanelFocus();
 
       state.set('focusIndex', newFocusIndex);
 
     }
 
     function getAllTabbableItemsInActiveCard () {
-      return document.querySelectorAll('#scp-' + baseController.getTab() + ' > .scp-active .scp-tabbable:not([data-show="false"])');
+      return document.querySelectorAll('#scp-' + focusController.getTab() + ' > .scp-active .scp-tabbable:not([data-show="false"])');
     }
 
     function getFocusedItemInActiveCard (tabbableItems) {
       for (var i = 0, l = tabbableItems.length; i < l; i++) {
-        if (tabbableItems[i].getAttribute('data-show-focus')) {
+        if (tabbableItems[i].getAttribute('data-show-focusset')) {
           return tabbableItems[i];
         }
       }
@@ -264,35 +255,16 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
     }
 
-    function skipItem (evt) {
-      setTabCycles(evt);
-      navigateToNextItemInTabCycle(evt);
-    }
+    function navigateInCard(direction) {
+      // All items in the active card.
+      var tabbableItemsInActiveCard = getAllTabbableItemsInActiveCard(),
+        focusedTabbableItem,
+        adjacentTabbableItem,
+        nextItemIndex,
+        nextItem;
 
-    function navigateToNextItemInTabCycle(evt) {
-
-      var item      = baseController.getFocusedItem(),
-          itemName  = baseController.getFocusedItemName(),
-          direction = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
-          isRight   = direction === TAB_DIRECTION.right,
-          tabbableItemsInActiveCard,
-          focusedTabbableItem,
-          adjacentTabbableItem,
-          nextItem,
-          nextItemIndex;
-
-      // Process the dynamic content for the possibility of tabbable items.
-      if (itemName === '$') {
-
-        // All items in the active card.
-        tabbableItemsInActiveCard = getAllTabbableItemsInActiveCard();
-
-        // If there are none, skip to the next item.
-        if (!tabbableItemsInActiveCard.length) {
-          skipItem(evt);
-          return;
-        }
-
+      // If there are none, skip to the next item.
+      if (tabbableItemsInActiveCard.length) {
         // The current focused item.  Might not exist.
         focusedTabbableItem = getFocusedItemInActiveCard(tabbableItemsInActiveCard);
 
@@ -304,36 +276,44 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         // Just skip.
         if (focusedTabbableItem && !adjacentTabbableItem) {
           clearAllFocusedItemsInActiveCard(tabbableItemsInActiveCard);
-          skipItem(evt);
-          return;
         }
+        else {
+          // First or last dynamic tabbable item.
+          nextItemIndex = direction > 0 ? 0 : tabbableItemsInActiveCard.length - 1;
 
-        // First or last dynamic tabbable item.
-        nextItemIndex = isRight ? 0 : tabbableItemsInActiveCard.length - 1;
+          // If a focused item exists, use the adjacent item.  Otherwise, its either the first or last item.
+          nextItem = focusedTabbableItem ? adjacentTabbableItem : tabbableItemsInActiveCard[nextItemIndex];
 
-        // If a focused item exists, use the adjacent item.  Otherwise, its either the first or last item.
-        nextItem = focusedTabbableItem ? adjacentTabbableItem : tabbableItemsInActiveCard[nextItemIndex];
+          setFocusedItemInActiveCard(tabbableItemsInActiveCard, nextItem);
 
-        setFocusedItemInActiveCard(tabbableItemsInActiveCard, nextItem);
-
-        item = adjacentTabbableItem || tabbableItemsInActiveCard[nextItemIndex];
-
+          nextItem = adjacentTabbableItem || tabbableItemsInActiveCard[nextItemIndex];
+        }
       }
 
-      if(!item) {
-        return;
+      return nextItem;
+    }
+
+    function navigateToNextItem(direction) {
+
+      var item      = focusController.getFocusedItem(),
+          itemName  = focusController.getFocusedItemName(),
+          nextItem;
+
+      // Process the dynamic content for the possibility of tabbable items.
+      while (true) {
+        if (itemName === '$') {
+          nextItem = navigateInCard(direction, item);
+        }
+        if (!nextItem) {
+          navigateInDirection(direction);
+        }
+        // Skip disabled items such as the prev arrow which is turned off at first
+        if (nextItem.getAttribute('aria-disabled') !== 'true') {
+          break;
+        }
       }
 
-      // The prev arrow is turned off when on the first card when
-      // going to the settings panel
-      if (item.getAttribute('aria-disabled') === 'true') {
-        skipItem(evt);
-        return;
-      }
-
-      baseController.showFocus(item);
-
-      evt.preventDefault();
+      focusController.showFocus(item);
     }
 
     // Enter or space key pressed
@@ -364,7 +344,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       item = item || evt.currentTarget;
 
       var feature      = item.getAttribute('data-feature'),
-          currentMode  = baseController.getTab(),
+          currentMode  = focusController.getTab(),
           settingName  = item.getAttribute('data-setting-name'),
           settingValue = item.getAttribute('data-setting-value'),
           target       = item.getAttribute('data-target');
@@ -388,14 +368,14 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
       if (target) {
         sitecues.emit('bp/do-target-card', helper.byId(target));
-        baseController.clearPanelFocus();
+        focusController.clearPanelFocus();
       }
       sitecues.emit('bp/do-update');
     }
 
     function syncFocusIndex (synchWith) {
       var currentMode = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()],
-          tabbable        = baseController.TABBABLE,
+          tabbable        = focusController.TABBABLE,
           previousMode    = tabbable[synchWith];
 
       state.set('focusIndex', tabbable[currentMode].indexOf(previousMode[state.get('focusIndex')]));

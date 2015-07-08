@@ -22,10 +22,10 @@ sitecues.def('bp', function (bp, callback) {
   'use strict';
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-    'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
+    'zoom', 'bp/controller/bp-controller', 'bp/controller/focus-controller', 'bp/placement', 'bp/view/elements/slider',
     'bp/size-animation', 'platform', 'conf/site', 'util/color',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, sizeAnimation, platform, site, colorUtil) {
+              focusController, placement, slider, sizeAnimation, platform, site, colorUtil) {
 
     /*
      *** Public methods ***
