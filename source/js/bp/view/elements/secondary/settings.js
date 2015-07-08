@@ -110,8 +110,6 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
 
 
     settings.getGeometryTargets = function(cssValues) {
-      cssValues[true].focusOutlineTranslateX = -131;
-      cssValues[false].focusOutlineTranslateX = 137;
       return cssValues;
     };
 

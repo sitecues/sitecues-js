@@ -22,10 +22,10 @@ sitecues.def('bp', function (bp, callback) {
   'use strict';
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-    'zoom', 'bp/controller/bp-controller', 'bp/controller/focus-controller', 'bp/placement', 'bp/view/elements/slider',
+    'zoom', 'bp/controller/bp-controller', 'bp/placement', 'bp/view/elements/slider',
     'bp/size-animation', 'platform', 'conf/site', 'util/color',
     function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              focusController, placement, slider, sizeAnimation, platform, site, colorUtil) {
+              placement, slider, sizeAnimation, platform, site, colorUtil) {
 
     /*
      *** Public methods ***
@@ -156,12 +156,6 @@ sitecues.def('bp', function (bp, callback) {
 
       bpContainer.innerHTML = bpSVG.getSvg();
 
-      // TODO: Should we remove the commented out code below?
-      // Create focus outline element
-      // var focusOutline = document.createElement('sc');
-      // document.querySelector('#scp-bp-container').appendChild(focusOutline);
-      // focusOutline.setAttribute('id', 'scbp-target-outline')
-
       // Parent the badge appropriately
       var svgElement = getSVGElement();
 
@@ -173,11 +167,7 @@ sitecues.def('bp', function (bp, callback) {
 
     function bindPermanentListeners(badgeElement) {
       badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
-      badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
       badgeElement.addEventListener('click', bpController.clickToOpenPanel);
-      // Commented out because it was breaking the focus outline when the slider
-      // is focused...  why is this necessary?
-      // bpContainer.addEventListener('blur', baseController.clearPanelFocus);
       badgeElement.addEventListener('mousemove', bpController.onMouseMove);
       badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }

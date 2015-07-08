@@ -12,10 +12,6 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       return helper.byId(BP_CONST.SPEECH_ID);
     }
 
-    function getMouseTargetForTTS() {
-      return helper.byId(BP_CONST.SPEECH_TARGET_ID);
-    }
-
     function getTTSStateLabelNode() {
       return helper.byId(BP_CONST.SPEECH_STATE_ID).firstChild;
     }
@@ -140,7 +136,7 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       */
     function init() {
 
-      var mouseTarget1 = getMouseTargetForTTS(),
+      var mouseTarget1 = getTTSButtonElement(),
         mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
 
       // todo: move this to ttsController

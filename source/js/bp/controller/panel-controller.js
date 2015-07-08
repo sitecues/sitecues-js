@@ -3,23 +3,14 @@
  */
 sitecues.def('bp/controller/panel-controller', function (pc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/focus-controller', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, focusController, sliderController, state, slider, helper) {
+  sitecues.use('bp/constants', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
+    function (BP_CONST, sliderController, state, slider, helper) {
 
       var MIN_DISTANCE = 75, // Min distance before shrink
         mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
-        isSticky;
-
-      // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
-      pc.wasInFeaturePanel  = false;
-      pc.lastFocus = null;
-
-    // TODO: rename
-    pc.panelMouseDown = function() {
-      focusController.clearPanelFocus();
-      state.set('isKeyboardMode', false);
-      sitecues.emit('bp/do-update');
-    };
+        isSticky,
+        // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
+        wasInFeaturePanel = false;
 
     function cancelMouseLeaveShrinkTimer() {
       clearTimeout(mouseLeaveShrinkTimer);
@@ -42,10 +33,10 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         return;  // Dragging slider, so don't close panel
       }
 
-      if (pc.wasInFeaturePanel) {
+      if (wasInFeaturePanel) {
         // Don't treat as mouse out if mouse just clicked on more button and panel shrunk
         // Only once back in the panel, reenable mouseout exit feature
-        pc.wasInFeaturePanel = isMouseOutsidePanel(evt, 0);
+        wasInFeaturePanel = isMouseOutsidePanel(evt, 0);
         return;
       }
 
@@ -68,7 +59,7 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         return;
       }
       // Once mouse used, no longer need this protection against accidental closure
-      pc.wasInFeaturePanel = false;
+      wasInFeaturePanel = false;
 
       if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
         pc.shrinkPanel();
@@ -83,18 +74,11 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     };
 
     // @param isFromKeyboard -- optional, if truthy, then the shrink command is from the keyboard (e.g. escape key)
-    // bpc.processKeydown, buttonPress, pc.winMouseMove, pc.winMouseDown call this function...
+    // bpc.processKeyDown, buttonPress, pc.winMouseMove, pc.winMouseDown call this function...
     pc.shrinkPanel = function(isFromKeyboard) {
       if (state.isShrinking()) {
         return; // Not a panel or is already shrinking -- nothing to do
       }
-
-      var activeElement = document.activeElement;
-
-      // Clears the focus attribute from the element that has focus. Sets the focusIndex to -1
-      // If the morePanel is already active, then we deactivate it and set the focusIndex to 0.
-      focusController.clearPanelFocus();
-
 
       state.set('transitionTo', BP_CONST.BADGE_MODE);
       state.set('featurePanelName', '');
@@ -121,19 +105,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       // does now or in the future.
       sliderController.finishZoomChanges();
 
-      // If the BP_CONTAINER has focus AND the document.body was the previous
-      // focused element, blur the BP_CONTAINER focus.
-      //
-      // If the BP_CONTAINER has focus AND the document.body was NOT the previous
-      // focused element, focus the previously focused element.
-      if (pc.lastFocus && activeElement && activeElement.id === BP_CONST.BP_CONTAINER_ID) {
-        if (pc.lastFocus === document.body) {
-          activeElement.blur();
-        } else {
-          pc.lastFocus.focus();
-        }
-      }
-
       // Finally, begin the shrinking animation.
       sitecues.emit('bp/do-update');
     };
@@ -148,10 +119,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     pc.panelReady = function() {
 
       state.set('currentMode', BP_CONST.PANEL_MODE);
-
-      if (state.get('isKeyboardMode')) {
-        focusController.showFocus();
-      }
 
       sitecues.emit('bp/did-expand');
       sitecues.emit('bp/do-update');
@@ -168,12 +135,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     function disableSecondaryPanel() {
 
       var moreToggle = helper.byId(BP_CONST.MORE_BUTTON_GROUP_ID);
-
-      if (state.get('isKeyboardMode')) {
-        state.set('focusIndex', 0);
-        focusController.showFocus();
-      }
-
       moreToggle.setAttribute('aria-label', 'View more options');
     }
 

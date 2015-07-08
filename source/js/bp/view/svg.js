@@ -61,7 +61,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
     <rect id="scp-zoom-slider-target" class="scp-hidden-target scp-hand-cursor" x="80" y="44" width="280" height="67"/>\
   </g>\
-  <use id="scp-zoom-slider-thumb" class="scp-hand-cursor" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" y="48" x="60"/>\
+  <use id="scp-zoom-slider-thumb" class="scp-hand-cursor" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" aria-controls="scp-zoom-slider-bar" y="48" x="60"/>\
   <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>\
   <line id="scp-vert-divider" class="scp-panel-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
   <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="Speech"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
@@ -110,12 +110,12 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
       <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
-      <g id="scp-rating" class="scp-hand-cursor" aria-valuemin="1" aria-valuemax="5" role="slider">\
-        <use id="scp-stars-1" role="button" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
-        <use id="scp-stars-2" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
-        <use id="scp-stars-3" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
-        <use id="scp-stars-4" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
-        <use id="scp-stars-5" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
+      <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="no rating">\
+        <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="1 star" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
+        <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="2 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
+        <use id="scp-stars-3" role="button" aria-pressed="false" aria-label="3 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
+        <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="4 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
+        <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="5 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
         <rect x="615" width="150" y="260" height="50" rx="20" ry="20"/>\

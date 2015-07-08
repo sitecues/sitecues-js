@@ -957,7 +957,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'pointer-events': 'all'
         },
 
-        '.scp-rating-star[data-selected="true"]': {    // Selected color
+        '.scp-rating-star[aria-pressed="true"]': {    // Selected color
           'fill': '#80A9F8'
         },
 

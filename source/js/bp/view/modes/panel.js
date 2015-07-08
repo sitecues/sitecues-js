@@ -1,8 +1,7 @@
 sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
-  sitecues.use('bp', 'bp/constants', 'bp/controller/focus-controller',
-    'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    function(bp, BP_CONST, focusController, panelController, bpController, state, helper) {
+  sitecues.use('bp', 'bp/constants', 'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
+    function(bp, BP_CONST, panelController, bpController, state, helper) {
 
       /*
        Show panel according to settings.
@@ -15,67 +14,27 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
 
         sitecues.emit('bp/will-expand');
 
-        prepareKeyboardFocus();
-        bindTemporaryHandlers();
+        toggleTemporaryHandlers(true);
         setPanelExpandedState();
 
         sitecues.emit('bp/do-update');
       }
 
-      /*
-       If the badge was focused, the panel will go into focus mode when it's entered.
-       In focus mode, we show the following:
-       - A keyboard focus outline so the user knows where they are tabbing
-       - A close button in case the user doesn't realize Escape key will close
-       - The "more button" is shown immediately rather than on a timer, so that the tabbing cycle doesn't suddenly change in the middle of tabbing
-       We also save the last focus so that we can restore it when the panel closes.
-       */
-      function prepareKeyboardFocus() {
-
-        // Save the last focus so that we can restore it when panel closes
-        var lastFocus = document.activeElement,
-
-            // If the badge is focused we will turn keyboard mode on for the panel
-            isFocused      = lastFocus && lastFocus.id === BP_CONST.BADGE_ID,
-            badgeElement   = helper.byId(BP_CONST.BADGE_ID),
-            panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
-
-        panelController.lastFocus = lastFocus;
-
-        focusController.clearPanelFocus();
-
-        if (isFocused) {
-
-          badgeElement.setAttribute('aria-expanded', 'true');
-
-          // Turn keyboard mode on for the panel, and start focus on the first item
-          state.set('isKeyboardMode', true);
-          state.set('focusIndex', 0);
-
-        }
-
-        // Take the focus whether or not we're in focus mode,
-        // in case the user presses tab or Escape to turn on keyboard mode after expansion
-        panelContainer.focus();
+      function getPanelContainer() {
+        return helper.byId(BP_CONST.BP_CONTAINER_ID);
       }
 
       // Window mouse listeners are temporary – only bound when the panel is open.
       // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
-      function bindTemporaryHandlers() {
+      function toggleTemporaryHandlers(isActive) {
+        var addOrRemoveFn = isActive ? 'addEventListener' : 'removeEventListener';
         // Pressing tab or shift tab when panel is open switches it to keyboard mode
-        window.addEventListener('keydown',   bpController.processKeydown, true);
-        window.addEventListener('mousedown', panelController.winMouseDown);
-        window.addEventListener('mousemove', panelController.winMouseMove);
-        window.addEventListener('blur', panelController.winBlur);
-        window.addEventListener('mouseout', panelController.winMouseLeave);
-      }
-
-      function unbindTemporaryMouseHandlers() {
-        window.removeEventListener('keydown',   bpController.processKeydown, true);
-        window.removeEventListener('mousemove', panelController.winMouseMove);
-        window.removeEventListener('mousedown', panelController.winMouseDown);
-        window.removeEventListener('blur', panelController.winBlur);
-        window.removeEventListener('mouseout', panelController.winMouseLeave);
+        window[addOrRemoveFn]('keydown',   bpController.processKeyDown, true);
+        window[addOrRemoveFn]('mousedown', panelController.winMouseDown);
+        window[addOrRemoveFn]('mousemove', panelController.winMouseMove);
+        window[addOrRemoveFn]('blur', panelController.winBlur);
+        window[addOrRemoveFn]('mouseout', panelController.winMouseLeave);
+//        getPanelContainer()[addOrRemoveFn]('mousedown', bpController.processMouseDown);
       }
 
       function setPanelExpandedState() {
@@ -147,20 +106,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         return className;
       }
 
-      // Bind the mouse handlers that we don't need to add/remove each time
-      // No sense in binding/unbinding event listeners on the slider etc. all the time.
-      // The unbinding code would cost bytes for nothing useful. It won't help with general
-      // window/document performance as these are just for mouse actions over the elements in the panel.
-      function bindPermanentMouseHandlers() {
-
-        var mainSVG = helper.byId(BP_CONST.SVG_ID);
-
-        mainSVG.addEventListener('mousedown', panelController.panelMouseDown);
-      }
-
       sitecues.on('bp/do-expand', expandPanel);
-
-      sitecues.on('bp/did-complete', bindPermanentMouseHandlers);
 
       // When a mousemove happens outside the panel, shrink the panel.
       // Unbind the window event listeners specifically created for shrinking the panel.
@@ -176,7 +122,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         panelContainer.removeAttribute('aria-activedescendant');
 
         // Don't listen to events on the window when the BP is collapsing
-        unbindTemporaryMouseHandlers();
+        toggleTemporaryHandlers(false);
       });
 
       // Unless callback() is queued, the module is not registered in global var modules{}

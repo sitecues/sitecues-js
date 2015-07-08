@@ -194,7 +194,6 @@ sitecues.def('bp/placement', function(placement, callback) {
       }
 
       // Set left and top for positioning.
-      // Set width and height for focus outline.
       ['width', 'height'].forEach(setBPProperty);
 
       bpElement.style.top  = 0;

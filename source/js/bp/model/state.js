@@ -17,7 +17,6 @@ sitecues.def('bp/model/state', function (state, callback) {
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.
     wasMouseInPanel         : false, // Was the mouse inside the panel since last expansion
     featurePanelName        : null,  // Either null, or 'settings' | 'about' | 'tips' | 'feedback'
-    focusIndex              : -1,    // When tabbing, where in the cycle are we?
     paletteName             : 'b',   // Currently either 'b' for basic or 'r' for red
     isAdaptivePalette       : false, // Is an adaptive palette name
     settingsIconVersion     : 1,     // Which settings icon to use?
@@ -92,6 +91,13 @@ sitecues.def('bp/model/state', function (state, callback) {
    */
   state.getSecondaryPanelName = function () {
     return data.secondaryPanelName;
+  };
+
+  state.getPanelName = function () {
+    if (state.isPanel() && state.isSecondaryPanelRequested()) {
+      return data.secondaryPanelName;
+    }
+    return 'main';
   };
 
   callback();

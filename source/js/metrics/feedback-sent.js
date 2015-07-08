@@ -29,7 +29,7 @@ sitecues.def('metrics/feedback-sent', function (feedbackSent, callback) {
 
         // ============= Events Handlers ======================
         // Create an instance on panel show event.
-        sitecues.on('feedback/do-send', function(text, rating) {
+        sitecues.on('bp/do-send-feedback', function(text, rating) {
             if (!feedbackSent.data) {
                 feedbackSent.init();
             }

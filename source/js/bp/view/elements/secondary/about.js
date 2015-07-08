@@ -21,8 +21,6 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       cssValues[true].menuBtnScale           = 1;    // About icon scales to 1
       cssValues[true].menuBtnRotate          = -360; // Roll the about icon
       cssValues[true].menuImageTranslateX    = -500;
-      cssValues[true].focusOutlineTranslateX = -314;
-      cssValues[false].focusOutlineTranslateX = 325;
       return cssValues;
     };
 

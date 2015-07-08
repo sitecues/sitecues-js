@@ -44,10 +44,13 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     }
 
     function onRatingClick(evt) {
-      var stars = getRating().children,
+      var ratingElem = getRating(),
+        stars = ratingElem.children,
         index = stars.length,
         targetStar = evt.target,
         star;
+
+      currRating = 0;
 
       while (index --) {
         star = stars[index];
@@ -55,8 +58,12 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
           currRating = index + 1;
         }
 
-        star.setAttribute('data-selected', currRating > 0);
+        star.setAttribute('aria-pressed', currRating > 0);
       }
+
+      // Copy current rating to group
+      // TODO need to test usability of ratings with screen reader
+      ratingElem.setAttribute('aria-label', targetStar.getAttribute('aria-label'));
 
       toggleSendEnabled(true);
     }
@@ -81,7 +88,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     function onSendFeedbackClick() {
       if (isSendEnabled()) {
-        sitecues.emit('feedback/do-send', getFeedbackText(), currRating);
+        sitecues.emit('bp/do-send-feedback', getFeedbackText(), currRating);
         toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
         var bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
         bpContainer.className += bpContainer.className + ' scp-feedback-sent';
@@ -91,8 +98,6 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
     feedback.getGeometryTargets = function(cssValues) {
 
       cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
-      cssValues[true].focusOutlineTranslateX = 130;
-      cssValues[false].focusOutlineTranslateX = -136;
       return cssValues;
     };
 

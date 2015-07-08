@@ -50,7 +50,6 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.ZOOM_SLIDER_THUMB_ID     = 'scp-zoom-slider-thumb';
 
   constants.SHOW_ID                  = 'scp-show';
-  constants.PANEL_TYPES              = ['main', 'more'];
 
   constants.MORE_ID                  = 'scp-secondary';
   constants.MORE_BUTTON_GROUP_ID     = 'scp-more-button-group';

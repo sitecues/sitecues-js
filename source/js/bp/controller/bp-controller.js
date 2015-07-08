@@ -4,14 +4,8 @@ BP Controller
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/controller/focus-controller', 'bp/controller/slider-controller',
-    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper', 'conf',
-    function (BP_CONST, focusController, sliderController, panelController, state, slider, helper, conf) {
-
-    var ROLES = {
-      'CHECKBOX': 'checkbox',
-      'SLIDER':   'slider',
-      'BUTTON':   'button'
-    };
+    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
+    function (BP_CONST, focusController, sliderController, panelController, state, slider, helper) {
 
     // How long we wait before expanding BP
     var hoverDelayTimer;
@@ -26,8 +20,25 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
     DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
 
-    // TODO: rename
-    bpc.processKeydown = function (evt) {
+      // TODO remove if unneeded
+//    bpc.processMouseDown = function(evt) {
+//      sitecues.emit('bp/click', evt);
+//    };
+
+    // If it was always HTML we could just use elem.click()
+    function simulateClick(element) {
+      var dispatchMouseEvent = function(target) {
+        var e = document.createEvent('MouseEvents');
+        // If you need clientX, clientY, etc., you can call
+        // initMouseEvent instead of initEvent
+        e.initEvent.apply(e, Array.prototype.slice.call(arguments, 1));
+        target.dispatchEvent(e);
+      };
+      console.log(element);
+      dispatchMouseEvent(element, 'click', true, true);
+    }
+
+    bpc.processKeyDown = function (evt) {
 
       // Escape = close
       if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
@@ -44,7 +55,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
         state.set('isKeyboardMode', true);
         sitecues.emit('bp/do-update');
-        navigateToNextItem(evt.shiftKey ? -1 : 1);
+        focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
         evt.preventDefault();
         return;
       }
@@ -53,11 +64,14 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       var item = focusController.getFocusedItem();
 
       if (item) {
-        if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
-          performMainAction(evt, item);
-        }
-        else if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+        if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
           performZoomSliderCommand(evt);
+        }
+        else if (item.localName !== 'textarea') {
+          if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
+            simulateClick(item);
+            evt.preventDefault();
+          }
         }
         // else fall through to native processing of keystroke
       }
@@ -145,21 +159,6 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
     };
 
-    // User may think they need to click in badge
-    // We don't want to take focus that way -- only via tabbing or from screen reader use
-    bpc.suppressBadgeFocusOnClick = function(event) {
-      var targetType = event.target.localName;
-      if (targetType === 'textarea' || targetType === 'input') {
-        return;
-      }
-      // Prevent default handling and thus prevent focus
-      event.returnValue = false;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      event.stopPropagation();
-      return false;
-    };
-
     // When a click happens on the badge, it can be from one of two things:
     // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
@@ -190,195 +189,12 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       return evt.altKey || evt.metaKey || evt.ctrlKey;
     }
 
-    // Tab cycles
-    // Tab cycles means that if you tab past the last tabbable item in the
-    // current view, it goes back to the first. Also the reverse:
-    // if you shift+tab from the first item, it goes to the last.
-    function navigateInDirection(direction) {
-
-      if (!state.isPanel()) {
-        // Skip if bp in badge state
-        return;
-      }
-
-      var currentPanel  = focusController.getTab(),
-          numItems      = focusController.TABBABLE[currentPanel].length,
-          newFocusIndex = state.get('focusIndex') + direction;
-
-      if (newFocusIndex < 0) {
-
-        newFocusIndex = numItems - 1;
-
-      } else if (newFocusIndex >= numItems) {
-
-        newFocusIndex = 0;
-
-      }
-
-      focusController.clearPanelFocus();
-
-      state.set('focusIndex', newFocusIndex);
-
-    }
-
-    function getAllTabbableItemsInActiveCard () {
-      return document.querySelectorAll('#scp-' + focusController.getTab() + ' > .scp-active .scp-tabbable:not([data-show="false"])');
-    }
-
-    function getFocusedItemInActiveCard (tabbableItems) {
-      for (var i = 0, l = tabbableItems.length; i < l; i++) {
-        if (tabbableItems[i].getAttribute('data-show-focusset')) {
-          return tabbableItems[i];
-        }
-      }
-    }
-
-    function setFocusedItemInActiveCard (tabbableItems, tabbableItem) {
-      clearAllFocusedItemsInActiveCard(tabbableItems);
-      tabbableItem.setAttribute('data-show-focus', true);
-    }
-
-    function clearAllFocusedItemsInActiveCard (tabbableItems) {
-      for (var i = 0, l = tabbableItems.length; i < l; i++) {
-        tabbableItems[i].removeAttribute('data-show-focus');
-      }
-    }
-
-    function getAdjacentTabbableItem (all, current, dir) {
-      if (!current) {
-        return;
-      }
-      for (var i = 0, l = all.length; i < l; i++) {
-        if (all[i] === current) {
-          return all[i + dir];
-        }
-      }
-    }
-
-    function navigateInCard(direction) {
-      // All items in the active card.
-      var tabbableItemsInActiveCard = getAllTabbableItemsInActiveCard(),
-        focusedTabbableItem,
-        adjacentTabbableItem,
-        nextItemIndex,
-        nextItem;
-
-      // If there are none, skip to the next item.
-      if (tabbableItemsInActiveCard.length) {
-        // The current focused item.  Might not exist.
-        focusedTabbableItem = getFocusedItemInActiveCard(tabbableItemsInActiveCard);
-
-        // The item adjacent to the current focused item, depending on what direction user tabs.
-        adjacentTabbableItem = getAdjacentTabbableItem(tabbableItemsInActiveCard, focusedTabbableItem, direction);
-
-        // There is a current focused item, but the adjacent item is not within the dynamic content
-        // within the active card.  Meaning, the adjacent item is really outside the dynamic content.
-        // Just skip.
-        if (focusedTabbableItem && !adjacentTabbableItem) {
-          clearAllFocusedItemsInActiveCard(tabbableItemsInActiveCard);
-        }
-        else {
-          // First or last dynamic tabbable item.
-          nextItemIndex = direction > 0 ? 0 : tabbableItemsInActiveCard.length - 1;
-
-          // If a focused item exists, use the adjacent item.  Otherwise, its either the first or last item.
-          nextItem = focusedTabbableItem ? adjacentTabbableItem : tabbableItemsInActiveCard[nextItemIndex];
-
-          setFocusedItemInActiveCard(tabbableItemsInActiveCard, nextItem);
-
-          nextItem = adjacentTabbableItem || tabbableItemsInActiveCard[nextItemIndex];
-        }
-      }
-
-      return nextItem;
-    }
-
-    function navigateToNextItem(direction) {
-
-      var item      = focusController.getFocusedItem(),
-          itemName  = focusController.getFocusedItemName(),
-          nextItem;
-
-      // Process the dynamic content for the possibility of tabbable items.
-      while (true) {
-        if (itemName === '$') {
-          nextItem = navigateInCard(direction, item);
-        }
-        if (!nextItem) {
-          navigateInDirection(direction);
-        }
-        // Skip disabled items such as the prev arrow which is turned off at first
-        if (nextItem.getAttribute('aria-disabled') !== 'true') {
-          break;
-        }
-      }
-
-      focusController.showFocus(item);
-    }
-
-    // Enter or space key pressed
-    function performMainAction(evt, item) {
-      var role = item.getAttribute('role');
-      if (role === ROLES.CHECKBOX) {
-        if (item.id === BP_CONST.SPEECH_ID) {
-          sitecues.emit('speech/do-toggle');
-          evt.preventDefault();
-        }
-      } else if (role === ROLES.BUTTON) {
-        buttonPress(evt, item);
-        evt.preventDefault();
-      }
-    }
-
     function performZoomSliderCommand(evt) {
       var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
       if (deltaSliderCommand) {
         sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
         evt.preventDefault();
       }
-    }
-
-    // todo: use constants.js for IDS
-    function buttonPress(evt, item) {
-
-      item = item || evt.currentTarget;
-
-      var feature      = item.getAttribute('data-feature'),
-          currentMode  = focusController.getTab(),
-          settingName  = item.getAttribute('data-setting-name'),
-          settingValue = item.getAttribute('data-setting-value'),
-          target       = item.getAttribute('data-target');
-
-      if (feature) {  /* Feature button has data-feature attribute */
-        sitecues.emit('bp/do-toggle-secondary-panel', feature);
-        syncFocusIndex(currentMode);
-      }
-      if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/do-toggle-secondary-panel');
-        syncFocusIndex(currentMode);
-      }
-      if (item.id === BP_CONST.NEXT_ID) {
-        sitecues.emit('bp/do-next-card');
-      }
-      if (item.id === BP_CONST.PREV_ID) {
-        sitecues.emit('bp/do-prev-card');
-      }
-      if (settingName) {
-        conf.set(settingName, settingValue);
-      }
-      if (target) {
-        sitecues.emit('bp/do-target-card', helper.byId(target));
-        focusController.clearPanelFocus();
-      }
-      sitecues.emit('bp/do-update');
-    }
-
-    function syncFocusIndex (synchWith) {
-      var currentMode = state.isSecondaryPanelRequested() ? state.getSecondaryPanelName() : BP_CONST.PANEL_TYPES[+state.isSecondaryPanel()],
-          tabbable        = focusController.TABBABLE,
-          previousMode    = tabbable[synchWith];
-
-      state.set('focusIndex', tabbable[currentMode].indexOf(previousMode[state.get('focusIndex')]));
     }
 
     window.addEventListener('focus', onWindowFocus);
