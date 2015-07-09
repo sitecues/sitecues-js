@@ -80,17 +80,17 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
         return; // Not a panel or is already shrinking -- nothing to do
       }
 
+      /*
+       bp/will-shrink sets and removes attributes used for screen readers.
+       bp/will-shrink removes mousedown, mousemove, and keydown event listeners bound to the window.
+       bp/will-shrink cancels badge->panel animation
+       bp/will-shrink removes click handler for toggling speech
+       */
+      sitecues.emit('bp/will-shrink');
+
       state.set('transitionTo', BP_CONST.BADGE_MODE);
       state.set('featurePanelName', '');
       state.set('isShrinkingFromKeyboard', isFromKeyboard);
-
-      /*
-        bp/will-shrink sets and removes attributes used for screen readers.
-        bp/will-shrink removes mousedown, mousemove, and keydown event listeners bound to the window.
-        bp/will-shrink cancels badge->panel animation
-        bp/will-shrink removes click handler for toggling speech
-       */
-      sitecues.emit('bp/will-shrink');
 
       // If the secondary panel is active, deactivate it.
       if (state.isSecondaryPanelRequested()) {
@@ -157,13 +157,13 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
       toggleListeners(true);
     }
 
-    function didShrink() {
+    function willShrink() {
       toggleListeners(false);
     }
 
     sitecues.on('bp/do-shrink', shrinkPanel);
     sitecues.on('bp/will-expand', willExpand);
-    sitecues.on('bp/did-shrink', didShrink);
+    sitecues.on('bp/will-shrink', willShrink);
 
     // TODO put in SC_DEV only
     sitecues.toggleStickyPanel = function() {
