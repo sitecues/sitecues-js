@@ -28,7 +28,7 @@ sitecues.def('bp/view/effects', function (effects, callback) {
         }
 
         var id = + target.getAttribute('data-id'),
-          origTransform = origTransforms[id],
+          origTransform = origTransforms[id] || '',
           cssProperties = {
             transform: origTransform + ' ' + (isActiveHover ? target.getAttribute('data-hover') : '')
           },
@@ -42,11 +42,11 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       }
 
       function onMouseOver(evt) {
-        toggleHover(evt.currentTarget, true);
+        toggleHover(evt.target, true);
       }
 
       function onMouseOut(evt) {
-        toggleHover(evt.currentTarget, false);
+        toggleHover(evt.target, false);
       }
 
       function toggleMouseListeners (willBeActive) {

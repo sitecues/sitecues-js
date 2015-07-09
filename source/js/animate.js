@@ -31,10 +31,12 @@ sitecues.def('animate', function (animate, callback) {
 
     function setTransform (element, useAttribute, left, top, transformScale, rotate) {
 
-      var translateCss   = (left || top) ? 'translate(' + left + ',' + top + ') ' : '',
-          scaleCSS       = transformScale && transformScale !== 1 ? ' scale(' + transformScale + ') ' : '',
-          rotateCSS      = rotate         ? ' rotate(' + rotate + ')'     : '',
-          attrVal        = (translateCss + scaleCSS + rotateCSS);
+      var scaleCss       = transformScale && transformScale !== 1 ? ' scale(' + transformScale + ') ' : '',
+          // Need to set translate if we also set scale or the element sometimes disappears in Firefox
+          // See https://bugzilla.mozilla.org/show_bug.cgi?id=969270
+          translateCss   = 'translate(' + left + ',' + top + ') ',
+          rotateCss      = rotate         ? ' rotate(' + rotate + ')'     : '',
+          attrVal        = (translateCss + scaleCss + rotateCss);
 
       if (useAttribute) {
         element.setAttribute('transform', attrVal);
@@ -45,7 +47,7 @@ sitecues.def('animate', function (animate, callback) {
 
     }
 
-    function normalizeTransformProps (animation, transformProperty) {
+    function normalizeTransformProps (animation) {
 
       var element          = animation.element,
           fromTransform    = animation.useAttribute ? element.getAttribute('transform') : element.style[platform.transformProperty],
@@ -63,7 +65,6 @@ sitecues.def('animate', function (animate, callback) {
       to.scale = toTransformObj.scale;
       to.translate = toTransformObj.translate;
       to.rotate = toTransformObj.rotate;
-
     }
 
     function Animate (element, CSSProperties, options) {
@@ -105,7 +106,6 @@ sitecues.def('animate', function (animate, callback) {
           that                        = this,
           fromStyles               = this.animateStyles.from,
           toStyles                = this.animateStyles.to;
-
       if (this.CSSProperties.transform) {
         setTransform(
           this.element,
