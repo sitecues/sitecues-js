@@ -8,7 +8,6 @@
 //
 // Commands:
 // bp/do-update    -- call to update the view to match the current state
-// bp/do-expand    -- call to expand the BP or listen to know when the BP will expand
 //
 // Information:
 // bp/did-create   -- BP inserted in page
@@ -22,9 +21,9 @@ sitecues.def('bp', function (bp, callback) {
   'use strict';
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-    'zoom', 'bp/controller/bp-controller', 'bp/placement', 'bp/view/elements/slider',
+    'zoom', 'bp/placement', 'bp/view/elements/slider',
     'bp/size-animation', 'platform', 'conf/site', 'util/color',
-    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
+    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod,
               placement, slider, sizeAnimation, platform, site, colorUtil) {
 
     /*
@@ -122,8 +121,6 @@ sitecues.def('bp', function (bp, callback) {
       // Set badge classes. Render the badge. Render slider.
       updateView(true);
 
-      slider.renderView();
-
       // Notify other modules we're completely ready
       // slider.js     -> Bind mousedown handlers for A's, thumb, slider. updateZoomValueView.
       // panel.js      -> Bind mousedown handler to SVG_ID
@@ -161,15 +158,6 @@ sitecues.def('bp', function (bp, callback) {
 
       // Append the bpContainer to the badgeElement.  Also calls repositionBPOverBadge.
       placement.init(badgeElement, bpContainer, svgElement);
-
-      bindPermanentListeners(badgeElement);
-    }
-
-    function bindPermanentListeners(badgeElement) {
-      badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
-      badgeElement.addEventListener('click', bpController.clickToOpenPanel);
-      badgeElement.addEventListener('mousemove', bpController.onMouseMove);
-      badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }
 
     function isBadgeAnImage (badgeElement) {

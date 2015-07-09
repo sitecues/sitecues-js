@@ -166,9 +166,6 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
     // Once BP is ready init the badge
     sitecues.on('bp/did-complete', init);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 });

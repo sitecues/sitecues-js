@@ -1,48 +1,7 @@
 sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
-  sitecues.use('bp', 'bp/constants', 'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    function(bp, BP_CONST, panelController, bpController, state, helper) {
-
-      /*
-       Show panel according to settings.
-       */
-      function expandPanel() {
-
-        if (state.isPanel()) {
-          return; // Already expanded or in the middle of shrinking
-        }
-
-        sitecues.emit('bp/will-expand');
-
-        toggleTemporaryHandlers(true);
-        setPanelExpandedState();
-
-        sitecues.emit('bp/do-update');
-      }
-
-      function getPanelContainer() {
-        return helper.byId(BP_CONST.BP_CONTAINER_ID);
-      }
-
-      // Window mouse listeners are temporary – only bound when the panel is open.
-      // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
-      function toggleTemporaryHandlers(isActive) {
-        var addOrRemoveFn = isActive ? 'addEventListener' : 'removeEventListener';
-        // Pressing tab or shift tab when panel is open switches it to keyboard mode
-        window[addOrRemoveFn]('keydown',   bpController.processKeyDown, true);
-        window[addOrRemoveFn]('mousedown', panelController.winMouseDown);
-        window[addOrRemoveFn]('mousemove', panelController.winMouseMove);
-        window[addOrRemoveFn]('blur', panelController.winBlur);
-        window[addOrRemoveFn]('mouseout', panelController.winMouseLeave);
-//        getPanelContainer()[addOrRemoveFn]('mousedown', bpController.processMouseDown);
-      }
-
-      function setPanelExpandedState() {
-        state.set('wasMouseInPanel', false);
-        state.set('transitionTo', BP_CONST.PANEL_MODE);
-        state.set('isRealSettings', true);    // Always use real settings once expanded
-        state.set('featurePanelName', null);  // We're not in a feature panel
-      }
+  sitecues.use('bp', 'bp/constants', 'bp/model/state',
+    function(bp, BP_CONST, state) {
 
       /**
        *** Getters ***
@@ -106,28 +65,6 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         return className;
       }
 
-      sitecues.on('bp/do-expand', expandPanel);
-
-      // When a mousemove happens outside the panel, shrink the panel.
-      // Unbind the window event listeners specifically created for shrinking the panel.
-      sitecues.on('bp/will-shrink', function() {
-
-        var badgeElement   = helper.byId(BP_CONST.BADGE_ID),
-            panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
-
-        // Tell screen reader explicitly that sitecues button’s state is no longer expanded.
-        badgeElement.setAttribute('aria-expanded', 'false');
-
-        // Remove the focus for SVG child elements.
-        panelContainer.removeAttribute('aria-activedescendant');
-
-        // Don't listen to events on the window when the BP is collapsing
-        toggleTemporaryHandlers(false);
-      });
-
-      // Unless callback() is queued, the module is not registered in global var modules{}
-      // See: https://fecru.ai2.at/cru/EQJS-39#c187
-      //      https://equinox.atlassian.net/browse/EQ-355
       callback();
     });
 

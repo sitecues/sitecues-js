@@ -9,10 +9,10 @@
 // The thumb position only changes based on the thumb change callback!!
 // Effectively this means the zoom module needs is in control of the thumb position.
 
-sitecues.def('bp/view/elements/slider', function (slider, callback) {
+sitecues.def('bp/view/elements/slider', function (sliderView, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/controller/slider-controller', 'zoom', 'bp/helper', 'locale',
-    function (BP_CONST, state, sliderController, zoomMod, helper, locale) {
+  sitecues.use('bp/constants', 'bp/model/state', 'zoom', 'bp/helper', 'locale',
+    function (BP_CONST, state, zoomMod, helper, locale) {
 
     /*
      *** Public methods ***
@@ -22,7 +22,7 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
      * Reposition the zoom slider thumb on badge-panel state change or thumb change callback.
      * This does not change the current zoom of the page -- it only changes the slider appearance.
      */
-    slider.updateThumbPosition = function(currZoom) {
+    sliderView.updateThumbPosition = function(currZoom) {
       var thumbId          = BP_CONST.ZOOM_SLIDER_THUMB_ID,
           thumbElement     = helper.byId(thumbId),
           panelSliderWidth = BP_CONST.TRANSFORMS.PANEL[thumbId].translateX,
@@ -37,39 +37,22 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
           offset      = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
 
       thumbElement.setAttribute('transform', 'translate(' + offset + ')');
-
     };
 
     // Update the slider thumb position on bp view updates because the entire slider changes size
     // (it scales more horizontally than vertically)
-    slider.renderView = function() {
-      slider.updateThumbPosition(zoomMod.getCompletedZoom());
+    sliderView.render = function() {
+      sliderView.updateThumbPosition(zoomMod.getCompletedZoom());
     };
 
-    /*
-     *** Private functions ***
-     */
-
-    function doUseRealSettings() {
+    sliderView.enableRealSettings = function() {
       state.set('isRealSettings', true);
-    }
-
-    function getLocalizedZoomValue(currZoom) {
-      if (currZoom === 1) {
-        // Zoom off
-        return locale.translate(BP_CONST.ZOOM_STATE_LABELS.ZOOM_OFF);
-      }
-
-      // 1.3x, etc.
-      var preZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.PRE_ZOOM),
-        postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
-      return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
-    }
+    };
 
     /*
       Display new zoom value.
      */
-    function updateZoomValueView(currZoom) {
+    sliderView.updateZoomValue = function(currZoom) {
       // 1. Set aria-valuenow for screen readers
       // We do this when zoom is finished so that the screen reader is not trying to read every
       // new value during an animation which would be way too verbose
@@ -86,39 +69,24 @@ sitecues.def('bp/view/elements/slider', function (slider, callback) {
       }
 
       setZoomLabel(zoomText);
+    };
+
+    /*
+     *** Private functions ***
+     */
+
+    function getLocalizedZoomValue(currZoom) {
+      if (currZoom === 1) {
+        // Zoom off
+        return locale.translate(BP_CONST.ZOOM_STATE_LABELS.ZOOM_OFF);
+      }
+
+      // 1.3x, etc.
+      var preZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.PRE_ZOOM),
+        postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
+      return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
     }
 
-    function addListeners() {
-      zoomMod.setThumbChangeListener(slider.updateThumbPosition);
-
-      // Zoom controls
-      var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),
-          sliderThumb  = helper.byId(BP_CONST.ZOOM_SLIDER_THUMB_ID),
-          smallA       = helper.byId(BP_CONST.SMALL_A_ID),
-          largeA       = helper.byId(BP_CONST.LARGE_A_ID),
-          zoomLabel    = helper.byId(BP_CONST.ZOOM_LABEL_ID);
-
-      sliderTarget.addEventListener('mousedown', sliderController.addSliderListeners);
-      sliderThumb.addEventListener('mousedown', sliderController.addSliderListeners);
-      smallA.addEventListener('mousedown', sliderController.handleAButtonsPress);
-      largeA.addEventListener('mousedown', sliderController.handleAButtonsPress);
-      zoomLabel.addEventListener('mousedown', sliderController.handleAButtonsPress);
-    }
-
-    // A zoom operation has been completed
-    // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
-    sitecues.on('zoom bp/did-complete', updateZoomValueView);
-
-    // As soon as any real zooming occurs, switch to displaying the correct thumb position
-    // (The fake settings are only used for someone who has never used sitecues before)
-    sitecues.on('zoom/begin', doUseRealSettings);
-
-    // Add mouse listeners once BP is ready
-    sitecues.on('bp/did-complete', addListeners);
-
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 

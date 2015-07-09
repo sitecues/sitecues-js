@@ -3,9 +3,9 @@
  */
 sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
   'use strict';
-  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'platform', 'zoom', 'bp/controller/panel-controller',
+  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'platform', 'zoom',
 
-    function(state, BP_CONST, helper, platform, zoomMod, panelController) {
+    function(state, BP_CONST, helper, platform, zoomMod) {
 
       var requestFrameFn = window.requestAnimationFrame   ||
                            window.msRequestAnimationFrame ||
@@ -763,18 +763,12 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
 
         getBadgeElement().setAttribute('aria-expanded', isPanelRequested);
 
-        if (isPanelRequested) {
-
-          currentlyTransitioningFrom = BP_CONST.PANEL_MODE;
-
-          panelController.panelReady();
-
-        } else {
-          currentlyTransitioningFrom = BP_CONST.BADGE_MODE;
-          panelController.panelShrunk();
-        }
-
+        state.set('currentMode', currentlyTransitioningTo);
+        currentlyTransitioningFrom = currentlyTransitioningTo;
         currentlyTransitioningTo = null;
+
+        sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
+        sitecues.emit('bp/do-update');
       }
 
       function cancelAnimation() {

@@ -1,13 +1,14 @@
 /*
  Panel Controller
  */
-sitecues.def('bp/controller/panel-controller', function (pc, callback) {
+sitecues.def('bp/controller/shrink-controller', function (shrinkController, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/slider-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, sliderController, state, slider, helper) {
+  sitecues.use('bp/constants', 'util/common', 'bp/model/state', 'bp/helper',
+    function (BP_CONST, common, state, helper) {
 
       var MIN_DISTANCE = 75, // Min distance before shrink
         mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
+        isListening,
         isSticky,
         // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
         wasInFeaturePanel = false;
@@ -20,17 +21,16 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
     // Don't close panel too quickly when the mouse leaves the window, because the panel
     // may be near the window's edge and users with shaky hands may accidentally move mouse outside the window.
     // We don't know anything about the mouse other than the fact that it left the window
-    pc.winMouseLeave = function(evt) {
+    function winMouseLeave(evt) {
       if (evt.target.id === BP_CONST.BADGE_ID) {
-        mouseLeaveShrinkTimer = setTimeout(pc.shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
+        mouseLeaveShrinkTimer = setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
       }
-    };
+    }
 
-    // TODO: rename
-    pc.winMouseMove = function(evt) {
+    function winMouseMove(evt) {
 
-      if (sliderController.isSliderActive()) {
-        return;  // Dragging slider, so don't close panel
+      if (common.isButtonDown(evt)) {
+        return; // Slider in use or text selection, etc.
       }
 
       if (wasInFeaturePanel) {
@@ -45,16 +45,16 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
           return;
         }
         if (state.get('wasMouseInPanel')) {
-          pc.shrinkPanel();
+          shrinkPanel();
         }
       }
       else {
         state.set('wasMouseInPanel', true);
         cancelMouseLeaveShrinkTimer();
       }
-    };
+    }
 
-    pc.winMouseDown = function(evt) {
+    function winMouseDown(evt) {
       if (SC_DEV && isSticky) {
         return;
       }
@@ -62,20 +62,20 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       wasInFeaturePanel = false;
 
       if (isMouseOutsidePanel(evt, 0)) { // Any click anywhere outside of visible contents, no safe-zone needed
-        pc.shrinkPanel();
+        shrinkPanel();
       }
-    };
+    }
 
-    pc.winBlur = function() {
+    function winBlur() {
       if (SC_DEV && isSticky) {
         return;
       }
-      pc.shrinkPanel(true);
-    };
+      shrinkPanel(true);
+    }
 
     // @param isFromKeyboard -- optional, if truthy, then the shrink command is from the keyboard (e.g. escape key)
-    // bpc.processKeyDown, buttonPress, pc.winMouseMove, pc.winMouseDown call this function...
-    pc.shrinkPanel = function(isFromKeyboard) {
+    // bpc.processKeyDown, buttonPress, winMouseMove, winMouseDown call this function...
+    function shrinkPanel(isFromKeyboard) {
       if (state.isShrinking()) {
         return; // Not a panel or is already shrinking -- nothing to do
       }
@@ -97,32 +97,9 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
         disableSecondaryPanel();
       }
 
-      // TODO: Why is this necessary?  It emits 'zoom/stop' and removes the
-      // mousemove handler from the thumb element.  My guess is that
-      // we only need to remove the mousemove handler and not emit the
-      // event, in which case I would prefer to be more explicit to what
-      // we need to happen, instead of relying upon whatever finishZoomChanges
-      // does now or in the future.
-      sliderController.finishZoomChanges();
-
       // Finally, begin the shrinking animation.
       sitecues.emit('bp/do-update');
-    };
-
-    // TODO: Maybe move to panel-controller?
-    pc.panelShrunk = function() {
-      state.set('currentMode', BP_CONST.BADGE_MODE);
-      state.set('isShrinkingFromKeyboard', false);
-      sitecues.emit('bp/did-shrink');
-    };
-
-    pc.panelReady = function() {
-
-      state.set('currentMode', BP_CONST.PANEL_MODE);
-
-      sitecues.emit('bp/did-expand');
-      sitecues.emit('bp/do-update');
-    };
+    }
 
     /*
     Private functions.
@@ -162,7 +139,31 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       }
     }
 
-    sitecues.on('bp/do-shrink', pc.shrinkPanel);
+    // These listeners are temporary – only bound when the panel is open.
+    // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
+    function toggleListeners(doTurnOn) {
+      if (isListening !== doTurnOn) {
+        isListening = doTurnOn;
+        var addOrRemoveFn = doTurnOn ? 'addEventListener' : 'removeEventListener';
+        // Pressing tab or shift tab when panel is open switches it to keyboard mode
+        window[addOrRemoveFn]('mousedown', winMouseDown);
+        window[addOrRemoveFn]('mousemove', winMouseMove);
+        window[addOrRemoveFn]('blur', winBlur);
+        window[addOrRemoveFn]('mouseout', winMouseLeave);
+      }
+    }
+
+    function willExpand() {
+      toggleListeners(true);
+    }
+
+    function didShrink() {
+      toggleListeners(false);
+    }
+
+    sitecues.on('bp/do-shrink', shrinkPanel);
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/did-shrink', didShrink);
 
     // TODO put in SC_DEV only
     sitecues.toggleStickyPanel = function() {
@@ -170,9 +171,6 @@ sitecues.def('bp/controller/panel-controller', function (pc, callback) {
       return isSticky;
     };
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 

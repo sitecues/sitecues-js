@@ -83,7 +83,6 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       }
       var outlineStyle = byId(BP_CONST.OUTLINE_ID).style;
       outlineStyle.display = 'none';
-      //outlineStyle[platform.transformProperty] = '';  // TODO why? Probably needed only if we animate the focus ring
     }
 
     function updateDOMFocusState() {
@@ -103,17 +102,18 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
     function showFocus() {
 
       if (!focusElement || !state.get('isKeyboardMode')) {
+        // No focus to show or not in keyboard mode
         hideFocus();
-        return;
       }
+      else {
+        // Show focus
+        if (focusElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
+          sitecues.emit('bp/do-show-help-button', true);
+        }
 
-      if (focusElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('bp/do-show-help-button', true);
+        updateDOMFocusState();
+        renderFocusOutline();
       }
-
-      updateDOMFocusState();
-
-      renderFocusOutline();
     }
 
     function init() {
@@ -350,7 +350,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       }
     }
 
-    sitecues.on('bp/do-toggle-secondary-panel bp/will-toggle-feature bp/did-show-card bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-toggle-feature bp/did-show-card bp/do-send-feedback', hideFocus);
     sitecues.on('bp/will-expand', beginKeyboardFocus);
     sitecues.on('bp/will-shrink', restoreDocumentFocus);
     sitecues.on('bp/did-expand', showFocus);

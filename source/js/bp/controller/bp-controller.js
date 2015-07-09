@@ -3,9 +3,9 @@ BP Controller
  */
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/focus-controller', 'bp/controller/slider-controller',
-    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, focusController, sliderController, panelController, state, slider, helper) {
+  sitecues.use('bp/constants', 'bp/controller/focus-controller',
+    'bp/model/state', 'bp/helper',
+    function (BP_CONST, focusController, state, helper) {
 
     // How long we wait before expanding BP
     var hoverDelayTimer;
@@ -20,29 +20,20 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
     DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
 
-      // TODO remove if unneeded
-//    bpc.processMouseDown = function(evt) {
-//      sitecues.emit('bp/click', evt);
-//    };
-
     // If it was always HTML we could just use elem.click()
     function simulateClick(element) {
-      var dispatchMouseEvent = function(target) {
-        var e = document.createEvent('MouseEvents');
-        // If you need clientX, clientY, etc., you can call
-        // initMouseEvent instead of initEvent
-        e.initEvent.apply(e, Array.prototype.slice.call(arguments, 1));
-        target.dispatchEvent(e);
-      };
-      console.log(element);
-      dispatchMouseEvent(element, 'click', true, true);
+      var event = document.createEvent('MouseEvents');
+      // If you need clientX, clientY, etc., you can call
+      // initMouseEvent instead of initEvent
+      event.initEvent('click', true, true);
+      element.dispatchEvent(event);
     }
 
-    bpc.processKeyDown = function (evt) {
+    function processKeyDown(evt) {
 
       // Escape = close
       if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-        panelController.shrinkPanel(true);
+        sitecues.emit('bp/do-shrink', true);
         evt.preventDefault();
         return;
       }
@@ -75,7 +66,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
         }
         // else fall through to native processing of keystroke
       }
-    };
+    }
 
     function isInActiveToolbarArea(evt, badgeRect) {
       var middleOfBadge = badgeRect.left + badgeRect.width / 2,
@@ -104,7 +95,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     // Logic to determine whether we should begin to expand panel
-    bpc.onMouseMove = function(evt) {
+    function onMouseMove(evt) {
       cancelHoverDelayTimer();
 
       if (doIgnoreNextMouseMove) {
@@ -129,57 +120,95 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       // Check if shrinking and need to reopen
       if (state.isShrinking()) {
         if (isInBadge) {
-          bpc.changeModeToPanel();  // User changed their mind -- reverse course and reopen
+          changeModeToPanel();  // User changed their mind -- reverse course and reopen
         }
         return;
       }
 
       // Use the event
       if (isInToolbar || isInBadge) {
-        hoverDelayTimer = setTimeout(bpc.changeModeToPanel,
+        hoverDelayTimer = setTimeout(changeModeToPanel,
           isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
       }
-    };
+    }
 
-    bpc.changeModeToPanel = function() {
+    /*
+     Show panel according to settings.
+     */
+    function expandPanel() {
+
+      if (state.isPanel()) {
+        return; // Already expanded or in the middle of shrinking
+      }
+
+      sitecues.emit('bp/will-expand');
+
+      setPanelExpandedState();
+
+      sitecues.emit('bp/do-update');
+    }
+
+    function setPanelExpandedState() {
+      state.set('wasMouseInPanel', false);
+      state.set('transitionTo', BP_CONST.PANEL_MODE);
+      state.set('isRealSettings', true);    // Always use real settings once expanded
+      state.set('featurePanelName', null);  // We're not in a feature panel
+    }
+
+    function changeModeToPanel() {
       cancelHoverDelayTimer();
       if (!state.get('isShrinkingFromKeyboard')) {
-        sitecues.emit('bp/do-expand');
+        expandPanel();
       }
-    };
+    }
 
     function cancelHoverDelayTimer() {
       clearTimeout(hoverDelayTimer);
       hoverDelayTimer = 0;
     }
 
-    bpc.onMouseOut = function(evt) {
+    function onMouseOut(evt) {
       if (evt.target.id === BP_CONST.BADGE_ID) {
         cancelHoverDelayTimer();
       }
-    };
+    }
 
     // When a click happens on the badge, it can be from one of two things:
     // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
     //   so that clicks around the panel don't accidentally open it.
-    bpc.clickToOpenPanel = function() {
+    function clickToOpenPanel() {
       var badgeElem = helper.byId(BP_CONST.BADGE_ID);
       if (document.activeElement === badgeElem) {
         // Click is in visible area and badge has focus -- go ahead and open the panel
-        bpc.changeModeToPanel();
+        changeModeToPanel();
       }
-    };
+    }
 
-    bpc.processBadgeActivationKeys = function(evt) {
+    function processBadgeActivationKeys(evt) {
       if (state.isBadge() &&
         (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE)) {
 
         evt.preventDefault();
-        // TODO Return to using the following:
-        bpc.changeModeToPanel();
+        changeModeToPanel();
       }
-    };
+    }
+
+    function willExpand() {
+      window.addEventListener('keydown', processKeyDown, true);
+    }
+
+    function didShrink() {
+      window.removeEventListener('keydown', processKeyDown, true);
+    }
+
+    function init() {
+      var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+      badgeElement.addEventListener('keydown', processBadgeActivationKeys);
+      badgeElement.addEventListener('click', clickToOpenPanel);
+      badgeElement.addEventListener('mousemove', onMouseMove);
+      badgeElement.addEventListener('mouseout', onMouseOut);
+    }
 
     /*
      Private functions.
@@ -198,10 +227,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     window.addEventListener('focus', onWindowFocus);
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/did-shrink', didShrink);
+    sitecues.on('bp/did-complete', init);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 

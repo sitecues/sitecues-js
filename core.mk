@@ -78,18 +78,11 @@ files=\
 	source/js/bp/model/state.js \
 	source/js/bp/constants.js \
 	source/js/bp/helper.js \
-	source/js/bp/controller/focus-controller.js \
-	source/js/bp/controller/slider-controller.js \
-	source/js/bp/controller/panel-controller.js \
-	source/js/bp/size-animation.js \
-	source/js/bp/view/elements/slider.js \
-	source/js/bp/controller/bp-controller.js \
-	source/js/bp/view/svg.js \
-	source/js/cursor/cursor-css.js \
 	source/js/bp/view/modes/panel.js \
 	source/js/bp/view/styles.js \
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
+	source/js/bp/view/elements/slider.js \
 	source/js/bp/view/elements/more-button.js \
 	source/js/bp/view/elements/secondary/cards.js \
 	source/js/bp/view/elements/secondary/tips.js \
@@ -98,8 +91,15 @@ files=\
 	source/js/bp/view/elements/secondary/about.js \
 	source/js/bp/view/elements/secondary/secondary-panel.js \
 	source/js/bp/view/svg-transform-effects.js \
+	source/js/bp/controller/focus-controller.js \
+	source/js/bp/controller/slider-controller.js \
+	source/js/bp/controller/shrink-controller.js \
+	source/js/bp/controller/bp-controller.js \
+	source/js/bp/size-animation.js \
+	source/js/bp/view/svg.js \
+	source/js/cursor/cursor-css.js \
 	source/js/bp/placement.js \
-	source/js/bp.js \
+	source/js/bp/bp.js \
 	source/js/keys/focus.js \
 	source/js/mouse-highlight/traitcache.js \
 	source/js/mouse-highlight/highlight-position.js \
