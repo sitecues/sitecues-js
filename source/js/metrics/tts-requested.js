@@ -27,7 +27,7 @@ sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
 
       ttsRequested.data = DEFAULT_STATE;
       ttsRequested.data.audio_format = getTTSAudioFormat(ttsUrl);
-      ttsRequested.data.char_count   = decodeURIComponent(text.replace(/\+/g,  " ")).length;
+      ttsRequested.data.char_count   = decodeURIComponent(text.replace(/\+/g,  ' ')).length;
       ttsRequested.data.request_time = 1;
     }
 
@@ -54,17 +54,17 @@ sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
     function getQueryVariable(url, variable) {
 
       var query = url.substring(url.indexOf('?') + 1),
-          vars = query.split("&"),
+          vars = query.split('&'),
           i, pair;
 
       for (i = 0; i < vars.length; i++) {
-        pair = vars[i].split("=");
-        if (pair[0] == variable) {
+        pair = vars[i].split('=');
+        if (pair[0] === variable) {
           return pair[1];
         }
       }
 
-      return(false);
+      return '';
     }
 
     // ============= Events Handlers ======================
