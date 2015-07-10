@@ -86,6 +86,9 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
     }
 
     function updateDOMFocusState() {
+      if (!focusElement) {
+        return;
+      }
       getPanelContainer().setAttribute('aria-activedescendant', focusElement.id);
       focusElement.setAttribute('focusable', true);
       focusElement.setAttribute('tabindex', 0);
@@ -101,6 +104,8 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
 
     function showFocus() {
 
+      updateDOMFocusState();
+
       if (!focusElement || !state.get('isKeyboardMode')) {
         // No focus to show or not in keyboard mode
         hideFocus();
@@ -111,7 +116,6 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
           sitecues.emit('bp/do-show-help-button', true);
         }
 
-        updateDOMFocusState();
         renderFocusOutline();
       }
     }
@@ -334,8 +338,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       }
 
       if (focusElement) {
-        // New focusable element -- update the DOM state but don't show focus ring from click-to-focus
-        updateDOMFocusState();
+        showFocus();
       }
       else {
         // Clicked in whitespace, on collapsed badge or somewhere that can't take focus
