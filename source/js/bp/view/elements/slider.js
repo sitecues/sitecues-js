@@ -42,7 +42,9 @@ sitecues.def('bp/view/elements/slider', function (sliderView, callback) {
     // Update the slider thumb position on bp view updates because the entire slider changes size
     // (it scales more horizontally than vertically)
     sliderView.render = function() {
-      sliderView.updateThumbPosition(zoomMod.getCompletedZoom());
+      var currZoom = zoomMod.getCompletedZoom();
+      sliderView.updateThumbPosition(currZoom);
+      sliderView.updateZoomValue(currZoom);
     };
 
     sliderView.enableRealSettings = function() {
