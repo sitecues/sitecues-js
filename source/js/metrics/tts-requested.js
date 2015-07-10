@@ -22,10 +22,8 @@ sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
   sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
 
     function init(ttsUrl) {
-
-      // TODO: The "URL" constructor does not exist in any version of IE.
-      //       Is this expected to work there?
-      var text = getQueryVariable(new URL(ttsUrl), 't');
+      
+      var text = getQueryVariable(ttsUrl, 't');
 
       ttsRequested.data = DEFAULT_STATE;
       ttsRequested.data.audio_format = getTTSAudioFormat(ttsUrl);
@@ -51,9 +49,11 @@ sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
       return ttsFileName.split('.')[1];
     }
 
+
+    // TODO: This function does not belong here . Make it a common utility.
     function getQueryVariable(url, variable) {
 
-      var query = url.search.substring(1),
+      var query = url.substring(url.indexOf('?') + 1),
           vars = query.split("&"),
           i, pair;
 
