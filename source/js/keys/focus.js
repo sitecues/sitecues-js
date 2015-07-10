@@ -24,7 +24,7 @@ sitecues.def('focus', function(focus, callback) {
       // 'z-index: 999999; position: relative;' +
       $styleSheet = $('<style>')
         // Note: using :not() helps avoid non-performant general descendant selector like 'body *'
-        .html('*:not(#sitecues-badge):not([id^="scp-"]):focus{box-shadow:0 0 3pt 2pt ' + FOCUS_RING_COLOR + ';}')
+        .html('*:not(html):not(body):not(#sitecues-badge):not([id^="scp-"]):focus{box-shadow:0 0 3pt 2pt ' + FOCUS_RING_COLOR + ';}')
         .appendTo('head');
     }
 
