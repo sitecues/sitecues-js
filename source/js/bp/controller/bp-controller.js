@@ -200,6 +200,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     function didShrink() {
       window.removeEventListener('keydown', processKeyDown, true);
+      state.set('isShrinkingFromKeyboard', false);
     }
 
     function init() {
