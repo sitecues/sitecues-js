@@ -206,6 +206,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         else {
           // Card link
           selectNewCard(byId(linkTarget));
+          sitecues.emit('bp/did-activate-link');
         }
       }
     }

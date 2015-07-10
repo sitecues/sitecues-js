@@ -169,8 +169,8 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       // If the BP_CONTAINER has focus AND the document.body was NOT the previous
       // focused element, focus the previously focused element.
       clearPanelFocus();
-      if (!savedDocumentFocus || savedDocumentFocus === document.body) {
-        document.body.focus(); // TODO used to be document.activeElement.blur() why?
+      if ((!savedDocumentFocus || savedDocumentFocus === document.body) && 'blur' in document.activeElement) {
+        document.activeElement.blur();
       } else {
         savedDocumentFocus.focus();
       }
@@ -350,7 +350,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       }
     }
 
-    sitecues.on('bp/will-toggle-feature bp/did-show-card bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
     sitecues.on('bp/will-expand', beginKeyboardFocus);
     sitecues.on('bp/will-shrink', restoreDocumentFocus);
     sitecues.on('bp/did-expand', showFocus);
