@@ -931,7 +931,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Feedback -- text area
         '#scp-feedback-textarea': {
           'position': 'absolute !important',  // Size will be set by feedback.js
-          'overflow': 'auto', // Hide scrollbar in IE
           'top': '23px !important',
           'left': '29px !important',
           'font-size': '22px !important',

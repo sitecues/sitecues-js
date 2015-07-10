@@ -121,6 +121,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
       var target = helper.getEventTarget(evt),
         settingName;
       if (target && !isNativeInput(target)) {
+        debugger;
         settingName = target.getAttribute('data-setting-name');
         if (settingName) {
           conf.set(settingName, target.getAttribute('data-setting-value'));

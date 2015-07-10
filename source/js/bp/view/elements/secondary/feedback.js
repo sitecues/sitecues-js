@@ -1,6 +1,6 @@
 sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', function (BP_CONST, helper, state) {
+  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', 'platform', function (BP_CONST, helper, state, platform) {
 
     var byId = helper.byId,
       isActive = false,
@@ -32,6 +32,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       feedbackTextareaStyle.width = feedbackInputRect.width + 'px';
       feedbackTextareaStyle.height = feedbackInputRect.height + 'px';
+      // Hide scrollbar in IE
+      if (platform.browser.isIE) {
+        feedbackTextareaStyle.clip = 'rect(0,' + (feedbackInputRect.width - 20) + 'px,' + feedbackTextareaStyle.height + ',0)';
+      }
     }
 
     function onPanelUpdate() {
