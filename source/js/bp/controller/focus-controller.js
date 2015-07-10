@@ -121,9 +121,9 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       if (!isInitialized) {
         isInitialized = true;
         var mainSVG = byId(BP_CONST.SVG_ID),
-          badgeElement = byId(BP_CONST.BADGE_ID);
+          bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
         mainSVG.addEventListener('mousedown', clickToFocus);
-        badgeElement.addEventListener('mousedown', clickToFocus);
+        bpContainer.addEventListener('mousedown', clickToFocus);
       }
     }
 

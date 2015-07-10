@@ -541,11 +541,6 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
         if (state.isExpanding() || state.isShrinking()) {
 
           // There is room to animate, not already at the size limit of where we're transitioning to
-
-          SC_DEV && console.log('PERFORM BP2 ANIMATION');
-          SC_DEV && console.log('currentMode : ' + state.get('currentMode'));
-          SC_DEV && console.log('        transitionTo: ' + state.get('transitionTo'));
-
           performAnimation();
         }
 
@@ -747,15 +742,11 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
         // The animation start time will be NOW minus how long the previous animation duration.
         animationStartTime = Date.now() - percentAnimationComplete * fullAnimationDuration;
 
-        SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
-
         animationId = requestFrameFn(animationTick);
 
       }
 
       function endAnimation () {
-
-        SC_DEV && console.log('BP2 animation complete.');
 
         var isPanelRequested = state.isPanelRequested();
 
@@ -772,7 +763,6 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
       }
 
       function cancelAnimation() {
-        SC_DEV && console.log('---- - canceling BP2 animation.  ----');
         cancelFrameFn(animationId);
       }
 
