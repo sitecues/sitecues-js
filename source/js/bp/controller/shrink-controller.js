@@ -9,7 +9,7 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
       var MIN_DISTANCE = 75, // Min distance before shrink
         mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
         isListening,
-        isSticky,
+        isSticky = SC_DEV,
         // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
         wasInFeaturePanel = false;
 
@@ -22,7 +22,7 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
     // may be near the window's edge and users with shaky hands may accidentally move mouse outside the window.
     // We don't know anything about the mouse other than the fact that it left the window
     function winMouseLeave(evt) {
-      if (evt.target.id === BP_CONST.BADGE_ID) {
+      if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
         mouseLeaveShrinkTimer = setTimeout(shrinkPanel, BP_CONST.MOUSELEAVE_DELAY_SHRINK_BP);
       }
     }
@@ -131,9 +131,10 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
     }
 
     function isMouseOutsidePanel(evt, distance) {
-      var targetId = evt.target.id;
+      var target = helper.getEventTarget(evt),
+        targetId = target.id;
       if (targetId !== BP_CONST.BP_CONTAINER_ID && targetId !== BP_CONST.BADGE_ID &&
-        !isWithinContainer(evt.target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
+        !isWithinContainer(target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
         var visiblePanelContainer = helper.byId(state.isSecondaryPanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
         return isMouseOutsideRect(evt, visiblePanelContainer, distance);
       }

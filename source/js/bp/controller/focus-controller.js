@@ -170,7 +170,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       // focused element, focus the previously focused element.
       clearPanelFocus();
       if (!savedDocumentFocus || savedDocumentFocus === document.body) {
-        document.activeElement.blur();
+        document.body.focus(); // TODO used to be document.activeElement.blur() why?
       } else {
         savedDocumentFocus.focus();
       }
@@ -318,7 +318,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
     }
 
     function clickToFocus(event) {
-      var target = state.isPanel() && event.target;
+      var target = state.isPanel() && helper.getEventTarget(event);
       clearPanelFocus();
       while (target && target.id !== BP_CONST.BADGE_ID && target.id !== BP_CONST.BP_CONTAINER_ID) {
         var ariaControls = target.getAttribute('aria-controls');

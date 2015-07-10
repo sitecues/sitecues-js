@@ -64,7 +64,7 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
      */
     function handleAButtonsPress(evt) {
 
-      var target = evt.target.correspondingUseElement || evt.target,
+      var target = helper.getEventTarget(evt),
           type   = (target.id === BP_CONST.SMALL_A_ID) ? 'decrease' : 'increase';
 
       window.addEventListener('mouseup', finishZoomChanges);

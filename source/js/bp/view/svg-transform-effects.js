@@ -42,11 +42,11 @@ sitecues.def('bp/view/effects', function (effects, callback) {
       }
 
       function onMouseOver(evt) {
-        toggleHover(evt.target, true);
+        toggleHover(helper.getEventTarget(evt), true);
       }
 
       function onMouseOut(evt) {
-        toggleHover(evt.target, false);
+        toggleHover(helper.getEventTarget(evt), false);
       }
 
       function toggleMouseListeners (willBeActive) {

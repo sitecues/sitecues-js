@@ -195,7 +195,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
     }
 
     function onClick(evt) {
-      var clickedElem = evt.target,
+      var clickedElem = helper.getEventTarget(evt),
         linkTarget = clickedElem.getAttribute('data-target');
 
       if (linkTarget) {

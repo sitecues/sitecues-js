@@ -168,7 +168,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     function onMouseOut(evt) {
-      if (evt.target.id === BP_CONST.BADGE_ID) {
+      if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
         cancelHoverDelayTimer();
       }
     }

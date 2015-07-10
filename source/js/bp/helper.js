@@ -119,6 +119,12 @@ sitecues.def('bp/helper', function (helper, callback) {
       return +(str.match(/[0-9\.\-]+/));
     };
 
+    // Fix for events in SVG in IE:
+    // IE sometimes gives us the <defs> element for the event, and we need the <use> element
+    helper.getEventTarget = function(evt) {
+      return evt.target.correspondingUseElement || evt.target;
+    };
+
     callback();
   });
 });

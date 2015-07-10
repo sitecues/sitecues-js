@@ -22,6 +22,10 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       return byId(BP_CONST.FEEDBACK_SEND);
     }
 
+    function getBPContainer() {
+      return byId(BP_CONST.BP_CONTAINER_ID);
+    }
+
     function autoSizeTextarea() {
       var feedbackTextareaStyle = getFeedbackArea().style,
         feedbackInputRect = getFeedbackInputRect().getBoundingClientRect();
@@ -45,9 +49,9 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
     function onRatingClick(evt) {
       var ratingElem = getRating(),
-        stars = ratingElem.children,
+        stars = getBPContainer().getElementsByClassName(BP_CONST.RATING_STAR_CLASS), // svgElem.children not supported in IE
         index = stars.length,
-        targetStar = evt.target,
+        targetStar = helper.getEventTarget(evt),
         star;
 
       currRating = 0;
@@ -63,6 +67,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
 
       // Copy current rating to group
       // TODO need to test usability of ratings with screen reader
+      // TODO breaking in IE9!! Object doesn't support getAttribute()
       ratingElem.setAttribute('aria-label', targetStar.getAttribute('aria-label'));
 
       toggleSendEnabled(true);
@@ -90,7 +95,7 @@ sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
       if (isSendEnabled()) {
         sitecues.emit('bp/do-send-feedback', getFeedbackText(), currRating);
         toggleSendEnabled(false); // Disable feedback button after sent, so that feedback isn't accidentally clicked twice
-        var bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
+        var bpContainer = getBPContainer();
         bpContainer.className += bpContainer.className + ' scp-feedback-sent';
       }
     }

@@ -1,15 +1,13 @@
 // TODO
-// Design questions:
-// - tips/settings: are back/forward buttons too ugly? (Anna)
-// - tips: is fake page or presence of second mouse in fake page confusing?
-// - tips: should user be able to try each exercise themselves?
-// - tips: speech page needs love -- break into Activate speech  and Use speech?
-//
 // Next
 // Design polish
 // UX testing -- Vermont?
+// IE
+// - feedback page issues
+// -- textarea looks funny in IE9
+// -- no caret visible in IE9
+// -- stars not activating via enter key in IE9
 // Beta testing
-// Firefox & IE
 // Applause testing
 // Localization
 // Provisional patents  -- who can help? Jeff? Ai2?

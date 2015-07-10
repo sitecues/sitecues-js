@@ -518,7 +518,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /*************** Focus **************************/
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
-        '#sitecues-badge:focus,#scp-bp-container:focus,#scp-svg g:focus': {
+        '#sitecues-badge:focus,#scp-bp-container:focus,#scp-bp-container *:focus': {
           'outline': '0 !important'
         },
 
@@ -931,6 +931,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // Feedback -- text area
         '#scp-feedback-textarea': {
           'position': 'absolute !important',  // Size will be set by feedback.js
+          'overflow': 'auto', // Hide scrollbar in IE
           'top': '23px !important',
           'left': '29px !important',
           'font-size': '22px !important',

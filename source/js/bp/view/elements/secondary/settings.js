@@ -118,7 +118,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     }
 
     function onSettingsClick(evt) {
-      var target = evt.target,
+      var target = helper.getEventTarget(evt),
         settingName;
       if (target && !isNativeInput(target)) {
         settingName = target.getAttribute('data-setting-name');
@@ -131,7 +131,7 @@ sitecues.def('bp/view/elements/settings', function (settings, callback) {
     // Use native value for things like <input type="range">
     // For sliders, this occurs when user drops the thumb (lets go of mouse button)
     function onSettingsNativeInputChange(evt) {
-      var target = evt.target;
+      var target = helper.getEventTarget(evt);
       if (target) {
         var settingName = target.getAttribute('data-setting-name');
         if (settingName) {
