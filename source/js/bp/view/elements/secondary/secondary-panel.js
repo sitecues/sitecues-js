@@ -4,15 +4,15 @@
 // UX testing -- Vermont?
 // IE
 // - feedback page issues
-// -- textarea looks funny in IE9
 // -- no caret visible in IE9
 // -- stars not activating via enter key in IE9
+// -- Sliders ugly in IE10
+// -- Performance bad in IE10 with nytimes.com
 // Beta testing
 // Applause testing
 // Localization
 // Provisional patents  -- who can help? Jeff? Ai2?
 // Accessibility
-// Move bp.js into bp/
 //
 // Later
 // About: Get it now
