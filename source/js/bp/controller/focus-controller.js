@@ -89,7 +89,8 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       if (!focusElement) {
         return;
       }
-      getPanelContainer().setAttribute('aria-activedescendant', focusElement.id);
+      var panelContainer = getPanelContainer();
+      panelContainer.setAttribute('aria-activedescendant', focusElement.id);
       focusElement.setAttribute('focusable', true);
       focusElement.setAttribute('tabindex', 0);
 
@@ -99,7 +100,9 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
         // - In other browsers, anything with focusable/tabindex can be focused
         focusElement.focus();
       }
-      catch (ex) {}
+      catch (ex) {
+        panelContainer.focus();
+      }
     }
 
     function showFocus() {
