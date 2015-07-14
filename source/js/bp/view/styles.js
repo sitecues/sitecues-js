@@ -307,6 +307,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-bp-container': {
           'position': 'fixed',
           'z-index': '9999999',
+          'user-select': 'none',
+          '-webkit-user-select': 'none',
+          '-moz-user-select': 'none',
+          '-ms-user-select': 'none',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',
           'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
@@ -389,11 +393,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '.scp-is-panel text': {
           'font-family': 'Arial',
           'font-size': '29px',
-          'font-weight': 'bold',
-          'user-select': 'none',
-          '-webkit-user-select': 'none',
-          '-moz-user-select': 'none',
-          '-ms-user-select': 'none'
+          'font-weight': 'bold'
         },
 
         'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not([data-sc-reversible="false"])': {
