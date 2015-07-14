@@ -13,16 +13,10 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
   'use strict';
 
   sitecues.use('jquery', 'util/color', function($, colorUtil) {
-    var BLACK = { r: 0, g: 0, b: 0, a: 1 },
-      MIN_INTENSITY = 0.6,
-      YELLOW_HUE = 0.167,
-      GREEN_HUE = 0.333,
-      RED_HUE = 0,
-      BLUE_HUE = 0.667,
-      MAGENTA_HUE = 0.8333,
-
-      monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
-      monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
+    var //BLACK = { r: 0, g: 0, b: 0, a: 1 },
+//      MIN_INTENSITY = 0.6,
+//      monoForegroundHsl = { h: 0.12, s: 1, l: 0.5 },
+//      monoBackgroundHsl = { h: 0.62, s: 1, l: 0.1 },
       hslToRgb = colorUtil.hslToRgb,
       rgbToHsl = colorUtil.rgbToHsl;
   
@@ -39,50 +33,42 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return lightenedRgb;
     }
 
-    function getInvertedLightness(rgba) {
-      var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-      hsl.l = 1 - hsl.l;  // Invert lightness
-      var invertedRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-      invertedRgb.a = rgba.a;
-      return invertedRgb;
-    }
+//    function getInvertedLightness(rgba) {
+//      var hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
+//      hsl.l = 1 - hsl.l;  // Invert lightness
+//      var invertedRgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+//      invertedRgb.a = rgba.a;
+//      return invertedRgb;
+//    }
 
     // style object is as follows:
     // rgba: color
     // prop: property name ('background', 'background-color' or 'color')
 
-    colorChoices.darkWithYellow = function (style, intensity) {
-      return darkWithHue(YELLOW_HUE, style, intensity);
-    };
+//    colorChoices.monochrome = function (style, intensity) {
+//      var mixInHsl = (style.prop === 'color') ? monoForegroundHsl : monoBackgroundHsl,
+//        rgba = style.parsedVal,
+//        origHsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+//        origLightness = Math.max(origHsl.l, 1 - origHsl.l);
+//      intensity = Math.max(intensity * origLightness, MIN_INTENSITY);
+//      var newRgba = $.extend({}, rgba, hslToRgb(mixInHsl.h, mixInHsl.s, mixInHsl.l));
+//      return getReducedIntensity(newRgba, intensity);
+//    };
 
-    colorChoices.darkWithGreen = function (style, intensity) {
-      return darkWithHue(GREEN_HUE, style, intensity);
-    };
-
-    colorChoices.monochrome = function (style, intensity) {
-      var mixInHsl = (style.prop === 'color') ? monoForegroundHsl : monoBackgroundHsl,
-        rgba = style.parsedVal,
-        origHsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
-        origLightness = Math.max(origHsl.l, 1 - origHsl.l);
-      intensity = Math.max(intensity * origLightness, MIN_INTENSITY);
-      var newRgba = $.extend({}, rgba, hslToRgb(mixInHsl.h, mixInHsl.s, mixInHsl.l));
-      return getReducedIntensity(newRgba, intensity);
-    };
-
-    function darkWithHue(hue, style, intensity) {
-      if (style.prop === 'color') {
-        var rgba = style.parsedVal,
-          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
-          origLightness = Math.max(Math.max(hsl.l, 1 - hsl.l), 0.5);
-        intensity = Math.max(origLightness, intensity);
-        var newRgba = $.extend({}, rgba, hslToRgb(hue, 1, 0.5));
-        return getReducedIntensity(newRgba, intensity);
-      }
-      else {
-        return getReducedIntensity(BLACK, intensity);
-      }
-    }
-
+//    function darkWithHue(hue, style, intensity) {
+//      if (style.prop === 'color') {
+//        var rgba = style.parsedVal,
+//          hsl = rgbToHsl(rgba.r, rgba.g, rgba.b),
+//          origLightness = Math.max(Math.max(hsl.l, 1 - hsl.l), 0.5);
+//        intensity = Math.max(origLightness, intensity);
+//        var newRgba = $.extend({}, rgba, hslToRgb(hue, 1, 0.5));
+//        return getReducedIntensity(newRgba, intensity);
+//      }
+//      else {
+//        return getReducedIntensity(BLACK, intensity);
+//      }
+//    }
+//
     function isHueBrightEnoughForDarkTheme(hue) {
        return hue <= 0.56 || (hue >= 0.8 && hue <= 0.92);
     }
@@ -239,29 +225,29 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return returnVal;
     };
 
-    var yowza = 0;
-    colorChoices.darkCreative = function (style, intensity) {
-
-      // Hues from .1 - .56 and .84 - .86 are dark enough
-      var MIN_CONTRAST_RATIO = 4.4,
-        NUM_COLORS = 50,
-        newHue,
-        contrastRatio,
-        oldYowza = yowza;
-      while (true) {
-        yowza = ((yowza + 1) % NUM_COLORS);
-        newHue = yowza / NUM_COLORS;
-        contrastRatio = colorUtil.getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
-        if (contrastRatio > MIN_CONTRAST_RATIO) {
-          SC_DEV && console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1');
-          break;
-        }
-        if (yowza === oldYowza) {
-          break;
-        }
-      }
-      return darkWithHue(newHue, style, intensity);
-    };
+//    var yowza = 0;
+//    colorChoices.darkCreative = function (style, intensity) {
+//
+//      // Hues from .1 - .56 and .84 - .86 are dark enough
+//      var MIN_CONTRAST_RATIO = 4.4,
+//        NUM_COLORS = 50,
+//        newHue,
+//        contrastRatio,
+//        oldYowza = yowza;
+//      while (true) {
+//        yowza = ((yowza + 1) % NUM_COLORS);
+//        newHue = yowza / NUM_COLORS;
+//        contrastRatio = colorUtil.getContrastRatio(hslToRgb(newHue, 1, 0.5), BLACK);
+//        if (contrastRatio > MIN_CONTRAST_RATIO) {
+//          SC_DEV && console.log('--> ' + yowza + ' ' + newHue + ' ' + contrastRatio + ':1');
+//          break;
+//        }
+//        if (yowza === oldYowza) {
+//          break;
+//        }
+//      }
+//      return darkWithHue(newHue, style, intensity);
+//    };
 
     function getSaturation(rgba) {
       return rgbToHsl(rgba.r, rgba.g, rgba.b).s;
@@ -306,47 +292,22 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return newRgba;
     };
 
-    // Invert all colors using HSL inversion
-    colorChoices.hslInvert = function (style, intensity) {
-      return getReducedIntensity(getInvertedLightness(style.parsedVal), intensity);
-    };
-
-    // Invert all colors using RGB inversion
-    colorChoices.rgbInvert = function (style, intensity) {
-      var rgba = style.parsedVal,
-        newRgba = {
-          r: 255 - rgba.r,
-          g: 255 - rgba.g,
-          b: 255 - rgba.b,
-          a: rgba.a
-        };
-      return getReducedIntensity(newRgba, intensity);
-    };
-
-    // Reduce overall contrast
-    colorChoices.lightened = function (style, intensity) {
-      return getReducedIntensity(style.parsedVal, intensity);
-    };
-
-    // Creme colored background and lightened text
-    // Roughly based on the research on readability for people with dyslexia at
-    // http://www.w3.org/WAI/RD/2012/text-customization/r11
-    colorChoices.paper = function (style, intensity) {
-      var rgba = style.parsedVal,
-        hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-      if (style.prop === 'color') {
-        return getReducedIntensity(rgba, intensity - 0.2);
-      }
-      else {
-        if (hsl.l > 0.95) {
-          var PAPER_HUE = 0.17,
-            PAPER_SATURATION = 0.8,
-            PAPER_LIGHTNESS_REDUCTION = 0.015;
-          rgba = $.extend({}, rgba, hslToRgb(PAPER_HUE, PAPER_SATURATION, hsl.l - PAPER_LIGHTNESS_REDUCTION));
-        }
-        return getReducedIntensity(rgba, intensity);
-      }
-    };
+//    // Invert all colors using HSL inversion
+//    colorChoices.hslInvert = function (style, intensity) {
+//      return getReducedIntensity(getInvertedLightness(style.parsedVal), intensity);
+//    };
+//
+//    // Invert all colors using RGB inversion
+//    colorChoices.rgbInvert = function (style, intensity) {
+//      var rgba = style.parsedVal,
+//        newRgba = {
+//          r: 255 - rgba.r,
+//          g: 255 - rgba.g,
+//          b: 255 - rgba.b,
+//          a: rgba.a
+//        };
+//      return getReducedIntensity(newRgba, intensity);
+//    };
 
     function mixRgbaColors(origRgba, mixInRgba, mixInRatio) {
       var reductionRatio = 1 - mixInRatio;
@@ -379,15 +340,6 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
       return mixRgbaColors(rgba, mixInRgba, mixInRatio);
     };
 
-    if (SC_DEV) {
-      // TODO Put in UI rather than global function
-      sitecues.setMonoForegroundHsl = function (newHsl) {
-        monoForegroundHsl = newHsl;
-      };
-      sitecues.setMonoBackgroundHsl = function (newHsl) {
-        monoBackgroundHsl = newHsl;
-      };
-    }
   });
 
 
