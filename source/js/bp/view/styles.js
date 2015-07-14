@@ -32,6 +32,12 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         'transform': 'scale(1.7)',
         'transition': 'transform .5s'
       },
+      PLACEHOLDER = {
+        'position': 'relative',
+        'font-size': '26px',
+        'left': '40px',
+        'top': '35px'
+      },
 
       WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
       WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
@@ -939,6 +945,13 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-feedback-textarea:focus': {
           'box-shadow': 'none !important'
         },
+
+        '#scp-feedback-textarea::-moz-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus::-moz-placeholder': { 'color': 'transparent' },
+        '#scp-feedback-textarea::-webkit-input-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus::-webkit-input-placeholder': { 'color': 'transparent' },
+        '#scp-feedback-textarea:-ms-input-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus:-ms-input-placeholder': { 'color': 'transparent' },
 
         // Feedback -- rating stars
         '.scp-rating-star': {
