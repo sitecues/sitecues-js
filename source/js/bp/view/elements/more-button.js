@@ -54,7 +54,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       var btnContainer           = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
           currentTranslate       = getElemTransform(btnContainer).translate;
 
-      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButton);
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
       setOpacityTransition(btnContainer, useInstantTransition);
 
@@ -91,7 +91,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       moreButton.setAttribute('class', '');
       moreButton.style.opacity = 0;
 
-      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButton);
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
       clearTimeout(userInputTimeoutId);
     }
