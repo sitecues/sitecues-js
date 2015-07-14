@@ -135,7 +135,7 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
         targetId = target.id;
       if (targetId !== BP_CONST.BP_CONTAINER_ID && targetId !== BP_CONST.BADGE_ID &&
         !isWithinContainer(target, BP_CONST.MORE_BUTTON_CONTAINER_ID)) {
-        var visiblePanelContainer = helper.byId(state.isSecondaryPanel() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
+        var visiblePanelContainer = helper.byId(state.isSecondaryPanelRequested() ? BP_CONST.MORE_OUTLINE_ID : BP_CONST.MAIN_OUTLINE_ID);
         return isMouseOutsideRect(evt, visiblePanelContainer, distance);
       }
     }

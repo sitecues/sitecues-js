@@ -5,7 +5,6 @@ sitecues.def('bp/model/state', function (state, callback) {
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
-    currentSecondaryPanelMode : 0,
     secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
     secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
@@ -73,11 +72,7 @@ sitecues.def('bp/model/state', function (state, callback) {
     return data.transitionTo === 1 && data.currentMode !== 1;
   };
 
-  state.isSecondaryPanel = function() {
-    return data.currentSecondaryPanelMode === 1 && data.secondaryPanelTransitionTo === 1;
-  };
-
-  state.isSecondaryPanelRequested = function () {
+  state.isSecondaryPanelRequested = function() {
     return data.secondaryPanelTransitionTo === 1;
   };
 

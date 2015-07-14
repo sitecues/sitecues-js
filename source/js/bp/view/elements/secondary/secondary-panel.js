@@ -166,7 +166,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           moreBtnEndRotation = willEnable ? MORE_BUTTON_ROTATION_ENABLED : 0;
 
         function onButtonMenuDropTick(time) {
-          state.set('currentSecondaryPanelMode', time);
           transform.setTransform(morePanel, 0, morePanelCurrentPos + posDiff * time);
           var moreBtnRotation = getValueInTime(moreBtnStartRotation, moreBtnEndRotation, time);
           updateMoreButton(origOutlineHeight, moreBtnRotation);
@@ -471,7 +470,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
 
       function onPanelClose () {
 
-        if (state.isSecondaryPanel()) {
+        if (state.isSecondaryPanelRequested()) {
           // Toggle current panel off
           sitecues.emit('bp/did-toggle-' + state.getSecondaryPanelName(), false);
         }
@@ -484,7 +483,6 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           setPanelHeight(origOutlineHeight, 0);
         }
 
-        state.set('currentSecondaryPanelMode',  DISABLED);
         state.set('secondaryPanelTransitionTo', DISABLED);
 
         cancelAllAnimations();
