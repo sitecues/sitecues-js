@@ -26,6 +26,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
     pathFillBackground: [], // In element rect coordinates, used with CSS background
     highlightPaddingWidth: 0,
     highlightBorderWidth: 0,
+    highlightBorderColor: '',
     bgColor: '',    // highlight color or '' if only outline is being used (as when highlighting media element)
     doUseOverlayforBgColor: false,  // was an overlay used to create the background color? If not, CSS background will be used.
     hasDarkBackgroundColor: false,
@@ -956,6 +957,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
 
       state.elementRect = roundRectCoordinates(elementRect);
       state.highlightBorderWidth = roundBorderWidth(getHighlightBorderWidth() / state.zoom);
+      state.highlightBorderColor = getHighlightBorderColor();
       state.highlightPaddingWidth = roundBorderWidth(EXTRA_PADDING_PIXELS);
       var extra = getExtraPixels();
 
@@ -1075,7 +1077,7 @@ sitecues.def('mouse-highlight', function (mh, callback) {
         truePaddingColor = state.doUseOverlayForBgColor ? '' : (isPossibleBullet() ? getTransparentBackgroundColor() : state.bgColor),
         paddingColor = (SC_DEV && isColorDebuggingOn) ? 'rgba(0, 255, 0, .4)' : truePaddingColor,
         paddingSVG = paddingColor ? getSVGForPath(state.pathFillPadding, state.highlightPaddingWidth, paddingColor, null, 1) : '',
-        outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, getHighlightBorderColor(),
+        outlineSVG = getSVGForPath(state.pathBorder, state.highlightBorderWidth, state.highlightBorderColor,
           overlayBgColor, 3),
         // Extra padding: when there is a need for extra padding and the outline is farther away from the highlight
         // rectangle. For example, if there are list bullet items inside the padding area, this extra space needs to be filled
