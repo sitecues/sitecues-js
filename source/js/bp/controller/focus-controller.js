@@ -348,11 +348,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
         // Prevent default handling and thus prevent focus
         // User may think they need to click in badge
         // We don't want to take focus that way -- only via tabbing or from screen reader use
-        event.returnValue = false;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-        return false;
+        return helper.cancelEvent(event);
       }
     }
 

@@ -194,13 +194,23 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       }
     }
 
+    // Don't scroll while BP is open
+    function preventScroll(evt) {
+      return helper.cancelEvent(evt);
+    }
+
     function willExpand() {
       window.addEventListener('keydown', processKeyDown, true);
+      window.addEventListener('wheel', preventScroll);
+    }
+
+    function willShrink() {
+      window.removeEventListener('keydown', processKeyDown, true);
+      window.removeEventListener('wheel', preventScroll);
     }
 
     function didShrink() {
-      window.removeEventListener('keydown', processKeyDown, true);
-      state.set('isShrinkingFromKeyboard', false);
+        state.set('isShrinkingFromKeyboard', false);
     }
 
     function init() {
@@ -229,6 +239,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
 
     window.addEventListener('focus', onWindowFocus);
     sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/will-shrink', willShrink);
     sitecues.on('bp/did-shrink', didShrink);
     sitecues.on('bp/did-complete', init);
 

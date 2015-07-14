@@ -125,6 +125,14 @@ sitecues.def('bp/helper', function (helper, callback) {
       return evt.target.correspondingUseElement || evt.target;
     };
 
+    helper.cancelEvent = function(evt) {
+      evt.returnValue = false;
+      evt.preventDefault();
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      return false;
+    };
+
     callback();
   });
 });
