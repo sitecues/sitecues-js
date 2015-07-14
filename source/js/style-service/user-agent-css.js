@@ -13,8 +13,8 @@ sitecues.def('ua-css', function (UA_CSS, callback) {
 // input:disabled, select:disabled {color:GrayText; background-color:ThreeDFace; }
 
 UA_CSS.text =
-'html,#scp-main {\n\
-  cursor:auto;\n\
+'html{\n\
+  cursor:default;\n\
 }\n\
 input,textarea,select,button,label[for]{\n\
   cursor:pointer;\n\

@@ -167,7 +167,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
-<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature" data-visible-focus-on="scp-feedback-input-rect" placeholder="Tell us something ...."></textarea>\
+<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" data-visible-focus-on="scp-feedback-input-rect" placeholder="Tell us something ...."></textarea>\
 <sc class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
   <sc-h1>Thank you</sc-h1>\
 </sc>\
