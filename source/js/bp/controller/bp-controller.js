@@ -30,38 +30,50 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     function processKeyDown(evt) {
+      if (isModifiedKey(evt) || !state.isPanel()) {
+        return;
+      }
+
+
+      if (!processKeyDownBehavior(evt)) {
+        evt.preventDefault();
+        return false;
+      }
+    }
+
+
+    // Process key down and return true if key should be allowed to perform default behavior
+    function processKeyDownBehavior(evt) {
+      var keyCode = evt.keyCode;
 
       // Escape = close
-      if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
+      if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
         sitecues.emit('bp/do-shrink', true);
-        evt.preventDefault();
         return;
       }
 
       // Tab navigation
-      if (evt.keyCode === BP_CONST.KEY_CODES.TAB) {
-        if (isModifiedKey(evt) || !state.isPanel()) {
-          return;
-        }
-
+      if (keyCode === BP_CONST.KEY_CODES.TAB) {
         state.set('isKeyboardMode', true);
         sitecues.emit('bp/do-update');
         focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
-        evt.preventDefault();
         return;
       }
 
       // Perform widget-specific commands
+      // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
       var item = focusController.getFocusedItem();
 
       if (item) {
-        if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
-          performZoomSliderCommand(evt);
+        if (item.localName === 'textarea' || item.localName === 'input') {
+          return true;
         }
-        else if (item.localName !== 'textarea') {
-          if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
+        if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+          performZoomSliderCommand(keyCode);
+        }
+        else {
+          if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
             simulateClick(item);
-            evt.preventDefault();
           }
         }
         // else fall through to native processing of keystroke
@@ -229,11 +241,10 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       return evt.altKey || evt.metaKey || evt.ctrlKey;
     }
 
-    function performZoomSliderCommand(evt) {
-      var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
+    function performZoomSliderCommand(keyCode) {
+      var deltaSliderCommand = DELTA_KEYS[keyCode];
       if (deltaSliderCommand) {
         sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
-        evt.preventDefault();
       }
     }
 
