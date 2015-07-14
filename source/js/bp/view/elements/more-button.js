@@ -76,6 +76,14 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       doAlwaysShowButton = true;
     }
 
+    function showMoreButtonSlowly() {
+      showMoreButton(false);
+    }
+
+    function showMoreButtonInstantly() {
+      showMoreButton(true);
+    }
+
     function hideHelpButton () {
 
       var moreButton       = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
@@ -113,7 +121,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
       }
 
       // Add event listener for mousing over the bottom of the panel
-      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).addEventListener('mousemove', showMoreButton);
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).addEventListener('mousemove', showMoreButtonSlowly);
 
       // Add event listener for mouse down anywhere on the panel
       byId(BP_CONST.SVG_ID).addEventListener('mousedown', captureUserInput);
@@ -137,7 +145,7 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
 
     // Allows other modules to show the more button.  For example, pressing the
     // tab key to navigate and operate the panel.
-    sitecues.on('bp/do-show-help-button', showMoreButton);
+    sitecues.on('bp/did-focus-more-button', showMoreButtonInstantly);
 
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);

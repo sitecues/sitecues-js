@@ -482,15 +482,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'transition': 'opacity 0s'
         },
 
-        // These are the 3 different ways the "?" button might fade in.
-        //
-        // We want to turn on pointer-events when the "?" becomes visible.
-        // If none of these classes are set, then the "?" opacity is 0 and pointer-events are disabled.
-        // COMMENTED OUT BECAUSE IT DOESNT WORK!
-        // '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
-        //  'pointer-events': 'all !important'
-        // },
-
         /******** Mouse targets must be hidden but still able to handle events *************/
 
         '.scp-hidden-target': {

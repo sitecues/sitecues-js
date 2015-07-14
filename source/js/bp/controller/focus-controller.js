@@ -116,7 +116,7 @@ sitecues.def('bp/controller/focus-controller', function (focusController, callba
       else {
         // Show focus
         if (focusElement.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-          sitecues.emit('bp/do-show-help-button', true);
+          sitecues.emit('bp/did-focus-more-button');
         }
 
         renderFocusOutline();
