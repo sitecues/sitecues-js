@@ -271,7 +271,8 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         bgAddedLightness,
         bgPreservationFactor,
         newHue,
-        foregroundIntensity = 0.5 + (intensity / 2);
+        foregroundIntensity = 0.4 + (Math.min(intensity, 0.8) / 2.9),
+        textShadowIntensity = Math.max(0, intensity - 0.8) * 0.8;
 
       if (style.prop === 'color') {
         colorizedRgba = (textHue && textHue < 1) ? colorizeGrayText(rgba, textHue) : rgba;
@@ -280,10 +281,13 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         newLightness = Math.max(foregroundIntensity * 0.91 * (origLightness + 0.1), foregroundIntensity / 3);
         newHue = getClosestGoodHueForDarkTheme(hsl.h);
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
+        if (textShadowIntensity > 0) {
+          newRgba.textShadow = textShadowIntensity;
+        }
       }
       else {
         hsl = rgbToHsl(rgba.r, rgba.g, rgba.b);
-        bgAddedLightness = (1 - intensity) / 7; // Add a little lightness when theme is less intense
+        bgAddedLightness = (1 - intensity) / 8; // Add a little lightness when theme is less intense
         bgPreservationFactor = 0.6 - intensity / 8;
         origLightness = hsl.l;
         newLightness = (origLightness < 0.4 ? origLightness : (1 - origLightness) * 3);

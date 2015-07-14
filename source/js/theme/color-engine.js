@@ -21,7 +21,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
         TRANSITION_CLASS = 'sc-animate-theme',
         TRANSITION_MS_FAST = 300,
         TRANSITION_MS_SLOW = 1400,
-        DEFAULT_INTENSITY = 0.8,
+        DEFAULT_INTENSITY = 0.5,
         URL_REGEXP = /url\((?:(?:[\'\" ])*([^\"\'\)]+)[\'\" ]*)/i,
         GRADIENT_REGEXP = /^\s*([\w-]+\s*gradient)\((.*)\).*$/i,
         BUTTON_REGEXP = /(?:^| |,)(?:(?:input\s*\[\s*type\s*=\s*\"(?:button|color|submit|reset)\"\s*\]\s*)|button)(?:$| |,|:)/,
@@ -301,6 +301,24 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
           sizePosCss + stackBelowCss + ensureStackingContextCss;
       }
 
+      function createTextShadowRule(size, hue) {
+        // Create 3 shadows:
+        // - To the right
+        // - Below
+        // - Below AND right
+        var right = size.toFixed(2),
+          below = (size / 2).toFixed(2), // Stretched vertically only half as much -- just looks better that way
+          shadowValue =
+            createShadow(right, below) + ',' +
+            createShadow(right, 0) + ',' +
+            createShadow(0, below);
+
+        function createShadow(x, y) {
+          return x + 'px ' + y + 'px ' + hue;
+        }
+        return createRule('text-shadow', shadowValue);
+      }
+
       /**
        * Retrieve the CSS text required to apply the requested theme
        * @param type
@@ -344,10 +362,7 @@ sitecues.def('theme/color/engine', function(colorEngine, callback) {
             }
             if (newRgba.textShadow) {
               // Sometimes we want to darken, so we create a tiny text shadow of the same color as the text
-              textShadow = createRule('text-shadow',
-                  newRgba.textShadow + 'px ' + (newRgba.textShadow / 2) + 'px ' + newValue + ',' +
-                    newRgba.textShadow + 'px ' + '0 ' + newValue + ',' +
-                    '0 ' + (newRgba.textShadow / 4) + 'px ' + newValue);
+              textShadow = createTextShadowRule(newRgba.textShadow, newValue);
             }
             styleSheetText += selector +
               '{' + createRule(style.value.prop, newValue, important) + formFixes + textShadow + '}\n';
