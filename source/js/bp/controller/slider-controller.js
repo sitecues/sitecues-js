@@ -3,35 +3,44 @@
  */
 sitecues.def('bp/controller/slider-controller', function (sc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'zoom', 'bp/model/state', function (BP_CONST, helper, zoomMod, state) {
+  sitecues.use('bp/constants', 'bp/helper', 'zoom', 'bp/model/state', 'bp/view/elements/slider',
+    function (BP_CONST, helper, zoomMod, state, sliderView) {
 
-    var isActive;
+    var isListeningToWindowMouseEvents;
 
     /**
      * Mouse is been pressed down on the slider:
      * If the slider is ready for input, begin sending zoom new values for every mouse move.
      */
-    sc.addSliderListeners = function(evt) {
+    function initialMouseDown(evt) {
 
       if (!state.isPanel()) {
         return; // Panel not ready for input
       }
 
-      window.addEventListener('mousemove', sc.moveThumb);
-      window.addEventListener('mouseup',   sc.finishZoomChanges);
+      moveThumb(evt);
 
-      isActive = true;
+      addWindowMouseMoveListeners();
+    }
 
-      sc.moveThumb(evt);
+    function addWindowMouseMoveListeners() {
 
-    };
+      if (!isListeningToWindowMouseEvents) {
+        isListeningToWindowMouseEvents = true;
+        window.addEventListener('mousemove', moveThumb);
+        window.addEventListener('mouseup', finishZoomChanges);
+      }
+    }
 
-    sc.isSliderActive = function() {
-      return isActive;
-    };
+    function removeWindowMouseMoveListeners() {
+      if (isListeningToWindowMouseEvents) {
+        window.removeEventListener('mousemove', moveThumb);
+        isListeningToWindowMouseEvents = false;
+      }
+    }
 
     // Mouse button was pressed down over slider and mouse cursor has moved
-    sc.moveThumb = function(evt) {
+    function moveThumb(evt) {
 
       var
         sliderThumbRect = helper.getRectById(BP_CONST.ZOOM_SLIDER_THUMB_ID),
@@ -48,31 +57,59 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
 
       evt.preventDefault();
 
-    };
+    }
 
     /**
      * Handler when click on small or large A.
      */
-    sc.handleAButtonsPress = function(evt) {
+    function handleAButtonsPress(evt) {
 
-      var target = evt.target.correspondingUseElement || evt.target,
+      var target = helper.getEventTarget(evt),
           type   = (target.id === BP_CONST.SMALL_A_ID) ? 'decrease' : 'increase';
 
-      window.addEventListener('mouseup', sc.finishZoomChanges);
+      window.addEventListener('mouseup', finishZoomChanges);
 
       sitecues.emit('zoom/' + type, evt);
-    };
+    }
 
-    sc.finishZoomChanges = function() {
+    function finishZoomChanges() {
       sitecues.emit('zoom/stop');
-      window.removeEventListener('mousemove', sc.moveThumb);
-      isActive = false;
-    };
+      removeWindowMouseMoveListeners();
+    }
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-      // See: https://fecru.ai2.at/cru/EQJS-39#c187
-      //      https://equinox.atlassian.net/browse/EQ-355
-      callback();
-    });
+    function init() {
+      sliderView.render();
+
+      // Add permanent listeners
+      zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
+
+      // Zoom controls
+      var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),
+          sliderThumb  = helper.byId(BP_CONST.ZOOM_SLIDER_THUMB_ID),
+          smallA       = helper.byId(BP_CONST.SMALL_A_ID),
+          largeA       = helper.byId(BP_CONST.LARGE_A_ID),
+          zoomLabel    = helper.byId(BP_CONST.ZOOM_LABEL_ID);
+
+      sliderTarget.addEventListener('mousedown', initialMouseDown);
+      sliderThumb.addEventListener('mousedown', initialMouseDown);
+      smallA.addEventListener('mousedown', handleAButtonsPress);
+      largeA.addEventListener('mousedown', handleAButtonsPress);
+      zoomLabel.addEventListener('mousedown', handleAButtonsPress);
+    }
+
+    // Add mouse listeners once BP is ready
+    sitecues.on('bp/did-complete', init);
+    sitecues.on('bp/will-shrink', finishZoomChanges);
+
+    // A zoom operation has been completed
+    // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
+    sitecues.on('zoom', sliderView.updateZoomValue);
+
+    // As soon as any real zooming occurs, switch to displaying the correct thumb position
+    // (The fake settings are only used for someone who has never used sitecues before)
+    sitecues.on('zoom/begin', sliderView.enableRealSettings);
+
+    callback();
+  });
 
 });

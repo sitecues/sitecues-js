@@ -69,7 +69,7 @@ sitecues.def('metrics', function (metrics, callback) {
       });
 
       // Update the basic metrics when metrics event object created.
-      sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create metrics/zoom-changed/create',
+      sitecues.on('metrics/panel-closed/create metrics/badge-hovered/create metrics/hlb-opened/create metrics/zoom-changed/create metrics/feedback-sent/create',
         function() {
           var data = {'client_time_ms': +new Date};
           metrics.update(data);

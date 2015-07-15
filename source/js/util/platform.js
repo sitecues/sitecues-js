@@ -54,20 +54,6 @@ sitecues.def('platform', function (platformModule, callback) {
     return charIndex < 0 ? 0 : parseInt(agent.substring(charIndex));  // Returns 0 for unknown version
   })();
 
-// TODO add back in if we need to use it
-//  // Set globally accessible version constants
-//  platformModule.os.versionString = (function() {
-//    // If IE is being used, determine which version
-//    var charIndex = agent.indexOf('Windows N') || agent.indexOf('Mac OS X ');
-//    if (charIndex === -1) {
-//      return '0'; // Unknown version
-//    }
-//    return agent.slice(charIndex + 9).replace(/\W.*$/, "");
-//  })();
-//
-//  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
-//  platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
-
   // Convenience method as IE9 is a common issue
   platformModule.isIE9 = function() {
     return platformModule.browser.isIE && platformModule.browser.version === 9;
@@ -85,9 +71,30 @@ sitecues.def('platform', function (platformModule, callback) {
     isMac     : os === 'mac',
     isWin     : os === 'win',
     isLinux   : os === 'mac', // This should say 'mac', not 'linux'
-    isUnknown : os === 'Unknown OS'
+    isUnknown : os === 'Unknown OS',
+    // Set globally accessible version constants
+    versionString: (function() {
+      // If IE is being used, determine which version
+      var charIndex = agent.indexOf(os === 'win' ? 'Windows NT' : 'Mac OS X ');
+      if (charIndex === -1) {
+        return '0'; // Unknown version
+      }
+      return agent.slice(charIndex).replace(/^\D*/,'').replace(/\W.*$/, '');
+    })()
   };
 
+  // Windows versions are weird:
+  // 5.1, 5.2 = Windows XP
+  // 5 = Windows Vista, Windows Server 2008
+  // 6.1 = Windows 7
+  // 6.2 = Windows 8
+  // 6.3 = Windows 8.1
+  // 10 = Windows 10
+  // For more details see https://en.wikipedia.org/?title=Windows_NT
+  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
+
+  // Restore if needed
+  //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
 
   // platformModule.pixel is deprecated
   // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
@@ -106,6 +113,8 @@ sitecues.def('platform', function (platformModule, callback) {
     }
     return '';
   })();
+
+  platformModule.transformProperty = platformModule.isIE9() ? 'msTransform' : (platformModule.browser.isWebKit ? 'webkitTransform' : 'transform');
 
   // Done
   callback();

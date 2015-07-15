@@ -12,10 +12,6 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       return helper.byId(BP_CONST.SPEECH_ID);
     }
 
-    function getMouseTargetForTTS() {
-      return helper.byId(BP_CONST.SPEECH_TARGET_ID);
-    }
-
     function getTTSStateLabelNode() {
       return helper.byId(BP_CONST.SPEECH_STATE_ID).firstChild;
     }
@@ -140,7 +136,7 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
       */
     function init() {
 
-      var mouseTarget1 = getMouseTargetForTTS(),
+      var mouseTarget1 = getTTSButtonElement(),
         mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
 
       // todo: move this to ttsController
@@ -170,9 +166,6 @@ sitecues.def('bp/view/elements/tts-button', function (ttsButton, callback) {
     // Once BP is ready init the badge
     sitecues.on('bp/did-complete', init);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 });

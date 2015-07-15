@@ -7,8 +7,8 @@ sitecues.def('zoom', function (zoom, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'zoom-forms',
-    function ($, conf, site, platform, common, zoomForms) {
+  sitecues.use('jquery', 'conf', 'conf/site', 'platform', 'util/common', 'util/transform', 'zoom-forms',
+    function ($, conf, site, platform, common, transform, zoomForms) {
       
       // Default zoom configuration
       
@@ -509,7 +509,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the current zoom value as reported by the layout engine
       function getActualZoom() {
-        return getSanitizedZoomValue(common.getTransform($body));
+        return getSanitizedZoomValue(transform.getComputedScale(body));
       }
 
       function onGlideStopped() {
@@ -744,6 +744,19 @@ sitecues.def('zoom', function (zoom, callback) {
         return glideChangeTimer;
       }
 
+      // After the user's initial zoom we need to realign any location hash target to the top of the screen
+      function jumpToLocationHash() {
+        var hash = document.location.hash,
+          EXTRA_SPACE_SCROLL_TOP = 60;
+        if (hash) {
+          var elem = document.querySelector(hash + ',[name="' + hash.substring(1) +'"]');
+          if (elem) {
+            elem.scrollIntoView(true);
+            window.scrollBy(0, - EXTRA_SPACE_SCROLL_TOP);
+          }
+        }
+      }
+
       // Must be called at the end of a zoom operation.
       function finishZoomOperation() {
         if (elementDotAnimatePlayer) {
@@ -755,7 +768,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
         var didUnzoom = completedZoom > currentTargetZoom;
 
-        completedZoom = common.getTransform($body);
+        completedZoom = getActualZoom();
         startZoomTime = 0;
 
         if (didUnzoom) {
@@ -779,6 +792,10 @@ sitecues.def('zoom', function (zoom, callback) {
         sitecues.emit('zoom', completedZoom);
 
         clearZoomCallbacks();
+
+        if (isInitialLoadZoom) {
+          jumpToLocationHash();
+        }
 
         isInitialLoadZoom = false;
         zoomInput = {};
@@ -875,7 +892,7 @@ sitecues.def('zoom', function (zoom, callback) {
         }, REPAINT_FOR_CRISP_TEXT_DELAY);
 
         var MAX_ZINDEX = 2147483647,
-          appendedDiv = $('<div>')
+          appendedDiv = $('<sc>')
           .css({
             position: 'fixed',
             top: 0,
@@ -987,7 +1004,7 @@ sitecues.def('zoom', function (zoom, callback) {
 
       // Get the desired width of the body for the current level of zoom
       function getRestrictedWidth(currZoom) {
-        var winWidth = window.innerWidth;
+        var winWidth = originalBodyInfo.width;
         return winWidth / getZoomForWidthRestriction(currZoom, winWidth) + 'px';
       }
 
@@ -1148,7 +1165,7 @@ sitecues.def('zoom', function (zoom, callback) {
       // Does not use getBoundingClientRect because we need size to include overflow
       function getAbsoluteRect(node) {
         var clientRect = node.getBoundingClientRect(),
-          width = Math.max(node.scrollWidth, clientRect.width),
+          width = clientRect.width, //  Math.max(node.scrollWidth, clientRect.width),
           height = Math.max(node.scrollHeight, clientRect.height),
           left = clientRect.left + window.pageXOffset,
           top = clientRect.top + window.pageYOffset;

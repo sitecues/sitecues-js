@@ -19,6 +19,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SPEECH_STATE_ID          = 'scp-speech-state';
 
   constants.MAIN_ID                  = 'scp-main';
+  constants.MAIN_CONTENT_FILL_ID     = 'scp-main-content-fill';
 
   constants.MOUSEOVER_TARGET         = 'scp-mouseover-target'; // Mousing over this element causes BP to expand
 
@@ -39,6 +40,7 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BOTTOM_DEF_ID            = 'scp-bottom-def';
   constants.BOTTOM_TEXT_ID           = 'scp-bottom-text';
   constants.BOTTOM_MOUSETARGET_ID    = 'scp-bottom-mousetarget';
+  constants.BOTTOM_MORE_ID           = 'scp-bottom-secondary';
 
   constants.CLOSE_BUTTON_ID          = 'scp-close-button';
 
@@ -48,25 +50,74 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.ZOOM_SLIDER_THUMB_ID     = 'scp-zoom-slider-thumb';
 
   constants.SHOW_ID                  = 'scp-show';
-  constants.PANEL_TYPES              = ['main', 'more'];
 
-  constants.MORE_ID                  = 'scp-more';
+  constants.MORE_ID                  = 'scp-secondary';
   constants.MORE_BUTTON_GROUP_ID     = 'scp-more-button-group';
   constants.MORE_BUTTON_CONTAINER_ID = 'scp-more-button-container';
 
+  constants.SHADOW_ID                = 'scp-shadow';
   constants.OUTLINE_ID               = 'scp-focus-outline';
   constants.MAIN_OUTLINE_ID          = 'scp-main-outline';
   constants.MAIN_OUTLINE_BORDER_ID   = 'scp-outline-def';
-  constants.MORE_OUTLINE_ID          = 'scp-more-outline';
-  constants.MORE_TARGET              = 'scp-more-button-transparent-target';
+  constants.MORE_OUTLINE_ID          = 'scp-secondary-outline';
+
+  constants.BUTTON_MENU_ID           = 'scp-button-menu';
+  constants.TIPS_BUTTON_ID           = 'scp-tips-button';
+  constants.SETTINGS_BUTTON_ID       = 'scp-settings-button';
+  constants.FEEDBACK_BUTTON_ID       = 'scp-feedback-button';
+  constants.ABOUT_BUTTON_ID          = 'scp-about-button';
+
+  constants.TIPS_LABEL_ID            = 'scp-tips-label';
+  constants.SETTINGS_LABEL_ID        = 'scp-settings-label';
+  constants.FEEDBACK_LABEL_ID        = 'scp-feedback-label';
+  constants.ABOUT_LABEL_ID           = 'scp-about-label';
+
+  constants.ABOUT_CONTENT_ID         = 'scp-about';
+  constants.ABOUT_CONTENT_IMAGE_ID   = 'scp-logo-text';
+
+  constants.FEEDBACK_CONTENT_ID      = 'scp-feedback';
+  constants.FEEDBACK_INPUT_RECT      = 'scp-feedback-input-rect';
+  constants.FEEDBACK_TEXTAREA        = 'scp-feedback-textarea';
+  constants.FEEDBACK_SEND            = 'scp-feedback-send';
+  constants.RATING                   = 'scp-rating';
+  constants.RATING_STAR_CLASS        = 'scp-rating-star';
+
+  constants.SETTINGS_CONTENT_ID      = 'scp-settings';
+  constants.TIPS_CONTENT_ID          = 'scp-tips';
+
+  constants.ARROWS_ID                = 'scp-arrows';
+  constants.NEXT_ID                  = 'scp-next-card';
+  constants.PREV_ID                  = 'scp-prev-card';
+
+  constants.DEFAULT_BADGE_CLASS      = 'scp-default-badge';
+
+  // Tips panel gadgets
+  constants.DEMO_PAGE                = 'scp-demo-page';
+  constants.DEMO_PAGE_CONTENTS       = 'scp-demo-page-contents';
+  constants.DEMO_PARA                = 'scp-demo-para';
+  constants.DEMO_MOUSE               = 'scp-demo-mouse';
+  constants.DEMO_SLIDER_THUMB        = 'scp-demo-slider-thumb';
+  constants.DEMO_ZOOM_PLUS           = 'scp-demo-zoom-plus';
+  constants.DEMO_ZOOM_MINUS          = 'scp-demo-zoom-minus';
+  constants.DEMO_LENS_SPACE          = 'scp-demo-lens-spacebar';
+  constants.DEMO_SPEECH_SPACE        = 'scp-demo-speech-spacebar';
+
+  // Settings panel gadgets
+  constants.THEME_POWER_ID           = 'scp-theme-power-group';
+  constants.THEME_TEXT_HUE_ID        = 'scp-theme-text-hue-group';
 
   constants.HOVER_DELAY_BADGE = 70;
   constants.HOVER_DELAY_TOOLBAR = 200;
   constants.MOUSELEAVE_DELAY_SHRINK_BP = 2000;
 
+
   constants.TRANSFORMS = {
-    'PANEL': {},
-    'BADGE': {}
+    'PANEL'           : {},
+    'BADGE'           : {},
+    'ABOUT_ENABLED'   : {},
+    'SETTINGS_ENABLED': {},
+    'FEEDBACK_ENABLED': {},
+    'TIPS_ENABLED'    : {}
   };
 
   constants.TRANSFORMS.PANEL[constants.VERT_DIVIDER_ID] = {translateX:44};
@@ -95,7 +146,12 @@ sitecues.def('bp/constants', function (constants, callback) {
     scaleY    : 1
   };
 
-  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {scale:1.35};
+  constants.TRANSFORMS[constants.MORE_ID]                  = {translateY: -198};
+  constants.TRANSFORMS[constants.MORE_BUTTON_CONTAINER_ID] = {translateX: 400, translateY: 198};
+  constants.TRANSFORMS[constants.TIPS_BUTTON_ID]           = {translateX: 25};
+  constants.TRANSFORMS[constants.SETTINGS_BUTTON_ID]       = {translateX: 235};
+  constants.TRANSFORMS[constants.FEEDBACK_BUTTON_ID]       = {translateX: 465};
+  constants.TRANSFORMS[constants.ABOUT_BUTTON_ID]          = {translateX: 675};
 
   // Elements that are only shown when panel is expanded
   // Attributes
@@ -111,7 +167,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.BADGE_ATTRS = {
     'ROLE'      : 'button',
     'TABINDEX'  : 0,
-    'ARIA-BUSY' : 'false'
+    'ARIA-BUSY' : 'false',
+    'DATA-SC-REVERSIBLE': 'false'
   };
 
   constants.DEFAULT_TOOLBAR_ATTRS = {
@@ -144,26 +201,8 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SHRINK_ANIMATION_DURATION_MS  = 750;  // Time it takes to shrink panel to badge -- no hovers during this time
   constants.NO_INPUT_TIMEOUT     = 7000;  // Show more button if no activity for this amount of time
 
+  // TODO is this still needed? It's fixed in Firefox
   constants.FIREFOX_SLIDER_OFFSET = 83; // Hardcoded because of https://bugzilla.mozilla.org/show_bug.cgi?id=479058
-
-  constants.FEATURES = {
-    'ABOUT': {
-      'EXTRA_HEIGHT'      : 150,
-      'WAIT_BEFORE_EXPAND': 1600
-    },
-    'SETTINGS': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    },
-    'FEEDBACK': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    },
-    'TIPS': {
-      'EXTRA_HEIGHT'      : 195,
-      'WAIT_BEFORE_EXPAND': 0
-    }
-  };
 
   constants.KEY_CODES = {
     'TAB'   : 9,
@@ -183,9 +222,11 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.LARGE_SLIDER_WIDTH = 256;
   constants.SMALL_SLIDER_WIDTH = 160;
 
-  // Minimum panel size
-  constants.MINIMUM_PANEL_WIDTH = 656;
-  constants.MINIMUM_PANEL_HEIGHT = 160;
+  // Ideal panel size for correct formatting of all contents.
+  // We may need to use a larger size if the badge was already large
+  // In that case we will make up the extra size using transform scale, so as not to disturb the HTML formatting
+  constants.IDEAL_PANEL_WIDTH = 656;
+  constants.IDEAL_PANEL_HEIGHT = 160;
 
   // Amount toolbar space that will open badge
   constants.ACTIVE_TOOLBAR_WIDTH = 500;
@@ -215,6 +256,8 @@ sitecues.def('bp/constants', function (constants, callback) {
 
   constants.BADGE_MODE = 0;
   constants.PANEL_MODE = 1;
+  constants.SECONDARY_PANEL_DISABLED = 0;
+  constants.SECONDARY_PANEL_ENABLED  = 1;
 
   // Unless callback() is queued, the module is not registered in global constants.modules{}
   // See: https://fecru.ai2.at/cru/EQJS-39#c187

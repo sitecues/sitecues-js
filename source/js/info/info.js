@@ -2,8 +2,8 @@ sitecues.def('info', function(info, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'locale',
-    function($, site, dimmer, platform, locale) {
+  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'locale', 'util/color',
+    function($, site, dimmer, platform, locale, colorUtil) {
 
     var $iframe = $(),
       $closeButton = $(),
@@ -15,8 +15,7 @@ sitecues.def('info', function(info, callback) {
         height: '80%',
         transform: 'scale3d(.7,.7,1)',
         willChange: 'transform',
-        backgroundColor: 'white',
-        border: '20px solid #000',
+        backgroundColor: '#fff',
         borderRadius: '8px',
         transition: 'opacity .9s, transform 1s',
         opacity: 0,
@@ -29,7 +28,6 @@ sitecues.def('info', function(info, callback) {
       BUTTON_SIZE = 60,
       CLOSE_BUTTON_CSS = {
         cursor: 'pointer',
-        color: '#ccc',
         border: '3px solid #ccc',
         borderRadius: '48px',
         background: '#222',
@@ -51,6 +49,11 @@ sitecues.def('info', function(info, callback) {
       addCloseButtonTimer,
       isModalOpen = false;
 
+    function getBorderCss() {
+      // Use adaptive border that is visible on any background
+      return colorUtil.isOnDarkBackground(document.body) ? '7px solid #fff' : '20px solid #000';
+    }
+
     function showModal(pageName, anchor) {
 
       if (isModalOpen) {
@@ -65,7 +68,7 @@ sitecues.def('info', function(info, callback) {
         localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
         sitecuesJsUrl = sitecues.getLibraryUrl().raw,
         hostUrl = window.location,
-        pageUrl = sitecues.resolveSitecuesUrl('../html/' + localizedPageName + '.html?') +
+        pageUrl = sitecues.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html?') +
           addParam('scUrl', sitecuesJsUrl) +
           addParam('siteId', site.getSiteId()) +
           addParam('siteUrl', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
@@ -77,6 +80,7 @@ sitecues.def('info', function(info, callback) {
       $iframe = $('<iframe>')
         .attr('src', pageUrl)
         .css(INITIAL_CSS)
+        .css('border', getBorderCss())
         .appendTo('html');
 
       $(window)
@@ -102,7 +106,7 @@ sitecues.def('info', function(info, callback) {
         }
       }, INITIAL_DELAY); // Waiting helps animation performance
 
-      addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 50);
+      addCloseButtonTimer = setTimeout(addCloseButton, INITIAL_DELAY + INFLATION_SPEED + 100);
 
       isModalOpen = true;
     }
@@ -126,7 +130,7 @@ sitecues.def('info', function(info, callback) {
         offsetTop = platform.browser.isIE ? -6 : -1;
 
       $closeButton =
-          $('<div><span style="position:relative;left:14px;top:23px">x</span></div>')
+          $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
         .css(CLOSE_BUTTON_CSS)
         .css({
           left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
@@ -137,7 +141,7 @@ sitecues.def('info', function(info, callback) {
 
       addCloseButtonTimer = setTimeout(function() {
         $closeButton.css('opacity', 1);
-      }, 50);
+      }, 100);
     }
 
     function removeCloseButton() {

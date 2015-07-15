@@ -8,168 +8,149 @@ sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
   'use strict';
   sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'zoom', 'audio', 'animate', 'util/transform', function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
 
-    var mouseEnterAnimation,
-        mouseLeaveAnimation,
-        BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
-        BUTTON_LEAVE_ANIMATION_DURATION = 400,
+    var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
         NO_INPUT_TIMEOUT                = 7000,
+        MORE_BTN_TRANSLATEX,
+        MORE_BTN_TRANSLATEY,
         userInputTimeoutId,
-        alwaysShowButton                = false,
-        userInputOccured                = false;
-
-    function onMouseEnter (e) {
-
-      var id               = e.target.id,
-          btn              = helper.byId(id),
-          currentTranslate = transform.getTranslate(btn.getAttribute('transform'));
-
-      if (mouseLeaveAnimation) {
-        mouseLeaveAnimation.cancel();
-      }
-
-      mouseEnterAnimation = animate.create(btn, {
-        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + BP_CONST.TRANSFORMS[id].scale + ')'
-      }, {
-        'duration': BUTTON_ENTER_ANIMATION_DURATION,
-        'useAttribute': true
-      });
-
-    }
-
-    function onMouseLeave (e) {
-
-      var id               = e.target.id,
-          btn              = helper.byId(id),
-          currentTranslate = transform.getTranslate(btn.getAttribute('transform'));
-
-      if (mouseEnterAnimation) {
-        mouseEnterAnimation.cancel();
-      }
-
-      mouseLeaveAnimation = animate.create(btn, {
-        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
-      }, {
-        'duration': BUTTON_LEAVE_ANIMATION_DURATION,
-        'useAttribute': true,
-        'animationFn': 'linear'
-
-      });
-
-    }
+        doAlwaysShowButton,
+        isAfterUserInput,
+        // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
+        byId = helper.byId,
+        getElemTransform = transform.getElemTransform,
+        getTransformString = transform.getTransformString;
 
     function onMouseClick () {
-      sitecues.emit('info/help');
-    }
 
-    function initMorePanel () {
-
-      addMouseListeners();
+      // Show or hide the secondary panel.
+      sitecues.emit('bp/do-toggle-secondary-panel');
 
     }
 
     function addMouseListeners () {
-
-      var moreButton = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-
-      moreButton.addEventListener('mouseenter', onMouseEnter);
-      moreButton.addEventListener('mouseleave', onMouseLeave);
+      var moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
       moreButton.addEventListener('click', onMouseClick);
-
     }
 
-    function showHelpButton (useInstantTransition) {
+    function setOpacityTransition(btnContainer, useInstantTransition) {
+      // Only use instant transition if true, not truthy, because mouse event is
+      // passed in when we use event listeners
+      var opacityType;
 
-      var btnContainer           = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate       = transform.getTranslate(btnContainer.getAttribute('transform')),
-          opacityTransitionClass;
+      if (useInstantTransition) {
+        opacityType = '-instant';
+      } else {
+        opacityType = doAlwaysShowButton ? '' : '-fast';
+      }
 
-          if (useInstantTransition === true) {
-            opacityTransitionClass = 'scp-transition-opacity-instant';
-          } else {
-            opacityTransitionClass = alwaysShowButton ? 'scp-transition-opacity' : 'scp-transition-opacity-fast';
-          }
+      btnContainer.setAttribute('class', 'scp-transition-opacity' + opacityType);
 
-      // The first time the "?" is presented to the user, scale the "?" to 0.5 and then animate it to a scale of 1
-      if (!alwaysShowButton && useInstantTransition !== true) {
+      // The class we set above takes care of the opacity animation...
+      btnContainer.style.opacity = 1;
+    }
 
-        btnContainer.setAttribute('transform', 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(' + 0.5 + ')');
+    function showMoreButton (useInstantTransition) {
 
-        animate.create(btnContainer, {
-          'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
+      var btnContainer           = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+          currentTranslate       = getElemTransform(btnContainer).translate;
+
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
+
+      setOpacityTransition(btnContainer, useInstantTransition);
+
+      // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
+      if (!doAlwaysShowButton && !useInstantTransition) {
+
+        btnContainer.setAttribute('transform', getTransformString(currentTranslate.left, currentTranslate.top, 0.5));
+
+        animate.animateCssProperties(btnContainer, {
+          'transform'   : getTransformString(currentTranslate.left, currentTranslate.top, 1)
         }, {
-          'duration': BUTTON_ENTER_ANIMATION_DURATION,
+          'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
           'useAttribute': true
         });
 
       }
 
-      btnContainer.setAttribute('class', opacityTransitionClass);
+      // Once we show the button, always show it.
+      doAlwaysShowButton = true;
+    }
 
-      btnContainer.style.opacity = 1;
-      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showHelpButton);
-      alwaysShowButton = true;
+    function showMoreButtonSlowly() {
+      showMoreButton(false);
+    }
+
+    function showMoreButtonInstantly() {
+      showMoreButton(true);
     }
 
     function hideHelpButton () {
 
-      var moreButton       = helper.byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-          currentTranslate = transform.getTranslate(moreButton.getAttribute('transform'));
+      var moreButton       = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
 
       moreButton.setAttribute('class', '');
       moreButton.style.opacity = 0;
 
-      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showHelpButton);
-
-      if (mouseEnterAnimation) {
-        mouseEnterAnimation.cancel();
-      }
-
-      if (mouseLeaveAnimation) {
-        mouseLeaveAnimation.cancel();
-      }
-
-      mouseLeaveAnimation = animate.create(moreButton, {
-        'transform': 'translate(' + currentTranslate.left + ', ' + currentTranslate.top + ') ' + ' scale(1)'
-      }, {
-        'duration': 1,
-        'useAttribute': true,
-        'animationFn': 'linear'
-      });
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
       clearTimeout(userInputTimeoutId);
     }
 
     function captureUserInput () {
-      userInputOccured = true;
-      helper.byId(BP_CONST.SVG_ID).removeEventListener('mousedown', captureUserInput);
+      isAfterUserInput = true;
+      byId(BP_CONST.SVG_ID).removeEventListener('mousedown', captureUserInput);
+    }
+
+    function showButtonIfNoUserInput () {
+      if (!isAfterUserInput) {
+        showMoreButton();
+      }
+    }
+
+    // Three things may happen when the panel is expanded:
+    // 1) Show the button immediately.
+    // 2) Wait for the user to mouse over the bottom of the panel. If so, show the button.
+    // 3) Wait and see if the user makes any actions in the panel. If not, show the button.
+    function initButtonBehaviorOnExpansion () {
+
+      // If the user has already been presented with the button (during this page load),
+      // there is no reason to not show it immediately whenever the panel is expanded.
+      if (doAlwaysShowButton) {
+        showMoreButton();
+        return;
+      }
+
+      // Add event listener for mousing over the bottom of the panel
+      byId(BP_CONST.BOTTOM_MOUSETARGET_ID).addEventListener('mousemove', showMoreButtonSlowly);
+
+      // Add event listener for mouse down anywhere on the panel
+      byId(BP_CONST.SVG_ID).addEventListener('mousedown', captureUserInput);
+
+      // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
+      // pressed their mouse button.  If they have not, show the additional button.
+      userInputTimeoutId = setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
+
+      var currentBtnTranslate = getElemTransform(byId(BP_CONST.MORE_BUTTON_CONTAINER_ID)).translate;
+
+      MORE_BTN_TRANSLATEY = currentBtnTranslate.top;
+      MORE_BTN_TRANSLATEX = currentBtnTranslate.left;
     }
 
     // Add mouse listeners once BP is ready
-    sitecues.on('bp/did-complete', initMorePanel);
+    sitecues.on('bp/did-complete', addMouseListeners);
 
-    sitecues.on('bp/did-expand', function () {
-      if (alwaysShowButton) {
-        showHelpButton();
-        return;
-      }
-      helper.byId(BP_CONST.BOTTOM_MOUSETARGET_ID).addEventListener('mousemove', showHelpButton);
-      helper.byId(BP_CONST.SVG_ID).addEventListener('mousedown', captureUserInput);
-      userInputTimeoutId = setTimeout(function () {
-        if (!userInputOccured) {
-          showHelpButton();
-        }
-      }, NO_INPUT_TIMEOUT);
-    });
+    // After a complete expansion of the badge, determine if and when we will show
+    // the "more" button.
+    sitecues.on('bp/did-expand', initButtonBehaviorOnExpansion);
 
-    sitecues.on('bp/do-show-help-button', showHelpButton);
+    // Allows other modules to show the more button.  For example, pressing the
+    // tab key to navigate and operate the panel.
+    sitecues.on('bp/did-focus-more-button', showMoreButtonInstantly);
 
-
+    // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 
-});
+  });

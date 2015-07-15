@@ -58,8 +58,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     var badgeElement,
         getNumberFromString = helper.getNumberFromString,
-        lastBgColor,
-        badgeStyle;
+        lastBgColor;
     /*
      *** Privates ***
      */
@@ -77,7 +76,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
      */
     function createToolbar() {
 
-      var toolbarElement = document.createElement('div'),
+      var toolbarElement = document.createElement('sc'),
         docElem = document.documentElement;
 
       docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
@@ -133,7 +132,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         }
       }
 
-      var div                 = document.createElement('div'),
+      var div                 = document.createElement('sc'),
           badgeImgBoundingBox = helper.getRect(badgeElement),
           badgeComputedStyles = window.getComputedStyle(badgeElement),
           stylesToTransfer    = [
@@ -185,18 +184,32 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       }
     }
 
-    function onPossiblePaletteChange() {
-      setTimeout(checkBackgroundColorChange, 0);
-    }
-
     function getBackgroundColor() {
       return getComputedStyle(document.body).backgroundColor;
     }
 
-    function addPaletteListener() {
-      document.body.addEventListener('click', onPossiblePaletteChange);
-      document.body.addEventListener('keydown', onPossiblePaletteChange);
+    // Input event has occured that may trigger a theme change produced from the website code
+    // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
+    function onPossibleWebpageThemeChange() {
+      setTimeout(checkBackgroundColorChange, 0);
+    }
+
+    // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
+    // We don't know when they occur so we check shortly after a click or keypress.
+    function addWebPageThemeListener() {
+      document.body.addEventListener('click', onPossibleWebpageThemeChange);
+      document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
       lastBgColor = getBackgroundColor();
+    }
+
+    // Listen for changes in the sitecues theme
+    function addSitecuesThemeListener() {
+      sitecues.on('theme/did-apply', onSitecuesThemeChange);
+    }
+
+    function onSitecuesThemeChange() {
+      state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
+      checkBackgroundColorChange();
     }
 
     function setCustomPalette (badgeElement) {
@@ -204,8 +217,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       var paletteName = getBadgePalette(badgeElement);
       if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
         state.set('isAdaptivePalette', true);
-        addPaletteListener();
+        addWebPageThemeListener();
       }
+
+      addSitecuesThemeListener();
 
       state.set('paletteName', paletteName);
 
@@ -267,6 +282,8 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
       // If a customer uses the <img> placeholder...
       if (badgeElement.localName === 'img') {
 
+        badgeElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
+
         convertExistingBadge();
         removeExistingBadgeId();
         setBadgeParentId();
@@ -300,10 +317,10 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
 
     badge.getViewClasses = function() {
 
-      var classBuilder = BP_CONST.WANT_BADGE + ' ';
+      var classBuilder = BP_CONST.WANT_BADGE;
 
       if (state.isBadge()) {
-        classBuilder += BP_CONST.IS_BADGE + ' ';
+        classBuilder += ' ' + BP_CONST.IS_BADGE;
       }
 
       if (state.get('isRealSettings')) {
@@ -313,7 +330,7 @@ sitecues.def('bp/view/modes/badge', function (badge, callback) {
         // The initial badge is easier-to-see, more attractive and more inviting when speech is on and zoom is
         // somewhere in the middle. Therefore the initial badge uses fake settings.
         // However, once the user has ever expanded the badge or used sitecues we show the real settings.
-        classBuilder += 'scp-realsettings ';
+        classBuilder += ' scp-realsettings';
       }
 
       return classBuilder;

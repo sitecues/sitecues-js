@@ -3,20 +3,9 @@ BP Controller
  */
 sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/controller/base-controller', 'bp/controller/slider-controller',
-    'bp/controller/panel-controller', 'bp/model/state', 'bp/view/elements/slider', 'bp/helper',
-    function (BP_CONST, baseController, sliderController, panelController, state, slider, helper) {
-
-    var TAB_DIRECTION = {
-      'left': -1,
-      'right': 1
-    };
-
-    var ROLES = {
-      'CHECKBOX': 'checkbox',
-      'SLIDER':   'slider',
-      'BUTTON':   'button'
-    };
+  sitecues.use('bp/constants', 'bp/controller/focus-controller',
+    'bp/model/state', 'bp/helper',
+    function (BP_CONST, focusController, state, helper) {
 
     // How long we wait before expanding BP
     var hoverDelayTimer;
@@ -31,50 +20,65 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
     DELTA_KEYS[BP_CONST.KEY_CODES.DOWN]  = -1;
 
-    // TODO: rename
-    bpc.processKeydown = function (evt) {
+    // If it was always HTML we could just use elem.click()
+    function simulateClick(element) {
+      var event = document.createEvent('MouseEvents');
+      // If you need clientX, clientY, etc., you can call
+      // initMouseEvent instead of initEvent
+      event.initEvent('click', true, true);
+      element.dispatchEvent(event);
+    }
 
-      var item = baseController.getFocusedItem(),
-          role;
-
-      //if (!getIsMorePanelState()) {
-      //  return;
-      //}
-
-      if (evt.keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-        panelController.shrinkPanel(true);
-        evt.preventDefault();
+    function processKeyDown(evt) {
+      if (isModifiedKey(evt) || !state.isPanel()) {
         return;
       }
 
-      if (evt.keyCode === BP_CONST.KEY_CODES.TAB) {
-        if (isModifiedKey(evt) || !state.isPanel()) {
-          return;
-        }
 
+      if (!processKeyDownBehavior(evt)) {
+        evt.preventDefault();
+        return false;
+      }
+    }
+
+
+    // Process key down and return true if key should be allowed to perform default behavior
+    function processKeyDownBehavior(evt) {
+      var keyCode = evt.keyCode;
+
+      // Escape = close
+      if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
+        sitecues.emit('bp/do-shrink', true);
+        return;
+      }
+
+      // Tab navigation
+      if (keyCode === BP_CONST.KEY_CODES.TAB) {
         state.set('isKeyboardMode', true);
         sitecues.emit('bp/do-update');
-        setTabCycles(evt);
-        processFocusedItem(evt);
-      }
-
-      if (!item) {
-        // Return early -- the remaining commands are specific to each control
+        focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
         return;
       }
 
-      role = item.getAttribute('role');
+      // Perform widget-specific commands
+      // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
+      var item = focusController.getFocusedItem();
 
-      processRoles(evt, item, role);
-
-      if (evt.keyCode === BP_CONST.KEY_CODES.ENTER ||
-          evt.keyCode === BP_CONST.KEY_CODES.SPACE ||
-          role !== ROLES.SLIDER) { // Remaining commands are for sliders only
-          return;
+      if (item) {
+        if (item.localName === 'textarea' || item.localName === 'input') {
+          return true;
+        }
+        if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+          performZoomSliderCommand(keyCode);
+        }
+        else {
+          if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
+            simulateClick(item);
+          }
+        }
+        // else fall through to native processing of keystroke
       }
-
-      processSliderCommands(evt);
-    };
+    }
 
     function isInActiveToolbarArea(evt, badgeRect) {
       var middleOfBadge = badgeRect.left + badgeRect.width / 2,
@@ -103,7 +107,7 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
     }
 
     // Logic to determine whether we should begin to expand panel
-    bpc.onMouseMove = function(evt) {
+    function onMouseMove(evt) {
       cancelHoverDelayTimer();
 
       if (doIgnoreNextMouseMove) {
@@ -128,69 +132,106 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       // Check if shrinking and need to reopen
       if (state.isShrinking()) {
         if (isInBadge) {
-          bpc.changeModeToPanel();  // User changed their mind -- reverse course and reopen
+          changeModeToPanel();  // User changed their mind -- reverse course and reopen
         }
         return;
       }
 
       // Use the event
       if (isInToolbar || isInBadge) {
-        hoverDelayTimer = setTimeout(bpc.changeModeToPanel,
+        hoverDelayTimer = setTimeout(changeModeToPanel,
           isInBadge ? BP_CONST.HOVER_DELAY_BADGE : BP_CONST.HOVER_DELAY_TOOLBAR);
       }
-    };
+    }
 
-    bpc.changeModeToPanel = function() {
+    /*
+     Show panel according to settings.
+     */
+    function expandPanel() {
+
+      if (state.isPanel()) {
+        return; // Already expanded or in the middle of shrinking
+      }
+
+      sitecues.emit('bp/will-expand');
+
+      setPanelExpandedState();
+
+      sitecues.emit('bp/do-update');
+    }
+
+    function setPanelExpandedState() {
+      state.set('wasMouseInPanel', false);
+      state.set('transitionTo', BP_CONST.PANEL_MODE);
+      state.set('isRealSettings', true);    // Always use real settings once expanded
+      state.set('featurePanelName', null);  // We're not in a feature panel
+    }
+
+    function changeModeToPanel() {
       cancelHoverDelayTimer();
       if (!state.get('isShrinkingFromKeyboard')) {
-        sitecues.emit('bp/do-expand');
+        expandPanel();
       }
-    };
+    }
 
     function cancelHoverDelayTimer() {
       clearTimeout(hoverDelayTimer);
       hoverDelayTimer = 0;
     }
 
-    bpc.onMouseOut = function(evt) {
-      if (evt.target.id === BP_CONST.BADGE_ID) {
+    function onMouseOut(evt) {
+      if (helper.getEventTarget(evt).id === BP_CONST.BADGE_ID) {
         cancelHoverDelayTimer();
       }
-    };
-
-    // User may think they need to click in badge
-    // We don't want to take focus that way -- only via tabbing or from screen reader use
-    bpc.suppressBadgeFocusOnClick = function(event) {
-      // Prevent default handling and thus prevent focus
-      event.returnValue = false;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      event.stopPropagation();
-      return false;
-    };
+    }
 
     // When a click happens on the badge, it can be from one of two things:
     // - A fake click event pushed by a screen reader when the user presses Enter -- in this case we should expand the panel
     // - An actual click in the whitespace around the panel (before they moused over the visible area) -- we should ignore these
     //   so that clicks around the panel don't accidentally open it.
-    bpc.clickToOpenPanel = function(event) {
+    function clickToOpenPanel() {
       var badgeElem = helper.byId(BP_CONST.BADGE_ID);
       if (document.activeElement === badgeElem) {
         // Click is in visible area and badge has focus -- go ahead and open the panel
-        bpc.changeModeToPanel();
+        changeModeToPanel();
       }
-    };
+    }
 
-    bpc.processBadgeActivationKeys = function(evt) {
+    function processBadgeActivationKeys(evt) {
       if (state.isBadge() &&
         (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE)) {
 
         evt.preventDefault();
-        // TODO Return to using the following:
-        bpc.changeModeToPanel();
-
+        changeModeToPanel();
       }
-    };
+    }
+
+    // Don't scroll while BP is open
+    function preventScroll(evt) {
+      return helper.cancelEvent(evt);
+    }
+
+    function willExpand() {
+      window.addEventListener('keydown', processKeyDown, true);
+      window.addEventListener('wheel', preventScroll);
+    }
+
+    function willShrink() {
+      window.removeEventListener('keydown', processKeyDown, true);
+      window.removeEventListener('wheel', preventScroll);
+    }
+
+    function didShrink() {
+        state.set('isShrinkingFromKeyboard', false);
+    }
+
+    function init() {
+      var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+      badgeElement.addEventListener('keydown', processBadgeActivationKeys);
+      badgeElement.addEventListener('click', clickToOpenPanel);
+      badgeElement.addEventListener('mousemove', onMouseMove);
+      badgeElement.addEventListener('mouseout', onMouseOut);
+    }
 
     /*
      Private functions.
@@ -200,114 +241,19 @@ sitecues.def('bp/controller/bp-controller', function (bpc, callback) {
       return evt.altKey || evt.metaKey || evt.ctrlKey;
     }
 
-    // Tab cycles
-    // Tab cycles means that if you tab past the last tabbable item in the
-    // current view, it goes back to the first. Also the reverse:
-    // if you shift+tab from the first item, it goes to the last.
-    function setTabCycles(evt) {
-
-      if (!state.isPanel()) {
-        // Skip if bp in badge state
-        return;
-      }
-
-      var direction     = evt.shiftKey ? TAB_DIRECTION.left : TAB_DIRECTION.right,
-          currentPanel  = BP_CONST.PANEL_TYPES[+state.isMorePanel()],
-          numItems      = baseController.tabbable[currentPanel].length,
-          newFocusIndex = state.get('focusIndex') + direction;
-
-      if (newFocusIndex < 0) {
-
-        newFocusIndex = numItems - 1;
-
-      } else if (newFocusIndex >= numItems) {
-
-        newFocusIndex = 0;
-
-      }
-
-      baseController.clearPanelFocus();
-
-      state.set('focusIndex', newFocusIndex);
-
-    }
-
-    function processFocusedItem(evt) {
-
-      var item = baseController.getFocusedItem();
-
-      if(!item) {
-        return;
-      }
-
-      baseController.showFocus();
-
-      evt.preventDefault();
-    }
-
-    function processRoles(evt, item, role) {
-      if (evt.keyCode === BP_CONST.KEY_CODES.ENTER || evt.keyCode === BP_CONST.KEY_CODES.SPACE) {
-        if (role === ROLES.CHECKBOX) {
-          if (item.id === BP_CONST.SPEECH_ID) {
-            sitecues.emit('speech/do-toggle');
-          }
-        } else if (role === ROLES.BUTTON) {
-          buttonPress(evt, item);
-        }
-        evt.preventDefault();
-        return;
-      }
-    }
-
-    function processSliderCommands(evt) {
-      var deltaSliderCommand = DELTA_KEYS[evt.keyCode];
+    function performZoomSliderCommand(keyCode) {
+      var deltaSliderCommand = DELTA_KEYS[keyCode];
       if (deltaSliderCommand) {
         sitecues.emit(deltaSliderCommand > 0 ? 'zoom/increase' : 'zoom/decrease');
-        evt.preventDefault();
-        return;
       }
-    }
-
-    // todo: use constants.js for IDS
-    function buttonPress(evt, item) {
-
-      item = item || evt.currentTarget;
-
-      var feature = item.getAttribute('data-feature');
-
-      if (feature) {  /* Feature button has data-feature attribute */
-        baseController.clearPanelFocus();
-        if (state.get('featurePanelName') === feature) {
-          state.set('featurePanelName', null); // Already on this feature, toggle it off (back to more panel)
-        }
-        else {
-          state.set('featurePanelName', feature);
-        }
-      }
-      if (item.id === BP_CONST.MORE_BUTTON_GROUP_ID) {
-        sitecues.emit('info/help');
-      }
-      // else if (item.id === 'scp-prev-card') {
-      //   switchCard(-1);
-      // }
-      // else if (item.id === 'scp-next-card') {
-      //   switchCard(1);
-      // }
-      // else if (item.id === 'scp-close-button-group') {
-      //   panelController.shrinkPanel();
-      // }
-      // else if (item.id === "scp-more-button-group") {
-      //   onMoreButton();
-      // }
-
-      sitecues.emit('bp/do-update');
     }
 
     window.addEventListener('focus', onWindowFocus);
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/will-shrink', willShrink);
+    sitecues.on('bp/did-shrink', didShrink);
+    sitecues.on('bp/did-complete', init);
 
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 

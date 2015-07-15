@@ -5,7 +5,7 @@ var png_output_path     = './cursor_output/png/'
   , phantom = require('node-phantom')
   ;
 
-phantom.create(function(err,ph) {
+phantom.animateCssProperties(function(err,ph) {
 
   return ph.createPage(function(err,page) {
     return page.open("./bin/svg2png/convert-svgs-to-dataurls.html", function(err,status) {

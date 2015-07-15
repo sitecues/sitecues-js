@@ -36,7 +36,7 @@ sitecues.def('zoom-forms', function (zoomForms, callback) {
         if (platform.browser.isChrome) {
           // In WebKit, buttons are weird
           // http://i.imgur.com/CgrMo.gif
-          $('input,button').css('transform', 'scale3d(1,1,1)');
+          $('body>input,button').css('transform', 'scale3d(1,1,1)');
         }
 
         // **** Comboboxes (<select>) ****

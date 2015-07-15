@@ -64,6 +64,7 @@ files=\
 	source/js/util/platform.js \
 	source/js/util/common.js \
 	source/js/util/geo.js \
+	source/js/util/color.js \
 	source/js/util/transform.js \
 	source/js/audio/speech-builder.js \
 	source/js/audio/html5-player.js \
@@ -77,21 +78,28 @@ files=\
 	source/js/bp/model/state.js \
 	source/js/bp/constants.js \
 	source/js/bp/helper.js \
-	source/js/bp/controller/base-controller.js \
-	source/js/bp/controller/slider-controller.js \
-	source/js/bp/controller/panel-controller.js \
-	source/js/bp/animate.js \
-	source/js/bp/view/elements/slider.js \
-	source/js/bp/controller/bp-controller.js \
-	source/js/bp/view/svg.js \
-	source/js/cursor/cursor-css.js \
 	source/js/bp/view/modes/panel.js \
 	source/js/bp/view/styles.js \
 	source/js/bp/view/modes/badge.js \
 	source/js/bp/view/elements/tts-button.js \
+	source/js/bp/view/elements/slider.js \
 	source/js/bp/view/elements/more-button.js \
+	source/js/bp/view/elements/secondary/cards.js \
+	source/js/bp/view/elements/secondary/tips.js \
+	source/js/bp/view/elements/secondary/settings.js \
+	source/js/bp/view/elements/secondary/feedback.js \
+	source/js/bp/view/elements/secondary/about.js \
+	source/js/bp/view/elements/secondary/secondary-panel.js \
+	source/js/bp/view/svg-transform-effects.js \
+	source/js/bp/controller/focus-controller.js \
+	source/js/bp/controller/slider-controller.js \
+	source/js/bp/controller/shrink-controller.js \
+	source/js/bp/controller/bp-controller.js \
+	source/js/bp/size-animation.js \
+	source/js/bp/view/svg.js \
+	source/js/cursor/cursor-css.js \
 	source/js/bp/placement.js \
-	source/js/bp.js \
+	source/js/bp/bp.js \
 	source/js/keys/focus.js \
 	source/js/mouse-highlight/traitcache.js \
 	source/js/mouse-highlight/highlight-position.js \
@@ -100,6 +108,9 @@ files=\
 	source/js/mouse-highlight/pick.js \
 	source/js/mouse-highlight/pick-debug.js \
 	source/js/mouse-highlight/mouse-highlight.js \
+	source/js/style-service/user-agent-css.js \
+	source/js/style-service/media-queries.js \
+	source/js/style-service/css-aggregator.js \
 	source/js/style-service/style-service.js \
 	source/js/cursor/cursor.js \
 	source/js/zoom/fixed-position-fixer.js \
@@ -113,12 +124,16 @@ files=\
 	source/js/keys/keys.js \
 	source/js/mouse-highlight/move-keys.js \
 	source/js/hpan/hpan.js \
+	source/js/theme/color-choices.js \
+	source/js/theme/img-classifier.js \
+	source/js/theme/color-engine.js \
 	source/js/info/info.js \
 	source/js/util/status.js \
 	source/js/metrics/util.js \
 	source/js/metrics/page-visited.js \
 	source/js/metrics/panel-closed.js \
 	source/js/metrics/badge-hovered.js \
+	source/js/metrics/feedback-sent.js \
 	source/js/metrics/hlb-opened.js \
 	source/js/metrics/zoom-changed.js \
 	source/js/metrics/tts-requested.js \

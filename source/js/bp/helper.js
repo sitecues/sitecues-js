@@ -76,8 +76,6 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
 
-    helper.transformProperty = helper.isIE9 ? 'msTransform' : (helper.isWebKit ? 'webkitTransform' : 'transform');
-
     helper.getCurrentSVGElementTransforms = function () {
 
       var result      = {},
@@ -119,6 +117,20 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.getNumberFromString = function (str) {
       return +(str.match(/[0-9\.\-]+/));
+    };
+
+    // Fix for events in SVG in IE:
+    // IE sometimes gives us the <defs> element for the event, and we need the <use> element
+    helper.getEventTarget = function(evt) {
+      return evt.target.correspondingUseElement || evt.target;
+    };
+
+    helper.cancelEvent = function(evt) {
+      evt.returnValue = false;
+      evt.preventDefault();
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      return false;
     };
 
     callback();

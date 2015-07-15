@@ -1,8 +1,8 @@
 sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight', 'hlb', 'platform', 'hlb/dimmer', 'util/common',
+  sitecues.use('jquery', 'mouse-highlight', 'hlb', 'platform', 'hlb/dimmer', 'util/common', 'util/transform',
     'mouse-highlight/picker', 'zoom', 'util/geo', 'fixed-fixer',
-    function($, mh, hlb, platform, dimmer, common, picker, zoomMod, geo, fixedFixer) {
+    function($, mh, hlb, platform, dimmer, common, transform, picker, zoomMod, geo, fixedFixer) {
 
     var STEP_SIZE_VERT = 18,
       STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -119,7 +119,7 @@ sitecues.def('mouse-highlight/move-keys', function(picker, callback) {
             document.createNodeIterator(hlbElement, NodeFilter.SHOW_TEXT, null, false),
           range = document.createRange(),
           lineTops = [],
-          hlbZoom = common.getTransform($(hlbElement));
+          hlbZoom = transform.getComputedScale(hlbElement);
 
       while (true) {
         var textNode = nodeIterator.nextNode(),

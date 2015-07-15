@@ -5,26 +5,23 @@ sitecues.def('bp/model/state', function (state, callback) {
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)
+    secondaryPanelTransitionTo: 0,
     isRealSettings          : false, // Are we currently showing the actual settings or fake settings?
-    isMorePanel             : false, // Second panel
+    secondaryPanelName      : 'button-menu', // 'button-menu', 'tips', 'settings', 'feedback', 'about'
+    isSecondaryExpanding    : false, // Is secondary panel currently expanding to accommodate new contents?
+    doSuppressHovers        : false, // Suppress mouse hovers until next mousemove, because browser won't recompute them until then (useful for animations)
     isKeyboardMode          : false, // Show focus in this mode, support tab navigation
     isMoreButtonVisible     : false, // Should the more button be shown?
     isPageBadge             : true,  // Is set to false if default badge is inserted
     isToolbarBadge          : false, // Set to true if using a badge toolbar. This may eventually become redundant with isPageBadge (the opposite of it) if we only use toolbar default badges.
     wasMouseInPanel         : false, // Was the mouse inside the panel since last expansion
     featurePanelName        : null,  // Either null, or 'settings' | 'about' | 'tips' | 'feedback'
-    focusIndex              : -1,    // When tabbing, where in the cycle are we?
     paletteName             : 'b',   // Currently either 'b' for basic or 'r' for red
     isAdaptivePalette       : false, // Is an adaptive palette name
     settingsIconVersion     : 1,     // Which settings icon to use?
     aboutIconVersion        : 1,     // Which about icon to use?
     isShrinkingFromKeyboard : false, // Is the panel shrinking because of a keyboard command?
     ratioOfSVGToVisibleBadgeSize: undefined // ratio of svg to visible badge size
-    //cardNumber         : { tips: 0, settings: 0 },
-    //hasEverCycledCards : { tips: false, settings: false}
-    //extraHeight        : 0,          // Current extra height of panel, used to accommodate tall feature panels
-    //targetExtraHeight  : 0,          // Extra height we are growing toward via animation
-    //numCards           : {tips: undefined, settings: undefined}, // Needs to be initialized
   };
 
   /*
@@ -75,12 +72,27 @@ sitecues.def('bp/model/state', function (state, callback) {
     return data.transitionTo === 1 && data.currentMode !== 1;
   };
 
-  state.isMorePanel = function() {
-    return data.isMorePanel;
+  state.isSecondaryPanelRequested = function() {
+    return data.secondaryPanelTransitionTo === 1;
   };
 
   state.isShrinking = function() {
     return data.transitionTo === 0 && data.currentMode !== 0;
+  };
+
+  /**
+   * Returns 'button-menu' or name of secondary panel
+   * @returns {string}
+   */
+  state.getSecondaryPanelName = function () {
+    return data.secondaryPanelName;
+  };
+
+  state.getPanelName = function () {
+    if (state.isPanel() && state.isSecondaryPanelRequested()) {
+      return data.secondaryPanelName;
+    }
+    return 'main';
   };
 
   callback();

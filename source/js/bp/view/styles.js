@@ -12,6 +12,33 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       classDelimiter = '.',
       hover = ':hover',
 
+      // Repeating code
+      MAKE_HIDDEN = {
+        'pointer-events': 'none',
+        'visibility': 'hidden',
+        'opacity': 0
+      },
+      MAKE_VISIBLE = {
+        'pointer-events': 'all',
+        'visibility': 'visible',
+        'opacity': 1
+      },
+      RANGE_THUMB = {
+        '-webkit-appearance': 'none',
+        'width': '18px',
+        'height': '24px',
+        'border': '4px solid #444',
+        'border-radius': '12px',
+        'transform': 'scale(1.7)',
+        'transition': 'transform .5s'
+      },
+      PLACEHOLDER = {
+        'position': 'relative',
+        'font-size': '26px',
+        'left': '40px',
+        'top': '35px'
+      },
+
       WANT_BADGE = classDelimiter + BP_CONST.WANT_BADGE,
       WANT_PANEL = classDelimiter + BP_CONST.WANT_PANEL,
 
@@ -118,21 +145,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          General CSS rules for panel
 
          Basic structure of panel:
-         <div #scp-bp-container>
-         <div #scp-close-button>
-         <div .scp-feature-content>
+         <sc #scp-bp-container>
+         <sc #scp-close-button>
+         <sc .scp-feature-content>
          <svg #scp-svg>
          <defs>
          <g #scp-main>
          #scp-zoom-slider
          #scp-speech›
          ...
-         <g #scp-more>     // Secondary panel that slides down
+         <g #scp-secondaty>     // Secondary panel that slides down
          <g .scp-feature-content>
-         <g .scp-feature-tips-content> etc.
-         .cards
-         .card
-         .card
+         <g .scp-tips> etc.
+         <sc-cards>
+           <sc-card>
+           <sc-card>
          ...
 
          Classes important for CSS:
@@ -145,7 +172,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          .scp-animate: Enable CSS animations (e.g. do not enable when first showing badge)
          .scp-keyboard: Keyboard mode
          - Elsewhere:
-         .scp-more-only   // Only display in more panel
+         .scp-secondary-only   // Only display in more panel
          .scp-feature-content // Only display in feature panel (reachable for more panel)
          .scp-hand-cursor: show a hand (aka pointer) cursor over this element
          .scp-hidden-target: a click target that is hidden (e.g. a rect that covers more area than the visible part of the target)
@@ -156,10 +183,119 @@ sitecues.def('bp/view/styles', function (styling, callback) {
          ARIA modes:
          - Used for CSS: aria-checked, aria-disabled
          - Not used for CSS: aria-activedescendant (focused item ID), aria-valuenow, aria-valuemin, aria-valuemax, aria-label, aria-labelledby
-         Data attributes: data-hasfocus, data-hadfocusonce (so dynamically shown items like close button remain onscreen), data-active (active feature card)
          */
 
-        /***************** Loading/badge  ****************/
+        /***************** sitecues div ******************/
+        // Prevent page style pollution, use our own <sc> element rather than
+        // <div> which may be styled by the page, e.g. at
+        // - Margins http://www.independent.ie/entertainment/trending/westboro-baptist-church-accidentally-hates-the-ivory-coast-31251240.html
+        // - Fonts: https://shuttle.support.signiant.com/customer/portal/articles/1720613-why-am-i-repeatedly-asked-to-make-my-media-shuttle-site-trusted-
+        '#scp-bp-container *': {
+          'box-sizing': 'content-box !important'
+        },
+
+        'sc,sc-cards,sc-card': {
+          'display': 'block',
+          'font-family': 'Arial',
+          'font-size': '21px',
+          'margin': '0',
+          'color': '#000',
+          'line-height': 'normal'
+        },
+
+        'sc-h1': {
+          'display': 'block',
+          'margin': '24px 0',
+          'font-size': '40px',
+          'width': '292px'  // If arrows are on top-right, we need this
+        },
+
+        'sc-h2': {
+          'display': 'block',
+          'margin': '15px 0',
+          'font-size': '24px'
+        },
+
+        'sc-center': {
+          'text-align': 'center',
+          'position': 'relative',
+          'left': '-30px'
+        },
+
+        'sc-p': {
+          'display': 'block',
+          'margin': '12px 0'
+        },
+
+        'sc-menu': {
+          'display': 'block',
+          'margin': '21px 16px'
+        },
+
+        'sc-link,sc-menuitem': {
+          'text-decoration': 'none',
+          'color': '#447AC4'
+        },
+
+        'sc-menuitem': {
+          'display': 'list-item',
+          'list-style-position': 'inside',
+          'list-style-type': 'decimal',
+          'margin': '10px 32px',
+          'font-size': '22px'
+        },
+
+        'sc-kbd': {
+          'display': 'inline-block',
+          'white-space': 'nowrap',
+          'position': 'relative',
+          'top': '-3px',
+          'font-size': '18px',
+          'min-width': '30px',
+          'padding': '.04em',
+          'text-align': 'center',
+          'border-radius': '3px',
+          'border': '0',
+          'background-image': 'linear-gradient(to top, #EEE, #FFF)',
+          'color':  '#333',
+          'margin': '0 4px',
+          'text-shadow': '0 0 2px #FFF',
+          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 .1em 0 #888, 0 .11em 0 rgba(0, 0, 0, .4), 0 .1em .11em rgba(0, 0, 0, .9)',
+          'transition': 'transform .5s, box-shadow .5s'
+        },
+        'sc-kbd.scp-space': {
+          'padding-left': '1.5em',
+          'padding-right': '1.5em'
+        },
+
+        'sc-span': {
+          'display': 'inline-block'
+        },
+
+        'sc-button': {
+          'display': 'inline-block',
+          'font-weight': 'bold',
+          'background-color': '#447AC4',
+          'color': 'white',
+          'border': '2px solid beige',
+          'border-radius': '5px',
+          'padding': '9px',
+          'margin-right': '10px'
+        },
+
+        /* Secondary Panel - Blue Button */
+        'sc-button-big': {
+          'display'      : 'inline-block',
+          'padding'      : '10px 30px',
+          'font-size'    : '24px',
+          'border'       : '3px solid #447AC4',
+          'border-radius': '4px',
+          'color'        : '#FFF',
+          'text-align'   : 'center',
+          'background'   : '#447AC4'
+        },
+
+      /***************** Loading/badge  ****************/
 
         // If there is an old badge image, it will fade out
         '#sitecues-badge>img': {
@@ -177,6 +313,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         '#scp-bp-container': {
           'position': 'fixed',
           'z-index': '9999999',
+          'user-select': 'none',
+          '-webkit-user-select': 'none',
+          '-moz-user-select': 'none',
+          '-ms-user-select': 'none',
           'transition': 'opacity 1.5s',
           'transform-origin': '0% 0%',
           'text-align': 'left', // To prevent style pollution found on http://codecanyon.net/
@@ -185,7 +325,9 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         },
 
         '#scp-svg': {
-          'max-width': 'none'
+          'max-width': 'none',
+          'overflow': 'hidden',
+          'position': 'absolute'
         },
 
         // The new badge is hidden until sitecues is loaded
@@ -208,15 +350,21 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         // .scp-toolbar means it's a toolbar
         '.scp-toolbar': {
           'position': 'fixed',
-          'top': '0px',
-          'left': '0px',
+          'top': 0,
+          'left': 0,
           'width': '100%',
           'height': '38px',
+          'margin': '0 !important',  // Prevent page style pollution
           'box-sizing': 'border-box',
           'box-shadow': '1px 1px 15px 0 rgba(9, 9, 9, .5)',
-          'padding': '6px 8px 8px calc(50% - 66px)',
-          'background-color': '#f7fcff',
+          'padding': '6px 0 8px calc(50% - 66px)',
+          'background-color': '#f7fcff !important',  // Ensure our own theme engine doesn't turn the toolbar dark
           'z-index': '9999999'
+        },
+
+        '.scp-toolbar > #scp-bp-container': {
+          'background-color': 'transparent !important',
+          'margin': '0 !important'  // Prevent page style pollution
         },
 
         // Move the body down by the height of the toolbar + 1px for the box-shadow
@@ -245,14 +393,20 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-bottom-text': {
           'transition': 'opacity 1s',
-          'visibility': 'hidden',
+          'visibility': 'hidden'
+        },
+
+        '.scp-is-panel text': {
           'font-family': 'Arial',
           'font-size': '29px',
-          'font-weight': 'bold',
-          'user-select': 'none',
-          '-webkit-user-select': 'none',
-          '-moz-user-select': 'none',
-          '-ms-user-select': 'none'
+          'font-weight': 'bold'
+        },
+
+        'body.sitecues-reverse-theme [data-sc-reversible="true"],body.sitecues-reverse-theme svg:not([data-sc-reversible="false"])': {
+          'filter': 'invert(100%)',
+          '-webkit-filter': 'invert(100%)',
+          '-moz-filter': 'invert(100%)',
+          '-ms-filter': 'invert(100%)'
         },
 
         /* Text label animation for main panel labels */
@@ -286,10 +440,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'opacity': '1 !important'
         },
 
-        '.scp-more .scp-more-only': { // element is visible in the more state of the badge-panel
-          'opacity': '1 !important'
-        },
-
         '.scp-want-panel #scp-mouseover-target': {
           'display': 'none'  // Don't let badge mouseover target interfere with actual use of panel
         },
@@ -303,7 +453,7 @@ sitecues.def('bp/view/styles', function (styling, callback) {
         /* Waves use gray off state if not hovering and showing real settings (not first time badge) */
         '.scp-realsettings #scp-speech[aria-checked="false"]:not(.scp-dim-waves) > .scp-wave': {
           /* First time we're small we always show on state because it's more inviting. However, going from small to large the first time, we're going from fake on to real off. Transition gently, don't draw attention to that. */
-          'fill': '#B0B0B0' /* Gray */
+          'fill': '#aaa' /* Gray */
         },
 
         '.scp-dim-waves> #scp-wave1': {
@@ -320,22 +470,14 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         /******************* More **********************/
 
-        '#scp-more': {
-          'opacity'   : 1
-        },
 
         '#scp-more-button-container': {
           'opacity': 0,
-          'transform-origin': '50% 50%',
-          'pointer-events': 'none'
-        },
-
-        '.origin-center': {
-          'transform-origin': '50% 50%'
+          'pointer-events': 'all'
         },
 
         '.scp-transition-opacity' : {
-          'transition': 'opacity 0.8s'
+          'transition': 'opacity .8s'
         },
 
         '.scp-transition-opacity-fast' : {
@@ -344,14 +486,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '.scp-transition-opacity-instant' : {
           'transition': 'opacity 0s'
-        },
-
-        // These are the 3 different ways the "?" button might fade in.
-        //
-        // We want to turn on pointer-events when the "?" becomes visible.
-        // If none of these classes are set, then the "?" opacity is 0 and pointer-events are disabled.
-        '.scp-transition-opacity, .scp-transition-opacity-fast, .scp-transition-opacity-instant': {
-         'pointer-events': 'all !important'
         },
 
         /******** Mouse targets must be hidden but still able to handle events *************/
@@ -378,21 +512,483 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'z-index': '99999999'
         },
 
-        /*************** Range *************************/
-
-        '#scp-bp-container input[type="range"]': {
-          'margin': '0px 15px'
-        },
-
         /*************** Focus **************************/
 
         /* Do not use outline because it ends up being larger than the visible content, at least in Firefox */
-        '#sitecues-badge:focus': {
-          'outline': 0
+        '#sitecues-badge:focus,#scp-bp-container:focus,#scp-bp-container *:focus': {
+          'outline': '0 !important'
         },
-        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-rect': {
+
+        '#sitecues-badge[aria-expanded="false"]:focus #scp-badge-focus-rect': {
           'stroke': 'rgba(82, 168, 236, 0.8)',
-          'stroke-width': '14px'
+          'stroke-width': '24px'
+        },
+
+        '#scp-focus-outline': {
+          'box-shadow': '0 0 4px 6px rgba(82, 168, 236, 0.8)',
+          'border-radius': '4px',
+          'display': 'none',
+          'position': 'absolute',
+          'pointer-events': 'none',
+          'z-index': 99999
+        },
+
+        '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
+          'display': 'block'
+        },
+
+        // The feedback text area has its own focus ring so that it can show behind the feedback button :/ !
+        '[data-own-focus-ring][data-show-focus]': {
+          'stroke': 'rgba(82,168,236,.8)',
+          'stroke-width': '6px',
+          'filter': 'url(#scp-focusblur)',
+          '-webkit-filter': 'url(#scp-focusblur)'
+        },
+
+        /*************** Secondary panel **************************/
+
+        // Make room for tall panel contents
+        '.scp-is-secondary > svg': {
+          'height': '1200px !important'
+        },
+
+        '.scp-arrow': {
+          'fill': '#6B9AE0'
+        },
+
+        // Arrows
+        '.scp-arrow[aria-disabled]': MAKE_HIDDEN,
+
+        // Conditional content
+        '.scp-if-tips, .scp-if-settings, .scp-if-feedback, .scp-if-about': MAKE_HIDDEN,
+        '.scp-panel-button-menu #scp-button-menu > g[role="button"]': MAKE_VISIBLE,  // Button menu -- all visible
+        '.scp-panel-settings .scp-if-settings': MAKE_VISIBLE,
+        '.scp-panel-tips .scp-if-tips': MAKE_VISIBLE,
+        '.scp-panel-feedback .scp-if-feedback': MAKE_VISIBLE,
+        '.scp-panel-about .scp-if-about': MAKE_VISIBLE,
+        '.scp-secondary-expanding .scp-secondary-feature': MAKE_HIDDEN,
+        '.scp-want-badge .scp-secondary-feature': {
+          'display': 'none !important'
+        },
+
+        '.scp-is-secondary .scp-secondary-only': { // element is visible in the more state of the badge-panel
+          'opacity': '1 !important'
+        },
+
+        // Don't allow hidden main panel elements to accept pointer events
+        '.scp-is-secondary > svg > #scp-main > *': {
+          'pointer-events': 'none'  // Otherwise IE seems to think slider is available in secondary panel
+        },
+
+        // Active label highlights
+        '.scp-panel-tips #scp-tips-label, .scp-panel-settings #scp-settings-label, .scp-panel-feedback #scp-feedback-label, .scp-panel-about #scp-about-label': {
+          fill: '#447AC4'
+        },
+
+        // Cards (for tips and settings)
+        'sc-cards': {
+          'position': 'relative',
+          'left': '105px',
+          'z-index': 999
+        },
+
+        'sc-card': {
+          'position': 'absolute',
+          'visibility' : 'hidden',
+          'pointer-events': 'none',  // Allow arrow pointer events
+          'opacity': 0,
+          'width': '360px',
+          'transition': 'opacity .5s'
+        },
+
+        'sc-card > *': {
+          'pointer-events': 'all'  // They were disallowed in parent because of arrows, but we still need them
+        },
+
+        '.scp-panel-tips .scp-if-tips > .scp-active, .scp-panel-settings .scp-if-settings > .scp-active': {
+          'visibility': 'visible',
+          'opacity': 1
+        },
+
+        // Tips -- demo page general styles
+        '#scp-demo-mouse': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/cursor-demo.svg') + ') 100% 100% no-repeat',
+          'position': 'absolute',
+          'left': '157px',
+          'top': '36px',
+          'width': '30px',
+          'height': '40px',
+          'transition': 'transform 2s',
+          'z-index': 1,
+          'display': 'none'
+        },
+
+        '#scp-demo-page': {
+          'position': 'absolute',  // Make fake mouse cursor positioning easier
+          'font-size': '16px',
+          'top': '240px',
+          'width': '280px',
+          'border': '1px solid black',
+          'background-color': '#f8f8f8',
+          'border-bottom': 0,
+          'height': '90px',
+          'padding': '20px 30px 0 30px',
+          'overflow': 'hidden' // So that fake dimmer doesn't go outside
+        },
+
+        '#scp-demo-page-contents': {
+          'transition': 'transform 2.2s linear',
+          'transform-origin': '0% 0%'
+        },
+
+        '#scp-demo-para': {
+          'position': 'relative',
+          'top': '-4px',
+          'left': '-4px',
+          'padding': '2px',
+          'border': '2px solid transparent',
+          'border-radius': '4px',
+          'transform-origin': '30% 50%', // Don't go off the left side of the page (simulates safe-zone)
+          'transition': 'transform .4s, box-shadow .2s'
+        },
+
+        '.scp-icon-menuitem': {
+          'margin-top': '38px',
+          'width': '90%',
+          'font-size': '26px'
+        },
+
+        '.scp-icon-menuitem>sc-button': {
+          'border': 0,
+          'width': '51px',
+          'margin-right': '20px',
+          'background-size': '100% auto',
+          'float': 'left',
+          'background-color': 'transparent',
+          'background-repeat': 'no-repeat'
+        },
+
+        // Full guide icon
+        '#scp-guide-icon': {
+          'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/full-guide-icon.png') + ')',
+          'height': '46px',
+          'margin-top': '-8px'
+        },
+
+        // Keyboard icon
+        '#scp-kbd-icon': {
+          'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ')',
+          'height': '26px',
+          'margin-top': '11px'
+        },
+
+        // Tips -- zoom demo (scp-zoom-card, scp-zoom-keys-card)
+        '#scp-demo-slider': {
+          'position': 'relative',
+          'width': '180px',
+          'height': '51px',
+          'text-align': 'left'
+        },
+        '#scp-demo-slider>*': {
+          'background': 'none',
+          'position': 'absolute',
+          'width': '180px',
+          'height': '51px'
+        },
+        '.scp-active #scp-demo-slider-bar': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-bar-demo.svg') + ') 100% 100% no-repeat'
+        },
+        '.scp-active #scp-demo-slider-thumb': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/slider-thumb-demo.svg') + ') 100% 100% no-repeat',
+          'transition': 'transform 2s linear'
+        },
+        '.scp-active #scp-demo-slider-thumb[data-demo="true"]': {
+          'transform': 'translateX(90px) scale(1.6)'
+        },
+        '#scp-demo-page-contents[data-demo="true"]': { // Zoom page
+          'transform': 'scale(1.6)'
+        },
+
+        // Tips -- highlight and lens demo (scp-highlight-card, scp-lens-card)
+        'sc-kbd[data-demo="true"]': {
+          'transform': 'translate(4px,4px)',
+          'box-shadow': 'inset 0 0 1px #FFF, inset 0 0 .4em #CCC, 0 1px 0 #888, 0 1px 0 rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .9)'
+        },
+
+        '.scp-demo-highlight #scp-demo-mouse,.scp-demo-lens #scp-demo-mouse': {
+          'display': 'block'
+        },
+        '.scp-demo-highlight #scp-demo-mouse[data-demo="true"],.scp-demo-lens #scp-demo-mouse': {
+          'transform': 'translate(-65px, -3px)'
+        },
+
+        '.scp-demo-highlight #scp-demo-para[data-demo="true"],.scp-demo-lens #scp-demo-para': {  // Highlighted paragraph
+          'background-color': 'rgba(240, 240, 180, 0.3)',
+          'border-color': '#222'
+        },
+
+        '.scp-demo-lens #scp-demo-para[data-demo="true"]': {  // HLB open
+          'background-color': 'white',
+          'transform': 'scale(1.6)',
+          'box-shadow': '0 0 0 999px rgba(0,0,0,.3)'
+        },
+
+        // Tips -- speech
+        '#scp-speech-button-demo': {
+          'background': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/speech-button-demo.svg') + ') 100% 100% no-repeat',
+          'position': 'relative',
+          'top': '2px',
+          'width': '39px',
+          'height': '26px'
+        },
+
+        // Tips -- full guide (scp-full-guide-card)
+        '#scp-demo-page[data-hasdemo="false"]': {
+          'display': 'none'  // No demo page on full guide card
+        },
+
+        // Settings -- input ranges
+        '.scp-range-group': {
+          'margin-top': '-20px',
+          'padding': '17px',
+          'pointer-events': 'none',
+          'opacity': 0,
+          'transition': 'opacity 1s'
+        },
+
+        '#scp-bp-container input[type="range"]': {
+          '-webkit-appearance': 'none',
+          'width': '282px',
+          'height': '24px',
+          'margin': '0',
+          'border': '4px solid #888',
+          'padding': '1px 2px',
+          'border-radius': '14px',
+          'background': 'transparent',
+          'outline': 0 // TODO need some other way of showing focus
+        },
+
+        '#scp-bp-container input[type=range]::-webkit-slider-runnable-track': {
+          'border': 0
+        },
+
+        '#scp-bp-container input[type="range"]::-moz-range-track': {
+          'border': 0,
+          'background': 'transparent'
+        },
+        '#scp-bp-container input[type=range]::-moz-focus-outer': {
+          'border': 0
+        },
+
+        '#scp-bp-container input[type="range"]::-ms-track': {
+          'border': 0,
+          'border-radius': '14px',
+          'color': 'transparent' /* don't drawn vertical reference line */
+        },
+
+        '#scp-bp-container input[type="range"]::-ms-fill-lower,input[type="range"]::-ms-fill-upper': {
+          'background': '#fffdde'
+        },
+        '#scp-bp-container input[type="range"]::-ms-tooltip': {
+          'display': 'none'
+        },
+        '#scp-bp-container input::-webkit-slider-thumb': RANGE_THUMB,
+        '#scp-bp-container input::-moz-range-thumb': RANGE_THUMB,
+        '#scp-bp-container input::-ms-thumb': RANGE_THUMB,
+        '#scp-bp-container input:hover::-webkit-slider-thumb': { 'transform': 'scale(2.1)' },
+        //'#scp-bp-container input:hover::-moz-range-thumb': { 'transform': 'scale(1.7)' }, // Doesn't transition, is too big anyway
+        '#scp-bp-container input:hover::-ms-thumb': { 'transform': 'scale(1.7)' },
+
+        // Settings -- Color theme buttons
+        '.scp-color-theme-group': {
+          'margin': '36px 0 62px 0'
+        },
+
+        '.scp-color-theme-group > :last-child': {
+          'margin-right': 0   // Otherwise we look wider than we are and centering other stuff with it looks off
+        },
+
+        'sc-button[data-setting-name="themeName"]': {
+          'padding': '15px 0',
+          'font-size': '20px',
+          'border-radius': '50px',
+          'text-align': 'center',
+          'color': '#000',
+          'width': '62px',
+          'border': '5px solid #000',
+          'background-color': '#fff',
+          'font-weight': 100
+        },
+
+        'sc-button[data-setting-name="themeName"]:not([data-setting-value])': {
+          'position': 'relative',
+          'top': '30px',
+          'color': '#222',
+          'border-width': '2px'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="increaseContrast"]': {
+          'font-weight': 700,
+          'text-shadow': '.4px .2px'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"]': {
+          'color': '#777',
+          'border-color': '#777',
+          'background-color': '#fffdde'
+        },
+
+        'sc-button[data-setting-name="themeName"][data-setting-value="dark"]': {
+          'position': 'relative',
+          'top': '30px',
+          'color': '#fff',
+          'background-color': '#000'
+        },
+
+        // Settings -- Color theme power
+        '#scp-theme-power::-webkit-slider-thumb': { 'background': '#ddd !important' },
+        '#scp-theme-power::-moz-range-thumb': { 'background': '#ddd !important' },
+        '#scp-theme-power::-ms-thumb': { 'background': '#ddd !important' },
+
+        '.scp-ie9-false .scp-range-group[data-show="true"]': {
+          'pointer-events': 'all',
+          'opacity': '1'
+        },
+
+        // Settings -- general hue slider (theme or mouse)
+        '[data-type="hue"]': {  // These colors match up with HSL values where the saturation is .5 and the lightness is .7 (must match CURSOR_HUE_LIGHTNESS in cursor-css.js)
+          'background-image': 'linear-gradient(to right, #f66 0%, #ff6 15%, #6f6 30%, #6ff 45%, #66f 60%, #f6f 75%, #f66 90%, #fff 92%, #fff 100%) !important'
+        },
+        '[data-type="hue"]::-webkit-slider-thumb': { 'background': 'transparent !important' },
+        '[data-type="hue"]::-moz-range-thumb': { 'background': 'transparent !important' },
+        '[data-type="hue"]::-ms-thumb': { 'background': 'transparent !important' },
+
+        // Settings -- Mouse
+        '#scp-mouse-settings-group': {
+          'margin-top': '60px'
+        },
+
+        '#scp-mouse-settings-group>sc-p': {
+          'margin-top': '20px'
+        },
+
+        '#scp-mouse-size-label,#scp-mouse-hue-label':{
+          'font-size': '26px',
+          'margin-top': '5px'
+        },
+
+        '#scp-mouse-size': {
+          'border': '0 !important',
+          'background': '#fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%281%2C.6%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important',
+          'transform': 'scale(1.01)'  // Make wider to make up for lack of border -- so that it appears balanced with color slider
+        },
+        '#scp-mouse-size::-webkit-slider-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+        '#scp-mouse-size::-moz-range-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+        '#scp-mouse-size::-ms-thumb': { 'background': '#80A9F8 !important', 'margin-top': '3px' },
+
+        // Settings -- Lens: small/medium/large
+        '.scp-lens-size-group': {
+          'padding-top': '10px'
+        },
+
+        'sc-button[data-setting-name="lensSize"]': {
+          'padding': '15px'
+        },
+
+        '#scp-lens-small': {
+          'padding-left': '30px',
+          'transform': 'translateX(-3px) scale(.9)'
+        },
+
+        '#scp-lens-medium': {
+          'transform': 'scale(1.2)'
+        },
+
+        '#scp-lens-large': {
+          'transform': 'scale(1.5) translateX(16px)'
+        },
+
+        // Settings -- current
+        'sc-button[data-setting-current="true"]': {
+          'text-decoration': 'underline'
+        },
+
+        // Feedback -- thank you message
+        '.scp-feedback-sent .scp-if-feedback.scp-secondary-feature': MAKE_HIDDEN,
+        '.scp-if-feedback-sent': {
+          'visibility': 'hidden',
+          'opacity': 0,
+          'position': 'absolute',
+          'left': '154px',
+          'top': '62px',
+          'width': '340px'
+        },
+        '.scp-panel-feedback.scp-feedback-sent .scp-if-feedback-sent': MAKE_VISIBLE,
+
+        // Feedback -- text area
+        '#scp-feedback-textarea': {
+          'position': 'absolute !important',  // Size will be set by feedback.js
+          'top': '23px !important',
+          'left': '29px !important',
+          'font-size': '22px !important',
+          'font-family': 'Arial !important',
+          'color': '#000 !important',
+          'padding': '10px 60px 10px 10px !important', // Make room for feedback icon on the top right
+          'border': '0 !important',
+          'resize': 'none !important',
+          'outline': '0 !important',
+          'background-color': 'transparent !important',
+          'box-shadow': 'none !important',
+          'box-sizing': 'border-box !important'
+        },
+
+        '#scp-feedback-textarea:focus': {
+          'box-shadow': 'none !important'
+        },
+
+        '#scp-feedback-textarea::-moz-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus::-moz-placeholder': { 'color': 'transparent' },
+        '#scp-feedback-textarea::-webkit-input-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus::-webkit-input-placeholder': { 'color': 'transparent' },
+        '#scp-feedback-textarea:-ms-input-placeholder': PLACEHOLDER,
+        '#scp-feedback-textarea:focus:-ms-input-placeholder': { 'color': 'transparent' },
+
+        // Feedback -- rating stars
+        '.scp-rating-star': {
+          'fill': '#ccc',
+          'stroke': '#333',
+          'stroke-width': '1px',
+          'pointer-events': 'all'
+        },
+
+        '.scp-rating-star[aria-pressed="true"]': {    // Selected color
+          'fill': '#80A9F8'
+        },
+
+        '#scp-rating:hover > .scp-rating-star': {       // Hover color
+          'fill': '#80A9F8'
+        },
+
+        '.scp-rating-star:hover ~ .scp-rating-star': {   // Any star after the currently hovered one is gray
+          'fill': '#aaa !important'
+        },
+
+        // Feedback -- send button
+        '#scp-feedback-send>rect': {    // Disabled send button
+          'fill': '#6B9AE0'
+          },
+
+        '#scp-feedback-send[aria-disabled="true"]>rect': {    // Disabled send button
+          'fill': '#aaa !important'
+        },
+
+        // About -- content that shows up after rolling animation
+        '.scp-about-teaser': {
+          'position'     : 'absolute',
+          'z-index'      : '9999',
+          'left'         : '163px',
+          'top'          : '99px',
+          'text-align'   : 'center'
         },
 
         /*************** Clipping rules for badge **************************/
@@ -418,18 +1014,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
 
         '#scp-zoom-slider-bar': {
           'fill': '#383838'
-        },
-
-        '#scp-focus-outline': {
-          'border': '5px solid rgba(82, 168, 236, 0.8)',
-          'border-radius': '3px',
-          'display': 'none',
-          'position': 'absolute',
-          'pointer-events': 'none'
-        },
-
-        '.scp-is-panel.scp-keyboard > #scp-focus-outline': {
-          'display': 'block'
         },
 
         '#scp-wave1': {

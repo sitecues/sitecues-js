@@ -10,82 +10,106 @@ sitecues.def('util/transform', function (transform, callback) {
 
   'use strict';
 
-  // Skips past non-numeric characters and get the next number as type 'number'
-  // It will include a negative sign and decimal point if it exists in the string
-  function getNumberFromString (str) {
-    return +(str.match(/[0-9\.\-]+/));
-  }
+  sitecues.use('platform', function(platform) {
 
-  transform.getTranslate = function (transform) {
+    // Skips past non-numeric characters and get the next number as type 'number'
+    // It will include a negative sign and decimal point if it exists in the string
+    function getNumberFromString(str) {
+      return typeof str === 'number' ? str : +(str.match(/[0-9\.\-]+/));
+    }
 
-    var position  = {},
-        transformValues,
-        translateLeft,
-        translateTop,
-        splitter;
+    function getComputedScale(elem) {
+      var style = getComputedStyle(elem),
+        transform = style[platform.transformProperty];
+      return parseFloat(transform.substring(7)) || 1;
+    }
 
-    if (!transform || transform.indexOf('translate') === -1) {
+    function getElemTransform(elem) {
+      return getTransform(elem.getAttribute('transform'));
+    }
 
-      position.left = 0;
-      position.top  = 0;
+    function getTransform(transform) {
 
-    } else {
+      var hasTranslate = transform && transform.indexOf('translate') !== -1,
+        hasScale = transform && transform.indexOf('scale') !== -1,
+        hasRotate = transform && transform.indexOf('rotate') !== -1,
 
-      splitter        = transform.indexOf(',') !== -1 ? ',' : ' ';
-      transformValues = transform.split(splitter);
-      translateLeft   = transformValues[0];
+        translateTop = 0,
+        translateLeft = 0,
+        scale = 1,
+        rotate = 0,
+        rotateX = 0,
+        rotateY = 0,
 
-      if (transformValues[1].indexOf('scale') !== -1) {
-        translateTop = transformValues[1].split('scale')[0];
-      } else {
-        translateTop = transformValues[1];
+      // IE9 sometimes does not include a translation that is seperated by a comma;
+        translateSplitter,
+
+      // We use String.prototype.split to extract the values we want, and we need a
+      // variable to store the intermediary result.  I'm not a huge fan of this.
+        rotateValues,
+        transformValues;
+
+      if (hasTranslate) {
+
+        translateSplitter = transform.indexOf(',') !== -1 ? ',' : ' ';
+        transformValues = transform.split(translateSplitter);
+        translateLeft = transformValues[0] || 0;
+        translateTop = hasScale ? transformValues[1].split('scale')[0] : transformValues[1] || 0;
+
       }
 
-      position.left   = getNumberFromString(translateLeft);
-      position.top    = getNumberFromString(translateTop);
-
-    }
-
-    return position;
-
-  };
-
-  transform.getScale = function (transformStyle) {
-
-    var transformValues,
-        stringWithScale;
-
-    if (transformStyle && transformStyle.indexOf('scale') !== -1) {
-
-      transformValues = transformStyle.split('scale');
-
-      if (transformValues[1].indexOf('rotate') !== -1) {
-        stringWithScale = transformValues[1].split('rotate')[0];
-      } else {
-        stringWithScale = transformValues[1];
+      if (hasScale) {
+        transformValues = transform.split('scale');
+        scale = hasRotate ? transformValues[1].split('rotate')[0] : transformValues[1];
       }
 
-      return getNumberFromString(stringWithScale);
+      if (hasRotate) {
+
+        rotate = transform.split('rotate')[1];
+
+        if (rotate.indexOf(',') !== -1) {
+          rotateValues = rotate.split(',');
+          rotate = rotateValues[0];
+          rotateX = rotateValues[1];
+          rotateY = rotateValues[2];
+        }
+      }
+
+      return {
+        'translate': {
+          'left': getNumberFromString(translateLeft),
+          'top': getNumberFromString(translateTop)
+        },
+        'scale': getNumberFromString(scale),
+        'rotate': getNumberFromString(rotate),
+        'rotateX': getNumberFromString(rotateX),
+        'rotateY': getNumberFromString(rotateY)
+      };
 
     }
 
-    return 1;
-  };
+    function setTransform(element, left, top, transformScale, rotate, x, y) {
 
-  transform.getRotation = function (transformStyle) {
-
-    var transformValues;
-
-    if (transformStyle.indexOf('rotate') !== -1) {
-
-      transformValues = transformStyle.split('rotate');
-
-      return getNumberFromString(transformValues[1]);
+      element.setAttribute('transform', getTransformString(left, top, transformScale, rotate, x, y));
 
     }
 
-    return 0;
-  };
+    function getTransformString(left, top, scale, rotate) {
+
+      var translateCSS = 'translate(' + left + ' , ' + top + ') ',
+        scaleCSS = scale ? ' scale(' + scale + ') ' : '',
+        rotateCSS = rotate ? ' rotate(' + rotate + ') ' : '';
+
+      return translateCSS + scaleCSS + rotateCSS;
+
+    }
+
+    transform.getComputedScale = getComputedScale;
+    transform.getElemTransform = getElemTransform;
+    transform.getTransform = getTransform;
+    transform.setTransform = setTransform;
+    transform.getTransformString = getTransformString;
+  });
 
   callback();
 

@@ -113,13 +113,13 @@ sitecues.def('locale', function(locale, callback) {
     var lang = locale.getShortWebsiteLang();
 
     // use ajax for polish
-    sitecues.use(getLanguageModuleName(lang), function(lang) {
-      if (lang) {
-        translations = lang.dictionary;
+    sitecues.use(getLanguageModuleName(lang), function(langModule) {
+      if (langModule) {
+        translations = langModule.dictionary;
       }
       else {
-        sitecues.use(getLanguageModuleName(locale.default), function(lang) {
-          translations = lang.dictionary;
+        sitecues.use(getLanguageModuleName(locale.default), function(defaultLangModule) {
+          translations = defaultLangModule.dictionary;
         });
       }
     });

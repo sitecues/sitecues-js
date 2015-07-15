@@ -1,8 +1,11 @@
-sitecues.def('bp/animate', function(animate, callback) {
+/**
+ * Expand or contract the BP
+ */
+sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
   'use strict';
-  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'zoom', 'bp/controller/panel-controller',
+  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'platform', 'zoom',
 
-    function(state, BP_CONST, helper, zoomMod, panelController) {
+    function(state, BP_CONST, helper, platform, zoomMod) {
 
       var requestFrameFn = window.requestAnimationFrame   ||
                            window.msRequestAnimationFrame ||
@@ -30,16 +33,30 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           // The minimum amount we want to increase the badge size
           // when transitioning to the panel.  Basically, the panel
-          // should be BP_CONST.MINIMUM_PANEL_WIDTH by BP_CONST.MINIMUM_PANEL_HEIGHT
+          // should be BP_CONST.IDEAL_PANEL_WIDTH by BP_CONST.IDEAL_PANEL_HEIGHT
           // or 1.5x the size of the badge.
           MINIMUM_PANEL_SIZE_INCREASE = 1.5,
           panelScaleFromBadge,
           badgeScaleFromPanel,
-          transformElementId          = BP_CONST.BP_CONTAINER_ID;
+          transformElementId          = BP_CONST.BP_CONTAINER_ID,
 
-      // Cache elementById results because we use it in each frame and it shows up while profiling
-      function byId(id) {
-        return helper.byId(id);
+          // The stable target badge width
+          targetBadgeWidth,
+
+          // Convenience methods
+          byId = helper.byId,
+          getRect = helper.getRect;
+
+      function isToolbarBadge() {
+        return state.get('isToolbarBadge');
+      }
+
+      function getSvgElement() {
+        return byId(BP_CONST.SVG_ID);
+      }
+
+      function getBadgeElement() {
+        return byId(BP_CONST.BADGE_ID);
       }
 
       /**
@@ -110,12 +127,10 @@ sitecues.def('bp/animate', function(animate, callback) {
             remainingTime         = 1 - state.get('currentMode'),
             possibleOutlineRects;
 
-        if (state.get('isToolbarBadge')) {
+        if (isToolbarBadge()) {
           // Centered toolbar gets centered expansion treatment
           possibleOutlineRects = {
-            'center'  : getScaledRect(currentOutlineRect, 0.68 * remainingTime, 0, increaseFactor),
-            'topLeft' : getScaledRect(currentOutlineRect, 0, 0, increaseFactor),
-            'topRight': getScaledRect(currentOutlineRect, 1, 0, increaseFactor)
+            'center'  : getScaledRect(currentOutlineRect, 0.68 * remainingTime, 0, increaseFactor)
           };
         }
         else {
@@ -180,10 +195,10 @@ sitecues.def('bp/animate', function(animate, callback) {
        * @return {[Boolean]}     [True if rect is outside viewport]
        */
       function isRectOutsideViewport (rect) {
-        return (isRectLeftOfViewport(rect)  ||
-                isRectRightOfViewport(rect) ||
-                isRectAboveViewport(rect)   ||
-                isRectBelowViewport(rect));
+        return isRectLeftOfViewport(rect)  ||
+               isRectRightOfViewport(rect) ||
+               isRectAboveViewport(rect)   ||
+               isRectBelowViewport(rect);
       }
 
       /**
@@ -217,36 +232,51 @@ sitecues.def('bp/animate', function(animate, callback) {
        * @return {Object} [width and height]
        */
       function getTargetSize () {
+        return state.isPanelRequested() ? getTargetPanelSize() : getTargetBadgeSize();
+      }
 
-        var zoomMult            = state.get('isPageBadge') ? zoomMod.getCompletedZoom() : 1,
-            isPanelRequested    = state.isPanelRequested(),
-            svgElement          = byId(BP_CONST.SVG_ID),
-            badgeElement        = byId(BP_CONST.BADGE_ID),
-            svgRect             = helper.getRect(svgElement),
-            badgeRect           = helper.getRect(badgeElement),
-            badgeComputedStyles = window.getComputedStyle(badgeElement),
-            extraWidth          = (parseFloat(badgeComputedStyles.paddingLeft) + parseFloat(badgeComputedStyles.paddingRight)) * zoomMult,
-            badgeRectWidth      = badgeRect.width - extraWidth,
-            viewBoxRect         = svgElement.viewBox.baseVal,
-            svgAspectRatio      = viewBoxRect.width / viewBoxRect.height,
+      function getTargetPanelSize() {
 
-            // BADGE SIZE
-            newBadgeWidth       = badgeRectWidth * state.get('ratioOfSVGToVisibleBadgeSize'),
-            newBadgeHeight      = newBadgeWidth / svgAspectRatio,
-
-            // PANEL SIZE
-            newPanelWidth       = Math.max(BP_CONST.MINIMUM_PANEL_WIDTH, svgRect.width * MINIMUM_PANEL_SIZE_INCREASE * (1 - state.get('currentMode'))),
-            newPanelHeight      = svgRect.height * newPanelWidth / svgRect.width,
-
-            newWidth            = isPanelRequested ? newPanelWidth  : newBadgeWidth,
-            newHeight           = isPanelRequested ? newPanelHeight : newBadgeHeight;
+        var svgRect             = getRect(getSvgElement()),
+            portionRemaining    = 1 - state.get('currentMode'),
+            newPanelWidth       = Math.max(BP_CONST.IDEAL_PANEL_WIDTH, svgRect.width * MINIMUM_PANEL_SIZE_INCREASE * portionRemaining),
+            newPanelHeight      = svgRect.height * newPanelWidth / svgRect.width;
 
         return {
-          'width' : newWidth,
-          'height': newHeight
+          width : newPanelWidth,
+          height: newPanelHeight
         };
-
       }
+
+      function getAspectRatio() {
+        var viewBoxRect = getSvgElement().viewBox.baseVal;
+        return viewBoxRect.width / viewBoxRect.height;
+      }
+
+      function getZoomAppliedToBadge() {
+        return state.get('isPageBadge') ? zoomMod.getCompletedZoom() : 1;
+      }
+
+      function getTargetBadgeSize() {
+        var zoomMult = getZoomAppliedToBadge();
+        if (!targetBadgeWidth || !state.get('isToolbarBadge')) {
+          targetBadgeWidth = getTargetBadgeWidth(zoomMult);
+        }
+        return {
+          width: targetBadgeWidth,
+          height: targetBadgeWidth / getAspectRatio()
+        };
+      }
+
+      function getTargetBadgeWidth(zoomMult) {
+        var badgeElement = getBadgeElement(),
+          badgeRect = getRect(badgeElement),
+          badgeComputedStyles = window.getComputedStyle(badgeElement),
+          extraWidth = (parseFloat(badgeComputedStyles.paddingLeft) + parseFloat(badgeComputedStyles.paddingRight)) * zoomMult,
+          badgeRectWidth = badgeRect.width - extraWidth;
+        return badgeRectWidth * state.get('ratioOfSVGToVisibleBadgeSize');
+      }
+
       /**
        * [getTargetBadgePosition computes and returns the desired badge position]
        * @return {Object} [top and left]
@@ -255,9 +285,9 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         var FUDGE_FACTOR        = -0.5, // This makes it  not jerk to a new spot, not sure why
             isPageBadge         = state.get('isPageBadge'),
-            badgeElement        = byId(BP_CONST.BADGE_ID),
+            badgeElement        = getBadgeElement(),
             badgeComputedStyles = window.getComputedStyle(badgeElement),
-            badgeRect           = helper.getRect(badgeElement),
+            badgeRect           = getRect(badgeElement),
             completedZoom       = zoomMod.getCompletedZoom(),
             paddingTop          = parseFloat(badgeComputedStyles.paddingTop),
             paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),
@@ -296,6 +326,10 @@ sitecues.def('bp/animate', function(animate, callback) {
             rect,
             currentRect,
             resultRect;
+
+        if (isToolbarBadge()) {
+          return outlineRects.center;
+        }
 
         for (rect in outlineRects) {
           if (outlineRects.hasOwnProperty(rect)) {
@@ -379,7 +413,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function getCurrentTransformPosition () {
 
-        var transform = byId(transformElementId).style[helper.transformProperty],
+        var transform = byId(transformElementId).style[platform.transformProperty],
             position  = {},
             transformValues,
             translateLeft,
@@ -407,7 +441,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function getCurrentSize () {
 
-        var svgRect = byId(BP_CONST.SVG_ID).getBoundingClientRect();
+        var svgRect = getRect(getSvgElement());
 
         return {
           'width' : svgRect.width,
@@ -418,7 +452,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function getCurrentScale () {
 
-        var transformStyle = byId(transformElementId).style[helper.transformProperty],
+        var transformStyle = byId(transformElementId).style[platform.transformProperty],
             transformValues;
 
         if (transformStyle.indexOf('scale') !== -1) {
@@ -434,7 +468,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function setSize (size, crispFactor) {
 
-        var svgStyle = byId(BP_CONST.SVG_ID).style;
+        var svgStyle = getSvgElement().style;
 
         // Height and Width
         svgStyle.width  = (size.width * crispFactor) + 'px';
@@ -446,7 +480,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
         var transformStyle = byId(transformElementId).style;
 
-        transformStyle[helper.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
+        transformStyle[platform.transformProperty] = 'translate(' + left + 'px' + ' , ' + top + 'px' + ') ' + 'scale(' + transformScale + ')';
 
       }
 
@@ -491,7 +525,7 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       }
 
-      animate.initAnimation = function (isFirstTime) {
+      sizeAnimation.initAnimation = function (isFirstTime) {
 
         if (isFirstTime) {
           firstTimeRender();
@@ -507,11 +541,6 @@ sitecues.def('bp/animate', function(animate, callback) {
         if (state.isExpanding() || state.isShrinking()) {
 
           // There is room to animate, not already at the size limit of where we're transitioning to
-
-          SC_DEV && console.log('PERFORM BP2 ANIMATION');
-          SC_DEV && console.log('        currentMode : ' + state.get('currentMode'));
-          SC_DEV && console.log('        transitionTo: ' + state.get('transitionTo'));
-
           performAnimation();
         }
 
@@ -638,13 +667,16 @@ sitecues.def('bp/animate', function(animate, callback) {
 
           if (isAnimationEnding) {
 
-            // Remove scale and set correct size.
-            setSize(getCurrentSize(), 1);
+            // The final size must be IDEAL_PANEL_WIDTH x IDEAL_PANEL_HEIGHT
+            // We use scale to make up the difference so that all HTML BP content is also sized properly (not just SVG)
+            var currentSize = getCurrentSize(),
+              ratioFromIdealSize = isPanelRequested ? BP_CONST.IDEAL_PANEL_WIDTH / currentSize.width : 1;
+            setSize(getCurrentSize(), ratioFromIdealSize);
 
             setTransform(
               (startingPosition.left + positionDifference.left * normalizedAnimationTime),
               (startingPosition.top  + positionDifference.top  * normalizedAnimationTime),
-              1
+              isPanelRequested ? 1 / ratioFromIdealSize : 1
             );
 
             endAnimation();
@@ -684,7 +716,10 @@ sitecues.def('bp/animate', function(animate, callback) {
 
             fullAnimationDuration         = isPanelRequested ? BP_CONST.EXPAND_ANIMATION_DURATION_MS : BP_CONST.SHRINK_ANIMATION_DURATION_MS,
 
-            startCrispFactor;
+            startCrispFactor,
+
+            percentEnlarged               = state.get('currentMode'),
+            percentAnimationComplete      = isPanelRequested ? percentEnlarged : 1 - percentEnlarged;
 
         if (isPanelRequested && state.isBadge()) {
 
@@ -705,13 +740,7 @@ sitecues.def('bp/animate', function(animate, callback) {
         scaleDifference = endingScale - startingScale;
 
         // The animation start time will be NOW minus how long the previous animation duration.
-        if (isPanelRequested) {
-          animationStartTime = Date.now() - state.get('currentMode') * fullAnimationDuration;
-        } else {
-          animationStartTime = Date.now() - (1 - state.get('currentMode')) * fullAnimationDuration;
-        }
-
-        SC_DEV && console.log('BP2 ANIMATION STARTED ' + (Date.now() - animationStartTime) + ' ago.');
+        animationStartTime = Date.now() - percentAnimationComplete * fullAnimationDuration;
 
         animationId = requestFrameFn(animationTick);
 
@@ -719,30 +748,21 @@ sitecues.def('bp/animate', function(animate, callback) {
 
       function endAnimation () {
 
-        SC_DEV && console.log('BP2 animation complete.');
-
         var isPanelRequested = state.isPanelRequested();
 
         cancelAnimation();
 
-        byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', isPanelRequested);
+        getBadgeElement().setAttribute('aria-expanded', isPanelRequested);
 
-        if (isPanelRequested) {
-
-          currentlyTransitioningFrom = BP_CONST.PANEL_MODE;
-
-          panelController.panelReady();
-
-        } else {
-          currentlyTransitioningFrom = BP_CONST.BADGE_MODE;
-          panelController.panelShrunk();
-        }
-
+        state.set('currentMode', currentlyTransitioningTo);
+        currentlyTransitioningFrom = currentlyTransitioningTo;
         currentlyTransitioningTo = null;
+
+        sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
+        sitecues.emit('bp/do-update');
       }
 
       function cancelAnimation() {
-        SC_DEV && console.log('---- - canceling BP2 animation.  ----');
         cancelFrameFn(animationId);
       }
 

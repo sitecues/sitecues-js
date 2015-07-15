@@ -264,11 +264,6 @@ sitecues.def('util/common', function (common, callback) {
       $.extend(exports, common);
     }
 
-    common.getTransform = function($jquery) {
-      var transform = $jquery.css('transform') || $jquery.css('webkitTransform');
-      return parseFloat(transform.substring(7)) || 1;
-    };
-
     function getEmsToPx(fontSize, ems) {
       // Create a div to measure the number of px in an em with this font-size
       var measureDiv = $('<div/>')
@@ -332,8 +327,9 @@ sitecues.def('util/common', function (common, callback) {
       useCss.left = (absRect.left + useOutlineWidth) + 'px';
       useCss.top = (absRect.top + useOutlineWidth) + 'px';
       useCss.outlineWidth = Math.round(useOutlineWidth) + 'px'; // Must round otherwise we get an outline in the middle
+      useCss.display = 'block';
 
-      return $('<div>')
+      return $('<sc>')
         .css(useCss)
         .appendTo(optionalParent || 'html');
     };

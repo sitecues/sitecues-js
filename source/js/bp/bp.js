@@ -8,12 +8,12 @@
 //
 // Commands:
 // bp/do-update    -- call to update the view to match the current state
-// bp/do-expand    -- call to expand the BP or listen to know when the BP will expand
 //
 // Information:
 // bp/did-create   -- BP inserted in page
 // bp/did-complete -- BP ready for input
 // bp/will-expand  -- BP is about to expand
+// bp/did-expand   -- BP has finished expanding
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
@@ -21,10 +21,10 @@ sitecues.def('bp', function (bp, callback) {
   'use strict';
   // So many dependencies...
   sitecues.use('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
-    'zoom', 'bp/controller/bp-controller', 'bp/controller/base-controller', 'bp/placement', 'bp/view/elements/slider',
-    'bp/animate', 'platform', 'conf/site',
-    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, bpController,
-              baseController, placement, slider, animate, platform, site) {
+    'zoom', 'bp/placement', 'bp/view/elements/slider',
+    'bp/size-animation', 'platform', 'conf/site', 'util/color',
+    function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod,
+              placement, slider, sizeAnimation, platform, site, colorUtil) {
 
     /*
      *** Public methods ***
@@ -32,8 +32,7 @@ sitecues.def('bp', function (bp, callback) {
 
     // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
     var bpContainer,
-        isInitialized,
-        MIN_YIQ_LIGHT_TEXT = 160;
+        isInitialized;
 
     /**
      *** Start point ***
@@ -60,7 +59,7 @@ sitecues.def('bp', function (bp, callback) {
 
       updateClasses();
 
-      animate.initAnimation(isFirstTime);
+      sizeAnimation.initAnimation(isFirstTime);
     }
 
     // 1. Badge- or panel- specific view classes
@@ -68,81 +67,18 @@ sitecues.def('bp', function (bp, callback) {
     function updateClasses() {
 
       var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-      classBuilder += 'scp-palette' + getPalette();
+      classBuilder += ' scp-palette' + getPalette();
       classBuilder += ' scp-ie9-' + platform.isIE9();
       bpContainer.setAttribute('class', classBuilder);
-    }
-
-    // TODO : This code is copied from the mouse-highlight module, put then in a
-    //        common module that does not use jQuery.
-    /**
-     * Returns an object {r: #, g: #, b: #, a: #}
-     * @param colorString  A color string provided by getComputedStyle() in the form of rgb(#, #, #) or rgba(#, #, #, #)
-     * @returns {rgba object}
-     */
-    function getRgba(colorString) {
-      // In some browsers, sometimes the computed style for a color is 'transparent' instead of rgb/rgba
-      if (colorString === 'transparent') {
-        return {
-          r: 0,
-          g: 0,
-          b: 0,
-          a: 0
-        };
-      }
-      var MATCH_COLORS = /rgba?\((\d+), (\d+), (\d+),?( [\d?.]+)?\)/,
-        match = MATCH_COLORS.exec(colorString) || {};
-
-      return {
-        r: parseInt(match[1] || 0),
-        g: parseInt(match[2] || 0),
-        b: parseInt(match[3] || 0),
-        a: parseFloat(match[4] || 1)
-      };
-    }
-
-    function isLightTone(colorValue) {
-
-      var RGBAColor = getRgba(colorValue),
-        // http://en.wikipedia.org/wiki/YIQ
-        yiq = ((RGBAColor.r*299)+(RGBAColor.g*587)+(RGBAColor.b*114)) * RGBAColor.a / 1000;
-
-      return yiq > MIN_YIQ_LIGHT_TEXT;
-    }
-
-    function getAlpha(color) {
-      return getRgba(color).a;
     }
 
     // Starting at the sitecues-badge element, keep moving up ancestors until we find a non-transparent
     // background.  Analyze the color, and determine the best suited color palette for the badge.
     function getAdaptivePalette() {
 
-      var badgeElement = helper.byId(BP_CONST.BADGE_ID),
-          currentParent,
-          currentBackgroundColor;
+      var badgeElement = helper.byId(BP_CONST.BADGE_ID);
 
-      while (true) {
-
-        currentParent          = currentParent ? currentParent.parentElement : badgeElement.parentElement;
-        currentBackgroundColor = window.getComputedStyle(currentParent).backgroundColor;
-
-        // Just return the normal palette if we have reached the <html>
-        if (currentParent === document.documentElement) {
-          return BP_CONST.PALETTE_NAME_MAP.normal;
-        }
-
-        // Only care about non-transparent backgrounds
-        if (getAlpha(currentBackgroundColor) > 0.5) {
-
-          if (isLightTone(currentBackgroundColor)) {
-            return BP_CONST.PALETTE_NAME_MAP.normal;
-          } else {
-            return BP_CONST.PALETTE_NAME_MAP['reverse-blue'];
-          }
-
-        }
-      }
+      return BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal'];
 
     }
 
@@ -185,8 +121,6 @@ sitecues.def('bp', function (bp, callback) {
       // Set badge classes. Render the badge. Render slider.
       updateView(true);
 
-      slider.renderView();
-
       // Notify other modules we're completely ready
       // slider.js     -> Bind mousedown handlers for A's, thumb, slider. updateZoomValueView.
       // panel.js      -> Bind mousedown handler to SVG_ID
@@ -212,35 +146,18 @@ sitecues.def('bp', function (bp, callback) {
       var badgeElement = badge.init();
 
       // Create the svg container
-      bpContainer = document.createElement('div');
+      bpContainer = document.createElement('sc');
 
       // Set attributes
       helper.setAttributes(bpContainer, BP_CONST.PANEL_CONTAINER_ATTRS);
 
       bpContainer.innerHTML = bpSVG.getSvg();
 
-      // TODO: Should we remove the commented out code below?
-      // Create focus outline element
-      // var focusOutline = document.createElement('div');
-      // document.querySelector('#scp-bp-container').appendChild(focusOutline);
-      // focusOutline.setAttribute('id', 'scbp-target-outline')
-
       // Parent the badge appropriately
       var svgElement = getSVGElement();
 
       // Append the bpContainer to the badgeElement.  Also calls repositionBPOverBadge.
       placement.init(badgeElement, bpContainer, svgElement);
-
-      bindPermanentListeners(badgeElement);
-    }
-
-    function bindPermanentListeners(badgeElement) {
-      badgeElement.addEventListener('keydown', bpController.processBadgeActivationKeys);
-      badgeElement.addEventListener('mousedown', bpController.suppressBadgeFocusOnClick);
-      badgeElement.addEventListener('click', bpController.clickToOpenPanel);
-      bpContainer.addEventListener('blur', baseController.clearPanelFocus);
-      badgeElement.addEventListener('mousemove', bpController.onMouseMove);
-      badgeElement.addEventListener('mouseout', bpController.onMouseOut);
     }
 
     function isBadgeAnImage (badgeElement) {
@@ -297,7 +214,7 @@ sitecues.def('bp', function (bp, callback) {
 
         SC_DEV && console.log('Document ready to initialize BP.');
 
-        initializeBPFeature();
+        setTimeout(initializeBPFeature, 0);
 
       } else {
 

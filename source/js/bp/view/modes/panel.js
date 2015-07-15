@@ -1,93 +1,7 @@
 sitecues.def('bp/view/modes/panel', function(panel, callback) {
   'use strict';
-  sitecues.use('bp', 'bp/constants', 'bp/controller/base-controller',
-    'bp/controller/panel-controller', 'bp/controller/bp-controller', 'bp/model/state', 'bp/helper',
-    function(bp, BP_CONST, baseController, panelController, bpController, state, helper) {
-
-      var isSticky;
-
-      /*
-       Show panel according to settings.
-       */
-      function expandPanel() {
-
-        if (state.isPanel()) {
-          return; // Already expanded or in the middle of shrinking
-        }
-
-        sitecues.emit('bp/will-expand');
-
-        prepareKeyboardFocus();
-        bindTemporaryHandlers();
-        setPanelExpandedState();
-
-        sitecues.emit('bp/do-update');
-      }
-
-      /*
-       If the badge was focused, the panel will go into focus mode when it's entered.
-       In focus mode, we show the following:
-       - A keyboard focus outline so the user knows where they are tabbing
-       - A close button in case the user doesn't realize Escape key will close
-       - The "more button" is shown immediately rather than on a timer, so that the tabbing cycle doesn't suddenly change in the middle of tabbing
-       We also save the last focus so that we can restore it when the panel closes.
-       */
-      function prepareKeyboardFocus() {
-
-        // Save the last focus so that we can restore it when panel closes
-        var lastFocus = document.activeElement,
-
-            // If the badge is focused we will turn keyboard mode on for the panel
-            isFocused      = lastFocus && lastFocus.id === BP_CONST.BADGE_ID,
-            badgeElement   = helper.byId(BP_CONST.BADGE_ID),
-            panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
-
-        panelController.lastFocus = lastFocus;
-
-        baseController.clearPanelFocus();
-
-        if (isFocused) {
-
-          badgeElement.setAttribute('aria-expanded', 'true');
-
-          // Turn keyboard mode on for the panel, and start focus on the first item
-          state.set('isKeyboardMode', true);
-          state.set('focusIndex', 0);
-
-        }
-
-        // Take the focus whether or not we're in focus mode,
-        // in case the user presses tab or Escape to turn on keyboard mode after expansion
-        panelContainer.focus();
-      }
-
-      // Window mouse listeners are temporary – only bound when the panel is open.
-      // Good for performance – it prevents extra code from being run on every mouse move/click when we don't need it
-      function bindTemporaryHandlers() {
-        // Pressing tab or shift tab when panel is open switches it to keyboard mode
-        window.addEventListener('keydown',   bpController.processKeydown, true);
-        window.addEventListener('mousedown', panelController.winMouseDown);
-        if (!SC_DEV || !isSticky) {
-          window.addEventListener('mousemove', panelController.winMouseMove);
-          window.addEventListener('blur', panelController.winBlur);
-          window.addEventListener('mouseout', panelController.winMouseLeave);
-        }
-      }
-
-      function unbindTemporaryMouseHandlers() {
-        window.removeEventListener('keydown',   bpController.processKeydown, true);
-        window.removeEventListener('mousemove', panelController.winMouseMove);
-        window.removeEventListener('mousedown', panelController.winMouseDown);
-        window.removeEventListener('blur', panelController.winBlur);
-        window.removeEventListener('mouseout', panelController.winMouseLeave);
-      }
-
-      function setPanelExpandedState() {
-        state.set('wasMouseInPanel', false);
-        state.set('transitionTo', BP_CONST.PANEL_MODE);
-        state.set('isRealSettings', true);    // Always use real settings once expanded
-        state.set('featurePanelName', null);  // We're not in a feature panel
-      }
+  sitecues.use('bp', 'bp/constants', 'bp/model/state',
+    function(bp, BP_CONST, state) {
 
       /**
        *** Getters ***
@@ -117,7 +31,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
         // *** scp-want-panel ***
         // Sets larger panel sizes on everything.
         // It can take time to take effect because of the animation properties.
-        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isMorePanel() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
+        classBuilder += ' ' + BP_CONST.WANT_PANEL + (state.isSecondaryPanelRequested() ? ' ' + BP_CONST.MORE_ID : ' ' + BP_CONST.MAIN_ID);
 
         if (state.get('isKeyboardMode')) {
           // *** scp-keyboard ***
@@ -125,7 +39,7 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
           classBuilder += ' scp-keyboard';
         }
 
-        return classBuilder + ' ' + getFeatureClass();
+        return classBuilder + getSecondaryPanelClasses();
       };
 
       /*
@@ -138,67 +52,19 @@ sitecues.def('bp/view/modes/panel', function(panel, callback) {
        These can only be shown when the panel is large.
        */
 
-      // TODO all of the feature panels
-      function getFeatureClass() {
-        return '';
-//        var featureClassBuilder = '';
-//
-//        // Feature panels are only displayed when the panel is large.
-//        if (state.data.featurePanelName) {
-//          featureClassBuilder += ' scp-feature ' + 'scp-' + state.data.featurePanelName + '-feature';
-//          var feature = BP_CONST.FEATURES[state.data.featurePanelName];
-//          doExtraHeight(feature);
-//          if (state.data.numCards[state.data.featurePanelName]) {
-//            displayActiveCard();
-//          } else {
-//            baseController.hideActiveCard();
-//          }
-//        }
-//        return featureClassBuilder;
-      }
-
-      // Bind the mouse handlers that we don't need to add/remove each time
-      // No sense in binding/unbinding event listeners on the slider etc. all the time.
-      // The unbinding code would cost bytes for nothing useful. It won't help with general
-      // window/document performance as these are just for mouse actions over the elements in the panel.
-      function bindPermanentMouseHandlers() {
-
-        var mainSVG = helper.byId(BP_CONST.SVG_ID);
-
-        mainSVG.addEventListener('mousedown', panelController.panelMouseDown);
-      }
-
-      sitecues.on('bp/do-expand', expandPanel);
-
-      sitecues.on('bp/did-complete', bindPermanentMouseHandlers);
-
-      // When a mousemove happens outside the panel, shrink the panel.
-      // Unbind the window event listeners specifically created for shrinking the panel.
-      sitecues.on('bp/will-shrink', function() {
-
-        var badgeElement   = helper.byId(BP_CONST.BADGE_ID),
-            panelContainer = helper.byId(BP_CONST.BP_CONTAINER_ID);
-
-        // Tell screen reader explicitly that sitecues button’s state is no longer expanded.
-        badgeElement.setAttribute('aria-expanded', 'false');
-
-        // Remove the focus for SVG child elements.
-        panelContainer.removeAttribute('aria-activedescendant');
-
-        // Don't listen to events on the window when the BP is collapsing
-        unbindTemporaryMouseHandlers();
-      });
-
-      if (SC_DEV) {
-        sitecues.toggleStickyPanel = function() {
-          isSticky = !isSticky;
-          return isSticky;
+      function getSecondaryPanelClasses() {
+        var panelName = state.getSecondaryPanelName(),
+          className =' scp-panel-' + panelName;
+        if (state.isSecondaryPanelRequested()) {
+          className += ' scp-is-secondary';
         }
+        if (state.get('isSecondaryExpanding')) {
+          className += ' scp-secondary-expanding';  // Growing in visual height
+        }
+
+        return className;
       }
 
-      // Unless callback() is queued, the module is not registered in global var modules{}
-      // See: https://fecru.ai2.at/cru/EQJS-39#c187
-      //      https://equinox.atlassian.net/browse/EQ-355
       callback();
     });
 
