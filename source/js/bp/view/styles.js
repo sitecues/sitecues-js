@@ -1221,9 +1221,6 @@ sitecues.def('bp/view/styles', function (styling, callback) {
       };
     }
 
-    // Unless callback() is queued, the module is not registered in global constants.modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
     callback();
   });
 });

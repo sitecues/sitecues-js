@@ -122,7 +122,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
     </g>\
-    <g id="scp-about" class="scp-if-about">\
+    <g id="scp-about" class="scp-if-about scp-secondary-feature">\
       <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="16" width="330" height="110"></image>\
     </g>\
   </g>\
