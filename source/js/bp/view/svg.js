@@ -122,8 +122,14 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
       </g>\
     </g>\
-    <g id="scp-about" class="scp-if-about scp-secondary-feature">\
-      <image id="scp-logo-text" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/sitecues-logo-text.png" x="805" y="16" width="330" height="110"></image>\
+    <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
+      <g id="scp-logo-text">\
+        <text style="font-family:Calibri;font-size:96px">\
+          <tspan style="fill:#100f0d;font-weight:bold" y="67" x="0 38 62 94">site</tspan>\
+          <tspan style="fill:#2d49a3;font-weight:normal" y="67" x="140 176 222 264">cues</tspan>\
+          <tspan text-anchor="end" style="font-family:Open Sans;font-size:24px" y="94" x="297">zoom &amp; speech</tspan>\
+        </text>\
+      </g>\
     </g>\
   </g>\
   <g id="scp-button-menu" transform="translate(52,66)">\

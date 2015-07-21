@@ -2,6 +2,7 @@
 // Next
 // Design polish
 // UX testing -- Vermont?
+// sitecues-logo-text.png is huge
 // IE
 // - feedback page issues
 // -- no caret visible in IE9
@@ -35,6 +36,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         origPanelContentsRect,
         origOutlineHeight,
         isActive = false,
+        isCssLoaded,
 
         // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
         byId = helper.byId,
@@ -468,6 +470,17 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
         });
       }
 
+      function onPanelOpen() {
+        if (!isCssLoaded) {
+          isCssLoaded = true;
+          var cssLink = document.createElement('link'),
+            cssUrl = sitecues.resolveSitecuesUrl('../css/secondary.css');
+          cssLink.setAttribute('rel', 'stylesheet');
+          cssLink.setAttribute('href', cssUrl);
+          document.querySelector('head').appendChild(cssLink);
+        }
+      }
+
       function onPanelClose () {
 
         if (state.isSecondaryPanelRequested()) {
@@ -495,6 +508,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       sitecues.on('bp/did-complete', resetStyles);
 
       sitecues.on('bp/do-toggle-secondary-panel', toggleSecondaryPanel);
+
+      sitecues.on('bp/did-expand', onPanelOpen);
 
       sitecues.on('bp/will-shrink', onPanelClose);
 

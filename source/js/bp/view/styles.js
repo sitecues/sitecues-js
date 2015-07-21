@@ -982,6 +982,15 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'fill': '#aaa !important'
         },
 
+        // About -- zoom & speech
+        '#scp-logo-text': {
+          'display': 'none'
+        },
+
+        '.scp-is-panel #scp-logo-text': {
+          'display': 'block'  // Only load font if panel open
+        },
+
         // About -- content that shows up after rolling animation
         '.scp-about-teaser': {
           'position'     : 'absolute',
