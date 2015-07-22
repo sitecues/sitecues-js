@@ -1,8 +1,7 @@
 // TODO
 // Next
 // Design polish
-// UX testing -- Vermont?
-// sitecues-logo-text.png is huge
+// UX testing
 // IE
 // - feedback page issues
 // -- no caret visible in IE9
