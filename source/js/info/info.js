@@ -60,25 +60,22 @@ sitecues.def('info', function(info, callback) {
         return;
       }
 
-      function addParam(name, value) {
-        return name + '=' + encodeURIComponent(value) + '&'
-      }
-
       var
         localizedPageName = pageName + '-' + locale.getShortWebsiteLang(),
         sitecuesJsUrl = sitecues.getLibraryUrl().raw,
         hostUrl = window.location,
-        pageUrl = sitecues.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html?') +
-          addParam('scUrl', sitecuesJsUrl) +
-          addParam('siteId', site.getSiteId()) +
-          addParam('siteUrl', hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port) +
-          addParam('prefs', window.localStorage.sitecues) +
-          anchor;
+        pageUrl = sitecues.resolveSitecuesUrl('../html/help/' + localizedPageName + '.html',
+          {
+            scUrl: sitecuesJsUrl,
+            siteId: site.getSiteId(),
+            siteUrl: hostUrl.protocol + '//' + hostUrl.hostname + ':' + hostUrl.port,
+            prefs: window.localStorage.sitecues
+          });
 
       sitecues.emit('bp/do-shrink');
 
       $iframe = $('<iframe>')
-        .attr('src', pageUrl)
+        .attr('src', pageUrl + anchor)
         .css(INITIAL_CSS)
         .css('border', getBorderCss())
         .appendTo('html');

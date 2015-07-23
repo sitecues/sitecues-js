@@ -479,8 +479,16 @@
   }
 
   // Resolve a URL as relative to the main script URL.
-  function resolveSitecuesUrl(urlStr) {
-    return resolveUrl(urlStr, getLibraryUrl());
+  // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
+  function resolveSitecuesUrl(urlStr, paramsMap) {
+    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + version;
+
+    function addParam(name) {
+      url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';
+    }
+
+    Object.keys(paramsMap || {}).forEach(addParam);
+    return url;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////
