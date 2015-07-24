@@ -61,7 +61,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
         parent,
         // ********** Some browsers are fine **********
         doFirefoxCorrections = platform.browser.isFirefox && platform.browser.version < 34,
-        doIECorrections = platform.browser.isIE && platform.browser.version !== 11,
+        doIECorrections = platform.browser.isIE && platform.browser.version < 11,
         isElement = node.nodeType === 1;
 
       if (isElement) {
