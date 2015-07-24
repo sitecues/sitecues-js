@@ -28,7 +28,7 @@ sitecues.def('cursor', function (cursor, callback) {
         cursorStylesheetObject,
         bpCursorStylesheetObject,
         isStyleServiceReady,
-        MAX_USER_SPECIFIED_CURSOR_SIZE = 4,
+        MAX_USER_SPECIFIED_CURSOR_SIZE = 3.5,
         MAX_USER_SPECIFIED_MOUSE_HUE = 1.1,// If > 1.0 then use white
         userSpecifiedSize,
         userSpecifiedHue,
