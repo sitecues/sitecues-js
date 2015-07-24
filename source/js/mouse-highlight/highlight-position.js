@@ -103,7 +103,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getOldIECorrectionsToRangeRect(origRangeRect) {
       // Factor in IE native browser zoom
-      var nativeZoom = screen.deviceXDPI / screen.logicalXDPI
+      var nativeZoom = screen.deviceXDPI / screen.logicalXDPI;
       origRangeRect.top /= nativeZoom;
       origRangeRect.left /= nativeZoom;
       origRangeRect.width /= nativeZoom;

@@ -70,8 +70,6 @@ sitecues.def('bp/helper', function (helper, callback) {
 
     helper.isChrome = platform.browser.isChrome;
 
-    helper.isMoz = platform.browser.isMoz;
-
     helper.isIE  = platform.browser.isIE;
 
     helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
