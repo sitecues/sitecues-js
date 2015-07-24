@@ -59,8 +59,9 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
     mhpos.getContentsRangeRect = function(node) {
       var range = document.createRange(),
         parent,
-        // ********** IE, Chrome, Safari and FF >= 34 are fine **********
-        isOldFirefox = platform.browser.isFirefox && platform.browser.version < 34,
+        // ********** Some browsers are fine **********
+        doFirefoxCorrections = platform.browser.isFirefox && platform.browser.version < 34,
+        doIECorrections = platform.browser.isIE && platform.browser.version < 11,
         isElement = node.nodeType === 1;
 
       if (isElement) {
@@ -76,11 +77,11 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
       var contentsRangeRect = $.extend({}, range.getBoundingClientRect());
 
-      if (platform.browser.isIE && platform.browser.version < 11) {
+      if (doIECorrections) {
         contentsRangeRect = getOldIECorrectionsToRangeRect(contentsRangeRect);
       }
 
-      if (isOldFirefox) {
+      if (doFirefoxCorrections) {
         contentsRangeRect = getFirefoxCorrectionsToRangeRect(parent, contentsRangeRect);
       }
 
@@ -102,7 +103,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
     function getOldIECorrectionsToRangeRect(origRangeRect) {
       // Factor in IE native browser zoom
-      var nativeZoom = screen.deviceXDPI / screen.logicalXDPI
+      var nativeZoom = screen.deviceXDPI / screen.logicalXDPI;
       origRangeRect.top /= nativeZoom;
       origRangeRect.left /= nativeZoom;
       origRangeRect.width /= nativeZoom;

@@ -7,18 +7,18 @@ sitecues.def('platform', function (platformModule, callback) {
   'use strict';
 
   // Store the agent and platform variables for later use
-  var agent    = navigator && navigator.userAgent ? navigator.userAgent : 'null',
+  var agent    = navigator.userAgent || '',
       platform = navigator.platform.toLowerCase(),
       browser,
       os;
 
   // Determine which browser is being used
-  browser = agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
-            agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0 ? 'IE':
+  browser = (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE':
+            agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
             agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
             agent.indexOf(' Safari') > 0 ? 'Safari'  :
-            agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/') > 0 ? 'Opera'  :
-            'Unknown Browser';
+            (agent.indexOf(' Opera/') > 0 || agent.indexOf(' Presto/')) > 0 ? 'Opera'  :
+            'Unknown';
 
   // Set globally accessible browser constants
   platformModule.browser = {
@@ -30,8 +30,7 @@ sitecues.def('platform', function (platformModule, callback) {
       isOpera     : browser === 'Opera',
       isSafari    : browser === 'Safari',
       isWebKit    : browser === 'Chrome' || browser === 'Opera' || browser === 'Safari',
-      isMoz        : browser === 'Firefox',
-      isUnknown   : browser === 'Unknown Browser'
+      isUnknown   : browser === 'Unknown'
     };
 
   // Set globally accessible version constants
@@ -41,7 +40,10 @@ sitecues.def('platform', function (platformModule, callback) {
     if (charIndex === -1) {
       if (platformModule.browser.isIE) {
         // Use MSIE XX.X
-        charIndex = agent.indexOf('MSIE') || agent.indexOf('Edge');
+        charIndex = agent.indexOf('MSIE');
+        if (charIndex < 0) {
+          charIndex = agent.indexOf('Edge');
+        }
         if (charIndex > 0) {
           charIndex += 5;  // MSIE #
         }
