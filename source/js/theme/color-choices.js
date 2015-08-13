@@ -271,14 +271,17 @@ sitecues.def('theme/color/choices', function(colorChoices, callback) {
         bgAddedLightness,
         bgPreservationFactor,
         newHue,
-        foregroundIntensity = 0.4 + (Math.min(intensity, 0.8) / 2.9),
+        foregroundIntensity = 0.4 + (Math.min(intensity, 0.8) / 1.15),
         textShadowIntensity = Math.max(0, intensity - 0.8) * 0.8;
 
       if (style.prop === 'color') {
         colorizedRgba = (textHue && textHue < 1) ? colorizeGrayText(rgba, textHue) : rgba;
         hsl = rgbToHsl(colorizedRgba.r, colorizedRgba.g, colorizedRgba.b);
         origLightness = Math.max(hsl.l, 1 - hsl.l);
-        newLightness = Math.max(foregroundIntensity * 0.91 * (origLightness + 0.1), foregroundIntensity / 3);
+        newLightness = foregroundIntensity * (origLightness + 0.1);
+        newLightness = newLightness * (1.4 - hsl.s / 2); // Saturated colors should be kept a bit
+        newLightness = Math.max(newLightness, foregroundIntensity / 3);
+        newLightness = Math.min(newLightness, 1);
         newHue = getClosestGoodHueForDarkTheme(hsl.h);
         newRgba = $.extend({}, rgba, hslToRgb(newHue, hsl.s, newLightness));
         if (textShadowIntensity > 0) {
