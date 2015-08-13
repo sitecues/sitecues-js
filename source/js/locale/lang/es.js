@@ -14,7 +14,6 @@ sitecues.def('locale/es', function(locale_es, callback) {
     'badge_label': 'Herramientas de acercamiento y de voz de sitecues',
     'zoom_in': 'aumentar acercamiento',
     'zoom_out': 'aisminuir acercamiento',
-    'help': 'ayuda',
 
     // Visible labels
     'pre_zoom': 'Acercamiento ',

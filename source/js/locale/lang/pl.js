@@ -12,7 +12,6 @@ sitecues.def('locale/pl', function(locale_pl, callback) {
     'badge_label': 'narzędzia powiększania i mowy sitecues',
     'zoom_in': 'powiększ',
     'zoom_out': 'pomniejsz',
-    'help': 'Pomoc',
 
     // Visible labels
     'pre_zoom': 'Powiększenie ',

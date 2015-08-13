@@ -52,19 +52,19 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </defs>\
 <rect id="scp-badge-bg" fill="white" stroke-width="0" x="0" y="0" width="630" height="124" opacity="0"/>\
 <rect id="scp-badge-focus-rect" fill="transparent" stroke-width="0" x="10" y="10" width="620" height="114" rx="15" ry="15" filter="url(#scp-shadowblur)"/>\
-<g id="scp-main" aria-label="sitecues main panel">\
+<g id="scp-main" aria-label="{{sitecues_main_panel}}">\
   <path id="scp-shadow" d="m808,188c0,6 -5,11 -11,11H11m797,-11v-188" stroke="#000" stroke-width="2" filter="url(#scp-shadowblur)" fill="none"/>\
   <rect id="scp-main-content-fill" fill="white" stroke-width="0" x="1" y="1" width="806" height="134" class="scp-panel-only" opacity="0"/>\
   <use id="scp-main-outline" xlink:href="#scp-outline-def" class="scp-panel-only" opacity="0" fill="none"/>\
-  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="Decrease zoom" class="scp-A-button"/>\
+  <use id="scp-small-A" xlink:href="#scp-small-A-def" y="48" role="button" aria-label="{{zoom_out}}" class="scp-A-button"/>\
   <g id="scp-zoom-slider-bar" role="slider" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-labelledby="scp-zoom-label" data-thumb-mover="scp-zoom-slider-thumb">\
     <use xlink:href="#scp-zoom-slider-bar-def" x="80" y="60"/>\
     <rect id="scp-zoom-slider-target" class="scp-hidden-target scp-hand-cursor" x="80" y="44" width="280" height="67"/>\
   </g>\
   <use id="scp-zoom-slider-thumb" class="scp-hand-cursor" xlink:href="#scp-zoom-slider-thumb-def" role="presentation" aria-controls="scp-zoom-slider-bar" y="48" x="60"/>\
-  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="Increase zoom" class="scp-A-button"/>\
+  <use id="scp-large-A" xlink:href="#scp-large-A-def" x="380" y="21" role="button" aria-label="{{zoom_in}}" class="scp-A-button"/>\
   <line id="scp-vert-divider" class="scp-panel-only" opacity="0" stroke="#888" stroke-width="2" x1="500" y1="31" x2="500" y2="99"/>\
-  <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="Speech"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
+  <g id="scp-speech" role="checkbox" aria-checked="false" aria-label="{{speech}}"> <!-- ARIA Toggle button not working well with NVDA screen reader -->\
     <use id="scp-head" xlink:href="#scp-head-def" x="530" y="11"/>\
     <use id="scp-wave1" xlink:href="#scp-wave1-def" class="scp-wave" x="530" y="11"/>\
     <use id="scp-wave2" xlink:href="#scp-wave2-def" class="scp-wave" x="530" y="11"/>\
@@ -82,25 +82,25 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     <rect opacity="0" x="0" y="195" width="808" height="64"/>\
   </g>\
 </g>\
-<g id="scp-secondary" class="scp-secondary-only" aria-label="More features" clip-path="url(#scp-outline-clip-def)">\
+<g id="scp-secondary" class="scp-secondary-only" aria-label="{{more_features}}" clip-path="url(#scp-outline-clip-def)">\
   <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text class="scp-hand-cursor" id="scp-tips-label" role="link" data-feature="tips" x="45" y="178">Tips</text>\
-    <text class="scp-hand-cursor" id="scp-settings-label" role="link" data-feature="settings" x="240" y="178">Adjust</text>\
-    <text class="scp-hand-cursor" id="scp-feedback-label" role="link" data-feature="feedback" x="468" y="178">Rate us</text>\
-    <text class="scp-hand-cursor" id="scp-about-label" role="link" data-feature="about" x="685" y="178">About</text>\
+    <text class="scp-hand-cursor" id="scp-tips-label" role="link" data-feature="tips" x="45" y="178">{{tips}}</text>\
+    <text class="scp-hand-cursor" id="scp-settings-label" role="link" data-feature="settings" x="240" y="178">{{settings}}</text>\
+    <text class="scp-hand-cursor" id="scp-feedback-label" role="link" data-feature="feedback" x="468" y="178">{{rate_us}}</text>\
+    <text class="scp-hand-cursor" id="scp-about-label" role="link" data-feature="about" x="685" y="178">{{about}}</text>\
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\
-      <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(690,72) rotate(90) scale(1.3)" role="button" aria-label="Previous" aria-disabled="true">\
+      <g id="scp-prev-card" class="scp-arrow scp-hand-cursor scp-transition-opacity" transform="translate(690,72) rotate(90) scale(1.3)" role="button" aria-label="{{previous}}" aria-disabled="true">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
           <use xlink:href="#scp-arrow" y="16"/>\
           <rect class="scp-hidden-target" x="-25" y="-15" width="50" height="50"/>\
         </g>\
       </g>\
-      <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(740,72) rotate(-90) scale(1.3)" role="button" aria-label="Next">\
+      <g id="scp-next-card" class="scp-arrow scp-hand-cursor" transform="translate(740,72) rotate(-90) scale(1.3)" role="button" aria-label="{{next}}">\
         <g data-hover="scale(1.3)">\
           <use xlink:href="#scp-arrow"/>\
           <use xlink:href="#scp-arrow" y="16""/>\
@@ -110,16 +110,16 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
       <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
-      <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="no rating">\
-        <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="1 star" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
-        <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="2 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
-        <use id="scp-stars-3" role="button" aria-pressed="false" aria-label="3 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
-        <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="4 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
-        <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="5 stars" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
+      <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="{{rating}}">\
+        <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
+        <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="{{rating_2}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\
+        <use id="scp-stars-3" role="button" aria-pressed="false" aria-label="{{rating_3}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="174" y="254"/>\
+        <use id="scp-stars-4" role="button" aria-pressed="false" aria-label="{{rating_4}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="240" y="254"/>\
+        <use id="scp-stars-5" role="button" aria-pressed="false" aria-label="{{rating_5}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="306" y="254"/>\
       </g>\
       <g id="scp-feedback-send" class="scp-hand-cursor" aria-disabled="true" role="button">\
         <rect x="615" width="150" y="260" height="50" rx="20" ry="20"/>\
-        <text x="654" y="295" font-family="Arial" fill="white">Send</text>\
+        <text x="654" y="295" font-family="Arial" fill="white">{{send}}</text>\
       </g>\
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
@@ -127,7 +127,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
         <text style="font-family:Calibri;font-size:96px">\
           <tspan style="fill:#100f0d;font-weight:bold" y="67" x="0 38 62 94">site</tspan>\
           <tspan style="fill:#2d49a3;font-weight:normal" y="67" x="140 176 222 264">cues</tspan>\
-          <tspan text-anchor="end" style="font-family:Open Sans;font-size:24px" y="94" x="297">zoom &amp; speech</tspan>\
+          <tspan text-anchor="end" style="font-family:Open Sans;font-size:24px" y="94" x="297">{{zoom_and_speech}}</tspan>\
         </text>\
       </g>\
     </g>\
@@ -165,7 +165,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 </g>\
 <use id="scp-outline" xlink:href="#scp-outline-def" class="scp-panel-only" fill="none" opacity="0"/>\
 <g id="scp-more-button-container" transform="translate(400,198)">\
-  <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="View more options">\
+  <g id="scp-more-button-group" data-hover="scale(1.2)" class="scp-hand-cursor" role="button" aria-label="{{more_features}}">\
     <circle fill="#FFF" stroke="#777" stroke-width="5" stroke-miterlimit="10" cx="0" cy="0" r="34"/>\
     <use fill="#777" xlink:href="#scp-arrow"/>\
    </g>\
@@ -173,9 +173,9 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
 <rect id="scp-mouseover-target" x="0" y="0" width="700" height="160" opacity="0"/>\
 </svg>\
 \
-<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" data-visible-focus-on="scp-feedback-input-rect" placeholder="Tell us something ...."></textarea>\
+<textarea id="scp-feedback-textarea" class="scp-if-feedback scp-transition-opacity scp-secondary-feature scp-hand-cursor" data-visible-focus-on="scp-feedback-input-rect" placeholder="{{tell_us_something}}"></textarea>\
 <sc class="scp-if-feedback-sent scp-transition-opacity scp-secondary-feature">\
-  <sc-h1>Thank you</sc-h1>\
+  <sc-h1>{{thank_you}}</sc-h1>\
 </sc>\
 <sc class="scp-about-teaser scp-if-about scp-transition-opacity scp-secondary-feature">\
   <sc-p>\

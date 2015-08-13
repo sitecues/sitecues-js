@@ -14,7 +14,6 @@ sitecues.def('locale/fr', function(locale_fr, callback) {
     'badge_label': 'Outils de zoom et diction sitecues',
     'zoom_in': 'agrandir',
     'zoom_out': 'réduire',
-    'help': 'aide',
 
     // Visible labels
     'pre_zoom': 'Zoom ',
