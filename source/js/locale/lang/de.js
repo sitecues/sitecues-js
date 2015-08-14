@@ -10,18 +10,42 @@ sitecues.def('locale/de', function(locale_de, callback) {
   // - use underscore to concatenate words
   locale_de.dictionary = {
     // ARIA labels
+    // - Main
     'sitecues_main_panel': 'sitecues dialog',
     'badge_label': 'sitecues Vergrößerungs und Sprachausgabe Steuerung',
     'zoom_in': 'Grösser',
     'zoom_out': 'Kleiner',
+    // - Secondary
+    'more_features': '-',
+    'previous': '-',
+    'next': '-',
+    // - Feedback
+    'rating_none': '-',
+    'rating_1': '-',
+    'rating_2': '-',
+    'rating_3': '-',
+    'rating_4': '-',
+    'rating_5': '-',
 
     // Visible labels
-    'pre_zoom': '',  // Nothing before number, everything after via 'x' label
+    // - Main
+    'pre_zoom': '',
     'post_zoom': ' fach Zoom',
     'zoom_off': 'Zoom Aus',
     'speech': 'Sprache',
     'on' : 'Ein',
-    'off': 'Aus'
+    'off': 'Aus',
+    // - Secondary
+    'tips': '-',
+    'settings': '-',
+    'rate_us': '-',
+    'about': '-',
+    // - Feedback
+    'send': '-',
+    'tell_us_something': '-',
+    'thank_you': '-',
+    // - About
+    'zoom_and_speech': '-'
   };
 
   callback();
