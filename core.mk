@@ -71,6 +71,7 @@ files=\
 	source/js/audio/audio.js \
 	source/js/audio/audio-cues.js \
 	source/js/audio/earcons.js \
+	source/js/audio/text-select.js \
 	source/js/zoom/zoom-forms.js \
 	source/js/zoom/zoom.js \
 	source/js/animate.js \

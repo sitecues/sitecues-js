@@ -65,6 +65,10 @@ sitecues.def('locale', function(locale, callback) {
     return locale.getFullWebsiteLang();
   };
 
+  locale.getDocumentLang = function() {
+    return locale.getElementLang(document.body);
+  };
+
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
