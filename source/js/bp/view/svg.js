@@ -86,10 +86,10 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   <use id="scp-secondary-outline" xlink:href="#scp-outline-def" fill="white"/>\
   <g id="scp-bottom-secondary">\
     <use xlink:href="#scp-bottom-def"/>\
-    <text class="scp-hand-cursor" id="scp-tips-label" role="link" data-feature="tips" x="45" y="178">{{tips}}</text>\
-    <text class="scp-hand-cursor" id="scp-settings-label" role="link" data-feature="settings" x="240" y="178">{{settings}}</text>\
-    <text class="scp-hand-cursor" id="scp-feedback-label" role="link" data-feature="feedback" x="468" y="178">{{rate_us}}</text>\
-    <text class="scp-hand-cursor" id="scp-about-label" role="link" data-feature="about" x="685" y="178">{{about}}</text>\
+    <text id="scp-tips-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="tips" x="75" y="178">{{tips}}</text>\
+    <text id="scp-settings-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="settings" x="285" y="178">{{settings}}</text>\
+    <text id="scp-feedback-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="feedback" x="517" y="178">{{rate_us}}</text>\
+    <text id="scp-about-label" text-anchor="middle" class="scp-hand-cursor" role="link" data-feature="about" x="730" y="178">{{about}}</text>\
   </g>\
   <g>\
     <g id="scp-arrows" class="scp-transition-opacity scp-secondary-feature scp-if-settings scp-if-tips">\

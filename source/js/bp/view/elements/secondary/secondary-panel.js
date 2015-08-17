@@ -1,6 +1,14 @@
 // TODO
-// Next
 // Design polish
+//Adjust -> Settings
+//Magnify -> Lens
+//Listen -> Speech
+//Seth wants mockups of breadcrumb design
+//Marc wants reset
+//Perkins wants faster access to colors – 3 levels deep is too much
+//Change to Open Sans?
+//
+
 // UX testing
 // IE
 // - feedback page issues
@@ -10,7 +18,7 @@
 // -- Performance bad in IE10 with nytimes.com
 // Beta testing
 // Applause testing
-// Localization
+// / Localization
 // Provisional patents  -- who can help? Jeff? Ai2?
 // Accessibility
 //
