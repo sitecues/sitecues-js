@@ -12,6 +12,10 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
       return from + (to - from) * time;
     }
 
+    function loadImage() {
+      byId('scp-sitecues-text').setAttributeNS('http://www.w3.org/1999/xlink', 'href', sitecues.resolveSitecuesUrl('/images/sitecues-logo-text.svg'));
+    }
+
     about.getGeometryTargets = function(cssValues) {
       // Which additional animations
       cssValues[false].menuImageTranslateX   = 0;   // About logo transitions to the left following the rolling icon
@@ -31,6 +35,8 @@ sitecues.def('bp/view/elements/about', function (about, callback) {
           transform.getTransformString(getValueInTime(0, targetCSSValues.menuImageTranslateX, t), 0);
       aboutImage.setAttribute('transform', newTransformString);
     };
+
+    sitecues.on('bp/do-toggle-secondary-panel', loadImage);
 
     callback();
 

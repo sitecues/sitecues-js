@@ -124,11 +124,8 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
     </g>\
     <g id="scp-about" class="scp-if-about" transform="translate(805,16)">\
       <g id="scp-logo-text">\
-        <text style="font-family:Calibri;font-size:96px">\
-          <tspan style="fill:#100f0d;font-weight:bold" y="67" x="0 38 62 94">site</tspan>\
-          <tspan style="fill:#2d49a3;font-weight:normal" y="67" x="140 176 222 264">cues</tspan>\
-          <tspan text-anchor="end" style="font-family:Open Sans;font-size:24px" y="94" x="297">{{zoom_and_speech}}</tspan>\
-        </text>\
+        <image id="scp-sitecues-text" transform="scale(.84) translate(-28, -12)" width="400" height="100"></image>\
+        <text text-anchor="end" style="font-family:Open Sans;font-size:24px" y="96" x="300">{{zoom_and_speech}}</text>\
       </g>\
     </g>\
   </g>\
