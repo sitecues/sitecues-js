@@ -143,11 +143,12 @@ sc-button-big {
   position: absolute;
   top: 99px;
   left: 15px;
+  width: 480px;
 }
 
 .scp-card-chooser > sc-link {
   display: inline-block;
-  width: 90px;
+  width: 89px;
   text-align: center;
 }
 
