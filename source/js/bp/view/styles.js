@@ -449,6 +449,10 @@ sitecues.def('bp/view/styles', function (styling, callback) {
           'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/full-guide-icon.png') + ')'
         },
 
+        '.scp-card-indicator': {
+          'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/card-indicator.svg') + ')'
+        },
+
         // Keyboard icon
         '#scp-kbd-icon': {
           'background-image': 'url(' + sitecues.resolveSitecuesUrl('/images/tips/keyboard-icon.png') + ')'

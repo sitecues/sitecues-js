@@ -201,8 +201,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
           numContentElements = contentElements.length,
           maxHeight = origPanelContentsRect.height,
           normalTop = origPanelContentsRect.top,
-          index = 0,
-          FUDGE_FACTOR = 8;
+          index = 0;
 
         function addRect(item) {
           var thisRect = item.getBoundingClientRect(),
@@ -223,7 +222,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
             }
           }
 
-          feature.contentsHeight = (maxHeight - FUDGE_FACTOR) / getSVGExpansionRatio();
+          feature.contentsHeight = maxHeight / getSVGExpansionRatio();
         }
 
         return feature.contentsHeight;

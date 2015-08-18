@@ -9,7 +9,7 @@ sitecues.def('bp/controller/shrink-controller', function (shrinkController, call
       var MIN_DISTANCE = 75, // Min distance before shrink
         mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
         isListening,
-        isSticky = false,
+        isSticky = SC_DEV, //false,
         // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
         wasInFeaturePanel = false;
 

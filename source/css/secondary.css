@@ -50,7 +50,6 @@ sc-h1 {
   display: block;
   margin: 24px 0;
   font-size: 40px;
-  width: 292px;
 }
 sc-h2 {
   display: block;
@@ -60,7 +59,6 @@ sc-h2 {
 sc-center {
   text-align: center;
   position: relative;
-  left: -30px;
 }
 sc-p {
   display: block;
@@ -126,13 +124,52 @@ sc-button-big {
   text-align: center;
   background: #447AC4;
 }
+
+/*************** Common card elements *********************/
+
+.scp-card-header {
+  position: absolute;
+  margin-top: 10px;
+  margin-left: 105px;
+  font-family: 'Open Sans';
+  font-size: 46px;
+  width: 252px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Card chooser */
+.scp-card-chooser {
+  position: absolute;
+  top: 99px;
+  left: 15px;
+}
+
+.scp-card-chooser > sc-link {
+  display: inline-block;
+  width: 90px;
+  text-align: center;
+}
+
+.scp-card-chooser > sc-link[aria-selected="true"] {
+  font-weight: bold;
+}
+
+.scp-card-indicator {
+  position: absolute;
+  top: 133px;
+  left: 30px;
+  width: 438px;
+  height: 18px;
+}
+
 /*************** Secondary panel **************************/
 
 .scp-is-secondary > svg {
   height: 1200px !important;
 }
 .scp-arrow {
-  fill: #6B9AE0;
+  fill: #447AC4;
 }
 .scp-arrow[aria-disabled] {
   pointer-events: none;
@@ -187,16 +224,16 @@ sc-button-big {
   fill: #447AC4;
 }
 sc-cards {
-  position: relative;
-  left: 105px;
   z-index: 999;
 }
 sc-card {
   position: absolute;
+  top: 150px;
+  left: 30px;
   visibility: hidden;
   pointer-events: none;
   opacity: 0;
-  width: 360px;
+  width: 442px;
   transition: opacity .5s;
 }
 sc-card > * {
@@ -209,13 +246,14 @@ sc-card > * {
 #scp-demo-page {
   position: absolute;
   font-size: 16px;
-  top: 240px;
-  width: 280px;
-  border: 1px solid black;
+  top: 285px;
+  left: 30px;
+  width: 390px;
+  height: 130px;
+  border: 1px solid #C0BFBF;
+  border-radius: 2px;
   background-color: #f8f8f8;
-  border-bottom: 0;
-  height: 90px;
-  padding: 20px 30px 0 30px;
+  padding: 20px 20px 5px 30px;
   overflow: hidden;
 }
 #scp-demo-page-contents {
@@ -323,18 +361,18 @@ sc-kbd[data-demo="true"] {
 
 .scp-range-group {
   margin-top: -20px;
-  padding: 17px;
+  padding: 17px 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1s;
 }
 #scp-bp-container input[type="range"] {
   -webkit-appearance: none;
-  width: 282px;
+  width: 420px;
   height: 24px;
   margin: 0;
   border: 4px solid #888;
-  padding: 1px 2px;
+  padding: 1px 0;
   border-radius: 14px;
   background: transparent;
   outline: 0;
@@ -400,19 +438,19 @@ sc-kbd[data-demo="true"] {
   margin-right: 0;
 }
 sc-button[data-setting-name="themeName"] {
-  padding: 15px 0;
+  padding: 25px 0;
   font-size: 20px;
-  border-radius: 50px;
+  margin-right: 20px;
+  border-radius: 28px;
   text-align: center;
   color: #000;
-  width: 62px;
+  width: 80px;
   border: 5px solid #000;
   background-color: #fff;
   font-weight: 100;
 }
 sc-button[data-setting-name="themeName"]:not([data-setting-value]) {
   position: relative;
-  top: 30px;
   color: #222;
   border-width: 2px;
 }
@@ -427,7 +465,6 @@ sc-button[data-setting-name="themeName"][data-setting-value="blueReduction"] {
 }
 sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   position: relative;
-  top: 30px;
   color: #fff;
   background-color: #000;
 }
@@ -468,8 +505,8 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
 }
 #scp-mouse-size {
   border: 0 !important;
-  background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%281%2C.6%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important;
-  transform: scale(1.01);
+  background: #fff url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0D%0A%3Cpath%20d%3D%22m280%2C5v27c0%2C2%20-1%2C3%20-3%2C3h-273c-2%2C0%20-3%2C-1%20-3%2C-3v-6c0%2C-1%201%2C-2%202%2C-3l273%2C-22c1%2C0%203%2C1%203%2C3l1%2C1z%22%20transform%3D%22scale%281.49%2C.65%29%22%2F%3E%0D%0A%3C%2Fsvg%3E") !important;
+  transform: scale(1.4 1.01);
 }
 #scp-mouse-size::-webkit-slider-thumb {
   background: #80A9F8 !important;
@@ -484,13 +521,13 @@ sc-button[data-setting-name="themeName"][data-setting-value="dark"] {
   margin-top: 3px;
 }
 .scp-lens-size-group {
-  padding-top: 10px;
+  padding-top: 14px;
 }
 sc-button[data-setting-name="lensSize"] {
   padding: 15px;
 }
 #scp-lens-small {
-  padding-left: 30px;
+  padding-left: 72px;
   transform: translateX(-3px) scale(.9);
 }
 #scp-lens-medium {

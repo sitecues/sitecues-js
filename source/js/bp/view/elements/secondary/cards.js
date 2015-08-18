@@ -129,6 +129,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       if (willBeActive) {
         activePanelName = panelName;
         activePanel = getPanelElement(panelName);
+        moveIndicator();
         newCardNotification();
       }
       else {
@@ -237,7 +238,28 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
       else {
         cardElement.className = cardElement.className.replace('scp-active', '');
       }
+    }
 
+    function moveIndicator() {
+      if (!activePanel) {
+        return;
+      }
+      var chooser = activePanel.querySelector('.scp-card-chooser'),
+        chosenItem = chooser.querySelector('[data-target="' + getActiveCard().id + '"]'),
+        indicator = activePanel.querySelector('.scp-card-indicator'),
+        indicatorRect = indicator.getBoundingClientRect(),
+        chosenItemRect =chosenItem.getBoundingClientRect(),
+        left = chosenItemRect.left - indicatorRect.left,
+        previouslyChosen = chooser.querySelector('[aria-selected="true"]');
+
+      // Reset old selection
+      if (previouslyChosen) {
+        previouslyChosen.removeAttribute('aria-selected');
+      }
+
+      // Set indicator
+      indicator.style.backgroundPositionX = (-442 + left + chosenItemRect.width / 2) + 'px';
+      chosenItem.setAttribute('aria-selected', 'true');
     }
 
     function isDisabled(id) {
@@ -277,6 +299,7 @@ sitecues.def('bp/view/elements/cards', function (cards, callback) {
         if (cardToSelect.localName === 'sc-card' && !cardToSelect.hasAttribute('data-advanced')) {
           toggleCardActive(getActiveCard(), false);
           toggleCardActive(cardToSelect, true);
+          moveIndicator();
           newCardNotification();
           // At first, back button is disabled when on first card
           // However, once we've gone forward we allow backwards cycling
