@@ -19,18 +19,19 @@
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
-  font-weight: 700;
-  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(http://fonts.gstatic.com/s/opensans/v13/k3k702ZOKiLJc3WVjuplzIjoYw3YTyktCCer_ilOlhE.woff2) format('woff2');
+  font-weight: 600;
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(http://fonts.gstatic.com/s/opensans/v13/MTP_ySUJH_bn48VBG8sNSojoYw3YTyktCCer_ilOlhE.woff2) format('woff2');
   unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
 }
-/* latin bold*/
+/* latin bold */
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
-  font-weight: 700;
-  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(http://fonts.gstatic.com/s/opensans/v13/k3k702ZOKiLJc3WVjuplzBampu5_7CjHW5spxoeN3Vs.woff2) format('woff2');
+  font-weight: 600;
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(http://fonts.gstatic.com/s/opensans/v13/MTP_ySUJH_bn48VBG8sNShampu5_7CjHW5spxoeN3Vs.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
+
 /** Enable secondary panel **/
 .scp-secondary-feature {
   display: block;
@@ -54,7 +55,8 @@ sc-h1 {
 sc-h2 {
   display: block;
   margin: 15px 0;
-  font-size: 24px;
+  font-size: 21px;
+  font-weight: 600;
 }
 sc-center {
   text-align: center;
@@ -106,7 +108,7 @@ sc-span {
 }
 sc-button {
   display: inline-block;
-  font-weight: bold;
+  font-weight: 600;
   background-color: #447AC4;
   color: white;
   border: 2px solid beige;
@@ -153,7 +155,7 @@ sc-button-big {
 }
 
 .scp-card-chooser > sc-link[aria-selected="true"] {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .scp-card-indicator {
@@ -247,7 +249,7 @@ sc-card > * {
 #scp-demo-page {
   position: absolute;
   font-size: 16px;
-  top: 285px;
+  top: 300px;
   left: 30px;
   width: 390px;
   height: 130px;
@@ -296,6 +298,10 @@ sc-card > * {
   position: absolute;
   width: 180px;
   height: 51px;
+}
+#scp-use-slider-heading {
+  font-size: 24px;
+  margin-top: 24px;
 }
 
 .scp-active #scp-demo-slider-thumb[data-demo="true"] {
