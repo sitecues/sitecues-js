@@ -33,7 +33,8 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/settings',
     'bp/view/elements/feedback',
     'bp/view/elements/about',
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule) {
+    'locale',
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale) {
 
       var BUTTON_CLICK_ANIMATION_DURATION = 800,
         ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -477,13 +478,20 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
       }
 
       function onPanelOpen() {
-        if (!isCssLoaded) {
-          isCssLoaded = true;
+        function insertCss(name) {
           var cssLink = document.createElement('link'),
-            cssUrl = sitecues.resolveSitecuesUrl('../css/secondary.css');
+            cssUrl = sitecues.resolveSitecuesUrl('../css/' + name + '.css');
           cssLink.setAttribute('rel', 'stylesheet');
           cssLink.setAttribute('href', cssUrl);
           document.querySelector('head').appendChild(cssLink);
+        }
+        if (!isCssLoaded) {
+          isCssLoaded = true;
+          insertCss('secondary');
+          var extendedFontCharsetName = locale.getExtendedFontCharsetName();
+          if (extendedFontCharsetName) {
+            insertCss(extendedFontCharsetName);
+          }
         }
       }
 

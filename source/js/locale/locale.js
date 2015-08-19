@@ -94,6 +94,42 @@ sitecues.def('locale', function(locale, callback) {
   };
 
   /**
+   * Return 'latin-ext' if latin-ext font needed, etc.
+   * @returns {*}
+   */
+  locale.getExtendedFontCharsetName = function() {
+    var lang = locale.getShortWebsiteLang(),
+      EXTENDED_LANGS = {
+        'latin-ext': [
+          'hr', // Croatian
+          'cs', // Czech
+          'et', // Estonian
+          'hu', // Hungarian
+          'lv', // Latvian
+          'lt', // Lithuanian
+          'pl',  // Polish
+          'ro', // Romanian
+          'sr', // Serbian
+          'sk', // Slovak
+          'sl', // Slovenian
+          'tr' // Turkish
+        ]
+      },
+      allExtensions = Object.keys(EXTENDED_LANGS),
+      index = allExtensions.length,
+      currExtension,
+      currLangs;
+
+    while (index --) {
+      currExtension = allExtensions[index];
+      currLangs = EXTENDED_LANGS[currExtension];
+      if (currLangs.indexOf(lang) >= 0) {
+        return currExtension;
+      }
+    }
+  };
+
+  /**
    * Translate a number
    * @param number  Number to translate
    * @param numDigits (optional)
