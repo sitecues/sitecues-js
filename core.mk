@@ -57,7 +57,13 @@ build:
 	# Overwrite sitecues.js with one that has the version set
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%' target/compile/js/sitecues.js > $(build-dir)/compile/js/sitecues.js
 
-	@echo "* File sizes$(min-bsbel):"
+	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
+	@echo
+	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
+		gzip -c $$FILE > $$FILE.gz ; \
+	done)
+
+	@echo "* File sizes:"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js *.js.gz | sort` ; do \
 		printf "*  %-16s $$(ls -l $$FILE | awk '{print($$5);}')\n" $$FILE ; \
@@ -85,18 +91,7 @@ debug:
 	# Add to the final sitecues.js the compiled code with version set
 	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%' target/compile/js/sitecues.js >> $(build-dir)/compile/js/sitecues.js
 
-#	@mkdir -p $(build-dir)/etc/js
-#	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
-#	@echo
-
-	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
-	@echo
-	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
-		gzip -c $$FILE > $$FILE.gz ; \
-	done)
-
-
-	@echo "* File sizes$(min-label):"
+	@echo "* File sizes:"
 	@(cd $(build-dir)/compile/js ; \
 	for FILE in `ls *.js | sort` ; do \
 		printf "*  %-16s $$(ls -l $$FILE | awk '{print($$5);}')\n" $$FILE ; \
