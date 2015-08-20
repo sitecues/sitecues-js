@@ -5,35 +5,6 @@
 #	by this file must be exported in 'makefile'.
 ################################################################################
 
-################################################################################
-# Load the custom configuration file
-################################################################################
-
-# Not a fan of special cases, but 'common' is a special case.
-ifeq ($(custom-config-name), common)
-	custom-name=common
-	custom-files=
-	# The common build does not modify the version, etc...
-	custom-suffix=
-	custom-suffix-upper=
-else
-	# Include the 'configuration' file.
-	include custom-config/$(custom-config-name).mk
-	# The custom builds append their name to the version, etc...
-	custom-suffix=-$(custom-name)
-	custom-suffix-upper=-$(shell echo $(custom-name) | $(to-upper))
-endif
-
-ifeq ($(sc-local), true)
-	# Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
-	extra-debug-flags="SC_LOCAL=true,"
-else
-	extra-debug-flags="SC_LOCAL=false,"
-endif
-
-# Make a build-specific version.
-custom-version=$(version)$(custom-suffix-upper)
-
 # Set up the build-specific directory and package name.
 build-basedir:=target
 build-dir:=$(build-basedir)/$(custom-name)
@@ -41,103 +12,6 @@ package-name:=$(product-name)-js-$(custom-version)
 package-file-name:=$(package-name).tgz
 package-basedir:=$(build-dir)/package
 package-dir:=$(package-basedir)/$(package-name)
-
-################################################################################
-# File sets.
-################################################################################
-
-# Production file list (combine all modules into one).
-files=\
-	$(build-dir)/source/js/core.js \
-	source/js/jquery.js \
-	source/js/locale/lang/*.js \
-	source/js/locale/locale.js \
-	source/js/util/localstorage.js \
-	source/js/conf/user/user-id.js \
-	source/js/custom-scripts/custom-scripts.js \
-	$(custom-files) \
-	source/js/conf/user/manager.js \
-	source/js/conf/user/server.js \
-	source/js/conf/user/user.js \
-	source/js/conf/site.js \
-	source/js/conf/conf.js \
-	source/js/util/platform.js \
-	source/js/util/common.js \
-	source/js/util/geo.js \
-	source/js/util/color.js \
-	source/js/util/transform.js \
-	source/js/audio/speech-builder.js \
-	source/js/audio/html5-player.js \
-	source/js/audio/safari-player.js \
-	source/js/audio/audio.js \
-	source/js/audio/audio-cues.js \
-	source/js/audio/earcons.js \
-	source/js/zoom/zoom-forms.js \
-	source/js/zoom/zoom.js \
-	source/js/animate.js \
-	source/js/bp/model/state.js \
-	source/js/bp/constants.js \
-	source/js/bp/helper.js \
-	source/js/bp/view/modes/panel.js \
-	source/js/bp/view/styles.js \
-	source/js/bp/view/modes/badge.js \
-	source/js/bp/view/elements/tts-button.js \
-	source/js/bp/view/elements/slider.js \
-	source/js/bp/view/elements/more-button.js \
-	source/js/bp/view/elements/secondary/cards.js \
-	source/js/bp/view/elements/secondary/tips.js \
-	source/js/bp/view/elements/secondary/settings.js \
-	source/js/bp/view/elements/secondary/feedback.js \
-	source/js/bp/view/elements/secondary/about.js \
-	source/js/bp/view/elements/secondary/secondary-panel.js \
-	source/js/bp/view/svg-transform-effects.js \
-	source/js/bp/controller/focus-controller.js \
-	source/js/bp/controller/slider-controller.js \
-	source/js/bp/controller/shrink-controller.js \
-	source/js/bp/controller/bp-controller.js \
-	source/js/bp/size-animation.js \
-	source/js/bp/view/svg.js \
-	source/js/cursor/cursor-css.js \
-	source/js/bp/placement.js \
-	source/js/bp/bp.js \
-	source/js/keys/focus.js \
-	source/js/mouse-highlight/traitcache.js \
-	source/js/mouse-highlight/highlight-position.js \
-	source/js/mouse-highlight/traits.js \
-	source/js/mouse-highlight/judge.js \
-	source/js/mouse-highlight/pick.js \
-	source/js/mouse-highlight/pick-debug.js \
-	source/js/mouse-highlight/mouse-highlight.js \
-	source/js/style-service/user-agent-css.js \
-	source/js/style-service/media-queries.js \
-	source/js/style-service/css-aggregator.js \
-	source/js/style-service/style-service.js \
-	source/js/cursor/cursor.js \
-	source/js/zoom/fixed-position-fixer.js \
-	source/js/hlb/event-handlers.js \
-	source/js/hlb/safe-area.js \
-	source/js/hlb/styling.js \
-	source/js/hlb/positioning.js \
-	source/js/hlb/dimmer.js \
-	source/js/hlb/animation.js \
-	source/js/hlb/hlb.js \
-	source/js/keys/keys.js \
-	source/js/mouse-highlight/move-keys.js \
-	source/js/hpan/hpan.js \
-	source/js/theme/color-choices.js \
-	source/js/theme/img-classifier.js \
-	source/js/theme/color-engine.js \
-	source/js/info/info.js \
-	source/js/util/status.js \
-	source/js/metrics/util.js \
-	source/js/metrics/page-visited.js \
-	source/js/metrics/panel-closed.js \
-	source/js/metrics/badge-hovered.js \
-	source/js/metrics/feedback-sent.js \
-	source/js/metrics/hlb-opened.js \
-	source/js/metrics/zoom-changed.js \
-	source/js/metrics/tts-requested.js \
-	source/js/metrics/metrics.js \
 
 ################################################################################
 # TARGET: build
@@ -186,11 +60,8 @@ debug:
 	@echo "===== STARTING: Build for '$(custom-name)' library (DEBUG VER) ====="
 	@echo
 
-	@mkdir -p $(build-dir)/source/js
-
-	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%g' source/js/core.js > $(build-dir)/source/js/core.js
-
 	@mkdir -p $(build-dir)/compile/js
+	@node node_modules/.bin/r.js -o baseUrl=source/js name=core out=$(build-dir)/compile/js/sitecues.js
 	@uglifyjs $(uglifyjs-args) -o $(build-dir)/compile/js/sitecues.js --source-map $(build-dir)/compile/js/sitecues.js.map --source-map-url sitecues.js.map $(files)
 
 #Copy files for Source-Maps

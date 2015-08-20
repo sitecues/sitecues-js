@@ -3,7 +3,190 @@
  *   The core module of the sitecues library.
  */
 
-(function () {
+// TODO have global closure with 'use strict'? Will need to be in all bundles.
+// TODO load ie9.js if necessary
+// TODO move weird ie9 coed to ie9.js
+// TODO remove effects/animate from our custom build of jquery to save another 8k
+// TODO load custom scripts
+//      source/js/custom-scripts/custom-scripts.js \
+//      $(custom-files) \
+// TODO load only the language we need from source/js/locale/lang/*.js
+
+define([
+// 'jquery',
+// 'locale/locale',
+// 'util/localstorage',
+// 'conf/user/user-id',
+// 'conf/user/manager',
+// 'conf/user/server',
+// 'conf/user/user',
+// 'conf/site',
+// 'conf/conf',
+// 'util/platform',
+// 'util/common',
+ 'util/geo'
+// 'util/color',
+// 'util/transform',
+// 'audio/speech-builder',
+// 'audio/html5-player',
+// 'audio/safari-player',
+// 'audio/audio',
+// 'audio/audio-cues',
+// 'audio/earcons',
+// 'zoom/zoom-forms',
+// 'zoom/zoom',
+// 'animate',
+// 'bp/model/state',
+// 'bp/constants',
+// 'bp/helper',
+// 'bp/view/modes/panel',
+// 'bp/view/styles',
+// 'bp/view/modes/badge',
+// 'bp/view/elements/tts-button',
+// 'bp/view/elements/slider',
+// 'bp/view/elements/more-button',
+// 'bp/view/elements/secondary/cards',
+// 'bp/view/elements/secondary/tips',
+// 'bp/view/elements/secondary/settings',
+// 'bp/view/elements/secondary/feedback',
+// 'bp/view/elements/secondary/about',
+// 'bp/view/elements/secondary/secondary-panel',
+// 'bp/view/svg-transform-effects',
+// 'bp/controller/focus-controller',
+// 'bp/controller/slider-controller',
+// 'bp/controller/shrink-controller',
+// 'bp/controller/bp-controller',
+// 'bp/size-animation',
+// 'bp/view/svg',
+// 'cursor/cursor-css',
+// 'bp/placement',
+// 'bp/bp',
+// 'keys/focus',
+// 'mouse-highlight/traitcache',
+// 'mouse-highlight/highlight-position',
+// 'mouse-highlight/traits',
+// 'mouse-highlight/judge',
+// 'mouse-highlight/pick',
+// 'mouse-highlight/pick-debug',
+// 'mouse-highlight/mouse-highlight',
+// 'style-service/user-agent-css',
+// 'style-service/media-queries',
+// 'style-service/css-aggregator',
+// 'style-service/style-service',
+// 'cursor/cursor',
+// 'zoom/fixed-position-fixer',
+// 'hlb/event-handlers',
+// 'hlb/safe-area',
+// 'hlb/styling',
+// 'hlb/positioning',
+// 'hlb/dimmer',
+// 'hlb/animation',
+// 'hlb/hlb',
+// 'keys/keys',
+// 'mouse-highlight/move-keys',
+// 'hpan/hpan',
+// 'theme/color-choices',
+// 'theme/img-classifier',
+// 'theme/color-engine',
+// 'info/info',
+// 'util/status',
+// 'metrics/util',
+// 'metrics/page-visited',
+// 'metrics/panel-closed',
+// 'metrics/badge-hovered',
+// 'metrics/feedback-sent',
+// 'metrics/hlb-opened',
+// 'metrics/zoom-changed',
+// 'metrics/tts-requested',
+// 'metrics/metrics'
+], function (
+//  $,
+//  locale_locale,
+//  util_localstorage,
+//  conf_user_user_id,
+//  conf_user_manager,
+//  conf_user_server,
+//  conf_user_user,
+//  conf_site,
+//  conf_conf,
+//  util_platform,
+//  util_common,
+  util_geo
+//  util_color,
+//  util_transform,
+//  audio_speech_builder,
+//  audio_html5_player,
+//  audio_safari_player,
+//  audio_audio,
+//  audio_audio_cues,
+//  audio_earcons,
+//  zoom_zoom_forms,
+//  zoom_zoom,
+//  animate,
+//  bp_model_state,
+//  bp_constants,
+//  bp_helper,
+//  bp_view_modes_panel,
+//  bp_view_styles,
+//  bp_view_modes_badge,
+//  bp_view_elements_tts_button,
+//  bp_view_elements_slider,
+//  bp_view_elements_more_button,
+//  bp_view_elements_secondary_cards,
+//  bp_view_elements_secondary_tips,
+//  bp_view_elements_secondary_settings,
+//  bp_view_elements_secondary_feedback,
+//  bp_view_elements_secondary_about,
+//  bp_view_elements_secondary_secondary_panel,
+//  bp_view_svg_transform_effects,
+//  bp_controller_focus_controller,
+//  bp_controller_slider_controller,
+//  bp_controller_shrink_controller,
+//  bp_controller_bp_controller,
+//  bp_size_animation,
+//  bp_view_svg,
+//  cursor_cursor_css,
+//  bp_placement,
+//  bp_bp,
+//  keys_focus,
+//  mouse_highlight_traitcache,
+//  mouse_highlight_highlight_position,
+//  mouse_highlight_traits,
+//  mouse_highlight_judge,
+//  mouse_highlight_pick,
+//  mouse_highlight_pick_debug,
+//  mouse_highlight_mouse_highlight,
+//  style_service_user_agent_css,
+//  style_service_media_queries,
+//  style_service_css_aggregator,
+//  style_service_style_service,
+//  cursor_cursor,
+//  zoom_fixed_position_fixer,
+//  hlb_event_handlers,
+//  hlb_safe_area,
+//  hlb_styling,
+//  hlb_positioning,
+//  hlb_dimmer,
+//  hlb_animation,
+//  hlb_hlb,
+//  keys_keys,
+//  mouse_highlight_move_keys,
+//  hpan_hpan,
+//  theme_color_choices,
+//  theme_img_classifier,
+//  theme_color_engine,
+//  info_info,
+//  util_status,
+//  metrics_util,
+//  metrics_page_visited,
+//  metrics_panel_closed,
+//  metrics_badge_hovered,
+//  metrics_feedback_sent,
+//  metrics_hlb_opened,
+//  metrics_zoom_changed,
+//  metrics_tts_requested,
+//  metrics_metrics
+  ) {
 
   'use strict';
 
@@ -19,30 +202,10 @@
   // Either up.sitecues.com/ or up.dev.sitecues.com/
   prefsDomain,
 
-  // Modules container
-  modules = {},
-
-  // Each customization that is registered requires a new index by which it is referenced in the
-  // future
-  customizationIndex = 0,
-
   // Sitecues top-level namespace: all public classes and modules will be
   // attached to this name space and aliased on 'window.sitecues'. This
   // variable is initialized at the bottom of this script.
-  sitecues = null,
-
-  // Define place-holder for Logger
-  log = {
-    fatal     : function () {},
-    error     : function () {},
-    warn      : function () {},
-    info      : function () {},
-    debug     : function () {},
-    trace     : function () {},
-    newLogger : function () {
-      return this;
-    }
-  };
+  sitecues = null;
 
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
@@ -72,11 +235,7 @@
     sitecues.on = on;
     sitecues.off = off;
     sitecues.emit = emit;
-    sitecues.def = def;
-    sitecues.use = use;
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
-    sitecues.loadScript = loadScript;
-    sitecues.load = load;
     sitecues.parseUrl = parseUrl;
     sitecues.resolveUrl = resolveUrl;
   }
@@ -133,6 +292,7 @@
   // bind an event, specified by a string name, `events`, to a `callback`
   // function. passing `'*'` will bind the callback to all events fired
   function on(events, callback, context) {
+    /* jshint validthis: true */
     var ev, list, tail;
     events = events.split(/\s+/);
     var calls = this._events || (this._events = {});
@@ -153,10 +313,14 @@
   // with that function. if `callback` is null, removes all callbacks for the
   // event. if `events` is null, removes all bound callbacks for all events
   function off(events, callback, context) {
-    var ev, calls, node;
+    /* jshint validthis: true */
+    var ev,
+      calls = this._events,
+      node;
+
     if (!events) {
       delete this._events;
-    } else if (calls = this._events) {
+    } else if (calls) {
       events = events.split(/\s+/);
       while ((ev = events.shift())) {
         node = calls[ev];
@@ -182,6 +346,7 @@
   // same arguments as `trigger` is, apart from the event name.
   // listening for `'*'` passes the true event name as the first argument
   function emit(events) {
+    /* jshint validthis: true */
     var event, node, calls, tail, args, all, rest;
     if (!(calls = this._events)) {
         return this;
@@ -223,157 +388,6 @@
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  Module Management
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
-
-  // Module modes management:
-  var MODULE_STATE = {
-    NONE         : 1, // A 'def' or 'use' call has never been made for the module.
-    LOADING      : 2, // A 'use' call has been made for a module, and a load request has been started.
-    INITIALIZING : 3, // A 'def' call has been made for a module, and the module is initializing.
-    READY        : 4  // The module is initialized and ready for use.
-  },
-  READY_FOR_DEF_CALLS = false,
-  DEF_QUEUE = [],
-  LOAD_LIST = [];
-
-  // Returns the state of the requested module.
-  function getModuleState(name) {
-    var module = modules[name];
-
-    if (!module) {
-      // There is no entry, so the there is no state.
-      return MODULE_STATE.NONE;
-    }
-
-    // The entry is a number, so just return that saved state.
-    if (typeof module === 'number') {
-      return module;
-    }
-
-    // Otherwise, the entry is an object, so the module is ready.
-    return MODULE_STATE.READY;
-  }
-
-  // define equinox module
-  function _def(name, constructor) {
-
-    // Handle customizations, which do not require a def name for defining the module
-    if (typeof name === 'function') {
-      constructor = name;
-      name = 'custom_' + customizationIndex;
-      customizationIndex++;
-    }
-
-    // do not define modules twice.
-    if (getModuleState(name) >= MODULE_STATE.INITIALIZING) {
-      log.warn('sitecues: module ' + name + ' already defined.');
-      return;
-    }
-
-    var module = {};
-
-    // module is initializing
-    modules[name] = MODULE_STATE.INITIALIZING;
-
-    // call constructor for module
-    constructor(module, function(result) {
-
-      // if return present
-      if (result) {
-        module = result;
-      } else {
-        // Modules can double-load when an sitecues.def use statement
-        // does not fire callback();
-      }
-      // save module for future call
-      modules[name] = module;
-      // notify about new module
-      sitecues.emit('module', name, module);
-      // notify about new module load once
-      sitecues.emit('load/' + name, module).off('load/' + name);
-      // Module checking.....
-      modules[name].defined = true;
-
-      // Apply any registered customizations
-      if (modules.custom && modules.custom.check) {
-        modules.custom.check.call(module, name);
-      }
-
-      // Process the next module in the Def_Queue
-      _processDefQueue();
-
-        // Pass a new logger into the constructor scope of the module
-    }, log.newLogger(name));
-  }
-
-  // exposed function for defining modules: queues until library is ready.
-  function def(name, constructor) {
-
-    if (READY_FOR_DEF_CALLS) {
-      _def(name, constructor);
-    } else {
-
-      DEF_QUEUE.push({
-        name: name,
-        constructor: constructor
-      });
-
-      LOAD_LIST.push(name);
-    }
-  }
-
-  var procDefCount = 0;
-
-  // processes the def queue once initialization has completed.
-  function _processDefQueue() {
-    if (procDefCount < DEF_QUEUE.length) {
-      var defObj = DEF_QUEUE[procDefCount];
-      procDefCount++;
-      _def(defObj.name, defObj.constructor);
-    } else {
-      READY_FOR_DEF_CALLS = true;
-
-      sitecues.emit('core/allModulesLoaded');
-
-      if (typeof sitecues.ready === 'function') {
-        sitecues.ready.call(sitecues);
-      }
-
-    }
-  }
-
-  // Fire use callbacks from module files
-  function use() {
-
-    var i = 0,
-      args = arguments,
-      l = args.length,
-      requiredModules = [],
-      sitecuesScope = this,
-      useCallback, moduleName, argument, modNames = [];
-
-    for (; i < l; i++) {
-      argument = args[i];
-      switch (typeof argument) {
-        case 'string':
-          moduleName = argument;
-          modNames.push(moduleName);
-          break;
-
-        case 'function':
-          useCallback = argument;
-          break;
-      }
-      requiredModules.push(modules[moduleName]);
-    }
-
-    useCallback.apply(sitecuesScope, requiredModules);
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
   //  URL Processing
   //
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -394,7 +408,9 @@
 
     while (start < queryStr.length) {
       end = queryStr.indexOf('=', start);
-      if (end < 0) end = queryStr.length;
+      if (end < 0) {
+        end = queryStr.length;
+      }
 
       var key = decodeURIComponent(queryStr.substring(start, end));
       start = end + 1;
@@ -402,7 +418,9 @@
       var value = null;
       if (start <= queryStr.length) {
         end = queryStr.indexOf('&', start);
-        if (end < 0) end = queryStr.length;
+        if (end < 0) {
+          end = queryStr.length;
+        }
 
         value = decodeURIComponent(queryStr.substring(start, end));
         start = end + 1;
@@ -493,50 +511,6 @@
 
   //////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  Script Loading
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
-
-  // Async script loading.
-  function loadScript(url, callback) {
-    // Resolve the URL as relative to the library URL.
-    url = sitecues.resolveSitecuesUrl(url);
-
-    // create script DOM element
-    var script = document.createElement('script');
-
-    // set proper script type
-    script.type = 'text/javascript';
-
-    // set url
-    script.src = url;
-
-    // enforce async loading
-    script.async = true;
-
-    // add callback to track when it will be loaded.
-
-    // NOTE: We should not be using script.onreadystatechange here for two
-    // reasons: 1, it doesn't mean that the script as loaded (it could change
-    // state to 'loading') and 2. it has been removed from IE as of v11.
-    script.onload = callback;
-
-    // add element to head to start loading
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-
-  // Trigger module loading.
-  function load() {
-    // iterate over passed module names
-    for (var i = 0, l = arguments.length; i < l; i++) {
-      // and initiate loading of code for each
-      sitecues.loadScript(arguments[i] + '.js');
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
   //  Basic Site Configuration
   //    This section process the basic site configuration, whose absence will
   //    prevent the library from loading.
@@ -545,12 +519,12 @@
 
   var validateConfiguration = function() {
     if (!sitecues.config) {
-      log.error('The ' + sitecues.config + ' object was not provided.');
+      console.error('The ' + sitecues.config + ' object was not provided.');
       return;
     }
 
     if (typeof sitecues.config !== 'object') {
-      log.error('The ' + sitecues.config + ' is not an object.');
+      console.error('The ' + sitecues.config + ' is not an object.');
       return;
     }
 
@@ -560,13 +534,13 @@
     // siteId is required and must be a string
     var siteId = everywhereConfig.siteId || sitecues.config.siteId || sitecues.config.site_id;
     if (typeof siteId !== 'string') {
-      log.error('The siteId parameter is not provided or not a string.');
+      console.error('The siteId parameter is not provided or not a string.');
       return;
     }
 
     // Library URL must be a valid URL
     if (!getLibraryUrl()) {
-      log.error('Unable to get sitecues script url. Library can not initialize.');
+      console.error('Unable to get sitecues script url. Library can not initialize.');
       return;
     }
 
@@ -591,8 +565,7 @@
 
   var initialize = function () {
 
-    // If the sitecues global object does not exist, then there is no basic site configuration, nor
-    // is there a logger. Simply print an error to the console and abort initialization.
+    // If the sitecues global object does not exist, then there is no basic site configuration
 
     // Set the internal reference.
     sitecues = window.sitecues;
@@ -614,14 +587,9 @@
     // As we have now 'planted our flag', export the public fields.
     exportPublicFields();
 
-    // Create the logger for this module
-    if (sitecues.logger) {
-      log = sitecues.logger.log('core');
-    }
-
     // Process the basic configuration needed for library initialization.
     if (!validateConfiguration()) {
-      log.error('Unable to load basic site configuration. Library can not initialize.');
+      console.error('Unable to load basic site configuration. Library can not initialize.');
     } else if (window !== window.top && !sitecues.config.iframe) {
       // Stop sitecues from initializing if:
       // 1) sitecues is running in an IFRAME
@@ -631,11 +599,10 @@
     }
     else {
       initServices();
-      _processDefQueue(); // Load all modules
     }
   };
 
   // Trigger initialization.
   initialize();
 
-}).call(this);
+});
