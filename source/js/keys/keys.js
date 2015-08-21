@@ -140,15 +140,13 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     },
     // define keys map used to bind actions to hotkeys
     KEY_EVENT_MAP = {
-      'space': 'key/space',
-      'minus': 'zoom/decrease',
-      'plus': 'zoom/increase',
-      'reset': 'sitecues/do-reset',
-      'zoom1x': 'zoom/do-reset',
-      'esc': 'key/esc',
-      'speech': 'speech/do-toggle'
+      'minus': 'zoom-decrease',
+      'plus': 'zoom-increase',
+      'reset': 'reset-sitecues',
+      'zoom1x': 'reset-zoom',
+      'speech': 'toggle-speech'
     },
-    KEY_EVENT_DEFAULT = 'key/nav';
+    KEY_EVENT_DEFAULT = 'queue-key';
 
   function canMoveHighlight(event) {
     return !hasCommandModifier(event) &&    // Plain or shifted keystroke
@@ -188,7 +186,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
   }
 
   // Handle key
-  function handle(sitecuesEvent, event, keyName) {
+  function handle(commandName, event, keyName) {
     // Prevent default behavior of key. The browser listens to these events
     // and does not execute commands based on the key pressed
     // (such as spacebar to page down, cmd+plus to zoom, arrow key to scroll, shift+arrow to select)
@@ -210,7 +208,9 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     }
 
     // Emit event defined for key
-    sitecues.emit(sitecuesEvent, event, keyName);
+    require('command/' + commandName, function(commandFn) {
+      commandFn(event, keyName);
+    });
   }
 
   // key event hook

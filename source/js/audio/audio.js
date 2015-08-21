@@ -226,17 +226,13 @@ define('conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util
   // User has requested a speech toggle
   sitecues.on('speech/do-toggle', toggleSpeech);
 
-  sitecues.on('sitecues/do-reset', function() {
-    stopAudio();
-    setSpeechState(false, true);
-  });
-
   if (conf.get('ttsOn')) {
     ttsOn = true;
     sitecues.emit('speech/did-change', true);
   }
 
   var publics = {
+    stopAudio: stopAudio,
     setSpeechState: setSpeechState,
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,

@@ -49,7 +49,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
   // Then move the point in the direction until we
   // are outside of the current highlight and we can pick something from that point.
   // Whenever the point gets close to the edge, we pan/scroll to bring up new content until we cant anymore.
-  function onNavCommand(event, keyName) {
+  function queueKey(event, keyName) {
     if (isKeyStillDown) {
       return;
     }
@@ -761,6 +761,11 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
     }
   }
 
-  sitecues.on('key/nav key/space key/esc', onNavCommand);
-
-});
+    var publics = {
+      queueKey: queueKey
+    };
+    if (SC_UNIT) {
+      module.exports = publics;
+    }
+    return publics;
+  });

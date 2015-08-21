@@ -73,7 +73,9 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/sta
   }
 
   function finishZoomChanges() {
-    sitecues.emit('zoom/stop');
+    require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.zoomStopRequested();
+    });
     removeWindowMouseMoveListeners();
   }
 

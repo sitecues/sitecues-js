@@ -345,6 +345,15 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
     return MIN_ZOOM_PER_CLICK;
   }
 
+  function beginZoomIncrease() {
+    // Increase up to max or until zoomStopRequested()
+    beginGlide(MAX, event);
+  }
+
+  function beginZoomDecrease(event) {
+    beginGlide(MIN, event);
+  }
+
   // Begin an operation to the glide toward the current zoom, if smooth zoom is currently supported.
   // If no smooth zoom, apply an instant zoom change to increase or decrease zoom by a constant amount.
   // If we are zooming with +/- or clicking A/a
@@ -592,7 +601,7 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
     // Apply the new CSS
     $body.css(animationCss);
 
-    // No zoom/stop received for initial zoom
+    // No zoomStopRequested() received for initial zoom
     $body.one(ANIMATION_END_EVENTS, onGlideStopped);
   }
 
@@ -1231,8 +1240,6 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
 
     $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
 
-    sitecues.on('sitecues/do-reset zoom/do-reset', resetZoom);
-
     if (SC_DEV) {
       console.log('_______________________________________________________');
       console.log('Zoom configuration: %o', zoomConfig);
@@ -1314,15 +1321,6 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
   // ATKratter wouldn't scroll when we listened to this on the window
   document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
 
-  // Set up listeners for zoom  operations
-  sitecues.on('zoom/stop', zoomStopRequested);
-  sitecues.on('zoom/increase', function(event) {
-    // Increase up to max or until zoom/stop requested
-    beginGlide(MAX, event);
-  });
-  sitecues.on('zoom/decrease', function(event) {
-    beginGlide(MIN, event);
-  });
   sitecues.on('bp/will-expand', function() {
     initZoomModule(); // Lazy init
     isPanelOpen = true;
@@ -1346,6 +1344,8 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
     provideCustomZoomConfig: provideCustomZoomConfig,
     jumpTo: jumpTo,
     isRetina: isRetina,
+    beginZoomIncrease: beginZoomIncrease,
+    beginZoomDecrease: beginZoomDecrease,
     getNativeZoom: getNativeZoom,
     getBodyWidth: getBodyWidth,
     getBodyRight: getBodyRight,
@@ -1353,8 +1353,11 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
     getMainNode: getMainNode,
     getCompletedZoom: getCompletedZoom,
     setThumbChangeListener: setThumbChangeListener,
-    hasZoomEverBeenSet: hasZoomEverBeenSet
+    hasZoomEverBeenSet: hasZoomEverBeenSet,
+    resetZoom: resetZoom,
+    zoomStopRequested: zoomStopRequested
   };
+    
   if (SC_UNIT) {
     module.exports = publics;
   }
