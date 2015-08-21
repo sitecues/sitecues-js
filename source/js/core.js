@@ -16,10 +16,8 @@
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
-// TODO clean up platform.js, helper.js
 // TODO remove sitecues.emit('foo/do-bar') pattern and use APIs, document APIs
-// TODO Only set thigns on sitecues object in core.js exportPublicFields()
-// TODO have global closure with 'use strict'? Will need to be in all bundles.
+// TODO Only set things on sitecues object in core.js exportPublicFields()
 
 define([
   'jquery',

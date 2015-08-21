@@ -180,6 +180,4 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
 
   sitecues.on('info/help', showHelp);
 
-  sitecues.showHelp = showHelp;
-
 });

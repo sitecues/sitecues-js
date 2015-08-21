@@ -1485,7 +1485,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       }
       containingElement = nextLeaf.parentNode;
       if (containingElement &&
-        sitecues.highlight(containingElement, true, true, true)) {
+        highlight(containingElement, true, true, true)) {
         skipElement = state.picked[0]; // Don't try anything else in this container
         var scoreInfo = picker.getAutoPickScore(state.picked, state.fixedContentRect, state.absoluteRect, bodyWidth, bodyHeight),
           score = scoreInfo.score;
@@ -1503,7 +1503,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       }
     }
 
-    sitecues.highlight(knownGoodState.target, true);
+    highlight(knownGoodState.target, true);
   }
 
   // Hide mouse highlight temporarily, keep picked data so we can reshow
@@ -1637,7 +1637,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
    *                       if falsey will just highlight seed exactly
    * @param doKeepHidden -- if truthy will compute highlight but now display it
    */
-  sitecues.highlight = function(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
+  mh.highlight = function(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
 
     hide();  // calling with no arguments will remove the highlight
     if (seed) {

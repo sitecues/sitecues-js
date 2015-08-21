@@ -643,7 +643,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
 
   function tryHighlight($picked) {
     var doKeepHighlightHidden = !!hlbElement;
-    return sitecues.highlight($picked, false, false, doKeepHighlightHidden);
+    return highlight($picked, false, false, doKeepHighlightHidden);
   }
 
   function moveByTagName(acceptableTagsMap, isReverse) {

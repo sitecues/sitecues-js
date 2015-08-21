@@ -700,20 +700,21 @@ define([
 
   // Public methods.
 
-  /**
-   * [toggleStickyHLB enables/disables HLB deflation]
-   * @return {[Boolean]} [True if deflation is disabled.  False if deflation is enabled.]
-   */
-  sitecues.toggleStickyHLB = function() {
-    isSticky = !isSticky;
-    return isSticky;
-  };
-
   if (SC_DEV) {
     console.log(
       '%cToggle HLB logging by executing : sitecues.toggleHLBLogging();',
       'background:black;color:white;font-size: 11pt'
     );
+
+    /**
+     * [toggleStickyHLB enables/disables HLB deflation]
+     * @return {[Boolean]} [True if deflation is disabled.  False if deflation is enabled.]
+     */
+    sitecues.toggleStickyHLB = function() {
+      isSticky = !isSticky;
+      return isSticky;
+    };
+
     sitecues.toggleHLBLogging = function () {
       loggingEnabled = !loggingEnabled;
       return loggingEnabled;
