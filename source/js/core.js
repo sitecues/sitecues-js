@@ -25,7 +25,6 @@
 //  bp/do-toggle-secondary-panel
 //  bp/do-prev-card
 //  bp/do-next-card
-//  bp/do-card-card
 //  mh/do-track-scroll
 // TODO Only set things on sitecues object in core.js exportPublicFields()
 
