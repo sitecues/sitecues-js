@@ -296,8 +296,8 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
     else {
       window.addEventListener('resize', repositionBPOverBadge);
     }
+  }
 
-  };
   var publics = {
     init: init
   };

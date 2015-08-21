@@ -237,7 +237,7 @@ define(['locale/locale', 'util/platform'], function(locale, platform) {
       localizedSvg = locale.localizeStrings(svgWithAllAbsoluteUrls);
 
     return localizedSvg;
-  };
+  }
   var publics = {
     getSvg: getSvg
   };

@@ -13,9 +13,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
   // PRIVATE VARIABLES
   /////////////////////////
 
-  var HLB_DEFAULT_ZOOM = 1.5,  // Amount HLB will scale up from current size
-
-      CHAR_WIDTH_LIMIT = 50,  // Amount of characters that fits horizontally in HLB
+  var CHAR_WIDTH_LIMIT = 50,  // Amount of characters that fits horizontally in HLB
 
       originCSS,    // The HLB element's midpoint for animation
       translateCSS; // The HLB element's translation for final position
@@ -579,19 +577,19 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
   function getOriginCSS() {
     return originCSS;
-  };
+  }
 
   function getTranslateCSS() {
     return translateCSS;
-  };
+  }
 
   function setOriginCSS(val) {
     originCSS = val;
-  };
+  }
 
   function setTranslateCSS(val) {
     translateCSS = val;
-  };
+  }
 
   function getHlbZoom() {
     var lensSizeSetting = conf.get('lensSize');
@@ -641,7 +639,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
     fixNegativeMargins($hlb, initialHLBRect);
 
-  };
+  }
 
   /**
    * [positionHLB positions the HLB.]
@@ -701,7 +699,8 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
     conf.def('lensSize', function(size) {
       return size === '-' || size === '+' ? size : null;
     });
-  };
+  }
+
   var publics = {
     getOriginCSS: getOriginCSS,
     getTranslateCSS: getTranslateCSS,

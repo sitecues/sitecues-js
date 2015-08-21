@@ -38,7 +38,7 @@ define([], function() {
       return data[propName];
     }
     SC_DEV && console.log('ERROR: Cannot get property with name ' + propName + '.');
-  };
+  }
 
   /**
    * Set state model value specified by the property name given
@@ -51,34 +51,34 @@ define([], function() {
     } else {
       SC_DEV && console.log('ERROR: Cannot set property with name ' + propName + '.');
     }
-  };
+  }
 
   /*
   Some of the most popular getters are listed below.
    */
   function isPanel() {
     return data.currentMode === 1;
-  };
+  }
 
   function isBadge() {
     return data.currentMode === 0;
-  };
+  }
 
   function isPanelRequested() {
     return data.transitionTo === 1;
-  };
+  }
 
   function isExpanding() {
     return data.transitionTo === 1 && data.currentMode !== 1;
-  };
+  }
 
   function isSecondaryPanelRequested() {
     return data.secondaryPanelTransitionTo === 1;
-  };
+  }
 
   function isShrinking() {
     return data.transitionTo === 0 && data.currentMode !== 0;
-  };
+  }
 
   /**
    * Returns 'button-menu' or name of secondary panel
@@ -86,14 +86,15 @@ define([], function() {
    */
   function getSecondaryPanelName() {
     return data.secondaryPanelName;
-  };
+  }
 
   function getPanelName() {
-    if (state.isPanel() && isSecondaryPanelRequested()) {
+    if (isPanel() && isSecondaryPanelRequested()) {
       return data.secondaryPanelName;
     }
     return 'main';
-  };
+  }
+
   var publics = {
     get: get,
     set: set,

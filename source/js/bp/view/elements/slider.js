@@ -37,7 +37,7 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
         offset      = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
 
     thumbElement.setAttribute('transform', 'translate(' + offset + ')');
-  };
+  }
 
   // Update the slider thumb position on bp view updates because the entire slider changes size
   // (it scales more horizontally than vertically)
@@ -71,7 +71,7 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
     }
 
     setZoomLabel(zoomText);
-  };
+  }
 
   /*
    *** Private functions ***

@@ -301,7 +301,7 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
 
     return badgeElement;
 
-  };
+  }
 
   // Make sure the badge has non-static positioning to make it easy to place
   // the position: absolute sc-bp-container inside of it
@@ -333,7 +333,8 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
     }
 
     return classBuilder;
-  };
+  }
+
   var publics = {
     init: init,
     getViewClasses: getViewClasses

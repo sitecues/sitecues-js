@@ -39,7 +39,7 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
     }
 
     return classBuilder + getSecondaryPanelClasses();
-  };
+  }
 
   /*
    A feature panel is a special panel that is triggered from the secondary panel. It can be one of four things right now:

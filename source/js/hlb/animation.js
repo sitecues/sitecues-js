@@ -50,7 +50,7 @@ define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platf
     } else {
       transitionInHLBWithCSS(data, speed);
     }
-  };
+  }
 
   /**
    * [transitionOutHLB animates and removes the HLB and background dimmer]
@@ -104,7 +104,7 @@ define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platf
       data.onHLBClosed();
     }
 
-  };
+  }
 
   /**
    * [transitionInHLBWithJquery animates the HLB open with jQuery.animate()]

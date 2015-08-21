@@ -33,8 +33,7 @@ define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, comm
     window.removeEventListener(wheelEventName, wheelEventCallback);
 
     isCapturing = false;
-
-  };
+  }
 
   /**
    * [captureWheelEvents captures wheel events while the HLB is open. ]
@@ -144,8 +143,8 @@ define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, comm
 
     // Trap the mousewheel events (wheel for all browsers except Safari, which uses mousehweel)
     window.addEventListener(wheelEventName, wheelEventCallback);
+  }
 
-  };
   var publics = {
     releaseWheelEvents: releaseWheelEvents,
     captureWheelEvents: captureWheelEvents

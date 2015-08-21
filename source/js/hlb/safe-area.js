@@ -6,10 +6,6 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
   // PRIVATE VARIABLES
   ////////////////////////
 
-  var documentElement = document.documentElement;
-
-
-
   /////////////////////////
   // PUBLIC PROPERTIES
   ////////////////////////
@@ -28,14 +24,9 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
    */
   function getUnsafePixels() {
 
-    var hypotenuse = Math.hypot ?
-      Math.hypot(  // modern browsers (not IE)
-        innerHeight,
-        innerWidth
-      )
-      : Math.sqrt(  // fallback for IE
-        Math.pow(innerHeight, 2) +
-        Math.pow(innerWidth, 2)
+    var hypotenuse = Math.sqrt(
+      Math.pow(window.innerHeight, 2) +
+      Math.pow(window.innerWidth, 2)
     );
 
     return hypotenuse * safeArea.HLB_SAFE_AREA;
@@ -54,10 +45,10 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
     return {
       'left'   : unsafePixels,
       'top'    : unsafePixels,
-      'width'  : innerWidth - unsafePixels * 2,
-      'height' : innerHeight - unsafePixels * 2,
-      'right'  : innerWidth - unsafePixels,
-      'bottom' : innerHeight - unsafePixels
+      'width'  : window.innerWidth - unsafePixels * 2,
+      'height' : window.innerHeight - unsafePixels * 2,
+      'right'  : window.innerWidth - unsafePixels,
+      'bottom' : window.innerHeight - unsafePixels
     };
 
   };

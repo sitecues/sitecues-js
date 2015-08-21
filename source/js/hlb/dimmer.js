@@ -31,7 +31,7 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
    */
   function dimBackgroundContent(inflationSpeed, $parentOfDimmer) {
 
-    if (dimmer.getDimmerElement()) {
+    if (getDimmerElement()) {
       return; // Background already dimmed
     }
 
@@ -53,7 +53,7 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
         opacity: DIMMER_MIN_OPACITY
       })
       .animate({ opacity : DIMMER_MAX_OPACITY }, inflationSpeed);
-  };
+  }
 
   /**
    * [undimBackgroundContent transitions the opacity of the dimmer to DIMMER_MIN_OPACITY]
@@ -61,20 +61,21 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
    */
   function undimBackgroundContent(deflationSpeed) {
 
-    $(dimmer.getDimmerElement())
+    $(getDimmerElement())
       .animate({ opacity : DIMMER_MIN_OPACITY}, deflationSpeed, onDimmerClosed);
-  };
+  }
 
   /**
    * [onDimmerClosed removes the dimmer element from the DOM]
    */
   function onDimmerClosed() {
-    $(dimmer.getDimmerElement()).remove();
+    $(getDimmerElement()).remove();
   }
 
   function getDimmerElement() {
     return document.getElementById(DIMMER_ID);
-  };
+  }
+
   var publics = {
     dimBackgroundContent: dimBackgroundContent,
     undimBackgroundContent: undimBackgroundContent,

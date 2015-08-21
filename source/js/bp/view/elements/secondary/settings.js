@@ -111,7 +111,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
 
   function getGeometryTargets(cssValues) {
     return cssValues;
-  };
+  }
 
   function isNativeInput(elem) {
     return typeof elem.value !== 'undefined';

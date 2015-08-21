@@ -15,11 +15,11 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
       elementByIdCache[id] = result;
     }
     return result;
-  };
+  }
 
   function invalidateId(id) {
     elementByIdCache[id] = undefined;
-  };
+  }
 
   /**
    * getRect returns the bounding client rect for the given element.
@@ -37,7 +37,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
       width: rect.width,
       height: rect.height
     };
-  };
+  }
 
   /**
    * getRectById returns the bounding client rect for the given ID.
@@ -46,7 +46,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
    * @returns {Object} rectangle
    */
   function getRectById(id) {
-    return getRect(helper.byId(id));
+    return getRect(byId(id));
   }
 
   /**
@@ -70,7 +70,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
 
     function mapTranslate(id) {
       result[id] = {
-        'translateX': getNumberFromString(helper.byId(id).getAttribute('transform'))
+        'translateX': getNumberFromString(byId(id).getAttribute('transform'))
       };
     }
 
@@ -99,18 +99,17 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
     };
 
     return result;
-
-  };
+  }
 
   function getNumberFromString(str) {
     return +(str.match(/[0-9\.\-]+/));
-  };
+  }
 
   // Fix for events in SVG in IE:
   // IE sometimes gives us the <defs> element for the event, and we need the <use> element
   function getEventTarget(evt) {
     return evt.target.correspondingUseElement || evt.target;
-  };
+  }
 
   function cancelEvent(evt) {
     evt.returnValue = false;
@@ -118,7 +117,8 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
     evt.stopImmediatePropagation();
     evt.stopPropagation();
     return false;
-  };
+  }
+
   var publics = {
     byId: byId,
     invalidateId: invalidateId,

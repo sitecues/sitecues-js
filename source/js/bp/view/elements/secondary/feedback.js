@@ -107,7 +107,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
 
     cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
     return cssValues;
-  };
+  }
 
   sitecues.on('bp/did-expand', autoSizeTextarea);
 

@@ -688,7 +688,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
 
     });
 
-  };
+  }
 
   /**
    * [getHLBStyles gets the HLB styles.]
@@ -758,7 +758,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
       backgroundStyles
     );
 
-  };
+  }
 
   /**
    * [filter filters elements, attributes, and styles from the HLB]
@@ -774,7 +774,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
 
     filterAttributes($hlb);
 
-  };
+  }
 
   /**
    * [initializeStyles clones the original elements styles and the styles of all of its children.]
@@ -787,7 +787,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
 
     initializeHLBDescendantStyles($foundation, $hlb, initialHLBRect);
 
-  };
+  }
 
 
   /**
@@ -810,7 +810,8 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
     }
 
     return cssText;
-  };
+  }
+
   var publics = {
     defaultBorder: defaultBorder,
     defaultPadding: defaultPadding,

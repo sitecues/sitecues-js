@@ -25,7 +25,7 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
     cssValues[true].menuBtnRotate          = -360; // Roll the about icon
     cssValues[true].menuImageTranslateX    = -500;
     return cssValues;
-  };
+  }
 
   // Custom animation of feature
   function tick(t, targetCSSValues) {
@@ -33,7 +33,7 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
       newTransformString =
         transform.getTransformString(getValueInTime(0, targetCSSValues.menuImageTranslateX, t), 0);
     aboutImage.setAttribute('transform', newTransformString);
-  };
+  }
 
   sitecues.on('bp/will-toggle-secondary-panel', loadImage);
   var publics = {

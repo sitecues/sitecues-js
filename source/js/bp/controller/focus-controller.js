@@ -184,7 +184,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
 
   function getFocusedItem() {
     return focusElement;
-  };
+  }
 
   function getElementToShowFocusOn() {
     if (focusElement) {
@@ -292,7 +292,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
 
     showFocus();
-  };
+  }
 
   function getTabbableItems() {
     return TABBABLE[state.getPanelName()];

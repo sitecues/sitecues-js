@@ -696,7 +696,7 @@ define([
   // Return the current DOM element for the HLB or falsey value if there is no HLB
   function getElement() {
     return $hlb && $hlb[0];
-  };
+  }
 
   // Public methods.
 

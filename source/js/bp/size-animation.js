@@ -543,7 +543,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
     }
 
     currentlyTransitioningTo = state.get('transitionTo');
-  };
+  }
 
   //  https://equinox.atlassian.net/wiki/display/EN/BP2%3A+Implementation+Details
   function getTargetScale (endingSizeToStartingSizeRatio, crispFactor) {

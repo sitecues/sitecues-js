@@ -1,7 +1,7 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-define(['geo'], function() {
+define([], function() {
   'use strict';
 
   /**
