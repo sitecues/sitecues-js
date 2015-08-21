@@ -1566,7 +1566,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   // Return all of the highlight information provided in the |state| variable
   function getHighlight() {
     return state;
-  };
+  }
 
   sitecues.isSitecuesOn = function() {
     return audio.isSpeechEnabled() || zoomMod.getCompletedZoom() > 1;
@@ -1655,7 +1655,8 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
         }
       }
     }
-  };
+  }
+
   var publics = {
     getHighlight: getHighlight,
     highlight: highlight

@@ -9,6 +9,8 @@ require([], function() {
   var customIndex = 0;
 
   var registry = {};
+
+  var custom = this;
   
   function register(moduleName, script) {
 
@@ -36,7 +38,7 @@ require([], function() {
     if (module) {
       for (var customIndex in module) {
         if (module.hasOwnProperty(customIndex)) {
-          module[customIndex].func.call(this);
+          module[customIndex].func.call(custom);
         }
       }
     }

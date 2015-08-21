@@ -2,13 +2,10 @@
 Temporary file for English wording.
 todo: remove it when we use API.
  */
-sitecues.def('locale/en', function(locale_en, callback) {
+define(['locale/en'], function() {
   'use strict';
 
-  // All
-  // - lower case
-  // - use underscore to concatenate words
-  locale_en.dictionary = {
+  return {
     // ARIA labels
     // - Main
     'sitecues_main_panel': 'sitecues main panel',

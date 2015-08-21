@@ -14,6 +14,8 @@ define(['metrics/util'], function (metricsUtil) {
   var SPEECH_TRIGGERS = ['space', 'shift', 'shift+m', 'shift+a'];
   var TTS_AUDIO_FORMATS = ['ogg', 'mp3', 'aac'];
 
+  var ttsRequested = this;
+
   var DEFAULT_STATE = {
     'name'         : 'tts-requested',
     'trigger'      : SPEECH_TRIGGERS[0],   // For now, it's always HLB.

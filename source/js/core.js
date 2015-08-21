@@ -9,6 +9,7 @@
 // TODO defer lots of stuff until user prefs ready (initialize settings-listener?)
 //      Or fire conf/did-complete?
 // TODO check on server.js -- doesn't seem like the code to store data on the server actually gets used!
+// TODO add to make -- jshint source/js --exclude source/js/jquery.js
 
 // Later
 // TODO clean up metrics
@@ -50,6 +51,7 @@ define([
   // 'metrics/tts-requested',
   //'metrics/metrics'
 ], function (
+  /*
   conf_user_user_id,
   conf_user_server,
   conf_site,
@@ -67,7 +69,7 @@ define([
   hpan_hpan,
   theme_color_engine,
   info_info,
-  util_status
+  util_status */
 //  metrics_util,
 //  metrics_page_visited,
 //  metrics_panel_closed,

@@ -1,4 +1,4 @@
-sitecues.def('hlb/safe-area', function(safeArea, callback) {
+define([], function() {
 
   'use strict';
 
@@ -11,7 +11,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
   ////////////////////////
 
   // Default fraction of viewport hypotenuse that will define the safe area
-  safeArea.HLB_SAFE_AREA = 0.05;
+  var HLB_SAFE_AREA = 0.05;
 
   /////////////////////////
   // PRIVATE FUNCTIONS
@@ -29,7 +29,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
       Math.pow(window.innerWidth, 2)
     );
 
-    return hypotenuse * safeArea.HLB_SAFE_AREA;
+    return hypotenuse * HLB_SAFE_AREA;
 
   }
 
@@ -38,7 +38,7 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
   ////////////////////////
 
   // Returns a rectangle the represents the area in which the HLB is allowed to occupy
-  safeArea.getSafeZoneBoundingBox = function() {
+  function getSafeZoneBoundingBox() {
 
     var unsafePixels = getUnsafePixels();
 
@@ -50,8 +50,14 @@ sitecues.def('hlb/safe-area', function(safeArea, callback) {
       'right'  : window.innerWidth - unsafePixels,
       'bottom' : window.innerHeight - unsafePixels
     };
+  }
 
+  var publics = {
+    getSafeZoneBoundingBox: getSafeZoneBoundingBox
   };
 
-  // no publics
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

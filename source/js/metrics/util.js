@@ -32,9 +32,9 @@ define(['conf/site', 'jquery'], function(site, $) {
         xhrObj.setRequestHeader('Accept', 'application/json');
       },
       url: sitecues.getApiUrl('metrics/site/' + siteId + '/notify.json'),
-      type: "POST",
+      type: 'POST',
       data: instance && JSON.stringify(instance.data),
-      dataType: "json"
+      dataType: 'json'
     });
 
     request.done(function() {
@@ -44,7 +44,7 @@ define(['conf/site', 'jquery'], function(site, $) {
     request.fail(function() {
 //                console.log("Request failed: " + textStatus);
     });
-  };
+  }
 
   function update(instance, newData, event) {
     // Object is passed.
@@ -57,7 +57,8 @@ define(['conf/site', 'jquery'], function(site, $) {
       sitecues.emit(event, instance);
     }
     return instance;
-  };
+  }
+
   var publics = {
     send: send,
     update: update

@@ -35,7 +35,7 @@ define(['metrics/util'], function (metricsUtil) {
   });
 
   sitecues.on('metrics/update', function(metrics) {
-    hlbOpened['data'] && hlbOpened.update(metrics.data);
+    hlbOpened.data && hlbOpened.update(metrics.data);
   });
 
   // Clear an instance data on hlb opened(ready) event.

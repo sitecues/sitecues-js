@@ -26,7 +26,7 @@ define([], function () {
 
     // Metrics Start
     sitecues.$(audioElement)[0].addEventListener('playing', function() {
-      sitecues.emit('audio/playing', {'data': {'request_time': new Date - t}});
+      sitecues.emit('audio/playing', {'data': {'request_time': new Date() - t}});
     });
 
     // Metrics End
