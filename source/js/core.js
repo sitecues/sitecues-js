@@ -17,6 +17,7 @@
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
 // TODO Only set things on sitecues object in core.js exportPublicFields()
+// TODO self-initializing modules should not load most code unless necessary, including those that init from settings
 
 define([
   'conf/user/user-id',
