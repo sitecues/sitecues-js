@@ -7,7 +7,7 @@
 // sitecues events used by BP
 //
 // Commands:
-// bp/do-update    -- call to update the view to match the current state
+// bp/did-change -- call to update the view to match the current state
 //
 // Information:
 // bp/did-create   -- BP inserted in page
@@ -170,7 +170,7 @@ define('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper
     return (document.readyState === 'interactive' && !isBadgeAnImage(badgeElement)) || document.readyState === 'complete';
   }
 
-  sitecues.on('bp/do-update', updateView);
+  sitecues.on('bp/did-change', updateView);
 
   /*
                          ********  INITIALIZATION **********

@@ -98,7 +98,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     state.set('secondaryPanelName', featureName || 'button-menu');
     state.set('isSecondaryExpanding', isSecondaryExpanding);
     state.set('wasMouseInPanel', false); // When panel shrinks mouse needs to go back inside of it before mouseout closes again
-    sitecues.emit('bp/do-update');
+    sitecues.emit('bp/did-change');
   }
 
   function getMoreButton() {
@@ -323,7 +323,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     function fadeInTextContentWhenLargeEnough() {
       setTimeout(function () {
         state.set('isSecondaryExpanding', false);
-        sitecues.emit('bp/do-update');
+        sitecues.emit('bp/did-change');
       }, heightAnimationDelay + heightAnimationDuration * 0.7);
     }
 
@@ -358,12 +358,12 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     // TODO should we include the below code and use a class to suppress other hovers?
 //        function suppressHovers() {
 //          state.set('doSuppressHovers', false);
-//          sitecues.emit('bp/do-update');
+//          sitecues.emit('bp/did-change');
 //          getMainSVG().removeEventListener('mousemove', suppressHovers);
 //        }
 //
 //        state.set('doSuppressHovers', true);
-//        sitecues.emit('bp/do-update');
+//        sitecues.emit('bp/did-change');
 //        getMainSVG().addEventListener('mousemove', suppressHovers);
   }
 
@@ -405,7 +405,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
 
     SC_DEV && console.log('Transitioning secondary panel to mode: ' + state.get('secondaryPanelTransitionTo'));
 
-    sitecues.emit('bp/do-update');
+    sitecues.emit('bp/did-change');
 
     animateButtonMenuDrop(willEnable);
 

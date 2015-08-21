@@ -97,7 +97,7 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     }
 
     // Finally, begin the shrinking animation.
-    sitecues.emit('bp/do-update');
+    sitecues.emit('bp/did-change');
   }
 
   /*

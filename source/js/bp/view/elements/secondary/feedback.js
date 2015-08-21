@@ -111,6 +111,6 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
 
   sitecues.on('bp/did-expand', autoSizeTextarea);
 
-  sitecues.on('bp/do-update', onPanelUpdate);
+  sitecues.on('bp/did-change', onPanelUpdate);
 
 });

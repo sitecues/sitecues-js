@@ -1357,7 +1357,7 @@ define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common
     resetZoom: resetZoom,
     zoomStopRequested: zoomStopRequested
   };
-    
+
   if (SC_UNIT) {
     module.exports = publics;
   }

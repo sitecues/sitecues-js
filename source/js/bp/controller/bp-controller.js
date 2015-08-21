@@ -53,7 +53,7 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
     // Tab navigation
     if (keyCode === BP_CONST.KEY_CODES.TAB) {
       state.set('isKeyboardMode', true);
-      sitecues.emit('bp/do-update');
+      sitecues.emit('bp/did-change');
       focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
       return;
     }
@@ -155,7 +155,7 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
 
     setPanelExpandedState();
 
-    sitecues.emit('bp/do-update');
+    sitecues.emit('bp/did-change');
   }
 
   function setPanelExpandedState() {

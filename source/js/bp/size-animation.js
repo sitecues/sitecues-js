@@ -757,7 +757,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
     currentlyTransitioningTo = null;
 
     sitecues.emit(isPanelRequested ? 'bp/did-expand' : 'bp/did-shrink');
-    sitecues.emit('bp/do-update');
+    sitecues.emit('bp/did-change');
   }
 
   function cancelAnimation() {

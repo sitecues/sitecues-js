@@ -151,5 +151,5 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
     }
   }
 
-  sitecues.on('bp/do-update', onPanelUpdate);
+  sitecues.on('bp/did-change', onPanelUpdate);
 });

@@ -114,18 +114,20 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
       pushTimeout(toggleSpacebar, 1000);
     }
 
-    function speakIt() {
-      sitecues.emit('mh/do-speak', byId(BP_CONST.DEMO_PARA), true, true);
-    }
-
     function openThenCloseLens() {
-      pushTimeout(pressSpacebar, 2000);
-      toggleElementDemo(BP_CONST.DEMO_PARA, true, 3200);  // Open lens
-      if (id === 'scp-speech-card') {
-        pushTimeout(speakIt, 3200);
-      }
-      pushTimeout(pressSpacebar, 6000);
-      toggleElementDemo(BP_CONST.DEMO_PARA, false, 7200);  // Close lens
+      require('audio/audio', function(audio) {
+        function speakIt() {
+          audio.speakHighlight(byId(BP_CONST.DEMO_PARA), true, true);
+        }
+
+        pushTimeout(pressSpacebar, 2000);
+        toggleElementDemo(BP_CONST.DEMO_PARA, true, 3200);  // Open lens
+        if (id === 'scp-speech-card') {
+          pushTimeout(speakIt, 3200);
+        }
+        pushTimeout(pressSpacebar, 6000);
+        toggleElementDemo(BP_CONST.DEMO_PARA, false, 7200);  // Close lens
+      });
     }
 
     openThenCloseLens();

@@ -212,11 +212,6 @@ define('conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util
    */
   sitecues.on('hlb/create', playHlbContent);
 
-  /**
-   * A request to read the current highlight
-   */
-  sitecues.on('mh/do-speak', playHighlight);
-
   /*
    * A highlight box was closed.  Stop/abort/dispose of the player
    * attached to it.
@@ -237,6 +232,7 @@ define('conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util
     toggleSpeech: toggleSpeech,
     isSpeechEnabled: isSpeechEnabled,
     playAudioByKey: playAudioByKey,
+    playHighlight: playHighlight,
     playEarcon: playEarcon,
     playHlbContent: playHlbContent,
     getTTSUrl: getTTSUrl

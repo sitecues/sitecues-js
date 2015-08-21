@@ -323,7 +323,7 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
 
   sitecues.on('bp/do-prev-card', prevCard);
 
-  sitecues.on('bp/do-update', onPanelUpdate);
+  sitecues.on('bp/did-change', onPanelUpdate);
 
   sitecues.on('bp/did-expand', init);
 
