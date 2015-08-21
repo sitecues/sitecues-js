@@ -1582,7 +1582,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   sitecues.on('hlb/closed zoom', resumeAppropriately);
 
   // Turn mouse-tracking on or off
-  sitecues.on('mh/do-track-scroll', setScrollTracking);
+  sitecues.on('keys/sitecues-key-down', setScrollTracking);
 
   // Turn mouse-tracking on or off
   sitecues.on('key/only-shift', setOnlyShift);

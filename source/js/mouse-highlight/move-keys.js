@@ -96,7 +96,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
       }
     }
     else {
-      setIsScrollTrackingEnabled(true);
+      mh.setScrollTracking(doTrackScroll);
     }
   }
 
@@ -285,7 +285,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
   function fail() {
     SC_DEV && console.log('Fail');
     navQueue = [];  // Don't keep trying
-    setIsScrollTrackingEnabled(true);
+    mh.setScrollTracking(true);
 
     fixedFixer.setAllowMouseEvents(true);
 
@@ -326,11 +326,6 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
     }
 
     dequeNextCommand();
-  }
-
-  // Don't allow the mouse highlight to follow scroll events from keyboard panning
-  function setIsScrollTrackingEnabled(doTrackScroll) {
-    sitecues.emit('mh/do-track-scroll', doTrackScroll);
   }
 
   function moveInDirection(horizDir, vertDir, isShifted) {
@@ -470,7 +465,8 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
     }
 
     function startPanning(isHighlightStillNeeded) {
-      setIsScrollTrackingEnabled(false);
+      // Don't allow the mouse highlight to follow scroll events from keyboard panning
+      mh.setScrollTracking(false);
 
       targetPanUp = Math.floor(constrained(targetPanUp, maxPanUp, maxPanDown));
       targetPanLeft = Math.floor(constrained(targetPanLeft, maxPanLeft, maxPanRight));

@@ -216,7 +216,7 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
    * A highlight box was closed.  Stop/abort/dispose of the player
    * attached to it.
    */
-  sitecues.on('hlb/closed audio/do-stop', stopAudio);
+  sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
   // User has requested a speech toggle
   sitecues.on('speech/do-toggle', toggleSpeech);

@@ -227,7 +227,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     for (var key in KEY_TESTS) {
       if (KEY_TESTS.hasOwnProperty(key) && KEY_TESTS[key](event)) {
         handle(KEY_EVENT_MAP[key] || KEY_EVENT_DEFAULT, event, key);
-        doFollowScroll(true);
+        notifySitecuesKeyDown(true);
         return false;
       }
     }
@@ -236,11 +236,11 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
 
     // Don't allow panning via arrow or other scroll keys to accidentally activate highlighting.
     // This happens when the panning causes the mouse on the screen to go over new content, firing a mouseover event.
-    doFollowScroll(false);
+    notifySitecuesKeyDown(false);
   }
 
   function onKeyUp(event) {
-    doFollowScroll(true);
+    notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
         sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
@@ -271,7 +271,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     if (!isShift || !isShiftKeyDown) {
       // Key down stops speech/audio
       // Exception is repeated shift key, which also starts speech when shift is held down
-      sitecues.emit('audio/do-stop');
+      sitecues.emit('keys/non-shift-key-pressed');
     }
 
     if (!isShift) {
@@ -281,8 +281,8 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     emitOnlyShiftStatus();
   }
 
-  function doFollowScroll(isFollowMouseEnabled) {
-    sitecues.emit('mh/do-track-scroll', isFollowMouseEnabled);
+  function notifySitecuesKeyDown(isFollowMouseEnabled) {
+    sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
   // bind key hook to window
