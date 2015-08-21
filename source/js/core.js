@@ -17,6 +17,16 @@
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
 // TODO remove sitecues.emit('foo/do-bar') pattern and use APIs, document APIs
+//  audio/do-stop
+//  audio/do-toggle
+//  bp/do-shrink
+//  bp/do-send-feedback
+//  bp/do-cancel-hovers
+//  bp/do-toggle-secondary-panel
+//  bp/do-prev-card
+//  bp/do-next-card
+//  bp/do-card-card
+//  mh/do-track-scroll
 // TODO Only set things on sitecues object in core.js exportPublicFields()
 
 define([

@@ -1,4 +1,4 @@
-define(['bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state) {
+define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state) {
 
   'use strict';
 

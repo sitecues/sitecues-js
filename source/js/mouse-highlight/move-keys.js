@@ -1,5 +1,5 @@
 define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 'hlb/dimmer', 'util/common', 'util/transform',
-  'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-fixer'],
+  'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
   function($, mh, hlb, platform, dimmer, common, transform, picker, zoomMod, geo, fixedFixer) {
 
   'use strict';
