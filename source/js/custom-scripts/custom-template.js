@@ -34,7 +34,7 @@
     //
     //          Eg:
     //
-    //          custom.register('mouse-highlight/picker', function (event) {
+    //          custom.register('mouse-highlight/pick', function (event) {
     //
     custom.register('[module-to-customize]', function (event) {
 

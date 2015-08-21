@@ -1,6 +1,6 @@
 // TODO Work in Firefox + EEOC menus
 // TODO Test! Especially in IE
-define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
+define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common', 'util/color',
     'audio/audio', 'util/geo', 'util/platform'],
   function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, platform) {
@@ -85,7 +85,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/picker', 'm
 
   cursorPos = {};
 
-  // depends on jquery, conf, mouse-highlight/picker and positioning modules
+  // depends on jquery, conf, mouse-highlight/pick and positioning modules
 
   function getMaxZIndex(styles) {
     var maxZIndex = 0;
