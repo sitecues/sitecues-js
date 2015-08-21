@@ -51,7 +51,7 @@ sitecues.def('bp/controller/slider-controller', function (sc, callback) {
         sliderLeft      = helper.isWebKit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,
         sliderWidth     = sliderRect.width - sliderThumbRect.width,
         newPercent      = (evt.clientX - sliderLeft) / sliderWidth,
-        newValue        = (newPercent * zoomMod.range) + zoomMod.min;
+        newValue        = (newPercent * zoomMod.RANGE) + zoomMod.RANGE;
 
       zoomMod.jumpTo(newValue);
 

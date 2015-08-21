@@ -12,7 +12,7 @@
  *   However, in the future this will be updated so that a customer can not, for example, override the TTS provider
  *   with one that is not available to them.
  */
-sitecues.def('conf/site', function (site, callback) {
+define(['jquery'], function($) {
 
   'use strict';
 
@@ -22,68 +22,72 @@ sitecues.def('conf/site', function (site, callback) {
     everywhereConfig = sitecues.getEverywhereConfig(),
     isSiteConfigFetchNeeded = false;
 
-  sitecues.use('jquery', function($) {
-    // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
-    // but the contents of root object properties can be modified.
-    site.get = function(key) {
-      if (!key) {
-        return fetchSiteConfig;
-      }
-
-      return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
-    };
-
-    // Names with underscores deprecated.
-    // Here is the order of precedence:
-    // 1. sitecues everywhere siteId
-    // 2. sitecues.config.siteId (camelCase is the new way)
-    // 3. sitecues.config.site_id (underscore in config field names is deprecated)
-    site.getSiteId = function() {
-      return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
-    };
-
-    // The everywhereConfig will be an empty object or will
-    // contain sitecues everywhere configuration, in which case it will contain a siteId
-    function isEverywhereConfigValid() {
-      return everywhereConfig.siteId;
+  // Simple get that denies direct access to the root data object. Root scalar properties can not be overwritten,
+  // but the contents of root object properties can be modified.
+  function get(key) {
+    if (!key) {
+      return fetchSiteConfig;
     }
 
-    function fetchSiteConfig() {
-      if (SC_LOCAL || isEverywhereConfigValid()) {
-        // Cannot save to server when we have no access to it
-        // Putting this condition in allows us to paste sitecues into the console
-        // and test it on sites that have a content security policy
-        return;
-      }
+    return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
+  }
 
-      if (isSiteConfigFetchNeeded) {
-        return; // Already being fetched or we already have the info
-      }
+  // Names with underscores deprecated.
+  // Here is the order of precedence:
+  // 1. sitecues everywhere siteId
+  // 2. sitecues.config.siteId (camelCase is the new way)
+  // 3. sitecues.config.site_id (underscore in config field names is deprecated)
+  function getSiteId() {
+    return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
+  }
 
-      isSiteConfigFetchNeeded = true;
+  // The everywhereConfig will be an empty object or will
+  // contain sitecues everywhere configuration, in which case it will contain a siteId
+  function isEverywhereConfigValid() {
+    return everywhereConfig.siteId;
+  }
 
-      // Trigger the initial fetch.
-      $.ajax({
-        // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
-        url: sitecues.getApiUrl('2/site/' + site.getSiteId() + '/config'),
-        dataType: 'json',
-        success: function (data) {
-          // Copy the fetched key/value pairs into the site configuration.
-          for (var i = 0; i < data.settings.length; i++) {
-            fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
-          }
+  function fetchSiteConfig() {
+    if (SC_LOCAL || isEverywhereConfigValid()) {
+      // Cannot save to server when we have no access to it
+      // Putting this condition in allows us to paste sitecues into the console
+      // and test it on sites that have a content security policy
+      return;
+    }
 
-          // Add the provided configuration
-          fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
+    if (isSiteConfigFetchNeeded) {
+      return; // Already being fetched or we already have the info
+    }
+
+    isSiteConfigFetchNeeded = true;
+
+    // Trigger the initial fetch.
+    $.ajax({
+      // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
+      url: sitecues.getApiUrl('2/site/' + getSiteId() + '/config'),
+      dataType: 'json',
+      success: function (data) {
+        // Copy the fetched key/value pairs into the site configuration.
+        for (var i = 0; i < data.settings.length; i++) {
+          fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
         }
-      });
-    }
 
-    // Fetch once we need it (we currently need it if speech might be used, because the fetched
-    // site config may specify different speech servers)
-    sitecues.on('speech/did-change zoom/begin', fetchSiteConfig);
+        // Add the provided configuration
+        fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
+      }
+    });
+  }
 
-    callback(site);
-  });
-  
+  // Fetch once we need it (we currently need it if speech might be used, because the fetched
+  // site config may specify different speech servers)
+  sitecues.on('speech/did-change zoom/begin', fetchSiteConfig);
+
+  var publics = {
+    get: get,
+    getSiteId: getSiteId
+  };
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

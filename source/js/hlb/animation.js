@@ -6,9 +6,9 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/common', 'util/transform', 'jquery', 'hlb/positioning', 'platform',
+  sitecues.use('hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'platform',
 
-  function (dimmer, common, transform, $, hlbPositioning, platform) {
+  function (dimmer, transform, $, hlbPositioning, platform) {
 
     var INFLATION_SPEED = 400, // Default inflation duration
         INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
@@ -48,7 +48,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
         return;
 
       }
-      if (common.useJqueryAnimate) {
+      if (platform.useJqueryAnimate) {
         transitionInHLBWithJquery(data, speed);
       } else {
         transitionInHLBWithCSS(data, speed);
@@ -93,7 +93,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
         }
 
-        if (common.useJqueryAnimate) {
+        if (platform.useJqueryAnimate) {
           // Stop the previous animation if it exists.
           if ($animation) {
             $animation.stop();
@@ -171,7 +171,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
           transitionOutCSS = getTransitionOutCSS(data);
 
       // After the deflation animation completes, clean up the HLB modes and DOM
-      $hlb[0].addEventListener(common.transitionEndEvent, data.onHLBClosed);
+      $hlb[0].addEventListener(platform.transitionEndEvent, data.onHLBClosed);
 
       // Animate the deflation by setting the transform scale to startingScale.
       $hlb.css(transitionOutCSS);
@@ -188,7 +188,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
           transitionInCSS = getTransitionInCSS(data, speed);
 
       // After the HLB animates, execute the callback that signifies the end of one-touch-read visuals
-      $hlb[0].addEventListener(common.transitionEndEvent, data.onHLBReady);
+      $hlb[0].addEventListener(platform.transitionEndEvent, data.onHLBReady);
 
       // Scale the element up the final amount
       $hlb.css(transitionInCSS);

@@ -15,14 +15,16 @@
  *    }
  * }
  */
-sitecues.def('util/localstorage', function(ls, callback) {
+define([], function() {
+
+  'use strict';
 
   /*
    * Run the function everytime we want to work with Local Storage
    * because settings can be changes while working with sitecues.
    * @returns {Boolean}
    */
-  ls.isSupported = function() {
+  function isSupported() {
     var testKey = 'test', storage = window.sessionStorage;
     try {
       storage.setItem(testKey, '1');
@@ -32,83 +34,81 @@ sitecues.def('util/localstorage', function(ls, callback) {
       SC_DEV && console.log('Local Storage is not supported or cannot be used.');
       return false;
     }
-  };
+  }
+
   /*
    * Get value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
-  ls.getSitecuesLs = function() {
-    if (ls.isSupported()) {
-      return window.localStorage.getItem('sitecues') || ls.setSitecuesLs();
+  function getSitecuesLs() {
+    if (isSupported()) {
+      return window.localStorage.getItem('sitecues') || setSitecuesLs();
     }
-  };
+  }
 
   /*
    * Set value of Local Storage's "sitecues" key which is the outer namespace.
    * @returns {DOMString}
    */
-  ls.setSitecuesLs = function(data) {
-    if (ls.isSupported()) {
-      var data = data || {};
-      window.localStorage.setItem('sitecues', JSON.stringify(data));
-      return ls.getSitecuesLs();
+  function setSitecuesLs(data) {
+    if (isSupported()) {
+      window.localStorage.setItem('sitecues', JSON.stringify(data || {}));
+      return getSitecuesLs();
     }
-  };
+  }
 
   /*
    * Clear "sitecues" key value which is the outer namespace.
    * @returns {DOMString}
    */
-  ls.clearSitecuesLs = function() {
-    ls.isSupported() && window.localStorage.removeItem('sitecues');
-  };
+  function clearSitecuesLs() {
+    isSupported() && window.localStorage.removeItem('sitecues');
+  }
 
   /*
    * Get current userId from Local Storage under "sitecues" namespace.
    * @returns {JSON.parse.j|Array|Object}
    */
-  ls.getUserId = function() {
-    if (ls.isSupported()) {
-      var sitecuesLs = ls.getSitecuesLs();
+  function getUserId() {
+    if (isSupported()) {
+      var sitecuesLs = getSitecuesLs();
       if (sitecuesLs) {
         var internalLs = JSON.parse(sitecuesLs);
-        return internalLs && internalLs['userId'];
+        return internalLs && internalLs.userId;
       }
     }
-  };
+  }
 
   /*
    * Set current userId from Local Storage under "sitecues" namespace.
    * @returns {JSON.parse.j|Array|Object}
    */
-  ls.setUserId = function(value) {
-    if (ls.isSupported()) {
-      var value = value || {};
-      var sitecuesLs = ls.getSitecuesLs() || ls.setSitecuesLs();
+  function setUserId(value) {
+    if (isSupported()) {
+      var sitecuesLs = getSitecuesLs() || setSitecuesLs();
       if (sitecuesLs) {
         var internalLs = JSON.parse(sitecuesLs);
-        internalLs['userId'] = value;
-        ls.setSitecuesLs(internalLs);
+        internalLs.userId = value || {};
+        setSitecuesLs(internalLs);
       }
     }
-  };
+  }
 
   /**
    * Set Local Storage data | siteues:userID namespace.
    * @param {Object} data
    * @returns {void}
    */
-  ls.setUserPreferencesById = function(userPrefData) {
-    if (ls.isSupported()) {
-      var userPrefData = userPrefData || "{}";
-      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
-      sitecuesLs[ls.getUserId()] = userPrefData;
+  function setUserPreferencesById(userPrefData) {
+    if (isSupported()) {
+      var sitecuesLs = JSON.parse(getSitecuesLs());
+      sitecuesLs[getUserId()] = userPrefData || '{}';
 
       // Set the initial data under userId namespace.
-      ls.setSitecuesLs(sitecuesLs);
+      setSitecuesLs(sitecuesLs);
       SC_DEV && console.log('Setting the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
     }
-  };
+  }
 
   /**
    * Update LocalStorage data in key, value format | siteues:userID namespace.
@@ -117,40 +117,41 @@ sitecues.def('util/localstorage', function(ls, callback) {
    * @param {String} value
    * @returns {void}
    */
-  ls.setUserPreferenceById = function(key, value) {
-    if (ls.isSupported()) {
-      var userPrefData = ls.getUserPreferencesById();
-      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
+  function setUserPreferenceById(key, value) {
+    if (isSupported()) {
+      var userPrefData = getUserPreferencesById();
+      var sitecuesLs = JSON.parse(getSitecuesLs());
       // Update value.
       userPrefData[key] = value;
-      sitecuesLs[ls.getUserId()] = userPrefData;
+      sitecuesLs[getUserId()] = userPrefData;
       // Save in LocalStorage.
-      ls.setSitecuesLs(sitecuesLs);
+      setSitecuesLs(sitecuesLs);
       //SC_DEV && console.log('Updating the data in LocalStorage: ' + JSON.stringify(sitecuesLs));
     }
-  };
+  }
 
   /**
    * Get LocalStorage data | siteues:userID namespace.
    * @returns {DOMString}
    */
-  ls.getUserPreferencesById = function() {
-    if (ls.isSupported()) {
-      var sitecuesLs = JSON.parse(ls.getSitecuesLs());
-      return sitecuesLs[ls.getUserId()];
+  function getUserPreferencesById() {
+    if (isSupported()) {
+      var sitecuesLs = JSON.parse(getSitecuesLs());
+      return sitecuesLs[getUserId()];
     }
+  }
+
+  var publics = {
+    clearSitecuesLs: clearSitecuesLs,
+    getUserId: getUserId,
+    setUserId: setUserId,
+    setUserPreferencesById: setUserPreferencesById,
+    setUserPreferenceById: setUserPreferenceById,
+    getUserPreferencesById: getUserPreferencesById
   };
-
-  // Expose getLocalData() for testing purposes.
-  window.sitecues.getLocalData = function() {
-    if (ls.isSupported()) {
-      return JSON.parse(ls.getSitecuesLs())
-    } else {
-      return "Local Storage isn't supported or cannot be used.";
-    }
-  };
-
-  callback();
-
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });
 

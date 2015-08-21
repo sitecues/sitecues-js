@@ -32,7 +32,7 @@ sitecues.def('bp/view/elements/slider', function (sliderView, callback) {
           // Use a fake zoom amount the first time sitecues loads for badge view
           // It just looks better -- making the slider look more interactive.
           useZoom     = state.get('isRealSettings') ? currZoom : BP_CONST.FAKE_ZOOM_AMOUNT,
-          percent     = (useZoom - zoomMod.min) / zoomMod.range,
+          percent     = (useZoom - zoomMod.MIN) / zoomMod.RANGE,
           sliderWidth = isPanel ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
           offset      = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
 

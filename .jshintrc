@@ -32,9 +32,12 @@
     "console",
     "SC_DEV",
     "SC_UNIT",
+    "SC_LOCAL",
     "$",
     "require",
-    "define"
+    "define",
+    "webkitAudioContext",
+    "devicePixelRatio"
   ],
 
   // Globals -- copy to both predef and globals sections
@@ -53,9 +56,12 @@
     "console": true,
     "SC_DEV": true,
     "SC_UNIT": true,
+    "SC_LOCAL": true,
     "$": true,
     "require": true,
-    "define": true
+    "define": true,
+    "webkitAudioContext": true,
+    "devicePixelRatio": true
   },
 
   // Enforcing
@@ -125,6 +131,8 @@
 
   "-W065": true,      // Refer to http://jslinterrors.com/missing-radix-parameter/
   "-W008": true,      // Leading 0 before decimal point
-  "-W030": false
+  "-W030": false,     // Allows stuff like: SC_DEV && console.log('foo') rather than if (SC_DEV) { console.log('foo'); }
+  "-W014": false      // Allows && or || to start a line, which can help make more readable code when there are numerous conditions
+
 
   }

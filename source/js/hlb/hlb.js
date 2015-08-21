@@ -206,7 +206,7 @@ sitecues.def('hlb', function(hlb, callback) {
         // UNTrap the mousewheel events (we don't want the event to even think when the user scrolls without the HLB)
         eventHandlers.releaseWheelEvents();
 
-        $hlb[0].removeEventListener(common.transitionEndEvent, onHLBReady);
+        $hlb[0].removeEventListener(platform.transitionEndEvent, onHLBReady);
 
         // Turn off the ability to deflate the HLB with mouse
         $(document).off('mousemove', onTargetChange);

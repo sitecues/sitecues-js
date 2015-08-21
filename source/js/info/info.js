@@ -2,7 +2,7 @@ sitecues.def('info', function(info, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf/site', 'hlb/dimmer', 'platform', 'locale', 'util/color',
+  define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
     function($, site, dimmer, platform, locale, colorUtil) {
 
     var $iframe = $(),

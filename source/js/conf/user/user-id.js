@@ -1,53 +1,50 @@
 // This module includes functionality used in user identification.
-sitecues.def('user-id', function(user, callback) {
+define(['util/localstorage'], function(ls) {
 
-  sitecues.use('util/localstorage', function(ls) {
+  'use strict';
 
-    var userId = ls.getUserId();
+  var userId = ls.getUserId();
 
-    user.getId = function() {
-      return userId;
-    };
-
-    if (userId) {
-      callback();
-    } else {
-      if (SC_LOCAL) {
-        // Cannot save to server when we have no access to it
-        // Putting this condition in allows us to paste sitecues into the console
-        // and test it on sites that have a content security policy
-        ls.clearSitecuesLs();
-        ls.setUserId('localuser');
-        SC_DEV && console.log('Use localuser because we have no access to it.');
-        callback();
-        return;
-      }
+  if (!userId) {
+    if (SC_LOCAL) {
+      // Cannot save to server when we have no access to it
+      // Putting this condition in allows us to paste sitecues into the console
+      // and test it on sites that have a content security policy
+      ls.clearSitecuesLs();
+      ls.setUserId('localuser');
+      SC_DEV && console.log('Use localuser because we have no access to it.');
+    }
+    else {
       SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-      sitecues.use('jquery', function(jquery) {
+      sitecues.use('jquery', function (jquery) {
         jquery.ajax({
           xhrFields: {
             withCredentials: true
           },
           crossDomain: true,
-          beforeSend: function(xhrObj) {
-            xhrObj.setRequestHeader("Accept", "application/json");
+          beforeSend: function (xhrObj) {
+            xhrObj.setRequestHeader('Accept', 'application/json');
           },
           url: sitecues.getApiUrl('user/id/get.json'),
           type: 'GET',
-          success: function(data) {
+          success: function (data) {
+            // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
+            // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
+            // That's why nothing ever needs to check the user ID directly except for this module!!!
             userId = data.userId;
             ls.clearSitecuesLs();
             ls.setUserId(data.userId);
-            callback();
+            sitecues.emit('user-id/did-complete');
           },
-          error: function(xhr, textStatus) {
+          error: function (xhr, textStatus) {
             if (SC_DEV) {
               console.log('===== Unable to get user ID: ' + textStatus);
             }
-            callback();
           }
         });
       });
     }
-  });
+  }
+
+  // No publics -- user id is put into local storage
 });

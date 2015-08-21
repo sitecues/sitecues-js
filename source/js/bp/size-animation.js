@@ -376,7 +376,7 @@ sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
             transforms       = isPanelRequested ? BP_CONST.TRANSFORMS.PANEL   : BP_CONST.TRANSFORMS.BADGE,
             sliderWidth      = isPanelRequested ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
             currentZoom      = zoomMod.getCompletedZoom(),
-            percentage       = (currentZoom - zoomMod.min) / zoomMod.range,
+            percentage       = (currentZoom - zoomMod.RANGE) / zoomMod.RANGE,
             result           = copyObj(transforms);
 
         result[BP_CONST.ZOOM_SLIDER_THUMB_ID].translateX += percentage * sliderWidth;

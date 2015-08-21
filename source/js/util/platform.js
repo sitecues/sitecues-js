@@ -2,18 +2,18 @@
  * platform.js
  * Determines the Browser Version and Operating System version constants
  */
-sitecues.def('platform', function (platformModule, callback) {
+define([], function() {
 
   'use strict';
 
   // Store the agent and platform variables for later use
   var agent    = navigator.userAgent || '',
       platform = navigator.platform.toLowerCase(),
-      browser,
-      os;
+      browserStr,
+      osStr;
 
   // Determine which browser is being used
-  browser = (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE':
+  browserStr = (agent.indexOf(' MSIE') > 0 || agent.indexOf(' Trident') > 0 || agent.indexOf(' Edge') > 0) ? 'IE':
             agent.indexOf(' Firefox/') > 0 ? 'Firefox' :
             agent.indexOf(' Chrome') > 0 ? 'Chrome'  :
             agent.indexOf(' Safari') > 0 ? 'Safari'  :
@@ -21,24 +21,24 @@ sitecues.def('platform', function (platformModule, callback) {
             'Unknown';
 
   // Set globally accessible browser constants
-  platformModule.browser = {
-      zoom        : 'zoom' in document.createElement('div').style,
-      is          : browser,
-      isFirefox   : browser === 'Firefox',
-      isIE        : browser === 'IE',
-      isChrome    : browser === 'Chrome',
-      isOpera     : browser === 'Opera',
-      isSafari    : browser === 'Safari',
-      isWebKit    : browser === 'Chrome' || browser === 'Opera' || browser === 'Safari',
-      isUnknown   : browser === 'Unknown'
-    };
+  var browser = {
+    zoom        : 'zoom' in document.createElement('div').style,
+    is          : browserStr,
+    isFirefox   : browserStr === 'Firefox',
+    isIE        : browserStr === 'IE',
+    isChrome    : browserStr === 'Chrome',
+    isOpera     : browserStr === 'Opera',
+    isSafari    : browserStr === 'Safari',
+    isWebKit    : browserStr === 'Chrome' || browserStr === 'Opera' || browserStr === 'Safari',
+    isUnknown   : browserStr === 'Unknown'
+  };
 
   // Set globally accessible version constants
-  platformModule.browser.version = (function() {
+  browser.version = (function() {
     // If IE is being used, determine which version
     var charIndex = agent.indexOf('rv:');
     if (charIndex === -1) {
-      if (platformModule.browser.isIE) {
+      if (browser.isIE) {
         // Use MSIE XX.X
         charIndex = agent.indexOf('MSIE');
         if (charIndex < 0) {
@@ -57,27 +57,27 @@ sitecues.def('platform', function (platformModule, callback) {
   })();
 
   // Convenience method as IE9 is a common issue
-  platformModule.isIE9 = function() {
-    return platformModule.browser.isIE && platformModule.browser.version === 9;
-  };
+  function isIE9() {
+    return browser.isIE && browser.version === 9;
+  }
 
   // Determine which opperating system is being used
-  os = platform.indexOf('mac') >-1 ? 'mac' :
+  osStr = platform.indexOf('mac') >-1 ? 'mac' :
        platform.indexOf('win') >-1 ? 'win' :
        platform.indexOf('linux') >-1 ? 'mac' : // This should say 'mac', not 'linux'
        'Unknown OS';
 
   // Set globally accessible operating system constants
-  platformModule.os = {
-    is        : os,
-    isMac     : os === 'mac',
-    isWin     : os === 'win',
-    isLinux   : os === 'mac', // This should say 'mac', not 'linux'
-    isUnknown : os === 'Unknown OS',
+  var os = {
+    is        : osStr,
+    isMac     : osStr === 'mac',
+    isWin     : osStr === 'win',
+    isLinux   : osStr === 'mac', // This should say 'mac', not 'linux'
+    isUnknown : osStr === 'Unknown OS',
     // Set globally accessible version constants
     versionString: (function() {
       // If IE is being used, determine which version
-      var charIndex = agent.indexOf(os === 'win' ? 'Windows NT' : 'Mac OS X ');
+      var charIndex = agent.indexOf(osStr === 'win' ? 'Windows NT' : 'Mac OS X ');
       if (charIndex === -1) {
         return '0'; // Unknown version
       }
@@ -93,7 +93,7 @@ sitecues.def('platform', function (platformModule, callback) {
   // 6.3 = Windows 8.1
   // 10 = Windows 10
   // For more details see https://en.wikipedia.org/?title=Windows_NT
-  platformModule.os.majorVersion = parseInt(platformModule.os.versionString);
+  os.majorVersion = parseInt(os.versionString);
 
   // Restore if needed
   //platformModule.os.minorVersion = parseInt(platformModule.os.versionString.split(/\D/)[1]);
@@ -101,23 +101,50 @@ sitecues.def('platform', function (platformModule, callback) {
   // platformModule.pixel is deprecated
   // use zoom.isRetina() to determine whether the current window is on a 2x pixel ratio or not
   // When a window moves to another display, it can change
-  platformModule.canUseRetinaCursors = platformModule.browser.isChrome;
+  var canUseRetinaCursors = browser.isChrome;
 
-  platformModule.cssPrefix = (function() {
-    if (platformModule.browser.isWebKit) {
+  var cssPrefix = (function() {
+    if (browser.isWebKit) {
       return '-webkit-';
     }
-    if (platformModule.browser.isFirefox) {
+    if (browser.isFirefox) {
       return '-moz-';
     }
-    if (platformModule.browser.isIE) {
+    if (browser.isIE) {
       return '-ms-';
     }
     return '';
   })();
 
-  platformModule.transformProperty = platformModule.isIE9() ? 'msTransform' : (platformModule.browser.isWebKit ? 'webkitTransform' : 'transform');
+  var transformProperty = isIE9() ? 'msTransform' : (browser.isWebKit ? 'webkitTransform' : 'transform');
 
-  // Done
-  callback();
+  // Windows 8 (aug 24, 2014) does not properly animate the HLB when using CSS Transitions.
+  // Very strange behavior, might be worth filing a browser bug repport.
+  // UPDATE: (sept 15, 2014) IE10 appears to regress in Win8.1, CSS transition animations for HLB not working.
+  // UPDATE: (oct  06, 2014) Firefox appears to regress when window.pageYOffset is 0.  Animation of HLB
+  //                         flies out from outside the viewport (top-left)
+  var useJqueryAnimate = (function () {
+    return browser.isIE ||
+      (browser.isSafari  && window.pageYOffset === 0) ||
+      (browser.isFirefox && window.pageYOffset === 0);
+
+  }());
+
+  var transitionEndEvent = browser.isWebKit ? 'webkitTransitionEnd' : 'transitionend';
+
+  var publics = {
+    browser: browser,
+    os: os,
+    isIE9: isIE9,
+    canUseRetinaCursors: canUseRetinaCursors,
+    cssPrefix: cssPrefix,
+    transformProperty: transformProperty,
+    useJqueryAnimate: useJqueryAnimate,
+    transitionEndEvent: transitionEndEvent
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

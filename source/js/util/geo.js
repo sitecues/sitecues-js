@@ -1,7 +1,7 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-require([], function() {
+define([], function() {
   'use strict';
 
   /**
@@ -72,14 +72,13 @@ require([], function() {
   }
 
   var publics = {
-    isPointInRect : isPointInRect,
-    isPointInAnyRect : isPointInAnyRect,
-    expandOrContractRect : expandOrContractRect,
-    expandOrContractRects : expandOrContractRects
+    isPointInRect: isPointInRect,
+    isPointInAnyRect: isPointInAnyRect,
+    expandOrContractRect: expandOrContractRect,
+    expandOrContractRects: expandOrContractRects
   };
   if (SC_UNIT) {
     module.exports = publics;
   }
   return publics;
-
 });
