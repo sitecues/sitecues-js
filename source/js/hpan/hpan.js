@@ -124,11 +124,13 @@ define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (co
     refresh();
   });
 
+  // Dont pan while the bp is expanded.
   sitecues.on('bp/will-expand', function () {
     isPanelOpen = true;
     refresh();
   });
 
+  // Allow panning while the bp is shrunk.   
   sitecues.on('bp/did-shrink', function () {
     isPanelOpen = false;
     refresh();
@@ -140,7 +142,7 @@ define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (co
     if (value > 1) {
       sitecues.on('resize', refresh);
     }
-
     refresh();
   });
+  //no publics
 });
