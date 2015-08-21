@@ -3,7 +3,6 @@
  *   The core module of the sitecues library.
  */
 
-// TODO have global closure with 'use strict'? Will need to be in all bundles.
 // TODO remove jquery dependency from user-id.js
 // TODO clean up metrics
 // TODO defer page-visited and possibly other metrics until user-id.js finishes getting reply (thus cookie with user id is set)
@@ -12,15 +11,15 @@
 //      conf/did-complete
 // TODO check on server.js -- doesn't seem like the code to store data on the server actually gets used!
 // TODO load ie9.js if necessary
-// TODO move weird ie9 code to ie9.js
-// TODO remove effects/animate from our custom build of jquery to save another 8k
+// TODO move other weird ie9 code to ie9.js
+// TODO remove effects/animate from our custom build of jquery to save another 8k/3k
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
-// TODO load only the language we need from source/js/locale/lang/*.js
 // TODO clean up platform.js, helper.js
 // TODO remove sitecues.emit('foo/do-bar') pattern and use APIs, document APIs
 // TODO Only set thigns on sitecues object in core.js exportPublicFields()
+// TODO have global closure with 'use strict'? Will need to be in all bundles.
 
 define([
   'jquery',

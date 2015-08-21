@@ -63,16 +63,6 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
     }
   };
 
-  helper.isWebKit = platform.browser.isWebKit;
-
-  helper.isSafari = platform.browser.isSafari;
-
-  helper.isChrome = platform.browser.isChrome;
-
-  helper.isIE  = platform.browser.isIE;
-
-  helper.isIE9 = platform.browser.isIE && platform.browser.version === 9;
-
   helper.getCurrentSVGElementTransforms = function () {
 
     var result      = {},

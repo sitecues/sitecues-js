@@ -1,12 +1,12 @@
-define(['bp/helper', 'bp/constants', 'conf/site'], function (helper, BP_CONST, site) {
+define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (helper, platform, BP_CONST, site) {
 
   'use strict';
 
   var
     isAnimationDebuggingOn = false,
 
-    doWebKitPrefix = helper.isSafari,
-    doMsPrefix = helper.isIE9,
+    doWebKitPrefix = platform.browser.isSafari,
+    doMsPrefix = platform.isIE9(),
 
     idDelimiter = '#',
     classDelimiter = '.',

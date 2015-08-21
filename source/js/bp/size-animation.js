@@ -689,7 +689,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
     // Chrome is affected by the size of the source of what's scaled
     // It ends up being faster when the source is smaller, but less crisp
     function getStartCrispFactor() {
-      if (!helper.isChrome) {
+      if (!platform.browser.isChrome) {
         return 1;  // Don't need to play games with crisping other than in Chrome
       }
 
