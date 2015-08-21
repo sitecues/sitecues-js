@@ -70,7 +70,7 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
           prefs: window.localStorage.sitecues
         });
 
-    sitecues.emit('bp/do-shrink');
+    sitecues.emit('info/did-show');
 
     $iframe = $('<iframe>')
       .attr('src', pageUrl + anchor)

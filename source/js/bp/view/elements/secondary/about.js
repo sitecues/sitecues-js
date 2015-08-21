@@ -35,6 +35,6 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
     aboutImage.setAttribute('transform', newTransformString);
   };
 
-  sitecues.on('bp/do-toggle-secondary-panel', loadImage);
+  sitecues.on('bp/will-toggle-secondary-panel', loadImage);
 
 });

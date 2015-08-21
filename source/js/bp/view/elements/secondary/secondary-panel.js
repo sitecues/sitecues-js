@@ -347,24 +347,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
 
     fadeInTextContentWhenLargeEnough();
 
-    suppressHoversUntilMousemove();
-  }
-
-  // Some browsers don't recompute CSS hover state unless mouse moves, so
-  // hover even though a button has moved away from the mouse cursor, it will still get
-  // the :hover effect unless we suppress it until the next mouse move
-  function suppressHoversUntilMousemove() {
-    sitecues.emit('bp/do-cancel-hovers');
-    // TODO should we include the below code and use a class to suppress other hovers?
-//        function suppressHovers() {
-//          state.set('doSuppressHovers', false);
-//          sitecues.emit('bp/did-change');
-//          getMainSVG().removeEventListener('mousemove', suppressHovers);
-//        }
-//
-//        state.set('doSuppressHovers', true);
-//        sitecues.emit('bp/did-change');
-//        getMainSVG().addEventListener('mousemove', suppressHovers);
+    sitecues.emit('bp/will-show-secondary-feature');
   }
 
   /********************** INTERACTIONS **************************/
@@ -410,6 +393,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     animateButtonMenuDrop(willEnable);
 
     toggleMouseListeners(willEnable);
+
+    sitecues.on('bp/will-toggle-secondary-panel', toggleSecondaryPanel);
   }
 
   /**
@@ -520,8 +505,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
 
   // Add mouse listeners once BP is ready
   sitecues.on('bp/did-complete', resetStyles);
-
-  sitecues.on('bp/do-toggle-secondary-panel', toggleSecondaryPanel);
 
   sitecues.on('bp/did-expand', onPanelOpen);
 

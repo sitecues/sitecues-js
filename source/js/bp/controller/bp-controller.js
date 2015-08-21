@@ -46,7 +46,9 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
 
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-      sitecues.emit('bp/do-shrink', true);
+      require(['bp/controller/shrink-controller'], function(shrinkController) {
+        shrinkController.shrinkPanel(true);
+      });
       return;
     }
 

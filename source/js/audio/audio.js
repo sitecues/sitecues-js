@@ -218,9 +218,6 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
    */
   sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
 
-  // User has requested a speech toggle
-  sitecues.on('speech/do-toggle', toggleSpeech);
-
   if (conf.get('ttsOn')) {
     ttsOn = true;
     sitecues.emit('speech/did-change', true);

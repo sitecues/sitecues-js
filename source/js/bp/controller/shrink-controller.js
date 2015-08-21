@@ -161,7 +161,7 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     toggleListeners(false);
   }
 
-  sitecues.on('bp/do-shrink', shrinkPanel);
+  sitecues.on('info/did-show', shrinkPanel);
   sitecues.on('bp/will-expand', willExpand);
   sitecues.on('bp/will-shrink', willShrink);
 

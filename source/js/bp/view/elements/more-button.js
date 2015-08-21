@@ -22,10 +22,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio
       getTransformString = transform.getTransformString;
 
   function onMouseClick () {
-
-    // Show or hide the secondary panel.
-    sitecues.emit('bp/do-toggle-secondary-panel');
-
+    require(['bp/view/elements/secondary/secondary-panel'], function(secondary) {
+      // Show or hide the secondary panel.
+      secondary.toggleSecondaryPanel();
+    });
   }
 
   function addMouseListeners () {
