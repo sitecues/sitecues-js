@@ -9,7 +9,7 @@
 // - Bad photo reversal guesses:
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
-sitecues.def('theme/color/choices', function(colorChoices, callback) {
+sitecues.def('theme/color-choices', function(colorChoices, callback) {
   'use strict';
 
   sitecues.use('jquery', 'util/color', function($, colorUtil) {

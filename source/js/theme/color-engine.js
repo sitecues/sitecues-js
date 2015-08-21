@@ -5,7 +5,7 @@
 sitecues.def('theme/color/engine', function(colorEngine, callback) {
   'use strict';
   sitecues.use('jquery', 'conf/user/manager', 'style-service/style-service', 'util/platform',
-    'theme/color/choices', 'util/color', 'theme/color/img-classifier',
+    'theme/color-choices', 'util/color', 'theme/img-classifier',
     function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
 
       var $themeStyleSheet,
