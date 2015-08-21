@@ -3,7 +3,7 @@
  */
 sitecues.def('bp/size-animation', function(sizeAnimation, callback) {
   'use strict';
-  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'platform', 'zoom',
+  sitecues.use('bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom',
 
     function(state, BP_CONST, helper, platform, zoomMod) {
 

@@ -49,7 +49,7 @@
  */
 sitecues.def('bp/placement', function(placement, callback) {
   'use strict';
-  sitecues.use('bp/view/modes/badge', 'bp/model/state', 'zoom', 'bp/constants', 'bp/helper', 'platform',
+  sitecues.use('bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'bp/helper', 'util/platform',
     function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
 
     var BADGE_PARENT = BP_CONST.BADGE_MODE,

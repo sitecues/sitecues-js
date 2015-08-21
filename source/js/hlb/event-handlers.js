@@ -11,7 +11,7 @@ sitecues.def('hlb/event-handlers', function(eventHandlers, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'util/common', 'keys', 'platform', function($, common, keys, platform) {
+  sitecues.use('jquery', 'util/common', 'keys/keys', 'util/platform', function($, common, keys, platform) {
 
     /////////////////////////
     // PRIVATE VARIABLES

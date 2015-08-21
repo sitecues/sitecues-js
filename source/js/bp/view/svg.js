@@ -185,7 +185,7 @@ sitecues.def('bp/view/svg', function (bpSVG, callback) {
   </sc-p>\
 </sc>\
 <sc style="display:none"></sc>'; // Hack to make sure innerHTML doesn't remove any important last element
-  sitecues.use('locale', 'platform', function(locale, platform) {
+  sitecues.use('locale/locale', 'util/platform', function(locale, platform) {
     // The original base URL for the current page regardless of <base> tag
     function removeEnd(loc) {
       var locString = '' + loc; // Convert to string

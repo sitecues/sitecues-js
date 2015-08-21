@@ -11,7 +11,7 @@ sitecues.def('metrics/zoom-changed', function (zoomChanged, callback) {
     "from_zoom": 1                       // Old zoom value
   };
 
-  sitecues.use('metrics/util', 'jquery', 'conf', 'zoom', function (metricsUtil, $, conf, zoom) {
+  sitecues.use('metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom', function (metricsUtil, $, conf, zoom) {
 
     // ============= Objects methods ======================
     zoomChanged = {

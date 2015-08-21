@@ -6,7 +6,8 @@
 
 sitecues.def('bp/view/elements/more-button', function (moreButton, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'zoom', 'audio', 'animate', 'util/transform', function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
+  sitecues.use('bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio', 'animate', 'util/transform',
+    function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
 
     var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
         NO_INPUT_TIMEOUT                = 7000,

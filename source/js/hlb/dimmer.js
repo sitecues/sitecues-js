@@ -5,7 +5,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'util/common', 'platform', function($, conf, common, platform) {
+  sitecues.use('jquery', 'util/conf', 'util/common', 'util/platform', function($, conf, common, platform) {
 
     //////////////////////////////
     // PRIVATE VARIABLES
@@ -76,7 +76,7 @@ sitecues.def('hlb/dimmer', function(dimmer, callback) {
 
     dimmer.getDimmerElement = function() {
       return document.getElementById(DIMMER_ID);
-    }
+    };
 
     if (SC_UNIT) {
       exports.onDimmerClosed = onDimmerClosed;

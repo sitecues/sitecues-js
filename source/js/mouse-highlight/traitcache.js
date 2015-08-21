@@ -7,7 +7,7 @@
  */
 sitecues.def('mouse-highlight/traitcache', function(traitcache, callback) {
   'use strict';
-  sitecues.use('jquery', 'zoom', function($, zoomMod) {
+  sitecues.use('jquery', 'zoom/zoom', function($, zoomMod) {
     var uniqueIdCounter = 0,
       styleCache = {},
       rectCache = {},

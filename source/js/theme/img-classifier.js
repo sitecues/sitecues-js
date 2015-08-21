@@ -11,7 +11,7 @@
 sitecues.def('theme/color/img-classifier', function(imgClassifier, callback) {
   'use strict';
 
-  sitecues.use('jquery', 'zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
+  sitecues.use('jquery', 'zoom/zoom', 'util/color', 'conf/site', function($, zoomMod, colorUtil, site) {
 
     var REVERSIBLE_ATTR = 'data-sc-reversible',
       customSelectors = site.get('themes') || { },

@@ -6,7 +6,7 @@ sitecues.def('hlb/animation', function (hlbAnimation, callback) {
 
   'use strict';
 
-  sitecues.use('hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'platform',
+  sitecues.use('hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platform',
 
   function (dimmer, transform, $, hlbPositioning, platform) {
 

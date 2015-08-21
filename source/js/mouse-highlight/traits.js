@@ -6,7 +6,7 @@
  */
 sitecues.def('mouse-highlight/traits', function(traits, callback) {
   'use strict';
-  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom', 'util/common',
+  sitecues.use('jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom/zoom', 'util/common',
     function($, traitcache, mhpos, zoomMod, common) {
 
     // ---- PUBLIC ----

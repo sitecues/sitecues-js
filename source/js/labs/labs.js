@@ -10,7 +10,7 @@ sitecues.def('labs', function (labs, callback) {
   
   'use strict';
   
-  sitecues.use('conf', 'jquery', function(conf, $) {
+  sitecues.use('conf/user/manager', 'jquery', function(conf, $) {
 
     var labSettings = $.extend({}, conf.get('labs'));
 

@@ -33,7 +33,7 @@ sitecues.def('bp/view/elements/secondary-panel', function (secondaryPanel, callb
     'bp/view/elements/settings',
     'bp/view/elements/feedback',
     'bp/view/elements/about',
-    'locale',
+    'locale/locale',
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale) {
 
       var BUTTON_CLICK_ANIMATION_DURATION = 800,

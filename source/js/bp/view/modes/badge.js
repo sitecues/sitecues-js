@@ -50,7 +50,7 @@
 
 sitecues.def('bp/view/modes/badge', function (badge, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'locale', 'bp/helper', 'conf', 'conf/site',
+  sitecues.use('bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/user/manager', 'conf/site',
     function (BP_CONST, state, locale, helper, conf, site) {
 
     /*

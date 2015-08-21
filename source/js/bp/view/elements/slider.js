@@ -11,7 +11,7 @@
 
 sitecues.def('bp/view/elements/slider', function (sliderView, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'zoom', 'bp/helper', 'locale',
+  sitecues.use('bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/locale',
     function (BP_CONST, state, zoomMod, helper, locale) {
 
     /*

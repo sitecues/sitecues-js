@@ -3,7 +3,7 @@
  */
 sitecues.def('bp/view/elements/cards', function (cards, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'locale', 'bp/model/state', 'platform', 'animate',
+  sitecues.use('bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'animate',
     function (BP_CONST, helper, locale, state, platform, animate) {
 
     var

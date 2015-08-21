@@ -7,7 +7,7 @@ sitecues.def('hlb/styling', function (hlbStyling, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'platform', 'util/common', 'conf',
+  sitecues.use('jquery', 'util/platform', 'util/common', 'conf/user/manager',
   function ($, platform, common, conf) {
 
 

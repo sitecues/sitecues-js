@@ -1,6 +1,6 @@
 sitecues.def('bp/view/elements/feedback', function (feedback, callback) {
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', 'platform', function (BP_CONST, helper, state, platform) {
+  sitecues.use('bp/constants', 'bp/helper', 'bp/model/state', 'util/platform', function (BP_CONST, helper, state, platform) {
 
     var byId = helper.byId,
       isActive = false,

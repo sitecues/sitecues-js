@@ -8,14 +8,14 @@ sitecues.def('hlb', function(hlb, callback) {
 
   sitecues.use(
     'jquery',
-    'conf',
+    'conf/user/manager',
     'hlb/event-handlers',
     'hlb/positioning',
     'hlb/styling',
-    'platform',
+    'util/platform',
     'util/common',
     'hlb/animation',
-    'mouse-highlight',
+    'mouse-highlight/mouse-highlight',
     'util/geo',
 
     function(

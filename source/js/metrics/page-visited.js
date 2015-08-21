@@ -5,7 +5,7 @@
  */
 sitecues.def('metrics/page-visited', function (pageVisited, callback) {
 
-    sitecues.use('metrics/util', 'zoom', function(metricsUtil, zoom) {
+    sitecues.use('metrics/util', 'zoom/zoom', function(metricsUtil, zoom) {
 
         // ============= Objects methods ======================
         pageVisited = {

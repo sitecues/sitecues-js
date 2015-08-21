@@ -8,7 +8,7 @@ sitecues.def('hlb/positioning', function(hlbPositioning, callback) {
 
   'use strict';
 
-  sitecues.use('jquery', 'conf', 'hlb/styling', 'util/common', 'hlb/safe-area',
+  sitecues.use('jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area',
   function($, conf, hlbStyling, common, hlbSafeArea) {
 
     /////////////////////////

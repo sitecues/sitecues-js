@@ -83,9 +83,9 @@ sitecues.def('mouse-highlight', function (mh, callback) {
   cursorPos = {};
 
     // depends on jquery, conf, mouse-highlight/picker and positioning modules
-  sitecues.use('jquery', 'conf', 'zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
+  sitecues.use('jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/picker', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common', 'util/color',
-    'audio', 'util/geo', 'platform',
+    'audio/audio', 'util/geo', 'util/platform',
     function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, platform) {
 
     function getMaxZIndex(styles) {

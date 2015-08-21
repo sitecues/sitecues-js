@@ -7,7 +7,7 @@ sitecues.def('mouse-highlight/highlight-position', function (mhpos, callback) {
 
   var MIN_RECT_SIDE = 4;
 
-  sitecues.use('jquery', 'util/common', 'zoom', 'platform', 'mouse-highlight/traitcache',
+  sitecues.use('jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache',
                function ($, common, zoomMod, platform, traitcache) {
 
     /**

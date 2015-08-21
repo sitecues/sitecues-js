@@ -27,7 +27,7 @@
 
 sitecues.def('mouse-highlight/picker', function(picker, callback) {
   'use strict';
-  sitecues.use('jquery', 'util/common', 'conf', 'conf/site',
+  sitecues.use('jquery', 'util/common', 'conf/user/manager', 'conf/site',
                'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge',
                function($, common, conf, site, traitcache, traits, judge) {
 

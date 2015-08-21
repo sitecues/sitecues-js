@@ -2,7 +2,7 @@
 // It is too similar to utils.js which is confusing
 sitecues.def('bp/helper', function (helper, callback) {
   'use strict';
-  sitecues.use('platform', 'bp/constants', function(platform, BP_CONST) {
+  sitecues.use('util/platform', 'bp/constants', function(platform, BP_CONST) {
     /**
      *** Getters ***
      */
