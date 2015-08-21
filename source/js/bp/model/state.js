@@ -1,5 +1,5 @@
 // TODO we can save a lot of bytes by setting these directly on the state object (instead of inside .data)
-sitecues.def('bp/model/state', function (state, callback) {
+define([], function() {
   'use strict';
 
   var data = {
@@ -94,7 +94,5 @@ sitecues.def('bp/model/state', function (state, callback) {
     }
     return 'main';
   };
-
-  callback();
 
 });

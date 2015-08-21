@@ -1,159 +1,155 @@
-sitecues.def('bp/view/elements/settings', function (settings, callback) {
+define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
+  function (BP_CONST, helper, conf, state) {
+
   'use strict';
-  sitecues.use('bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state',
-    function (BP_CONST, helper, conf, state) {
 
-    var byId = helper.byId,
-      isActive = false,
-      settingsPanel,
-      lastDragUpdateTime = 0,
-      SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
+  var byId = helper.byId,
+    isActive = false,
+    settingsPanel,
+    lastDragUpdateTime = 0,
+    SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
 
-    function onPanelUpdate() {
+  function onPanelUpdate() {
 
-      var willBeActive = state.getSecondaryPanelName() === 'settings',
-        settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
+    var willBeActive = state.getSecondaryPanelName() === 'settings',
+      settingsCards = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
-      if (isActive !== willBeActive) {
-        if (willBeActive) {
-          if (!settingsPanel) {
-            init();
-          }
-          settingsCards.addEventListener('click', onSettingsClick);
-          settingsCards.addEventListener('change', onSettingsNativeInputChange);
-          settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
+    if (isActive !== willBeActive) {
+      if (willBeActive) {
+        if (!settingsPanel) {
+          init();
         }
-        else {
-          settingsCards.removeEventListener('click', onSettingsClick);
-          settingsCards.removeEventListener('change', onSettingsNativeInputChange);
-          settingsCards.removeEventListener('input', onSettingsNativeInputChangeDrag);
-        }
+        settingsCards.addEventListener('click', onSettingsClick);
+        settingsCards.addEventListener('change', onSettingsNativeInputChange);
+        settingsCards.addEventListener('input', onSettingsNativeInputChangeDrag);
       }
-
-      isActive = willBeActive;
+      else {
+        settingsCards.removeEventListener('click', onSettingsClick);
+        settingsCards.removeEventListener('change', onSettingsNativeInputChange);
+        settingsCards.removeEventListener('input', onSettingsNativeInputChangeDrag);
+      }
     }
 
-    function init() {
-      settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
+    isActive = willBeActive;
+  }
 
-      generalInit();
+  function init() {
+    settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
-      initRanges();
+    generalInit();
 
-      themeSlidersInit();
+    initRanges();
+
+    themeSlidersInit();
+  }
+
+  // Set up setting synchronization
+  function generalInit() {
+    var allSettingNames = {},
+      allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
+      index = allSettingElems.length,
+      name;
+
+    // For each setting name, get a list of elements
+    while (index --) {
+      name = allSettingElems[index].getAttribute('data-setting-name');
+      allSettingNames[name] = 1;
     }
 
-    // Set up setting synchronization
-    function generalInit() {
-      var allSettingNames = {},
-        allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
-        index = allSettingElems.length,
-        name;
-
-      // For each setting name, get a list of elements
-      while (index --) {
-        name = allSettingElems[index].getAttribute('data-setting-name');
-        allSettingNames[name] = 1;
-      }
-
-      Object.keys(allSettingNames).forEach(function(name) {
-        conf.get(name, function(newValue) {
-          var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
-            index = settingElems.length,
-            elem,
-            isCurrentValue;
-          while (index -- ) {
-            elem = settingElems[index];
-            isCurrentValue = elem.getAttribute('data-setting-value') === newValue;
-            elem.setAttribute('data-setting-current', isCurrentValue);
-          }
-        });
+    Object.keys(allSettingNames).forEach(function(name) {
+      conf.get(name, function(newValue) {
+        var settingElems = settingsPanel.querySelectorAll('sc-button[data-setting-name="' + name + '"]'),
+          index = settingElems.length,
+          elem,
+          isCurrentValue;
+        while (index -- ) {
+          elem = settingElems[index];
+          isCurrentValue = elem.getAttribute('data-setting-value') === newValue;
+          elem.setAttribute('data-setting-current', isCurrentValue);
+        }
       });
+    });
+  }
+
+  function getThemePowerGroup() {
+    return byId(BP_CONST.THEME_POWER_ID);
+  }
+
+  function getThemeTextHueGroup() {
+    return byId(BP_CONST.THEME_TEXT_HUE_ID);
+  }
+
+  function initRangeListener(settingName, rangeElem) {
+    conf.get(settingName, function(val) {
+      rangeElem.value = val;
+    });
+  }
+
+  function initRanges() {
+    var rangeElems = settingsPanel.querySelectorAll('input[type="range"]'),
+      index = rangeElems.length,
+      rangeElem,
+      settingName;
+
+    while (index --) {
+      rangeElem = rangeElems[index];
+      settingName = rangeElem.getAttribute('data-setting-name');
+      initRangeListener(settingName, rangeElem);
     }
 
-    function getThemePowerGroup() {
-      return byId(BP_CONST.THEME_POWER_ID);
-    }
+  }
 
-    function getThemeTextHueGroup() {
-      return byId(BP_CONST.THEME_TEXT_HUE_ID);
-    }
-
-    function initRangeListener(settingName, rangeElem) {
-      conf.get(settingName, function(val) {
-        rangeElem.value = val;
-      });
-    }
-
-    function initRanges() {
-      var rangeElems = settingsPanel.querySelectorAll('input[type="range"]'),
-        index = rangeElems.length,
-        rangeElem,
-        settingName;
-
-      while (index --) {
-        rangeElem = rangeElems[index];
-        settingName = rangeElem.getAttribute('data-setting-name');
-        initRangeListener(settingName, rangeElem);
-      }
-
-    }
-
-    function themeSlidersInit() {
-      conf.get('themeName', function (name) {
-        var isThemePowerEnabled = name !== null,
-          isThemeTextHueEnabled = name === 'dark';
-        getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
-        getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
-      });
-    }
+  function themeSlidersInit() {
+    conf.get('themeName', function (name) {
+      var isThemePowerEnabled = name !== null,
+        isThemeTextHueEnabled = name === 'dark';
+      getThemePowerGroup().setAttribute('data-show', isThemePowerEnabled);
+      getThemeTextHueGroup().setAttribute('data-show', isThemeTextHueEnabled);
+    });
+  }
 
 
-    settings.getGeometryTargets = function(cssValues) {
-      return cssValues;
-    };
+  settings.getGeometryTargets = function(cssValues) {
+    return cssValues;
+  };
 
-    function isNativeInput(elem) {
-      return typeof elem.value !== 'undefined';
-    }
+  function isNativeInput(elem) {
+    return typeof elem.value !== 'undefined';
+  }
 
-    function onSettingsClick(evt) {
-      var target = helper.getEventTarget(evt),
-        settingName;
-      if (target && !isNativeInput(target)) {
-        settingName = target.getAttribute('data-setting-name');
-        if (settingName) {
-          conf.set(settingName, target.getAttribute('data-setting-value'));
-        }
-      }
-    }
-
-    // Use native value for things like <input type="range">
-    // For sliders, this occurs when user drops the thumb (lets go of mouse button)
-    function onSettingsNativeInputChange(evt) {
-      var target = helper.getEventTarget(evt);
-      if (target) {
-        var settingName = target.getAttribute('data-setting-name');
-        if (settingName) {
-          conf.set(settingName, + target.value);
-        }
+  function onSettingsClick(evt) {
+    var target = helper.getEventTarget(evt),
+      settingName;
+    if (target && !isNativeInput(target)) {
+      settingName = target.getAttribute('data-setting-name');
+      if (settingName) {
+        conf.set(settingName, target.getAttribute('data-setting-value'));
       }
     }
+  }
 
-    // Native input change
-    // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
-    // We don't want to update too much, hence the timer
-    function onSettingsNativeInputChangeDrag(evt) {
-      var currTime = + Date.now();
-      if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
-        lastDragUpdateTime = currTime;
-        setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
+  // Use native value for things like <input type="range">
+  // For sliders, this occurs when user drops the thumb (lets go of mouse button)
+  function onSettingsNativeInputChange(evt) {
+    var target = helper.getEventTarget(evt);
+    if (target) {
+      var settingName = target.getAttribute('data-setting-name');
+      if (settingName) {
+        conf.set(settingName, + target.value);
       }
     }
+  }
 
-    sitecues.on('bp/do-update', onPanelUpdate);
+  // Native input change
+  // For sliders, this occurs when thumb moves at all, it doesn't need to be dropped there
+  // We don't want to update too much, hence the timer
+  function onSettingsNativeInputChangeDrag(evt) {
+    var currTime = + Date.now();
+    if (currTime - lastDragUpdateTime > SLIDER_DRAG_UPDATE_MIN_INTERVAL) {
+      lastDragUpdateTime = currTime;
+      setTimeout(function() { onSettingsNativeInputChange(evt);}, 0 );
+    }
+  }
 
-    callback();
-
-  });
+  sitecues.on('bp/do-update', onPanelUpdate);
 });

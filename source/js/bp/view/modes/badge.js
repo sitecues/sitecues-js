@@ -48,302 +48,296 @@
 //     * Add keyboard accessibility and ARIA
 // * Add to docs: accessibility explanation, palettes, etc.
 
-sitecues.def('bp/view/modes/badge', function (badge, callback) {
+define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/user/manager', 'conf/site'],
+  function(BP_CONST, state, locale, helper, conf, site) {
+
   'use strict';
-  sitecues.use('bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/user/manager', 'conf/site',
-    function (BP_CONST, state, locale, helper, conf, site) {
+  /*
+   Default bounding box object.
+   */
+  var badgeElement,
+      getNumberFromString = helper.getNumberFromString,
+      lastBgColor;
+  /*
+   *** Privates ***
+   */
 
-    /*
-     Default bounding box object.
-     */
-    var badgeElement,
-        getNumberFromString = helper.getNumberFromString,
-        lastBgColor;
-    /*
-     *** Privates ***
-     */
+  /**
+   * Basic structure of badge:
+   * TODO: Need to update this
+   * Create a new badge element outside of the body to use it for panel state.
+     This occurs when the page did not supply a #sitecues-badge page badge.
+     Create and insert a new one as a sibling to body for later usage.
+   * <span #sitecues-badge>
+   *    <svg>
+   * </span>
+   * @returns {Object}
+   */
+  function createToolbar() {
 
-    /**
-     * Basic structure of badge:
-     * TODO: Need to update this
-     * Create a new badge element outside of the body to use it for panel state.
-       This occurs when the page did not supply a #sitecues-badge page badge.
-       Create and insert a new one as a sibling to body for later usage.
-     * <span #sitecues-badge>
-     *    <svg>
-     * </span>
-     * @returns {Object}
-     */
-    function createToolbar() {
+    var toolbarElement = document.createElement('sc'),
+      docElem = document.documentElement;
 
-      var toolbarElement = document.createElement('sc'),
-        docElem = document.documentElement;
+    docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
+    docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
 
-      docElem.setAttribute('data-sitecues-toolbar', ''); // Enable default.css rules
-      docElem.insertBefore(toolbarElement, docElem.childNodes[0]);
+    helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
+    ensureBodyBelowToolbar();
 
-      helper.setAttributes(toolbarElement, BP_CONST.DEFAULT_TOOLBAR_ATTRS);
-      ensureBodyBelowToolbar();
+    state.set('isPageBadge', false);
+    state.set('isToolbarBadge', true);
 
-      state.set('isPageBadge', false);
-      state.set('isToolbarBadge', true);
-
-      if (!isToolbarUIRequested()) {
-        console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
-      }
-
-      sitecues.emit('bp/did-insert-toolbar');
-
-      return toolbarElement;
+    if (!isToolbarUIRequested()) {
+      console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
     }
 
-    // In some cases body may be positioned absolutely above the toolbar
-    function ensureBodyBelowToolbar() {
-      var body = document.body;
-      if (body) {
-        if (getComputedStyle(body).position !== 'static' &&
-          body.getBoundingClientRect().top < 41) {
-            body.setAttribute('data-sc-extra-toolbar-bump', '');
+    sitecues.emit('bp/did-insert-toolbar');
+
+    return toolbarElement;
+  }
+
+  // In some cases body may be positioned absolutely above the toolbar
+  function ensureBodyBelowToolbar() {
+    var body = document.body;
+    if (body) {
+      if (getComputedStyle(body).position !== 'static' &&
+        body.getBoundingClientRect().top < 41) {
+          body.setAttribute('data-sc-extra-toolbar-bump', '');
+      }
+    }
+    else {
+      // Wait for body. There will always be one after DOMContentLoaded,
+      // because the browser inserts one if the markup didn't provide it.
+      document.addEventListener('DOMContentLoaded', ensureBodyBelowToolbar);
+    }
+  }
+
+  function isToolbarUIRequested() {
+    return site.get('uiMode') === 'toolbar';
+  }
+
+  // Create <div> and put the existing badge inside it.
+  // Transfer necessary styles from the <img> to the <div>
+  function convertExistingBadge() {
+
+    // Transfer styles from placeholder <img> to <div>
+    // Remove those styles from placeholder <img>
+    function transferStylesFromExistingBadge (styles) {
+      var len = styles.length,
+          i   = 0;
+      for (; i < len; i++) {
+        div.style[styles[i]] = getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
+        badgeElement.style[styles[i]] = 0;
+      }
+    }
+
+    var div                 = document.createElement('sc'),
+        badgeImgBoundingBox = helper.getRect(badgeElement),
+        badgeComputedStyles = window.getComputedStyle(badgeElement),
+        stylesToTransfer    = [
+          'marginTop',
+          'marginBottom',
+          'marginLeft',
+          'marginRight',
+          'paddingTop',
+          'paddingBottom',
+          'paddingLeft',
+          'paddingRight'
+        ];
+
+    // Added to fix issue on ruhglobal.com
+    if (badgeElement.style.position === 'relative') {
+      stylesToTransfer.push('top');
+      stylesToTransfer.push('left');
+    }
+
+    transferStylesFromExistingBadge(stylesToTransfer);
+
+    // Set other styles that cannot be abstracted into a helper function.
+    div.style.display = 'inline-block';
+    div.style.height  = badgeImgBoundingBox.height - (badgeComputedStyles.paddingTop  + badgeComputedStyles.paddingBottom) + 'px';
+    div.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
+    div.style.float   = badgeComputedStyles.float;
+
+    badgeElement.parentElement.insertBefore(div, badgeElement);
+
+    div.appendChild(badgeElement);
+
+  }
+
+  function removeExistingBadgeId() {
+    badgeElement.removeAttribute('id');
+  }
+
+  function setBadgeParentId() {
+    badgeElement.parentElement.id = BP_CONST.BADGE_ID;
+  }
+
+  function checkBackgroundColorChange() {
+    var newBgColor = getBackgroundColor();
+
+    if (newBgColor !== lastBgColor) {
+      lastBgColor = newBgColor;
+      sitecues.emit('bp/do-update');
+      SC_DEV && console.log('Updating adaptive badge palette');
+    }
+  }
+
+  function getBackgroundColor() {
+    return getComputedStyle(document.body).backgroundColor;
+  }
+
+  // Input event has occured that may trigger a theme change produced from the website code
+  // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
+  function onPossibleWebpageThemeChange() {
+    setTimeout(checkBackgroundColorChange, 0);
+  }
+
+  // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
+  // We don't know when they occur so we check shortly after a click or keypress.
+  function addWebPageThemeListener() {
+    document.body.addEventListener('click', onPossibleWebpageThemeChange);
+    document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
+    lastBgColor = getBackgroundColor();
+  }
+
+  // Listen for changes in the sitecues theme
+  function addSitecuesThemeListener() {
+    sitecues.on('theme/did-apply', onSitecuesThemeChange);
+  }
+
+  function onSitecuesThemeChange() {
+    state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
+    checkBackgroundColorChange();
+  }
+
+  function setCustomPalette (badgeElement) {
+
+    var paletteName = getBadgePalette(badgeElement);
+    if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
+      state.set('isAdaptivePalette', true);
+      addWebPageThemeListener();
+    }
+
+    addSitecuesThemeListener();
+
+    state.set('paletteName', paletteName);
+
+  }
+
+  function getBadgePalette(badge) {
+    var paletteName = badge.localName === 'img' ? badge.src : site.get('palette') || '',
+      fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
+      index = 0;
+
+    // Check for a string because site.get('palette')
+    // returns an Object if a custom palette is used.
+    if (typeof paletteName === 'string') {
+
+      for (; index < fullNames.length; index ++) {
+        var fullName = fullNames[index];
+        if (paletteName.indexOf(fullName) >= 0) {
+          return BP_CONST.PALETTE_NAME_MAP[fullName];
         }
       }
-      else {
-        // Wait for body. There will always be one after DOMContentLoaded,
-        // because the browser inserts one if the markup didn't provide it.
-        document.addEventListener('DOMContentLoaded', ensureBodyBelowToolbar);
-      }
-    }
-
-    function isToolbarUIRequested() {
-      return site.get('uiMode') === 'toolbar';
-    }
-
-    // Create <div> and put the existing badge inside it.
-    // Transfer necessary styles from the <img> to the <div>
-    function convertExistingBadge() {
-
-      // Transfer styles from placeholder <img> to <div>
-      // Remove those styles from placeholder <img>
-      function transferStylesFromExistingBadge (styles) {
-        var len = styles.length,
-            i   = 0;
-        for (; i < len; i++) {
-          div.style[styles[i]] = getNumberFromString(badgeComputedStyles[styles[i]]) + 'px';
-          badgeElement.style[styles[i]] = 0;
-        }
-      }
-
-      var div                 = document.createElement('sc'),
-          badgeImgBoundingBox = helper.getRect(badgeElement),
-          badgeComputedStyles = window.getComputedStyle(badgeElement),
-          stylesToTransfer    = [
-            'marginTop',
-            'marginBottom',
-            'marginLeft',
-            'marginRight',
-            'paddingTop',
-            'paddingBottom',
-            'paddingLeft',
-            'paddingRight'
-          ];
-
-      // Added to fix issue on ruhglobal.com
-      if (badgeElement.style.position === 'relative') {
-        stylesToTransfer.push('top');
-        stylesToTransfer.push('left');
-      }
-
-      transferStylesFromExistingBadge(stylesToTransfer);
-
-      // Set other styles that cannot be abstracted into a helper function.
-      div.style.display = 'inline-block';
-      div.style.height  = badgeImgBoundingBox.height - (badgeComputedStyles.paddingTop  + badgeComputedStyles.paddingBottom) + 'px';
-      div.style.width   = badgeImgBoundingBox.width  - (badgeComputedStyles.paddingLeft + badgeComputedStyles.paddingRight)  + 'px';
-      div.style.float   = badgeComputedStyles.float;
-
-      badgeElement.parentElement.insertBefore(div, badgeElement);
-
-      div.appendChild(badgeElement);
 
     }
 
-    function removeExistingBadgeId() {
-      badgeElement.removeAttribute('id');
-    }
+    return '';
+  }
 
-    function setBadgeParentId() {
-      badgeElement.parentElement.id = BP_CONST.BADGE_ID;
-    }
+  /**
+   *** Publics ***
+   */
 
-    function checkBackgroundColorChange() {
-      var newBgColor = getBackgroundColor();
+  /*
+   Augments the customers placeholder if found, otherwise creates the floating badge.
 
-      if (newBgColor !== lastBgColor) {
-        lastBgColor = newBgColor;
-        sitecues.emit('bp/do-update');
-        SC_DEV && console.log('Updating adaptive badge palette');
-      }
-    }
+   If the customer uses an <img> as a placeholder:
+     We determine the color palette to be used based on the .src attribute.
+     We create a <div> and insert it into the DOM as the previous sibling of the <img>
+     We insert the <img> into the newly created <div>
+     We remove the id from the <img>
+     We set the id of the newly created <div> to BP_CONST.BADGE_ID
 
-    function getBackgroundColor() {
-      return getComputedStyle(document.body).backgroundColor;
-    }
+   Badge will never be statically positioned.  It must be relative or absolute
+   so its contents can be absolutely positioned.
 
-    // Input event has occured that may trigger a theme change produced from the website code
-    // (as opposed to sitecues-based themes). For example, harpo.com, cnib.ca, lloydsbank have their own themes.
-    function onPossibleWebpageThemeChange() {
-      setTimeout(checkBackgroundColorChange, 0);
-    }
+   Sets attributes on badge elements (ARIA).
 
-    // Listen for change in the web page's custom theme (as opposed to the sitecues-based themes).
-    // We don't know when they occur so we check shortly after a click or keypress.
-    function addWebPageThemeListener() {
-      document.body.addEventListener('click', onPossibleWebpageThemeChange);
-      document.body.addEventListener('keyup', onPossibleWebpageThemeChange);
-      lastBgColor = getBackgroundColor();
-    }
+   * @returns {Object|Element}
+   */
+  badge.init = function() {
 
-    // Listen for changes in the sitecues theme
-    function addSitecuesThemeListener() {
-      sitecues.on('theme/did-apply', onSitecuesThemeChange);
-    }
+    var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 
-    function onSitecuesThemeChange() {
-      state.set('isAdaptivePalette', true); // If sitecues theme changes, force adaptive palette
-      checkBackgroundColorChange();
-    }
+    // Get site's in-page placeholder badge or create our own
+    badgeElement = badge || createToolbar();
+    badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
 
-    function setCustomPalette (badgeElement) {
 
-      var paletteName = getBadgePalette(badgeElement);
-      if (paletteName === BP_CONST.PALETTE_NAME_MAP.adaptive) {
-        state.set('isAdaptivePalette', true);
-        addWebPageThemeListener();
-      }
+    setCustomPalette(badgeElement);
 
-      addSitecuesThemeListener();
+    // If a customer uses the <img> placeholder...
+    if (badgeElement.localName === 'img') {
 
-      state.set('paletteName', paletteName);
+      badgeElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
+
+      convertExistingBadge();
+      removeExistingBadgeId();
+      setBadgeParentId();
+
+      // Invalidate the cache because we just removed the BADGE_ID
+      // from the <img> and set it on the <div>
+      helper.invalidateId(BP_CONST.BADGE_ID);
+
+      badgeElement = badgeElement.parentElement;
 
     }
 
-    function getBadgePalette(badge) {
-      var paletteName = badge.localName === 'img' ? badge.src : site.get('palette') || '',
-        fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
-        index = 0;
+    setCSSPositioningForBadge();
 
-      // Check for a string because site.get('palette')
-      // returns an Object if a custom palette is used.
-      if (typeof paletteName === 'string') {
+    helper.setAttributes(badgeElement, BP_CONST.BADGE_ATTRS);
 
-        for (; index < fullNames.length; index ++) {
-          var fullName = fullNames[index];
-          if (paletteName.indexOf(fullName) >= 0) {
-            return BP_CONST.PALETTE_NAME_MAP[fullName];
-          }
-        }
+    return badgeElement;
 
-      }
+  };
 
-      return '';
+  // Make sure the badge has non-static positioning to make it easy to place
+  // the position: absolute sc-bp-container inside of it
+  function setCSSPositioningForBadge() {
+
+    var existingPositionCss = getComputedStyle(badgeElement).position;
+
+    if (existingPositionCss === 'static') {
+      badgeElement.style.position = 'relative';
+    }
+  }
+
+  badge.getViewClasses = function() {
+
+    var classBuilder = BP_CONST.WANT_BADGE;
+
+    if (state.isBadge()) {
+      classBuilder += ' ' + BP_CONST.IS_BADGE;
     }
 
-    /**
-     *** Publics ***
-     */
-
-    /*
-     Augments the customers placeholder if found, otherwise creates the floating badge.
-
-     If the customer uses an <img> as a placeholder:
-       We determine the color palette to be used based on the .src attribute.
-       We create a <div> and insert it into the DOM as the previous sibling of the <img>
-       We insert the <img> into the newly created <div>
-       We remove the id from the <img>
-       We set the id of the newly created <div> to BP_CONST.BADGE_ID
-
-     Badge will never be statically positioned.  It must be relative or absolute
-     so its contents can be absolutely positioned.
-
-     Sets attributes on badge elements (ARIA).
-
-     * @returns {Object|Element}
-     */
-    badge.init = function() {
-
-      var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
-
-      // Get site's in-page placeholder badge or create our own
-      badgeElement = badge || createToolbar();
-      badgeElement.setAttribute('aria-label', locale.translate(BP_CONST.STRINGS.BADGE_LABEL));
-
-
-      setCustomPalette(badgeElement);
-
-      // If a customer uses the <img> placeholder...
-      if (badgeElement.localName === 'img') {
-
-        badgeElement.setAttribute('data-sc-reversible', false); // Will use a different palette dark theme is used
-
-        convertExistingBadge();
-        removeExistingBadgeId();
-        setBadgeParentId();
-
-        // Invalidate the cache because we just removed the BADGE_ID
-        // from the <img> and set it on the <div>
-        helper.invalidateId(BP_CONST.BADGE_ID);
-
-        badgeElement = badgeElement.parentElement;
-
-      }
-
-      setCSSPositioningForBadge();
-
-      helper.setAttributes(badgeElement, BP_CONST.BADGE_ATTRS);
-
-      return badgeElement;
-
-    };
-
-    // Make sure the badge has non-static positioning to make it easy to place
-    // the position: absolute sc-bp-container inside of it
-    function setCSSPositioningForBadge() {
-
-      var existingPositionCss = getComputedStyle(badgeElement).position;
-
-      if (existingPositionCss === 'static') {
-        badgeElement.style.position = 'relative';
-      }
+    if (state.get('isRealSettings')) {
+      // *** scp-realsettings ***
+      // Show the real settings for the badge (not the fake ones)
+      // Why it's used:
+      // The initial badge is easier-to-see, more attractive and more inviting when speech is on and zoom is
+      // somewhere in the middle. Therefore the initial badge uses fake settings.
+      // However, once the user has ever expanded the badge or used sitecues we show the real settings.
+      classBuilder += ' scp-realsettings';
     }
 
-    badge.getViewClasses = function() {
+    return classBuilder;
+  };
 
-      var classBuilder = BP_CONST.WANT_BADGE;
+  // *** Unit tests export... ***
+  if (SC_UNIT) {
+    exports.badge = badge;
+  }
 
-      if (state.isBadge()) {
-        classBuilder += ' ' + BP_CONST.IS_BADGE;
-      }
-
-      if (state.get('isRealSettings')) {
-        // *** scp-realsettings ***
-        // Show the real settings for the badge (not the fake ones)
-        // Why it's used:
-        // The initial badge is easier-to-see, more attractive and more inviting when speech is on and zoom is
-        // somewhere in the middle. Therefore the initial badge uses fake settings.
-        // However, once the user has ever expanded the badge or used sitecues we show the real settings.
-        classBuilder += ' scp-realsettings';
-      }
-
-      return classBuilder;
-    };
-
-    // *** Unit tests export... ***
-    if (SC_UNIT) {
-      exports.badge = badge;
-    }
-
-    // Unless callback() is queued, the module is not registered in global var modules{}
-    // See: https://fecru.ai2.at/cru/EQJS-39#c187
-    //      https://equinox.atlassian.net/browse/EQ-355
-    callback();
-  });
 });

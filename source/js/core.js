@@ -43,7 +43,7 @@ define([
   'audio/earcons',
   'zoom/zoom-forms',
   'zoom/zoom',
-  'animate',
+  'util/animate',
 // 'bp/model/state',
 // 'bp/constants',
 // 'bp/helper',

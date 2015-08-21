@@ -14,7 +14,7 @@
 
 sitecues.def('mouse-highlight/judge', function(judge, callback) {
   'use strict';
-  sitecues.use('jquery', 'util/common', 'mouse-highlight/traitcache',
+  define('jquery', 'util/common', 'mouse-highlight/traitcache',
     function($, common, traitcache) {
 
     // ----------- PUBLIC  ----------------

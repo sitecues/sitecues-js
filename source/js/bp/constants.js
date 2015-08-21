@@ -1,6 +1,8 @@
-sitecues.def('bp/constants', function (constants, callback) {
+define([], function() {
 
   'use strict';
+
+  var constants = {};
 
   // TODO don't repeat this in styles.js
 
@@ -259,8 +261,5 @@ sitecues.def('bp/constants', function (constants, callback) {
   constants.SECONDARY_PANEL_DISABLED = 0;
   constants.SECONDARY_PANEL_ENABLED  = 1;
 
-  // Unless callback() is queued, the module is not registered in global constants.modules{}
-  // See: https://fecru.ai2.at/cru/EQJS-39#c187
-  //      https://equinox.atlassian.net/browse/EQ-355
-  callback();
+  return constants;
 });

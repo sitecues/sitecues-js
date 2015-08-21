@@ -47,261 +47,257 @@
  *    Parent: #scp-bp-container
  *    Accessibility: uses ARIA to describe controls
  */
-sitecues.def('bp/placement', function(placement, callback) {
+define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'bp/helper', 'util/platform'],
+  function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
   'use strict';
-  sitecues.use('bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'bp/helper', 'util/platform',
-    function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
 
-    var BADGE_PARENT = BP_CONST.BADGE_MODE,
-        HTML_PARENT  = BP_CONST.PANEL_MODE,
-        currentBPParent,
-        badgeElement,
-        badgeRect = {},
-        bpElement,
-        svgElement,
-        ratioOfSVGToVisibleBadgeSize,
+  var BADGE_PARENT = BP_CONST.BADGE_MODE,
+      HTML_PARENT  = BP_CONST.PANEL_MODE,
+      currentBPParent,
+      badgeElement,
+      badgeRect = {},
+      bpElement,
+      svgElement,
+      ratioOfSVGToVisibleBadgeSize,
 
-        // The width/height of the <SVG>
-        // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
-        // because of transparent space to the right/bottom of the visible BP
-        svgAspectRatio,
-        documentElement   = document.documentElement,
+      // The width/height of the <SVG>
+      // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
+      // because of transparent space to the right/bottom of the visible BP
+      svgAspectRatio,
+      documentElement   = document.documentElement,
 
-        SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
+      SHOULD_FIX_USE_ELEMENTS = platform.browser.isIE && platform.browser.version >= 11 && platform.os.majorVersion >= 10;
 
-    // Allow animations just before panel expands
-    function disableAnimations() {
-      svgElement.removeAttribute('class');
+  // Allow animations just before panel expands
+  function disableAnimations() {
+    svgElement.removeAttribute('class');
+  }
+
+  // Reparent panel container to badgeElement so that page badge grows and moves
+  // in-place inside the page where it is attached.
+  // Also, position and size the bpContainer and set height and width of the SVG
+  function switchToBadgeParent() {
+
+    // Remove transform/translate so that badge is fully returned to origin state
+    bpElement.style[platform.transformProperty] = '';
+
+    badgeElement.appendChild(bpElement);
+
+    SC_DEV && console.log('BP reparented as badge child');
+
+    currentBPParent = BADGE_PARENT;
+
+    repositionBPOverBadge();
+    fitSVGtoBadgeRect();
+  }
+
+  // Reparent panel container to <html> so that panel stays constant size and position during zooming/panning
+  function switchToHtmlParent() {
+
+    if (bpElement.parentElement === documentElement) {
+      return;
     }
 
-    // Reparent panel container to badgeElement so that page badge grows and moves
-    // in-place inside the page where it is attached.
-    // Also, position and size the bpContainer and set height and width of the SVG
-    function switchToBadgeParent() {
+    // HTML_PARENT
+    // Case 3. Insert outside body (as a child of <html>)
+    documentElement.insertBefore(bpElement, documentElement.childNodes[0]);
 
-      // Remove transform/translate so that badge is fully returned to origin state
-      bpElement.style[platform.transformProperty] = '';
+    SC_DEV && console.log('BP reparented as <html> child');
 
-      badgeElement.appendChild(bpElement);
+    currentBPParent = HTML_PARENT;
 
-      SC_DEV && console.log('BP reparented as badge child');
+    // The BP must be positioned over the #sitecues-badge
+    repositionBPOverBadge();
+    fitSVGtoBadgeRect();
+  }
 
-      currentBPParent = BADGE_PARENT;
+  // Spartan and IE11 on Windows 10 fix
+  // Once the BP is moved, these browsers are not re-recognizing the @xlink:href on <use> elements
+  // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
+  function fixUseElementsInIE() {
 
-      repositionBPOverBadge();
-      fitSVGtoBadgeRect();
-    }
+    if (SHOULD_FIX_USE_ELEMENTS) {
 
-    // Reparent panel container to <html> so that panel stays constant size and position during zooming/panning
-    function switchToHtmlParent() {
-
-      if (bpElement.parentElement === documentElement) {
-        return;
-      }
-
-      // HTML_PARENT
-      // Case 3. Insert outside body (as a child of <html>)
-      documentElement.insertBefore(bpElement, documentElement.childNodes[0]);
-
-      SC_DEV && console.log('BP reparented as <html> child');
-
-      currentBPParent = HTML_PARENT;
-
-      // The BP must be positioned over the #sitecues-badge
-      repositionBPOverBadge();
-      fitSVGtoBadgeRect();
-    }
-
-    // Spartan and IE11 on Windows 10 fix
-    // Once the BP is moved, these browsers are not re-recognizing the @xlink:href on <use> elements
-    // if they are moved. However, toggling a space in front of the attribute value fixes the issue.
-    function fixUseElementsInIE() {
-
-      if (SHOULD_FIX_USE_ELEMENTS) {
-
-        var useElements = svgElement.getElementsByTagName('use'),
-          numUseElements = useElements.length,
-          useIndex = 0,
-          useElement;
-        for (; useIndex < numUseElements; useIndex++) {
-          useElement = useElements[useIndex];
-          // Toggle space in front of href attribute to get
-          // IE to 'wake up' and understand it again
-          var href = useElement.getAttribute('xlink:href'),
-            newHref = href.charAt(0) === ' ' ? href.substr(1) : ' ' + href;
-          useElement.setAttribute('xlink:href', newHref);
-        }
+      var useElements = svgElement.getElementsByTagName('use'),
+        numUseElements = useElements.length,
+        useIndex = 0,
+        useElement;
+      for (; useIndex < numUseElements; useIndex++) {
+        useElement = useElements[useIndex];
+        // Toggle space in front of href attribute to get
+        // IE to 'wake up' and understand it again
+        var href = useElement.getAttribute('xlink:href'),
+          newHref = href.charAt(0) === ' ' ? href.substr(1) : ' ' + href;
+        useElement.setAttribute('xlink:href', newHref);
       }
     }
+  }
 
-    function getAppliedBPZoom() {
-      var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
-      return isBPInBody ? zoomMod.getCompletedZoom() : 1;
+  function getAppliedBPZoom() {
+    var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
+    return isBPInBody ? zoomMod.getCompletedZoom() : 1;
+  }
+
+  // Move the BP object so that the top, left sits exactly over the badge rectangle top, left
+  // This is only called when the BP is small (about to expand or finished collapsing)
+  function repositionBPOverBadge() {
+
+    function getPadding(property) {
+      return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
     }
 
-    // Move the BP object so that the top, left sits exactly over the badge rectangle top, left
-    // This is only called when the BP is small (about to expand or finished collapsing)
-    function repositionBPOverBadge() {
 
-      function getPadding(property) {
-        return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
-      }
-
-
-      // Used for setting the bpContainer left, top, width, and height
-      function setBPProperty(prop) {
-        bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
-      }
-
-      // Current badge rectangle in screen coordinates
-      var newBadgeRect   = helper.getRect(badgeElement),
-
-          // Get the amount of zoom being applied to the badge
-          appliedZoom = getAppliedBPZoom(),
-
-          // Adjust for padding
-          badgeComputedStyle = window.getComputedStyle(badgeElement),
-
-          paddingLeft = getPadding('Left'),
-          paddingTop  = getPadding('Top'),
-
-          isToolbarBadge = state.get('isToolbarBadge');
-
-
-      if (currentBPParent === BADGE_PARENT) {
-
-        // Not a toolbar badge and in body (inside of #sitecues-badge)
-        // It's already inside of the #sitecues-badge, which is in the right place on the page,
-        // and we only need transform translate to move it from there for padding and vertical offset.
-        // By being a child of #sitecues-badge, it will automatically be positioned within that.
-        newBadgeRect.left = 0;
-        newBadgeRect.top  = 0;
-
-      }
-
-      // Adjust for top whitespace in SVG badge (it's there because it turns into an outline on expansion)
-      if (!isToolbarBadge) {
-        newBadgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
-      }
-
-      badgeRect.left   = newBadgeRect.left + paddingLeft;
-      badgeRect.top    = newBadgeRect.top + paddingTop;
-
-      // A toolbar badge's size remains the same for the lifetime of the page, so we use the cached version of size in that case
-      if (!badgeRect.width || !isToolbarBadge) {
-        badgeRect.width = newBadgeRect.width - paddingLeft - getPadding('Right');
-        badgeRect.height = newBadgeRect.height - paddingTop - getPadding('Bottom');
-      }
-
-      // Set left and top for positioning.
-      ['width', 'height'].forEach(setBPProperty);
-
-      bpElement.style.top  = 0;
-      bpElement.style.left = 0;
-      bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
+    // Used for setting the bpContainer left, top, width, and height
+    function setBPProperty(prop) {
+      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
     }
 
-    // This makes the collapsed svg large enough so that even with
-    // all the whitespace it stretches to cover the badge
-    // So it should be the actual svg width / badge width
-    function fitSVGtoBadgeRect() {
+    // Current badge rectangle in screen coordinates
+    var newBadgeRect   = helper.getRect(badgeElement),
 
-      var svgStyle  = svgElement.style,
-          svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
-          svgHeight = svgWidth / svgAspectRatio;
+        // Get the amount of zoom being applied to the badge
+        appliedZoom = getAppliedBPZoom(),
 
-      svgStyle.width  = svgWidth  + 'px';
-      svgStyle.height = svgHeight + 'px';
+        // Adjust for padding
+        badgeComputedStyle = window.getComputedStyle(badgeElement),
 
-      // Do not animate the adjustment of the SVG to fit the size of the badge
-      // We only animate large-scale size changes (badge->panel or panel->badge)
-      disableAnimations();
+        paddingLeft = getPadding('Left'),
+        paddingTop  = getPadding('Top'),
 
-      // Oh, IE (Edge, we know you're still really IE).
-      fixUseElementsInIE();
+        isToolbarBadge = state.get('isToolbarBadge');
+
+
+    if (currentBPParent === BADGE_PARENT) {
+
+      // Not a toolbar badge and in body (inside of #sitecues-badge)
+      // It's already inside of the #sitecues-badge, which is in the right place on the page,
+      // and we only need transform translate to move it from there for padding and vertical offset.
+      // By being a child of #sitecues-badge, it will automatically be positioned within that.
+      newBadgeRect.left = 0;
+      newBadgeRect.top  = 0;
+
     }
 
-    // This is the ratio of the height allotted by the badge to the visible height.
-    // It is what we need to multiply the SVG height by to get the final desired height.
-    function getSVGScale (badgeRect) {
-
-      // First get the height for the third wave in the speech button, useful for measurements
-      // It is the tallest and rightmost element
-      if (!ratioOfSVGToVisibleBadgeSize) { // Computed lazily and only once
-
-        var svgStyle         = svgElement.style,
-            badgeRectWidth   = badgeRect.width;
-
-        // Set default height and width, because this normalizes cross browser inconsistencies
-        // for SVG sizing.  Basically, if no height or width are set explicitly, then the viewBox
-        // attribute effects the values of the boundingClient height and width of the SVG in Chrome,
-        // but not IE.  Therefore, setting these values allows getSVGScale() to return the proper
-        // values no matter the browser.
-        svgStyle.width  = badgeRectWidth + 'px';
-        svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
-
-        ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
-
-        state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
-      }
-
-      return ratioOfSVGToVisibleBadgeSize;
+    // Adjust for top whitespace in SVG badge (it's there because it turns into an outline on expansion)
+    if (!isToolbarBadge) {
+      newBadgeRect.top -= BP_CONST.BADGE_VERTICAL_OFFSET;
     }
 
-    function addClipRectStyleFix () {
+    badgeRect.left   = newBadgeRect.left + paddingLeft;
+    badgeRect.top    = newBadgeRect.top + paddingTop;
 
-      var badgeRect    = helper.getRect(badgeElement),
-
-          // A magic number to fix SC-2759.  Underlying issue is probably
-          // rectangle calculations are a bit off...
-          // TODO: Figure out why we are using magic numbers
-          EXTRA_PIXELS_HEIGHT = 5,
-          EXTRA_PIXELS_WIDTH  = 10;
-
-      bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
+    // A toolbar badge's size remains the same for the lifetime of the page, so we use the cached version of size in that case
+    if (!badgeRect.width || !isToolbarBadge) {
+      badgeRect.width = newBadgeRect.width - paddingLeft - getPadding('Right');
+      badgeRect.height = newBadgeRect.height - paddingTop - getPadding('Bottom');
     }
 
-    /**
-     * [init initializes the placement of the bpElement, svgElement, and badgeElement]
-     * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
-     * @param  {[DOM element]} bpContainer [SVG container <div> with ID 'scp-bp-container']
-     * @param  {[DOM element]} svg         [SVG with ID 'scp-svg']
-     */
-    placement.init = function(badge, bpContainer, svg) {
+    // Set left and top for positioning.
+    ['width', 'height'].forEach(setBPProperty);
 
-      // Compute the aspect ratio (the width:height ratio required for the <svg>)
-      var viewBoxRect = svg.viewBox.baseVal;
+    bpElement.style.top  = 0;
+    bpElement.style.left = 0;
+    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
+  }
 
-      // Set module scoped variables.
-      badgeElement = badge;
-      bpElement    = bpContainer;
-      svgElement   = svg;
+  // This makes the collapsed svg large enough so that even with
+  // all the whitespace it stretches to cover the badge
+  // So it should be the actual svg width / badge width
+  function fitSVGtoBadgeRect() {
 
-      svgAspectRatio = viewBoxRect.width / viewBoxRect.height;
+    var svgStyle  = svgElement.style,
+        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
+        svgHeight = svgWidth / svgAspectRatio;
 
-      // Initially, BP must always be contained by #sitecues-badge
-      switchToBadgeParent();
+    svgStyle.width  = svgWidth  + 'px';
+    svgStyle.height = svgHeight + 'px';
 
-      // For some reason, without this fix elements around the badge
-      // do not get mouse events because the sizing of something is off.
-      // See SC-2759.
-      addClipRectStyleFix();
+    // Do not animate the adjustment of the SVG to fit the size of the badge
+    // We only animate large-scale size changes (badge->panel or panel->badge)
+    disableAnimations();
 
-      // Listen for change events for page badges
-      if (state.get('isPageBadge')) {
+    // Oh, IE (Edge, we know you're still really IE).
+    fixUseElementsInIE();
+  }
 
-        // Page badges must switch back and forth dynamically
-        sitecues.on('bp/will-expand', switchToHtmlParent);
-        sitecues.on('bp/did-shrink', switchToBadgeParent);
-      }
-      else {
-        window.addEventListener('resize', repositionBPOverBadge);
-      }
+  // This is the ratio of the height allotted by the badge to the visible height.
+  // It is what we need to multiply the SVG height by to get the final desired height.
+  function getSVGScale (badgeRect) {
 
-    };
+    // First get the height for the third wave in the speech button, useful for measurements
+    // It is the tallest and rightmost element
+    if (!ratioOfSVGToVisibleBadgeSize) { // Computed lazily and only once
 
-  });
+      var svgStyle         = svgElement.style,
+          badgeRectWidth   = badgeRect.width;
 
-  callback();
+      // Set default height and width, because this normalizes cross browser inconsistencies
+      // for SVG sizing.  Basically, if no height or width are set explicitly, then the viewBox
+      // attribute effects the values of the boundingClient height and width of the SVG in Chrome,
+      // but not IE.  Therefore, setting these values allows getSVGScale() to return the proper
+      // values no matter the browser.
+      svgStyle.width  = badgeRectWidth + 'px';
+      svgStyle.height = badgeRectWidth / svgAspectRatio + 'px';
+
+      ratioOfSVGToVisibleBadgeSize = badgeRect.height / helper.getRectById(BP_CONST.WAVE_3_ID).height;
+
+      state.set('ratioOfSVGToVisibleBadgeSize', ratioOfSVGToVisibleBadgeSize);
+    }
+
+    return ratioOfSVGToVisibleBadgeSize;
+  }
+
+  function addClipRectStyleFix () {
+
+    var badgeRect    = helper.getRect(badgeElement),
+
+        // A magic number to fix SC-2759.  Underlying issue is probably
+        // rectangle calculations are a bit off...
+        // TODO: Figure out why we are using magic numbers
+        EXTRA_PIXELS_HEIGHT = 5,
+        EXTRA_PIXELS_WIDTH  = 10;
+
+    bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
+  }
+
+  /**
+   * [init initializes the placement of the bpElement, svgElement, and badgeElement]
+   * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
+   * @param  {[DOM element]} bpContainer [SVG container <div> with ID 'scp-bp-container']
+   * @param  {[DOM element]} svg         [SVG with ID 'scp-svg']
+   */
+  placement.init = function(badge, bpContainer, svg) {
+
+    // Compute the aspect ratio (the width:height ratio required for the <svg>)
+    var viewBoxRect = svg.viewBox.baseVal;
+
+    // Set module scoped variables.
+    badgeElement = badge;
+    bpElement    = bpContainer;
+    svgElement   = svg;
+
+    svgAspectRatio = viewBoxRect.width / viewBoxRect.height;
+
+    // Initially, BP must always be contained by #sitecues-badge
+    switchToBadgeParent();
+
+    // For some reason, without this fix elements around the badge
+    // do not get mouse events because the sizing of something is off.
+    // See SC-2759.
+    addClipRectStyleFix();
+
+    // Listen for change events for page badges
+    if (state.get('isPageBadge')) {
+
+      // Page badges must switch back and forth dynamically
+      sitecues.on('bp/will-expand', switchToHtmlParent);
+      sitecues.on('bp/did-shrink', switchToBadgeParent);
+    }
+    else {
+      window.addEventListener('resize', repositionBPOverBadge);
+    }
+
+  };
 
 });
+
