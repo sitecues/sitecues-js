@@ -67,7 +67,7 @@ define([], function() {
     var numRects = rects.length,
       index = 0;
     for (; index < numRects; index ++ ) {
-      rects[index] = geo.expandOrContractRect(rects[index], delta);
+      rects[index] = expandOrContractRect(rects[index], delta);
     }
   }
 
