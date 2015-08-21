@@ -20,6 +20,7 @@
 // TODO load only the language we need from source/js/locale/lang/*.js
 // TODO clean up platform.js, helper.js
 // TODO remove sitecues.emit('foo/do-bar') pattern and use APIs, document APIs
+// TODO Only set thigns on sitecues object in core.js exportPublicFields()
 
 define([
   'jquery',
@@ -95,8 +96,8 @@ define([
 // 'theme/color-choices',
 // 'theme/img-classifier',
 // 'theme/color-engine',
-// 'info/info',
-// 'util/status',
+'info/info',
+'util/status',
 // 'metrics/util',
 // 'metrics/page-visited',
 // 'metrics/panel-closed',
@@ -180,8 +181,8 @@ define([
 //  theme_color_choices,
 //  theme_img_classifier,
 //  theme_color_engine,
-//  info_info,
-//  util_status,
+  info_info,
+  util_status,
 //  metrics_util,
 //  metrics_page_visited,
 //  metrics_panel_closed,
@@ -243,6 +244,7 @@ define([
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
     sitecues.parseUrl = parseUrl;
     sitecues.resolveUrl = resolveUrl;
+    sitecues.status = status;
   }
 
 
@@ -609,5 +611,4 @@ define([
 
   // Trigger initialization.
   initialize();
-
 });
