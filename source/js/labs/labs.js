@@ -13,9 +13,9 @@ define(['conf/user/manager', 'jquery'], function(conf, $) {
 
   var labSettings = $.extend({}, conf.get('labs'));
 
-  labs.isEnabled = function(labName) {
+  function isEnabled(labName) {
     return labSettings[labName];
-  };
+  }
 
   sitecues.on('labs/get', function(labInfo) {
     $.extend(labInfo, labSettings);
@@ -25,5 +25,12 @@ define(['conf/user/manager', 'jquery'], function(conf, $) {
     labSettings = $.extend({}, labInfo);
     conf.set('labs', labSettings);
   });
+  var publics = {
+    isEnabled: isEnabled
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

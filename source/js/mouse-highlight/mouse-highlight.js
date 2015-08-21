@@ -1189,22 +1189,22 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     pickFromMouseAfterDelay(event);
   }
 
- function updateDebugRect() {
-   $('#sc-debug-mh-rect').remove();
-   if (!state.isCreated) {
-     return;
-   }
-   $('<sc id="sc-debug-mh-rect">')
-     .appendTo(document.documentElement)
-     .css({
-       top: state.fixedContentRect.top + 'px',
-       left: state.fixedContentRect.left + 'px',
-       width: state.fixedContentRect.width + 'px',
-       height: state.fixedContentRect.height + 'px',
-       position: 'fixed',
-       pointerEvents: 'none',
-       outline: '2px solid rgba(150,0,0,.5)'
-     });
+  function updateDebugRect() {
+    $('#sc-debug-mh-rect').remove();
+    if (!state.isCreated) {
+      return;
+    }
+    $('<sc id="sc-debug-mh-rect">')
+      .appendTo(document.documentElement)
+      .css({
+        top: state.fixedContentRect.top + 'px',
+        left: state.fixedContentRect.left + 'px',
+        width: state.fixedContentRect.width + 'px',
+        height: state.fixedContentRect.height + 'px',
+        position: 'fixed',
+        pointerEvents: 'none',
+        outline: '2px solid rgba(150,0,0,.5)'
+      });
  }
 
   // We run the picker if the mouse position hasn't changed for a while, meaning
@@ -1564,7 +1564,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   }
 
   // Return all of the highlight information provided in the |state| variable
-  mh.getHighlight = function() {
+  function getHighlight() {
     return state;
   };
 
@@ -1627,7 +1627,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       return isHighlightRectDebuggingOn;
     };
 
-    sitecues.getHighlight = mh.getHighlight;
+    sitecues.getHighlight = getHighlight;
   }
 
   /**
@@ -1637,7 +1637,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
    *                       if falsey will just highlight seed exactly
    * @param doKeepHidden -- if truthy will compute highlight but now display it
    */
-  mh.highlight = function(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
+  function highlight(seed, doUsePicker, doSuppressVoting, doKeepHidden) {
 
     hide();  // calling with no arguments will remove the highlight
     if (seed) {
@@ -1656,5 +1656,13 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
       }
     }
   };
+  var publics = {
+    getHighlight: getHighlight,
+    highlight: highlight
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

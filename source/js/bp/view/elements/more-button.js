@@ -150,5 +150,5 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio
 
   // Always hide the more button when the panel is about to collapse.
   sitecues.on('bp/will-shrink', hideHelpButton);
-
-  });
+  // no publics
+});

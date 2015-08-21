@@ -28,9 +28,9 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
       BP_CONST.DEMO_LENS_SPACE
     ];
 
-  tips.getGeometryTargets = function(cssValues) {
+  function getGeometryTargets(cssValues) {
     return cssValues;
-  };
+  }
 
   function cardActivated(id) {
     // Clear existing tips animations
@@ -135,4 +135,12 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
   }
 
   sitecues.on('bp/did-show-card', cardActivated);
+  var publics = {
+    getGeometryTargets: getGeometryTargets
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

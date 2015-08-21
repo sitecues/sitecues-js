@@ -3,14 +3,14 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (m
   'use strict';
 
   var DEFAULT_STATE = {
-    "name": "zoom-changed",
-    "is_slider_click": 0,                // Slider in panel
-    "is_slider_drag": 0,                 // True if the user drags the slider (as opposed to clicking in it)
-    "is_key": 0,                         // + or - key (or with modifier)
-    "is_browser_zoom_key_override": 0,   // User is pressing the browser's zoom key command -
-    "is_button_press": 0,                // Small or large A in panel
-    "is_long_glide": 0,                  // Key or A button held down to glide extra        -
-    "from_zoom": 1                       // Old zoom value
+    'name': 'zoom-changed',
+    'is_slider_click': 0,                // Slider in panel
+    'is_slider_drag': 0,                 // True if the user drags the slider (as opposed to clicking in it)
+    'is_key': 0,                         // + or - key (or with modifier)
+    'is_browser_zoom_key_override': 0,   // User is pressing the browser's zoom key command -
+    'is_button_press': 0,                // Small or large A in panel
+    'is_long_glide': 0,                  // Key or A button held down to glide extra        -
+    'from_zoom': 1                       // Old zoom value
   };
 
   // ============= Objects methods ======================
@@ -50,11 +50,11 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (m
 
   function sliderMouseDown() {
     setDataPropertyValue('is_slider_click', 1);
-  };
+  }
 
   function buttonsMouseDown() {
     setDataPropertyValue('is_button_press', 1);
-  };
+  }
 
   function anyKeyDown(event) {
     // Handle keypress events(for ex., +/-)
@@ -68,14 +68,14 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (m
         // + is a simple way to convert boolean to a number: true becomes 1 and false is 0. I'll add a comment to it.
         setDataPropertyValue('is_browser_zoom_key_override', +(event.ctrlKey || event.metaKey));
       }
-    };
+    }
   }
 
   function readyForMetrics() {
     return !zoom.getIsInitialZoom();
   }
 
-  function run(zoom) {
+  function run() {
     if (readyForMetrics()) {
       // Create an instance on zoom changed event and add event listeners.
       zoomChanged.init();
@@ -95,7 +95,7 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (m
     sitecues.on('zoom/begin', function() {
       // Update the initial zoom value('from_zoom')
       setDataPropertyValue('from_zoom', conf.get('zoom'));
-    })
+    });
 
     // Is it a long glide?
     sitecues.on('zoom/long-glide', function () {
@@ -120,7 +120,7 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (m
 
   // Update data from the other modules.
   sitecues.on('metrics/update', function(metrics) {
-    zoomChanged['data'] && zoomChanged.update(metrics.data);
+    zoomChanged.data && zoomChanged.update(metrics.data);
   });
-
+  // no publics
 });

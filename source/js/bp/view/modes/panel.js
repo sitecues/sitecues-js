@@ -6,8 +6,8 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
    *** Getters ***
    */
 
-  // These classes add styles based on the current state of the panel.
-  panel.getViewClasses = function() {
+  // These classes add styles based on the current state of the
+  function getViewClasses() {
 
     var classBuilder = '';  // Allow animations for growing or shrinking panel
 
@@ -63,5 +63,12 @@ define(['bp/bp', 'bp/constants', 'bp/model/state'], function(bp, BP_CONST, state
 
     return className;
   }
+  var publics = {
+    getViewClasses: getViewClasses
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

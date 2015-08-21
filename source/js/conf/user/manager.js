@@ -57,7 +57,7 @@ define([], function () {
 		// about new value
     list = listeners[key];
 		if (list) {
-      for(i=0, l=list.length; i<l; i++) {
+      for (i = 0, l = list.length; i < l; i++) {
 				list[i](value);
       }
     }
@@ -65,7 +65,7 @@ define([], function () {
 		// notify each update listeners about changes
     list = listeners['*'];
 		if (list) {
-      for (i=0, l=list.length; i<l; i++) {
+      for (i=0, l = list.length; i < l; i++) {
 				list[i](key, value);
       }
     }

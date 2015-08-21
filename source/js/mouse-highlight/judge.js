@@ -23,7 +23,7 @@ define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
   // The judgements, traits and nodes all correlate, such that index 0 of each array
   // stores information for the first candidate node, index 1 is the parent, etc.
   // When the node is unusable, judgements is set to null, rather than wasting cycles calculating the judgements.
-  judge.getJudgementStack = function (traitStack, nodeStack) {
+  function getJudgementStack(traitStack, nodeStack) {
     var firstNonInlineTraits = getTraitsOfFirstNonInlineCandidate(traitStack),
       childJudgements = null,
       childTraits = traitStack[0],  // For simplicity of calculations, not allowed to be null
@@ -42,16 +42,16 @@ define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
     }
 
     return traitStack.map(mapJudgements);
-  };
+  }
 
   // This is a hook for customization scripts, which can add their own judgements by overriding this method.
   // Pass in as { judgementName: fn(), judgementName2: fn2(), etc. }
   // Parameters to judgement functions are:
   //   judgements, traits, belowTraits, belowJudgements, parentTraits, firstNonInlineTraits, node, index
   // For each judgement, a weight of the same name must exist.
-  judge.provideCustomJudgements = function(judgements) {
+  function provideCustomJudgements(judgements) {
     customJudgements = judgements;
-  };
+  }
 
   // ------------ PRIVATE -------------
 
@@ -459,8 +459,8 @@ define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
       }
 
       // Do almost all of the siblings have the same tag name?
+      numSiblings = $parent.children().length;
       var $parent = $(node).parent(),
-        numSiblings = $parent.children().length,
         numSiblingsSameTag = $parent.children(traits.tag).length,
         numSiblingsOtherTagAllowed = Math.min(2, Math.floor(numSiblingsSameTag * 0.33));
       if (numSiblingsSameTag < numSiblings - numSiblingsOtherTagAllowed) {
@@ -661,11 +661,6 @@ define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
     return leaves.length === 1 && common.isVisualMedia(leaves[0]);
   }
 
-  function getLastLeaf(container) {
-    var lastElementChild = container;
-    return lastElementChild ? getLastLeaf(lastElementChild) : container;
-  }
-
   function getLeafElements(node) {
     return $(node).find('*').filter(function() {
       return this.childElementCount === 0;
@@ -833,5 +828,13 @@ define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
     }
     return traitStack[0];
   }
+  var publics = {
+    getJudgementStack: getJudgementStack,
+    provideCustomJudgements: provideCustomJudgements
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

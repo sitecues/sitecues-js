@@ -25,7 +25,7 @@ define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platf
    * [transitionInHLB animates the inflation of the HLB and background dimmer]
    * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
    */
-  hlbAnimation.transitionInHLB = function (doShowQuickly, data) {
+  function transitionInHLB(doShowQuickly, data) {
 
     // Dim the background!
     dimmer.dimBackgroundContent(INFLATION_SPEED, data.$hlb.parent());
@@ -56,7 +56,7 @@ define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platf
    * [transitionOutHLB animates and removes the HLB and background dimmer]
    * @param  {[Object]} data [The information passed by the HLB module to perform the animation]
    */
-  hlbAnimation.transitionOutHLB = function (data) {
+  function transitionOutHLB(data) {
 
     var $hlb = data.$hlb;
 
@@ -261,5 +261,13 @@ define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platf
     };
 
   }
+  var publics = {
+    transitionInHLB: transitionInHLB,
+    transitionOutHLB: transitionOutHLB
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

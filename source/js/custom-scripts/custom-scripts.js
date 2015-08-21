@@ -8,16 +8,16 @@ sitecues.def('custom', function (custom, callback) {
 
   var customIndex = 0;
 
-  custom.registry = {};
+ registry = {};
   
-  custom.register = function (moduleName, script) {
+  function register(moduleName, script) {
 
     // Create a object for the module you want to customize if it does not exist
     if (!custom.registry[moduleName]) {
-      custom.registry[moduleName] = {};
+     registry[moduleName] = {};
     }
 
-    var registryEntry = custom.registry[moduleName][customIndex] = {};
+    var registryEntry = registry[moduleName][customIndex] = {};
 
     customIndex++;
 
@@ -27,11 +27,11 @@ sitecues.def('custom', function (custom, callback) {
   };
 
   // Checks if there are fixes for a module,and executes their fix functions with the module's scope
-  custom.check = function (moduleName) {
-    // The scope of 'this' with the custom.check function is the module being passed via call()
+  function check(moduleName) {
+    // The scope of 'this' with thecheck function is the module being passed via call()
     // from the callback in core.js's _def function
 
-    var module = custom.registry[moduleName];
+    var module = registry[moduleName];
 
     if (module) {
       for (var customIndex in module) {
@@ -41,7 +41,13 @@ sitecues.def('custom', function (custom, callback) {
 
   };
 
-  // Done.
-  callback();
+  var publics = {
+    register: register,
+    check: check
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

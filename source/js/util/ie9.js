@@ -93,4 +93,3 @@ define(['jquery'], function($) {
     init: init
   };
 });
-

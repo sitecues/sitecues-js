@@ -70,9 +70,9 @@ define([], function() {
     return getFullWebsiteLang();
   }
 
-  locale.getDocumentLang = function() {
-    return locale.getElementLang(document.body);
-  };
+  function getDocumentLang() {
+    return getElementLang(document.body);
+  }
 
   /**
    * Represents browser language.
@@ -160,11 +160,11 @@ define([], function() {
     // use ajax for polish
     require([ LANG_FOLDER + getLanguageModuleName(lang) ], function(langModule) {
       if (langModule) {
-        translations = langModule.dictionary;
+        translations = langModule;
       }
       else {
         require([ LANG_FOLDER + getLanguageModuleName(DEFAULT_LANG) ], function(defaultLangModule) {
-          translations = defaultLangModule.dictionary;
+          translations = defaultLangModule;
         });
       }
     });
@@ -177,6 +177,7 @@ define([], function() {
     getShortWebsiteLang: getShortWebsiteLang,
     getFullWebsiteLang: getFullWebsiteLang,
     getElementLang: getElementLang,
+    getDocumentLang: getDocumentLang,
     getBrowserLangStringName: getBrowserLangStringName,
     translate: translate,
     localizeStrings: localizeStrings,

@@ -2,13 +2,10 @@
 Temporary file for German wording.
 todo: remove it when we use API.
  */
-sitecues.def('locale/de', function(locale_de, callback) {
+define(['locale/pl'], function() {
   'use strict';
 
-  // All
-  // - lower case
-  // - use underscore to concatenate words
-  locale_de.dictionary = {
+  return {
     // ARIA labels
     // - Main
     'sitecues_main_panel': 'sitecues dialog',
@@ -47,7 +44,4 @@ sitecues.def('locale/de', function(locale_de, callback) {
     // - About
     'zoom_and_speech': '-'
   };
-
-  callback();
-
 });

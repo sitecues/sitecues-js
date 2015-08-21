@@ -33,7 +33,7 @@ define([], function() {
    * @param propName String
    * @returns {*}
    */
-  state.get = function(propName) {
+  function get(propName) {
     if (data.hasOwnProperty(propName)) {
       return data[propName];
     }
@@ -45,7 +45,7 @@ define([], function() {
    * @param propName String
    * @param propValue String or Number
    */
-  state.set = function(propName, propValue) {
+  function set(propName, propValue) {
     if (data.hasOwnProperty(propName)) {
       data[propName] = propValue;
     } else {
@@ -56,27 +56,27 @@ define([], function() {
   /*
   Some of the most popular getters are listed below.
    */
-  state.isPanel = function() {
+  function isPanel() {
     return data.currentMode === 1;
   };
 
-  state.isBadge = function() {
+  function isBadge() {
     return data.currentMode === 0;
   };
 
-  state.isPanelRequested = function() {
+  function isPanelRequested() {
     return data.transitionTo === 1;
   };
 
-  state.isExpanding = function () {
+  function isExpanding() {
     return data.transitionTo === 1 && data.currentMode !== 1;
   };
 
-  state.isSecondaryPanelRequested = function() {
+  function isSecondaryPanelRequested() {
     return data.secondaryPanelTransitionTo === 1;
   };
 
-  state.isShrinking = function() {
+  function isShrinking() {
     return data.transitionTo === 0 && data.currentMode !== 0;
   };
 
@@ -84,15 +84,31 @@ define([], function() {
    * Returns 'button-menu' or name of secondary panel
    * @returns {string}
    */
-  state.getSecondaryPanelName = function () {
+  function getSecondaryPanelName() {
     return data.secondaryPanelName;
   };
 
-  state.getPanelName = function () {
-    if (state.isPanel() && state.isSecondaryPanelRequested()) {
+  function getPanelName() {
+    if (state.isPanel() && isSecondaryPanelRequested()) {
       return data.secondaryPanelName;
     }
     return 'main';
   };
+  var publics = {
+    get: get,
+    set: set,
+    isPanel: isPanel,
+    isBadge: isBadge,
+    isPanelRequested: isPanelRequested,
+    isExpanding: isExpanding,
+    isSecondaryPanelRequested: isSecondaryPanelRequested,
+    isShrinking: isShrinking,
+    getSecondaryPanelName: getSecondaryPanelName,
+    getPanelName: getPanelName
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

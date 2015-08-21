@@ -37,4 +37,5 @@ define(['metrics/util', 'zoom/zoom'], function(metricsUtil, zoom) {
     //  We already sent the metrics for this event, no need to keep the intance.
     pageVisited.clear();
   });
+  // no publics
 });

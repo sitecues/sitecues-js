@@ -694,7 +694,7 @@ define([
   //////////////////////////////////
 
   // Return the current DOM element for the HLB or falsey value if there is no HLB
-  hlb.getElement = function() {
+  function getElement() {
     return $hlb && $hlb[0];
   };
 
@@ -720,5 +720,12 @@ define([
       return loggingEnabled;
     };
   }
+  var publics = {
+    getElement: getElement
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

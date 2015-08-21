@@ -54,19 +54,19 @@ define(['metrics/util', 'jquery'], function(metricsUtil, $) {
       panelClosed.data.tts_clicked = 1;
     });
     return false;
-  };
+  }
 
   // ============= Events Handlers ======================
   // Create an instance on panel show event.
   sitecues.on('bp/will-expand', function() {
-    if (!panelClosed['data']) {
+    if (!panelClosed.data) {
       panelClosed.init();
     }
     sitecues.emit('metrics/panel-closed/create');
   });
 
   sitecues.on('metrics/update', function(metrics) {
-    panelClosed['data'] && panelClosed.update(metrics.data);
+    panelClosed.data && panelClosed.update(metrics.data);
   });
 
   // Clear an instance data on panel hide event.
@@ -74,5 +74,5 @@ define(['metrics/util', 'jquery'], function(metricsUtil, $) {
     panelClosed.send();
     panelClosed.reset();
   });
-
+  // no publics
 });

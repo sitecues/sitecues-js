@@ -28,7 +28,7 @@ define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, comm
   /**
    * [releaseWheelEvents disables the capturing of wheel events.  This is called once the HLB is closed.]
    */
-  eventHandlers.releaseWheelEvents = function () {
+  function releaseWheelEvents() {
 
     window.removeEventListener(wheelEventName, wheelEventCallback);
 
@@ -40,7 +40,7 @@ define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, comm
    * [captureWheelEvents captures wheel events while the HLB is open. ]
    * @param  {[jQuery Element]} $hlb [The HLB element]
    */
-  eventHandlers.captureWheelEvents = function ($hlb) {
+  function captureWheelEvents($hlb) {
 
     if (isCapturing) {
       return; // Already capturing
@@ -146,5 +146,13 @@ define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, comm
     window.addEventListener(wheelEventName, wheelEventCallback);
 
   };
+  var publics = {
+    releaseWheelEvents: releaseWheelEvents,
+    captureWheelEvents: captureWheelEvents
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

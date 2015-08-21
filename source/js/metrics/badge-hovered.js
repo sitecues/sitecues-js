@@ -27,7 +27,7 @@ define(['metrics/util'], function (metricsUtil) {
   // ============= Events Handlers ======================
   // Create an instance on panel show event.
   sitecues.on('bp/will-expand', function() {
-    if (!badgeHovered['data']) {
+    if (!badgeHovered.data) {
       badgeHovered.init();
     }
     sitecues.emit('metrics/badge-hovered/create');
@@ -35,7 +35,7 @@ define(['metrics/util'], function (metricsUtil) {
   });
 
   sitecues.on('metrics/ready metrics/update', function(metrics) {
-    badgeHovered['data'] && badgeHovered.update(metrics.data);
+    badgeHovered.data && badgeHovered.update(metrics.data);
   });
 
   // Clear an instance data on panel hide event.
@@ -43,6 +43,5 @@ define(['metrics/util'], function (metricsUtil) {
     badgeHovered.reset();
   });
 
-  // Done.
-  callback();
+  // no publics
 });

@@ -678,4 +678,5 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (he
       createStyleSheet(BP_CONST.BASE_STYLESHEET_ID, BASE_CSS);
     };
   }
+  // no publics
 });

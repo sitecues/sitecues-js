@@ -66,7 +66,7 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
    * Basic structure of badge:
    * TODO: Need to update this
    * Create a new badge element outside of the body to use it for panel state.
-     This occurs when the page did not supply a #sitecues-badge page badge.
+     This occurs when the page did not supply a #sitecues-badge page
      Create and insert a new one as a sibling to body for later usage.
    * <span #sitecues-badge>
    *    <svg>
@@ -225,8 +225,8 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
 
   }
 
-  function getBadgePalette(badge) {
-    var paletteName = badge.localName === 'img' ? badge.src : site.get('palette') || '',
+  function getBadgePalette(badgeElem) {
+    var paletteName = badgeElem.localName === 'img' ? badgeElem.src : site.get('palette') || '',
       fullNames = Object.keys(BP_CONST.PALETTE_NAME_MAP),
       index = 0;
 
@@ -267,7 +267,7 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
 
    * @returns {Object|Element}
    */
-  badge.init = function() {
+  function init() {
 
     var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 
@@ -314,7 +314,7 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
     }
   }
 
-  badge.getViewClasses = function() {
+  function getViewClasses() {
 
     var classBuilder = BP_CONST.WANT_BADGE;
 
@@ -334,5 +334,13 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
 
     return classBuilder;
   };
+  var publics = {
+    init: init,
+    getViewClasses: getViewClasses
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

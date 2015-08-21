@@ -103,7 +103,7 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
     }
   }
 
-  feedback.getGeometryTargets = function(cssValues) {
+  function getGeometryTargets(cssValues) {
 
     cssValues[true].menuBtnTranslateX = 674; // The feedback icon goes to the top right
     return cssValues;
@@ -112,5 +112,12 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
   sitecues.on('bp/did-expand', autoSizeTextarea);
 
   sitecues.on('bp/did-change', onPanelUpdate);
+  var publics = {
+    getGeometryTargets: getGeometryTargets
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

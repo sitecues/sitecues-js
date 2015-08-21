@@ -3,10 +3,10 @@
  todo: remove it when we use API.
  todo: we need to check the translations
  */
-sitecues.def('locale/pl', function(locale_pl, callback) {
+define(['locale/pl'], function() {
   'use strict';
 
-  locale_pl.dictionary = {
+  return {
     // ARIA labels
     // - Main
     'sitecues_main_panel': 'główny panel sitecues',
@@ -45,7 +45,4 @@ sitecues.def('locale/pl', function(locale_pl, callback) {
     // - About
     'zoom_and_speech': '-'
   };
-
-  callback();
-
 });

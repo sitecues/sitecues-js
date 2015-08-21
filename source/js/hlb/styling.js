@@ -13,13 +13,13 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
   //////////////////////////
 
   // All HLB instances will use these default padding and border values.
-  hlbStyling.defaultPadding = 4;
-  hlbStyling.defaultBorder  = 3;
+  var defaultPadding = 4;
+  var defaultBorder  = 3;
 
   // Transition property used for hlb animation (-webkit, -moz)
   // This is used to transition the transform property for HLB
   // inflation/deflation animation
-  hlbStyling.transitionProperty = platform.cssPrefix + 'transform ';
+  var transitionProperty = platform.cssPrefix + 'transform ';
 
   ///////////////////////////
   // PRIVATE VARIABLES
@@ -79,8 +79,8 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
       defaultHLBStyles  = {
         'position'         : 'absolute',   // Doesn't interfere with document flow
         'zIndex'           : HLB_Z_INDEX,  // Max z-index for HLB overlay
-        'border'           : hlbStyling.defaultBorder + 'px solid black',
-        'padding'          : hlbStyling.defaultPadding,
+        'border'           : defaultBorder + 'px solid black',
+        'padding'          : defaultPadding,
         'margin'           : 0,            // Margin isn't necessary and only adds complexity
         'border-radius'    : '4px',        // Aesthetic purposes
         'box-sizing'       : 'content-box', // Default value.  If we do not force this property, then our positioning algorithm must be dynamic...
@@ -396,7 +396,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    */
   function getHLBLeftPadding ($foundation, computedStyle) {
 
-    return hlbStyling.defaultPadding + getBulletWidth($foundation, computedStyle);
+    return defaultPadding + getBulletWidth($foundation, computedStyle);
 
   }
 
@@ -504,7 +504,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    */
   function initializeHLBElementStyles ($foundation, $hlb) {
 
-    $hlb[0].style.cssText = hlbStyling.getComputedStyleCssText($foundation[0]);
+    $hlb[0].style.cssText = getComputedStyleCssText($foundation[0]);
 
   }
 
@@ -546,7 +546,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
       foundationDescendantStyle = getComputedStyle(foundationDescendant);
 
       // Copy the original elements child styles to the HLB elements child.
-      hlbDescendant.style.cssText = hlbStyling.getComputedStyleCssText(foundationDescendant);
+      hlbDescendant.style.cssText = getComputedStyleCssText(foundationDescendant);
 
       if (shouldRemovePadding($foundationDescendant, initialHLBRect)) {
         $hlbDescendant.css(getChildPadding($foundationDescendant, initialHLBRect));
@@ -633,7 +633,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    * @param {[jQuery element]} $hlb [The HLB element]
    * NOTE: This function was created to fix a bug found on TexasAT home page navigation (Home, Sitemap, Contact Us)
    */
-  hlbStyling.setHLBChildTextColor = function ($hlb) {
+  function setHLBChildTextColor($hlb) {
 
     var children;
 
@@ -695,7 +695,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    * @param {[DOM element]} $foundation [the original element]
    * @return {[Object]} [CSS style object to be used by jQuery.css()]
    */
-  hlbStyling.getHLBStyles = function ($picked, $foundation) {
+  function getHLBStyles($picked, $foundation) {
 
     var originalElement       = $foundation[0],
         originalElementOffset = $foundation.offset(),
@@ -720,7 +720,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
 
     // A black HLB background should use a white border
     if (isBlack(calculatedHLBStyles.backgroundColor)) {
-      calculatedHLBStyles.border = hlbStyling.defaultBorder + 'px solid #fff';
+      calculatedHLBStyles.border = defaultBorder + 'px solid #fff';
     }
 
     // If the original element uses a background image, preserve original padding.
@@ -764,7 +764,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    * [filter filters elements, attributes, and styles from the HLB]
    * @param  {[DOM element]} $hlb [HLB]
    */
-  hlbStyling.filter = function ($hlb, $picked, hiddenElements) {
+  function filter($hlb, $picked, hiddenElements) {
 
     filterStyles($hlb);
 
@@ -781,7 +781,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    * @param  {[DOM element]} $foundation [sanitized picked element]
    * @param  {[DOM element]} $hlb [The HLB]
    */
-  hlbStyling.initializeStyles = function ($foundation, $hlb, initialHLBRect) {
+  function initializeStyles($foundation, $hlb, initialHLBRect) {
 
     initializeHLBElementStyles($foundation, $hlb);
 
@@ -796,7 +796,7 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
    * @return {[String]}              [Computed styles for an DOM element]
    * NOTE: Fixes bug described here: [https://bugzilla.mozilla.org/show_bug.cgi?id=137687]
    */
-  hlbStyling.getComputedStyleCssText = function (element) {
+  function getComputedStyleCssText(element) {
 
     var style   = window.getComputedStyle(element),
         cssText = '';
@@ -811,5 +811,19 @@ define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
 
     return cssText;
   };
+  var publics = {
+    defaultBorder: defaultBorder,
+    defaultPadding: defaultPadding,
+    transitionProperty: transitionProperty,
+    setHLBChildTextColor: setHLBChildTextColor,
+    getHLBStyles: getHLBStyles,
+    filter: filter,
+    initializeStyles: initializeStyles,
+    getComputedStyleCssText: getComputedStyleCssText
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

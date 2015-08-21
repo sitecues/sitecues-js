@@ -61,9 +61,9 @@ define(['metrics/util', 'jquery', 'conf/user/manager', 'audio/audio', 'locale/lo
   }
 
   // ============= Objects methods ======================
- function update(data) {
-   metricsUtil.update(metrics, data, 'metrics/update');
- }
+  function update(data) {
+    metricsUtil.update(metrics, data, 'metrics/update');
+  }
 
   // ============= Events Handlers ======================
   sitecues.on('zoom', function(zoomLevel) {

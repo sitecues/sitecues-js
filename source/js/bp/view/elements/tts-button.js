@@ -163,5 +163,5 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
 
   // Once BP is ready init the badge
   sitecues.on('bp/did-complete', init);
+  // no publics
 });
-

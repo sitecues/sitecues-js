@@ -96,7 +96,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
       }
     }
     else {
-      mh.setScrollTracking(doTrackScroll);
+      mh.setScrollTracking(true);
     }
   }
 

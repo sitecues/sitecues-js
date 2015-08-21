@@ -48,6 +48,5 @@ sitecues.def('locale/en', function(locale_en, callback) {
     'zoom_and_speech': 'zoom &amp; speech'
   };
 
-  callback();
-
+  // no publics
 });

@@ -110,4 +110,5 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/sta
   // As soon as any real zooming occurs, switch to displaying the correct thumb position
   // (The fake settings are only used for someone who has never used sitecues before)
   sitecues.on('zoom/begin', sliderView.enableRealSettings);
+  // no publics
 });

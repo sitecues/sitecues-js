@@ -170,5 +170,5 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     isSticky = !isSticky;
     return isSticky;
   };
-
+  // no publics
 });

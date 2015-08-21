@@ -266,7 +266,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
    * @param  {[DOM element]} bpContainer [SVG container <div> with ID 'scp-bp-container']
    * @param  {[DOM element]} svg         [SVG with ID 'scp-svg']
    */
-  placement.init = function(badge, bpContainer, svg) {
+  function init(badge, bpContainer, svg) {
 
     // Compute the aspect ratio (the width:height ratio required for the <svg>)
     var viewBoxRect = svg.viewBox.baseVal;
@@ -298,6 +298,12 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
     }
 
   };
+  var publics = {
+    init: init
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });
-

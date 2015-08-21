@@ -41,5 +41,5 @@ define(['metrics/util'], function (metricsUtil) {
   sitecues.on('metrics/ready metrics/update', function(metrics) {
     feedbackSent.data && feedbackSent.update(metrics.data);
   });
-
+  // no publics
 });

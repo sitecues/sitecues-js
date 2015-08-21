@@ -87,7 +87,7 @@ define(['jquery', 'conf/user/manager', 'util/platform'], function ($, conf, plat
           zoom: completedZoom
         },
         removeSpaceRight: (origSize.width - desiredRect.width) / completedZoom
-      }
+      };
     }
 
     function getFirefoxComboboxFixes(desiredRect, origSize, completedZoom) {

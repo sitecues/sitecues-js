@@ -8,7 +8,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
 
   var elementByIdCache = {};
 
-  helper.byId = function (id) {
+  function byId(id) {
     var result = elementByIdCache[id];
     if (!result) {
       result = document.getElementById(id);
@@ -17,7 +17,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
     return result;
   };
 
-  helper.invalidateId = function (id) {
+  function invalidateId(id) {
     elementByIdCache[id] = undefined;
   };
 
@@ -27,7 +27,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
    * @param element
    * @returns {Object} rectangle
    */
-  helper.getRect = function(element) {
+  function getRect(element) {
     var rect = element.getBoundingClientRect();
     return {
       top: rect.top,
@@ -45,9 +45,9 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
    * @param id
    * @returns {Object} rectangle
    */
-  helper.getRectById = function(id) {
-    return helper.getRect(helper.byId(id));
-  };
+  function getRectById(id) {
+    return getRect(helper.byId(id));
+  }
 
   /**
    *** Setters ***
@@ -55,23 +55,23 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
 
   // Leave this method here rather than take it out to 'util/common' to avoid extra modules deps.
   // In the end, we only want to load badge on the page w/o any other modules.
-  helper.setAttributes = function (element, attrs) {
+  function setAttributes(element, attrs) {
     for (var attrName in attrs) {
       if (attrs.hasOwnProperty(attrName)) {
         element.setAttribute(attrName, attrs[attrName]);
       }
     }
-  };
+  }
 
-  helper.getCurrentSVGElementTransforms = function () {
+  function getCurrentSVGElementTransforms() {
 
-    var result      = {},
-      byId        = helper.byId;
+    var result = {},
+      byId = byId;
 
     function mapTranslate(id) {
       result[id] = {
-        'translateX': helper.getNumberFromString(helper.byId(id).getAttribute('transform'))
-      }
+        'translateX': getNumberFromString(helper.byId(id).getAttribute('transform'))
+      };
     }
 
     // Everything except slider
@@ -93,31 +93,46 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
       sliderBarScaleY     = sliderBarScale.length > 1 ? sliderBarScale[1] : sliderBarScaleX;
 
     result[BP_CONST.ZOOM_SLIDER_BAR_ID] = {
-      'translateX': helper.getNumberFromString(sliderBarTransforms[0]),
-      'scaleX'    : helper.getNumberFromString(sliderBarScaleX),
-      'scaleY'    : helper.getNumberFromString(sliderBarScaleY)
+      'translateX':getNumberFromString(sliderBarTransforms[0]),
+      'scaleX'    :getNumberFromString(sliderBarScaleX),
+      'scaleY'    :getNumberFromString(sliderBarScaleY)
     };
 
     return result;
 
   };
 
-  helper.getNumberFromString = function (str) {
+  function getNumberFromString(str) {
     return +(str.match(/[0-9\.\-]+/));
   };
 
   // Fix for events in SVG in IE:
   // IE sometimes gives us the <defs> element for the event, and we need the <use> element
-  helper.getEventTarget = function(evt) {
+  function getEventTarget(evt) {
     return evt.target.correspondingUseElement || evt.target;
   };
 
-  helper.cancelEvent = function(evt) {
+  function cancelEvent(evt) {
     evt.returnValue = false;
     evt.preventDefault();
     evt.stopImmediatePropagation();
     evt.stopPropagation();
     return false;
   };
+  var publics = {
+    byId: byId,
+    invalidateId: invalidateId,
+    getRect: getRect,
+    getRectById: getRectById,
+    setAttributes: setAttributes,
+    getCurrentSVGElementTransforms: getCurrentSVGElementTransforms,
+    getNumberFromString: getNumberFromString,
+    getEventTarget: getEventTarget,
+    cancelEvent: cancelEvent
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

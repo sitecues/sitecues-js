@@ -208,14 +208,14 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
 
   // This is the body's currently visible width, with zoom factored in
   function getBodyWidth() {
-   // Use the originally measured visible body width
-   initBodyInfo();
+    // Use the originally measured visible body width
+    initBodyInfo();
 
-   // If width was restricted
-   var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1;
+    // If width was restricted
+    var divisorUsedToRestrictWidth = shouldRestrictWidth() ? getZoomForWidthRestriction(completedZoom, window.innerWidth) : 1;
 
     // Multiply be the amount of zoom currently used
-   return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
+    return completedZoom * originalBodyInfo.width / divisorUsedToRestrictWidth;
   }
 
   function getBodyRight() {

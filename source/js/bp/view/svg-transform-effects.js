@@ -97,5 +97,5 @@ define(['bp/helper', 'bp/constants', 'util/platform', 'util/transform', 'util/an
   sitecues.on('bp/will-shrink', hoversOff);
   sitecues.on('bp/content-loaded', refreshHovers);
   sitecues.on('bp/will-show-secondary-feature', cancelHovers);
+  // no publics
 });
-

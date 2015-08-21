@@ -29,7 +29,7 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
    * @param  {number}        inflationSpeed      The duration of the opacity transition
    * @param  {Object} (optional) $parentOfDimmer  A selector describing the node that should parent the dimmer
    */
-  dimmer.dimBackgroundContent = function(inflationSpeed, $parentOfDimmer) {
+  function dimBackgroundContent(inflationSpeed, $parentOfDimmer) {
 
     if (dimmer.getDimmerElement()) {
       return; // Background already dimmed
@@ -59,7 +59,7 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
    * [undimBackgroundContent transitions the opacity of the dimmer to DIMMER_MIN_OPACITY]
    * @param  {[integer]} deflationSpeed [The duration of the opacity transition]
    */
-  dimmer.undimBackgroundContent = function(deflationSpeed) {
+  function undimBackgroundContent(deflationSpeed) {
 
     $(dimmer.getDimmerElement())
       .animate({ opacity : DIMMER_MIN_OPACITY}, deflationSpeed, onDimmerClosed);
@@ -72,7 +72,17 @@ define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function
     $(dimmer.getDimmerElement()).remove();
   }
 
-  dimmer.getDimmerElement = function() {
+  function getDimmerElement() {
     return document.getElementById(DIMMER_ID);
   };
+  var publics = {
+    dimBackgroundContent: dimBackgroundContent,
+    undimBackgroundContent: undimBackgroundContent,
+    getDimmerElement: getDimmerElement
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

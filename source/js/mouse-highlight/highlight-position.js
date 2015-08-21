@@ -28,7 +28,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
    *   hiddenElements: []   // Elements whose contents are not included in the highlight, e.g. have absolutely positioned or hidden subtrees
    * }
    */
-  mhpos.getHighlightPositionInfo = function (selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
+  function getHighlightPositionInfo(selector, proximityBeforeBoxesMerged, doStretchForSprites, doIgnoreFloats) {
     var
       accumulatedPositionInfo = {
         allRects: [],
@@ -37,17 +37,17 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
       $selector = $(selector);
 
     getHighlightInfoRecursive($selector, accumulatedPositionInfo, doStretchForSprites, doIgnoreFloats, true);
-    mhpos.combineIntersectingRects(accumulatedPositionInfo.allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
+    combineIntersectingRects(accumulatedPositionInfo.allRects, proximityBeforeBoxesMerged); // Merge overlapping boxes
 
     return accumulatedPositionInfo;
-  };
+  }
 
   // Get a single rectangle that covers the entire area defined by the selector
   // doIgnoreFloats is optional
-  mhpos.getRect = function (selector, doIgnoreFloats) {
+  function getRect(selector, doIgnoreFloats) {
     var COMBINE_ALL_RECTS = 99999;
-    return mhpos.getHighlightPositionInfo(selector, COMBINE_ALL_RECTS, true, doIgnoreFloats).allRects[0]
-  };
+    return getHighlightPositionInfo(selector, COMBINE_ALL_RECTS, true, doIgnoreFloats).allRects[0];
+  }
 
   function getZoom() {
     return zoomMod.getCompletedZoom();
@@ -55,7 +55,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
 
   // Get the rect for the contents of a node (text node or contents inside element node)
   // @param node -- an element that contains visible content, or a text node
-  mhpos.getContentsRangeRect = function(node) {
+  function getContentsRangeRect(node) {
     var range = document.createRange(),
       parent,
       // ********** Some browsers are fine **********
@@ -98,7 +98,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
     }
 
     return contentsRangeRect;
-  };
+  }
 
   function getOldIECorrectionsToRangeRect(origRangeRect) {
     // Factor in IE native browser zoom
@@ -137,10 +137,10 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
         top: parentElementRect.top + contentTopOffset
       };
 
-   return normalizeRect(correctedRect);
- }
+    return normalizeRect(correctedRect);
+  }
 
- function getRectMinusPadding(rect, style) {
+  function getRectMinusPadding(rect, style) {
     // Reduce by padding amount -- useful for images such as Google Logo
     // which have a ginormous amount of padding on one side
     var
@@ -287,8 +287,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
     if (!rect) {
       return;
     }
-    var rect = rect,
-      zoom = getZoom(),
+    var zoom = getZoom(),
       minRectSide = MIN_RECT_SIDE * zoom;
     if (!doLoosenMinSizeRule && (rect.width < minRectSide || rect.height < minRectSide)) {
       return; // Not large enough to matter
@@ -305,7 +304,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
       viewPos = traitcache.getCachedViewPosition();
 
 
-    $selector.each(function (index) {
+    $selector.each(function () {
       var isElement = this.nodeType === 1;
 
       // --- Leaf nodes ---
@@ -320,7 +319,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
           // Note: this would not work if any of the children were display: block, because
           // the returned rectangle would be the larger element rect, rather for just the visible content.
           //
-          // var parentContentsRect = mhpos.getContentsRangeRect(this.parentNode);
+          // var parentContentsRect = getContentsRangeRect(this.parentNode);
           // addRect(allRects, parentContentsRect);
           // return false;  // Don't keep iterating over text/inlines in this container
           // ----------------------------------------------------------------------------------------------------
@@ -332,7 +331,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
           // This 'normal' method goes through the nodes one at a time, so that we can be sure to deal with
           // hidden and clipped elements.
           // ----------------------------------------------------------------------------------------------------
-          var rect = mhpos.getContentsRangeRect(this);
+          var rect = getContentsRangeRect(this);
 
           addRect(allRects, rect);
 
@@ -446,7 +445,7 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
   /**
    * Combine intersecting rects. If they are within |extraSpace| pixels of each other, merge them.
    */
-  mhpos.combineIntersectingRects = function(rects, extraSpace) {
+  function combineIntersectingRects(rects, extraSpace) {
     function intersects(r1, r2) {
       return !( r2.left - extraSpace > r1.left + r1.width + extraSpace ||
         r2.left + r2.width + extraSpace < r1.left - extraSpace ||
@@ -488,5 +487,17 @@ define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/
         }
       }
     }
+  }
+
+  var publics = {
+    getHighlightPositionInfo: getHighlightPositionInfo,
+    getRect: getRect,
+    getContentsRangeRect: getContentsRangeRect,
+    combineIntersectingRects: combineIntersectingRects
   };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

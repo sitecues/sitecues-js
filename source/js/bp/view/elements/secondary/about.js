@@ -15,7 +15,7 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
     byId('scp-sitecues-text').setAttributeNS('http://www.w3.org/1999/xlink', 'href', sitecues.resolveSitecuesUrl('/images/sitecues-logo-text.svg'));
   }
 
-  about.getGeometryTargets = function(cssValues) {
+  function getGeometryTargets(cssValues) {
     // Which additional animations
     cssValues[false].menuImageTranslateX   = 0;   // About logo transitions to the left following the rolling icon
 
@@ -28,7 +28,7 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
   };
 
   // Custom animation of feature
-  about.tick = function(t, targetCSSValues) {
+  function tick(t, targetCSSValues) {
     var aboutImage = getAboutImage(),
       newTransformString =
         transform.getTransformString(getValueInTime(0, targetCSSValues.menuImageTranslateX, t), 0);
@@ -36,5 +36,13 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
   };
 
   sitecues.on('bp/will-toggle-secondary-panel', loadImage);
+  var publics = {
+    getGeometryTargets: getGeometryTargets,
+    tick: tick
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

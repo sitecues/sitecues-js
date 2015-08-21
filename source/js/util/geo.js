@@ -1,7 +1,7 @@
 /**
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
-define([], function() {
+define(['geo'], function() {
   'use strict';
 
   /**
@@ -31,7 +31,7 @@ define([], function() {
    */
   function isPointInAnyRect(x, y, rects, proximity) {
     for (var count = 0; count < rects.length; count++) {
-      if (rects[count] && geo.isPointInRect(x, y, rects[count], proximity)) {
+      if (rects[count] && isPointInRect(x, y, rects[count], proximity)) {
         return true;
       }
     }

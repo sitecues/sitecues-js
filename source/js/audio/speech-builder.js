@@ -163,19 +163,19 @@ define(['util/common', 'jquery'], function(common, $) {
       textEquiv = textEquiv || node.getAttribute('alt') || node.getAttribute('title') || '';
     }
     else if ($node.is('select')) {
-      textEquiv = node.getAttribute("title") || '';
+      textEquiv = node.getAttribute('title') || '';
       value = $node.children(':selected').text();
       doWalkChildren = false; // Otherwise will read all the <option> elements
     }
 
     else if ($node.is('input[type=radio],input[type=checkbox]')) {
       // value, and title on these form controls
-      textEquiv = textEquiv || node.getAttribute("title") || '';
+      textEquiv = textEquiv || node.getAttribute('title') || '';
     }
 
     else if ($node.is('input,textarea,button')) {
       // value, placeholder and title on these form controls
-      textEquiv = textEquiv || node.getAttribute("placeholder") || node.getAttribute("title") || '';
+      textEquiv = textEquiv || node.getAttribute('placeholder') || node.getAttribute('title') || '';
       value = node.value;
     }
 

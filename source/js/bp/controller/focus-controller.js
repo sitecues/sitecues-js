@@ -182,7 +182,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
   }
 
-  focusController.getFocusedItem = function() {
+  function getFocusedItem() {
     return focusElement;
   };
 
@@ -251,7 +251,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
       parseFloat(getComputedStyle(elem).opacity) > 0;
   }
 
-  focusController.navigateInDirection = function(direction) {
+  function navigateInDirection(direction) {
 
     if (!state.isPanel()) {
       return;
@@ -355,5 +355,13 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
   sitecues.on('bp/will-expand', beginKeyboardFocus);
   sitecues.on('bp/will-shrink', restoreDocumentFocus);
   sitecues.on('bp/did-expand', showFocus);
+  var publics = {
+    getFocusedItem: getFocusedItem,
+    navigateInDirection: navigateInDirection
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

@@ -28,7 +28,7 @@ define(['metrics/util'], function (metricsUtil) {
   // ============= Events Handlers ======================
   // Create an instance on hlb create event.
   sitecues.on('hlb/create', function() {
-    if (!hlbOpened['data']) {
+    if (!hlbOpened.data) {
       hlbOpened.init();
     }
     sitecues.emit('metrics/hlb-opened/create');
@@ -43,5 +43,5 @@ define(['metrics/util'], function (metricsUtil) {
     hlbOpened.send();
     hlbOpened.reset();
   });
-
+  // no publics
 });

@@ -256,4 +256,5 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
   sitecues.on('bp/will-shrink', willShrink);
   sitecues.on('bp/did-shrink', didShrink);
   sitecues.on('bp/did-complete', init);
+  // no publics
 });

@@ -247,7 +247,7 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
       chosenItem = chooser.querySelector('[data-target="' + getActiveCard().id + '"]'),
       indicator = activePanel.querySelector('.scp-card-indicator'),
       indicatorRect = indicator.getBoundingClientRect(),
-      chosenItemRect =chosenItem.getBoundingClientRect(),
+      chosenItemRect = chosenItem.getBoundingClientRect(),
       left = chosenItemRect.left - indicatorRect.left,
       previouslyChosen = chooser.querySelector('[aria-selected="true"]');
 
@@ -324,5 +324,5 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
   sitecues.on('bp/did-expand', init);
 
   sitecues.on('bp/do-target-card', selectNewCard);
-
+  // no publics
 });

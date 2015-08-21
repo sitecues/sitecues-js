@@ -15,5 +15,5 @@ define(['custom'], function (custom) {
     });
 
   });
-
+  // no publics
 });

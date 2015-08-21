@@ -15,7 +15,7 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
       willChange: 'transform',
       backgroundColor: '#fff',
       borderRadius: '8px',
-      transition: 'opacity .9s, transform 1s',
+      transition: 'opacity 9s, transform 1s',
       opacity: 0,
       zIndex: 2147483645
     },
@@ -50,6 +50,25 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
   function getBorderCss() {
     // Use adaptive border that is visible on any background
     return colorUtil.isOnDarkBackground(document.body) ? '7px solid #fff' : '20px solid #000';
+  }
+
+  function close() {
+    $iframe.css(INITIAL_CSS);
+    setTimeout(function() {
+      $iframe.remove();
+      $iframe = $();
+      isModalOpen = false;
+    }, INFLATION_SPEED);
+
+    $(window)
+      .off('focus', close)
+      .off('message', checkCloseMessage)
+      .off('DOMMouseScroll mousewheel', preventScroll);
+    enableWebPagePointerEvents(true);
+
+    dimmer.undimBackgroundContent(DIMMER_SPEED);
+
+    removeCloseButton();
   }
 
   function showModal(pageName, anchor) {
@@ -125,14 +144,14 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
       offsetTop = platform.browser.isIE ? -6 : -1;
 
     $closeButton =
-        $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
-      .css(CLOSE_BUTTON_CSS)
-      .css({
-        left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
-        top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
-      })
-      .appendTo('html')
-      .one('click', close);
+      $('<scx style="display:block" class="scp-hand-cursor"><scx style="position:relative;left:14px;top:23px;color:#ccc">x</scx></scx>')
+        .css(CLOSE_BUTTON_CSS)
+        .css({
+          left: (helpRect.right - BUTTON_SIZE / 2 + offsetLeft) + 'px',  // Subtracts border width as well
+          top: (helpRect.top - BUTTON_SIZE / 2 + offsetTop) + 'px'
+        })
+        .appendTo('html')
+        .one('click', close);
 
     addCloseButtonTimer = setTimeout(function() {
       $closeButton.css('opacity', 1);
@@ -152,32 +171,11 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
       .css('pointerEvents', doEnable ? '' : 'none');
   }
 
-  function close() {
-    $iframe.css(INITIAL_CSS);
-    setTimeout(function() {
-      $iframe.remove();
-      $iframe = $();
-      isModalOpen = false;
-    }, INFLATION_SPEED);
-
-    $(window)
-      .off('focus', close)
-      .off('message', checkCloseMessage)
-      .off('DOMMouseScroll mousewheel', preventScroll);
-    enableWebPagePointerEvents(true);
-
-    dimmer.undimBackgroundContent(DIMMER_SPEED);
-
-    removeCloseButton();
-
-  }
-
-
   // jumpTo can be to a named anchor or id in the document, e.g. #keyboard
   function showHelp(jumpToAnchor) {
     showModal('help', jumpToAnchor || '');
   }
 
   sitecues.on('info/help', showHelp);
-
+  // no publics
 });

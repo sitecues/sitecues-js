@@ -509,4 +509,5 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
   sitecues.on('bp/did-expand', onPanelOpen);
 
   sitecues.on('bp/will-shrink', onPanelClose);
+  // no publics
 });

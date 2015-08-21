@@ -10,6 +10,7 @@ define(['metrics/util'], function (metricsUtil) {
 
   'use strict';
 
+  var data;
   var SPEECH_TRIGGERS = ['space', 'shift', 'shift+m', 'shift+a'];
   var TTS_AUDIO_FORMATS = ['ogg', 'mp3', 'aac'];
 
@@ -25,10 +26,10 @@ define(['metrics/util'], function (metricsUtil) {
 
     var text = getQueryVariable(ttsUrl, 't');
 
-    ttsRequested.data = DEFAULT_STATE;
-    ttsRequested.data.audio_format = getTTSAudioFormat(ttsUrl);
-    ttsRequested.data.char_count   = decodeURIComponent(text.replace(/\+/g,  ' ')).length;
-    ttsRequested.data.request_time = 1;
+    data = DEFAULT_STATE;
+    data.audio_format = getTTSAudioFormat(ttsUrl);
+    data.char_count   = decodeURIComponent(text.replace(/\+/g,  ' ')).length;
+    data.request_time = 1;
   }
 
   function update(data) {
@@ -98,5 +99,5 @@ define(['metrics/util'], function (metricsUtil) {
   ttsRequested.update = update;
   ttsRequested.send = send;
   ttsRequested.reset = reset;
-
+  // no publics
 });

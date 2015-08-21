@@ -56,7 +56,7 @@ define(['util/transform', 'util/platform'], function (transform, platform) {
         from = styles.from,
         to = styles.to;
 
-    from.scale =fromTransformObj.scale;
+    from.scale = fromTransformObj.scale;
     from.translate = fromTransformObj.translate;
     from.rotate = fromTransformObj.rotate;
 

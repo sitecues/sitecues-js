@@ -296,4 +296,5 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
   addEventListener('keyup', onKeyUp, true);
 
   // No exports
+  // no publics
 });

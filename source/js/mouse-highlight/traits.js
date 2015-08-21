@@ -11,7 +11,7 @@ define(['jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-posit
 
   // ---- PUBLIC ----
 
-  traits.getTraitStack = function(nodes) {
+  function getTraitStack(nodes) {
     var traitStack;
 
     viewSize = traitcache.getCachedViewSize();
@@ -19,7 +19,7 @@ define(['jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-posit
     traitStack = nodes.map(getTraits);
 
     return traitStack;
-  };
+  }
 
   // ---- PRIVATE ----
 
@@ -153,8 +153,12 @@ define(['jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-posit
         $(node).is(':empty'));
   }
 
-  if (SC_UNIT) {
-    $.extend(exports, traits);
-  }
+    var publics = {
+      getTraitStack: getTraitStack
+    };
 
+    if (SC_UNIT) {
+      module.exports = publics;
+    }
+    return publics;
 });

@@ -92,7 +92,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
     if (colorMapFn || !type) {
       init(applyThemeImpl);
     }
-  };
+  }
 
   function isDarkTheme(colorMapFn) {
     if (!colorMapFn) {
@@ -658,7 +658,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
   }
 
   function onThemeChange() {
-    colorEngine.applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
+    applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
   }
 
   conf.def('themeName', getSanitizedThemeName);
@@ -689,12 +689,13 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
   sitecues.on('bp/did-shrink', onPanelShrink);
 
   if (SC_DEV) {
-    sitecues.applyTheme  = colorEngine.applyTheme;
+    sitecues.applyTheme  = applyTheme;
   }
 
   var publics = {
     applyTheme: applyTheme
   };
+
   if (SC_UNIT) {
     module.exports = publics;
   }

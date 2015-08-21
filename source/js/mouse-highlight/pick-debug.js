@@ -4,11 +4,10 @@
 
 // This helps debug the picker. Use sitecues.togglePickerDebugging() to turn
 // on useful console log messages related to picker heuristics.
-define(['custom'], function (custom) {
+define(['custom'], function () {
   'use strict';
 
-  var DEBUG_LABEL_STYLE = 'font-weight: normal; color: purple',
-    isDebuggingOn = false;
+  var DEBUG_LABEL_STYLE = 'font-weight: normal; color: purple';
 
   // -------- Logging section ---------
 
@@ -32,7 +31,7 @@ define(['custom'], function (custom) {
            String('                        ' + (sf.weight * value).toFixed(0)).slice(-21);
   }
 
-  pickDebug.logHeuristicResult = function(scoreObjs, bestScoreIndex, nodes) {
+  function logHeuristicResult(scoreObjs, bestScoreIndex, nodes) {
     var index, scoreObj;
     var numUnusableAtTop = 0;
     var startItem = scoreObjs.length - 1;
@@ -65,7 +64,7 @@ define(['custom'], function (custom) {
     scoreObjs.forEach(function () {
       console.groupEnd();
     });
-  };
+  }
 
   function logItem(item) {
     if (console.log.toString().indexOf('[native code]') > 0) {
@@ -126,5 +125,12 @@ define(['custom'], function (custom) {
       console.groupEnd();
     }
   }
+  var publics = {
+    logHeuristicResult: logHeuristicResult
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

@@ -70,14 +70,14 @@ define(['jquery', 'audio/audio', 'conf/user/manager'], function ($, audio, conf)
         'clientTop'     : html.clientTop
       },
       'window'          : {
-        'pageXOffset'   : pageXOffset,
-        'pageYOffset'   : pageYOffset,
-        'innerWidth'    : innerWidth,
-        'innerHeight'   : innerHeight,
-        'outerWidth'    : outerWidth,
-        'outerHeight'   : outerHeight,
-        'screenX'       : screenX,
-        'screenY'       : screenY
+        'pageXOffset'   : window.pageXOffset,
+        'pageYOffset'   : window.pageYOffset,
+        'innerWidth'    : window.innerWidth,
+        'innerHeight'   : window.innerHeight,
+        'outerWidth'    : window.outerWidth,
+        'outerHeight'   : window.outerHeight,
+        'screenX'       : window.screenX,
+        'screenY'       : window.screenY
       },
       'screen'          : {
         'width'         : screen.width,

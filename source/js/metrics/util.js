@@ -9,7 +9,7 @@ define(['conf/site', 'jquery'], function(site, $) {
 
   var toClass = {}.toString;
 
-  metricsUtil.send = function(instance) {
+  function send(instance) {
     if (SC_LOCAL) {
       // Cannot save to server when we have no access to it
       // Putting this condition in allows us to paste sitecues into the console
@@ -20,7 +20,7 @@ define(['conf/site', 'jquery'], function(site, $) {
     // Send data in JSON format to backend using end point.
     var siteId =  site.getSiteId();
     // Update timestamp before send.
-    metricsUtil.update(instance, {'client_time_ms': +new Date});
+    update(instance, {'client_time_ms': +new Date()});
 
     var request = $.ajax({
       xhrFields: {
@@ -28,8 +28,8 @@ define(['conf/site', 'jquery'], function(site, $) {
       },
       crossDomain: true,
       beforeSend: function(xhrObj){
-        xhrObj.setRequestHeader("Content-Type","application/json");
-        xhrObj.setRequestHeader("Accept","application/json");
+        xhrObj.setRequestHeader('Content-Type', 'application/json');
+        xhrObj.setRequestHeader('Accept', 'application/json');
       },
       url: sitecues.getApiUrl('metrics/site/' + siteId + '/notify.json'),
       type: "POST",
@@ -46,7 +46,7 @@ define(['conf/site', 'jquery'], function(site, $) {
     });
   };
 
-  metricsUtil.update = function(instance, newData, event) {
+  function update(instance, newData, event) {
     // Object is passed.
     var newDataType = newData ? toClass.call(newData).slice(8, -1) : undefined;
     if (newDataType === 'Object') {
@@ -58,4 +58,13 @@ define(['conf/site', 'jquery'], function(site, $) {
     }
     return instance;
   };
+  var publics = {
+    send: send,
+    update: update
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

@@ -523,7 +523,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
 
   }
 
-  sizeAnimation.initAnimation = function (isFirstTime) {
+  function initAnimation(isFirstTime) {
 
     if (isFirstTime) {
       firstTimeRender();
@@ -769,4 +769,12 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
   sitecues.on('zoom/begin', function () {
     animationStartTime = 0;
   });
+  var publics = {
+    initAnimation: initAnimation
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

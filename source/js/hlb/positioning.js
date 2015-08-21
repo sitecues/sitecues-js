@@ -35,7 +35,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
     var sum               = 0,
         hlbBoundingRect   = $hlb[0].getBoundingClientRect(),
         childBoundingRect = child.getBoundingClientRect(),
-        inheritedZoom     = hlbPositioning.getInheritedZoom($hlb),
+        inheritedZoom     = getInheritedZoom($hlb),
         leftDiff          = childBoundingRect.left > hlbBoundingRect.left ? childBoundingRect.left - hlbBoundingRect.left : 0,
         leftSum           = 0,
         rightSum          = 0;
@@ -347,7 +347,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
       // height is now the "safe zone" height, minus the padding/border
       $hlb.css({
-        'height': ((safeZoneHeight / hlbPositioning.getFinalScale($hlb) / hlbPositioning.getInheritedZoom($hlb)) -
+        'height': ((safeZoneHeight /getFinalScale($hlb) / getInheritedZoom($hlb)) -
                    (hlbStyling.defaultBorder +
                     hlbStyling.defaultBorder +
                     parseInt($hlb.css('paddingTop')) +
@@ -361,7 +361,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({
-          'width': ($hlb[0].getBoundingClientRect().width / hlbPositioning.getInheritedZoom($hlb) *
+          'width': ($hlb[0].getBoundingClientRect().width / getInheritedZoom($hlb) *
               (safeZoneHeight / originalHeight)) + 'px'
         });
 
@@ -384,7 +384,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
       // width is now the "safe zone" width, minus the padding/border
       $hlb.css({
-        'width': ((safeZoneWidth / hlbPositioning.getFinalScale($hlb) / hlbPositioning.getInheritedZoom($hlb)) -
+        'width': ((safeZoneWidth /getFinalScale($hlb) / getInheritedZoom($hlb)) -
             (hlbStyling.defaultBorder + hlbStyling.defaultPadding + getExtraLeftPadding($hlb) / 2) * 2) + 'px'
       });
 
@@ -393,7 +393,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({
-          'height': ($hlb[0].getBoundingClientRect().height / hlbPositioning.getInheritedZoom($hlb) *
+          'height': ($hlb[0].getBoundingClientRect().height / getInheritedZoom($hlb) *
               (safeZoneWidth / originalWidth)) + 'px'
         });
 
@@ -435,7 +435,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
   function scaleRectFromCenter($hlb) {
 
     var clonedNodeBoundingBox = $hlb[0].getBoundingClientRect(),
-        zoomFactor = hlbPositioning.getFinalScale($hlb);
+        zoomFactor = getFinalScale($hlb);
 
     // The bounding box of the cloned element if we were to scale it
     return {
@@ -577,19 +577,19 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
   // PUBLIC FUNCTIONS
   //////////////////////////
 
-  hlbPositioning.getOriginCSS = function () {
+  function getOriginCSS() {
     return originCSS;
   };
 
-  hlbPositioning.getTranslateCSS = function () {
+  function getTranslateCSS() {
     return translateCSS;
   };
 
-  hlbPositioning.setOriginCSS = function (val) {
+  function setOriginCSS(val) {
     originCSS = val;
   };
 
-  hlbPositioning.setTranslateCSS = function (val) {
+  function setTranslateCSS(val) {
     translateCSS = val;
   };
 
@@ -604,22 +604,22 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
 
   // HLB transform scale necessary to provide the HLBExtraZoom size increase.
   // If zoom is on the body, then scaling needs to account for that since the HLB is outside of the body.
-  hlbPositioning.getFinalScale = function ($hlb) {
-    return getHlbZoom() * hlbPositioning.getStartingScale($hlb);
-  };
+  function getFinalScale($hlb) {
+    return getHlbZoom() *getStartingScale($hlb);
+  }
 
   // HLB transform scale necessary to show HLB at same size as original highlighted content.
-  hlbPositioning.getStartingScale = function ($hlb) {
+  function getStartingScale($hlb) {
     return $hlb.closest(document.body).length ? 1 : conf.get('zoom');
-  };
+  }
 
   // Transform scale that affects HLB (was inherited from page zoom)
   // If the HLB is outside the body, this will be 1 (since the page zoom is on <body>)
-  hlbPositioning.getInheritedZoom = function ($hlb) {
+  function getInheritedZoom($hlb) {
     return $hlb.closest(document.body).length ? conf.get('zoom') : 1;
-  };
+  }
 
-  hlbPositioning.sizeHLB = function ($hlb, $originalElement, initialHLBRect) {
+  function sizeHLB($hlb, $originalElement, initialHLBRect) {
 
     // Initialize height/width of the HLB
     if (SC_DEV) {
@@ -646,7 +646,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
   /**
    * [positionHLB positions the HLB.]
    */
-  hlbPositioning.positionHLB = function ($hlb, initialHLBRect, inheritedZoom) {
+  function positionHLB($hlb, initialHLBRect, inheritedZoom) {
 
     // The minimum distance we must move the HLB for it to fall within the safe zone
     var constrainedOffset,
@@ -702,5 +702,20 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
       return size === '-' || size === '+' ? size : null;
     });
   };
+  var publics = {
+    getOriginCSS: getOriginCSS,
+    getTranslateCSS: getTranslateCSS,
+    setOriginCSS: setOriginCSS,
+    setTranslateCSS: setTranslateCSS,
+    getFinalScale: getFinalScale,
+    getStartingScale: getStartingScale,
+    getInheritedZoom: getInheritedZoom,
+    sizeHLB: sizeHLB,
+    positionHLB: positionHLB
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

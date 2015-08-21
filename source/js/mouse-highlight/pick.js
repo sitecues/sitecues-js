@@ -100,7 +100,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     },
     MAX_VISUAL_BOX_CHECK_SIZE = 400,  // We try to highlight even over whitespace if cursor is within a box of this size or less
 
-    // Inject selectors via sitecues.config.picker or customization module using picker.provideCustomSelectors()
+    // Inject selectors via sitecues.config.picker or customization module using provideCustomSelectors()
     // Object is as follows:
     //{
     //  prefer: "[selector]",
@@ -124,7 +124,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
    *
    * @param hover The element the mouse is hovering over
    */
-  picker.find = function find(startElement, doSuppressVoting) {
+  function find(startElement, doSuppressVoting) {
     var candidates, picked;
 
     function processResult(result) {
@@ -170,11 +170,11 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     lastPicked = picked;
 
     return processResult(picked ? $(picked) : null);
-  };
+  }
 
-  picker.reset = function() {
+  function reset() {
     lastPicked = null;
-  };
+  }
 
   function getCandidates(startElement) {
     var allAncestors = $(startElement).parentsUntil('body'),
@@ -288,19 +288,23 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
       return processResult(-1); // No valid candidate
     }
 
+    function getNumericScore(scoreObj) {
+      return scoreObj.score;
+    }
+
     // 2. Get the second best candidate
     while (doAllowVoting) {
       var minSecondBestScore = scoreObjs[bestIndex].score - SECOND_BEST_IS_VIABLE_THRESHOLD;
       var secondBestIndex = getCandidateWithHighestScore(scoreObjs, minSecondBestScore, bestIndex);
 
       if (secondBestIndex < 0) {
-        var scores = scoreObjs.map(function(scoreObj) { return scoreObj.score });
+        var scores = scoreObjs.map(getNumericScore);
         SC_DEV && isVoteDebuggingOn && console.log('--> break no other competitors: ' + JSON.stringify(scores));
         break;  // Only one valid candidate
       }
 
-      SC_DEV && isVoteDebuggingOn && console.log("1st = %d (score=%d) %O", bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
-      SC_DEV && isVoteDebuggingOn && console.log("2nd = %d (score=%d) %O", secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
+      SC_DEV && isVoteDebuggingOn && console.log('1st = %d (score=%d) %O', bestIndex, scoreObjs[bestIndex].score, candidates[bestIndex]);
+      SC_DEV && isVoteDebuggingOn && console.log('2nd = %d (score=%d) %O', secondBestIndex, scoreObjs[secondBestIndex].score, candidates[secondBestIndex]);
 
       // 3. Choose between first and second best candidate
       ++ extraWork;
@@ -319,7 +323,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
           isVoteForTop = candidatesForVote[leafVoteIndex] === topElement;
         SC_DEV && isVoteDebuggingOn && console.log('Vote for top ? %s ---> %o voted for %O', isVoteForTop,
             leaves[leafIndex].firstChild || leaves[leafIndex],
-          candidatesForVote[leafVoteIndex])
+          candidatesForVote[leafVoteIndex]);
         votesForTop += isVoteForTop ? 1 : -1;
       }
 
@@ -503,8 +507,9 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
 
   if (SC_DEV) {
     // Placeholder used by 'debug' customization
-    picker.logResults = function () {
-    };
+    // TODO move picker debugging to new module system
+//    logResults = function () {
+//    };
   }
 
   // Get the score for the candidate node at the given index
@@ -586,26 +591,28 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
           scoreObjs[index].isUsable &&
           scoreObjs[index].score > MIN_SCORE_TO_PICK) {
         for (reasonToSteal in THIEF_WEIGHTS) {
-          childScore = scoreObjs[childIndex].score; // Child's score
-          weight = THIEF_WEIGHTS[reasonToSteal];
-          parentJudgement = scoreObjs[index].judgements[reasonToSteal];
-          delta = childScore * weight * parentJudgement; // How much to steal from child
-          if (delta) {
-            scoreObjs[index].score += delta;
-            if (SC_DEV) {
-              scoreObjs[index].factors.push({
-                about: reasonToSteal + '-from-child',    // Debug info
-                value: childScore,
-                weight: weight
-              });
-            }
-            if (delta > 0) {   // Only take from child, don't give
-              scoreObjs[childIndex].score -= delta;
-              scoreObjs[childIndex].factors.push({
-                about: reasonToSteal + '-from-parent',
-                value: childScore,
-                weight: -weight
-              });
+          if (THIEF_WEIGHTS.hasOwnProperty(reasonToSteal)) {
+            childScore = scoreObjs[childIndex].score; // Child's score
+            weight = THIEF_WEIGHTS[reasonToSteal];
+            parentJudgement = scoreObjs[index].judgements[reasonToSteal];
+            delta = childScore * weight * parentJudgement; // How much to steal from child
+            if (delta) {
+              scoreObjs[index].score += delta;
+              if (SC_DEV) {
+                scoreObjs[index].factors.push({
+                  about: reasonToSteal + '-from-child',    // Debug info
+                  value: childScore,
+                  weight: weight
+                });
+              }
+              if (delta > 0) {   // Only take from child, don't give
+                scoreObjs[childIndex].score -= delta;
+                scoreObjs[childIndex].factors.push({
+                  about: reasonToSteal + '-from-parent',
+                  value: childScore,
+                  weight: -weight
+                });
+              }
             }
           }
         }
@@ -650,7 +657,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
   // This gives us a score for how good what we want to auto pick is.
   // Auto picking is where we highlight something useful onscreen after the user presses space with no highlight.
   // The candidate passed in is guaranteed to be at least partly onscreen
-  picker.getAutoPickScore = function(picked, fixedRect, absoluteRect, bodyWidth, bodyHeight) {
+  function getAutoPickScore(picked, fixedRect, absoluteRect, bodyWidth, bodyHeight) {
     var MIN_TOP_COORDINATE_PREFERRED = 100;
     var MIN_SIGNIFICANT_TEXT_LENGTH = 25;
     var topRole = picked.parents('[role]').last().attr('role');
@@ -731,27 +738,27 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     }
 
     return scoreInfo;
-  };
+  }
 
   // -------------- Customizations ----------------------
   // See https://equinox.atlassian.net/wiki/display/EN/Picker+hints+and+customizations
 
   // This is a hook for customization scripts, which can add their own judgements by overriding this method.
-  picker.provideCustomSelectors = function(selectors) {
+  function provideCustomSelectors(selectors) {
     customSelectors = selectors;
-  };
+  }
 
   // This is a hook for customization scripts, which can add their own judgements by overriding this method.
   // Weights can be changed for pre-existing or added for custom judgements
   // Pass in as { judgementName: weightValue, judgementName2: weightValue2, etc. }
-  picker.provideCustomWeights = function(weights) {
+  function provideCustomWeights(weights) {
     $.extend(judgementWeights, weights);
-  };
+  }
 
   if (SC_DEV) {
     // --- For debugging ----------------------
     sitecues.pickFrom = function (element) {
-      return picker.find(element);
+      return find(element);
     };
 
     sitecues.togglePickerDebugging = function() {
@@ -767,5 +774,16 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
       console.log('Auto pick debugging: ' + (isAutoPickDebuggingOn = !isAutoPickDebuggingOn));
     };
   }
+  var publics = {
+    find: find,
+    reset: reset,
+    getAutoPickScore: getAutoPickScore,
+    provideCustomSelectors: provideCustomSelectors,
+    provideCustomWeights: provideCustomWeights
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

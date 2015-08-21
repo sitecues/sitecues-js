@@ -2,7 +2,7 @@
  * If speech is on, automatically speak newly selected regions in document.
  * Created by akhabibullina on 8/3/2015.
  */
-sitecues.def('audio/text-select', function (ts, callback) {
+define([], function () {
 
   'use strict';
 
@@ -53,5 +53,5 @@ sitecues.def('audio/text-select', function (ts, callback) {
 
   sitecues.on('speech/did-change', refresh);
 
-  callback();
+  // No publics
 });

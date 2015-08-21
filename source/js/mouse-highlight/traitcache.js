@@ -26,14 +26,14 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
   // ------- PUBLIC ----------
 
   // Call this before using cache if view may have changed
-  traitcache.resetCache = function () {
+  function resetCache() {
     updateCachedViewSize();
-    traitcache.updateCachedViewPosition();
+    updateCachedViewPosition();
     styleCache = {};
     rectCache = {};
-  };
+  }
 
-  traitcache.updateCachedViewPosition = function() {
+  function updateCachedViewPosition() {
 
     var pageXOffset = window.pageXOffset,
       pageYOffset = window.pageYOffset;
@@ -43,36 +43,36 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
       cachedViewPosition.y = pageYOffset;
       return true;
     }
-  };
+  }
 
-  traitcache.getCachedViewPosition = function() {
+  function getCachedViewPosition() {
     return cachedViewPosition;
-  };
+  }
 
-  traitcache.getCachedViewSize = function() {
+  function getCachedViewSize() {
     return cachedViewSize;
-  };
+  }
 
   // Can be used in the context of the highlighter, as the picker caches these values (expensive to get from browser)
-  traitcache.getStyle = function (element) {
-    var id = traitcache.getUniqueId(element),
+  function getStyle(element) {
+    var id = getUniqueId(element),
       style = styleCache[id];
     if (!style) {
       style = window.getComputedStyle(element);
       styleCache[id] = style;
     }
     return style;
-  };
+  }
 
   // Convenience method to get one cached style trait
-  traitcache.getStyleProp = function (element, propName) {
-    var styleObj = traitcache.getStyle(element);
+  function getStyleProp(element, propName) {
+    var styleObj = getStyle(element);
     return styleObj[propName];
-  };
+  }
 
   // Get rectangle in SCREEN coordinates
-  traitcache.getScreenRect = function (element) {
-    var rect = $.extend({}, traitcache.getRect(element)),
+  function getScreenRect(element) {
+    var rect = $.extend({}, getRect(element)),
       top = cachedViewPosition.y,
       left = cachedViewPosition.x;
     rect.top -= top;
@@ -80,19 +80,19 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
     rect.left -= left;
     rect.right -= left;
     return rect;
-  };
+  }
 
   // Get rectangle in DOCUMENT coordinates
-  traitcache.getRect = function (element) {
-    var id = traitcache.getUniqueId(element),
+  function getRect(element) {
+    var id = getUniqueId(element),
       rect = rectCache[id];
     if (!rect) {
       // Copy rect object into our own object so we can modify values
       rect = $.extend({}, element.getBoundingClientRect());
 
       // Use the scroll height when the overflow is visible, as it shows the full height
-      if (traitcache.getStyleProp(element, 'overflowY') === 'visible' &&
-        !parseFloat(traitcache.getStyleProp(element, 'borderRightWidth'))) {
+      if (getStyleProp(element, 'overflowY') === 'visible' &&
+        !parseFloat(getStyleProp(element, 'borderRightWidth'))) {
         var scrollHeight = element.scrollHeight;
         if (scrollHeight > 1 && scrollHeight > element.clientHeight) {
           rect.height = Math.max(rect.height, scrollHeight * cachedViewSize.zoom);
@@ -100,8 +100,8 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
       }
 
       // Use the scroll width when the overflow is visible, as it shows the full height
-      if (traitcache.getStyleProp(element, 'overflowX') === 'visible' &&
-        !parseFloat(traitcache.getStyleProp(element, 'borderBottomWidth'))) {
+      if (getStyleProp(element, 'overflowX') === 'visible' &&
+        !parseFloat(getStyleProp(element, 'borderBottomWidth'))) {
         rect.width = Math.max(rect.width, element.scrollWidth * cachedViewSize.zoom);
       }
 
@@ -120,25 +120,25 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
     }
 
     return rect;
-  };
+  }
 
   // Hidden for any reason? Includes offscreen or dimensionless, or tiny (if doTreatTinyAsHidden == true)
-  traitcache.isHidden = function(element, doTreatTinyAsHidden) {
-    var rect = traitcache.getRect(element),
+  function isHidden(element, doTreatTinyAsHidden) {
+    var rect = getRect(element),
       MIN_RECT_SIDE_TINY = 5,
-      minRectSide = doTreatTinyAsHidden ? MIN_RECT_SIDE_TINY * traitcache.getCachedViewSize().zoom : 1;
+      minRectSide = doTreatTinyAsHidden ? MIN_RECT_SIDE_TINY * getCachedViewSize().zoom : 1;
     return (rect.right < 0 || rect.top < 0 || rect.width < minRectSide || rect.height < minRectSide);
-  };
+  }
 
 
-  traitcache.getUniqueId = function(element) {
+  function getUniqueId(element) {
     var currId = getStoredUniqueId(element);
     if (currId) {
       return currId;
     }
     $(element).data('sc', ++uniqueIdCounter);   // Possibly a memory issue
     return uniqueIdCounter;
-  };
+  }
 
   // ------- PRIVATE -----------
 
@@ -150,6 +150,23 @@ define(['jquery', 'zoom/zoom'], function($, zoomMod) {
   function updateCachedViewSize() {
     cachedViewSize.height = window.innerHeight;
     cachedViewSize.width = window.innerWidth;
-    cachedViewSize.zoom = zoomMod.getCompletedZoom()
+    cachedViewSize.zoom = zoomMod.getCompletedZoom();
   }
+  var publics = {
+    resetCache: resetCache,
+    updateCachedViewPosition: updateCachedViewPosition,
+    getCachedViewPosition: getCachedViewPosition,
+    getCachedViewSize: getCachedViewSize,
+    getStyle: getStyle,
+    getStyleProp: getStyleProp,
+    getScreenRect: getScreenRect,
+    getRect: getRect,
+    isHidden: isHidden,
+    getUniqueId: getUniqueId
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

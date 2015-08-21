@@ -22,7 +22,7 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
    * Reposition the zoom slider thumb on badge-panel state change or thumb change callback.
    * This does not change the current zoom of the page -- it only changes the slider appearance.
    */
-  sliderView.updateThumbPosition = function(currZoom) {
+  function updateThumbPosition(currZoom) {
     var thumbId          = BP_CONST.ZOOM_SLIDER_THUMB_ID,
         thumbElement     = helper.byId(thumbId),
         panelSliderWidth = BP_CONST.TRANSFORMS.PANEL[thumbId].translateX,
@@ -41,20 +41,20 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
 
   // Update the slider thumb position on bp view updates because the entire slider changes size
   // (it scales more horizontally than vertically)
-  sliderView.render = function() {
+  function render() {
     var currZoom = zoomMod.getCompletedZoom();
-    sliderView.updateThumbPosition(currZoom);
-    sliderView.updateZoomValue(currZoom);
-  };
+    updateThumbPosition(currZoom);
+    updateZoomValue(currZoom);
+  }
 
-  sliderView.enableRealSettings = function() {
+  function enableRealSettings() {
     state.set('isRealSettings', true);
-  };
+  }
 
   /*
     Display new zoom value.
    */
-  sliderView.updateZoomValue = function(currZoom) {
+  function updateZoomValue(currZoom) {
     // 1. Set aria-valuenow for screen readers
     // We do this when zoom is finished so that the screen reader is not trying to read every
     // new value during an animation which would be way too verbose
@@ -88,5 +88,15 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
       postZoomText = locale.translate(BP_CONST.ZOOM_STATE_LABELS.POST_ZOOM);
     return preZoomText + locale.translateNumber(currZoom, 2) + postZoomText;
   }
+  var publics = {
+    updateThumbPosition: updateThumbPosition,
+    render: render,
+    enableRealSettings: enableRealSettings,
+    updateZoomValue: updateZoomValue
+  };
 
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

@@ -45,8 +45,9 @@ define(['custom', '[required-module-1]', '[required-module-2]'], function (custo
 
   });
 
-});
+
 
 // 8 - Delete all instruction comments from you customization script file.
 
-// 9 - Reference this file in the custom .mk file, which can be found in /custom-config/
+// 9 - Reference this file in the custom.mk file, which can be found in /custom-config/
+});

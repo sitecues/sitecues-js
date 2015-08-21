@@ -234,5 +234,5 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
   }
 
   initIfBadgeReady();
-
+  // no publics
 });

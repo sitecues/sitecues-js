@@ -109,7 +109,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
   }
 
 
-  settings.getGeometryTargets = function(cssValues) {
+  function getGeometryTargets(cssValues) {
     return cssValues;
   };
 
@@ -152,4 +152,12 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
   }
 
   sitecues.on('bp/did-change', onPanelUpdate);
+  var publics = {
+    getGeometryTargets: getGeometryTargets
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

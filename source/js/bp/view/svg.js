@@ -231,11 +231,19 @@ define(['locale/locale', 'util/platform'], function(locale, platform) {
 
     return text;
   }
-  bpSVG.getSvg = function() {
+  function getSvg() {
     var svgWithCorrectSitecuesUrls = convertSitecuesUrlsToAbsolute(svg),
       svgWithAllAbsoluteUrls = convertRelativeUrlsToAbsolute(svgWithCorrectSitecuesUrls),
       localizedSvg = locale.localizeStrings(svgWithAllAbsoluteUrls);
 
     return localizedSvg;
   };
+  var publics = {
+    getSvg: getSvg
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });
