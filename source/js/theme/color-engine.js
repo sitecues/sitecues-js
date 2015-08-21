@@ -58,7 +58,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
    * @param {string} type one of the theme names from color-choices.js
    * @param {number} intensity (optional) = .01-1
    */
-  colorEngine.applyTheme = function(type, intensity, textHue) {
+  function applyTheme(type, intensity, textHue) {
 
     function applyThemeImpl() {
       var
@@ -692,8 +692,11 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
     sitecues.applyTheme  = colorEngine.applyTheme;
   }
 
+  var publics = {
+    applyTheme: applyTheme
+  };
   if (SC_UNIT) {
-    $.extend(exports, colorEngine);
+    module.exports = publics;
   }
-
+  return publics;
 });

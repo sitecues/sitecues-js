@@ -39,7 +39,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
     // Method for animation
     requestFrame = window.requestAnimationFrame || window.msRequestAnimationFrame ||
       function (fn) {
-        return setTimeout(fn, ONE_ANIMATION_FRAME_MS)
+        return setTimeout(fn, ONE_ANIMATION_FRAME_MS);
       },
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
@@ -227,7 +227,6 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
       // Didn't move or target reached
       if (isTargetReached) {
         // Finished
-        var hasMoreToScroll = direction > 0 ? midAnimationTop < maxTop - MIN_SCROLL : midAnimationTop > MIN_SCROLL;
         if (isKeyStillDown) {
           performHLBScroll(nextMove);  // Repeat for scrolling, but not for moving HLB
         }
@@ -278,7 +277,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
   function prepareMovement() {
     // Hide current HLB so it doesn't interfere with getElementFromPoint
     if (hlbElement) {
-      hlbElement.style.display = 'none'
+      hlbElement.style.display = 'none';
     }
     fixedFixer.setAllowMouseEvents(false);
   }
@@ -331,7 +330,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
 
   // Don't allow the mouse highlight to follow scroll events from keyboard panning
   function setIsScrollTrackingEnabled(doTrackScroll) {
-    sitecues.emit('mh/track-scroll', doTrackScroll);
+    sitecues.emit('mh/do-track-scroll', doTrackScroll);
   }
 
   function moveInDirection(horizDir, vertDir, isShifted) {
@@ -416,7 +415,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
       for (var spreadDistance = spreadStart; !$picked && spreadDistance < spreadEnd; spreadDistance += SPREAD_STEP_SIZE) {
         if (isVertMovement) {
           // Enable crosshatch pattern
-          toggleExtraY = toggleExtraY ? 0 : SPREAD_STEP_SIZE / 2
+          toggleExtraY = toggleExtraY ? 0 : SPREAD_STEP_SIZE / 2;
         }
 
         // Test dots in orthogonal directions from base direction of movement
@@ -643,7 +642,7 @@ define('jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 
 
   function tryHighlight($picked) {
     var doKeepHighlightHidden = !!hlbElement;
-    return highlight($picked, false, false, doKeepHighlightHidden);
+    return mh.highlight($picked, false, false, doKeepHighlightHidden);
   }
 
   function moveByTagName(acceptableTagsMap, isReverse) {

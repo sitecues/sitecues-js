@@ -282,7 +282,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
   }
 
   function doFollowScroll(isFollowMouseEnabled) {
-    sitecues.emit('mh/track-scroll', isFollowMouseEnabled);
+    sitecues.emit('mh/do-track-scroll', isFollowMouseEnabled);
   }
 
   // bind key hook to window
