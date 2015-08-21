@@ -6,6 +6,8 @@
 
 define(['custom'], function (custom) {
 
+  'use strict';
+
   custom.register('mouse-highlight/pick', function () {
 
     this.provideCustomSelectors({
