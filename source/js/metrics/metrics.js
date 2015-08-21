@@ -4,6 +4,7 @@
 // jshint -W016
 define(['metrics/util', 'jquery', 'conf/user/manager', 'audio/audio', 'locale/locale'],
   function(metricsUtil, $, conf, audio, locale) {
+
   'use strict';
 
   /**

@@ -1,5 +1,5 @@
 // focus enhancement (make focus easier to see)
-sitecues.use('jquery', 'conf/user/manager', function($, conf) {
+define(['jquery', 'conf/user/manager'], function($, conf) {
 
   'use strict';
 

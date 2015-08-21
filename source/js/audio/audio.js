@@ -138,12 +138,12 @@ define('conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util
   function getAudioPlayer() {
     if (!audioPlayer) {
       if (platform.browser.isSafari) {
-        sitecues.use('audio/safari-player', function(player) {
+        require(['audio/safari-player'], function(player) {
           audioPlayer = player;
         });
       }
       else {
-        sitecues.use('audio/html5-player', function(player) {
+        require(['audio/html5-player'], function(player) {
           audioPlayer = player;
         });
       }

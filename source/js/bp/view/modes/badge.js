@@ -335,9 +335,4 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
     return classBuilder;
   };
 
-  // *** Unit tests export... ***
-  if (SC_UNIT) {
-    exports.badge = badge;
-  }
-
 });

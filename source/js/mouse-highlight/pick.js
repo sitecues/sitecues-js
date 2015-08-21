@@ -270,7 +270,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     function processResult(pickedIndex) {
       // Log the results if necessary for debugging
       if (SC_DEV && isDebuggingOn) {
-        sitecues.use('mouse-highlight/pick-debug', function(pickDebug) {
+        require(['mouse-highlight/pick-debug'], function(pickDebug) {
           // Use sitecues.togglePickerDebugging() to turn on the logging
           pickDebug.logHeuristicResult(scoreObjs, bestIndex, candidates);
         });

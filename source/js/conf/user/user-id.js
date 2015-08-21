@@ -16,7 +16,7 @@ define(['util/localstorage'], function(ls) {
     }
     else {
       SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-      sitecues.use('jquery', function (jquery) {
+      require(['jquery'], function (jquery) {
         jquery.ajax({
           xhrFields: {
             withCredentials: true

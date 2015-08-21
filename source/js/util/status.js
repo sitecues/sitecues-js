@@ -150,9 +150,5 @@ define(['jquery', 'audio/audio', 'conf/user/manager'], function ($, audio, conf)
     return 'Fetching sitecues status...';
   }
 
-  if (SC_UNIT) {
-    module.exports.status = status;
-  }
-
   return status;
 });

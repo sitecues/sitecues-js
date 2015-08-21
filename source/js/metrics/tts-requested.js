@@ -6,7 +6,9 @@
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
 
-sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
+define(['metrics/util'], function (metricsUtil) {
+
+  'use strict';
 
   var SPEECH_TRIGGERS = ['space', 'shift', 'shift+m', 'shift+a'];
   var TTS_AUDIO_FORMATS = ['ogg', 'mp3', 'aac'];
@@ -19,87 +21,82 @@ sitecues.def('metrics/tts-requested', function (ttsRequested, callback) {
     'request_time' : 0                     // Number of milliseconds the TTS request took to complete.
   };
 
-  sitecues.use('metrics/util', 'jquery', function (metricsUtil) {
+  function init(ttsUrl) {
 
-    function init(ttsUrl) {
-      
-      var text = getQueryVariable(ttsUrl, 't');
+    var text = getQueryVariable(ttsUrl, 't');
 
-      ttsRequested.data = DEFAULT_STATE;
-      ttsRequested.data.audio_format = getTTSAudioFormat(ttsUrl);
-      ttsRequested.data.char_count   = decodeURIComponent(text.replace(/\+/g,  ' ')).length;
-      ttsRequested.data.request_time = 1;
-    }
+    ttsRequested.data = DEFAULT_STATE;
+    ttsRequested.data.audio_format = getTTSAudioFormat(ttsUrl);
+    ttsRequested.data.char_count   = decodeURIComponent(text.replace(/\+/g,  ' ')).length;
+    ttsRequested.data.request_time = 1;
+  }
 
-    function update(data) {
-      metricsUtil.update(ttsRequested, data);
-    }
+  function update(data) {
+    metricsUtil.update(ttsRequested, data);
+  }
 
-    function send() {
-      metricsUtil.send(ttsRequested);
-    }
+  function send() {
+    metricsUtil.send(ttsRequested);
+  }
 
-    function reset() {
-        ttsRequested.update(DEFAULT_STATE);
-    }
+  function reset() {
+    ttsRequested.update(DEFAULT_STATE);
+  }
 
-    function getTTSAudioFormat(ttsUrl) {
-      var ttsQueryURL = ttsUrl.split('/')[8];
-      var ttsFileName = ttsQueryURL.split('?')[0];
-      return ttsFileName.split('.')[1];
-    }
+  function getTTSAudioFormat(ttsUrl) {
+    var ttsQueryURL = ttsUrl.split('/')[8];
+    var ttsFileName = ttsQueryURL.split('?')[0];
+    return ttsFileName.split('.')[1];
+  }
 
 
-    // TODO: This function does not belong here . Make it a common utility.
-    function getQueryVariable(url, variable) {
+  // TODO: This function does not belong here . Make it a common utility.
+  function getQueryVariable(url, variable) {
 
-      var query = url.substring(url.indexOf('?') + 1),
-          vars = query.split('&'),
-          i, pair;
+    var query = url.substring(url.indexOf('?') + 1),
+      vars = query.split('&'),
+      i, pair;
 
-      for (i = 0; i < vars.length; i++) {
-        pair = vars[i].split('=');
-        if (pair[0] === variable) {
-          return pair[1];
-        }
+    for (i = 0; i < vars.length; i++) {
+      pair = vars[i].split('=');
+      if (pair[0] === variable) {
+        return pair[1];
       }
-
-      return '';
     }
 
-    // ============= Events Handlers ======================
-    // Create an instance on audio speech-play event.
-    sitecues.on('audio/speech-play', function (ttsUrl) {
-      if (!ttsRequested.data) {
-        ttsRequested.init(ttsUrl);
-      }
-      sitecues.emit('metrics/tts-requested/create');
-    });
+    return '';
+  }
 
-    sitecues.on('metrics/update', function (metrics) {
-      if (ttsRequested.data) {
-        ttsRequested.update(metrics.data);
-      }
-    });
-
-    // Update requested time
-    sitecues.on('audio/playing', function (metrics) {
-      if (ttsRequested.data) {
-        ttsRequested.update(metrics.data);
-
-        // Send the metric data and clear an instance data on hlb opened(ready) event.
-        ttsRequested.send();
-        ttsRequested.reset();
-      }
-    });
-
-    // ============= The API ======================
-    ttsRequested.init = init;
-    ttsRequested.update = update;
-    ttsRequested.send = send;
-    ttsRequested.reset = reset;
-
-    // Done.
-    callback();
+  // ============= Events Handlers ======================
+  // Create an instance on audio speech-play event.
+  sitecues.on('audio/speech-play', function (ttsUrl) {
+    if (!ttsRequested.data) {
+      ttsRequested.init(ttsUrl);
+    }
+    sitecues.emit('metrics/tts-requested/create');
   });
+
+  sitecues.on('metrics/update', function (metrics) {
+    if (ttsRequested.data) {
+      ttsRequested.update(metrics.data);
+    }
+  });
+
+  // Update requested time
+  sitecues.on('audio/playing', function (metrics) {
+    if (ttsRequested.data) {
+      ttsRequested.update(metrics.data);
+
+      // Send the metric data and clear an instance data on hlb opened(ready) event.
+      ttsRequested.send();
+      ttsRequested.reset();
+    }
+  });
+
+  // ============= The API ======================
+  ttsRequested.init = init;
+  ttsRequested.update = update;
+  ttsRequested.send = send;
+  ttsRequested.reset = reset;
+
 });

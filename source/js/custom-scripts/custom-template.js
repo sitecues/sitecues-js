@@ -25,34 +25,24 @@
    *               updating the CSS rules of some elements of the home-page."] 
    */
 
-  sitecues.def(function (module, callback, log) {
+  define(['custom', '[required-module-1]', '[required-module-2]'], function (custom, required_module_1, required_module_2) {
 
-    // 5 - Insert your [module-to-customize] and your [required-modules] in the use() statement below...
-    // 
-    //     Eg:
-    //     
-    //     sitecues.use('customization', 'picker', 'jquery', function (customization, picker, jquery) {
-    //     
-    sitecues.use('custom', '[required-module-1]', '[required-module-2]', function (custom, required_module_1, required_module_2) {
+    // 6 - Insert the [module-to-customize] for the module that the customization should run in.
+    //          You can find the [module-to-customize] name in the define() statement of the module
+    //          that you want to customize. Make sure you use the full path-name of the module
+    //          including any slashes.
+    //
+    //          Eg:
+    //
+    //          custom.register('mouse-highlight/picker', function (event) {
+    //
+    custom.register('[module-to-customize]', function (event) {
 
-      // 6 - Insert the [module-to-customize] for the module that the customization should run in.
-      //          You can find the [module-to-customize] name in the def() statement of the module
-      //          that you want to customize. Make sure you use the full path-name of the module
-      //          including any slashes.
-      //          
-      //          Eg:
-      //
-      //          custom.register('mouse-highlight/picker', function (event) {
-      //          
-      custom.register('[module-to-customize]', function (event) {
-          
-          // 7 - Insert your customization code here. This function runs AFTER the module is loaded.
-          alert('Your customization callback executed successfully!');
+        // 7 - Insert your customization code here. This function runs AFTER the module is loaded.
+        alert('Your customization callback executed successfully!');
 
-      });
+    });
 
-      callback();
-    })
   });
 
   // 8 - Delete all instruction comments from you customization script file.
