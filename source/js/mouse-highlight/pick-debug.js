@@ -1,3 +1,5 @@
+// Has not been converted to the new module system yet
+
 /*global console: true */
 
 // This helps debug the picker. Use sitecues.togglePickerDebugging() to turn
