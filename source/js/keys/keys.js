@@ -208,7 +208,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     }
 
     // Emit event defined for key
-    require('command/' + commandName, function(commandFn) {
+    require(['command/' + commandName], function(commandFn) {
       commandFn(event, keyName);
     });
   }

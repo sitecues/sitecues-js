@@ -242,7 +242,7 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
   function performZoomSliderCommand(keyCode) {
     var deltaSliderCommand = DELTA_KEYS[keyCode];
     if (deltaSliderCommand) {
-      require('zoom/zoom', function(zoomMod) {
+      require(['zoom/zoom'], function(zoomMod) {
         var zoomFn = deltaSliderCommand > 0 ? zoomMod.beginZoomIncrease : zoomMod.beginZoomDecrease;
         zoomFn();
       });

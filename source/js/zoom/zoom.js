@@ -3,7 +3,7 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define('jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'zoom/zoom-forms',
+define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'zoom/zoom-forms'],
   function ($, conf, site, platform, common, transform, zoomForms) {
 
   'use strict';

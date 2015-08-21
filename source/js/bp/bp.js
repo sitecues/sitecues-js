@@ -17,8 +17,8 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define('bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants', 'zoom/zoom',
-  'bp/placement', 'bp/view/elements/slider', 'bp/size-animation', 'platform', 'conf/site', 'util/color',
+define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants', 'zoom/zoom',
+  'bp/placement', 'bp/view/elements/slider', 'bp/size-animation', 'platform', 'conf/site', 'util/color'],
   function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, placement, slider, sizeAnimation, platform, site, colorUtil) {
 
   'use strict';
