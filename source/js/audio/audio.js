@@ -24,7 +24,6 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     if (!ttsOn) {
       return;
     }
-    stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     speakContent($content);
   }
 
@@ -46,11 +45,16 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
   function speakContent($content) {
     var text = builder.getText($content);
     if (text) {
-      var TTSUrl = getTTSUrl(text, $content);
-      getAudioPlayer().playAudioSrc(TTSUrl);
-      sitecues.emit('audio/speech-play', TTSUrl);
-      addStopAudioHandlers();
+      speakText(text, locale.getElementLang($content[0]));
     }
+  }
+
+  function speakText(text, lang) {
+    stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
+    var TTSUrl = getTTSUrl(text, lang);
+    getAudioPlayer().playAudioSrc(TTSUrl);
+    sitecues.emit('audio/speech-play', TTSUrl);
+    addStopAudioHandlers();
   }
 
   function addStopAudioHandlers() {
@@ -77,9 +81,9 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
-  // $content is an optional parameter. If it exists, the closest lang parameter
-  function getLanguageParameter($content) {
-    return '?l=' + (locale.getElementLang($content)) + '&';
+  // lang is an optional parameter. If it doesn't exist, the document language will be used.
+  function getLanguageParameter(lang) {
+    return '?l=' + (lang || locale.getDocumentLang()) + '&';
   }
 
   function getAudioKeyUrl(key) {  // TODO why does an audio cue need the site id?
@@ -88,9 +92,14 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     return sitecues.getApiUrl(restOfUrl);
   }
 
-  function getTTSUrl(text, $content) {
-    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForTTS() +
-      getLanguageParameter($content && $content[0]) + 't=' + encodeURIComponent(text);
+  /**
+   * Get URL for speaking text
+   * @param text  Text to be spoken
+   * @param lang  Optional language parameter -- defaults to document language
+   * @returns {string} url
+   */
+  function getTTSUrl(text, lang) {
+    var restOfUrl = 'tts/site/' + site.getSiteId() + '/tts.' + getMediaTypeForTTS() + getLanguageParameter(lang) + 't=' + encodeURIComponent(text);
     return sitecues.getApiUrl(restOfUrl);
   }
 

@@ -70,6 +70,10 @@ define([], function() {
     return getFullWebsiteLang();
   }
 
+  locale.getDocumentLang = function() {
+    return locale.getElementLang(document.body);
+  };
+
   /**
    * Represents browser language.
    * @returns String Example: 'en_US'
