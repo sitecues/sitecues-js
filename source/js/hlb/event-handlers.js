@@ -9,8 +9,6 @@
 // TODO: Call this module scrolling.js
 define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, common, keys, platform) {
 
-  'use strict';
-
   /////////////////////////
   // PRIVATE VARIABLES
   ////////////////////////

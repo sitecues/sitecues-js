@@ -3,8 +3,6 @@
  */
 define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom'],
   function(state, BP_CONST, helper, platform, zoomMod) {
-  'use strict';
-
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {

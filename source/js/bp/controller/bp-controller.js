@@ -4,7 +4,6 @@ BP Controller
 define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/helper'],
   function (BP_CONST, focusController, state, helper) {
 
-  'use strict';
   // How long we wait before expanding BP
   var hoverDelayTimer;
 

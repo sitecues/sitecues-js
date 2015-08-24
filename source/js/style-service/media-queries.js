@@ -3,8 +3,7 @@
  */
 define([], function () {
 
-  'use strict';
-  
+
   function isActiveMediaQuery(mediaQuery) {
 
     if (!mediaQuery) {

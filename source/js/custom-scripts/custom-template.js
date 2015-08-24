@@ -27,8 +27,6 @@
 
 define(['custom', '[required-module-1]', '[required-module-2]'], function (custom, required_module_1, required_module_2) {
 
-  'use strict';
-
   // 6 - Insert the [module-to-customize] for the module that the customization should run in.
   //          You can find the [module-to-customize] name in the define() statement of the module
   //          that you want to customize. Make sure you use the full path-name of the module

@@ -4,7 +4,6 @@
 define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/platform', 'util/animate'],
   function (BP_CONST, helper, locale, state, platform, animate) {
 
-  'use strict';
   var
     PANELS_WITH_CARDS = { tips: 1, settings: 1},
     PULSE_NEXT_BUTTON_ANIMATION_MS = 300,

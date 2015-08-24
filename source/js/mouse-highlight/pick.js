@@ -29,8 +29,6 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
   function($, common, conf, site, traitcache, traits, judge) {
 
-  'use strict';
-
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
     MIN_ANCESTORS_TO_ANALYZE = 4,    // Three is enough -- after that, we can stop analyzing if things start to look unusable

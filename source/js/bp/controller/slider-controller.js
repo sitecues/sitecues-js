@@ -4,8 +4,6 @@
 define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/state', 'bp/view/elements/slider'],
   function (BP_CONST, helper, platform, zoomMod, state, sliderView) {
 
-  'use strict';
-
   var isListeningToWindowMouseEvents;
 
   /**

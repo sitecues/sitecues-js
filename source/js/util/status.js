@@ -1,7 +1,5 @@
 define(['jquery', 'audio/audio', 'conf/user/manager'], function ($, audio, conf) {
 
-  'use strict';
-
   function format(object) {
 
     // Helper to turn objects into string representations for logging.

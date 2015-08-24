@@ -1,7 +1,5 @@
 // TODO we can save a lot of bytes by setting these directly on the state object (instead of inside .data)
 define([], function() {
-  'use strict';
-
   var data = {
     currentMode             : 0,     // 0 - 1, 0 is badge, 1 is panel, anything in between means its currently transitioning
     transitionTo            : 0,     // 0 - 1, 0 is badge, 1 is panel, it cannot be anything in between (doesnt seem to make sense to transition to anything other than the badge or panel state)

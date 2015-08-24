@@ -1,8 +1,6 @@
 // TODO wave animation broken except in default badge
 define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/locale'],
   function (BP_CONST, helper, audio, state, locale) {
-  'use strict';
-
   var waveAnimationTimer,
       waveAnimationStepNum;
 

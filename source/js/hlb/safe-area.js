@@ -1,7 +1,5 @@
 define([], function() {
 
-  'use strict';
-
   /////////////////////////
   // PRIVATE VARIABLES
   ////////////////////////

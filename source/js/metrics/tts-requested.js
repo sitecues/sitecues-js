@@ -8,8 +8,6 @@
 
 define(['metrics/util'], function (metricsUtil) {
 
-  'use strict';
-
   var data;
   var SPEECH_TRIGGERS = ['space', 'shift', 'shift+m', 'shift+a'];
   var TTS_AUDIO_FORMATS = ['ogg', 'mp3', 'aac'];

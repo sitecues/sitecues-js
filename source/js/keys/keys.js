@@ -1,8 +1,6 @@
 define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
   function($, mh, common, hlb) {
 
-  'use strict';
-
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
     // The key tests return true if the correct key was pressed, the current focus

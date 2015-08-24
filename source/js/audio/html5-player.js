@@ -9,8 +9,6 @@
 // 4 = HAVE_ENOUGH_DATA  - enough data available to start playing
 define([], function () {
 
-  'use strict';
-
   var audioElements    = [],
       HAVE_FUTURE_DATA = 3;
 

@@ -5,8 +5,6 @@
 // Define dependency modules.
 define(['conf/site', 'jquery'], function(site, $) {
 
-  'use strict';
-
   var toClass = {}.toString;
 
   function send(instance) {

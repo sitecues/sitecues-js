@@ -5,8 +5,6 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     'audio/audio', 'util/geo', 'util/platform'],
   function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, platform) {
 
-  'use strict';
-
   var
 
   INIT_STATE = {

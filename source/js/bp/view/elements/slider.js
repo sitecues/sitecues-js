@@ -12,8 +12,6 @@
 define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/locale'],
   function (BP_CONST, state, zoomMod, helper, locale) {
 
-  'use strict';
-
   /*
    *** Public methods ***
    */

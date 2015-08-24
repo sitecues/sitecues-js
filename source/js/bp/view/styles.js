@@ -1,7 +1,5 @@
 define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (helper, platform, BP_CONST, site) {
 
-  'use strict';
-
   var
     isAnimationDebuggingOn = false,
 

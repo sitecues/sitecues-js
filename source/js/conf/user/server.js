@@ -4,8 +4,6 @@
  */
 define(['conf/user/manager', 'util/localstorage', 'jquery'], function(manager, ls, $) {
 
-  'use strict';
-
   // URLs for loading/saving data
   var lsByUserId;
   var params = '/' + location.hostname + '?callback=?';

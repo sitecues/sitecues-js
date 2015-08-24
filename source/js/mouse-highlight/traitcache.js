@@ -7,7 +7,6 @@
  */
 define(['jquery', 'zoom/zoom'], function($, zoomMod) {
 
-  'use strict';
   var uniqueIdCounter = 0,
     styleCache = {},
     rectCache = {},

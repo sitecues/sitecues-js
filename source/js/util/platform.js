@@ -4,8 +4,6 @@
  */
 define([], function() {
 
-  'use strict';
-
   // Store the agent and platform variables for later use
   var agent    = navigator.userAgent || '',
       platform = navigator.platform.toLowerCase(),

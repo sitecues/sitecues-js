@@ -34,8 +34,6 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     'locale/locale'],
     function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale) {
 
-  'use strict';
-
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
     DISABLED_PANEL_TRANSLATE_Y = -198,

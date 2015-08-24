@@ -3,8 +3,6 @@
  */
 define(['jquery', 'conf/user/manager', 'util/common', 'util/platform'], function($, conf, common, platform) {
 
-  'use strict';
-
   //////////////////////////////
   // PRIVATE VARIABLES
   /////////////////////////////

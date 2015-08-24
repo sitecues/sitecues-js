@@ -5,8 +5,6 @@
  */
 define([], function () {
 
-  'use strict';
-
   // Best practice is to use a single audio context per window.
   var context,
     volumeNode,

@@ -7,8 +7,6 @@
 define(['bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio', 'util/animate', 'util/transform'],
   function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
 
-  'use strict';
-
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
       MORE_BTN_TRANSLATEX,

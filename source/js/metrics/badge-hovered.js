@@ -4,8 +4,6 @@
  */
 define(['metrics/util'], function (metricsUtil) {
 
-  'use strict';
-
   var DEFAULT_STATE = {'name': 'badge-hovered'};
 
   // ============= Objects methods ======================

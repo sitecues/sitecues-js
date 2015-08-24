@@ -6,8 +6,6 @@
 define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'zoom/zoom-forms'],
   function ($, conf, site, platform, common, transform, zoomForms) {
 
-  'use strict';
-
   // Default zoom configuration
 
   // Can be customized via provideCustomConfig()

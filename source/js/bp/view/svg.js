@@ -10,8 +10,6 @@ The purpose of some elements:
 define(['locale/locale', 'util/platform'], function(locale, platform) {
   /*jshint multistr: true */
 
-  'use strict';
-
   var svg = '\
 <sc id="scp-focus-outline" role="presentation"></sc>\
 \

@@ -7,8 +7,6 @@
 define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area'],
   function($, conf, hlbStyling, common, hlbSafeArea) {
 
-  'use strict';
-
   /////////////////////////
   // PRIVATE VARIABLES
   /////////////////////////

@@ -4,8 +4,6 @@
 
 define(['jquery', 'conf/user/manager', 'util/platform'], function ($, conf, platform) {
 
-  'use strict';
-
     var DEFAULT_COMBOBOX_ZOOM_CSS = {
         outlineOffset: '2px',  // Make sure focus outline goes outside
         transformOrigin: '0% 0%'

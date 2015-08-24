@@ -9,8 +9,6 @@
 define(['jquery', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-css', 'util/platform'],
   function (  $, styleService, conf, cursorCss, platform) {
 
-  'use strict';
-
   var autoSize = 1,
       // Regexp is used to match URL in the string given(see below).
       URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',

@@ -2,7 +2,6 @@
 define(['bp/constants', 'bp/model/state', 'bp/helper'],
   function (BP_CONST, state, helper) {
 
-  'use strict';
   var savedDocumentFocus,
     focusElement,
     isInitialized,

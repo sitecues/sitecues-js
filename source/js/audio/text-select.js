@@ -4,8 +4,6 @@
  */
 define([], function () {
 
-  'use strict';
-
   var wasOn = false;
 
   function speakSelectedTextOnDelay() {

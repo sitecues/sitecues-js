@@ -8,8 +8,6 @@
 
 define([ 'util/platform' ], function(platform) {
 
-  'use strict';
-
   // Skips past non-numeric characters and get the next number as type 'number'
   // It will include a negative sign and decimal point if it exists in the string
   function getNumberFromString(str) {

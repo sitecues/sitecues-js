@@ -3,8 +3,6 @@
  */
 define([], function () {
 
-  'use strict';
-
   var TRANSPARENT = 'rgba(0, 0, 0, 0)',
     MIN_LUMINOSITY_LIGHT_TONE = 0.62;
 

@@ -5,8 +5,6 @@
 define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/platform',
     'theme/color-choices', 'util/color', 'theme/img-classifier'],
   function($, conf, styleService, platform, colorChoices, colorUtil, imgClassifier) {
-  'use strict';
-
   var $themeStyleSheet,
     THEME_STYLESHEET_NAME = 'sitecues-theme',
     REPAINT_MS = 40,

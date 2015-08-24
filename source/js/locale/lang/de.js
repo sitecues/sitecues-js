@@ -3,8 +3,6 @@ Temporary file for German wording.
 todo: remove it when we use API.
  */
 define(['locale/pl'], function() {
-  'use strict';
-
   return {
     // ARIA labels
     // - Main

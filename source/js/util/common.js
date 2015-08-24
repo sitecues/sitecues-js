@@ -3,8 +3,6 @@
  */
 define(['jquery'], function ($) {
 
-  'use strict';
-
   /*
    * Check if two Javascript objects are equal.
    * TODO check if this is the best implementation for us and write in a clearer way

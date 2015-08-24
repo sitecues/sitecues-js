@@ -1,6 +1,4 @@
 define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, helper, transform) {
-  'use strict';
-
   var byId = helper.byId;
 
   function getAboutImage() {

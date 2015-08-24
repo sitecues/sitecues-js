@@ -1,6 +1,4 @@
 define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], function (BP_CONST, helper, state, platform) {
-  'use strict';
-
   var byId = helper.byId,
     isActive = false,
     currRating = 0;  // Zero = no rating defined

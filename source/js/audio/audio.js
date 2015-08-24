@@ -13,8 +13,6 @@
 define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util/platform', 'locale/locale'],
   function(conf, site, $, builder, platform, locale) {
 
-  'use strict';
-
   var ttsOn = false,
     audioPlayer,
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues

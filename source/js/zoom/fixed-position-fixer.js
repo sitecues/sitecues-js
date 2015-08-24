@@ -6,8 +6,6 @@
 define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', 'util/common'],
   function ($, zoomMod, platform, styleService, common) {
 
-  'use strict';
-
     var isOn = false,
       toolbarHeight = 0,
       fixedSelector            = null,   //CSS selectors & properties that specify position:fixed

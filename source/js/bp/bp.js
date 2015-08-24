@@ -21,8 +21,6 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
   'bp/placement', 'bp/view/elements/slider', 'bp/size-animation', 'util/platform', 'conf/site', 'util/color'],
   function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, placement, slider, sizeAnimation, platform, site, colorUtil) {
 
-  'use strict';
-
   /*
    *** Public methods ***
    */

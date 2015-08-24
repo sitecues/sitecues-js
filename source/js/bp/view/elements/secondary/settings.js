@@ -1,8 +1,6 @@
 define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
   function (BP_CONST, helper, conf, state) {
 
-  'use strict';
-
   var byId = helper.byId,
     isActive = false,
     settingsPanel,

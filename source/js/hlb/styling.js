@@ -6,8 +6,6 @@
 define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
   function ($, platform, common, conf) {
 
-  'use strict';
-
   ///////////////////////////
   // PUBLIC PROPERTIES
   //////////////////////////

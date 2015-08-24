@@ -2,8 +2,6 @@
  * Implements IE9-specific code
  */
 define(['jquery'], function($) {
-  'use strict';
-
   function init() {
     initIE9Cors();
   }

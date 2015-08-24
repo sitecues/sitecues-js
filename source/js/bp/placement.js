@@ -49,8 +49,6 @@
  */
 define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'bp/helper', 'util/platform'],
   function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
-  'use strict';
-
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,

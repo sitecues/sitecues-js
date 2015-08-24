@@ -1,8 +1,6 @@
 // focus enhancement (make focus easier to see)
 define(['jquery', 'conf/user/manager'], function($, conf) {
 
-  'use strict';
-
   var MIN_ZOOM = 1.4,   // minimum zoom at which focus enhancement appears
     FOCUS_RING_COLOR = 'rgba(82,168,236,.8)',    // color of focus enhancement
     $styleSheet = $(),

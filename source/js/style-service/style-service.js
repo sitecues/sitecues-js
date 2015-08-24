@@ -4,8 +4,6 @@
  */
 define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
 
-  'use strict';
-  
   var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
     combinedDOMStylesheetObject,
     SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',

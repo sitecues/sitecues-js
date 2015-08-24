@@ -10,8 +10,6 @@
  * - Localize a number string
  */
 define([], function() {
-  'use strict';
-
   var translations,
     DEFAULT_LANG = 'en',
     LANG_FOLDER = 'locale/lang/';

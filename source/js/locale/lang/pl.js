@@ -4,8 +4,6 @@
  todo: we need to check the translations
  */
 define(['locale/pl'], function() {
-  'use strict';
-
   return {
     // ARIA labels
     // - Main

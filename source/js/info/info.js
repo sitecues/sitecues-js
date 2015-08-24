@@ -1,8 +1,6 @@
 define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
   function($, site, dimmer, platform, locale, colorUtil) {
 
-  'use strict';
-
   var $iframe = $(),
     $closeButton = $(),
     INITIAL_CSS = {

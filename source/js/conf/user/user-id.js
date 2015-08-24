@@ -1,8 +1,6 @@
 // This module includes functionality used in user identification.
 define(['util/localstorage'], function(ls) {
 
-  'use strict';
-
   var userId = ls.getUserId();
 
   if (!userId) {

@@ -1,6 +1,4 @@
 define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (conf, common, $, zoomMod) {
-  'use strict';
-
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,

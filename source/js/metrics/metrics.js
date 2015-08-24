@@ -5,8 +5,6 @@
 define(['metrics/util', 'jquery', 'conf/user/manager', 'audio/audio', 'locale/locale'],
   function(metricsUtil, $, conf, audio, locale) {
 
-  'use strict';
-
   /**
    * *Session ID:* A random UUID v4 generated for this library session.
    * *Client time milliseconds:* The epoch time in milliseconds when the event occurred

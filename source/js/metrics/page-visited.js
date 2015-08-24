@@ -5,8 +5,6 @@
  */
 define(['metrics/util', 'zoom/zoom'], function(metricsUtil, zoom) {
 
-  'use strict';
-
   // ============= Objects methods ======================
   var pageVisited = {
     init: function() {

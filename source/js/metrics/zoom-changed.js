@@ -1,7 +1,5 @@
 define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (metricsUtil, $, conf, zoom) {
 
-  'use strict';
-
   var DEFAULT_STATE = {
     'name': 'zoom-changed',
     'is_slider_click': 0,                // Slider in panel

@@ -2,8 +2,6 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
   'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
   function($, mh, hlb, platform, dimmer, common, transform, picker, zoomMod, geo, fixedFixer) {
 
-  'use strict';
-
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
     SPREAD_STEP_SIZE = 32,

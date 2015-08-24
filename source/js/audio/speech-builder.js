@@ -5,8 +5,6 @@
  */
 
 define(['util/common', 'jquery'], function(common, $) {
-  'use strict';
-
   var textBuffer = '',
     TEXT_NODE = 3,
     ELEMENT_NODE = 1;

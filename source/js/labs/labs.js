@@ -8,8 +8,7 @@
 
 define(['conf/user/manager', 'jquery'], function(conf, $) {
   
-  'use strict';
-  
+
 
   var labSettings = $.extend({}, conf.get('labs'));
 

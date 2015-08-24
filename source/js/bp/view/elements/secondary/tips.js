@@ -3,8 +3,6 @@
  */
 define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
 
-  'use strict';
-
   var byId = helper.byId,
     animationTimers = [],
     animationFns = {

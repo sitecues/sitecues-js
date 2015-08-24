@@ -1,7 +1,5 @@
 define([], function() {
 
-  'use strict';
-
   var constants = {};
 
   // TODO don't repeat this in styles.js

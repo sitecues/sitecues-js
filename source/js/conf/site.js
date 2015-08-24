@@ -14,8 +14,6 @@
  */
 define(['jquery'], function($) {
 
-  'use strict';
-
   var
     fetchedSiteConfig = {},
     providedSiteConfig = sitecues.getSiteConfig(),

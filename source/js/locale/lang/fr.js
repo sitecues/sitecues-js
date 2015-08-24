@@ -3,8 +3,6 @@ Temporary file for English wording.
 todo: remove it when we use API.
  */
 define(['locale/fr'], function() {
-  'use strict';
-
   return {
     // ARIA labels
     // - Main

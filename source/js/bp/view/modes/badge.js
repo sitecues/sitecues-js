@@ -51,7 +51,6 @@
 define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/user/manager', 'conf/site'],
   function(BP_CONST, state, locale, helper, conf, site) {
 
-  'use strict';
   /*
    Default bounding box object.
    */

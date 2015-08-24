@@ -4,8 +4,6 @@
  */
 require([], function() {
   
-  'use strict';
-
   var customIndex = 0;
 
   var registry = {};

@@ -6,8 +6,6 @@
  *
 */
 define(['custom'], function (custom) {
-  'use strict';
-
   custom.register('bp/view/styles', function () {
     this.provideCustomPalette({
       'A': 'red',

@@ -5,8 +5,6 @@
 define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
   function ($, common, zoomMod, platform, traitcache) {
 
-  'use strict';
-
   var MIN_RECT_SIDE = 4;
 
   /**

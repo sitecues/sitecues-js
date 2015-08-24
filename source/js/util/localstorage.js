@@ -17,8 +17,6 @@
  */
 define([], function() {
 
-  'use strict';
-
   /*
    * Run the function everytime we want to work with Local Storage
    * because settings can be changes while working with sitecues.

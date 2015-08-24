@@ -5,8 +5,6 @@
 define(['hlb/dimmer', 'util/transform', 'jquery', 'hlb/positioning', 'util/platform'],
   function (dimmer, transform, $, hlbPositioning, platform) {
 
-  'use strict';
-
   var INFLATION_SPEED = 400, // Default inflation duration
       INFLATION_SPEED_FAST = 0, // Inflation duration when retargeting
       DEFLATION_SPEED = 150, // Default deflation duration

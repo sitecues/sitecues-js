@@ -25,8 +25,6 @@ define([
     mh,
     geo) {
 
-  'use strict';
-
   /////////////////////////
   // PRIVATE VARIABLES
   ////////////////////////

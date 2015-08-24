@@ -2,8 +2,6 @@
 * Methods for giving us coordinates and sizes, where jQuery was not giving us what we needed.
 */
 define([], function() {
-  'use strict';
-
   /**
    * Is the point inside the rectangle or within proximity pixels
    * @access public

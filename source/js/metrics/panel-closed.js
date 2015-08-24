@@ -4,8 +4,6 @@
  */
 define(['metrics/util', 'jquery'], function(metricsUtil, $) {
 
-  'use strict';
-
   var DEFAULT_STATE = {
     'name': 'panel-closed',
     'slider_interacted': 0,

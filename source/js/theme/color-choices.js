@@ -10,7 +10,6 @@
 //   http://www.leadingage.org/ and // - http://www.leadingage.org/
 
 define(['jquery', 'util/color'], function ($, colorUtil) {
-  'use strict';
   var hslToRgb = colorUtil.hslToRgb,
     rgbToHsl = colorUtil.rgbToHsl;
 

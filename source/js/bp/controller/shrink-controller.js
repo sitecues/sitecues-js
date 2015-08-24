@@ -4,7 +4,6 @@
 define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
   function (BP_CONST, common, state, helper) {
 
-  'use strict';
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,

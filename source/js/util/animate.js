@@ -5,8 +5,6 @@
 
 define(['util/transform', 'util/platform'], function (transform, platform) {
 
-  'use strict';
-
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {

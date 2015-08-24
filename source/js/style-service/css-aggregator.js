@@ -4,8 +4,6 @@
 
 define(['jquery', 'style-service/user-agent-css', 'conf/site', 'style-service/media-queries'], function ($, UA_CSS, site, mediaQueries) {
 
-  'use strict';
-
   var numPending = 0,
     sheets = [],
     onCssReadyFn,
