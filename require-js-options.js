@@ -7,7 +7,6 @@
     compress: {
       dead_code: true
     },
-    mangle: true,
-    warnings: true
+    mangle: true
   }
 })
