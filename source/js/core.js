@@ -10,13 +10,17 @@
 //      Or fire conf/did-complete?
 // TODO check on server.js -- doesn't seem like the code to store data on the server actually gets used!
 // TODO add to make -- jshint source/js --exclude source/js/jquery.js
+// TODO use seth's more modern jshint options
+// TODO Used to use these uglify options: -m -c dead_code=true    -- Which others should we use? Can we mangle property/key names now?
+//      If we need to set complex options can do -o build.js e.g. http://requirejs.org/docs/optimization.html#basics
+//      See all build options https://github.com/jrburke/r.js/blob/master/build/example.build.js
 
 // Later
 // TODO clean up metrics
 // TODO defer page-visited and possibly other metrics until user-id.js finishes getting reply (thus cookie with user id is set)
 //      user-id/did-complete
 // TODO load ie9.js if necessary
-// TODO move other weird ie9 code to ie9.js
+// TODO move other weird ie9 code to ie9.js  -- check out has.js support in r.js
 // TODO remove effects/animate from our custom build of jquery to save another 8k/3k
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
@@ -80,14 +84,8 @@ define([
 //  metrics_tts_requested,
 //  metrics_metrics
   ) {
-
-  'use strict';
-
-  // WARNING: **** DO NOT REMOVE OR CHANGE THE FOLLOWING LINE! ****
-  var version = '0.0.0-UNVERSIONED',
-
    // Array's prototype
-  arr = Array.prototype,
+  var arr = Array.prototype,
 
   // Either ws.sitecues.com/ or ws.dev.sitecues.com/
   apiDomain,
@@ -113,7 +111,7 @@ define([
 
   if (SC_DEV) {
     safe_production_msg('SITECUES MODE: SC_DEV');
-    safe_production_msg('SITECUES VERSION: '+version);
+    safe_production_msg('SITECUES VERSION: ' + SC_VERSION);
   }
 
   // This function is called when we are sure that no other library already exists in the page. Otherwise,
@@ -142,7 +140,7 @@ define([
   //////////////////////////////////////////////////////////////////////////////////////////
 
   function getVersion() {
-    return version;
+    return SC_VERSION;
   }
 
   function isProduction() {
@@ -393,7 +391,7 @@ define([
   // Resolve a URL as relative to the main script URL.
   // Add a version parameter so that new versions of the library always get new versions of files we use, rather than cached versions.
   function resolveSitecuesUrl(urlStr, paramsMap) {
-    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + version;
+    var url = resolveUrl(urlStr, getLibraryUrl()) + '?version=' + SC_VERSION;
 
     function addParam(name) {
       url += name + '=' + encodeURIComponent(paramsMap[name]) + '&';

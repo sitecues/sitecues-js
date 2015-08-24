@@ -24,11 +24,11 @@ else
 	custom-suffix-upper=-$(shell echo $(custom-name) | $(to-upper))
 endif
 
+# Are we making a local-only version?
 ifeq ($(sc-local), true)
-	# Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
-	extra-debug-flags="SC_LOCAL=true,"
+  # Build a version that doesn't use AJAX for settings, config or metrics -- can be used locally or pasted into a console
 else
-	extra-debug-flags="SC_LOCAL=false,"
+  sc-local=false
 endif
 
 # Make a build-specific version.
@@ -51,12 +51,9 @@ build:
 	@echo
 
 	@mkdir -p $(build-dir)/compile/js
-	@node node_modules/.bin/r.js -o baseUrl=source/js generateSourceMaps=true preserveLicenseComments=false optimize=uglify2 name=core out=target/compile/js/sitecues.js
-	# Copy all files to final target directory
-	@cp -R target/compile/js/* $(build-dir)/compile/js
-	# Overwrite sitecues.js with one that has the version set
-	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%' target/compile/js/sitecues.js > $(build-dir)/compile/js/sitecues.js
 
+	# Require.js build
+	node node_modules/.bin/r.js -o require-js-options.js baseUrl=source/js optimize=uglify2 out=$(build-dir)/compile/js/sitecues.js wrap.start="(function(SC_VERSION,SC_LOCAL,SC_DEV,SC_UNIT){'use strict';" wrap.end="}('$(custom-version)',$(sc-local),false,false));"
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
@@ -83,13 +80,9 @@ debug:
 	@echo
 
 	@mkdir -p $(build-dir)/compile/js
-	@node node_modules/.bin/r.js -o baseUrl=source/js name=core generateSourceMaps=true preserveLicenseComments=false optimize=none out=target/compile/js/sitecues.js
-	# Copy all files to final target directory
-	@cp -R target/compile/js/* $(build-dir)/compile/js
-  # Prefix sitecues.js with code to set the global variables. The rest of sitecues.js will be added on top
-	@echo "SC_DEV=true,SC_UNIT=false,"$(extra-debug-flags) > $(build-dir)/compile/js/sitecues.js
-	# Add to the final sitecues.js the compiled code with version set
-	@sed 's%0.0.0-UNVERSIONED%'$(custom-version)'%' target/compile/js/sitecues.js >> $(build-dir)/compile/js/sitecues.js
+
+	# Require.js build
+	node node_modules/.bin/r.js -o require-js-options.js optimize=none out=$(build-dir)/compile/js/sitecues.js wrap.start="(function(SC_VERSION,SC_LOCAL,SC_DEV,SC_UNIT) {'use strict';" wrap.end="}('$(custom-version)',$(sc-local),false,false));"
 
 	@echo "* File sizes:"
 	@(cd $(build-dir)/compile/js ; \
