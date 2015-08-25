@@ -15,6 +15,12 @@
       namespace: 'sitecues',
       insertRequire: ['core']
     },
+    { name: 'command/queue-key' },
+    { name: 'command/reset-sitecues' },
+    { name: 'command/reset-zoom' },
+    { name: 'command/toggle-speech' },
+    { name: 'command/zoom-increase' },
+    { name: 'command/zoom-decrease' },
     { name: 'locale/lang/de' },
     { name: 'locale/lang/en' },
     { name: 'locale/lang/es' },

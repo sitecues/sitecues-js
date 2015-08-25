@@ -30,7 +30,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
     isKeyStillDown,
     lastMoveCommand,
     $lastPicked,
-    // Queue of key navigation commands
+    // Queue of key navigation command
     navQueue = [],
     // Approximate amount of time for one animation frame
     ONE_ANIMATION_FRAME_MS = 16,  // 16ms is about 60fps
@@ -81,7 +81,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
       lastMoveCommand = null;
       var keyName = nextCommand.keyName;
 
-      // Non-movement commands
+      // Non-movement command
       if (keyName === 'space') {
         onSpace(nextCommand.shiftKey);
       }
@@ -99,7 +99,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
   }
 
   function onMovementCommand(nextMove) {
-    // Movement commands
+    // Movement command
     hlbElement = hlb.getElement();
 
     if (hlbElement && performHLBScroll(nextMove)) {
@@ -312,7 +312,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
       sitecues.emit('hlb/retarget');
     }
     else if (doAllowRepeat && isKeyStillDown && lastMoveCommand) {
-      // For movement, we need a delay between commands, otherwise it can happen too fast
+      // For movement, we need a delay between command, otherwise it can happen too fast
       var isFirstRepeat = !isKeyRepeating,
         repeatDelay = isFirstRepeat ? HIGHLIGHT_MOVE_FIRST_REPEAT_DELAY_MS : HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS;
       // Repeat last command if key is still pressed down

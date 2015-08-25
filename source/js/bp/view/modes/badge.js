@@ -36,7 +36,7 @@
 //     * Can we make animations even faster by rotating 1 degree
 //     * Intelligent positioning of textarea and close button
 // * Hook up
-//     * Actually zoom (via event queue so it's not filled up with commands?)
+//     * Actually zoom (via event queue so it's not filled up with command?)
 //     * Make sure it collapses back to appropriate place after zoom. Needs to zip to new badge location.
 //     * Does page initially load with a png or with svg image?
 //     * If we use png, how do we perfectly position new panel object over old svg

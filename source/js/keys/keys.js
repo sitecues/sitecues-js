@@ -186,7 +186,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
   // Handle key
   function handle(commandName, event, keyName) {
     // Prevent default behavior of key. The browser listens to these events
-    // and does not execute commands based on the key pressed
+    // and does not execute command based on the key pressed
     // (such as spacebar to page down, cmd+plus to zoom, arrow key to scroll, shift+arrow to select)
     event.preventDefault();
     // Keeps the rest of the handlers from being executed and prevents the event from bubbling up the DOM tree.
@@ -206,7 +206,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     }
 
     // Emit event defined for key
-    require(['command/' + commandName], function(commandFn) {
+    sitecues.require(['command/' + commandName], function(commandFn) {
       commandFn(event, keyName);
     });
   }

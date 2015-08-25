@@ -7,7 +7,7 @@ The purpose of some elements:
 - #scpspeechtarget adds animation styles for speech icon waves
 -
  */
-define(['locale/locale', 'util/platform'], function(locale, platform) {
+define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, platform) {
   /*jshint multistr: true */
 
   var svg = '\

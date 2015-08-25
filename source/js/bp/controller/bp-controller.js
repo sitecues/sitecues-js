@@ -59,7 +59,7 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
       return;
     }
 
-    // Perform widget-specific commands
+    // Perform widget-specific command
     // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
     var item = focusController.getFocusedItem();
 
