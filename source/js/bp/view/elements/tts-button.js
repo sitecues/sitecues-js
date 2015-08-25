@@ -156,10 +156,12 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
     waveAnimationStepNum = 0;
   }
 
-  // Update the TTS button view on any speech state change
-  sitecues.on('speech/did-change', updateTTSStateView);
+  function init() {
+    // Update the TTS button view on any speech state change
+    sitecues.on('speech/did-change', updateTTSStateView);
+  }
 
-  // Once BP is ready init the badge
-  sitecues.on('bp/did-complete', init);
-  // no publics
+  return {
+    init: init
+  };
 });

@@ -1,8 +1,10 @@
 /*
 BP Controller
  */
-define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/helper'],
-  function (BP_CONST, focusController, state, helper) {
+define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-controller',
+    'bp/controller/slider-controller', 'bp/model/state', 'bp/helper',
+    'bp/view/elements/tts-button', 'bp/view/elements/more-button'],
+  function (BP_CONST, focusController, shrinkController, sliderController, state, helper, ttsButton, moreButton) {
 
   // How long we wait before expanding BP
   var hoverDelayTimer;
@@ -45,9 +47,7 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
 
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-      require(['bp/controller/shrink-controller'], function(shrinkController) {
-        shrinkController.shrinkPanel(true);
-      });
+      shrinkController.shrinkPanel(true);
       return;
     }
 
@@ -250,10 +250,20 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/model/state', 'bp/
     }
   }
 
-  window.addEventListener('focus', onWindowFocus);
-  sitecues.on('bp/will-expand', willExpand);
-  sitecues.on('bp/will-shrink', willShrink);
-  sitecues.on('bp/did-shrink', didShrink);
-  sitecues.on('bp/did-complete', init);
-  // no publics
+  function init() {
+    window.addEventListener('focus', onWindowFocus);
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/will-shrink', willShrink);
+    sitecues.on('bp/did-shrink', didShrink);
+
+    shrinkController.init();
+    focusController.init();
+    sliderController.init();
+    ttsButton.init();
+    moreButton.init();
+  }
+
+  return {
+    init: init
+  };
 });

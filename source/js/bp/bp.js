@@ -17,9 +17,9 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants', 'zoom/zoom',
+define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants', 'zoom/zoom',
   'bp/placement', 'bp/view/elements/slider', 'bp/size-animation', 'util/platform', 'conf/site', 'util/color'],
-  function (state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, placement, slider, sizeAnimation, platform, site, colorUtil) {
+  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, placement, slider, sizeAnimation, platform, site, colorUtil) {
 
   /*
    *** Public methods ***
@@ -116,14 +116,11 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
     // Set badge classes. Render the badge. Render slider.
     updateView(true);
 
-    // Notify other modules we're completely ready
-    // slider.js     -> Bind mousedown handlers for A's, thumb, slider. updateZoomValueView.
-    // panel.js      -> Bind mousedown handler to SVG_ID
-    // zoom.js       -> performInitialLoadZoom
-    // tts-button.js -> init (TODO: Be certain that bp/did-create was not necessary)
-    sitecues.emit('bp/did-complete');
+    bpController.init();
 
     isInitialized = true;
+
+    sitecues.on('bp/did-change', updateView);
   }
 
   // This function augments the customers placeholder if found, otherwise creates the floating badge.
@@ -168,8 +165,6 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
     return (document.readyState === 'interactive' && !isBadgeAnImage(badgeElement)) || document.readyState === 'complete';
   }
 
-  sitecues.on('bp/did-change', updateView);
-
   /*
                          ********  INITIALIZATION **********
 
@@ -195,7 +190,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
     }
   }
 
-  function initIfBadgeReady() {
+  function init() {
 
     if (site.get('uiMode') === 'toolbar') {
       setTimeout(initBPFeature, 0);
@@ -231,6 +226,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
     }
   }
 
-  initIfBadgeReady();
-  // no publics
+    return {
+      init: init
+    };
 });

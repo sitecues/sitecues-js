@@ -135,18 +135,23 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio
     MORE_BTN_TRANSLATEX = currentBtnTranslate.left;
   }
 
-  // Add mouse listeners once BP is ready
-  sitecues.on('bp/did-complete', addMouseListeners);
+  function init() {
+    // Add mouse listeners once BP is ready
+    addMouseListeners();
 
-  // After a complete expansion of the badge, determine if and when we will show
-  // the "more" button.
-  sitecues.on('bp/did-expand', initButtonBehaviorOnExpansion);
+    // After a complete expansion of the badge, determine if and when we will show
+    // the "more" button.
+    sitecues.on('bp/did-expand', initButtonBehaviorOnExpansion);
 
-  // Allows other modules to show the more button.  For example, pressing the
-  // tab key to navigate and operate the panel.
-  sitecues.on('bp/did-focus-more-button', showMoreButtonInstantly);
+    // Allows other modules to show the more button.  For example, pressing the
+    // tab key to navigate and operate the panel.
+    sitecues.on('bp/did-focus-more-button', showMoreButtonInstantly);
 
-  // Always hide the more button when the panel is about to collapse.
-  sitecues.on('bp/will-shrink', hideHelpButton);
-  // no publics
+    // Always hide the more button when the panel is about to collapse.
+    sitecues.on('bp/will-shrink', hideHelpButton);
+  }
+
+  return {
+    init: init
+  };
 });

@@ -31,8 +31,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     'bp/view/elements/settings',
     'bp/view/elements/feedback',
     'bp/view/elements/about',
-    'locale/locale'],
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale) {
+    'locale/locale',
+    'bp/view/svg-transform-effects'],
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale, svgTransformEffects) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -42,6 +43,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     origPanelContentsRect,
     origOutlineHeight,
     isActive = false,
+    isInitialized,
     isCssLoaded,
 
     // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
@@ -368,6 +370,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
    */
   function toggleSecondaryPanel(feature) {
 
+    init();
+
     var featurePanelName = feature || getFeaturePanelName();
     if (featurePanelName) {
       toggleSecondaryFeature(featurePanelName);
@@ -501,12 +505,20 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
     toggleMouseListeners(false);
   }
 
-  // Add mouse listeners once BP is ready
-  sitecues.on('bp/did-complete', resetStyles);
+  function init() {
+    if (!isInitialized) {
+      // Add mouse listeners once BP is ready
+      resetStyles();
 
-  sitecues.on('bp/did-expand', onPanelOpen);
+      sitecues.on('bp/did-expand', onPanelOpen);
 
-  sitecues.on('bp/will-shrink', onPanelClose);
+      sitecues.on('bp/will-shrink', onPanelClose);
+
+      svgTransformEffects.init();
+
+      isInitialized = true;
+    }
+  }
 
   var publics = {
     toggleSecondaryPanel: toggleSecondaryPanel

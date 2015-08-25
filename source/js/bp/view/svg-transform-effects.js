@@ -93,9 +93,19 @@ define(['bp/helper', 'bp/constants', 'util/platform', 'util/transform', 'util/an
     hoversOn();
   }
 
-  sitecues.on('bp/did-expand', hoversOn);
-  sitecues.on('bp/will-shrink', hoversOff);
-  sitecues.on('bp/content-loaded', refreshHovers);
-  sitecues.on('bp/will-show-secondary-feature', cancelHovers);
-  // no publics
+  function init() {
+    sitecues.on('bp/did-expand', hoversOn);
+    sitecues.on('bp/will-shrink', hoversOff);
+    sitecues.on('bp/content-loaded', refreshHovers);
+    sitecues.on('bp/will-show-secondary-feature', cancelHovers);
+  }
+
+  var publics = {
+    init: init
+  };
+
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
 });

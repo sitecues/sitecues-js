@@ -350,11 +350,15 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
   }
 
-  sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
-  sitecues.on('bp/will-expand', beginKeyboardFocus);
-  sitecues.on('bp/will-shrink', restoreDocumentFocus);
-  sitecues.on('bp/did-expand', showFocus);
+  function init() {
+    sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
+    sitecues.on('bp/will-expand', beginKeyboardFocus);
+    sitecues.on('bp/will-shrink', restoreDocumentFocus);
+    sitecues.on('bp/did-expand', showFocus);
+  }
+
   var publics = {
+    init: init,
     getFocusedItem: getFocusedItem,
     navigateInDirection: navigateInDirection
   };

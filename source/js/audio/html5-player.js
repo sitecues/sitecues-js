@@ -7,7 +7,7 @@
 // 2 = HAVE_CURRENT_DATA - data for the current playback position is available, but not enough data to play next frame/millisecond
 // 3 = HAVE_FUTURE_DATA  - data for the current and at least the next frame is available
 // 4 = HAVE_ENOUGH_DATA  - enough data available to start playing
-define([], function () {
+define(['jquery'], function ($) {
 
   var audioElements    = [],
       HAVE_FUTURE_DATA = 3;
@@ -23,21 +23,21 @@ define([], function () {
     var t = new Date();
 
     // Metrics Start
-    sitecues.$(audioElement)[0].addEventListener('playing', function() {
+    audioElement.addEventListener('playing', function() {
       sitecues.emit('audio/playing', {'data': {'request_time': new Date() - t}});
     });
 
     // Metrics End
 
     audioElement.src = ''; // Clean up
-    sitecues.$(audioElement).one('canplay', playIt);
+    $(audioElement).one('canplay', playIt);
     audioElement.src = url;
     audioElements.push(audioElement);
   }
 
   function playIt(event) {
     var audioElement = event.target;
-    sitecues.$(audioElement).one('ended', onEnded);
+    $(audioElement).one('ended', onEnded);
     audioElement.play();
   }
 
@@ -55,8 +55,8 @@ define([], function () {
    */
   function stop() {
     audioElements.forEach(function(audioElement) {
-      sitecues.$(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
-      sitecues.$(audioElement).off('ended');
+      $(audioElement).off('canplay'); // Don't fire notification to play if we haven't played yet
+      $(audioElement).off('ended');
       // We can only pause in IE9 if there is enough data
       // for the current and at least the next frame
       if (audioElement.readyState >= HAVE_FUTURE_DATA) {

@@ -95,18 +95,19 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/sta
     smallA.addEventListener('mousedown', handleAButtonsPress);
     largeA.addEventListener('mousedown', handleAButtonsPress);
     zoomLabel.addEventListener('mousedown', handleAButtonsPress);
+
+    sitecues.on('bp/will-shrink', finishZoomChanges);
+
+    // A zoom operation has been completed
+    // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
+    sitecues.on('zoom', sliderView.updateZoomValue);
+
+    // As soon as any real zooming occurs, switch to displaying the correct thumb position
+    // (The fake settings are only used for someone who has never used sitecues before)
+    sitecues.on('zoom/begin', sliderView.enableRealSettings);
   }
 
-  // Add mouse listeners once BP is ready
-  sitecues.on('bp/did-complete', init);
-  sitecues.on('bp/will-shrink', finishZoomChanges);
-
-  // A zoom operation has been completed
-  // (We don't move the thumb here ... we do via setThumbChangeListener, because we get mid-animation changes that way)
-  sitecues.on('zoom', sliderView.updateZoomValue);
-
-  // As soon as any real zooming occurs, switch to displaying the correct thumb position
-  // (The fake settings are only used for someone who has never used sitecues before)
-  sitecues.on('zoom/begin', sliderView.enableRealSettings);
-  // no publics
+  return {
+    init: init
+  };
 });

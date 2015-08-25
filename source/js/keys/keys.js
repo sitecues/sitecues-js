@@ -283,16 +283,19 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     sitecues.emit('keys/sitecues-key-down', isFollowMouseEnabled);
   }
 
-  // bind key hook to window
-  // 3rd param changes event order: false == bubbling; true = capturing.
-  // We use capturing because we want to get the key before anything else does --
-  // this allows us to have the first choice, and we can preventDefault on it so that
-  // nothing else uses it after us.
-  addEventListener('keydown', onKeyDown, true);
+  function init() {
+    // bind key hook to window
+    // 3rd param changes event order: false == bubbling; true = capturing.
+    // We use capturing because we want to get the key before anything else does --
+    // this allows us to have the first choice, and we can preventDefault on it so that
+    // nothing else uses it after us.
+    addEventListener('keydown', onKeyDown, true);
 
-  // Will reenable highlight on mouse follow
-  addEventListener('keyup', onKeyUp, true);
+    // Will reenable highlight on mouse follow
+    addEventListener('keyup', onKeyUp, true);
+  }
 
-  // No exports
-  // no publics
+  return {
+    init: init
+  };
 });

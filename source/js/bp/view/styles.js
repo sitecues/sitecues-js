@@ -424,6 +424,14 @@ define(['bp/helper', 'util/platform', 'bp/constants', 'conf/site'], function (he
         'display': 'none'
       },
 
+      '#scp-secondary': {
+        'display': 'none'
+      },
+
+      '.scp-secondary #scp-secondary': {
+        'display': 'block'
+      },
+
       /******************* Images ********************/
 
       '.scp-active #scp-demo-slider-bar': {

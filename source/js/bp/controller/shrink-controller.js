@@ -160,14 +160,20 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
     toggleListeners(false);
   }
 
-  sitecues.on('info/did-show', shrinkPanel);
-  sitecues.on('bp/will-expand', willExpand);
-  sitecues.on('bp/will-shrink', willShrink);
+  if (SC_DEV) {
+    sitecues.toggleStickyPanel = function () {
+      isSticky = !isSticky;
+      return isSticky;
+    };
+  }
 
-  // TODO put in SC_DEV only
-  sitecues.toggleStickyPanel = function() {
-    isSticky = !isSticky;
-    return isSticky;
+  function init() {
+    sitecues.on('info/did-show', shrinkPanel);
+    sitecues.on('bp/will-expand', willExpand);
+    sitecues.on('bp/will-shrink', willShrink);
+  }
+
+  return {
+    init: init
   };
-  // no publics
 });

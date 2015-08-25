@@ -68,7 +68,7 @@ define([
   cursor_cursor,
   zoom_fixed_position_fixer,
   hlb,
-  keys_keys,
+  keys,
   mouse_highlight_move_keys,
   hpan_hpan,
   theme_color_engine,
@@ -84,6 +84,10 @@ define([
 //  metrics_tts_requested,
 //  metrics_metrics
   ) {
-  return function() { };
+  return function() {
+    bp.init();
+    keys.init();
+
+  };
 });
 
