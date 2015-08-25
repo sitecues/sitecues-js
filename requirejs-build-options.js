@@ -5,7 +5,6 @@
     {
       name: 'sitecues',
       include : [
-        'requirejs-loader-config.js',
         '../config/config.js',
         'require.js',
         'core',
@@ -28,6 +27,16 @@
     { name: 'locale/lang/fr' },
     { name: 'locale/lang/pl' }
   ],
+  onBuildRead: function(module, path, contents) {
+    if (module === 'require.js') {
+      var loaderConfig = fs.readFileSync('requirejs-loader-config.js', 'utf8');
+      // Prepend our runtime configuration to the loader itself,
+      // so that we can use options like "skipDataMain" in it.
+      return loaderConfig + contents;
+    }
+
+    return contents;
+  },
   onModuleBundleComplete: function (data) {
     var includedStr = '';
     for (var index = 0; index < data.included.length; index ++) {

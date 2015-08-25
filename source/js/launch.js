@@ -29,9 +29,7 @@
 // TODO themes
 // TODO in keys need to get events for lens/mh visibility
 // TODO bp.js implementation of is real settings
-
-//define(['conf/user/server', 'bp/bp', 'keys/keys' ],
-//  function (conf, bp, keys) {
+// TODO file bug on requirejs needing sitecues.require when variable name used
 
 define(['bp/bp', 'keys/keys' ],
   function (bp, keys) {
