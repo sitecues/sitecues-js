@@ -1,19 +1,18 @@
 /*
 BP Controller
  */
-define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-controller',
-    'bp/controller/slider-controller', 'bp/model/state', 'bp/helper',
-    'bp/view/elements/tts-button', 'bp/view/elements/more-button'],
-  function (BP_CONST, focusController, shrinkController, sliderController, state, helper, ttsButton, moreButton) {
+define(['bp/constants', 'bp/model/state', 'bp/helper'],
+  function (BP_CONST, state, helper) {
 
   // How long we wait before expanding BP
-  var hoverDelayTimer;
+  var hoverDelayTimer,
+    hasEverExpanded,
+    isInitialized,
+    // We ignore the first mouse move when a window becomes active, otherwise badge opens
+    // if the mouse happens to be over the badge/toolbar
+    doIgnoreNextMouseMove = true,
+    DELTA_KEYS = {};
 
-  // We ignore the first mouse move when a window becomes active, otherwise badge opens
-  // if the mouse happens to be over the badge/toolbar
-  var doIgnoreNextMouseMove = true;
-
-  var DELTA_KEYS = {};
   DELTA_KEYS[BP_CONST.KEY_CODES.LEFT]  = -1;
   DELTA_KEYS[BP_CONST.KEY_CODES.UP]    = 1;
   DELTA_KEYS[BP_CONST.KEY_CODES.RIGHT] = 1;
@@ -47,36 +46,39 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-
 
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
-      shrinkController.shrinkPanel(true);
+      require('bp/controller/shrink-controller', function(shrinkController) {
+        shrinkController.shrinkPanel(true);
+      });
       return;
     }
 
-    // Tab navigation
-    if (keyCode === BP_CONST.KEY_CODES.TAB) {
-      state.set('isKeyboardMode', true);
-      sitecues.emit('bp/did-change');
-      focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
-      return;
-    }
-
-    // Perform widget-specific command
-    // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
-    var item = focusController.getFocusedItem();
-
-    if (item) {
-      if (item.localName === 'textarea' || item.localName === 'input') {
-        return true;
+    require('bp/controller/focus-controller', function(focusController) {
+      // Tab navigation
+      if (keyCode === BP_CONST.KEY_CODES.TAB) {
+        state.set('isKeyboardMode', true);
+        sitecues.emit('bp/did-change');
+        focusController.navigateInDirection(evt.shiftKey ? -1 : 1);
       }
-      if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
-        performZoomSliderCommand(keyCode);
-      }
-      else {
-        if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
-          simulateClick(item);
+
+      // Perform widget-specific command
+      // Can't use evt.target because in the case of SVG it sometimes only has fake focus (some browsers can't focus SVG elements)
+      var item = focusController.getFocusedItem();
+
+      if (item) {
+        if (item.localName === 'textarea' || item.localName === 'input') {
+          return true;
         }
+        if (item.id === BP_CONST.ZOOM_SLIDER_BAR_ID) {
+          performZoomSliderCommand(keyCode);
+        }
+        else {
+          if (keyCode === BP_CONST.KEY_CODES.ENTER || keyCode === BP_CONST.KEY_CODES.SPACE) {
+            simulateClick(item);
+          }
+        }
+        // else fall through to native processing of keystroke
       }
-      // else fall through to native processing of keystroke
-    }
+    });
   }
 
   function isInActiveToolbarArea(evt, badgeRect) {
@@ -215,6 +217,25 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-
     window.addEventListener('wheel', preventScroll);
   }
 
+  function didExpand() {
+    if (!hasEverExpanded) {
+      hasEverExpanded = true;
+      require(['slider-controller', 'shrink-controller', 'focus-controller', 'tts-button', 'more-button'], function (sliderController, shrinkController, focusController, ttsButton, moreButton) {
+        sliderController.init();
+        shrinkController.init();
+        focusController.init();
+        ttsButton.init();
+        moreButton.init();
+      });
+    }
+  }
+
+  function didZoom() {
+    require(['slider-controller'], function (sliderController) {
+      sliderController.init();
+    });
+  }
+
   function willShrink() {
     window.removeEventListener('keydown', processKeyDown, true);
     window.removeEventListener('wheel', preventScroll);
@@ -222,14 +243,6 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-
 
   function didShrink() {
       state.set('isShrinkingFromKeyboard', false);
-  }
-
-  function init() {
-    var badgeElement = helper.byId(BP_CONST.BADGE_ID);
-    badgeElement.addEventListener('keydown', processBadgeActivationKeys);
-    badgeElement.addEventListener('click', clickToOpenPanel);
-    badgeElement.addEventListener('mousemove', onMouseMove);
-    badgeElement.addEventListener('mouseout', onMouseOut);
   }
 
   /*
@@ -251,16 +264,21 @@ define(['bp/constants', 'bp/controller/focus-controller', 'bp/controller/shrink-
   }
 
   function init() {
-    window.addEventListener('focus', onWindowFocus);
-    sitecues.on('bp/will-expand', willExpand);
-    sitecues.on('bp/will-shrink', willShrink);
-    sitecues.on('bp/did-shrink', didShrink);
+    if (!isInitialized) {
+      isInitialized = true;
+      var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+      badgeElement.addEventListener('keydown', processBadgeActivationKeys);
+      badgeElement.addEventListener('click', clickToOpenPanel);
+      badgeElement.addEventListener('mousemove', onMouseMove);
+      badgeElement.addEventListener('mouseout', onMouseOut);
 
-    shrinkController.init();
-    focusController.init();
-    sliderController.init();
-    ttsButton.init();
-    moreButton.init();
+      window.addEventListener('focus', onWindowFocus);
+      sitecues.on('bp/will-expand', willExpand);
+      sitecues.on('bp/did-expand', didExpand);
+      sitecues.on('bp/will-shrink', willShrink);
+      sitecues.on('bp/did-shrink', didShrink);
+      sitecues.on('zoom', didZoom);
+    }
   }
 
   return {

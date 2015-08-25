@@ -26,68 +26,68 @@
 // TODO load custom scripts
 //      source/js/custom-scripts/custom-scripts.js \
 //      $(custom-files) \
+// TODO themes
+// TODO in keys need to get events for lens/mh visibility
+// TODO bp.js implementation of is real settings
 
-define([
-  'conf/user/user-id',
-  'conf/user/server',
-  'conf/site',
-  'audio/audio',
-  'audio/audio-cues',
-  'zoom/zoom',
-  'bp/bp',
-  'keys/focus',
-  'mouse-highlight/mouse-highlight',
-  'cursor/cursor',
-  'zoom/fixed-position-fixer',
-  'hlb/hlb',
-  'keys/keys',
-  'mouse-highlight/move-keys',
-  'hpan/hpan',
-  'theme/color-engine',
-  'info/info',
-  'util/status'
-  // 'metrics/util',
-  // 'metrics/page-visited',
-  // 'metrics/panel-closed',
-  // 'metrics/badge-hovered',
-  // 'metrics/feedback-sent',
-  // 'metrics/hlb-opened',
-  // 'metrics/zoom-changed',
-  // 'metrics/tts-requested',
-  //'metrics/metrics'
-], function (
-  conf_user_user_id,
-  conf_user_server,
-  conf_site,
-  audio_audio,
-  audio_audio_cues,
-  zoom_zoom,
-  bp,
-  keys_focus,
-  mh,
-  cursor_cursor,
-  zoom_fixed_position_fixer,
-  hlb,
-  keys,
-  mouse_highlight_move_keys,
-  hpan_hpan,
-  theme_color_engine,
-  info_info,
-  util_status
-//  metrics_util,
-//  metrics_page_visited,
-//  metrics_panel_closed,
-//  metrics_badge_hovered,
-//  metrics_feedback_sent,
-//  metrics_hlb_opened,
-//  metrics_zoom_changed,
-//  metrics_tts_requested,
-//  metrics_metrics
-  ) {
+//define(['conf/user/server', 'bp/bp', 'keys/keys' ],
+//  function (conf, bp, keys) {
+
+define(['bp/bp', 'keys/keys' ],
+  function (bp, keys) {
+  var ALWAYS_ON_FEATURES = [ bp, keys ],
+    ZOOM_FEATURE_NAMES = ['zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
+    TTS_FEATURE_NAMES = [ 'audio/audio' ],
+    ZOOM_OR_TTS_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'audio/audio-cues', 'hlb/hlb', 'mouse-highlight/move-keys', 'conf/site' ],
+    isZoomInitialized,
+    isSpeechInitialized,
+    currZoom,
+    isSpeechOn,
+    isSitecuesOn = false;
+
+  var conf = { init: function() {} };
+
+  function initFeaturesByName(featureNames) {
+    featureNames.forEach(function(featureName) {
+      sitecues.require(featureName, function(featureModule) {
+        featureModule.init();
+      });
+    });
+  }
+
+  // Init features that require *either* zoom or speech to be on
+  function onFeatureSettingChanged() {
+    var isOn = currZoom > 1 || isSpeechOn;
+    if (isOn !== isSitecuesOn) {
+      isSitecuesOn = isOn;
+      sitecues.emit('sitecues/did-toggle', isSitecuesOn);
+    }
+    if (isOn && !isZoomInitialized && !isSpeechInitialized) {
+      initFeaturesByName(ZOOM_OR_TTS_FEATURE_NAMES);
+    }
+  }
+
   return function() {
-    bp.init();
-    keys.init();
+    ALWAYS_ON_FEATURES.forEach(function(feature) { feature.init(); });
 
+    conf.init(function() {
+      conf.get('zoom', function(zoomLevel) {
+        currZoom = zoomLevel;
+        onFeatureSettingChanged();
+        if (zoomLevel > 1 && !isZoomInitialized) {
+          initFeaturesByName(ZOOM_FEATURE_NAMES);
+          isZoomInitialized = true;
+        }
+      });
+      conf.get('tts', function(isOn) {
+        isSpeechOn = isOn;
+        onFeatureSettingChanged();
+        if (isOn && !isSpeechInitialized) {
+          initFeaturesByName(TTS_FEATURE_NAMES);
+          isSpeechInitialized = true;
+        }
+      });
+    });
   };
 });
 

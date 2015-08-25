@@ -1,20 +1,17 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['jquery'], function ($) {
+define(['util/element-classifier'], function (elemClassifier) {
 
   /*
    * Check if two Javascript objects are equal.
-   * TODO check if this is the best implementation for us and write in a clearer way
+   * TODO this can be fooled by the order of properties, but we don't care for our uses
    * @param {type} obj1
    * @param {type} obj2
    * @returns {unresolved}
    */
   function equals(obj1, obj2) {
-    function _equals(obj1, obj2) {
-        return JSON.stringify(obj1) === JSON.stringify($.extend(true, {}, obj1, obj2));
-    }
-    return _equals(obj1, obj2) && _equals(obj2, obj1);
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
   }
 
   /**
@@ -84,7 +81,7 @@ define(['jquery'], function ($) {
       MAX_CHILDREN_TO_CHECK = 10,
       numChildrenToCheck;
 
-    if (isVisualMedia(current) || isFormControl(current)) {
+    if (elemClassifier.isVisualMedia(current) || elemClassifier.isFormControl(current)) {
       var mediaRect = current.getBoundingClientRect(),
         MIN_RECT_SIDE = 5;
       return (mediaRect.width >= MIN_RECT_SIDE && mediaRect.height >= MIN_RECT_SIDE);
@@ -110,51 +107,6 @@ define(['jquery'], function ($) {
     return false;
   }
 
-  /**
-   * Checks if the element has media contents which can be rendered.
-   */
-  function isVisualMedia(selector) {
-    var VISUAL_MEDIA_ELEMENTS = 'img,picture,canvas,video,embed,object,iframe,frame,audio';
-    return $(selector).is(VISUAL_MEDIA_ELEMENTS);
-  }
-
-  /**
-   * Checks if the element is a form control
-   */
-  function isFormControl(selector) {
-    var FORM_ELEMENTS = 'input,textarea,select,button';
-    return $(selector).is(FORM_ELEMENTS);
-  }
-
-  /**
-   * Returns true if the element may use spacebar presses for its own purposes when focused.
-   * For example, a video is likely to use spacebar to pause/play the video, and an input
-   * uses the spacebar to insert spaces into the text.
-   * @param selector
-   * @returns {*|boolean}
-   */
-  // Define set of elements that need the spacebar but are not editable
-  var NON_EDITABLE_SPACEBAR_ELEMENTS = 'video,embed,object,iframe,frame,audio,button,input,select,[tabindex],[onkeypress],[onkeydown]';
-  function isSpacebarConsumer(element) {
-    return $(element).is(NON_EDITABLE_SPACEBAR_ELEMENTS) || isEditable(element);
-  }
-
-  /**
-   * Is the current element editable for any reason???
-   * @param element
-   * @returns {boolean} True if editable
-   */
-  var EDITABLE_INPUT_TYPES = [ 'text', 'email', 'password', 'search', 'tel', 'url', 'color', 'date', 'datetime', 'datetime-local',
-    'month','number','time','week' ];
-  function isEditable(element) {
-    if (element.localName === 'input') {
-      var type = element.getAttribute('type');
-      return !type || EDITABLE_INPUT_TYPES.indexOf(type) >= 0;
-    }
-    return document.designMode === 'on' || $(element).is(
-      'textarea,[contenteditable="true"],[contenteditable=""]');
-  }
-
   /*
    * Check if current image value is not empty.
    * @imageValue A string that represents current image value.
@@ -162,16 +114,6 @@ define(['jquery'], function ($) {
    */
   function isEmptyBgImage(imageValue) {
     return !imageValue || imageValue === 'none';
-  }
-
-  // Return true if the element is part of the sitecues user interface
-  // Everything inside the <body> other than the page-inserted badge
-  function isInSitecuesUI(node) {
-    // Check for nodeType of 1, which is an element
-    // If not, use the parent of the node
-    var element = node.nodeType === 1 ? node : node.parentNode;
-    return ! $.contains(document.body, element) || // Is not in the <body>
-      $(element).closest('#sitecues-badge,#scp-bp-container').length;
   }
 
   /**
@@ -229,59 +171,18 @@ define(['jquery'], function ($) {
     return el.clientHeight < el.scrollHeight;
   }
 
+  var MONOSPACE_BULLET_TYPES = { circle: 1, square: 1, disc: 1, none: 1 };
   function getBulletWidth(listElement, style) {
     var bulletType = style.listStyleType,
       ems = 2.5;  // Browsers seem use max of 2.5 em for bullet width -- use as a default
-    if ($.inArray(bulletType, ['circle', 'square', 'disc', 'none']) >= 0) {
+    if (MONOSPACE_BULLET_TYPES.hasOwnProperty(bulletType)) {
       ems = 1.6; // Simple bullet
     } else if (bulletType === 'decimal') {
-      var start = parseInt($(listElement).attr('start'), 10),
+      var start = parseInt(listElement.getAttribute('start'), 10),
         end = (start || 1) + listElement.childElementCount - 1;
       ems = (0.9 + 0.5 * end.toString().length);
     }
     return getEmsToPx(style.fontSize, ems);
-  }
-
-  // Draw a rectangle that does not capture any mouse events
-  // Implemented via zero-area element and CSS outline
-  // Useful because IE9/10 does not have pointer-events: none
-  // For example, if drawing a horizontal box we draw a line that is 0px high:
-  //
-  //       ---------------
-  //
-  // Then we fill in the outline around it using CSS:
-  //
-  //      OOOOOOOOOOOOOOOOO
-  //      O---------------O
-  //      OOOOOOOOOOOOOOOOO
-  //
-  function drawRect(absRect, color, optionalParent) {
-    var useCss = {
-        position: 'absolute',
-        outlineColor: color,
-        outlineStyle: 'solid'
-      },
-      useOutlineWidth;
-
-    if (absRect.width > absRect.height) {   // Wider than tall: draw horizontal line
-      useOutlineWidth = absRect.height / 2;
-      useCss.width = absRect.width - 2 * useOutlineWidth + 'px';
-      useCss.height = 0;
-    }
-    else {   // Taller than wide: draw vertical line
-      useOutlineWidth = absRect.width / 2;
-      useCss.height = absRect.height - 2 * useOutlineWidth + 'px';
-      useCss.width = 0;
-    }
-
-    useCss.left = (absRect.left + useOutlineWidth) + 'px';
-    useCss.top = (absRect.top + useOutlineWidth) + 'px';
-    useCss.outlineWidth = Math.round(useOutlineWidth) + 'px'; // Must round otherwise we get an outline in the middle
-    useCss.display = 'block';
-
-    return $('<sc>')
-      .css(useCss)
-      .appendTo(optionalParent || 'html');
   }
 
   // Return truthy value if a button is pressed on a mouse event.
@@ -308,16 +209,16 @@ define(['jquery'], function ($) {
 
   function getEmsToPx(fontSize, ems) {
     // Create a div to measure the number of px in an em with this font-size
-    var measureDiv = $('<div/>')
-        .appendTo(document.body)
-        .css({
-          fontSize: fontSize,
-          width: ems + 'em',
-          visibility: 'hidden'
-        }),
+    var measureDiv = document.createElement('div'),
+      measureStyle = measureDiv.style,
+      px;
+    document.body.appendChild(measureDiv);
+    measureStyle.fontSize = fontSize;
+    measureStyle.width = ems + 'em';
+    measureStyle.visibility = 'hidden';
     // Multiply by zoom because our <div> is not affected by the document's current zoom level
-      px = measureDiv[0].clientWidth;
-    measureDiv.remove();
+    px = measureDiv[0].clientWidth;
+    document.body.removeChild(measureDiv);
     return px;
   }
 
@@ -330,19 +231,13 @@ define(['jquery'], function ($) {
     hasOwnBackground: hasOwnBackground,
     hasOwnBackgroundColor: hasOwnBackgroundColor,
     hasVisibleContent: hasVisibleContent,
-    isVisualMedia: isVisualMedia,
-    isFormControl: isFormControl,
-    isSpacebarConsumer: isSpacebarConsumer,
-    isEditable: isEditable,
     isEmptyBgImage: isEmptyBgImage,
-    isInSitecuesUI: isInSitecuesUI,
     wheelUp: wheelUp,
     wheelDown: wheelDown,
     createSVGFragment: createSVGFragment,
     elementFromPoint: elementFromPoint,
     hasVertScroll: hasVertScroll,
     getBulletWidth: getBulletWidth,
-    drawRect: drawRect,
     isButtonDown: isButtonDown
   };
 

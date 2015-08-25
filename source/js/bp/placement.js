@@ -47,8 +47,8 @@
  *    Parent: #scp-bp-container
  *    Accessibility: uses ARIA to describe controls
  */
-define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'bp/helper', 'util/platform'],
-  function(baseBadge, state, zoomMod, BP_CONST, helper, platform) {
+define(['bp/view/modes/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
+  function(baseBadge, state, BP_CONST, helper, platform) {
   var BADGE_PARENT = BP_CONST.BADGE_MODE,
       HTML_PARENT  = BP_CONST.PANEL_MODE,
       currentBPParent,
@@ -57,6 +57,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
       bpElement,
       svgElement,
       ratioOfSVGToVisibleBadgeSize,
+      zoomAppliedToBadge = 1,
 
       // The width/height of the <SVG>
       // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
@@ -131,30 +132,22 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
     }
   }
 
-  function getAppliedBPZoom() {
-    var isBPInBody  = state.get('isPageBadge') && currentBPParent === BADGE_PARENT;
-    return isBPInBody ? zoomMod.getCompletedZoom() : 1;
-  }
-
   // Move the BP object so that the top, left sits exactly over the badge rectangle top, left
   // This is only called when the BP is small (about to expand or finished collapsing)
   function repositionBPOverBadge() {
 
     function getPadding(property) {
-      return parseFloat(badgeComputedStyle['padding' + property]) * appliedZoom;
+      return parseFloat(badgeComputedStyle['padding' + property]) * zoomAppliedToBadge;
     }
 
 
     // Used for setting the bpContainer left, top, width, and height
     function setBPProperty(prop) {
-      bpElement.style[prop] = (badgeRect[prop] / appliedZoom) + 'px';
+      bpElement.style[prop] = (badgeRect[prop] / zoomAppliedToBadge) + 'px';
     }
 
     // Current badge rectangle in screen coordinates
     var newBadgeRect   = helper.getRect(badgeElement),
-
-        // Get the amount of zoom being applied to the badge
-        appliedZoom = getAppliedBPZoom(),
 
         // Adjust for padding
         badgeComputedStyle = window.getComputedStyle(badgeElement),
@@ -195,7 +188,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
 
     bpElement.style.top  = 0;
     bpElement.style.left = 0;
-    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / appliedZoom + 'px,' + badgeRect.top / appliedZoom + 'px)';
+    bpElement.style[platform.transformProperty] = 'translate(' + badgeRect.left / zoomAppliedToBadge+ 'px,' + badgeRect.top / zoomAppliedToBadge + 'px)';
   }
 
   // This makes the collapsed svg large enough so that even with
@@ -204,7 +197,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
   function fitSVGtoBadgeRect() {
 
     var svgStyle  = svgElement.style,
-        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / getAppliedBPZoom(),
+        svgWidth  = badgeRect.width * getSVGScale(badgeRect) / zoomAppliedToBadge,
         svgHeight = svgWidth / svgAspectRatio;
 
     svgStyle.width  = svgWidth  + 'px';
@@ -258,6 +251,10 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
     bpElement.style.clip =  'rect(0,' + (badgeRect.width  + EXTRA_PIXELS_WIDTH) + 'px,' + (badgeRect.height + EXTRA_PIXELS_HEIGHT) + 'px,0)';
   }
 
+  function onZoomChange(zoomLevel) {
+    zoomAppliedToBadge = zoomLevel;
+  }
+
   /**
    * [init initializes the placement of the bpElement, svgElement, and badgeElement]
    * @param  {[DOM element]} badge       [Either placeholder or badge we create with ID 'sitecues-badge']
@@ -290,6 +287,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'zoom/zoom', 'bp/constants', 'b
       // Page badges must switch back and forth dynamically
       sitecues.on('bp/will-expand', switchToHtmlParent);
       sitecues.on('bp/did-shrink', switchToBadgeParent);
+      sitecues.on('zoom', onZoomChange);
     }
     else {
       window.addEventListener('resize', repositionBPOverBadge);

@@ -17,9 +17,9 @@
 // bp/will-shrink  -- BP is about to shrink
 // bp/did-shrink   -- BP has finished shrinking
 
-define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants', 'zoom/zoom',
-  'bp/placement', 'bp/view/elements/slider', 'bp/size-animation', 'util/platform', 'conf/site', 'util/color'],
-  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, zoomMod, placement, slider, sizeAnimation, platform, site, colorUtil) {
+define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helper', 'bp/view/svg', 'bp/constants',
+  'bp/placement', 'bp/size-animation', 'util/platform', 'conf/site'],
+  function (bpController, state, badge, panel, helper, bpSVG, BP_CONST, placement, sizeAnimation, platform, site) {
 
   /*
    *** Public methods ***
@@ -27,7 +27,8 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
   // The htmlContainer has all of the SVG inside of it, and can take keyboard focus
   var bpContainer,
-      isInitialized;
+      isInitComplete,
+      isInitBegun;
 
   /**
    *** Start point ***
@@ -41,51 +42,52 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
   function updateView(isFirstTime) {
 
-    // If we are expanding or contracting, aria-expanded is true (enables CSS)
-    helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
+    getClasses(function(classes) {
 
-    // 2. Suppress animations if necessary
-    // This is done for the first view change
-    // TODO: Replace with JS animations, this is just setting a class for
-    //       opacity and fill transitions...
-    if (!isFirstTime) {
-      enableAnimations();
-    }
+      // If we are expanding or contracting, aria-expanded is true (enables CSS)
+      helper.byId(BP_CONST.BADGE_ID).setAttribute('aria-expanded', state.isPanelRequested());
 
-    updateClasses();
+      // 2. Suppress animations if necessary
+      // This is done for the first view change
+      // TODO: Replace with JS animations, this is just setting a class for
+      //       opacity and fill transitions...
+      if (!isFirstTime) {
+        enableAnimations();
+      }
 
-    sizeAnimation.initAnimation(isFirstTime);
+      bpContainer.setAttribute('class', classes);
+
+      sizeAnimation.init(isFirstTime);
+    });
   }
 
   // 1. Badge- or panel- specific view classes
   // Space delimited list of classes to set for view
-  function updateClasses() {
+  function getClasses(callbackFn) {
 
     var classBuilder = state.isPanelRequested() ? panel.getViewClasses() : badge.getViewClasses();
-    classBuilder += ' scp-palette' + getPalette();
     classBuilder += ' scp-ie9-' + platform.isIE9();
-    bpContainer.setAttribute('class', classBuilder);
+
+    getPalette(function(palette) {
+      classBuilder += ' scp-palette' + palette;
+      callbackFn(classBuilder);
+    });
   }
 
-  // Starting at the sitecues-badge element, keep moving up ancestors until we find a non-transparent
-  // background.  Analyze the color, and determine the best suited color palette for the badge.
-  function getAdaptivePalette() {
-
-    var badgeElement = helper.byId(BP_CONST.BADGE_ID);
-
-    return BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal'];
-
-  }
-
-    // Set the colors
-  function getPalette() {
+  // Set the colors
+  function getPalette(callbackFn) {
     if (state.get('isToolbarBadge')) {
-      return BP_CONST.PALETTE_NAME_MAP.normal;
+      callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
     }
-    if (state.get('isAdaptivePalette')) {
-      return getAdaptivePalette();
+    else if (state.get('isAdaptivePalette')) {
+      require('util/color', function(colorUtil) {
+        var badgeElement = helper.byId(BP_CONST.BADGE_ID);
+        callbackFn(BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal']);
+      });
     }
-    return state.get('paletteName');
+    else {
+      callbackFn(state.get('paletteName'));
+    }
   }
 
   // Can get SVG element whether currently attached to document or not
@@ -101,7 +103,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
    */
   function initBPFeature() {
 
-    if (isInitialized) {
+    if (isInitComplete) {
       return;
     }
 
@@ -110,15 +112,16 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
     // Use fake settings if undefined -- user never used sitecues before.
     // This will be turned off once user interacts with sitecues.
-    state.set('isRealSettings', site.get('alwaysRealSettings') ||
-      zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
+    // TODO QQQQ
+//    state.set('isRealSettings', site.get('alwaysRealSettings') ||
+//      zoomMod.hasZoomEverBeenSet()); // TODO what about audio?
 
     // Set badge classes. Render the badge. Render slider.
     updateView(true);
 
     bpController.init();
 
-    isInitialized = true;
+    isInitComplete = true;
 
     sitecues.on('bp/did-change', updateView);
   }
@@ -192,6 +195,12 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
 
   function init() {
 
+    if (isInitBegun) {
+      return;
+    }
+
+    isInitBegun = true;
+
     if (site.get('uiMode') === 'toolbar') {
       setTimeout(initBPFeature, 0);
       return;
@@ -226,7 +235,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
     }
   }
 
-    return {
-      init: init
-    };
+  return {
+    init: init
+  };
 });

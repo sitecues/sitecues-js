@@ -1,5 +1,5 @@
-define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
-  function($, mh, common, hlb) {
+define(['util/element-classifier'],
+  function(elemClassifier) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -49,6 +49,9 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     F8 = 119,
     isShiftKeyDown,
     isAnyNonShiftKeyDown,
+    isHighlightVisible,
+    isLensVisible,
+    isSitecuesOn,
 
     KEY_TESTS = {
       'space': function(event) {
@@ -58,10 +61,10 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
           event.keyCode === SPACE &&
           // It was not pressed with a modifier (we don't currently support cmd/ctrl/alt/shift with space), *and*
           !hasCommandModifier(event) &&
-          // HLB is on or highlighting is enabled
-          sitecues.isSitecuesOn() &&
+          // Lens is on or highlighting is enabled
+          isSitecuesOn &&
           // It is not pressed when focus is on something that needs space (e.g. textfield, button or checkbox)
-          !common.isSpacebarConsumer(event.target)
+          !elemClassifier.isSpacebarConsumer(event.target)
         );
       },
       'minus': function(event) {
@@ -85,14 +88,14 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
         return event.keyCode === NUMPAD_0 && event.altKey;
       },
       'zoom1x': function(event) {  // Ctrl+0, Cmd+0 or just 0 to reset zoom only
-        return event.keyCode === NUMPAD_0 && (!common.isEditable(event.target) || hasCommandModifier(event));
+        return event.keyCode === NUMPAD_0 && (!elemClassifier.isEditable(event.target) || hasCommandModifier(event));
       },
       'speech': function(event) {
-        return event.keyCode === QUOTE && event.altKey && !common.isEditable(event.target);
+        return event.keyCode === QUOTE && event.altKey && !elemClassifier.isEditable(event.target);
       },
       'esc': function(event) {
-         // Escape key is only valid if there is an HLB to close
-         return event.keyCode === ESCAPE && (mh.getHighlight().isVisible || hlb.getElement());
+         // Escape key is only valid if there is an lens to close
+         return event.keyCode === ESCAPE && (isHighlightVisible || isLensVisible);
       },
       // For arrow keys, allow number pad usage as well (2/4/6/8)
       'up': function(event) {
@@ -108,16 +111,16 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
         return (event.keyCode === RIGHT || event.keyCode === NUMPAD_6) && canMoveHighlight(event);
       },
       'heading': function(event) {
-        return event.keyCode === LETTER_H && !common.isEditable(event.target) && !event.altKey && !event.ctrlKey && !event.metaKey;
+        return event.keyCode === LETTER_H && !elemClassifier.isEditable(event.target) && !event.altKey && !event.ctrlKey && !event.metaKey;
       },
       'pageup': function(event) {
-        return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollHlb(event);
+        return (event.keyCode === PAGE_UP || event.keyCode === NUMPAD_9) && canScrollLens(event);
       },
       'pagedn': function(event) {
-        return (event.keyCode === PAGE_DN || event.keyCode === NUMPAD_3) && canScrollHlb(event);
+        return (event.keyCode === PAGE_DN || event.keyCode === NUMPAD_3) && canScrollLens(event);
       },
       'home': function(event) {  // Also support cmd+up on Mac
-        if (!canScrollHlb(event)) {
+        if (!canScrollLens(event)) {
           return false;
         }
         return (event.keyCode === HOME && !hasAnyModifier(event)) ||
@@ -125,7 +128,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
           (event.keyCode === UP && event.metaKey);
       },
       'end': function(event) {  // Also support cmd+down on Mac
-        if (!canScrollHlb(event)) {
+        if (!canScrollLens(event)) {
           return false;
         }
         return (event.keyCode === END && !hasAnyModifier(event)) ||
@@ -138,8 +141,8 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     },
     // define keys map used to bind actions to hotkeys
     KEY_EVENT_MAP = {
-      'minus': 'zoom-decrease',
-      'plus': 'zoom-increase',
+      'minus': 'decrease-zoom',
+      'plus': 'increase-zoom',
       'reset': 'reset-sitecues',
       'zoom1x': 'reset-zoom',
       'speech': 'toggle-speech'
@@ -148,17 +151,17 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
 
   function canMoveHighlight(event) {
     return !hasCommandModifier(event) &&    // Plain or shifted keystroke
-      (mh.getHighlight().isVisible || hlb.getElement()) &&    // Visible highlight or HLB
-      !common.isEditable(event.target);   // Not focused in editable area
+      (isHighlightVisible || isLensVisible) &&    // Visible highlight or HLB
+      !elemClassifier.isEditable(event.target);   // Not focused in editable area
   }
 
-  function canScrollHlb(event) {
-    return hlb.getElement() && !common.isEditable(event.target);
+  function canScrollLens(event) {
+    return isLensVisible && !elemClassifier.isEditable(event.target);
   }
 
   function canUseZoomKey(event) {
-    // Minus/plus cannot trigger if there is an HLB
-    if (hlb.getElement()) {
+    // Minus/plus cannot trigger if there is a lens
+    if (isLensVisible) {
       return;
     }
 
@@ -170,7 +173,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
 
     // Plain minus/plus was pressed without a modifier -- the command is only valid if we're not in an editable field
     // (which needs to allow the user to type the minus/plus key)
-    return !common.isEditable(event.target);
+    return !elemClassifier.isEditable(event.target);
   }
 
   // Non-shift modifier keys (ctrl, cmd, alt)
@@ -205,13 +208,17 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
       event.stopImmediatePropagation();
     }
 
+    executeCommand(commandName, keyName);
+  }
+
+  function executeCommand(commandName, keyName) {
     // Emit event defined for key
-    sitecues.require(['command/' + commandName], function(commandFn) {
+    sitecues.require(['command/' + commandName], function (commandFn) {
       commandFn(event, keyName);
     });
   }
 
-  // key event hook
+    // key event hook
   function onKeyDown(event) {
 
     // Shift key gets additional processing before other keys
@@ -241,7 +248,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
     notifySitecuesKeyDown(true);
     if (event.keyCode === SHIFT) {
       if (isOnlyShift()) {
-        sitecues.emit('mh/do-speak', mh.getHighlight().picked, true);
+        executeCommand('speak-highlight');
       }
     }
 
@@ -293,6 +300,18 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'hlb/hlb'],
 
     // Will reenable highlight on mouse follow
     addEventListener('keyup', onKeyUp, true);
+
+    sitecues.on('mh/did-toggle-visibility', function(isVisible) {
+      isHighlightVisible = isVisible;
+    });
+
+    sitecues.on('lens/did-toggle-visibility', function(isVisible) {
+      isLensVisible = isVisible;
+    });
+
+    sitecues.on('sitecues/did-toggle', function(isOn) {
+      isSitecuesOn = isOn;
+    });
   }
 
   return {

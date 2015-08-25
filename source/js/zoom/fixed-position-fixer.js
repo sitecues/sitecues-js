@@ -3,8 +3,8 @@
  * for the current zoom and scroll position in the window.
  * It is used as little as possible because it runs code on scroll events, which can slow down scrolling significantly.
  */
-define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', 'util/common'],
-  function ($, zoomMod, platform, styleService, common) {
+define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', 'util/jquery-utils'],
+  function ($, zoomMod, platform, styleService, jqUtils) {
 
     var isOn = false,
       toolbarHeight = 0,
@@ -36,7 +36,7 @@ define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', '
        * @param  elements [element to position]
        */
       function adjustElement(index, element) {
-        if (common.isInSitecuesUI(element)) {
+        if (jqUtils.isInSitecuesUI(element)) {
           return;
         }
 

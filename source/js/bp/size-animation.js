@@ -1,8 +1,8 @@
 /**
  * Expand or contract the BP
  */
-define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom'],
-  function(state, BP_CONST, helper, platform, zoomMod) {
+define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
+  function(state, BP_CONST, helper, platform) {
   var requestFrameFn = window.requestAnimationFrame   ||
                        window.msRequestAnimationFrame ||
                        function (fn) {
@@ -38,6 +38,9 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
 
       // The stable target badge width
       targetBadgeWidth,
+
+      // Amount of zoom currently applied to the badge
+      zoomAppliedToBadge = 1,
 
       // Convenience methods
       byId = helper.byId,
@@ -141,7 +144,6 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
     }
 
     return possibleOutlineRects;
-
   }
 
   /**
@@ -521,10 +523,21 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
 
   }
 
-  function initAnimation(isFirstTime) {
+  function init(isFirstTime) {
 
     if (isFirstTime) {
       firstTimeRender();
+
+      sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+
+      sitecues.on('zoom/begin', function () {
+        animationStartTime = 0;
+      });
+
+      if (state.get('isPageBadge')) {
+        sitecues.on('zoom', onZoomChange);
+      }
+
       return;
     }
 
@@ -762,13 +775,13 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform', 'zoom/zo
     cancelFrameFn(animationId);
   }
 
-  sitecues.on('bp/will-expand bp/will-shrink', cancelAnimation);
+  function onZoomChange(zoomLevel) {
+    zoomAppliedToBadge = zoomLevel;
+  }
 
-  sitecues.on('zoom/begin', function () {
-    animationStartTime = 0;
-  });
+
   var publics = {
-    initAnimation: initAnimation
+    init: init
   };
 
   if (SC_UNIT) {

@@ -1,4 +1,4 @@
-define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (conf, common, $, zoomMod) {
+define(['conf/user/manager', 'util/jquery-utils', 'zoom/zoom'], function (conf, common, zoomMod) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,
@@ -12,7 +12,7 @@ define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (co
 
   function mousemove(evt) {
 
-    if (common.isInSitecuesUI(evt.target)) {
+    if (jqUtils.isInSitecuesUI(evt.target)) {
       return; // Don't pan while interacting with sitecues UI
     }
 
@@ -112,35 +112,40 @@ define(['conf/user/manager', 'util/common', 'jquery', 'zoom/zoom'], function (co
     isOn = doTurnOn;
   }
 
-  sitecues.on('hlb/ready', function () {
-    isHlbOn = true;
-    refresh();
-  });
+  function init() {
+    sitecues.on('hlb/ready', function () {
+      isHlbOn = true;
+      refresh();
+    });
 
-  sitecues.on( 'hlb/closed', function () {
-    isHlbOn = false;
-    refresh();
-  });
+    sitecues.on('hlb/closed', function () {
+      isHlbOn = false;
+      refresh();
+    });
 
-  // Dont pan while the bp is expanded.
-  sitecues.on('bp/will-expand', function () {
-    isPanelOpen = true;
-    refresh();
-  });
+    // Dont pan while the bp is expanded.
+    sitecues.on('bp/will-expand', function () {
+      isPanelOpen = true;
+      refresh();
+    });
 
-  // Allow panning while the bp is shrunk.   
-  sitecues.on('bp/did-shrink', function () {
-    isPanelOpen = false;
-    refresh();
-  });
+    // Allow panning while the bp is shrunk.
+    sitecues.on('bp/did-shrink', function () {
+      isPanelOpen = false;
+      refresh();
+    });
 
-  // react on any zoom change
-  sitecues.on('zoom', function (value) {
-    sitecues.off('resize', refresh);
-    if (value > 1) {
-      sitecues.on('resize', refresh);
-    }
-    refresh();
-  });
-  //no publics
+    // react on any zoom change
+    sitecues.on('zoom', function (value) {
+      sitecues.off('resize', refresh);
+      if (value > 1) {
+        sitecues.on('resize', refresh);
+      }
+      refresh();
+    });
+  }
+
+  return {
+    init: init
+  }
 });

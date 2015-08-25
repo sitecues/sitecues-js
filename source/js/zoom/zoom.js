@@ -246,11 +246,6 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
     thumbChangeListener = listener;
   }
 
-  // Has the zoom setting ever been touched by the user at all
-  function hasZoomEverBeenSet() {
-    return conf.get('zoom') >= 1;
-  }
-
   // ------------------------ PRIVATE -----------------------------
 
   // Continual slider updates

@@ -12,7 +12,7 @@
  *   However, in the future this will be updated so that a customer can not, for example, override the TTS provider
  *   with one that is not available to them.
  */
-define(['jquery'], function($) {
+define([], function() {
 
   var
     fetchedSiteConfig = {},
@@ -24,7 +24,7 @@ define(['jquery'], function($) {
   // but the contents of root object properties can be modified.
   function get(key) {
     if (!key) {
-      return fetchSiteConfig;
+      return fetchSpeechConfig;
     }
 
     return everywhereConfig[key] || fetchedSiteConfig[key] || providedSiteConfig[key];
@@ -36,7 +36,7 @@ define(['jquery'], function($) {
   // 2. sitecues.config.siteId (camelCase is the new way)
   // 3. sitecues.config.site_id (underscore in config field names is deprecated)
   function getSiteId() {
-    return everywhereConfig.siteId || providedSiteConfig.siteId || providedSiteConfig.site_id;
+    return everywhereConfig.siteId || providedSiteConfig.site_id;
   }
 
   // The everywhereConfig will be an empty object or will
@@ -45,7 +45,7 @@ define(['jquery'], function($) {
     return everywhereConfig.siteId;
   }
 
-  function fetchSiteConfig() {
+  function fetchSpeechConfig() {
     if (SC_LOCAL || isEverywhereConfigValid()) {
       // Cannot save to server when we have no access to it
       // Putting this condition in allows us to paste sitecues into the console
@@ -59,30 +59,33 @@ define(['jquery'], function($) {
 
     isSiteConfigFetchNeeded = true;
 
-    // Trigger the initial fetch.
-    $.ajax({
-      // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
-      url: sitecues.getApiUrl('2/site/' + getSiteId() + '/config'),
-      dataType: 'json',
-      success: function (data) {
-        // Copy the fetched key/value pairs into the site configuration.
-        for (var i = 0; i < data.settings.length; i++) {
-          fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
-        }
+    require(['jquery'], function($) {
+      // Trigger the initial fetch.
+      $.ajax({
+        // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.
+        url: sitecues.getApiUrl('2/site/' + getSiteId() + '/config'),
+        dataType: 'json',
+        success: function (data) {
+          // Copy the fetched key/value pairs into the site configuration.
+          for (var i = 0; i < data.settings.length; i++) {
+            fetchedSiteConfig[data.settings[i].key] = data.settings[i].value;
+          }
 
-        // Add the provided configuration
-        fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
-      }
+          // Add the provided configuration
+          fetchedSiteConfig = $.extend(true, fetchedSiteConfig, providedSiteConfig);
+        }
+      });
     });
   }
 
-  // Fetch once we need it (we currently need it if speech might be used, because the fetched
-  // site config may specify different speech servers)
-  sitecues.on('speech/did-change zoom/begin', fetchSiteConfig);
+  function init() {
+    sitecues.on('sitecues/did-toggle', fetchSpeechConfig);
+  }
 
   var publics = {
     get: get,
-    getSiteId: getSiteId
+    getSiteId: getSiteId,
+    init: init
   };
   if (SC_UNIT) {
     module.exports = publics;

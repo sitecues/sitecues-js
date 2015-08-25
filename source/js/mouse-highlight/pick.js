@@ -25,9 +25,9 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
+define(['jquery', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site',
     'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
-  function($, common, conf, site, traitcache, traits, judge) {
+  function($, common, jqUtils, conf, site, traitcache, traits, judge) {
 
   var UNUSABLE_SCORE = -99999,       // A score so low there is no chance of picking the item
     MAX_ANCESTORS_TO_ANALYZE = 14,   // Maximum ancestors to climb looking for start.
@@ -131,7 +131,7 @@ define(['jquery', 'util/common', 'conf/user/manager', 'conf/site',
     }
 
     // 1. Don't pick anything in the sitecues UI
-    if (!startElement || $(startElement).is('html,body') || common.isInSitecuesUI(startElement)) {
+    if (!startElement || $(startElement).is('html,body') || jqUtils.isInSitecuesUI(startElement)) {
       return null;
     }
 

@@ -66,6 +66,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
   state,
 
+  isSitecuesOn,
   isTrackingMouse, // Are we currently tracking the mouse?
   canTrackScroll = true,  // Is scroll tracking allowable? Turned off during panning from keyboard navigation
   willRespondToScroll = true, // After scroll tracking is turned on, we won't respond to it until at least one normal mousemove
@@ -1285,7 +1286,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   // return true if highlight visibility should be restored
   function refreshEventListeners(doForceOff) {
     // The mouse highlight is always enabled when TTS is on or zoom > MIN_ZOOM
-    var doTrackMouse = sitecues.isSitecuesOn() && isBadgeReady && !doForceOff;
+    var doTrackMouse = isSitecuesOn && isBadgeReady && !doForceOff;
 
     if (doTrackMouse === isTrackingMouse) {
       return isTrackingMouse;
@@ -1566,38 +1567,41 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     return state;
   }
 
-  sitecues.isSitecuesOn = function() {
-    return audio.isSpeechEnabled() || zoomMod.getCompletedZoom() > 1;
-  };
+    function init() {
 
-  forget();
+    forget();
 
-  // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
-  // Also to this until zooming finished so that outline doesn't get out of place during zoom
-  sitecues.on('zoom/begin mh/pause', pause);
+    // Temporarily hide and disable mouse highlight once highlight box appears. SC-1786
+    // Also to this until zooming finished so that outline doesn't get out of place during zoom
+    sitecues.on('zoom/begin mh/pause', pause);
 
-  // enable mouse highlight back once highlight box deflates or zoom finishes
-  sitecues.on('hlb/closed zoom', resumeAppropriately);
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('hlb/closed zoom', resumeAppropriately);
 
-  // Turn mouse-tracking on or off
-  sitecues.on('keys/sitecues-key-down', setScrollTracking);
+    // Turn mouse-tracking on or off
+    sitecues.on('keys/sitecues-key-down', setScrollTracking);
 
-  // Turn mouse-tracking on or off
-  sitecues.on('key/only-shift', setOnlyShift);
+    // Turn mouse-tracking on or off
+    sitecues.on('key/only-shift', setOnlyShift);
 
-  // enable mouse highlight back once highlight box deflates or zoom finishes
-  sitecues.on('mh/autopick', autoPick);
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('mh/autopick', autoPick);
 
-  // enable mouse highlight back once highlight box deflates or zoom finishes
-  sitecues.on('mh/hide', hide);
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('mh/hide', hide);
 
-  // enable mouse highlight back once highlight box deflates or zoom finishes
-  sitecues.on('bp/did-complete', onBadgeReady);
+    // enable mouse highlight back once highlight box deflates or zoom finishes
+    sitecues.on('bp/did-complete', onBadgeReady);
 
-  // Darken highlight appearance when speech is enabled
-  conf.get('ttsOn', onSpeechChanged);
+    sitecues.on('sitecues/did-toggle', function(isOn) {
+      isSitecuesOn = isOn;
+    });
 
-  testFocus(); // Set initial focus state
+    // Darken highlight appearance when speech is enabled
+    conf.get('ttsOn', onSpeechChanged);
+
+    testFocus(); // Set initial focus state
+  }
 
   if (SC_DEV) {
     /**
@@ -1657,7 +1661,8 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
   var publics = {
     getHighlight: getHighlight,
-    highlight: highlight
+    highlight: highlight,
+    init: init
   };
 
   if (SC_UNIT) {

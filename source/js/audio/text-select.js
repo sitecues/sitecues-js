@@ -49,7 +49,11 @@ define([], function () {
     }
   }
 
-  sitecues.on('speech/did-change', refresh);
+  function init() {
+    sitecues.on('speech/did-change', refresh);
+  }
 
-  // No publics
+  return {
+    init: init
+  };
 });

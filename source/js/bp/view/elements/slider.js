@@ -9,8 +9,8 @@
 // The thumb position only changes based on the thumb change callback!!
 // Effectively this means the zoom module needs is in control of the thumb position.
 
-define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/locale'],
-  function (BP_CONST, state, zoomMod, helper, locale) {
+define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
+  function (BP_CONST, state, helper, locale) {
 
   /*
    *** Public methods ***
@@ -21,18 +21,20 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
    * This does not change the current zoom of the page -- it only changes the slider appearance.
    */
   function updateThumbPosition(currZoom) {
-    var thumbId          = BP_CONST.ZOOM_SLIDER_THUMB_ID,
-        thumbElement     = helper.byId(thumbId),
-        panelSliderWidth = BP_CONST.TRANSFORMS.PANEL[thumbId].translateX,
-        badgeSliderWidth = BP_CONST.TRANSFORMS.BADGE[thumbId].translateX,
-        isPanel          = state.isPanel(),
+    var thumbId = BP_CONST.ZOOM_SLIDER_THUMB_ID,
+      thumbElement = helper.byId(thumbId),
+      panelSliderWidth = BP_CONST.TRANSFORMS.PANEL[thumbId].translateX,
+      badgeSliderWidth = BP_CONST.TRANSFORMS.BADGE[thumbId].translateX,
+      isPanel = state.isPanel(),
+      MIN_ZOOM = 1,
+      ZOOM_RANGE = 2,
 
-        // Use a fake zoom amount the first time sitecues loads for badge view
-        // It just looks better -- making the slider look more interactive.
-        useZoom     = state.get('isRealSettings') ? currZoom : BP_CONST.FAKE_ZOOM_AMOUNT,
-        percent     = (useZoom - zoomMod.MIN) / zoomMod.RANGE,
-        sliderWidth = isPanel ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
-        offset      = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
+      // Use a fake zoom amount the first time sitecues loads for badge view
+      // It just looks better -- making the slider look more interactive.
+      useZoom = state.get('isRealSettings') ? currZoom : BP_CONST.FAKE_ZOOM_AMOUNT,
+      percent = (useZoom - MIN_ZOOM) / ZOOM_RANGE,
+      sliderWidth = isPanel ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
+      offset = (percent * sliderWidth) + (isPanel ? panelSliderWidth : badgeSliderWidth);
 
     thumbElement.setAttribute('transform', 'translate(' + offset + ')');
   }
@@ -40,9 +42,11 @@ define(['bp/constants', 'bp/model/state', 'zoom/zoom', 'bp/helper', 'locale/loca
   // Update the slider thumb position on bp view updates because the entire slider changes size
   // (it scales more horizontally than vertically)
   function render() {
-    var currZoom = zoomMod.getCompletedZoom();
-    updateThumbPosition(currZoom);
-    updateZoomValue(currZoom);
+    require('zoom/zoom', function(zoomMod) {
+      var currZoom = zoomMod.getCompletedZoom();
+      updateThumbPosition(currZoom);
+      updateZoomValue(currZoom);
+    });
   }
 
   function enableRealSettings() {

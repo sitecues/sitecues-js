@@ -353,7 +353,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
       });
 
       // Keep aspect ratio if HLB is an image
-      if (common.isVisualMedia($hlb)) {
+      if (common.isVisualMedia($hlb[0])) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({
@@ -385,7 +385,7 @@ define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-a
       });
 
       // Keep aspect ratio if HLB is an image
-      if (common.isVisualMedia($hlb)) {
+      if (common.isVisualMedia($hlb[0])) {
 
         // We need to recalculate the bounding client rect of the HLB element, because we just changed it.
         $hlb.css({

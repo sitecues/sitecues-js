@@ -44,7 +44,7 @@ define([], function () {
     sitecues.resolveSitecuesUrl = resolveSitecuesUrl;
     sitecues.parseUrl = parseUrl;
     sitecues.resolveUrl = resolveUrl;
-    sitecues.status = status;
+    sitecues.status = getStatus;
   }
 
 
@@ -88,6 +88,12 @@ define([], function () {
 
   function getEverywhereConfig() {
     return sitecues.everywhereConfig || {};
+  }
+
+  function getStatus() {
+    require(['util/status'], function(statusFn) {
+      statusFn();
+    });
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////

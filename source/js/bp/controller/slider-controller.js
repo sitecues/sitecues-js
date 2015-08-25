@@ -1,8 +1,8 @@
 /*
  Slider Controller
  */
-define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/state', 'bp/view/elements/slider'],
-  function (BP_CONST, helper, platform, zoomMod, state, sliderView) {
+define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view/elements/slider'],
+  function (BP_CONST, helper, platform, state, sliderView) {
 
   var isListeningToWindowMouseEvents;
 
@@ -49,7 +49,8 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/sta
       sliderLeft      = platform.browser.isWebKit ? sliderRect.left + sliderThumbRect.width / 2 : panelLeft + BP_CONST.FIREFOX_SLIDER_OFFSET,
       sliderWidth     = sliderRect.width - sliderThumbRect.width,
       newPercent      = (evt.clientX - sliderLeft) / sliderWidth,
-      newValue        = (newPercent * zoomMod.RANGE) + zoomMod.RANGE;
+      ZOOM_RANGE      = 2,
+      newValue        = (newPercent * ZOOM_RANGE) + ZOOM_RANGE;
 
     zoomMod.jumpTo(newValue);
 
@@ -81,7 +82,9 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'zoom/zoom', 'bp/model/sta
     sliderView.render();
 
     // Add permanent listeners
-    zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
+    require('zoom/zoom', function(zoomMod) {
+      zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
+    });
 
     // Zoom controls
     var sliderTarget = helper.byId(BP_CONST.ZOOM_SLIDER_ID),

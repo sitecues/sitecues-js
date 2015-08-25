@@ -4,8 +4,8 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/model/state', 'bp/helper', 'zoom/zoom', 'audio/audio', 'util/animate', 'util/transform'],
-  function (BP_CONST, state, helper, zoomMod, audioMod, animate, transform) {
+define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform'],
+  function (BP_CONST, helper, animate, transform) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
