@@ -1346,7 +1346,6 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
     getMainNode: getMainNode,
     getCompletedZoom: getCompletedZoom,
     setThumbChangeListener: setThumbChangeListener,
-    hasZoomEverBeenSet: hasZoomEverBeenSet,
     resetZoom: resetZoom,
     zoomStopRequested: zoomStopRequested
   };

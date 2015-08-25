@@ -25,7 +25,8 @@
     { name: 'locale/lang/en' },
     { name: 'locale/lang/es' },
     { name: 'locale/lang/fr' },
-    { name: 'locale/lang/pl' }
+    { name: 'locale/lang/pl' },
+    { name: 'jquery' }
   ],
   onBuildRead: function(module, path, contents) {
     if (module === 'require.js') {

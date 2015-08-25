@@ -145,7 +145,7 @@ endif
 # TARGET: build
 #	Build the compressed file and, optionally, run gjslint.
 ################################################################################
-build: $(_force-deps-refresh) $(_build_lint_dep)
+build: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo "Node version : $(shell node --version)"
 	@echo "npm version  : v$(shell npm --version)"
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
@@ -156,7 +156,7 @@ build: $(_force-deps-refresh) $(_build_lint_dep)
 # TARGET: debug
 #	Build the debug version
 ################################################################################
-debug: $(_force-deps-refresh) $(_build_lint_dep)
+debug: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk debug custom-config-name=$$_CUSTOM_CONF_NAME ; \
@@ -312,7 +312,7 @@ stop-all-services: stop-testsite
 ################################################################################
 # TARGET: local -- allows sitecues to be used locally or pasted into a console
 ################################################################################
-local: $(_force-deps-refresh) $(_build_lint_dep)
+local: clean $(_force-deps-refresh) $(_build_lint_dep)
 	@echo
 	@for _CUSTOM_CONF_NAME in $(custom-config-names) ; do \
 		$(MAKE) --no-print-directory -f core.mk debug sc-local=true custom-config-name=$$_CUSTOM_CONF_NAME ; \
