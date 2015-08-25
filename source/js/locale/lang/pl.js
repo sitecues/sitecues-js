@@ -3,7 +3,7 @@
  todo: remove it when we use API.
  todo: we need to check the translations
  */
-define(['locale/pl'], function() {
+define([], function() {
   return {
     // ARIA labels
     // - Main

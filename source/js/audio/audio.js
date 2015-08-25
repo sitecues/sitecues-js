@@ -14,6 +14,7 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
   function(conf, site, $, builder, platform, locale) {
 
   var ttsOn = false,
+    isAudioPlaying,
     audioPlayer,
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
     mediaTypeForPrerecordedAudio;
@@ -51,6 +52,7 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     stopAudio();  // Stop any currently playing audio and halt keydown listener until we're playing again
     var TTSUrl = getTTSUrl(text, lang);
     getAudioPlayer().playAudioSrc(TTSUrl);
+    isAudioPlaying = true;
     sitecues.emit('audio/speech-play', TTSUrl);
     addStopAudioHandlers();
   }
@@ -74,8 +76,11 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
    * or is not playing.
    */
   function stopAudio() {
-    getAudioPlayer().stop();
-    removeBlurHandler();
+    if (isAudioPlaying) {
+      getAudioPlayer().stop();
+      removeBlurHandler();
+      isAudioPlaying = false;
+    }
   }
 
   // Puts in delimiters on both sides of the parameter -- ? before and & after
@@ -146,15 +151,16 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     if (!audioPlayer) {
       if (platform.browser.isSafari) {
         require(['audio/safari-player'], function(player) {
+          player.init();
           audioPlayer = player;
         });
       }
       else {
         require(['audio/html5-player'], function(player) {
+          player.init();
           audioPlayer = player;
         });
       }
-      audioPlayer.init();
     }
 
     return audioPlayer;
@@ -229,6 +235,8 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     ttsOn = true;
     sitecues.emit('speech/did-change', true);
   }
+
+  getAudioPlayer();  // Init audio player
 
   var publics = {
     stopAudio: stopAudio,

@@ -99,7 +99,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
    * BP feature is ready to be enabled.  It creates the necessary elements,
    * renders them, and emits events for the rest of the application to
    */
-  function initializeBPFeature() {
+  function initBPFeature() {
 
     if (isInitialized) {
       return;
@@ -184,7 +184,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
 
   function initBPIfDocumentComplete() {
     if (document.readyState === 'complete') {
-      initializeBPFeature();
+      initBPFeature();
       return true;
     }
   }
@@ -198,7 +198,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
   function initIfBadgeReady() {
 
     if (site.get('uiMode') === 'toolbar') {
-      setTimeout(initializeBPFeature, 0);
+      setTimeout(initBPFeature, 0);
       return;
     }
 
@@ -209,7 +209,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
 
       SC_DEV && console.log('Document ready to initialize BP.');
 
-      setTimeout(initializeBPFeature, 0);
+      setTimeout(initBPFeature, 0);
 
     } else {
 
@@ -219,7 +219,7 @@ define(['bp/model/state','bp/view/modes/badge', 'bp/view/modes/panel', 'bp/helpe
 
         // Loading of badge image is enough -- once it's ready we can initialize
         // because we now have the desired dimensions of the badge
-        earlyBadgeElement.addEventListener('load', initializeBPFeature);
+        earlyBadgeElement.addEventListener('load', initBPFeature);
 
         // Because IE does not reliably fire load events for badge, we
         // will also listen for document complete events and make  sure we are initialized then

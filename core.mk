@@ -51,9 +51,11 @@ build:
 	@echo
 
 	@mkdir -p $(build-dir)/compile/js
+	@mkdir -p $(build-dir)/compile/config
+	echo "sitecues.version='$(custom-version)';" > $(build-dir)/compile/config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o require-js-options.js baseUrl=source/js optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false out=$(build-dir)/compile/js/sitecues.js wrap.start="(function(SC_VERSION){'use strict';" wrap.end="}('$(custom-version)'));"
+	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/compile/js wrap.start="'use strict';"
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@echo
 	@(cd $(build-dir)/compile/js ; for FILE in *.js ; do \
@@ -80,9 +82,12 @@ debug:
 	@echo
 
 	@mkdir -p $(build-dir)/compile/js
+	@mkdir -p $(build-dir)/compile/config
+	echo "sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=false,SC_UNIT=false;" > $(build-dir)/compile/config/config.js
 
 	# Require.js build
-	node node_modules/.bin/r.js -o require-js-options.js baseUrl=source/js optimize=none out=$(build-dir)/compile/js/sitecues.js wrap.start="(function(SC_VERSION,SC_LOCAL,SC_DEV,SC_UNIT) {'use strict';" wrap.end="}('$(custom-version)',$(sc-local),false,false));"
+	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
+	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=none dir=$(build-dir)/compile/js
 
 	@echo "* File sizes:"
 	@(cd $(build-dir)/compile/js ; \

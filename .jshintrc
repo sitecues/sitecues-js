@@ -13,7 +13,7 @@
   "plusplus"      : false,    // true: Prohibit use of `++` & `--`
   "quotmark"      : "single", // Quotation mark consistency
   "unused"        : true,     // true: Require all defined variables be used
-  "strict"        : false,     // true: Requires all functions run in ES5 Strict Mode
+  "strict"        : false,    // true: Requires all functions run in ES5 Strict Mode
   "immed"         : true,     // true: Require immediate invocations to be wrapped in parens e.g. `(function () { } ());`
 
   // Define Global Variables Here   -- copy to both predef and globals sections
@@ -97,7 +97,7 @@
   "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
   "expr"          : false,     // true: Tolerate `ExpressionStatement` as Programs
   "funcscope"     : false,     // true: Tolerate defining variables inside control statements
-  "globalstrict"  : true,      // true: Allow global use strict (also enables strict)
+  "globalstrict"  : false,      // true: Allow global use strict (also enables strict)
   "iterator"      : false,     // true: Tolerate using the `__iterator__` property
   "lastsemic"     : false,     // true: Tolerate omitting a semicolon for the last statement of a 1-line block
   "loopfunc"      : false,     // true: Tolerate functions being defined in loops

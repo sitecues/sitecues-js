@@ -3,11 +3,9 @@
  * The module represents HLB event handlers.
  * For example, we want to onle allow scroll for HLB and its entities when HLB is open.
  * Stop event bubble up to window/document object.
- *
- * Note: keydown event is also handled in keys.js
  */
 // TODO: Call this module scrolling.js
-define(['jquery', 'util/common', 'keys/keys', 'util/platform'], function($, common, keys, platform) {
+define(['jquery', 'util/common', 'util/platform'], function($, common, platform) {
 
   /////////////////////////
   // PRIVATE VARIABLES

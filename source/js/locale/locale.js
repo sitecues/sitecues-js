@@ -10,9 +10,19 @@
  * - Localize a number string
  */
 define([], function() {
-  var translations,
+  var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
-    LANG_FOLDER = 'locale/lang/';
+    LANG_FOLDER = 'locale/lang/',
+    SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
+    lang = getShortWebsiteLang(),
+    sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
+    langModuleName = LANG_FOLDER + sanitizedLang;
+
+  // Had to put the 'sitecues.' prefix because the requirejs auto names
+  // pacing didn't work with our variable language module
+  sitecues.require([ langModuleName ], function(langEntries) {
+    translations = langEntries;
+  });
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
@@ -147,29 +157,7 @@ define([], function() {
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   }
 
-  function getLanguageModuleName(lang) {
-    return 'locale/' + lang;
-  }
-
-  // todo: fetch from the server via CORS Ajax
-  function getTranslationFile() {
-    var lang = getShortWebsiteLang();
-
-    // use ajax for polish
-    require([ LANG_FOLDER + getLanguageModuleName(lang) ], function(langModule) {
-      if (langModule) {
-        translations = langModule;
-      }
-      else {
-        require([ LANG_FOLDER + getLanguageModuleName(DEFAULT_LANG) ], function(defaultLangModule) {
-          translations = defaultLangModule;
-        });
-      }
-    });
-  }
-
   // On load fetch the translations only once
-  getTranslationFile();
 
   var publics = {
     getShortWebsiteLang: getShortWebsiteLang,
