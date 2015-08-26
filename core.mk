@@ -62,11 +62,14 @@ build:
 		gzip -c $$FILE > $$FILE.gz ; \
 	done)
 
+  # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
 	@echo "* File sizes:"
-	@(cd $(build-dir)/compile/js ; \
-	for FILE in `ls *.js *.js.gz | sort` ; do \
-		printf "*  %-16s $$(ls -l $$FILE | awk '{print($$5);}')\n" $$FILE ; \
-	done)
+	@echo -----------------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "sitecues.*" | grep -v "\.src|\.map"
+	@echo -----------------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "*.js" | grep -v "\.src\.|sitecues\.js"
+	@echo -----------------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "*.js.gz" | grep -v "\.src\.|sitecues\.js"
 
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
@@ -90,10 +93,7 @@ debug:
 	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=none dir=$(build-dir)/compile/js
 
 	@echo "* File sizes:"
-	@(cd $(build-dir)/compile/js ; \
-	for FILE in `ls *.js | sort` ; do \
-		printf "*  %-16s $$(ls -l $$FILE | awk '{print($$5);}')\n" $$FILE ; \
-	done)
+	@./show-file-sizes.sh $(build-dir)/compile/js "*.js"
 
 #	@echo
 #	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="

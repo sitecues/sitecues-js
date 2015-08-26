@@ -24,6 +24,7 @@
       create: true,
       include: [
         'jquery',
+        'jquery-private',
         'util/common',
         'util/jquery-utils'
       ],
@@ -146,7 +147,7 @@
   onModuleBundleComplete: function (data) {
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
-    console.log("'" + data.name + "': ['" + includedStr + "']");
+    console.log("'" + data.name + "': ['" + includedStr + "'],");
   },
   namespace: 'sitecues',
   useStrict: true,
