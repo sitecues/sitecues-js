@@ -58,6 +58,7 @@ define(['bp/view/modes/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'u
       svgElement,
       ratioOfSVGToVisibleBadgeSize,
       zoomAppliedToBadge = 1,
+      isInitialized,
 
       // The width/height of the <SVG>
       // Note: this currently stays the same in badge vs panel sizes even though the panel stretches,
@@ -262,6 +263,12 @@ define(['bp/view/modes/badge', 'bp/model/state', 'bp/constants', 'bp/helper', 'u
    * @param  {[DOM element]} svg         [SVG with ID 'scp-svg']
    */
   function init(badge, bpContainer, svg) {
+
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
 
     // Compute the aspect ratio (the width:height ratio required for the <svg>)
     var viewBoxRect = svg.viewBox.baseVal;

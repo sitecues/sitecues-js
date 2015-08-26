@@ -1201,49 +1201,6 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
       typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
-  // Lazy init, saves time on page load
-  function initZoomModule() {
-    if (isInitialized) {
-      return;
-    }
-
-    isInitialized = true;
-
-    initBodyInfo();
-
-    $.extend(zoomConfig, {
-      // Does the web page use a fluid layout, where content wraps to the width?
-      isFluid: site.get('isFluid'), // Can override in site preferences
-
-      // Should the width of the page be restricted as zoom increases?
-      // This is helpful for pages that try to word-wrap or use a fluid layout.
-      // Eventually use fast page health calculation to automatically determine this
-      // Assumes window width of 1440 (maximized screen on macbook)
-      maxZoomToRestrictWidthIfFluid: site.get('maxRewrapZoom') || 1.5,
-
-      // Set to 5 on sites where the words get too close to the left window's edge
-      leftMarginOffset: site.get('leftMarginOffset') || 2
-    });
-
-    if (typeof zoomConfig.isFluid === 'undefined') {
-      zoomConfig.isFluid = isFluidLayout();
-    }
-
-    $(window).resize(onResize);
-
-    $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
-
-    if (SC_DEV) {
-      console.log('_______________________________________________________');
-      console.log('Zoom configuration: %o', zoomConfig);
-      console.log('Window width: %o', window.outerWidth);
-      console.log('Visible body rect: %o', originalBodyInfo);
-      console.log('isFluid?: %o', zoomConfig.isFluid);
-      console.log('_______________________________________________________');
-    }
-  }
-
-
   function performInitialLoadZoom() {
     if (!document.body) {
       // Wait until <body> is ready
@@ -1308,25 +1265,54 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
     event.preventDefault();
   }
 
-  // Use conf module for sharing current zoom level value
-  conf.def('zoom', getSanitizedZoomValue);
-
-  // ATKratter wouldn't scroll when we listened to this on the window
-  document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
-
-  sitecues.on('bp/will-expand', function() {
-    initZoomModule(); // Lazy init
-    isPanelOpen = true;
-    if (shouldPrepareAnimations()) {
-      prepareAnimationOptimizations();
+  function init() {
+    if (isInitialized) {
+      return;
     }
-  });
-  sitecues.on('bp/did-shrink', function() {
-    isPanelOpen = false;
-    clearAnimationOptimizations(); // Browser can reclaim resources used
-  });
+    isInitialized = true;
 
-  sitecues.on('bp/did-complete', performInitialLoadZoom); // Zoom once badge is ready
+    // Use conf module for sharing current zoom level value
+    conf.def('zoom', getSanitizedZoomValue);
+
+    // ATKratter wouldn't scroll when we listened to this on the window
+    document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
+
+    sitecues.on('bp/will-expand', function () {
+      initBodyInfo();   // Lazy init
+      isPanelOpen = true;
+      if (shouldPrepareAnimations()) {
+        prepareAnimationOptimizations();
+      }
+    });
+    sitecues.on('bp/did-shrink', function () {
+      isPanelOpen = false;
+      clearAnimationOptimizations(); // Browser can reclaim resources used
+    });
+
+    sitecues.on('bp/did-complete', performInitialLoadZoom); // Zoom once badge is ready
+
+    $.extend(zoomConfig, {
+      // Does the web page use a fluid layout, where content wraps to the width?
+      isFluid: site.get('isFluid'), // Can override in site preferences
+
+      // Should the width of the page be restricted as zoom increases?
+      // This is helpful for pages that try to word-wrap or use a fluid layout.
+      // Eventually use fast page health calculation to automatically determine this
+      // Assumes window width of 1440 (maximized screen on macbook)
+      maxZoomToRestrictWidthIfFluid: site.get('maxRewrapZoom') || 1.5,
+
+      // Set to 5 on sites where the words get too close to the left window's edge
+      leftMarginOffset: site.get('leftMarginOffset') || 2
+    });
+
+    if (typeof zoomConfig.isFluid === 'undefined') {
+      zoomConfig.isFluid = isFluidLayout();
+    }
+
+    $(window).resize(onResize);
+
+    $body.css(getZoomBodyCSSFixes()); // Get it read as soon as zoom might be used
+  }
 
   var publics = {
     MAX: MAX,
@@ -1347,7 +1333,8 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
     getCompletedZoom: getCompletedZoom,
     setThumbChangeListener: setThumbChangeListener,
     resetZoom: resetZoom,
-    zoomStopRequested: zoomStopRequested
+    zoomStopRequested: zoomStopRequested,
+    init: init
   };
 
   if (SC_UNIT) {

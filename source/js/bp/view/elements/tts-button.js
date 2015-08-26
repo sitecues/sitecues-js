@@ -1,8 +1,10 @@
 // TODO wave animation broken except in default badge
 define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/locale'],
   function (BP_CONST, helper, audio, state, locale) {
-  var waveAnimationTimer,
-      waveAnimationStepNum;
+  var
+    waveAnimationTimer,
+    waveAnimationStepNum,
+    isInitialized;
 
   function getTTSButtonElement() {
     return helper.byId(BP_CONST.SPEECH_ID);
@@ -132,6 +134,12 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
     */
   function init() {
 
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
     var mouseTarget1 = getTTSButtonElement(),
       mouseTarget2 = helper.byId(BP_CONST.SPEECH_LABEL_ID);
 
@@ -153,12 +161,10 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
 
     updateTTSStateView(audio.isSpeechEnabled());
 
-    waveAnimationStepNum = 0;
-  }
-
-  function init() {
     // Update the TTS button view on any speech state change
     sitecues.on('speech/did-change', updateTTSStateView);
+
+    waveAnimationStepNum = 0;
   }
 
   return {

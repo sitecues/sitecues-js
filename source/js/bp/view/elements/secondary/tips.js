@@ -4,6 +4,7 @@
 define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
 
   var byId = helper.byId,
+    isInitialized,
     animationTimers = [],
     animationFns = {
       'scp-zoom-card': 'zoom',
@@ -132,9 +133,16 @@ define(['bp/constants', 'bp/helper'], function (BP_CONST, helper) {
     pushTimeout(openThenCloseLens, 12000);
   }
 
-  sitecues.on('bp/did-show-card', cardActivated);
+  function init() {
+    if (!isInitialized) {
+      isInitialized = true;
+      sitecues.on('bp/did-show-card', cardActivated);
+    }
+  }
+
   var publics = {
-    getGeometryTargets: getGeometryTargets
+    getGeometryTargets: getGeometryTargets,
+    init: init
   };
 
   if (SC_UNIT) {

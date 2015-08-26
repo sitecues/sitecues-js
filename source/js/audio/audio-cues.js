@@ -18,7 +18,9 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
 
     VERBAL_CUE_SPEECH_ON = 'verbalCueSpeechOn',
     VERBAL_CUE_SPEECH_ON_DESCRIPTIVE = 'verbalCueSpeechOnFirst',
-    VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff';
+    VERBAL_CUE_SPEECH_OFF = 'verbalCueSpeechOff',
+
+    isInitialized;
 
   // This is the initial zoom level, we're only going to use the verbal cue if someone increases it
   var initialZoom = conf.get('zoom');
@@ -83,15 +85,26 @@ define(['conf/user/manager', 'audio/audio'], function(conf, audio) {
     }
   }
 
-  /*
-   * Play speech on cue if necessary
-   */
-  sitecues.on('speech/did-change', playSpeechCue);
+  function init() {
 
-  /*
-   * Play cue describing "zoom in more" one-touch-read feature if necessary
-   */
-  sitecues.on('zoom', onZoomChanged);
+    if (isInitialized) {
+      return;
+    }
 
-  // No publics
+    isInitialized = true;
+
+    /*
+     * Play speech on cue if necessary
+     */
+    sitecues.on('speech/did-change', playSpeechCue);
+
+    /*
+     * Play cue describing "zoom in more" one-touch-read feature if necessary
+     */
+    sitecues.on('zoom', onZoomChanged);
+  }
+
+  return {
+    init: init
+  };
 });

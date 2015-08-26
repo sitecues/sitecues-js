@@ -1,5 +1,5 @@
-define(['util/element-classifier'],
-  function(elemClassifier) {
+define(['util/element-classifier', 'keys/commands'],
+  function(elemClassifier, commands) {
 
   var
     // KEY_TESTS defines keys used to bind actions to hotkeys.
@@ -213,9 +213,7 @@ define(['util/element-classifier'],
 
   function executeCommand(commandName, keyName) {
     // Emit event defined for key
-    sitecues.require(['command/' + commandName], function (commandFn) {
-      commandFn(event, keyName);
-    });
+    commands[commandName](event, keyName);
   }
 
     // key event hook

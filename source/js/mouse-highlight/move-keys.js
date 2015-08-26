@@ -1,6 +1,6 @@
-define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform', 'hlb/dimmer', 'util/common', 'util/transform',
+define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
-  function($, mh, hlb, platform, dimmer, common, transform, picker, zoomMod, geo, fixedFixer) {
+  function($, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
 
   var STEP_SIZE_VERT = 18,
     STEP_SIZE_HORIZ = 24,  // Different step sizes because content tends to be wider than tall (lines of text)
@@ -20,6 +20,8 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
     HIGHLIGHT_MOVE_NEXT_REPEAT_DELAY_MS = 250,
     // Helps us know whether it's the first repeat and therefore how much to delay
     isKeyRepeating,
+    isInitialized,
+    isLensVisible,
     repeatDelayTimer,
     MAX_PIXELS_TO_PAN = 999,
     HEADING_TAGS = { h1:1,h2:1,h3:1,h4:1,h5:1,h6:1 },
@@ -100,9 +102,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
 
   function onMovementCommand(nextMove) {
     // Movement command
-    hlbElement = hlb.getElement();
-
-    if (hlbElement && performHLBScroll(nextMove)) {
+    if (isLensVisible && performHLBScroll(nextMove)) {
       return; // HLB could scroll -- finish
     }
 
@@ -289,7 +289,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
 
     if (hlbElement) {
       SC_DEV && console.log('Close HLB');
-      sitecues.emit('hlb/toggle'); // Nothing found .. close HLB and enable highlight on last known item
+      toggleHLB(); // Nothing found .. close HLB and enable highlight on last known item
     }
   }
 
@@ -306,10 +306,10 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
       speakHighlight();
     }
 
-    if (hlb.getElement()) {
+    if (isLensVisible) {
       // Open new HLB
       SC_DEV && console.log('Retarget HLB');
-      sitecues.emit('hlb/retarget');
+      retargetHLB();
     }
     else if (doAllowRepeat && isKeyStillDown && lastMoveCommand) {
       // For movement, we need a delay between command, otherwise it can happen too fast
@@ -723,43 +723,68 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'hlb/hlb', 'util/platform',
     return outlineRect;
   }
 
+  function toggleHLB() {
+    require(['hlb/hlb'], function(hlb) {
+      // Nothing found .. close HLB and enable highlight on last known item
+      hlb.toggleHLB();
+    });
+  }
+
+  function retargetHLB() {
+    require(['hlb/hlb'], function(hlb) {
+      // Nothing found .. close HLB and enable highlight on last known item
+      hlb.retargetHLB();
+    });
+  }
+
   function onSpace(doSpeakText) {
-    if (hlb.getElement() || mh.getHighlight().isVisible) {
+    if (isLensVisible || mh.getHighlight().isVisible) {
       // Has an HLB or a highlight -- toggle HLB
-      sitecues.emit('hlb/toggle');
+      toggleHLB();
     }
     else if (isNavigationEnabled) {
       // No highlight -- make one
-      sitecues.emit('mh/autopick');
+      mh.autoPick();
     }
     if (doSpeakText) {
       speakHighlight();
     }
   }
 
-  $(window).on('keyup', function() {
-    clearTimeout(repeatDelayTimer);
-    isKeyStillDown = false;
-    isKeyRepeating = false;
-  });
-
   function onEscape() {
-    if (hlb.getElement()) {
-      sitecues.emit('hlb/toggle');
+    if (isLensVisible) {
+      toggleHLB();
     }
     else {
       // TODO next arrow key is still moving highlight
       // Probably the invisible mouse cursor is messing us up as well
-      sitecues.emit('mh/hide', true);
+      mh.hide(true);
       navQueue = []; // No highlight -- can't process any more nav keys in the queue
     }
   }
 
-    var publics = {
-      queueKey: queueKey
-    };
-    if (SC_UNIT) {
-      module.exports = publics;
+  function init() {
+    if (isInitialized) {
+      return;
     }
-    return publics;
-  });
+    isinitialized = true;
+    $(window).on('keyup', function () {
+      clearTimeout(repeatDelayTimer);
+      isKeyStillDown = false;
+      isKeyRepeating = false;
+    });
+
+    sitecues.on('lens/did-toggle-visibility', function(isVisible) {
+      isLensVisible = isVisible;
+    });
+ }
+
+  var publics = {
+    queueKey: queueKey,
+    init: init
+  };
+  if (SC_UNIT) {
+    module.exports = publics;
+  }
+  return publics;
+});

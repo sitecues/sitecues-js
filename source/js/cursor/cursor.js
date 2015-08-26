@@ -10,6 +10,7 @@ define(['jquery', 'style-service/style-service', 'conf/user/manager', 'cursor/cu
   function (  $, styleService, conf, cursorCss, platform) {
 
   var autoSize = 1,
+      isInitialized,
       // Regexp is used to match URL in the string given(see below).
       URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
       CURSOR_TYPES = ['default', 'pointer' ],
@@ -342,14 +343,6 @@ define(['jquery', 'style-service/style-service', 'conf/user/manager', 'cursor/cu
     return userSpecifiedHue > 0 && userSpecifiedHue < 1.1 ? Math.min(userSpecifiedHue, 1) : 0;
   }
 
-  conf.def('mouseSize', sanitizeMouseSize);
-  conf.def('mouseHue', sanitizeMouseHue);
-  conf.get('mouseSize', onMouseSizeSetting);
-  conf.get('mouseHue', onMouseHueSetting);
-  if (typeof conf.get('mouseHue') === 'undefined') {
-    conf.set('mouseHue', MAX_USER_SPECIFIED_MOUSE_HUE);
-  }
-
   function onPageZoom(pageZoom) {
     if (userSpecifiedSize) {
       return;
@@ -363,16 +356,33 @@ define(['jquery', 'style-service/style-service', 'conf/user/manager', 'cursor/cu
     }
   }
 
-  if (!userSpecifiedSize) {
-    sitecues.on('zoom', onPageZoom);
+  function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
+
+    conf.def('mouseSize', sanitizeMouseSize);
+    conf.def('mouseHue', sanitizeMouseHue);
+    conf.get('mouseSize', onMouseSizeSetting);
+    conf.get('mouseHue', onMouseHueSetting);
+    if (typeof conf.get('mouseHue') === 'undefined') {
+      conf.set('mouseHue', MAX_USER_SPECIFIED_MOUSE_HUE);
+    }
+
+    if (!userSpecifiedSize) {
+      sitecues.on('zoom', onPageZoom);
+    }
+
+    sitecues.on('style-service/ready', function () {
+      isStyleServiceReady = true;
+      refreshStylesheetsIfNecessary();
+    });
+
+    constructBPCursorStylesheet();
   }
 
-  sitecues.on('style-service/ready', function() {
-    isStyleServiceReady = true;
-    refreshStylesheetsIfNecessary();
-  });
-
-  constructBPCursorStylesheet();
-
-  // No publics
+  return {
+    init: init
+  };
 });

@@ -281,7 +281,6 @@ define(['jquery', 'style-service/user-agent-css', 'conf/site', 'style-service/me
     }
   }
 
-
   // Needed to support hacky inline style attributes
   // for example background-image on http://www.classifieds.faast.org/
   function addInlineStyles() {

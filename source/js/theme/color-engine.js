@@ -12,6 +12,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
     shouldRepaintToEnsureFullCoverage = platform.browser.isChrome,
     isPanelExpanded,
     isRepaintNeeded,
+    isInitialized,
     originalBodyBackgroundColor,
     isOriginalThemeDark,
     transitionTimer,
@@ -58,6 +59,8 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
    */
   function applyTheme(type, intensity, textHue) {
 
+    init();
+
     function applyThemeImpl() {
       var
         isDark = colorUtil.isDarkColor(colorUtil.getDocumentBackgroundColor()),
@@ -88,7 +91,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
 
     var colorMapFn = colorChoices[type];
     if (colorMapFn || !type) {
-      init(applyThemeImpl);
+      initStyles(applyThemeImpl);
     }
   }
 
@@ -606,7 +609,7 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
     }
   }
 
-  function init(callbackFn) {
+  function initStyles(callbackFn) {
     if (!styleService.isReady()) {
       sitecues.on('style-service/ready', function () {
         collectRelevantStyles(callbackFn);
@@ -659,32 +662,40 @@ define(['jquery', 'conf/user/manager', 'style-service/style-service', 'util/plat
     applyTheme(conf.get('themeName'), conf.get('themePower'), conf.get('themeTextHue'));
   }
 
-  conf.def('themeName', getSanitizedThemeName);
-  conf.def('themePower', getSanitizedThemePower);
-  conf.def('themeTextHue', getSanitizedHue);
-  conf.get('themeName', onThemeChange);
-  conf.get('themePower', onThemeChange);
-  conf.get('themeTextHue', onThemeChange);
-  if (typeof conf.get('themePower') === 'undefined') {
-    conf.set('themePower', DEFAULT_INTENSITY);
-  }
-  if (typeof conf.get('themeTextHue') === 'undefined') {
-    conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
-  }
-
-  function onPanelExpand() {
-    isPanelExpanded = true;
-  }
-  function onPanelShrink() {
-    isPanelExpanded = false;
-    if (isRepaintNeeded) {
-      repaintPage();
-      isRepaintNeeded = false;
+  function init() {
+    if (isInitialized) {
+      return;
     }
-  }
+    isInitialized = true;
 
-  sitecues.on('bp/did-expand', onPanelExpand);
-  sitecues.on('bp/did-shrink', onPanelShrink);
+    conf.def('themeName', getSanitizedThemeName);
+    conf.def('themePower', getSanitizedThemePower);
+    conf.def('themeTextHue', getSanitizedHue);
+    conf.get('themeName', onThemeChange);
+    conf.get('themePower', onThemeChange);
+    conf.get('themeTextHue', onThemeChange);
+    if (typeof conf.get('themePower') === 'undefined') {
+      conf.set('themePower', DEFAULT_INTENSITY);
+    }
+    if (typeof conf.get('themeTextHue') === 'undefined') {
+      conf.set('themeTextHue', MAX_USER_SPECIFIED_HUE); // Use white text by default
+    }
+
+    function onPanelExpand() {
+      isPanelExpanded = true;
+    }
+
+    function onPanelShrink() {
+      isPanelExpanded = false;
+      if (isRepaintNeeded) {
+        repaintPage();
+        isRepaintNeeded = false;
+      }
+    }
+
+    sitecues.on('bp/did-expand', onPanelExpand);
+    sitecues.on('bp/did-shrink', onPanelShrink);
+  }
 
   if (SC_DEV) {
     sitecues.applyTheme  = applyTheme;

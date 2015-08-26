@@ -3,6 +3,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
 
   var byId = helper.byId,
     isActive = false,
+    isInitialized,
     settingsPanel,
     lastDragUpdateTime = 0,
     SLIDER_DRAG_UPDATE_MIN_INTERVAL= 50;
@@ -15,7 +16,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
     if (isActive !== willBeActive) {
       if (willBeActive) {
         if (!settingsPanel) {
-          init();
+          initContents();
         }
         settingsCards.addEventListener('click', onSettingsClick);
         settingsCards.addEventListener('change', onSettingsNativeInputChange);
@@ -31,10 +32,11 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
     isActive = willBeActive;
   }
 
-  function init() {
+  function initContents() {
+
     settingsPanel = byId(BP_CONST.SETTINGS_CONTENT_ID);
 
-    generalInit();
+    initButtons();
 
     initRanges();
 
@@ -42,7 +44,7 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
   }
 
   // Set up setting synchronization
-  function generalInit() {
+  function initButtons() {
     var allSettingNames = {},
       allSettingElems = settingsPanel.querySelectorAll('[data-setting-name]'),
       index = allSettingElems.length,
@@ -149,9 +151,19 @@ define(['bp/constants', 'bp/helper', 'conf/user/manager', 'bp/model/state'],
     }
   }
 
-  sitecues.on('bp/did-change', onPanelUpdate);
+  function init() {
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
+    sitecues.on('bp/did-change', onPanelUpdate);
+  }
+
   var publics = {
-    getGeometryTargets: getGeometryTargets
+    getGeometryTargets: getGeometryTargets,
+    init: init
   };
 
   if (SC_UNIT) {

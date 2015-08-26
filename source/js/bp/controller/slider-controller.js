@@ -4,9 +4,10 @@
 define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view/elements/slider'],
   function (BP_CONST, helper, platform, state, sliderView) {
 
-  var isListeningToWindowMouseEvents;
+  var isListeningToWindowMouseEvents,
+    isInitialized;
 
-  /**
+    /**
    * Mouse is been pressed down on the slider:
    * If the slider is ready for input, begin sending zoom new values for every mouse move.
    */
@@ -81,6 +82,10 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     // Add permanent listeners
     require(['zoom/zoom'], function(zoomMod) {
       sliderView.render(zoomMod.getCompletedZoom());

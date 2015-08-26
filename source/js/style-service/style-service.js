@@ -8,8 +8,9 @@ define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries']
     combinedDOMStylesheetObject,
     SITECUES_COMBINED_CSS_ID = 'sitecues-combined-css',
     WAIT_BEFORE_INIT_STYLESHEET = 50,
-    hasInitBeenRequested,   // Have we even begun the init sequence?
-    isInitComplete;      // Init sequence is complete
+    isInitialized,
+    isCssRequested,   // Have we even begun the init sequence?
+    isCssComplete;      // Init sequence is complete
 
   /**
    * Create an disabled style sheet to be filled in later with styles
@@ -30,22 +31,22 @@ define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries']
       combinedDOMStylesheetObject.disabled = true; // Don't interfere with page
       // Takes the browser a moment to process the new stylesheet
       setTimeout(function() {
-        isInitComplete = true;
+        isCssComplete = true;
         sitecues.emit('style-service/ready');
       }, WAIT_BEFORE_INIT_STYLESHEET);
     });
   }
 
   function isReady() {
-    return isInitComplete;
+    return isCssComplete;
   }
 
-  function init() {
-    if (hasInitBeenRequested) {
+  function requestCss() {
+    if (isCssRequested) {
       return;  // Only init once
     }
 
-    hasInitBeenRequested = true;
+    isCssRequested = true;
 
     // Create a <style id="sitecues-combined-css"> containing all relevant style rule in the right order.
     // It will start with default user agent style rules and add
@@ -121,7 +122,7 @@ define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries']
       }
     }
 
-    if (!isInitComplete) {
+    if (!isCssComplete) {
       return [];
     }
 
@@ -178,34 +179,41 @@ define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries']
     return css;
   }
 
-  // Once the user zooms the style service is necessary to create the proper cursor rules
-  sitecues.on('zoom', function (pageZoom) {
-    if (pageZoom > 1) {
-     init();
+  function init() {
+    if (isInitialized) {
+      return;
     }
-  });
+    isInitialized = true;
 
+    // Once the user zooms the style service is necessary to create the proper cursor rules
+    sitecues.on('zoom', function (pageZoom) {
+      if (pageZoom > 1) {
+        requestCss();
+      }
+    });
 
-  // Normally we wait until the user zooms before initializing the style sevice.
-  // However, in the case of the toolbar, we must always move fixed position elements
-  // down. As this process requires the style-service, when the toolbar is inserted,
-  // we will initialize the style service immediately.
-  sitecues.on('bp/did-insert-toolbar', function() {
-    if (document.readyState === 'complete') {
-      init();
-    }
-    else {
-      window.addEventListener('load', init);
-    }
-  });
+    // Normally we wait until the user zooms before initializing the style sevice.
+    // However, in the case of the toolbar, we must always move fixed position elements
+    // down. As this process requires the style-service, when the toolbar is inserted,
+    // we will initialize the style service immediately.
+    sitecues.on('bp/did-insert-toolbar', function () {
+      if (document.readyState === 'complete') {
+        requestCss();
+      }
+      else {
+        window.addEventListener('load', requestCss);
+      }
+    });
+  }
 
   var publics = {
     isReady: isReady,
+    requestCss: requestCss,
     init: init,
     getAllMatchingStyles: getAllMatchingStyles,
     getAllMatchingStylesCustom: getAllMatchingStylesCustom,
     getDOMStylesheet: getDOMStylesheet,
-    getStyleText: getStyleText
+    getStyleText: getStyleText,
   };
   if (SC_UNIT) {
     module.exports = publics;

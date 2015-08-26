@@ -30,6 +30,7 @@
 // TODO in keys need to get events for lens/mh visibility
 // TODO bp.js implementation of is real settings
 // TODO file bug on requirejs needing sitecues.require when variable name used
+// TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
 
 define(['bp/bp', 'keys/keys' ],
   function (bp, keys) {
@@ -37,9 +38,11 @@ define(['bp/bp', 'keys/keys' ],
     ZOOM_FEATURE_NAMES = ['zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_FEATURE_NAMES = [ 'audio/audio' ],
     ZOOM_OR_TTS_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'audio/audio-cues', 'hlb/hlb', 'mouse-highlight/move-keys', 'conf/site' ],
+    THEME_FEATURE_NAMES = ['theme/color-engine'],
     isZoomInitialized,
     isSpeechInitialized,
-    currZoom,
+    isThemeEngineInitialized,
+    isZoomOn,
     isSpeechOn,
     isSitecuesOn = false;
 
@@ -55,7 +58,7 @@ define(['bp/bp', 'keys/keys' ],
 
   // Init features that require *either* zoom or speech to be on
   function onFeatureSettingChanged() {
-    var isOn = currZoom > 1 || isSpeechOn;
+    var isOn = isZoomOn || isSpeechOn;
     if (isOn !== isSitecuesOn) {
       isSitecuesOn = isOn;
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
@@ -70,9 +73,9 @@ define(['bp/bp', 'keys/keys' ],
 
     conf.init(function() {
       conf.get('zoom', function(zoomLevel) {
-        currZoom = zoomLevel;
+        isZoomOn = zoomLevel > 1;
         onFeatureSettingChanged();
-        if (zoomLevel > 1 && !isZoomInitialized) {
+        if (isZoomOn && !isZoomInitialized) {
           initFeaturesByName(ZOOM_FEATURE_NAMES);
           isZoomInitialized = true;
         }
@@ -83,6 +86,12 @@ define(['bp/bp', 'keys/keys' ],
         if (isOn && !isSpeechInitialized) {
           initFeaturesByName(TTS_FEATURE_NAMES);
           isSpeechInitialized = true;
+        }
+      });
+      conf.get('themeName', function(themeName) {
+        if (themeName && !isThemeEngineInitialized) {
+          initFeaturesByName(THEME_FEATURE_NAMES);
+          isThemeEngineInitialized = true;
         }
       });
     });

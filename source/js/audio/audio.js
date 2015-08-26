@@ -17,7 +17,8 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     isAudioPlaying,
     audioPlayer,
     mediaTypeForTTS,  // For TTS only, not used for pre-recorded sounds such as verbal cues
-    mediaTypeForPrerecordedAudio;
+    mediaTypeForPrerecordedAudio,
+    isInitialized;
 
   function playHlbContent($content) {
     if (!ttsOn) {
@@ -219,24 +220,33 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     return ttsOn;
   }
 
-  /*
-   * A highlight box has been requested.  This will create the player
-   * if necessary, but will not play anything.
-   */
-  sitecues.on('hlb/create', playHlbContent);
+  function init() {
 
-  /*
-   * A highlight box was closed.  Stop/abort/dispose of the player
-   * attached to it.
-   */
-  sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+    if (isInitialized) {
+      return;
+    }
 
-  if (conf.get('ttsOn')) {
-    ttsOn = true;
-    sitecues.emit('speech/did-change', true);
+    isInitialized = true;
+
+    /*
+     * A highlight box has been requested.  This will create the player
+     * if necessary, but will not play anything.
+     */
+    sitecues.on('hlb/create', playHlbContent);
+
+    /*
+     * A highlight box was closed.  Stop/abort/dispose of the player
+     * attached to it.
+     */
+    sitecues.on('hlb/closed keys/non-shift-key-pressed', stopAudio);
+
+    if (conf.get('ttsOn')) {
+      ttsOn = true;
+      sitecues.emit('speech/did-change', true);
+    }
+
+    getAudioPlayer();  // Init audio player
   }
-
-  getAudioPlayer();  // Init audio player
 
   var publics = {
     stopAudio: stopAudio,
@@ -247,7 +257,8 @@ define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'uti
     playHighlight: playHighlight,
     playEarcon: playEarcon,
     playHlbContent: playHlbContent,
-    getTTSUrl: getTTSUrl
+    getTTSUrl: getTTSUrl,
+    init: init
   };
   if (SC_UNIT) {
     module.exports = publics;

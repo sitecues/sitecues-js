@@ -1567,7 +1567,7 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
     return state;
   }
 
-    function init() {
+  function init() {
 
     forget();
 
@@ -1583,12 +1583,6 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
 
     // Turn mouse-tracking on or off
     sitecues.on('key/only-shift', setOnlyShift);
-
-    // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('mh/autopick', autoPick);
-
-    // enable mouse highlight back once highlight box deflates or zoom finishes
-    sitecues.on('mh/hide', hide);
 
     // enable mouse highlight back once highlight box deflates or zoom finishes
     sitecues.on('bp/did-complete', onBadgeReady);
@@ -1662,6 +1656,8 @@ define(['jquery', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mou
   var publics = {
     getHighlight: getHighlight,
     highlight: highlight,
+    autoPick: autoPick,
+    hide: hide,
     init: init
   };
 

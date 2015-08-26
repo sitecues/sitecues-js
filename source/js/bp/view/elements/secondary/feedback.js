@@ -1,6 +1,7 @@
 define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], function (BP_CONST, helper, state, platform) {
   var byId = helper.byId,
     isActive = false,
+    isInitialized,
     currRating = 0;  // Zero = no rating defined
 
   function getFeedbackArea() {
@@ -107,11 +108,17 @@ define(['bp/constants', 'bp/helper', 'bp/model/state', 'util/platform'], functio
     return cssValues;
   }
 
-  sitecues.on('bp/did-expand', autoSizeTextarea);
+  function init() {
+    if (!isInitialized) {
+      isInitialized = true;
+      autoSizeTextarea();
+      sitecues.on('bp/did-change', onPanelUpdate);
+    }
+  }
 
-  sitecues.on('bp/did-change', onPanelUpdate);
   var publics = {
-    getGeometryTargets: getGeometryTargets
+    getGeometryTargets: getGeometryTargets,
+    init: init
   };
 
   if (SC_UNIT) {

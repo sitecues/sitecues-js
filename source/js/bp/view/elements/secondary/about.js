@@ -1,5 +1,6 @@
 define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, helper, transform) {
-  var byId = helper.byId;
+  var byId = helper.byId,
+    isInitialized;
 
   function getAboutImage() {
     return byId(BP_CONST.ABOUT_CONTENT_IMAGE_ID);
@@ -33,10 +34,17 @@ define(['bp/constants', 'bp/helper', 'util/transform'], function (BP_CONST, help
     aboutImage.setAttribute('transform', newTransformString);
   }
 
-  sitecues.on('bp/will-toggle-secondary-panel', loadImage);
+  function init() {
+    if (!isInitialized) {
+      isInitialized = true;
+      sitecues.on('bp/will-toggle-secondary-panel', loadImage);
+    }
+  }
+
   var publics = {
     getGeometryTargets: getGeometryTargets,
-    tick: tick
+    tick: tick,
+    init: init
   };
 
   if (SC_UNIT) {

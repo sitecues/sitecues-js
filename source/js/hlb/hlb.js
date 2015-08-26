@@ -616,7 +616,7 @@ define([
     if ($hlb && !isElementInsideHlb(event.target)) {
       // If click is outside of HLB, close it
       // (Need to doublecheck this because HLB can sometimes be inside of <body>)
-      sitecues.emit('hlb/toggle');
+      toggleHLB();
     }
   }
 
@@ -680,12 +680,6 @@ define([
       $hlbWrapper = null;
     }
   }
-
-  // Picker module emits this event when the spacebar is pressed.
-  sitecues.on('hlb/toggle', toggleHLB);
-
-  // Arrowkeys module emits this event when the HLB needs to move (dimmer already shown)
-  sitecues.on('hlb/retarget', retargetHLB);
 
   //////////////////////////////////
   // PUBLIC FUNCTIONS

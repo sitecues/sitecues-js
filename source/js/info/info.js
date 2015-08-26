@@ -174,6 +174,7 @@ define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', '
     showModal('help', jumpToAnchor || '');
   }
 
-  sitecues.on('info/help', showHelp);
-  // no publics
+  return {
+    showHelp: showHelp
+  };
 });

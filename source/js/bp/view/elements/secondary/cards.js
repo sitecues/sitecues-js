@@ -20,17 +20,6 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
     NUM_PANELS_WITH_CARDS = 2, // can also be computed via PANELS_WITH_CARDS.keys().length;
     panelsToLoad = NUM_PANELS_WITH_CARDS;
 
-  function init() {
-    if (isInitialized) {
-      return;
-    }
-
-    isInitialized = true;
-
-    loadPanelContents('settings');
-    loadPanelContents('tips');
-  }
-
   function loadPanelContents(panelName) {
     var localizedPanelName = panelName + '-' + locale.getShortWebsiteLang(),
       panelUrl = sitecues.resolveSitecuesUrl('../html/' + panelName + '/' + localizedPanelName + '.html');
@@ -200,7 +189,9 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
     if (linkTarget) {
       if (linkTarget.charAt(0) === '#') {
         // Help target
-        sitecues.emit('info/help', linkTarget.substring(1));
+        require(['info/info'], function(info) {
+          info.showHelp(linkTarget.substring(1));
+        });
       }
       else {
         // Card link
@@ -318,10 +309,21 @@ define(['bp/constants', 'bp/helper', 'locale/locale', 'bp/model/state', 'util/pl
     }
   }
 
-  sitecues.on('bp/did-change', onPanelUpdate);
+  function init() {
+    if (isInitialized) {
+      return;
+    }
 
-  sitecues.on('bp/did-expand', init);
+    isInitialized = true;
 
-  sitecues.on('bp/do-target-card', selectNewCard);
-  // no publics
+    loadPanelContents('settings');
+    loadPanelContents('tips');
+
+    sitecues.on('bp/did-change', onPanelUpdate);
+    sitecues.on('bp/do-target-card', selectNewCard);
+  }
+
+  return {
+    init: init
+  }
 });

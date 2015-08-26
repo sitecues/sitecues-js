@@ -43,22 +43,26 @@ define(['jquery', 'conf/user/manager'], function($, conf) {
     }
   }
 
-  // subscribe to zoom changes and update
-  // enhancement state with each change
-  conf.get('zoom', function(currZoom) {
-    // remember previous state of focus
-    var wasEnabled = isEnabled;
+  function init() {
+    // subscribe to zoom changes and update
+    // enhancement state with each change
+    conf.get('zoom', function (currZoom) {
+      // remember previous state of focus
+      var wasEnabled = isEnabled;
 
-    // determinate should focus enhancement
-    // be enabled or not
-    isEnabled = currZoom >= MIN_ZOOM;
+      // determinate should focus enhancement
+      // be enabled or not
+      isEnabled = currZoom >= MIN_ZOOM;
 
-    // if state of enhancement was changed
-    // refresh module bindings on the page
-    if (wasEnabled !== isEnabled) {
-      refreshFeatureEnablement();
-    }
-  });
+      // if state of enhancement was changed
+      // refresh module bindings on the page
+      if (wasEnabled !== isEnabled) {
+        refreshFeatureEnablement();
+      }
+    });
+  }
 
-  // No publics
+  return {
+    init: init
+  };
 });

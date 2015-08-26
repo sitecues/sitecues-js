@@ -4,8 +4,8 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform'],
-  function (BP_CONST, helper, animate, transform) {
+define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/svg-transform-effects'],
+  function (BP_CONST, helper, animate, transform, transformEffects) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
@@ -149,6 +149,8 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform'],
 
     // Always hide the more button when the panel is about to collapse.
     sitecues.on('bp/will-shrink', hideHelpButton);
+
+    transformEffects.init();
   }
 
   return {

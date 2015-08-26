@@ -27,13 +27,13 @@
 //
 
 define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/transform',
-    'bp/view/elements/tips',
-    'bp/view/elements/settings',
-    'bp/view/elements/feedback',
-    'bp/view/elements/about',
-    'locale/locale',
-    'bp/view/svg-transform-effects'],
-    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, locale, svgTransformEffects) {
+    'bp/view/elements/secondary/tips',
+    'bp/view/elements/secondary/settings',
+    'bp/view/elements/secondary/feedback',
+    'bp/view/elements/secondary/about',
+    'bp/view/elements/secondary/cards',
+    'locale/locale'],
+    function (BP_CONST, state, helper, animate, transform, tipsModule, settingsModule, feedbackModule, aboutModule, cardsModule, locale) {
 
   var BUTTON_CLICK_ANIMATION_DURATION = 800,
     ENABLED_PANEL_TRANSLATE_Y = 0,
@@ -415,7 +415,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
   function toggleSecondaryFeature(featureName) {
     var willEnable = state.getSecondaryPanelName() !== featureName;
     if (willEnable && !isFeatureAvailable(featureName)) {
-      sitecues.emit('info/help'); // The feature was not loaded -- punt and go to help page
+      // The feature was not loaded -- punt and go to help page
+      require(['info/info'], function(info) {
+        info.showHelp();
+      });
     }
     else {
       sitecues.emit('bp/will-toggle-feature');
@@ -507,6 +510,8 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
 
   function init() {
     if (!isInitialized) {
+      isInitialized = true;
+
       // Add mouse listeners once BP is ready
       resetStyles();
 
@@ -514,9 +519,11 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/tra
 
       sitecues.on('bp/will-shrink', onPanelClose);
 
-      svgTransformEffects.init();
-
-      isInitialized = true;
+      aboutModule.init();
+      feedbackModule.init();
+      settingsModule.init();
+      tipsModule.init();
+      cardsModule.init();
     }
   }
 

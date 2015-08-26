@@ -54,9 +54,12 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
   /*
    Default bounding box object.
    */
-  var badgeElement,
-      getNumberFromString = helper.getNumberFromString,
-      lastBgColor;
+  var
+    badgeElement,
+    getNumberFromString = helper.getNumberFromString,
+    lastBgColor,
+    isInitialized;
+
   /*
    *** Privates ***
    */
@@ -267,6 +270,12 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
    * @returns {Object|Element}
    */
   function init() {
+
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
 
     var badge = !isToolbarUIRequested() && helper.byId(BP_CONST.BADGE_ID);
 

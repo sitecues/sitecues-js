@@ -7,6 +7,7 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
   var MIN_DISTANCE = 75, // Min distance before shrink
     mouseLeaveShrinkTimer,  // How long we wait before shrinking BP from any mouseout (even only just barely outside panel)
     isListening,
+    isInitialized,
     isSticky = SC_DEV, //false,
     // Feature panels are larger, need to know this so that mouseout doesn't exit accidentally after we close feature panel
     wasInFeaturePanel = false;
@@ -168,6 +169,11 @@ define(['bp/constants', 'util/common', 'bp/model/state', 'bp/helper'],
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
+
     sitecues.on('info/did-show', shrinkPanel);
     sitecues.on('bp/will-expand', willExpand);
     sitecues.on('bp/will-shrink', willShrink);

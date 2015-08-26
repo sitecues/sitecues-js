@@ -162,11 +162,6 @@ define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', '
       sitecues.on('bp/did-insert-toolbar', onToolbarEnabled);
     }
 
-
-    if (SHOULD_POSITION_FIXED_ELEMENTS || SHOULD_ZOOM_FIXED_ELEMENTS) {
-      initializeModule();
-    }
-
     // Initialize only when we really have to, because it's a very, very bad idea to
     // attach handlers to the window scroll event:
     // http://ejohn.org/blog/learning-from-twitter
@@ -189,8 +184,15 @@ define(['jquery', 'zoom/zoom', 'util/platform', 'style-service/style-service', '
       refresh();
     }
 
+    function init() {
+      if (SHOULD_POSITION_FIXED_ELEMENTS || SHOULD_ZOOM_FIXED_ELEMENTS) {
+        initializeModule();
+      }
+    }
+
     var publics = {
-      setAllowMouseEvents: setAllowMouseEvents
+      setAllowMouseEvents: setAllowMouseEvents,
+      init: init
     };
     if (SC_UNIT) {
       module.exports = publics;

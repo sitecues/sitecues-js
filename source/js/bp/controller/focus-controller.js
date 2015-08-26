@@ -5,6 +5,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
   var savedDocumentFocus,
     focusElement,
     isInitialized,
+    isListeningToClicks,
     byId = helper.byId,
     TABBABLE = {
       'main': [
@@ -121,10 +122,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     }
   }
 
-  function init() {
+  function listenToClicks() {
 
-    if (!isInitialized) {
-      isInitialized = true;
+    if (!isListeningToClicks) {
+      isListeningToClicks = true;
       var mainSVG = byId(BP_CONST.SVG_ID),
         bpContainer = byId(BP_CONST.BP_CONTAINER_ID);
       mainSVG.addEventListener('mousedown', clickToFocus);
@@ -142,7 +143,7 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
    */
   function beginKeyboardFocus() {
 
-    init();
+    listenToClicks();
 
     // Save the last focus so that we can restore it when panel closes
     savedDocumentFocus = document.activeElement;
@@ -351,6 +352,10 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
   }
 
   function init() {
+    if (isInitialized) {
+      return;
+    }
+    isInitialized = true;
     sitecues.on('bp/will-toggle-feature bp/did-activate-link bp/do-send-feedback', hideFocus);
     sitecues.on('bp/will-expand', beginKeyboardFocus);
     sitecues.on('bp/will-shrink', restoreDocumentFocus);
