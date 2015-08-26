@@ -32,14 +32,16 @@
 // TODO file bug on requirejs needing sitecues.require when variable name used
 // TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
 // TODO util/transform is duplicated across bundles
+// TODO need is retina info in size-animation.js
 
-define(['bp/bp', 'keys/keys' ],
-  function (bp, keys) {
-  var ALWAYS_ON_FEATURES = [ bp, keys ],
-    ZOOM_FEATURE_NAMES = ['zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
+define(['conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
+  var
+    numPrereqsToComplete,
+    ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
+    ZOOM_FEATURE_NAMES = [ 'zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_FEATURE_NAMES = [ 'audio/audio' ],
     ZOOM_OR_TTS_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'audio/audio-cues', 'hlb/hlb', 'mouse-highlight/move-keys', 'conf/site' ],
-    THEME_FEATURE_NAMES = ['theme/color-engine'],
+    THEME_FEATURE_NAMES = [ 'theme/color-engine' ],
     isZoomInitialized,
     isSpeechInitialized,
     isThemeEngineInitialized,
@@ -47,11 +49,9 @@ define(['bp/bp', 'keys/keys' ],
     isSpeechOn,
     isSitecuesOn = false;
 
-  var conf = { init: function() {} };
-
-  function initFeaturesByName(featureNames) {
+  function initModulesByName(featureNames) {
     featureNames.forEach(function(featureName) {
-      sitecues.require(featureName, function(featureModule) {
+      sitecues.require([featureName], function(featureModule) {
         featureModule.init();
       });
     });
@@ -65,37 +65,56 @@ define(['bp/bp', 'keys/keys' ],
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
     }
     if (isOn && !isZoomInitialized && !isSpeechInitialized) {
-      initFeaturesByName(ZOOM_OR_TTS_FEATURE_NAMES);
+      initModulesByName(ZOOM_OR_TTS_FEATURE_NAMES);
+    }
+  }
+
+  function onAllPrereqsComplete() {
+    initModulesByName(ALWAYS_ON_FEATURES);
+
+    conf.get('zoom', function(zoomLevel) {
+      isZoomOn = zoomLevel > 1;
+      onFeatureSettingChanged();
+      if (isZoomOn && !isZoomInitialized) {
+        initModulesByName(ZOOM_FEATURE_NAMES);
+        isZoomInitialized = true;
+      }
+    });
+    conf.get('tts', function(isOn) {
+      isSpeechOn = isOn;
+      onFeatureSettingChanged();
+      if (isOn && !isSpeechInitialized) {
+        initModulesByName(TTS_FEATURE_NAMES);
+        isSpeechInitialized = true;
+      }
+    });
+    conf.get('themeName', function(themeName) {
+      if (themeName && !isThemeEngineInitialized) {
+        initModulesByName(THEME_FEATURE_NAMES);
+        isThemeEngineInitialized = true;
+      }
+    });
+  }
+
+  function onPrereqComplete() {
+    if (--numPrereqsToComplete === 0) {
+      onAllPrereqsComplete();
     }
   }
 
   return function() {
-    ALWAYS_ON_FEATURES.forEach(function(feature) { feature.init(); });
+    // Load and initialize the prereqs before doing anything else
+    numPrereqsToComplete = 2;  // User settings (conf) and locale
 
-    conf.init(function() {
-      conf.get('zoom', function(zoomLevel) {
-        isZoomOn = zoomLevel > 1;
-        onFeatureSettingChanged();
-        if (isZoomOn && !isZoomInitialized) {
-          initFeaturesByName(ZOOM_FEATURE_NAMES);
-          isZoomInitialized = true;
-        }
-      });
-      conf.get('tts', function(isOn) {
-        isSpeechOn = isOn;
-        onFeatureSettingChanged();
-        if (isOn && !isSpeechInitialized) {
-          initFeaturesByName(TTS_FEATURE_NAMES);
-          isSpeechInitialized = true;
-        }
-      });
-      conf.get('themeName', function(themeName) {
-        if (themeName && !isThemeEngineInitialized) {
-          initFeaturesByName(THEME_FEATURE_NAMES);
-          isThemeEngineInitialized = true;
-        }
-      });
+    sitecues.on('user-id/did-complete', function() {
+      sitecues.on('conf/did-complete', onPrereqComplete); // User setting prereq: dependent on user id completion
+      userSettingsServer.init();
     });
+
+    sitecues.on('locale/did-complete', onPrereqComplete); // Local prereq
+
+    userId.init();
+    locale.init();
   };
 });
 

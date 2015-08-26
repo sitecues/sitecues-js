@@ -67,8 +67,9 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
     var result = {};
 
     function mapTranslate(id) {
+      var transformAttrValue = byId(id).getAttribute('transform') || '';
       result[id] = {
-        'translateX': getNumberFromString(byId(id).getAttribute('transform'))
+        'translateX': getNumberFromString(transformAttrValue) || 0
       };
     }
 

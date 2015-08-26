@@ -8,7 +8,9 @@
         '../config/config.js',
         'require.js',
         'core',
-        'launch'
+        'launch',
+        'bp/bp',
+        'keys/keys'
       ],
       create: true,
       namespace: 'sitecues',

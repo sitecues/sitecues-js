@@ -18,12 +18,6 @@ define([], function() {
     sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
     langModuleName = LANG_FOLDER + sanitizedLang;
 
-  // Had to put the 'sitecues.' prefix because the requirejs auto names
-  // pacing didn't work with our variable language module
-  sitecues.require([ langModuleName ], function(langEntries) {
-    translations = langEntries;
-  });
-
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.
   function getBaseLanguage(lang) {
@@ -157,7 +151,15 @@ define([], function() {
     return numDigits ? translated.slice(0, numDigits + 1) : translated;
   }
 
-  // On load fetch the translations only once
+  function init() {
+    // On load fetch the translations only once
+    // TODO Had to put the 'sitecues.' prefix because the requirejs auto namespacing didn't work with our variable language module
+    sitecues.require([ langModuleName ], function(langEntries) {
+      translations = langEntries;
+      sitecues.emit('locale/did-complete');
+    });
+
+  }
 
   var publics = {
     getShortWebsiteLang: getShortWebsiteLang,
@@ -168,7 +170,8 @@ define([], function() {
     translate: translate,
     localizeStrings: localizeStrings,
     getExtendedFontCharsetName: getExtendedFontCharsetName,
-    translateNumber: translateNumber
+    translateNumber: translateNumber,
+    init: init
   };
 
   if (SC_UNIT) {

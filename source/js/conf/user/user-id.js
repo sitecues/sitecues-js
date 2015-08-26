@@ -1,9 +1,26 @@
 // This module includes functionality used in user identification.
 define(['util/localstorage'], function(ls) {
 
-  var userId = ls.getUserId();
+  var isInitialized;
 
-  if (!userId) {
+  function didComplete() {
+    sitecues.emit('user-id/did-complete');
+  }
+
+  function init() {
+    if (isInitialized) {
+      return;
+    }
+
+    isInitialized = true;
+
+    var userId = ls.getUserId();
+
+    if (userId) {
+      didComplete();
+      return;
+    }
+
     if (SC_LOCAL) {
       // Cannot save to server when we have no access to it
       // Putting this condition in allows us to paste sitecues into the console
@@ -11,38 +28,41 @@ define(['util/localstorage'], function(ls) {
       ls.clearSitecuesLs();
       ls.setUserId('localuser');
       SC_DEV && console.log('Use localuser because we have no access to it.');
+      didComplete();
+      return;
     }
-    else {
-      SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-      require(['jquery'], function (jquery) {
-        jquery.ajax({
-          xhrFields: {
-            withCredentials: true
-          },
-          crossDomain: true,
-          beforeSend: function (xhrObj) {
-            xhrObj.setRequestHeader('Accept', 'application/json');
-          },
-          url: sitecues.getApiUrl('user/id/get.json'),
-          type: 'GET',
-          success: function (data) {
-            // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
-            // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
-            // That's why nothing ever needs to check the user ID directly except for this module!!!
-            userId = data.userId;
-            ls.clearSitecuesLs();
-            ls.setUserId(data.userId);
-            sitecues.emit('user-id/did-complete');
-          },
-          error: function (xhr, textStatus) {
-            if (SC_DEV) {
-              console.log('===== Unable to get user ID: ' + textStatus);
-            }
+
+    SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
+    require(['jquery'], function (jquery) {
+      jquery.ajax({
+        xhrFields: {
+          withCredentials: true
+        },
+        crossDomain: true,
+        beforeSend: function (xhrObj) {
+          xhrObj.setRequestHeader('Accept', 'application/json');
+        },
+        url: sitecues.getApiUrl('user/id/get.json'),
+        type: 'GET',
+        success: function (data) {
+          // Important MAGIC: this will also have set a cookie that ends up getting used in future requests
+          // e.g. _ai2_sc_uid = 3d50a209-dc12-4bf4-9913-de5ba74f96cf
+          // That's why nothing ever needs to check the user ID directly except for this module!!!
+          userId = data.userId;
+          ls.clearSitecuesLs();
+          ls.setUserId(data.userId);
+          didComplete();
+        },
+        error: function (xhr, textStatus) {
+          if (SC_DEV) {
+            console.log('===== Unable to get user ID: ' + textStatus);
           }
-        });
+        }
       });
-    }
+    });
   }
 
-  // No publics -- user id is put into local storage
+  return {
+    init: init
+  };
 });

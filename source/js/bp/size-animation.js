@@ -19,6 +19,8 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
       animationId,
       MINIMUM_DISTANCE_FROM_EDGE  = 20,
       MINIMUM_DISTANCE_FROM_EDGE_TOP = 2, // More forgiving on top side because of toolbar
+      ZOOM_MIN = 1,
+      ZOOM_RANGE = 2,
 
       // What we're transitioning from and to
       // Note that if you exit/enter the panel in the middle of animation you can
@@ -40,7 +42,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
       targetBadgeWidth,
 
       // Amount of zoom currently applied to the badge
-      zoomAppliedToBadge = 1,
+      currentZoom = 1,
 
       // Convenience methods
       byId = helper.byId,
@@ -251,14 +253,9 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
     return viewBoxRect.width / viewBoxRect.height;
   }
 
-  function getZoomAppliedToBadge() {
-    return state.get('isPageBadge') ? zoomMod.getCompletedZoom() : 1;
-  }
-
   function getTargetBadgeSize() {
-    var zoomMult = getZoomAppliedToBadge();
     if (!targetBadgeWidth || !state.get('isToolbarBadge')) {
-      targetBadgeWidth = getTargetBadgeWidth(zoomMult);
+      targetBadgeWidth = getTargetBadgeWidth(currentZoom);
     }
     return {
       width: targetBadgeWidth,
@@ -286,7 +283,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
         badgeElement        = getBadgeElement(),
         badgeComputedStyles = window.getComputedStyle(badgeElement),
         badgeRect           = getRect(badgeElement),
-        completedZoom       = zoomMod.getCompletedZoom(),
+        completedZoom       = currentZoom, // TODO Was zoomMod.getCompletedZoom(), -- good now?
         paddingTop          = parseFloat(badgeComputedStyles.paddingTop),
         paddingLeft         = parseFloat(badgeComputedStyles.paddingLeft),
         top,
@@ -373,8 +370,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
     var isPanelRequested = state.isPanelRequested(),
         transforms       = isPanelRequested ? BP_CONST.TRANSFORMS.PANEL   : BP_CONST.TRANSFORMS.BADGE,
         sliderWidth      = isPanelRequested ? BP_CONST.LARGE_SLIDER_WIDTH : BP_CONST.SMALL_SLIDER_WIDTH,
-        currentZoom      = zoomMod.getCompletedZoom(),
-        percentage       = (currentZoom - zoomMod.RANGE) / zoomMod.RANGE,
+        percentage       = (currentZoom - ZOOM_MIN) / ZOOM_RANGE,
         result           = copyObj(transforms);
 
     result[BP_CONST.ZOOM_SLIDER_THUMB_ID].translateX += percentage * sliderWidth;
@@ -492,14 +488,15 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
    * @param {Float}  animationTime                 [0 - 1, the fraction the animation is at]
    */
   function setSVGElementTransforms (startingSVGElementTransforms, svgElementTransformDifference, animationTime) {
-
     var translateX,
+      transformStr,
         scaleX,
         scaleY,
         currentStartingValue,
-        currentDifferenceValue;
+        currentDifferenceValue,
+        id;
 
-    for (var id in startingSVGElementTransforms) {
+    for (id in startingSVGElementTransforms) {
 
       if (startingSVGElementTransforms.hasOwnProperty(id)) {
 
@@ -507,17 +504,18 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
         currentDifferenceValue = svgElementTransformDifference[id];
 
         translateX = currentStartingValue.translateX + currentDifferenceValue.translateX * animationTime;
+        transformStr = 'translate(' + translateX + ')';
 
         if (currentStartingValue.scaleX) {
 
           scaleX = currentStartingValue.scaleX + currentDifferenceValue.scaleX * animationTime;
           scaleY = currentStartingValue.scaleY + currentDifferenceValue.scaleY * animationTime;
 
-          byId(id).setAttribute('transform', 'translate(' + translateX + ') scale(' + scaleX + ',' + scaleY + ')');
+          transformStr += ' scale(' + scaleX + ',' + scaleY + ')';
 
-        } else {
-          byId(id).setAttribute('transform', 'translate(' + translateX + ')');
         }
+
+        byId(id).setAttribute('transform', transformStr);
       }
     }
 
@@ -704,7 +702,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
         return 1;  // Don't need to play games with crisping other than in Chrome
       }
 
-      return zoomMod.isRetina() ? 1.5 : 3;
+      return 1.5; // TODO zoomMod.isRetina() ? 1.5 : 3;
     }
 
     var isPanelRequested              = state.isPanelRequested(),
@@ -776,7 +774,7 @@ define(['bp/model/state', 'bp/constants', 'bp/helper', 'util/platform'],
   }
 
   function onZoomChange(zoomLevel) {
-    zoomAppliedToBadge = zoomLevel;
+    currentZoom = zoomLevel;
   }
 
 

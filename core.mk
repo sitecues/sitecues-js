@@ -63,13 +63,18 @@ build:
 	done)
 
   # Show file sizes but not for foo.src.bar -- those are built by r.js for sourcemaps
-	@echo "* File sizes:"
-	@echo -----------------------------------
-	@./show-file-sizes.sh $(build-dir)/compile/js "sitecues.*" | grep -v "\.src|\.map"
-	@echo -----------------------------------
-	@./show-file-sizes.sh $(build-dir)/compile/js "*.js" | grep -v "\.src\.|sitecues\.js"
-	@echo -----------------------------------
-	@./show-file-sizes.sh $(build-dir)/compile/js "*.js.gz" | grep -v "\.src\.|sitecues\.js"
+	@echo **** File sizes ******************************************
+	@echo
+	@echo ---- sitecues core zipped --------------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "sitecues.js.gz"
+	@echo ----- additional bundles zipped --------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "*.js.gz" | grep -vE "\.src\.|sitecues\.js"
+# Uncomment if you want to see raw file sources before zipping
+#	@echo
+#	@echo ---- sitecues core source --------------------------------
+#	@./show-file-sizes.sh $(build-dir)/compile/js "sitecues.js"
+#	@echo ---- additional bundles source ---------------------------
+#	@./show-file-sizes.sh $(build-dir)/compile/js "*.js" | grep -vE "\.src\.|sitecues\.js"
 
 	@echo
 	@echo "===== COMPLETE: Building '$(custom-name)' library"
@@ -92,8 +97,11 @@ debug:
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode
 	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=none dir=$(build-dir)/compile/js
 
-	@echo "* File sizes:"
-	@./show-file-sizes.sh $(build-dir)/compile/js "*.js"
+	@echo **** File sizes ******************************************
+	@echo ---- sitecues core source --------------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "sitecues.js"
+	@echo ---- additional bundles source ---------------------------
+	@./show-file-sizes.sh $(build-dir)/compile/js "*.js" | grep -vE "\.src\.|sitecues\.js"
 
 #	@echo
 #	@echo "===== COMPLETE: Building '$(custom-name)' library (DEBUG VER) ====="
