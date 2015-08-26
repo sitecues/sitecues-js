@@ -1,10 +1,17 @@
 // TODO wave animation broken except in default badge
-define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/locale'],
-  function (BP_CONST, helper, audio, state, locale) {
+define(['bp/constants', 'bp/helper', 'bp/model/state', 'locale/locale', 'conf/user/manager'],
+  function (BP_CONST, helper, state, locale, conf) {
   var
     waveAnimationTimer,
     waveAnimationStepNum,
-    isInitialized;
+    isInitialized,
+    isSpeechEnabled;
+
+  function toggleSpeech() {
+    require(['audio/audio'], function(audio) {
+      audio.toggleSpeech();
+    });
+  }
 
   function getTTSButtonElement() {
     return helper.byId(BP_CONST.SPEECH_ID);
@@ -60,7 +67,7 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
     enableDimmingHover(false);  // Don't use hover effects after a click
 
     // Set aria-checked so that screen readers speak the new state
-    ttsButton.setAttribute('aria-checked', isEnabled);
+    ttsButton.setAttribute('aria-checked', !!isEnabled);
 
     // Update the label for the TTS button
     setTTSLabel(isEnabled ? BP_CONST.SPEECH_STATE_LABELS.ON : BP_CONST.SPEECH_STATE_LABELS.OFF);
@@ -115,10 +122,12 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
 
     enableDimmingHover(true);
 
-    if (!audio.isSpeechEnabled() && !waveAnimationStepNum) {
+    if (!isSpeechEnabled && !waveAnimationStepNum) {
       nextWaveAnimationStep();
     }
   }
+
+
 
   function endHoverEffects() {
     endWaveAnimation();
@@ -147,19 +156,23 @@ define(['bp/constants', 'bp/helper', 'audio/audio', 'bp/model/state', 'locale/lo
     sitecues.on('bp/will-expand', function() {
       // Do not use this listener when the panel is shrunk because it confused the Window-Eyes browse mode
       // (when Enter key was pressed on badge, it toggled speech)
-      mouseTarget1.addEventListener('click', audio.toggleSpeech);
-      mouseTarget2.addEventListener('click', audio.toggleSpeech);
+      mouseTarget1.addEventListener('click', toggleSpeech);
+      mouseTarget2.addEventListener('click', toggleSpeech);
     });
 
     sitecues.on('bp/will-shrink', function() {
-      mouseTarget1.removeEventListener('click', audio.toggleSpeech);
-      mouseTarget2.removeEventListener('click', audio.toggleSpeech);
+      mouseTarget1.removeEventListener('click', toggleSpeech);
+      mouseTarget2.removeEventListener('click', toggleSpeech);
     });
 
     mouseTarget1.addEventListener('mouseover', beginHoverEffects);
     mouseTarget1.addEventListener('mouseout', endHoverEffects);
 
-    updateTTSStateView(audio.isSpeechEnabled());
+    updateTTSStateView(isSpeechEnabled);
+
+    conf.get('ttsOn', function(isOn) {
+      isSpeechEnabled = isOn;
+    });
 
     // Update the TTS button view on any speech state change
     sitecues.on('speech/did-change', updateTTSStateView);

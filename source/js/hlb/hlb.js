@@ -11,7 +11,6 @@ define([
     'util/platform',
     'util/common',
     'hlb/animation',
-    'mouse-highlight/mouse-highlight',
     'util/geo'],
   function(
     $,
@@ -234,10 +233,7 @@ define([
     });
   }
 
-  function targetHLB(isRetargeting) {
-
-    // Set module scoped variable so the rest of the program has reference.
-    highlight = mh.getHighlight();
+  function targetHLB(highlight, isRetargeting) {
 
     if (!highlight.fixedContentRect) {
       return;  // No highlight present -- nothing to open HLB on
@@ -267,7 +263,7 @@ define([
   /**
    * [toggleHLB closes or creates a new HLB]
    */
-  function toggleHLB() {
+  function toggleHLB(highlight) {
     // Sadly, the HLB animation system does not currently
     // know how to reverse an animation, so we cannot
     // toggle if currently deflating. :(
@@ -278,7 +274,7 @@ define([
     if ($hlb) {
       closeHLB();
     } else {
-      targetHLB();
+      targetHLB(highlight);
     }
   }
 
@@ -286,10 +282,10 @@ define([
    * This is called when the user presses a key that moves the mouse highlight
    * has changed while the HLB opens
    */
-  function retargetHLB() {
+  function retargetHLB(highlight) {
     copyFormDataToPage(); // Make sure we don't lose any of the form entry from the current HLB
     $hlb.remove();
-    targetHLB(true);
+    targetHLB(highlight, true);
   }
 
   /**

@@ -41,6 +41,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
       function (fn) {
         return setTimeout(fn, ONE_ANIMATION_FRAME_MS);
       },
+    getHighlight = mh.getHighlight,
     isNavigationEnabled = true,// labs.isEnabled('arrowKeyNav'), // We no longer use labs here, it is on by default
     SAFE_ZONE = 30; // Begin scrolling when we get this close to window edge
 
@@ -294,7 +295,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
   }
 
   function speakHighlight() {
-    sitecues.emit('mh/do-speak', mh.getHighlight().picked);
+    sitecues.emit('mh/do-speak', getHighlight().picked);
   }
 
   function succeed(doAllowRepeat, doSpeakText) {
@@ -329,7 +330,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
   function moveInDirection(horizDir, vertDir, isShifted) {
 
     var
-      highlight = mh.getHighlight(),
+      highlight = getHighlight(),
 
       // *** Window size ***
       winRight = window.innerWidth - 1,
@@ -428,7 +429,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
         tryHighlight($picked)) {
 
         // Pan until highlight is fully visible onscreen (if necessary)
-        var pickedRect = mh.getHighlight().fixedContentRect;
+        var pickedRect = getHighlight().fixedContentRect;
 
         if (horizDir < 0 && pickedRect.left < SAFE_ZONE) {
           // Pan left far enough so that full width of the highlight is visible
@@ -658,7 +659,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
         return; // Couldn't highlight (element offscreen, invisible, etc.)
       }
 
-      if (!isValidTarget(mh.getHighlight().picked[0], $lastPicked)) {
+      if (!isValidTarget(getHighlight().picked[0], $lastPicked)) {
         return;  // The actually picked element from the suggested target is not valid
       }
       // Successful highlight
@@ -677,7 +678,7 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
       }
     }
 
-    var $lastPicked = mh.getHighlight().picked,
+    var $lastPicked = getHighlight().picked,
       treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT, null, false);
 
     // Set the starting point (can do with tree walker but doesn't look like the similar node iterator API can do this)
@@ -726,19 +727,19 @@ define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transf
   function toggleHLB() {
     require(['hlb/hlb'], function(hlb) {
       // Nothing found .. close HLB and enable highlight on last known item
-      hlb.toggleHLB();
+      hlb.toggleHLB(getHighlight());
     });
   }
 
   function retargetHLB() {
     require(['hlb/hlb'], function(hlb) {
       // Nothing found .. close HLB and enable highlight on last known item
-      hlb.retargetHLB();
+      hlb.retargetHLB(getHighlight());
     });
   }
 
   function onSpace(doSpeakText) {
-    if (isLensVisible || mh.getHighlight().isVisible) {
+    if (isLensVisible || getHighlight().isVisible) {
       // Has an HLB or a highlight -- toggle HLB
       toggleHLB();
     }

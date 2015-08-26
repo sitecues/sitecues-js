@@ -4,20 +4,18 @@
  *  keyboard commands.
  */
 
-define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/svg-transform-effects'],
-  function (BP_CONST, helper, animate, transform, transformEffects) {
+define(['bp/constants', 'bp/helper', 'util/animate', 'bp/view/svg-transform-effects'],
+  function (BP_CONST, helper, animate, transformEffects) {
 
   var BUTTON_ENTER_ANIMATION_DURATION = 800, // Milliseconds
       NO_INPUT_TIMEOUT                = 7000,
-      MORE_BTN_TRANSLATEX,
-      MORE_BTN_TRANSLATEY,
       userInputTimeoutId,
       doAlwaysShowButton,
       isAfterUserInput,
       // Oft-used functions. Putting it in a variable helps minifier, convenience, brevity
       byId = helper.byId,
-      getElemTransform = transform.getElemTransform,
-      getTransformString = transform.getTransformString;
+      moreButtonContainer = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
+      currentTranslate = moreButtonContainer.getAttribute('transform');
 
   function onMouseClick () {
     require(['bp/view/elements/secondary/secondary-panel'], function(secondary) {
@@ -27,8 +25,11 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/
   }
 
   function addMouseListeners () {
-    var moreButton = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-    moreButton.addEventListener('click', onMouseClick);
+    moreButtonContainer.addEventListener('click', onMouseClick);
+  }
+
+  function getTransformString(scale) {
+    return currentTranslate + ' scale(' + scale + ')';
   }
 
   function setOpacityTransition(btnContainer, useInstantTransition) {
@@ -50,20 +51,17 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/
 
   function showMoreButton (useInstantTransition) {
 
-    var btnContainer           = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID),
-        currentTranslate       = getElemTransform(btnContainer).translate;
-
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
-    setOpacityTransition(btnContainer, useInstantTransition);
+    setOpacityTransition(moreButtonContainer, useInstantTransition);
 
     // The first time the button is presented to the user, scale the button to 0.5 and then animate it to a scale of 1
     if (!doAlwaysShowButton && !useInstantTransition) {
 
-      btnContainer.setAttribute('transform', getTransformString(currentTranslate.left, currentTranslate.top, 0.5));
+      moreButtonContainer.setAttribute('transform', getTransformString(0.5));
 
-      animate.animateCssProperties(btnContainer, {
-        'transform'   : getTransformString(currentTranslate.left, currentTranslate.top, 1)
+      animate.animateCssProperties(moreButtonContainer, {
+        'transform'   : getTransformString(1)
       }, {
         'duration'    : BUTTON_ENTER_ANIMATION_DURATION,
         'useAttribute': true
@@ -85,10 +83,8 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/
 
   function hideHelpButton () {
 
-    var moreButton       = byId(BP_CONST.MORE_BUTTON_CONTAINER_ID);
-
-    moreButton.setAttribute('class', '');
-    moreButton.style.opacity = 0;
+    moreButtonContainer.setAttribute('class', '');
+    moreButtonContainer.style.opacity = 0;
 
     byId(BP_CONST.BOTTOM_MOUSETARGET_ID).removeEventListener('mousemove', showMoreButtonSlowly);
 
@@ -128,11 +124,6 @@ define(['bp/constants', 'bp/helper', 'util/animate', 'util/transform', 'bp/view/
     // After NO_INPUT_TIMEOUT, we will be able to determine if the user has
     // pressed their mouse button.  If they have not, show the additional button.
     userInputTimeoutId = setTimeout(showButtonIfNoUserInput, NO_INPUT_TIMEOUT);
-
-    var currentBtnTranslate = getElemTransform(byId(BP_CONST.MORE_BUTTON_CONTAINER_ID)).translate;
-
-    MORE_BTN_TRANSLATEY = currentBtnTranslate.top;
-    MORE_BTN_TRANSLATEX = currentBtnTranslate.left;
   }
 
   function init() {

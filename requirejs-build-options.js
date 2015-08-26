@@ -26,6 +26,9 @@
         'jquery',
         'util/common',
         'util/jquery-utils'
+      ],
+      exclude: [
+        'util/element-classifier'
       ]
     },
     {
@@ -59,7 +62,6 @@
         'audio/audio-cues',
         'audio/audio',
         'mouse-highlight/move-keys',
-        'conf/site',
         'zoom/zoom',
         'hpan/hpan',
         'zoom/fixed-position-fixer',
@@ -75,6 +77,7 @@
         'jquery',
         'util/common',
         'util/jquery-utils',
+        'conf/site',
         'conf/user/manager'
       ]
     },
@@ -92,7 +95,11 @@
         'bp/helper',
         'jquery',
         'util/common',
-        'util/jquery-utils'
+        'util/jquery-utils',
+        'conf/site',
+        'conf/user/manager',
+        'util/geo',
+        'util/transform'
       ]
     },
     {
@@ -113,6 +120,7 @@
         'jquery',
         'util/common',
         'util/jquery-utils',
+        'conf/site',
         'conf/user/manager',
         'style-service/user-agent-css.js',
         'conf/site.js',
