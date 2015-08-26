@@ -31,6 +31,7 @@
 // TODO bp.js implementation of is real settings
 // TODO file bug on requirejs needing sitecues.require when variable name used
 // TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
+// TODO util/transform is duplicated across bundles
 
 define(['bp/bp', 'keys/keys' ],
   function (bp, keys) {

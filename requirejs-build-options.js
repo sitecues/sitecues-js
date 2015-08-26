@@ -145,6 +145,7 @@
   },
   onModuleBundleComplete: function (data) {
     var includedStr = data.included.join("','");
+    includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     console.log("'" + data.name + "': ['" + includedStr + "']");
   },
   namespace: 'sitecues',

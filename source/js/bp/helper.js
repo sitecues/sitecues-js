@@ -64,8 +64,7 @@ define(['util/platform', 'bp/constants'], function(platform, BP_CONST) {
 
   function getCurrentSVGElementTransforms() {
 
-    var result = {},
-      byId = byId;
+    var result = {};
 
     function mapTranslate(id) {
       result[id] = {

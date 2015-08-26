@@ -19,50 +19,16 @@ var require = {
     }
   },
   bundles: {
-    'sitecues': [
-      'core.js',
-      'bp/constants.js',
-      'bp/model/state.js',
-      'util/platform.js',
-      'bp/helper.js',
-      'bp/controller/bp-controller.js',
-      'locale/locale.js',
-      'conf/user/manager.js',
-      'conf/site.js',
-      'bp/view/modes/badge.js',
-      'bp/view/modes/panel.js',
-      'bp/view/styles.js',
-      'bp/view/svg.js',
-      'bp/placement.js',
-      'bp/size-animation.js',
-      'bp/bp.js',
-      'util/element-classifier.js',
-      'keys/keys.js',
-      'launch.js'
-    ],
-    'utils': [
-      'jquery',
-      'util/common',
-      'util/jquery-utils'
-    ],
-    'bp-expanded': [
-      'bp/view/elements/slider.js',
-      'bp/controller/slider-controller.js',
-      'bp/controller/focus-controller.js',
-      'bp/controller/shrink-controller.js',
-      'conf/site.js',
-      'audio/speech-builder.js',
-      'audio/audio.js',
-      'bp/view/elements/tts-button.js',
-      'util/transform.js',
-      'util/animate.js',
-      'bp/view/svg-transform-effects.js',
-      'bp/view/elements/more-button.js',
-      'bp/view/elements/secondary/tips.js',
-      'bp/view/elements/secondary/settings.js',
-      'bp/view/elements/secondary/feedback.js',
-      'bp/view/elements/secondary/about.js',
-      'bp/view/elements/secondary/secondary-panel.js'
-    ]
+    'sitecues': ['require','../config/config','core','bp/constants','bp/model/state','util/platform','bp/helper','bp/controller/bp-controller','locale/locale','conf/user/manager','conf/site','bp/view/modes/badge','bp/view/modes/panel','bp/view/styles','bp/view/svg','bp/placement','bp/size-animation','bp/bp','util/element-classifier','keys/commands','keys/keys','launch'],
+    'locale/lang/de': ['locale/lang/de'],
+    'locale/lang/en': ['locale/lang/en'],
+    'locale/lang/es': ['locale/lang/es'],
+    'locale/lang/fr': ['locale/lang/fr'],
+    'locale/lang/pl': ['locale/lang/pl'],
+    'utils': ['jquery','util/common','util/jquery-utils'],
+    'bp-expanded': ['bp/view/elements/slider','bp/controller/slider-controller','bp/controller/focus-controller','bp/controller/shrink-controller','bp/view/elements/tts-button','util/transform','util/animate','bp/view/svg-transform-effects','bp/view/elements/more-button','bp/view/elements/secondary/tips','bp/view/elements/secondary/settings','bp/view/elements/secondary/feedback','bp/view/elements/secondary/about','bp/view/elements/secondary/cards','bp/view/elements/secondary/secondary-panel'],
+    'page-features': ['util/transform','zoom/zoom-forms','zoom/zoom','mouse-highlight/traitcache','mouse-highlight/highlight-position','mouse-highlight/traits','mouse-highlight/judge','mouse-highlight/pick','util/color','audio/speech-builder','audio/audio','util/geo','mouse-highlight/mouse-highlight','audio/audio-cues','style-service/user-agent-css','style-service/media-queries','style-service/css-aggregator','style-service/style-service','zoom/fixed-position-fixer','mouse-highlight/move-keys','hpan/hpan','keys/focus','cursor/cursor-css','cursor/cursor'],
+    'hlb': ['hlb/event-handlers','hlb/styling','hlb/safe-area','hlb/positioning','hlb/dimmer','hlb/animation','hlb/hlb'],
+    'themes': ['theme/color-choices','theme/img-classifier','theme/color-engine']
   }
 };

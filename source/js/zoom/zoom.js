@@ -699,7 +699,7 @@ define(['jquery', 'conf/user/manager', 'conf/site', 'util/platform', 'util/commo
     }, input);
 
     // Make sure we're ready
-    initZoomModule();
+    initBodyInfo();
 
     // Ensure no other operation is running
     clearZoomCallbacks();
