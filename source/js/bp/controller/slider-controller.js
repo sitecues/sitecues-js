@@ -52,7 +52,9 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
       ZOOM_RANGE      = 2,
       newValue        = (newPercent * ZOOM_RANGE) + ZOOM_RANGE;
 
-    zoomMod.jumpTo(newValue);
+    require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.jumpTo(newValue);
+    });
 
     evt.preventDefault();
 
@@ -79,10 +81,9 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
   }
 
   function init() {
-    sliderView.render();
-
     // Add permanent listeners
-    require('zoom/zoom', function(zoomMod) {
+    require(['zoom/zoom'], function(zoomMod) {
+      sliderView.render(zoomMod.getCompletedZoom());
       zoomMod.setThumbChangeListener(sliderView.updateThumbPosition);
     });
 

@@ -80,7 +80,7 @@ define(['bp/controller/bp-controller', 'bp/model/state','bp/view/modes/badge', '
       callbackFn(BP_CONST.PALETTE_NAME_MAP.normal);
     }
     else if (state.get('isAdaptivePalette')) {
-      require('util/color', function(colorUtil) {
+      require(['util/color'], function(colorUtil) {
         var badgeElement = helper.byId(BP_CONST.BADGE_ID);
         callbackFn(BP_CONST.PALETTE_NAME_MAP[colorUtil.isOnDarkBackground(badgeElement) ? 'reverse-blue' : 'normal']);
       });

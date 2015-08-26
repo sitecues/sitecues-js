@@ -26,7 +26,9 @@
     { name: 'locale/lang/es' },
     { name: 'locale/lang/fr' },
     { name: 'locale/lang/pl' },
-    { name: 'jquery' }
+    { name: 'bp/controller/slider-controller' },
+    { name: 'bp/controller/focus-controller' },
+    { name: 'bp/controller/shrink-controller' }
   ],
   onBuildRead: function(module, path, contents) {
     if (module === 'require.js') {

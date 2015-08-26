@@ -41,12 +41,9 @@ define(['bp/constants', 'bp/model/state', 'bp/helper', 'locale/locale'],
 
   // Update the slider thumb position on bp view updates because the entire slider changes size
   // (it scales more horizontally than vertically)
-  function render() {
-    require('zoom/zoom', function(zoomMod) {
-      var currZoom = zoomMod.getCompletedZoom();
-      updateThumbPosition(currZoom);
-      updateZoomValue(currZoom);
-    });
+  function render(zoomLevel) {
+    updateThumbPosition(zoomLevel);
+    updateZoomValue(zoomLevel);
   }
 
   function enableRealSettings() {
