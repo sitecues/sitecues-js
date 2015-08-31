@@ -379,7 +379,7 @@ define([], function () {
     sitecues = window.sitecues;
 
     if (!sitecues || typeof sitecues !== 'object') {
-      console.log('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
+      safe_production_msg('The base ' + window.sitecues + ' namespace was not found. The sitecues library will not load.');
       return;
     }
 
