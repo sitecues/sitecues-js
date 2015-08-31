@@ -5,9 +5,9 @@
     {
       name: 'sitecues',
       include : [
+        '../config/config.js',
         'core/sitecues',
         'core/launch',
-        '../config/config.js',
         '../../../../node_modules/requirejs/require.js',
         'bp/bp',
         'keys/keys'

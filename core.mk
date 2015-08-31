@@ -91,7 +91,9 @@ debug:
 
 	@mkdir -p $(build-dir)/compile/js
 	@mkdir -p $(build-dir)/compile/config
-	echo "sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=false,SC_UNIT=false;" > $(build-dir)/compile/config/config.js
+	echo "sitecues.version='$(custom-version)';var SC_LOCAL=$(sc-local),SC_DEV=true,SC_UNIT=false;" > $(build-dir)/compile/config/config.js
+	echo $(build-dir)/compile/config/config.js
+	cat $(build-dir)/compile/config/config.js
 
 	# Require.js build
 	# TODO add 'use strict' inside each module to help throw exceptions in debug mode

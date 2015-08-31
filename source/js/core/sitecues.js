@@ -6,12 +6,7 @@ define([], function () {
   apiDomain,
 
   // Either up.sitecues.com/ or up.dev.sitecues.com/
-  prefsDomain,
-
-  // Sitecues top-level namespace: all public classes and modules will be
-  // attached to this name space and aliased on 'window.sitecues'. This
-  // variable is initialized at the bottom of this script.
-  sitecues = null;
+  prefsDomain;
 
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
