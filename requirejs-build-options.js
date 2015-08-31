@@ -5,23 +5,23 @@
     {
       name: 'sitecues',
       include : [
-        '../config/config.js',
+        '../../build-config/config.js',
         'core/sitecues',
         'core/launch',
-        '../../../../node_modules/requirejs/require.js',
+        '../../../node_modules/requirejs/require.js',
         'bp/bp',
         'keys/keys'
       ],
       create: true,
       namespace: 'sitecues',
-      insertRequire: ['core/sitecues']
+      insertRequire: ['../../build-config/config.js', 'core/sitecues']
     },
     {
       name: 'utils',
       create: true,
       include: [
-        'jquery',
-        'jquery-private',
+        'util/jquery',
+        '$',
         'util/common',
         'util/jquery-utils'
       ],
@@ -46,9 +46,10 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'jquery',
+        'util/jquery',
         'util/common',
         'util/jquery-utils',
+        'util/transform',
         'conf/user/manager'
       ]
     },
@@ -72,9 +73,10 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'jquery',
+        'util/jquery',
         'util/common',
         'util/jquery-utils',
+        'util/transform',
         'conf/site',
         'conf/user/manager'
       ]
@@ -91,7 +93,7 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'jquery',
+        'util/jquery',
         'util/common',
         'util/jquery-utils',
         'conf/site',
@@ -115,7 +117,7 @@
         'bp/constants',
         'bp/model/state',
         'bp/helper',
-        'jquery',
+        'util/jquery',
         'util/common',
         'util/jquery-utils',
         'conf/site',
@@ -132,7 +134,7 @@
     }
   ],
   onBuildRead: function(module, path, contents) {
-    if (module.indexOf('/require.js') > 0) {
+    if (module.indexOf('/requirejs') > 0) {
       var loaderConfig = fs.readFileSync('requirejs-loader-config.js', 'utf8');
       // Prepend our runtime configuration to the loader itself,
       // so that we can use options like "skipDataMain" in it.
@@ -144,21 +146,18 @@
   onModuleBundleComplete: function (data) {
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
-    console.log("'" + data.name + "': ['" + includedStr + "'],");
+    fs.appendFileSync('target/build-config/sitecues-bundles.js', "\n    '" + data.name + "': ['" + includedStr + "'],");
   },
   map: {
-    // All modules get 'jquery-private' when they ask for 'jquery',
+    // All modules get 'jquery-private' when they ask for '$',
     // so that we can secretly return a customized value which
     // implements .noConflict() to avoid puking on customers.
     '*': {
-      '$': 'jquery-private'
-    },
-    // Treat 'jquery-private' as a special case and allow it to access
-    // the "real" jQuery module. Without this, there would be an
-    // unresolvable cyclic dependency.
-    'jquery-private': {
-      'jquery': 'jquery'
+      '$': 'util/jquery-private'
     }
+  },
+  paths: {
+    jquery: 'util/jquery'
   },
   namespace: 'sitecues',
   useStrict: true,

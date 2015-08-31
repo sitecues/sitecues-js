@@ -12,7 +12,7 @@
 define([], function() {
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
-    LANG_PREFIX = 'locale/lang/',
+    LANG_PREFIX = 'locale-data/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     lang = getShortWebsiteLang(),
     sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,

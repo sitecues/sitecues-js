@@ -1,12 +1,9 @@
 // TODO
+//1.) The 'Welcome' example box run really close to the bottom menu items. I have highlighted this in the attached screenshot.  Would it be possible to reduce the height of this box by about 20-30px to give more padding between the bottom of the box and the menu items?
+//2.) The line and arrow below the breadcrumbs appears a little thick. That may be because of the screenshot or just because a thinner line is to hard to see. Can this be reduced in thickness, maybe by about 1px - or does it become to thin and lost?
 // Design polish
-//Adjust -> Settings
-//Magnify -> Lens
-//Listen -> Speech
-//Seth wants mockups of breadcrumb design
 //Marc wants reset
 //Perkins wants faster access to colors – 3 levels deep is too much
-//Change to Open Sans?
 //
 
 // UX testing
@@ -18,13 +15,14 @@
 // -- Performance bad in IE10 with nytimes.com
 // Beta testing
 // Applause testing
-// / Localization
 // Provisional patents  -- who can help? Jeff? Ai2?
 // Accessibility
 //
 // Later
+// Localization
 // About: Get it now
 //
+
 
 define(['bp/constants', 'bp/model/state', 'bp/helper', 'util/animate', 'util/transform',
     'bp/view/elements/secondary/tips',

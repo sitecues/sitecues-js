@@ -106,7 +106,7 @@ define(['locale/locale', 'util/platform', 'bp/view/styles'], function(locale, pl
       </g>\
     </g>\
     <g id="scp-feedback" class="scp-if-feedback scp-transition-opacity scp-secondary-feature">\
-      <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaaaaa" fill="none" rx="20" ry="20"/>\
+      <rect id="scp-feedback-input-rect" data-own-focus-ring x="45" y="35" width="715" height="200" stroke-width="3" stroke="#aaa" fill="none" rx="20" ry="20"/>\
       <g id="scp-rating" class="scp-hand-cursor" role="group" aria-label="{{rating}}">\
         <use id="scp-stars-1" role="button" aria-pressed="false" aria-label="{{rating_1}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="42" y="254"/>\
         <use id="scp-stars-2" role="button" aria-pressed="false" aria-label="{{rating_2}}" class="scp-rating-star" xlink:href="#scp-rating-star-def" x="108" y="254"/>\

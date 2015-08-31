@@ -15,7 +15,7 @@ define([], function() {
     'previous': 'Previous',
     'next': 'Next',
     // - Feedback
-    'rating_none': 'Rating',
+    'rating': 'Rating',
     'rating_1': '1 star',
     'rating_2': '2 stars',
     'rating_3': '3 stars',
