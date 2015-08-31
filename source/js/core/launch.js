@@ -40,7 +40,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
     ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
     ZOOM_FEATURE_NAMES = [ 'zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_FEATURE_NAMES = [ 'audio/audio' ],
-    ZOOM_OR_TTS_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'audio/audio-cues', 'hlb/hlb', 'mouse-highlight/move-keys', 'conf/site' ],
+    SITECUES_ON_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'audio/audio-cues', 'mouse-highlight/move-keys', 'conf/site' ],
     THEME_FEATURE_NAMES = [ 'theme/color-engine' ],
     isZoomInitialized,
     isSpeechInitialized,
@@ -65,7 +65,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
     }
     if (isOn && !isZoomInitialized && !isSpeechInitialized) {
-      initModulesByName(ZOOM_OR_TTS_FEATURE_NAMES);
+      initModulesByName(SITECUES_ON_FEATURE_NAMES);
     }
   }
 

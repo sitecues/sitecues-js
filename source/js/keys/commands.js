@@ -2,16 +2,19 @@ define([], function() {
   return {
     'decrease-zoom': function() {
       require(['zoom/zoom'], function (zoomMod) {
+        zoomMod.init();
         zoomMod.beginZoomDecrease();
       });
     },
     'increase-zoom': function() {
       require(['zoom/zoom'], function (zoomMod) {
+        zoomMod.init();
         zoomMod.beginZoomIncrease();
       });
     },
     'queue-key': function() {
       require(['mouse-highlight/move-keys'], function(moveKeys) {
+        moveKeys.init();
         moveKeys.queueKey();
       });
     },
@@ -33,11 +36,13 @@ define([], function() {
     },
     'speak-highlight': function() {
       require(['audio/audio', 'mouse-highlight/mouse-highlight'], function(audio, mh) {
+        audio.init();
         audio.speakHighlight(mh.getHighlight().picked, true);
       });
     },
     'toggle-speech':  function() {
       require(['audio/audio'], function(audio) {
+        audio.init();
         audio.toggleSpeech();
       });
     }

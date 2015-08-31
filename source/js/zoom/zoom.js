@@ -1277,8 +1277,9 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     // ATKratter wouldn't scroll when we listened to this on the window
     document.addEventListener('wheel', onMouseWheel);  // Ctrl+wheel = unpinch
 
+    initBodyInfo();
+
     sitecues.on('bp/will-expand', function () {
-      initBodyInfo();   // Lazy init
       isPanelOpen = true;
       if (shouldPrepareAnimations()) {
         prepareAnimationOptimizations();

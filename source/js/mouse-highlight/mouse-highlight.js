@@ -2,8 +2,8 @@
 // TODO Test! Especially in IE
 define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-highlight/traitcache',
     'mouse-highlight/highlight-position', 'util/common', 'util/color',
-    'audio/audio', 'util/geo', 'util/platform'],
-  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, platform) {
+    'audio/audio', 'util/geo', 'util/element-classifier', 'util/platform'],
+  function($, conf, zoomMod, picker, traitcache, mhpos, common, colorUtil, audio, geo, elementClassifier, platform) {
 
   var
 
@@ -1370,7 +1370,7 @@ define(['$', 'conf/user/manager', 'zoom/zoom', 'mouse-highlight/pick', 'mouse-hi
     var wasAppropriateFocus = isAppropriateFocus;
     // don't show highlight if current active isn't body
     var target = document.activeElement;
-    isAppropriateFocus = (!target || !common.isSpacebarConsumer(target)) && isWindowActive();
+    isAppropriateFocus = (!target || !elementClassifier.isSpacebarConsumer(target)) && isWindowActive();
     if (!isSticky) {
       if (wasAppropriateFocus && !isAppropriateFocus) {
         hide();
