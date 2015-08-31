@@ -52,13 +52,18 @@ build:
 
 	@mkdir -p $(build-dir)/js
 	@mkdir -p target/build-config
-	echo "sitecues.version='$(custom-version)';" > target/config.js
+	echo "sitecues.version='$(custom-version)';" > target/build-config/config.js
 
 	# Require.js build
 	node node_modules/.bin/r.js -o requirejs-build-options.js baseUrl=source/js optimize=uglify2 uglify2.compress.global_defs.SC_DEV=false uglify2.compress.global_defs.SC_LOCAL=$(sc-local) uglify2.compress.global_defs.SC_UNIT=false dir=$(build-dir)/js wrap.start="'use strict';"
 
 	# Insert runtime bundle configuration
 	./insert-bundle-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js
+
+	# Non-js files, such as css, images, html, audio files
+	@mkdir -p $(build-dir)/etc
+	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@echo
 
 	@echo "===== GZIP: Creating compressed (gzipped) JavaScript files."
 	@echo
@@ -106,6 +111,11 @@ debug:
 	# Insert runtime bundle configuration
 	./insert-bundle-config.js target/common/js/sitecues.js target/build-config/sitecues-bundles.js
 
+	# Non-js files, such as css, images, html, audio files
+	@mkdir -p $(build-dir)/etc
+	@(for F in `ls -d source/* | grep -Ev '^source/js$$'` ; do cp -r $$F $(build-dir)/etc ; done)
+	@echo
+
 	@echo **** File sizes ******************************************
 	@echo ---- sitecues core source --------------------------------
 	@./show-file-sizes.sh $(build-dir)/js "sitecues.js"
@@ -123,27 +133,27 @@ debug:
 ################################################################################
 package:
 	@echo "===== STARTING: Packaging '$(custom-name)' library"
-	@mkdir -p $(package-dir)
-	@mkdir -p $(package-dir)/locale-data
-	@echo $(custom-version) > $(package-dir)/VERSION.TXT
-	@echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
-	@echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
+	rm -rf $(package-dir)
+	mkdir -p $(package-dir)
+	mkdir -p $(package-dir)/locale-data
+	echo $(custom-version) > $(package-dir)/VERSION.TXT
+	echo "SC_BUILD_NAME=$(custom-name)" > $(package-dir)/BUILD.TXT
+	echo "SC_BUILD_SUFFIX=$(custom-suffix)" >> $(package-dir)/BUILD.TXT
 
-  #Shallow copy of $(build-dir) and $(build-dir)/locale-data
-	@cp $(build-dir)/* $(package-dir)
-	@cp $(build-dir)/locale-data $(package-dir)/locale-data
+	# Shallow copy of $(build-dir) and $(build-dir)/locale-data
+	cp $(build-dir)/js/*.js $(package-dir)
+	cp $(build-dir)/js/locale-data/??.js $(package-dir)/locale-data
 
-	#Make dir for Source-Maps
-	@mkdir -p $(package-dir)/js/source/
-	@mkdir -p $(package-dir)/js/$(build-dir)/source/js/
-	#Copy files for Source-Maps
-	@cp -R source/js $(package-dir)/js/source/
-	@cp $(build-dir)/source/js/core.js $(package-dir)/js/$(build-dir)/source/js/core.js
+  # TODO sourcemaps on production -- need to get them from target-build source?
+	# cp $(build-dir)/js/*.map $(package-dir)
+	# Make dir for Source-Maps
+	# mkdir -p $(package-dir)/source/
+	# Copy files for Source-Maps
+	# cp -R source/js $(package-dir)/source/
 
-	@cp -R source/images $(package-dir)
-	@cp -R source/earcons $(package-dir)
-	@cp -R source/html $(package-dir)
+  # Copy all the resources
+	cp -R $(build-dir)/etc/* $(package-dir)
 
-	@tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
+	tar -C $(package-basedir) -zcf $(build-basedir)/$(package-file-name) $(package-name)
 	@echo "===== COMPLETE: Packaging '$(custom-name)' library"
 	@echo
