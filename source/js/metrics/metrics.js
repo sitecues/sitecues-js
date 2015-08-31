@@ -2,7 +2,7 @@
  * Basic metrics.
  */
 // jshint -W016
-define(['metrics/util', 'jquery', 'conf/user/manager', 'audio/audio', 'locale/locale'],
+define(['metrics/util', '$', 'conf/user/manager', 'audio/audio', 'locale/locale'],
   function(metricsUtil, $, conf, audio, locale) {
 
   /**

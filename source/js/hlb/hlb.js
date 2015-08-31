@@ -3,7 +3,7 @@
  * Documentation: https://equinox.atlassian.net/wiki/display/EN/HLB3
  */
 define([
-    'jquery',
+    '$',
     'conf/user/manager',
     'hlb/event-handlers',
     'hlb/positioning',

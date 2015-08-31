@@ -5,7 +5,7 @@
  * Note: the traitcache keeps a unique ID for each element, via $(data) with the key 'sc'
  * This unique ID can be used for other caches (for example the pickedItemsCache in pick.js uses it).
  */
-define(['jquery', 'zoom/zoom'], function($, zoomMod) {
+define(['$', 'zoom/zoom'], function($, zoomMod) {
 
   var uniqueIdCounter = 0,
     styleCache = {},

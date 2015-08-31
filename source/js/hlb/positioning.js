@@ -4,7 +4,7 @@
  * It is also responsible for calculating and setting the appropriate height/width of the HLB so that it is
  * encapsulated within the HLB_SAFE_AREA.
  */
-define(['jquery', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area'],
+define(['$', 'conf/user/manager', 'hlb/styling', 'util/common', 'hlb/safe-area'],
   function($, conf, hlbStyling, common, hlbSafeArea) {
 
   /////////////////////////

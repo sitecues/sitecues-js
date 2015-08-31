@@ -34,7 +34,7 @@ define([], function () {
 
   function status(callback) {
 
-    require(['jquery', 'conf/user/manager'], function($, conf) {
+    require(['$', 'conf/user/manager'], function($, conf) {
 
       var html = document.documentElement,
           confData = conf.data(),

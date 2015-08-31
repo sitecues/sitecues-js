@@ -3,7 +3,7 @@
  * of the different metric modules.
  */
 // Define dependency modules.
-define(['conf/site', 'jquery'], function(site, $) {
+define(['conf/site', '$'], function(site, $) {
 
   var toClass = {}.toString;
 

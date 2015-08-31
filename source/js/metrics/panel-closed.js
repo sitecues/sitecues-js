@@ -2,7 +2,7 @@
  * Create and send a metric event when the user opens an HLB.
  * This event creation should wait until the user preferences are loaded, and the UI is initialized.
  */
-define(['metrics/util', 'jquery'], function(metricsUtil, $) {
+define(['metrics/util', '$'], function(metricsUtil, $) {
 
   var DEFAULT_STATE = {
     'name': 'panel-closed',

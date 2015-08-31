@@ -5,22 +5,17 @@
     {
       name: 'sitecues',
       include : [
+        'core/sitecues',
+        'core/launch',
         '../config/config.js',
-        'require.js',
-        'core',
-        'launch',
+        '../../../../node_modules/requirejs/require.js',
         'bp/bp',
         'keys/keys'
       ],
       create: true,
       namespace: 'sitecues',
-      insertRequire: ['core']
+      insertRequire: ['core/sitecues']
     },
-    { name: 'locale/lang/de' },
-    { name: 'locale/lang/en' },
-    { name: 'locale/lang/es' },
-    { name: 'locale/lang/fr' },
-    { name: 'locale/lang/pl' },
     {
       name: 'utils',
       create: true,
@@ -137,7 +132,7 @@
     }
   ],
   onBuildRead: function(module, path, contents) {
-    if (module === 'require.js') {
+    if (module.indexOf('/require.js') > 0) {
       var loaderConfig = fs.readFileSync('requirejs-loader-config.js', 'utf8');
       // Prepend our runtime configuration to the loader itself,
       // so that we can use options like "skipDataMain" in it.
@@ -150,6 +145,20 @@
     var includedStr = data.included.join("','");
     includedStr = includedStr.replace(/\.js/g, ''); // Remove .js
     console.log("'" + data.name + "': ['" + includedStr + "'],");
+  },
+  map: {
+    // All modules get 'jquery-private' when they ask for 'jquery',
+    // so that we can secretly return a customized value which
+    // implements .noConflict() to avoid puking on customers.
+    '*': {
+      '$': 'jquery-private'
+    },
+    // Treat 'jquery-private' as a special case and allow it to access
+    // the "real" jQuery module. Without this, there would be an
+    // unresolvable cyclic dependency.
+    'jquery-private': {
+      'jquery': 'jquery'
+    }
   },
   namespace: 'sitecues',
   useStrict: true,

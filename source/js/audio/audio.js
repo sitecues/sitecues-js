@@ -10,7 +10,7 @@
  * - Playing audio by key when requested by another module
  */
 
-define(['conf/user/manager', 'conf/site', 'jquery', 'audio/speech-builder', 'util/platform', 'locale/locale'],
+define(['conf/user/manager', 'conf/site', '$', 'audio/speech-builder', 'util/platform', 'locale/locale'],
   function(conf, site, $, builder, platform, locale) {
 
   var ttsOn = false,

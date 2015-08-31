@@ -1,4 +1,4 @@
-define(['jquery', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
+define(['$', 'mouse-highlight/mouse-highlight', 'util/common', 'util/transform',
   'mouse-highlight/pick', 'zoom/zoom', 'util/geo', 'zoom/fixed-position-fixer'],
   function($, mh, common, transform, picker, zoomMod, geo, fixedFixer) {
 

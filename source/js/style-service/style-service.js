@@ -2,7 +2,7 @@
  * Service that lazily gets user agent stylesheets
  * and provides information about them.
  */
-define(['jquery', 'style-service/css-aggregator', 'style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
+define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], function ($, cssAggregator, mediaQueries) {
 
   var $combinedStylesheet,  // Style sheet we lazily create as a composite of all styles, which we use to look at parsed style rules
     combinedDOMStylesheetObject,

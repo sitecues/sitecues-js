@@ -7,7 +7,7 @@
 // 2 = HAVE_CURRENT_DATA - data for the current playback position is available, but not enough data to play next frame/millisecond
 // 3 = HAVE_FUTURE_DATA  - data for the current and at least the next frame is available
 // 4 = HAVE_ENOUGH_DATA  - enough data available to start playing
-define(['jquery'], function ($) {
+define(['$'], function ($) {
 
   var audioElements    = [],
       HAVE_FUTURE_DATA = 3;

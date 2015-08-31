@@ -16,7 +16,7 @@ define([], function () {
   function safe_production_msg (text) {
     if (window.navigator.userAgent.indexOf('MSIE ') > 0) {
       // Using console.log in IE9 too early can cause "Invalid pointer" errors -- see SC-2237.
-      // To be safe, do not use console.log in core.js in IE.
+      // To be safe, do not use console.log in sitecues.js in IE.
       return;
     }
     if (console) {
@@ -412,7 +412,7 @@ define([], function () {
     }
     else {
       initServices();
-      require(['launch'], function(launch) {
+      require(['core/launch'], function(launch) {
         launch();
       });
     }

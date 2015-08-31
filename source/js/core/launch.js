@@ -34,7 +34,7 @@
 // TODO util/transform is duplicated across bundles
 // TODO need is retina info in size-animation.js
 
-define(['conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
+define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
   var
     numPrereqsToComplete,
     ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],

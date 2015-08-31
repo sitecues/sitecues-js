@@ -25,7 +25,7 @@
  * For more details see https://equinox.atlassian.net/wiki/display/EN/Picker+v2+Architecture
  */
 
-define(['jquery', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site',
+define(['$', 'util/common', 'util/jquery-utils', 'conf/user/manager', 'conf/site',
     'mouse-highlight/traitcache', 'mouse-highlight/traits', 'mouse-highlight/judge'],
   function($, common, jqUtils, conf, site, traitcache, traits, judge) {
 

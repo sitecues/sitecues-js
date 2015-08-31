@@ -59,7 +59,7 @@ define([], function() {
 
     isSiteConfigFetchNeeded = true;
 
-    require(['jquery'], function($) {
+    require(['$'], function($) {
       // Trigger the initial fetch.
       $.ajax({
         // The 'provided.siteId' parameter must exist, or else core would have aborted the loading of modules.

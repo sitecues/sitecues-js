@@ -6,7 +6,7 @@
  * NOTE: currently we are not using/building this
  */
 
-define(['conf/user/manager', 'jquery'], function(conf, $) {
+define(['conf/user/manager', '$'], function(conf, $) {
   
 
 

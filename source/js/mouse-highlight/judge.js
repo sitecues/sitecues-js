@@ -12,7 +12,7 @@
  * Note: "Growth" is a synonym for "Expansion" -- very intuitive for Aaron but no one else!
  */
 
-define(['jquery', 'util/common', 'mouse-highlight/traitcache'],
+define(['$', 'util/common', 'mouse-highlight/traitcache'],
   function($, common, traitcache) {
 
     'use strict';

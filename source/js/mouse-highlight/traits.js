@@ -4,7 +4,7 @@
  *  bounding rectangle
  *  margin, padding, overall spacing
  */
-define(['jquery', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom/zoom', 'util/common'],
+define(['$', 'mouse-highlight/traitcache', 'mouse-highlight/highlight-position', 'zoom/zoom', 'util/common'],
   function($, traitcache, mhpos, zoomMod, common) {
 
     'use strict';

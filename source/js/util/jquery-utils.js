@@ -1,7 +1,7 @@
 /**
  * This is module for common utilities that might need to be used across all of the different modules.
  */
-define(['jquery'], function ($) {
+define(['$'], function ($) {
 
   // Return true if the element is part of the sitecues user interface
   // Everything inside the <body> other than the page-inserted badge

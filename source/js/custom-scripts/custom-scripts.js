@@ -29,7 +29,7 @@ require([], function() {
   // Checks if there are fixes for a module,and executes their fix functions with the module's scope
   function check(moduleName) {
     // The scope of 'this' with thecheck function is the module being passed via call()
-    // from the callback in core.js's _def function
+    // from the callback in sitecues.js's _def function
 
     var module = registry[moduleName];
 

@@ -6,7 +6,7 @@
     "type": "git",
     "url": "git@bitbucket.org:ai_squared/sitecues-js.git"
   },
-  "main": "source/js/core.js",
+  "main": "source/js/sitecues.js",
   "private": true,
   "engines": {
     "node": "~0.10.38",

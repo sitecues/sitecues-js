@@ -12,11 +12,11 @@
 define([], function() {
   var translations = {},  // TODO this is a workaround
     DEFAULT_LANG = 'en',
-    LANG_FOLDER = 'locale/lang/',
+    LANG_PREFIX = 'locale/lang/',
     SUPPORTED_LANGS = ['de', 'en', 'es', 'fr', 'pl'],
     lang = getShortWebsiteLang(),
     sanitizedLang = SUPPORTED_LANGS.indexOf(lang) === -1 ? DEFAULT_LANG : lang,
-    langModuleName = LANG_FOLDER + sanitizedLang;
+    langModuleName = LANG_PREFIX + sanitizedLang;
 
   // Get the language but not the regional differences
   // For example, return just 'en' but not 'en-US'.

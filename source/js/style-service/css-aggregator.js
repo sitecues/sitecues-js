@@ -2,7 +2,7 @@
  * This module collects all the relevant CSS for the entire web page into one large string.
  */
 
-define(['jquery', 'style-service/user-agent-css', 'conf/site', 'style-service/media-queries'], function ($, UA_CSS, site, mediaQueries) {
+define(['$', 'style-service/user-agent-css', 'conf/site', 'style-service/media-queries'], function ($, UA_CSS, site, mediaQueries) {
 
   var numPending = 0,
     sheets = [],

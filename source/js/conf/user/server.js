@@ -64,7 +64,7 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
         return;
       }
 
-      require(['jquery'], function($) {
+      require(['$'], function($) {
         // Save the server data.
         $.ajax({
           type: 'GET',
@@ -127,7 +127,7 @@ define(['conf/user/manager', 'util/localstorage'], function(manager, ls) {
       }
 
       // Load the server data.
-      require(['jquery'], function ($) {
+      require(['$'], function ($) {
         $.ajax({
           type: 'GET',
           url: loadUrl,

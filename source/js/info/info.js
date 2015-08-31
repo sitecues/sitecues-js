@@ -1,4 +1,4 @@
-define(['jquery', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
+define(['$', 'conf/site', 'hlb/dimmer', 'util/platform', 'locale/locale', 'util/color'],
   function($, site, dimmer, platform, locale, colorUtil) {
 
   var $iframe = $(),

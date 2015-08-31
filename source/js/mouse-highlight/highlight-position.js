@@ -2,7 +2,7 @@
  * This is module for common positioning utilities that might need to be used across all of the different modules.
  * See more info on https://equinox.atlassian.net/wiki/display/EN/positioning+utility
  */
-define(['jquery', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
+define(['$', 'util/common', 'zoom/zoom', 'util/platform', 'mouse-highlight/traitcache'],
   function ($, common, zoomMod, platform, traitcache) {
 
   var MIN_RECT_SIDE = 4;

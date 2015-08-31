@@ -1,4 +1,4 @@
-define(['metrics/util', 'jquery', 'conf/user/manager', 'zoom/zoom'], function (metricsUtil, $, conf, zoom) {
+define(['metrics/util', '$', 'conf/user/manager', 'zoom/zoom'], function (metricsUtil, $, conf, zoom) {
 
   var DEFAULT_STATE = {
     'name': 'zoom-changed',

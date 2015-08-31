@@ -33,7 +33,7 @@ define(['util/localstorage'], function(ls) {
     }
 
     SC_DEV && console.log('UserID not found in localStorage, fallback to ajax request.');
-    require(['jquery'], function (jquery) {
+    require(['$'], function (jquery) {
       jquery.ajax({
         xhrFields: {
           withCredentials: true

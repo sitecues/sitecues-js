@@ -3,7 +3,7 @@
 //   sets background, sets default styles, computes some styles,
 //   and cloned child styles from the original element to the HLB.
 //  */
-define(['jquery', 'util/platform', 'util/common', 'conf/user/manager'],
+define(['$', 'util/platform', 'util/common', 'conf/user/manager'],
   function ($, platform, common, conf) {
 
   ///////////////////////////
