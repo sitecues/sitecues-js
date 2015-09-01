@@ -77,7 +77,6 @@
       create: true,
       include: [
         'mouse-highlight/mouse-highlight',
-        'audio/audio-cues',
         'audio/audio',
         'mouse-highlight/move-keys',
         'zoom/zoom',
@@ -87,6 +86,47 @@
         'cursor/cursor'
       ],
       exclude: [
+        'locale/locale',
+        'util/platform',
+        'bp/constants',
+        'bp/model/state',
+        'bp/helper',
+        'util/jquery',
+        'util/common',
+        'util/jquery-utils',
+        'util/transform',
+        'conf/site',
+        'conf/user/manager'
+      ]
+    },
+    {
+      name: 'zoom-forms',
+      create: true,
+      include: [
+        'zoom/zoom-forms'
+      ],
+      exclude: [
+        'locale/locale',
+        'util/platform',
+        'bp/constants',
+        'bp/model/state',
+        'bp/helper',
+        'util/jquery',
+        'util/common',
+        'util/jquery-utils',
+        'util/transform',
+        'conf/site',
+        'conf/user/manager'
+      ]
+    },
+    {
+      name: 'audio-cues',
+      create: true,
+      include: [
+        'audio/audio-cues'
+      ],
+      exclude: [
+        'audio/audio',
         'locale/locale',
         'util/platform',
         'bp/constants',

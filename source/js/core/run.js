@@ -33,14 +33,15 @@
 // TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
 // TODO util/transform is duplicated across bundles
 // TODO need is retina info in size-animation.js
+// TODO cursor settings only -- be careful of mousehue 1.1 which means nothing
 
 define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/manager'], function (userId, userSettingsServer, locale, conf) {
   var
     numPrereqsToComplete,
     ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
-    ZOOM_FEATURE_NAMES = [ 'zoom/zoom', 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
+    ZOOM_FEATURE_NAMES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
     TTS_FEATURE_NAMES = [ 'audio/audio' ],
-    SITECUES_ON_FEATURE_NAMES = [ 'audio/audio-cues', 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
+    SITECUES_ON_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
     THEME_FEATURE_NAMES = [ 'theme/color-engine' ],
     isZoomInitialized,
     isSpeechInitialized,
@@ -69,17 +70,29 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
     }
   }
 
+  function onZoomChange(zoomLevel) {
+    isZoomOn = zoomLevel > 1;
+    onFeatureSettingChanged();
+    if (isZoomOn && !isZoomInitialized) {
+      initModulesByName(ZOOM_FEATURE_NAMES);
+      isZoomInitialized = true;
+    }
+  }
+
   function onAllPrereqsComplete() {
     initModulesByName(ALWAYS_ON_FEATURES);
 
-    conf.get('zoom', function(zoomLevel) {
-      isZoomOn = zoomLevel > 1;
-      onFeatureSettingChanged();
-      if (isZoomOn && !isZoomInitialized) {
-        initModulesByName(ZOOM_FEATURE_NAMES);
-        isZoomInitialized = true;
-      }
-    });
+    var initialZoom = conf.get('zoom');
+    if (initialZoom) {
+      require(['zoom/zoom'], function (zoomMod) {
+        zoomMod.init();
+        zoomMod.performInitialLoadZoom(initialZoom);
+        onZoomChange(initialZoom);
+      });
+    }
+
+    sitecues.on('zoom', onZoomChange);
+
     conf.get('ttsOn', function(isOn) {
       isSpeechOn = isOn;
       onFeatureSettingChanged();

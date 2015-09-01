@@ -2,13 +2,13 @@ define([], function() {
   return {
     'decrease-zoom': function() {
       require(['zoom/zoom'], function (zoomMod) {
-        zoomMod.init();
+        zoomMod.init(true);
         zoomMod.beginZoomDecrease();
       });
     },
     'increase-zoom': function() {
       require(['zoom/zoom'], function (zoomMod) {
-        zoomMod.init();
+        zoomMod.init(true);
         zoomMod.beginZoomIncrease();
       });
     },

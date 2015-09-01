@@ -4,83 +4,83 @@
  * persisted in the user preferences data store.
  */
 define([], function () {
-	'use strict';
+  'use strict';
 
-	// private variables
-	var storedData      = {}
-		, handlers  = {}
-		, listeners = {}
+  // private variables
+  var storedData      = {}
+    , handlers  = {}
+    , listeners = {}
     ;
 
-	// get configuration value
-	function get(key, callback) {
+  // get configuration value
+  function get(key, callback) {
 
-		// handle sync getting of value
-		if (!callback) {
-			return storedData[key];
-		}
+    // handle sync getting of value
+    if (!callback) {
+      return storedData[key];
+    }
 
     // private variables
-    var list = listeners[key] || [];
+    listeners[key] = listeners[key] || [];
 
-		// push callback to listeners list
-		list.push(callback);
+    // push callback to listeners list
+    listeners[key].push(callback);
 
-		if (key in storedData) {
-			// call back if there is value for key
-			callback(storedData[key]);
-		}
-	}
+    if (key in storedData) {
+      // call back if there is value for key
+      callback(storedData[key]);
+    }
+  }
 
-	// set configuration value
-	function set(key, value) {
-		// private variables
-		var list, i, l;
+  // set configuration value
+  function set(key, value) {
+    // private variables
+    var list, i, l;
 
-		// call handler if needed
-		value = handlers[key] ? handlers[key](value) : value;
+    // call handler if needed
+    value = handlers[key] ? handlers[key](value) : value;
 
-		// value isn't changed or is empty after handler
-		if (undefined === value || value === storedData[key]) {
-			return;
+    // value isn't changed or is empty after handler
+    if (typeof value === 'undefined' || value === storedData[key]) {
+      return;
     }
 
-		// save value, use handler if needed
-		storedData[key] = value;
+    // save value, use handler if needed
+    storedData[key] = value;
 
-		// if list isn't empty, call each listener
-		// about new value
+    // if list isn't empty, call each listener
+    // about new value
     list = listeners[key];
-		if (list) {
+    if (list) {
       for (i = 0, l = list.length; i < l; i++) {
-				list[i](value);
+        list[i](value);
       }
     }
 
-		// notify each update listeners about changes
+    // notify each update listeners about changes
     list = listeners['*'];
-		if (list) {
+    if (list) {
       for (i=0, l = list.length; i < l; i++) {
-				list[i](key, value);
+        list[i](key, value);
       }
     }
-	}
+  }
 
-	// define key handler
-	function def(key, handler) {
-		// set handler for key
-		if ('function' === typeof handler) {
+  // define key handler
+  function def(key, handler) {
+    // set handler for key
+    if ('function' === typeof handler) {
       handlers[key] = handler;
     }
-	}
+  }
 
-	// get/update all stored values
-	function data(newData) {
+  // get/update all stored values
+  function data(newData) {
     if (newData) {
       storedData = newData;
     }
-  	return storedData;
-	}
+    return storedData;
+  }
 
   var publics = {
     get: get,

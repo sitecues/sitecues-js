@@ -1,4 +1,4 @@
-define(['conf/user/manager', 'util/jquery-utils', 'zoom/zoom'], function (conf, common, zoomMod) {
+define(['conf/user/manager', 'util/jquery-utils', 'zoom/zoom'], function (conf, jqUtils, zoomMod) {
   var isOn = false,
     isHlbOn = false,
     isPanelOpen = false,

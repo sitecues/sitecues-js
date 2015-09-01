@@ -3,8 +3,8 @@
  * See docs at https://equinox.atlassian.net/wiki/display/EN/Smooth+Zoom
  */
 
-define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform', 'zoom/zoom-forms'],
-  function ($, conf, site, platform, common, transform, zoomForms) {
+define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', 'util/transform'],
+  function ($, conf, site, platform, common, transform) {
 
   // Default zoom configuration
 
@@ -30,9 +30,10 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     completedZoom = 1,       // Current zoom as of the last finished operation
     currentTargetZoom = 1,   // Zoom we are aiming for in the current operation
     startZoomTime,           // If no current zoom operation, this is cleared (0 or undefined)
-    isInitialLoadZoom = true, // Is this the initial zoom for page load? (The one based on previous user settings)
+    isInitialLoadZoom = false, // Is this the initial zoom for page load? (The one based on previous user settings)
     nativeZoom,              // Amount of native browserZoom
     isRetinaDisplay,         // Is the current display a retina display?
+    hasFormsToFix,
 
     // Zoom slider change listener
     thumbChangeListener,    // Supports a single listener that is called back as animation proceeds
@@ -781,17 +782,24 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     // Restore mouse cursor events and CSS behavior
     $body.css('pointerEvents', '');
 
-    zoomForms.applyZoomFixes(completedZoom);
+    if (platform.browser.isWebKit || platform.browser.isFirefox) {
+      hasFormsToFix = hasFormsToFix || document.querySelector('select,body>input,button');
+      if (hasFormsToFix) {
+        require('zoom/zoom-forms', function (zoomForms) {
+          zoomForms.applyZoomFixes(completedZoom);
+        });
+      }
+    }
 
     // When zooming is finished, we will restrict the width
     // Un-Blur text in Chrome
     repaintToEnsureCrispText();
 
     // notify all about zoom change
-    conf.set('zoom', completedZoom);
     sitecues.emit('zoom', completedZoom);
 
     if (!isInitialLoadZoom) {
+      conf.set('zoom', completedZoom);
       require(['audio/audio-cues'], function (audioCues) {
         audioCues.playZoomCue(completedZoom);
       });
@@ -1207,24 +1215,23 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       typeof body.style.willChange === 'string' && !shouldUseElementDotAnimate;
   }
 
-  function performInitialLoadZoom() {
+  function performInitialLoadZoom(targetZoom) {
+    if (targetZoom === 1) {
+      return;
+    }
+
     if (!document.body) {
       // Wait until <body> is ready
       // This can happen in the case of extension which loads very fast
       // In the future, extension may try to zoom sooner rather than waiting for entire document to load
-      $(document).ready(performInitialLoadZoom);
+      sitecues.on('bp/did-complete', function() { performInitialLoadZoom(targetZoom); }); // Zoom once badge is ready
       return;
     }
 
     getNativeZoom(); // Make sure we have native zoom value available
 
-    var targetZoom = conf.get('zoom');
-    if (targetZoom > 1) {
-      beginGlide(targetZoom);
-    } else {
-      // No initial zoom from settings, first zoom will only be from user input
-      isInitialLoadZoom = false;
-    }
+    isInitialLoadZoom = true;
+    beginGlide(targetZoom);
   }
 
   /**
@@ -1271,7 +1278,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     event.preventDefault();
   }
 
-  function init() {
+  function init(isUserCommand) {
     if (isInitialized) {
       return;
     }
@@ -1295,8 +1302,6 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
       isPanelOpen = false;
       clearAnimationOptimizations(); // Browser can reclaim resources used
     });
-
-    sitecues.on('bp/did-complete', performInitialLoadZoom); // Zoom once badge is ready
 
     $.extend(zoomConfig, {
       // Does the web page use a fluid layout, where content wraps to the width?
@@ -1341,6 +1346,7 @@ define(['$', 'conf/user/manager', 'conf/site', 'util/platform', 'util/common', '
     setThumbChangeListener: setThumbChangeListener,
     resetZoom: resetZoom,
     zoomStopRequested: zoomStopRequested,
+    performInitialLoadZoom: performInitialLoadZoom,
     init: init
   };
 

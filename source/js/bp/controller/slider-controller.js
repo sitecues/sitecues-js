@@ -54,6 +54,7 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
       newValue        = (newPercent * ZOOM_RANGE) + ZOOM_RANGE;
 
     require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.init(true);
       zoomMod.jumpTo(newValue);
     });
 
@@ -67,11 +68,15 @@ define(['bp/constants', 'bp/helper', 'util/platform', 'bp/model/state', 'bp/view
   function handleAButtonsPress(evt) {
 
     var target = helper.getEventTarget(evt),
-        type   = (target.id === BP_CONST.SMALL_A_ID) ? 'decrease' : 'increase';
+        isDecrease   = (target.id === BP_CONST.SMALL_A_ID);
 
     window.addEventListener('mouseup', finishZoomChanges);
 
-    sitecues.emit('zoom/' + type, evt);
+    require(['zoom/zoom'], function(zoomMod) {
+      zoomMod.init(true);
+      isDecrease ? zoomMod.beginZoomDecrease() : beginZoomIncrease();
+    });
+
   }
 
   function finishZoomChanges() {
