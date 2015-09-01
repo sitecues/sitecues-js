@@ -31,7 +31,6 @@
 // TODO bp.js implementation of is real settings
 // TODO file bug on requirejs needing sitecues.require when variable name used
 // TODO what if cursor size set but no other page features set? (E.g. zoom === 1) -- we still need to init page features esp. cursor then
-// TODO util/transform is duplicated across bundles
 // TODO need is retina info in size-animation.js
 // TODO cursor settings only -- be careful of mousehue 1.1 which means nothing
 
@@ -39,13 +38,13 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
   var
     numPrereqsToComplete,
     ALWAYS_ON_FEATURES = [ 'bp/bp', 'keys/keys' ],
-    ZOOM_FEATURE_NAMES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
-    TTS_FEATURE_NAMES = [ 'audio/audio' ],
-    SITECUES_ON_FEATURE_NAMES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
-    THEME_FEATURE_NAMES = [ 'theme/color-engine' ],
+    ZOOM_ON_FEATURES = [ 'hpan/hpan', 'zoom/fixed-position-fixer', 'keys/focus', 'cursor/cursor' ],
+    TTS_ON_FEATURES = [ 'audio/audio' ],
+    SITECUES_ON_FEATURES = [ 'mouse-highlight/mouse-highlight', 'mouse-highlight/move-keys' ],
+    THEME_ON_FEATURES = [ 'theme/color-engine' ],
+    MOUSE_ON_FEATURES = ['cursor/cursor'],
     isZoomInitialized,
     isSpeechInitialized,
-    isThemeEngineInitialized,
     isZoomOn,
     isSpeechOn,
     isSitecuesOn = false;
@@ -66,7 +65,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
       sitecues.emit('sitecues/did-toggle', isSitecuesOn);
     }
     if (isOn && !isZoomInitialized && !isSpeechInitialized) {
-      initModulesByName(SITECUES_ON_FEATURE_NAMES);
+      initModulesByName(SITECUES_ON_FEATURES);
     }
   }
 
@@ -74,7 +73,7 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
     isZoomOn = zoomLevel > 1;
     onFeatureSettingChanged();
     if (isZoomOn && !isZoomInitialized) {
-      initModulesByName(ZOOM_FEATURE_NAMES);
+      initModulesByName(ZOOM_ON_FEATURES);
       isZoomInitialized = true;
     }
   }
@@ -87,7 +86,6 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
       require(['zoom/zoom'], function (zoomMod) {
         zoomMod.init();
         zoomMod.performInitialLoadZoom(initialZoom);
-        onZoomChange(initialZoom);
       });
     }
 
@@ -97,14 +95,18 @@ define(['../conf/user/user-id', 'conf/user/server', 'locale/locale', 'conf/user/
       isSpeechOn = isOn;
       onFeatureSettingChanged();
       if (isOn && !isSpeechInitialized) {
-        initModulesByName(TTS_FEATURE_NAMES);
+        initModulesByName(TTS_ON_FEATURES);
         isSpeechInitialized = true;
       }
     });
     conf.get('themeName', function(themeName) {
-      if (themeName && !isThemeEngineInitialized) {
-        initModulesByName(THEME_FEATURE_NAMES);
-        isThemeEngineInitialized = true;
+      if (themeName) {
+        initModulesByName(THEME_ON_FEATURES);
+      }
+    });
+    conf.get('mouseSize mouseHue', function(value) {
+      if (value) {
+        initModulesByName(MOUSE_ON_FEATURES);
       }
     });
   }

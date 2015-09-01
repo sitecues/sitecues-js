@@ -131,7 +131,7 @@ define(['$', 'zoom/zoom', 'util/platform', 'style-service/style-service', 'util/
      * @return {[type]} [description]
      */
     function initializeModule() {
-      sitecues.on('style-service/ready', function () {
+      styleService.init(function () {
         var selector = getFixedPositionSelector();
         if (selector) {
           $(selector).css({

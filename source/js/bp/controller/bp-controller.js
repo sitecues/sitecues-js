@@ -47,12 +47,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     // Escape = close
     if (keyCode === BP_CONST.KEY_CODES.ESCAPE) {
       require(['bp/controller/shrink-controller'], function(shrinkController) {
+        debugger;
         shrinkController.shrinkPanel(true);
       });
       return;
     }
 
     require(['bp/controller/focus-controller'], function(focusController) {
+      debugger;
       // Tab navigation
       if (keyCode === BP_CONST.KEY_CODES.TAB) {
         state.set('isKeyboardMode', true);
@@ -221,13 +223,14 @@ define(['bp/constants', 'bp/model/state', 'bp/helper'],
     if (!hasEverExpanded) {
       hasEverExpanded = true;
       require(['bp/controller/slider-controller', 'bp/controller/shrink-controller', 'bp/controller/focus-controller',
-          'bp/view/elements/tts-button', 'bp/view/elements/more-button'],
-        function (sliderController, shrinkController, focusController, ttsButton, moreButton) {
+          'bp/view/elements/tts-button', 'bp/view/elements/more-button', 'cursor/cursor'],
+        function (sliderController, shrinkController, focusController, ttsButton, moreButton, cursor) {
         sliderController.init();
         shrinkController.init();
         focusController.init();
         ttsButton.init();
         moreButton.init();
+        cursor.init();
       });
     }
   }

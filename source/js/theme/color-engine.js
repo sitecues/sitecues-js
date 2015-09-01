@@ -610,16 +610,10 @@ define(['$', 'conf/user/manager', 'style-service/style-service', 'util/platform'
   }
 
   function initStyles(callbackFn) {
-    if (!styleService.isReady()) {
-      sitecues.on('style-service/ready', function () {
-        collectRelevantStyles(callbackFn);
-      });
-      styleService.init();
-    }
-    else {
+    styleService.init(function () {
       collectRelevantStyles(callbackFn);
+    });
     }
-  }
 
   function collectRelevantStyles(callbackFn) {
     if (!themeStyles) {

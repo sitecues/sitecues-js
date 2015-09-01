@@ -9,7 +9,7 @@
 define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-css', 'util/platform'],
   function (  $, styleService, conf, cursorCss, platform) {
 
-  var autoSize = 1,
+  var autoSize,
       isInitialized,
       // Regexp is used to match URL in the string given(see below).
       URL_REGEXP = '//[a-z0-9\-_]+(\.[a-z0-9\-_]+)+([a-z0-9\-_\.,@\?^=%&;:/~\+#]*[a-z0-9\-@\?^=%&;/~\+#])?',
@@ -24,14 +24,14 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
       $bpStylesheet,// For BP cursors, having a min size of MIN_BP_CURSOR_SIZE -- cursor is always large in BP
       cursorStylesheetObject,
       bpCursorStylesheetObject,
-      isStyleServiceReady,
       MAX_USER_SPECIFIED_CURSOR_SIZE = 3.5,
       MAX_USER_SPECIFIED_MOUSE_HUE = 1.1,// If > 1.0 then use white
       userSpecifiedSize,
       userSpecifiedHue,
       doAllowCursors = true,
       doUseAjaxCursors = platform.browser.isIE,
-      doDisableDuringZoom = platform.browser.isIE;
+      doDisableDuringZoom = platform.browser.isIE,
+      getAutoSize = cursorCss.getCursorZoom;
 
   /*
    * Change a style rule in the sitecues-cursor stylesheet to use the new cursor URL
@@ -220,7 +220,6 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
 
     styleService.getDOMStylesheet($bpStylesheet, function(styleSheetObject) {
       bpCursorStylesheetObject = styleSheetObject;
-      refreshStylesheetsIfNecessary();
     });
   }
 
@@ -269,9 +268,9 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
       doRefresh();
     }
     else if (!$stylesheet) {
-      if (isStyleServiceReady) {
+      styleService.init(function () {
         constructCursorStylesheet(doRefresh);
-      }
+      });
     }
     else {
       doRefresh();
@@ -334,7 +333,7 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
 
   function sanitizeMouseHue(hue) {
     if (!hue || hue < 0 || hue > MAX_USER_SPECIFIED_MOUSE_HUE) {
-      return MAX_USER_SPECIFIED_MOUSE_HUE;
+      return 0;
     }
     return hue;
   }
@@ -349,7 +348,7 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
     }
     // At page zoom level 1.0, the cursor is the default size (same as us being off).
     // After that, the cursor grows faster than the zoom level, maxing out at 4x at zoom level 3
-    var newCursorZoom = cursorCss.getCursorZoom(pageZoom);
+    var newCursorZoom = getAutoSize(pageZoom);
     if (autoSize !== newCursorZoom) {
       autoSize = newCursorZoom;
       refreshStylesheetsIfNecessary();
@@ -366,20 +365,14 @@ define(['$', 'style-service/style-service', 'conf/user/manager', 'cursor/cursor-
     conf.def('mouseHue', sanitizeMouseHue);
     conf.get('mouseSize', onMouseSizeSetting);
     conf.get('mouseHue', onMouseHueSetting);
-    if (typeof conf.get('mouseHue') === 'undefined') {
-      conf.set('mouseHue', MAX_USER_SPECIFIED_MOUSE_HUE);
-    }
 
     if (!userSpecifiedSize) {
       sitecues.on('zoom', onPageZoom);
     }
 
-    sitecues.on('style-service/ready', function () {
-      isStyleServiceReady = true;
-      refreshStylesheetsIfNecessary();
-    });
-
     constructBPCursorStylesheet();
+    autoSize = getAutoSize(conf.get('zoom'));
+    refreshStylesheetsIfNecessary();
   }
 
   return {

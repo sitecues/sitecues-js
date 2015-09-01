@@ -77,6 +77,7 @@
       create: true,
       include: [
         'mouse-highlight/mouse-highlight',
+        'util/transform',
         'audio/audio',
         'mouse-highlight/move-keys',
         'zoom/zoom',
@@ -94,7 +95,6 @@
         'util/jquery',
         'util/common',
         'util/jquery-utils',
-        'util/transform',
         'conf/site',
         'conf/user/manager'
       ]

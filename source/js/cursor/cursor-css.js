@@ -121,7 +121,7 @@ define(['util/platform', 'zoom/zoom', 'util/color'], function (platform, zoomMod
   }
 
   function getCursorZoom(pageZoom) {
-    var zoomDiff = pageZoom - zoomModule.min,
+    var zoomDiff = pageZoom - zoomModule.MIN,
     // SC-1431 Need to keep the cursor smaller than MAX_CURSOR_SIZE_WIN (defined in custom.js)
     // when on Windows OS, otherwise the cursor intermittently can become a large black square.
     // Therefore, on Windows we cannot zoom the cursor up as much as on the Mac (3.5x instead of 4x)
@@ -130,7 +130,7 @@ define(['util/platform', 'zoom/zoom', 'util/color'], function (platform, zoomMod
       CURSOR_ZOOM_RANGE = CURSOR_ZOOM_MAX - CURSOR_ZOOM_MIN;
 
     // ALGORITHM - SINUSOIDAL EASING OUT HOLLADAY SPECIAL: Decelerating to zero velocity, more quickly.
-    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.range * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
+    return CURSOR_ZOOM_RANGE * Math.sin(zoomDiff / zoomModule.RANGE * (Math.PI / 2.8)) + CURSOR_ZOOM_MIN;
   }
 
   var publics = {

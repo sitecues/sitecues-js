@@ -93,9 +93,19 @@ define(['bp/constants', 'bp/model/state', 'locale/locale', 'bp/helper', 'conf/us
       console.log('No element with #sitecues-badge provided by page. Backup badge inserted. Contact support@sitecues.com for support.');
     }
 
-    sitecues.emit('bp/did-insert-toolbar');
+    adjustFixedElementsBelowToolbar();
 
     return toolbarElement;
+  }
+
+  // TODO Aaron hates this
+  function adjustFixedElementsBelowToolbar() {
+    require(['zoom/fixed-position-fixer'], function(fixer) {
+      // However, in the case of the toolbar, we must always move fixed position elements
+      // down. As this process requires the style-service, when the toolbar is inserted,
+      // we will initialize the style service immediately.
+      fixer.init();
+    });
   }
 
   // In some cases body may be positioned absolutely above the toolbar

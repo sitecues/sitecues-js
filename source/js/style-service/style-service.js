@@ -10,7 +10,8 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
     WAIT_BEFORE_INIT_STYLESHEET = 50,
     isInitialized,
     isCssRequested,   // Have we even begun the init sequence?
-    isCssComplete;      // Init sequence is complete
+    isCssComplete,      // Init sequence is complete
+    callbackFns = [];
 
   /**
    * Create an disabled style sheet to be filled in later with styles
@@ -32,7 +33,7 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
       // Takes the browser a moment to process the new stylesheet
       setTimeout(function() {
         isCssComplete = true;
-        sitecues.emit('style-service/ready');
+        clearCallbacks();
       }, WAIT_BEFORE_INIT_STYLESHEET);
     });
   }
@@ -179,31 +180,25 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
     return css;
   }
 
-  function init() {
+  function clearCallbacks() {
+    var index = callbackFns.length;
+    while (index --) {
+      callbackFns[index]();
+    }
+    callbackFns = [];
+  }
+
+  function init(callbackFn) {
+    callbackFn && callbackFns.push(callbackFn);
     if (isInitialized) {
+      if (isCssComplete) {
+        clearCallbacks();
+      }
       return;
     }
     isInitialized = true;
 
-    // Once the user zooms the style service is necessary to create the proper cursor rules
-    sitecues.on('zoom', function (pageZoom) {
-      if (pageZoom > 1) {
-        requestCss();
-      }
-    });
-
-    // Normally we wait until the user zooms before initializing the style sevice.
-    // However, in the case of the toolbar, we must always move fixed position elements
-    // down. As this process requires the style-service, when the toolbar is inserted,
-    // we will initialize the style service immediately.
-    sitecues.on('bp/did-insert-toolbar', function () {
-      if (document.readyState === 'complete') {
-        requestCss();
-      }
-      else {
-        window.addEventListener('load', requestCss);
-      }
-    });
+    requestCss();
   }
 
   var publics = {
@@ -213,7 +208,7 @@ define(['$', 'style-service/css-aggregator', 'style-service/media-queries'], fun
     getAllMatchingStyles: getAllMatchingStyles,
     getAllMatchingStylesCustom: getAllMatchingStylesCustom,
     getDOMStylesheet: getDOMStylesheet,
-    getStyleText: getStyleText,
+    getStyleText: getStyleText
   };
   if (SC_UNIT) {
     module.exports = publics;
